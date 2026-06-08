@@ -1,0 +1,2407 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Tag Snapshot - alert levels 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 rounded-full pl-0.5 bg-f0-background-info text-f0-foreground-info"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      aria-hidden={true}
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-5 h-5 stroke-md text-f0-icon-info"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-8.65-2.9a.65.65 0 1 0 1.3 0V9a.65.65 0 1 0-1.3 0zm0 6a.65.65 0 1 0 1.3 0v-3a.65.65 0 1 0-1.3 0z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-info text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      info
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - alert levels 2`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 rounded-full pl-0.5 bg-f0-background-warning text-f0-foreground-warning"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      aria-hidden={true}
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-5 h-5 stroke-md text-f0-icon-warning"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M5.399 19c-1.525 0-2.489-1.638-1.748-2.971l6.6-11.882c.763-1.372 2.735-1.372 3.497 0l6.601 11.882c.74 1.333-.223 2.971-1.748 2.971zM12 7.5a.97.97 0 0 0-.967 1.045l.302 3.9a.667.667 0 0 0 1.33 0l.303-3.9A.97.97 0 0 0 12 7.5m0 8.987a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-warning text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      warning
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - alert levels 3`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 rounded-full pl-0.5 bg-f0-background-critical text-f0-foreground-critical"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      aria-hidden={true}
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-5 h-5 stroke-md text-f0-icon-critical"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      critical
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - alert levels 4`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 rounded-full pl-0.5 bg-f0-background-positive text-f0-foreground-positive"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      aria-hidden={true}
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-5 h-5 stroke-md text-f0-icon-positive"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-3.48-2.61a.65.65 0 1 0-1.04-.78l-4.05 5.4-2.47-2.47a.65.65 0 1 0-.92.92l3 3a.65.65 0 0 0 .98-.07z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      positive
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - balance variants 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-positive text-f0-foreground-positive"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-positive"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="m6 11 6-6 6 6M12 19V5.5"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinecap",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinecap={1}
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      12% · 102.35
+    </Text>
+    <Text
+      className="sr-only no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    >
+      positive balance
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - balance variants 2`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-critical text-f0-foreground-critical"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-critical"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="m18 13-6 6-6-6"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinecap",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinecap={1}
+          strokeLinejoin={1}
+        />
+        <RNSVGPath
+          d="M12 5v13.5"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinecap",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinecap={1}
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      -3% · 209.80
+    </Text>
+    <Text
+      className="sr-only no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+    >
+      negative balance
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - balance variants 3`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-2 rounded-full"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-secondary text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      N/A
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - custom dot color 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(216 90% 65%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      custom
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(184 92% 35%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      viridian
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 2`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(216 90% 65%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      malibu
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 3`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(38 92% 54%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      yellow
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 4`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(258 88% 67%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      purple
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 5`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(340 49% 60%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      lilac
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 6`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(331 84% 63%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      barbie
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 7`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(192 26% 54%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      smoke
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 8`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(162 44% 33%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      army
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 9`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(84 55% 53%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      flubber
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 10`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(239 91% 64%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      indigo
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - dot colors 11`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full"
+      style={
+        {
+          "backgroundColor": "hsl(25 46% 53%)",
+        }
+      }
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      camel
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - person, team and company variants 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden pr-2 text-f0-foreground rounded-full border border-solid border-f0-border-secondary py-px pl-px"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="inline-flex "
+    >
+      <View
+        className="h-fit w-fit"
+      >
+        <View
+          aria-hidden={true}
+          className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.army-50))]"
+          data-a11y-color-contrast-ignore={true}
+          role="img"
+        >
+          <Text
+            className="text-f0-foreground-inverse/90 text-sm"
+            data-a11y-color-contrast-ignore={true}
+          >
+            J
+          </Text>
+        </View>
+      </View>
+    </View>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Jane Doe
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - person, team and company variants 2`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden pr-2 text-f0-foreground rounded-sm border border-solid border-f0-border-secondary py-px pl-px"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="inline-flex "
+    >
+      <View
+        className="h-fit w-fit"
+      >
+        <View
+          aria-hidden={true}
+          className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.purple-50))]"
+          data-a11y-color-contrast-ignore={true}
+          role="img"
+        >
+          <Text
+            className="text-f0-foreground-inverse/90 text-sm"
+            data-a11y-color-contrast-ignore={true}
+          >
+            P
+          </Text>
+        </View>
+      </View>
+    </View>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      People Ops
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - person, team and company variants 3`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden pr-2 text-f0-foreground rounded-sm border border-solid border-f0-border-secondary py-px pl-px"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      className="inline-flex "
+    >
+      <View
+        className="h-fit w-fit"
+      >
+        <View
+          aria-hidden={true}
+          className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.viridian-50))]"
+          data-a11y-color-contrast-ignore={true}
+          role="img"
+        >
+          <Text
+            className="text-f0-foreground-inverse/90 text-sm"
+            data-a11y-color-contrast-ignore={true}
+          >
+            F
+          </Text>
+        </View>
+      </View>
+    </View>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      Factorial
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - raw with icon 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full border border-solid border-f0-border-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      aria-hidden={true}
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="m6.256 7.603 4-2.857a3 3 0 0 1 3.488 0l4 2.857A3 3 0 0 1 19 10.043V16a3 3 0 0 1-3 3h-1a1 1 0 0 1-1-1v-2.5a2 2 0 1 0-4 0V18a1 1 0 0 1-1 1H8a3 3 0 0 1-3-3v-5.956a3 3 0 0 1 1.256-2.441Z"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      home
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - root composition 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 text-f0-foreground pl-1 rounded-full"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="m6.256 7.603 4-2.857a3 3 0 0 1 3.488 0l4 2.857A3 3 0 0 1 19 10.043V16a3 3 0 0 1-3 3h-1a1 1 0 0 1-1-1v-2.5a2 2 0 1 0-4 0V18a1 1 0 0 1-1 1H8a3 3 0 0 1-3-3v-5.956a3 3 0 0 1 1.256-2.441Z"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      In review
+    </Text>
+    <Text
+      className="text-xs text-f0-foreground-secondary"
+    >
+      Q1
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - status variants 1`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-secondary text-f0-foreground-secondary"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full bg-f0-icon"
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-secondary text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      neutral
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - status variants 2`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-info text-f0-foreground-info"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full bg-f0-icon-info"
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-info text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      info
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - status variants 3`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-positive text-f0-foreground-positive"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full bg-f0-icon-positive"
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      positive
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - status variants 4`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-warning text-f0-foreground-warning"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full bg-f0-icon-warning"
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-warning text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      warning
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`F0Tag Snapshot - status variants 5`] = `
+<View
+  className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1"
+>
+  <View
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": true,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    className="flex max-w-full min-w-0 shrink flex-row items-center justify-start gap-1 overflow-hidden py-0.5 pr-2 pl-1 rounded-full bg-f0-background-critical text-f0-foreground-critical"
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      [
+        {
+          "transform": [
+            {
+              "scale": 1,
+            },
+          ],
+        },
+        undefined,
+      ]
+    }
+  >
+    <View
+      aria-hidden={true}
+      className="m-1 aspect-square w-2 rounded-full bg-f0-icon-critical"
+    />
+    <Text
+      className="max-w-full shrink no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
+      ellipsizeMode="tail"
+      numberOfLines={1}
+    >
+      critical
+    </Text>
+  </View>
+</View>
+`;

@@ -1,5 +1,101 @@
 # Changelog
 
+## [1.52.0](https://github.com/factorialco/f0/compare/f0-core-v1.51.1...f0-core-v1.52.0) (2026-05-26)
+
+
+### Features
+
+* **PageHeader:** support AI-kind actions ([#4235](https://github.com/factorialco/f0/issues/4235)) ([b2cb371](https://github.com/factorialco/f0/commit/b2cb371fff11e2670ee9efc3c72292d5c4e9d3b5))
+
+
+### Bug Fixes
+
+* adjust horizontal paddings in data collection ([#4240](https://github.com/factorialco/f0/issues/4240)) ([aefb009](https://github.com/factorialco/f0/commit/aefb0091feafebba885a654cd00c0b4d11310490))
+
+## [1.51.1](https://github.com/factorialco/f0/compare/f0-core-v1.51.0...f0-core-v1.51.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* Update icons in MultitaskHeader for consistency and design ([#4140](https://github.com/factorialco/f0/issues/4140)) ([0be4c84](https://github.com/factorialco/f0/commit/0be4c84db2956749b748972a962418954c69a7df))
+
+## [1.51.0](https://github.com/factorialco/f0/compare/f0-core-v1.50.3...f0-core-v1.51.0) (2026-05-21)
+
+
+### Features
+
+* **f0:** add F0SegmentedControl experimental component ([#4102](https://github.com/factorialco/f0/issues/4102)) ([17218e6](https://github.com/factorialco/f0/commit/17218e676bd0456ac45a3c14683f188fbf1db40a))
+
+## [1.50.3](https://github.com/factorialco/f0/compare/f0-core-v1.50.2...f0-core-v1.50.3) (2026-05-15)
+
+
+### Bug Fixes
+
+* **icons:** align Marker and Multitask with app icon style ([#4137](https://github.com/factorialco/f0/issues/4137)) ([e616765](https://github.com/factorialco/f0/commit/e616765b8a129573a6e51b5f2a62a8e7fa51d814))
+
+## [1.50.2](https://github.com/factorialco/f0/compare/f0-core-v1.50.1...f0-core-v1.50.2) (2026-05-15)
+
+
+### Bug Fixes
+
+* **colors:** adjust secondary border color for improved contrast ([#4142](https://github.com/factorialco/f0/issues/4142)) ([d3eae7b](https://github.com/factorialco/f0/commit/d3eae7b60f1d0fb3a3bf0e10fbb523babf17f914))
+
+## [1.50.1](https://github.com/factorialco/f0/compare/f0-core-v1.50.0...f0-core-v1.50.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **core:** align border radius tokens with Figma design system ([#3805](https://github.com/factorialco/f0/issues/3805)) ([63e20e1](https://github.com/factorialco/f0/commit/63e20e1b72c87b0a033dd903a7211138515fcfb1))
+
+## [1.50.0](https://github.com/factorialco/f0/compare/f0-core-v1.49.0...f0-core-v1.50.0) (2026-04-22)
+
+
+### Features
+
+* **F0AiChat:** clarifying question UX, persistence, motion polish, reply ([#4004](https://github.com/factorialco/f0/issues/4004)) ([8fb49f4](https://github.com/factorialco/f0/commit/8fb49f49afb466d3a2ad24b3be1a5c038fa4611e))
+
+## [1.49.0](https://github.com/factorialco/f0/compare/f0-core-v1.48.2...f0-core-v1.49.0) (2026-04-13)
+
+
+### Features
+
+* **ai:** F0AnalyticsDashboard edit mode and DataDownload canvas ([#3819](https://github.com/factorialco/f0/issues/3819)) ([56afe21](https://github.com/factorialco/f0/commit/56afe21af606ce52ec9e279b8cad1e24ba9b794c))
+
+## [1.48.2](https://github.com/factorialco/f0/compare/f0-core-v1.48.1...f0-core-v1.48.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **editable-table:** fix disabled cell background color, add new color ([#3722](https://github.com/factorialco/f0/issues/3722)) ([7a93d73](https://github.com/factorialco/f0/commit/7a93d73ccddb7e93892b3f903e7b4f739288a479))
+
+## [1.48.1](https://github.com/factorialco/f0/compare/f0-core-v1.48.0...f0-core-v1.48.1) (2026-03-27)
+
+
+### Bug Fixes
+
+* **core:** align color tokens with Figma design system ([#3775](https://github.com/factorialco/f0/issues/3775)) ([c0f1420](https://github.com/factorialco/f0/commit/c0f1420b5cdd04ea49a0b7007b9a1b1ff0b5cd6f))
+
+## [1.48.0](https://github.com/factorialco/f0/compare/f0-core-v1.47.0...f0-core-v1.48.0) (2026-03-26)
+
+
+### Features
+
+* **react:** add F0TimelineRow component ([#3727](https://github.com/factorialco/f0/issues/3727)) ([eb5e1f4](https://github.com/factorialco/f0/commit/eb5e1f4b3d5db5dd1cbbcfc1fa6950dfdb8b4016))
+
+## [1.47.0](https://github.com/factorialco/f0/compare/f0-core-v1.46.1...f0-core-v1.47.0) (2026-03-24)
+
+
+### Features
+
+* 7 new icons ([#3741](https://github.com/factorialco/f0/issues/3741)) ([8802553](https://github.com/factorialco/f0/commit/8802553d91e9b9b8be245f7d486357fa8303ddf9))
+
+## [1.46.1](https://github.com/factorialco/f0/compare/f0-core-v1.46.0...f0-core-v1.46.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* add lms icon to modules ([#3699](https://github.com/factorialco/f0/issues/3699)) ([b3652bf](https://github.com/factorialco/f0/commit/b3652bfa8f2dc3ff5b5d5b29a1c7bdcb6ec4be69))
+
 ## [1.46.0](https://github.com/factorialco/f0/compare/f0-core-v1.45.0...f0-core-v1.46.0) (2026-02-26)
 
 

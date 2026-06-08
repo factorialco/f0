@@ -28,24 +28,28 @@ const config: StorybookConfig = {
       titlePrefix: "Components",
     },
     {
+      directory: "../src/patterns",
+      titlePrefix: "Patterns",
+    },
+    {
       directory: "../src/experimental",
-      titlePrefix: "Components",
+      titlePrefix: "Experimental",
     },
     {
-      directory: "../src/ai",
-      titlePrefix: "Components",
-    },
-    {
-      directory: "../src/lib",
-      titlePrefix: "Library",
+      directory: "../src/kits",
+      titlePrefix: "Kits",
     },
     {
       directory: "../src/layouts",
       titlePrefix: "Layouts",
     },
     {
+      directory: "../src/lib",
+      titlePrefix: "Library",
+    },
+    {
       directory: "../src/hooks",
-      titlePrefix: "Hooks",
+      titlePrefix: "Library",
     },
     {
       directory: "../src/sds",
@@ -54,6 +58,10 @@ const config: StorybookConfig = {
     {
       directory: "../src/examples",
       titlePrefix: "Examples",
+    },
+    {
+      directory: "../src/deprecated",
+      titlePrefix: "Deprecated",
     },
     {
       directory: "../src/ui",
@@ -82,6 +90,15 @@ const config: StorybookConfig = {
     },
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-vitest"),
+    // MCP server: exposes component docs/stories to AI agents via the MCP protocol.
+    // In public (static) builds only the docs toolset is useful; dev and test require
+    // a running Storybook server.
+    {
+      name: getAbsolutePath("@storybook/addon-mcp"),
+      options: process.env.STORYBOOK_PUBLIC_BUILD
+        ? { toolsets: { dev: false, test: false, docs: true } }
+        : {},
+    },
   ].filter(Boolean) as Preset[],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
@@ -122,6 +139,8 @@ const config: StorybookConfig = {
       "@copilotkit/react-core",
       "@copilotkit/react-ui",
       "@copilotkit/shared",
+      "@xyflow/react",
+      "@dagrejs/dagre",
     ]
 
     return config

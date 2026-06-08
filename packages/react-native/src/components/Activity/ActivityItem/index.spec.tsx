@@ -2,7 +2,7 @@ import { render, fireEvent, screen } from "@testing-library/react-native"
 import React from "react"
 
 import { ActivityItem, ActivityItemSkeleton } from "../../Activity/ActivityItem"
-import { IconType } from "../../Icon"
+import { type IconType } from "../../primitives/F0Icon"
 
 // Mock the IconAvatar component
 jest.mock("../../Avatars/IconAvatar", () => ({

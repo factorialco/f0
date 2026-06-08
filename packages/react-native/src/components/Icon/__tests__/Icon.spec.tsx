@@ -20,8 +20,6 @@ describe("Icon", () => {
     const { getByTestId } = render(
       <Icon icon={Archive} size="lg" testID="icon" />
     )
-    // In a real test environment, we could check the actual style props applied
-    // but for now we just ensure it renders
     expect(getByTestId("icon")).toBeTruthy()
   })
 
@@ -29,8 +27,6 @@ describe("Icon", () => {
     const { getByTestId } = render(
       <Icon icon={Archive} className="text-red-500" testID="icon" />
     )
-    // In a real test environment, we could check the actual style props applied
-    // but for now we just ensure it renders
     expect(getByTestId("icon")).toBeTruthy()
   })
 })

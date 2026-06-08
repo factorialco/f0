@@ -1,2 +1,9 @@
 export { F0AiChatTextArea } from "./F0AiChatTextArea"
-export type { F0AiChatTextAreaProps } from "./types"
+export { DropOverlay } from "./components/DropOverlay"
+export type {
+  F0AiChatTextAreaProps,
+  F0AiChatTextAreaSubmitPayload,
+  AttachedFile,
+  UserTextPart,
+  UserBinaryPart,
+} from "./types"

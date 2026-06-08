@@ -1,0 +1,5122 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Avatar Alert Snapshot - all types at lg 1`] = `
+<View
+  accessibilityLabel="critical alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-10 w-10 rounded-lg bg-f0-background-critical border-f0-border-critical"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-6 h-6 stroke-lg text-f0-icon-critical"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at lg 2`] = `
+<View
+  accessibilityLabel="warning alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-10 w-10 rounded-lg bg-f0-background-warning border-f0-border-warning"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-6 h-6 stroke-lg text-f0-icon-warning"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        clipRule={0}
+        d="M5.399 19c-1.525 0-2.489-1.638-1.748-2.971l6.6-11.882c.763-1.372 2.735-1.372 3.497 0l6.601 11.882c.74 1.333-.223 2.971-1.748 2.971zM12 7.5a.97.97 0 0 0-.967 1.045l.302 3.9a.667.667 0 0 0 1.33 0l.303-3.9A.97.97 0 0 0 12 7.5m0 8.987a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        fillRule={0}
+        propList={
+          [
+            "fill",
+            "fillRule",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at lg 3`] = `
+<View
+  accessibilityLabel="info alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-10 w-10 rounded-lg bg-f0-background-info border-f0-border-info"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-6 h-6 stroke-lg text-f0-icon-info"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        clipRule={0}
+        d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-8.65-2.9a.65.65 0 1 0 1.3 0V9a.65.65 0 1 0-1.3 0zm0 6a.65.65 0 1 0 1.3 0v-3a.65.65 0 1 0-1.3 0z"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        fillRule={0}
+        propList={
+          [
+            "fill",
+            "fillRule",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at lg 4`] = `
+<View
+  accessibilityLabel="positive alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-10 w-10 rounded-lg bg-f0-background-positive border-f0-border-positive"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-6 h-6 stroke-lg text-f0-icon-positive"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        clipRule={0}
+        d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-3.48-2.61a.65.65 0 1 0-1.04-.78l-4.05 5.4-2.47-2.47a.65.65 0 1 0-.92.92l3 3a.65.65 0 0 0 .98-.07z"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        fillRule={0}
+        propList={
+          [
+            "fill",
+            "fillRule",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at sm 1`] = `
+<View
+  accessibilityLabel="critical alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-critical border-f0-border-critical"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-critical"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at sm 2`] = `
+<View
+  accessibilityLabel="warning alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-warning border-f0-border-warning"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-warning"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        clipRule={0}
+        d="M5.399 19c-1.525 0-2.489-1.638-1.748-2.971l6.6-11.882c.763-1.372 2.735-1.372 3.497 0l6.601 11.882c.74 1.333-.223 2.971-1.748 2.971zM12 7.5a.97.97 0 0 0-.967 1.045l.302 3.9a.667.667 0 0 0 1.33 0l.303-3.9A.97.97 0 0 0 12 7.5m0 8.987a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        fillRule={0}
+        propList={
+          [
+            "fill",
+            "fillRule",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at sm 3`] = `
+<View
+  accessibilityLabel="info alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-info border-f0-border-info"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-info"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        clipRule={0}
+        d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-8.65-2.9a.65.65 0 1 0 1.3 0V9a.65.65 0 1 0-1.3 0zm0 6a.65.65 0 1 0 1.3 0v-3a.65.65 0 1 0-1.3 0z"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        fillRule={0}
+        propList={
+          [
+            "fill",
+            "fillRule",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Alert Snapshot - all types at sm 4`] = `
+<View
+  accessibilityLabel="positive alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-positive border-f0-border-positive"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-positive"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        clipRule={0}
+        d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-3.48-2.61a.65.65 0 1 0-1.04-.78l-4.05 5.4-2.47-2.47a.65.65 0 1 0-.92.92l3 3a.65.65 0 0 0 .98-.07z"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        fillRule={0}
+        propList={
+          [
+            "fill",
+            "fillRule",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Company Snapshot - default 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.viridian-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        F
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Company Snapshot - with badge 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-10 h-10 rounded-lg bg-[hsl(theme(colors.viridian-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        FA
+      </Text>
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="stroke-xs flex shrink-0 items-center justify-center rounded-full bg-f0-background-positive-bold text-f0-foreground-inverse h-3 w-3"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1m0 0V3m0 2v2M5 10h14"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinecap",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinecap={1}
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Date Snapshot - default 1`] = `
+<View
+  className="flex h-10 w-10 flex-col items-center justify-center rounded border border-solid border-f0-border-secondary bg-f0-background-inverse-secondary"
+>
+  <Text
+    className="pt-0.5 no-underline tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-accent text-left uppercase"
+  >
+    Jul
+  </Text>
+  <Text
+    className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground text-left"
+  >
+    10
+  </Text>
+</View>
+`;
+
+exports[`F0Avatar Emoji Snapshot - all sizes 1`] = `
+<View
+  className="w-6 h-6 rounded-sm flex aspect-square items-center justify-center border border-solid border-f0-border-secondary bg-f0-background dark:bg-f0-background-inverse-secondary"
+>
+  <Text
+    className="text-xs"
+  >
+    peach
+  </Text>
+</View>
+`;
+
+exports[`F0Avatar Emoji Snapshot - all sizes 2`] = `
+<View
+  className="w-8 h-8 rounded flex aspect-square items-center justify-center border border-solid border-f0-border-secondary bg-f0-background dark:bg-f0-background-inverse-secondary"
+>
+  <Text
+    className="text-sm"
+  >
+    peach
+  </Text>
+</View>
+`;
+
+exports[`F0Avatar Emoji Snapshot - all sizes 3`] = `
+<View
+  className="w-10 h-10 rounded-lg flex aspect-square items-center justify-center border border-solid border-f0-border-secondary bg-f0-background dark:bg-f0-background-inverse-secondary"
+>
+  <Text
+    className="text-md"
+  >
+    peach
+  </Text>
+</View>
+`;
+
+exports[`F0Avatar File Snapshot - DOC 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      className="flex shrink-0 items-center justify-center text-center font-semibold w-8 h-8 rounded overflow-visible border border-solid border-f0-border-secondary bg-f0-background"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-info text-left"
+        ellipsizeMode="tail"
+        numberOfLines={1}
+      >
+        DOC
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar File Snapshot - PDF 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      className="flex shrink-0 items-center justify-center text-center font-semibold w-8 h-8 rounded overflow-visible border border-solid border-f0-border-secondary bg-f0-background"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-accent text-left"
+        ellipsizeMode="tail"
+        numberOfLines={1}
+      >
+        PDF
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar File Snapshot - with badge 1`] = `
+<View
+  className="inline-flex p-[3px]"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      className="flex shrink-0 items-center justify-center text-center font-semibold w-10 h-10 rounded-lg overflow-visible border border-solid border-f0-border-secondary bg-f0-background"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-accent text-left"
+        ellipsizeMode="tail"
+        numberOfLines={1}
+      >
+        PDF
+      </Text>
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <View
+      accessibilityRole="image"
+      className="relative flex shrink-0 items-center justify-center h-4 w-4"
+    >
+      <RNSVGSvgView
+        align="none"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="absolute h-full w-full"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={100}
+        vbWidth={100}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGDefs>
+            <RNSVGLinearGradient
+              gradient={
+                [
+                  0,
+                  -51874,
+                  0.44,
+                  -51874,
+                  1,
+                  -2740913,
+                ]
+              }
+              gradientTransform={null}
+              gradientUnits={0}
+              name="gradient-«r2»"
+              x1="0%"
+              x2="100%"
+              y1="0%"
+              y2="100%"
+            />
+          </RNSVGDefs>
+          <RNSVGPath
+            d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+            fill={
+              {
+                "brushRef": "gradient-«r2»",
+                "type": 1,
+              }
+            }
+            matrix={
+              [
+                0.95,
+                0,
+                0,
+                0.95,
+                2.375,
+                2.375,
+              ]
+            }
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            strokeWidth={10}
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <View
+        className="absolute inset-0 items-center justify-center z-10 h-4 w-4"
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight="100%"
+          bbWidth="100%"
+          className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+          fill="none"
+          focusable={false}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          vbHeight={24}
+          vbWidth={24}
+        >
+          <RNSVGGroup
+            fill={null}
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M5.7 3.85A2.7 2.7 0 0 0 3 6.55v9a3.6 3.6 0 0 0 3.6 3.6h10.8a3.6 3.6 0 0 0 3.6-3.6v-5.4a3.6 3.6 0 0 0-3.6-3.6h-4.243a.257.257 0 0 1-.257-.257 2.443 2.443 0 0 0-2.443-2.443z"
+              fill={
+                {
+                  "type": 2,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag Snapshot - all sizes 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of ES"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-5 w-5 rounded-xs"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/es.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag Snapshot - all sizes 2`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of ES"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-6 w-6 rounded-sm"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/es.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag Snapshot - all sizes 3`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of ES"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-8 w-8 rounded"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/es.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag Snapshot - all sizes 4`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of ES"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-10 w-10 rounded-lg"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/es.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag Snapshot - with icon badge 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of DE"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-10 w-10 rounded-lg"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/de.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="stroke-xs flex shrink-0 items-center justify-center rounded-full bg-f0-background-positive-bold text-f0-foreground-inverse h-3 w-3"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1m0 0V3m0 2v2M5 10h14"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinecap",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinecap={1}
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag Snapshot - with module badge 1`] = `
+<View
+  className="inline-flex p-[3px]"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of US"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-8 w-8 rounded"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/us.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <View
+      accessibilityRole="image"
+      className="relative flex shrink-0 items-center justify-center h-4 w-4"
+    >
+      <RNSVGSvgView
+        align="none"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="absolute h-full w-full"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={100}
+        vbWidth={100}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGDefs>
+            <RNSVGLinearGradient
+              gradient={
+                [
+                  0,
+                  -51874,
+                  0.44,
+                  -51874,
+                  1,
+                  -2740913,
+                ]
+              }
+              gradientTransform={null}
+              gradientUnits={0}
+              name="gradient-«r3»"
+              x1="0%"
+              x2="100%"
+              y1="0%"
+              y2="100%"
+            />
+          </RNSVGDefs>
+          <RNSVGPath
+            d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+            fill={
+              {
+                "brushRef": "gradient-«r3»",
+                "type": 1,
+              }
+            }
+            matrix={
+              [
+                0.95,
+                0,
+                0,
+                0.95,
+                2.375,
+                2.375,
+              ]
+            }
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            strokeWidth={10}
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <View
+        className="absolute inset-0 items-center justify-center z-10 h-4 w-4"
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight="100%"
+          bbWidth="100%"
+          className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+          fill="none"
+          focusable={false}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          vbHeight={24}
+          vbWidth={24}
+        >
+          <RNSVGGroup
+            fill={null}
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+              fill={
+                {
+                  "type": 2,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Flag renders with accessibility label 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of FR"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-5 w-5 rounded-xs"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/fr.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Icon Snapshot - all sizes 1`] = `
+<View
+  className="flex aspect-square items-center justify-center border border-solid border-f0-border-secondary h-6 w-6 rounded-sm"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-4 h-4 stroke-sm text-f0-foreground-secondary"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1m0 0V3m0 2v2M5 10h14"
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeLinecap",
+            "strokeLinejoin",
+          ]
+        }
+        stroke={
+          {
+            "type": 2,
+          }
+        }
+        strokeLinecap={1}
+        strokeLinejoin={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Icon Snapshot - all sizes 2`] = `
+<View
+  className="flex aspect-square items-center justify-center border border-solid border-f0-border-secondary h-8 w-8 rounded"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-5 h-5 stroke-md text-f0-foreground-secondary"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1m0 0V3m0 2v2M5 10h14"
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeLinecap",
+            "strokeLinejoin",
+          ]
+        }
+        stroke={
+          {
+            "type": 2,
+          }
+        }
+        strokeLinecap={1}
+        strokeLinejoin={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Icon Snapshot - all sizes 3`] = `
+<View
+  className="flex aspect-square items-center justify-center border border-solid border-f0-border-secondary h-10 w-10 rounded-lg"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-6 h-6 stroke-lg text-f0-foreground-secondary"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1m0 0V3m0 2v2M5 10h14"
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+        propList={
+          [
+            "stroke",
+            "strokeLinecap",
+            "strokeLinejoin",
+          ]
+        }
+        stroke={
+          {
+            "type": 2,
+          }
+        }
+        strokeLinecap={1}
+        strokeLinejoin={1}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar List Snapshot - company list with remainingCount 1`] = `
+<View
+  className="flex-row items-center"
+>
+  <View
+    style={
+      {
+        "marginLeft": 0,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={32}
+      bbWidth={32}
+      focusable={false}
+      height={32}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 32,
+            "width": 32,
+          },
+        ]
+      }
+      vbHeight={32}
+      vbWidth={32}
+      width={32}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«rc»-clip-0"
+          >
+            <RNSVGPath
+              d="M1.08993 5.46009C0 7.59921 0 10.3995 0 16C0 21.6005 0 24.4008 1.08993 26.5399C2.04867 28.4215 3.57847 29.9513 5.46009 30.9101C7.59921 32 10.3995 32 16 32C21.6005 32 24.4008 32 26.5399 30.9101C27.4506 30.446 28.279 29.8482 29 29.1414C28.2314 28.388 27.5846 27.5108 27.0899 26.5399C26 24.4008 26 21.6005 26 16C26 10.3995 26 7.59921 27.0899 5.46009C27.5846 4.48921 28.2314 3.612 29 2.85857C28.279 2.15181 27.4506 1.55398 26.5399 1.08993C24.4008 0 21.6005 0 16 0C10.3995 0 7.59921 0 5.46009 1.08993C3.57847 2.04867 2.04867 3.57847 1.08993 5.46009Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«rc»-clip-0"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4278689963,
+                "type": 0,
+              }
+            }
+            height={32}
+            propList={
+              [
+                "fill",
+              ]
+            }
+            width={32}
+            x={0}
+            y={0}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                5.6,
+              ]
+            }
+            fill={
+              {
+                "payload": 3875536895,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 16,
+                "fontWeight": "600",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                16,
+              ]
+            }
+            y={
+              [
+                16,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="FA"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGRect
+            fill={null}
+            height={31}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            rx={6}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={31}
+            x={0.5}
+            y={0.5}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -4,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={32}
+      bbWidth={32}
+      focusable={false}
+      height={32}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 32,
+            "width": 32,
+          },
+        ]
+      }
+      vbHeight={32}
+      vbWidth={32}
+      width={32}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«rc»-clip-1"
+          >
+            <RNSVGPath
+              d="M1.08993 5.46009C0 7.59921 0 10.3995 0 16C0 21.6005 0 24.4008 1.08993 26.5399C2.04867 28.4215 3.57847 29.9513 5.46009 30.9101C7.59921 32 10.3995 32 16 32C21.6005 32 24.4008 32 26.5399 30.9101C27.4506 30.446 28.279 29.8482 29 29.1414C28.2314 28.388 27.5846 27.5108 27.0899 26.5399C26 24.4008 26 21.6005 26 16C26 10.3995 26 7.59921 27.0899 5.46009C27.5846 4.48921 28.2314 3.612 29 2.85857C28.279 2.15181 27.4506 1.55398 26.5399 1.08993C24.4008 0 21.6005 0 16 0C10.3995 0 7.59921 0 5.46009 1.08993C3.57847 2.04867 2.04867 3.57847 1.08993 5.46009Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«rc»-clip-1"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4278689963,
+                "type": 0,
+              }
+            }
+            height={32}
+            propList={
+              [
+                "fill",
+              ]
+            }
+            width={32}
+            x={0}
+            y={0}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                5.6,
+              ]
+            }
+            fill={
+              {
+                "payload": 3875536895,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 16,
+                "fontWeight": "600",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                16,
+              ]
+            }
+            y={
+              [
+                16,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="GO"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGRect
+            fill={null}
+            height={31}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            rx={6}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={31}
+            x={0.5}
+            y={0.5}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "height": 32,
+        "marginLeft": -4,
+        "minWidth": 32,
+      }
+    }
+  >
+    <View
+      className="flex shrink-0 items-center justify-center bg-f0-background-secondary h-8 min-w-8 rounded px-1.5"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-medium text-f0-foreground-secondary text-left"
+      >
+        +
+        5
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar List Snapshot - file list 1`] = `
+<View
+  className="flex-row items-center"
+>
+  <View
+    style={
+      {
+        "marginLeft": 0,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={32}
+      bbWidth={32}
+      focusable={false}
+      height={32}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 32,
+            "width": 32,
+          },
+        ]
+      }
+      vbHeight={32}
+      vbWidth={32}
+      width={32}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«re»-clip-0"
+          >
+            <RNSVGPath
+              d="M1.08993 5.46009C0 7.59921 0 10.3995 0 16C0 21.6005 0 24.4008 1.08993 26.5399C2.04867 28.4215 3.57847 29.9513 5.46009 30.9101C7.59921 32 10.3995 32 16 32C21.6005 32 24.4008 32 26.5399 30.9101C27.4506 30.446 28.279 29.8482 29 29.1414C28.2314 28.388 27.5846 27.5108 27.0899 26.5399C26 24.4008 26 21.6005 26 16C26 10.3995 26 7.59921 27.0899 5.46009C27.5846 4.48921 28.2314 3.612 29 2.85857C28.279 2.15181 27.4506 1.55398 26.5399 1.08993C24.4008 0 21.6005 0 16 0C10.3995 0 7.59921 0 5.46009 1.08993C3.57847 2.04867 2.04867 3.57847 1.08993 5.46009Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«re»-clip-0"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            height={31}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={31}
+            x={0.5}
+            y={0.5}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                4.199999999999999,
+              ]
+            }
+            fill={
+              {
+                "payload": 4288418095,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 12,
+                "fontWeight": "500",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                16,
+              ]
+            }
+            y={
+              [
+                16,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="PDF"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -4,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 32,
+          "width": 32,
+        }
+      }
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            className="flex shrink-0 items-center justify-center text-center font-semibold w-8 h-8 rounded overflow-visible border border-solid border-f0-border-secondary bg-f0-background"
+          >
+            <Text
+              className="no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-positive text-left"
+              ellipsizeMode="tail"
+              numberOfLines={1}
+            >
+              XLS
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar List Snapshot - flag list 1`] = `
+<View
+  className="flex-row items-center"
+>
+  <View
+    style={
+      {
+        "marginLeft": 0,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={20}
+      bbWidth={20}
+      focusable={false}
+      height={20}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 20,
+            "width": 20,
+          },
+        ]
+      }
+      vbHeight={21}
+      vbWidth={21}
+      width={20}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«rd»-clip-0"
+          >
+            <RNSVGPath
+              d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«rd»-clip-0"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGImage
+            align="xMidYMid"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            height={21}
+            meetOrSlice={1}
+            src={
+              {
+                "uri": "https://flagcdn.com/w80/es.png",
+              }
+            }
+            width={21}
+            x={0}
+            y={0}
+          />
+          <RNSVGRect
+            fill={null}
+            height={20}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            rx={2}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={20}
+            x={0.5}
+            y={0.5}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -2,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={20}
+      bbWidth={20}
+      focusable={false}
+      height={20}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 20,
+            "width": 20,
+          },
+        ]
+      }
+      vbHeight={21}
+      vbWidth={21}
+      width={20}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«rd»-clip-1"
+          >
+            <RNSVGPath
+              d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«rd»-clip-1"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGImage
+            align="xMidYMid"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            height={21}
+            meetOrSlice={1}
+            src={
+              {
+                "uri": "https://flagcdn.com/w80/fr.png",
+              }
+            }
+            width={21}
+            x={0}
+            y={0}
+          />
+          <RNSVGRect
+            fill={null}
+            height={20}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            rx={2}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={20}
+            x={0.5}
+            y={0.5}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -2,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 20,
+          "width": 20,
+        }
+      }
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            accessibilityLabel="Flag of DE"
+            accessibilityRole="image"
+            className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-5 w-5 rounded-xs"
+          >
+            <Image
+              cachePolicy="memory-disk"
+              className="h-full w-full"
+              contentFit="cover"
+              source={
+                {
+                  "uri": "https://flagcdn.com/w80/de.png",
+                }
+              }
+              style={
+                [
+                  {},
+                  undefined,
+                ]
+              }
+              transition={150}
+            />
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar List Snapshot - person list 1`] = `
+<View
+  className="flex-row items-center"
+>
+  <View
+    style={
+      {
+        "marginLeft": 0,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={32}
+      bbWidth={32}
+      focusable={false}
+      height={32}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 32,
+            "width": 32,
+          },
+        ]
+      }
+      vbHeight={32}
+      vbWidth={32}
+      width={32}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«ra»-clip-0"
+          >
+            <RNSVGPath
+              d="M29 6.67055C27.1119 9.29683 26 12.5186 26 16C26 19.4814 27.1119 22.7032 29 25.3295C26.0958 29.3692 21.3551 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0C21.3551 0 26.0958 2.63083 29 6.67055Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«ra»-clip-0"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4285242536,
+                "type": 0,
+              }
+            }
+            height={32}
+            propList={
+              [
+                "fill",
+              ]
+            }
+            width={32}
+            x={0}
+            y={0}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                5.6,
+              ]
+            }
+            fill={
+              {
+                "payload": 3875536895,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 16,
+                "fontWeight": "600",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                16,
+              ]
+            }
+            y={
+              [
+                16,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="AG"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGCircle
+            cx={16}
+            cy={16}
+            fill={null}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            r={15.5}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -4,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={32}
+      bbWidth={32}
+      focusable={false}
+      height={32}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 32,
+            "width": 32,
+          },
+        ]
+      }
+      vbHeight={32}
+      vbWidth={32}
+      width={32}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«ra»-clip-1"
+          >
+            <RNSVGPath
+              d="M29 6.67055C27.1119 9.29683 26 12.5186 26 16C26 19.4814 27.1119 22.7032 29 25.3295C26.0958 29.3692 21.3551 32 16 32C7.16344 32 0 24.8366 0 16C0 7.16344 7.16344 0 16 0C21.3551 0 26.0958 2.63083 29 6.67055Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«ra»-clip-1"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4291520392,
+                "type": 0,
+              }
+            }
+            height={32}
+            propList={
+              [
+                "fill",
+              ]
+            }
+            width={32}
+            x={0}
+            y={0}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                5.6,
+              ]
+            }
+            fill={
+              {
+                "payload": 3875536895,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 16,
+                "fontWeight": "600",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                16,
+              ]
+            }
+            y={
+              [
+                16,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="BT"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGCircle
+            cx={16}
+            cy={16}
+            fill={null}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            r={15.5}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -4,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "height": 32,
+          "width": 32,
+        }
+      }
+    >
+      <View
+        className="inline-flex"
+      >
+        <View
+          className="h-fit w-fit"
+        >
+          <View
+            aria-hidden={true}
+            className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-[hsl(theme(colors.lilac-50))]"
+            data-a11y-color-contrast-ignore={true}
+            role="img"
+          >
+            <Text
+              className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+              data-a11y-color-contrast-ignore={true}
+            >
+              CL
+            </Text>
+          </View>
+        </View>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar List Snapshot - team list with overflow 1`] = `
+<View
+  className="flex-row items-center"
+>
+  <View
+    style={
+      {
+        "marginLeft": 0,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«rb»-clip-0"
+          >
+            <RNSVGPath
+              d="M0.608964 4.93853C0 6.4087 0 8.27247 0 12C0 15.7275 0 17.5913 0.608964 19.0615C1.42092 21.0217 2.97831 22.5791 4.93853 23.391C6.4087 24 8.27247 24 12 24C15.7275 24 17.5913 24 19.0615 23.391C19.9729 23.0135 20.7972 22.4749 21.5 21.8095C20.6912 21.0438 20.0434 20.1103 19.609 19.0615C19 17.5913 19 15.7275 19 12C19 8.27247 19 6.4087 19.609 4.93853C20.0434 3.88971 20.6912 2.95622 21.5 2.19052C20.7972 1.52515 19.9729 0.986481 19.0615 0.608964C17.5913 0 15.7275 0 12 0C8.27247 0 6.4087 0 4.93853 0.608964C2.97831 1.42092 1.42092 2.97831 0.608964 4.93853Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«rb»-clip-0"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4283799286,
+                "type": 0,
+              }
+            }
+            height={24}
+            propList={
+              [
+                "fill",
+              ]
+            }
+            width={24}
+            x={0}
+            y={0}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                4.8999999999999995,
+              ]
+            }
+            fill={
+              {
+                "payload": 3875536895,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                12,
+              ]
+            }
+            y={
+              [
+                12,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="E"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGRect
+            fill={null}
+            height={23}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            rx={4}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={23}
+            x={0.5}
+            y={0.5}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "marginLeft": -3,
+      }
+    }
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight={24}
+      bbWidth={24}
+      focusable={false}
+      height={24}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          {
+            "flex": 0,
+            "height": 24,
+            "width": 24,
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+      width={24}
+    >
+      <RNSVGGroup
+        fill={
+          {
+            "payload": 4278190080,
+            "type": 0,
+          }
+        }
+      >
+        <RNSVGDefs>
+          <RNSVGClipPath
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            name="«rb»-clip-1"
+          >
+            <RNSVGPath
+              d="M0.608964 4.93853C0 6.4087 0 8.27247 0 12C0 15.7275 0 17.5913 0.608964 19.0615C1.42092 21.0217 2.97831 22.5791 4.93853 23.391C6.4087 24 8.27247 24 12 24C15.7275 24 17.5913 24 19.0615 23.391C19.9729 23.0135 20.7972 22.4749 21.5 21.8095C20.6912 21.0438 20.0434 20.1103 19.609 19.0615C19 17.5913 19 15.7275 19 12C19 8.27247 19 6.4087 19.609 4.93853C20.0434 3.88971 20.6912 2.95622 21.5 2.19052C20.7972 1.52515 19.9729 0.986481 19.0615 0.608964C17.5913 0 15.7275 0 12 0C8.27247 0 6.4087 0 4.93853 0.608964C2.97831 1.42092 1.42092 2.97831 0.608964 4.93853Z"
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+            />
+          </RNSVGClipPath>
+        </RNSVGDefs>
+        <RNSVGGroup
+          clipPath="«rb»-clip-1"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGRect
+            fill={
+              {
+                "payload": 4290674256,
+                "type": 0,
+              }
+            }
+            height={24}
+            propList={
+              [
+                "fill",
+              ]
+            }
+            width={24}
+            x={0}
+            y={0}
+          />
+          <RNSVGText
+            content={null}
+            dx={[]}
+            dy={
+              [
+                4.8999999999999995,
+              ]
+            }
+            fill={
+              {
+                "payload": 3875536895,
+                "type": 0,
+              }
+            }
+            font={
+              {
+                "fontSize": 14,
+                "fontWeight": "600",
+                "textAnchor": "middle",
+              }
+            }
+            propList={
+              [
+                "fill",
+              ]
+            }
+            rotate={[]}
+            x={
+              [
+                12,
+              ]
+            }
+            y={
+              [
+                12,
+              ]
+            }
+          >
+            <RNSVGTSpan
+              content="D"
+              dx={[]}
+              dy={[]}
+              fill={
+                {
+                  "payload": 4278190080,
+                  "type": 0,
+                }
+              }
+              font={{}}
+              rotate={[]}
+              x={[]}
+              y={[]}
+            />
+          </RNSVGText>
+          <RNSVGRect
+            fill={null}
+            height={23}
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            rx={4}
+            stroke={
+              {
+                "payload": 251658240,
+                "type": 0,
+              }
+            }
+            strokeWidth={1}
+            width={23}
+            x={0.5}
+            y={0.5}
+          />
+        </RNSVGGroup>
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <View
+    style={
+      {
+        "height": 24,
+        "marginLeft": -3,
+        "minWidth": 24,
+      }
+    }
+  >
+    <View
+      className="flex shrink-0 items-center justify-center bg-f0-background-secondary h-6 min-w-6 rounded-sm px-1"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[12px] leading-[16px] font-medium text-f0-foreground-secondary text-left"
+      >
+        +
+        2
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Module Snapshot - all sizes 1`] = `
+<View
+  accessibilityRole="image"
+  className="relative flex shrink-0 items-center justify-center h-2.5 w-2.5"
+>
+  <RNSVGSvgView
+    align="none"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="absolute h-full w-full"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={100}
+    vbWidth={100}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGLinearGradient
+          gradient={
+            [
+              0,
+              -51874,
+              0.44,
+              -51874,
+              1,
+              -2740913,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="gradient-«r4»"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        />
+      </RNSVGDefs>
+      <RNSVGPath
+        d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+        fill={
+          {
+            "brushRef": "gradient-«r4»",
+            "type": 1,
+          }
+        }
+        matrix={
+          [
+            0.95,
+            0,
+            0,
+            0.95,
+            2.375,
+            2.375,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4294967295,
+            "type": 0,
+          }
+        }
+        strokeWidth={10}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    className="absolute inset-0 items-center justify-center z-10 h-2.5 w-2.5"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="relative text-f0-foreground-inverse h-[6px] w-[6px]"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Module Snapshot - all sizes 2`] = `
+<View
+  accessibilityRole="image"
+  className="relative flex shrink-0 items-center justify-center h-3 w-3"
+>
+  <RNSVGSvgView
+    align="none"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="absolute h-full w-full"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={100}
+    vbWidth={100}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGLinearGradient
+          gradient={
+            [
+              0,
+              -51874,
+              0.44,
+              -51874,
+              1,
+              -2740913,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="gradient-«r5»"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        />
+      </RNSVGDefs>
+      <RNSVGPath
+        d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+        fill={
+          {
+            "brushRef": "gradient-«r5»",
+            "type": 1,
+          }
+        }
+        matrix={
+          [
+            0.95,
+            0,
+            0,
+            0.95,
+            2.375,
+            2.375,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4294967295,
+            "type": 0,
+          }
+        }
+        strokeWidth={10}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    className="absolute inset-0 items-center justify-center z-10 h-3 w-3"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="relative text-f0-foreground-inverse h-2 w-2"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Module Snapshot - all sizes 3`] = `
+<View
+  accessibilityRole="image"
+  className="relative flex shrink-0 items-center justify-center h-4 w-4"
+>
+  <RNSVGSvgView
+    align="none"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="absolute h-full w-full"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={100}
+    vbWidth={100}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGLinearGradient
+          gradient={
+            [
+              0,
+              -51874,
+              0.44,
+              -51874,
+              1,
+              -2740913,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="gradient-«r6»"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        />
+      </RNSVGDefs>
+      <RNSVGPath
+        d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+        fill={
+          {
+            "brushRef": "gradient-«r6»",
+            "type": 1,
+          }
+        }
+        matrix={
+          [
+            0.95,
+            0,
+            0,
+            0.95,
+            2.375,
+            2.375,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4294967295,
+            "type": 0,
+          }
+        }
+        strokeWidth={10}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    className="absolute inset-0 items-center justify-center z-10 h-4 w-4"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Module Snapshot - all sizes 4`] = `
+<View
+  accessibilityRole="image"
+  className="relative flex shrink-0 items-center justify-center h-5 w-5"
+>
+  <RNSVGSvgView
+    align="none"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="absolute h-full w-full"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={100}
+    vbWidth={100}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGLinearGradient
+          gradient={
+            [
+              0,
+              -51874,
+              0.44,
+              -51874,
+              1,
+              -2740913,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="gradient-«r7»"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        />
+      </RNSVGDefs>
+      <RNSVGPath
+        d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+        fill={
+          {
+            "brushRef": "gradient-«r7»",
+            "type": 1,
+          }
+        }
+        matrix={
+          [
+            0.95,
+            0,
+            0,
+            0.95,
+            2.375,
+            2.375,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4294967295,
+            "type": 0,
+          }
+        }
+        strokeWidth={10}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    className="absolute inset-0 items-center justify-center z-10 h-5 w-5"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Module Snapshot - all sizes 5`] = `
+<View
+  accessibilityRole="image"
+  className="relative flex shrink-0 items-center justify-center h-6 w-6"
+>
+  <RNSVGSvgView
+    align="none"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="absolute h-full w-full"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={100}
+    vbWidth={100}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGLinearGradient
+          gradient={
+            [
+              0,
+              -51874,
+              0.44,
+              -51874,
+              1,
+              -2740913,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="gradient-«r8»"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        />
+      </RNSVGDefs>
+      <RNSVGPath
+        d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+        fill={
+          {
+            "brushRef": "gradient-«r8»",
+            "type": 1,
+          }
+        }
+        matrix={
+          [
+            0.95,
+            0,
+            0,
+            0.95,
+            2.375,
+            2.375,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4294967295,
+            "type": 0,
+          }
+        }
+        strokeWidth={10}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    className="absolute inset-0 items-center justify-center z-10 h-6 w-6"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="relative text-f0-foreground-inverse h-[18px] w-[18px]"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Module Snapshot - all sizes 6`] = `
+<View
+  accessibilityRole="image"
+  className="relative flex shrink-0 items-center justify-center h-8 w-8"
+>
+  <RNSVGSvgView
+    align="none"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="absolute h-full w-full"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={100}
+    vbWidth={100}
+  >
+    <RNSVGGroup
+      fill={
+        {
+          "payload": 4278190080,
+          "type": 0,
+        }
+      }
+    >
+      <RNSVGDefs>
+        <RNSVGLinearGradient
+          gradient={
+            [
+              0,
+              -51874,
+              0.44,
+              -51874,
+              1,
+              -2740913,
+            ]
+          }
+          gradientTransform={null}
+          gradientUnits={0}
+          name="gradient-«r9»"
+          x1="0%"
+          x2="100%"
+          y1="0%"
+          y2="100%"
+        />
+      </RNSVGDefs>
+      <RNSVGPath
+        d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+        fill={
+          {
+            "brushRef": "gradient-«r9»",
+            "type": 1,
+          }
+        }
+        matrix={
+          [
+            0.95,
+            0,
+            0,
+            0.95,
+            2.375,
+            2.375,
+          ]
+        }
+        propList={
+          [
+            "fill",
+            "stroke",
+            "strokeWidth",
+          ]
+        }
+        stroke={
+          {
+            "payload": 4294967295,
+            "type": 0,
+          }
+        }
+        strokeWidth={10}
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+  <View
+    className="absolute inset-0 items-center justify-center z-10 h-8 w-8"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="relative text-f0-foreground-inverse h-6 w-6"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - all sizes 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        J
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - all sizes 2`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-6 h-6 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        J
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - all sizes 3`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        JD
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - all sizes 4`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-10 h-10 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        JD
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - all sizes 5`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-14 h-14 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        JD
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - all sizes 6`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-18 h-18 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case text-[24px] leading-[32px] tracking-[-0.2px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        JD
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - deactivated 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-f0-background-secondary"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <RNSVGSvgView
+        align="xMidYMid"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="shrink-0 w-5 h-5 stroke-md text-f0-icon-secondary"
+        fill="none"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            [
+              {},
+            ],
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={24}
+        vbWidth={24}
+      >
+        <RNSVGGroup
+          fill={null}
+          propList={
+            [
+              "fill",
+            ]
+          }
+        >
+          <RNSVGPath
+            d="M10 5.535a4 4 0 0 1 5.254 5.791M7.8 11a4 4 0 0 0 1.887 1.89"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "stroke",
+                "strokeLinecap",
+              ]
+            }
+            stroke={
+              {
+                "type": 2,
+              }
+            }
+            strokeLinecap={1}
+          />
+          <RNSVGPath
+            d="M7 18s1.5-2 5-2q.53 0 1 .057"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "stroke",
+                "strokeLinecap",
+                "strokeLinejoin",
+              ]
+            }
+            stroke={
+              {
+                "type": 2,
+              }
+            }
+            strokeLinecap={1}
+            strokeLinejoin={1}
+          />
+          <RNSVGPath
+            d="m5 5 14 14"
+            fill={
+              {
+                "payload": 4278190080,
+                "type": 0,
+              }
+            }
+            propList={
+              [
+                "stroke",
+                "strokeLinecap",
+              ]
+            }
+            stroke={
+              {
+                "type": 2,
+              }
+            }
+            strokeLinecap={1}
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - default size 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        J
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - with badge 1`] = `
+<View
+  className="inline-flex p-[3px]"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        JD
+      </Text>
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <View
+      accessibilityRole="image"
+      className="relative flex shrink-0 items-center justify-center h-4 w-4"
+    >
+      <RNSVGSvgView
+        align="none"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="absolute h-full w-full"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={100}
+        vbWidth={100}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGDefs>
+            <RNSVGLinearGradient
+              gradient={
+                [
+                  0,
+                  -51874,
+                  0.44,
+                  -51874,
+                  1,
+                  -2740913,
+                ]
+              }
+              gradientTransform={null}
+              gradientUnits={0}
+              name="gradient-«r0»"
+              x1="0%"
+              x2="100%"
+              y1="0%"
+              y2="100%"
+            />
+          </RNSVGDefs>
+          <RNSVGPath
+            d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+            fill={
+              {
+                "brushRef": "gradient-«r0»",
+                "type": 1,
+              }
+            }
+            matrix={
+              [
+                0.95,
+                0,
+                0,
+                0.95,
+                2.375,
+                2.375,
+              ]
+            }
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            strokeWidth={10}
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <View
+        className="absolute inset-0 items-center justify-center z-10 h-4 w-4"
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight="100%"
+          bbWidth="100%"
+          className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+          fill="none"
+          focusable={false}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          vbHeight={24}
+          vbWidth={24}
+        >
+          <RNSVGGroup
+            fill={null}
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+              fill={
+                {
+                  "type": 2,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Person Snapshot - with icon badge 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-10 h-10 rounded-full bg-[hsl(theme(colors.indigo-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        JD
+      </Text>
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="stroke-xs flex shrink-0 items-center justify-center rounded-full bg-f0-background-positive-bold text-f0-foreground-inverse h-3 w-3"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h1m0 0V3m0 2v2M5 10h14"
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+          propList={
+            [
+              "stroke",
+              "strokeLinecap",
+              "strokeLinejoin",
+            ]
+          }
+          stroke={
+            {
+              "type": 2,
+            }
+          }
+          strokeLinecap={1}
+          strokeLinejoin={1}
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Polymorphic root Snapshot - alert via root 1`] = `
+<View
+  accessibilityLabel="critical alert"
+  accessibilityRole="image"
+  className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-8 w-8 rounded bg-f0-background-critical border-f0-border-critical"
+>
+  <RNSVGSvgView
+    align="xMidYMid"
+    bbHeight="100%"
+    bbWidth="100%"
+    className="shrink-0 w-5 h-5 stroke-md text-f0-icon-critical"
+    fill="none"
+    focusable={false}
+    meetOrSlice={0}
+    minX={0}
+    minY={0}
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "borderWidth": 0,
+        },
+        [
+          {},
+        ],
+        {
+          "flex": 0,
+          "height": "100%",
+          "width": "100%",
+        },
+      ]
+    }
+    vbHeight={24}
+    vbWidth={24}
+  >
+    <RNSVGGroup
+      fill={null}
+      propList={
+        [
+          "fill",
+        ]
+      }
+    >
+      <RNSVGPath
+        d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+        fill={
+          {
+            "type": 2,
+          }
+        }
+        propList={
+          [
+            "fill",
+          ]
+        }
+      />
+    </RNSVGGroup>
+  </RNSVGSvgView>
+</View>
+`;
+
+exports[`F0Avatar Polymorphic root Snapshot - company via root 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded bg-[hsl(theme(colors.viridian-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        FA
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Polymorphic root Snapshot - flag with badge via root 1`] = `
+<View
+  className="inline-flex p-[3px]"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      accessibilityLabel="Flag of ES"
+      accessibilityRole="image"
+      className="flex shrink-0 items-center justify-center overflow-hidden border border-solid border-f0-border-secondary h-8 w-8 rounded"
+    >
+      <Image
+        cachePolicy="memory-disk"
+        className="h-full w-full"
+        contentFit="cover"
+        source={
+          {
+            "uri": "https://flagcdn.com/w80/es.png",
+          }
+        }
+        style={
+          [
+            {},
+            undefined,
+          ]
+        }
+        transition={150}
+      />
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <View
+      accessibilityRole="image"
+      className="relative flex shrink-0 items-center justify-center h-4 w-4"
+    >
+      <RNSVGSvgView
+        align="none"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="absolute h-full w-full"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={100}
+        vbWidth={100}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGDefs>
+            <RNSVGLinearGradient
+              gradient={
+                [
+                  0,
+                  -51874,
+                  0.44,
+                  -51874,
+                  1,
+                  -2740913,
+                ]
+              }
+              gradientTransform={null}
+              gradientUnits={0}
+              name="gradient-«rg»"
+              x1="0%"
+              x2="100%"
+              y1="0%"
+              y2="100%"
+            />
+          </RNSVGDefs>
+          <RNSVGPath
+            d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+            fill={
+              {
+                "brushRef": "gradient-«rg»",
+                "type": 1,
+              }
+            }
+            matrix={
+              [
+                0.95,
+                0,
+                0,
+                0.95,
+                2.375,
+                2.375,
+              ]
+            }
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            strokeWidth={10}
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <View
+        className="absolute inset-0 items-center justify-center z-10 h-4 w-4"
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight="100%"
+          bbWidth="100%"
+          className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+          fill="none"
+          focusable={false}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          vbHeight={24}
+          vbWidth={24}
+        >
+          <RNSVGGroup
+            fill={null}
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+              fill={
+                {
+                  "type": 2,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Polymorphic root Snapshot - person via root 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded-full bg-[hsl(theme(colors.lilac-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        AL
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Team Snapshot - default 1`] = `
+<View
+  className="inline-flex"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-5 h-5 rounded-xs bg-[hsl(theme(colors.malibu-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[14px] leading-[20px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        E
+      </Text>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`F0Avatar Team Snapshot - with badge 1`] = `
+<View
+  className="inline-flex p-[3px]"
+>
+  <View
+    className="h-fit w-fit"
+  >
+    <View
+      aria-hidden={true}
+      className="flex shrink-0 items-center justify-center overflow-hidden text-center font-semibold w-8 h-8 rounded bg-[hsl(theme(colors.camel-50))]"
+      data-a11y-color-contrast-ignore={true}
+      role="img"
+    >
+      <Text
+        className="no-underline normal-case tracking-normal text-[16px] leading-[24px] font-semibold text-f0-foreground-inverse text-left"
+        data-a11y-color-contrast-ignore={true}
+      >
+        DE
+      </Text>
+    </View>
+  </View>
+  <View
+    className="absolute -right-0.5 -bottom-0.5"
+  >
+    <View
+      accessibilityRole="image"
+      className="relative flex shrink-0 items-center justify-center h-4 w-4"
+    >
+      <RNSVGSvgView
+        align="none"
+        bbHeight="100%"
+        bbWidth="100%"
+        className="absolute h-full w-full"
+        focusable={false}
+        meetOrSlice={0}
+        minX={0}
+        minY={0}
+        style={
+          [
+            {
+              "backgroundColor": "transparent",
+              "borderWidth": 0,
+            },
+            {
+              "flex": 0,
+              "height": "100%",
+              "width": "100%",
+            },
+          ]
+        }
+        vbHeight={100}
+        vbWidth={100}
+      >
+        <RNSVGGroup
+          fill={
+            {
+              "payload": 4278190080,
+              "type": 0,
+            }
+          }
+        >
+          <RNSVGDefs>
+            <RNSVGLinearGradient
+              gradient={
+                [
+                  0,
+                  -51874,
+                  0.44,
+                  -51874,
+                  1,
+                  -2740913,
+                ]
+              }
+              gradientTransform={null}
+              gradientUnits={0}
+              name="gradient-«r1»"
+              x1="0%"
+              x2="100%"
+              y1="0%"
+              y2="100%"
+            />
+          </RNSVGDefs>
+          <RNSVGPath
+            d="M50,0 C43,0 36,0 30,1 23,2 17,5 12,9 5,16 1,25 0,36 0,43 0,57 0,64 1,75 5,84 12,91 17,95 23,98 30,99 36,100 43,100 50,100 57,100 64,100 70,99 77,98 83,95 88,91 95,84 99,75 100,64 100,57 100,43 100,36 99,25 95,16 88,9 83,5 77,2 70,1 64,0 57,0 50,0"
+            fill={
+              {
+                "brushRef": "gradient-«r1»",
+                "type": 1,
+              }
+            }
+            matrix={
+              [
+                0.95,
+                0,
+                0,
+                0.95,
+                2.375,
+                2.375,
+              ]
+            }
+            propList={
+              [
+                "fill",
+                "stroke",
+                "strokeWidth",
+              ]
+            }
+            stroke={
+              {
+                "payload": 4294967295,
+                "type": 0,
+              }
+            }
+            strokeWidth={10}
+          />
+        </RNSVGGroup>
+      </RNSVGSvgView>
+      <View
+        className="absolute inset-0 items-center justify-center z-10 h-4 w-4"
+      >
+        <RNSVGSvgView
+          align="xMidYMid"
+          bbHeight="100%"
+          bbWidth="100%"
+          className="relative text-f0-foreground-inverse h-[14px] w-[14px]"
+          fill="none"
+          focusable={false}
+          meetOrSlice={0}
+          minX={0}
+          minY={0}
+          style={
+            [
+              {
+                "backgroundColor": "transparent",
+                "borderWidth": 0,
+              },
+              [
+                {},
+              ],
+              {
+                "flex": 0,
+                "height": "100%",
+                "width": "100%",
+              },
+            ]
+          }
+          vbHeight={24}
+          vbWidth={24}
+        >
+          <RNSVGGroup
+            fill={null}
+            propList={
+              [
+                "fill",
+              ]
+            }
+          >
+            <RNSVGPath
+              d="M9.675 3.932a4 4 0 0 1 4.65 0l4 2.857A4 4 0 0 1 20 10.044V16a4 4 0 0 1-4 4h-1a2 2 0 0 1-2-2v-2.5a1 1 0 1 0-2 0V18a2 2 0 0 1-2 2H8a4 4 0 0 1-4-4v-5.956a4 4 0 0 1 1.675-3.255z"
+              fill={
+                {
+                  "type": 2,
+                }
+              }
+              propList={
+                [
+                  "fill",
+                ]
+              }
+            />
+          </RNSVGGroup>
+        </RNSVGSvgView>
+      </View>
+    </View>
+  </View>
+</View>
+`;

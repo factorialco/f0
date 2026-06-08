@@ -2,8 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
 import { F0Button } from "@/components/F0Button"
-import { ResourceHeader } from "@/experimental/Information/Headers/ResourceHeader"
-import { Default as ResourceHeaderDefault } from "@/experimental/Information/Headers/ResourceHeader/index.stories"
+import { ResourceHeader } from "@/patterns/ResourceHeader"
+import { Default as ResourceHeaderDefault } from "@/patterns/ResourceHeader/index.stories"
 import {
   OnePersonListItem,
   OnePersonListItemProps,

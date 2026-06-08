@@ -8,12 +8,9 @@ import { expect, fn, within } from "storybook/test"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
+import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
 
-import {
-  CalendarView,
-  DateRange,
-} from "../../../experimental/OneCalendar/types"
+import { CalendarView, DateRange } from "@/components/OneCalendar/types"
 import { F0DatePicker } from "../index"
 import { predefinedPresets } from "../presets"
 import { datepickerSizes, DatePickerValue } from "../types"
@@ -99,7 +96,7 @@ const meta = {
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
   decorators: [
     (Story, { args, parameters }) => {
       const width = parameters?.width || "300px"

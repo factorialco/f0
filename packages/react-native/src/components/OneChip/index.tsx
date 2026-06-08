@@ -1,11 +1,14 @@
-import { View, Text, Pressable } from "react-native"
+import { Pressable, Text, View } from "react-native"
 import { tv, type VariantProps } from "tailwind-variants"
 
 import { CrossedCircle } from "../../icons/app"
 import { cn } from "../../lib/utils"
-import { Icon, type IconType } from "../Icon"
-import { PressableFeedback } from "../PressableFeedback"
+import { F0Icon, type IconType } from "../primitives/F0Icon"
+import { PressableFeedback } from "../primitives/PressableFeedback"
 
+/**
+ * @deprecated Use `f0ChipContainerVariants` from `../F0Chip/F0Chip.styles` instead.
+ */
 export const chipContainerVariants = tv({
   base: "flex items-center gap-1 rounded-full border border-solid border-f0-border px-2 py-0.5 grow-0",
   variants: {
@@ -19,6 +22,9 @@ export const chipContainerVariants = tv({
   },
 })
 
+/**
+ * @deprecated Use `f0ChipTextVariants` from `../F0Chip/F0Chip.styles` instead.
+ */
 export const chipTextVariants = tv({
   base: "font-medium",
   variants: {
@@ -32,20 +38,27 @@ export const chipTextVariants = tv({
   },
 })
 
-interface ChipProps extends VariantProps<typeof chipContainerVariants> {
+/**
+ * @deprecated Use `F0Chip` from `src/components/F0Chip` instead.
+ */
+interface OneChipProps extends VariantProps<typeof chipContainerVariants> {
   label: string
   icon?: IconType
   onClick?: () => void
   onClose?: () => void
 }
 
+/**
+ * @deprecated Use `F0Chip` from `src/components/F0Chip` instead.
+ * Migration: replace `OneChip` with `F0Chip` and rename `onClick` to `onPress`.
+ */
 export const OneChip = ({
   label,
   variant,
   onClick,
   onClose,
   icon,
-}: ChipProps) => {
+}: OneChipProps) => {
   return (
     <View className="flex items-start">
       <PressableFeedback
@@ -61,7 +74,7 @@ export const OneChip = ({
       >
         <View className="flex flex-row items-center gap-0.5">
           {icon && (
-            <Icon
+            <F0Icon
               icon={icon}
               size="sm"
               className={chipTextVariants({ variant })}
@@ -70,15 +83,15 @@ export const OneChip = ({
           <Text className={chipTextVariants({ variant })}>{label}</Text>
           {onClose && (
             <Pressable
-              onPress={(e) => {
-                e.stopPropagation()
+              onPress={(event) => {
+                event.stopPropagation()
                 onClose()
               }}
               className="-m-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full [&_svg]:text-f0-icon-secondary"
               accessibilityRole="button"
               accessibilityLabel="Close"
             >
-              <Icon
+              <F0Icon
                 icon={CrossedCircle}
                 className={chipTextVariants({ variant })}
                 size="sm"

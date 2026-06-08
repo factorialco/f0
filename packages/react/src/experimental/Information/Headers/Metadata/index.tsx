@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { memo, useState } from "react"
+import { Fragment, memo, useState } from "react"
 
 import {
   AvatarVariant,
@@ -24,7 +24,7 @@ type MetadataItemValue =
   | { type: "text"; content: string }
   | { type: "avatar"; variant: AvatarVariant; text: string }
   | { type: "status"; label: string; variant: StatusVariant }
-  | ({ type: "list" } & (
+  | ({ type: "list"; max?: number } & (
       | {
           variant: "person"
           avatars: (
@@ -51,6 +51,13 @@ type MetadataItemValue =
   | { type: "tag-list"; tags: string[] }
   | { type: "dot-tag"; label: string; color: NewColor }
   | { type: "date"; formattedDate: string; icon?: "warning" | "critical" }
+  | {
+      type: "progress-bar"
+      value: number
+      max?: number
+      label?: string
+      color?: string
+    }
 
 type MetadataAction = {
   icon: IconType
@@ -83,6 +90,12 @@ interface MetadataItem {
   value: MetadataItemValue
   actions?: (MetadataAction | MetadataCopyAction)[]
   hideLabel?: boolean
+
+  /**
+   * Optional leading icon shown before the label/value. Useful when the icon itself
+   * conveys the field (e.g. with `hideLabel`), so the item reads as "icon + value".
+   */
+  icon?: IconType
 
   /**
    * Optional info text. When provided, displays an info icon next to the label
@@ -139,6 +152,11 @@ function MetadataItem({ item }: { item: MetadataItem }) {
         return value.data.join(", ")
       case "list":
         return ""
+      case "progress-bar": {
+        const normalizedMax =
+          typeof value.max === "number" && value.max > 0 ? value.max : 100
+        return value.label ?? `${value.value}/${normalizedMax}`
+      }
       default:
         _exhaustiveCheck = value // Nice hack to ensure we covered all cases
         return _exhaustiveCheck
@@ -147,6 +165,11 @@ function MetadataItem({ item }: { item: MetadataItem }) {
 
   return (
     <div className="flex h-8 items-center gap-2">
+      {item.icon && (
+        <span className="flex shrink-0 items-center text-f1-foreground-secondary">
+          <F0Icon icon={item.icon} size="md" />
+        </span>
+      )}
       <div
         className={cn(
           "flex w-28 items-center gap-1 truncate text-f1-foreground-secondary md:w-fit",
@@ -269,15 +292,12 @@ const _Metadata = memo(function Metadata({ items }: MetadataProps) {
   return (
     <div className="flex flex-col items-start gap-x-3 gap-y-0 md:flex-row md:flex-wrap md:items-center">
       {cleanedItems.map((item, index) => (
-        <>
-          <MetadataItem key={`item-${index}`} item={item} />
+        <Fragment key={`metadata-item-${index}`}>
+          <MetadataItem item={item} />
           {index < cleanedItems.length - 1 && (
-            <div
-              key={`separator-${index}`}
-              className="hidden h-4 w-[1px] bg-f1-border md:block"
-            />
+            <div className="hidden h-4 w-[1px] bg-f1-border md:block" />
           )}
-        </>
+        </Fragment>
       ))}
     </div>
   )

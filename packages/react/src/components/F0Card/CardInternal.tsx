@@ -13,17 +13,22 @@ import {
 } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 
-import { OneEllipsis } from "../OneEllipsis/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import {
   CardActions,
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
 } from "./components/CardActions"
+import { CardAlertWrapper, alertBorderColor } from "./components/CardAlert"
 import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
 import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
-import { type CardMetadata as CardMetadataType } from "./types"
+import {
+  type CardAlertProps,
+  type CardBookmark,
+  type CardMetadata as CardMetadataType,
+} from "./types"
 
 export const cardImageFits = [
   "contain", // Show entire image, no crop
@@ -38,6 +43,10 @@ export type CardImageFit = (typeof cardImageFits)[number]
 export const cardImageSizes = ["xs", "sm", "md", "lg", "xl"] as const
 
 export type CardImageSize = (typeof cardImageSizes)[number]
+
+export const cardImageAspectRatios = ["default", "video"] as const
+
+export type CardImageAspectRatio = (typeof cardImageAspectRatios)[number]
 
 const imageSizeClassMap: Record<CardImageSize, string> = {
   xs: "h-24",
@@ -74,6 +83,13 @@ export interface CardInternalProps {
    * @default "sm"
    */
   imageSize?: CardImageSize
+
+  /**
+   * Constrain the image container to a fixed aspect ratio instead of a fixed height.
+   * When set, `imageSize` is ignored for height.
+   * @example "video"
+   */
+  imageAspectRatio?: CardImageAspectRatio
 
   /**
    * Whether to show a blurred background image when the image doesn't fill the container
@@ -122,6 +138,12 @@ export interface CardInternalProps {
   otherActions?: DropdownItem[]
 
   /**
+   * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+   * Shows an outline bookmark when not bookmarked and a filled one when bookmarked.
+   */
+  bookmark?: CardBookmark
+
+  /**
    * Whether the card is selectable
    */
   selectable?: boolean
@@ -153,10 +175,24 @@ export interface CardInternalProps {
   fullHeight?: boolean
 
   /**
+   * Use a softer/lighter border (`border-f1-border-secondary`) instead of the default
+   * `border-f1-border`. Opt-in so existing cards keep their current appearance.
+   * @default false
+   */
+  subtleBorder?: boolean
+
+  /**
    * When true, disables the full-card overlay link so parent components
    * can manage drag-and-drop while still allowing click navigation via onClick
    */
   disableOverlayLink?: boolean
+
+  /**
+   * Alert banner displayed above the card with a coloured header strip and matching border.
+   * Supports info, warning, critical, and positive variants with a default icon per variant.
+   * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+   */
+  alert?: CardAlertProps
 }
 
 const imageFitClassMap: Record<CardImageFit, string> = {
@@ -182,6 +218,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       image,
       imageFit = "fit-width",
       imageSize = "sm",
+      imageAspectRatio = "default",
       blurredBackground = true,
       title,
       description,
@@ -191,13 +228,16 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       primaryAction,
       secondaryActions,
       otherActions,
+      bookmark,
       selectable = false,
+      subtleBorder = false,
       selected = false,
       onSelect,
       onClick,
       forceVerticalMetadata = false,
       fullHeight = false,
       disableOverlayLink = false,
+      alert,
     },
     ref
   ) {
@@ -211,10 +251,14 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       e.preventDefault()
       e.stopPropagation()
     }
-    return (
+
+    // The card body — extracted so it can be placed inside either the plain root
+    // or the alert wrapper without duplication.
+    const cardBody = (
       <Card
         className={cn(
           "group relative bg-f1-background shadow-none transition-all",
+          subtleBorder && "border-f1-border-secondary",
           compact && "p-3",
           fullHeight && "h-full",
           (selectable || (otherActions && otherActions.length > 0)) &&
@@ -225,9 +269,17 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
           selected &&
             "border-f1-border-selected bg-f1-background-selected-secondary"
         )}
+        style={
+          alert && alert.visible !== false && !selected
+            ? {
+                borderColor: alertBorderColor[alert.variant],
+                borderWidth: "2px",
+              }
+            : undefined
+        }
         onClick={onClick}
         data-testid="card"
-        ref={ref}
+        ref={alert && alert.visible !== false ? undefined : ref}
       >
         {link && !disableOverlayLink && (
           <F0Link
@@ -244,8 +296,12 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {image && (
           <div
             className={cn(
-              "relative -mx-3 -mt-3 mb-4 rounded-md",
-              imageSizeClassMap[imageSize],
+              // pointer-events-none lets clicks on the image fall through to the
+              // full-card overlay link; interactive overlay controls re-enable them.
+              "pointer-events-none relative -mx-3 -mt-3 mb-4 rounded-md",
+              imageAspectRatio === "video"
+                ? "aspect-video"
+                : imageSizeClassMap[imageSize],
               compact && "-mx-2 -mt-2 mb-3",
               imageFit === "fit-height" &&
                 "flex items-center justify-center overflow-hidden",
@@ -284,6 +340,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               selectable={selectable}
               selected={selected}
               onSelect={onSelect}
+              bookmark={bookmark}
               title={title}
               overlay
             />
@@ -346,6 +403,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 selectable={selectable}
                 selected={selected}
                 onSelect={onSelect}
+                bookmark={bookmark}
                 title={title}
               />
             )}
@@ -379,6 +437,16 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         />
       </Card>
     )
+
+    if (alert && alert.visible !== false) {
+      return (
+        <CardAlertWrapper ref={ref} alert={alert} fullHeight={fullHeight}>
+          {cardBody}
+        </CardAlertWrapper>
+      )
+    }
+
+    return cardBody
   }
 )
 

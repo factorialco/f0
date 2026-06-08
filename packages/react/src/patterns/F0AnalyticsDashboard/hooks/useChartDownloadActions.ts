@@ -1,0 +1,106 @@
+import type { RefObject } from "react"
+
+import * as echarts from "echarts"
+import { useCallback, useMemo } from "react"
+
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+
+import { Table, Image } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
+
+import type { DashboardChartConfig, DashboardChartData } from "../types"
+
+import { detectDataShape } from "../utils/chartDataAdapter"
+import { chartDataToTabular } from "../utils/chartDataToTabular"
+import {
+  downloadAsCsv,
+  downloadAsExcel,
+  downloadAsImage,
+} from "../utils/downloadHelpers"
+
+function getEChartsInstance(
+  containerRef: RefObject<HTMLDivElement | null>
+): echarts.ECharts | null {
+  const el = containerRef.current?.querySelector<HTMLDivElement>(":scope > div")
+  return el ? (echarts.getInstanceByDom(el) ?? null) : null
+}
+
+interface UseChartDownloadActionsOptions {
+  chartContainerRef: RefObject<HTMLDivElement | null>
+  chartConfig: DashboardChartConfig
+  data: DashboardChartData | undefined
+  title: string
+}
+
+export function useChartDownloadActions({
+  chartContainerRef,
+  chartConfig,
+  data,
+  title,
+}: UseChartDownloadActionsOptions): DropdownItem[] {
+  const { t } = useI18n()
+
+  const handleImage = useCallback(
+    (type: "png" | "jpg") => {
+      const instance = getEChartsInstance(chartContainerRef)
+      if (!instance) return
+      const echartsType = type === "jpg" ? "jpeg" : "png"
+      const dataUrl = instance.getDataURL({
+        type: echartsType,
+        pixelRatio: 2,
+        ...(type === "jpg" ? { backgroundColor: "#fff" } : {}),
+      })
+      downloadAsImage(dataUrl, title, type)
+    },
+    [chartContainerRef, title]
+  )
+
+  const effectiveConfig = useMemo(() => {
+    if (!data) return chartConfig
+    const dataShape = detectDataShape(data, chartConfig.type)
+    return dataShape !== chartConfig.type
+      ? ({ ...chartConfig, type: dataShape } as DashboardChartConfig)
+      : chartConfig
+  }, [chartConfig, data])
+
+  const handleExcel = useCallback(() => {
+    if (!data) return
+    const tabular = chartDataToTabular(effectiveConfig, data)
+    downloadAsExcel(tabular.columns, tabular.rows, title)
+  }, [effectiveConfig, data, title])
+
+  const handleCsv = useCallback(() => {
+    if (!data) return
+    const tabular = chartDataToTabular(effectiveConfig, data)
+    downloadAsCsv(tabular.columns, tabular.rows, title)
+  }, [effectiveConfig, data, title])
+
+  return useMemo(() => {
+    if (!data) return []
+    return [
+      {
+        label: t("ai.dataDownload.download", { format: "PNG" }),
+        icon: Image,
+        onClick: () => handleImage("png"),
+      },
+      {
+        label: t("ai.dataDownload.download", { format: "JPG" }),
+        icon: Image,
+        onClick: () => handleImage("jpg"),
+      },
+      {
+        type: "separator",
+      },
+      {
+        label: t("ai.dataDownload.download", { format: "Excel" }),
+        icon: Table,
+        onClick: handleExcel,
+      },
+      {
+        label: t("ai.dataDownload.download", { format: "CSV" }),
+        icon: Table,
+        onClick: handleCsv,
+      },
+    ]
+  }, [data, t, handleImage, handleExcel, handleCsv])
+}

@@ -5,6 +5,7 @@ export interface PrimaryAction {
   disabled?: boolean
   tooltip?: string
   isVisible?: boolean
+  loading?: boolean
 }
 export interface PrimaryActionButton extends PrimaryAction {
   label: string

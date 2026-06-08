@@ -56,6 +56,10 @@ export type ButtonInternalProps = Pick<
      */
     icon?: IconType
     /**
+     * Sets the side of the label the icon is placed on. Defaults to "left".
+     */
+    iconPosition?: "left" | "right"
+    /**
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
     emoji?: string
@@ -76,6 +80,11 @@ export type ButtonInternalProps = Pick<
      * If true, the button is inactive and does not respond to user interaction.
      */
     disabled?: boolean
+    /**
+     * If true and disabled is also true, the button retains its normal visual appearance
+     * (no reduced opacity or not-allowed cursor) while still being non-interactive.
+     */
+    withoutDisabledAppearance?: boolean
     /**
      * @private
      * If true, the button is visually active or selected (pressed state).

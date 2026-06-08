@@ -1,5 +1,260 @@
 # Changelog
 
+## [0.55.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.54.0...f0-react-native-v0.55.0) (2026-05-20)
+
+
+### Features
+
+* **react-native:** add calendar icon support to F0Metadata date value ([8e37190](https://github.com/factorialco/f0/commit/8e371909bb8435530765f4fde8a37eb5969e38c9))
+
+
+### Bug Fixes
+
+* **react-native:** drop fixed-width label column in F0Metadata horizontal mode ([da6d392](https://github.com/factorialco/f0/commit/da6d3929b95cb57636c8f8a518681ab29d2d284f))
+* **react-native:** keep date text color independent of icon color in F0Metadata ([7a80fce](https://github.com/factorialco/f0/commit/7a80fce9fb9c28b9913d5ad87b3b888b387fcd6a))
+* **react-native:** tighten F0Metadata horizontal label width ([f36c64f](https://github.com/factorialco/f0/commit/f36c64fcf876d00cd02d46a5c50ed8c7da1e9ae5))
+
+## [0.54.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.53.0...f0-react-native-v0.54.0) (2026-05-18)
+
+
+### Features
+
+* **react-native:** add F0WizardSteps component ([#4141](https://github.com/factorialco/f0/issues/4141)) ([a4f11e9](https://github.com/factorialco/f0/commit/a4f11e93a007c72cd7d521f34b440f0b141c12a1))
+
+## [0.53.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.1...f0-react-native-v0.53.0) (2026-04-30)
+
+
+### Features
+
+* **F0Tabs:** make tab id type generic ([a0f43e9](https://github.com/factorialco/f0/commit/a0f43e920f34c71866cc0d8254ce3a58bc4f2794))
+
+## [0.52.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.52.0...f0-react-native-v0.52.1) (2026-04-24)
+
+
+### Bug Fixes
+
+* **core:** align border radius tokens with Figma design system ([#3805](https://github.com/factorialco/f0/issues/3805)) ([63e20e1](https://github.com/factorialco/f0/commit/63e20e1b72c87b0a033dd903a7211138515fcfb1))
+
+## [0.52.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.51.0...f0-react-native-v0.52.0) (2026-04-21)
+
+
+### Features
+
+* **F0Button:** changes to F0Button and added new icons ([#3969](https://github.com/factorialco/f0/issues/3969)) ([15d9e88](https://github.com/factorialco/f0/commit/15d9e88f90f74a94adfb93d36cb263fc42427aa2))
+
+## [0.51.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.50.0...f0-react-native-v0.51.0) (2026-04-16)
+
+
+### Features
+
+* **F0Tabs:** improvements and changes ([#3948](https://github.com/factorialco/f0/issues/3948)) ([488dfff](https://github.com/factorialco/f0/commit/488dfff3db73b2aa2888fec0dfcc5eeea7a1fd1f))
+
+## [0.50.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.1...f0-react-native-v0.50.0) (2026-04-15)
+
+
+### Features
+
+* **F0Icon:** add tintColor prop for runtime color customization and … ([#3934](https://github.com/factorialco/f0/issues/3934)) ([403d9dd](https://github.com/factorialco/f0/commit/403d9dd18cefe77f386f4cd3c833085e7ce52e62))
+
+## [0.49.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.49.0...f0-react-native-v0.49.1) (2026-04-07)
+
+
+### Bug Fixes
+
+* no thumbnail variant ([#3860](https://github.com/factorialco/f0/issues/3860)) ([0eb01d8](https://github.com/factorialco/f0/commit/0eb01d828f60884d7535e5f69f675d4428195c7f))
+
+## [0.49.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.48.0...f0-react-native-v0.49.0) (2026-03-26)
+
+
+### Features
+
+* add `F0BlurView` primitive ([#3778](https://github.com/factorialco/f0/issues/3778)) ([20d8067](https://github.com/factorialco/f0/commit/20d8067a16602797e48ee57f7350a494bc7ccf97))
+
+## [0.48.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.47.0...f0-react-native-v0.48.0) (2026-03-26)
+
+
+### Features
+
+* **checkbox:** add F0Checkbox component with showcase ([#3776](https://github.com/factorialco/f0/issues/3776)) ([9b77789](https://github.com/factorialco/f0/commit/9b77789203053e74680583098332f3df5161c4ee))
+
+## [0.47.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.46.0...f0-react-native-v0.47.0) (2026-03-26)
+
+
+### Features
+
+* add F0Metadata component ([#3766](https://github.com/factorialco/f0/issues/3766)) ([7d98d34](https://github.com/factorialco/f0/commit/7d98d34d58e533bb7af7a0e81449ad0aeafa4756))
+
+## [0.46.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.45.0...f0-react-native-v0.46.0) (2026-03-26)
+
+
+### Features
+
+* **tabs:** add F0Tabs component with showcase, styles, and docs ([#3765](https://github.com/factorialco/f0/issues/3765)) ([97b0bd7](https://github.com/factorialco/f0/commit/97b0bd7b5c63099a88b65f2c603f559b559b0d06))
+
+## [0.45.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.44.0...f0-react-native-v0.45.0) (2026-03-25)
+
+
+### Features
+
+* **step:** add F0Step component with showcase and documentation ([#3757](https://github.com/factorialco/f0/issues/3757)) ([3a1f361](https://github.com/factorialco/f0/commit/3a1f3610e16afff4bde7079eb03589306377834b))
+
+## [0.44.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.43.0...f0-react-native-v0.44.0) (2026-03-25)
+
+
+### Features
+
+* **chip:** introduce F0Chip component with showcase and styles ([#3755](https://github.com/factorialco/f0/issues/3755)) ([ad1738e](https://github.com/factorialco/f0/commit/ad1738e883df76f67d67bf4e24794a1f972e3c71))
+
+## [0.43.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.42.0...f0-react-native-v0.43.0) (2026-03-25)
+
+
+### Features
+
+* **progress:** add F0Progress component ([#3742](https://github.com/factorialco/f0/issues/3742)) ([401edd5](https://github.com/factorialco/f0/commit/401edd5ed005ecd3ec20014cbcd5938d2c0a2a3b))
+
+## [0.42.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.41.0...f0-react-native-v0.42.0) (2026-03-18)
+
+
+### Features
+
+* new item to datalist ([#3532](https://github.com/factorialco/f0/issues/3532)) ([0eebb0a](https://github.com/factorialco/f0/commit/0eebb0a13aa3222e1d684c98f136c9ddffa138bb))
+
+## [0.41.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.40.0...f0-react-native-v0.41.0) (2026-03-17)
+
+
+### Features
+
+* added `f0link` component ([#3677](https://github.com/factorialco/f0/issues/3677)) ([59657c9](https://github.com/factorialco/f0/commit/59657c958dd6076e4afdbdf957d9f0737083c071))
+
+## [0.40.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.39.0...f0-react-native-v0.40.0) (2026-03-17)
+
+
+### Features
+
+* f0 react native F0Avatar component ([#3670](https://github.com/factorialco/f0/issues/3670)) ([a91f808](https://github.com/factorialco/f0/commit/a91f808ef9182249cbcddddbba6ed76123f69b25))
+
+## [0.39.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.38.0...f0-react-native-v0.39.0) (2026-03-12)
+
+
+### Features
+
+* add F0Preset component with showcase and documentation ([#3654](https://github.com/factorialco/f0/issues/3654)) ([5faacc6](https://github.com/factorialco/f0/commit/5faacc6714855241b734977ed015a72ae67cd66c))
+
+## [0.38.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.1...f0-react-native-v0.38.0) (2026-03-12)
+
+
+### Features
+
+* add F0Counter component with size and type variants ([#3649](https://github.com/factorialco/f0/issues/3649)) ([d8bbae4](https://github.com/factorialco/f0/commit/d8bbae450dad7453b08eab68027970b7df1c71d8))
+
+## [0.37.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.37.0...f0-react-native-v0.37.1) (2026-03-12)
+
+
+### Bug Fixes
+
+* **F0Button:** update button sizes in styles and snapshots for consis… ([#3650](https://github.com/factorialco/f0/issues/3650)) ([da3103c](https://github.com/factorialco/f0/commit/da3103c17ec8814c1068afb75ac785c0faf77381))
+
+## [0.37.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.36.0...f0-react-native-v0.37.0) (2026-03-12)
+
+
+### Features
+
+* introduce F0Tag component with multiple variants ([#3642](https://github.com/factorialco/f0/issues/3642)) ([12f1927](https://github.com/factorialco/f0/commit/12f19272b3fe4df2a1ca7e1b7e2aa1ce9e302924))
+
+## [0.36.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.35.0...f0-react-native-v0.36.0) (2026-03-11)
+
+
+### Features
+
+* f0 react native f0image primitive ([#3639](https://github.com/factorialco/f0/issues/3639)) ([ebfae3f](https://github.com/factorialco/f0/commit/ebfae3fdd50bead2f4191555313700e1f509493a))
+
+## [0.35.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.34.0...f0-react-native-v0.35.0) (2026-03-11)
+
+
+### Features
+
+* introduce F0Button component ([#3626](https://github.com/factorialco/f0/issues/3626)) ([05bc2b2](https://github.com/factorialco/f0/commit/05bc2b2f29b7db8da6a487639fc7dc21184dfb54))
+
+## [0.34.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.33.0...f0-react-native-v0.34.0) (2026-03-11)
+
+
+### Features
+
+* **F0Badge:** introduce F0Badge component with variants and sizes ([#3631](https://github.com/factorialco/f0/issues/3631)) ([72febd3](https://github.com/factorialco/f0/commit/72febd3dbe6f7dc3bc1973f865f001069e98078e))
+
+## [0.33.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.32.0...f0-react-native-v0.33.0) (2026-03-10)
+
+
+### Features
+
+* add GitHub Actions workflow for automated Expo preview on PRs ([#3629](https://github.com/factorialco/f0/issues/3629)) ([d100867](https://github.com/factorialco/f0/commit/d100867292e605088257675b517db090568102a9))
+
+## [0.32.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.31.0...f0-react-native-v0.32.0) (2026-03-10)
+
+
+### Features
+
+* add f0bignumber component ([#3144](https://github.com/factorialco/f0/issues/3144)) ([cc289d7](https://github.com/factorialco/f0/commit/cc289d7b187e04af2b8a962cb0385a4ce068fde8))
+* add new primitive `F0Icon` ([#3594](https://github.com/factorialco/f0/issues/3594)) ([bea9161](https://github.com/factorialco/f0/commit/bea9161a0027d32c1669d0220c467bea5119d39b))
+* add oxlint anf oxfmt to react-native ([#3391](https://github.com/factorialco/f0/issues/3391)) ([dcf3854](https://github.com/factorialco/f0/commit/dcf3854a3d5675728948a8e933273ab98234bd8f))
+* allow className for layout on F0Text ([#3606](https://github.com/factorialco/f0/issues/3606)) ([2ec6f3b](https://github.com/factorialco/f0/commit/2ec6f3b27f0f6b5a79ba568746d1fbfc15e0aa23))
+* f0-react-native-headingxl-and-animatedf0text ([#3581](https://github.com/factorialco/f0/issues/3581)) ([41e31f6](https://github.com/factorialco/f0/commit/41e31f6d85a801df4a84ec163b735deba441c847))
+* **F0Text:** introduce F0Text primitive component  ([#3563](https://github.com/factorialco/f0/issues/3563)) ([a55dbcb](https://github.com/factorialco/f0/commit/a55dbcbd60e442b22e8b3f1f3a5f11f31d1ede7a))
+* pressableFeedback primitive ([#3620](https://github.com/factorialco/f0/issues/3620)) ([7603842](https://github.com/factorialco/f0/commit/760384269d416d0eff7899e31466827a8edf7255))
+* React Native Design System migration to Uniwind and Tailwind 4 ([#3333](https://github.com/factorialco/f0/issues/3333)) ([ce05b98](https://github.com/factorialco/f0/commit/ce05b987d2b26298cc12e4bd7a4876405a0fb628))
+* react native tokens renaming from f1-* to f0-* ([#3554](https://github.com/factorialco/f0/issues/3554)) ([c6568d7](https://github.com/factorialco/f0/commit/c6568d739882a4d5e40291ef928c1a06a5af71a8))
+* **react-native:** add QuestionCircle icon ([7aa0cb8](https://github.com/factorialco/f0/commit/7aa0cb8f6ae3921c7abbd3d21c133770557880bc))
+* **react-native:** upgrade to Expo SDK 54, React 19, and React Nativ… ([#3132](https://github.com/factorialco/f0/issues/3132)) ([1877d24](https://github.com/factorialco/f0/commit/1877d2457b1ef76eb9b6e855f1e9a7289a7aec32))
+
+
+### Bug Fixes
+
+* font differences between Android and iOS ([#3596](https://github.com/factorialco/f0/issues/3596)) ([4ec216a](https://github.com/factorialco/f0/commit/4ec216a04cfae36f43b173d2805587ee52a0684b))
+* **Hub:** remove unsupported filter attribute from SVG ([ae6ae4f](https://github.com/factorialco/f0/commit/ae6ae4f49fb44be1ebfad190ef1a0ad430ff514e))
+* theme typography tokens ([#3371](https://github.com/factorialco/f0/issues/3371)) ([8b39216](https://github.com/factorialco/f0/commit/8b39216584c31874aef95e0206a58bddc30ba6ec))
+
+## [0.31.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.30.0...f0-react-native-v0.31.0) (2026-03-10)
+
+
+### Features
+
+* pressableFeedback primitive ([#3620](https://github.com/factorialco/f0/issues/3620)) ([7603842](https://github.com/factorialco/f0/commit/760384269d416d0eff7899e31466827a8edf7255))
+
+## [0.30.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.29.0...f0-react-native-v0.30.0) (2026-03-10)
+
+
+### Features
+
+* add new primitive `F0Icon` ([#3594](https://github.com/factorialco/f0/issues/3594)) ([bea9161](https://github.com/factorialco/f0/commit/bea9161a0027d32c1669d0220c467bea5119d39b))
+
+## [0.29.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.28.1...f0-react-native-v0.29.0) (2026-03-09)
+
+
+### Features
+
+* allow className for layout on F0Text ([#3606](https://github.com/factorialco/f0/issues/3606)) ([2ec6f3b](https://github.com/factorialco/f0/commit/2ec6f3b27f0f6b5a79ba568746d1fbfc15e0aa23))
+
+## [0.28.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.28.0...f0-react-native-v0.28.1) (2026-03-06)
+
+
+### Bug Fixes
+
+* font differences between Android and iOS ([#3596](https://github.com/factorialco/f0/issues/3596)) ([4ec216a](https://github.com/factorialco/f0/commit/4ec216a04cfae36f43b173d2805587ee52a0684b))
+
+## [0.28.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.27.0...f0-react-native-v0.28.0) (2026-03-04)
+
+
+### Features
+
+* f0-react-native-headingxl-and-animatedf0text ([#3581](https://github.com/factorialco/f0/issues/3581)) ([41e31f6](https://github.com/factorialco/f0/commit/41e31f6d85a801df4a84ec163b735deba441c847))
+
+## [0.27.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.26.0...f0-react-native-v0.27.0) (2026-03-03)
+
+
+### Features
+
+* **F0Text:** introduce F0Text primitive component  ([#3563](https://github.com/factorialco/f0/issues/3563)) ([a55dbcb](https://github.com/factorialco/f0/commit/a55dbcbd60e442b22e8b3f1f3a5f11f31d1ede7a))
+
 ## [0.26.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.25.0...f0-react-native-v0.26.0) (2026-02-27)
 
 

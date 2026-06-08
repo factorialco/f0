@@ -27,9 +27,9 @@ describe("DetailsItemsList", () => {
           title: "Manager",
           content: {
             type: "person",
-            firstName: "Saul",
-            lastName: "Dominguez",
-            avatarUrl: "https://github.com/sauldom102.png",
+            firstName: "John",
+            lastName: "Doe",
+            avatarUrl: "https://github.com/octocat.png",
             action: {
               type: "generic",
               handlePress: () => console.log("Its work"),

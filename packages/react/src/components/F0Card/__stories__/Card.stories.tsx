@@ -4,6 +4,7 @@ import image from "@storybook-static/avatars/person04.jpg"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
 
+import { F0Link } from "@/components/F0Link"
 import {
   Add,
   Briefcase,
@@ -23,15 +24,15 @@ import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
-
-import { F0Link } from "@/components/F0Link"
 import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
 
 import {
+  cardAlertVariants,
   cardImageFits,
   cardImageSizes,
   F0Card,
+  type CardAlertVariant,
   type CardImageFit,
   type CardImageSize,
 } from "../F0Card"
@@ -104,8 +105,28 @@ const meta = {
         defaultValue: { summary: "sm" },
       },
     },
+    subtleBorder: {
+      control: "boolean",
+      description:
+        "Use a softer/lighter border (`border-f1-border-secondary`). Opt-in so " +
+        "existing cards keep the default `border-f1-border`.",
+      table: {
+        defaultValue: { summary: "false" },
+      },
+    },
+    bookmark: {
+      control: false,
+      description:
+        "Optional save/bookmark toggle rendered as a circular icon button in the " +
+        "card overlay. Pass `{ bookmarked, onBookmarkChange, label? }`. Shows an " +
+        "outline icon when not saved and a filled icon when saved; it is revealed " +
+        "on card hover and stays visible while bookmarked.",
+      table: {
+        type: { summary: "CardBookmark" },
+      },
+    },
     ...dataTestIdArgs,
-  },
+  } as never,
   args: {
     imageFit: "fit-width",
     imageSize: "sm",
@@ -148,25 +169,25 @@ export const Default: Story = {
     metadata: [
       {
         icon: Briefcase,
-        tooltip: "Job title",
         property: {
           type: "text",
+          label: "Job title",
           value: "Design Engineer",
         },
       },
       {
         icon: CalendarArrowRight,
-        tooltip: "Date",
         property: {
           type: "text",
+          label: "Date",
           value: "3 years ago",
         },
       },
       {
         icon: Star,
-        tooltip: "Status",
         property: {
           type: "status",
+          label: "Status",
           value: {
             status: "positive",
             label: "Active",
@@ -175,9 +196,9 @@ export const Default: Story = {
       },
       {
         icon: Link,
-        tooltip: "Link",
         property: {
           type: "text",
+          label: "Link",
           value:
             "https://docs.google.com/spreadsheets/d/1jO1tPWhNe1y_ciSmNVYHugIPaOIEWOqrHR50Du2wvbc/edit",
         },
@@ -239,6 +260,7 @@ export const WithActions: Story = {
         icon: Office,
         property: {
           type: "tag",
+          label: "Location",
           value: {
             label: "Barcelona, Spain",
           },
@@ -248,6 +270,7 @@ export const WithActions: Story = {
         icon: Calendar,
         property: {
           type: "text",
+          label: "Start date",
           value: "10 months ago",
         },
       },
@@ -284,6 +307,65 @@ export const Selectable: Story = {
   },
 }
 
+export const Bookmarkable: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `bookmark` to add a save/bookmark toggle. The control is a circular " +
+          "icon button shown in the card overlay — outline when not saved, filled when " +
+          "saved. It toggles without triggering the card's `link`/`onClick`.",
+      },
+    },
+  },
+  args: {
+    ...Default.args,
+  },
+  render: (args) => {
+    const [bookmarked, setBookmarked] = useState(false)
+    return (
+      <F0Card
+        {...args}
+        bookmark={{
+          bookmarked,
+          onBookmarkChange: setBookmarked,
+          label: "Save",
+        }}
+      />
+    )
+  },
+}
+
+export const BookmarkableWithImage: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With an image, the bookmark toggle overlays the top-right corner. It is " +
+          "revealed on card hover and stays visible while bookmarked, so the saved " +
+          "state is always recognisable at a glance.",
+      },
+    },
+  },
+  args: {
+    ...Default.args,
+    image: image,
+  },
+  render: (args) => {
+    const [bookmarked, setBookmarked] = useState(false)
+    return (
+      <F0Card
+        {...args}
+        bookmark={{
+          bookmarked,
+          onBookmarkChange: setBookmarked,
+          label: "Save",
+        }}
+      />
+    )
+  },
+}
+
 export const WithChildren: Story = {
   args: {
     title: "Card with children",
@@ -307,6 +389,15 @@ export const WithEmoji: Story = {
       type: "emoji",
       emoji: "🐱",
     },
+  },
+}
+
+export const WithAspectRatio16x9: Story = {
+  args: {
+    ...Default.args,
+    image: imageTypes.wide,
+    imageAspectRatio: "video",
+    imageFit: "cover",
   },
 }
 
@@ -367,17 +458,17 @@ export const WithProgressBar: Story = {
     metadata: [
       {
         icon: Calendar,
-        tooltip: "Due date",
         property: {
           type: "date",
+          label: "Due date",
           value: new Date(2025, 11, 31),
         },
       },
       {
         icon: ChartPie,
-        tooltip: "Completion",
         property: {
           type: "progressBar",
+          label: "Completion",
           value: {
             value: 75,
             max: 100,
@@ -387,9 +478,9 @@ export const WithProgressBar: Story = {
       },
       {
         icon: Star,
-        tooltip: "Status",
         property: {
           type: "status",
+          label: "Status",
           value: {
             status: "positive",
             label: "On track",
@@ -411,9 +502,9 @@ export const WithProgressBarCustomColor: Story = {
     metadata: [
       {
         icon: ChartPie,
-        tooltip: "Budget used",
         property: {
           type: "progressBar",
+          label: "Budget used",
           value: {
             value: 85,
             max: 100,
@@ -649,6 +740,118 @@ export const ImageFitOptions: StoryObj<
   },
 }
 
+export const WithAlert: Story = {
+  args: {
+    ...Default.args,
+    alert: {
+      variant: "warning",
+      title: "This record has pending changes",
+    },
+  },
+}
+
+export const WithDismissibleAlert: Story = {
+  render: (args) => {
+    const [visible, setVisible] = useState(true)
+    return (
+      <div className="flex flex-col gap-3">
+        <F0Card
+          {...args}
+          alert={{
+            variant: "critical",
+            title: "Contract expires soon",
+            dismissible: true,
+            visible,
+            onDismiss: () => setVisible(false),
+          }}
+        />
+        {!visible && (
+          <button
+            className="self-start text-sm text-f1-foreground-secondary underline"
+            onClick={() => setVisible(true)}
+          >
+            Restore alert
+          </button>
+        )}
+      </div>
+    )
+  },
+  args: {
+    ...Default.args,
+  },
+}
+
+export const WithAlertAction: Story = {
+  render: (args) => {
+    const [actioned, setActioned] = useState(false)
+    return (
+      <div className="flex flex-col gap-3">
+        <F0Card
+          {...args}
+          alert={{
+            variant: "warning",
+            title: "Contract requires attention",
+            action: {
+              label: actioned ? "Done" : "Review",
+              onClick: () => setActioned(true),
+              disabled: actioned,
+            },
+          }}
+        />
+        {actioned && (
+          <button
+            type="button"
+            className="self-start text-sm text-f1-foreground-secondary underline"
+            onClick={() => setActioned(false)}
+          >
+            Reset action
+          </button>
+        )}
+      </div>
+    )
+  },
+  args: {
+    ...Default.args,
+  },
+}
+
+export const WithAlertActionHref: Story = {
+  args: {
+    ...Default.args,
+    alert: {
+      variant: "info",
+      title: "New policy available",
+      action: {
+        label: "View",
+        href: "/policies",
+      },
+    },
+  },
+}
+
+export const AlertVariants: Story = {
+  parameters: {
+    docs: {
+      story: { inline: false, height: "1400px" },
+    },
+    noMetaLayout: true,
+  },
+  render: () => (
+    <div className="mx-auto flex max-w-[372px] flex-col gap-4 p-4">
+      {(cardAlertVariants as readonly CardAlertVariant[]).map((variant) => (
+        <F0Card
+          key={variant}
+          {...Default.args}
+          alert={{
+            variant,
+            title: `${variant.charAt(0).toUpperCase()}${variant.slice(1)} alert`,
+          }}
+        />
+      ))}
+    </div>
+  ),
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -662,6 +865,38 @@ export const Snapshot: Story = {
       <F0Card {...WithImage.args} />
       <F0Card {...WithProgressBar.args} />
       <F0Card {...WithProgressBarCustomColor.args} />
+      <F0Card
+        {...Default.args}
+        alert={{ variant: "info", title: "Info alert" }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{ variant: "warning", title: "Warning alert" }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{ variant: "critical", title: "Critical alert" }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{ variant: "positive", title: "Positive alert" }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{
+          variant: "warning",
+          title: "Contract requires attention",
+          action: { label: "Review", onClick: () => {} },
+        }}
+      />
+      <F0Card
+        {...Default.args}
+        alert={{
+          variant: "info",
+          title: "New policy available",
+          action: { label: "View", href: "/policies" },
+        }}
+      />
     </div>
   ),
 }

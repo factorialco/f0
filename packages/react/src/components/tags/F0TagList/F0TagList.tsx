@@ -20,6 +20,7 @@ export const F0TagList = <T extends TagType>({
     <OverflowList
       items={tagVariants}
       max={max}
+      min={1}
       renderListItem={(tag) => <Tag tag={tag} />}
       renderDropdownItem={() => null}
       forceShowingOverflowIndicator={initialRemainingCount !== undefined}

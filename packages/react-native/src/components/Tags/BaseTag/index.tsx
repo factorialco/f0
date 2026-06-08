@@ -2,7 +2,7 @@ import { ReactNode } from "react"
 import { Text, View } from "react-native"
 
 import { cn } from "../../../lib/utils"
-import { PressableFeedback } from "../../PressableFeedback"
+import { PressableFeedback } from "../../primitives/PressableFeedback"
 
 type Props = {
   additionalAccesibleText?: string

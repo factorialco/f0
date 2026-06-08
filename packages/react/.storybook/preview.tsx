@@ -1,15 +1,17 @@
 import type { Preview, StoryFn, StoryContext } from "@storybook/react-vite"
 
+import { DARK_MODE_EVENT_NAME } from "@vueless/storybook-dark-mode"
 import isChromatic from "chromatic/isChromatic"
 import { MotionGlobalConfig } from "motion/react"
 // organize-imports-ignore
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { action } from "storybook/actions"
 import { INITIAL_VIEWPORTS } from "storybook/viewport"
+import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
 import { aiTranslations } from "@/sds/ai/F0AiChat/types"
-import { WeekStartDay } from "@/experimental/OneCalendar/types"
+import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
@@ -19,16 +21,23 @@ import { DocsContainer } from "./DocsContainer.tsx"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
 
+const channel = addons.getChannel()
+
+// eslint-disable-next-line react/display-name
 export const withTheme = () => {
-  // eslint-disable-next-line react/display-name
   return (Story: StoryFn) => {
-    const Wrapper = (
-      <ThemeProvider theme="light">
+    const [isDark, setDark] = useState(false)
+
+    useEffect(() => {
+      channel.on(DARK_MODE_EVENT_NAME, setDark)
+      return () => channel.off(DARK_MODE_EVENT_NAME, setDark)
+    }, [])
+
+    return (
+      <ThemeProvider theme={isDark ? "dark" : "light"}>
         <Story />
       </ThemeProvider>
     )
-
-    return Wrapper
   }
 }
 
@@ -162,58 +171,58 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Sort all the components and experimental stories in an aplhabetical order, but keep
-       * Introduction, How to contribute, Data test ID, Foundations, and Playground in specific order
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns groups in the specific order defined below.
        */
-      storySort: (a, b) => {
-        const topLevelOrder = [
-          "introduction",
-          "how-to-contribute",
-          "ai-configuration",
-          "foundations",
-          "library",
-          "data-testid",
-          "hooks",
-        ]
-
-        const aId = a.id.split("-")?.[0].toLowerCase()
-        const bId = b.id.split("-")?.[0].toLowerCase()
-
-        const aIndex = topLevelOrder.indexOf(aId)
-        const bIndex = topLevelOrder.indexOf(bId)
-
-        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex
-        if (aIndex !== -1) return -1
-        if (bIndex !== -1) return 1
-
-        const isAFoundation = aId.startsWith("foundations/")
-        const isBFoundation = bId.startsWith("foundations/")
-
-        if (isAFoundation || isBFoundation) {
-          if (isAFoundation && isBFoundation) {
-            const foundationOrder = [
-              "colors",
-              "typography",
-              "spacing",
-              "borders",
-              "shadows",
-              "icons",
-            ]
-            const aFoundationIndex = foundationOrder.indexOf(aId.split("/")[1])
-            const bFoundationIndex = foundationOrder.indexOf(bId.split("/")[1])
-            if (aFoundationIndex !== -1 && bFoundationIndex !== -1) {
-              return aFoundationIndex - bFoundationIndex
-            }
-          }
-          return isAFoundation ? -1 : 1
-        }
-
-        return a.title.localeCompare(b.title)
+      storySort: {
+        method: "alphabetical",
+        order: [
+          "Introduction",
+          "How to contribute",
+          "AI configuration",
+          "Foundations",
+          ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          "Components",
+          ["Primitives", "Inputs"],
+          "Patterns",
+          [
+            "Data collection",
+            [
+              "CRUD patterns",
+              ["Overview", "By view", "Create", "Read", "Update", "Delete"],
+            ],
+          ],
+          "Graph",
+          ["F0Graph", "F0GraphNode", "F0GraphEdge", "F0GraphControls"],
+          "Kits",
+          "Layouts",
+          "Library",
+          "Experimental",
+          [
+            "CRUD patterns",
+            [
+              "Overview",
+              "Principles",
+              "Action hierarchy",
+              "Containers",
+              "Create & Update",
+              "Read",
+              "Delete & destructive",
+              "Bulk & async",
+              "Decisions",
+              "Quick reference",
+              "Checklist",
+              "New surfaces",
+            ],
+          ],
+          "Examples",
+          "Internal",
+        ],
       },
     },
-    // darkMode: {
-    //   stylePreview: true,
-    // },
+    darkMode: {
+      stylePreview: true,
+    },
   },
 
   tags: ["autodocs"],

@@ -1,8 +1,9 @@
+import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import {
   DatePickerPopupProps,
   DatePickerValue as DatePickerPopupValue,
 } from "@/ui/DatePickerPopup"
-import { INPUTFIELD_SIZES, InputFieldProps } from "@/ui/InputField/InputField"
+import { INPUTFIELD_SIZES, InputFieldProps } from "@/components/F0InputField"
 
 import { InputFieldInheritedProps } from "./types.internal"
 
@@ -14,6 +15,9 @@ export type F0DatePickerProps = Pick<
   DatePickerPopupProps,
   "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange"
 > & {
+  showIcon?: boolean
+  /** Controls how the selected date is displayed in the input. Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy. */
+  displayFormat?: DateStringFormat
   onChange?: (
     value: DatePickerValue | undefined,
     stringValue: string | undefined

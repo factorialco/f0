@@ -23,9 +23,18 @@ import {
 } from "@/experimental/Navigation/Dropdown"
 import { cn } from "@/lib/utils"
 
-export type HeaderSecondaryAction = SecondaryAction & {
+export type HeaderSecondaryButtonAction = SecondaryAction & {
   hideLabel?: boolean
 }
+
+export type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
+  variant?: "outline"
+}
+
+export type HeaderSecondaryAction =
+  | HeaderSecondaryButtonAction
+  | HeaderSecondaryDropdownAction
+
 interface BaseHeaderProps {
   title: string
   deactivated?: boolean
@@ -48,6 +57,8 @@ interface BaseHeaderProps {
     actions?: MetadataAction[]
   }
   metadata?: MetadataProps["items"]
+  /** Renders a 1px bottom border at the very bottom of the header. */
+  showBottomBorder?: boolean
 }
 
 const isVisible = (action: { isVisible?: boolean }) =>
@@ -63,6 +74,7 @@ export function BaseHeader({
   otherActions = [],
   status,
   metadata = [],
+  showBottomBorder = false,
 }: BaseHeaderProps) {
   const allMetadata: BaseHeaderProps["metadata"] = [
     status && {
@@ -96,8 +108,27 @@ export function BaseHeader({
     return !!action && "label" in action && !("items" in action)
   }
 
+  const getSecondaryActionKey = (
+    action: HeaderSecondaryAction,
+    index: number
+  ) => {
+    const actionKey = isSecondaryDropdownAction(action)
+      ? `${action.value ?? "default"}-${action.items.map((item) => item.value).join("-")}`
+      : action.label
+
+    return `${actionKey}-${index}`
+  }
+
   return (
-    <div className="resource-header flex flex-col gap-3 px-6 pb-5 pt-3">
+    <div
+      className={cn(
+        "resource-header px-page flex flex-col gap-3 pb-5 pt-3",
+        // `border-0` zeroes all sides first so this renders bottom-only even in apps that
+        // don't load the Tailwind preflight border reset (otherwise `border-solid` would
+        // light up all four sides at the CSS-initial `medium` width).
+        showBottomBorder && "border-0 border-b border-solid border-f1-border"
+      )}
+    >
       <div
         className={cn(
           "flex flex-col items-start justify-start gap-4 md:flex-row",
@@ -152,6 +183,7 @@ export function BaseHeader({
                 size="lg"
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
@@ -165,23 +197,38 @@ export function BaseHeader({
                 size="lg"
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
 
-          {visibleSecondaryActions.map((action) => (
-            <Fragment key={action.label}>
+          {visibleSecondaryActions.map((action, index) => (
+            <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="w-full md:hidden [&>*]:w-full [&>span]:block [&>span_div]:w-full">
-                <F0Button
-                  label={action.label}
-                  onClick={action.onClick}
-                  variant={action.variant ?? "outline"}
-                  icon={action.icon}
-                  size="lg"
-                  hideLabel={action.hideLabel}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                />
+                {isSecondaryDropdownAction(action) ? (
+                  <F0ButtonDropdown
+                    items={action.items}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    value={action.value}
+                    size="lg"
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                ) : (
+                  <F0Button
+                    label={action.label}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    icon={action.icon}
+                    size="lg"
+                    hideLabel={action.hideLabel}
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                )}
               </div>
             </Fragment>
           ))}
@@ -199,18 +246,32 @@ export function BaseHeader({
               <Dropdown items={visibleOtherActions} />
             </div>
           )}
-          {visibleSecondaryActions.map((action) => (
-            <Fragment key={action.label}>
+          {visibleSecondaryActions.map((action, index) => (
+            <Fragment key={getSecondaryActionKey(action, index)}>
               <div className="hidden md:block">
-                <F0Button
-                  label={action.label}
-                  onClick={action.onClick}
-                  variant={action.variant ?? "outline"}
-                  icon={action.icon}
-                  hideLabel={action.hideLabel}
-                  disabled={action.disabled}
-                  tooltip={action.tooltip}
-                />
+                {isSecondaryDropdownAction(action) ? (
+                  <F0ButtonDropdown
+                    items={action.items}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    value={action.value}
+                    size="md"
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                ) : (
+                  <F0Button
+                    label={action.label}
+                    onClick={action.onClick}
+                    variant={action.variant ?? "outline"}
+                    icon={action.icon}
+                    hideLabel={action.hideLabel}
+                    disabled={action.disabled}
+                    tooltip={action.tooltip}
+                    loading={action.loading}
+                  />
+                )}
               </div>
             </Fragment>
           ))}
@@ -227,6 +288,7 @@ export function BaseHeader({
                 icon={primaryAction.icon}
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
@@ -240,6 +302,7 @@ export function BaseHeader({
                 size="md"
                 disabled={primaryAction.disabled}
                 tooltip={primaryAction.tooltip}
+                loading={primaryAction.loading}
               />
             </div>
           )}
@@ -252,4 +315,10 @@ export function BaseHeader({
       )}
     </div>
   )
+}
+
+export const isSecondaryDropdownAction = (
+  action: HeaderSecondaryAction
+): action is HeaderSecondaryDropdownAction => {
+  return "items" in action
 }

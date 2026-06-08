@@ -71,6 +71,7 @@ const SelectWithHooks = ({
     () =>
       (options || []).map((option) => ({
         value: option.value,
+        key: `item-${option.value}`,
         height: 40,
         item: <SelectItem value={option.value}>{option.label}</SelectItem>,
       })),

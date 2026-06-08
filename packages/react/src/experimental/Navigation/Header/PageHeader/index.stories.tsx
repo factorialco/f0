@@ -3,7 +3,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
+import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
 import { PageHeader } from "./index"
 
@@ -16,7 +18,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <F0AiChatProvider enabled runtimeUrl="https://example.com">
+      <F0AiChatProvider enabled>
         <div className="bg-f1-background">
           <Story />
         </div>
@@ -77,10 +79,56 @@ export const Default: Story = {
   },
 }
 
+export const WithOnClickAction: Story = {
+  args: {
+    module: defaultModule,
+    actions: [
+      {
+        label: "Run",
+        icon: Settings,
+        onClick: () => {
+          // eslint-disable-next-line no-alert
+          alert("Run clicked")
+        },
+      },
+    ],
+  },
+}
+
 export const WithActions: Story = {
   args: {
     module: defaultModule,
     actions: defaultActions,
+  },
+}
+
+export const WithAIDashboardLaunch: Story = {
+  args: {
+    module: {
+      name: "Trainings",
+      href: "/trainings",
+      id: "company_trainings" as const,
+    },
+    actions: [
+      {
+        label: "Settings",
+        icon: Settings,
+        href: "/trainings/settings",
+      },
+      {
+        variant: "ai",
+        label: "Learn how your employees complete trainings",
+        icon: ChartLine,
+        onClick: () => {
+          // In product code this calls
+          // `useOpenDashboardAction().openDashboard("trainings")`,
+          // which opens One and renders the dashboard inline via the
+          // `displayDashboard` tool call.
+          // eslint-disable-next-line no-alert
+          alert("openDashboard('trainings')")
+        },
+      },
+    ],
   },
 }
 
@@ -395,5 +443,29 @@ export const WithOneSwitchTooltipAlwaysVisible: Story = {
     module: defaultModule,
     oneSwitchTooltip: { whenEnabled: "Ask me anything" },
     oneSwitchAutoOpen: true,
+  },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    module: {
+      name: "Trainings",
+      href: "/trainings",
+      id: "company_trainings" as const,
+    },
+    actions: [
+      {
+        label: "Settings",
+        icon: Settings,
+        href: "/trainings/settings",
+      },
+      {
+        variant: "ai",
+        label: "Learn how your employees complete trainings",
+        icon: ChartLine,
+        onClick: () => {},
+      },
+    ],
   },
 }

@@ -1,57 +1,144 @@
-import type { AiChatToolHint, EntityResolvers } from "../F0AiChat/types"
+import type { ReactNode, RefObject } from "react"
+
+import type {
+  AiChatCreditWarning,
+  AiChatDisclaimer,
+  AiChatFileAttachmentConfig,
+  PendingContext,
+  PendingQuote,
+  PersonProfile,
+  TranscribeFn,
+  UploadedFile,
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../F0AiChat/types"
+export type AttachedFile = {
+  id: string
+  file: File
+  status: "uploading" | "uploaded" | "error"
+  uploadedFile?: UploadedFile
+  errorMessage?: string
+}
+
+export type UserTextPart = { type: "text"; text: string }
+export type UserBinaryPart = {
+  type: "binary"
+  url: string
+  filename: string
+  mimeType: string
+}
 
 /**
- * Props for the F0AiChatTextArea component
+ * Payload emitted by `F0AiChatTextArea` when the user submits.
+ *
+ * `text` contains HTML-escaped user-typed text with `<entity-ref>` tags
+ * for @mentions only. The reply quote (if any) and pending context
+ * travel as separate structured fields — the adapter (factorial) owns
+ * the wire encoding when forwarding to the agent.
  */
-export interface F0AiChatTextAreaProps {
-  /**
-   * Whether the chat is currently processing a message
-   */
-  inProgress: boolean
-  /**
-   * Callback when the user sends a message
-   */
-  onSend: (message: string) => void
-  /**
-   * Callback when the user stops the current generation
-   */
+export type F0AiChatTextAreaSubmitPayload = {
+  text: string
+  files: UploadedFile[]
+  context: PendingContext | null
+  quote: PendingQuote | null
+}
+
+export type F0AiChatTextAreaProps = {
+  ref: RefObject<HTMLDivElement>
+  /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
+  onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>
+  /** Called when the user clicks the stop button while a response is streaming. */
   onStop?: () => void
+  /** Whether a response is currently streaming. Switches the submit button to "stop". */
+  inProgress?: boolean
   /**
-   * Custom label for the submit button
+   * Optional gate run before submission. Return `false` to abort the send
+   * (e.g. show a quota dialog). The textarea stays focused and the input
+   * is preserved.
    */
-  submitLabel?: string
-  /**
-   * Array of placeholder strings to cycle through with typewriter effect.
-   * If multiple placeholders are provided, they will animate in a cycle.
-   * If a single placeholder is provided, it will be displayed statically.
-   */
+  onBeforeSubmit?: () => boolean | Promise<boolean>
+
+  /** Rotating placeholders for the typewriter effect. Empty/single-entry skips the typewriter. */
   placeholders?: string[]
+
+  /** Credit warning banner shown above the composer. */
+  creditWarning?: AiChatCreditWarning
+
   /**
-   * Default placeholder text when no placeholders are provided or as fallback
+   * Optional ReactNode rendered in place of the input. When present the
+   * composer enters "clarifying" mode: form submission is blocked, the
+   * gradient border activates, and a nav-hint replaces the disclaimer.
+   * The host owns the panel (typically `F0ClarifyingPanel`) and its
+   * state — F0 just renders the slot.
    */
-  defaultPlaceholder?: string
+  clarifyingUI?: ReactNode
+
+  /** Pending context shown as a chip; prepended invisibly on submit. */
+  pendingContext?: PendingContext | null
+  /** Called when the user dismisses pending context (or it gets consumed on submit). */
+  onPendingContextChange?: (context: PendingContext | null) => void
+
+  /** Pending quote shown as a chip above the textarea. */
+  pendingQuote?: PendingQuote | null
+  /** Called when the user dismisses the quote (or it gets consumed on submit). */
+  onPendingQuoteChange?: (quote: PendingQuote | null) => void
+
+  /** File attachment configuration. When omitted, attachments are disabled. */
+  fileAttachments?: AiChatFileAttachmentConfig
+
   /**
-   * Whether the textarea should autofocus on mount
-   * @default true
+   * Voice dictation. When provided, a microphone button is shown: recorded
+   * audio is transcribed and the transcript fills the textarea (the user
+   * reviews and sends it manually). When omitted, the microphone is hidden.
    */
-  autoFocus?: boolean
+  onTranscribe?: TranscribeFn
+
+  /** Async search used by the @-mention popover. When omitted, mentions are disabled. */
+  searchPersons?: (query: string) => Promise<PersonProfile[]>
+
   /**
-   * Entity resolvers for @mention autocomplete and entity reference rendering.
-   * When `searchPersons` is provided, typing @ in the textarea opens an
-   * autocomplete popover to mention employees.
+   * Registers a callback that lets external drop zones forward dropped
+   * files to this textarea's file-attachment pipeline. The textarea calls
+   * the registrar with the handler on mount and with `null` on unmount.
    */
-  entityResolvers?: EntityResolvers
+  onProcessFilesRef?: (handler: ((files: File[]) => void) | null) => void
+
   /**
-   * Available tool hints that the user can activate.
-   * Renders a selector button to the left of the send button.
+   * Optional disclaimer text + link rendered below the textarea. Hidden on
+   * the welcome screen of the fullscreen layout to give the footer room.
    */
-  toolHints?: AiChatToolHint[]
+  disclaimer?: AiChatDisclaimer
+
   /**
-   * The currently active tool hint, or null if none is selected.
+   * Optional footer (e.g. powered-by, legal copy) rendered below the
+   * textarea on the welcome screen.
    */
-  activeToolHint?: AiChatToolHint | null
+  footer?: ReactNode
+
   /**
-   * Callback when the active tool hint changes (selection or removal).
+   * Whether the chat is currently in its welcome state (no messages yet).
+   * Controls footer visibility and welcome-screen-only layout tweaks.
    */
-  onActiveToolHintChange?: (toolHint: AiChatToolHint | null) => void
+  isWelcomeScreen?: boolean
+
+  /**
+   * Grouped suggestions rendered as outline buttons above the composer on
+   * the welcome screen. Clicking a group opens a single popover (above the
+   * row, left-aligned, spanning the composer width) with that group's items.
+   * Hovering an item previews its prompt in the textarea placeholder.
+   */
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  /** Called when the user clicks a sub-suggestion. Receives the picked
+   *  `item` and its parent `group` (the outline-button entry). */
+  onSuggestionClick?: (
+    item: WelcomeScreenSuggestionItem,
+    group: WelcomeScreenSuggestion
+  ) => void
+
+  /**
+   * When true, the composer adopts the fullscreen layout: the welcome
+   * footer is pushed to the bottom and the disclaimer is hidden so the
+   * footer is the only thing under the textarea.
+   */
+  fullscreen?: boolean
 }

@@ -1,0 +1,323 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0ButtonDropdown.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# ButtonDropdown
+
+Consolidates multiple related actions under a single button. Comes in two modes: **split** (default) promotes the most common action to a one-click trigger while keeping the rest reachable via a chevron; **dropdown** presents all actions equally under a single trigger button. For a single action use `F0Button` instead.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Modes
+
+<Canvas of={Stories.Modes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Mode</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>split</code> (default)
+        </td>
+        <td>
+          Two interactive areas: main button label and action come from the
+          selected item (defaults to the first item, controllable via{" "}
+          <code>value</code>). Chevron opens the menu with the remaining items.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dropdown</code>
+        </td>
+        <td>
+          Single unified button that opens a menu showing all items. A custom
+          trigger label can be set independently of the items.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Variants
+
+<Canvas of={Stories.Variants} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Variant</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>default</code>
+        </td>
+        <td>
+          Primary or most prominent action on a surface. One per layout area.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>outline</code>
+        </td>
+        <td>
+          Secondary actions, or when the button should be less visually
+          prominent.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>neutral</code>
+        </td>
+        <td>Tertiary actions or toolbar contexts with many buttons.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Sizes
+
+<Canvas of={Stories.Sizes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>Compact surfaces, toolbars, or dense table rows.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code> (default)
+        </td>
+        <td>Standard usage in forms, cards, and page headers.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>Hero sections or prominent call-to-action areas.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+Use **split mode** when one action is clearly more frequent than the rest — the user can trigger it in one click without opening the menu.
+
+<Canvas of={Stories.SplitModeExample} />
+
+Use **dropdown mode** when all actions are equally likely and none should be promoted — a single trigger opens the full list.
+
+<Canvas of={Stories.DropdownModeExample} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use ButtonDropdown when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Multiple related actions on the same entity</td>
+        <td>
+          The actions share context but have different consequences (e.g. "Save
+          changes", "Save and close", "Discard")
+        </td>
+      </tr>
+      <tr>
+        <td>Surface is crowded with buttons</td>
+        <td>
+          Consolidating secondary actions reduces visual noise while keeping
+          them accessible
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>There is only one action</td>
+        <td>
+          <code>F0Button</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Actions are unrelated and belong to different parts of the UI</td>
+        <td>
+          Separate <code>F0Button</code> instances
+        </td>
+      </tr>
+      <tr>
+        <td>The list contains more than 7–8 items</td>
+        <td>A dedicated navigation pattern or page section</td>
+      </tr>
+      <tr>
+        <td>All actions are equally destructive or critical</td>
+        <td>
+          Surface them individually with separate <code>F0Button</code>{" "}
+          instances, or use <code>F0Dialog</code> to require explicit
+          confirmation before each
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Mark only genuinely destructive or irreversible actions as critical.",
+    guidelines: [
+      '"Delete employee" with critical: true — cannot be undone',
+      '"Archive record" without critical: true — secondary but not destructive',
+    ],
+    children: <Canvas of={Stories.DoDontCriticalDo} sourceState="none" />,
+  }}
+  dont={{
+    description:
+      "Don't mark non-destructive actions as critical just to draw attention.",
+    guidelines: [
+      '"Export report" with critical: true — exports are reversible',
+      '"Send notification" with critical: true — not destructive; trains users to ignore the warning',
+    ],
+    children: <Canvas of={Stories.DoDontCriticalDont} sourceState="none" />,
+  }}
+/>
+
+### Content best practices
+
+- Item labels: verb-first, sentence case, no period ("Save draft", "Delete record")
+- Group labels: short noun phrases that categorize the items below ("File actions", "Export options")
+- Trigger label (dropdown mode): a noun or verb phrase describing the category, not a specific item ("Actions", "Export")
+- Descriptions: one short sentence under 60 characters that clarifies what the action does
+
+### Behavior
+
+- In split mode the first item is selected by default. Clicking the main button triggers it directly; the chevron opens the menu with all remaining items.
+- In dropdown mode all items appear in the menu. The `trigger` prop sets an independent label for the trigger button.
+- The `value` prop (split mode) controls which item is currently selected. When omitted, defaults to the first item's value.
+- `disabled` and `loading` apply to the entire control — both the main button and the chevron are affected.
+- Item values and the first argument passed to `onClick` are the same value. In split mode, `value` should match one of the item `value` fields.
+
+### Usage examples
+
+**Items with descriptions and a critical action**
+
+Use `description` to clarify what each item does when the label alone is ambiguous. Mark destructive actions with `critical: true` — they render in a danger style to signal irreversibility.
+
+<Canvas of={Stories.WithDescription} />
+
+**Grouped items**
+
+Use `ButtonDropdownGroup` objects to organize items into labeled sections with visual separators. Useful when the list mixes actions of different categories.
+
+<Canvas of={Stories.WithGroups} />
+
+**With tooltip**
+
+Use `tooltip` when the button's context needs additional explanation — for example in toolbars where space limits the label.
+
+<Canvas of={Stories.WithTooltip} />
+
+**Critical items in context**
+
+<Canvas of={Stories.CriticalItems} />
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Move focus to the main button, then the chevron button (split mode),
+          or the trigger button (dropdown mode)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>
+          Activate the focused element — trigger the selected action (main
+          button) or open the dropdown (chevron / dropdown trigger)
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Arrow Down</kbd> / <kbd>Arrow Up</kbd>
+        </td>
+        <td>Navigate between items in the open dropdown menu</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Close the dropdown and return focus to the trigger</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The main button (split mode) has `aria-label` set to the selected item's label
+- The chevron button (split mode) has a visually hidden label (`sr-only`) using the `actions.more` i18n string
+- Item icons are decorative — meaning is carried by the label and optional description
+- Critical items are distinguished by color only — no additional ARIA role marks them as destructive
+- The dropdown is Radix-based — it traps focus while open and restores it to the trigger on close

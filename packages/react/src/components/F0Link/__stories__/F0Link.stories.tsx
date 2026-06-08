@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
@@ -36,7 +35,7 @@ const meta = {
     href: "/foo",
     "data-test": "foo",
   },
-} satisfies Meta<ComponentProps<typeof F0Link>>
+} satisfies Meta<typeof F0Link>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -82,7 +81,24 @@ export const States: Story = {
       <F0Link {...args} variant="link" disabled>
         Disabled link
       </F0Link>
+      <F0Link {...args} variant="mention">
+        @Jane Doe
+      </F0Link>
     </div>
+  ),
+}
+
+export const Mention: Story = {
+  args: {
+    children: "@Jane Doe",
+    href: "/users/jane-doe",
+    variant: "mention",
+  },
+  render: (args) => (
+    <p>
+      The project is led by <F0Link {...args} /> and the design is owned by{" "}
+      <F0Link {...args}>@John Smith</F0Link>.
+    </p>
   ),
 }
 
@@ -116,6 +132,10 @@ export const Snapshot: Story = {
       <F0Link {...args} variant="unstyled" />
       <h3>Disabled</h3>
       <F0Link {...args} variant="link" disabled />
+      <h3>Mention</h3>
+      <F0Link {...args} variant="mention">
+        @Jane Doe
+      </F0Link>
       <h3>Tooltip</h3>
       <F0Link {...args} variant="link" tooltip="Tooltip" />
     </div>

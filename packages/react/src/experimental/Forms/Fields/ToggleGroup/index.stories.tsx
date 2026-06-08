@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ToggleGroup, ToggleGroupItem } from "../../../../ui/toggleGroup"
+import { ToggleGroup, ToggleGroupItem } from "@/deprecated/ToggleGroup"
 
 const children: React.ReactNode = (
   <>

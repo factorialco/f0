@@ -16,6 +16,8 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
     onChange,
     variant,
     disabled,
+    withBorder = true,
+    fullWidth = false,
   } = props
 
   const [localValue, setLocalValue] = useState(value)
@@ -69,19 +71,24 @@ export const F0ButtonToggleGroup = (props: F0ButtonToggleGroupProps) => {
       {...groupProps}
       onValueChange={handleChange}
       disabled={disabled}
-      className={cn("flex flex-wrap items-center justify-center gap-1")}
+      className={cn(
+        "flex flex-wrap items-center justify-center gap-1",
+        fullWidth && "w-full"
+      )}
     >
       {localItems.map((item) => (
         <ToggleGroupItem
           key={item.value as string}
           value={item.value as string}
           asChild
+          className={cn(fullWidth && "flex-1")}
         >
           <F0ButtonToggleInternal
             {...item}
             size={size}
-            withBorder
+            withBorder={withBorder}
             variant={variant}
+            className={cn(fullWidth && "w-full")}
             selected={!!selectedValues?.includes(item.value)}
             // Intentionally pass a no-op function to satisfy type requirements.
             // The group manages selection state in a controlled manner.

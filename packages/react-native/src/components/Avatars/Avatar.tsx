@@ -29,6 +29,7 @@ export const Avatar = ({
           firstName={avatar.firstName}
           lastName={avatar.lastName}
           src={avatar.src}
+          deactivated={avatar.deactivated}
           size={size}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}

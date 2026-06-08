@@ -1,9 +1,10 @@
 import { cva } from "cva"
 
+import { mentionClasses } from "@/lib/recipes"
 import { cn } from "@/lib/utils"
 
 const baseButton =
-  "group relative inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border-none p-0 text-base font-medium shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] transition-colors [&_.main]:transform-gpu [&_.main]:transition-transform [&_.main]:duration-100 active:[&_.main]:translate-y-px [&_.main]:flex [&_.main]:items-center [&_.main]:justify-center disabled:opacity-30 disabled:cursor-not-allowed no-underline [&_.main]:z-20"
+  "group relative inline-flex items-center justify-center gap-1 whitespace-nowrap rounded border-none p-0 text-base font-medium shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)] transition-colors [&_.main]:transform-gpu [&_.main]:transition-transform [&_.main]:duration-100 active:[&_.main]:translate-y-px active:[&_.main]:scale-[0.97] [&_.main]:flex [&_.main]:items-center [&_.main]:justify-center disabled:opacity-30 disabled:cursor-not-allowed no-underline [&_.main]:z-20"
 
 const baseLink =
   "relative flex-row font-medium [&[aria-disabled=true]]:pointer-events-none [&[aria-disabled=true]]:cursor-not-allowed [&[aria-disabled=true]]:opacity-30 transition-colors"
@@ -20,7 +21,7 @@ export const actionVariants = cva({
       ),
       outline: cn(
         baseButton,
-        "bg-f1-background-inverse-secondary text-f1-foreground after:pointer-events-none after:absolute after:inset-0 after:rounded after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] hover:bg-f1-background-tertiary hover:after:opacity-70 hover:after:ring-f1-border-hover",
+        "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary text-f1-foreground after:pointer-events-none after:absolute after:inset-0 after:rounded after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] hover:bg-f1-background-tertiary hover:after:opacity-70 hover:after:ring-f1-border-hover",
         "active:bg-f1-background-tertiary active:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] active:after:opacity-70 active:after:ring-f1-border-hover",
         "data-[pressed=true]:bg-f1-background-tertiary data-[pressed=true]:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] data-[pressed=true]:after:opacity-70 data-[pressed=true]:after:ring-f1-border-hover"
       ),
@@ -50,7 +51,7 @@ export const actionVariants = cva({
       ),
       outlinePromote: cn(
         baseButton,
-        "bg-f1-background-inverse-secondary text-f1-foreground after:pointer-events-none after:absolute after:inset-0 after:rounded after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] hover:bg-f1-background-tertiary hover:after:opacity-70 hover:after:ring-f1-border-hover",
+        "bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary text-f1-foreground after:pointer-events-none after:absolute after:inset-0 after:rounded after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] hover:bg-f1-background-tertiary hover:after:opacity-70 hover:after:ring-f1-border-hover",
         "active:bg-f1-background-tertiary active:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] active:after:opacity-70 active:after:ring-f1-border-hover",
         "data-[pressed=true]:bg-f1-background-tertiary data-[pressed=true]:shadow-[inset_0_2px_6px_0_rgba(13,22,37,.15)] data-[pressed=true]:after:opacity-70 data-[pressed=true]:after:ring-f1-border-hover"
       ),
@@ -59,10 +60,7 @@ export const actionVariants = cva({
         "text-f1-foreground underline decoration-f1-border-hover decoration-1 underline-offset-[5px] visited:text-f1-foreground hover:text-f1-foreground hover:decoration-f1-border-bold active:text-f1-foreground"
       ),
       unstyled: cn(baseLink, "text-inherit no-underline"),
-      mention: cn(
-        baseLink,
-        "bg-f1-background-accent !px-1.5 font-medium text-f1-foreground-accent"
-      ),
+      mention: cn(baseLink, mentionClasses),
       selected: cn(
         baseButton,
         "bg-f1-background-selected text-f1-icon-selected shadow-none hover:bg-f1-background-selected-hover hover:text-f1-icon-selected-hover hover:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_-2px_4px_rgba(13,22,37,.04)]",
@@ -71,7 +69,7 @@ export const actionVariants = cva({
       ),
       ai: cn(
         baseButton,
-        "bg-f1-border text-f1-foreground transition-all duration-200",
+        "bg-f1-border text-f1-foreground transition-colors duration-200",
         "[--gradient-angle:0deg]",
         "hover:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] hover:before:opacity-100",
         "hover:animate-rotate-gradient",
@@ -189,7 +187,7 @@ export const iconVariants = cva({
     {
       variant: "mention",
       mode: "default",
-      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "unstyled",
@@ -242,11 +240,6 @@ export const iconVariants = cva({
       variant: "unstyled",
       mode: "only",
       class: "[&_svg:not([data-has-color])]:text-f1-icon",
-    },
-    {
-      variant: "mention",
-      mode: "default",
-      class: "[&_svg:not([data-has-color])]:text-f1-icon-accent",
     },
     {
       variant: "ai",

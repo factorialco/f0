@@ -2,7 +2,7 @@ import { NewColor } from "@/components/tags/F0TagDot"
 import {
   PropertyDefinition,
   renderProperty,
-} from "@/experimental/OneDataCollection/property-render"
+} from "@/patterns/OneDataCollection/property-render"
 import { useI18n } from "@/lib/providers/i18n"
 
 export const mockItem = {
@@ -29,6 +29,14 @@ export const mockItem = {
       src: "/avatars/person02.jpg",
     },
   ],
+  positiveDelta: {
+    label: "10%",
+    deltaStatus: "positive" as const,
+  },
+  negativeDelta: {
+    label: "10%",
+    deltaStatus: "negative" as const,
+  },
   companyName: "Factorial",
   companyLogo: "/avatars/factorial.png",
   teamName: "Engineering",

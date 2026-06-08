@@ -1,7 +1,6 @@
-import { motion } from "motion/react"
-
 import { F0Icon } from "@/components/F0Icon"
 import { ChevronDown } from "@/icons/app"
+import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
 export type ChevronToggleProps = {
@@ -10,6 +9,8 @@ export type ChevronToggleProps = {
   onClick?: () => void
   disabled?: boolean
   size?: "xs" | "sm"
+  closedRotation?: number
+  openRotation?: number
 }
 
 export const ChevronToggle = ({
@@ -18,20 +19,25 @@ export const ChevronToggle = ({
   onClick,
   disabled,
   size = "xs",
+  closedRotation = 0,
+  openRotation = 180,
 }: ChevronToggleProps) => {
+  const shouldReduceMotion = useReducedMotion()
+  const rotation = open ? openRotation : closedRotation
   return (
-    <motion.div
-      animate={{ rotate: open ? 180 : 0 }}
-      transition={{ duration: 0.2 }}
+    <div
+      style={{
+        transform: `rotate(${rotation}deg)`,
+        transition: shouldReduceMotion ? "none" : "transform 200ms ease-out",
+      }}
       className={cn(
         "flex h-3 w-3 shrink-0 items-center justify-center",
         disabled && "cursor-not-allowed opacity-50",
-
         className
       )}
       onClick={onClick}
     >
       <F0Icon icon={ChevronDown} size={size} role="button" />
-    </motion.div>
+    </div>
   )
 }

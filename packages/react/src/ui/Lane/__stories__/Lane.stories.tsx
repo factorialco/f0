@@ -74,15 +74,27 @@ export const Default: Story = {
           metadata={[
             {
               icon: Person,
-              property: { type: "text", value: mockTask.assignee },
+              property: {
+                type: "text",
+                label: "Assignee",
+                value: mockTask.assignee,
+              },
             },
             {
               icon: ArrowUp,
-              property: { type: "text", value: mockTask.priority },
+              property: {
+                type: "text",
+                label: "Priority",
+                value: mockTask.priority,
+              },
             },
             {
               icon: Clock,
-              property: { type: "text", value: mockTask.dueDate },
+              property: {
+                type: "text",
+                label: "Due date",
+                value: mockTask.dueDate,
+              },
             },
           ]}
           primaryAction={{
@@ -137,15 +149,27 @@ export const WithFetchMore: Story = {
             metadata={[
               {
                 icon: Person,
-                property: { type: "text", value: mockTask.assignee },
+                property: {
+                  type: "text",
+                  label: "Assignee",
+                  value: mockTask.assignee,
+                },
               },
               {
                 icon: ArrowUp,
-                property: { type: "text", value: mockTask.priority },
+                property: {
+                  type: "text",
+                  label: "Priority",
+                  value: mockTask.priority,
+                },
               },
               {
                 icon: Clock,
-                property: { type: "text", value: mockTask.dueDate },
+                property: {
+                  type: "text",
+                  label: "Due date",
+                  value: mockTask.dueDate,
+                },
               },
             ]}
           />
@@ -281,7 +305,11 @@ export const CompactCards: Story = {
             metadata={[
               {
                 icon: ArrowUp,
-                property: { type: "text", value: mockTask.priority },
+                property: {
+                  type: "text",
+                  label: "Priority",
+                  value: mockTask.priority,
+                },
               },
             ]}
           />
@@ -335,7 +363,7 @@ export const WithImages: Story = {
           metadata={[
             {
               icon: Person,
-              property: { type: "text", value: proj.team },
+              property: { type: "text", label: "Team", value: proj.team },
             },
           ]}
           link={`/projects/${proj.id}`}

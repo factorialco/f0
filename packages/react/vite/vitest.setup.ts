@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest"
-import { cleanup } from "@testing-library/react"
 import type * as ReactTypes from "react"
+
+import { cleanup } from "@testing-library/react"
 import { afterEach, vi } from "vitest"
 
 afterEach(() => {
@@ -71,10 +72,62 @@ vi.stubGlobal(
   }
 )
 
+// Mock IntersectionObserver - required by @emoji-mart/react and other libs
+vi.stubGlobal(
+  "IntersectionObserver",
+  class MockedIntersectionObserver {
+    readonly root = null
+    readonly rootMargin = "0px"
+    readonly thresholds: ReadonlyArray<number> = [0]
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+    takeRecords = vi.fn().mockReturnValue([])
+  }
+)
+
 // Add pointer event polyfills for testing environment
 if (typeof window !== "undefined") {
   window.HTMLElement.prototype.hasPointerCapture = () => false
   window.HTMLElement.prototype.setPointerCapture = () => {}
   window.HTMLElement.prototype.releasePointerCapture = () => {}
   window.HTMLElement.prototype.scrollIntoView = () => {}
+}
+
+// ProseMirror's scrollToSelection path calls Range.getClientRects() and
+// Range.getBoundingClientRect(), which JSDOM does not implement.
+// Without these stubs, any test that triggers editor focus + scroll throws:
+//   TypeError: target.getClientRects is not a function
+// Rects must be non-zero (1×1) because ProseMirror's nonZero() filter rejects zero-area rects.
+if (typeof Range !== "undefined") {
+  if (!Range.prototype.getClientRects) {
+    Range.prototype.getClientRects = () => {
+      const rect = {
+        top: 0,
+        left: 0,
+        bottom: 1,
+        right: 1,
+        width: 1,
+        height: 1,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }
+      return [rect] as unknown as DOMRectList
+    }
+  }
+  if (!Range.prototype.getBoundingClientRect) {
+    Range.prototype.getBoundingClientRect = () =>
+      ({
+        top: 0,
+        left: 0,
+        bottom: 1,
+        right: 1,
+        width: 1,
+        height: 1,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect
+  }
 }

@@ -1,7 +1,8 @@
 import * as React from "react"
 
+import { F0InputField, InputFieldProps } from "@/components/F0InputField"
+
 import { cn } from "../lib/utils"
-import { InputField, InputFieldProps } from "./InputField"
 
 export type InputProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -37,6 +38,7 @@ export type InputProps = Omit<
     | "readonly"
     | "autocomplete"
     | "buttonToggle"
+    | "transparent"
   >
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -75,12 +77,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       onKeyDown,
       readonly,
       buttonToggle,
+      transparent,
       ...props
     },
     ref
   ) => {
     return (
-      <InputField
+      <F0InputField
         label={label}
         icon={icon}
         labelIcon={labelIcon}
@@ -114,6 +117,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         inputRef={ref}
         readonly={readonly}
         buttonToggle={buttonToggle}
+        transparent={transparent}
       >
         <input
           type={type}
@@ -124,7 +128,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "w-full shrink placeholder:-z-10 disabled:cursor-not-allowed"
           )}
         />
-      </InputField>
+      </F0InputField>
     )
   }
 )

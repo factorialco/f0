@@ -1,13 +1,9 @@
-import React, {
-  forwardRef,
-  ForwardRefExoticComponent,
-  RefAttributes,
-} from "react"
+import React, { forwardRef } from "react"
 import { Svg, SvgProps } from "react-native-svg"
 import { tv, type VariantProps } from "tailwind-variants"
-import { withUniwind } from "uniwind"
 
 import { cn } from "../../lib/utils"
+import { applyIconInterop, type IconType } from "../primitives/F0Icon"
 
 const iconVariants = tv({
   base: "shrink-0",
@@ -25,6 +21,11 @@ const iconVariants = tv({
   },
 })
 
+/**
+ * @deprecated Use `F0IconProps` from `../primitives/F0Icon` instead.
+ * Migration: Replace `IconProps` with `F0IconProps`.
+ * `F0Icon` supports `icon`, `size`, `testID`, and `className`, and adds semantic `color` variants.
+ */
 export interface IconProps extends SvgProps, VariantProps<typeof iconVariants> {
   icon: IconType
   testID?: string
@@ -33,26 +34,11 @@ export interface IconProps extends SvgProps, VariantProps<typeof iconVariants> {
   isPressed?: boolean
 }
 
-export type IconType = ForwardRefExoticComponent<
-  SvgProps &
-    RefAttributes<Svg> & {
-      className?: string
-    }
->
-
-// Keep track of icons that have already had withUniwind applied
-const interopAppliedIcons = new WeakSet()
-
-// Function to apply UniWind interop to an icon component
-export function applyIconInterop(icon: IconType) {
-  if (!interopAppliedIcons.has(icon)) {
-    const wrappedIcon = withUniwind(icon)
-    interopAppliedIcons.add(wrappedIcon)
-    return wrappedIcon
-  }
-  return icon
-}
-
+/**
+ * @deprecated Use F0Icon instead. This component will be removed in a future version.
+ * Migration: Replace <Icon icon={X} /> with <F0Icon icon={X} />.
+ * F0Icon supports the same `icon`, `size`, `testID`, and `className` props, plus semantic `color` variants.
+ */
 export const Icon = forwardRef<Svg, IconProps>(function Icon(
   { size = "md", icon, className, testID, ...props },
   ref

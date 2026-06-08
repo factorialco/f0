@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 
 import { F0Checkbox } from "@/components/F0Checkbox"
-import { Await } from "@/components/Utilities/Await"
+import { Await } from "@/lib/Await"
 import { Counter } from "@/ui/Counter"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
 import { Skeleton } from "@/ui/skeleton"
 
@@ -17,6 +17,9 @@ type GroupHeaderProps = {
   select?: true | false | "indeterminate"
   onSelectChange?: (selected: boolean) => void
   className?: string
+  chevronPosition?: "leading" | "trailing"
+  closedRotation?: number
+  openRotation?: number
 }
 
 export const GroupHeader = ({
@@ -29,6 +32,9 @@ export const GroupHeader = ({
   select,
   onSelectChange,
   className,
+  chevronPosition = "trailing",
+  closedRotation,
+  openRotation,
 }: GroupHeaderProps) => {
   const [isOpen, setIsOpen] = useState(open)
 
@@ -49,11 +55,41 @@ export const GroupHeader = ({
     }
   }
 
+  const chevron = showOpenChange && (
+    <span className="text-f1-icon-secondary" data-testid="group-header-chevron">
+      <ChevronToggle
+        open={isOpen}
+        size="sm"
+        closedRotation={closedRotation}
+        openRotation={openRotation}
+      />
+    </span>
+  )
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      if (e.key === " ") e.preventDefault()
+      handleGroupClick()
+    }
+  }
+
+  const isInteractive = showOpenChange || selectable
+
   return (
     <div
-      className={cn("pointer-events-auto flex items-center gap-2", className)}
+      className={cn(
+        "pointer-events-auto flex items-center gap-2",
+        isInteractive && focusRing("rounded"),
+        className
+      )}
       onClick={handleGroupClick}
+      {...(isInteractive && {
+        role: "button",
+        tabIndex: 0,
+        onKeyDown: handleKeyDown,
+      })}
     >
+      {chevronPosition === "leading" && chevron}
       {selectable && (
         <F0Checkbox
           checked={!!select}
@@ -74,11 +110,7 @@ export const GroupHeader = ({
       <Await resolve={itemCount} fallback={<Skeleton className="h-4 w-5" />}>
         {(count) => count !== undefined && <Counter value={count} />}
       </Await>
-      {showOpenChange && (
-        <span className="text-f1-icon-secondary">
-          <ChevronToggle open={isOpen} size="sm" />
-        </span>
-      )}
+      {chevronPosition === "trailing" && chevron}
     </div>
   )
 }

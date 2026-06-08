@@ -7,6 +7,11 @@ import {
   AvatarImage,
 } from "../../../ui/avatar"
 import { Badge, BadgeProps } from "../../Badge"
+import {
+  F0Icon,
+  type F0IconProps,
+  type IconType,
+} from "../../primitives/F0Icon"
 import { ModuleAvatar, ModuleAvatarProps } from "../ModuleAvatar"
 import { AvatarBadge } from "../types"
 
@@ -52,7 +57,22 @@ type Props = {
   size?: ShadAvatarProps["size"]
   color?: ShadAvatarProps["color"] | "random"
   badge?: AvatarBadge
+  icon?: {
+    icon: IconType
+    color?: F0IconProps["color"]
+  }
 } & Pick<ShadAvatarProps, "aria-label" | "aria-labelledby">
+
+const iconSizeMap: Record<
+  NonNullable<ShadAvatarProps["size"]>,
+  F0IconProps["size"]
+> = {
+  xsmall: "xs",
+  small: "sm",
+  medium: "md",
+  large: "lg",
+  xlarge: "xl",
+}
 
 export const BaseAvatar = ({
   src,
@@ -63,6 +83,7 @@ export const BaseAvatar = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  icon,
 }: Props) => {
   const initials = getInitials(name, size)
   const avatarColor =
@@ -104,12 +125,20 @@ export const BaseAvatar = ({
           aria-labelledby={ariaLabelledby}
           data-a11y-color-contrast-ignore
           className={
-            src
-              ? "bg-f0-background dark:bg-f0-background-inverse-secondary"
-              : ""
+            icon
+              ? "bg-f0-background-secondary"
+              : src
+                ? "bg-f0-background dark:bg-f0-background-inverse-secondary"
+                : ""
           }
         >
-          {src ? (
+          {icon ? (
+            <F0Icon
+              icon={icon.icon}
+              color={icon.color}
+              size={iconSizeMap[size ?? "medium"]}
+            />
+          ) : src ? (
             <AvatarImage src={src} alt={initials} />
           ) : (
             <AvatarFallback size={size} data-a11y-color-contrast-ignore>

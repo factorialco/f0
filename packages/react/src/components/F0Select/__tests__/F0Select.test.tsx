@@ -1,10 +1,9 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-import type { RecordType } from "@/hooks/datasource"
-
+import { createDataSourceDefinition, type RecordType } from "@/hooks/datasource"
 import { zeroRender as render } from "@/testing/test-utils"
 
 import type { F0SelectItemProps } from "../types"
@@ -161,6 +160,188 @@ describe("Select", () => {
     await openSelect(user)
 
     expect(screen.getByText("Search options")).toBeInTheDocument()
+  })
+
+  it("renders icon tags with text", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "icon-tag-option",
+            label: "Icon tag option",
+            tag: {
+              type: "icon",
+              text: "System",
+              icon: Search,
+            },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(screen.getByText("System")).toBeInTheDocument()
+  })
+
+  it("renders selected status tags as pills in the trigger", async () => {
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+        value="approved"
+      />
+    )
+
+    const combobox = screen.getByRole("combobox")
+    const selectedLabel = within(combobox).getByText("Approved")
+
+    await waitFor(() => {
+      expect(selectedLabel.closest(".bg-f1-background-positive")).toBeTruthy()
+    })
+  })
+
+  it("renders status-only options without duplicating the label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "draft",
+            label: "Draft",
+            tag: {
+              type: "status",
+              text: "Draft",
+              variant: "neutral",
+            },
+          },
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    const approvedOption = screen.getByRole("option", { name: "Approved" })
+
+    expect(within(approvedOption).getAllByText("Approved")).toHaveLength(1)
+    expect(
+      within(approvedOption)
+        .getByText("Approved")
+        .closest(".bg-f1-background-positive")
+    ).toBeTruthy()
+  })
+
+  it("throws when options mix multiple tag types", () => {
+    expect(() =>
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={[
+            {
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status",
+                text: "Approved",
+                variant: "positive",
+              },
+            },
+            {
+              value: "isabella",
+              label: "Isabella",
+              tag: { type: "person", name: "Isabella" },
+            },
+          ]}
+          onChange={() => {}}
+        />
+      )
+    ).toThrow(/All options must use the same tag type/)
+  })
+
+  it("forces at least md trigger size when options carry status tags", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="approved"
+        options={[
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+  })
+
+  it("forces at least md trigger size for a preselected status pill not yet in the dataset", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="approved"
+        // Dataset hasn't loaded the selected record; the pill comes from defaultItem
+        options={[]}
+        defaultItem={{
+          value: "approved",
+          label: "Approved",
+          tag: {
+            type: "status",
+            text: "Approved",
+            variant: "positive",
+          },
+        }}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+  })
+
+  it("keeps the requested sm trigger size when no status tags are present", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="option1"
+        options={[{ value: "option1", label: "Option 1" }]}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[32px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[40px\\]")).toBeFalsy()
   })
 
   it("filters options based on search input", async () => {
@@ -405,7 +586,7 @@ describe("Select", () => {
       expect(screen.getByText("Option 1")).toBeInTheDocument()
     })
 
-    // Find the clear button using the same approach as InputField tests
+    // Find the clear button using the same approach as F0InputField tests
     // The clear button should be visible when there's a value
     const clearButton = container.querySelector(
       "button[data-testid='clear-button']"
@@ -421,6 +602,644 @@ describe("Select", () => {
     })
     await waitFor(() => {
       expect(handleChangeSelectedOption).toHaveBeenCalledWith(undefined, false)
+    })
+  })
+
+  it("defers onChange until apply when withApplySelection is enabled", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={[]}
+        onChange={handleChange}
+        withApplySelection
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 1"))
+
+    expect(handleChange).not.toHaveBeenCalled()
+
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledWith(
+        ["option1"],
+        [
+          {
+            id: "option1",
+            name: "Option 1",
+            description: "Description 1",
+          },
+        ],
+        [
+          expect.objectContaining({
+            label: "Option 1",
+            value: "option1",
+            description: "Description 1",
+          }),
+        ]
+      )
+    })
+    expect(handleChange).toHaveBeenCalledTimes(1)
+  })
+
+  it("cancels staged multi-select changes on outside click when withApplySelection is enabled", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <div>
+        <button type="button">Outside</button>
+        <F0Select
+          {...defaultSelectProps}
+          multiple
+          options={mockOptions}
+          value={["option1", "option2"]}
+          onChange={handleChange}
+          withApplySelection
+        />
+      </div>
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 2"))
+    fireEvent.pointerDown(document.body)
+
+    await waitFor(() => {
+      expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
+    })
+
+    expect(handleChange).not.toHaveBeenCalled()
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 3"))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    await waitFor(() => {
+      expect(handleChange).toHaveBeenCalledTimes(1)
+    })
+
+    expect(handleChange.mock.calls[0]?.[0]).toEqual(
+      expect.arrayContaining(["option1", "option2", "option3"])
+    )
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.arrayContaining(["option1", "option2", "option3"]),
+      expect.any(Array),
+      expect.any(Array)
+    )
+  })
+
+  it("cancels staged changes without closing when cancel button is clicked", async () => {
+    const handleChange = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        multiple
+        options={mockOptions}
+        value={["option1", "option2"]}
+        onChange={handleChange}
+        withApplySelection
+      />
+    )
+
+    await openSelect(user)
+    await user.click(screen.getByText("Option 2"))
+    await user.click(screen.getByRole("button", { name: "Cancel" }))
+
+    expect(screen.getByRole("listbox")).toBeInTheDocument()
+    expect(handleChange).not.toHaveBeenCalled()
+
+    await user.click(screen.getByText("Option 3"))
+    await user.click(screen.getByRole("button", { name: "Apply selection" }))
+
+    expect(handleChange).toHaveBeenCalledWith(
+      expect.arrayContaining(["option1", "option2", "option3"]),
+      expect.arrayContaining([
+        {
+          id: "option1",
+          name: "Option 1",
+          description: "Description 1",
+        },
+        {
+          id: "option2",
+          name: "Option 2",
+          description: "Description 2",
+        },
+        {
+          id: "option3",
+          name: "Option 3",
+          description: "Description 3",
+        },
+      ]),
+      expect.arrayContaining([
+        expect.objectContaining({
+          label: "Option 1",
+          value: "option1",
+          description: "Description 1",
+        }),
+        expect.objectContaining({
+          label: "Option 2",
+          value: "option2",
+        }),
+        expect.objectContaining({
+          label: "Option 3",
+          value: "option3",
+        }),
+      ])
+    )
+  })
+
+  describe("asList mode", () => {
+    it("preserves selection after searching and clicking an item", async () => {
+      const handleChange = vi.fn()
+      const user = userEvent.setup()
+
+      const source = createDataSourceDefinition<RecordType>({
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: ({ search }) => {
+            const allRecords = [
+              { id: "1", name: "Alice" },
+              { id: "2", name: "Bob" },
+              { id: "3", name: "Carol" },
+            ]
+            const filtered = search
+              ? allRecords.filter((r) =>
+                  r.name.toLowerCase().includes(search.toLowerCase())
+                )
+              : allRecords
+            return Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: filtered,
+              total: filtered.length,
+            })
+          },
+        },
+      })
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={source}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          onChange={handleChange}
+          asList
+          showSearchBox
+        />
+      )
+
+      // In asList mode, items are shown inline (no popover to open)
+      await waitFor(() => {
+        expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
+      })
+
+      // Type in the search box to filter
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "Ali")
+
+      // Wait for filtered results
+      await waitFor(() => {
+        expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
+        expect(screen.queryByText("Bob")).not.toBeInTheDocument()
+      })
+
+      // Click the first "Alice" element to select it
+      await user.click(screen.getAllByText("Alice")[0])
+
+      // onChange should be called with the selected value
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith(
+          "1",
+          expect.objectContaining({ id: "1", name: "Alice" }),
+          expect.objectContaining({ value: "1", label: "Alice" })
+        )
+      })
+
+      // Wait a bit for any debounced effects to fire
+      await waitFor(
+        () => {
+          // onChange should NOT have been called with undefined (i.e., selection should not be cleared)
+          const calls = handleChange.mock.calls
+          const undefinedCall = calls.find(
+            (call: unknown[]) => call[0] === undefined
+          )
+          expect(undefinedCall).toBeUndefined()
+        },
+        { timeout: 1000 }
+      )
+    })
+  })
+
+  describe("collapsible groups", () => {
+    type GroupedItem = {
+      value: string
+      label: string
+      role: string
+    }
+
+    const groupedItems: GroupedItem[] = [
+      { value: "a1", label: "Alice", role: "Engineer" },
+      { value: "a2", label: "Bob", role: "Engineer" },
+      { value: "b1", label: "Carol", role: "Designer" },
+      { value: "b2", label: "Dan", role: "Designer" },
+    ]
+
+    const buildSource = (defaultOpenGroups: boolean) =>
+      createDataSourceDefinition<GroupedItem>({
+        grouping: {
+          mandatory: true,
+          collapsible: true,
+          defaultOpenGroups,
+          groupBy: {
+            role: {
+              name: "Role",
+              label: (groupId) => `${groupId}`,
+              itemCount: (groupId) =>
+                groupedItems.filter((item) => item.role === groupId).length,
+            },
+          },
+        },
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: () =>
+            Promise.resolve({
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: groupedItems,
+              total: groupedItems.length,
+            }),
+        },
+      })
+
+    const mapOptions = (item: GroupedItem) => ({
+      value: item.value,
+      label: item.label,
+    })
+
+    it("shows group headers when all groups are collapsed (no false empty state)", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(false)}
+          mapOptions={mapOptions}
+          searchEmptyMessage="No results found"
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      // Group headers must be visible even though no items contribute a value
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      expect(screen.getByText("Designer")).toBeInTheDocument()
+
+      // Records remain hidden while groups are closed
+      expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+      expect(screen.queryByText("Carol")).not.toBeInTheDocument()
+
+      // Empty-state message must NOT show — group headers count as content
+      expect(screen.queryByText("No results found")).not.toBeInTheDocument()
+    })
+
+    it("shows group headers and records when groups are open by default", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(true)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      expect(screen.getByText("Alice")).toBeInTheDocument()
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      expect(screen.getByText("Carol")).toBeInTheDocument()
+      expect(screen.getByText("Dan")).toBeInTheDocument()
+    })
+
+    it("reveals records when a closed group header is clicked", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={buildSource(false)}
+          mapOptions={mapOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(screen.getByText("Engineer")).toBeInTheDocument()
+      })
+      expect(screen.queryByText("Alice")).not.toBeInTheDocument()
+
+      await user.click(screen.getByText("Engineer"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Alice")).toBeInTheDocument()
+      })
+      expect(screen.getByText("Bob")).toBeInTheDocument()
+      // The other group remains collapsed
+      expect(screen.queryByText("Carol")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("onCreate", () => {
+    it("shows create button in empty state when search has text", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "nonexistent")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "nonexistent"/ })
+        ).toBeInTheDocument()
+      })
+    })
+
+    it("does not show create button when search is empty", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={[]}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      await waitFor(() => {
+        expect(
+          screen.queryByRole("button", { name: /Create/ })
+        ).not.toBeInTheDocument()
+      })
+    })
+
+    it("calls onCreate with search text when create button is clicked", async () => {
+      const user = userEvent.setup()
+      const handleCreate = vi.fn()
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "new item")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "new item"/ })
+        ).toBeInTheDocument()
+      })
+
+      await user.click(
+        screen.getByRole("button", { name: /Create "new item"/ })
+      )
+
+      expect(handleCreate).toHaveBeenCalledWith("new item")
+    })
+
+    it("clears search after async onCreate resolves", async () => {
+      const user = userEvent.setup()
+      let resolveCreate: () => void
+      const handleCreate = vi.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveCreate = resolve
+          })
+      )
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          showSearchBox
+          onCreate={handleCreate}
+        />
+      )
+
+      await openSelect(user)
+
+      const searchInput = screen.getByRole("searchbox")
+      await user.type(searchInput, "new item")
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole("button", { name: /Create "new item"/ })
+        ).toBeInTheDocument()
+      })
+
+      await user.click(
+        screen.getByRole("button", { name: /Create "new item"/ })
+      )
+
+      // Search should still show while promise is pending
+      expect(handleCreate).toHaveBeenCalledWith("new item")
+
+      // Resolve the promise
+      resolveCreate!()
+
+      // After resolution, search should be cleared
+      await waitFor(() => {
+        expect(searchInput).toHaveValue("")
+      })
+    })
+  })
+
+  describe("controlled value sync", () => {
+    // Regression test for https://github.com/factorialco/f0/pull/4134
+    // After PR #4134 refactored F0Select to use `useSelectable`'s `localValue` /
+    // `committedSelectionRef`, programmatic resets of the `value` prop from the
+    // parent stopped being reflected in the displayed selection: the previous
+    // value remained "stuck" in the trigger because the internal
+    // `updateLocalSelectedState` merge in useSelectable was additive and never
+    // unchecked items that disappeared from the external state.
+    it("reflects an externally reset `value` prop after the user has clicked another option", async () => {
+      const user = userEvent.setup()
+
+      const { rerender } = render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option1"
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Option 1")).toBeInTheDocument()
+      })
+
+      // User picks Option 2 (simulates a transient selection inside a form).
+      await openSelect(user)
+      await user.click(screen.getByText("Option 2"))
+
+      await waitFor(() => {
+        expect(screen.getByText("Option 2")).toBeInTheDocument()
+      })
+
+      // Parent programmatically resets the value (e.g. cross-field rule
+      // forcing recurrence back to a default option). The trigger must
+      // reflect the new value, not stay stuck on the user's previous pick.
+      rerender(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          value="option3"
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Option 3")).toBeInTheDocument()
+      })
+      expect(screen.queryByText("Option 2")).not.toBeInTheDocument()
+    })
+  })
+
+  describe("onChange emit is debounced against spurious re-fires", () => {
+    // Regression for the F0Select double-emit observed in the
+    // BankAccountTypeSelectorWizardStepF0 flow:
+    //
+    // With an async datasource (`useGraphqlDataSource`-style), clicking a
+    // single-select option fired `onChange` once on the click, and then a
+    // second time once the async `records` finished resolving / the
+    // `selectedState` items were re-cloned by `updateLocalSelectedState`.
+    // Consumers that toggle state on every onChange call ended up flipping
+    // back to a stale value.
+    //
+    // The contract we enforce here: a single user click on a single-select
+    // F0Select with an async datasource must call `onChange` exactly once
+    // with that value, even after async data resolution settles.
+    it("single-select async datasource: a single click emits onChange exactly once", async () => {
+      const handleChange = vi.fn()
+      const user = userEvent.setup()
+
+      let resolveFetch: (() => void) | undefined
+      const source = createDataSourceDefinition<RecordType>({
+        dataAdapter: {
+          paginationType: "infinite-scroll",
+          fetchData: async () => {
+            // Defer the first resolution to simulate an async backend
+            // (GraphQL roundtrip). The click below should NOT wait for this.
+            await new Promise<void>((resolve) => {
+              resolveFetch = resolve
+            })
+            return {
+              type: "infinite-scroll" as const,
+              cursor: "100",
+              perPage: 100,
+              hasMore: false,
+              records: [
+                { id: "1", name: "Alice" },
+                { id: "2", name: "Bob" },
+              ],
+              total: 2,
+            }
+          },
+        },
+      })
+
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          source={source}
+          mapOptions={(item: RecordType) => ({
+            value: item.id as string,
+            label: item.name as string,
+          })}
+          onChange={handleChange}
+          asList
+          showSearchBox
+        />
+      )
+
+      // Wait until the datasource's fetchData effect has run and exposed the
+      // resolver, then resolve so the options render. Calling resolveFetch
+      // synchronously after render races with the useEffect that triggers it.
+      await waitFor(() => {
+        expect(resolveFetch).toBeDefined()
+      })
+      resolveFetch!()
+
+      await waitFor(() => {
+        expect(screen.getAllByText("Alice").length).toBeGreaterThanOrEqual(1)
+      })
+
+      // Pick "Alice".
+      await user.click(screen.getAllByText("Alice")[0])
+
+      await waitFor(() => {
+        expect(handleChange).toHaveBeenCalledWith(
+          "1",
+          expect.objectContaining({ id: "1", name: "Alice" }),
+          expect.objectContaining({ value: "1", label: "Alice" })
+        )
+      })
+
+      // Give async effects (record resolution, deep-compare effects, item
+      // reference population) time to settle, then assert the emit count
+      // stays at exactly one. Note: a `waitFor`-based check is not suitable
+      // here because `waitFor` returns on the first passing assertion and
+      // therefore cannot prove "stays stable over a window" — a regression
+      // that produces a second emit a few ms later would slip through. We
+      // wait an explicit window (100ms is generous w.r.t. the < ~16ms render
+      // cycle that would carry the duplicate emit) and then assert.
+      await new Promise((resolve) => setTimeout(resolve, 100))
+
+      const callsForOne = handleChange.mock.calls.filter(
+        (call: unknown[]) => call[0] === "1"
+      )
+      expect(callsForOne).toHaveLength(1)
     })
   })
 })

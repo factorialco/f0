@@ -3,8 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, FC, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { ApplicationFrame } from "@/examples/ApplicationFrame"
-import ApplicationFrameStoryMeta from "@/examples/ApplicationFrame/index.stories"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { F0WizardStep } from "../types"
@@ -12,7 +12,7 @@ import type { F0WizardStep } from "../types"
 import { F0Wizard } from "../index"
 
 const meta: Meta<typeof F0Wizard> = {
-  title: "F0Wizard",
+  title: "Wizard",
   component: F0Wizard,
   parameters: {
     layout: "fullscreen",

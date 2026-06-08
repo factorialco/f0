@@ -20,6 +20,9 @@ export type Content =
   | (ComponentProps<typeof DataList.DotTagItem> & {
       type: "dot-tag"
     })
+  | (ComponentProps<typeof DataList.CardItem> & {
+      type: "card"
+    })
 
 export interface DetailsItemType {
   title: string
@@ -27,6 +30,7 @@ export interface DetailsItemType {
   spacingAtTheBottom?: boolean
   isHorizontalItem?: boolean
   tableView?: boolean
+  fullWidth?: boolean
 }
 
 const ItemContent: FC<{ content: Content }> = ({ content }) => (
@@ -36,6 +40,7 @@ const ItemContent: FC<{ content: Content }> = ({ content }) => (
     {content.type === "team" && <DataList.TeamItem {...content} />}
     {content.type === "company" && <DataList.CompanyItem {...content} />}
     {content.type === "dot-tag" && <DataList.DotTagItem {...content} />}
+    {content.type === "card" && <DataList.CardItem {...content} />}
   </>
 )
 
@@ -44,6 +49,7 @@ export const DetailsItem = ({
   content,
   isHorizontalItem = false,
   tableView = false,
+  fullWidth = false,
   spacingAtTheBottom,
 }: DetailsItemType) => {
   const contentArray = Array.isArray(content) ? content : [content]
@@ -59,6 +65,7 @@ export const DetailsItem = ({
         label={title}
         isHorizontalItem={isHorizontalItem}
         tableView={tableView}
+        fullWidth={fullWidth}
       >
         {contentArray.map((c, i) => (
           <ItemContent key={i} content={c} />

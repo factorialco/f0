@@ -1,0 +1,226 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="CRUD patterns/Principles" />
+
+# Principles
+
+Ten rules that hold regardless of product, framework, surface, or platform.
+Every pattern in this documentation traces back to one or more of these.
+
+---
+
+## 1. Action hierarchy is a hierarchy of intent, not of styling
+
+A "primary" action is not the prettiest button. It is the single thing the user
+came to do on this surface. "Secondary" is the supporting set of alternatives.
+"Overflow" holds the rarely-used and the dangerous.
+
+If two actions both feel primary, one of them isn't. Re-examine the surface's
+purpose.
+
+<DoDonts
+  do={{
+    description:
+      "Allow exactly one primary intent per surface. Make its label match the user's goal.",
+  }}
+  dont={{
+    description:
+      "Do not promote an action to primary because it is destructive or urgent. Urgency is not intent.",
+  }}
+/>
+
+---
+
+## 2. Create lives at the collection level, never on an item
+
+Creation defines scope; it does not mutate an existing scope. A "Create"
+affordance attached to an item invites two failures: ambiguity about what the new
+thing relates to, and accidental destruction of the item the affordance is mounted
+on.
+
+The exceptions are not exceptions: lane-scoped create on a board, or add-row on
+an editable grid, are still collection-level — the lane and the grid _are_ the
+collection.
+
+<DoDonts
+  do={{
+    description:
+      "Anchor Create to the collection's frame (header, top bar, or empty state).",
+  }}
+  dont={{
+    description: "Do not put a Create action on a row, card, or detail view.",
+  }}
+/>
+
+---
+
+## 3. Update is Create's mirror
+
+The form a user fills to create something should be the same form they edit it in:
+same fields, same order, same labels, same validation, same container shape.
+Divergence is a tax on memory and a source of bugs.
+
+If you must differ — locked fields, additional context, audit metadata — make the
+difference legible and motivated, not incidental.
+
+<DoDonts
+  do={{
+    description:
+      "Parametrize one form with a create/update mode. Share field order and validation.",
+  }}
+  dont={{
+    description:
+      "Do not fork the form for one extra field; conditionally show it instead.",
+  }}
+/>
+
+---
+
+## 4. Read is the lightest commitment (recommended)
+
+Reading something should feel low-cost. Prefer cheap, dismissible surfaces —
+overlays, side panels, hovers — for first-look reading when the content is simple
+enough. Escalate to a dedicated page when content depth, deep-linkability, or
+further branching demands it.
+
+Some resources are inherently deep (multi-tab, shareable, heavily nested). For
+those, navigating directly to a page is the right default — not everything needs
+an intermediate overlay.
+
+<DoDonts
+  do={{
+    description:
+      "Match the read container to content depth: overlay for simple resources, page for deep ones. Both are valid defaults.",
+  }}
+  dont={{
+    description:
+      "Do not force an intermediate overlay when the resource always needs a full page, or force a page when an overlay suffices.",
+  }}
+/>
+
+---
+
+## 5. Destructive actions require deliberate friction
+
+Deletion, archival, irreversible state changes, and anything with side effects on
+other users must demand a second, considered click. The confirmation must name
+_what_ is being affected, _how much_ of it, and _whether_ it can be undone.
+
+"Are you sure?" is not a confirmation. It is a stalling tactic.
+
+<DoDonts
+  do={{
+    description:
+      'Write confirmations that name the resource and the scope: "Delete the 14 selected invoices? This cannot be undone."',
+  }}
+  dont={{
+    description:
+      'Do not rely on generic "Are you sure?" prompts that give the user nothing to evaluate.',
+  }}
+/>
+
+---
+
+## 6. Destructive actions hide by default (recommended)
+
+The recommended default is that destructive actions belong in the overflow menu —
+not in a header slot, not in a footer slot, not next to the primary. Muscle memory
+pointing at a header button should not delete data.
+
+However, some contexts justify surfacing a destructive action more prominently:
+when deletion is a frequent core workflow for that resource, when the context makes
+the action unambiguous, or when the surface's primary purpose is cleanup. In those
+cases, confirmation and destructive styling remain mandatory.
+
+<DoDonts
+  do={{
+    description:
+      "Default to overflow for critical actions. If surfaced, ensure confirmation and destructive styling are always present.",
+  }}
+  dont={{
+    description:
+      "Do not surface destructive actions without deliberate justification — overflow is the safe default.",
+  }}
+/>
+
+---
+
+## 7. Bulk is a different beast from single
+
+A bulk action looks like a single action repeated. It is not. The differences:
+
+- **Selection scope is ambiguous.** "The selected items" can mean the visible page
+  or the entire result set. The user must be told which one.
+- **Failure modes multiply.** Partial success is the common case.
+- **Cost grows non-linearly.** A confirmation that is overkill for one item is
+  correct for a hundred.
+
+<DoDonts
+  do={{
+    description:
+      "Expose a clear mechanism that lets the user expand selection from visible page to all results — deliberately.",
+  }}
+  dont={{
+    description:
+      "Do not assume a header checkbox selects the entire dataset unless you say so explicitly in the UI.",
+  }}
+/>
+
+---
+
+## 8. Async state belongs at the action that triggered it
+
+Loading spinners, success ticks, and error states must live at — or within
+touching distance of — the affordance the user pressed. Banners at the top of the
+page, toasts at the bottom corner, and silent state changes all break the causal
+chain.
+
+<DoDonts
+  do={{
+    description:
+      "Show in-place feedback on the button, bar, or container that initiated the work.",
+  }}
+  dont={{
+    description:
+      "Do not rely solely on a global notification to confirm a local action.",
+  }}
+/>
+
+---
+
+## 9. The container should match the cost of the operation
+
+Quick edits deserve ephemeral surfaces. Complex flows deserve persistent ones.
+Multi-step decisions deserve guided flows. Mismatches are felt immediately: a
+wizard for a one-field change feels bureaucratic; a side panel for a 30-field
+configuration feels cramped.
+
+<DoDonts
+  do={{
+    description:
+      "Match container weight to operation complexity: inline for trivial, overlay for moderate, page for deep.",
+  }}
+  dont={{
+    description:
+      "Do not default to the heaviest container (page or wizard) when the operation has few fields and no branching.",
+  }}
+/>
+
+---
+
+## 10. Affordance reveal must match item density
+
+Dense rows of compact data can hide actions behind hover and surface them on
+demand. Sparse cards, list items with breathing room, and touch-first surfaces
+must show their actions persistently. Hover is not a feature on touch.
+
+<DoDonts
+  do={{
+    description: "Persistently show actions on low-density and touch surfaces.",
+  }}
+  dont={{
+    description:
+      "Do not rely on hover as the sole reveal mechanism on anything reachable by finger.",
+  }}
+/>

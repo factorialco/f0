@@ -115,6 +115,24 @@ export const Default: Story = {
           icon: "warning",
         },
       },
+      {
+        label: "Progress",
+        value: {
+          type: "progress-bar",
+          value: 75,
+          max: 100,
+          label: "75%",
+        },
+      },
+      {
+        label: "Vacancies",
+        value: {
+          type: "progress-bar",
+          value: 1,
+          max: 3,
+          label: "1/3",
+        },
+      },
     ],
   },
 }

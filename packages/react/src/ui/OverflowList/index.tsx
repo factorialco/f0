@@ -136,7 +136,7 @@ const OverflowList = function OverflowList<T>({
 
   // Common classes in the measurement and visible containers
   const itemsWrapperClasses =
-    "flex min-w-0 flex-1 items-center justify-start whitespace-nowrap"
+    "flex min-w-0 items-center justify-start whitespace-nowrap"
 
   return (
     <div

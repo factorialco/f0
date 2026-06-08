@@ -1,25 +1,29 @@
-import React from "react";
-import { ScrollView, Text, View } from "react-native";
-import { useCSSVariable } from "uniwind";
-import { DetailsItemsList } from "../../../src/components/experimental/Lists/DetailsItemsList";
+import React from "react"
+import { ScrollView, Text, View } from "react-native"
+import { useCSSVariable } from "uniwind"
+
+import { DetailsItemsList } from "../../../src/components/experimental/Lists/DetailsItemsList"
 
 export function DetailsItemsListShowcase() {
-  const [f0Foreground] = useCSSVariable(['--color-f0-foreground']);
+  const [f0Foreground] = useCSSVariable(["--color-f0-foreground"])
 
   const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
+    if (typeof value === "string") return value
+    if (typeof value === "number") return String(value)
+    return "#000000"
+  }
 
   return (
-    <ScrollView 
-      className="p-4" 
+    <ScrollView
+      className="p-4"
       contentContainerStyle={{ paddingBottom: 20 }}
       style={{ width: "100%" }}
     >
       {/* Primary */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Primary
       </Text>
       <View className="mb-6">
@@ -83,7 +87,10 @@ export function DetailsItemsListShowcase() {
       </View>
 
       {/* Table View */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Table View
       </Text>
       <View className="mb-6">
@@ -148,7 +155,10 @@ export function DetailsItemsListShowcase() {
       </View>
 
       {/* Table View Horizontal Items */}
-      <Text className="text-lg font-bold mb-4" style={{ color: asString(f0Foreground) }}>
+      <Text
+        className="mb-4 text-lg font-bold"
+        style={{ color: asString(f0Foreground) }}
+      >
         Table View Horizontal Items
       </Text>
       <View className="mb-6">
@@ -213,5 +223,5 @@ export function DetailsItemsListShowcase() {
         />
       </View>
     </ScrollView>
-  );
+  )
 }

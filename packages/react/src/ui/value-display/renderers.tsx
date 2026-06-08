@@ -3,11 +3,14 @@ import { ReactNode } from "react"
 import { ValueDisplayRendererContext } from "./types.ts"
 import { AlertTagCell } from "./types/alertTag"
 import { AmountCell } from "./types/amount"
-import { BarSeriesCell } from "./types/barSeries"
 import { AvatarListCell } from "./types/avatarList"
+import { BarSeriesCell } from "./types/barSeries"
 import { CompanyCell } from "./types/company"
+import { CompoundCell } from "./types/compound"
+import { CountCell } from "./types/count"
 import { CountryCell } from "./types/country"
 import { DateCell } from "./types/date"
+import { DeltaCell } from "./types/delta"
 import { DotTagCell } from "./types/dotTag"
 import { FileCell } from "./types/file"
 import { FolderCell } from "./types/folder"
@@ -19,6 +22,7 @@ import { PercentageCell } from "./types/percentage"
 import { PersonCell } from "./types/person"
 import { ProgressBarCell } from "./types/progressBar"
 import { StatusCell } from "./types/status"
+import { SummaryCell } from "./types/summary"
 import { TagCell } from "./types/tag"
 import { TagListCell } from "./types/tagList"
 import { TeamCell } from "./types/team"
@@ -43,6 +47,7 @@ export const valueDisplayRenderers = {
   number: NumberCell,
   date: DateCell,
   amount: AmountCell,
+  compound: CompoundCell,
   avatarList: AvatarListCell,
   status: StatusCell,
   alertTag: AlertTagCell,
@@ -60,6 +65,9 @@ export const valueDisplayRenderers = {
   file: FileCell,
   folder: FolderCell,
   country: CountryCell,
+  delta: DeltaCell,
+  summary: SummaryCell,
+  count: CountCell,
 } as const satisfies Record<string, ValueDisplayRenderer>
 
 /**
@@ -128,5 +136,6 @@ export const metadataRenderer: ValueDisplayRenderer = (
   return renderer(value, {
     visualization: context.visualization,
     i18n: context.i18n,
+    tableAlign: context.tableAlign,
   })
 }

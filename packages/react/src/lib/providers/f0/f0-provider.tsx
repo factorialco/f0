@@ -8,6 +8,10 @@ import {
 } from "react"
 import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
+import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
+
+import { FormCardValueFormatterProvider } from "@/sds/ai/F0AiChat/providers/FormCardValueFormatterProvider"
+
 import { ImageContextValue, ImageProvider } from "../../imageHandler"
 import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
@@ -70,6 +74,12 @@ const MotionProvider: React.FC<{ children: React.ReactNode }> = ({
   return <MotionConfig reducedMotion="user">{children}</MotionConfig>
 }
 
+const FormComponentContext = createContext<F0FormLikeComponent | undefined>(
+  undefined
+)
+
+export const useFormComponent = () => useContext(FormComponentContext)
+
 export const F0Provider: React.FC<{
   children: React.ReactNode
   link?: LinkContextValue
@@ -82,6 +92,17 @@ export const F0Provider: React.FC<{
   showExperimentalWarnings?: boolean
   dataCollectionStorageHandler?: DataCollectionStorageHandler
   renderDataTestIdAttribute?: boolean
+  /**
+   * Custom form component to use instead of the default F0Form in
+   * AI canvas form panels. Useful for platform-level wrappers that
+   * auto-provide `renderCustomField` or `useUpload`.
+   *
+   * Cast overloaded components when passing:
+   * ```tsx
+   * <F0Provider formComponent={FactorialF0Form as F0FormLikeComponent} />
+   * ```
+   */
+  formComponent?: F0FormLikeComponent
 }> = ({
   children,
   layout,
@@ -94,6 +115,7 @@ export const F0Provider: React.FC<{
   dataCollectionStorageHandler,
   showExperimentalWarnings = false,
   renderDataTestIdAttribute = false,
+  formComponent,
 }) => {
   return (
     <MotionProvider>
@@ -115,7 +137,11 @@ export const F0Provider: React.FC<{
                         handler={dataCollectionStorageHandler}
                       >
                         <DialogsAlikeLayoutProvider>
-                          {children}
+                          <FormComponentContext.Provider value={formComponent}>
+                            <FormCardValueFormatterProvider>
+                              {children}
+                            </FormCardValueFormatterProvider>
+                          </FormComponentContext.Provider>
                         </DialogsAlikeLayoutProvider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>

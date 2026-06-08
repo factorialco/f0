@@ -4,7 +4,7 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { getAvatarColor } from "@/components/avatars/internal/BaseAvatar/utils"
 import { cn } from "@/lib/utils"
 
-import { Picker } from "@/experimental/Information/Reactions/Picker"
+import { Picker } from "@/kits/Social/Reactions/Picker"
 import { BACKGROUND_COLORS } from "../types"
 
 type CelebrationAvatarProps = {

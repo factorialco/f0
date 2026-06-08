@@ -2,15 +2,19 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
-import { Add, Delete, Pencil, Replace, Save } from "@/icons/app/index.ts"
+import { Add, Delete, Pencil, Replace, Save } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
-import { withSnapshot } from "@/lib/storybook-utils/parameters.ts"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0ButtonDropdown } from "../index"
-import { buttonDropdownSizes, buttonDropdownVariants } from "../types.ts"
+import {
+  buttonDropdownModes,
+  buttonDropdownSizes,
+  buttonDropdownVariants,
+} from "../types"
 
 const meta = {
-  title: "ButtonDropdown",
+  title: "Button/ButtonDropdown",
   component: F0ButtonDropdown,
   parameters: {
     layout: "centered",
@@ -26,7 +30,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   args: {
     variant: "default",
     onClick: (value, item) => {
@@ -64,11 +68,11 @@ const meta = {
       table: {
         type: {
           summary: "ButtonDropdownItem[]",
-          detail: `type ButtonDropdownItem = { 
-  value: string; 
-  label: string; 
-  icon?: IconType; 
-  critical?: boolean 
+          detail: `type ButtonDropdownItem = {
+  value: string;
+  label: string;
+  icon?: IconType;
+  critical?: boolean
 }`,
         },
       },
@@ -76,6 +80,16 @@ const meta = {
     tooltip: {
       control: "text",
       description: "Tooltip to explain the button",
+    },
+    mode: {
+      control: "select",
+      options: buttonDropdownModes,
+      description: "Rendering mode of the button",
+      table: {
+        type: {
+          summary: buttonDropdownModes.join(" | "),
+        },
+      },
     },
     ...dataTestIdArgs,
   },
@@ -85,23 +99,29 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 // Basic Variants
+// Note: do NOT add `tags: ["no-sidebar"]` to the primary (first exported)
+// story. Storybook propagates the primary story's tags to the MDX
+// `--documentation` entry, which would hide the entire Documentation page
+// from the sidebar. Hide secondary variants instead.
 export const Default: Story = {
   args: {
     variant: "default",
     items: [
       {
-        value: "1",
-        label: "Item 1",
-        icon: Add,
+        value: "save",
+        label: "Save changes",
+        icon: Save,
       },
       {
-        value: "2",
-        label: "Item 2",
-        icon: Replace,
+        value: "save-close",
+        label: "Save and close",
+        icon: Save,
       },
       {
-        value: "3",
-        label: "Item 3",
+        value: "discard",
+        label: "Discard changes",
+        icon: Delete,
+        critical: true,
       },
     ],
   },
@@ -134,6 +154,7 @@ export const WithDataTestId: Story = {
 
 // Basic Variants
 export const WithTooltip: Story = {
+  tags: ["no-sidebar"],
   args: {
     variant: "default",
     tooltip: "Tooltip to explain the button",
@@ -157,30 +178,31 @@ export const WithTooltip: Story = {
 }
 
 export const WithDescription: Story = {
+  tags: ["no-sidebar"],
   args: {
     items: [
       {
-        value: "1",
-        label: "Item 1",
-        description: "New creation process",
-        icon: Add,
-      },
-      {
-        value: "2",
-        label: "Item 2",
-        description: "Edit item's information",
-        icon: Pencil,
-      },
-      {
-        value: "3",
-        label: "Item 3",
-        description: "Save changes",
+        value: "save",
+        label: "Save changes",
+        description: "Save without closing the form",
         icon: Save,
       },
       {
-        value: "4",
-        label: "Item 4",
-        description: "Delete item",
+        value: "save-close",
+        label: "Save and close",
+        description: "Save and return to the list",
+        icon: Save,
+      },
+      {
+        value: "archive",
+        label: "Archive employee",
+        description: "Hide from active headcount",
+        icon: Pencil,
+      },
+      {
+        value: "delete",
+        label: "Delete employee",
+        description: "Permanently remove all data",
         icon: Delete,
         critical: true,
       },
@@ -189,6 +211,7 @@ export const WithDescription: Story = {
 }
 
 export const WithGroups: Story = {
+  tags: ["no-sidebar"],
   args: {
     items: [
       {
@@ -223,7 +246,270 @@ export const WithGroups: Story = {
   },
 }
 
+// Dropdown mode stories
+export const DropdownMode: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    mode: "dropdown",
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        description: "New creation process",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        description: "Edit item's information",
+        icon: Pencil,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+        description: "Save changes",
+        icon: Save,
+      },
+      {
+        value: "4",
+        label: "Item 4",
+        description: "Delete item",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+}
+
+export const DropdownModeWithTrigger: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    mode: "dropdown",
+    trigger: "New action",
+    items: [
+      {
+        value: "1",
+        label: "Item 1",
+        description: "New creation process",
+        icon: Add,
+      },
+      {
+        value: "2",
+        label: "Item 2",
+        description: "Edit item's information",
+        icon: Pencil,
+      },
+      {
+        value: "3",
+        label: "Item 3",
+        description: "Save changes",
+        icon: Save,
+      },
+    ],
+  },
+}
+
+export const DropdownModeWithGroups: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    mode: "dropdown",
+    trigger: "Actions",
+    items: [
+      {
+        label: "Group 1",
+        items: [
+          {
+            value: "1",
+            label: "Item 1",
+            description: "New creation process",
+            icon: Add,
+          },
+          {
+            value: "2",
+            label: "Item 2",
+            description: "Edit item's information",
+            icon: Pencil,
+          },
+        ],
+      },
+      {
+        label: "Group 2",
+        items: [
+          {
+            value: "3",
+            label: "Item 3",
+            description: "Save changes",
+            icon: Save,
+          },
+        ],
+      },
+    ],
+  },
+}
+
+const variantItems = [
+  { value: "save", label: "Save draft", icon: Save },
+  { value: "delete", label: "Delete record", icon: Delete, critical: true },
+]
+
+export const Variants: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    items: variantItems,
+    onClick: () => {},
+  },
+  render: (args) => (
+    <div className="flex flex-col gap-4">
+      {buttonDropdownVariants.map((variant) => (
+        <F0ButtonDropdown key={variant} {...args} variant={variant} />
+      ))}
+    </div>
+  ),
+}
+
+export const Sizes: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    items: [{ value: "save", label: "Save draft", icon: Save }],
+    onClick: () => {},
+  },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0ButtonDropdown
+        size="sm"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        size="md"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        size="lg"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+    </div>
+  ),
+}
+
+export const Modes: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    items: [{ value: "save", label: "Save draft", icon: Save }],
+    onClick: () => {},
+  },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0ButtonDropdown
+        mode="split"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          { value: "add", label: "Add item", icon: Add },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+      <F0ButtonDropdown
+        mode="dropdown"
+        trigger="Actions"
+        items={[
+          { value: "save", label: "Save draft", icon: Save },
+          { value: "add", label: "Add item", icon: Add },
+          {
+            value: "delete",
+            label: "Delete record",
+            icon: Delete,
+            critical: true,
+          },
+        ]}
+        onClick={() => {}}
+      />
+    </div>
+  ),
+}
+
+// Split mode: one action is clearly more frequent
+export const SplitModeExample: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    mode: "split",
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "save-close", label: "Save and close", icon: Save },
+      {
+        value: "discard",
+        label: "Discard changes",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+}
+
+// Dropdown mode: no single action has priority
+export const DropdownModeExample: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    mode: "dropdown",
+    trigger: "Export",
+    items: [
+      { value: "csv", label: "Export as CSV", icon: Add },
+      { value: "pdf", label: "Export as PDF", icon: Add },
+      { value: "xlsx", label: "Export as Excel", icon: Add },
+    ],
+  },
+}
+
+// When not to use: single action → use F0Button instead (shown as reference)
+export const CriticalItems: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "archive", label: "Archive employee", icon: Pencil },
+      {
+        value: "delete",
+        label: "Delete employee",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+}
+
 export const Snapshot: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   args: {
     items: [
@@ -245,4 +531,38 @@ export const Snapshot: Story = {
     ],
   },
   render: (args) => <F0ButtonDropdown {...args} />,
+}
+
+// Do: only genuinely destructive actions marked as critical
+export const DoDontCriticalDo: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "archive", label: "Archive record", icon: Pencil },
+      {
+        value: "delete",
+        label: "Delete employee",
+        icon: Delete,
+        critical: true,
+      },
+    ],
+  },
+}
+
+// Don't: non-destructive actions marked as critical
+export const DoDontCriticalDont: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    items: [
+      { value: "save", label: "Save changes", icon: Save },
+      { value: "export", label: "Export report", icon: Add, critical: true },
+      {
+        value: "notify",
+        label: "Send notification",
+        icon: Pencil,
+        critical: true,
+      },
+    ],
+  },
 }

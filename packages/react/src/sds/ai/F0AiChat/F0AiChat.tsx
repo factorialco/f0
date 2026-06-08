@@ -1,226 +1,153 @@
-import {
-  CopilotKit,
-  CopilotKitProps,
-  useCopilotChatInternal,
-  useCopilotContext,
-} from "@copilotkit/react-core"
-import { CopilotSidebar, InputProps } from "@copilotkit/react-ui"
-import { randomId } from "@copilotkit/shared"
-import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useRef } from "react"
+import type { ReactNode } from "react"
 
-import { OneEllipsis } from "@/components/OneEllipsis"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import Cross from "@/icons/app/Cross"
 import { experimentalComponent } from "@/lib/experimental"
-import { Link } from "@/lib/linkHandler"
-import { cn } from "@/lib/utils"
+import { useI18n } from "@/lib/providers/i18n"
 
-import { AssistantMessage } from "./components/AssistantMessage"
-import { ChatHeader } from "./components/ChatHeader"
-import { ChatTextarea } from "./components/ChatTextarea"
-import { SidebarWindow } from "./components/ChatWindow"
-import { MessagesContainer } from "./components/MessagesContainer"
-import { UserMessage } from "./components/UserMessage"
-import { WelcomeScreenSuggestion } from "./components/WelcomeScreen"
-import { useDefaultCopilotActions } from "./copilotActions"
-import { F0AiFullscreenChatComponent } from "./F0AiFullscreenChat"
+import { SidebarWindow } from "./components/layout/ChatWindow"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import { AiChatProviderProps } from "./types"
+import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
+
+/**
+ * Slot composition for the F0 AI chat shell. F0 ships the shell + UI
+ * primitives; the consumer (factorial in production, the mock runtime
+ * in stories) supplies the connected slot components that wire data
+ * through whatever runtime they choose (CopilotKit, Mastra, mock, …).
+ *
+ * Slots are optional so the shell renders cleanly even when no runtime
+ * is mounted (the chat just stays empty).
+ */
+export interface F0AiChatProps {
+  /** Header slot rendered at the top of the chat window. */
+  header?: ReactNode
+  /** Messages slot rendered inside the scrollable area. */
+  messages?: ReactNode
+  /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
+  input?: ReactNode
+}
 
 const F0AiChatProviderComponent = ({
   enabled = false,
-  greeting,
   initialMessage,
+  chatHeader,
+  chatMessages,
+  chatInput,
   welcomeScreenSuggestions,
   disclaimer,
   resizable = false,
   defaultVisualizationMode,
   lockVisualizationMode,
+  historyEnabled,
   footer,
-  entityResolvers,
-  toolHints,
+  VoiceMode,
+  entityRefs,
+  canvasActions,
+  canvasEntities,
+  credits,
+  employeeCredits,
+  creditWarning,
+  fileAttachments,
+  onTranscribe,
   onThumbsUp,
   onThumbsDown,
   children,
   agent,
   tracking,
-  ...copilotKitProps
 }: AiChatProviderProps) => {
   return (
     <AiChatStateProvider
       enabled={enabled}
-      greeting={greeting}
-      initialMessage={initialMessage}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
+      initialMessage={initialMessage}
+      chatHeader={chatHeader}
+      chatMessages={chatMessages}
+      chatInput={chatInput}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       disclaimer={disclaimer}
       resizable={resizable}
       defaultVisualizationMode={defaultVisualizationMode}
       lockVisualizationMode={lockVisualizationMode}
+      historyEnabled={historyEnabled}
       footer={footer}
+      VoiceMode={VoiceMode}
       tracking={tracking}
-      entityResolvers={entityResolvers}
-      toolHints={toolHints}
+      entityRefs={entityRefs}
+      canvasActions={canvasActions}
+      canvasEntities={canvasEntities}
+      credits={credits}
+      employeeCredits={employeeCredits}
+      creditWarning={creditWarning}
+      fileAttachments={fileAttachments}
+      onTranscribe={onTranscribe}
     >
-      <AiChatKitWrapper {...copilotKitProps}>{children}</AiChatKitWrapper>
+      {children}
     </AiChatStateProvider>
   )
 }
 
-const AiChatKitWrapper = ({
-  children,
-  ...copilotKitProps
-}: Omit<CopilotKitProps, "agent">) => {
-  const { agent } = useAiChat()
+const F0AiChatComponent = ({
+  header: headerProp,
+  messages: messagesProp,
+  input: inputProp,
+}: F0AiChatProps) => {
+  const {
+    enabled,
+    setOpen,
+    mode,
+    VoiceMode,
+    tracking,
+    chatHeader,
+    chatMessages,
+    chatInput,
+  } = useAiChat()
+  const translations = useI18n()
 
-  return (
-    <CopilotKit runtimeUrl="/copilotkit" agent={agent} {...copilotKitProps}>
-      <ResetFunctionInjector />
-      <SendMessageFunctionInjector />
-      {children}
-    </CopilotKit>
-  )
-}
-
-const ResetFunctionInjector = () => {
-  const { setClearFunction } = useAiChat()
-  const { reset } = useCopilotChatInternal()
-  const { setThreadId } = useCopilotContext()
-
-  useEffect(() => {
-    const resetWithNewThread = () => {
-      reset()
-      setThreadId(randomId())
-    }
-    setClearFunction(resetWithNewThread)
-    return () => {
-      setClearFunction(null)
-    }
-  }, [setClearFunction, reset, setThreadId])
-
-  return null
-}
-
-const SendMessageFunctionInjector = () => {
-  const { setSendMessageFunction } = useAiChat()
-  const { sendMessage } = useCopilotChatInternal()
-
-  useEffect(() => {
-    if (sendMessage) {
-      setSendMessageFunction(sendMessage)
-    }
-    return () => {
-      setSendMessageFunction(null)
-    }
-  }, [setSendMessageFunction, sendMessage])
-
-  return null
-}
-
-const ChatInput = (props: InputProps) => {
-  const { disclaimer, footer, visualizationMode } = useAiChat()
-  const { messages } = useCopilotChatInternal()
-  const containerRef = useRef<HTMLDivElement>(null)
-  const isWelcomeScreen = messages.length === 0
-  const fullscreen = visualizationMode === "fullscreen"
-  const fullscreenWelcome = fullscreen && isWelcomeScreen
-
-  useEffect(() => {
-    const textarea = containerRef.current?.querySelector("textarea")
-    textarea?.focus()
-  }, [visualizationMode])
-
-  return (
-    <div
-      ref={containerRef}
-      className={cn(
-        "flex flex-col items-center gap-2 px-4 pb-4 pt-2",
-        fullscreenWelcome && "flex-1"
-      )}
-    >
-      <motion.div
-        layout="position"
-        className="w-full max-w-[712px]"
-        transition={{
-          layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-        }}
-      >
-        <ChatTextarea {...props} />
-      </motion.div>
-      {disclaimer?.text && (
-        <motion.div
-          layout="position"
-          className="flex w-full max-w-[712px] flex-row items-center justify-center gap-1"
-          transition={{
-            layout: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
-          }}
-        >
-          <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-            {disclaimer.text}
-          </OneEllipsis>
-
-          {disclaimer.link && disclaimer.linkText && (
-            <Link
-              href={disclaimer.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
-            >
-              {disclaimer.linkText}
-            </Link>
-          )}
-        </motion.div>
-      )}
-      <AnimatePresence>
-        {footer && isWelcomeScreen && (
-          <motion.div
-            key="chat-footer"
-            className={cn(
-              "w-full py-4 mx-auto max-w-[712px]",
-              fullscreenWelcome && "mt-auto",
-              fullscreen && "flex justify-center"
-            )}
-            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            {footer}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-const F0AiChatComponent = () => {
-  const { enabled, open, setOpen } = useAiChat()
-
-  // Register all default copilot actions
-  useDefaultCopilotActions()
+  // Props take precedence over provider-supplied slots. The provider slots
+  // are how `ApplicationFrame` (which mounts `<F0AiChat />` itself) gets
+  // a fully wired chat without f0 knowing about specific runtimes.
+  const header = headerProp ?? chatHeader
+  const messages = messagesProp ?? chatMessages
+  const input = inputProp ?? chatInput
 
   if (!enabled) {
     return null
   }
 
+  if (mode === "voice" && VoiceMode) {
+    return (
+      <SidebarWindow>
+        <div className="flex h-full w-full flex-col">
+          <div className="absolute right-3 top-3 z-20">
+            <ButtonInternal
+              variant="ghost"
+              hideLabel
+              label={translations.ai.closeChat}
+              icon={Cross}
+              onClick={() => {
+                setOpen(false)
+                tracking?.onClose?.()
+              }}
+            />
+          </div>
+          <VoiceMode />
+        </div>
+      </SidebarWindow>
+    )
+  }
+
   return (
-    <CopilotSidebar
-      className="h-full w-full"
-      defaultOpen={open}
-      onSetOpen={(isOpen) => {
-        setOpen(isOpen)
-      }}
-      Window={SidebarWindow}
-      Header={ChatHeader}
-      Messages={MessagesContainer}
-      Button={() => {
-        return null // hide CopilotKit's default chat button
-      }}
-      Input={ChatInput}
-      UserMessage={UserMessage}
-      AssistantMessage={AssistantMessage}
-    />
+    <SidebarWindow>
+      <div className="flex h-full w-full flex-col">
+        {header}
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          {messages}
+        </div>
+        {input}
+      </div>
+    </SidebarWindow>
   )
 }
 
@@ -228,14 +155,6 @@ const F0AiChatComponent = () => {
  * @experimental This is an experimental component use it at your own risk
  */
 export const F0AiChat = experimentalComponent("F0AiChat", F0AiChatComponent)
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-export const F0AiFullscreenChat = experimentalComponent(
-  "F0AiFullscreenChat",
-  F0AiFullscreenChatComponent
-)
 
 /**
  * @experimental This is an experimental component use it at your own risk

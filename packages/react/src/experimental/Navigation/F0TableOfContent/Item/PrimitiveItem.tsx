@@ -3,7 +3,7 @@ import { ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { OneEllipsis } from "@/components/OneEllipsis/OneEllipsis"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { Counter } from "@/ui/Counter"
 import { ChevronDown, Handle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -76,8 +76,8 @@ export function PrimitiveItem({
       <div
         className={cn(
           focusRing("focus:border-f1-border-focus"),
-          "relative flex h-[36px] min-w-0 flex-grow items-center gap-1 rounded-[10px] border border-solid border-transparent px-1.5 text-sm transition-colors",
-          isActive && "bg-f1-background-selected",
+          "relative flex h-[36px] min-w-0 flex-grow items-center gap-1 rounded border border-solid border-transparent px-1.5 text-sm transition-colors",
+          isActive && "bg-f1-background-hover",
           onClick && !disabled && "cursor-pointer hover:bg-f1-background-hover",
           disabled && "cursor-not-allowed opacity-30"
         )}
@@ -132,7 +132,7 @@ export function PrimitiveItem({
           lines={1}
           className={cn(
             "flex-grow text-[14px] font-medium text-f1-foreground transition-all",
-            showHandleIcon || icon ? "pl-7" : "pl-0"
+            showHandleIcon || icon ? "pl-7" : "pl-0.5"
           )}
         >
           {label}
@@ -180,12 +180,14 @@ export function PrimitiveItem({
                       }}
                       className="flex items-center justify-center"
                     >
-                      <ItemDropDown
-                        otherActions={otherActions}
-                        open={open}
-                        setOpen={setOpen}
-                        disabled={disabled}
-                      />
+                      {otherActions && (
+                        <ItemDropDown
+                          otherActions={otherActions}
+                          open={open}
+                          setOpen={setOpen}
+                          disabled={disabled}
+                        />
+                      )}
                     </motion.div>
                   )
                 )}

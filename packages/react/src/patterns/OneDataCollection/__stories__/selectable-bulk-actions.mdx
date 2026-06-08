@@ -1,0 +1,433 @@
+import {
+  Canvas,
+  Meta,
+  Controls,
+  Unstyled,
+  Story,
+} from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as DataCollectionStories from "./index.stories"
+import * as ActionDataCollectionStories from "./actions/collection-actions.stories"
+
+<Meta title="Data collection/Selectable and bulk actions" />
+
+# Data collection Selectable and bulk actions
+
+## Introduction
+
+The selectable and bulk actions are two features related (but selectable can
+work without bulk actions) that allow the user to select items in the data
+collection and perform actions on them.
+
+The selectable is applied in the frontend just defining a function that returns
+the id of the item to be selected in the source. This value is common for all
+visualizations.
+
+The bulk actions are applied in the frontend just defining a function that
+returns the actions to be performed on the selected items.
+
+> Important: The value returned by the selectable function must be unique for
+> each datacollection
+
+## Selectable
+
+In order to use the selectable, you need to define a function that returns the
+id of the item to be selected in the source. This value is common for all
+visualizations.
+
+> Important: The value returned by the selectable function must be unique for
+> each datacollection
+
+```tsx
+const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
+  ...
+  selectable: (item) => item.id,
+  },
+  ...
+})
+
+<OneDataCollection
+  source={source}
+  onSelectItems={handleSelectItems}
+/>
+```
+
+You can react to the item selection change using the `OneDataCollection`
+component `onSelectItems` prop.
+
+### onSelectItems
+
+The `onSelectItems` prop is a function that is called when the user selects or
+de-selects an item.
+
+The callback receives the an object with the following properties:
+
+- `allSelected`: A boolean indicating the all items check is checked.
+- `groupsStatus`: If the data is grouped, an object with the status of each
+  group all checked status. e.g. `{ "group1": true, "group2": false }` (Checked
+  true means the user has checked all items in the group or the all group global
+  check)
+- `itemsStatus`: This is an array of `{item: R, checked: boolean}` objects which
+  indicates the items status. NOTE: This doesn't represent all the selected
+  items, it represents the items that where loaded in the data collection and
+  their status.
+- `filters`: The current filters state
+
+### defaultSelectedItems
+
+The `defaultSelectedItems` prop is an object that contains the default selected
+items.
+
+```tsx
+const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
+  ...
+  selectable: (item) => item.id,
+  defaultSelectedItems: {
+    allSelected: false,
+    items: [
+      { id: "1", checked: true },
+      { id: "2", checked: false },
+    ],
+    groups: [
+      { groupId: "group1", checked: true },
+      { groupId: "group2", checked: false },
+    ],
+  },
+  ...
+})
+```
+
+### Selection scope (page-only vs all-pages)
+
+By default, the selection state is scoped to the current page only. This means:
+
+- Selection state resets when navigating between pages
+- `itemsStatus` only includes items from the current page
+- `selectedCount` and `totalKnownItemsCount` are based on current page only
+- Useful for bulk actions that should only affect the current page
+
+If you need selections that can span every page (to support a "Select all
+N items" Gmail-style CTA), set `allPagesSelection: true` in your data
+source. This enables the CTA; once the user clicks it, the selection
+persists across pagination.
+
+```tsx
+const { source } = useDataCollectionSource({
+  ...
+  selectable: (item) => item.id,
+  allPagesSelection: true, // Maintain selection across all pages
+  ...
+})
+```
+
+When `allPagesSelection` is enabled, a banner row appears directly below the column
+headers as soon as at least one row is selected. The banner shows the current selection
+count. If more items exist beyond what is currently selected, it also offers a
+"Select all N items" button, following the Gmail-style pattern for cross-page selection.
+The column headers remain fully visible at all times.
+
+**Page-only selection (default behavior):**
+
+- Navigate to page 1, select 2 items
+- Navigate to page 2 → previous selections are cleared
+- Select 3 items on page 2
+- Only the 3 items from page 2 are selected
+
+<Canvas
+  of={DataCollectionStories.WithPageOnlySelection}
+  meta={DataCollectionStories}
+/>
+
+**All-pages selection (`allPagesSelection: true`):**
+
+- Per-row selections are scoped to the current page the same way as the default mode:
+  navigating to a new page clears manually-ticked rows.
+- When any row is selected, a banner appears below the column headers (headers remain
+  visible). The banner shows the current selection count and, as long as there are more
+  total items than currently selected, a "Select all N items" button.
+- Clicking "Select all N items" promotes the selection across every page — after that,
+  your selection persists through pagination and includes items you have not yet seen.
+  You can still deselect individual rows from this state; the banner updates accordingly.
+- You need to manage the full selection state in your backend.
+
+<Canvas
+  of={DataCollectionStories.WithCrossPageSelection}
+  meta={DataCollectionStories}
+/>
+
+**Infinite-scroll selection:**
+
+In infinite-scroll mode, manual row selections persist across `loadMore` calls.
+New rows that arrive when the user scrolls down appear unchecked — no existing
+selection is ever cleared. The example below combines infinite-scroll with
+`allPagesSelection: true` so the Gmail-style "Select all N items" banner appears
+once every loaded row is checked.
+
+<Canvas
+  of={DataCollectionStories.WithInfiniteScrollSelection}
+  meta={DataCollectionStories}
+/>
+
+#### Examples
+
+**Default selected items**
+
+<Canvas
+  of={DataCollectionStories.WithSelectableAndDefaultSelectedItems}
+  meta={DataCollectionStories}
+/>
+
+**Default selected items and groups**
+
+<Canvas
+  of={DataCollectionStories.WithSelectableAndDefaultSelectedGroups}
+  meta={DataCollectionStories}
+/>
+
+#### Why this complex structure?
+
+You can think why not just return an array of selected items?
+
+The answer is that the data collection is a stateful component that is
+responsible for fetching the data and not all the dataset is loaded from the
+backend. Data collection only loads the data needed to render the view in each
+moment.
+
+Imagine this scenario:
+
+- You have a dataset of 1000 items
+- You are in the first page
+- You click on the "Select all" button
+- You navigate to the second page
+- You select all selected because the all items check is checked
+- You navigate to the third page
+- You deselect the element 1,5,6 and 10 in the third page
+- You want to delete the selected items
+
+The datacollection only know the first 30 items in the dataset, so it can't
+return an array of selected items.
+
+In this case trusting only in the itemsStatus the action will not delete all the
+items the user expect as there is no items loaded from the rest of pages.
+
+This is why the `onSelectItems` callback receives more information to allow you
+to recover the list of selected items in your side (typically in the backend)
+
+In this example you know the user has checked the `allSelected` that means it
+wants to delete all the items in the dataset, but from the `itemsStatus` you
+know that the user unchecked the items 1,5,6 and 10 you should not remove them.
+
+This works in the same way for the groups.
+
+<Canvas
+  of={DataCollectionStories.WithPagesPagination}
+  meta={DataCollectionStories}
+/>
+
+## Bulk actions
+
+Bulk Actions allow users to select multiple items in a table and perform an
+action on all of them simultaneously. This functionality significantly improves
+user efficiency when working with large data sets, eliminating the need to
+perform the same action repeatedly on individual items.
+
+It includes several key elements:
+
+1. **Main checkbox**: Located in the table header, it allows selecting or
+   deselecting all visible items.
+2. **Individual checkboxes**: Positioned in the first column of each row, they
+   allow selecting specific items.
+3. **Floating toolbar**: A dark bar that appears at the bottom of the screen
+   when items are selected. It contains:
+   - **Counter**: Displays the number of selected items.
+   - **Available actions**: Buttons or dropdown menu representing the actions
+     that can be performed on the selected items.
+   - **Cancel button**: Allows deselecting all items and hiding the toolbar.
+
+The bulk actions allows you to define a set of actions that will be available
+when the user has selected items.
+
+The data collection will render the actions in the actionbar of the data
+collection and will be disabled if no items are selected.
+
+```tsx
+const { source, currentSelectable, setCurrentSelectable } = useDataCollection({
+  ...
+  selectable: (item) => item.id,
+  bulkActions: (allSelected) => {
+    return {
+      primary: [
+        {
+          label: allSelected ? "Delete All" : "Delete",
+          icon: Delete,
+          id: "delete-all",
+        },
+        {
+          label: allSelected ? "Edit All" : "Edit",
+          icon: Edit,
+          id: "edit-all",
+        },
+      ],
+      secondary: [
+        {
+          label: "Approve",
+          icon: Approve,
+          id: "approve",
+        },
+      ],
+    }
+  }
+  ...
+})
+
+<OneDataCollection
+  source={source}
+  onBulkAction={handleBulkActions}
+/>
+```
+
+You can react to the action selected by the user using the `OneDataCollection`
+component `onBulkAction` prop.
+
+### datasource.bulkActions
+
+Defined the available actions in the data source via a function that get the
+selected items (in the same way as the `onSelectItems` callback). This allows
+you to define the actions based on the selected items.
+
+It returns an object with the following properties:
+
+- `primary`: A mandatory array of primary actions. If more than one action is
+  defined, the data collection will render a dropdown button with the actions.
+- `secondary`: An optional array of secondary actions.
+
+```tsx
+  bulkActions?: (
+    selectedItems: Parameters<OnBulkActionCallback<Record, Filters>>[1]
+  ) => {
+    primary: BulkActionDefinition[]
+    secondary?: BulkActionDefinition[]
+  }
+```
+
+#### BulkActionDefinition
+
+- `label: string`: The label to show in the button / dropdown
+- `icon?: IconType`: The icon to show in the button / dropdown
+- `id: string`: The id of the action. This is used to identify the action in the
+  `onBulkAction` callback.
+- `keepSelection?: boolean`: If true, the selection will not be cleared after
+  the action is performed. Use for actions where the user may want to act again
+  after completion (e.g. "Download CSV"). For modal-gated actions, use
+  `bulkActionStatus` instead — it handles selection clearing automatically.
+
+### onBulkAction
+
+The `onBulkAction` prop is a function that is called when the user selects an
+action.
+
+The callback receives the following parameters:
+
+- `action`: The action selected by the user
+- `selectedItems`: The items selected by the user. Check the `onSelectItems`
+  callback for more information about the structure of the object.
+
+It may return `void` (synchronous fire-and-forget) or `Promise<void>` — see
+[Async bulk actions with status feedback](#async-bulk-actions-with-status-feedback).
+
+<Canvas
+  of={DataCollectionStories.WithSelectableAndBulkActions}
+  meta={DataCollectionStories}
+/>
+
+### Async bulk actions with status feedback
+
+When your handler does real async work (server call, batch update), opt in
+with `autoManageBulkActionStatus` and return a `Promise`. The action bar then
+drives a loading → success → idle (or loading → error) status machine
+automatically:
+
+- While the promise is pending, the action button itself shows a spinner and
+  becomes disabled, along with all other primary and secondary action buttons,
+  to prevent overlapping clicks. With a single primary action the spinner
+  appears inside the button; with multiple primary actions it appears on the
+  dropdown trigger. The bar-level status area is kept clear during loading so
+  the spinner is never shown twice.
+  (Secondary actions rendered in the overflow dropdown on mobile are not yet
+  disabled — tracked for a future improvement to `F0ActionBar`.)
+- On resolve, the bar flips to `success` for ~1.5 seconds (checkmark) before
+  returning to `idle`. Selection is cleared on resolve unless the action has
+  `keepSelection: true`.
+- On reject, the bar flips to `error`: the container wiggles, the error icon
+  stays until the next selection change, and the selection is preserved so the
+  user can retry.
+
+```tsx
+<OneDataCollection
+  autoManageBulkActionStatus
+  onBulkAction={async (action) => {
+    await api.run(action)
+  }}
+/>
+```
+
+Opt-in is required because handlers that **open a modal** typically resolve
+when the modal opens rather than when the user confirms — auto-managing those
+would flash a premature success. Without the flag, sync and async handlers
+both keep today's fire-and-forget behavior (selection clears immediately, no
+status transitions).
+
+For flows that can't be modelled as a single promise (confirmation dialogs,
+server polling, multi-step wizards), combine `autoManageBulkActionStatus` with
+the controlled `bulkActionStatus` prop. The two props work together:
+
+- **Immediate actions** (return `Promise`) — F0 auto-manages status normally
+  whenever `bulkActionStatus` is `"idle"`.
+- **Modal-gated actions** (return `void`) — F0 keeps the selection alive and
+  defers to your status transitions. You drive `"loading"` → `"success"` or
+  `"error"` from your modal confirm handler; F0 auto-clears selection and
+  resets to idle after ~1.5 s on success.
+
+```tsx
+const [status, setStatus] = useState<ActionBarStatus>("idle")
+
+<OneDataCollection
+  autoManageBulkActionStatus
+  bulkActionStatus={status}
+  onBulkAction={(action, selectedItems) => {
+    if (action === "delete") {
+      // Immediate — return Promise, F0 auto-manages
+      return api.delete(selectedItems)
+    }
+    // Modal-gated — return void, F0 keeps selection
+    openConfirmModal({
+      onConfirm: async () => {
+        setStatus("loading")
+        try {
+          await api.reject(selectedItems)
+          setStatus("success")
+          // No timer, no clearSelection needed — F0 handles both
+        } catch {
+          setStatus("error")
+        }
+      },
+    })
+  }}
+/>
+```
+
+When `bulkActionStatus` is provided, void-returning handlers never auto-clear
+selection regardless of the current value — F0 treats the prop's presence as
+a signal that some actions have modal lifecycles.
+
+In **auto-managed mode**, `"error"` persists until the user changes their
+selection (which resets it to `"idle"`), allowing them to retry. In
+**controlled mode**, selection changes only reset the internal state — the
+controlled `"error"` prop remains active until the consumer explicitly sets a
+different value.
+
+<Canvas
+  of={DataCollectionStories.WithAsyncBulkActions}
+  meta={DataCollectionStories}
+/>

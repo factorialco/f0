@@ -15,11 +15,12 @@ jobs:
     name: "[⚛️ REACT] Build and Publish ALPHA"
     needs: detect-changes
     if: |
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       github.event.comment.body == 'build') ||
-      (github.event_name == 'pull_request' && 
-      needs.detect-changes.outputs.package_react == 'true')
+      !startsWith(github.head_ref, 'release-please--') &&
+      ((github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.body == 'build') ||
+       (github.event_name == 'pull_request' &&
+        needs.detect-changes.outputs.package_react == 'true'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -38,6 +39,8 @@ jobs:
         run: |
           pnpm --filter @factorialco/f0-core build
           pnpm --filter @factorialco/f0-react build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=6144"
 
       - name: Publish to release branch npm/alpha-pr-${{ github.event.pull_request.number }}
         uses: ./.github/actions/publish-release-branch
@@ -48,11 +51,12 @@ jobs:
     name: "[📱 REACT NATIVE] Build and Publish ALPHA"
     needs: detect-changes
     if: |
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       github.event.comment.body == 'build') ||
-      (github.event_name == 'pull_request' && 
-      needs.detect-changes.outputs.package_react_native == 'true')
+      !startsWith(github.head_ref, 'release-please--') &&
+      ((github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.body == 'build') ||
+       (github.event_name == 'pull_request' &&
+        needs.detect-changes.outputs.package_react_native == 'true'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -77,15 +81,32 @@ jobs:
           branch-name: npm/alpha-pr-${{ github.event.pull_request.number }}-react-native
           directory: packages/react-native
 
+  publish-expo-preview-react-native:
+    name: "[📱 REACT NATIVE] Build and Publish Expo Preview"
+    needs: publish-alpha-react-native
+    if: |
+      github.event_name == 'pull_request' &&
+      needs.publish-alpha-react-native.result == 'success' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    uses: ./.github/workflows/build-and-publish-expo-preview.yaml
+    permissions:
+      contents: read
+      pull-requests: write
+    secrets: inherit
+    with:
+      pr-number: ${{ github.event.pull_request.number }}
+      head-ref: ${{ github.event.pull_request.head.ref }}
+
   publish-alpha-core:
     name: "[🎯 CORE] Build and Publish ALPHA"
     needs: detect-changes
     if: |
-      (github.event_name == 'issue_comment' &&
-       github.event.issue.pull_request &&
-       github.event.comment.body == 'build') ||
-      (github.event_name == 'pull_request' && 
-      needs.detect-changes.outputs.package_core == 'true')
+      !startsWith(github.head_ref, 'release-please--') &&
+      ((github.event_name == 'issue_comment' &&
+        github.event.issue.pull_request &&
+        github.event.comment.body == 'build') ||
+       (github.event_name == 'pull_request' &&
+        needs.detect-changes.outputs.package_core == 'true'))
     runs-on: ubuntu-latest
     permissions:
       contents: write

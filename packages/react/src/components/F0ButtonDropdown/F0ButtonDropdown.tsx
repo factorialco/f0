@@ -63,20 +63,38 @@ function isButtonDropdownItem<T = string>(
   return "value" in item
 }
 
-const _F0ButtonDropdown = ({
+/**
+ * Split mode: the current behavior — main button shows selected item and triggers onClick,
+ * chevron button opens dropdown with remaining items.
+ */
+const SplitMode = ({
   onClick,
   value,
-  ...props
-}: F0ButtonDropdownProps) => {
+  items: rawItems,
+  size,
+  variant,
+  disabled,
+  loading,
+  tooltip,
+}: {
+  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+  value?: string
+  items:
+    | ButtonDropdownItem<string>[]
+    | ButtonDropdownGroup<string>[]
+    | ButtonDropdownGroup<string>
+  size?: ButtonDropdownSize
+  variant?: ButtonDropdownVariant
+  disabled?: boolean
+  loading?: boolean
+  tooltip?: string
+}) => {
   const t = useI18n()
   const [isOpen, setIsOpen] = useState(false)
 
-  /**
-   * Normalize the items to an array of DropdownButtonGroup
-   */
   const items: ButtonDropdownGroup<string>[] = useMemo(
-    () => normalizeItems(props.items),
-    [props.items]
+    () => normalizeItems(rawItems),
+    [rawItems]
   )
 
   const flattenedItems = useMemo(() => {
@@ -126,64 +144,191 @@ const _F0ButtonDropdown = ({
   )
 
   const dropdownSize =
-    props.size === "sm"
+    size === "sm"
       ? "[&_.main]:w-6"
-      : props.size === "lg"
+      : size === "lg"
         ? "[&_.main]:w-10"
         : "[&_.main]:w-8"
 
   return (
     selectedItem && (
+      <div className={cn(disabled && "opacity-30")}>
+        <Action
+          onClick={handleClick}
+          variant={variant}
+          size={size}
+          disabled={disabled}
+          loading={loading}
+          data-testid="button-main"
+          aria-label={selectedItem.label}
+          prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
+          className="rounded-r-none after:rounded-r-none disabled:opacity-100"
+          tooltip={tooltip}
+          appendOutside={
+            <DropdownInternal
+              items={dropdownItems}
+              align="end"
+              open={isOpen && !disabled}
+              onOpenChange={(open) => {
+                if (disabled) return
+                setIsOpen(open)
+              }}
+            >
+              <button
+                className={cn(
+                  actionVariants({
+                    variant: variant,
+                    pressed: isOpen && !disabled,
+                  }),
+                  buttonSizeVariants({ size: size }),
+                  "-translate-x-px rounded-l-none px-0 after:rounded-l-none disabled:opacity-100",
+                  dropdownSize,
+                  focusRing()
+                )}
+                disabled={disabled}
+                data-testid="button-menu"
+                data-pressed={isOpen && !disabled}
+              >
+                <div className="main flex items-center justify-center gap-1">
+                  <span className="sr-only">{t.actions.more}</span>
+                  <F0Icon
+                    icon={ChevronDown}
+                    size={size === "sm" ? "sm" : "md"}
+                  />
+                </div>
+              </button>
+            </DropdownInternal>
+          }
+        >
+          {selectedItem.label}
+        </Action>
+      </div>
+    )
+  )
+}
+
+/**
+ * Dropdown mode: a single unified button with an inline chevron.
+ * Clicking anywhere on the button opens a dropdown showing all items
+ * (with optional descriptions and icons).
+ */
+const DropdownMode = ({
+  onClick,
+  trigger,
+  items: rawItems,
+  size,
+  variant,
+  disabled,
+  loading,
+  tooltip,
+}: {
+  onClick: (value: string, item: ButtonDropdownItem<string>) => void
+  trigger?: string
+  items:
+    | ButtonDropdownItem<string>[]
+    | ButtonDropdownGroup<string>[]
+    | ButtonDropdownGroup<string>
+  size?: ButtonDropdownSize
+  variant?: ButtonDropdownVariant
+  disabled?: boolean
+  loading?: boolean
+  tooltip?: string
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const items: ButtonDropdownGroup<string>[] = useMemo(
+    () => normalizeItems(rawItems),
+    [rawItems]
+  )
+
+  const flattenedItems = useMemo(() => {
+    return items.flatMap((item) => item.items)
+  }, [items])
+
+  const triggerLabel = trigger || flattenedItems[0]?.label
+
+  const dropdownItems = useMemo(
+    () =>
+      items
+        .map((group) => group.items)
+        .reduce<DropdownItem[]>((acc, curr) => {
+          if (acc.length > 0) {
+            acc.push({ type: "separator" })
+          }
+          acc.push(
+            ...curr.map((item) => ({
+              ...item,
+              onClick: () => {
+                onClick(item.value, item)
+                setIsOpen(false)
+              },
+            }))
+          )
+          return acc
+        }, []),
+    [items, onClick]
+  )
+
+  if (!triggerLabel) return null
+
+  return (
+    <DropdownInternal
+      items={dropdownItems}
+      align="end"
+      open={isOpen && !disabled}
+      onOpenChange={(open) => {
+        if (disabled) return
+        setIsOpen(open)
+      }}
+    >
       <Action
-        onClick={handleClick}
-        variant={props.variant}
+        variant={variant}
+        size={size}
+        disabled={disabled}
+        loading={loading}
+        data-testid="button-dropdown-trigger"
+        aria-label={triggerLabel}
+        append={
+          <F0Icon icon={ChevronDown} size={size === "sm" ? "sm" : "md"} />
+        }
+        pressed={isOpen && !disabled}
+        tooltip={tooltip}
+      >
+        {triggerLabel}
+      </Action>
+    </DropdownInternal>
+  )
+}
+
+const _F0ButtonDropdown = (props: F0ButtonDropdownProps) => {
+  const mode = props.mode ?? "split"
+
+  if (mode === "dropdown") {
+    return (
+      <DropdownMode
+        onClick={props.onClick}
+        trigger={"trigger" in props ? props.trigger : undefined}
+        items={props.items}
         size={props.size}
+        variant={props.variant}
         disabled={props.disabled}
         loading={props.loading}
-        data-testid="button-main"
-        aria-label={selectedItem.label}
-        prepend={selectedItem.icon && <F0Icon icon={selectedItem.icon} />}
-        className="rounded-r-none after:rounded-r-none"
         tooltip={props.tooltip}
-        appendOutside={
-          <DropdownInternal
-            items={dropdownItems}
-            align="end"
-            open={isOpen && !props.disabled}
-            onOpenChange={(open) => {
-              if (props.disabled) return
-              setIsOpen(open)
-            }}
-          >
-            <button
-              className={cn(
-                actionVariants({
-                  variant: props.variant,
-                  pressed: isOpen && !props.disabled,
-                }),
-                buttonSizeVariants({ size: props.size }),
-                "-translate-x-px rounded-l-none px-0 after:rounded-l-none",
-                dropdownSize,
-                focusRing()
-              )}
-              disabled={props.disabled}
-              data-testid="button-menu"
-              data-pressed={isOpen && !props.disabled}
-            >
-              <div className="main flex items-center justify-center gap-1">
-                <span className="sr-only">{t.actions.more}</span>
-                <F0Icon
-                  icon={ChevronDown}
-                  size={props.size === "sm" ? "sm" : "md"}
-                />
-              </div>
-            </button>
-          </DropdownInternal>
-        }
-      >
-        {selectedItem.label}
-      </Action>
+      />
     )
+  }
+
+  return (
+    <SplitMode
+      onClick={props.onClick}
+      value={"value" in props ? props.value : undefined}
+      items={props.items}
+      size={props.size}
+      variant={props.variant}
+      disabled={props.disabled}
+      loading={props.loading}
+      tooltip={props.tooltip}
+    />
   )
 }
 

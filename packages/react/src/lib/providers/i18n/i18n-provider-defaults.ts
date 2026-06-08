@@ -32,6 +32,9 @@ export const defaultTranslations = {
       hide: "Hide password",
     },
   },
+  link: {
+    opensInNewTab: "opens in new tab",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -44,9 +47,12 @@ export const defaultTranslations = {
     paste: "Paste",
     close: "Close",
     collapse: "Collapse",
+    collapseItem: "Collapse {{title}}",
     expand: "Expand",
+    expandItem: "Expand {{title}}",
     showAll: "Show all",
     showLess: "Show less",
+    seeMore: "See more",
     skipToContent: "Skip to content",
     view: "View",
     unselect: "Unselect",
@@ -62,6 +68,7 @@ export const defaultTranslations = {
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
+    apply: "Apply",
   },
   status: {
     selected: {
@@ -84,6 +91,10 @@ export const defaultTranslations = {
     availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
+    resultsFor: {
+      one: "{{count}} result for:",
+      other: "{{count}} results for:",
+    },
     applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
@@ -130,6 +141,7 @@ export const defaultTranslations = {
     },
     visualizations: {
       table: "Table view",
+      editableTable: "Editable table view",
       card: "Card view",
       list: "List view",
       kanban: "Kanban view",
@@ -144,6 +156,12 @@ export const defaultTranslations = {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
       },
+    },
+    editableTable: {
+      errors: {
+        saveFailed: "Save failed",
+      },
+      addRow: "Add row",
     },
     itemsCount: "items",
     emptyStates: {
@@ -165,7 +183,12 @@ export const defaultTranslations = {
     summaries: {
       types: {
         sum: "sum",
+        count: "count",
       },
+    },
+    export: {
+      label: "Export to CSV",
+      description: "Download all data as a CSV file",
     },
   },
   shortcut: "Shortcut",
@@ -252,6 +275,7 @@ export const defaultTranslations = {
     openChat: "Open Chat with One AI",
     closeChat: "Close Chat with One AI",
     startNewChat: "Start new chat",
+    settings: "Settings",
     scrollToBottom: "Scroll to bottom",
     welcome: "Ask or create with One",
     defaultInitialMessage: "How can I help you today?",
@@ -260,11 +284,9 @@ export const defaultTranslations = {
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
+    thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -277,13 +299,113 @@ export const defaultTranslations = {
         placeholder: "Share what didn’t work",
       },
     },
-    dataDownloadPreview:
-      "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
+    chatHistory: "Chat history",
+    noPreviousChats: "No previous conversations",
+    newConversation: "New conversation",
+    today: "Today",
+    yesterday: "Yesterday",
+    thisMonth: "This month",
+    older: "Older",
+    searchChats: "Search conversations...",
+    pinnedChats: "Pinned",
+    threadOptions: "Thread options",
+    pinChat: "Pin chat",
+    unpinChat: "Unpin chat",
+    deleteChat: "Delete chat",
     ask: "Ask One",
-    viewProfile: "View profile",
-    tools: "Tools",
+    view: "View",
+    entityRef: {
+      candidate: {
+        source: "Source",
+        applied: "Applied on",
+      },
+      requisition: {
+        lineManager: "Line manager",
+        reason: "Reason",
+        status: "Status",
+      },
+    },
+    credits: {
+      title: "Credits",
+      employeeCredits: "Your credits",
+      creditsLeft: "{{total}} left",
+      monthlyCredits: "Monthly credits",
+      creditsError: "Could not load credits",
+      upgradePlan: "Upgrade",
+      needMoreCredits: "Need more credits?",
+    },
+    reportCard: {
+      tableLabel: "Table",
+      openButton: "Open",
+    },
+    formCard: {
+      moreFields: "Open to see all fields",
+    },
+    aiTable: {
+      title: "Table",
+      downloadExcel: "Download Excel",
+      downloadCsv: "Download CSV",
+    },
+    dataDownload: {
+      title: "Download",
+      download: "Download {{format}}",
+      exportDashboard: "Export dashboard as {{format}}",
+      exporting: "Exporting…",
+    },
+    dashboardItem: {
+      chartType: "Chart type",
+      errorTitle: "Error loading data",
+      retry: "Retry",
+      dataExplanation: "Where does this data come from?",
+    },
+    pong: {
+      title: "Pong",
+      youWin: "You win!",
+      youLose: "You lose!",
+      goal: "Goal",
+      controls: "← → to move",
+      escToExit: "Esc to exit",
+    },
+    creditWarning: {
+      soft: "You're running low on AI credits.",
+      getCredits: "Get credits",
+      dismiss: "Dismiss",
+    },
+    attachFile: "Attach file",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    transcribing: "Transcribing…",
+    micPermissionDenied:
+      "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
+    removeFile: "Remove",
+    fileUploadError: "Upload failed",
+    fileUploadBlockedSubmit:
+      "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    dropFilesHere: "Drop your files here",
+    reply: "Reply",
+    removeQuote: "Remove quote",
+    clarifyingQuestion: {
+      submit: "Submit",
+      next: "Next",
+      back: "Back",
+      skip: "Skip",
+      typeYourAnswer: "Type your answer…",
+      stepOf: "{{current}} of {{total}}",
+      custom: "own answer",
+      skipped: "skipped",
+      navHint: {
+        navigate: "navigate",
+        select: "select",
+        cancel: "cancel",
+      },
+    },
     growth: {
       demoCard: {
         title: "See {{moduleName}} in action",
@@ -307,10 +429,26 @@ export const defaultTranslations = {
       },
     },
   },
+  dataChart: {
+    heatmapNotSupported: "Heatmap not supported at this size",
+    barChartVertical: "Bar (vertical)",
+    barChartHorizontal: "Bar (horizontal)",
+    lineChart: "Line",
+    funnel: "Funnel",
+    pieChart: "Pie",
+    table: "Table",
+    emptyState: {
+      title: "No data available",
+      description: "Try a different date or fewer filters",
+    },
+  },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
     applySelection: "Apply selection",
+    create: "Create",
+    createWithValue: 'Create "{{value}}"',
+    createEmptyMessage: "Try another search or create a new item",
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -329,13 +467,16 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
   },
-  coCreationForm: {
+  surveyFormBuilder: {
     actions: {
       actions: "Actions",
+      addQuestion: "Add question",
       duplicateQuestion: "Duplicate question",
       deleteQuestion: "Delete question",
       duplicateSection: "Duplicate section",
       deleteSection: "Delete section",
+      confirmMoveLastQuestion: "Move question",
+      cancelMoveLastQuestion: "Cancel",
     },
     questionTypes: {
       section: "Section",
@@ -347,6 +488,9 @@ export const defaultTranslations = {
       numeric: "Numeric",
       link: "Link",
       date: "Date",
+      dropdownSingle: "Dropdown",
+      file: "File upload",
+      checkbox: "Checkbox",
     },
     selectQuestion: {
       addOption: "Add option",
@@ -356,9 +500,19 @@ export const defaultTranslations = {
       correct: "Correct",
       optionPlaceholder: "Type anything you want here...",
     },
+    fileQuestion: {
+      uploadButton: "Upload file",
+    },
+    checkboxQuestion: {
+      placeholder: "Provide a label for the checkbox",
+    },
     answer: {
       label: "Answer",
-      placeholder: "Respondent's answer",
+      dropdownPlaceholder: "Pick an option",
+      textPlaceholder: "Type your answer",
+      numericPlaceholder: "Enter a number",
+      linkPlaceholder: "https://example.com",
+      invalidUrl: "Enter a valid URL",
     },
     labels: {
       applyingChanges: "Applying changes",
@@ -369,10 +523,34 @@ export const defaultTranslations = {
       questionDescriptionPlaceholder: "Describe the question in a few words",
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
+      allowMultiSelection: "Allow multi-selection",
+      allowCreate: "Allow creation",
+      singleSelection: "Single selection",
+      multiSelection: "Multi selection",
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
       sectionTitlePlaceholder: "Section title",
+      lastQuestionDialogTitle: "Remove last question from section",
+      lastQuestionDialogDescription:
+        "Moving this question will leave the section empty and it will be removed. Do you want to continue?",
+    },
+  },
+  surveyAnsweringForm: {
+    actions: {
+      submit: "Submit survey",
+      cancel: "Cancel",
+      next: "Next",
+      previous: "Previous",
+      expand: "Expand",
+      collapse: "Collapse",
+    },
+    labels: {
+      empty: {
+        title: "No questions to answer",
+        description: "This survey has no questions yet.",
+        emoji: "📝",
+      },
     },
   },
   richTextEditor: {
@@ -444,7 +622,9 @@ export const defaultTranslations = {
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+      maxFilesReached: "Maximum {{maxFiles}} files",
     },
+    moreInformation: "More information",
     validation: {
       required: "This field is required",
       invalidType: "Invalid value",
@@ -473,6 +653,44 @@ export const defaultTranslations = {
       checkbox: {
         mustBeChecked: "This option must be selected",
       },
+    },
+  },
+  graph: {
+    canvas: "Graph canvas",
+    view: "Graph view",
+    controls: {
+      findMe: "Find me",
+      fitToView: "Fit to view",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      navigation: "Graph navigation",
+      metadataSettings: "Metadata visibility",
+      tagTypeLabels: {
+        person: "People",
+        team: "Teams",
+        company: "Companies",
+        status: "Statuses",
+        alert: "Alerts",
+        balance: "Balances",
+        dot: "Tags",
+        raw: "Tags",
+      },
+    },
+    search: {
+      noResults: "No results",
+    },
+    detailPanel: {
+      details: "Details",
+      moreActions: "More actions",
+      resize: "Resize detail panel",
+    },
+    expander: {
+      collapse: "Collapse {{count}} items",
+      expand: "Expand {{count}} items",
+      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
+      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
+      collapseWithParent: "Collapse {{parent}}",
+      collapseDefault: "Collapse children",
     },
   },
   wizard: {

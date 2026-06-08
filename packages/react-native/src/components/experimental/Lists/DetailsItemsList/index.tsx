@@ -41,6 +41,7 @@ export const DetailsItemsList = function DetailsItemList({
               spacingAtTheBottom={item.spacingAtTheBottom}
               tableView={tableView}
               isHorizontalItem={isHorizontalItem}
+              fullWidth={item.fullWidth}
             />
             {tableView && index !== details.length - 1 && (
               <View className="h-[1px] w-full bg-f0-border-secondary" />

@@ -4,22 +4,32 @@ import { expect, userEvent, within } from "storybook/test"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
 
-const meta: Meta<typeof Dropdown> = {
+const meta = {
   title: "Dropdown",
   component: Dropdown,
   tags: ["autodocs", "experimental"],
-}
+  argTypes: {
+    disabled: {
+      control: "boolean",
+      description:
+        "Disables the trigger and prevents the menu from opening, regardless of controlled `open` state.",
+      defaultValue: { summary: false },
+    },
+  },
+} satisfies Meta<typeof Dropdown>
 
 export default meta
 
-type Story = StoryObj<typeof Dropdown>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
     label: "",
+    disabled: false,
     items: [
       {
         label: "Create",
@@ -225,6 +235,81 @@ export const WithLabels: Story = {
   },
 }
 
+export const Disabled: Story = {
+  args: {
+    disabled: true,
+    items: [
+      {
+        label: "Create",
+        onClick: () => console.log("Create clicked"),
+        icon: Icons.Add,
+      },
+      {
+        label: "Edit",
+        onClick: () => console.log("Edit clicked"),
+        icon: Icons.Pencil,
+      },
+    ],
+  },
+  parameters: {
+    a11y: {
+      skipCi: true,
+      disable: true,
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+    const trigger = page.getByRole("button")
+    await expect(trigger).toBeDisabled()
+    await userEvent.click(trigger)
+    await expect(page.queryByText("Create")).not.toBeInTheDocument()
+  },
+}
+
+export const DisabledWithCustomTrigger: Story = {
+  args: {
+    disabled: true,
+    items: [
+      {
+        label: "Upload new avatar",
+        onClick: () => console.log("Create clicked"),
+      },
+      {
+        label: "Delete current avatar",
+        onClick: () => console.log("Delete clicked"),
+        critical: true,
+      },
+    ],
+  },
+  render: (args) => (
+    <Dropdown {...args}>
+      <button aria-label="Open user menu">
+        <F0AvatarPerson
+          src="/avatars/person04.jpg"
+          firstName="Dani"
+          lastName="Moreno"
+          size="lg"
+        />
+      </button>
+    </Dropdown>
+  ),
+  parameters: {
+    a11y: {
+      config: {
+        rules: [],
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+    const trigger = page.getByRole("button", { name: "Open user menu" })
+    await expect(trigger).toHaveAttribute("aria-disabled", "true")
+    await expect(trigger).toBeDisabled()
+    await userEvent.click(trigger)
+    await expect(page.queryByText("Upload new avatar")).not.toBeInTheDocument()
+  },
+}
+
 export const MobileDropdown: Story = {
   args: {
     items: [
@@ -280,4 +365,30 @@ export const WithDataTestId: Story = {
     const canvas = within(canvasElement)
     await expect(canvas.getByTestId("dropdown-test-id")).toBeInTheDocument()
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  args: {
+    items: [
+      { label: "Create", icon: Icons.Add },
+      { label: "Edit", icon: Icons.Pencil },
+    ],
+  },
+  render: (args) => (
+    <div className="flex items-start gap-6">
+      <Dropdown {...args} />
+      <Dropdown {...args} disabled />
+      <Dropdown {...args} disabled>
+        <button aria-label="Open user menu">
+          <F0AvatarPerson
+            src="/avatars/person04.jpg"
+            firstName="Dani"
+            lastName="Moreno"
+            size="lg"
+          />
+        </button>
+      </Dropdown>
+    </div>
+  ),
 }

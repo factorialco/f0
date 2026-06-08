@@ -1,1 +1,1 @@
-export * from "@/ui/toggleGroup"
+export * from "@/deprecated/ToggleGroup"

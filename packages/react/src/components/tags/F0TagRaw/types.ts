@@ -9,6 +9,10 @@ export type F0TagRawProps = {
    * Additional accessible text to display in the tag
    */
   additionalAccessibleText?: string
+  /**
+   * Info text to display an i icon and a tooltip next to the tag
+   */
+  info?: string
 } & (
   | {
       icon: IconType

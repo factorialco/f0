@@ -1,4 +1,4 @@
-import { NestedRowProps } from "@/experimental/OneDataCollection/visualizations/collection/Table/components/Row"
+import { NestedRowProps } from "@/patterns/OneDataCollection/visualizations/collection/Table/components/Row"
 
 export const SPACING_FACTOR = 32
 export const CHEVRON_PARENT_SIZE = 24
@@ -10,6 +10,8 @@ export const BUTTON_PADDING = 4
 export const CONNECTOR_WIDTH = 40
 export const CONNECTOR_WIDTH_WITH_CHILDREN =
   CONNECTOR_WIDTH - CHEVRON_PARENT_SIZE
+export const SELECTABLE_EDITABLE_ROW_OFFSET = 24
+export const SELECTABLE_ROW_OFFSET = 16
 
 export const getNestedMarginLeft = ({
   depth,
@@ -30,7 +32,7 @@ export const getNestedMarginLeftForLoadMore = ({
 }) => {
   return getNestedMarginLeft({
     depth,
-    padding: isDetailedVariant ? -BUTTON_HEIGHT / 2 : -BUTTON_PADDING,
+    padding: isDetailedVariant ? -BUTTON_PADDING : -BUTTON_PADDING,
   })
 }
 

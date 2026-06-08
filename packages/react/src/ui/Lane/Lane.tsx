@@ -5,11 +5,11 @@ import type { RecordType } from "@/hooks/datasource"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Card } from "@/components/F0Card"
-import { Spinner } from "@/ui/Spinner"
-import { useInfiniteScrollPagination } from "@/experimental/OneDataCollection/hooks/useInfiniteScrollPagination"
 import { ScrollArea } from "@/experimental/Utilities/ScrollArea"
 import { Plus } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { useInfiniteScrollPagination } from "@/patterns/OneDataCollection/hooks/useInfiniteScrollPagination"
+import { Spinner } from "@/ui/Spinner"
 
 import { LaneHeader } from "./components/LaneHeader"
 import { LoadingSkeleton } from "./components/LoadingSkeleton"
@@ -51,7 +51,7 @@ export function Lane<Record extends RecordType>({
   const showFooterAction = Boolean(onFooterAction)
 
   return (
-    <div className="shadow-sm group relative flex h-full w-[323.2px] flex-col">
+    <div className="shadow-sm group relative flex h-full w-[322px] flex-col">
       <LaneHeader
         label={title || "Lane"}
         variant={variant}

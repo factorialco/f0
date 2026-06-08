@@ -1,14 +1,14 @@
 import { AlertCircle, InfoCircle, Warning } from "../../../icons/app"
 import { useTextFormatEnforcer } from "../../../lib/text"
 import { cn } from "../../../lib/utils"
-import { Icon, IconType } from "../../Icon"
+import { F0Icon, type IconType } from "../../primitives/F0Icon"
 import { BaseTag } from "../BaseTag"
 
 type Level = "info" | "warning" | "critical"
 
 type NonEmpty<T extends string> = T extends "" ? never : T
 
-type Props<T extends string = string> = {
+export type AlertTagProps<T extends string = string> = {
   text: NonEmpty<T>
   level: Level
 }
@@ -19,7 +19,10 @@ const iconMap: Record<Level, IconType> = {
   critical: AlertCircle,
 }
 
-export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
+export const AlertTag = <T extends string>({
+  text,
+  level,
+}: AlertTagProps<T>) => {
   useTextFormatEnforcer(text, { disallowEmpty: true })
 
   return (
@@ -40,7 +43,7 @@ export const AlertTag = <T extends string>({ text, level }: Props<T>) => {
         }[level]
       )}
       left={
-        <Icon
+        <F0Icon
           icon={iconMap[level]}
           className={cn(
             {

@@ -8,7 +8,7 @@ import { F0AiBanner, F0AiBannerProps } from "."
 import { AiBannerSkeleton } from "./AiBannerInternal"
 
 const meta = {
-  title: "Banners/AiBanner",
+  title: "AI/AiBanner",
   component: F0AiBanner,
   parameters: {
     layout: "centered",

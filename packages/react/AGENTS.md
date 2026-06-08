@@ -2,6 +2,22 @@
 
 This is the F0 React component library (`@factorialco/f0-react`). See the root [AGENTS.md](../../AGENTS.md) for monorepo-level guidelines.
 
+## Pre-Commit Checklist (MANDATORY)
+
+Before **every** `git commit`, run these two commands — no exceptions:
+
+```bash
+# 1. Format all changed source files
+pnpm --filter @factorialco/f0-react run format
+
+# 2. Type-check
+pnpm --filter @factorialco/f0-react run tsc
+```
+
+Failing to run `format` before committing will cause the `Format` CI check to fail on every PR.
+`oxfmt` rewrites whitespace, quote style, trailing commas, and import order — always run it last,
+after all code edits are done, and include the resulting changes in the same commit.
+
 ## Post-Implementation Quality Gate
 
 After completing **any code modification task** (new component, feature, bug fix, refactoring),
@@ -33,8 +49,8 @@ For **MDX documentation** (the Docs tab), use the global `factorial-f0-component
 
 ```
 src/
-  components/    — all public F0 components
-  experimental/  — legacy only, do NOT add new components here
+  components/    — stable public F0 components only (promoted by Foundations team)
+  experimental/  — ALL new components start here; never add directly to components/
   hooks/         — public exported hooks
   icons/         — generated icons (do not edit manually)
   layout/        — page layout components
@@ -42,6 +58,16 @@ src/
   sds/           — satellite design systems (non-core components)
   ui/            — primitive wrappers (Radix, shadcn/ui); not re-exported publicly
 ```
+
+### New component workflow
+
+**Every new component must start in `experimental/`**, regardless of how complete it feels.
+Only a member of the **Foundations team** can promote a component from `experimental/` to `components/` (stable).
+
+1. Create component in `experimental/<Category>/F0ComponentName/`
+2. Export from `experimental/<Category>/exports.ts`
+3. Story title: `"Components/F0ComponentName"` (no `Experimental/` prefix in sidebar)
+4. Foundations team reviews and promotes to `components/` when ready — use the `f0-experimental-component-migration` skill
 
 Each component follows this structure:
 
@@ -142,6 +168,25 @@ See `f0-component-patterns` skill for code examples.
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
 
+### Visual recipes (`lib/recipes/`)
+
+Some design system patterns must be reproducible **both** as React components
+and as serialized HTML strings (e.g. mention chips inside a Tiptap editor
+that emits `<a class="...">` nodes). For those, the styles live as a
+**recipe** — a small set of static Tailwind classes — in `src/lib/recipes/`,
+and every consumer (component variants, Tiptap extensions, ad-hoc HTML
+renderers) imports the same constant.
+
+- **Default rule:** prefer the public component (e.g. `F0Link variant="mention"`)
+  whenever React can be mounted.
+- **Use the recipe directly** only when you must produce raw HTML and cannot
+  render React (Tiptap `HTMLAttributes`, server-rendered chat payloads, …).
+- **Add a new recipe only** when the pattern is part of the DS, must be
+  applied from at least two execution models (React + non-React), and can be
+  expressed as static classes. Otherwise, build a component or a `cva()`
+  variant.
+- **Existing recipes** are documented in `src/lib/recipes/README.md`.
+
 ## i18n
 
 - `useI18n()` from `@/lib/providers/i18n` — returns direct property access and `t()` for dot-notation keys with `{{placeholder}}` interpolation
@@ -180,4 +225,6 @@ pnpm test-storybook # Storybook interaction + a11y tests
 pnpm lint           # lint check
 pnpm lint-fix       # auto-fix lint issues
 pnpm tsc            # type-check
+pnpm format         # auto-fix formatting (oxfmt) — run before every commit
+pnpm format:check   # check formatting without modifying files (same as CI)
 ```

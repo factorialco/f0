@@ -7,7 +7,7 @@ import { Action } from "../Action"
 import { actionSizes } from "../types"
 
 const meta: Meta<typeof Action> = {
-  title: "Components/Action",
+  title: "Action",
   component: Action,
   tags: ["autodocs"],
   argTypes: {

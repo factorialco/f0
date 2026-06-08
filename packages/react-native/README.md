@@ -4,35 +4,52 @@
 
 React Native implementation of the F0 Design System.
 
+## New Architecture compatibility
+
+This package supports React Native **New Architecture only** (Fabric/TurboModules) and **Expo SDK 54+ only**. See [`docs/new-architecture.md`](docs/new-architecture.md) for requirements and troubleshooting (notably Reanimated + Uniwind host app setup).
+
+### Supported compatibility matrix
+
+| Host stack                                       | Support          |
+| ------------------------------------------------ | ---------------- |
+| Expo SDK 54+                                     | ✅ Supported     |
+| Expo SDK 53 and below                            | ❌ Not supported |
+| New Architecture enabled (`expo.newArchEnabled`) | ✅ Required      |
+| Old Architecture                                 | ❌ Not supported |
+
 ## 🚀 Quick Setup
 
 ### 1️⃣ Install Dependencies
 
 ```bash
-# Install package and peer dependencies
+# 1) Install package + JS peer dependencies
 pnpm add @factorialco/f0-react-native \
   date-fns@^3.6.0 \
-  react-native-reanimated@^3.19.4 \
-  react-native-safe-area-context@^5.4.0 \
-  react-native-svg@^15.12.1 \
-  react-native-worklets-core@^1.6.2 \
   tailwind-merge@^3.4.0 \
   tailwind-variants@^3.2.2 \
   tailwindcss@^4.1.18 \
   uniwind@^1.2.7 \
   twemoji-parser@^14.0.0
+
+# 2) Install Expo-native dependencies pinned to your SDK
+npx expo install \
+  expo-image \
+  react-native-reanimated \
+  react-native-worklets \
+  react-native-safe-area-context \
+  react-native-svg
 ```
 
 > **Note:** The following peer dependencies are required:
+>
 > - `uniwind` and `tailwindcss` - Required for styling (must be configured in Metro and CSS files)
 > - `tailwind-merge` and `tailwind-variants` - Required for component variant system and class merging
 > - `react-native-reanimated` - Required for animations
+> - `react-native-worklets` - Required by Reanimated 4
 > - `react-native-safe-area-context` - Required for safe area handling
 > - `react-native-svg` - Required for icon components
 > - `date-fns` - Required for date utilities
 > - `twemoji-parser` - Required for emoji support
-> 
-> `react-native-worklets-core` is optional but recommended for better performance.
 
 ### 2️⃣ Configure Babel
 
@@ -43,15 +60,11 @@ module.exports = function (api) {
   api.cache(true);
   return {
     presets: ["babel-preset-expo"], // Expo only
-    plugins: [
-      "react-native-worklets-core/plugin",
-      "react-native-reanimated/plugin", // MUST be last
-    ],
   };
 };
 ```
 
-> **Note:** Uniwind doesn't require special Babel configuration. The above is a standard Expo setup.
+> **Note:** In managed Expo SDK 54+ apps using the standard `babel-preset-expo`, Reanimated/Worklets Babel plugins are already included and should not be added manually. In custom/bare hosts, follow [`docs/new-architecture.md`](docs/new-architecture.md) and add the required plugins explicitly.
 
 ### 3️⃣ Configure Metro
 
@@ -77,11 +90,11 @@ module.exports = withUniwindConfig(config, {
 **`global.css` (root):**
 
 ```css
-@import 'tailwindcss';
-@import 'uniwind';
+@import "tailwindcss";
+@import "uniwind";
 
 /* Import F0 styles (theme tokens + base styles) */
-@import '@factorialco/f0-react-native/styles';
+@import "@factorialco/f0-react-native/styles";
 
 /* Add your app's source paths for Tailwind CSS v4 */
 @source "./app/**/*.{js,jsx,ts,tsx}";
@@ -92,7 +105,6 @@ module.exports = withUniwindConfig(config, {
 
 /* Also scan library source files */
 @source "./node_modules/@factorialco/f0-react-native/src/**/*.{js,jsx,ts,tsx}";
-
 ```
 
 **Import in your entry file (`App.tsx` or `index.js`):**
@@ -103,52 +115,69 @@ import "./global.css";
 
 > **Note:** Add `@source "./node_modules/@factorialco/f0-react-native/lib";` so Tailwind can detect all component classes.
 
-### 5️⃣ Add Custom Fonts (Host App)
+### 5️⃣ Add Inter Fonts (Host App)
 
-To use custom fonts in your host app, load them with Expo Font and override the font CSS variables.
+F0 components use the **Inter** font family. The host app must embed the font files
+and register them with Uniwind so both iOS and Android resolve them correctly.
 
-**Install font dependencies (Expo):**
+#### Step A: Add font files
 
-```bash
-pnpm add expo-font @expo-google-fonts/your-font
+Place the Inter `.ttf` files in your project. **File names must match the PostScript
+name embedded in each font file** (you can inspect PostScript names with tools like
+`fc-query` or `fontTools`):
+
+```
+assets/fonts/Inter/
+  Inter-Regular.ttf      # PostScript name: Inter-Regular   (weight 400)
+  Inter-Medium.ttf       # PostScript name: Inter-Medium    (weight 500)
+  Inter-SemiBold.ttf     # PostScript name: Inter-SemiBold  (weight 600)
+  Inter-Bold.ttf         # PostScript name: Inter-Bold      (weight 700)
 ```
 
-**Load fonts in your app (Expo):**
+> **Why file names matter:** iOS resolves fonts by PostScript name, Android by
+> asset file name (minus extension). When they match, a single CSS value works on
+> both platforms without platform-specific overrides.
 
-```tsx
-import { useFonts } from "expo-font";
-import {
-  YourFont_400Regular,
-  YourFont_500Medium,
-  YourFont_600SemiBold,
-} from "@expo-google-fonts/your-font";
+#### Step B: Register with `expo-font`
 
-export default function App() {
-  const [fontsLoaded] = useFonts({
-    YourFont_400Regular,
-    YourFont_500Medium,
-    YourFont_600SemiBold,
-  });
+Add the `expo-font` config plugin to your **`app.json`**:
 
-  if (!fontsLoaded) {
-    return null; // Or return a loading screen
+```json
+[
+  "expo-font",
+  {
+    "fonts": [
+      "./assets/fonts/Inter/Inter-Regular.ttf",
+      "./assets/fonts/Inter/Inter-Medium.ttf",
+      "./assets/fonts/Inter/Inter-SemiBold.ttf",
+      "./assets/fonts/Inter/Inter-Bold.ttf"
+    ]
   }
-
-  return <YourApp />; // Render your app root
-}
+]
 ```
 
-**Override font variables in `global.css`:**
+This embeds the fonts at build time — no runtime `useFonts` call needed.
+
+#### Step C: Define font variables in `global.css`
+
+Add a `@theme` block **after** the F0 style imports:
 
 ```css
 @theme {
-  --font-normal: "YourFont-Regular";
-  --font-medium: "YourFont-Medium";
-  --font-semibold: "YourFont-SemiBold";
+  --font-normal: "Inter-Regular";
+  --font-medium: "Inter-Medium";
+  --font-semibold: "Inter-SemiBold";
+  --font-bold: "Inter-Bold";
 }
 ```
 
-> **Note:** The font names must match the PostScript names of the loaded fonts. Use the exact names from your font package or assets.
+The values must match the file names (without `.ttf`). Uniwind maps Tailwind
+`font-normal`, `font-medium`, `font-semibold`, and `font-bold` utilities to
+these variables.
+
+> **Rebuild required:** Font changes are picked up at build time, not via
+> Metro hot reload. Run `npx expo prebuild --clean && npx expo run:ios` (or
+> `run:android`) after adding or renaming font files.
 
 ### 6️⃣ TypeScript Support (Optional)
 
@@ -160,6 +189,31 @@ export default function App() {
 
 This file is automatically generated by Uniwind when you run Metro. You can add it to your `.gitignore` if desired.
 
+## 🤖 PR Previews (Published with React Native ALPHA)
+
+Expo preview publishing is tied to the React Native ALPHA workflow. The QR comment is posted only when the React Native ALPHA publish job succeeds.
+
+- Trigger source: React Native ALPHA workflow (`build-and-publish-alpha`)
+- Scope: runs when the React Native package changes (or when manually triggered with the `build` PR comment path in that workflow)
+- Publish branch: `development`
+- Update message: latest commit message (via `eas update --auto`)
+- PR output: one updatable comment with Expo Go links and a QR code
+
+### Required Secret
+
+Add this repository secret in GitHub:
+
+- `EXPO_TOKEN`: personal access token from Expo account settings
+
+### How it appears in GitHub
+
+On each PR update, CI posts or updates a single comment containing:
+
+- Update metadata (message, group ID, timestamp)
+- Expo update page link
+- Direct QR link
+- Embedded QR image for quick scan in Expo Go
+
 ## 📱 Expo Go (Latest Update)
 
 Use this section after each manual update so people can install the latest build in Expo Go.
@@ -167,8 +221,8 @@ Use this section after each manual update so people can install the latest build
 ### ✅ Latest Update
 
 - **Branch / Channel:** `production`
-- **Update message:** `Typography Scale`
-- **Published at:** `Feb 6, 2026 1:19 PM`
+- **Update message:** `F0Text and AnimatedF0Text`
+- **Published at:** `Mar 4, 2026`
 
 ### 🔗 Deep Link
 
@@ -187,17 +241,19 @@ Use this section after each manual update so people can install the latest build
 ### Basic Component Usage
 
 ```tsx
-import { Button, Icon, AppIcons } from "@factorialco/f0-react-native";
+import { F0Button, F0Icon, AppIcons } from "@factorialco/f0-react-native";
 
 export default function App() {
   return (
     <>
-      <Button label="Click me" variant="default" size="md" />
-      <Icon icon={AppIcons.Calendar} size="md" />
+      <F0Button label="Click me" variant="default" size="md" />
+      <F0Icon icon={AppIcons.Calendar} size="md" />
     </>
   );
 }
 ```
+
+> Legacy `Button` and `Icon` remain available for backward compatibility, but are deprecated.
 
 ### Using the `cn` Utility
 
@@ -211,10 +267,10 @@ function MyComponent({ className, isActive }) {
   return (
     <View
       className={cn(
-        'bg-background p-4 rounded-lg',
-        'border border-divider',
-        isActive && 'bg-accent',
-        className
+        "bg-background p-4 rounded-lg",
+        "border border-divider",
+        isActive && "bg-accent",
+        className,
       )}
     />
   );
@@ -222,6 +278,7 @@ function MyComponent({ className, isActive }) {
 ```
 
 The `cn` utility:
+
 - ✅ Automatically merges Tailwind classes with conflict resolution
 - ✅ Uses `tailwind-merge` under the hood
 - ✅ Supports custom opacity class groups
@@ -232,14 +289,14 @@ The `cn` utility:
 All components use `tailwind-variants` for type-safe variant props:
 
 ```tsx
-import { Button } from "@factorialco/f0-react-native";
+import { F0Button } from "@factorialco/f0-react-native";
 
 // Type-safe variants
-<Button 
+<F0Button
   label="Primary Button"
-  variant="default"  // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
-  size="md"          // ✅ Autocomplete: "sm" | "md" | "lg"
-/>
+  variant="default" // ✅ Autocomplete: "default" | "outline" | "critical" | "neutral" | "ghost" | "promote"
+  size="md" // ✅ Autocomplete: "sm" | "md" | "lg"
+/>;
 ```
 
 ## 🔧 Troubleshooting
@@ -249,12 +306,14 @@ import { Button } from "@factorialco/f0-react-native";
 If styles from F0 components aren't being applied, ensure:
 
 1. **Import styles and add source paths:** Your `global.css` includes the F0 styles and the F0 source path:
+
    ```css
-   @import '@factorialco/f0-react-native/styles';
+   @import "@factorialco/f0-react-native/styles";
    @source "./node_modules/@factorialco/f0-react-native/lib";
    ```
 
 2. **Metro Cache:** Clear Metro bundler cache:
+
    ```bash
    npx expo start --clear
    # or
@@ -277,6 +336,7 @@ pnpm add tailwind-variants@^3.2.2
 ### Build Errors
 
 If you encounter build errors, ensure:
+
 - All peer dependencies are installed
 - Metro config includes CSS file extensions
 - Babel plugins are properly configured
@@ -301,20 +361,22 @@ pnpm build
 
 This package requires the following peer dependencies to be installed in your host project:
 
-| Package | Version | Required | Purpose |
-|---------|---------|----------|---------|
-| `react` | `*` | ✅ Yes | React library |
-| `react-native` | `*` | ✅ Yes | React Native framework |
-| `tailwindcss` | `^4.1.18` | ✅ Yes | CSS framework |
-| `uniwind` | `^1.2.7` | ✅ Yes | Tailwind CSS for React Native |
-| `tailwind-merge` | `^3.4.0` | ✅ Yes | Class merging utility |
-| `tailwind-variants` | `^3.2.2` | ✅ Yes | Variant system |
-| `react-native-reanimated` | `^3.19.4` | ✅ Yes | Animations |
-| `react-native-safe-area-context` | `^5.4.0` | ✅ Yes | Safe area handling |
-| `react-native-svg` | `^15.12.1` | ✅ Yes | SVG support for icons |
-| `date-fns` | `^3.6.0` | ✅ Yes | Date utilities |
-| `twemoji-parser` | `^14.0.0` | ✅ Yes | Emoji support |
-| `react-native-worklets-core` | `^1.6.2` | ⚠️ Optional | Performance optimization |
+| Package                          | Version          | Required | Purpose                          |
+| -------------------------------- | ---------------- | -------- | -------------------------------- |
+| `react`                          | `*`              | ✅ Yes   | React library                    |
+| `react-native`                   | `*`              | ✅ Yes   | React Native framework           |
+| `tailwindcss`                    | `^4.1.18`        | ✅ Yes   | CSS framework                    |
+| `uniwind`                        | `^1.2.7`         | ✅ Yes   | Tailwind CSS for React Native    |
+| `tailwind-merge`                 | `^3.4.0`         | ✅ Yes   | Class merging utility            |
+| `tailwind-variants`              | `^3.2.2`         | ✅ Yes   | Variant system                   |
+| `react-native-reanimated`        | `>=4.1.1 <5.0.0` | ✅ Yes   | Animations                       |
+| `react-native-worklets`          | `>=0.5.1 <1.0.0` | ✅ Yes   | Worklet runtime for Reanimated 4 |
+| `react-native-safe-area-context` | `^5.6.0`         | ✅ Yes   | Safe area handling               |
+| `react-native-svg`               | `^15.12.1`       | ✅ Yes   | SVG support for icons            |
+| `expo-image`                     | `~3.0.11`        | ✅ Yes   | Image rendering                  |
+| `expo-blur`                      | `~15.0.8`        | ✅ Yes   | Blur effects                     |
+| `date-fns`                       | `^3.6.0`         | ✅ Yes   | Date utilities                   |
+| `twemoji-parser`                 | `^14.0.0`        | ✅ Yes   | Emoji support                    |
 
 ## 📄 License
 

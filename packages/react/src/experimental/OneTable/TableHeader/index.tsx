@@ -8,7 +8,7 @@ interface TableHeaderProps {
 
 export function TableHeader({ children, sticky = false }: TableHeaderProps) {
   return (
-    <TableHeaderRoot className={cn(sticky && "sticky top-0 z-20")}>
+    <TableHeaderRoot className={cn(sticky && "sticky top-0 z-30")}>
       {children}
     </TableHeaderRoot>
   )

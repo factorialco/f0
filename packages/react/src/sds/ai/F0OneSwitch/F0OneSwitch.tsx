@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 
-import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import { useAiChatToggle } from "../F0AiChat/providers/useAiChatToggle"
 import { F0OneIcon } from "../F0OneIcon"
 import { F0OneSwitchProps } from "./types"
 
@@ -23,7 +23,7 @@ export const F0OneSwitch = ({
   autoOpen = false,
   onToggle,
 }: F0OneSwitchProps) => {
-  const { enabled, setOpen, open } = useAiChat()
+  const { enabled, setOpen, open } = useAiChatToggle()
   const translations = useI18n()
   const [isHover, setIsHover] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
@@ -85,7 +85,7 @@ export const F0OneSwitch = ({
                   open ? translations.ai.closeChat : translations.ai.openChat
                 }
                 className={cn(
-                  "group relative h-8 w-12 rounded-full border-none bg-f1-background-inverse-secondary transition-all hover:bg-f1-background-hover",
+                  "group relative h-8 w-12 rounded-full border-none bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary transition-all hover:bg-f1-background-hover",
                   "shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.04)] data-[state=checked]:shadow-[0_2px_6px_-1px_rgba(13,22,37,.04),inset_0_0_4px_rgba(13,22,37,.6)]",
                   "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] data-[state=checked]:after:ring-f1-border-inverse",
                   "before:absolute before:inset-0 before:rounded-full before:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] before:opacity-0 before:transition-all before:duration-300 before:content-[''] data-[state=checked]:before:opacity-100",

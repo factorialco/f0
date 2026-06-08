@@ -13,7 +13,7 @@ import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { inputFieldStatus } from "@/ui/InputField"
+import { inputFieldStatus } from "@/components/F0InputField"
 
 import { F0Select, selectSizes } from "../index"
 import {
@@ -168,7 +168,7 @@ const meta: Meta = {
         "  label: string\n" +
         "  description?: string\n" +
         "  avatar?: AvatarVariant\n" +
-        "  tag?: string | { type: 'dot'; text: string; color: NewColor }\n" +
+        "  tag?: string | { type: 'dot'; text: string; color: NewColor } | { type: 'person'; name: string; src?: string } | { type: 'status'; text: string; variant: StatusVariant }\n" +
         "  icon?: IconType\n" +
         "  item?: unknown\n" +
         "  disabled?: boolean\n" +
@@ -177,6 +177,10 @@ const meta: Meta = {
     onChange: {
       description:
         "Function to handle the change event. Returns the value of the selected option, and the item object if it exists",
+    },
+    withApplySelection: {
+      description:
+        "When true in multi-select mode, selection changes are staged until Apply is clicked. Clicking Apply confirms the selection through `onChange`, while clicking outside or Cancel discards the staged changes.",
     },
     actions: {
       description:
@@ -411,6 +415,148 @@ export const WithDotTags: Story = {
         description: "Inactive description",
         icon: Desktop,
         tag: "Disabled",
+      },
+    ],
+  },
+}
+
+export const WithPersonTags: Story = {
+  args: {
+    label: "Select a reviewer",
+    placeholder: "Select a reviewer",
+    onChange: fn(),
+    options: [
+      {
+        value: "isabella",
+        label: "Isabella Tangari",
+        description: "Product Designer",
+        tag: {
+          type: "person",
+          name: "Marta Serrano",
+        },
+      },
+      {
+        value: "saul",
+        label: "Saul Dominguez",
+        tag: {
+          type: "person",
+          name: "Eliseo Quintanilla",
+        },
+      },
+      {
+        value: "inactive",
+        label: "Inactive",
+        icon: Appearance,
+        tag: "Disabled",
+      },
+    ],
+  },
+}
+
+export const WithIconTags: Story = {
+  args: {
+    label: "Select a theme",
+    placeholder: "Select a theme",
+    onChange: fn(),
+    options: [
+      {
+        value: "light",
+        label: "Light",
+        description: "Bright workspace theme",
+        tag: {
+          type: "icon",
+          text: "Light",
+          icon: Circle,
+        },
+      },
+      {
+        value: "dark",
+        label: "Dark",
+        description: "Low-light interface theme",
+        tag: {
+          type: "icon",
+          text: "Dark",
+          icon: Appearance,
+        },
+      },
+      {
+        value: "system",
+        label: "System",
+        tag: {
+          type: "icon",
+          text: "System",
+          icon: Desktop,
+        },
+      },
+    ],
+  },
+}
+
+export const WithStatusTags: Story = {
+  args: {
+    label: "Status",
+    placeholder: "Select a status",
+    onChange: fn(),
+    value: "pending",
+    options: [
+      {
+        value: "draft",
+        label: "Draft",
+        tag: { type: "status", text: "Draft", variant: "neutral" },
+      },
+      {
+        value: "pending",
+        label: "Pending",
+        tag: { type: "status", text: "Pending", variant: "warning" },
+      },
+      {
+        value: "approved",
+        label: "Approved",
+        tag: { type: "status", text: "Approved", variant: "positive" },
+      },
+      {
+        value: "rejected",
+        label: "Rejected",
+        tag: { type: "status", text: "Rejected", variant: "critical" },
+      },
+    ],
+  },
+}
+
+export const WithPersonAvatar: Story = {
+  args: {
+    label: "Select a reviewer",
+    placeholder: "Select a reviewer",
+    onChange: fn(),
+    value: "isabella",
+    options: [
+      {
+        value: "isabella",
+        label: "Isabella Tangari",
+        description: "Product Designer",
+        avatar: {
+          type: "person",
+          firstName: "Isabella",
+          lastName: "Tangari",
+        },
+      },
+      {
+        value: "saul",
+        label: "Saul Dominguez",
+        avatar: {
+          type: "person",
+          firstName: "Saul",
+          lastName: "Dominguez",
+        },
+      },
+      {
+        value: "marta",
+        label: "Marta Serrano",
+        avatar: {
+          type: "person",
+          firstName: "Marta",
+          lastName: "Serrano",
+        },
       },
     ],
   },
@@ -682,6 +828,119 @@ export const WithDataSourceGrouping: Story = {
   },
 }
 
+export const WithDataSourceGroupingDefaultOpen: Story = {
+  args: {
+    label: "Data Source Grouping (Default Open)",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    value: "option-2",
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        defaultOpenGroups: true,
+        groupBy: {
+          role: {
+            name: "Role",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+        },
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 10
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: item.description,
+    }),
+  },
+}
+
+export const WithManyCollapsibleGroups: Story = {
+  args: {
+    label: "Many Collapsible Groups",
+    placeholder: "Select a value",
+    showSearchBox: true,
+    onChange: fn(),
+    source: createDataSourceDefinition<MockItem>({
+      grouping: {
+        mandatory: true,
+        collapsible: true,
+        defaultOpenGroups: false,
+        groupBy: {
+          role: {
+            name: "Role",
+            label: (groupId) => `${groupId}`,
+            itemCount: (groupId) =>
+              mockItems.filter((item) => item.role === groupId).length,
+          },
+        },
+      },
+      dataAdapter: {
+        paginationType: "infinite-scroll",
+        fetchData: (options) => {
+          const { search, pagination } = options
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const pageSize = pagination.perPage ?? 50
+              const cursor = "cursor" in pagination ? pagination.cursor : null
+              const nextCursor = cursor ? Number(cursor) + pageSize : pageSize
+              const results = mockItems.filter(
+                (item) =>
+                  !search ||
+                  item.label.toLowerCase().includes(search.toLowerCase())
+              )
+              resolve({
+                type: "infinite-scroll" as const,
+                cursor: String(nextCursor),
+                perPage: pageSize,
+                hasMore: nextCursor < results.length,
+                records: results.slice(cursor ? Number(cursor) : 0, nextCursor),
+                total: results.length,
+              })
+            }, 100)
+          })
+        },
+      },
+    }),
+    mapOptions: (item: MockItem) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: item.description,
+    }),
+  },
+}
+
 export const MultipleNotPaginated: Story = {
   args: {
     label: "Select Team Members",
@@ -783,6 +1042,61 @@ export const MultiplePaginatedWithPreview: Story = {
   },
 }
 
+export const MultiplePaginatedWithApply: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["3", "42", "500", "1200"],
+    defaultItem: (() => {
+      const ids = [42, 500, 1200]
+      return ids
+        .map((id) => {
+          const emp = getEmployeeById(id)
+          return emp
+            ? {
+                value: emp.value,
+                label: emp.label,
+                avatar: emp.avatar,
+              }
+            : null
+        })
+        .filter(Boolean)
+    })(),
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+    }),
+    onChange: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+    withApplySelection: true,
+  },
+}
+
+export const MultipleWithApply: Story = {
+  args: {
+    label: "Select Team Members",
+    placeholder: "Search employees...",
+    multiple: true,
+    value: ["2", "5"],
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    withApplySelection: true,
+  },
+}
+
 /**
  * Multiple selection with paginated data (2,847 employees).
  * Use `defaultItem` to provide labels for pre-selected values not in the first page.
@@ -879,6 +1193,65 @@ export const MultipleManualSelectionOnly: Story = {
 }
 
 /**
+ * Multi-select with preserved selections (default behavior).
+ *
+ * Selections persist across search and filter changes — the normal
+ * selector workflow. Try this:
+ * 1. Select a few employees
+ * 2. Type in the search box to filter
+ * 3. Select another employee from the filtered results
+ * 4. Clear the search — all selections are still there
+ * 5. Use a filter (e.g. department) — selections still preserved
+ */
+export const MultiplePreserveSelections: Story = {
+  args: {
+    label: "Preserve Selections (default)",
+    placeholder: "Search employees...",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
+ * Multi-select that clears selections on dataset changes.
+ *
+ * When `preserveSelectionOnDatasetChange` is false, selections are
+ * cleared whenever the user searches, filters, or sorts. Try the
+ * same workflow as above — selections will be lost on each change.
+ */
+export const MultipleClearSelectionsOnDatasetChange: Story = {
+  args: {
+    label: "Clear Selections on change",
+    placeholder: "Search employees...",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    preserveSelectionOnDatasetChange: false,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.
@@ -939,6 +1312,29 @@ export const WithCustomTrigger: Story = {
       </div>
     </F0Select>
   ),
+}
+
+export const WithOnCreate: Story = {
+  args: {
+    label: "Select Employee",
+    placeholder: "Search employees...",
+    showSearchBox: true,
+    onChange: fn(),
+    source: employeeNonPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onCreate: (_value: string) => {
+      return new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve()
+        }, 500)
+      })
+    },
+  },
 }
 
 export const Snapshot: Story = {

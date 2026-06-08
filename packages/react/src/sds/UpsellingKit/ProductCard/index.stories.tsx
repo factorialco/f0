@@ -41,3 +41,21 @@ export const Dismissable: Story = {
     dismissable: true,
   },
 }
+
+export const LMS: Story = {
+  args: {
+    isVisible: true,
+    title: "LMS",
+    description:
+      "Manage your team's learning and development with our Learning Management System.",
+    onClick: () => {
+      alert("onClick")
+    },
+    onClose: () => {
+      alert("onClose")
+    },
+    module: "lms",
+    dismissable: false,
+  },
+  tags: ["autodocs", "experimental"],
+}

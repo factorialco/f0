@@ -1,0 +1,97 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="CRUD patterns/Checklist" />
+
+# Pre-Ship Checklist
+
+Verify these before shipping any CRUD flow. Each item links to the relevant
+principle or pattern page for context.
+
+---
+
+## Collection setup
+
+- [ ] There is exactly **one primary action** per collection
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 1</a>)
+- [ ] The primary action label is a verb-noun pair ("Add employee", not "New")
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-create-update--documentation">Create & Update</a>)
+- [ ] Create is anchored to the collection frame, not to any item
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 2</a>)
+- [ ] No more than 2 expanded secondary actions in the toolbar
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-action-hierarchy--documentation">Action hierarchy</a>)
+
+---
+
+## Forms (Create & Update)
+
+- [ ] The update form reuses the create form (same fields, order, validation)
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 3</a>)
+- [ ] The container matches operation complexity (not over- or under-weighted)
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-containers--documentation">Containers</a>)
+- [ ] If a wizard is used, there is actual branching or validation gating
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-containers--documentation">Containers</a>)
+- [ ] If a side panel is used, it degrades gracefully below ~900px
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-containers--documentation">Containers</a>)
+
+---
+
+## Read
+
+- [ ] The read container matches the resource depth: overlay for simple, page for deep
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 4</a>)
+- [ ] The user does not lose scroll position when opening/closing read
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-read--documentation">Read</a>)
+- [ ] If detail-then-escalate is used, "Open full view" is a clear affordance
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-read--documentation">Read</a>)
+- [ ] Editable surfaces do NOT use row-click for read (conflicts with cell focus)
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-read--documentation">Read</a>)
+
+---
+
+## Destructive actions
+
+- [ ] Destructive actions default to overflow (ellipsis); if surfaced, there is deliberate justification
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 6</a>)
+- [ ] Confirmation names the resource, count, and reversibility
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-delete-destructive--documentation">Delete & destructive</a>)
+- [ ] No generic "Are you sure?" confirmations anywhere
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 5</a>)
+- [ ] Destructive styling appears only at the confirmation step, not in the menu
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-delete-destructive--documentation">Delete & destructive</a>)
+
+---
+
+## Bulk operations
+
+- [ ] Selection scope is explicit — user knows if they selected page or all results
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 7</a>)
+- [ ] A scope banner appears when the dataset spans pages
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-bulk-async--documentation">Bulk & async</a>)
+- [ ] Bulk bar shows the exact count of selected items
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-action-hierarchy--documentation">Action hierarchy</a>)
+- [ ] Bulk destructive actions always show a confirmation with count
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-delete-destructive--documentation">Delete & destructive</a>)
+- [ ] Partial failure is handled: count shown, failed items stay selected, retry offered
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-bulk-async--documentation">Bulk & async</a>)
+
+---
+
+## Async feedback
+
+- [ ] Feedback is co-located with the triggering affordance (button/bar/container)
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 8</a>)
+- [ ] Global notifications (toasts) are used ONLY for background work the user is not waiting on
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-bulk-async--documentation">Bulk & async</a>)
+- [ ] The state machine covers all four states: idle, loading, success, error
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-bulk-async--documentation">Bulk & async</a>)
+
+---
+
+## Affordances & density
+
+- [ ] Dense surfaces (tables): actions are hover-revealed or in a dedicated column
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 10</a>)
+- [ ] Sparse/touch surfaces (cards, mobile): actions are persistently visible
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-principles--documentation">Principle 10</a>)
+- [ ] Item actions return nothing (not disabled) for items where the action is inapplicable
+      (<a target="_parent" href="/?path=/docs/experimental-crud-patterns-action-hierarchy--documentation">Action hierarchy</a>)

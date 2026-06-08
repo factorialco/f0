@@ -1,5 +1,6 @@
 import { ComponentProps } from "react"
 
+import { PersonNegative } from "../../../icons/app"
 import { BaseAvatar } from "../BaseAvatar"
 import { AvatarBadge } from "../types"
 
@@ -11,6 +12,7 @@ export type PersonAvatarProps = {
   src?: string
   size?: BaseAvatarProps["size"]
   badge?: AvatarBadge
+  deactivated?: boolean
 } & Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">
 
 export const PersonAvatar = ({
@@ -21,6 +23,7 @@ export const PersonAvatar = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  deactivated,
 }: PersonAvatarProps) => {
   return (
     <BaseAvatar
@@ -32,6 +35,9 @@ export const PersonAvatar = ({
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}
+      icon={
+        deactivated ? { icon: PersonNegative, color: "secondary" } : undefined
+      }
     />
   )
 }

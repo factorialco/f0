@@ -1,4 +1,8 @@
 <style>
+  :root {
+    --storybook-docs-space-5: 20px;
+  }
+
   #storybook-docs h1:not(.docs-story *),
   #storybook-docs h2:not(.docs-story *),
   #storybook-docs h3:not(.docs-story *),
@@ -24,7 +28,7 @@
     border-bottom: none !important;
   }
 
-  #storybook-docs h1:not(.docs-story *)+h2:not(.docs-story *) {
+  #storybook-docs h1:not(.docs-story *) + h2:not(.docs-story *) {
     margin-top: 24px !important;
   }
 
@@ -35,7 +39,10 @@
     border-bottom: none !important;
   }
 
-  #storybook-docs h3:not(.docs-story *)+p:not(.docs-story *)~h3:not(.docs-story *) {
+  #storybook-docs
+    h3:not(.docs-story *)
+    + p:not(.docs-story *)
+    ~ h3:not(.docs-story *) {
     margin-bottom: 4px !important;
   }
 
@@ -46,25 +53,27 @@
     border-bottom: none !important;
   }
 
-  #storybook-docs h3:not(.docs-story *)+h4:not(.docs-story *) {
+  #storybook-docs h3:not(.docs-story *) + h4:not(.docs-story *) {
     margin-top: 8px !important;
   }
 
-  #storybook-docs p:not(.docs-story *, .docblock-argstable-body *, table *, .sb-unstyled *) {
+  #storybook-docs
+    p:not(.docs-story *, .docblock-argstable-body *, table *, .sb-unstyled *) {
     font-size: 16px;
     line-height: 1.5;
     color: #65636d !important;
     font-weight: 400 !important;
-    margin: 0 !important;
+    margin: 0 0 var(--storybook-docs-space-5) !important;
     font-family: "Inter", sans-serif !important;
   }
 
-  #storybook-docs ul:not(.docs-story *, .toc-list) {
+  #storybook-docs ul:not(.docs-story *, .toc-list),
+  #storybook-docs ol:not(.docs-story *) {
     margin-top: 8px !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 24px !important;
   }
 
-  #storybook-docs ol:not(.docs-story *)+h3:not(.docs-story *) {
+  #storybook-docs ol:not(.docs-story *) + h3:not(.docs-story *) {
     margin-top: 32px !important;
   }
 
@@ -123,27 +132,42 @@
     filter: none !important;
     outline: rgba(0, 0, 0, 0.1) 1px solid !important;
     border-radius: 10px;
-    overflow: hidden;
     background: #fff;
   }
 
-  .sb-unstyled tbody>tr:nth-child(even)>td:not(.docs-story td),
-  .docblock-argstable-body>tr:nth-child(even)>td {
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:first-child > td:first-child {
+    border-top-left-radius: 10px;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:first-child > td:last-child {
+    border-top-right-radius: 10px;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:last-child > td:first-child {
+    border-bottom-left-radius: 10px;
+  }
+
+  .sb-unstyled tbody:not(.docs-story tbody) > tr:last-child > td:last-child {
+    border-bottom-right-radius: 10px;
+  }
+
+  .sb-unstyled tbody > tr:nth-child(even) > td:not(.docs-story td),
+  .docblock-argstable-body > tr:nth-child(even) > td {
     background: #fafbfc !important;
   }
 
-  .sb-unstyled tbody>tr:not(:last-child)>td:not(.docs-story td),
-  .docblock-argstable-body>tr:not(:last-child)>td {
+  .sb-unstyled tbody > tr:not(:last-child) > td:not(.docs-story td),
+  .docblock-argstable-body > tr:not(:last-child) > td {
     border-bottom: #dce0e5 1px solid !important;
   }
 
-  .sb-unstyled thead>tr>th:not(.docs-story th) {
+  .sb-unstyled thead > tr > th:not(.docs-story th) {
     padding: 10px 20px;
     color: #647084;
     text-align: left;
   }
 
-  .sb-unstyled tbody>tr>td:not(.docs-story td) {
+  .sb-unstyled tbody > tr > td:not(.docs-story td) {
     padding: 16px 20px;
   }
 
@@ -161,7 +185,7 @@
     font-size: 12px !important;
   }
 
-  .toc-list .toc-list-item>a.is-active-link {
+  .toc-list .toc-list-item > a.is-active-link {
     color: #e51943 !important;
   }
 
@@ -170,7 +194,7 @@
     display: none !important;
   }
 
-  .toc-wrapper .toc-list li:only-child:empty~* {
+  .toc-wrapper .toc-list li:only-child:empty ~ * {
     display: none !important;
   }
 
@@ -215,6 +239,10 @@
     transform: scale(1);
   }
 
+  #storybook-docs hr:not(.docs-story *) {
+    margin-top: 48px !important;
+  }
+
   .rejt-tree {
     max-width: 240px;
     overflow-x: scroll;
@@ -230,12 +258,12 @@
     color: #fff !important;
   }
 
-  body.dark #storybook-docs h1>a,
-  body.dark #storybook-docs h2>a,
-  body.dark #storybook-docs h3>a,
-  body.dark #storybook-docs h4>a,
-  body.dark #storybook-docs h5>a,
-  body.dark #storybook-docs h6>a {
+  body.dark #storybook-docs h1 > a,
+  body.dark #storybook-docs h2 > a,
+  body.dark #storybook-docs h3 > a,
+  body.dark #storybook-docs h4 > a,
+  body.dark #storybook-docs h5 > a,
+  body.dark #storybook-docs h6 > a {
     float: left;
     line-height: inherit;
     padding-right: 10px;
@@ -243,7 +271,7 @@
     color: #647084;
   }
 
-  body.dark #storybook-docs>div {
+  body.dark #storybook-docs > div {
     background: #0d1625 !important;
   }
 
@@ -267,11 +295,11 @@
     border-left-color: #647084 !important;
   }
 
-  body.dark .toc-list .toc-list-item>a {
+  body.dark .toc-list .toc-list-item > a {
     color: #647084 !important;
   }
 
-  body.dark .toc-list .toc-list-item>a.is-active-link {
+  body.dark .toc-list .toc-list-item > a.is-active-link {
     color: #fff !important;
   }
 
@@ -291,8 +319,8 @@
     border: #161f30 4px solid;
   }
 
-  body.dark .sb-unstyled thead:not(.docs-story thead)>tr>th,
-  body.dark .docblock-argstable-head>tr>th>span {
+  body.dark .sb-unstyled thead:not(.docs-story thead) > tr > th,
+  body.dark .docblock-argstable-head > tr > th > span {
     color: #a1abbd !important;
   }
 
@@ -302,14 +330,14 @@
     background: #0d1625;
   }
 
-  body.dark .sb-unstyled tbody:not(.docs-story tbody)>tr>td,
-  body.dark .docblock-argstable-body>tr>td>span {
+  body.dark .sb-unstyled tbody:not(.docs-story tbody) > tr > td,
+  body.dark .docblock-argstable-body > tr > td > span {
     color: #a1abbd !important;
   }
 
-  body.dark .docblock-argstable-body>tr>td>span,
-  body.dark .docblock-argstable-body>tr>td>div>span,
-  body.dark .docblock-argstable-body>tr>td>div>div>span {
+  body.dark .docblock-argstable-body > tr > td > span,
+  body.dark .docblock-argstable-body > tr > td > div > span,
+  body.dark .docblock-argstable-body > tr > td > div > div > span {
     color: #a1abbd !important;
     background: #161f30 !important;
     border-color: #2d3545 !important;
@@ -326,18 +354,22 @@
     box-shadow: none !important;
   }
 
-  body.dark .sb-unstyled tbody:not(.docs-story tbody)>tr:nth-child(even)>td,
-  body.dark .docblock-argstable-body>tr:nth-child(even)>td {
+  body.dark .sb-unstyled tbody:not(.docs-story tbody) > tr:nth-child(even) > td,
+  body.dark .docblock-argstable-body > tr:nth-child(even) > td {
     background: #0d1625 !important;
   }
 
-  body.dark .sb-unstyled tbody:not(.docs-story tbody)>tr:nth-child(odd)>td,
-  body.dark .docblock-argstable-body>tr:nth-child(odd)>td {
+  body.dark .sb-unstyled tbody:not(.docs-story tbody) > tr:nth-child(odd) > td,
+  body.dark .docblock-argstable-body > tr:nth-child(odd) > td {
     background: #111a2a !important;
   }
 
-  body.dark .sb-unstyled tbody:not(.docs-story tbody)>tr:not(:last-child)>td,
-  body.dark .docblock-argstable-body>tr:not(:last-child)>td {
+  body.dark
+    .sb-unstyled
+    tbody:not(.docs-story tbody)
+    > tr:not(:last-child)
+    > td,
+  body.dark .docblock-argstable-body > tr:not(:last-child) > td {
     border-bottom: #172031 1px solid !important;
   }
 
@@ -381,6 +413,10 @@
 
   body.dark #panel-tab-content {
     background: #0d1625 !important;
+  }
+
+  cpk-web-inspector {
+    display: none;
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/react-render-tracker"></script>

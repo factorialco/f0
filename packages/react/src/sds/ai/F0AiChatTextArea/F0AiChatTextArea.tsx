@@ -1,84 +1,283 @@
-import { motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { AnimatePresence, motion } from "motion/react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { ButtonInternal } from "@/components/F0Button/internal"
-import { ArrowUp, SolidStop } from "@/icons/app"
+import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
+import { useReducedMotion } from "@/lib/a11y"
+import { Link } from "@/lib/linkHandler"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import type { F0AiChatTextAreaProps } from "./types"
-
-import { MentionPopover } from "./MentionPopover"
-import { ToolHintSelector } from "./ToolHintSelector"
-import { TypewriterPlaceholder } from "./TypewriterPlaceholder"
+import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
+import { ActionBar } from "./components/ActionBar"
+import { AttachedFilesList } from "./components/AttachedFilesList"
+import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
+import { MentionPopover } from "./components/MentionPopover"
+import { PendingQuoteChip } from "./components/PendingQuoteChip"
+import { TextareaField } from "./components/TextareaField"
+import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
+import type {
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../F0AiChat/types"
+import { buildHighlightSegments } from "./highlight-utils"
+import { type F0AiChatTextAreaProps } from "./types"
+import { type RecorderError, useAudioRecorder } from "./useAudioRecorder"
+import { useFileAttachments } from "./useFileAttachments"
 import { useMentions } from "./useMentions"
-import { buildHighlightSegments } from "./utils"
 
+/** Markdown syntax characters that would otherwise trigger formatting. */
+const MD_SPECIAL = /[\\`*_{}[\]()#+\-.!|~>]/g
+
+/**
+ * Neutralize markdown / HTML metacharacters in user-typed text so `*hola*`,
+ * `# title`, `> quote`, etc. render literally in the bubble. Preserves the
+ * `<entity-ref>` tags that `transformMentions` inserts, so @mentions keep
+ * their interactive rendering.
+ */
+const escapeUserText = (s: string): string =>
+  s
+    .split(/(<entity-ref\b[^>]*>[\s\S]*?<\/entity-ref>)/g)
+    .map((part, i) => {
+      // Odd indices are entity-ref tags produced by transformMentions — leave
+      // them intact so the markdown renderer can turn them into chips.
+      if (i % 2 === 1) return part
+      return part
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(MD_SPECIAL, "\\$&")
+    })
+    .join("")
+
+/**
+ * Headless chat composer.
+ *
+ * Owns local UI state (text, cursor, attached files, mention popover) and
+ * emits a structured payload via `onSubmit`. The consumer decides what to
+ * do with it (forward to CopilotKit, log it, mock it…). It carries no
+ * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
+ * provide the wiring.
+ */
 export const F0AiChatTextArea = ({
-  submitLabel,
-  inProgress,
-  onSend,
+  onSubmit,
   onStop,
-  placeholders = [],
-  defaultPlaceholder,
-  autoFocus = true,
-  entityResolvers,
-  toolHints,
-  activeToolHint,
-  onActiveToolHintChange,
+  inProgress,
+  onBeforeSubmit,
+  placeholders,
+  creditWarning,
+  clarifyingUI,
+  pendingContext = null,
+  onPendingContextChange,
+  pendingQuote = null,
+  onPendingQuoteChange,
+  fileAttachments,
+  onTranscribe,
+  searchPersons,
+  onProcessFilesRef,
+  disclaimer,
+  footer,
+  isWelcomeScreen = false,
+  fullscreen = false,
+  welcomeScreenSuggestions,
+  onSuggestionClick,
+  ref,
 }: F0AiChatTextAreaProps) => {
+  const translation = useI18n()
+  const shouldReduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
+  const [isPreSending, setIsPreSending] = useState(false)
+  // Set when the user hits send while an attachment is still uploading: the
+  // submit is queued and fired once uploads finish (see effect below), so the
+  // message goes WITH the file instead of being dropped or sent without it.
+  const [pendingSubmit, setPendingSubmit] = useState(false)
+  const [hoveredSuggestion, setHoveredSuggestion] =
+    useState<WelcomeScreenSuggestionItem | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
-  const translation = useI18n()
+
+  const isClarifying = clarifyingUI != null
+
+  // Fire `tracking.onWelcomeSuggestionClick` from inside the textarea so
+  // hosts only need to wire the `onSuggestionClick` business action.
+  // When the textarea is rendered outside an `F0AiChatProvider` the
+  // tracking ref resolves to a no-op via the provider fallback.
+  const { tracking } = useAiChat()
+  const handleSuggestionClick = useCallback(
+    (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
+      tracking?.onWelcomeSuggestionClick?.({
+        item,
+        group,
+        prompt: item.prompt || item.title,
+      })
+      onSuggestionClick?.(item, group)
+    },
+    [tracking, onSuggestionClick]
+  )
+
+  const {
+    attachedFiles,
+    fileInputRef,
+    onUploadFiles,
+    acceptValue,
+    isAtMaxFiles,
+    maxFiles,
+    processFiles,
+    handleFileSelect,
+    handleRemoveFile,
+    clearFiles,
+    transientError,
+    showTransientError,
+  } = useFileAttachments(fileAttachments)
 
   const mentions = useMentions({
     inputValue,
     setInputValue,
     cursorPosition,
-    entityResolvers,
+    searchPersons,
     textareaRef,
   })
 
-  // Skip autofocus when URL has a hash (e.g. #section) so we don't steal focus
-  // from the element the hash points to when the URL updates. We use an effect
-  // so we only read window on the client and avoid hydration mismatch.
+  // Voice dictation. Transcripts are written onto whatever was already typed
+  // (captured when recording starts) so dictation appends instead of replacing.
+  const dictationBaseRef = useRef("")
+  const applyDictation = useCallback((text: string) => {
+    const base = dictationBaseRef.current
+    const separator = base && !/\s$/.test(base) ? " " : ""
+    const next = `${base}${separator}${text}`
+    setInputValue(next)
+    setCursorPosition(next.length)
+  }, [])
+  const recorderErrorMessage: Record<RecorderError, string> = {
+    "permission-denied": translation.ai.micPermissionDenied,
+    "device-error": translation.ai.micError,
+    "transcription-failed": translation.ai.transcriptionError,
+  }
+  const recorder = useAudioRecorder({
+    onTranscribe,
+    onPartial: applyDictation,
+    onFinal: (text) => {
+      applyDictation(text)
+      textareaRef.current?.focus()
+    },
+    onError: (error) => showTransientError(recorderErrorMessage[error]),
+  })
+  const canRecord = !!onTranscribe && recorder.isSupported
+  const handleStartRecording = useCallback(() => {
+    dictationBaseRef.current = inputValue
+    void recorder.start()
+  }, [inputValue, recorder])
+
   useEffect(() => {
-    if (
-      autoFocus &&
-      typeof window !== "undefined" &&
-      window.location.hash.length === 0
-    ) {
+    if (typeof window !== "undefined" && window.location.hash.length === 0) {
       textareaRef.current?.focus()
     }
-  }, [autoFocus])
+  }, [])
 
-  const resolvedDefaultPlaceholder =
-    defaultPlaceholder ?? translation.ai.inputPlaceholder
+  // Expose the file-drop handler to parents that own a wider drop zone
+  // (e.g. the whole chat window). The handler is stable for the lifetime
+  // of the textarea — `processFiles` keeps its identity unless its
+  // dependencies change, which the parent re-registers automatically.
+  useEffect(() => {
+    if (!onProcessFilesRef) return
+    onProcessFilesRef((files) => {
+      void processFiles(files)
+    })
+    return () => {
+      onProcessFilesRef(null)
+    }
+  }, [onProcessFilesRef, processFiles])
 
+  // While recording, the placeholder becomes "Listening…" so the empty
+  // textarea signals that dictation is live.
+  const isRecording = recorder.status === "recording"
+  const resolvedDefaultPlaceholder = isRecording
+    ? translation.ai.listening
+    : translation.ai.inputPlaceholder
+  const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
+  const isUploading = attachedFiles.some((f) => f.status === "uploading")
+  const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
   const hasDataToSend = inputValue.trim().length > 0
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Fire a queued submit once all attachments finish uploading. If an upload
+  // failed, do NOT auto-send (the message would go without the file) — surface
+  // a transient banner so the user knows the click was acknowledged but the
+  // send was blocked, instead of silently swallowing the event.
+  useEffect(() => {
+    if (!pendingSubmit || isUploading) return
+    setPendingSubmit(false)
+    if (hasErrorFiles) {
+      showTransientError(translation.ai.fileUploadBlockedSubmit)
+      return
+    }
+    formRef.current?.requestSubmit()
+  }, [
+    pendingSubmit,
+    isUploading,
+    hasErrorFiles,
+    showTransientError,
+    translation.ai.fileUploadBlockedSubmit,
+  ])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
+    // When clarifying, form submit is a no-op — the panel handles its own confirm
+    if (isClarifying) return
+
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend) {
+    } else if (hasDataToSend && !isPreSending) {
+      // Attachment still uploading: queue the send instead of dropping it.
+      if (isUploading) {
+        setPendingSubmit(true)
+        textareaRef.current?.focus()
+        return
+      }
+      if (onBeforeSubmit) {
+        setIsPreSending(true)
+        try {
+          if ((await onBeforeSubmit()) === false) {
+            textareaRef.current?.focus()
+            return
+          }
+        } finally {
+          setIsPreSending(false)
+        }
+      }
+
       const transformed = mentions.transformMentions(inputValue.trim())
-      const withToolHint = activeToolHint
-        ? `<tool-context tool="${activeToolHint.id}">${activeToolHint.prompt}</tool-context>\n\n${transformed}`
-        : transformed
-      onSend(withToolHint)
+      // Escape markdown/HTML in the user's own text so `*hola*` stays literal
+      // and only features we control (@mentions) produce rich rendering.
+      const safeUserText = escapeUserText(transformed)
+
+      const files = uploadedFiles.flatMap((f) =>
+        f.uploadedFile ? [f.uploadedFile] : []
+      )
+
+      const consumedContext = pendingContext
+      const consumedQuote = pendingQuote
+      if (consumedContext) onPendingContextChange?.(null)
+      if (consumedQuote) onPendingQuoteChange?.(null)
+
+      await onSubmit({
+        text: safeUserText,
+        files,
+        context: consumedContext,
+        quote: consumedQuote,
+      })
+
       setInputValue("")
+      clearFiles()
     }
 
     textareaRef.current?.focus()
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Let mention popover handle keyboard events first
+    if (isClarifying) return
     if (mentions.handleKeyDown(e)) return
 
     if (e.key === "Enter" && !e.shiftKey) {
@@ -99,14 +298,18 @@ export const F0AiChatTextArea = ({
     }
   }
 
-  const multiplePlaceholders = placeholders.length > 1
+  // Hovering a welcome suggestion replaces the rotating placeholders with the
+  // hovered item's prompt so the user can preview what's about to be sent.
+  const previewPlaceholder = hoveredSuggestion
+    ? (hoveredSuggestion.prompt ?? hoveredSuggestion.title)
+    : null
+  const effectivePlaceholders = isRecording
+    ? [translation.ai.listening]
+    : previewPlaceholder
+      ? [previewPlaceholder]
+      : (placeholders ?? [])
+  const multiplePlaceholders = effectivePlaceholders.length > 1
 
-  /**
-   * Split inputValue into segments: plain text, mention spans, and ghost
-   * (inline-completion) text. The highlight overlay uses these to render
-   * @Name mentions with distinct styling and show the autocomplete ghost
-   * text at the cursor position.
-   */
   const highlightSegments = useMemo(() => {
     return buildHighlightSegments(inputValue, mentions.mentions, {
       cursorPosition,
@@ -114,201 +317,293 @@ export const F0AiChatTextArea = ({
     })
   }, [inputValue, mentions.mentions, cursorPosition, mentions.inlineCompletion])
 
-  // The overlay must be active when there are either mentions to highlight
-  // or ghost (inline-completion) text to render at the cursor.
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
   return (
-    <motion.form
-      aria-busy={inProgress}
-      ref={formRef}
-      className={cn(
-        "relative isolate z-20",
-        "flex flex-row items-end sm:flex-col sm:items-stretch gap-3",
-        "rounded-lg border border-solid border-f1-border",
-        "transition-all hover:cursor-text",
-        "py-px pl-3 pr-1 sm:p-0",
-        "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
-        "before:rounded-[inherit] before:bg-f1-background before:content-['']",
-        "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
-        "after:rounded-[inherit] after:blur-[5px] after:content-['']",
-        "after:scale-90 after:opacity-0",
-        "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-        "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-        "after:transition-all after:delay-200 after:duration-300",
-        "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100"
-      )}
-      animate={{
-        "--gradient-angle": ["0deg", "360deg"],
-      }}
-      transition={{
-        duration: 6,
-        ease: "linear",
-        repeat: Infinity,
-      }}
-      style={
-        {
-          "--gradient-angle": "180deg",
-        } as React.CSSProperties
-      }
-      onClick={() => {
-        textareaRef.current?.focus()
-      }}
-      onSubmit={handleSubmit}
-    >
-      <MentionPopover
-        isOpen={mentions.isOpen}
-        results={mentions.results}
-        isLoading={mentions.isLoading}
-        selectedIndex={mentions.selectedIndex}
-        position={mentions.popoverPosition}
-        onSelect={mentions.selectPerson}
-      />
-
-      <div
-        className={cn(
-          "grid flex-1 grid-cols-1 grid-rows-1",
-          "min-h-[20px] py-2.5 sm:min-h-[20px] sm:py-0"
-        )}
-      >
-        <div
-          aria-hidden={true}
-          className={cn(
-            "col-start-1 row-start-1",
-            "pointer-events-none invisible",
-            "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px]",
-            "whitespace-pre-wrap break-words",
-            "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
-            "sm:mt-3 sm:px-3"
+    <div ref={ref} className="flex flex-col items-center gap-2 px-4 pb-3 pt-2">
+      <div className="flex w-full max-w-content flex-col gap-2">
+        {isWelcomeScreen &&
+          welcomeScreenSuggestions &&
+          welcomeScreenSuggestions.length > 0 &&
+          onSuggestionClick && (
+            <WelcomeScreenSuggestionsRow
+              suggestions={welcomeScreenSuggestions}
+              onItemClick={handleSuggestionClick}
+              onItemHover={setHoveredSuggestion}
+            />
           )}
-        >
-          {inputValue.endsWith("\n") ? inputValue + "_" : inputValue}
-        </div>
-        {/* Highlight overlay: renders text with styled @mentions and ghost completions */}
-        {hasOverlay && (
-          <div
-            ref={highlightRef}
-            aria-hidden={true}
+        <CreditWarningWrapper creditWarning={creditWarning}>
+          <motion.form
+            aria-busy={inProgress}
+            ref={formRef}
             className={cn(
-              "col-start-1 row-start-1",
-              "pointer-events-none",
-              "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px]",
-              "whitespace-pre-wrap break-words",
-              "sm:text-[14px] text-[16px] leading-[20px] font-normal text-f1-foreground",
-              "px-0 sm:mt-3 sm:px-3",
-              "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              "relative isolate z-20",
+              "flex flex-col items-stretch md:gap-3 gap-2",
+              "rounded-lg border border-solid border-f1-border has-[textarea:focus]:border-f1-background-tertiary",
+              "transition-all hover:cursor-text",
+              "p-0",
+              "before:pointer-events-none before:absolute before:inset-0 before:z-[-1]",
+              "before:rounded-[inherit] before:bg-f1-background before:content-['']",
+              "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2]",
+              "after:rounded-md after:blur-[6px] after:content-['']",
+              "after:scale-90 after:opacity-0",
+              "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
+              "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
+              "after:transition-all after:delay-200 after:duration-300",
+              "has-[textarea:focus]:after:scale-100 has-[textarea:focus]:after:opacity-100",
+              isClarifying &&
+                "after:scale-100 after:opacity-100 border-f1-background-tertiary"
             )}
+            animate={{
+              "--gradient-angle": ["0deg", "360deg"],
+            }}
+            transition={{
+              duration: 6,
+              ease: "linear",
+              repeat: Infinity,
+            }}
+            style={
+              {
+                "--gradient-angle": "180deg",
+              } as React.CSSProperties
+            }
+            onClick={() => {
+              if (!isClarifying) {
+                textareaRef.current?.focus()
+              }
+            }}
+            onSubmit={handleSubmit}
           >
-            {highlightSegments.map((seg, i) =>
-              seg.type === "mention" ? (
-                <span
-                  key={i}
-                  className="font-medium text-f1-foreground-secondary"
+            <MentionPopover
+              isOpen={mentions.isOpen}
+              results={mentions.results}
+              isLoading={mentions.isLoading}
+              selectedIndex={mentions.selectedIndex}
+              position={mentions.popoverPosition}
+              onSelect={mentions.selectPerson}
+            />
+
+            <AnimatePresence initial={false}>
+              {isClarifying ? (
+                <motion.div
+                  key="clarifying"
+                  className="overflow-hidden"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.22,
+                      ease: [0.4, 0, 1, 1],
+                    },
+                  }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
                 >
-                  {seg.text}
-                </span>
-              ) : seg.type === "ghost" ? (
-                <span
-                  key={i}
-                  className="text-f1-foreground-secondary opacity-50"
-                >
-                  {seg.text}
-                </span>
+                  {clarifyingUI}
+                </motion.div>
               ) : (
-                <span key={i}>{seg.text}</span>
-              )
-            )}
-          </div>
-        )}
-        {!inputValue && !multiplePlaceholders && (
-          <p
-            className={cn(
-              "col-start-1 row-start-1",
-              "pointer-events-none",
-              "text-f1-foreground-secondary",
-              "sm:text-[14px] text-[16px] leading-[20px] font-normal",
-              "sm:pt-3 sm:px-3",
-              "overflow-hidden text-ellipsis whitespace-nowrap"
-            )}
-          >
-            {resolvedDefaultPlaceholder}
-          </p>
-        )}
-        <textarea
-          autoFocus={false}
-          name="one-ai-input"
-          rows={1}
-          ref={textareaRef}
-          value={inputValue}
-          onChange={(e) => {
-            setInputValue(e.target.value)
-            setCursorPosition(e.target.selectionStart ?? 0)
-          }}
-          onKeyDown={handleKeyDown}
-          onKeyUp={updateCursorPosition}
-          onClick={updateCursorPosition}
-          onSelect={updateCursorPosition}
-          onScroll={syncHighlightScroll}
-          className={cn(
-            "col-start-1 row-start-1",
-            "min-h-[20px] max-h-[120px] sm:min-h-[20px] sm:max-h-[240px] sm:h-auto",
-            "resize-none",
-            "whitespace-pre-wrap break-words",
-            "sm:text-[14px] text-[16px] leading-[20px] font-normal",
-            "px-0 sm:mt-3 sm:px-3",
-            "overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-            "outline-none",
-            hasOverlay
-              ? "text-transparent caret-f1-foreground"
-              : "text-f1-foreground",
-            !hasOverlay &&
-              (inputValue || !multiplePlaceholders
-                ? "caret-f1-foreground"
-                : "caret-transparent")
-          )}
-        />
-        {multiplePlaceholders && (
-          <TypewriterPlaceholder
-            placeholders={placeholders}
-            defaultPlaceholder={resolvedDefaultPlaceholder}
-            inputValue={inputValue}
-            inProgress={inProgress}
-          />
-        )}
-      </div>
+                <motion.div
+                  key="input"
+                  className="overflow-hidden"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.15,
+                      ease: [0.55, 0, 1, 0.45],
+                    },
+                  }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                >
+                  {pendingQuote && (
+                    <PendingQuoteChip
+                      quote={pendingQuote}
+                      onRemove={() => onPendingQuoteChange?.(null)}
+                    />
+                  )}
 
-      <div className="flex shrink-0 items-center justify-between p-1 sm:p-3">
-        <div className="flex items-center">
-          {toolHints && toolHints.length > 0 && onActiveToolHintChange && (
-            <ToolHintSelector
-              toolHints={toolHints}
-              activeToolHint={activeToolHint ?? null}
-              onChange={onActiveToolHintChange}
-            />
-          )}
-        </div>
-        <div className="flex items-center">
-          {inProgress ? (
-            <ButtonInternal
-              type="submit"
-              variant="neutral"
-              label={translation.ai.stopAnswerGeneration}
-              icon={SolidStop}
-              hideLabel
-            />
-          ) : (
-            <ButtonInternal
-              type="submit"
-              disabled={!hasDataToSend}
-              variant={hasDataToSend ? "default" : "neutral"}
-              label={submitLabel || translation.ai.sendMessage}
-              icon={submitLabel ? undefined : ArrowUp}
-              hideLabel={!submitLabel}
-            />
-          )}
-        </div>
+                  <AnimatePresence initial={false}>
+                    {transientError && (
+                      <motion.div
+                        key="transient-error"
+                        role="alert"
+                        aria-live="polite"
+                        className="p-1"
+                        initial={{ opacity: 0, y: -4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.2,
+                          ease: "easeOut",
+                        }}
+                      >
+                        <div
+                          className={cn(
+                            "flex w-full flex-row items-center gap-2 rounded-md p-2 pr-3",
+                            "bg-f1-background-critical text-f1-foreground"
+                          )}
+                        >
+                          <div className="h-6 w-6 flex-shrink-0">
+                            <F0AvatarAlert type="critical" size="sm" />
+                          </div>
+                          <p className="font-medium text-f1-foreground-critical">
+                            {transientError}
+                          </p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <AttachedFilesList
+                    attachedFiles={attachedFiles}
+                    isUploading={isUploading}
+                    onRemove={handleRemoveFile}
+                    removeLabel={translation.ai.removeFile}
+                  />
+
+                  <TextareaField
+                    textareaRef={textareaRef}
+                    highlightRef={highlightRef}
+                    inputValue={inputValue}
+                    onInputChange={(value, cursorPos) => {
+                      setInputValue(value)
+                      setCursorPosition(cursorPos)
+                    }}
+                    onKeyDown={handleKeyDown}
+                    onCursorUpdate={updateCursorPosition}
+                    onScroll={syncHighlightScroll}
+                    highlightSegments={highlightSegments}
+                    hasOverlay={hasOverlay}
+                    multiplePlaceholders={multiplePlaceholders}
+                    placeholders={effectivePlaceholders}
+                    resolvedDefaultPlaceholder={resolvedDefaultPlaceholder}
+                    inProgress={inProgress}
+                  />
+
+                  <ActionBar
+                    onUploadFiles={onUploadFiles}
+                    isAtMaxFiles={isAtMaxFiles}
+                    maxFiles={maxFiles}
+                    acceptValue={acceptValue}
+                    fileInputRef={fileInputRef}
+                    handleFileSelect={handleFileSelect}
+                    inProgress={inProgress}
+                    hasDataToSend={hasDataToSend}
+                    isPreSending={isPreSending || pendingSubmit}
+                    canRecord={canRecord}
+                    recordingStatus={recorder.status}
+                    recordingStream={recorder.stream}
+                    onStartRecording={handleStartRecording}
+                    onStopRecording={recorder.stop}
+                    onCancelRecording={recorder.cancel}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.form>
+        </CreditWarningWrapper>
       </div>
-    </motion.form>
+      <AnimatePresence mode="wait" initial={false}>
+        {isClarifying ? (
+          <motion.div
+            key="clarifying-nav-hint"
+            className="flex w-full max-w-content flex-row flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm font-medium text-f1-foreground-tertiary"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
+            <span>
+              <kbd className="font-sans">↑↓</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.navigate}
+            </span>
+            <span>
+              <kbd className="font-sans">Enter</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.select}
+            </span>
+            <span>
+              <kbd className="font-sans">Esc</kbd>{" "}
+              {translation.ai.clarifyingQuestion.navHint.cancel}
+            </span>
+          </motion.div>
+        ) : (
+          disclaimer?.text && (
+            <motion.div
+              key="chat-disclaimer"
+              className="flex w-full max-w-content flex-row items-center justify-center gap-1"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+            >
+              {disclaimer.onClick ? (
+                <button
+                  type="button"
+                  onClick={disclaimer.onClick}
+                  className={cn(
+                    "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
+                    "transition-transform duration-700 ease-out",
+                    "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                    "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+                  )}
+                >
+                  <OneEllipsis
+                    className={cn(
+                      "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
+                      "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
+                      "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                    )}
+                  >
+                    {disclaimer.text}
+                  </OneEllipsis>
+                </button>
+              ) : (
+                <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+                  {disclaimer.text}
+                </OneEllipsis>
+              )}
+
+              {disclaimer.link && disclaimer.linkText && (
+                <Link
+                  href={disclaimer.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 text-sm font-medium text-f1-foreground-tertiary"
+                >
+                  {disclaimer.linkText}
+                </Link>
+              )}
+            </motion.div>
+          )
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {footer && isWelcomeScreen && (
+          <motion.div
+            key="chat-footer"
+            className={cn(
+              "w-full py-4 mx-auto max-w-content",
+              fullscreen && "flex justify-center"
+            )}
+            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            {footer}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

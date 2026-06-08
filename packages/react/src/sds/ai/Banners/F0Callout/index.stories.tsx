@@ -8,7 +8,7 @@ import { F0Callout, F0CalloutProps } from "."
 import { CalloutSkeleton } from "./CalloutInternal"
 
 const meta = {
-  title: "Banners/Callout",
+  title: "AI/AICallout",
   component: F0Callout,
   parameters: {
     layout: "centered",
