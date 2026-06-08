@@ -190,6 +190,38 @@ describe("F0CardRow", () => {
     })
   })
 
+  describe("status (resolved state)", () => {
+    it("renders the status tag", () => {
+      render(
+        <F0CardRow
+          title="Row"
+          status={{ text: "Accepted", variant: "positive" }}
+        />
+      )
+
+      expect(screen.getByText("Accepted")).toBeInTheDocument()
+    })
+
+    it("takes precedence over the action props", () => {
+      render(
+        <F0CardRow
+          title="Row"
+          status={{ text: "Rejected", variant: "critical" }}
+          primaryAction={{ label: "Open", onClick: vi.fn() }}
+          secondaryActions={[{ label: "Edit", onClick: vi.fn() }]}
+        />
+      )
+
+      expect(screen.getByText("Rejected")).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Open" })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Edit" })
+      ).not.toBeInTheDocument()
+    })
+  })
+
   it("renders the alert banner when alert is provided", () => {
     render(
       <F0CardRow

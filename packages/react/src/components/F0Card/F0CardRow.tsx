@@ -1,6 +1,7 @@
 import { forwardRef } from "react"
 
 import { F0Link } from "@/components/F0Link"
+import { type TagStatusProps } from "@/components/tags/F0TagStatus"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
@@ -71,6 +72,14 @@ export interface F0CardRowProps {
   rejectAction?: CardRowConfirmAction
 
   /**
+   * Resolved-state status tag shown at the trailing edge in place of any
+   * actions — e.g. the `{ text: "Accepted", variant: "positive" }` /
+   * `{ text: "Rejected", variant: "critical" }` outcome of a confirm/reject row.
+   * Takes precedence over the action props.
+   */
+  status?: TagStatusProps
+
+  /**
    * Compact layout: tighter padding and smaller controls.
    */
   compact?: boolean
@@ -129,6 +138,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       otherActions,
       confirmAction,
       rejectAction,
+      status,
       compact = false,
       link,
       fullHeight = false,
@@ -192,6 +202,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
             otherActions={otherActions}
             confirmAction={confirmAction}
             rejectAction={rejectAction}
+            status={status}
             compact={compact}
             stackAt={stackAt}
           />

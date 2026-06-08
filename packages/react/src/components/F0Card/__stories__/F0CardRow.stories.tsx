@@ -145,6 +145,39 @@ export const ConfirmReject: Story = {
 }
 
 /**
+ * Resolved state of a confirm/reject row: once a decision is made, pass `status`
+ * to swap the buttons for a status tag. The accepted/rejected → positive/critical
+ * mapping lives with the caller (here in the story).
+ */
+export const Accepted: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description: "Requested 3 days off",
+    status: { text: "Accepted", variant: "positive" },
+  },
+}
+
+export const Rejected: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description: "Requested 3 days off",
+    status: { text: "Rejected", variant: "critical" },
+  },
+}
+
+/**
  * Actions stay inline at every width by default (`stackAt: "never"`). Opt into a
  * responsive collapse with `stackAt` (e.g. `"md"`): below that container width the
  * actions drop onto their own line with a separator, and secondary buttons fold

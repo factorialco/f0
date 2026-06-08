@@ -1,3 +1,4 @@
+import { F0TagStatus, type TagStatusProps } from "@/components/tags/F0TagStatus"
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Check, Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -103,6 +104,12 @@ interface CardRowActionsProps {
   confirmAction?: CardRowConfirmAction
   /** Reject (✗) icon-only action — enables the confirm/reject variant. */
   rejectAction?: CardRowConfirmAction
+  /**
+   * Resolved-state status tag shown at the trailing edge in place of any
+   * actions (e.g. the "Accepted" / "Rejected" outcome of a confirm/reject row).
+   * Takes precedence over every action prop.
+   */
+  status?: TagStatusProps
   compact?: boolean
   /** Container breakpoint at which the actions drop to their own line. */
   stackAt?: CardRowStackAt
@@ -132,10 +139,28 @@ export function CardRowActions({
   otherActions,
   confirmAction,
   rejectAction,
+  status,
   compact = false,
   stackAt = "never",
 }: CardRowActionsProps) {
   const size = compact ? "sm" : "md"
+
+  // Resolved state: a status tag replaces the actions. It's informational, so
+  // no click-stop / z-index — a row-level overlay link stays clickable through
+  // it. The outer flex drops it to its own line when stacked, with the footer.
+  if (status) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-end",
+          stackedChrome[stackAt],
+          stackAt !== "never" && compact && "mt-3 pt-3"
+        )}
+      >
+        <F0TagStatus {...status} />
+      </div>
+    )
+  }
 
   const wrapperClassName = cn(
     "relative z-[1]",
