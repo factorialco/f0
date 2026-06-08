@@ -1956,7 +1956,7 @@ const inscripcionCopy = {
     },
     warning: "This course doesn't have any groups yet. Matching people will stay pending group assignment until you create a group and assign them. Enrollment is not immediate.",
   },
-  manualCallout: "No automatic enrollment. You'll be able to enroll participants manually from the course once it's created, in the Participants tab.",
+  manualCallout: "Without automatic enrollment, you can always assign participants manually from the Participants list.",
 } as const
 
 const AUDIENCE_PREVIEW_AVATARS = [
@@ -2165,7 +2165,7 @@ function InscripcionStep({ values, onUpdate, audienceError = false }: { values: 
           pendingNote={pendingNote}
         />
       ) : (
-        <F0Alert variant="info" title="" description={inscripcionCopy.manualCallout} />
+        <F0Alert variant="neutral" title="" description={inscripcionCopy.manualCallout} />
       )}
     </div>
   )
@@ -3978,7 +3978,7 @@ function EditCourseEnrollmentSection({
               is no "How are people assigned?" section in settings. */}
         </>
       ) : (
-        <F0Alert variant="info" title="" description={inscripcionCopy.manualCallout} />
+        <F0Alert variant="neutral" title="" description={inscripcionCopy.manualCallout} />
       )}
     </div>
   )
