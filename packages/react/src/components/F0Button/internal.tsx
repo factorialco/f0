@@ -29,6 +29,7 @@ const ButtonInternal = forwardRef<
     withoutDisabledAppearance,
     loading: forceLoading,
     icon,
+    iconPosition = "left",
     emoji,
     variant = "default",
     size = "md",
@@ -40,6 +41,7 @@ const ButtonInternal = forwardRef<
     noAutoTooltip,
     noTitle,
     iconRotate = false,
+    block = false,
     counterValue,
     ...props
   },
@@ -76,6 +78,38 @@ const ButtonInternal = forwardRef<
   const buttonLabel = (label ?? "").toString()
   const buttonFontSize = fontSize ?? size
 
+  const iconNode = icon ? (
+    iconRotate ? (
+      <IconMotion
+        size={size === "sm" ? "sm" : "md"}
+        icon={icon}
+        animate={{
+          rotate: isHovered ? 90 : 0,
+          scale: isHovered ? [1, 0.8, 1] : 1,
+          filter: isHovered
+            ? ["blur(0px)", "blur(1px)", "blur(0px)"]
+            : "blur(0px)",
+        }}
+        transition={{
+          rotate: {
+            duration: 0.5,
+            ease: [0.77, 0, 0.13, 1.52],
+          },
+          scale: {
+            duration: 0.4,
+            ease: [0.65, 0, 0.35, 1],
+          },
+          filter: {
+            duration: 0.4,
+            ease: [0.65, 0, 0.35, 1],
+          },
+        }}
+      />
+    ) : (
+      <F0Icon size={size === "sm" ? "sm" : "md"} icon={icon} />
+    )
+  ) : null
+
   return (
     <>
       {variant === "ai" && (
@@ -109,6 +143,7 @@ const ButtonInternal = forwardRef<
         loading={isLoading}
         className={cn(
           "max-w-full",
+          block && "w-full",
           withoutDisabledAppearance &&
             disabled &&
             "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default",
@@ -129,39 +164,12 @@ const ButtonInternal = forwardRef<
           className={cn(
             isLoading && "invisible",
             "flex min-w-0 flex-1 items-center justify-center gap-1",
-            icon && !hideLabel && "-ml-[3px]"
+            icon &&
+              !hideLabel &&
+              (iconPosition === "right" ? "-mr-[3px]" : "-ml-[3px]")
           )}
         >
-          {icon &&
-            (iconRotate ? (
-              <IconMotion
-                size={size === "sm" ? "sm" : "md"}
-                icon={icon}
-                animate={{
-                  rotate: isHovered ? 90 : 0,
-                  scale: isHovered ? [1, 0.8, 1] : 1,
-                  filter: isHovered
-                    ? ["blur(0px)", "blur(1px)", "blur(0px)"]
-                    : "blur(0px)",
-                }}
-                transition={{
-                  rotate: {
-                    duration: 0.5,
-                    ease: [0.77, 0, 0.13, 1.52],
-                  },
-                  scale: {
-                    duration: 0.4,
-                    ease: [0.65, 0, 0.35, 1],
-                  },
-                  filter: {
-                    duration: 0.4,
-                    ease: [0.65, 0, 0.35, 1],
-                  },
-                }}
-              />
-            ) : (
-              <F0Icon size={size === "sm" ? "sm" : "md"} icon={icon} />
-            ))}
+          {iconPosition === "left" && iconNode}
           {emoji && (
             <EmojiImage
               emoji={emoji}
@@ -182,6 +190,7 @@ const ButtonInternal = forwardRef<
           ) : (
             <span className="sr-only">{buttonLabel}</span>
           )}
+          {iconPosition === "right" && iconNode}
           {append}{" "}
           {counterValue && (
             <Counter value={counterValue} size="sm" type="selected" />

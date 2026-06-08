@@ -108,7 +108,7 @@ window.IntersectionObserver = MockIntersectionObserver
 
 describe("TableCollection", () => {
   describe("rendering", () => {
-    it("shows loading state initially", () => {
+    it("shows loading state initially", async () => {
       render(
         <TableCollection<
           Person,
@@ -210,10 +210,20 @@ describe("TableCollection", () => {
         })
       })
     })
-  })
 
-  describe("edge cases", () => {
-    it("handles empty data gracefully", async () => {
+    it("applies minWidth to header and row cells", async () => {
+      const columnsWithMinWidth = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          minWidth: 220,
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+        },
+      ]
+
       render(
         <TableCollection<
           Person,
@@ -224,25 +234,78 @@ describe("TableCollection", () => {
           TestNavigationFilters,
           GroupingDefinition<Person>
         >
-          columns={testColumns}
-          source={createTestSource([])}
+          columns={columnsWithMinWidth}
+          source={createTestSource()}
           onSelectItems={vi.fn()}
           onLoadData={vi.fn()}
           onLoadError={vi.fn()}
         />
       )
 
-      // Wait for loading state to finish
       await waitFor(() => {
-        const rows = screen.getAllByRole("row")
-        expect(rows).toHaveLength(1) // Just the header row
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
       })
 
-      // Headers should still be present
-      expect(screen.getAllByRole("columnheader")).toHaveLength(2)
+      const nameHeader = screen.getByRole("columnheader", { name: "name" })
+      expect(nameHeader).toHaveStyle({ minWidth: "220px" })
+
+      const firstNameCell = screen
+        .getAllByText(testData[0].name)[0]
+        .closest("td")
+      expect(firstNameCell).toHaveStyle({ minWidth: "220px" })
     })
 
-    it("handles error states appropriately", async () => {
+    it("applies minWidth in grouped header placeholders for ungrouped columns", async () => {
+      const groupedColumns = [
+        {
+          label: "name",
+          render: (item: Person) => item.name,
+          headerGroupId: "identity",
+        },
+        {
+          label: "email",
+          render: (item: Person) => item.email,
+          minWidth: 180,
+        },
+      ]
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={groupedColumns}
+          source={createTestSource()}
+          headerGroupLabels={{ identity: "Identity" }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const identityGroupHeader = screen.getByRole("columnheader", {
+        name: "Identity",
+      })
+      const groupedHeaderRow = identityGroupHeader.closest("tr")
+      const groupedHeaderCells = within(
+        groupedHeaderRow as HTMLElement
+      ).getAllByRole("columnheader")
+
+      const ungroupedPlaceholderHeader =
+        groupedHeaderCells[groupedHeaderCells.length - 1]
+      expect(ungroupedPlaceholderHeader).toHaveStyle({ minWidth: "180px" })
+    })
+
+    it("renders error state when data fetch fails", async () => {
       const errorMessage = "Failed to fetch data"
       const error = new Error(errorMessage)
 

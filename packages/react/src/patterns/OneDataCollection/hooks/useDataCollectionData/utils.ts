@@ -1,11 +1,8 @@
 /**
- * Merges global filters with lane-specific filters using intersection logic.
- * For array-based filters (like InFilter), it finds the intersection of values.
- * For other filter types, lane filters override global filters.
- *
- * @param globalFilters - The global filters applied to all lanes
- * @param laneFilters - The lane-specific filters
- * @returns The merged filters with proper intersection logic
+ * Merges global (source-level) filters with lane-specific filters by
+ * intersecting array filters. On disjoint arrays the lane's own values win,
+ * since downstream adapters collapse `[]` to "no filter" rather than "match
+ * nothing". For non-array filters the lane wins.
  */
 export function mergeFiltersWithIntersection<T extends Record<string, unknown>>(
   globalFilters: T,
@@ -16,20 +13,17 @@ export function mergeFiltersWithIntersection<T extends Record<string, unknown>>(
   for (const [key, laneValue] of Object.entries(laneFilters)) {
     const globalValue = globalFilters[key]
 
-    // If both values exist and are arrays (InFilter case), find intersection
     if (
       Array.isArray(globalValue) &&
       Array.isArray(laneValue) &&
       globalValue.length > 0 &&
       laneValue.length > 0
     ) {
-      // Find intersection of the two arrays
       const intersection = globalValue.filter((item) =>
         laneValue.includes(item)
       )
-      result[key] = intersection
+      result[key] = intersection.length > 0 ? intersection : laneValue
     } else {
-      // For non-array filters or when one is empty, lane filter takes precedence
       result[key] = laneValue
     }
   }

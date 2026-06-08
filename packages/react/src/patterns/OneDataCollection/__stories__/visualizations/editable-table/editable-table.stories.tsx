@@ -3,6 +3,8 @@ import { format } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
+import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
+
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
 import { Delete, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
@@ -42,7 +44,7 @@ function useEditableTableData(
   const itemsRef = useRef(items)
   itemsRef.current = items
 
-  const onCellChange = async (updatedItem: MockUser) => {
+  const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
     action("onCellChange")(updatedItem)
     setItems((prev) =>
       prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
@@ -100,6 +102,38 @@ export const BasicEditableTable: Story = {
   },
 }
 
+export const EditableTableWithSelectableRows: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({
+      table: {
+        nestedRecords: true,
+      },
+    })
+    const { dataAdapter, onCellChange } = useEditableTableData()
+    return (
+      <ExampleComponent
+        selectable={() => ""}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-selectable/v1"
+      />
+    )
+  },
+}
+
 export const EditableTableWithColumnSettings: Story = {
   render: () => {
     const mockVisualizations = getMockVisualizations({
@@ -147,7 +181,7 @@ export const EditableTableWithErrors: Story = {
     const mockVisualizations = getMockVisualizations()
     const { dataAdapter } = useEditableTableData()
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
       // Simulate an API call that always fails
       await new Promise((resolve) => setTimeout(resolve, 300))
@@ -365,7 +399,7 @@ export const EditableTableWithNestedRecords: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -419,7 +453,7 @@ export const EditableTableWithStickyNestedRecords: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -467,7 +501,7 @@ export const EditableTableWithNestedRecordsDetailed: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -515,7 +549,7 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -566,7 +600,7 @@ export const EditableTableWithNestedRecordsAndAddRow: Story = {
       },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -619,7 +653,7 @@ export const EditableTableWithMultipleAddRowActions: Story = {
       table: { noSorting: true, nestedRecords: true, applyLongText: false },
     })
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       action("onCellChange")(updatedItem)
     }
 
@@ -760,7 +794,7 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
     itemsRef.current = items
     const counter = useRef(0)
 
-    const onCellChange = async (updatedItem: MockUser) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: MockUser }) => {
       const normalized: MockUser = {
         ...updatedItem,
         salary:
@@ -1037,6 +1071,79 @@ export const EditableTableWithDateCell: Story = {
   },
 }
 
+export const EditableTableWithDateCellMinMax: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable date cells constrained with `dateConfig.minDate` / `dateConfig.maxDate`. Dates outside the range are disabled in the picker.",
+      },
+    },
+  },
+  render: () => {
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      getMockVisualizations().editableTable as Extract<
+        ReturnType<typeof getMockVisualizations>["editableTable"],
+        { type: "editableTable" }
+      >
+    ).options
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const oneYearOut = new Date(today)
+    oneYearOut.setFullYear(oneYearOut.getFullYear() + 1)
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: [
+                {
+                  label: "Name",
+                  render: (item: MockUser) => ({
+                    type: "person" as const,
+                    value: {
+                      firstName: item.name.split(" ")[0],
+                      lastName: item.name.split(" ")[1],
+                    },
+                  }),
+                  id: "name",
+                },
+                {
+                  label: "Start date (no past dates)",
+                  id: "startDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  dateConfig: { minDate: today },
+                },
+                {
+                  label: "End date (today → +1y)",
+                  id: "endDate",
+                  render: (item: MockUser) =>
+                    format(item.joinedAt, "yyyy-MM-dd"),
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  dateConfig: { minDate: today, maxDate: oneYearOut },
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-date-min-max/v1"
+      />
+    )
+  },
+}
+
 export const TableAndEditableTable: Story = {
   parameters: {
     docs: {
@@ -1284,7 +1391,7 @@ export const DynamicUnitsPerRow: Story = {
     const itemsRef = useRef(items)
     itemsRef.current = items
 
-    const onCellChange = async (updatedItem: LineItem) => {
+    const onCellChange = async ({ updatedItem }: { updatedItem: LineItem }) => {
       action("onCellChange")(updatedItem)
       setItems((prev) =>
         prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
@@ -1386,6 +1493,115 @@ export const DynamicUnitsPerRow: Story = {
           },
         ]}
         id="editable-table-dynamic-units/v1"
+      />
+    )
+  },
+}
+
+/**
+ * Shows a select column whose options carry a `status` tag. The cell trigger
+ * renders the matching status pill (instead of plain text), and each option in
+ * the dropdown is shown with its pill — a "pill picker" UX.
+ */
+export const EditableTableWithStatusPillSelect: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Select column where each option carries a `tag: { type: 'status' }`. The closed cell trigger renders a status pill (matching what a non-editable `type: 'status'` cell would show), and the dropdown options show pills too.",
+      },
+    },
+  },
+  render: () => {
+    type RequestStatus = "draft" | "pending" | "approved" | "rejected"
+
+    const STATUS_LABEL: Record<RequestStatus, string> = {
+      draft: "Draft",
+      pending: "Pending",
+      approved: "Approved",
+      rejected: "Rejected",
+    }
+    const STATUS_VARIANT: Record<RequestStatus, StatusVariant> = {
+      draft: "neutral",
+      pending: "warning",
+      approved: "positive",
+      rejected: "critical",
+    }
+    const STATUS_VALUES: RequestStatus[] = [
+      "draft",
+      "pending",
+      "approved",
+      "rejected",
+    ]
+
+    const initialItems = generateMockUsers(4).map((user, index) => ({
+      ...user,
+      status: STATUS_VALUES[index],
+    }))
+
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  editType: () => "text" as const,
+                  render: (item: MockUser) => item.name,
+                },
+                {
+                  label: "Status",
+                  id: "status",
+                  width: 200,
+                  editType: () => "select" as const,
+                  render: (item: MockUser) => {
+                    const status = item.status as RequestStatus
+                    return {
+                      type: "status" as const,
+                      value: {
+                        label: STATUS_LABEL[status],
+                        status: STATUS_VARIANT[status],
+                      },
+                    }
+                  },
+                  selectConfig: {
+                    placeholder: "Status",
+                    showSearchBox: false,
+                    options: STATUS_VALUES.map((id) => ({
+                      value: id,
+                      label: STATUS_LABEL[id],
+                      tag: {
+                        type: "status" as const,
+                        text: STATUS_LABEL[id],
+                        variant: STATUS_VARIANT[id],
+                      },
+                    })),
+                    defaultItem: (item: MockUser) => {
+                      const status = item.status as RequestStatus
+                      return {
+                        value: status,
+                        label: STATUS_LABEL[status],
+                        tag: {
+                          type: "status" as const,
+                          text: STATUS_LABEL[status],
+                          variant: STATUS_VARIANT[status],
+                        },
+                      }
+                    },
+                  },
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-status-pill-select/v1"
       />
     )
   },

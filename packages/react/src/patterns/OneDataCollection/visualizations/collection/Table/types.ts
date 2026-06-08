@@ -35,6 +35,13 @@ export type WithOptionalSorting<
    * The width of the column. If not provided, the width will be "auto"
    */
   width?: number
+
+  /**
+   * Optional minimum width for the column in pixels. When provided, overrides
+   * the minWidth derived from `width`. Useful for columns with no fixed
+   * `width` that should not shrink below a given size.
+   */
+  minWidth?: number
 }
 
 export type ColId = string
@@ -46,7 +53,7 @@ export type TableColumnDefinition<
 > = WithOptionalSorting<R, Sortings> &
   Pick<
     ComponentProps<typeof TableHead>,
-    "hidden" | "info" | "infoIcon" | "sticky" | "width"
+    "hidden" | "info" | "infoIcon" | "sticky" | "width" | "minWidth"
   > & {
     /**
      * Optional summary configuration for this column
@@ -132,6 +139,12 @@ export type TableVisualizationOptions<
    * definitions, values are the display labels rendered in the spanning header row.
    */
   headerGroupLabels?: Record<string, string>
+
+  /**
+   * Wraps the table in a rounded border container.
+   * Useful for embedding the table inside panels or detail views.
+   */
+  bordered?: boolean
 }
 
 export type TableCollectionProps<

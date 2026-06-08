@@ -21,6 +21,13 @@ interface TableHeadProps {
   width?: ColumnWidth
 
   /**
+   * Optional minimum width for the header cell. When provided, overrides the
+   * minWidth derived from `width`, allowing the column to grow past `width`
+   * while never shrinking below this value.
+   */
+  minWidth?: ColumnWidth
+
+  /**
    * When true, the header cell will stick in the specified position when scrolling horizontally
    * @default undefined
    */
@@ -77,6 +84,7 @@ interface TableHeadProps {
 export function TableHead({
   children,
   width = "auto",
+  minWidth,
   sortState = "none",
   onSortClick,
   info,
@@ -187,6 +195,7 @@ export function TableHead({
   )
 
   const colWidth = getColWidth(width)
+  const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
 
   return (
     <TableHeadRoot
@@ -206,7 +215,7 @@ export function TableHead({
       style={{
         width: colWidth,
         maxWidth: colWidth,
-        minWidth: colWidth,
+        minWidth: colMinWidth,
         left: stickyLeft,
         right: stickyRight,
       }}

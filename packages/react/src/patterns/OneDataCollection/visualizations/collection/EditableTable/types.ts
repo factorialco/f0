@@ -1,3 +1,4 @@
+import type { IconType, F0IconProps } from "@/components/F0Icon"
 import type {
   F0SelectItemObject,
   F0SelectItemProps,
@@ -30,6 +31,34 @@ export type AddRowActionsResult =
   | undefined
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
+
+/**
+ * Map of the attributes modified in a cell update, keyed by record key.
+ * Each entry is a `[previousValue, newValue]` tuple.
+ */
+export type EditableTableCellChanges<R extends RecordType> = {
+  [K in keyof R]?: [R[K], R[K]]
+}
+
+/**
+ * Arguments passed to `onCellChange`.
+ */
+export type EditableTableOnCellChangeParams<R extends RecordType> = {
+  /** The full row item with the change(s) applied. */
+  updatedItem: R
+  /**
+   * Map of the modified attributes keyed by record key, where each entry is a
+   * `[previousValue, newValue]` tuple.
+   */
+  changes: EditableTableCellChanges<R>
+}
+
+export type DateCellConfig = {
+  /** Earliest selectable date. Dates before this are disabled in the picker. */
+  minDate?: Date
+  /** Latest selectable date. Dates after this are disabled in the picker. */
+  maxDate?: Date
+}
 
 export type NumberCellConfig<R extends RecordType = RecordType> = {
   min?: number
@@ -124,6 +153,60 @@ export type EditableTableColumnDefinition<
    * Falls back to sensible defaults when omitted.
    */
   numberConfig?: NumberCellConfig<R>
+
+  /**
+   * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
+   * restrict the selectable date range in the picker.
+   */
+  dateConfig?: DateCellConfig
+
+  /**
+   * Called after this cell's value changes. Use to compute derived values
+   * and update other cells in the same row.
+   *
+   * Works with every cell type (text, number, date, select, etc.).
+   *
+   * @example
+   * formula: ({ value, setCellValue }) => {
+   *   const hours = roleHoursMap[value as string]
+   *   if (hours != null) setCellValue("plannedHours", hours)
+   * }
+   */
+  formula?: (params: {
+    /** The new value of this cell. */
+    value: unknown
+    /** The current row item (before this change is applied). */
+    item: R
+    /** For select cells: the full record associated with the selected option. */
+    selectedItem?: RecordType
+    /** Update another cell in the same row by column id. */
+    setCellValue: (columnId: string, value: unknown) => void
+  }) => void
+
+  /**
+   * Returns a hint to display as an icon with tooltip inside the cell.
+   * Use to warn the user when a value diverges from its formula-inferred value,
+   * or to provide extra context for non-editable / disabled cells (e.g. why a
+   * value was inferred, who a row is backfilling, why editing is locked).
+   *
+   * Supported by all `editType` values, including `display-only` and `disabled`.
+   *
+   * Return `undefined` to hide the hint.
+   *
+   * @example
+   * cellHint: (item) => {
+   *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
+   *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+   *   }
+   * }
+   */
+  cellHint?: (item: R) =>
+    | {
+        icon: IconType
+        message: string
+        iconColor?: F0IconProps["color"]
+      }
+    | undefined
 }
 
 export type EditableTableVisualizationOptions<
@@ -137,11 +220,15 @@ export type EditableTableVisualizationOptions<
 > & {
   columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>
   /**
-   * Called when a cell value changes with the full updated row.
+   * Called when a cell value changes. Receives an object with the full updated
+   * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
+   * record key, where each entry is a `[previousValue, newValue]` tuple.
    * Resolve with nothing for success, or `{ columnId: "message" }` to set errors.
    * Rejection sets an error on the edited column.
    */
-  onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellChange: (
+    params: EditableTableOnCellChangeParams<R>
+  ) => Promise<void | Record<string, string>>
   /**
    * When provided, renders action buttons at the bottom of the root-level table.
    * Returns a single action, an array of actions, or undefined to hide the row.

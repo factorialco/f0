@@ -49,8 +49,8 @@ For **MDX documentation** (the Docs tab), use the global `factorial-f0-component
 
 ```
 src/
-  components/    — all public F0 components
-  experimental/  — legacy only, do NOT add new components here
+  components/    — stable public F0 components only (promoted by Foundations team)
+  experimental/  — ALL new components start here; never add directly to components/
   hooks/         — public exported hooks
   icons/         — generated icons (do not edit manually)
   layout/        — page layout components
@@ -58,6 +58,16 @@ src/
   sds/           — satellite design systems (non-core components)
   ui/            — primitive wrappers (Radix, shadcn/ui); not re-exported publicly
 ```
+
+### New component workflow
+
+**Every new component must start in `experimental/`**, regardless of how complete it feels.
+Only a member of the **Foundations team** can promote a component from `experimental/` to `components/` (stable).
+
+1. Create component in `experimental/<Category>/F0ComponentName/`
+2. Export from `experimental/<Category>/exports.ts`
+3. Story title: `"Components/F0ComponentName"` (no `Experimental/` prefix in sidebar)
+4. Foundations team reviews and promotes to `components/` when ready — use the `f0-experimental-component-migration` skill
 
 Each component follows this structure:
 
@@ -157,6 +167,25 @@ See `f0-component-patterns` skill for code examples.
 - Inline `style` only for truly dynamic values (hex colors, percentages)
 
 See `f0-component-patterns` skill for CVA, container query, and animation code examples.
+
+### Visual recipes (`lib/recipes/`)
+
+Some design system patterns must be reproducible **both** as React components
+and as serialized HTML strings (e.g. mention chips inside a Tiptap editor
+that emits `<a class="...">` nodes). For those, the styles live as a
+**recipe** — a small set of static Tailwind classes — in `src/lib/recipes/`,
+and every consumer (component variants, Tiptap extensions, ad-hoc HTML
+renderers) imports the same constant.
+
+- **Default rule:** prefer the public component (e.g. `F0Link variant="mention"`)
+  whenever React can be mounted.
+- **Use the recipe directly** only when you must produce raw HTML and cannot
+  render React (Tiptap `HTMLAttributes`, server-rendered chat payloads, …).
+- **Add a new recipe only** when the pattern is part of the DS, must be
+  applied from at least two execution models (React + non-React), and can be
+  expressed as static classes. Otherwise, build a component or a `cva()`
+  variant.
+- **Existing recipes** are documented in `src/lib/recipes/README.md`.
 
 ## i18n
 

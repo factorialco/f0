@@ -33,7 +33,7 @@ const _TwoColumnLayout = forwardRef<HTMLDivElement, TwoColumnLayoutProps>(
         >
           <main
             className={cn(
-              "sm:min-h-xs order-2 h-fit border-0 px-4 py-5 sm:flex-1 sm:border-solid md:order-2 md:px-6",
+              "sm:min-h-xs order-2 h-fit border-0 py-5 sm:flex-1 sm:border-solid md:order-2 px-page",
               sticky
                 ? "md:h-full md:max-h-full md:overflow-y-auto"
                 : "min-h-full",
@@ -80,7 +80,7 @@ const Aside = ({
 }) => (
   <aside
     className={cn(
-      "min-w-30 py-5 pl-4 pr-4 sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
+      "min-w-30 py-5 pl-page pr-page sm:basis-1/4 sm:pb-6 md:max-w-80 md:pl-2",
       className
     )}
   >

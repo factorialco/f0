@@ -284,6 +284,29 @@ export const WithDropdownAction: Story = {
   },
 }
 
+export const WithSecondaryDropdownAction: Story = {
+  tags: ["!dev"],
+  args: {
+    ...Default.args,
+    secondaryActions: [
+      {
+        label: "Edit",
+        icon: Icon.Pencil,
+        onClick: fn(),
+      },
+      {
+        items: [
+          { label: "Export Excel", value: "excel", icon: Icon.Download },
+          { label: "Export CSV", value: "csv", icon: Icon.Download },
+        ],
+        value: "excel",
+        onClick: fn(),
+        variant: "outline",
+      },
+    ],
+  },
+}
+
 export const CompanyHeader: Story = {
   tags: ["!dev"],
   args: {
@@ -506,6 +529,36 @@ export const TeamHeader: Story = {
   },
 }
 
+export const WithIconMetadataAndBorder: Story = {
+  tags: ["!dev"],
+  args: {
+    title: 'MacBook Pro 14" M5',
+    showBottomBorder: true,
+    metadata: [
+      {
+        icon: Icon.Laptop,
+        label: "Category",
+        hideLabel: true,
+        value: { type: "text", content: "Laptops" },
+      },
+      {
+        label: "Brand",
+        value: { type: "text", content: "Apple" },
+      },
+      {
+        icon: Icon.Calendar,
+        label: "Delivery",
+        hideLabel: true,
+        value: { type: "text", content: "24h delivery" },
+      },
+      {
+        label: "SKU",
+        value: { type: "text", content: "000017" },
+      },
+    ],
+  },
+}
+
 export const WithLongDescription: Story = {
   tags: ["!dev"],
   args: {
@@ -599,6 +652,9 @@ export const Snapshot: Story = {
           {...(WithLongDescription.args as ResourceHeaderProps)}
         />
         <ResourceHeader {...(WithDropdownAction.args as ResourceHeaderProps)} />
+        <ResourceHeader
+          {...(WithSecondaryDropdownAction.args as ResourceHeaderProps)}
+        />
         <ResourceHeader {...(PersonHeader.args as ResourceHeaderProps)} />
         <ResourceHeader
           {...(DeactivatedEmployee.args as ResourceHeaderProps)}

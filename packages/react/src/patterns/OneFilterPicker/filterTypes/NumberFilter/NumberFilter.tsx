@@ -4,7 +4,7 @@ import { useDeepCompareEffect } from "@reactuses/core"
 import { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { NumberInputInternal } from "@/experimental/Forms/Fields/NumberInput/internal"
+import { NumberInputInternal } from "@/components/F0NumberInput/internal"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
 import { EqualGreater, EqualLess, Greater, Less } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
@@ -187,7 +187,7 @@ export function NumberFilter({
 
   return (
     <>
-      <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-6">
+      <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-4">
         <div className="flex flex-row gap-2">
           <div className="min-w-1/2 flex-1">
             <NumberInputInternal

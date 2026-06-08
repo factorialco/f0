@@ -3,9 +3,11 @@ import { useState } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
-import { Ellipsis } from "@/icons/app"
+import { Bookmark, BookmarkFilled, Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+
+import { type CardBookmark } from "../types"
 
 interface CardOptionsProps {
   /**
@@ -29,6 +31,11 @@ interface CardOptionsProps {
   onSelect?: (selected: boolean) => void
 
   /**
+   * Bookmark (save) toggle rendered alongside the other options.
+   */
+  bookmark?: CardBookmark
+
+  /**
    * Title for accessibility
    */
   title?: string
@@ -44,6 +51,7 @@ export function CardOptions({
   selectable = false,
   selected = false,
   onSelect,
+  bookmark,
   title,
   overlay = false,
 }: CardOptionsProps) {
@@ -51,7 +59,7 @@ export function CardOptions({
   const hasOtherActions = otherActions && otherActions.length > 0
   const [isOpen, setIsOpen] = useState(false)
 
-  if (!hasOtherActions && !selectable) {
+  if (!hasOtherActions && !selectable && !bookmark) {
     return null
   }
 
@@ -59,9 +67,12 @@ export function CardOptions({
     <div
       className={cn(
         "flex flex-row gap-1 opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover:sm:opacity-100 [&>div]:z-[1]",
-        (isOpen || selected) && "delay-0 sm:opacity-100",
+        // Stays visible (no hover needed) while the dropdown is open, the card is
+        // selected, or the card is bookmarked — otherwise reveals on card hover.
+        (isOpen || selected || bookmark?.bookmarked) &&
+          "delay-0 sm:opacity-100",
         overlay &&
-          "absolute right-2 top-2 rounded-sm bg-f1-background/60 p-1 shadow-md backdrop-blur-sm"
+          "pointer-events-auto absolute right-2 top-2 rounded-sm bg-f1-background/60 p-1 shadow-md backdrop-blur-sm"
       )}
     >
       {hasOtherActions && (
@@ -88,6 +99,25 @@ export function CardOptions({
             checked={selected}
             onCheckedChange={onSelect}
             hideLabel
+            stopPropagation
+          />
+        </div>
+      )}
+      {bookmark && (
+        <div className="flex items-center justify-center">
+          <ButtonInternal
+            label={bookmark.label ?? title ?? translations.actions.save}
+            icon={bookmark.bookmarked ? BookmarkFilled : Bookmark}
+            variant="ghost"
+            size="sm"
+            hideLabel
+            pressed={bookmark.bookmarked}
+            compact
+            data-testid="card-bookmark-toggle"
+            onClick={(e) => {
+              e.stopPropagation()
+              bookmark.onBookmarkChange(!bookmark.bookmarked)
+            }}
           />
         </div>
       )}

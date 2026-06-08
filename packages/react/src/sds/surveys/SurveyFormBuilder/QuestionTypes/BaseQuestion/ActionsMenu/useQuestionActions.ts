@@ -79,12 +79,15 @@ export type QuestionActions = {
   currentRatingType: RatingOptionType | null
   currentDatasetKey: string | undefined
   isMultiSelectEnabled: boolean
+  isAllowCreateEnabled: boolean
+  datasetHasOnCreate: boolean
   disallowOptionalQuestions: boolean | undefined
   canDelete: boolean
   handleChangeRequired: (checked: boolean) => void
   handleSelectQuestionType: (type: QuestionType, datasetKey?: string) => void
   handleSelectRatingType: (type: RatingOptionType) => void
   handleToggleMultiSelect: (enabled: boolean) => void
+  handleToggleAllowCreate: (enabled: boolean) => void
   handleDuplicate: () => void
   handleDelete: () => void
 }
@@ -101,6 +104,7 @@ export function useQuestionActionsFactory() {
     deleteElement,
     onDuplicateElement,
     disallowOptionalQuestions,
+    datasets,
   } = useSurveyFormBuilderContext()
 
   const questionTypes = useQuestionTypes()
@@ -194,6 +198,27 @@ export function useQuestionActionsFactory() {
         >[0])
       }
 
+      const datasetHasOnCreate = !!(
+        currentDatasetKey && datasets?.[currentDatasetKey]?.onCreate
+      )
+
+      const isAllowCreateEnabled = !!(
+        question &&
+        "allowCreate" in question &&
+        question.allowCreate
+      )
+
+      const handleToggleAllowCreate = (enabled: boolean) => {
+        if (!currentDatasetKey) return
+        onQuestionChange?.({
+          id: questionId,
+          type: questionType,
+          allowCreate: enabled,
+        } as Parameters<
+          NonNullable<SurveyFormBuilderCallbacks["onQuestionChange"]>
+        >[0])
+      }
+
       const handleDuplicate = () => {
         onDuplicateElement?.({ elementId: questionId, type: questionType })
       }
@@ -208,12 +233,15 @@ export function useQuestionActionsFactory() {
         currentRatingType,
         currentDatasetKey,
         isMultiSelectEnabled,
+        isAllowCreateEnabled,
+        datasetHasOnCreate,
         disallowOptionalQuestions,
         canDelete,
         handleChangeRequired,
         handleSelectQuestionType,
         handleSelectRatingType,
         handleToggleMultiSelect,
+        handleToggleAllowCreate,
         handleDuplicate,
         handleDelete,
       }
@@ -225,6 +253,7 @@ export function useQuestionActionsFactory() {
       onDuplicateElement,
       disallowOptionalQuestions,
       questionTypes,
+      datasets,
     ]
   )
 

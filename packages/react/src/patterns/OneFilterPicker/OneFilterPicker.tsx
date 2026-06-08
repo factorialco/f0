@@ -12,7 +12,7 @@ import { FiltersChipsList as FiltersChipsListComponent } from "./components/Filt
 import { FiltersControls as FiltersControlsComponent } from "./components/FiltersControls"
 import { FiltersPresets as FiltersPresetsComponent } from "./components/FiltersPresets"
 import { FiltersContext } from "./context"
-import { getPresetCoveredKeys } from "./internal/getPresetCoveredKeys"
+import { isPresetSelected } from "./internal/isPresetSelected"
 import { PresetsDefinition } from "./types"
 
 /**
@@ -38,6 +38,25 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   onOpenChange?: (isOpen: boolean) => void
   /** Display counter for the applied filters */
   displayCounter?: boolean
+  /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
+  resultCount?: number
+  /**
+   * Id of the currently selected preset. When provided together with
+   * `onSelectPreset`, preset selection is identity-based (the preset stays
+   * selected as the user changes state on top of it). When absent, the picker
+   * falls back to legacy exact-filter-match selection.
+   */
+  selectedPresetId?: string
+  /** Selects a preset by id. Enables identity-based selection. */
+  onSelectPreset?: (presetId: string) => void
+  /** Ids of presets that can be edited/deleted (user-created presets). */
+  editablePresetIds?: string[]
+  /** Opens the edit flow for a preset (hover icon on editable presets). */
+  onEditPreset?: (presetId: string) => void
+  /** Whether to show the dashed "Save view" chip ("save" | "none"). */
+  presetActionState?: "save" | "none"
+  /** Opens the preset create/update dialog. */
+  onPresetAction?: () => void
 }
 
 /**
@@ -229,13 +248,36 @@ FiltersControls.displayName = "OneFilterPicker.Controls"
  * Filter presets
  */
 const FiltersPresets = () => {
-  const { presets, presetsLoading, value, setFiltersValue, emitPresetClick } =
-    useContext(FiltersContext)
+  const {
+    presets,
+    presetsLoading,
+    value,
+    setFiltersValue,
+    emitPresetClick,
+    selectedPresetId,
+    onSelectPreset,
+    editablePresetIds,
+    onEditPreset,
+    presetActionState,
+    onPresetAction,
+  } = useContext(FiltersContext)
 
   const handlePresetClick = (presetFilter: FiltersState<FiltersDefinition>) => {
     emitPresetClick(presetFilter)
     setFiltersValue(presetFilter)
   }
+
+  // In identity-based mode the owner applies the whole preset state; we still
+  // emit the analytics event with the preset's filter for parity with legacy.
+  const handleSelectPreset = onSelectPreset
+    ? (presetId: string) => {
+        const preset = presets?.find(
+          (p, index) => (p.id ?? `${p.label}-${index}`) === presetId
+        )
+        if (preset) emitPresetClick(preset.filter)
+        onSelectPreset(presetId)
+      }
+    : undefined
 
   return (
     presets && (
@@ -244,6 +286,12 @@ const FiltersPresets = () => {
         presetsLoading={presetsLoading}
         value={value}
         onPresetsChange={handlePresetClick}
+        selectedPresetId={selectedPresetId}
+        onSelectPreset={handleSelectPreset}
+        editablePresetIds={editablePresetIds}
+        onEditPreset={onEditPreset}
+        presetActionState={presetActionState}
+        onPresetAction={onPresetAction}
       />
     )
   )
@@ -261,12 +309,19 @@ const FiltersChipsList = () => {
     presets,
     removeFilterValue,
     setFiltersValue,
+    resultCount,
+    onSelectPreset,
   } = useContext(FiltersContext)
 
-  // Get filter keys that are covered by currently selected presets
-  const presetCoveredKeys = useMemo(() => {
-    return getPresetCoveredKeys(presets, value)
-  }, [presets, value])
+  // In identity-based mode chips stay visible while a preset is selected so the
+  // user can see what they've changed on top of it. In legacy mode, hide all
+  // chips when a preset exactly matches the current filters (the preset chip
+  // already represents them).
+  const isAnyPresetActive = useMemo(() => {
+    if (onSelectPreset) return false
+    if (!presets?.length) return false
+    return presets.some((preset) => isPresetSelected(preset, value))
+  }, [presets, value, onSelectPreset])
 
   return (
     filters && (
@@ -276,7 +331,8 @@ const FiltersChipsList = () => {
         onFilterSelect={() => setIsFiltersOpen(true)}
         onFilterRemove={removeFilterValue}
         onClearAll={() => setFiltersValue({})}
-        excludedKeys={presetCoveredKeys}
+        hideChips={isAnyPresetActive}
+        resultCount={resultCount}
       />
     )
   )

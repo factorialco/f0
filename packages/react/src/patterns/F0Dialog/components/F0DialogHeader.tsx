@@ -6,6 +6,7 @@ import {
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
 import { Tabs } from "@/patterns/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
+import { Ellipsis } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
@@ -42,7 +43,9 @@ export const F0DialogHeader = ({
   const Actions = () => {
     if (!otherActionItems.length || !otherActions) return null
 
-    if (otherActionItems.length <= 2) {
+    const hasCriticalAction = otherActionItems.some((action) => action.critical)
+
+    if (otherActionItems.length <= 2 && !hasCriticalAction) {
       return (
         <div className="flex flex-row gap-2">
           {otherActionItems.map((action) => (
@@ -59,7 +62,7 @@ export const F0DialogHeader = ({
       )
     }
 
-    return <DropdownInternal items={otherActions} />
+    return <DropdownInternal items={otherActions} icon={Ellipsis} />
   }
 
   const Module = () => {

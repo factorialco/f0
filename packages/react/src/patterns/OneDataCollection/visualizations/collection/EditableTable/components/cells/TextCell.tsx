@@ -1,4 +1,4 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
@@ -11,9 +11,10 @@ export function TextCell<R extends RecordType>({
   error,
   loading,
   onChange,
+  hint,
 }: EditableCellProps<R>) {
   return (
-    <BaseCell error={error}>
+    <BaseCell error={error} hint={hint}>
       <div
         className={cn(
           "flex w-full min-w-0",
@@ -21,7 +22,7 @@ export function TextCell<R extends RecordType>({
           editableColumn.align === "right" && "[&_input]:text-right"
         )}
       >
-        <Input
+        <F0TextInput
           type="text"
           label={editableColumn.label}
           hideLabel

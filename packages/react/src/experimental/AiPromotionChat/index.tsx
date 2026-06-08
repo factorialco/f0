@@ -75,7 +75,7 @@ const AiPromotionChatCmp = () => {
   }
 
   return (
-    <ChatWindow clickOutsideToClose hitEscapeToClose shortcut="">
+    <ChatWindow>
       {/* Close button header */}
       <div className="flex items-center justify-end p-3 pb-0">
         <ButtonInternal

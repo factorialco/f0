@@ -2,7 +2,6 @@ import { useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   GroupingDefinition,
   GroupingState,
@@ -12,6 +11,7 @@ import {
 } from "@/hooks/datasource"
 import { Reset, Sliders } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { ItemActionsDefinition } from "../item-actions"
@@ -21,6 +21,7 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
+import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { VisualizationSelector } from "./components/VisualizationSelector"
@@ -58,6 +59,7 @@ type SettingsProps<
   sortings?: SortingsDefinition
   summaries?: SummariesDefinition
   currentSortings: SortingsState<Sortings>
+  defaultSortings: SortingsState<Sortings>
   onSortingsChange: (sortings: SortingsState<Sortings>) => void
 }
 
@@ -79,6 +81,7 @@ export const Settings = <
   onGroupingChange,
   sortings,
   currentSortings,
+  defaultSortings,
   onSortingsChange,
 }: SettingsProps<
   R,
@@ -153,11 +156,30 @@ export const Settings = <
 
   const settingsContext = useDataCollectionSettings()
 
+  const hasModifiedSettings = useMemo(() => {
+    if (JSON.stringify(currentSortings) !== JSON.stringify(defaultSortings))
+      return true
+
+    const visualizationType = visualizations[currentVisualization]?.type
+
+    return !isVisualizationSettingsDefault(
+      settingsContext.settings,
+      visualizationType
+    )
+  }, [
+    settingsContext.settings.visualization,
+    visualizations,
+    currentVisualization,
+    currentSortings,
+    defaultSortings,
+  ])
+
   const onResetSettings = () => {
     // Call to the all visualizations reset handler
     Object.values(collectionVisualizations).forEach((visualization) => {
       visualization.settings.resetHandler?.(settingsContext)
     })
+    onSortingsChange(defaultSortings)
   }
 
   return (
@@ -222,18 +244,20 @@ export const Settings = <
                 {visualizacionSettings}
               </section>
             ),
-            <section
-              key="reset"
-              className="border-0 border-t border-solid border-t-f1-border p-3"
-            >
-              <F0Button
-                size="sm"
-                variant="ghost"
-                icon={Reset}
-                label={i18n.collections.visualizations.reset}
-                onClick={onResetSettings}
-              />
-            </section>,
+            hasModifiedSettings && (
+              <section
+                key="reset"
+                className="border-0 border-t border-solid border-t-f1-border p-3"
+              >
+                <F0Button
+                  size="sm"
+                  variant="ghost"
+                  icon={Reset}
+                  label={i18n.collections.visualizations.reset}
+                  onClick={onResetSettings}
+                />
+              </section>
+            ),
           ].filter(Boolean)}
         </PopoverContent>
       </Popover>

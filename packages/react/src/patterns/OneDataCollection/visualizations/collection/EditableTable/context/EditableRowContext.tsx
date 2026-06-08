@@ -10,7 +10,13 @@ import {
 } from "react"
 
 import type { RecordType } from "@/hooks/datasource"
+
 import { useI18n } from "@/lib/providers/i18n"
+
+import type {
+  EditableTableCellChanges,
+  EditableTableOnCellChangeParams,
+} from "../types"
 
 type EditableRowContextValue<R extends RecordType> = {
   /** The optimistic local copy of the item, updated immediately on change */
@@ -21,6 +27,8 @@ type EditableRowContextValue<R extends RecordType> = {
   cellLoading: Record<string, boolean>
   /** Update a single field and notify the parent via onCellChange */
   handleCellChange: (columnId: string, value: unknown) => void
+  /** Apply multiple field updates at once, then call onCellChange once */
+  batchCellChanges: (updates: Record<string, unknown>) => void
 }
 
 // React's createContext does not support per-usage generics.
@@ -30,7 +38,9 @@ const EditableRowContext =
 
 export type EditableRowProviderProps<R extends RecordType> = {
   item: R
-  onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellChange: (
+    params: EditableTableOnCellChangeParams<R>
+  ) => Promise<void | Record<string, string>>
   children: React.ReactNode
 }
 
@@ -59,7 +69,13 @@ export function EditableRowProvider<R extends RecordType>({
 
   const handleCellChange = useCallback(
     (columnId: string, value: unknown) => {
-      const updatedItem = { ...localItemRef.current, [columnId]: value } as R
+      const previousItem = localItemRef.current
+      const updatedItem = { ...previousItem, [columnId]: value } as R
+      localItemRef.current = updatedItem
+
+      const changes: EditableTableCellChanges<R> = {
+        [columnId]: [previousItem[columnId], value],
+      } as EditableTableCellChanges<R>
 
       setLocalItem(updatedItem)
 
@@ -73,7 +89,7 @@ export function EditableRowProvider<R extends RecordType>({
 
       setCellLoading((prev) => ({ ...prev, [columnId]: true }))
 
-      onCellChange(updatedItem)
+      onCellChange({ updatedItem, changes })
         .then((errors) => {
           if (errors && Object.keys(errors).length > 0) {
             setCellErrors((prev) => ({ ...prev, ...errors }))
@@ -95,9 +111,84 @@ export function EditableRowProvider<R extends RecordType>({
     [onCellChange, t]
   )
 
+  const batchCellChanges = useCallback(
+    (updates: Record<string, unknown>) => {
+      const columnIds = Object.keys(updates)
+      if (columnIds.length === 0) return
+
+      const previousItem = localItemRef.current
+      const updatedItem = { ...previousItem, ...updates } as R
+      localItemRef.current = updatedItem
+
+      const changes: EditableTableCellChanges<R> = {}
+      for (const id of columnIds) {
+        ;(changes as Record<string, [unknown, unknown]>)[id] = [
+          previousItem[id],
+          updates[id],
+        ]
+      }
+
+      setLocalItem(updatedItem)
+
+      setCellErrors((prev) => {
+        const next = { ...prev }
+        let changed = false
+        for (const id of columnIds) {
+          if (id in next) {
+            delete next[id]
+            changed = true
+          }
+        }
+        return changed ? next : prev
+      })
+
+      const loadingOn: Record<string, boolean> = {}
+      for (const id of columnIds) {
+        loadingOn[id] = true
+      }
+      setCellLoading((prev) => ({ ...prev, ...loadingOn }))
+
+      onCellChange({ updatedItem, changes })
+        .then((errors) => {
+          if (errors && Object.keys(errors).length > 0) {
+            setCellErrors((prev) => ({ ...prev, ...errors }))
+          }
+        })
+        .catch((error: unknown) => {
+          const msg =
+            error instanceof Error
+              ? error.message
+              : t("collections.editableTable.errors.saveFailed")
+          setCellErrors((prev) => {
+            const next = { ...prev }
+            for (const id of columnIds) {
+              next[id] = msg
+            }
+            return next
+          })
+        })
+        .finally(() => {
+          setCellLoading((prev) => {
+            const next = { ...prev }
+            for (const id of columnIds) {
+              next[id] = false
+            }
+            return next
+          })
+        })
+    },
+    [onCellChange, t]
+  )
+
   return (
     <EditableRowContext.Provider
-      value={{ localItem, cellErrors, cellLoading, handleCellChange }}
+      value={{
+        localItem,
+        cellErrors,
+        cellLoading,
+        handleCellChange,
+        batchCellChanges,
+      }}
     >
       {children}
     </EditableRowContext.Provider>

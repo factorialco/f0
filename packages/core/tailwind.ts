@@ -6,6 +6,7 @@ import { boxShadow } from "./src/tokens/shadows"
 import {
   absoluteSpacing,
   betweenSpacing,
+  pageSpacing,
   relativeSpacing,
 } from "./src/tokens/spacing"
 import { fontSize, fontWeight } from "./src/tokens/typography"
@@ -58,6 +59,7 @@ export const baseConfig: Omit<Config, "content"> = {
       width: relativeSpacing,
       gap: betweenSpacing,
       space: betweenSpacing,
+      padding: pageSpacing,
       colors: {
         f1: f1Colors,
       },

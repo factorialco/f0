@@ -40,6 +40,7 @@ export const BaseQuestion = ({
   required,
   locked: questionLocked,
   type: questionType,
+  hiddenActions,
 }: BaseQuestionProps) => {
   const {
     onQuestionChange,
@@ -130,7 +131,7 @@ export const BaseQuestion = ({
     <div
       id={`co-creation-question-${id}`}
       className={cn(
-        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-3 py-4",
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
         !isDragging && !answering && "hover:border-f1-border-hover",
         !answering || !!description ? "gap-4" : "gap-2"
       )}
@@ -194,6 +195,7 @@ export const BaseQuestion = ({
                 canDeleteQuestion={
                   !isWithinSection || !isSingleQuestionInSection
                 }
+                hiddenActions={hiddenActions}
               />
             </div>
           )}

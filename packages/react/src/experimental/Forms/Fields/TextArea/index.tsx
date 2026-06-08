@@ -1,46 +1,10 @@
-export * from "@/ui/textarea"
-import { ComponentProps } from "react"
-
-import { experimentalComponent } from "@/lib/experimental"
-import { Textarea as ShadcnTextarea } from "@/ui/textarea"
-
-import { Component } from "../../../../lib/component/component"
-
-export type TextareaProps = Pick<
-  ComponentProps<typeof ShadcnTextarea>,
-  | "disabled"
-  | "onChange"
-  | "value"
-  | "placeholder"
-  | "rows"
-  | "cols"
-  | "label"
-  | "labelIcon"
-  | "icon"
-  | "hideLabel"
-  | "maxLength"
-  | "clearable"
-  | "onBlur"
-  | "onFocus"
-  | "name"
-  | "status"
-  | "hint"
-  | "error"
-  | "size"
-  | "loading"
-  | "required"
-  | "maxHeight"
->
-
-const _Textarea: React.FC<TextareaProps> = Component(
-  {
-    name: "Textarea",
-    type: "form",
-  },
-  ShadcnTextarea
-)
-
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Moved to `@/components/F0TextAreaInput`.
+ * Re-exported for backwards compatibility. Will be removed in 2.0.0.
+ *
+ *   - import { F0TextAreaInput } from "@factorialco/f0-react/dist/experimental"
+ *   + import { F0TextAreaInput } from "@factorialco/f0-react"
+ *
+ * @removeIn 2.0.0
  */
-export const Textarea = experimentalComponent("Textarea", _Textarea)
+export * from "@/components/F0TextAreaInput"

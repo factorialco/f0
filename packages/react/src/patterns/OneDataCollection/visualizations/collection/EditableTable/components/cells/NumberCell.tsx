@@ -1,10 +1,11 @@
 import { useCallback } from "react"
 
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { F0NumberInput } from "@/components/F0NumberInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
 import type { EditableCellProps } from "."
+
 import { BaseCell } from "./BaseCell"
 import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
 
@@ -15,6 +16,7 @@ export function NumberCell<R extends RecordType>({
   loading,
   onChange,
   item,
+  hint,
 }: EditableCellProps<R>) {
   const config = editableColumn.numberConfig
 
@@ -61,7 +63,7 @@ export function NumberCell<R extends RecordType>({
   }, [])
 
   return (
-    <BaseCell error={error}>
+    <BaseCell error={error} hint={hint}>
       <div
         ref={ref}
         onClick={handleCellClick}
@@ -79,7 +81,7 @@ export function NumberCell<R extends RecordType>({
           style={{ width }}
         >
           {unitsBefore && unitsSpan}
-          <NumberInput
+          <F0NumberInput
             label={editableColumn.label}
             hideLabel
             value={numericValue}

@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import { F0Select } from "@/components/F0Select"
 
@@ -39,6 +39,7 @@ function SelectWithOptions({
     showSearchBox: field.showSearchBox,
     searchBoxPlaceholder: field.searchBoxPlaceholder,
     icon: field.icon,
+    onCreate: field.onCreate,
     name: formField.name,
     onBlur: formField.onBlur,
     error,
@@ -116,6 +117,7 @@ function SelectWithSource({
     showSearchBox: field.showSearchBox,
     searchBoxPlaceholder: field.searchBoxPlaceholder,
     icon: field.icon,
+    onCreate: field.onCreate,
     name: formField.name,
     onBlur: formField.onBlur,
     error,

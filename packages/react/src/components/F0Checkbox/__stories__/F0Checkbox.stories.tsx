@@ -4,12 +4,13 @@ import { useState } from "react"
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Checkbox } from "../F0Checkbox"
 
 const meta = {
   component: F0Checkbox,
-  tags: ["experimental", "!autodocs"],
+  tags: ["stable", "!autodocs"],
   title: "Checkbox",
   parameters: {
     layout: "centered",
@@ -131,4 +132,17 @@ export const Checked: Story = {
       <F0Checkbox {...args} checked={checked} onCheckedChange={setChecked} />
     )
   },
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <F0Checkbox title="Unchecked" checked={false} />
+      <F0Checkbox title="Checked" checked={true} />
+      <F0Checkbox title="Indeterminate" indeterminate />
+      <F0Checkbox title="Disabled" disabled />
+      <F0Checkbox title="Disabled checked" disabled checked={true} />
+    </div>
+  ),
 }

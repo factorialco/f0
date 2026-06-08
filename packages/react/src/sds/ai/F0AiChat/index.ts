@@ -1,5 +1,11 @@
 // Main components
-export { F0AiChat, F0AiChatProvider, F0AiFullscreenChat } from "./F0AiChat"
+export { F0AiChat, type F0AiChatProps, F0AiChatProvider } from "./F0AiChat"
+
+// Markdown renderers (consumed by host's markdown library via `components` override).
+export {
+  markdownRenderers,
+  type MarkdownTagRenderers,
+} from "./components/markdownRenderers/MarkdownRenderers"
 
 // Types
 export type {
@@ -8,7 +14,6 @@ export type {
   AiChatMode,
   AiChatFileAttachmentConfig,
   AiChatProviderProps,
-  AiChatToolHint,
   AppendMessage,
   AppendToolCall,
   CandidateProfile,
@@ -17,6 +22,11 @@ export type {
   CanvasContentBase,
   CreditsUsage,
   DashboardCanvasContent,
+  DataDownloadCanvasContent,
+  F0AIMessage,
+  F0Message,
+  F0ToolCall,
+  FormCanvasContent,
   EntityResolvers,
   EntityUrlBuilders,
   EntityRefs,
@@ -27,13 +37,15 @@ export type {
   VacancyProfile,
   VisualizationMode,
   WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+  WelcomeSuggestionClickEvent,
+  AiChatTrackingOptions,
   AiChatTranslations,
   AiChatTranslationsProviderProps,
 } from "./types"
 
-// Canvas entity registry and types
-export { getCanvasEntity } from "./canvas"
-export type { CanvasEntityDefinition, CanvasActions } from "./canvas"
+// Tool-call context (host actions need it to identify their own tool call)
+export { useToolCallId } from "../F0AiMessagesContainer"
 
 export { aiTranslations } from "./types"
 
@@ -51,10 +63,3 @@ export {
   useSetFormCardValueFormatter,
   type FormCardValueFormatterEntry,
 } from "./providers/FormCardValueFormatterProvider"
-
-// Copilot Actions
-export {
-  useDefaultCopilotActions,
-  useOrchestratorThinkingAction,
-  useMessageSourcesAction,
-} from "./actions"
