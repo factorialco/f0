@@ -917,6 +917,12 @@ const OneDataCollectionComp = <
   // unpersisted changes the user had applied) instead of a hard reset.
   const preSelectionStateRef = useRef<ViewSnapshot | null>(null)
 
+  // Set when a developer preset auto-deselects because the user diverged from it,
+  // so "Save as preset" is offered afterwards — even for a view-only divergence
+  // (which from a pristine baseline would normally be too transient to offer).
+  // Reset when a preset is selected/toggled or a preset is saved.
+  const forkAfterDeselectRef = useRef(false)
+
   // When applying a snapshot that also switches the visualization, the
   // per-visualization filter logic restores the *target* view's own filters on
   // switch, which would clobber the filters we want to apply. So we defer the
@@ -976,6 +982,8 @@ const OneDataCollectionComp = <
   /** Applies a preset's full captured state (resetting uncaptured dimensions). */
   const applyPreset = useCallback(
     (presetId: string) => {
+      // Selecting/toggling a preset clears any pending "fork after deselect" hint.
+      forkAfterDeselectRef.current = false
       // Toggle off: clicking the selected preset returns to the working state
       // captured before it was selected (default config + unpersisted changes).
       if (presetId === selectedPresetId) {
@@ -1006,6 +1014,69 @@ const OneDataCollectionComp = <
       getPresetCapturedState,
     ]
   )
+
+  // Tracks the selected developer preset's applied snapshot and whether the view
+  // has *settled* onto it. Auto-deselect only fires after settling, so applying a
+  // preset that also switches the visualization (a multi-commit transition where
+  // the view transiently differs from the snapshot) never trips the deselect.
+  const devSelectionRef = useRef<{
+    id: string
+    snapshot: ViewSnapshot
+    settled: boolean
+  } | null>(null)
+
+  // A selected DEVELOPER preset represents a specific view; once the user changes
+  // anything (filters/sorting/grouping/columns/view mode) it no longer matches,
+  // so de-select it. Custom presets intentionally stay selected so the "Persist
+  // in preset" update-in-place flow keeps working. Works for both click- and
+  // URL-restored selections (it keys off `selectedPresetId`, not `applyPreset`).
+  useEffect(() => {
+    const selectedPreset = selectedPresetId
+      ? mergedPresets.find((p) => p.id === selectedPresetId)
+      : undefined
+
+    // Only developer presets auto-deselect; clear tracking otherwise.
+    if (!selectedPreset || customPresetIds.has(selectedPreset.id)) {
+      devSelectionRef.current = null
+      return
+    }
+
+    // (Re)start tracking when the selected developer preset changes.
+    if (devSelectionRef.current?.id !== selectedPreset.id) {
+      devSelectionRef.current = {
+        id: selectedPreset.id!,
+        snapshot: getPresetCapturedState(selectedPreset),
+        settled: false,
+      }
+    }
+    const tracked = devSelectionRef.current
+    if (!tracked) return
+
+    // Don't evaluate mid-transition (filters still being applied across a view
+    // switch); the post-transition render will re-run this effect.
+    if (pendingFiltersRef.current) return
+
+    if (!tracked.settled) {
+      // Wait until the view first matches the preset before arming deselect.
+      if (isEqual(capturedState, tracked.snapshot)) tracked.settled = true
+      return
+    }
+
+    if (!isEqual(capturedState, tracked.snapshot)) {
+      devSelectionRef.current = null
+      preSelectionStateRef.current = null
+      // Offer "Save as preset" after deselecting: the user diverged from a named
+      // preset, so the new view is worth saving (incl. a view-only divergence).
+      forkAfterDeselectRef.current = true
+      setSelectedPresetId(undefined)
+    }
+  }, [
+    selectedPresetId,
+    mergedPresets,
+    customPresetIds,
+    capturedState,
+    getPresetCapturedState,
+  ])
 
   // Snapshot of the view captured once storage has settled. "Save as preset"
   // (no preset selected) is offered only when the current view diverges from
@@ -1054,9 +1125,17 @@ const OneDataCollectionComp = <
     // Until storage settles (baseline captured), don't offer to save — avoids a
     // spurious "save" flash while filters/sorting/etc. hydrate from storage.
     if (sessionBaseline === null) return "none"
-    return sameIgnoringVisualization(capturedState, sessionBaseline)
-      ? "none"
-      : "save"
+    if (!sameIgnoringVisualization(capturedState, sessionBaseline))
+      return "save"
+    // Just diverged from a (now de-selected) developer preset → offer to fork it,
+    // even when only the view mode differs, as long as we're not back at baseline.
+    if (
+      forkAfterDeselectRef.current &&
+      !isEqual(capturedState, sessionBaseline)
+    ) {
+      return "save"
+    }
+    return "none"
   }, [
     selectedPresetId,
     mergedPresets,
@@ -1100,6 +1179,7 @@ const OneDataCollectionComp = <
       } as PresetsDefinition<Filters>[number]
       setCustomPresets((prev) => [...prev, newPreset])
       setSelectedPresetId(newPreset.id)
+      forkAfterDeselectRef.current = false
       setPresetDialog(null)
     },
     [

@@ -353,7 +353,7 @@ describe("OneDataCollection - presets", () => {
     })
   })
 
-  it("offers 'Save as preset' (not 'Persist') when a developer preset is selected and edited", async () => {
+  it("de-selects a developer preset (offering 'Save as preset') when the view is edited", async () => {
     const user = userEvent.setup()
     const devPresets: PresetsDefinition<typeof filters> = [
       { id: "dev-eng", label: "Eng team", filter: { department: ["eng"] } },
@@ -362,22 +362,68 @@ describe("OneDataCollection - presets", () => {
 
     await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
 
+    const chip = () =>
+      screen
+        .getAllByText("Eng team")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+
     // Select the developer preset.
-    const presetChip = screen
-      .getAllByText("Eng team")
-      .find((el) => !el.closest('[aria-hidden="true"]'))!
-    await user.click(presetChip)
+    await user.click(chip())
+    await waitFor(() =>
+      expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
+    )
 
     // Pristine relative to the preset → no save action. (The save chip lives in
     // the presets list; query by text since it may sit in the overflow copy.)
-    await waitFor(() =>
-      expect(screen.queryByText("Save as preset")).not.toBeInTheDocument()
-    )
+    expect(screen.queryByText("Save as preset")).not.toBeInTheDocument()
 
     // Change a (non-view-mode) dimension on top of the developer preset.
     await sortByName(user)
 
-    // Developer presets are read-only → fork via "Save as preset", never "Persist".
+    // The preset no longer represents the view → it auto-de-selects...
+    await waitFor(() =>
+      expect(chip()).not.toHaveClass("bg-f1-background-selected-secondary")
+    )
+    // ...and "Save as preset" is offered (fork), never "Persist".
+    expect(screen.getAllByText("Save as preset").length).toBeGreaterThan(0)
+    expect(
+      screen.queryByRole("button", { name: "Persist in preset" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("de-selects a developer preset and offers 'Save as preset' on a view-mode change", async () => {
+    const user = userEvent.setup()
+    // Empty filter so switching view mode does not change the (per-view) filter
+    // — this isolates a pure view-mode change (table → card).
+    const devPresets: PresetsDefinition<typeof filters> = [
+      { id: "dev-all", label: "All people", filter: {} },
+    ]
+    renderHarness({ presets: devPresets })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    const chip = () =>
+      screen
+        .getAllByText("All people")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+
+    await user.click(chip())
+    await waitFor(() =>
+      expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
+    )
+
+    // Switch the view mode (to a non-default view) on top of the developer preset.
+    await openSettingsAndSwitchTo(user, "Card view")
+
+    // The captured view no longer matches → the preset de-selects...
+    await waitFor(() =>
+      expect(chip()).not.toHaveClass("bg-f1-background-selected-secondary")
+    )
+    // ...and, having diverged from a named preset, "Save as preset" is offered
+    // (a view-mode change from a *preset* is meaningful — unlike a transient
+    // toggle from a pristine baseline).
     await waitFor(() =>
       expect(screen.getAllByText("Save as preset").length).toBeGreaterThan(0)
     )
@@ -386,33 +432,104 @@ describe("OneDataCollection - presets", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("does not offer to fork a developer preset for a view-mode-only change", async () => {
+  it("keeps a developer preset selected when re-selecting after it was de-selected by a view switch", async () => {
     const user = userEvent.setup()
-    // Empty filter so switching view mode does not change the (per-view) filter
-    // — this isolates a pure view-mode change.
     const devPresets: PresetsDefinition<typeof filters> = [
-      { id: "dev-all", label: "All people", filter: {} },
+      {
+        id: "dev-cards",
+        label: "Eng (cards)",
+        filter: { department: ["eng"] },
+        visualization: 1, // card
+      },
     ]
     renderHarness({ presets: devPresets })
 
     await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
 
-    await user.click(
+    const chip = () =>
       screen
-        .getAllByText("All people")
+        .getAllByText("Eng (cards)")
         .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+
+    // Selecting a preset that switches the visualization must NOT transiently
+    // de-select it (the deferred-filter window is guarded).
+    await user.click(chip())
+    await waitFor(() =>
+      expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
+    )
+    // Still selected after the transition settles.
+    expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
+  })
+
+  it("de-selects a view-switching developer preset when its view mode changes afterward", async () => {
+    const user = userEvent.setup()
+    const devPresets: PresetsDefinition<typeof filters> = [
+      {
+        id: "dev-cards",
+        label: "Eng (cards)",
+        filter: { department: ["eng"] },
+        visualization: 1, // card
+      },
+    ]
+    renderHarness({ presets: devPresets })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    const chip = () =>
+      screen
+        .getAllByText("Eng (cards)")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+
+    await user.click(chip())
+    await waitFor(() =>
+      expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
     )
 
-    // Only switch the view mode on top of the developer preset.
-    await openSettingsAndSwitchTo(user, "Card view")
+    // Switch the view mode away from the one the preset captured → de-selects.
+    // (Switching back to the default view restores the baseline filters, so no
+    // "Save as preset" is offered here — see the table → card case above for
+    // the diverged-from-a-preset save affordance.)
+    await openSettingsAndSwitchTo(user, "Table view")
 
-    // A view-mode-only change must not offer "Save as preset".
+    await waitFor(() =>
+      expect(chip()).not.toHaveClass("bg-f1-background-selected-secondary")
+    )
+  })
+
+  it("keeps a custom preset selected when the view diverges (Persist flow)", async () => {
+    const user = userEvent.setup()
+    renderHarness()
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // Create a custom preset (auto-selected).
+    await sortByName(user)
+    await user.click(
+      await screen.findByRole("button", { name: "Save as preset" })
+    )
+    await user.type(await screen.findByLabelText("Preset title"), "My view")
+    await user.click(screen.getByRole("button", { name: "Save" }))
+
+    const chip = () =>
+      screen
+        .getAllByText("My view")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+
+    await waitFor(() =>
+      expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
+    )
+
+    // Diverge again: a custom preset stays selected and offers "Persist".
+    await sortByName(user)
+
     expect(
-      screen.queryByRole("button", { name: "Save as preset" })
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole("button", { name: "Persist in preset" })
-    ).not.toBeInTheDocument()
+      await screen.findByRole("button", { name: "Persist in preset" })
+    ).toBeInTheDocument()
+    // Still selected (unlike developer presets, custom presets are not auto-deselected).
+    expect(chip()).toHaveClass("bg-f1-background-selected-secondary")
   })
 
   it("applies the captured filters, sorting, grouping and view mode on a single click — even when the preset also switches view", async () => {
