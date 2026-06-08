@@ -1,0 +1,114 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import LinkTo from "@storybook/addon-links/react"
+import * as F0DialogStories from "./F0Dialog.stories"
+
+<Meta of={F0DialogStories} />
+
+# F0Dialog
+
+## Introduction
+
+F0Dialog is a component that provides a dialog interface for the application. It is used to display a dialog to the user.
+
+<div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-4 text-blue-800">
+  <strong>Note:</strong> While this component can be used directly, we recommend
+  checking the{" "}
+  <LinkTo kind="Dialogs" story="Docs">
+    useDialog
+  </LinkTo>{" "}
+  hook documentation before using this component directly, as it simplifies many
+  common use cases (notifications, alerts, confirmations).
+</div>
+
+## Anatomy
+
+<Canvas of={F0DialogStories.Default} />
+<Controls of={F0DialogStories.Default} />
+
+## Props
+
+### F0DialogAction Type
+
+The `F0DialogAction` type defines the properties for the buttons in the footer.
+
+```typescript
+type F0DialogAction = {
+  value?: string // Optional value identifier (used when primaryAction is array)
+  label: string // Button label text
+  icon?: IconType // Optional icon component
+  onClick: () => void | Promise<void> // Click handler - can return promise
+  disabled?: boolean // Whether button is disabled
+  loading?: boolean // Whether button shows loading state
+  closeOnClick?: boolean // Close dialog after promise resolves
+}
+```
+
+## Special Behaviors
+
+### Promise-based Actions & closeOnClick
+
+The `onClick` handler of actions has special support for Promises, which interacts with the `closeOnClick` property.
+
+- **Loading State**: If `onClick` returns a Promise, the button automatically enters a loading state and becomes disabled while the promise is pending.
+- **Auto-closing**:
+  - If `closeOnClick` is `true`, the dialog will automatically close (`onClose` is called) **after** the promise resolves.
+  - If `closeOnClick` is `false` or undefined, the dialog remains open after the promise resolves.
+
+This is particularly useful for form submissions or async operations where you want to show feedback (loading) and then close the dialog upon success.
+
+```tsx
+primaryAction={{
+  label: "Save",
+  onClick: async () => {
+    await saveData() // Button shows loading spinner during this call
+  },
+  closeOnClick: true // Dialog closes only after saveData() finishes
+}}
+```
+
+## Examples
+
+### With Description
+
+You can add a description below the title to provide more context.
+
+<Canvas of={F0DialogStories.WithDescription} />
+
+### Modal
+
+When `modal` is true, the dialog forces the user to interact with it and cannot be closed by clicking outside or pressing Escape (unless configured otherwise).
+
+<Canvas of={F0DialogStories.Modal} />
+
+### Sizes
+
+The dialog comes in different sizes: `sm`, `md` (default), `lg`, `xl`, and `fullscreen`.
+
+<Canvas of={F0DialogStories.WithSmsize} />
+<Canvas of={F0DialogStories.WithLgsize} />
+<Canvas of={F0DialogStories.WithFullscreenSize} />
+
+### With Module
+
+When used with a module ID, the header adapts to show the module icon and breadcrumbs.
+
+<Canvas of={F0DialogStories.WithModule} />
+
+### Multiple Primary Actions
+
+You can pass an array of actions to `primaryAction` to create a dropdown menu of actions. The first action is displayed as the main button.
+
+<Canvas of={F0DialogStories.WithMultiplePrimaryActions} />
+
+### Async Action (Promise)
+
+Example of an action that returns a promise, triggering the loading state.
+
+<Canvas of={F0DialogStories.WithPromisePrimaryAction} />
+
+## Guidelines
+
+- **Use `useDialog`**: Whenever possible, prefer the <LinkTo kind="Dialogs" story="Docs">useDialog</LinkTo> hook for managing dialog state and instances, especially for global notifications or confirmations.
+- **Actions**: Limit primary actions to 1 or 2 distinct choices. Use secondary actions for "Cancel" or "Close" operations.
+- **Content**: Keep dialog content focused. If you need a complex workflow, consider if a full page or a different pattern is more appropriate.
+- **Mobile**: The dialog automatically handles responsiveness, but ensure your content is responsive within the dialog container.
