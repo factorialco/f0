@@ -89,38 +89,6 @@ A slider input for selecting a numeric value from a range. Supports labels, hint
 
 ## Variants
 
-### Size Variants
-
-<Canvas of={Stories.Sizes} />
-
-<Unstyled>
-  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
-    <thead>
-      <tr>
-        <th className="text-left">Size</th>
-        <th className="text-left">Description</th>
-        <th className="text-left">When to use</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          <code>md</code>
-        </td>
-        <td>Medium track height (1.5px) and thumb (20px)</td>
-        <td>Default size for most use cases</td>
-      </tr>
-      <tr>
-        <td>
-          <code>sm</code>
-        </td>
-        <td>Small track height (1px) and thumb (16px)</td>
-        <td>Compact layouts or space-constrained forms</td>
-      </tr>
-    </tbody>
-  </table>
-</Unstyled>
-
 ### Status Variants
 
 <Canvas of={Stories.WithStatus} />
@@ -364,12 +332,6 @@ import { F0Slider } from "@factorialco/f0-react"
         <td><code>number</code></td>
         <td><code>1</code></td>
         <td>Step increment for keyboard and drag</td>
-      </tr>
-      <tr>
-        <td><code>size</code></td>
-        <td><code>"sm" | "md"</code></td>
-        <td><code>"md"</code></td>
-        <td>Track and thumb size</td>
       </tr>
       <tr>
         <td><code>hideLabel</code></td>

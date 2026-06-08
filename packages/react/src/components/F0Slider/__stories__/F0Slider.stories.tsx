@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0Slider } from ".."
-import { sliderSizes, sliderTooltipModes } from "../types"
+import { sliderTooltipModes } from "../types"
 
 const meta = {
   component: F0Slider,
@@ -33,11 +33,6 @@ const meta = {
     minLabel: { control: "text" },
     maxLabel: { control: "text" },
     hint: { control: "text" },
-    size: {
-      control: "radio",
-      options: [...sliderSizes],
-      table: { type: { summary: sliderSizes.join(" | ") } },
-    },
     showTooltip: {
       control: "radio",
       options: [...sliderTooltipModes],
@@ -201,26 +196,10 @@ export const Disabled: Story = {
   ),
 }
 
-export const Sizes: Story = {
-  tags: ["!dev"],
-  render: () => (
-    <div className="flex flex-col gap-6 w-80">
-      <F0Slider label="Medium (default)" min={0} max={100} defaultValue={50} />
-      <F0Slider label="Small" min={0} max={100} defaultValue={50} size="sm" />
-    </div>
-  ),
-}
-
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-6 p-4 w-96">
-      <section className="flex flex-col gap-3">
-        <h3 className="text-sm font-semibold">Sizes</h3>
-        <F0Slider label="Medium" min={0} max={100} defaultValue={50} />
-        <F0Slider label="Small" min={0} max={100} defaultValue={50} size="sm" />
-      </section>
-
       <section className="flex flex-col gap-3">
         <h3 className="text-sm font-semibold">Statuses</h3>
         <F0Slider

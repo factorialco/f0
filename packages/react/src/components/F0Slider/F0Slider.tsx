@@ -19,12 +19,8 @@ import { SliderTooltip } from "./components/SliderTooltip"
 import type { F0SliderProps } from "./types"
 
 const trackVariants = cva({
-  base: "relative grow overflow-hidden rounded-full bg-f1-background-tertiary",
+  base: "relative h-1.5 grow overflow-hidden rounded-full bg-f1-background-tertiary",
   variants: {
-    size: {
-      sm: "h-1",
-      md: "h-1.5",
-    },
     status: {
       default: "",
       warning: "",
@@ -44,13 +40,13 @@ const rangeVariants = cva({
       error: "bg-f1-background-critical-bold",
     },
     disabled: {
-      true: "bg-f1-background-tertiary",
+      true: "bg-f1-background-disabled",
       false: "",
     },
   },
 })
 
-const thumbSizePx = { sm: 16, md: 20 } as const
+const thumbWidthPx = 20
 
 const thumbVariants = cva({
   base: cn(
@@ -67,7 +63,7 @@ const thumbVariants = cva({
       error: "border-f1-background-critical-bold",
     },
     disabled: {
-      true: "border-f1-background-tertiary",
+      true: "border-f1-background-disabled",
       false: "",
     },
   },
@@ -94,7 +90,6 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
     maxLabel,
     formatValue = (v) => String(v),
     showTooltip = "onHover",
-    size = "md",
     ...rest
   } = props
 
@@ -128,8 +123,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
 
   const percent = max !== min ? ((clampedValue - min) / (max - min)) * 100 : 0
 
-  const thumbWidth = thumbSizePx[size]
-  const thumbInBoundsOffset = thumbWidth * (0.5 - percent / 100)
+  const thumbInBoundsOffset = thumbWidthPx * (0.5 - percent / 100)
 
   const handleValueChange = useCallback(
     (next: number[]) => {
@@ -205,7 +199,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <SliderTrack className={trackVariants({ size, status: statusType })}>
+        <SliderTrack className={trackVariants({ status: statusType })}>
           <SliderRange
             className={rangeVariants({ status: statusType, disabled })}
           />
@@ -217,7 +211,7 @@ const F0SliderBase = forwardRef<HTMLDivElement, F0SliderProps>((props, ref) => {
           aria-valuetext={formatValue(currentValue)}
           aria-describedby={describedBy}
           aria-required={required}
-          style={{ width: thumbWidth, height: thumbWidth }}
+          style={{ width: thumbWidthPx, height: thumbWidthPx }}
           className={cn(
             thumbVariants({ status: statusType, disabled }),
             focusRing("focus-visible:ring-offset-1")

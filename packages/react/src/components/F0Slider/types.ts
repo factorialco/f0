@@ -2,9 +2,6 @@ import { DataAttributes } from "@/global.types"
 import { WithDataTestIdProps } from "@/lib/data-testid"
 import { InputFieldStatus } from "@/ui/InputField/types"
 
-export const sliderSizes = ["sm", "md"] as const
-export type F0SliderSize = (typeof sliderSizes)[number]
-
 export const sliderTooltipModes = ["always", "onHover", "never"] as const
 export type F0SliderTooltipMode = (typeof sliderTooltipModes)[number]
 
@@ -54,6 +51,4 @@ export interface F0SliderProps extends WithDataTestIdProps, DataAttributes {
    * - `"never"`: never rendered.
    */
   showTooltip?: F0SliderTooltipMode
-
-  size?: F0SliderSize
 }
