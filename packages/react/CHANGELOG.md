@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.42.0](https://github.com/factorialco/f0/compare/f0-react-v2.41.5...f0-react-v2.42.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** add ButtonGroup — a data-driven action bar ([#4339](https://github.com/factorialco/f0/issues/4339)) ([170314e](https://github.com/factorialco/f0/commit/170314ec4f9f24ed79b2e0257189744c17459ab4))
+
 ## [2.41.5](https://github.com/factorialco/f0/compare/f0-react-v2.41.4...f0-react-v2.41.5) (2026-06-08)
 
 
