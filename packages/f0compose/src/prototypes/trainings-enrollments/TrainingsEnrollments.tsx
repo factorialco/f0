@@ -1889,11 +1889,11 @@ const inscripcionCopy = {
     label: "Course type",
     noEditions: {
       title: "One-time",
-      description: "Runs once. No separate groups to manage.",
+      description: "Runs once. No groups to schedule or manage.",
     },
     withEditions: {
       title: "Recurring",
-      description: "Runs in separate training groups over time. You create each group.",
+      description: "Runs in separate training groups over time. You create and manage each one.",
     },
   },
   step: {
