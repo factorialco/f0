@@ -54,10 +54,6 @@ export const buttonGroupVariants = cva({
       true: "",
       false: "",
     },
-    wrap: {
-      true: "flex-wrap",
-      false: "",
-    },
   },
   compoundVariants: [
     // full-width only while stacked, released at the row breakpoint
@@ -87,6 +83,5 @@ export const buttonGroupVariants = cva({
     stack: "none",
     fullWidthOnStack: false,
     reverseOnStack: false,
-    wrap: false,
   },
 })

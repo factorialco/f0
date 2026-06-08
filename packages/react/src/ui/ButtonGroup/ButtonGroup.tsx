@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useRef } from "react"
+import { type ReactNode, useEffect, useMemo, useRef } from "react"
 import { useMediaQuery, useResizeObserver } from "usehooks-ts"
 
 import { F0Button } from "@/components/F0Button"
@@ -23,7 +23,11 @@ import { buttonGroupVariants } from "./variants"
 /** Fields a primary/secondary action button exposes. Variant is fixed by role
  * (primary → solid `default`, secondary → `outline`); `size` is a group prop. */
 export interface ButtonGroupButtonBase {
-  /** Stable identifier, used as the React key. */
+  /**
+   * Stable identifier. Required (unlike index-keyed action lists elsewhere)
+   * because width-overflow moves a button between the measurement copy, the
+   * visible row, and the "⋯" menu — a stable key keeps it from remounting.
+   */
   id: string
   /** Visible label; also the a11y name (pair with `hideLabel` for icon-only). */
   label: string
@@ -117,6 +121,77 @@ const isPlainButton = (
   item: ButtonGroupSecondaryItem
 ): item is ButtonGroupButton => !("type" in item)
 
+const renderActionButton = (
+  action: ButtonGroupButton,
+  size: ButtonSize,
+  variant: "default" | "outline"
+) => (
+  <F0Button
+    key={action.id}
+    label={action.label}
+    icon={action.icon}
+    iconPosition={action.iconPosition}
+    variant={action.critical ? "critical" : variant}
+    size={size}
+    disabled={action.disabled}
+    loading={action.loading}
+    hideLabel={action.hideLabel}
+    tooltip={action.tooltip}
+    {...(action.href != null
+      ? { href: action.href, target: action.target }
+      : { onClick: action.onClick })}
+  />
+)
+
+const renderSplitButton = (
+  action: ButtonGroupSplitAction,
+  size: ButtonSize,
+  variant: "default" | "outline"
+) => {
+  const { id, type: _type, ...rest } = action
+  return (
+    <F0ButtonDropdown
+      key={id}
+      {...(rest as F0ButtonDropdownProps)}
+      size={size}
+      variant={variant}
+    />
+  )
+}
+
+const renderSecondaryLink = (
+  link: ButtonGroupSecondaryLink,
+  size: ButtonSize
+) => (
+  <F0Button
+    key="secondary-link"
+    label={link.label}
+    variant="outline"
+    size={size}
+    disabled={link.disabled}
+    href={link.href}
+    target={link.target}
+  />
+)
+
+const renderPrimaryNode = (
+  action: ButtonGroupButton | ButtonGroupSplitAction,
+  size: ButtonSize
+) =>
+  isSplitAction(action)
+    ? renderSplitButton(action, size, "default")
+    : renderActionButton(action, size, "default")
+
+interface ButtonGroupBranchProps {
+  primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  secondaryItems: ButtonGroupSecondaryItem[]
+  secondaryLink?: ButtonGroupSecondaryLink
+  otherActions: DropdownItem[]
+  size: ButtonSize
+  gap: number
+  align: "end" | "between"
+}
+
 /**
  * A data-driven, responsive action bar. Pass actions as props — `primaryAction`
  * (solid, pinned at the trailing edge), `secondaryActions` (outline buttons that
@@ -130,6 +205,11 @@ const isPlainButton = (
  * - An inline `{ type: "separator" }` renders a hairline between two visible
  *   secondaries; as the last secondary it becomes the divider before the primary.
  *   Separators are hidden while stacked.
+ *
+ * The row and stacked branches are separate, keyed children: the stable outer
+ * element keeps measuring the container width, while the overflow machinery
+ * (which needs its DOM present when it initializes) mounts fresh with whichever
+ * branch is active.
  */
 export function ButtonGroup({
   primaryAction,
@@ -150,7 +230,11 @@ export function ButtonGroup({
   })
   const viewportBreakpoint =
     stack === "sm" || stack === "md" ? BREAKPOINT_PX[stack] : BREAKPOINT_PX.md
-  const isViewportRow = useMediaQuery(`(min-width: ${viewportBreakpoint}px)`)
+  // SSR-safe: render the stacked branch first, reconcile on the client (avoids a
+  // hydration mismatch). Matches the explicit-option convention used repo-wide.
+  const isViewportRow = useMediaQuery(`(min-width: ${viewportBreakpoint}px)`, {
+    initializeWithValue: false,
+  })
 
   const isRowMode =
     stack === "none"
@@ -173,8 +257,89 @@ export function ButtonGroup({
       ? secondaryActions
       : undefined
 
+  const branchProps: ButtonGroupBranchProps = {
+    primaryAction,
+    secondaryItems,
+    secondaryLink,
+    otherActions,
+    size: resolvedSize,
+    gap,
+    align,
+  }
+
+  return (
+    <div
+      ref={rootRef}
+      role="group"
+      className={cn(
+        isRowMode
+          ? "flex w-full items-center"
+          : buttonGroupVariants({
+              align,
+              stack,
+              fullWidthOnStack,
+              reverseOnStack,
+            }),
+        className
+      )}
+      style={{ gap }}
+    >
+      {isRowMode ? (
+        <ButtonGroupRow key="row" {...branchProps} />
+      ) : (
+        <ButtonGroupStacked key="stacked" {...branchProps} />
+      )}
+    </div>
+  )
+}
+
+/** Stacked (column) branch: everything visible, the menu is a mobile drawer. */
+function ButtonGroupStacked({
+  primaryAction,
+  secondaryItems,
+  secondaryLink,
+  otherActions,
+  size,
+}: ButtonGroupBranchProps) {
+  const stackedSecondaries = secondaryItems
+    .filter(
+      (item): item is ButtonGroupButton | ButtonGroupSplitAction =>
+        !isInlineSeparator(item)
+    )
+    .map((item) =>
+      isSplitAction(item)
+        ? renderSplitButton(item, size, "outline")
+        : renderActionButton(item, size, "outline")
+    )
+
+  return (
+    <>
+      {otherActions.length > 0 && <MobileDropdown items={otherActions} />}
+      {stackedSecondaries}
+      {secondaryLink && renderSecondaryLink(secondaryLink, size)}
+      {primaryAction && renderPrimaryNode(primaryAction, size)}
+    </>
+  )
+}
+
+/** Row branch: width-measured overflow of plain secondaries into a "⋯" Dropdown. */
+function ButtonGroupRow({
+  primaryAction,
+  secondaryItems,
+  secondaryLink,
+  otherActions,
+  size,
+  gap,
+  align,
+}: ButtonGroupBranchProps) {
   // Only plain buttons are width-measured; splits + separators are pinned/excluded.
-  const plainSecondaries = secondaryItems.filter(isPlainButton)
+  // Memoized so the reference is stable across renders — a fresh array would
+  // change useOverflowCalculation's callback identity and loop ("Maximum update
+  // depth exceeded").
+  const plainSecondaries = useMemo(
+    () => secondaryItems.filter(isPlainButton),
+    [secondaryItems]
+  )
 
   const {
     containerRef,
@@ -189,104 +354,16 @@ export function ButtonGroup({
   // measurement copy imperatively — it removes the copy from focus + a11y.
   useEffect(() => {
     measurementContainerRef.current?.setAttribute("inert", "")
-  })
+  }, [measurementContainerRef])
 
   // Before the first measurement, optimistically show everything to avoid a flash.
   const shownPlain = isInitialized ? visibleItems : plainSecondaries
   const overflowedPlain = isInitialized ? overflowItems : []
   const shownIds = new Set(shownPlain.map((action) => action.id))
 
-  const renderButton = (
-    action: ButtonGroupButton,
-    variant: "default" | "outline"
-  ) => (
-    <F0Button
-      key={action.id}
-      label={action.label}
-      icon={action.icon}
-      iconPosition={action.iconPosition}
-      variant={action.critical ? "critical" : variant}
-      size={resolvedSize}
-      disabled={action.disabled}
-      loading={action.loading}
-      hideLabel={action.hideLabel}
-      tooltip={action.tooltip}
-      {...(action.href != null
-        ? { href: action.href, target: action.target }
-        : { onClick: action.onClick })}
-    />
-  )
-
-  const renderSplit = (
-    action: ButtonGroupSplitAction,
-    variant: "default" | "outline"
-  ) => {
-    const { id, type: _type, ...rest } = action
-    return (
-      <F0ButtonDropdown
-        key={id}
-        {...(rest as F0ButtonDropdownProps)}
-        size={resolvedSize}
-        variant={variant}
-      />
-    )
-  }
-
-  const renderLink = (link: ButtonGroupSecondaryLink) => (
-    <F0Button
-      key="secondary-link"
-      label={link.label}
-      variant="outline"
-      size={resolvedSize}
-      disabled={link.disabled}
-      href={link.href}
-      target={link.target}
-    />
-  )
-
   const primaryNode = primaryAction
-    ? isSplitAction(primaryAction)
-      ? renderSplit(primaryAction, "default")
-      : renderButton(primaryAction, "default")
+    ? renderPrimaryNode(primaryAction, size)
     : null
-
-  // ---- Stacked (column) mode: everything visible, menu is a mobile drawer ----
-  if (!isRowMode) {
-    const stackedSecondaries = secondaryItems
-      .filter(
-        (item): item is ButtonGroupButton | ButtonGroupSplitAction =>
-          !isInlineSeparator(item)
-      )
-      .map((item) =>
-        isSplitAction(item)
-          ? renderSplit(item, "outline")
-          : renderButton(item, "outline")
-      )
-
-    return (
-      <div
-        ref={rootRef}
-        role="group"
-        className={cn(
-          buttonGroupVariants({
-            align,
-            stack,
-            fullWidthOnStack,
-            reverseOnStack,
-          }),
-          className
-        )}
-        style={{ gap }}
-      >
-        {otherActions.length > 0 && <MobileDropdown items={otherActions} />}
-        {stackedSecondaries}
-        {secondaryLink && renderLink(secondaryLink)}
-        {primaryNode}
-      </div>
-    )
-  }
-
-  // ---- Row mode: width-measured overflow into a "⋯" Dropdown -----------------
   const splitSecondaries = secondaryItems.filter(isSplitAction)
   const lastItem = secondaryItems[secondaryItems.length - 1]
   const dividerBeforePinned =
@@ -306,7 +383,10 @@ export function ButtonGroup({
       return
     }
     if (shownIds.has(item.id)) {
-      clusterTokens.push({ kind: "node", node: renderButton(item, "outline") })
+      clusterTokens.push({
+        kind: "node",
+        node: renderActionButton(item, size, "outline"),
+      })
     }
   })
   // Drop separators that aren't between two rendered nodes.
@@ -334,12 +414,7 @@ export function ButtonGroup({
   ]
 
   return (
-    <div
-      ref={rootRef}
-      role="group"
-      className={cn("flex w-full items-center", className)}
-      style={{ gap }}
-    >
+    <>
       <div
         ref={containerRef}
         className={cn(
@@ -355,12 +430,14 @@ export function ButtonGroup({
           className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
           style={{ gap }}
         >
-          {plainSecondaries.map((action) => renderButton(action, "outline"))}
+          {plainSecondaries.map((action) =>
+            renderActionButton(action, size, "outline")
+          )}
         </div>
 
         {menuItems.length > 0 && (
           <div ref={customOverflowIndicatorRef}>
-            <Dropdown items={menuItems} icon={Ellipsis} size={resolvedSize} />
+            <Dropdown items={menuItems} icon={Ellipsis} size={size} />
           </div>
         )}
 
@@ -372,13 +449,15 @@ export function ButtonGroup({
           )
         )}
 
-        {secondaryLink && renderLink(secondaryLink)}
+        {secondaryLink && renderSecondaryLink(secondaryLink, size)}
       </div>
 
-      {splitSecondaries.map((action) => renderSplit(action, "outline"))}
+      {splitSecondaries.map((action) =>
+        renderSplitButton(action, size, "outline")
+      )}
       {dividerBeforePinned && <ButtonGroupSeparator />}
       {primaryNode}
-    </div>
+    </>
   )
 }
 
@@ -392,7 +471,7 @@ export function ButtonGroupSeparator() {
     <div
       role="separator"
       aria-orientation="vertical"
-      className="h-4 w-px self-center bg-f1-background-secondary"
+      className="h-4 w-px self-center bg-f1-border-secondary"
     />
   )
 }
