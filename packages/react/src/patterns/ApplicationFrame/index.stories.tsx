@@ -365,6 +365,73 @@ const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
   return MOCK_TRANSCRIPT
 }
 
+const QuickActions = () => {
+  const { sendMessage } = useMockAiChatRuntime()
+
+  const buttonWithMessage = (action: {
+    label: string
+    message: string
+    icon: IconType
+  }) => {
+    return (
+      <F0Button
+        variant="outline"
+        label={action.label}
+        onClick={() => {
+          sendMessage(action.message)
+        }}
+        icon={action.icon}
+      />
+    )
+  }
+
+  const actions = [
+    {
+      label: "All templates",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+    {
+      label: "Empty survey",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+    {
+      label: "Q4 Employee Satisfaction",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+    {
+      label: "Team Effectiveness",
+      message: "Give me a summary of my pending time-off requests",
+      icon: Lightbulb,
+    },
+  ]
+
+  return (
+    <div className="flex w-full flex-col gap-4 rounded-md border-2 border-dotted border-f1-border p-4">
+      <div className="flex items-center justify-between gap-4">
+        <p className="whitespace-nowrap text-sm text-f1-foreground-secondary">
+          Or start from
+        </p>
+        <div className="flex items-center gap-2">
+          <Action
+            variant="ghost"
+            prepend={<F0Icon icon={Marketplace} size="sm" />}
+            append={<ArrowRight className="h-3.5 w-3.5" />}
+            onClick={() => {}}
+          >
+            All templates
+          </Action>
+        </div>
+      </div>
+      <F0Box display="grid" columns="4" gap="sm">
+        {actions.map((action) => buttonWithMessage(action))}
+      </F0Box>
+    </div>
+  )
+}
+
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
@@ -377,6 +444,7 @@ const meta: Meta<typeof ApplicationFrame> = {
       historyEnabled: true,
       enabled: true,
       resizable: true,
+      footer: <QuickActions />,
       onThumbsUp: (message, { threadId, feedback }) => {
         console.log("thumbs up", { message, threadId, feedback })
       },
@@ -696,73 +764,6 @@ export const WithAiPromotion: Story = {
   },
 }
 
-const QuickActions = () => {
-  const { sendMessage } = useMockAiChatRuntime()
-
-  const buttonWithMessage = (action: {
-    label: string
-    message: string
-    icon: IconType
-  }) => {
-    return (
-      <F0Button
-        variant="outline"
-        label={action.label}
-        onClick={() => {
-          sendMessage(action.message)
-        }}
-        icon={action.icon}
-      />
-    )
-  }
-
-  const actions = [
-    {
-      label: "All templates",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Empty survey",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Q4 Employee Satisfaction",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-    {
-      label: "Team Effectiveness",
-      message: "Give me a summary of my pending time-off requests",
-      icon: Lightbulb,
-    },
-  ]
-
-  return (
-    <div className="flex w-full flex-col gap-4 rounded-md border-2 border-dotted border-f1-border p-4">
-      <div className="flex items-center justify-between gap-4">
-        <p className="whitespace-nowrap text-sm text-f1-foreground-secondary">
-          Or start from
-        </p>
-        <div className="flex items-center gap-2">
-          <Action
-            variant="ghost"
-            prepend={<F0Icon icon={Marketplace} size="sm" />}
-            append={<ArrowRight className="h-3.5 w-3.5" />}
-            onClick={() => {}}
-          >
-            All templates
-          </Action>
-        </div>
-      </div>
-      <F0Box display="grid" columns="4" gap="sm">
-        {actions.map((action) => buttonWithMessage(action))}
-      </F0Box>
-    </div>
-  )
-}
-
 export const FullscreenWithActions: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
@@ -831,86 +832,6 @@ export const FullscreenWithActions: Story = {
         companyLogoUrl: "/avatars/factorial.png",
         planName: "Free plan",
       },
-      welcomeScreenSuggestions: [
-        {
-          icon: ChartVerticalBars,
-          label: "Analyze",
-          items: [
-            {
-              title: "April leave and overtime summary",
-              prompt:
-                "Give me a detailed breakdown of leave taken and overtime worked across the company in April, grouped by department.",
-            },
-            {
-              title: "Current gross salary by employee",
-              prompt:
-                "List the current gross salary of every active employee, sorted from highest to lowest.",
-            },
-            {
-              title: "Report on starters and leavers",
-              prompt:
-                "Show me a report of starters and leavers in the last quarter, with start/end dates and roles.",
-            },
-            {
-              title: "Headcount evolution by department",
-              prompt:
-                "Plot headcount evolution by department over the last twelve months and highlight the fastest-growing teams.",
-            },
-            {
-              title: "Absence trends across teams",
-              prompt:
-                "Compare absence rates across teams over the last six months and call out any anomalies.",
-            },
-          ],
-        },
-        {
-          icon: Search,
-          label: "Find",
-          items: [
-            {
-              title: "Who's out of office this week?",
-              prompt:
-                "List every employee on time-off, sick leave, or other absence between today and the end of the week.",
-            },
-            {
-              title: "Engineers based in Barcelona",
-              prompt:
-                "Find all employees in the Engineering department whose office location is Barcelona.",
-            },
-            {
-              title: "Open positions in Sales",
-              prompt:
-                "Show every open job posting in the Sales department, including hiring manager and target start date.",
-            },
-            {
-              title: "Documents shared with me",
-              prompt:
-                "List documents shared with me in the last 30 days, sorted by most recent activity.",
-            },
-          ],
-        },
-        {
-          icon: Pencil,
-          label: "Create",
-          items: [
-            {
-              title: "Draft a job description for a Senior Backend role",
-              prompt:
-                "Draft a job description for a Senior Backend Engineer focused on distributed systems, with responsibilities, requirements, and a short company pitch.",
-            },
-            {
-              title: "Compose an offboarding email template",
-              prompt:
-                "Compose an offboarding email template that thanks the employee, lists return-of-equipment steps, and links to the HR exit form.",
-            },
-            {
-              title: "Outline an onboarding checklist for new hires",
-              prompt:
-                "Outline a one-week onboarding checklist for new hires that covers IT setup, meetings to schedule, and key documents to read.",
-            },
-          ],
-        },
-      ],
       fileAttachments: {
         onUploadFiles: mockUploadFiles,
         maxFiles: 5,

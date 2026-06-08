@@ -44,6 +44,12 @@ export type WelcomeScreenSuggestionsRowProps = {
    * textarea placeholder.
    */
   onItemHover?: (item: WelcomeScreenSuggestionItem | null) => void
+  /**
+   * Side the popover opens towards. Defaults to "top" (sidepanel, row sits
+   * above the textarea). Fullscreen passes "bottom" so the popover opens into
+   * the empty space below the textarea instead of covering it.
+   */
+  side?: "top" | "bottom"
 }
 
 /**
@@ -55,6 +61,7 @@ export const WelcomeScreenSuggestionsRow = ({
   suggestions,
   onItemClick,
   onItemHover,
+  side = "top",
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const activeGroup = activeIdx !== null ? suggestions[activeIdx] : null
@@ -91,7 +98,7 @@ export const WelcomeScreenSuggestionsRow = ({
       </PopoverAnchor>
       {activeGroup && (
         <PopoverContent
-          side="top"
+          side={side}
           align="start"
           sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}

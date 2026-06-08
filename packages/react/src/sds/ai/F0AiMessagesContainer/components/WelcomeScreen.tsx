@@ -1,5 +1,7 @@
+import { motion } from "motion/react"
 import { useEffect, useState, type KeyboardEvent } from "react"
 
+import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 
 const CHAR_IN_MS = 35
@@ -19,13 +21,31 @@ export interface WelcomeScreenProps {
    * `F0AiChat` to wire the pong easter egg.
    */
   onClick?: () => void
+  /**
+   * Fullscreen welcome layout: the phrase is pushed to the bottom of the top
+   * half (instead of vertically centered) so it meets the composer — which
+   * rises to the top of the bottom half — around the vertical center.
+   */
+  fullscreen?: boolean
 }
 
-export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({
+  messages,
+  onClick,
+  fullscreen = false,
+}: WelcomeScreenProps) => {
   const [index, setIndex] = useState(0)
   const [chars, setChars] = useState(0)
   const [phase, setPhase] = useState<Phase>("starting")
   const current = messages[index] ?? ""
+  const shouldReduceMotion = useReducedMotion()
+
+  // Spring that glides the phrase to its new vertical spot (center ↔ bottom)
+  // when toggling fullscreen ↔ sidepanel. Scoped to mode changes via
+  // `layoutDependency={fullscreen}` so it never fires on the typewriter ticks.
+  const layoutSpring = shouldReduceMotion
+    ? { duration: 0 }
+    : { type: "spring" as const, stiffness: 380, damping: 38, mass: 1 }
 
   // Recover from external mutations of `messages` (e.g. host swapping in a
   // shorter array). Without this, an out-of-range `index` would render a
@@ -79,27 +99,38 @@ export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
     : undefined
 
   return (
-    <div className="flex w-full flex-1 items-center justify-center px-4">
-      <p
-        key={index}
-        role={interactive ? "button" : undefined}
-        tabIndex={interactive ? 0 : undefined}
-        onClick={onClick}
-        onKeyDown={handleKeyDown}
-        className={cn(
-          "bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
-          interactive &&
-            cn(
-              "cursor-pointer transition-transform duration-200",
-              "hover:scale-[1.02] focus-visible:scale-[1.02]",
-              "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
-            )
-        )}
-        style={{ minHeight: 28 }}
-        aria-label={current}
+    <div
+      className={cn(
+        "flex w-full flex-1 justify-center px-4",
+        fullscreen ? "items-end pb-12" : "items-center"
+      )}
+    >
+      <motion.div
+        layout={shouldReduceMotion ? false : "position"}
+        layoutDependency={fullscreen}
+        transition={{ layout: layoutSpring }}
       >
-        {current.slice(0, chars)}
-      </p>
+        <p
+          key={index}
+          role={interactive ? "button" : undefined}
+          tabIndex={interactive ? 0 : undefined}
+          onClick={onClick}
+          onKeyDown={handleKeyDown}
+          className={cn(
+            "bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+            interactive &&
+              cn(
+                "cursor-pointer transition-transform duration-200",
+                "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+              )
+          )}
+          style={{ minHeight: 28 }}
+          aria-label={current}
+        >
+          {current.slice(0, chars)}
+        </p>
+      </motion.div>
     </div>
   )
 }
