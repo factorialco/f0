@@ -1,10 +1,9 @@
 import { forwardRef } from "react"
 
-import { F0Link } from "@/components/F0Link"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { Card } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { Text } from "@/ui/Text"
@@ -99,11 +98,6 @@ export interface F0CardRowProps {
   stackAt?: CardRowStackAt
 
   /**
-   * When set, the whole row becomes a link to this href.
-   */
-  link?: string
-
-  /**
    * Stretch to fill the height of its container.
    */
   fullHeight?: boolean
@@ -114,17 +108,6 @@ export interface F0CardRowProps {
    * Use `visible` + `onDismiss` for controlled dismiss behaviour.
    */
   alert?: CardAlertProps
-
-  /**
-   * Called when the row is clicked.
-   */
-  onClick?: () => void
-
-  /**
-   * Disables the full-row overlay link so a parent can manage drag-and-drop while
-   * still allowing click navigation via `onClick`.
-   */
-  disableOverlayLink?: boolean
 }
 
 /**
@@ -148,11 +131,8 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       status,
       inactive = false,
       compact = false,
-      link,
       fullHeight = false,
       alert,
-      onClick,
-      disableOverlayLink = false,
       stackAt = "never",
     },
     ref
@@ -163,11 +143,9 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       <Card
         ref={hasAlert ? undefined : ref}
         className={cn(
-          "group relative @container bg-f1-background shadow-none transition-all",
+          "group @container bg-f1-background shadow-none",
           compact && "p-3",
-          fullHeight && "h-full",
-          link &&
-            "focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md"
+          fullHeight && "h-full"
         )}
         style={
           hasAlert
@@ -177,20 +155,8 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
               }
             : undefined
         }
-        onClick={onClick}
         data-testid="card"
       >
-        {link && !disableOverlayLink && (
-          <F0Link
-            href={link}
-            variant="unstyled"
-            className={cn("z-1 absolute inset-0 block rounded-xl", focusRing())}
-            aria-label={title}
-          >
-            &nbsp;
-          </F0Link>
-        )}
-
         <div className={cardRowClassName[stackAt]}>
           <div className="flex min-w-0 flex-row items-center gap-3">
             {avatar && <CardAvatar avatar={avatar} size="lg" />}

@@ -74,21 +74,12 @@ describe("F0CardRow", () => {
     })
   })
 
-  it("renders as a clickable link when link is provided", () => {
-    render(<F0CardRow title="Linked row" link="/test-link" />)
+  it("does not make the card background a click target", () => {
+    render(<F0CardRow title="Not clickable" description="Just text" />)
 
-    const link = screen.getByRole("link", { name: "Linked row" })
-    expect(link).toHaveAttribute("href", "/test-link")
-  })
-
-  it("calls onClick when the row is clicked", async () => {
-    const user = userEvent.setup()
-    const handleClick = vi.fn()
-
-    render(<F0CardRow title="Clickable" onClick={handleClick} />)
-
-    await user.click(screen.getByText("Clickable"))
-    expect(handleClick).toHaveBeenCalledTimes(1)
+    // The row itself exposes no link/button role — only its actions do.
+    expect(screen.queryByRole("link")).not.toBeInTheDocument()
+    expect(screen.queryByRole("button")).not.toBeInTheDocument()
   })
 
   it("calls primaryAction.onClick", async () => {
