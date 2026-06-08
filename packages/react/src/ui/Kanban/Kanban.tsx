@@ -18,7 +18,7 @@ import { KanbanLane } from "./components/KanbanLane.tsx"
 export function Kanban<TRecord extends RecordType>(
   props: KanbanProps<TRecord>
 ): JSX.Element {
-  const { lanes, renderCard, getKey, className, dnd, loading, onCreate } = props
+  const { lanes, renderCard, getKey, className, dnd, onCreate } = props
 
   // Local source-of-truth for lanes to orchestrate moves centrally
   const [localLanes, setLocalLanes] = useState(
@@ -323,7 +323,7 @@ export function Kanban<TRecord extends RecordType>(
                       return node
                     }}
                     emptyState={lane.emptyState}
-                    loading={loading || lane.loading}
+                    loading={lane.loading}
                     variant={lane.variant}
                     total={total}
                     hasMore={lane.hasMore}

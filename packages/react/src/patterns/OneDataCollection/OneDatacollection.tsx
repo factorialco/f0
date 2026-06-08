@@ -211,6 +211,9 @@ export type OneDataCollectionProps<
    * - `false` or `undefined` disables the export action (default)
    */
   csvExport?: boolean | { filename?: string }
+
+  /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
+  initialVisualization?: number
 }
 
 const OneDataCollectionComp = <
@@ -236,6 +239,7 @@ const OneDataCollectionComp = <
   disableUrlParams,
   tmpFullWidth,
   csvExport,
+  initialVisualization = 0,
 }: OneDataCollectionProps<
   R,
   Filters,
@@ -276,7 +280,8 @@ const OneDataCollectionComp = <
     sortings,
   } = source
 
-  const [currentVisualization, setCurrentVisualization] = useState(0)
+  const [currentVisualization, setCurrentVisualization] =
+    useState(initialVisualization)
 
   const {
     effectiveFilters,
