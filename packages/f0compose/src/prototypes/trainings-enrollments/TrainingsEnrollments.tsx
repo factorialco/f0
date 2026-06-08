@@ -1902,7 +1902,7 @@ const inscripcionCopy = {
   },
   toggle: {
     label: "Automatic enrollment",
-    hint: "People who match the criteria are added automatically, now and as new people join.",
+    hint: "People who match the criteria are added automatically as new people join.",
   },
   audience: {
     label: "Who should take this course?",
