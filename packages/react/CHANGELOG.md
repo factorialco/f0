@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.49.0](https://github.com/factorialco/f0/compare/f0-react-v2.48.0...f0-react-v2.49.0) (2026-06-08)
+
+
+### Features
+
+* **dialog 3/6:** dialog-alike core + new F0Dialog (additive, subpath-only) ([#4365](https://github.com/factorialco/f0/issues/4365)) ([c29ac48](https://github.com/factorialco/f0/commit/c29ac48a3337a41b556e01f2ce4924f7cc88923c))
+
 ## [2.48.0](https://github.com/factorialco/f0/compare/f0-react-v2.47.0...f0-react-v2.48.0) (2026-06-08)
 
 
