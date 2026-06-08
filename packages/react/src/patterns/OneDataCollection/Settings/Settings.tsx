@@ -21,6 +21,7 @@ import {
   collectionVisualizations,
   Visualization,
 } from "../visualizations/collection"
+import { isVisualizationSettingsDefault } from "../internal/isSettingsDefault"
 import { GroupingSelector } from "./components/GroupingSelector"
 import { SortingSelector } from "./components/SortingSelector"
 import { VisualizationSelector } from "./components/VisualizationSelector"
@@ -160,14 +161,11 @@ export const Settings = <
       return true
 
     const visualizationType = visualizations[currentVisualization]?.type
-    if (!visualizationType || !(visualizationType in collectionVisualizations))
-      return false
 
-    const key = visualizationType as keyof typeof collectionVisualizations
-    const currentSettings = settingsContext.settings.visualization[key]
-    const defaultSettings = collectionVisualizations[key]?.settings.default
-
-    return JSON.stringify(currentSettings) !== JSON.stringify(defaultSettings)
+    return !isVisualizationSettingsDefault(
+      settingsContext.settings,
+      visualizationType
+    )
   }, [
     settingsContext.settings.visualization,
     visualizations,

@@ -693,7 +693,10 @@ describe("usePerVisualizationFilters", () => {
       })
     })
 
-    it("should use source presets as fallback when target view has no own presets", () => {
+    it("does NOT use source presets as the default for a view with no own presets", () => {
+      // A never-visited view must start with no filter. Falling back to the
+      // first *source* preset silently filtered the view, which made
+      // deselecting a (neutral) preset reveal fewer items than the preset.
       const sourceSetCurrentFilters = vi.fn()
       const globalPresets = [
         {
@@ -729,7 +732,8 @@ describe("usePerVisualizationFilters", () => {
       // Switch to viz 1 (never visited, no per-viz presets, but has source presets)
       rerender({ currentViz: 1 })
 
-      expect(sourceSetCurrentFilters).toHaveBeenCalledWith({
+      expect(sourceSetCurrentFilters).toHaveBeenCalledWith({})
+      expect(sourceSetCurrentFilters).not.toHaveBeenCalledWith({
         department: ["Engineering"],
       })
     })
