@@ -2,7 +2,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import type { AriaAttributes } from "react"
 
 import { F0DurationInput } from "@/components/F0DurationInput"
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import type { F0DurationField } from "./types"
 import type { ResolvedField } from "../types"

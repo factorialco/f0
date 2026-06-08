@@ -77,33 +77,6 @@ function getUploadedFiles(
   )
 }
 
-/** Strips <pending-context> tags (used when loading from history where the
- *  multipart structure was flattened into a single string). */
-const PENDING_CONTEXT_RE = /<pending-context>[\s\S]*?<\/pending-context>\s*/g
-
-/**
- * Regex matching the `<reply-quote>...</reply-quote>` prefix that the
- * composer prepends when the user replied to a selected fragment. The
- * quote is rendered ABOVE the bubble — not inside — so we extract it
- * before rendering the markdown content.
- */
-const REPLY_QUOTE_RE = /^\s*<reply-quote>([\s\S]*?)<\/reply-quote>\s*/
-
-/**
- * Decode the HTML-escaped quote body back to plain text. The composer
- * escapes the user's selection with `escapeHtml` and turns newlines into
- * `<br/>` so the payload is valid HTML — reverse that here.
- */
-function decodeReplyQuote(raw: string): string {
-  return raw
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&amp;/g, "&")
-}
-
 const defaultMarkdownFallback = (content: string): ReactNode => (
   <RichTextDisplay content={content} format="markdown" />
 )
@@ -173,16 +146,11 @@ export const UserMessage = ({
     message?.content as MessagePart[],
     rawData
   )
-  const raw = getTextContent(message?.content as MessagePart[]) ?? ""
-
-  // Extract the reply quote (if any) so we can render it as a separate
-  // block above the bubble instead of inside the markdown content.
-  const quoteMatch = raw.match(REPLY_QUOTE_RE)
-  const quoteText = quoteMatch ? decodeReplyQuote(quoteMatch[1]) : null
-  const rawWithoutQuote = quoteMatch ? raw.replace(REPLY_QUOTE_RE, "") : raw
-
-  const content = rawWithoutQuote.replace(PENDING_CONTEXT_RE, "").trim()
-  const hasVisibleText = content.trim().length > 0
+  const content = (
+    getTextContent(message?.content as MessagePart[]) ?? ""
+  ).trim()
+  const quoteText = message?.replyQuote ?? null
+  const hasVisibleText = content.length > 0
 
   const { anchor, clear } = useReplySelection({
     containerRef: bubbleRef,
@@ -212,7 +180,7 @@ export const UserMessage = ({
       {hasVisibleText && (
         <div
           ref={bubbleRef}
-          className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-2xl border border-solid border-f1-border-secondary bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
+          className="w-fit max-w-[90%] self-end whitespace-pre-wrap rounded-xl bg-f1-background-tertiary px-4 py-3 [&>div]:flex [&>div]:flex-col [&>div]:gap-1"
         >
           {(renderMarkdown ?? defaultMarkdownFallback)(content)}
         </div>

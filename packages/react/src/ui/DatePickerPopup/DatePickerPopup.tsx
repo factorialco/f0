@@ -29,9 +29,8 @@ export type CompareToDef = {
     | ((value: DateRangeComplete) => DateRangeComplete | DateRangeComplete[])
 }
 
-export type DatePickerCompareTo = Record<
-  GranularityDefinitionKey,
-  CompareToDef[]
+export type DatePickerCompareTo = Partial<
+  Record<GranularityDefinitionKey, CompareToDef[]>
 >
 
 export interface DatePickerPopupProps {

@@ -22,7 +22,7 @@ const meta = {
     },
     status: {
       control: "select",
-      options: ["inProgress", "executing", "completed"],
+      options: ["inProgress", "executing", "writing", "completed"],
       description: "Current status of the action item",
     },
   },
@@ -37,9 +37,24 @@ export const Default: Story = {
   },
 }
 
+export const Writing: Story = {
+  args: {
+    title: "Writing response",
+    status: "writing",
+  },
+  render: (args) => {
+    return <F0ActionItem {...args} />
+  },
+}
+
 export const InfiniteStatusCycling: Story = {
   render: (args) => {
-    const statuses = ["inProgress", "executing", "completed"] as const
+    const statuses = [
+      "inProgress",
+      "executing",
+      "writing",
+      "completed",
+    ] as const
     const [currentStatusIndex, setCurrentStatusIndex] = React.useState(0)
 
     useEffect(() => {

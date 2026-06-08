@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useEffect, useState } from "react"
 
-import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import {
   generateMockUsers,
   MockUser,
@@ -206,7 +206,7 @@ const AsyncOptionsWithSearchExample = () => {
 
   return (
     <div className="flex flex-col gap-3">
-      <F1SearchBox
+      <F0SearchInput
         placeholder="Search countries..."
         value={searchTerm}
         onChange={setSearchTerm}

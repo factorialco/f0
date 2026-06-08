@@ -115,6 +115,60 @@ describe("F0ClarifyingPanel", () => {
     expect(screen.getAllByRole("radio")).toHaveLength(3)
   })
 
+  describe("isSubmitDisabled", () => {
+    it("disables the submit button on the final step", () => {
+      const state = buildState({}, { selectedOptionIds: ["this-month"] })
+      render(<F0ClarifyingPanel clarifyingQuestion={state} isSubmitDisabled />)
+      expect(screen.getByRole("button", { name: "Submit" })).toBeDisabled()
+    })
+
+    it("does not call confirm() when Enter is pressed in the custom answer input on the final step", async () => {
+      const state = buildState(
+        {},
+        { allowCustomAnswer: true, isCustomAnswerActive: true }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} isSubmitDisabled />)
+      const input = screen.getByRole("textbox")
+      await userEvent.type(input, "my answer{Enter}")
+      expect(state.confirm).not.toHaveBeenCalled()
+    })
+
+    it("disables the Skip button on a final optional step", () => {
+      const state = buildState({}, { optional: true })
+      render(<F0ClarifyingPanel clarifyingQuestion={state} isSubmitDisabled />)
+      expect(screen.getByRole("button", { name: "Skip" })).toBeDisabled()
+    })
+
+    it("keeps the Next button enabled on non-final steps", () => {
+      const state = buildState(
+        { currentStepIndex: 0, totalSteps: 2 },
+        { selectedOptionIds: ["this-month"] }
+      )
+      render(<F0ClarifyingPanel clarifyingQuestion={state} isSubmitDisabled />)
+      // Both the step-header arrow and the footer button are named "Next"
+      const nextButtons = screen.getAllByRole("button", { name: "Next" })
+      nextButtons.forEach((button) => expect(button).toBeEnabled())
+    })
+
+    it("keeps option selection interactive on the final step", async () => {
+      const state = buildState()
+      render(<F0ClarifyingPanel clarifyingQuestion={state} isSubmitDisabled />)
+      await userEvent.click(screen.getByRole("radio", { name: "This month" }))
+      expect(state.toggleOption).toHaveBeenCalledWith("this-month")
+    })
+
+    it("enables the submit button when isSubmitDisabled is false", () => {
+      const state = buildState({}, { selectedOptionIds: ["this-month"] })
+      render(
+        <F0ClarifyingPanel
+          clarifyingQuestion={state}
+          isSubmitDisabled={false}
+        />
+      )
+      expect(screen.getByRole("button", { name: "Submit" })).toBeEnabled()
+    })
+  })
+
   describe("auto-advance in single-select mode", () => {
     it("calls confirm() after selecting an option on a non-final step", async () => {
       const state = buildState({ currentStepIndex: 0, totalSteps: 2 })

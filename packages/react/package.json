@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "2.20.0",
+  "version": "2.43.0",
   "private": false,
   "files": [
     "assets",
@@ -46,6 +46,7 @@
     "format": "sh -c 'oxfmt \"${@:-src/}\"' --",
     "format:check": "sh -c 'oxfmt --check \"${@:-src/}\"' --",
     "tsc": "tsc --noEmit",
+    "check:api-surface": "tsx .scripts/check-api-surface.ts",
     "vitest": "vitest --project=unit",
     "vitest:ui": "vitest --project=unit --ui",
     "vitest:watch": "vitest --project=unit dev",
@@ -216,11 +217,6 @@
     "vitest": "^4.0.15"
   },
   "peerDependencies": {
-    "@ag-ui/client": "^0.0.47",
-    "@copilotkit/react-core": "^1.54.0",
-    "@copilotkit/react-ui": "^1.54.0",
-    "@copilotkit/runtime": "^1.54.0",
-    "@copilotkit/shared": "^1.54.0",
     "@hookform/resolvers": "^3.9.0",
     "@livekit/components-react": "^2.9.19",
     "@number-flow/react": "^0.5.10",

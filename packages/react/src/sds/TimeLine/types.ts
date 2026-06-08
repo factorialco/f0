@@ -72,28 +72,35 @@ export interface F0TimelineRowMultitaskProps extends F0TimelineRowBaseProps {
 }
 
 /**
- * Props for a nestedtask timeline row.
- * Renders a task-style header (custom icon, title, description, chevron toggle)
- * with collapsible nested items and optional group-level metadata (assignees, file chips, etc.).
- * Unlike multitask, the header looks like a regular task row with expand/collapse capability.
+ * Shared shape for nestedtask rows. The collapsible behaviour is layered on
+ * top via a discriminated union (`F0TimelineRowNestedtaskProps`) so callers
+ * either provide both `expanded` and `onExpandToggle` (collapsible) or
+ * neither (non-collapsible).
  */
-export interface F0TimelineRowNestedtaskProps extends F0TimelineRowBaseProps {
+interface F0TimelineRowNestedtaskBaseProps extends F0TimelineRowBaseProps {
   /** The icon representing the task type */
   icon: IconType
   /** Description text (e.g., "Estimated on 18/07/2025") */
   description?: string
-  /** Number of nested items (displayed in the progress pill) */
-  taskCount: number
+  /**
+   * Number of nested items (displayed in the progress pill alongside
+   * `completedCount`). Omit when the row body conveys progress on its own
+   * (e.g. an embedded info card or table) and a pill would be redundant.
+   */
+  taskCount?: number
   /** Number of completed items (displayed in the progress pill) */
   completedCount?: number
-  /** Whether the row is expanded (controlled) */
-  expanded: boolean
-  /** Callback when expand/collapse is toggled */
-  onExpandToggle: () => void
   /** Metadata items displayed below the header (e.g., assignees, file chips). Always visible regardless of expand/collapse */
   metadata?: (MetadataItem | undefined | boolean)[]
-  /** The nested task items to render when expanded */
-  items: F0TimelineRowTaskProps[]
+  /** The nested task items to render when expanded. Ignored when `content` is provided. */
+  items?: F0TimelineRowTaskProps[]
+  /**
+   * Custom content to render in the expanded body of the row. When provided,
+   * `items` is ignored and this React node is rendered instead. Use this to
+   * embed richer UI (callout cards, tables, custom panels) inside a nested
+   * timeline row.
+   */
+  content?: React.ReactNode
   /** Primary action button (displayed on the right after a divider) */
   primaryAction?: F0TimelineRowAction
   /** Secondary action buttons (displayed on the left) */
@@ -101,6 +108,40 @@ export interface F0TimelineRowNestedtaskProps extends F0TimelineRowBaseProps {
   /** Overflow menu items (displayed as a dropdown via ellipsis button) */
   otherActions?: F0TimelineRowOtherAction[]
 }
+
+/**
+ * Props for a nestedtask timeline row.
+ * Renders a task-style header (custom icon, title, description, chevron toggle)
+ * with collapsible nested items and optional group-level metadata (assignees, file chips, etc.).
+ * Unlike multitask, the header looks like a regular task row with expand/collapse capability.
+ *
+ * Discriminated by `collapsible`:
+ * - default / `collapsible: true` — both `expanded` and `onExpandToggle` are required.
+ * - `collapsible: false` — the row is always expanded, the header has no toggle affordance,
+ *   and `expanded`/`onExpandToggle` are not accepted.
+ */
+export type F0TimelineRowNestedtaskProps =
+  | (F0TimelineRowNestedtaskBaseProps & {
+      /**
+       * Whether the header chevron toggles the body.
+       * @default true
+       */
+      collapsible?: true
+      /** Whether the row is expanded (controlled) */
+      expanded: boolean
+      /** Callback when expand/collapse is toggled */
+      onExpandToggle: () => void
+    })
+  | (F0TimelineRowNestedtaskBaseProps & {
+      /**
+       * When false, the row is always expanded and the header has no toggle
+       * affordance — useful when the body controls its own expansion
+       * (e.g. a collapsible callout card).
+       */
+      collapsible: false
+      expanded?: never
+      onExpandToggle?: never
+    })
 
 export type F0TimelineRowProps =
   | F0TimelineRowTaskProps

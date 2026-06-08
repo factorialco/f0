@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { Clock } from "@/icons/app"
 
 import type { ResolvedTimeField } from "./types"
@@ -41,7 +41,7 @@ export function TimeFieldRenderer({
   // Uses null instead of undefined for cleared values because
   // react-hook-form treats undefined as "use defaultValue".
   // Note: onBlur is NOT called here — validation is triggered on actual
-  // blur (the Input's onBlur prop), not after every keystroke.
+  // blur (the F0TextInput's onBlur prop), not after every keystroke.
   const handleChange = useCallback(
     (value: string | undefined) => {
       if (!value) {
@@ -57,7 +57,7 @@ export function TimeFieldRenderer({
   )
 
   return (
-    <Input
+    <F0TextInput
       type="time"
       label={field.label}
       disabled={field.disabled}

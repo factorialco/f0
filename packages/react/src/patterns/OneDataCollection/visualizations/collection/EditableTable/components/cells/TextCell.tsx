@@ -1,4 +1,4 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
@@ -22,7 +22,7 @@ export function TextCell<R extends RecordType>({
           editableColumn.align === "right" && "[&_input]:text-right"
         )}
       >
-        <Input
+        <F0TextInput
           type="text"
           label={editableColumn.label}
           hideLabel

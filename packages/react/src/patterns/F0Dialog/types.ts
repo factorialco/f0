@@ -14,6 +14,7 @@ export type DialogWidth = (typeof dialogWidths)[number]
 export type F0DialogPrimaryAction = {
   label: string
   icon?: IconType
+  iconPosition?: "left" | "right"
   onClick: () => void
   disabled?: boolean
   loading?: boolean
@@ -22,6 +23,7 @@ export type F0DialogPrimaryAction = {
 export type F0DialogSecondaryAction = {
   label: string
   icon?: IconType
+  iconPosition?: "left" | "right"
   onClick: () => void
   disabled?: boolean
   loading?: boolean

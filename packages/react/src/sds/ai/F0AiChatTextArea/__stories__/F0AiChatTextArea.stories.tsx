@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
   AiChatCreditWarning,
@@ -12,6 +13,7 @@ import type {
   PendingContext,
   PendingQuote,
   PersonProfile,
+  TranscribeFn,
   UploadedFile,
 } from "../../F0AiChat/types"
 
@@ -81,6 +83,21 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
   maxFiles: 3,
 }
 
+// Simulates a streaming STT endpoint: emits the same transcript word by word
+// so the textarea fills live (Wispr Flow feel) without any backend.
+const MOCK_TRANSCRIPT = "How many vacation days do I have left this year?"
+const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
+  const words = MOCK_TRANSCRIPT.split(" ")
+  let acc = ""
+  for (const word of words) {
+    if (signal?.aborted) break
+    await new Promise((r) => setTimeout(r, 140))
+    acc = acc ? `${acc} ${word}` : word
+    onPartial(acc)
+  }
+  return MOCK_TRANSCRIPT
+}
+
 const CREDIT_WARNING: AiChatCreditWarning = {
   level: "soft",
   onGetCredits: () => console.log("get credits clicked"),
@@ -123,6 +140,7 @@ const buildClarifyingState = (
 type WrapperProps = {
   placeholders?: string[]
   fileAttachments?: AiChatFileAttachmentConfig
+  onTranscribe?: TranscribeFn
   searchPersons?: (query: string) => Promise<PersonProfile[]>
   initialPendingContext?: PendingContext | null
   initialPendingQuote?: PendingQuote | null
@@ -138,6 +156,7 @@ type WrapperProps = {
 const Wrapper = ({
   placeholders,
   fileAttachments,
+  onTranscribe,
   searchPersons,
   initialPendingContext = null,
   initialPendingQuote = null,
@@ -174,12 +193,17 @@ const Wrapper = ({
         inProgress={inProgress}
         placeholders={placeholders}
         creditWarning={creditWarning}
-        clarifyingQuestion={clarifyingQuestion}
+        clarifyingUI={
+          clarifyingQuestion ? (
+            <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
+          ) : undefined
+        }
         pendingContext={pendingContext}
         onPendingContextChange={setPendingContext}
         pendingQuote={pendingQuote}
         onPendingQuoteChange={setPendingQuote}
         fileAttachments={fileAttachments}
+        onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
@@ -211,6 +235,45 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+// Interactive story to inspect the textarea ↔ clarifying panel transition.
+// Click "Trigger clarifying mode" to see the swap animation.
+export const TransitionDemo: Story = {
+  render: () => {
+    const ref = useRef<HTMLDivElement>(null)
+    const [clarifyingQuestion, setClarifyingQuestion] =
+      useState<ClarifyingQuestionState | null>(null)
+
+    const toggle = () => {
+      setClarifyingQuestion((prev) => (prev ? null : buildClarifyingState()))
+    }
+
+    return (
+      <div className="flex flex-col gap-4 w-[640px]">
+        <button
+          onClick={toggle}
+          className="self-start rounded border border-f1-border bg-f1-background px-3 py-1.5 text-sm font-medium text-f1-foreground hover:bg-f1-background-hover transition-colors"
+        >
+          {clarifyingQuestion
+            ? "← Volver al textarea"
+            : "Trigger clarifying mode →"}
+        </button>
+
+        <F0AiChatTextArea
+          ref={ref}
+          onSubmit={() => {}}
+          onStop={() => {}}
+          disclaimer={DISCLAIMER}
+          clarifyingUI={
+            clarifyingQuestion ? (
+              <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
+            ) : undefined
+          }
+        />
+      </div>
+    )
+  },
+}
 
 export const WithRotatingPlaceholders: Story = {
   args: {
@@ -296,6 +359,13 @@ export const WithMentions: Story = {
   },
 }
 
+export const WithVoiceDictation: Story = {
+  args: {
+    onTranscribe: mockTranscribe,
+    placeholders: ["Tap the mic and start talking…"],
+  },
+}
+
 export const Clarifying: Story = {
   args: {
     clarifyingQuestion: buildClarifyingState(),
@@ -332,6 +402,7 @@ export const Everything: Story = {
   args: {
     placeholders: ROTATING_PLACEHOLDERS,
     fileAttachments: FILE_UPLOAD_CONFIG,
+    onTranscribe: mockTranscribe,
     searchPersons: mockSearchPersons,
     creditWarning: CREDIT_WARNING,
     disclaimer: DISCLAIMER,

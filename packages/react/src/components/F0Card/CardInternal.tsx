@@ -26,6 +26,7 @@ import { CardMetadata } from "./components/CardMetadata"
 import { CardOptions } from "./components/CardOptions"
 import {
   type CardAlertProps,
+  type CardBookmark,
   type CardMetadata as CardMetadataType,
 } from "./types"
 
@@ -137,6 +138,12 @@ export interface CardInternalProps {
   otherActions?: DropdownItem[]
 
   /**
+   * Bookmark (save) toggle rendered as an icon button in the card's options overlay.
+   * Shows an outline bookmark when not bookmarked and a filled one when bookmarked.
+   */
+  bookmark?: CardBookmark
+
+  /**
    * Whether the card is selectable
    */
   selectable?: boolean
@@ -166,6 +173,13 @@ export interface CardInternalProps {
    * Whether the card should have a full height
    */
   fullHeight?: boolean
+
+  /**
+   * Use a softer/lighter border (`border-f1-border-secondary`) instead of the default
+   * `border-f1-border`. Opt-in so existing cards keep their current appearance.
+   * @default false
+   */
+  subtleBorder?: boolean
 
   /**
    * When true, disables the full-card overlay link so parent components
@@ -214,7 +228,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       primaryAction,
       secondaryActions,
       otherActions,
+      bookmark,
       selectable = false,
+      subtleBorder = false,
       selected = false,
       onSelect,
       onClick,
@@ -242,6 +258,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
       <Card
         className={cn(
           "group relative bg-f1-background shadow-none transition-all",
+          subtleBorder && "border-f1-border-secondary",
           compact && "p-3",
           fullHeight && "h-full",
           (selectable || (otherActions && otherActions.length > 0)) &&
@@ -279,7 +296,9 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
         {image && (
           <div
             className={cn(
-              "relative -mx-3 -mt-3 mb-4 rounded-md",
+              // pointer-events-none lets clicks on the image fall through to the
+              // full-card overlay link; interactive overlay controls re-enable them.
+              "pointer-events-none relative -mx-3 -mt-3 mb-4 rounded-md",
               imageAspectRatio === "video"
                 ? "aspect-video"
                 : imageSizeClassMap[imageSize],
@@ -321,6 +340,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
               selectable={selectable}
               selected={selected}
               onSelect={onSelect}
+              bookmark={bookmark}
               title={title}
               overlay
             />
@@ -383,6 +403,7 @@ export const CardInternal = forwardRef<HTMLDivElement, CardInternalProps>(
                 selectable={selectable}
                 selected={selected}
                 onSelect={onSelect}
+                bookmark={bookmark}
                 title={title}
               />
             )}

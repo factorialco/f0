@@ -8,7 +8,7 @@ import { expect, fn, within } from "storybook/test"
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
-import { getInputFieldArgs } from "@/ui/InputField/__stories__/InputField.args"
+import { getInputFieldArgs } from "@/components/F0InputField/__stories__/F0InputField.args"
 
 import { CalendarView, DateRange } from "@/components/OneCalendar/types"
 import { F0DatePicker } from "../index"

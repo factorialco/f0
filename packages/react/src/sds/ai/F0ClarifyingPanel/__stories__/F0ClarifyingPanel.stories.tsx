@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
 
 import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
@@ -229,30 +230,58 @@ function useLocalClarifyingState(steps: StoryStep[]) {
 // Story shell — renders the panel plus a "resolved" log. No F0AiChat anywhere.
 // ---------------------------------------------------------------------------
 
-const StoryShell = ({ steps }: { steps: StoryStep[] }) => {
+const StoryShell = ({
+  steps,
+  isSubmitDisabled,
+}: {
+  steps: StoryStep[]
+  isSubmitDisabled?: boolean
+}) => {
   const { state, resolved, reset } = useLocalClarifyingState(steps)
 
   return (
     <div className="w-[360px] space-y-3">
-      <div className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background">
-        {state ? (
-          <F0ClarifyingPanel clarifyingQuestion={state} />
-        ) : (
-          <div className="flex flex-col gap-2 p-4">
-            <div className="text-sm font-medium text-f1-foreground">
-              Resolved:
-            </div>
-            <pre className="whitespace-pre-wrap text-sm text-f1-foreground-secondary">
-              {resolved.join("\n\n") || "(no responses yet)"}
-            </pre>
-            <button
-              className="self-start rounded-md border border-solid border-f1-border px-3 py-1 text-sm text-f1-foreground hover:bg-f1-background-secondary"
-              onClick={reset}
+      <div className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background">
+        <AnimatePresence initial={false}>
+          {state ? (
+            <motion.div
+              key="panel"
+              className="overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             >
-              Restart
-            </button>
-          </div>
-        )}
+              <F0ClarifyingPanel
+                clarifyingQuestion={state}
+                isSubmitDisabled={isSubmitDisabled}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="resolved"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="flex flex-col gap-2 p-4">
+                <div className="text-sm font-medium text-f1-foreground">
+                  Resolved:
+                </div>
+                <pre className="whitespace-pre-wrap text-sm text-f1-foreground-secondary">
+                  {resolved.join("\n\n") || "(no responses yet)"}
+                </pre>
+                <button
+                  className="self-start rounded-md border border-solid border-f1-border px-3 py-1 text-sm text-f1-foreground hover:bg-f1-background-secondary"
+                  onClick={reset}
+                >
+                  Restart
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -367,6 +396,42 @@ export const CustomAnswerMultiple: Story = {
       []
     )
     return <StoryShell steps={steps} />
+  },
+}
+
+/**
+ * Simulates the assistant still streaming a response: submission (final-step
+ * confirm, Enter on the custom answer, and Skip) is disabled until the toggle
+ * is turned off, while option selection and step navigation stay interactive.
+ */
+export const SubmitDisabled: Story = {
+  render: () => {
+    const [isResponding, setIsResponding] = useState(true)
+    const steps = useMemo<StoryStep[]>(
+      () => [
+        {
+          question: "What time period should the report cover?",
+          options: SINGLE_OPTIONS,
+          selectionMode: "single",
+          optional: true,
+          allowCustomAnswer: true,
+        },
+      ],
+      []
+    )
+    return (
+      <div className="space-y-3">
+        <label className="flex items-center gap-2 text-sm text-f1-foreground">
+          <input
+            type="checkbox"
+            checked={isResponding}
+            onChange={(e) => setIsResponding(e.target.checked)}
+          />
+          Assistant is responding (submit disabled)
+        </label>
+        <StoryShell steps={steps} isSubmitDisabled={isResponding} />
+      </div>
+    )
   },
 }
 

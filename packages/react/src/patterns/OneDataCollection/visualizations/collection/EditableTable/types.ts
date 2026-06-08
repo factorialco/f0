@@ -32,6 +32,27 @@ export type AddRowActionsResult =
 
 export type EditableTableVisualizationSettings = TableVisualizationSettings
 
+/**
+ * Map of the attributes modified in a cell update, keyed by record key.
+ * Each entry is a `[previousValue, newValue]` tuple.
+ */
+export type EditableTableCellChanges<R extends RecordType> = {
+  [K in keyof R]?: [R[K], R[K]]
+}
+
+/**
+ * Arguments passed to `onCellChange`.
+ */
+export type EditableTableOnCellChangeParams<R extends RecordType> = {
+  /** The full row item with the change(s) applied. */
+  updatedItem: R
+  /**
+   * Map of the modified attributes keyed by record key, where each entry is a
+   * `[previousValue, newValue]` tuple.
+   */
+  changes: EditableTableCellChanges<R>
+}
+
 export type DateCellConfig = {
   /** Earliest selectable date. Dates before this are disabled in the picker. */
   minDate?: Date
@@ -164,7 +185,11 @@ export type EditableTableColumnDefinition<
 
   /**
    * Returns a hint to display as an icon with tooltip inside the cell.
-   * Use to warn the user when a value diverges from its formula-inferred value.
+   * Use to warn the user when a value diverges from its formula-inferred value,
+   * or to provide extra context for non-editable / disabled cells (e.g. why a
+   * value was inferred, who a row is backfilling, why editing is locked).
+   *
+   * Supported by all `editType` values, including `display-only` and `disabled`.
    *
    * Return `undefined` to hide the hint.
    *
@@ -195,11 +220,15 @@ export type EditableTableVisualizationOptions<
 > & {
   columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>
   /**
-   * Called when a cell value changes with the full updated row.
+   * Called when a cell value changes. Receives an object with the full updated
+   * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
+   * record key, where each entry is a `[previousValue, newValue]` tuple.
    * Resolve with nothing for success, or `{ columnId: "message" }` to set errors.
    * Rejection sets an error on the edited column.
    */
-  onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>
+  onCellChange: (
+    params: EditableTableOnCellChangeParams<R>
+  ) => Promise<void | Record<string, string>>
   /**
    * When provided, renders action buttons at the bottom of the root-level table.
    * Returns a single action, an array of actions, or undefined to hide the row.

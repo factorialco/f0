@@ -20,6 +20,7 @@ import {
   overflowVariants,
   paddingDefaults,
   paddingVariants,
+  shadowVariants,
   zIndexVariants,
 } from "./utils"
 import {
@@ -42,6 +43,7 @@ const boxVariants = cva({
     ...borderVariants,
     ...overflowVariants,
     ...dividerVariants,
+    ...shadowVariants,
     ...zIndexVariants,
   },
   defaultVariants: {
@@ -138,6 +140,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
       // Divider
       divider,
       dividerColor,
+      boxShadow,
       // Flex
       alignItems,
       justifyContent,
@@ -234,6 +237,7 @@ export const F0Box = forwardRef<HTMLDivElement, F0BoxProps>(
             flexWrap,
             grow,
             shrink,
+            boxShadow,
           }),
           responsiveClasses,
           hasBorder && !borderColor && "border-f1-border",

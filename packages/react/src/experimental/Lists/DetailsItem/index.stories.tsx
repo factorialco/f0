@@ -72,3 +72,29 @@ export const WithDataTestId: Story = {
     await expect(canvas.getByTestId("details-item-test-id")).toBeInTheDocument()
   },
 }
+
+export const FileVariant: Story = {
+  args: {
+    title: "Document",
+    content: {
+      type: "file",
+      file: { name: "contract.pdf", type: "application/pdf" },
+      actions: [
+        {
+          label: "Open",
+          onClick: () => window.open("https://example.com/contract.pdf"),
+        },
+      ],
+    },
+  },
+}
+
+export const FileVariantImage: Story = {
+  args: {
+    title: "Attachment",
+    content: {
+      type: "file",
+      file: { name: "screenshot.png", type: "image/png" },
+    },
+  },
+}

@@ -54,7 +54,7 @@ export function MetadataValue({
             type: value.variant,
             avatars: value.avatars,
             size: "xs" as const,
-            max: 3,
+            max: value.max ?? 3,
           } as F0AvatarListProps)}
           // TS dont narrow correctly the type of the list when destructuring the value
         />

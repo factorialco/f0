@@ -46,7 +46,9 @@ export const defaultTranslations = {
     paste: "Paste",
     close: "Close",
     collapse: "Collapse",
+    collapseItem: "Collapse {{title}}",
     expand: "Expand",
+    expandItem: "Expand {{title}}",
     showAll: "Show all",
     showLess: "Show less",
     seeMore: "See more",
@@ -65,6 +67,7 @@ export const defaultTranslations = {
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
+    apply: "Apply",
   },
   status: {
     selected: {
@@ -280,7 +283,7 @@ export const defaultTranslations = {
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
+    thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
     feedbackModal: {
@@ -370,8 +373,19 @@ export const defaultTranslations = {
       dismiss: "Dismiss",
     },
     attachFile: "Attach file",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    transcribing: "Transcribing…",
+    micPermissionDenied:
+      "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
+    fileUploadBlockedSubmit:
+      "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
     tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
     reply: "Reply",
