@@ -225,6 +225,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
     onSubmit,
     submitConfig,
     errorTriggerMode = "on-blur",
+    secondaryAction,
   } = formDefinition as F0FormDefinitionPerSection<T>
 
   const submitLabel = submitConfig?.label
@@ -445,6 +446,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       nextLabel={nextLabel}
       previousLabel={previousLabel}
       submitLabel={submitLabel}
+      secondaryAction={secondaryAction}
       onSubmit={handleLastStepCompleted}
       onStepChanged={handleStepChanged}
       allowStepSkipping={allowStepSkipping}
@@ -600,6 +602,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
     onSubmit,
     submitConfig,
     errorTriggerMode = "on-blur",
+    secondaryAction,
   } = formDefinition as F0FormDefinitionSingleSchema<TSchema>
 
   const submitLabel = submitConfig?.label
@@ -755,6 +758,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       nextLabel={nextLabel}
       previousLabel={previousLabel}
       submitLabel={submitLabel}
+      secondaryAction={secondaryAction}
       onSubmit={handleLastStepCompleted}
       onStepChanged={handleStepChanged}
       allowStepSkipping={allowStepSkipping}

@@ -3,6 +3,7 @@ import { FC, useMemo } from "react"
 import type {
   F0DialogPrimaryAction,
   F0DialogSecondaryAction,
+  F0DialogTertiaryAction,
 } from "@/patterns/F0Dialog/types"
 
 import { F0DialogInternal as F0Dialog } from "@/patterns/F0Dialog/F0DialogInternal"
@@ -35,6 +36,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
   nextLabel,
   previousLabel,
   submitLabel,
+  secondaryAction,
   onSubmit,
   onStepChanged,
   allowStepSkipping = false,
@@ -86,7 +88,7 @@ export const F0Wizard: FC<F0WizardProps> = ({
     [resolvedNextLabel, isLastStep, navigation, currentStepDef]
   )
 
-  const secondaryAction = useMemo<F0DialogSecondaryAction | undefined>(
+  const previousAction = useMemo<F0DialogSecondaryAction | undefined>(
     () =>
       isFirstStep
         ? undefined
@@ -99,6 +101,36 @@ export const F0Wizard: FC<F0WizardProps> = ({
     [isFirstStep, resolvedPreviousLabel, navigation]
   )
 
+  const resolvedSecondaryAction = useMemo<
+    F0DialogTertiaryAction | undefined
+  >(() => {
+    if (!secondaryAction) return undefined
+
+    const visible =
+      secondaryAction.isVisible?.({
+        stepIndex: navigation.currentStep,
+        isFirstStep,
+        isLastStep,
+        totalSteps: steps.length,
+      }) ?? true
+
+    if (!visible) return undefined
+
+    return {
+      label: secondaryAction.label,
+      icon: secondaryAction.icon,
+      onClick: secondaryAction.onClick,
+      disabled: secondaryAction.disabled,
+      loading: secondaryAction.loading,
+    }
+  }, [
+    secondaryAction,
+    navigation.currentStep,
+    isFirstStep,
+    isLastStep,
+    steps.length,
+  ])
+
   return (
     <F0Dialog
       isOpen={isOpen}
@@ -106,7 +138,8 @@ export const F0Wizard: FC<F0WizardProps> = ({
       width={width}
       title={title}
       primaryAction={primaryAction}
-      secondaryAction={secondaryAction}
+      secondaryAction={previousAction}
+      tertiaryAction={resolvedSecondaryAction}
       disableContentPadding
     >
       <WizardProvider

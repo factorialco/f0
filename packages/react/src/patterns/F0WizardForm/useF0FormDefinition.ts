@@ -12,6 +12,8 @@ import type {
   F0PerSectionSectionConfig,
 } from "@/patterns/F0Form/types"
 
+import type { F0WizardSecondaryAction } from "@/ui/F0Wizard/types"
+
 import type {
   F0FormDefinitionPerSection,
   F0FormDefinitionSingleSchema,
@@ -66,6 +68,8 @@ interface UseF0FormDefinitionSingleSchemaInputBase<
   initialFiles?: AsyncOrSync<InitialFile[]>
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
+  /** Optional consumer-defined action rendered as an extra footer button in the wizard */
+  secondaryAction?: F0WizardSecondaryAction
 }
 
 /** Single-schema input WITHOUT `defaultValuesParamsSchema` → `defaultValues` is sync or `(signal) => Promise<T>` */
@@ -116,6 +120,8 @@ interface UseF0FormDefinitionPerSectionInputBase<T extends F0PerSectionSchema> {
   initialFiles?: AsyncOrSync<InitialFile[]>
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
+  /** Optional consumer-defined action rendered as an extra footer button in the wizard */
+  secondaryAction?: F0WizardSecondaryAction
 }
 
 /** Per-section input WITHOUT `defaultValuesParamsSchema` */
@@ -298,6 +304,8 @@ export function useF0FormDefinition(
 
   const initialFiles = "initialFiles" in input ? input.initialFiles : undefined
   const steps = "steps" in input ? input.steps : undefined
+  const secondaryAction =
+    "secondaryAction" in input ? input.secondaryAction : undefined
 
   // Store the raw function for the AI registry to call with actual params
   const defaultValuesFn =
@@ -340,6 +348,7 @@ export function useF0FormDefinition(
       initialFiles: resolvedInitialFiles,
       isLoadingInitialFiles,
       steps,
+      secondaryAction,
       _brand: brand,
     } as
       | F0FormDefinitionSingleSchema<F0FormSchema>
@@ -361,5 +370,6 @@ export function useF0FormDefinition(
     resolvedInitialFiles,
     isLoadingInitialFiles,
     steps,
+    secondaryAction,
   ])
 }

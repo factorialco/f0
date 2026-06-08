@@ -44,7 +44,12 @@ type F0DialogActionItem = {
 export type F0DialogPrimaryActionItem = F0DialogActionItem
 export type F0DialogSecondaryActionItem = F0DialogActionItem
 
+// An additional footer action rendered between the secondary and primary
+// buttons. Same shape as the secondary action (single button, no dropdown).
+export type F0DialogTertiaryAction = F0DialogSecondaryAction
+
 export type F0DialogActionsProps = {
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
   secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[]
+  tertiaryAction?: F0DialogTertiaryAction
 }

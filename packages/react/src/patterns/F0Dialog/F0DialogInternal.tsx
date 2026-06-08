@@ -74,6 +74,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   width = "md",
   primaryAction,
   secondaryAction,
+  tertiaryAction,
   title,
   description,
   module,
@@ -167,6 +168,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
             <F0DialogFooter
               primaryAction={primaryAction}
               secondaryAction={secondaryAction}
+              tertiaryAction={tertiaryAction}
             />
           </DrawerContent>
         </Drawer>
@@ -204,6 +206,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           <F0DialogFooter
             primaryAction={primaryAction}
             secondaryAction={secondaryAction}
+            tertiaryAction={tertiaryAction}
           />
         </DialogContent>
       </Dialog>

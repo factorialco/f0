@@ -987,3 +987,63 @@ describe("F0WizardForm — Single-schema mode", () => {
     expect(screen.queryByLabelText("Legal entity")).not.toBeInTheDocument()
   })
 })
+
+// =============================================================================
+// Secondary action (extra footer button)
+// =============================================================================
+
+describe("F0WizardForm — secondary action", () => {
+  it("renders the secondary action button from the form definition and fires onClick", async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    const definition = makeSingleSchemaDefinition({
+      secondaryAction: { label: "Save as draft", onClick },
+    })
+
+    render(<SingleSchemaWrapper definition={definition} />)
+
+    const button = screen.getByText("Save as draft")
+    expect(button).toBeInTheDocument()
+
+    await user.click(button)
+    expect(onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it("hides the secondary action when isVisible returns false", () => {
+    const definition = makeSingleSchemaDefinition({
+      secondaryAction: {
+        label: "Save as draft",
+        onClick: vi.fn(),
+        isVisible: () => false,
+      },
+    })
+
+    render(<SingleSchemaWrapper definition={definition} />)
+
+    expect(screen.queryByText("Save as draft")).not.toBeInTheDocument()
+  })
+
+  it("shows the secondary action only on the configured step (last step)", async () => {
+    const user = userEvent.setup()
+    const definition = makeSingleSchemaDefinition({
+      defaultValues: { email: "test@test.com" },
+      secondaryAction: {
+        label: "Save as draft",
+        onClick: vi.fn(),
+        isVisible: ({ isLastStep }) => isLastStep,
+      },
+    })
+
+    render(<SingleSchemaWrapper definition={definition} />)
+
+    // First step → not visible yet
+    expect(screen.queryByText("Save as draft")).not.toBeInTheDocument()
+
+    await user.click(screen.getByText("Continue"))
+
+    // Last step → visible
+    await waitFor(() => {
+      expect(screen.getByText("Save as draft")).toBeInTheDocument()
+    })
+  })
+})

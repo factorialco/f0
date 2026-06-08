@@ -11,8 +11,11 @@ import type {
   F0PerSectionSectionConfig,
 } from "@/patterns/F0Form/types"
 import type { RenderCustomFieldFunction } from "@/patterns/F0Form/types"
+import type { F0WizardSecondaryAction } from "@/ui/F0Wizard/types"
 
 import { DialogWidth } from "@/patterns/F0Dialog"
+
+export type { F0WizardSecondaryAction }
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>
@@ -94,6 +97,11 @@ export interface F0FormDefinitionSingleSchema<TSchema extends F0FormSchema> {
   isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
+  /**
+   * Optional consumer-defined action rendered as an extra footer button in the
+   * wizard, between the Previous and Next/Submit buttons.
+   */
+  secondaryAction?: F0WizardSecondaryAction
 }
 
 export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
@@ -130,6 +138,11 @@ export interface F0FormDefinitionPerSection<T extends F0PerSectionSchema> {
   isLoadingInitialFiles?: boolean
   /** Wizard steps — when present, F0WizardForm uses these instead of auto-deriving from sections */
   steps?: F0WizardFormStep[]
+  /**
+   * Optional consumer-defined action rendered as an extra footer button in the
+   * wizard, between the Previous and Next/Submit buttons.
+   */
+  secondaryAction?: F0WizardSecondaryAction
 }
 
 export type F0FormDefinition<

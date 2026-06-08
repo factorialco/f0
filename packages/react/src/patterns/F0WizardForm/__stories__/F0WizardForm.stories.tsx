@@ -4,6 +4,7 @@ import { ComponentProps, useState } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
+import Save from "@/icons/app/Save"
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
@@ -835,6 +836,67 @@ function ManyFieldsStory() {
 
 export const ManyFieldsPerSection: Story = {
   render: () => <ManyFieldsStory />,
+}
+
+// =============================================================================
+// Secondary action (extra footer button)
+// =============================================================================
+
+function SecondaryActionStory() {
+  const [open, setOpen] = useState(true)
+  const [draftCount, setDraftCount] = useState(0)
+
+  const definition = useF0FormDefinition({
+    name: "add-employee-secondary-action",
+    schema: singleSchema,
+    defaultValues: { email: "alicia.keys@factorial.co" },
+    sections: {
+      general: { title: "General information" },
+      personal: { title: "Personal details" },
+      work: { title: "Work details" },
+    },
+    onSubmit: async ({ data }) => {
+      console.log("Form submitted:", data)
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: "Employee saved successfully" }
+    },
+    // Extra footer button, rendered between Previous and Next/Submit.
+    secondaryAction: {
+      label: "Save as draft",
+      icon: Save,
+      onClick: () => {
+        setDraftCount((count) => count + 1)
+        console.log("Saved as draft")
+      },
+      // Visible on every step except the first one.
+      isVisible: ({ isFirstStep }) => !isFirstStep,
+    },
+  })
+
+  return (
+    <ApplicationFrame
+      {...(ApplicationFrameStoryMeta.args as ComponentProps<
+        typeof ApplicationFrame
+      >)}
+    >
+      <div className="flex flex-1 flex-col items-center justify-center gap-2">
+        <F0Button label="Open wizard" onClick={() => setOpen(true)} />
+        <span className="text-f1-foreground-secondary text-sm">
+          Drafts saved: {draftCount}
+        </span>
+        <F0WizardForm
+          formDefinition={definition}
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="Add employee"
+        />
+      </div>
+    </ApplicationFrame>
+  )
+}
+
+export const SecondaryAction: Story = {
+  render: () => <SecondaryActionStory />,
 }
 
 // =============================================================================

@@ -1,5 +1,6 @@
 import { ReactNode } from "react"
 
+import { IconType } from "@/components/F0Icon"
 import { DialogWidth } from "@/patterns/F0Dialog"
 
 export interface F0WizardStep {
@@ -9,6 +10,28 @@ export interface F0WizardStep {
   nextLabel?: string
   previousLabel?: string
   onNext?: () => void | Promise<unknown>
+}
+
+/**
+ * A consumer-defined action rendered as an additional button in the wizard
+ * footer, alongside the built-in Previous/Next (Submit) buttons.
+ */
+export interface F0WizardSecondaryAction {
+  label: string
+  icon?: IconType
+  onClick: () => void
+  disabled?: boolean
+  loading?: boolean
+  /**
+   * Controls on which steps the action is shown.
+   * When omitted, the action is visible on every step.
+   */
+  isVisible?: (arg: {
+    stepIndex: number
+    isFirstStep: boolean
+    isLastStep: boolean
+    totalSteps: number
+  }) => boolean
 }
 
 export interface F0WizardChildrenProps {
@@ -31,6 +54,11 @@ export interface F0WizardProps {
   nextLabel?: string
   previousLabel?: string
   submitLabel?: string
+  /**
+   * Optional consumer-defined action rendered as an extra footer button
+   * between the Previous and Next/Submit buttons.
+   */
+  secondaryAction?: F0WizardSecondaryAction
   onSubmit?: () => void | Promise<unknown>
   onStepChanged?: (stepIndex: number) => void
   /**

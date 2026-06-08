@@ -24,11 +24,13 @@ const isSecondaryActionArray = (
 export const F0DialogFooter = ({
   primaryAction,
   secondaryAction,
+  tertiaryAction,
 }: F0DialogActionsProps) => {
   const hasSecondaryAction = secondaryAction
   const hasPrimaryAction = primaryAction
+  const hasTertiaryAction = tertiaryAction
 
-  if (!hasPrimaryAction && !hasSecondaryAction) {
+  if (!hasPrimaryAction && !hasSecondaryAction && !hasTertiaryAction) {
     return null
   }
 
@@ -98,11 +100,28 @@ export const F0DialogFooter = ({
     )
   }
 
+  const renderTertiaryAction = () => {
+    if (!hasTertiaryAction) return null
+
+    return (
+      <F0Button
+        label={tertiaryAction.label}
+        onClick={tertiaryAction.onClick}
+        variant="outline"
+        icon={tertiaryAction.icon}
+        iconPosition={tertiaryAction.iconPosition}
+        disabled={tertiaryAction.disabled}
+        loading={tertiaryAction.loading}
+      />
+    )
+  }
+
   return (
     <div className="flex flex-row items-center justify-between border-x-0 border-b-0 border-t border-solid border-f1-border-secondary px-4 py-3">
       <div className="flex-1" />
       <div className="flex flex-row items-center gap-2">
         {renderSecondaryAction()}
+        {renderTertiaryAction()}
         {renderPrimaryAction()}
       </div>
     </div>
