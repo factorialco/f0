@@ -29,7 +29,7 @@ interface PageMetrics {
   originalHeight: number
 }
 
-const SCROLL_PADDING = 20
+const PAGE_VIEWPORT_PADDING = 48
 
 export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
   (props, ref) => {
@@ -104,8 +104,9 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
         const toolbarHeight = toolbarRef.current?.offsetHeight ?? 0
         const computed =
           value === "page-width"
-            ? (container.clientWidth - SCROLL_PADDING) / metrics.originalWidth
-            : (container.clientHeight - toolbarHeight - SCROLL_PADDING) /
+            ? (container.clientWidth - PAGE_VIEWPORT_PADDING) /
+              metrics.originalWidth
+            : (container.clientHeight - toolbarHeight - PAGE_VIEWPORT_PADDING) /
               metrics.originalHeight
 
         setScale(computed)
@@ -222,7 +223,7 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
         <div
           ref={containerRef}
           onScroll={onContainerScroll}
-          className="F0PdfViewer__surface relative flex h-full flex-col overflow-auto"
+          className="F0PdfViewer__surface relative flex h-full flex-col overflow-auto [scrollbar-gutter:stable_both-edges]"
         >
           <PdfToolbar
             toolbarRef={toolbarRef}

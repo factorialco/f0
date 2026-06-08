@@ -22,6 +22,27 @@ import { F0PdfViewer } from "@factorialco/f0-react"
 
 The component fills its container, so give it a sized wrapper (height + width).
 
+## Sizing
+
+`F0PdfViewer` is `height: 100%` / `width: 100%` — it has no intrinsic size and
+takes the height of its parent. Always render it inside a container with a
+defined height, otherwise it collapses.
+
+```tsx
+// Fixed height
+<div className="h-[640px]">
+  <F0PdfViewer url={url} filename="doc.pdf" />
+</div>
+
+// Fill a flex layout (use min-h-0 so the inner scroll works)
+<div className="flex h-full flex-col">
+  <Header />
+  <div className="min-h-0 flex-1">
+    <F0PdfViewer url={url} filename="doc.pdf" />
+  </div>
+</div>
+```
+
 ## Worker setup
 
 `pdf.js` renders in a Web Worker. F0 configures the worker automatically,

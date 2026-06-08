@@ -5,9 +5,15 @@ interface ToolbarButtonProps {
   label: string
   icon: IconType
   onClick: () => void
+  size?: "sm" | "md"
 }
 
-export const ToolbarButton = ({ label, icon, onClick }: ToolbarButtonProps) => {
+export const ToolbarButton = ({
+  label,
+  icon,
+  onClick,
+  size = "md",
+}: ToolbarButtonProps) => {
   return (
     <F0Button
       label={label}
@@ -15,7 +21,7 @@ export const ToolbarButton = ({ label, icon, onClick }: ToolbarButtonProps) => {
       onClick={onClick}
       hideLabel
       variant="outline"
-      size="md"
+      size={size}
     />
   )
 }

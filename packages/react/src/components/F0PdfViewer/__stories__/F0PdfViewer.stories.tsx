@@ -12,6 +12,7 @@ const meta = {
   title: "F0PdfViewer",
   parameters: {
     layout: "fullscreen",
+    docs: { story: { inline: false, height: "680px" } },
   },
   argTypes: {
     initialScale: {
@@ -27,7 +28,7 @@ type Story = StoryObj<typeof F0PdfViewer>
 
 export const Default: Story = {
   render: () => (
-    <div className="h-[640px] w-[840px] p-4">
+    <div className="h-full w-full">
       <F0PdfViewer
         url={SAMPLE_URL}
         filename="sample.pdf"
@@ -40,7 +41,7 @@ export const Default: Story = {
 export const PageFit: Story = {
   tags: ["!dev"],
   render: () => (
-    <div className="h-[640px] w-[840px] p-4">
+    <div className="h-full w-full">
       <F0PdfViewer
         url={SAMPLE_URL}
         filename="sample.pdf"
@@ -54,7 +55,7 @@ export const PageFit: Story = {
 export const Skeleton: Story = {
   tags: ["!dev"],
   render: () => (
-    <div className="h-[640px] w-[840px] p-4">
+    <div className="h-full w-full">
       <F0PdfViewer.Skeleton />
     </div>
   ),
