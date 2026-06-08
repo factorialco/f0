@@ -25,37 +25,24 @@ interface F0ClarifyingPanelProps {
 }
 
 /**
- * Animated wrapper that mounts/unmounts the clarifying question panel.
+ * Clarifying question panel — content only, no mount animation.
  *
- * Uses Motion's native `height: "auto"` support — it measures the
- * content internally, so the same transition covers the initial
- * appearance, step changes with a different number of options, and
- * dismissal. No manual ResizeObserver.
+ * The parent slot (F0AiChatTextArea) owns the enter/exit animation so
+ * nested height animations don't conflict. Step-to-step transitions are
+ * still animated internally via F0ClarifyingPanelContent.
  *
- * Props-driven: the entire panel state (current step, navigation,
- * callbacks) lives in `clarifyingQuestion`. No coupling to `useAiChat`
- * — embedders can construct a state object themselves.
+ * When used standalone (e.g. Storybook), wrap in a motion.div with
+ * `overflow-hidden` and `height: 0 → "auto"`.
  */
 export const F0ClarifyingPanel = ({
   clarifyingQuestion,
   isSubmitDisabled,
 }: F0ClarifyingPanelProps) => {
-  const shouldReduceMotion = useReducedMotion()
-  const duration = shouldReduceMotion ? 0 : DURATION
-
   return (
-    <motion.div
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: "auto", opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      transition={{ duration, ease: EASE }}
-      className="overflow-hidden"
-    >
-      <F0ClarifyingPanelContent
-        clarifyingQuestion={clarifyingQuestion}
-        isSubmitDisabled={isSubmitDisabled}
-      />
-    </motion.div>
+    <F0ClarifyingPanelContent
+      clarifyingQuestion={clarifyingQuestion}
+      isSubmitDisabled={isSubmitDisabled}
+    />
   )
 }
 
