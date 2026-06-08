@@ -63,6 +63,26 @@ configurePdfWorker("/static/pdf.worker.min.js")
 
 <Canvas of={Stories.PageFit} />
 
+## Rotation
+
+Set `rotatable` to add a toolbar control that rotates the document in 90°
+steps. Rotation is uncontrolled: the viewer keeps its own state, but you can
+seed it with `initialRotation` and react to changes via `onRotationChange` (for
+example, to persist it per file). Persistence is left to the consumer so the
+component stays free of storage concerns.
+
+```tsx
+<F0PdfViewer
+  url={url}
+  filename="doc.pdf"
+  rotatable
+  initialRotation={getStoredRotation(fileId)}
+  onRotationChange={(rotation) => storeRotation(fileId, rotation)}
+/>
+```
+
+<Canvas of={Stories.Rotatable} />
+
 ## Loading
 
 While the document loads (and as a `F0PdfViewer.Skeleton` placeholder) the
@@ -99,8 +119,10 @@ viewer shows a status region announced to assistive tech.
       <td>
         <code>string</code>
       </td>
-      <td>—</td>
-      <td>File name used when downloading (required)</td>
+      <td>
+        <code>"document.pdf"</code>
+      </td>
+      <td>File name used when downloading</td>
     </tr>
     <tr>
       <td>
@@ -147,6 +169,40 @@ viewer shows a status region announced to assistive tech.
         <code>true</code>
       </td>
       <td>Send credentials with the document request</td>
+    </tr>
+    <tr>
+      <td>
+        <code>rotatable</code>
+      </td>
+      <td>
+        <code>boolean</code>
+      </td>
+      <td>
+        <code>false</code>
+      </td>
+      <td>Show a toolbar control to rotate the document in 90° steps</td>
+    </tr>
+    <tr>
+      <td>
+        <code>initialRotation</code>
+      </td>
+      <td>
+        <code>0 | 90 | 180 | 270</code>
+      </td>
+      <td>
+        <code>0</code>
+      </td>
+      <td>Initial rotation in degrees</td>
+    </tr>
+    <tr>
+      <td>
+        <code>onRotationChange</code>
+      </td>
+      <td>
+        <code>(rotation: number) =&gt; void</code>
+      </td>
+      <td>—</td>
+      <td>Called with the new rotation in degrees when the user rotates</td>
     </tr>
     <tr>
       <td>

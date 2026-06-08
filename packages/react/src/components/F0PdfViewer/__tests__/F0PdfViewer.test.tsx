@@ -1,7 +1,12 @@
 import { type ReactNode, useEffect, useRef } from "react"
 import { describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { F0PdfViewer } from "../index"
 
@@ -37,10 +42,12 @@ vi.mock("@/ui/pdf", () => ({
   },
   Page: ({
     pageNumber,
+    rotate,
     onLoadSuccess,
     inputRef,
   }: {
     pageNumber: number
+    rotate?: number
     onLoadSuccess?: (page: {
       originalWidth: number
       originalHeight: number
@@ -51,8 +58,15 @@ vi.mock("@/ui/pdf", () => ({
     useEffect(() => {
       inputRef?.(ref.current)
       onLoadSuccess?.({ originalWidth: 600, originalHeight: 800 })
-    }, [inputRef, onLoadSuccess])
-    return <div ref={ref} data-testid={`pdf-page-${pageNumber}`} />
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+    return (
+      <div
+        ref={ref}
+        data-testid={`pdf-page-${pageNumber}`}
+        data-rotate={rotate}
+      />
+    )
   },
 }))
 
@@ -113,6 +127,46 @@ describe("F0PdfViewer", () => {
       expect(screen.getByTestId("pdf-page-2")).toBeInTheDocument()
     )
     expect(screen.queryByTestId("pdf-page-1")).not.toBeInTheDocument()
+  })
+
+  it("hides the rotate control by default", async () => {
+    render(<F0PdfViewer url="/doc.pdf" filename="doc.pdf" />)
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: "Next page" })
+      ).toBeInTheDocument()
+    )
+    expect(
+      screen.queryByRole("button", { name: "Rotate" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("rotates and reports the new rotation when rotatable", async () => {
+    const onRotationChange = vi.fn()
+    render(
+      <F0PdfViewer
+        url="/doc.pdf"
+        filename="doc.pdf"
+        rotatable
+        onRotationChange={onRotationChange}
+      />
+    )
+    await waitFor(() =>
+      expect(screen.getByTestId("pdf-page-1")).toHaveAttribute(
+        "data-rotate",
+        "0"
+      )
+    )
+
+    fireEvent.click(screen.getByRole("button", { name: "Rotate" }))
+
+    expect(onRotationChange).toHaveBeenCalledWith(90)
+    await waitFor(() =>
+      expect(screen.getByTestId("pdf-page-1")).toHaveAttribute(
+        "data-rotate",
+        "90"
+      )
+    )
   })
 
   it("renders the skeleton variant", () => {
