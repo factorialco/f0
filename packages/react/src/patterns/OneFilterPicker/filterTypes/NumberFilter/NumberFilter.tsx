@@ -187,7 +187,7 @@ export function NumberFilter({
 
   return (
     <>
-      <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-6">
+      <div className="flex flex-col gap-2 space-y-4 overflow-x-hidden p-4">
         <div className="flex flex-row gap-2">
           <div className="min-w-1/2 flex-1">
             <NumberInputInternal
