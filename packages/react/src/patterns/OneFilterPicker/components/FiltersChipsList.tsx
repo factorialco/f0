@@ -38,15 +38,18 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   const i18n = useI18n()
 
   const activeFilterKeys = getActiveFilterKeys(filters, value, i18n)
+  const hasVisibleChips = !hideChips && activeFilterKeys.length > 0
 
-  if (hideChips || activeFilterKeys.length === 0) {
+  // The "Save view" action lives in the presets row (the dashed save chip), not
+  // here — this row only shows filter chips + Clear.
+  if (!hasVisibleChips) {
     return null
   }
 
   return (
     <div className="mt-2 flex items-start justify-between gap-2">
       <div className="flex flex-wrap items-center gap-2">
-        {resultCount !== undefined && (
+        {resultCount !== undefined && hasVisibleChips && (
           <span className="whitespace-nowrap font-medium text-f1-foreground-secondary">
             {i18n.t(
               resultCount === 1
@@ -57,43 +60,45 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
           </span>
         )}
         <AnimatePresence presenceAffectsLayout initial={false}>
-          {activeFilterKeys.map((key) => {
-            const filterSchema = filters[key]
+          {hasVisibleChips &&
+            activeFilterKeys.map((key) => {
+              const filterSchema = filters[key]
 
-            if (!filters[key]) {
-              return null
-            }
+              if (!filters[key]) {
+                return null
+              }
 
-            const currentValue = value?.[key as keyof Filters]
+              const currentValue = value?.[key as keyof Filters]
 
-            const filterType = getFilterType(filterSchema.type)
-            type FilterType = FilterDefinitionsByType[typeof filterSchema.type]
+              const filterType = getFilterType(filterSchema.type)
+              type FilterType =
+                FilterDefinitionsByType[typeof filterSchema.type]
 
-            const typedFilterType =
-              filterType as unknown as FilterTypeDefinition<
-                FilterValue<FilterType>
-              >
+              const typedFilterType =
+                filterType as unknown as FilterTypeDefinition<
+                  FilterValue<FilterType>
+                >
 
-            if (
-              typedFilterType.isEmpty(currentValue, {
-                schema: filterSchema as unknown as FilterTypeSchema,
-                i18n,
-              })
-            ) {
-              return null
-            }
+              if (
+                typedFilterType.isEmpty(currentValue, {
+                  schema: filterSchema as unknown as FilterTypeSchema,
+                  i18n,
+                })
+              ) {
+                return null
+              }
 
-            return (
-              <FilterChipButton
-                key={`filter-${String(key)}`}
-                filter={filterSchema}
-                filterKey={String(key)}
-                value={currentValue}
-                onSelect={() => onFilterSelect(key)}
-                onRemove={() => onFilterRemove(key)}
-              />
-            )
-          })}
+              return (
+                <FilterChipButton
+                  key={`filter-${String(key)}`}
+                  filter={filterSchema}
+                  filterKey={String(key)}
+                  value={currentValue}
+                  onSelect={() => onFilterSelect(key)}
+                  onRemove={() => onFilterRemove(key)}
+                />
+              )
+            })}
         </AnimatePresence>
       </div>
 

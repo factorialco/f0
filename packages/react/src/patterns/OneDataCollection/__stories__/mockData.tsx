@@ -1297,6 +1297,7 @@ export type FiltersType = typeof filters
 export const ExampleComponent = ({
   useObservable = false,
   usePresets = false,
+  presets: presetsOverride,
   frozenColumns = 0,
   selectable,
   defaultSelectedItems,
@@ -1336,6 +1337,8 @@ export const ExampleComponent = ({
 }: {
   useObservable?: boolean
   usePresets?: boolean
+  /** Override the developer-provided presets used when `usePresets` is true. */
+  presets?: PresetsDefinition<typeof filters>
   frozenColumns?: 0 | 1 | 2
   fullHeight?: boolean
   visualizations?: ReadonlyArray<
@@ -1447,7 +1450,7 @@ export const ExampleComponent = ({
       currentSortings,
       navigationFilters,
       currentNavigationFilters,
-      presets: usePresets ? filterPresets : undefined,
+      presets: usePresets ? (presetsOverride ?? filterPresets) : undefined,
       sortings: noSorting ? undefined : sortings,
       grouping,
       currentGrouping: currentGrouping,

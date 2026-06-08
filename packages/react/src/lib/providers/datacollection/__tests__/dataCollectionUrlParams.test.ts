@@ -111,9 +111,9 @@ describe("parseDataCollectionUrlParams", () => {
   })
 
   it("parses the visualization as a type/key string", () => {
-    expect(parseDataCollectionUrlParams(`dc_view=kanban`).visualization).toBe(
-      "kanban"
-    )
+    expect(
+      parseDataCollectionUrlParams(`dc_visualization=kanban`).visualization
+    ).toBe("kanban")
     expect(parseDataCollectionUrlParams(``)).not.toHaveProperty("visualization")
   })
 
@@ -122,6 +122,15 @@ describe("parseDataCollectionUrlParams", () => {
     expect(parseDataCollectionUrlParams(``)).not.toHaveProperty("page")
     // page 0 / negative are ignored.
     expect(parseDataCollectionUrlParams(`dc_page=0`)).not.toHaveProperty("page")
+  })
+
+  it("parses the selected preset id", () => {
+    expect(parseDataCollectionUrlParams(`dc_view=eng`).preset).toBe("eng")
+    expect(parseDataCollectionUrlParams(``)).not.toHaveProperty("preset")
+    // empty value is ignored
+    expect(parseDataCollectionUrlParams(`dc_view=`)).not.toHaveProperty(
+      "preset"
+    )
   })
 
   it("skips filters when no definition is provided", () => {
@@ -231,7 +240,9 @@ describe("buildDataCollectionUrlParams", () => {
 
   it("encodes the visualization as its type/key", () => {
     expect(
-      buildDataCollectionUrlParams({ visualization: "kanban" }).get("dc_view")
+      buildDataCollectionUrlParams({ visualization: "kanban" }).get(
+        "dc_visualization"
+      )
     ).toBe("kanban")
     expect([...buildDataCollectionUrlParams({}).keys()]).toEqual([])
   })
@@ -239,6 +250,17 @@ describe("buildDataCollectionUrlParams", () => {
   it("encodes the page, omitting the first one", () => {
     expect(buildDataCollectionUrlParams({ page: 3 }).get("dc_page")).toBe("3")
     expect(buildDataCollectionUrlParams({ page: 1 }).has("dc_page")).toBe(false)
+  })
+
+  it("encodes and round-trips the selected preset id", () => {
+    expect(buildDataCollectionUrlParams({ preset: "eng" }).get("dc_view")).toBe(
+      "eng"
+    )
+    expect([...buildDataCollectionUrlParams({}).keys()]).toEqual([])
+    const state = { preset: "eng" }
+    expect(
+      parseDataCollectionUrlParams(buildDataCollectionUrlParams(state))
+    ).toEqual(state)
   })
 
   it("round-trips sorting + page together (no clobber)", () => {

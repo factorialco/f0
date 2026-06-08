@@ -31,15 +31,18 @@ type UseDataCollectionUrlSyncOptions = {
   visualization: number
   /**
    * Ordered visualization type/keys (e.g. `["table", "kanban"]`), used to map
-   * the index to/from the readable `dc_view` value. URL `dc_view` is only synced
+   * the index to/from the readable `dc_visualization` value, only synced
    * when there is more than one visualization. Duplicate types resolve to the
    * first matching index on read.
    */
   visualizationKeys: readonly string[]
+  /** Id of the selected preset (absent when none is selected). */
+  selectedPresetId: string | undefined
   setFilters: (value: FiltersState<FiltersDefinition>) => void
   setSearch: (value: string | undefined) => void
   setSortings: (value: SortingsState<SortingsDefinition>) => void
   setVisualization: (value: number) => void
+  setSelectedPresetId: (value: string | undefined) => void
 }
 
 /**
@@ -66,10 +69,12 @@ export const useDataCollectionUrlSync = ({
   sortings,
   visualization,
   visualizationKeys,
+  selectedPresetId,
   setFilters,
   setSearch,
   setSortings,
   setVisualization,
+  setSelectedPresetId,
 }: UseDataCollectionUrlSyncOptions): void => {
   const active = !disabled
   // Only sync the visualization when there is a real choice to reflect.
@@ -95,6 +100,9 @@ export const useDataCollectionUrlSync = ({
       const index = visualizationKeys.indexOf(state.visualization)
       if (index >= 0) setVisualization(index)
     }
+    // Restore the selected preset marker; its captured filters/sorting/view are
+    // carried by the other params, so we only mark the selection here.
+    if (state.preset !== undefined) setSelectedPresetId(state.preset)
 
     // Enable writing in the same render as the applied state, so the first
     // write reflects the URL we just read rather than the prior snapshot.
@@ -114,6 +122,7 @@ export const useDataCollectionUrlSync = ({
         syncVisualization && visualization > 0
           ? visualizationKeys[visualization]
           : undefined,
+      preset: selectedPresetId,
     })
   }, [
     active,
@@ -124,5 +133,6 @@ export const useDataCollectionUrlSync = ({
     visualization,
     visualizationKeys,
     syncVisualization,
+    selectedPresetId,
   ])
 }

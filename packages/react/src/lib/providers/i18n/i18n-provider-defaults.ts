@@ -69,6 +69,8 @@ export const defaultTranslations = {
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
     apply: "Apply",
+    saveAsPreset: "Save view",
+    editPreset: "Edit view",
   },
   status: {
     selected: {
@@ -138,6 +140,23 @@ export const defaultTranslations = {
     },
     actions: {
       actions: "Actions",
+    },
+    presets: {
+      createTitle: "Save view",
+      createDescription:
+        "Save the current filters, sorting, grouping and columns as a view.",
+      updateTitle: "Update view",
+      updateDescription: "Update this view's name and description.",
+      nameLabel: "Title",
+      namePlaceholder: "View name",
+      duplicateName: "A view with this name already exists",
+      descriptionLabel: "Description",
+      descriptionPlaceholder: "Optional description",
+      save: "Save",
+      delete: "Remove",
+      share: "Share view",
+      copiedToClipboard: "Copied to your clipboard",
+      cancel: "Cancel",
     },
     visualizations: {
       table: "Table view",
