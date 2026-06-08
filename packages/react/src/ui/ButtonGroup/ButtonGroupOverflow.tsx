@@ -91,6 +91,7 @@ export function ButtonGroupOverflow({
       <div
         ref={measurementContainerRef}
         aria-hidden="true"
+        inert
         className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
         style={{ gap }}
       >
