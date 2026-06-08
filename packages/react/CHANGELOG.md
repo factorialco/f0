@@ -6,6 +6,7 @@
 ### Features
 
 * **dialog 1/6:** foundation bits for dialog-alike (additive) ([#4363](https://github.com/factorialco/f0/issues/4363)) ([3ffc2e9](https://github.com/factorialco/f0/commit/3ffc2e910533562103ec58bdd80406f9a8943dfc))
+* **dialog 2/6:** private forked Dialog primitives (additive) ([#4364](https://github.com/factorialco/f0/issues/4364)) ([4ce7aae](https://github.com/factorialco/f0/commit/4ce7aae58f8819f0312218611369d20613f5a26d))
 
 ## [2.46.0](https://github.com/factorialco/f0/compare/f0-react-v2.45.0...f0-react-v2.46.0) (2026-06-08)
 
