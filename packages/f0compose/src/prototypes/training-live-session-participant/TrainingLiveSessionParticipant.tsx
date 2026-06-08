@@ -4466,7 +4466,7 @@ function SessionFormDialog({
     instructors: [],
     durationHours: 1,
     durationMinutes: 0,
-    minimumAttendance: 1,
+    minimumAttendance: 75,
     meetingLink: DEFAULT_FACTORIAL_LIVE_ROOM,
     location: "",
     calendarInvites: false,
@@ -4975,7 +4975,7 @@ function EndSessionModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onCl
       isOpen={isOpen}
       onClose={onClose}
       title="Review attendance"
-      description="The session has ended. Everyone who joined is set as attended — change anyone if needed, then confirm. You can also edit it later from the Attendance tab."
+      description={`The session has ended. Attendance is set automatically from each person's time in the session — anyone below the ${COMPLETION_THRESHOLD_PCT}% minimum is marked Not attended. Change anyone if needed, then confirm. You can also edit it later from the Attendance tab.`}
       width="xl"
       primaryAction={{ label: "Confirm attendance", onClick: onConfirm }}
     >
@@ -5371,6 +5371,9 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
           },
         },
       },
+      // The end-session review modal opens pre-filtered to "Not attended" so the
+      // instructor lands straight on who needs reviewing. They can clear it.
+      defaultFilters: isModal && isEnded ? { attendance: ["Not attended"] } : undefined,
       dataAdapter: {
         paginationType: "pages",
         perPage: 10,
@@ -5382,95 +5385,55 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
           return paginateRecords(filtered, pagination, 10)
         },
       },
-      // The end-session modal edits per row via an inline status dropdown
-      // (editableTable), so it has no multi-select / bulk. The Attendance tab
-      // keeps multi-select + bulk actions.
+      // Both the Attendance tab and the end-session review modal use the same
+      // table: status pills + multi-select + bulk "Mark as attended / not
+      // attended", so the instructor edits the same way in both places.
       secondaryActions: () =>
-        !isModal && isEnded
+        isEnded
           ? [{ label: "Download connectivity log", icon: Download, onClick: () => undefined }]
           : [],
-      selectable: isModal ? undefined : (row: SessionAttendanceRow) => row.id,
-      bulkActions: isModal
-        ? undefined
-        : () => ({
-            primary: [
-              { id: "attended", label: "Mark as attended", icon: CheckCircle },
-              { id: "not-attended", label: "Mark as not attended", icon: Cross, critical: true },
-            ],
-          }),
+      selectable: (row: SessionAttendanceRow) => row.id,
+      bulkActions: () => ({
+        primary: [
+          { id: "attended", label: "Mark as attended", icon: CheckCircle },
+          { id: "not-attended", label: "Mark as not attended", icon: Cross, critical: true },
+        ],
+      }),
       totalItemSummary: (total: number) => `${total} participants`,
     },
     [isEnded, rows]
   )
 
-  const setRowAttendance = async (updatedItem: SessionAttendanceRow) => {
-    setRows((current) =>
-      current.map((row) => (row.id === updatedItem.id ? { ...row, attendance: updatedItem.attendance } : row))
-    )
-  }
-
   return (
     <F0BoxWithClassName className={isModal ? "w-full px-6 pb-2" : "ml-4 mt-4 w-[574px]"}>
-      {isModal ? (
-        <OneDataCollection
-          id={`${prototypeSlug}/session-attendance/modal/v1`}
-          storage={false}
-          source={source}
-          visualizations={[
-            {
-              type: "editableTable",
-              options: {
-                columns: [
-                  { id: "name", label: "Name", editType: () => "display-only" as const, render: (row: SessionAttendanceRow) => personValue(row.name) },
-                  {
-                    id: "attendance",
-                    label: "Attendance",
-                    editType: () => "select" as const,
-                    selectConfig: {
-                      options: [
-                        { value: "Attended", label: "Attended" },
-                        { value: "Not attended", label: "Not attended" },
-                      ],
-                    },
-                    render: (row: SessionAttendanceRow) => row.attendance,
-                  },
-                  { id: "completedHours", label: "Time attended", editType: () => "display-only" as const, render: (row: SessionAttendanceRow) => row.completedHours },
-                ],
-                onCellChange: setRowAttendance,
-              },
+      <OneDataCollection
+        id={`${prototypeSlug}/session-attendance/${variant}/v1`}
+        storage={false}
+        source={source}
+        onBulkAction={(action, selectedItems, clearSelected) => {
+          if (action === "attended" || action === "not-attended") {
+            const ids = new Set(selectedItems.selectedIds.map(String))
+            const nextAttendance: SessionAttendanceRow["attendance"] =
+              action === "attended" ? "Attended" : "Not attended"
+            setRows((current) =>
+              current.map((row) => (ids.has(row.id) ? { ...row, attendance: nextAttendance } : row))
+            )
+          }
+          clearSelected()
+        }}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
+                { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
+                { id: "completedHours", label: `Time attended (of ${SESSION_DURATION_MIN}m)`, render: (row: SessionAttendanceRow) => row.completedHours.split("/")[0] ?? row.completedHours },
+              ],
             },
-          ]}
-        />
-      ) : (
-        <OneDataCollection
-          id={`${prototypeSlug}/session-attendance/tab/v1`}
-          storage={false}
-          source={source}
-          onBulkAction={(action, selectedItems, clearSelected) => {
-            if (action === "attended" || action === "not-attended") {
-              const ids = new Set(selectedItems.selectedIds.map(String))
-              const nextAttendance: SessionAttendanceRow["attendance"] =
-                action === "attended" ? "Attended" : "Not attended"
-              setRows((current) =>
-                current.map((row) => (ids.has(row.id) ? { ...row, attendance: nextAttendance } : row))
-              )
-            }
-            clearSelected()
-          }}
-          visualizations={[
-            {
-              type: "table",
-              options: {
-                columns: [
-                  { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
-                  { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
-                  { id: "completedHours", label: "Time attended", render: (row: SessionAttendanceRow) => row.completedHours },
-                ],
-              },
-            },
-          ]}
-        />
-      )}
+          },
+        ]}
+      />
     </F0BoxWithClassName>
   )
 }
@@ -6738,11 +6701,12 @@ function requestStatusValue(status: RequestRow["status"]) {
   return { label: "Pending review", status: "warning" as const }
 }
 
-// Minimum attendance set when the session is created. Default is 0 → joining the
-// session is enough (joined = attended). The instructor can raise it to require a
-// share of the session (RFC: completion_threshold_percentage). Frozen at creation.
+// Minimum attendance set when the session is created. Default is 75% of the
+// session: a participant must be present for at least that share to count as
+// Attended. The instructor can lower it (down to 1% = joining is enough) or
+// raise it (RFC: completion_threshold_percentage). Frozen at creation.
 const SESSION_DURATION_MIN = 60
-const COMPLETION_THRESHOLD_PCT = 1
+const COMPLETION_THRESHOLD_PCT = 75
 // Demo only: how far ahead the scheduled start is anchored when an instructor
 // enters a waiting session early, so the green-room countdown is watchable and
 // then flips to the live class clock. Real scheduling would use the session time.
@@ -6754,8 +6718,8 @@ const thresholdMinutes = (pct: number, durationMin: number) =>
 function presentMinutes(completedHours: string): number {
   return Number((completedHours.split("/")[0] ?? "").replace(/[^\d.]/g, "")) || 0
 }
-// You must have joined (present > 0) and met the minimum. With the default 0% the
-// minimum is 0 min, so any join counts as attended.
+// You must have joined (present > 0) and met the minimum. With the default 75%
+// the minimum is ~45 min, so a short join does not count as attended.
 function attendanceFromThreshold(completedHours: string): "Attended" | "Not attended" {
   const required = thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)
   const present = presentMinutes(completedHours)
