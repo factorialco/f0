@@ -347,17 +347,43 @@ export const F0AiChatTextArea = ({
 
             <AnimatePresence initial={false}>
               {isClarifying ? (
-                <div key="clarifying">{clarifyingUI}</div>
+                <motion.div
+                  key="clarifying"
+                  className="overflow-hidden"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.22,
+                      ease: [0.4, 0, 1, 1],
+                    },
+                  }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                >
+                  {clarifyingUI}
+                </motion.div>
               ) : (
                 <motion.div
                   key="input"
                   className="overflow-hidden"
-                  initial={{ height: "auto", opacity: 1 }}
+                  initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.15,
+                      ease: [0.55, 0, 1, 0.45],
+                    },
+                  }}
                   transition={{
-                    duration: shouldReduceMotion ? 0 : 0.3,
-                    ease: "easeOut",
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
                   }}
                 >
                   {pendingQuote && (
