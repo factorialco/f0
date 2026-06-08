@@ -31,6 +31,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
+import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { Spinner } from "@/ui/Spinner"
 
 import type {
@@ -791,11 +792,14 @@ const OneDataCollectionComp = <
     filters: FiltersState<Filters>,
     search: string | undefined
   ) => {
-    return totalItems === 0
-      ? Object.keys(filters).length > 0 || search
-        ? "no-results"
-        : "no-data"
+    if (totalItems !== 0) return false
+    // Count only *active* filters: an all-empty value like `{ department: [] }`
+    // is not a filter, so an empty result with no active filters is "no-data",
+    // not "no-results".
+    const hasActiveFilters = effectiveFilters
+      ? getActiveFilterKeys(effectiveFilters, filters, i18n).length > 0
       : false
+    return hasActiveFilters || search ? "no-results" : "no-data"
   }
 
   const onLoadData = ({
