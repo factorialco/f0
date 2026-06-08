@@ -1,11 +1,12 @@
-import { type Ref } from "react"
-
-import { F0Button } from "@/components/F0Button"
-import { F0Link } from "@/components/F0Link"
-import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
+import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Check, Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
-import { useOverflowCalculation } from "@/ui/OverflowList/useOverflowCalculation"
+import {
+  ButtonGroup,
+  type ButtonGroupButton,
+  type ButtonGroupSecondaryItem,
+  type ButtonGroupSecondaryLink,
+} from "@/ui/ButtonGroup"
 
 import {
   type CardPrimaryAction,
@@ -41,20 +42,20 @@ export const cardRowClassName: Record<CardRowStackAt, string> = {
   never: "flex flex-row items-center justify-between gap-4",
 }
 
-// Inline ("wide") cluster — shown only at/above the breakpoint.
-const wideClusterVisibility: Record<CardRowStackAt, string> = {
-  sm: "hidden @xs:flex",
-  md: "hidden @md:flex",
-  lg: "hidden @lg:flex",
-  never: "flex",
-}
-
-// Stacked ("narrow") cluster — shown only below the breakpoint.
-const narrowClusterVisibility: Record<CardRowStackAt, string> = {
-  sm: "flex @xs:hidden",
-  md: "flex @md:hidden",
-  lg: "flex @lg:hidden",
-  never: "hidden",
+/**
+ * Width of the actions wrapper. `ButtonGroup` reserves the "⋯"-button width on
+ * top of its content, so a shrink-to-fit container would always shed the tail
+ * into the menu — it needs a bound *wider* than its content. Inline (at/above
+ * the breakpoint) we hand it the remaining row space via `flex-1`, with its own
+ * `justify-end` keeping the buttons at the trailing edge; once stacked it spans
+ * the full line instead (no `flex-1`, which would grow it vertically in the
+ * column). `never` is always inline.
+ */
+const actionsWidthClassName: Record<CardRowStackAt, string> = {
+  sm: "w-full @xs:w-auto @xs:min-w-0 @xs:flex-1",
+  md: "w-full @md:w-auto @md:min-w-0 @md:flex-1",
+  lg: "w-full @lg:w-auto @lg:min-w-0 @lg:flex-1",
+  never: "min-w-0 flex-1",
 }
 
 // Footer-style separator shown while the actions sit on their own stacked line;
@@ -88,14 +89,17 @@ interface CardRowActionsProps {
 }
 
 /**
- * Trailing actions for the card row. The "more" (⋯) menu sits on the LEFT and
- * the primary stays pinned at the trailing edge.
+ * Trailing actions for the card row — a thin adapter over {@link ButtonGroup}.
+ * The data-driven `primaryAction` / `secondaryActions` / `otherActions` triplet
+ * maps straight through; `ButtonGroup` owns the row layout, the width-driven
+ * overflow into the "⋯" menu, and pinning the primary at the trailing edge.
  *
- * Two layouts, toggled by the card's container width at `stackAt`:
- * - Wide (inline): all secondary buttons shown; the ⋯ holds only `otherActions`.
- * - Narrow: the row drops onto its own full-width line; there the cluster IS
- *   width-bounded, so we measure it (same engine as `OverflowList`) and shed
- *   secondary buttons right→left into the left ⋯ as it tightens.
+ * The card adds two things on top:
+ * - The wrapper stops click propagation so an action never triggers the row's
+ *   own `onClick` / overlay-link navigation.
+ * - `stackAt` drops the cluster onto its own full-width line (with a footer
+ *   hairline) below a container breakpoint; the breakpoint mapping is shared
+ *   with the row root via {@link cardRowClassName}.
  *
  * Pass `confirmAction` / `rejectAction` for the icon-only confirm/reject variant
  * (✗ then ✓), which replaces the standard actions.
@@ -111,197 +115,98 @@ export function CardRowActions({
 }: CardRowActionsProps) {
   const size = compact ? "sm" : "md"
 
-  // Hook must run unconditionally, before any early return.
-  const secondaryArray = Array.isArray(secondaryActions) ? secondaryActions : []
-  const {
-    containerRef,
-    measurementContainerRef,
-    customOverflowIndicatorRef,
-    visibleItems,
-    overflowItems,
-    isInitialized,
-  } = useOverflowCalculation(secondaryArray, GAP)
-
-  const chrome = cn(
+  const wrapperClassName = cn(
+    "relative z-[1]",
+    actionsWidthClassName[stackAt],
     stackedChrome[stackAt],
     stackAt !== "never" && compact && "mt-3 pt-3"
   )
 
+  const wrap = (group: React.ReactNode) => (
+    // Keep action clicks from bubbling to the row's onClick / overlay link.
+    <div className={wrapperClassName} onClick={(e) => e.stopPropagation()}>
+      {group}
+    </div>
+  )
+
   // Confirm/reject variant: icon-only outline buttons, reject (✗) then confirm (✓).
   if (confirmAction || rejectAction) {
-    return (
-      <div
-        className={cn(
-          "relative z-[1] flex flex-row items-center justify-end gap-2",
-          chrome
-        )}
-      >
-        {rejectAction && (
-          <F0Button
-            icon={Cross}
-            label={rejectAction.label ?? "Reject"}
-            hideLabel
-            variant="outline"
-            size={size}
-            disabled={rejectAction.disabled}
-            onClick={(e) => {
-              e.stopPropagation()
-              rejectAction.onClick()
-            }}
-            data-testid="reject-button"
-          />
-        )}
-        {confirmAction && (
-          <F0Button
-            icon={Check}
-            label={confirmAction.label ?? "Confirm"}
-            hideLabel
-            variant="outline"
-            size={size}
-            disabled={confirmAction.disabled}
-            onClick={(e) => {
-              e.stopPropagation()
-              confirmAction.onClick()
-            }}
-            data-testid="confirm-button"
-          />
-        )}
-      </div>
+    const variantActions: ButtonGroupButton[] = []
+    if (rejectAction) {
+      variantActions.push({
+        id: "reject",
+        icon: Cross,
+        label: rejectAction.label ?? "Reject",
+        hideLabel: true,
+        disabled: rejectAction.disabled,
+        onClick: rejectAction.onClick,
+      })
+    }
+    if (confirmAction) {
+      variantActions.push({
+        id: "confirm",
+        icon: Check,
+        label: confirmAction.label ?? "Confirm",
+        hideLabel: true,
+        disabled: confirmAction.disabled,
+        onClick: confirmAction.onClick,
+      })
+    }
+    return wrap(
+      <ButtonGroup secondaryActions={variantActions} size={size} gap={GAP} />
     )
   }
 
-  const secondaryLink =
-    secondaryActions && !Array.isArray(secondaryActions)
-      ? secondaryActions
+  const secondaryItems:
+    | ButtonGroupSecondaryItem[]
+    | ButtonGroupSecondaryLink
+    | undefined = Array.isArray(secondaryActions)
+    ? secondaryActions.map(
+        (action, index): ButtonGroupButton => ({
+          id: `secondary-${index}`,
+          label: action.label,
+          icon: action.icon,
+          onClick: action.onClick,
+        })
+      )
+    : secondaryActions
+      ? {
+          label: secondaryActions.label,
+          // `CardSecondaryLink.href` is loosely typed as optional; a link always
+          // carries one in practice, so pass it through unchanged.
+          href: secondaryActions.href as string,
+          target: secondaryActions.target,
+          disabled: secondaryActions.disabled,
+        }
       : undefined
-  const other = otherActions ?? []
 
-  // Before the first measurement, optimistically show everything so the row
-  // doesn't flash empty; the measured split takes over once initialized.
-  const shown = isInitialized ? visibleItems : secondaryArray
-  const overflowed = isInitialized ? overflowItems : []
-
-  const toDropdownItem = (action: CardSecondaryAction): DropdownItem => ({
-    label: action.label,
-    icon: action.icon,
-    onClick: action.onClick,
-  })
-
-  // Narrow ⋯ menu = collapsed secondaries, then the always-present otherActions,
-  // divided by a separator when both are present.
-  const narrowMenu: DropdownItem[] = [
-    ...overflowed.map(toDropdownItem),
-    ...(overflowed.length > 0 && other.length > 0
-      ? [{ type: "separator" } as DropdownItem]
-      : []),
-    ...other,
-  ]
+  const primary: ButtonGroupButton | undefined = primaryAction
+    ? {
+        id: "primary",
+        label: primaryAction.label,
+        icon: primaryAction.icon,
+        onClick: primaryAction.onClick,
+      }
+    : undefined
 
   const hasAnyAction =
-    primaryAction ||
-    secondaryArray.length > 0 ||
-    !!secondaryLink ||
-    other.length > 0
+    !!primary ||
+    (Array.isArray(secondaryActions)
+      ? secondaryActions.length > 0
+      : !!secondaryActions) ||
+    (otherActions?.length ?? 0) > 0
 
   if (!hasAnyAction) {
     return null
   }
 
-  const renderSecondary = (action: CardSecondaryAction, index: number) => (
-    <F0Button
-      key={index}
-      label={action.label}
-      icon={action.icon}
-      variant="outline"
+  return wrap(
+    <ButtonGroup
+      primaryAction={primary}
+      secondaryActions={secondaryItems}
+      otherActions={otherActions}
       size={size}
-      onClick={(e) => {
-        e.stopPropagation()
-        action.onClick()
-      }}
+      gap={GAP}
     />
-  )
-
-  const more = (items: DropdownItem[], ref?: Ref<HTMLDivElement>) =>
-    items.length > 0 ? (
-      <div ref={ref} onClick={(e) => e.stopPropagation()}>
-        <Dropdown items={items} size={size} />
-      </div>
-    ) : null
-
-  const link = secondaryLink ? (
-    <F0Link
-      href={secondaryLink.href}
-      target={secondaryLink.target}
-      disabled={secondaryLink.disabled}
-      onClick={(e) => e.stopPropagation()}
-      data-testid="secondary-link"
-    >
-      {secondaryLink.label}
-    </F0Link>
-  ) : null
-
-  const primary = primaryAction ? (
-    <F0Button
-      label={primaryAction.label}
-      icon={primaryAction.icon}
-      size={size}
-      onClick={(e) => {
-        e.stopPropagation()
-        primaryAction.onClick()
-      }}
-      data-testid="primary-button"
-    />
-  ) : null
-
-  return (
-    <>
-      {/* Wide (inline): all secondary buttons shown, ⋯ = otherActions. */}
-      <div
-        className={cn(
-          "relative z-[1] flex-row items-center justify-end gap-2",
-          wideClusterVisibility[stackAt]
-        )}
-      >
-        {more(other)}
-        {secondaryArray.map(renderSecondary)}
-        {link}
-        {primary}
-      </div>
-
-      {/* Narrow: own full-width line; measured left-overflow. Only rendered when
-          a breakpoint is set — with `never` the inline cluster above is enough,
-          and we avoid a hidden measurement subtree + its ResizeObserver. */}
-      {stackAt !== "never" && (
-        <div
-          className={cn(
-            "relative z-[1] flex-row items-center justify-end gap-2",
-            narrowClusterVisibility[stackAt],
-            chrome
-          )}
-        >
-          <div
-            ref={containerRef}
-            className="relative flex min-w-0 flex-1 items-center justify-end"
-            style={{ gap: GAP }}
-          >
-            {/* Hidden measurement copy of every secondary button. */}
-            <div
-              ref={measurementContainerRef}
-              aria-hidden="true"
-              className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
-              style={{ gap: GAP }}
-            >
-              {secondaryArray.map(renderSecondary)}
-            </div>
-
-            {more(narrowMenu, customOverflowIndicatorRef)}
-            {shown.map(renderSecondary)}
-          </div>
-
-          {link}
-          {primary}
-        </div>
-      )}
-    </>
   )
 }

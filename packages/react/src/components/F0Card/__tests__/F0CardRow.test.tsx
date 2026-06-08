@@ -8,6 +8,21 @@ import {
   waitFor,
 } from "@/testing/test-utils"
 
+// The actions delegate to ButtonGroup, whose width-driven overflow measures DOM
+// it can't in jsdom (zero layout) — so it would shove every action into the "⋯"
+// menu. Stub the measurement to keep everything visible, as a real browser would.
+vi.mock("@/ui/OverflowList/useOverflowCalculation", () => ({
+  useOverflowCalculation: <T,>(items: T[]) => ({
+    containerRef: { current: null },
+    overflowButtonRef: { current: null },
+    customOverflowIndicatorRef: { current: null },
+    measurementContainerRef: { current: null },
+    visibleItems: items,
+    overflowItems: [],
+    isInitialized: true,
+  }),
+}))
+
 import type { CardSecondaryLink } from "../components/CardActions"
 import type { CardAvatarVariant } from "../components/CardAvatar"
 
@@ -82,7 +97,7 @@ describe("F0CardRow", () => {
 
     render(<F0CardRow title="Row" primaryAction={{ label: "Open", onClick }} />)
 
-    await user.click(screen.getByTestId("primary-button"))
+    await user.click(screen.getByRole("button", { name: "Open" }))
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
@@ -111,7 +126,7 @@ describe("F0CardRow", () => {
 
     render(<F0CardRow title="Row" secondaryActions={secondaryLink} />)
 
-    const link = screen.getByTestId("secondary-link")
+    const link = screen.getByRole("link", { name: "View more" })
     expect(link).toHaveAttribute("href", "/test-page")
     expect(link).toHaveAttribute("target", "_blank")
   })
@@ -141,7 +156,7 @@ describe("F0CardRow", () => {
 
       render(<F0CardRow title="Row" confirmAction={{ onClick: onConfirm }} />)
 
-      await user.click(screen.getByTestId("confirm-button"))
+      await user.click(screen.getByRole("button", { name: "Confirm" }))
       expect(onConfirm).toHaveBeenCalledTimes(1)
     })
 
@@ -151,7 +166,7 @@ describe("F0CardRow", () => {
 
       render(<F0CardRow title="Row" rejectAction={{ onClick: onReject }} />)
 
-      await user.click(screen.getByTestId("reject-button"))
+      await user.click(screen.getByRole("button", { name: "Reject" }))
       expect(onReject).toHaveBeenCalledTimes(1)
     })
 
@@ -165,9 +180,13 @@ describe("F0CardRow", () => {
         />
       )
 
-      expect(screen.getByTestId("confirm-button")).toBeInTheDocument()
-      expect(screen.getByTestId("reject-button")).toBeInTheDocument()
-      expect(screen.queryByTestId("primary-button")).not.toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: "Confirm" })
+      ).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "Reject" })).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Open" })
+      ).not.toBeInTheDocument()
     })
   })
 
@@ -195,9 +214,8 @@ describe("F0CardRow", () => {
       )
 
       expect(screen.getByTestId("card")).toBeInTheDocument()
-      // The primary stays visible at every breakpoint (rendered in the inline
-      // cluster and, for non-"never", the stacked cluster too).
-      expect(screen.getAllByTestId("primary-button").length).toBeGreaterThan(0)
+      // The primary stays visible (pinned at the trailing edge) at every breakpoint.
+      expect(screen.getByRole("button", { name: "Open" })).toBeInTheDocument()
       unmount()
     })
   })
