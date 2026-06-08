@@ -30,7 +30,6 @@ on:
 
 env:
   PROVIDER: groq
-  SLACK_CHANNEL: "#testing-zerito"
 
 jobs:
   summarize:
@@ -116,26 +115,19 @@ jobs:
         if: ${{ inputs.dry_run != 'true' }}
         env:
           BLOCKS_FILE: ${{ steps.summarize.outputs.blocks_file }}
-          SLACK_BOT_TOKEN: ${{ secrets.ZERITO_SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK: ${{ secrets.ZERITO_SLACK_WEBHOOK }}
         run: |
-          if [ -z "$SLACK_BOT_TOKEN" ]; then
-            echo "::error::ZERITO_SLACK_BOT_TOKEN is not set"
+          if [ -z "$SLACK_WEBHOOK" ]; then
+            echo "::error::ZERITO_SLACK_WEBHOOK is not set"
             exit 1
           fi
-          # Debug: print token prefix to verify it's a bot token (xoxb-)
-          echo "Token prefix: $(echo "$SLACK_BOT_TOKEN" | cut -c1-10)..."
           # index.ts already produced the Block Kit payload ({ "blocks": [...] })
-          # with long sections split under Slack's 3000-char limit.
-          # We inject the target channel and post via chat.postMessage.
-          jq --arg channel "$SLACK_CHANNEL" '. + {channel: $channel}' "$BLOCKS_FILE" > /tmp/payload.json
+          # with long sections split under Slack's 3000-char limit — just post it.
           RESPONSE=$(curl --silent --show-error --fail \
-            -X POST \
-            -H "Authorization: Bearer $SLACK_BOT_TOKEN" \
-            -H "Content-Type: application/json; charset=utf-8" \
-            --data @/tmp/payload.json \
-            https://slack.com/api/chat.postMessage)
+            -X POST -H "Content-Type: application/json; charset=utf-8" \
+            --data @"$BLOCKS_FILE" "$SLACK_WEBHOOK")
           echo "Slack response: $RESPONSE"
-          if ! echo "$RESPONSE" | jq -e '.ok' > /dev/null; then
-            echo "::error::chat.postMessage failed: $(echo "$RESPONSE" | jq -r '.error')"
+          if [ "$RESPONSE" != "ok" ]; then
+            echo "::error::Slack webhook post failed: $RESPONSE"
             exit 1
           fi
