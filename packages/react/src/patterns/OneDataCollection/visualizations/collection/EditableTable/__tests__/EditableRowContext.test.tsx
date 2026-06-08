@@ -85,7 +85,7 @@ describe("EditableRowContext", () => {
       expect(screen.getByTestId("name")).toHaveTextContent("Updated Name")
     })
 
-    it("calls onCellChange with updated item", async () => {
+    it("calls onCellChange with updated item and changes", async () => {
       const user = userEvent.setup()
       const onCellChange = vi.fn().mockResolvedValue(undefined)
 
@@ -98,8 +98,13 @@ describe("EditableRowContext", () => {
       await user.click(screen.getByTestId("update-name"))
 
       expect(onCellChange).toHaveBeenCalledWith({
-        ...testItem,
-        name: "Updated Name",
+        updatedItem: {
+          ...testItem,
+          name: "Updated Name",
+        },
+        changes: {
+          name: ["John Doe", "Updated Name"],
+        },
       })
     })
 
