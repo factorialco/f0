@@ -47,14 +47,16 @@ export const cardRowClassName: Record<CardRowStackAt, string> = {
  * top of its content, so a shrink-to-fit container would always shed the tail
  * into the menu — it needs a bound *wider* than its content. Inline (at/above
  * the breakpoint) we hand it the remaining row space via `flex-1`, with its own
- * `justify-end` keeping the buttons at the trailing edge; once stacked it spans
- * the full line instead (no `flex-1`, which would grow it vertically in the
- * column). `never` is always inline.
+ * `justify-end` keeping the buttons at the trailing edge. Once stacked we leave
+ * it `auto`: the flex column stretches it to full width, and crucially that lets
+ * the `-mx-4` full-bleed footer extend symmetrically — an explicit `w-full`
+ * would clip the right edge, since a negative right margin can't widen a
+ * fixed-width box. `never` is always inline.
  */
 const actionsWidthClassName: Record<CardRowStackAt, string> = {
-  sm: "w-full @xs:w-auto @xs:min-w-0 @xs:flex-1",
-  md: "w-full @md:w-auto @md:min-w-0 @md:flex-1",
-  lg: "w-full @lg:w-auto @lg:min-w-0 @lg:flex-1",
+  sm: "@xs:min-w-0 @xs:flex-1",
+  md: "@md:min-w-0 @md:flex-1",
+  lg: "@lg:min-w-0 @lg:flex-1",
   never: "min-w-0 flex-1",
 }
 
@@ -208,10 +210,11 @@ export function CardRowActions({
     return (
       <>
         {inline}
-        {/* Labelled, on its own full-width line below the breakpoint. */}
+        {/* Labelled, on its own line below the breakpoint. Width left to the
+            flex column's stretch so the `-mx-4` footer bleeds symmetrically. */}
         <div
           className={cn(
-            "relative z-[1] w-full",
+            "relative z-[1]",
             stackedClusterVisibility[stackAt],
             stackedChrome[stackAt],
             compact && "mt-3 pt-3"
