@@ -40,8 +40,8 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   const activeFilterKeys = getActiveFilterKeys(filters, value, i18n)
   const hasVisibleChips = !hideChips && activeFilterKeys.length > 0
 
-  // The preset "save"/"persist" actions live in the presets row (save chip /
-  // persist icon on the chip), not here — this row only shows filter chips + Clear.
+  // The "Save view" action lives in the presets row (the dashed save chip), not
+  // here — this row only shows filter chips + Clear.
   if (!hasVisibleChips) {
     return null
   }

@@ -35,7 +35,7 @@ describe("Preset - edit action", () => {
     zeroRender(<Preset label="Engineering" />)
 
     expect(
-      screen.queryByRole("button", { name: "Edit preset" })
+      screen.queryByRole("button", { name: "Edit view" })
     ).not.toBeInTheDocument()
   })
 
@@ -49,60 +49,15 @@ describe("Preset - edit action", () => {
     // The action is revealed (mounted) on hover.
     const chip = screen.getByText("Engineering").closest("label")!
     expect(
-      screen.queryByRole("button", { name: "Edit preset" })
+      screen.queryByRole("button", { name: "Edit view" })
     ).not.toBeInTheDocument()
 
     await user.hover(chip)
 
-    await user.click(await screen.findByRole("button", { name: "Edit preset" }))
+    await user.click(await screen.findByRole("button", { name: "Edit view" }))
     expect(onEdit).toHaveBeenCalledTimes(1)
 
     // Clicking an action must not toggle the preset's selection.
-    expect(onClick).not.toHaveBeenCalled()
-  })
-})
-
-describe("Preset - emoji", () => {
-  it("does not render an emoji when none is provided", () => {
-    zeroRender(<Preset label="Engineering" />)
-    expect(screen.queryByRole("img")).not.toBeInTheDocument()
-  })
-
-  it("renders the emoji on the left when provided", () => {
-    zeroRender(<Preset label="Engineering" emoji="🚀" />)
-    // EmojiImage renders an <img> with the emoji as its alt text.
-    expect(screen.getByAltText("🚀")).toBeInTheDocument()
-  })
-})
-
-describe("Preset - persist action", () => {
-  it("does not render a persist button when onPersist is absent", () => {
-    zeroRender(<Preset label="Engineering" selected onClick={vi.fn()} />)
-    expect(
-      screen.queryByRole("button", { name: "Persist in preset" })
-    ).not.toBeInTheDocument()
-  })
-
-  it("shows the persist button without hovering and calls onPersist without toggling selection", async () => {
-    const user = userEvent.setup()
-    const onPersist = vi.fn()
-    const onClick = vi.fn()
-
-    zeroRender(
-      <Preset
-        label="Engineering"
-        selected
-        onClick={onClick}
-        onPersist={onPersist}
-      />
-    )
-
-    // Visible without any hover.
-    const persist = screen.getByRole("button", { name: "Persist in preset" })
-    expect(persist).toBeInTheDocument()
-
-    await user.click(persist)
-    expect(onPersist).toHaveBeenCalledTimes(1)
     expect(onClick).not.toHaveBeenCalled()
   })
 })

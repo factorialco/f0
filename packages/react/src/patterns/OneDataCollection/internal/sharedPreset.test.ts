@@ -10,7 +10,6 @@ describe("shared preset encoding", () => {
   const payload: SharedPresetPayload = {
     label: "My cool view 🚀",
     description: "Engineering, by salary",
-    emoji: "🚀",
     filter: { department: ["Engineering"] },
     sortings: { field: "salary", order: "desc" },
     grouping: { field: "role" },
@@ -18,7 +17,7 @@ describe("shared preset encoding", () => {
     settings: { columns: ["name", "salary"] },
   }
 
-  it("round-trips a full payload (incl. emoji / non-ASCII)", () => {
+  it("round-trips a full payload (non-ASCII title survives)", () => {
     const decoded = decodeSharedPreset(encodeSharedPreset(payload))
     expect(decoded).toEqual(payload)
   })

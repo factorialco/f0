@@ -427,7 +427,7 @@ describe("FiltersPresets - groups, separator and save chip", () => {
     ).not.toBeInTheDocument()
   })
 
-  it("shows a 'Save as preset' chip when presetActionState is 'save' and triggers onPresetAction", async () => {
+  it("shows a 'Save view' chip when presetActionState is 'save' and triggers onPresetAction", async () => {
     const user = userEvent.setup()
     const onPresetAction = vi.fn()
 
@@ -445,7 +445,7 @@ describe("FiltersPresets - groups, separator and save chip", () => {
 
     // The save chip is a list item; in jsdom (0-width) it may land in the
     // overflow measurement copy, so query by text (incl. aria-hidden).
-    await user.click(getVisibleByText("Save as preset"))
+    await user.click(getVisibleByText("Save view"))
     expect(onPresetAction).toHaveBeenCalledTimes(1)
   })
 
@@ -462,11 +462,11 @@ describe("FiltersPresets - groups, separator and save chip", () => {
     )
 
     expect(
-      screen.getByRole("button", { name: "Save as preset" })
+      screen.getByRole("button", { name: "Save view" })
     ).toBeInTheDocument()
   })
 
-  it("does not show the save chip when presetActionState is not 'save'", () => {
+  it("does not show the save chip when presetActionState is 'none'", () => {
     zeroRender(
       <FiltersPresets
         presets={mixedPresets}
@@ -474,13 +474,13 @@ describe("FiltersPresets - groups, separator and save chip", () => {
         onPresetsChange={vi.fn()}
         onSelectPreset={vi.fn()}
         editablePresetIds={["custom-1"]}
-        presetActionState="persist"
+        presetActionState="none"
         onPresetAction={vi.fn()}
       />
     )
 
     expect(
-      screen.queryByRole("button", { name: "Save as preset" })
+      screen.queryByRole("button", { name: "Save view" })
     ).not.toBeInTheDocument()
   })
 })

@@ -30,14 +30,11 @@ const baseProps = {
 }
 
 describe("FiltersChipsList - chips and clear", () => {
-  it("does not render preset action buttons (save/persist live in the presets row)", () => {
+  it("does not render the save-view action button (it lives in the presets row)", () => {
     zeroRender(<FiltersChipsList {...baseProps} value={activeValue} />)
 
     expect(
-      screen.queryByRole("button", { name: "Save as preset" })
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByRole("button", { name: "Persist in preset" })
+      screen.queryByRole("button", { name: "Save view" })
     ).not.toBeInTheDocument()
     // Clear shows because there are active filter chips.
     expect(screen.getByRole("button", { name: "Clear" })).toBeInTheDocument()

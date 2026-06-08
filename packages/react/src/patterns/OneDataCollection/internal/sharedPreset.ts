@@ -1,24 +1,23 @@
 /**
- * Self-contained, shareable encoding of a preset.
+ * Self-contained, shareable encoding of a view.
  *
- * "Share preset" copies a link carrying the whole preset (title, description,
- * emoji and the full captured config) base64url-encoded in the
- * `dc_shared_preset` query param. Opening that link prefills the create-preset
- * dialog so the recipient can save it as their own custom preset.
+ * "Share view" copies a link carrying the whole view (title, description and
+ * the full captured config) base64url-encoded in the `dc_shared_preset` query
+ * param. Opening that link prefills the create-view dialog so the recipient can
+ * save it as their own view.
  *
  * base64url (RFC 4648 §5: `-`/`_`, no padding) keeps the blob URL-safe so it
- * survives `URLSearchParams` untouched. Encoding is UTF-8 aware so emojis and
- * non-ASCII titles round-trip.
+ * survives `URLSearchParams` untouched. Encoding is UTF-8 aware so non-ASCII
+ * titles round-trip.
  */
 
-/** The URL query param carrying a shared preset payload. */
+/** The URL query param carrying a shared view payload. */
 export const SHARED_PRESET_PARAM = "dc_shared_preset"
 
-/** The portion of a preset that is shared (everything except its local id). */
+/** The portion of a view that is shared (everything except its local id). */
 export interface SharedPresetPayload {
   label: string
   description?: string
-  emoji?: string
   filter?: unknown
   sortings?: unknown
   grouping?: unknown
@@ -40,12 +39,11 @@ const fromBase64Url = (encoded: string): string => {
   return new TextDecoder().decode(bytes)
 }
 
-/** Picks the shareable fields off a preset and base64url-encodes them. */
+/** Picks the shareable fields off a view and base64url-encodes them. */
 export const encodeSharedPreset = (payload: SharedPresetPayload): string => {
   const slim: SharedPresetPayload = {
     label: payload.label,
     description: payload.description,
-    emoji: payload.emoji,
     filter: payload.filter,
     sortings: payload.sortings,
     grouping: payload.grouping,

@@ -118,8 +118,6 @@ export type PresetDefinition<Filters extends FiltersDefinition> = {
   label: string
   /** Optional longer description, shown/edited in the preset form */
   description?: string
-  /** Optional emoji shown on the preset chip (left of the label). */
-  emoji?: string
   /** Filter configuration to apply when this preset is selected.
    * Clicking a preset replaces all current filters with this value.
    */

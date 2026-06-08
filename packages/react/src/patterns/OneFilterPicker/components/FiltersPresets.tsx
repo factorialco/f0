@@ -27,11 +27,10 @@ interface FilterPresetsProps<Filters extends FiltersDefinition> {
   /** Opens the edit flow for a preset (shown as a hover icon on editable presets). */
   onEditPreset?: (presetId: string) => void
   /**
-   * When "save", a dashed "Save as preset" chip is shown at the end of the row.
-   * ("persist" is surfaced elsewhere — next to Clear — not here.)
+   * When "save", a dashed "Save view" chip is shown at the end of the row.
    */
-  presetActionState?: "save" | "persist" | "none"
-  /** Opens the create-preset dialog (used by the "Save as preset" chip). */
+  presetActionState?: "save" | "none"
+  /** Opens the create-view dialog (used by the "Save view" chip). */
   onPresetAction?: () => void
 }
 
@@ -194,21 +193,15 @@ export const FiltersPresets = <Filters extends FiltersDefinition>({
     const { isSelected, handleClick } = getPresetState(preset, presetId)
     const presetNumber = preset.itemsCount?.(safeValue)
     const isEditable = editablePresetIds?.includes(presetId) ?? false
-    // The selected preset shows a persist icon (always visible) when the current
-    // view diverges from it.
-    const canPersist =
-      isSelected && presetActionState === "persist" && !!onPresetAction
 
     return (
       <Preset
         label={preset.label}
         description={preset.description}
-        emoji={preset.emoji}
         selected={isSelected}
         onClick={handleClick}
         data-visible={isVisible}
         number={presetNumber}
-        onPersist={canPersist ? onPresetAction : undefined}
         onEdit={
           isEditable && onEditPreset ? () => onEditPreset(presetId) : undefined
         }

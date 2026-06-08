@@ -1025,23 +1025,22 @@ const OneDataCollectionComp = <
     settled: boolean
   } | null>(null)
 
-  // A selected DEVELOPER preset represents a specific view; once the user changes
+  // A selected view represents a specific snapshot; once the user changes
   // anything (filters/sorting/grouping/columns/view mode) it no longer matches,
-  // so de-select it. Custom presets intentionally stay selected so the "Persist
-  // in preset" update-in-place flow keeps working. Works for both click- and
+  // so de-select it (and offer "Save view" to fork it into a new one). Applies
+  // to both developer- and user-created views. Works for both click- and
   // URL-restored selections (it keys off `selectedPresetId`, not `applyPreset`).
   useEffect(() => {
     const selectedPreset = selectedPresetId
       ? mergedPresets.find((p) => p.id === selectedPresetId)
       : undefined
 
-    // Only developer presets auto-deselect; clear tracking otherwise.
-    if (!selectedPreset || customPresetIds.has(selectedPreset.id)) {
+    if (!selectedPreset) {
       devSelectionRef.current = null
       return
     }
 
-    // (Re)start tracking when the selected developer preset changes.
+    // (Re)start tracking when the selected view changes.
     if (devSelectionRef.current?.id !== selectedPreset.id) {
       devSelectionRef.current = {
         id: selectedPreset.id!,
@@ -1065,18 +1064,12 @@ const OneDataCollectionComp = <
     if (!isEqual(capturedState, tracked.snapshot)) {
       devSelectionRef.current = null
       preSelectionStateRef.current = null
-      // Offer "Save as preset" after deselecting: the user diverged from a named
-      // preset, so the new view is worth saving (incl. a view-only divergence).
+      // Offer "Save view" after deselecting: the user diverged from a named view,
+      // so the new view is worth saving (incl. a view-only divergence).
       forkAfterDeselectRef.current = true
       setSelectedPresetId(undefined)
     }
-  }, [
-    selectedPresetId,
-    mergedPresets,
-    customPresetIds,
-    capturedState,
-    getPresetCapturedState,
-  ])
+  }, [selectedPresetId, mergedPresets, capturedState, getPresetCapturedState])
 
   // Snapshot of the view captured once storage has settled. "Save as preset"
   // (no preset selected) is offered only when the current view diverges from
@@ -1087,39 +1080,32 @@ const OneDataCollectionComp = <
   )
 
   /**
-   * Which preset action to offer next to "Clear":
-   * - a custom preset is selected and the view diverges → "persist" (update it)
-   * - a developer preset is selected and a non-view-mode dimension diverges → "save" (fork it)
-   * - no preset selected and a non-view-mode dimension diverges from the session
+   * Whether to offer "Save view" (create a new view):
+   * - a view is selected → "none" (diverging from it auto-deselects via the
+   *   effect above; while it still matches there's nothing to save)
+   * - no view selected and a non-view-mode dimension diverges from the session
    *   baseline → "save"
+   * - just diverged from a (now de-selected) view → "save", even for a view-only
+   *   divergence, as long as we're not back at the baseline
    *
-   * Note: a visualization (view mode) change on its own never offers "Save as
-   * preset" — switching views is too transient to warrant creating a preset.
+   * Note: a visualization (view mode) change on its own, from a pristine
+   * baseline, never offers "Save view" — switching views is too transient.
    */
-  const presetActionState = useMemo<"save" | "persist" | "none">(() => {
+  const presetActionState = useMemo<"save" | "none">(() => {
     // Compares everything except the view mode, so a visualization-only change
-    // does not count as a reason to save a new preset.
+    // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
       isEqual(
         { ...a, visualization: undefined },
         { ...b, visualization: undefined }
       )
 
-    const selectedPreset = selectedPresetId
-      ? mergedPresets.find((preset) => preset.id === selectedPresetId)
-      : undefined
-
-    if (selectedPreset) {
-      const presetState = getPresetCapturedState(selectedPreset)
-      // Custom presets can be updated in place — including to capture a new view
-      // mode — so they consider every dimension.
-      if (customPresetIds.has(selectedPreset.id)) {
-        return isEqual(capturedState, presetState) ? "none" : "persist"
-      }
-      // Developer presets fork via "Save as preset", but not for a view-only change.
-      return sameIgnoringVisualization(capturedState, presetState)
-        ? "none"
-        : "save"
+    // A still-matching selected view offers nothing; divergence deselects it.
+    if (
+      selectedPresetId &&
+      mergedPresets.some((preset) => preset.id === selectedPresetId)
+    ) {
+      return "none"
     }
 
     // Until storage settles (baseline captured), don't offer to save — avoids a
@@ -1127,8 +1113,8 @@ const OneDataCollectionComp = <
     if (sessionBaseline === null) return "none"
     if (!sameIgnoringVisualization(capturedState, sessionBaseline))
       return "save"
-    // Just diverged from a (now de-selected) developer preset → offer to fork it,
-    // even when only the view mode differs, as long as we're not back at baseline.
+    // Just diverged from a (now de-selected) view → offer to fork it, even when
+    // only the view mode differs, as long as we're not back at baseline.
     if (
       forkAfterDeselectRef.current &&
       !isEqual(capturedState, sessionBaseline)
@@ -1136,18 +1122,11 @@ const OneDataCollectionComp = <
       return "save"
     }
     return "none"
-  }, [
-    selectedPresetId,
-    mergedPresets,
-    capturedState,
-    customPresetIds,
-    getPresetCapturedState,
-    sessionBaseline,
-  ])
+  }, [selectedPresetId, mergedPresets, capturedState, sessionBaseline])
 
   const handleSavePreset = useCallback(
     (values: PresetFormValues) => {
-      // A shared-link preset carries its own config; a regular "Save as preset"
+      // A shared-link view carries its own config; a regular "Save view"
       // captures the current view.
       const shared =
         presetDialog?.mode === "create" ? presetDialog.shared : undefined
@@ -1174,7 +1153,6 @@ const OneDataCollectionComp = <
         ),
         label: values.title,
         description: values.description,
-        emoji: values.emoji,
         ...config,
       } as PresetsDefinition<Filters>[number]
       setCustomPresets((prev) => [...prev, newPreset])
@@ -1193,8 +1171,8 @@ const OneDataCollectionComp = <
     ]
   )
 
-  // Edit a custom preset's title/description (from its hover edit icon). The
-  // captured options are left untouched — use "Persist in preset" to update those.
+  // Rename a custom view (title/description, from its hover edit icon). The
+  // captured options are left untouched — diverging then saving creates a new view.
   const handleEditPresetMeta = useCallback(
     (values: PresetFormValues) => {
       const targetId =
@@ -1207,7 +1185,6 @@ const OneDataCollectionComp = <
                 ...preset,
                 label: values.title,
                 description: values.description,
-                emoji: values.emoji,
               }
             : preset
         )
@@ -1229,41 +1206,10 @@ const OneDataCollectionComp = <
     setPresetDialog(null)
   }, [presetDialog])
 
-  // Persist the current view into the selected custom preset, keeping its
-  // title/description. This is a quick "update in place" — no dialog.
-  const handlePersistPreset = useCallback(() => {
-    setCustomPresets((prev) =>
-      prev.map((preset) =>
-        preset.id === selectedPresetId
-          ? {
-              ...preset,
-              filter: activeCurrentFilters,
-              sortings: currentSortings,
-              grouping: currentGrouping,
-              visualization: currentVisualization,
-              settings,
-            }
-          : preset
-      )
-    )
-  }, [
-    selectedPresetId,
-    activeCurrentFilters,
-    currentSortings,
-    currentGrouping,
-    currentVisualization,
-    settings,
-  ])
-
+  // "Save view" → open the create dialog.
   const onPresetAction = useCallback(() => {
-    if (presetActionState === "persist") {
-      // Quick save into the currently selected preset — no dialog.
-      handlePersistPreset()
-      return
-    }
-    // "Save as preset" → open the create dialog.
     setPresetDialog({ mode: "create" })
-  }, [presetActionState, handlePersistPreset])
+  }, [])
 
   const editablePresetIds = useMemo(
     () => Array.from(customPresetIds).filter((id): id is string => !!id),
@@ -1275,7 +1221,7 @@ const OneDataCollectionComp = <
     []
   )
 
-  // Copies a self-contained shareable link for a custom preset to the clipboard,
+  // Copies a self-contained shareable link for a custom view to the clipboard,
   // then flashes a "Copied to your clipboard" action bar.
   const onSharePreset = useCallback(
     (presetId: string) => {
@@ -1284,7 +1230,6 @@ const OneDataCollectionComp = <
       const url = buildSharedPresetUrl({
         label: preset.label,
         description: preset.description,
-        emoji: preset.emoji,
         filter: preset.filter,
         sortings: preset.sortings,
         grouping: preset.grouping,
@@ -1714,13 +1659,11 @@ const OneDataCollectionComp = <
             ? {
                 title: editingPreset.label,
                 description: editingPreset.description,
-                emoji: editingPreset.emoji,
               }
             : presetDialog?.mode === "create" && presetDialog.shared
               ? {
                   title: presetDialog.shared.label,
                   description: presetDialog.shared.description,
-                  emoji: presetDialog.shared.emoji,
                 }
               : undefined
         }

@@ -1,8 +1,6 @@
 import { z } from "zod"
 
-import { F0TextInput } from "@/components/F0TextInput"
 import { Delete, Share } from "@/icons/app"
-import { Picker } from "@/kits/Social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { f0FormField, F0Form, useF0Form } from "@/patterns/F0Form"
@@ -11,26 +9,24 @@ import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 export type PresetFormValues = {
   title: string
   description?: string
-  /** Optional emoji shown on the preset chip. */
-  emoji?: string
 }
 
 interface PresetFormDialogProps {
   isOpen: boolean
-  /** "create" → "Save as preset"; "update" → edit an existing custom preset. */
+  /** "create" → "Save view"; "update" → edit an existing custom view. */
   mode: "create" | "update"
-  /** Seed values when updating an existing preset. */
+  /** Seed values when updating an existing view. */
   initialValues?: PresetFormValues
   onClose: () => void
   /** Called with the validated form values when the user saves. */
   onSubmit: (values: PresetFormValues) => void
   /**
-   * Called when the user removes the preset. Only shown in "update" mode, as a
+   * Called when the user removes the view. Only shown in "update" mode, as a
    * critical action in the dialog's overflow ("extra actions") menu.
    */
   onDelete?: () => void
   /**
-   * Called when the user shares the preset (copies a shareable link to the
+   * Called when the user shares the view (copies a shareable link to the
    * clipboard). Only shown in "update" mode, in the overflow menu.
    */
   onShare?: () => void
@@ -38,7 +34,7 @@ interface PresetFormDialogProps {
 
 /**
  * Dialog wrapping an F0Form (title + optional description), reused for both
- * creating a new custom preset and updating an existing one. The captured view
+ * creating a new custom view and renaming an existing one. The captured view
  * state (filters/sorting/view/grouping/columns) is owned by OneDataCollection;
  * this dialog only collects the title and description.
  */
@@ -56,41 +52,13 @@ export function PresetFormDialog({
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
   const schema = z.object({
-    emojiAndTitle: f0FormField(
-      z.object({
-        emoji: z.string().optional(),
-        title: z.string().min(1),
-      }),
-      {
-        fieldType: "custom",
-        render: (props) => (
-          <div className="-mb-3 flex flex-row items-end gap-2">
-            <div className="[&>button]:size-10">
-              <Picker
-                label={presets.emojiLabel}
-                lastEmojiReaction={props.value?.emoji}
-                size="md"
-                onSelect={(emoji) => props.onChange({ ...props.value, emoji })}
-              />
-            </div>
-            <div className="flex-1">
-              <F0TextInput
-                label=""
-                placeholder={presets.namePlaceholder}
-                value={props.value?.title}
-                size="md"
-                onChange={(value: string) =>
-                  props.onChange({ ...props.value, title: value })
-                }
-              />
-            </div>
-          </div>
-        ),
-        label: presets.emojiLabel,
-      }
-    ),
+    title: f0FormField.text({
+      label: presets.nameLabel,
+      placeholder: presets.namePlaceholder,
+      minLength: 1,
+    }),
     description: f0FormField.textarea({
-      label: "",
+      label: presets.descriptionLabel,
       placeholder: presets.descriptionPlaceholder,
       optional: true,
       rows: 4,
@@ -98,25 +66,21 @@ export function PresetFormDialog({
   })
 
   const formDefinition = useF0FormDefinition({
-    // Key the form by mode + title so defaults re-seed when switching presets.
+    // Key the form by mode + title so defaults re-seed when switching views.
     name: `preset-${mode}-${initialValues?.title ?? ""}`,
     schema,
     defaultValues: {
-      emojiAndTitle: {
-        emoji: initialValues?.emoji ?? "",
-        title: initialValues?.title ?? "",
-      },
+      title: initialValues?.title ?? "",
       description: initialValues?.description ?? "",
     },
     onSubmit: async ({ data }) => {
-      if (!data.emojiAndTitle?.title) {
+      if (!data.title) {
         return { success: false }
       }
 
       onSubmit({
-        title: data.emojiAndTitle?.title,
+        title: data.title,
         description: data.description || undefined,
-        emoji: data.emojiAndTitle?.emoji || undefined,
       })
       return { success: true }
     },

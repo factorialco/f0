@@ -53,8 +53,8 @@ export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   editablePresetIds?: string[]
   /** Opens the edit flow for a preset (hover icon on editable presets). */
   onEditPreset?: (presetId: string) => void
-  /** Which preset action button to show next to "Clear" ("save" | "persist" | "none"). */
-  presetActionState?: "save" | "persist" | "none"
+  /** Whether to show the dashed "Save view" chip ("save" | "none"). */
+  presetActionState?: "save" | "none"
   /** Opens the preset create/update dialog. */
   onPresetAction?: () => void
 }

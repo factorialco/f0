@@ -41,7 +41,7 @@ const richPresets: PresetsDefinition<typeof filters> = [
 ]
 
 const meta = {
-  title: "Data Collection/Presets",
+  title: "Data Collection/Views",
   parameters: {
     layout: "padded",
   },
@@ -52,37 +52,30 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 /**
- * Custom, persistable presets.
+ * Custom, savable views.
  *
- * Presets now capture the whole view: filters, sorting, view mode, grouping and
+ * A view captures the whole snapshot: filters, sorting, view mode, grouping and
  * column order/visibility — not just filters.
  *
  * Try it:
- * - Change filters / sorting / grouping / columns with no preset selected → a
- *   dashed "Save as preset" chip appears as the last item in the presets row.
- *   Saving opens a dialog (optional emoji + title + optional description) and
- *   creates a custom preset, which becomes selected. (A view-mode-only change
- *   does not offer to save.)
- * - Hover a preset box → after a short delay its description shows in a tooltip.
- * - Hover a custom (user-created) preset → an edit icon button appears (the box
- *   grows smoothly); edit opens the form to rename it / change the emoji. The
- *   edit dialog's overflow ("…") menu holds extra actions: "Share preset" and
- *   "Remove".
- * - "Share preset" copies a self-contained link (the whole preset — title,
- *   description, emoji and config — base64url-encoded in `dc_shared_preset`).
- *   Opening that link prefills the create dialog so the recipient can just hit
- *   Save.
- * - Select the custom preset → the whole captured view is applied; its emoji (if
- *   any) shows on the left of the chip.
- * - Change something on top → a persist (save) icon appears on the selected
- *   preset itself; clicking it saves the current view into that preset in place
- *   (no dialog), keeping its title/description/emoji.
- * - The selected preset is reflected in the URL via `dc_preset`.
- * - Reload the page → custom presets rehydrate from localStorage (key
+ * - Change filters / sorting / grouping / columns with no view selected → a
+ *   dashed "Save view" chip appears as the last item in the views row. Saving
+ *   opens a dialog (title + optional description) and creates a view, which
+ *   becomes selected. (A view-mode-only change from a pristine state does not
+ *   offer to save.)
+ * - Hover a view box → after a short delay its description shows in a tooltip.
+ * - Hover a custom (user-created) view → an edit icon button appears (the box
+ *   grows smoothly); edit opens the form to rename it. The edit dialog's overflow
+ *   ("…") menu holds extra actions: "Share view" and "Remove".
+ * - "Share view" copies a self-contained link (the whole view — title,
+ *   description and config — base64url-encoded). Opening that link prefills the
+ *   create dialog so the recipient can just hit Save.
+ * - Select a view → the whole captured snapshot is applied.
+ * - Change anything on top of a selected view → it auto-de-selects (it no longer
+ *   matches) and a "Save view" chip appears to fork it into a new view.
+ * - The selected view is reflected in the URL via `dc_preset`.
+ * - Reload the page → custom views rehydrate from localStorage (key
  *   `datacollection-presets/custom/v1`).
- * - Select a built-in preset → its captured sorting/view/grouping is applied;
- *   uncaptured dimensions reset to defaults. Editing a built-in preset offers
- *   "Save as preset" (a fork), never "Persist".
  */
 export const CustomPresets: Story = {
   render: () => (

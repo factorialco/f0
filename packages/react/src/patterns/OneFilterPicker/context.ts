@@ -36,13 +36,12 @@ export type FiltersContextType<Definition extends FiltersDefinition> = {
   /** Opens the edit flow for a preset (hover icon on editable presets). */
   onEditPreset?: (presetId: string) => void
   /**
-   * Which preset action button to show next to "Clear":
-   * - "persist": current state diverges from the selected (editable) preset
-   * - "save": there are unsaved changes and no editable preset is selected
+   * Whether to show the dashed "Save view" chip in the presets row:
+   * - "save": the current view diverges and no view is selected → offer to save
    * - "none": no action available
    */
-  presetActionState?: "save" | "persist" | "none"
-  /** Opens the preset create/update dialog. */
+  presetActionState?: "save" | "none"
+  /** Opens the create-view dialog. */
   onPresetAction?: () => void
 }
 

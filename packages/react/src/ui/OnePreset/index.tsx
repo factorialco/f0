@@ -2,13 +2,11 @@ import { AnimatePresence, motion } from "motion/react"
 import { type MouseEvent, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { F0Icon } from "@/components/F0Icon"
-import { Pencil, Save } from "@/icons/app"
+import { Pencil } from "@/icons/app"
 import { Await } from "@/lib/Await"
-import { EmojiImage } from "@/lib/emojis"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
-import { cn, focusRing } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 import { Counter } from "@/ui/Counter"
 import { Skeleton } from "@/ui/skeleton"
 import {
@@ -25,16 +23,8 @@ interface PresetProps {
   selected?: boolean
   /** Optional longer description, shown as a tooltip on hover. */
   description?: string
-  /** Optional emoji shown on the left of the label. */
-  emoji?: string
   /** When provided, an edit icon button is shown on hover. */
   onEdit?: () => void
-  /**
-   * When provided, a persist icon button is shown on the preset — always
-   * visible (not hover-gated), in the selected color. Used to save the current
-   * view into the selected preset.
-   */
-  onPersist?: () => void
 }
 
 const _Preset = ({
@@ -43,9 +33,7 @@ const _Preset = ({
   onClick,
   selected,
   description,
-  emoji,
   onEdit,
-  onPersist,
 }: PresetProps) => {
   const i18n = useI18n()
   const hasActions = !!onEdit
@@ -81,7 +69,6 @@ const _Preset = ({
         checked={selected}
         onChange={() => onClick?.()}
       />
-      {emoji && <EmojiImage size="sm" emoji={emoji} />}
       <span className="whitespace-nowrap">{label}</span>
       {number !== undefined && (
         <Await resolve={number} fallback={<Skeleton className="h-4 w-4" />}>
@@ -95,27 +82,12 @@ const _Preset = ({
           }
         </Await>
       )}
-      {onPersist && (
-        // Custom (not F0Button) so it can use the preset's selected color and
-        // stay always-visible (not hover-gated).
-        <button
-          type="button"
-          aria-label={i18n.actions.persistInPreset}
-          className={cn(
-            "-my-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-xs text-f1-foreground-selected transition-colors hover:bg-f1-background-selected hover:text-f1-foreground-inverse",
-            focusRing()
-          )}
-          onClick={actionHandler(onPersist)}
-        >
-          <F0Icon icon={Save} size="sm" />
-        </button>
-      )}
       {hasActions && (
         <AnimatePresence initial={false}>
           {showActions && (
             <motion.span
               key="preset-actions"
-              className="-my-0.5 -mr-1.5 flex items-center gap-0.5 overflow-hidden"
+              className="-my-0.5 -ml-1.5 -mr-1 flex items-center gap-0.5 overflow-hidden"
               initial={{ opacity: 0, width: 0 }}
               animate={{ opacity: 1, width: "auto" }}
               exit={{ opacity: 0, width: 0 }}
