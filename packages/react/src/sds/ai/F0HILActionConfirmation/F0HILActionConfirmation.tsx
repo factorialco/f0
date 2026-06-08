@@ -14,7 +14,7 @@ export const F0HILActionConfirmation = ({
 }: F0HILActionConfirmationProps) => {
   return (
     <F0CardRow
-      title={text ?? ""}
+      title={text}
       description={description}
       avatar={avatar}
       stackAt={stackAt}

@@ -10,8 +10,9 @@ import type { F0CardRowProps } from "@/components/F0Card"
 export type F0HILActionConfirmationProps = {
   /**
    * The prompt shown as the row title (e.g. the action awaiting confirmation).
+   * Required — a confirmation without a prompt has no meaning.
    */
-  text?: string
+  text: string
   /**
    * Optional secondary line shown beneath the title (single line, truncated).
    */
