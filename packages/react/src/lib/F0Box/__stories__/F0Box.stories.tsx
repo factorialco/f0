@@ -289,7 +289,7 @@ const meta = {
     // Shadow
     boxShadow: {
       control: "select",
-      options: [undefined, "none", "md", "lg", "xl"],
+      options: [undefined, "none", "sm", "md", "lg", "xl"],
     },
     // Divider
     divider: { control: "select", options: [undefined, "x", "y"] },
@@ -2766,7 +2766,7 @@ export const Shadow: Story = {
       </Label>
 
       <F0Box display="flex" gap="xl" flexWrap="wrap" alignItems="end">
-        {(["none", "md", "lg", "xl"] as const).map((s) => (
+        {(["none", "sm", "md", "lg", "xl"] as const).map((s) => (
           <F0Box
             key={s}
             width="32"
