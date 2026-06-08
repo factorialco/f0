@@ -80,6 +80,13 @@ export interface F0CardRowProps {
   status?: TagStatusProps
 
   /**
+   * Strikes through and dims the title/description, marking the row's subject as
+   * void or closed (e.g. a rejected request). Purely presentational — pair it
+   * with the matching `status` tag at the call site.
+   */
+  inactive?: boolean
+
+  /**
    * Compact layout: tighter padding and smaller controls.
    */
   compact?: boolean
@@ -139,6 +146,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       confirmAction,
       rejectAction,
       status,
+      inactive = false,
       compact = false,
       link,
       fullHeight = false,
@@ -188,10 +196,21 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
             {avatar && <CardAvatar avatar={avatar} size="lg" />}
             <div className="flex min-w-0 flex-col gap-0">
               {title && (
-                <Text variant="body" content={title} className="font-medium" />
+                <Text
+                  variant="body"
+                  content={title}
+                  className={cn(
+                    "font-medium",
+                    inactive && "text-f1-foreground-secondary line-through"
+                  )}
+                />
               )}
               {description && (
-                <Text variant="description" content={description} />
+                <Text
+                  variant="description"
+                  content={description}
+                  className={cn(inactive && "line-through")}
+                />
               )}
             </div>
           </div>

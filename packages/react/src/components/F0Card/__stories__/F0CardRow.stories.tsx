@@ -174,6 +174,7 @@ export const Rejected: Story = {
     title: "Jane Cooper",
     description: "Requested 3 days off",
     status: { text: "Rejected", variant: "critical" },
+    inactive: true,
   },
 }
 

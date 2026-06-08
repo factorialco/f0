@@ -220,6 +220,15 @@ describe("F0CardRow", () => {
         screen.queryByRole("button", { name: "Edit" })
       ).not.toBeInTheDocument()
     })
+
+    it("strikes through and dims the title when inactive", () => {
+      render(<F0CardRow title="Void request" description="Details" inactive />)
+
+      const title = screen.getByText("Void request")
+      expect(title).toHaveClass("line-through")
+      expect(title).toHaveClass("text-f1-foreground-secondary")
+      expect(screen.getByText("Details")).toHaveClass("line-through")
+    })
   })
 
   it("renders the alert banner when alert is provided", () => {
