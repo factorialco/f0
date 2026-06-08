@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.41.4](https://github.com/factorialco/f0/compare/f0-react-v2.41.3...f0-react-v2.41.4) (2026-06-08)
+
+
+### Bug Fixes
+
+* **react:** smooth F0ClarifyingPanel ↔ textarea transition ([#4355](https://github.com/factorialco/f0/issues/4355)) ([0f2535a](https://github.com/factorialco/f0/commit/0f2535a1aae37c393e6e9878a8cb37b977c9cb9b))
+
 ## [2.41.3](https://github.com/factorialco/f0/compare/f0-react-v2.41.2...f0-react-v2.41.3) (2026-06-08)
 
 
