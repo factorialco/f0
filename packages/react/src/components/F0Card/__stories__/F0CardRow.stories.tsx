@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import image from "@storybook-static/avatars/person04.jpg"
 import { fn } from "storybook/test"
 
-import { Briefcase, Delete, Envelope } from "@/icons/app"
+import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
 
 import { F0CardRow } from "../F0CardRow"
 
@@ -174,6 +174,39 @@ export const Rejected: Story = {
     title: "Jane Cooper",
     description: "Requested 3 days off",
     status: { text: "Rejected", variant: "critical" },
+    inactive: true,
+  },
+}
+
+/**
+ * The resolved state can also be shown as a coloured icon instead of a tag —
+ * pass `status` an `{ icon, variant, label }` (the `label` keeps it accessible).
+ */
+export const AcceptedIcon: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description: "Requested 3 days off",
+    status: { icon: Check, variant: "positive", label: "Accepted" },
+  },
+}
+
+export const RejectedIcon: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description: "Requested 3 days off",
+    status: { icon: Cross, variant: "critical", label: "Rejected" },
     inactive: true,
   },
 }

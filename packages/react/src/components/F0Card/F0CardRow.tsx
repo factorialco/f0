@@ -1,7 +1,6 @@
 import { forwardRef } from "react"
 
 import { F0Link } from "@/components/F0Link"
-import { type TagStatusProps } from "@/components/tags/F0TagStatus"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
@@ -21,6 +20,7 @@ import {
   CardRowActions,
   type CardRowConfirmAction,
   type CardRowStackAt,
+  type CardRowStatus,
   cardRowClassName,
 } from "./components/CardRowActions"
 import { type CardAlertProps } from "./types"
@@ -72,12 +72,13 @@ export interface F0CardRowProps {
   rejectAction?: CardRowConfirmAction
 
   /**
-   * Resolved-state status tag shown at the trailing edge in place of any
-   * actions — e.g. the `{ text: "Accepted", variant: "positive" }` /
-   * `{ text: "Rejected", variant: "critical" }` outcome of a confirm/reject row.
+   * Resolved-state indicator shown at the trailing edge in place of any actions
+   * — the outcome of a confirm/reject row. Either a status tag
+   * (`{ text: "Accepted", variant: "positive" }`) or a coloured icon
+   * (`{ icon: Check, variant: "positive", label: "Accepted" }`).
    * Takes precedence over the action props.
    */
-  status?: TagStatusProps
+  status?: CardRowStatus
 
   /**
    * Strikes through and dims the title/description, marking the row's subject as

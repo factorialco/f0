@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { Briefcase } from "@/icons/app"
+import { Briefcase, Check } from "@/icons/app"
 import {
   zeroRender as render,
   screen,
@@ -219,6 +219,17 @@ describe("F0CardRow", () => {
       expect(
         screen.queryByRole("button", { name: "Edit" })
       ).not.toBeInTheDocument()
+    })
+
+    it("renders an icon status by its accessible label", () => {
+      render(
+        <F0CardRow
+          title="Row"
+          status={{ icon: Check, variant: "positive", label: "Accepted" }}
+        />
+      )
+
+      expect(screen.getByRole("img", { name: "Accepted" })).toBeInTheDocument()
     })
 
     it("strikes through and dims the title when inactive", () => {
