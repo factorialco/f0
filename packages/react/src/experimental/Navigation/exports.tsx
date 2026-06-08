@@ -1,3 +1,5 @@
+export * from "./F0CommandBar"
+
 /**
  * @deprecated ApplicationFrame has moved to @/patterns/ApplicationFrame. Import from there instead.
  */

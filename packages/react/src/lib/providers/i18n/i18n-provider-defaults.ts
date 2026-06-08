@@ -191,6 +191,13 @@ export const defaultTranslations = {
     },
   },
   shortcut: "Shortcut",
+  commandBar: {
+    searchPlaceholder: "Search...",
+    navigate: "to navigate",
+    select: "to select",
+    cancel: "to cancel",
+    empty: "No results found",
+  },
   date: {
     from: "From",
     to: "To",
