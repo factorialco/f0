@@ -160,7 +160,7 @@ export function CardRowActions({
         ? {
             id: "reject",
             icon: Cross,
-            label: rejectAction.label ?? "Cancel",
+            label: rejectAction.label ?? "Reject",
             hideLabel,
             disabled: rejectAction.disabled,
             onClick: rejectAction.onClick,
