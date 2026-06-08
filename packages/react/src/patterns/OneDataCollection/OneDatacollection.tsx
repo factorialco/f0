@@ -1683,6 +1683,15 @@ const OneDataCollectionComp = <
             ? () => onSharePreset(presetDialog.presetId)
             : undefined
         }
+        existingNames={mergedPresets
+          .filter(
+            (preset) =>
+              !(
+                presetDialog?.mode === "update" &&
+                preset.id === presetDialog.presetId
+              )
+          )
+          .map((preset) => preset.label)}
       />
       {typeof document !== "undefined" &&
         createPortal(

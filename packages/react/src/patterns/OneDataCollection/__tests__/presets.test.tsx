@@ -242,6 +242,45 @@ describe("OneDataCollection - presets", () => {
     })
   })
 
+  it("allows saving an edited view under its own (unchanged) name", async () => {
+    const user = userEvent.setup()
+    renderHarness()
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+
+    // Create a custom view.
+    await sortByName(user)
+    await user.click(await screen.findByRole("button", { name: "Save view" }))
+    await user.type(await screen.findByLabelText("Title"), "My view")
+    await user.click(screen.getByRole("button", { name: "Save" }))
+    await waitFor(() =>
+      expect(screen.getAllByText("My view").length).toBeGreaterThan(0)
+    )
+
+    // Edit it and save without renaming → the view is excluded from the
+    // uniqueness check, so its own name is allowed (no error).
+    await user.hover(
+      screen
+        .getAllByText("My view")
+        .find((el) => !el.closest('[aria-hidden="true"]'))!
+        .closest("label")!
+    )
+    await user.click(
+      (await screen.findAllByRole("button", { name: "Edit view" })).find(
+        (el) => !el.closest('[aria-hidden="true"]')
+      )!
+    )
+    await user.click(screen.getByRole("button", { name: "Save" }))
+
+    // The dialog closes (no error) — the title field is gone.
+    await waitFor(() =>
+      expect(screen.queryByLabelText("Title")).not.toBeInTheDocument()
+    )
+    expect(
+      screen.queryByText("A view with this name already exists")
+    ).not.toBeInTheDocument()
+  })
+
   it("persists custom presets even without an `id`, under an `auto/` storage key derived from the URL", async () => {
     const user = userEvent.setup()
     const { set } = renderHarness({ id: null })

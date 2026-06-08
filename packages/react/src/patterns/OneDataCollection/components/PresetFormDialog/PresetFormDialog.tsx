@@ -30,6 +30,12 @@ interface PresetFormDialogProps {
    * clipboard). Only shown in "update" mode, in the overflow menu.
    */
   onShare?: () => void
+  /**
+   * Names of existing views to validate the title against (case-insensitive) —
+   * saving a duplicate name raises an inline error. The view being edited should
+   * be excluded by the caller so renaming it to itself is allowed.
+   */
+  existingNames?: string[]
 }
 
 /**
@@ -46,24 +52,42 @@ export function PresetFormDialog({
   onSubmit,
   onDelete,
   onShare,
+  existingNames = [],
 }: PresetFormDialogProps) {
   const i18n = useI18n()
   const presets = i18n.collections.presets
   const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
 
-  const schema = z.object({
-    title: f0FormField.text({
-      label: presets.nameLabel,
-      placeholder: presets.namePlaceholder,
-      minLength: 1,
-    }),
-    description: f0FormField.textarea({
-      label: presets.descriptionLabel,
-      placeholder: presets.descriptionPlaceholder,
-      optional: true,
-      rows: 4,
-    }),
-  })
+  const takenNames = new Set(
+    existingNames.map((name) => name.trim().toLowerCase())
+  )
+
+  const schema = z
+    .object({
+      title: f0FormField.text({
+        label: presets.nameLabel,
+        placeholder: presets.namePlaceholder,
+        minLength: 1,
+      }),
+      description: f0FormField.textarea({
+        label: presets.descriptionLabel,
+        placeholder: presets.descriptionPlaceholder,
+        optional: true,
+        rows: 4,
+      }),
+    })
+    // Names must be unique across views (case-insensitive). Surfaces the error on
+    // the title field; runs on submit, so it blocks saving a duplicate.
+    .superRefine((data, ctx) => {
+      const name = (data.title ?? "").trim().toLowerCase()
+      if (name && takenNames.has(name)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["title"],
+          message: presets.duplicateName,
+        })
+      }
+    })
 
   const formDefinition = useF0FormDefinition({
     // Key the form by mode + title so defaults re-seed when switching views.

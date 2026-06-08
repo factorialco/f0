@@ -148,6 +148,7 @@ export const defaultTranslations = {
       updateDescription: "Update this view's name and description.",
       nameLabel: "Title",
       namePlaceholder: "View name",
+      duplicateName: "A view with this name already exists",
       descriptionLabel: "Description",
       descriptionPlaceholder: "Optional description",
       save: "Save",
