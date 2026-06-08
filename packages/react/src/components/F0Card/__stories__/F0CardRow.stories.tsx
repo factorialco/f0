@@ -146,43 +146,11 @@ export const ConfirmReject: Story = {
 
 /**
  * Resolved state of a confirm/reject row: once a decision is made, pass `status`
- * to swap the buttons for a status tag. The accepted/rejected → positive/critical
+ * a coloured icon (`{ icon, variant, label }`, the `label` keeps it accessible)
+ * to swap the buttons for the outcome. The accepted/rejected → positive/critical
  * mapping lives with the caller (here in the story).
  */
 export const Accepted: Story = {
-  args: {
-    avatar: {
-      type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
-    },
-    title: "Jane Cooper",
-    description: "Requested 3 days off",
-    status: { text: "Accepted", variant: "positive" },
-  },
-}
-
-export const Rejected: Story = {
-  args: {
-    avatar: {
-      type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
-    },
-    title: "Jane Cooper",
-    description: "Requested 3 days off",
-    status: { text: "Rejected", variant: "critical" },
-    inactive: true,
-  },
-}
-
-/**
- * The resolved state can also be shown as a coloured icon instead of a tag —
- * pass `status` an `{ icon, variant, label }` (the `label` keeps it accessible).
- */
-export const AcceptedIcon: Story = {
   args: {
     avatar: {
       type: "person",
@@ -196,7 +164,7 @@ export const AcceptedIcon: Story = {
   },
 }
 
-export const RejectedIcon: Story = {
+export const Rejected: Story = {
   args: {
     avatar: {
       type: "person",

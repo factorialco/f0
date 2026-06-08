@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
-import { Briefcase, Check } from "@/icons/app"
+import { Briefcase, Check, Cross } from "@/icons/app"
 import {
   zeroRender as render,
   screen,
@@ -191,37 +191,7 @@ describe("F0CardRow", () => {
   })
 
   describe("status (resolved state)", () => {
-    it("renders the status tag", () => {
-      render(
-        <F0CardRow
-          title="Row"
-          status={{ text: "Accepted", variant: "positive" }}
-        />
-      )
-
-      expect(screen.getByText("Accepted")).toBeInTheDocument()
-    })
-
-    it("takes precedence over the action props", () => {
-      render(
-        <F0CardRow
-          title="Row"
-          status={{ text: "Rejected", variant: "critical" }}
-          primaryAction={{ label: "Open", onClick: vi.fn() }}
-          secondaryActions={[{ label: "Edit", onClick: vi.fn() }]}
-        />
-      )
-
-      expect(screen.getByText("Rejected")).toBeInTheDocument()
-      expect(
-        screen.queryByRole("button", { name: "Open" })
-      ).not.toBeInTheDocument()
-      expect(
-        screen.queryByRole("button", { name: "Edit" })
-      ).not.toBeInTheDocument()
-    })
-
-    it("renders an icon status by its accessible label", () => {
+    it("renders the status icon by its accessible label", () => {
       render(
         <F0CardRow
           title="Row"
@@ -230,6 +200,25 @@ describe("F0CardRow", () => {
       )
 
       expect(screen.getByRole("img", { name: "Accepted" })).toBeInTheDocument()
+    })
+
+    it("takes precedence over the action props", () => {
+      render(
+        <F0CardRow
+          title="Row"
+          status={{ icon: Cross, variant: "critical", label: "Rejected" }}
+          primaryAction={{ label: "Open", onClick: vi.fn() }}
+          secondaryActions={[{ label: "Edit", onClick: vi.fn() }]}
+        />
+      )
+
+      expect(screen.getByRole("img", { name: "Rejected" })).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Open" })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Edit" })
+      ).not.toBeInTheDocument()
     })
 
     it("strikes through and dims the title when inactive", () => {

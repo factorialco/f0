@@ -1,9 +1,5 @@
 import { F0Icon, type IconType } from "@/components/F0Icon"
-import {
-  F0TagStatus,
-  type StatusVariant,
-  type TagStatusProps,
-} from "@/components/tags/F0TagStatus"
+import { type StatusVariant } from "@/components/tags/F0TagStatus"
 import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Check, Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -100,21 +96,18 @@ export interface CardRowConfirmAction {
   disabled?: boolean
 }
 
-/** Resolved-state indicator at the trailing edge: a coloured icon. */
-export interface CardRowStatusIcon {
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+export interface CardRowStatus {
   /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
   icon: IconType
-  /** Colour family — same variants as the status tag. */
+  /** Colour family. */
   variant: StatusVariant
   /** Accessible label; the icon carries meaning, so this is required. */
   label: string
 }
-
-/**
- * Resolved state shown in place of the actions: either a {@link F0TagStatus}
- * pill ({@link TagStatusProps}) or a {@link CardRowStatusIcon} coloured icon.
- */
-export type CardRowStatus = TagStatusProps | CardRowStatusIcon
 
 // Status variant → F0Icon colour token (no "neutral" icon colour; map to secondary).
 const statusIconColor: Record<
@@ -128,9 +121,6 @@ const statusIconColor: Record<
   critical: "critical",
 }
 
-const isStatusIcon = (status: CardRowStatus): status is CardRowStatusIcon =>
-  "icon" in status
-
 interface CardRowActionsProps {
   primaryAction?: CardPrimaryAction
   secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
@@ -141,9 +131,9 @@ interface CardRowActionsProps {
   /** Reject (✗) icon-only action — enables the confirm/reject variant. */
   rejectAction?: CardRowConfirmAction
   /**
-   * Resolved-state indicator shown at the trailing edge in place of any actions
-   * (e.g. the "Accepted" / "Rejected" outcome of a confirm/reject row) — a
-   * status tag or a coloured icon. Takes precedence over every action prop.
+   * Resolved-state icon shown at the trailing edge in place of any actions
+   * (e.g. the "Accepted" / "Rejected" outcome of a confirm/reject row).
+   * Takes precedence over every action prop.
    */
   status?: CardRowStatus
   compact?: boolean
@@ -193,17 +183,13 @@ export function CardRowActions({
           stackAt !== "never" && compact && "mt-3 pt-3"
         )}
       >
-        {isStatusIcon(status) ? (
-          <F0Icon
-            icon={status.icon}
-            color={statusIconColor[status.variant]}
-            size="lg"
-            role="img"
-            aria-label={status.label}
-          />
-        ) : (
-          <F0TagStatus {...status} />
-        )}
+        <F0Icon
+          icon={status.icon}
+          color={statusIconColor[status.variant]}
+          size="lg"
+          role="img"
+          aria-label={status.label}
+        />
       </div>
     )
   }

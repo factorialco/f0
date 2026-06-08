@@ -72,10 +72,9 @@ export interface F0CardRowProps {
   rejectAction?: CardRowConfirmAction
 
   /**
-   * Resolved-state indicator shown at the trailing edge in place of any actions
-   * — the outcome of a confirm/reject row. Either a status tag
-   * (`{ text: "Accepted", variant: "positive" }`) or a coloured icon
-   * (`{ icon: Check, variant: "positive", label: "Accepted" }`).
+   * Resolved-state icon shown at the trailing edge in place of any actions — the
+   * outcome of a confirm/reject row, e.g.
+   * `{ icon: Check, variant: "positive", label: "Accepted" }`.
    * Takes precedence over the action props.
    */
   status?: CardRowStatus
