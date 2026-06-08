@@ -2,7 +2,7 @@
  * Self-contained, shareable encoding of a view.
  *
  * "Share view" copies a link carrying the whole view (title, description and
- * the full captured config) base64url-encoded in the `dc_shared_preset` query
+ * the full captured config) base64url-encoded in the `dc_shared_view` query
  * param. Opening that link prefills the create-view dialog so the recipient can
  * save it as their own view.
  *
@@ -12,7 +12,7 @@
  */
 
 /** The URL query param carrying a shared view payload. */
-export const SHARED_PRESET_PARAM = "dc_shared_preset"
+export const SHARED_PRESET_PARAM = "dc_shared_view"
 
 /** The portion of a view that is shared (everything except its local id). */
 export interface SharedPresetPayload {
@@ -54,7 +54,7 @@ export const encodeSharedPreset = (payload: SharedPresetPayload): string => {
 }
 
 /**
- * Decodes a `dc_shared_preset` value back into a payload. Returns `null` for
+ * Decodes a `dc_shared_view` value back into a payload. Returns `null` for
  * malformed input (bad base64, non-JSON, or a payload without a string label).
  */
 export const decodeSharedPreset = (
@@ -78,7 +78,7 @@ export const decodeSharedPreset = (
 
 /**
  * Builds an absolute, shareable URL for a preset: the current origin + path
- * with a single `dc_shared_preset` param (any existing query is dropped so the
+ * with a single `dc_shared_view` param (any existing query is dropped so the
  * link is clean and self-contained). Returns `null` under SSR.
  */
 export const buildSharedPresetUrl = (

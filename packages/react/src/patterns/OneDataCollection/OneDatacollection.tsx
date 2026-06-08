@@ -327,7 +327,7 @@ const OneDataCollectionComp = <
     | null
   >(null)
 
-  // A preset shared via a `dc_shared_preset` link, captured once at mount (so a
+  // A view shared via a `dc_shared_view` link, captured once at mount (so a
   // later URL sync can't wipe it before we read it). When present, we open the
   // create dialog prefilled with it; saving stores the shared config verbatim.
   const [sharedPreset] = useState<SharedPresetPayload | null>(() => {
