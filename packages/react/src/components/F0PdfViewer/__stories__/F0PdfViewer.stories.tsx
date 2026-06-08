@@ -52,6 +52,20 @@ export const PageFit: Story = {
   ),
 }
 
+export const Rotatable: Story = {
+  tags: ["!dev"],
+  render: () => (
+    <div className="h-full w-full">
+      <F0PdfViewer
+        url={SAMPLE_URL}
+        filename="sample.pdf"
+        rotatable
+        withCredentials={false}
+      />
+    </div>
+  ),
+}
+
 export const Skeleton: Story = {
   tags: ["!dev"],
   render: () => (

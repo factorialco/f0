@@ -19,7 +19,7 @@ import "./F0PdfViewer.styles.css"
 import { downloadPdf, printPdf } from "./pdfActions"
 import { ensurePdfWorker } from "./pdfWorker"
 import { fixedScales, nextScaleDown, nextScaleUp } from "./scales"
-import type { F0PdfScale, F0PdfViewerProps } from "./types"
+import type { F0PdfRotation, F0PdfScale, F0PdfViewerProps } from "./types"
 import { calculateVisiblePage } from "./visiblePage"
 
 ensurePdfWorker()
@@ -35,11 +35,14 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
   (props, ref) => {
     const {
       url,
-      filename,
+      filename = "document.pdf",
       page = 0,
       pagesToDisplay = [],
       initialScale = "page-width",
       withCredentials = true,
+      rotatable = false,
+      initialRotation = 0,
+      onRotationChange,
       onPdfLoaded,
       onPageChange,
       ...rest
@@ -52,6 +55,7 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
     const [scale, setScale] = useState(1)
     const [currentPage, setCurrentPage] = useState(0)
     const [selectedScale, setSelectedScale] = useState<F0PdfScale>(initialScale)
+    const [rotation, setRotation] = useState<F0PdfRotation>(initialRotation)
 
     const containerRef = useRef<HTMLDivElement>(null)
     const toolbarRef = useRef<HTMLDivElement>(null)
@@ -102,17 +106,23 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
         if (!metrics || !container) return
 
         const toolbarHeight = toolbarRef.current?.offsetHeight ?? 0
+        const quarterTurned = rotation === 90 || rotation === 270
+        const pageWidth = quarterTurned
+          ? metrics.originalHeight
+          : metrics.originalWidth
+        const pageHeight = quarterTurned
+          ? metrics.originalWidth
+          : metrics.originalHeight
         const computed =
           value === "page-width"
-            ? (container.clientWidth - PAGE_VIEWPORT_PADDING) /
-              metrics.originalWidth
+            ? (container.clientWidth - PAGE_VIEWPORT_PADDING) / pageWidth
             : (container.clientHeight - toolbarHeight - PAGE_VIEWPORT_PADDING) /
-              metrics.originalHeight
+              pageHeight
 
         setScale(computed)
         setSelectedScale(value)
       },
-      [pages, currentPage]
+      [pages, currentPage, rotation]
     )
 
     const onScaleChange = useCallback(
@@ -142,6 +152,14 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
       () => zoomTo(nextScaleDown(scale)),
       [scale, zoomTo]
     )
+
+    const onRotate = useCallback(() => {
+      setRotation((current) => {
+        const next = ((current + 90) % 360) as F0PdfRotation
+        onRotationChange?.(next)
+        return next
+      })
+    }, [onRotationChange])
 
     const onDocumentLoadSuccess = useCallback(
       (loadedPdf: PDFDocumentProxy) => {
@@ -199,6 +217,13 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
     }, [pages.length, initialScale])
 
     useEffect(() => {
+      if (selectedScale === "page-width" || selectedScale === "page-fit") {
+        applyDynamicScale(selectedScale)
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rotation])
+
+    useEffect(() => {
       const container = containerRef.current
       if (!container) return
 
@@ -237,6 +262,8 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
             onZoomIn={onZoomIn}
             onZoomOut={onZoomOut}
             onScaleChange={onScaleChange}
+            rotatable={rotatable}
+            onRotate={onRotate}
             onPrint={onPrint}
             onDownload={onDownload}
           />
@@ -264,6 +291,7 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
                         className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
                         pageNumber={pageNumber}
                         scale={scale}
+                        rotate={rotation}
                         renderForms
                         renderTextLayer
                         inputRef={(reference) => {

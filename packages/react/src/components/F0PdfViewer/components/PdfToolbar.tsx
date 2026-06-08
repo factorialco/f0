@@ -7,6 +7,7 @@ import {
   Minus,
   Plus,
   Printer,
+  Reset,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
@@ -32,6 +33,8 @@ interface PdfToolbarProps {
   onZoomIn: () => void
   onZoomOut: () => void
   onScaleChange: (value: F0PdfScale) => void
+  rotatable: boolean
+  onRotate: () => void
   onPrint: () => void
   onDownload: () => void
 }
@@ -50,6 +53,8 @@ export const PdfToolbar = ({
   onZoomIn,
   onZoomOut,
   onScaleChange,
+  rotatable,
+  onRotate,
   onPrint,
   onDownload,
 }: PdfToolbarProps) => {
@@ -109,6 +114,13 @@ export const PdfToolbar = ({
       </div>
 
       <div className={groupClassName}>
+        {rotatable && (
+          <ToolbarButton
+            label={pdfViewer.rotate}
+            onClick={onRotate}
+            icon={Reset}
+          />
+        )}
         <ToolbarButton
           label={pdfViewer.print}
           onClick={onPrint}

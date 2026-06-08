@@ -821,6 +821,7 @@ export const defaultTranslations = {
     scaleSelector: "Zoom level",
     pageWidth: "Page width",
     pageFit: "Page fit",
+    rotate: "Rotate",
     print: "Print",
     download: "Download",
     loading: "Loading document",
