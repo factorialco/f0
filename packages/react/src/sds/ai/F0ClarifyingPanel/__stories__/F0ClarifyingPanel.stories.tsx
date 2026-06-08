@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { AnimatePresence, motion } from "motion/react"
 import { useCallback, useMemo, useState } from "react"
 
 import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
@@ -240,28 +241,47 @@ const StoryShell = ({
 
   return (
     <div className="w-[360px] space-y-3">
-      <div className="rounded-lg border border-solid border-f1-border-secondary bg-f1-background">
-        {state ? (
-          <F0ClarifyingPanel
-            clarifyingQuestion={state}
-            isSubmitDisabled={isSubmitDisabled}
-          />
-        ) : (
-          <div className="flex flex-col gap-2 p-4">
-            <div className="text-sm font-medium text-f1-foreground">
-              Resolved:
-            </div>
-            <pre className="whitespace-pre-wrap text-sm text-f1-foreground-secondary">
-              {resolved.join("\n\n") || "(no responses yet)"}
-            </pre>
-            <button
-              className="self-start rounded-md border border-solid border-f1-border px-3 py-1 text-sm text-f1-foreground hover:bg-f1-background-secondary"
-              onClick={reset}
+      <div className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background">
+        <AnimatePresence initial={false}>
+          {state ? (
+            <motion.div
+              key="panel"
+              className="overflow-hidden"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
             >
-              Restart
-            </button>
-          </div>
-        )}
+              <F0ClarifyingPanel
+                clarifyingQuestion={state}
+                isSubmitDisabled={isSubmitDisabled}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="resolved"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="flex flex-col gap-2 p-4">
+                <div className="text-sm font-medium text-f1-foreground">
+                  Resolved:
+                </div>
+                <pre className="whitespace-pre-wrap text-sm text-f1-foreground-secondary">
+                  {resolved.join("\n\n") || "(no responses yet)"}
+                </pre>
+                <button
+                  className="self-start rounded-md border border-solid border-f1-border px-3 py-1 text-sm text-f1-foreground hover:bg-f1-background-secondary"
+                  onClick={reset}
+                >
+                  Restart
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

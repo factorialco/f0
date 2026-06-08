@@ -484,7 +484,7 @@ function EditableTableInlineUpdateScenario() {
             ...editableTableVisualization,
             options: {
               ...editableTableVisualization.options,
-              onCellChange: async (updatedResource) => {
+              onCellChange: async ({ updatedItem: updatedResource }) => {
                 setResources((currentResources) =>
                   currentResources.map((resource) =>
                     resource.id === updatedResource.id

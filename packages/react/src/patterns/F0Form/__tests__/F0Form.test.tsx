@@ -3730,3 +3730,51 @@ describe("F0Form renderIf hidden field layout", () => {
     expect(screen.getByLabelText("Conditional Field")).toBeInTheDocument()
   })
 })
+
+describe("F0Form clearing optional values", () => {
+  it("keeps the cleared input empty after submit when the parent owns the value", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      budget: f0FormField.money({
+        label: "Budget",
+        currency: "EUR",
+        optional: true,
+      }),
+    })
+
+    const submissions: Array<number | undefined> = []
+
+    const Harness = () => {
+      const [budget, setBudget] = React.useState<number | undefined>(50)
+      return (
+        <F0Form
+          name="controlled-optional-money-regression"
+          schema={formSchema}
+          defaultValues={{ budget }}
+          onSubmit={async (data) => {
+            submissions.push(data.budget)
+            setBudget(data.budget)
+            return { success: true }
+          }}
+        />
+      )
+    }
+
+    render(<Harness />)
+
+    const input = screen.getByLabelText("Budget") as HTMLInputElement
+    expect(input.value).toBe("50")
+
+    await user.clear(input)
+    expect(input.value).toBe("")
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(submissions).toEqual([undefined])
+    })
+
+    expect(input.value).toBe("")
+  })
+})

@@ -11,15 +11,15 @@ afterEach(() => {
 
 describe("OneDataCollection URL sync — visualization", () => {
   it("keeps the visualization param (by type) from the URL on mount (wiring smoke)", async () => {
-    // ExampleComponent renders [table, card, list, …], so dc_view=card → index 1.
-    window.history.replaceState(null, "", "/people?dc_view=card")
+    // ExampleComponent renders [table, card, list, …], so dc_visualization=card → index 1.
+    window.history.replaceState(null, "", "/people?dc_visualization=card")
 
     render(<ExampleComponent id="people/v1" />)
 
-    // The view is applied and re-affirmed, so dc_view=card survives (it would be
+    // The view is applied and re-affirmed, so dc_visualization=card survives (it would be
     // dropped if visualization weren't wired into the URL sync).
     await waitFor(() =>
-      expect(window.location.search).toContain("dc_view=card")
+      expect(window.location.search).toContain("dc_visualization=card")
     )
   })
 })

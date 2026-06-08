@@ -1,5 +1,97 @@
 # Changelog
 
+## [2.49.0](https://github.com/factorialco/f0/compare/f0-react-v2.48.0...f0-react-v2.49.0) (2026-06-08)
+
+
+### Features
+
+* **dialog 3/6:** dialog-alike core + new F0Dialog (additive, subpath-only) ([#4365](https://github.com/factorialco/f0/issues/4365)) ([c29ac48](https://github.com/factorialco/f0/commit/c29ac48a3337a41b556e01f2ce4924f7cc88923c))
+
+## [2.48.0](https://github.com/factorialco/f0/compare/f0-react-v2.47.0...f0-react-v2.48.0) (2026-06-08)
+
+
+### Features
+
+* **OneDataCollection:** capture the full view in user-creatable presets ([#4344](https://github.com/factorialco/f0/issues/4344)) ([9b8fb10](https://github.com/factorialco/f0/commit/9b8fb10a28a777f8b99a6f42227b5d92c05afd9e))
+
+## [2.47.0](https://github.com/factorialco/f0/compare/f0-react-v2.46.0...f0-react-v2.47.0) (2026-06-08)
+
+
+### Features
+
+* **dialog 1/6:** foundation bits for dialog-alike (additive) ([#4363](https://github.com/factorialco/f0/issues/4363)) ([3ffc2e9](https://github.com/factorialco/f0/commit/3ffc2e910533562103ec58bdd80406f9a8943dfc))
+* **dialog 2/6:** private forked Dialog primitives (additive) ([#4364](https://github.com/factorialco/f0/issues/4364)) ([4ce7aae](https://github.com/factorialco/f0/commit/4ce7aae58f8819f0312218611369d20613f5a26d))
+
+## [2.46.0](https://github.com/factorialco/f0/compare/f0-react-v2.45.0...f0-react-v2.46.0) (2026-06-08)
+
+
+### Features
+
+* **sds:** render F0HILActionConfirmation with F0CardRow ([#4341](https://github.com/factorialco/f0/issues/4341)) ([e0c8cf0](https://github.com/factorialco/f0/commit/e0c8cf03b5706fb322685001d655acbbe1e9ee98))
+
+## [2.45.0](https://github.com/factorialco/f0/compare/f0-react-v2.44.0...f0-react-v2.45.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** add F0CardRow component ([#4340](https://github.com/factorialco/f0/issues/4340)) ([806cd55](https://github.com/factorialco/f0/commit/806cd55c60d5a6b8765798e98ea3b68cc9a043b1))
+
+## [2.44.0](https://github.com/factorialco/f0/compare/f0-react-v2.43.0...f0-react-v2.44.0) (2026-06-08)
+
+
+### Features
+
+* **F0Box:** expose subtle "sm" boxShadow token ([#4354](https://github.com/factorialco/f0/issues/4354)) ([4b77a5c](https://github.com/factorialco/f0/commit/4b77a5c9db2f1fe58614577311da8bea13c58872))
+
+## [2.43.0](https://github.com/factorialco/f0/compare/f0-react-v2.42.0...f0-react-v2.43.0) (2026-06-08)
+
+
+### Features
+
+* **EditableTable:** pass changes map to onCellChange ([#4342](https://github.com/factorialco/f0/issues/4342)) ([7d7543a](https://github.com/factorialco/f0/commit/7d7543a41ec668db8e84a5e0099e9a3a07671bac))
+
+## [2.42.0](https://github.com/factorialco/f0/compare/f0-react-v2.41.5...f0-react-v2.42.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** add ButtonGroup — a data-driven action bar ([#4339](https://github.com/factorialco/f0/issues/4339)) ([170314e](https://github.com/factorialco/f0/commit/170314ec4f9f24ed79b2e0257189744c17459ab4))
+
+## [2.41.5](https://github.com/factorialco/f0/compare/f0-react-v2.41.4...f0-react-v2.41.5) (2026-06-08)
+
+
+### Bug Fixes
+
+* **F0Form:** preserve cleared optional values after submit ([#4287](https://github.com/factorialco/f0/issues/4287)) ([925990e](https://github.com/factorialco/f0/commit/925990ea1d6793d987e8bae6c0c90a6b2649a993))
+
+## [2.41.4](https://github.com/factorialco/f0/compare/f0-react-v2.41.3...f0-react-v2.41.4) (2026-06-08)
+
+
+### Bug Fixes
+
+* **react:** smooth F0ClarifyingPanel ↔ textarea transition ([#4355](https://github.com/factorialco/f0/issues/4355)) ([0f2535a](https://github.com/factorialco/f0/commit/0f2535a1aae37c393e6e9878a8cb37b977c9cb9b))
+
+## [2.41.3](https://github.com/factorialco/f0/compare/f0-react-v2.41.2...f0-react-v2.41.3) (2026-06-08)
+
+
+### Bug Fixes
+
+* **datacollection:** prevent stuck kanban loading on view-restore bounce ([#4350](https://github.com/factorialco/f0/issues/4350)) ([c97eb32](https://github.com/factorialco/f0/commit/c97eb32bc04e806cf5c2cbbbddc8f6584f4c4f50))
+
+## [2.41.2](https://github.com/factorialco/f0/compare/f0-react-v2.41.1...f0-react-v2.41.2) (2026-06-07)
+
+
+### Bug Fixes
+
+* **ResourceHeader:** make showBottomBorder render bottom-only without Tailwind preflight ([#4347](https://github.com/factorialco/f0/issues/4347)) ([f23bc50](https://github.com/factorialco/f0/commit/f23bc50c968f345a81cf5ae6c3aa05e759510a61))
+
+## [2.41.1](https://github.com/factorialco/f0/compare/f0-react-v2.41.0...f0-react-v2.41.1) (2026-06-06)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** make recording waveform more sensitive ([#4345](https://github.com/factorialco/f0/issues/4345)) ([54ab099](https://github.com/factorialco/f0/commit/54ab09971e30880b0bfb7f2169b36ef98455b99f))
+
 ## [2.41.0](https://github.com/factorialco/f0/compare/f0-react-v2.40.2...f0-react-v2.41.0) (2026-06-05)
 
 

@@ -41,6 +41,7 @@ const ButtonInternal = forwardRef<
     noAutoTooltip,
     noTitle,
     iconRotate = false,
+    block = false,
     counterValue,
     ...props
   },
@@ -142,6 +143,7 @@ const ButtonInternal = forwardRef<
         loading={isLoading}
         className={cn(
           "max-w-full",
+          block && "w-full",
           withoutDisabledAppearance &&
             disabled &&
             "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default",
