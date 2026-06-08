@@ -39,9 +39,6 @@ export type MockAiChatRuntime = {
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
   ) => void
-  appendRawMessages: (
-    messages: (Omit<F0Message, "id"> & { id?: string })[]
-  ) => void
   /** Swaps the scripted assistant responses and restarts from the first turn. */
   setScript: (script: string[]) => void
   clear: () => void
@@ -449,16 +446,6 @@ export const MockAiChatRuntimeProvider = ({
     []
   )
 
-  const appendRawMessages = useCallback<MockAiChatRuntime["appendRawMessages"]>(
-    (msgs) => {
-      setMessages((prev) => [
-        ...prev,
-        ...msgs.map((m) => ({ id: nextId(), ...m })),
-      ])
-    },
-    []
-  )
-
   const setScript = useCallback<MockAiChatRuntime["setScript"]>((next) => {
     scriptRef.current = next
     scriptTurnRef.current = 0
@@ -545,7 +532,6 @@ export const MockAiChatRuntimeProvider = ({
         sendMessage,
         sendMessageWithThinkingOnly,
         appendMessages,
-        appendRawMessages,
         setScript,
         clear,
         currentThreadTitle,

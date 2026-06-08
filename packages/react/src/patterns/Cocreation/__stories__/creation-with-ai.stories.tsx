@@ -13,16 +13,17 @@ import {
 } from "react"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
+import { F0CardRow } from "@/components/F0Card"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import {
   Add,
   Delete,
   ExternalLink,
-  Files,
+  File,
   LayersFront,
+  Marketplace,
   Settings,
   SolidPlay,
-  Sparkles,
 } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -50,11 +51,7 @@ import { SurveyAnsweringForm } from "@/sds/surveys/SurveyAnsweringForm"
 import { mockDatasets } from "@/sds/surveys/__stories__/mocks"
 
 import {
-  cardVisualization,
-  emptyDataAdapter,
-  employeeTableVisualization,
   filledDataAdapter,
-  MOCK_EMPLOYEES,
   resourceFilters,
   resourceSortings,
   tableVisualization,
@@ -140,14 +137,14 @@ function useTabConfig(): TabConfigContextValue {
 }
 
 function TabConfigProvider({
-  initialTabId = "tasks",
+  initialTabId = "surveys",
   children,
 }: {
   initialTabId?: string
   children: ReactNode
 }) {
   const [activeTabId, setActiveTabId] = useState(initialTabId)
-  const tabConfig = TAB_CONFIGS[activeTabId] ?? TAB_CONFIGS.tasks
+  const tabConfig = TAB_CONFIGS[activeTabId] ?? TAB_CONFIGS.surveys
 
   return (
     <TabConfigContext.Provider
@@ -274,6 +271,44 @@ function SurveySettingsForm() {
 }
 
 /**
+ * Cards rendered below the chat text area on the welcome screen (the chat
+ * `footer` slot). They offer the two entry points into the survey flow:
+ * an empty survey or the template browser.
+ */
+function WelcomeFooterCards() {
+  const { sendMessage } = useMockAiChatRuntime()
+
+  const cards = [
+    {
+      icon: File,
+      title: "Empty survey",
+      description: "Start from scratch",
+      message: "Create an empty survey.",
+    },
+    {
+      icon: Marketplace,
+      title: "Templates",
+      description: "Browse pre-made surveys",
+      message: "Show me the survey templates.",
+    },
+  ]
+
+  return (
+    <div className="grid w-full grid-cols-2 gap-3">
+      {cards.map((card) => (
+        <F0CardRow
+          key={card.title}
+          avatar={{ type: "icon", icon: card.icon }}
+          title={card.title}
+          description={card.description}
+          onClick={() => sendMessage(card.message)}
+        />
+      ))}
+    </div>
+  )
+}
+
+/**
  * The page content rendered inside the shared chat-enabled ApplicationFrame.
  * Derives the chat's open/visualization state from `phase` and keeps `phase` in
  * sync when the user toggles the header One switch.
@@ -287,13 +322,12 @@ function FlowContent({
 }) {
   const { activeTabId, setActiveTabId, tabConfig } = useTabConfig()
   const [templatesOpen, setTemplatesOpen] = useState(false)
-  const [resourceTabId, setResourceTabId] = useState("tab-1")
   // The Surveys resource view has its own tab strip (Editor / Settings); the
   // survey questions show under "Editor", which is the default focused tab in
   // the co-creation flow.
   const [surveyTabId, setSurveyTabId] = useState("editor")
   const { open, setOpen, visualizationMode, setVisualizationMode } = useAiChat()
-  const { inProgress, sendMessageWithThinkingOnly } = useMockAiChatRuntime()
+  const { inProgress } = useMockAiChatRuntime()
 
   const sharedSourceOptions = {
     filters: resourceFilters,
@@ -311,41 +345,21 @@ function FlowContent({
     primaryActions: () => [
       {
         // The single primary "Create" button launches the chat FULL WIDTH
-        // (fullscreen) and auto-sends the opening intent message so the AI can
-        // start thinking immediately.
+        // (fullscreen). It only opens the chat shell — no message is sent yet,
+        // so the flow starts from a clean slate.
         label: "Create",
         icon: Add,
         onClick: () => {
           setVisualizationMode("fullscreen")
           setPhase("chat")
-          sendMessageWithThinkingOnly(tabConfig.initialMessage)
         },
       },
     ],
   }
 
-  const sourceEmpty = useDataCollectionSource({
-    dataAdapter: emptyDataAdapter,
-    ...sharedSourceOptions,
-  })
-
   const sourceTable = useDataCollectionSource({
     dataAdapter: filledDataAdapter,
     ...sharedSourceOptions,
-  })
-
-  const sourceCards = useDataCollectionSource({
-    dataAdapter: filledDataAdapter,
-    ...sharedSourceOptions,
-  })
-
-  const sourceEmployees = useDataCollectionSource({
-    dataAdapter: {
-      fetchData: () => Promise.resolve({ records: MOCK_EMPLOYEES }),
-    },
-    ...sharedSourceOptions,
-    // Employees don't offer templates.
-    secondaryActions: undefined,
   })
 
   // phase → chat open state. Opening from "collection" flips `open` false→true
@@ -393,96 +407,64 @@ function FlowContent({
             // The Surveys canvas mirrors a real Survey resource view: a
             // page-level ResourceHeader (the single header — the inline survey
             // form's own header is suppressed) plus an Editor/Settings tab
-            // strip. Other tabs keep the generic placeholder chrome.
-            activeTabId === "surveys" ? (
-              <>
-                <ResourceHeader
-                  title={tabConfig.cards[0].title}
-                  description={tabConfig.cards[0].description}
-                  status={{
-                    label: "Status",
-                    text: "Draft",
-                    variant: "neutral",
-                  }}
-                  primaryAction={{
-                    label: "Publish",
-                    icon: SolidPlay,
+            // strip.
+            <>
+              <ResourceHeader
+                title={tabConfig.cards[0].title}
+                description={tabConfig.cards[0].description}
+                status={{
+                  label: "Status",
+                  text: "Draft",
+                  variant: "neutral",
+                }}
+                primaryAction={{
+                  label: "Publish",
+                  icon: SolidPlay,
+                  onClick: () => {},
+                }}
+                otherActions={[
+                  {
+                    label: "Duplicate",
+                    icon: LayersFront,
                     onClick: () => {},
-                  }}
-                  otherActions={[
-                    {
-                      label: "Duplicate",
-                      icon: LayersFront,
-                      onClick: () => {},
-                    },
-                    { type: "separator" },
-                    {
-                      label: "Delete",
-                      icon: Delete,
-                      critical: true,
-                      onClick: () => {},
-                    },
-                  ]}
-                  metadata={[
-                    { label: "Owner", value: { type: "text", content: "You" } },
-                    {
-                      label: "Recurrence",
-                      value: { type: "text", content: "Does not repeat" },
-                    },
-                    {
-                      label: "Finishes on",
-                      value: { type: "text", content: "—" },
-                    },
-                    {
-                      label: "Questions",
-                      value: { type: "text", content: "10" },
-                    },
-                  ]}
-                />
-                <Tabs
-                  tabs={[
-                    { label: "Questions", id: "editor" },
-                    { label: "Settings", id: "settings" },
-                  ]}
-                  activeTabId={surveyTabId}
-                  setActiveTabId={setSurveyTabId}
-                />
-              </>
-            ) : (
-              <>
-                <ResourceHeader
-                  title={tabConfig.cards[0].title}
-                  description={tabConfig.cards[0].description}
-                  status={{
-                    label: "Status",
-                    text: "Draft",
-                    variant: "neutral",
-                  }}
-                  primaryAction={{ label: "Save", onClick: () => {} }}
-                  metadata={[
-                    { label: "Owner", value: { type: "text", content: "You" } },
-                  ]}
-                />
-                <Tabs
-                  tabs={[
-                    { label: "Tab 1", id: "tab-1" },
-                    { label: "Tab 2", id: "tab-2" },
-                    { label: "Tab 3", id: "tab-3" },
-                  ]}
-                  activeTabId={resourceTabId}
-                  setActiveTabId={setResourceTabId}
-                />
-              </>
-            )
+                  },
+                  { type: "separator" },
+                  {
+                    label: "Delete",
+                    icon: Delete,
+                    critical: true,
+                    onClick: () => {},
+                  },
+                ]}
+                metadata={[
+                  { label: "Owner", value: { type: "text", content: "You" } },
+                  {
+                    label: "Recurrence",
+                    value: { type: "text", content: "Does not repeat" },
+                  },
+                  {
+                    label: "Finishes on",
+                    value: { type: "text", content: "—" },
+                  },
+                  {
+                    label: "Questions",
+                    value: { type: "text", content: "10" },
+                  },
+                ]}
+              />
+              <Tabs
+                tabs={[
+                  { label: "Questions", id: "editor" },
+                  { label: "Settings", id: "settings" },
+                ]}
+                activeTabId={surveyTabId}
+                setActiveTabId={setSurveyTabId}
+              />
+            </>
           ) : (
             visualizationMode !== "fullscreen" && (
               <Tabs
-                tabs={[
-                  { label: "Surveys", id: "surveys" },
-                  { label: "Tasks", id: "tasks" },
-                  { label: "Employees", id: "employees" },
-                  { label: "Absences", id: "absences" },
-                ]}
+                tabs={[{ label: "Surveys", id: "surveys" }]}
                 activeTabId={activeTabId}
                 setActiveTabId={setActiveTabId}
               />
@@ -497,57 +479,28 @@ function FlowContent({
           // thinking/updating the form we blur + lock it (with the "Applying
           // changes" pill) so the user can't edit content that's about to change.
           <F0AiProcessingOverlay active={inProgress} className="h-full w-full">
-            {activeTabId === "surveys" ? (
-              surveyTabId === "editor" ? (
-                <SurveyAnsweringForm
-                  inline
-                  hideResourceHeader
-                  title={tabConfig.cards[0].title}
-                  description={tabConfig.cards[0].description}
-                  elements={SURVEY_ELEMENTS}
-                  datasets={mockDatasets}
-                  defaultValues={SURVEY_DEFAULT_VALUES}
-                />
-              ) : surveyTabId === "settings" ? (
-                <SurveySettingsForm />
-              ) : (
-                <></>
-              )
+            {surveyTabId === "editor" ? (
+              <SurveyAnsweringForm
+                inline
+                hideResourceHeader
+                title={tabConfig.cards[0].title}
+                description={tabConfig.cards[0].description}
+                elements={SURVEY_ELEMENTS}
+                datasets={mockDatasets}
+                defaultValues={SURVEY_DEFAULT_VALUES}
+              />
+            ) : surveyTabId === "settings" ? (
+              <SurveySettingsForm />
             ) : (
               <></>
             )}
           </F0AiProcessingOverlay>
         ) : (
-          <>
-            {activeTabId === "tasks" && (
-              <OneDataCollection
-                source={sourceEmpty}
-                visualizations={[tableVisualization]}
-                fullHeight
-              />
-            )}
-            {activeTabId === "surveys" && (
-              <OneDataCollection
-                source={sourceTable}
-                visualizations={[tableVisualization]}
-                fullHeight
-              />
-            )}
-            {activeTabId === "employees" && (
-              <OneDataCollection
-                source={sourceEmployees}
-                visualizations={[employeeTableVisualization]}
-                fullHeight
-              />
-            )}
-            {activeTabId === "absences" && (
-              <OneDataCollection
-                source={sourceCards}
-                visualizations={[cardVisualization]}
-                fullHeight
-              />
-            )}
-          </>
+          <OneDataCollection
+            source={sourceTable}
+            visualizations={[tableVisualization]}
+            fullHeight
+          />
         )}
       </StandardLayout>
 
@@ -584,21 +537,8 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
       "What do you want to create?",
       "Describe it and I'll draft it with you",
     ],
-    welcomeScreenSuggestions: [
-      {
-        icon: Sparkles,
-        label: "Start from a goal",
-        items: [
-          { title: "Onboarding plan for a new engineer" },
-          { title: "Quarterly performance review cycle" },
-        ],
-      },
-      {
-        icon: Files,
-        label: "Start from a template",
-        items: [{ title: "Use the standard onboarding template" }],
-      },
-    ],
+    // Two cards rendered below the text area on the welcome screen.
+    footer: <WelcomeFooterCards />,
     resizable: true,
     // Start closed in sidepanel mode so the chat plays its entrance animation
     // when opened from the collection view.
