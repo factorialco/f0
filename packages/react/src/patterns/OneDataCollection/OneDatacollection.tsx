@@ -1146,7 +1146,7 @@ const OneDataCollectionComp = <
             settings,
           }
       const newPreset = {
-        // Title-derived id (doubles as the readable `dc_preset` URL value).
+        // Title-derived id (doubles as the readable `dc_view` URL value).
         id: derivePresetId(
           values.title,
           mergedPresets.map((preset) => preset.id ?? preset.label)
@@ -1178,7 +1178,7 @@ const OneDataCollectionComp = <
       const targetId =
         presetDialog?.mode === "update" ? presetDialog.presetId : undefined
       if (!targetId) return
-      // The id is title-derived and doubles as the readable `dc_preset` URL
+      // The id is title-derived and doubles as the readable `dc_view` URL
       // value, so a rename must regenerate it (deduped against the other views)
       // and re-point the selection — otherwise the URL keeps the old name.
       const newId = derivePresetId(

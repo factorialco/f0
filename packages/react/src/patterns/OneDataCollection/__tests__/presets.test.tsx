@@ -117,7 +117,7 @@ function Harness({
         })
       }
       // Tests drive state directly; URL sync would otherwise leak the view mode
-      // (dc_view) into window.location across tests.
+      // (dc_visualization) into window.location across tests.
       disableUrlParams={!urlSync}
     />
   )
@@ -237,7 +237,7 @@ describe("OneDataCollection - presets", () => {
       )
       expect(call).toBeTruthy()
       expect(call![1].customPresets![0].label).toBe("My view")
-      // The id is derived from the title (doubles as the readable dc_preset).
+      // The id is derived from the title (doubles as the readable dc_view).
       expect(call![1].customPresets![0].id).toBe("My view")
     })
   })
@@ -649,19 +649,19 @@ describe("OneDataCollection - presets", () => {
     expect(screen.queryByText("My view")).not.toBeInTheDocument()
   })
 
-  it("reflects a renamed view in the URL (dc_preset updates to the new title)", async () => {
+  it("reflects a renamed view in the URL (dc_view updates to the new title)", async () => {
     const user = userEvent.setup()
     renderHarness({ urlSync: true })
 
     await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
 
-    // Create a custom view (auto-selected) → dc_preset is its title-derived id.
+    // Create a custom view (auto-selected) → dc_view is its title-derived id.
     await sortByName(user)
     await user.click(await screen.findByRole("button", { name: "Save view" }))
     await user.type(await screen.findByLabelText("Title"), "My view")
     await user.click(screen.getByRole("button", { name: "Save" }))
     await waitFor(() =>
-      expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+      expect(new URLSearchParams(window.location.search).get("dc_view")).toBe(
         "My view"
       )
     )
@@ -685,7 +685,7 @@ describe("OneDataCollection - presets", () => {
 
     // The URL now reflects the new title (spaces render as '+').
     await waitFor(() =>
-      expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+      expect(new URLSearchParams(window.location.search).get("dc_view")).toBe(
         "Renamed view"
       )
     )
@@ -730,7 +730,7 @@ describe("OneDataCollection - presets", () => {
     )
   })
 
-  it("writes the selected preset to the URL (dc_preset) and removes it on deselect", async () => {
+  it("writes the selected preset to the URL (dc_view) and removes it on deselect", async () => {
     const user = userEvent.setup()
     const devPresets: PresetsDefinition<typeof filters> = [
       { id: "dev-eng", label: "Eng team", filter: { department: ["eng"] } },
@@ -746,7 +746,7 @@ describe("OneDataCollection - presets", () => {
 
     await user.click(presetChip())
     await waitFor(() =>
-      expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+      expect(new URLSearchParams(window.location.search).get("dc_view")).toBe(
         "dev-eng"
       )
     )
@@ -754,7 +754,7 @@ describe("OneDataCollection - presets", () => {
     // Toggle off → the param is removed.
     await user.click(presetChip())
     await waitFor(() =>
-      expect(new URLSearchParams(window.location.search).has("dc_preset")).toBe(
+      expect(new URLSearchParams(window.location.search).has("dc_view")).toBe(
         false
       )
     )
@@ -774,16 +774,16 @@ describe("OneDataCollection - presets", () => {
 
     // Spaces in the title render as '+' in the URL (standard query encoding)...
     await waitFor(() =>
-      expect(window.location.search).toContain("dc_preset=My+cool+view")
+      expect(window.location.search).toContain("dc_view=My+cool+view")
     )
     // ...and decode back to the stored, space-separated id.
-    expect(new URLSearchParams(window.location.search).get("dc_preset")).toBe(
+    expect(new URLSearchParams(window.location.search).get("dc_view")).toBe(
       "My cool view"
     )
   })
 
-  it("restores the selected preset from the URL (dc_preset) on load", async () => {
-    window.history.replaceState({}, "", "/?dc_preset=dev-eng")
+  it("restores the selected preset from the URL (dc_view) on load", async () => {
+    window.history.replaceState({}, "", "/?dc_view=dev-eng")
     const devPresets: PresetsDefinition<typeof filters> = [
       { id: "dev-eng", label: "Eng team", filter: { department: ["eng"] } },
     ]

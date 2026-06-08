@@ -115,7 +115,7 @@ describe("useDataCollectionUrlSync — collection → URL", () => {
 
 describe("useDataCollectionUrlSync — visualization", () => {
   it("maps a view key from the URL back to its index", () => {
-    window.history.replaceState(null, "", `/?dc_view=list`)
+    window.history.replaceState(null, "", `/?dc_visualization=list`)
 
     const { setVisualization } = setup({
       visualizationKeys: ["table", "card", "list"],
@@ -124,7 +124,7 @@ describe("useDataCollectionUrlSync — visualization", () => {
   })
 
   it("ignores an unknown view key", () => {
-    window.history.replaceState(null, "", `/?dc_view=gallery`)
+    window.history.replaceState(null, "", `/?dc_visualization=gallery`)
 
     const { setVisualization } = setup({
       visualizationKeys: ["table", "card", "list"],
@@ -133,7 +133,7 @@ describe("useDataCollectionUrlSync — visualization", () => {
   })
 
   it("does not sync visualization when there is only one", () => {
-    window.history.replaceState(null, "", `/?dc_view=card`)
+    window.history.replaceState(null, "", `/?dc_visualization=card`)
 
     const { setVisualization, rerender } = setup({
       visualizationKeys: ["table"],
@@ -141,7 +141,7 @@ describe("useDataCollectionUrlSync — visualization", () => {
     expect(setVisualization).not.toHaveBeenCalled()
 
     rerender({ visualization: 0 })
-    expect(currentParams().has("dc_view")).toBe(false)
+    expect(currentParams().has("dc_visualization")).toBe(false)
   })
 
   it("reflects a visualization change into the URL by type (omitting the first)", () => {
@@ -150,10 +150,10 @@ describe("useDataCollectionUrlSync — visualization", () => {
     const { rerender } = setup({ visualizationKeys: ["table", "card", "list"] })
 
     rerender({ visualization: 2 })
-    expect(currentParams().get("dc_view")).toBe("list")
+    expect(currentParams().get("dc_visualization")).toBe("list")
 
     rerender({ visualization: 0 })
-    expect(currentParams().has("dc_view")).toBe(false)
+    expect(currentParams().has("dc_visualization")).toBe(false)
   })
 })
 

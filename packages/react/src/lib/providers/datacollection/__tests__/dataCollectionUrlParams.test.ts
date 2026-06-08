@@ -111,9 +111,9 @@ describe("parseDataCollectionUrlParams", () => {
   })
 
   it("parses the visualization as a type/key string", () => {
-    expect(parseDataCollectionUrlParams(`dc_view=kanban`).visualization).toBe(
-      "kanban"
-    )
+    expect(
+      parseDataCollectionUrlParams(`dc_visualization=kanban`).visualization
+    ).toBe("kanban")
     expect(parseDataCollectionUrlParams(``)).not.toHaveProperty("visualization")
   })
 
@@ -125,10 +125,10 @@ describe("parseDataCollectionUrlParams", () => {
   })
 
   it("parses the selected preset id", () => {
-    expect(parseDataCollectionUrlParams(`dc_preset=eng`).preset).toBe("eng")
+    expect(parseDataCollectionUrlParams(`dc_view=eng`).preset).toBe("eng")
     expect(parseDataCollectionUrlParams(``)).not.toHaveProperty("preset")
     // empty value is ignored
-    expect(parseDataCollectionUrlParams(`dc_preset=`)).not.toHaveProperty(
+    expect(parseDataCollectionUrlParams(`dc_view=`)).not.toHaveProperty(
       "preset"
     )
   })
@@ -240,7 +240,9 @@ describe("buildDataCollectionUrlParams", () => {
 
   it("encodes the visualization as its type/key", () => {
     expect(
-      buildDataCollectionUrlParams({ visualization: "kanban" }).get("dc_view")
+      buildDataCollectionUrlParams({ visualization: "kanban" }).get(
+        "dc_visualization"
+      )
     ).toBe("kanban")
     expect([...buildDataCollectionUrlParams({}).keys()]).toEqual([])
   })
@@ -251,9 +253,9 @@ describe("buildDataCollectionUrlParams", () => {
   })
 
   it("encodes and round-trips the selected preset id", () => {
-    expect(
-      buildDataCollectionUrlParams({ preset: "eng" }).get("dc_preset")
-    ).toBe("eng")
+    expect(buildDataCollectionUrlParams({ preset: "eng" }).get("dc_view")).toBe(
+      "eng"
+    )
     expect([...buildDataCollectionUrlParams({}).keys()]).toEqual([])
     const state = { preset: "eng" }
     expect(

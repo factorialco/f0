@@ -73,7 +73,7 @@ type Story = StoryObj<typeof meta>
  * - Select a view → the whole captured snapshot is applied.
  * - Change anything on top of a selected view → it auto-de-selects (it no longer
  *   matches) and a "Save view" chip appears to fork it into a new view.
- * - The selected view is reflected in the URL via `dc_preset`.
+ * - The selected view is reflected in the URL via `dc_view`.
  * - Reload the page → custom views rehydrate from localStorage (key
  *   `datacollection-presets/custom/v1`).
  */

@@ -1,9 +1,9 @@
 /**
  * Derives a stable, human-readable id for a custom preset from its title.
  *
- * The id doubles as the `dc_preset` URL value, so we keep it as the plain title
+ * The id doubles as the `dc_view` URL value, so we keep it as the plain title
  * (whitespace trimmed and collapsed to single spaces). Spaces render as `+` in
- * the URL via standard query encoding (e.g. `My View` → `dc_preset=My+View`)
+ * the URL via standard query encoding (e.g. `My View` → `dc_view=My+View`)
  * and round-trip back to spaces on read — so the cached id and the URL stay in
  * sync without any literal `+` (which would percent-encode to `%2B`).
  *

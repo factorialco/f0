@@ -31,7 +31,7 @@ type UseDataCollectionUrlSyncOptions = {
   visualization: number
   /**
    * Ordered visualization type/keys (e.g. `["table", "kanban"]`), used to map
-   * the index to/from the readable `dc_view` value. URL `dc_view` is only synced
+   * the index to/from the readable `dc_visualization` value, only synced
    * when there is more than one visualization. Duplicate types resolve to the
    * first matching index on read.
    */
