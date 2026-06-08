@@ -27,7 +27,7 @@ export const F0AvatarIcon = ({
   return (
     <div
       className={cn(
-        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background dark:bg-f1-background-inverse-secondary",
+        "flex aspect-square items-center justify-center border border-solid border-f1-border-secondary bg-f1-background",
         sizes[size]
       )}
       aria-label={ariaLabel}
