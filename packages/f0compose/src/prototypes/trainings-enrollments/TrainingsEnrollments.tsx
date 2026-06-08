@@ -1,4 +1,5 @@
 import {
+  CardSelectableContainer,
   Chip,
   F0Alert,
   F0AvatarList,
@@ -1967,10 +1968,6 @@ const AUDIENCE_PREVIEW_AVATARS = [
 function CourseTypeField({ values, onUpdate }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void }) {
   const courseType = (values.courseType as string) ?? "no-editions"
   const copy = inscripcionCopy.courseType
-  const options = [
-    { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
-    { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
-  ]
   return (
     <div className="flex flex-col gap-2">
       {/* Exact F0 input-field label style (matches the DS <label> markup) so
@@ -1978,33 +1975,20 @@ function CourseTypeField({ values, onUpdate }: { values: Record<string, unknown>
       <span className="text-base font-medium leading-normal text-f1-foreground-secondary">
         {copy.label}
       </span>
-      {/* Compact radio group — two distinct course types (not an on/off toggle), so
-          radios, per the F0ButtonToggle guidance. Both descriptions stay visible so
-          the TM can compare the types without interacting. Subordinate to Course
-          name: no big bordered cards, just radio + title + description rows. */}
-      <div className="flex flex-col gap-2.5">
-        {options.map((option) => {
-          const selected = courseType === option.value
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onUpdate("courseType", option.value)}
-              className="flex items-start gap-2.5 text-left"
-            >
-              <span
-                className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-solid ${selected ? "border-f1-border-selected" : "border-f1-border-secondary"}`}
-              >
-                {selected && <span className="h-2 w-2 rounded-full bg-f1-background-selected-bold" />}
-              </span>
-              <div className="flex flex-col gap-0.5">
-                <F0Text variant="body" as="span" content={option.title} />
-                <F0Text variant="description" as="span" content={option.description} />
-              </div>
-            </button>
-          )
-        })}
-      </div>
+      {/* Native F0 CardSelectableContainer in grouped mode: one bordered container
+          with the two types as rows (radio + title + description) and a divider
+          between — the Factorial pattern for picking one config, compact (not the
+          big floating cards) with both descriptions visible. */}
+      <CardSelectableContainer
+        grouped
+        label={copy.label}
+        value={courseType}
+        onChange={(val) => onUpdate("courseType", val ?? "no-editions")}
+        items={[
+          { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
+          { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
+        ]}
+      />
     </div>
   )
 }
