@@ -22,7 +22,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
 } satisfies Meta<typeof F0Button>
 
 export default meta
