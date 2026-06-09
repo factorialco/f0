@@ -312,12 +312,16 @@ export const Toolbar = ({
     />
   )
 
+  // Inside a table cell only simple inline formatting makes sense — hide the
+  // block-level controls (headings, lists, alignment, code, quote, divider…).
+  const isInTableCell = editor.isActive("table")
+
   const groups = compact([
     linkGroup,
     showEmojiPicker && !disableButtons && emojiGroup,
     formattingGroup,
-    textSizeGroup,
-    moreOptionsGroup,
+    !isInTableCell && textSizeGroup,
+    !isInTableCell && moreOptionsGroup,
   ])
 
   return (
