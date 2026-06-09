@@ -172,23 +172,3 @@ drawer.open({
 // later, from anywhere:
 drawer.close("my-drawer")
 ```
-
-## Type Reference
-
-```tsx
-type DrawerDefinition = {
-  /** Auto-generated if not provided. */
-  id?: DialogId
-  title: string
-  description?: string
-  content: ReactNode
-  actions: DialogActions
-  /** @default "right" */
-  position?: "left" | "right"
-  /** @default "md" */
-  size?: "md"
-  /** Keep the drawer open after an action is clicked. */
-  keepOpen?: boolean
-  modal?: boolean
-}
-```
