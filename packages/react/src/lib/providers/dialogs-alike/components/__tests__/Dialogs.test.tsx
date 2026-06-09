@@ -1080,4 +1080,78 @@ describe("DialogsAlike", () => {
       })
     })
   })
+
+  describe("exit animation", () => {
+    it("keeps a removed dialog mounted (closed) until its exit animation finishes", () => {
+      vi.useFakeTimers()
+      try {
+        const dialogs: DialogDefinitionInternal[] = [
+          {
+            id: "dialog-1",
+            title: "Test Dialog",
+            content: <div>Content</div>,
+            actions: { primary: { label: "OK", value: true } },
+            onCloseDialog: vi.fn(),
+            onClickAction: vi.fn(),
+          },
+        ]
+
+        const { rerender } = zeroRender(<DialogsAlike items={dialogs} />)
+        expect(screen.getByTestId("f0-dialog-internal")).toHaveAttribute(
+          "data-is-open",
+          "true"
+        )
+
+        // Remove it from the store: it should stay mounted but closed so the
+        // exit animation can play.
+        rerender(<DialogsAlike items={[]} />)
+        expect(screen.getByTestId("f0-dialog-internal")).toHaveAttribute(
+          "data-is-open",
+          "false"
+        )
+
+        // After the exit-animation window it is actually unmounted.
+        act(() => {
+          vi.advanceTimersByTime(250)
+        })
+        expect(
+          screen.queryByTestId("f0-dialog-internal")
+        ).not.toBeInTheDocument()
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+
+    it("cancels removal if the same dialog is re-opened during its exit", () => {
+      vi.useFakeTimers()
+      try {
+        const dialogs: DialogDefinitionInternal[] = [
+          {
+            id: "dialog-1",
+            title: "Test Dialog",
+            content: <div>Content</div>,
+            actions: { primary: { label: "OK", value: true } },
+            onCloseDialog: vi.fn(),
+            onClickAction: vi.fn(),
+          },
+        ]
+
+        const { rerender } = zeroRender(<DialogsAlike items={dialogs} />)
+        rerender(<DialogsAlike items={[]} />) // start closing
+        rerender(<DialogsAlike items={dialogs} />) // re-open before timer
+
+        act(() => {
+          vi.advanceTimersByTime(250)
+        })
+
+        // Still open — the pending removal was cancelled.
+        expect(screen.getByTestId("f0-dialog-internal")).toHaveAttribute(
+          "data-is-open",
+          "true"
+        )
+      } finally {
+        vi.useRealTimers()
+      }
+    })
+  })
 })

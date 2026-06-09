@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid"
-import { Fragment, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0DialogAction } from "@/components/dialog-alike/F0Dialog"
 import { DialogInternal } from "@/components/dialog-alike/F0Dialog/internal/DialogInternal"
@@ -14,6 +14,11 @@ type DialogsAlikeProps = {
   items: DialogDefinitionProviderItem[]
 }
 
+// How long a removed dialog/drawer is kept mounted (with isOpen=false) so its
+// close animation can play before it is actually unmounted. Slightly longer
+// than the CSS exit animation so it always finishes.
+const EXIT_ANIMATION_MS = 200
+
 const materializeActionValue = async (
   action: DialogAction
 ): Promise<DialogActionValuePrimitive> => {
@@ -25,6 +30,72 @@ const materializeActionValue = async (
 export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
   // Contabilize the actions are blocking the dialog by dialog id
   const [blocks, setBlocks] = useState<Record<DialogId, number>>({})
+
+  // `items` (from the store) is the source of truth for what should be OPEN.
+  // We keep just-removed items in `renderedItems` (rendered with isOpen=false)
+  // so their close animation can play before they unmount. Without this the
+  // item is removed from the tree instantly and the exit animation is skipped.
+  const [renderedItems, setRenderedItems] = useState(items)
+  const previousItemsRef = useRef(items)
+  const exitTimers = useRef(new Map<DialogId, ReturnType<typeof setTimeout>>())
+
+  useEffect(() => {
+    const liveIds = new Set(items.map((item) => item.id))
+    const previousItems = previousItemsRef.current
+    previousItemsRef.current = items
+
+    // An item is live again (e.g. re-opened): cancel any pending exit cleanup.
+    for (const id of liveIds) {
+      const timer = exitTimers.current.get(id)
+      if (timer) {
+        clearTimeout(timer)
+        exitTimers.current.delete(id)
+      }
+    }
+
+    // An item just left the store: schedule its removal once its exit
+    // animation has had time to play.
+    for (const previousItem of previousItems) {
+      if (liveIds.has(previousItem.id)) continue
+      if (exitTimers.current.has(previousItem.id)) continue
+      const timer = setTimeout(() => {
+        exitTimers.current.delete(previousItem.id)
+        setRenderedItems((current) =>
+          current.filter((item) => item.id !== previousItem.id)
+        )
+      }, EXIT_ANIMATION_MS)
+      exitTimers.current.set(previousItem.id, timer)
+    }
+
+    setRenderedItems((previous) => {
+      // Live items first (fresh content/actions, correct order)...
+      const next = [...items]
+      // ...then retain previously-rendered items that are no longer live so
+      // they can animate out.
+      for (const previousItem of previous) {
+        if (liveIds.has(previousItem.id)) continue
+        if (next.some((item) => item.id === previousItem.id)) continue
+        next.push(previousItem)
+      }
+      // Avoid a needless re-render (which would regenerate action ids) when the
+      // rendered list is unchanged.
+      const unchanged =
+        next.length === previous.length &&
+        next.every((item, index) => item === previous[index])
+      return unchanged ? previous : next
+    })
+  }, [items])
+
+  useEffect(() => {
+    const timers = exitTimers.current
+    return () => {
+      for (const timer of timers.values()) clearTimeout(timer)
+      timers.clear()
+    }
+  }, [])
+
+  // Whether a rendered item should currently be open (still in the store).
+  const openIds = useMemo(() => new Set(items.map((item) => item.id)), [items])
 
   const isBlocked = (dialogId: DialogId) => {
     return blocks[dialogId] > 0
@@ -68,7 +139,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
       }
     }
 
-    return items.map((item) => ({
+    return renderedItems.map((item) => ({
       ...item,
       actions: {
         primary: toArray(item.actions.primary).map((action) =>
@@ -79,7 +150,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
         ),
       },
     }))
-  }, [items])
+  }, [renderedItems])
 
   const f0ItemsWithBlocks = useMemo(() => {
     /**
@@ -118,7 +189,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
               description={item.description ?? ""}
               key={item.id}
               type={item.type}
-              isOpen
+              isOpen={openIds.has(item.id)}
               onClose={item.onCloseDialog}
               primaryAction={item.actions.primary[0]}
               secondaryAction={item.actions.secondary}
@@ -127,7 +198,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
             <DrawerInternal
               disableClose={isBlocked(item.id)}
               key={item.id}
-              isOpen
+              isOpen={openIds.has(item.id)}
               size={item.size}
               onClose={item.onCloseDialog}
               title={item.title}
@@ -144,7 +215,7 @@ export const DialogsAlike = ({ items }: DialogsAlikeProps) => {
             <DialogInternal
               disableClose={isBlocked(item.id)}
               key={item.id}
-              isOpen
+              isOpen={openIds.has(item.id)}
               size={item.size}
               onClose={item.onCloseDialog}
               title={item.title}
