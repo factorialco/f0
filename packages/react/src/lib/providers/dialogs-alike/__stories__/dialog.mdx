@@ -98,9 +98,21 @@ The API handles all the state management, dialog rendering, and cleanup automati
 
 ## Notification Dialogs
 
-The `notification` method displays a notification dialog which should be used to display messages to the user or ask for a confirmation.
-Notification dialogs have different severity levels: `info`, `warning`, `critical` and `positive`.
-By default, the severity level is `info`.
+Notification dialogs are centered, modal-style dialogs used to **inform the user** or **ask for a decision**. There are three ways to open one — they all render the same notification UI (an icon, title and message styled by a severity `type`), but they differ in the buttons they build for you:
+
+| Method | Buttons it builds | Resolves with | Reach for it when… |
+| --- | --- | --- | --- |
+| `dialog.alert` | One confirm button (default **Ok**) | the confirm `value` (default `true`) | You only need to **inform** the user and have them acknowledge — there's no choice to make. |
+| `dialog.confirm` | Confirm **+** cancel (default **Ok** / **Cancel**) | `true` when confirmed, `false` when cancelled or dismissed | You need a **yes/no decision** before continuing — e.g. confirming a destructive action. |
+| `dialog.notification` | Whatever you pass in `actions` | the clicked action's `value` | You need **custom actions** — custom labels/values, more than two buttons, a dropdown — beyond the `alert`/`confirm` presets. |
+
+`alert` and `confirm` are thin convenience wrappers over `notification`: they pre-build the `actions` for you. Use them for the common cases, and drop down to `notification` only when you need full control over the buttons.
+
+All three accept a severity `type` — `info` (default), `warning`, `critical` or `positive` — which sets the icon and color, plus a `title` and a `msg` body.
+
+### Notification (custom actions)
+
+The `notification` method is the general form: you provide the `actions` yourself, so it can render any combination of buttons. Use it when neither `alert` nor `confirm` fits.
 
 ```tsx
 import { dialog, F0Button } from "@factorialco/f0-react"
@@ -114,7 +126,7 @@ function MyComponent() {
       actions: {
         primary: {
           value: true,
-          label: "Actept",
+          label: "Accept",
         },
       },
     })
@@ -183,7 +195,7 @@ The `openDialog` method provides full control over the dialog content and action
 
 ```tsx
 import { dialog, F0Button } from "@factorialco/f0-react"
-import { Delete, Pencil } from "lucide-react"
+import { Delete, Pencil } from "@factorialco/f0-react/icons/app"
 
 function MyComponent() {
   const showCustomDialog = async () => {
