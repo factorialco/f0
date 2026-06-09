@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.54.0](https://github.com/factorialco/f0/compare/f0-react-v2.53.0...f0-react-v2.54.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 5/6:** imperative provider + useDialog/useDrawer (additive) ([#4367](https://github.com/factorialco/f0/issues/4367)) ([5059cbe](https://github.com/factorialco/f0/commit/5059cbebc9e683983b80c217d4b18e4fd5379cf4))
+
 ## [2.53.0](https://github.com/factorialco/f0/compare/f0-react-v2.52.0...f0-react-v2.53.0) (2026-06-09)
 
 
