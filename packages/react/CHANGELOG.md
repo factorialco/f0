@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.51.0](https://github.com/factorialco/f0/compare/f0-react-v2.50.0...f0-react-v2.51.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 4/6:** new F0Drawer component (additive) ([#4366](https://github.com/factorialco/f0/issues/4366)) ([1a3cd91](https://github.com/factorialco/f0/commit/1a3cd9189bfcee531eb35cb8bee89243471cbc38))
+
 ## [2.50.0](https://github.com/factorialco/f0/compare/f0-react-v2.49.0...f0-react-v2.50.0) (2026-06-09)
 
 
