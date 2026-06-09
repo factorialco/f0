@@ -64,7 +64,12 @@ export const DialogContent = forwardRef<
       if (propContainer !== undefined) {
         setContainer(propContainer)
       } else {
-        setContainer(document.getElementById("content"))
+        // Prefer the app's content area (e.g. ApplicationFrame's `#content`),
+        // but fall back to document.body so the dialog/drawer still renders in
+        // contexts without that element (Storybook docs, tests, apps that don't
+        // use ApplicationFrame). Without this, the Radix portal target is null
+        // and nothing renders.
+        setContainer(document.getElementById("content") ?? document.body)
       }
     }, [propContainer])
 
