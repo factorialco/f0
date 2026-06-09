@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { toArray } from "@/lib/toArray"
@@ -18,6 +20,13 @@ export type FooterProps = DialogAlikeActionsProps & {
 export const Footer = (props: FooterProps) => {
   const primaryActions = toArray(props.primaryAction)
   const secondaryActions = toArray(props.secondaryAction)
+
+  // When the primary actions render as a dropdown, F0ButtonDropdown does not
+  // auto-manage a loading state for async item clicks the way ButtonInternal
+  // does for a single button. Track it here so a promise-returning action
+  // shows a spinner on the trigger (and can't be re-triggered while pending).
+  const [isPrimaryDropdownLoading, setIsPrimaryDropdownLoading] =
+    useState(false)
 
   const hasSecondaryAction = secondaryActions.length > 0
   const hasPrimaryAction = primaryActions.length > 0
@@ -40,6 +49,7 @@ export const Footer = (props: FooterProps) => {
     if (primaryActions.length > 1) {
       return (
         <F0ButtonDropdown
+          loading={isPrimaryDropdownLoading}
           items={primaryActions.map((action) => ({
             value: action.value ?? action.label,
             label: action.label,
@@ -48,9 +58,17 @@ export const Footer = (props: FooterProps) => {
             loading: action.loading,
           }))}
           onClick={async (value) => {
+            // Guard against re-triggering while an action is still pending.
+            if (isPrimaryDropdownLoading) return
             const action = primaryActions.find((a) => a.value === value)
-            await (action ? toPromise(action?.onClick) : Promise.resolve())
-            if (action?.closeOnClick) {
+            if (!action) return
+            setIsPrimaryDropdownLoading(true)
+            try {
+              await toPromise(action.onClick)
+            } finally {
+              setIsPrimaryDropdownLoading(false)
+            }
+            if (action.closeOnClick) {
               props.onClose()
             }
           }}
