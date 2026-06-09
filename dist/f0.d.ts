@@ -54,12 +54,15 @@ import { F0AvatarPersonProps as F0AvatarPersonProps_2 } from './types';
 import { F0AvatarTeamProps as F0AvatarTeamProps_2 } from './F0AvatarTeam';
 import { F0DataChartProps as F0DataChartProps_2 } from './types';
 import { F0DialogInternalProps } from './internal-types';
+import { F0DrawerProps } from './F0Drawer';
 import { F0DurationInputProps as F0DurationInputProps_2 } from './types';
 import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
 import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
 import { F0SelectProps as F0SelectProps_2 } from './types';
+import { F0SliderProps as F0SliderProps_2 } from './types';
+import { F0SliderSkeletonProps } from './F0SliderSkeleton';
 import { F0TagBalanceProps } from './types';
 import { F0TagCompanyProps } from './types';
 import { F0TagListProps } from './types';
@@ -154,6 +157,7 @@ import { TextCellValue as TextCellValue_2 } from './types/text';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from './f0';
 import { VariantProps } from 'cva';
+import { WithDataTestIdProps as WithDataTestIdProps_2 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './f0';
@@ -5028,6 +5032,25 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "file";
 });
 
+declare type DialogAlikeAction = {
+    value?: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void | Promise<void>;
+    disabled?: boolean;
+    loading?: boolean;
+    closeOnClick?: boolean;
+};
+
+declare type DialogAlikeActionsProps = {
+    primaryAction?: DialogAlikeAction | DialogAlikeAction[];
+    secondaryAction?: DialogAlikeAction | DialogAlikeAction[];
+};
+
+declare type DialogAlikePosition = (typeof dialogAlikePositions)[number];
+
+declare const dialogAlikePositions: readonly ["center", "left", "right", "fullscreen"];
+
 export declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
@@ -5035,6 +5058,31 @@ declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"
 export declare type DialogWidth = (typeof dialogWidths)[number];
 
 declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
+
+declare type DialogWrapperContextType = {
+    open: boolean;
+    onClose: () => void;
+    shownBottomSheet: boolean;
+    position: DialogAlikePosition;
+    /**
+     * The dialog's content container element.
+     * Use this as the `portalContainer` prop for components like F0Select
+     * to ensure dropdowns render inside the dialog.
+     */
+    portalContainer: HTMLDivElement | null;
+};
+
+/**
+ * The props for the F0DialogProvider component.
+ */
+declare type DialogWrapperProviderProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    shownBottomSheet?: boolean;
+    position: DialogAlikePosition;
+    children: ReactNode;
+    portalContainer: HTMLDivElement | null;
+};
 
 /** Display modes */
 export declare type DisplayToken = "block" | "flex" | "inline" | "inline-flex" | "grid" | "none";
@@ -5085,6 +5133,8 @@ export declare type DragPayload<T = unknown> = {
     id: string;
     data?: T;
 };
+
+declare const drawerPositions: readonly ["left", "right"];
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -7811,6 +7861,10 @@ export declare type F0DialogActionsProps = {
     secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[];
 };
 
+export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
+
+export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -7858,6 +7912,20 @@ export declare type F0DialogSecondaryAction = {
 };
 
 export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0Drawer: {
+    (props: F0DrawerProps): JSX_2.Element;
+    displayName: string;
+};
+
+export declare type F0DrawerAction = DialogAlikeAction;
+
+export declare type F0DrawerActionsProps = DialogAlikeActionsProps;
+
+export declare type F0DrawerPosition = (typeof drawerPositions)[number];
 
 export declare type F0DropdownButtonProps<T = string> = {
     size?: ButtonDropdownSize;
@@ -9777,6 +9845,57 @@ export declare type F0SelectTagProp = string | {
     text: string;
     variant: StatusVariant;
 };
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0Slider: ForwardRefExoticComponent<Omit<F0SliderProps_2 & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<F0SliderProps_2 & RefAttributes<HTMLDivElement>>, never> & {
+    Skeleton: ({ hideLabel }: F0SliderSkeletonProps) => JSX_2.Element;
+};
+
+export declare interface F0SliderProps extends WithDataTestIdProps, DataAttributes_2 {
+    label: string;
+    ariaLabel?: string;
+    hideLabel?: boolean;
+    hint?: string;
+    status?: InputFieldStatus;
+    required?: boolean;
+    disabled?: boolean;
+    name?: string;
+    value?: number;
+    defaultValue?: number;
+    onChange?: (value: number) => void;
+    /**
+     * Fires once when the user commits a value: on pointer release after a drag,
+     * and on each discrete keyboard step. Use this — not `onChange` — to trigger
+     * expensive side effects such as mutations, so dragging does not fire one
+     * call per intermediate value.
+     */
+    onValueCommit?: (value: number) => void;
+    min: number;
+    max: number;
+    step?: number;
+    minLabel?: string;
+    maxLabel?: string;
+    /**
+     * Format the value for the floating tooltip. Receives the raw numeric value
+     * and must return the full localised string. The whole string is built by
+     * the consumer (instead of e.g. a `unit` prop concatenated by the component)
+     * so locales can reorder the phrase around the number — for example RTL
+     * languages or locales where the unit precedes the value.
+     */
+    formatValue?: (value: number) => string;
+    /**
+     * When to show the floating value tooltip above the thumb.
+     * - `"always"`: visible at all times.
+     * - `"onHover"`: visible while the slider is hovered, focused or being
+     *   dragged. Default.
+     * - `"never"`: never rendered.
+     */
+    showTooltip?: F0SliderTooltipMode;
+}
+
+export declare type F0SliderTooltipMode = (typeof sliderTooltipModes)[number];
 
 /**
  * Config for string fields rendered as grouped radio cards
@@ -13870,6 +13989,8 @@ declare type SimpleResult<T> = T[];
 /** Size tokens for width/height/min/max dimensions */
 export declare type SizeToken = "auto" | "full" | "screen" | "min" | "max" | "fit" | NumericSizeToken | FractionToken;
 
+export declare const sliderTooltipModes: readonly ["always", "onHover", "never"];
+
 /**
  * Type helper to extract keys from a SortingsDefinition
  */
@@ -15161,6 +15282,8 @@ export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | nu
 
 export declare const useF0Dialog: () => F0DialogContextType;
 
+export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
+
 /**
  * Hook to control F0Form programmatically.
  *
@@ -15830,13 +15953,8 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
@@ -15845,6 +15963,16 @@ declare module "@tiptap/core" {
         enhanceHighlight: {
             setEnhanceHighlight: (from: number, to: number) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -15876,11 +16004,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 
