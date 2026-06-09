@@ -107,6 +107,15 @@ interface MetadataItem {
   }
 }
 
+export type MetadataRowGap = "none" | "xs" | "sm" | "md"
+
+const metadataRowGapClass: Record<MetadataRowGap, string> = {
+  none: "gap-y-0",
+  xs: "gap-y-1",
+  sm: "gap-y-2",
+  md: "gap-y-3",
+}
+
 export interface MetadataProps {
   /**
    * Everything is not a MetadataItem is ignored.
@@ -118,6 +127,8 @@ export interface MetadataProps {
    * If true and the metadata type is a list, it will be collapsed to the first item
    */
   collapse?: boolean
+
+  rowGap?: MetadataRowGap
 }
 
 function MetadataItem({ item }: { item: MetadataItem }) {
@@ -287,10 +298,18 @@ function MetadataItem({ item }: { item: MetadataItem }) {
   )
 }
 
-const _Metadata = memo(function Metadata({ items }: MetadataProps) {
+const _Metadata = memo(function Metadata({
+  items,
+  rowGap = "none",
+}: MetadataProps) {
   const cleanedItems = items.filter((item) => typeof item === "object")
   return (
-    <div className="flex flex-col items-start gap-x-3 gap-y-0 md:flex-row md:flex-wrap md:items-center">
+    <div
+      className={cn(
+        "flex flex-col items-start gap-x-3 md:flex-row md:flex-wrap md:items-center",
+        metadataRowGapClass[rowGap]
+      )}
+    >
       {cleanedItems.map((item, index) => (
         <Fragment key={`metadata-item-${index}`}>
           <MetadataItem item={item} />
