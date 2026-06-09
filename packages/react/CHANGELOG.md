@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.53.0](https://github.com/factorialco/f0/compare/f0-react-v2.52.0...f0-react-v2.53.0) (2026-06-09)
+
+
+### Features
+
+* **ai-chat:** center fullscreen welcome, prompts below textarea ([#4377](https://github.com/factorialco/f0/issues/4377)) ([8bbcc22](https://github.com/factorialco/f0/commit/8bbcc227e4934a22db64ed7bb69a4ccc550fdb8c))
+
 ## [2.52.0](https://github.com/factorialco/f0/compare/f0-react-v2.51.0...f0-react-v2.52.0) (2026-06-09)
 
 
