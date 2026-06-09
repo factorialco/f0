@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.52.0](https://github.com/factorialco/f0/compare/f0-react-v2.51.0...f0-react-v2.52.0) (2026-06-09)
+
+
+### Features
+
+* **F0Dialog:** resource-aware header variant + opt-in metadata row gap ([#4313](https://github.com/factorialco/f0/issues/4313)) ([a92b0f2](https://github.com/factorialco/f0/commit/a92b0f2a5cd3789c73f4c5a49de46f725ef10f3a))
+
 ## [2.51.0](https://github.com/factorialco/f0/compare/f0-react-v2.50.0...f0-react-v2.51.0) (2026-06-09)
 
 
