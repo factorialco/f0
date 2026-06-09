@@ -1,7 +1,8 @@
 import { ReactNode } from "react"
 
 import { F0Icon, type IconType, type F0IconProps } from "@/components/F0Icon"
-import { cn, focusRing } from "@/lib/utils"
+import { F0Box } from "@/lib/F0Box"
+import { cn } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
@@ -48,16 +49,16 @@ export function BaseCell({
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button
-            type="button"
+          <F0Box
+            role="img"
             aria-label={hint.message}
-            className={cn(
-              "pointer-events-auto flex shrink-0 cursor-pointer items-center rounded px-1",
-              focusRing()
-            )}
+            display="flex"
+            alignItems="center"
+            shrink={false}
+            paddingX="xs"
           >
             <F0Icon icon={hint.icon} size="md" color={hint.iconColor} />
-          </button>
+          </F0Box>
         </TooltipTrigger>
         <TooltipContent
           side="top"
