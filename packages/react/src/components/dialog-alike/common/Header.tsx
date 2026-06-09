@@ -5,17 +5,16 @@ import {
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
-import { Tabs, TabsProps } from "@/patterns/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
+import { DialogModule } from "@/lib/providers/dialogs-alike/module-types"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Tabs, TabsProps } from "@/patterns/Navigation/Tabs"
 import { BreadcrumbList } from "@/ui/breadcrumb"
 import { DialogTitle } from "@/ui/Dialog/dialog"
 import { DrawerDescription } from "@/ui/drawer"
 
 import { useDialogWrapperContext } from "./DialogWrapperProvider"
-
-import { DialogModule } from "@/lib/providers/dialogs-alike/module-types"
 
 export type HeaderProps = {
   /**
