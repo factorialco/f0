@@ -56,6 +56,7 @@ import {
   File,
   Files,
   InfoCircle,
+  InfoCircleLine,
   InProgressTask,
   Link,
   Settings,
@@ -2165,7 +2166,7 @@ function InscripcionStep({ values, onUpdate, audienceError = false }: { values: 
           pendingNote={pendingNote}
         />
       ) : (
-        <F0Alert variant="neutral" icon={InfoCircle} title="" description={inscripcionCopy.manualCallout} />
+        <F0Alert variant="neutral" icon={InfoCircleLine} title="" description={inscripcionCopy.manualCallout} />
       )}
     </div>
   )
@@ -3978,7 +3979,7 @@ function EditCourseEnrollmentSection({
               is no "How are people assigned?" section in settings. */}
         </>
       ) : (
-        <F0Alert variant="neutral" icon={InfoCircle} title="" description={inscripcionCopy.manualCallout} />
+        <F0Alert variant="neutral" icon={InfoCircleLine} title="" description={inscripcionCopy.manualCallout} />
       )}
     </div>
   )
