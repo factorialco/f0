@@ -33,7 +33,7 @@ const meta: Meta<typeof F0Drawer> = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   argTypes: {
     ...getDialogAlikeArgTypes({
       componentName: "drawer",
