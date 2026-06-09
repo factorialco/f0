@@ -1,6 +1,15 @@
 import { BubbleMenu, Editor } from "@tiptap/react"
 
-import { Delete, Plus, Split, Table } from "@/icons/app"
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Delete,
+  Group,
+  Split,
+  Table,
+} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { ToolbarDropdown } from "../Toolbar"
@@ -49,13 +58,13 @@ export const TableBubbleMenu = ({
           activator={{ label: translations.richTextEditor.table, icon: Table }}
           items={[
             {
-              icon: Plus,
+              icon: ArrowLeft,
               label: t.addColumnBefore,
               onClick: () => editor.chain().focus().addColumnBefore().run(),
               disabled: !editor.can().addColumnBefore(),
             },
             {
-              icon: Plus,
+              icon: ArrowRight,
               label: t.addColumnAfter,
               onClick: () => editor.chain().focus().addColumnAfter().run(),
               disabled: !editor.can().addColumnAfter(),
@@ -63,17 +72,19 @@ export const TableBubbleMenu = ({
             {
               icon: Delete,
               label: t.deleteColumn,
+              variant: "critical",
               onClick: () => editor.chain().focus().deleteColumn().run(),
               disabled: !editor.can().deleteColumn(),
             },
             {
-              icon: Plus,
+              icon: ArrowUp,
               label: t.addRowBefore,
+              separator: true,
               onClick: () => editor.chain().focus().addRowBefore().run(),
               disabled: !editor.can().addRowBefore(),
             },
             {
-              icon: Plus,
+              icon: ArrowDown,
               label: t.addRowAfter,
               onClick: () => editor.chain().focus().addRowAfter().run(),
               disabled: !editor.can().addRowAfter(),
@@ -81,12 +92,14 @@ export const TableBubbleMenu = ({
             {
               icon: Delete,
               label: t.deleteRow,
+              variant: "critical",
               onClick: () => editor.chain().focus().deleteRow().run(),
               disabled: !editor.can().deleteRow(),
             },
             {
-              icon: Split,
+              icon: Group,
               label: t.mergeCells,
+              separator: true,
               onClick: () => editor.chain().focus().mergeCells().run(),
               disabled: !editor.can().mergeCells(),
             },
@@ -99,6 +112,7 @@ export const TableBubbleMenu = ({
             {
               icon: Table,
               label: t.toggleHeaderRow,
+              separator: true,
               onClick: () => editor.chain().focus().toggleHeaderRow().run(),
               isActive: editor.isActive("tableHeader"),
               disabled: !editor.can().toggleHeaderRow(),
@@ -106,6 +120,8 @@ export const TableBubbleMenu = ({
             {
               icon: Delete,
               label: t.deleteTable,
+              variant: "critical",
+              separator: true,
               onClick: () => editor.chain().focus().deleteTable().run(),
               disabled: !editor.can().deleteTable(),
             },
