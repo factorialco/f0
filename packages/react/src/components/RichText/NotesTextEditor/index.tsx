@@ -26,6 +26,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { AIBlockConfig } from "../CoreEditor/Extensions/AIBlock"
 import { documentHasMissingBlockIds } from "../CoreEditor/Extensions/BlockIdExtension"
+import { FileUploadConfig } from "../CoreEditor/Extensions/FileAttachment"
 import {
   ImageUploadConfig,
   ImageUploadErrorType,
@@ -58,6 +59,7 @@ interface NotesTextEditorProps extends WithDataTestIdProps {
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
   onTitleChange?: (title: string) => void
   titlePlaceholder?: string
   primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
@@ -79,6 +81,7 @@ const NotesTextEditorComponent = forwardRef<
     readonly = false,
     aiBlockConfig,
     imageUploadConfig,
+    fileUploadConfig,
     onTitleChange,
     primaryAction,
     secondaryActions,
@@ -131,6 +134,14 @@ const NotesTextEditorComponent = forwardRef<
         ? {
             ...imageUploadConfig,
             onError: (errorType: ImageUploadErrorType) => {
+              setError(errorType)
+            },
+          }
+        : undefined,
+      fileUploadConfig: fileUploadConfig
+        ? {
+            ...fileUploadConfig,
+            onError: (errorType) => {
               setError(errorType)
             },
           }
@@ -490,6 +501,7 @@ export const NotesTextEditorSkeleton = ({
 }
 
 export type { Message, User } from "../CoreEditor/Extensions/Transcript"
+export type { FileUploadConfig } from "../CoreEditor/Extensions/FileAttachment"
 export type { ImageUploadConfig } from "./types"
 export {
   NotesTextEditorPatchTargetNotFoundError,

@@ -26,6 +26,8 @@ import {
   ImageUploadConfig,
   VideoEmbedExtension,
   createFileHandlerExtension,
+  FileAttachmentExtension,
+  FileUploadConfig,
 } from "@/components/RichText/CoreEditor"
 import { I18nContextType } from "@/lib/providers/i18n"
 
@@ -34,6 +36,7 @@ interface CreateNotesTextEditorExtensionsProps {
   translations: I18nContextType
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
 }
 
 export const createNotesTextEditorExtensions = ({
@@ -41,6 +44,7 @@ export const createNotesTextEditorExtensions = ({
   translations,
   aiBlockConfig,
   imageUploadConfig,
+  fileUploadConfig,
 }: CreateNotesTextEditorExtensionsProps) => {
   return [
     StarterKitExtension,
@@ -64,6 +68,7 @@ export const createNotesTextEditorExtensions = ({
     }),
     ImageExtension,
     VideoEmbedExtension,
+    FileAttachmentExtension,
     ...(imageUploadConfig
       ? [createFileHandlerExtension(imageUploadConfig)]
       : []),
@@ -76,6 +81,7 @@ export const createNotesTextEditorExtensions = ({
       aiBlockConfig,
       translations,
       imageUploadConfig,
+      fileUploadConfig,
     }),
   ]
 }

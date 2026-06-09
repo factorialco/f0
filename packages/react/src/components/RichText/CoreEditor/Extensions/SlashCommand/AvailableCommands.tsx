@@ -12,12 +12,18 @@ import {
   List,
   Minus,
   OlList,
+  Paperclip,
   Quote,
   Video,
 } from "@/icons/app"
 import { I18nContextType } from "@/lib/providers/i18n"
 
 import { AIBlockConfig } from "../AIBlock"
+import {
+  DEFAULT_FILE_ACCEPTED_TYPES,
+  FileUploadConfig,
+  insertFileFromFile,
+} from "../FileAttachment"
 import {
   DEFAULT_ACCEPTED_TYPES,
   ImageUploadConfig,
@@ -40,6 +46,7 @@ interface CommandGroup {
 interface AvailableCommandsProps {
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
   translations: I18nContextType
 }
 
@@ -47,11 +54,13 @@ const availableCommands = ({
   aiBlockConfig,
   translations,
   imageUploadConfig,
+  fileUploadConfig,
 }: AvailableCommandsProps): CommandItem[] => {
   const groups = getGroupedCommands({
     aiBlockConfig,
     translations,
     imageUploadConfig,
+    fileUploadConfig,
   })
   return groups.flatMap((group) => group.commands)
 }
@@ -60,12 +69,14 @@ interface GetGroupedCommandsProps {
   aiBlockConfig?: AIBlockConfig
   translations: I18nContextType
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
 }
 
 const getGroupedCommands = ({
   aiBlockConfig,
   translations,
   imageUploadConfig,
+  fileUploadConfig,
 }: GetGroupedCommandsProps): CommandGroup[] => {
   return [
     // Only include AI Block group if config is provided
@@ -198,6 +209,30 @@ const getGroupedCommands = ({
                   input.click()
                 },
                 icon: Image,
+              },
+            ]
+          : []),
+        ...(fileUploadConfig
+          ? [
+              {
+                title: "File",
+                command: (editor: Editor) => {
+                  // Create a file input to select a document/PDF
+                  const input = document.createElement("input")
+                  input.type = "file"
+                  input.accept = (
+                    fileUploadConfig.acceptedTypes ??
+                    DEFAULT_FILE_ACCEPTED_TYPES
+                  ).join(",")
+                  input.onchange = () => {
+                    const file = input.files?.[0]
+                    if (file) {
+                      insertFileFromFile(editor, file, fileUploadConfig)
+                    }
+                  }
+                  input.click()
+                },
+                icon: Paperclip,
               },
             ]
           : []),

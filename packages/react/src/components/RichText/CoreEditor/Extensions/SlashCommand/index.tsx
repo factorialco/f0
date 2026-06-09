@@ -6,6 +6,7 @@ import { createRoot, Root } from "react-dom/client"
 
 import { I18nContextType } from "@/lib/providers/i18n"
 
+import { FileUploadConfig } from "../FileAttachment"
 import { ImageUploadConfig } from "../Image"
 import {
   AIBlockConfig,
@@ -19,12 +20,14 @@ interface CreateSlashCommandExtensionProps {
   aiBlockConfig?: AIBlockConfig
   translations: I18nContextType
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
 }
 
 const createSlashCommandExtension = ({
   aiBlockConfig,
   translations,
   imageUploadConfig,
+  fileUploadConfig,
 }: CreateSlashCommandExtensionProps) =>
   Extension.create({
     name: "slashCommand",
@@ -98,6 +101,7 @@ const createSlashCommandExtension = ({
               translations,
               aiBlockConfig,
               imageUploadConfig,
+              fileUploadConfig,
             }).filter((item: CommandItem) => {
               const normalizedTitle = item.title.toLowerCase()
               // If query is empty, show all commands
@@ -194,6 +198,7 @@ const createSlashCommandExtension = ({
                   aiBlockConfig,
                   translations,
                   imageUploadConfig,
+                  fileUploadConfig,
                 })
 
                 // Filter groups based on query if available
@@ -256,6 +261,7 @@ const createSlashCommandExtension = ({
                   aiBlockConfig,
                   translations,
                   imageUploadConfig,
+                  fileUploadConfig,
                 })
 
                 let filteredGroups = groupedCommands
