@@ -1828,6 +1828,7 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -1855,6 +1856,8 @@ export declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -1924,6 +1927,22 @@ export declare const defaultTranslations: {
         };
         readonly actions: {
             readonly actions: "Actions";
+        };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
         };
         readonly visualizations: {
             readonly table: "Table view";
@@ -2846,9 +2865,10 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
-     * When true, the composer adopts the fullscreen layout: the welcome
-     * footer is pushed to the bottom and the disclaimer is hidden so the
-     * footer is the only thing under the textarea.
+     * When true on the welcome screen, the composer adopts the fullscreen
+     * layout: the input slot grows to claim the bottom half (so the textarea
+     * rises toward the vertical center), and the welcome suggestions render
+     * below the textarea with their popover opening downward (instead of above).
      */
     fullscreen?: boolean;
 };
@@ -2867,6 +2887,39 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     context: PendingContext | null;
     quote: PendingQuote | null;
 };
+
+export declare type F0AiChatWelcomeCard = {
+    icon: IconType;
+    title: string;
+    description?: string;
+    /** Prompt cards: sent to `onSelect` when the card is clicked. */
+    message?: string;
+    /**
+     * Action cards: custom click handler (e.g. open a dialog). Takes precedence
+     * over `message`/`onSelect` when both are present.
+     */
+    onClick?: () => void;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ *
+ * Action cards shown below the chat text area on the F0AiChat welcome screen
+ * (the chat `footer` slot). Two card kinds are supported: prompt cards (with a
+ * `message`, clicking calls `onSelect`) and action cards (with an `onClick`,
+ * which takes precedence). Data-driven and runtime-agnostic — the caller
+ * supplies the cards and decides what `onSelect` does.
+ */
+export declare function F0AiChatWelcomeCards({ cards, onSelect, }: F0AiChatWelcomeCardsProps): JSX_2.Element;
+
+export declare interface F0AiChatWelcomeCardsProps {
+    cards: F0AiChatWelcomeCard[];
+    /**
+     * Called with a prompt card's `message` when clicked. Wire this to the
+     * chat's `sendMessage`. Not needed when every card is an action card.
+     */
+    onSelect?: (message: string) => void;
+}
 
 export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
@@ -2946,6 +2999,9 @@ export declare type F0AiMessagesContainerProps = {
     onAssistantMessageRendered?: (message: Message) => void;
     /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
     autoScrollUserIntoView?: boolean;
+    /** Fullscreen welcome layout: pushes the welcome phrase to the bottom of the
+     *  top half so it meets the composer near the vertical center. */
+    fullscreen?: boolean;
     /**
      * Renders the markdown content of user/assistant messages. The connected
      * wrapper provides a CopilotKit + f0-markdown-renderers implementation;
@@ -4717,8 +4773,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -4727,16 +4788,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -4768,6 +4819,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 

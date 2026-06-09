@@ -141,6 +141,7 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -168,6 +169,8 @@ export declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -237,6 +240,22 @@ export declare const defaultTranslations: {
         };
         readonly actions: {
             readonly actions: "Actions";
+        };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
         };
         readonly visualizations: {
             readonly table: "Table view";
@@ -851,8 +870,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -861,16 +885,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -902,6 +916,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 

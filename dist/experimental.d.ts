@@ -1019,7 +1019,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1044,6 +1044,7 @@ declare interface BaseHeaderProps_2 {
         actions?: MetadataAction[];
     };
     metadata?: MetadataProps["items"];
+    metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
 }
@@ -1329,6 +1330,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The style of the button.
      */
     style?: React.CSSProperties;
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean;
 } & ({
     /**
      * The URL to navigate to when the button is clicked.
@@ -2526,6 +2532,8 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     /** Per-visualization filter states, keyed by visualization index.
      *  Only present when visualizations declare per-view filter overrides. */
     visualizationFilters?: Record<string, CurrentFiltersState>;
+    /** User-created custom presets persisted alongside the rest of the state. */
+    customPresets?: PresetsDefinition<FiltersDefinition>;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
@@ -2977,6 +2985,7 @@ declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -3004,6 +3013,8 @@ declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -3073,6 +3084,22 @@ declare const defaultTranslations: {
         };
         readonly actions: {
             readonly actions: "Actions";
+        };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
         };
         readonly visualizations: {
             readonly table: "Table view";
@@ -5834,7 +5861,10 @@ declare interface MetadataProps {
      * If true and the metadata type is a list, it will be collapsed to the first item
      */
     collapse?: boolean;
+    rowGap?: MetadataRowGap;
 }
+
+declare type MetadataRowGap = "none" | "xs" | "sm" | "md";
 
 declare interface MetricComputation {
     datasetId: string;
@@ -5988,7 +6018,7 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
     label: string;
 } & DataAttributes_2;
 
-declare type NavigationProps = {
+export declare type NavigationProps = {
     previous?: {
         url: string;
         title: string;
@@ -6557,6 +6587,23 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     displayCounter?: boolean;
     /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
     resultCount?: number;
+    /**
+     * Id of the currently selected preset. When provided together with
+     * `onSelectPreset`, preset selection is identity-based (the preset stays
+     * selected as the user changes state on top of it). When absent, the picker
+     * falls back to legacy exact-filter-match selection.
+     */
+    selectedPresetId?: string;
+    /** Selects a preset by id. Enables identity-based selection. */
+    onSelectPreset?: (presetId: string) => void;
+    /** Ids of presets that can be edited/deleted (user-created presets). */
+    editablePresetIds?: string[];
+    /** Opens the edit flow for a preset (hover icon on editable presets). */
+    onEditPreset?: (presetId: string) => void;
+    /** Whether to show the dashed "Save view" chip ("save" | "none"). */
+    presetActionState?: "save" | "none";
+    /** Opens the preset create/update dialog. */
+    onPresetAction?: () => void;
 };
 
 /**
@@ -6745,6 +6792,8 @@ export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<
 
 export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps): JSX_2.Element;
 
+export declare function PageNavigation({ previous, next, counter }: NavigationProps): JSX_2.Element;
+
 declare interface PageProps {
     children?: React.ReactNode;
     header?: React.ReactNode;
@@ -6862,22 +6911,65 @@ declare type PostEventProps = {
 export declare const predefinedPresets: Record<string, DatePreset>;
 
 /**
- * Defines preset filter configurations that can be applied to a collection.
+ * Defines preset configurations that can be applied to a collection.
+ *
+ * A preset is a saveable snapshot of the collection view. Historically it only
+ * captured a group of filters; it can now also capture the sorting, view mode
+ * (visualization), grouping and column order/visibility. All non-filter fields are
+ * optional so existing filter-only presets remain valid.
+ *
  * @template Filters - The available filter configurations
  */
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
+    /**
+     * Stable identifier for the preset. Optional for developer-provided presets (a
+     * fallback id is derived from the label at merge time); user-created custom
+     * presets always carry a generated id.
+     */
+    id?: string;
     /** Display name for the preset */
     label: string;
+    /** Optional longer description, shown/edited in the preset form */
+    description?: string;
     /** Filter configuration to apply when this preset is selected.
      * Clicking a preset replaces all current filters with this value.
-     * The preset shows as selected only when the current filters exactly match this value.
      */
     filter: FiltersState<Filters>;
+    /**
+     * Captured sorting state (`SortingsState`). Typed loosely here to avoid forcing
+     * the `Sortings` generic onto every preset consumer; narrowed at the
+     * OneDataCollection boundary.
+     */
+    sortings?: unknown;
+    /** Captured grouping state (`GroupingState`). Typed loosely; see `sortings`. */
+    grouping?: unknown;
+    /** Captured view mode as the visualization index. */
+    visualization?: number;
+    /**
+     * Captured column order/visibility settings (`DataCollectionSettings`, shaped
+     * like `PresetSettings`). Typed loosely; narrowed at the OneDataCollection
+     * boundary.
+     */
+    settings?: unknown;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
 
 export declare type PresetsDefinition<Filters extends FiltersDefinition> = PresetDefinition<Filters>[];
+
+/**
+ * Structural snapshot of the visualization (column order/visibility) settings a
+ * preset can capture. Typed structurally (rather than importing
+ * `DataCollectionSettings`) to keep the filter pattern free of a dependency on
+ * OneDataCollection. Narrowed to `DataCollectionSettings` at the OneDataCollection
+ * boundary.
+ */
+export declare type PresetSettings = {
+    visualization?: Record<string, {
+        order?: string[];
+        hidden?: string[];
+    }>;
+};
 
 export declare type PrevNextDateNavigation = {
     prev: DateRange | false;
@@ -6928,7 +7020,7 @@ declare interface PrimaryDropdownAction<T> extends PrimaryAction {
 
 export declare const PrivateBox: FC<PropsWithChildren>;
 
-declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "block"];
 
 declare const privateProps_2: readonly ["withBorder"];
 
@@ -7041,7 +7133,7 @@ declare type PropertyDefinition_2<T> = {
     hide?: (item: T) => boolean;
 };
 
-declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "showBottomBorder">;
+declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
 
 declare type Props_10<Id extends string | number = string | number> = {
     items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
@@ -7236,7 +7328,7 @@ export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordTyp
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, showBottomBorder, }: Props) => JSX_2.Element;
+export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, }: Props) => JSX_2.Element;
 
 export declare type ResourceHeaderProps = Props;
 
@@ -8779,8 +8871,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -8789,16 +8886,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -8830,6 +8917,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 

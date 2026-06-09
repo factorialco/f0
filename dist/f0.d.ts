@@ -54,12 +54,15 @@ import { F0AvatarPersonProps as F0AvatarPersonProps_2 } from './types';
 import { F0AvatarTeamProps as F0AvatarTeamProps_2 } from './F0AvatarTeam';
 import { F0DataChartProps as F0DataChartProps_2 } from './types';
 import { F0DialogInternalProps } from './internal-types';
+import { F0DrawerProps } from './F0Drawer';
 import { F0DurationInputProps as F0DurationInputProps_2 } from './types';
 import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
 import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
 import { F0SelectProps as F0SelectProps_2 } from './types';
+import { F0SliderProps as F0SliderProps_2 } from './types';
+import { F0SliderSkeletonProps } from './F0SliderSkeleton';
 import { F0TagBalanceProps } from './types';
 import { F0TagCompanyProps } from './types';
 import { F0TagListProps } from './types';
@@ -155,6 +158,7 @@ import { TextCellValue as TextCellValue_2 } from './types/text';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from './f0';
 import { VariantProps } from 'cva';
+import { WithDataTestIdProps as WithDataTestIdProps_2 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './f0';
@@ -1437,7 +1441,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1462,6 +1466,7 @@ declare interface BaseHeaderProps_2 {
         actions?: MetadataAction[];
     };
     metadata?: MetadataProps["items"];
+    metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
 }
@@ -1826,6 +1831,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The style of the button.
      */
     style?: React.CSSProperties;
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean;
 } & ({
     /**
      * The URL to navigate to when the button is clicked.
@@ -3564,7 +3574,7 @@ export declare type Data<R extends RecordType> = {
 
 /**
  * Every data collection URL param shares this prefix, so each filter is its own
- * readable param — e.g. `?dc_department=Sales&dc_search=ada&dc_view=kanban`
+ * readable param — e.g. `?dc_department=Sales&dc_search=ada&dc_visualization=kanban`
  * instead of a single JSON blob. Params are not scoped to a collection id, so
  * this assumes a single URL-synced collection per page.
  */
@@ -3580,9 +3590,11 @@ export declare const DATA_COLLECTION_URL_PARAMS: {
     readonly search: "dc_search";
     readonly sortings: "dc_sort";
     /** Active visualization type/key, e.g. `table` (omitted for the default one). */
-    readonly visualization: "dc_view";
+    readonly visualization: "dc_visualization";
     /** Current page (1-indexed; omitted for the first page). */
     readonly page: "dc_page";
+    /** Selected view id (omitted when no view is selected). */
+    readonly preset: "dc_view";
 };
 
 /**
@@ -3713,6 +3725,8 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     /** Per-visualization filter states, keyed by visualization index.
      *  Only present when visualizations declare per-view filter overrides. */
     visualizationFilters?: Record<string, CurrentFiltersState>;
+    /** User-created custom presets persisted alongside the rest of the state. */
+    customPresets?: PresetsDefinition<FiltersDefinition>;
 };
 
 export declare type DataCollectionStorage<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
@@ -3738,6 +3752,8 @@ export declare type DataCollectionUrlState<CurrentFiltersState extends FiltersSt
     visualization?: string;
     /** Current page (1-indexed). Not part of persisted storage — URL only. */
     page?: number;
+    /** Selected preset id (absent when no preset is selected). URL only. */
+    preset?: string;
 };
 
 /**
@@ -4275,6 +4291,7 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -4302,6 +4319,8 @@ export declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -4371,6 +4390,22 @@ export declare const defaultTranslations: {
         };
         readonly actions: {
             readonly actions: "Actions";
+        };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
         };
         readonly visualizations: {
             readonly table: "Table view";
@@ -5007,6 +5042,38 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "file";
 });
 
+declare type DialogAlikeAction = {
+    value?: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void | Promise<void>;
+    disabled?: boolean;
+    loading?: boolean;
+    closeOnClick?: boolean;
+};
+
+declare type DialogAlikeActionsProps = {
+    primaryAction?: DialogAlikeAction | DialogAlikeAction[];
+    secondaryAction?: DialogAlikeAction | DialogAlikeAction[];
+};
+
+declare type DialogAlikePosition = (typeof dialogAlikePositions)[number];
+
+declare const dialogAlikePositions: readonly ["center", "left", "right", "fullscreen"];
+
+export declare type DialogControls = {
+    kind: "resource";
+    expand?: {
+        label: string;
+        onClick: () => void;
+    };
+    navigation?: NavigationProps;
+} | {
+    kind: "back";
+    label: string;
+    onClick: () => void;
+};
+
 export declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
@@ -5014,6 +5081,31 @@ declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"
 export declare type DialogWidth = (typeof dialogWidths)[number];
 
 declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
+
+declare type DialogWrapperContextType = {
+    open: boolean;
+    onClose: () => void;
+    shownBottomSheet: boolean;
+    position: DialogAlikePosition;
+    /**
+     * The dialog's content container element.
+     * Use this as the `portalContainer` prop for components like F0Select
+     * to ensure dropdowns render inside the dialog.
+     */
+    portalContainer: HTMLDivElement | null;
+};
+
+/**
+ * The props for the F0DialogProvider component.
+ */
+declare type DialogWrapperProviderProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    shownBottomSheet?: boolean;
+    position: DialogAlikePosition;
+    children: ReactNode;
+    portalContainer: HTMLDivElement | null;
+};
 
 /** Display modes */
 export declare type DisplayToken = "block" | "flex" | "inline" | "inline-flex" | "grid" | "none";
@@ -5064,6 +5156,8 @@ export declare type DragPayload<T = unknown> = {
     id: string;
     data?: T;
 };
+
+declare const drawerPositions: readonly ["left", "right"];
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -5793,9 +5887,10 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
-     * When true, the composer adopts the fullscreen layout: the welcome
-     * footer is pushed to the bottom and the disclaimer is hidden so the
-     * footer is the only thing under the textarea.
+     * When true on the welcome screen, the composer adopts the fullscreen
+     * layout: the input slot grows to claim the bottom half (so the textarea
+     * rises toward the vertical center), and the welcome suggestions render
+     * below the textarea with their popover opening downward (instead of above).
      */
     fullscreen?: boolean;
 };
@@ -5814,6 +5909,39 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     context: PendingContext | null;
     quote: PendingQuote | null;
 };
+
+export declare type F0AiChatWelcomeCard = {
+    icon: IconType;
+    title: string;
+    description?: string;
+    /** Prompt cards: sent to `onSelect` when the card is clicked. */
+    message?: string;
+    /**
+     * Action cards: custom click handler (e.g. open a dialog). Takes precedence
+     * over `message`/`onSelect` when both are present.
+     */
+    onClick?: () => void;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ *
+ * Action cards shown below the chat text area on the F0AiChat welcome screen
+ * (the chat `footer` slot). Two card kinds are supported: prompt cards (with a
+ * `message`, clicking calls `onSelect`) and action cards (with an `onClick`,
+ * which takes precedence). Data-driven and runtime-agnostic — the caller
+ * supplies the cards and decides what `onSelect` does.
+ */
+export declare function F0AiChatWelcomeCards({ cards, onSelect, }: F0AiChatWelcomeCardsProps): JSX_2.Element;
+
+export declare interface F0AiChatWelcomeCardsProps {
+    cards: F0AiChatWelcomeCard[];
+    /**
+     * Called with a prompt card's `message` when clicked. Wire this to the
+     * chat's `sendMessage`. Not needed when every card is an action card.
+     */
+    onSelect?: (message: string) => void;
+}
 
 /**
  * Context value for the AI form registry
@@ -6025,6 +6153,9 @@ export declare type F0AiMessagesContainerProps = {
     onAssistantMessageRendered?: (message: Message_2) => void;
     /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
     autoScrollUserIntoView?: boolean;
+    /** Fullscreen welcome layout: pushes the welcome phrase to the bottom of the
+     *  top half so it meets the composer near the vertical center. */
+    fullscreen?: boolean;
     /**
      * Renders the markdown content of user/assistant messages. The connected
      * wrapper provides a CopilotKit + f0-markdown-renderers implementation;
@@ -6731,7 +6862,7 @@ export declare interface F0BoxProps extends Omit<React.ComponentPropsWithoutRef<
     xl?: ResponsiveStyleProps;
 }
 
-export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
+export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "block" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 } & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>>;
 
@@ -7826,6 +7957,10 @@ export declare type F0DialogActionsProps = {
     secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[];
 };
 
+export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
+
+export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -7873,6 +8008,20 @@ export declare type F0DialogSecondaryAction = {
 };
 
 export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0Drawer: {
+    (props: F0DrawerProps): JSX_2.Element;
+    displayName: string;
+};
+
+export declare type F0DrawerAction = DialogAlikeAction;
+
+export declare type F0DrawerActionsProps = DialogAlikeActionsProps;
+
+export declare type F0DrawerPosition = (typeof drawerPositions)[number];
 
 export declare type F0DropdownButtonProps<T = string> = {
     size?: ButtonDropdownSize;
@@ -9797,6 +9946,57 @@ export declare type F0SelectTagProp = string | {
     text: string;
     variant: StatusVariant;
 };
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0Slider: ForwardRefExoticComponent<Omit<F0SliderProps_2 & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<F0SliderProps_2 & RefAttributes<HTMLDivElement>>, never> & {
+    Skeleton: ({ hideLabel }: F0SliderSkeletonProps) => JSX_2.Element;
+};
+
+export declare interface F0SliderProps extends WithDataTestIdProps, DataAttributes_2 {
+    label: string;
+    ariaLabel?: string;
+    hideLabel?: boolean;
+    hint?: string;
+    status?: InputFieldStatus;
+    required?: boolean;
+    disabled?: boolean;
+    name?: string;
+    value?: number;
+    defaultValue?: number;
+    onChange?: (value: number) => void;
+    /**
+     * Fires once when the user commits a value: on pointer release after a drag,
+     * and on each discrete keyboard step. Use this — not `onChange` — to trigger
+     * expensive side effects such as mutations, so dragging does not fire one
+     * call per intermediate value.
+     */
+    onValueCommit?: (value: number) => void;
+    min: number;
+    max: number;
+    step?: number;
+    minLabel?: string;
+    maxLabel?: string;
+    /**
+     * Format the value for the floating tooltip. Receives the raw numeric value
+     * and must return the full localised string. The whole string is built by
+     * the consumer (instead of e.g. a `unit` prop concatenated by the component)
+     * so locales can reorder the phrase around the number — for example RTL
+     * languages or locales where the unit precedes the value.
+     */
+    formatValue?: (value: number) => string;
+    /**
+     * When to show the floating value tooltip above the thumb.
+     * - `"always"`: visible at all times.
+     * - `"onHover"`: visible while the slider is hovered, focused or being
+     *   dragged. Default.
+     * - `"never"`: never rendered.
+     */
+    showTooltip?: F0SliderTooltipMode;
+}
+
+export declare type F0SliderTooltipMode = (typeof sliderTooltipModes)[number];
 
 /**
  * Config for string fields rendered as grouped radio cards
@@ -11893,7 +12093,10 @@ declare interface MetadataProps {
      * If true and the metadata type is a list, it will be collapsed to the first item
      */
     collapse?: boolean;
+    rowGap?: MetadataRowGap;
 }
+
+declare type MetadataRowGap = "none" | "xs" | "sm" | "md";
 
 export declare interface MetricComputation {
     datasetId: string;
@@ -12046,6 +12249,21 @@ declare type NavigationFilterValue<T> = T extends DateNavigatorFilterDefinition 
 declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
     label: string;
 } & DataAttributes_2;
+
+declare type NavigationProps = {
+    previous?: {
+        url: string;
+        title: string;
+    };
+    next?: {
+        url: string;
+        title: string;
+    };
+    counter?: {
+        current: number;
+        total: number;
+    };
+};
 
 declare type NavTarget = HTMLAttributeAnchorTarget;
 
@@ -12593,6 +12811,23 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     displayCounter?: boolean;
     /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
     resultCount?: number;
+    /**
+     * Id of the currently selected preset. When provided together with
+     * `onSelectPreset`, preset selection is identity-based (the preset stays
+     * selected as the user changes state on top of it). When absent, the picker
+     * falls back to legacy exact-filter-match selection.
+     */
+    selectedPresetId?: string;
+    /** Selects a preset by id. Enables identity-based selection. */
+    onSelectPreset?: (presetId: string) => void;
+    /** Ids of presets that can be edited/deleted (user-created presets). */
+    editablePresetIds?: string[];
+    /** Opens the edit flow for a preset (hover icon on editable presets). */
+    onEditPreset?: (presetId: string) => void;
+    /** Whether to show the dashed "Save view" chip ("save" | "none"). */
+    presetActionState?: "save" | "none";
+    /** Opens the preset create/update dialog. */
+    onPresetAction?: () => void;
 };
 
 export declare type OneIconSize = (typeof oneIconSizes)[number];
@@ -12840,22 +13075,65 @@ export declare type PositionToken = "static" | "relative" | "absolute" | "fixed"
 export declare const predefinedPresets: Record<string, DatePreset>;
 
 /**
- * Defines preset filter configurations that can be applied to a collection.
+ * Defines preset configurations that can be applied to a collection.
+ *
+ * A preset is a saveable snapshot of the collection view. Historically it only
+ * captured a group of filters; it can now also capture the sorting, view mode
+ * (visualization), grouping and column order/visibility. All non-filter fields are
+ * optional so existing filter-only presets remain valid.
+ *
  * @template Filters - The available filter configurations
  */
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
+    /**
+     * Stable identifier for the preset. Optional for developer-provided presets (a
+     * fallback id is derived from the label at merge time); user-created custom
+     * presets always carry a generated id.
+     */
+    id?: string;
     /** Display name for the preset */
     label: string;
+    /** Optional longer description, shown/edited in the preset form */
+    description?: string;
     /** Filter configuration to apply when this preset is selected.
      * Clicking a preset replaces all current filters with this value.
-     * The preset shows as selected only when the current filters exactly match this value.
      */
     filter: FiltersState<Filters>;
+    /**
+     * Captured sorting state (`SortingsState`). Typed loosely here to avoid forcing
+     * the `Sortings` generic onto every preset consumer; narrowed at the
+     * OneDataCollection boundary.
+     */
+    sortings?: unknown;
+    /** Captured grouping state (`GroupingState`). Typed loosely; see `sortings`. */
+    grouping?: unknown;
+    /** Captured view mode as the visualization index. */
+    visualization?: number;
+    /**
+     * Captured column order/visibility settings (`DataCollectionSettings`, shaped
+     * like `PresetSettings`). Typed loosely; narrowed at the OneDataCollection
+     * boundary.
+     */
+    settings?: unknown;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
 
 export declare type PresetsDefinition<Filters extends FiltersDefinition> = PresetDefinition<Filters>[];
+
+/**
+ * Structural snapshot of the visualization (column order/visibility) settings a
+ * preset can capture. Typed structurally (rather than importing
+ * `DataCollectionSettings`) to keep the filter pattern free of a dependency on
+ * OneDataCollection. Narrowed to `DataCollectionSettings` at the OneDataCollection
+ * boundary.
+ */
+export declare type PresetSettings = {
+    visualization?: Record<string, {
+        order?: string[];
+        hidden?: string[];
+    }>;
+};
 
 export declare type PrevNextDateNavigation = {
     prev: DateRange | false;
@@ -12903,7 +13181,7 @@ export declare const PrivacyModeProvider: React_2.FC<{
     children: ReactNode;
 }>;
 
-declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "block"];
 
 declare const privateProps_2: readonly ["withBorder"];
 
@@ -13113,7 +13391,7 @@ declare type Props_3 = {
     list?: TagCounterItem[];
 };
 
-declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "showBottomBorder">;
+declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
 
 declare type Pulse = (typeof pulses)[number];
 
@@ -13829,6 +14107,8 @@ declare type SimpleResult<T> = T[];
 
 /** Size tokens for width/height/min/max dimensions */
 export declare type SizeToken = "auto" | "full" | "screen" | "min" | "max" | "fit" | NumericSizeToken | FractionToken;
+
+export declare const sliderTooltipModes: readonly ["always", "onHover", "never"];
 
 /**
  * Type helper to extract keys from a SortingsDefinition
@@ -15126,6 +15406,8 @@ export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | nu
 
 export declare const useF0Dialog: () => F0DialogContextType;
 
+export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
+
 /**
  * Hook to control F0Form programmatically.
  *
@@ -15795,8 +16077,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -15805,16 +16092,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -15846,6 +16123,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
