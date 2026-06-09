@@ -13,6 +13,7 @@ import {
   ImageExtension,
   LinkExtension,
   MoodTrackerExtension,
+  NotionTableControls,
   PasteSanitizer,
   PersistSelection,
   StarterKitExtension,
@@ -57,6 +58,9 @@ export const createNotesTextEditorExtensions = ({
     DetailsSummaryExtension,
     DetailsContentExtension,
     TableExtension,
+    NotionTableControls.configure({
+      labels: translations.richTextEditor.tableControls,
+    }),
     MoodTrackerExtension,
     TranscriptExtension,
     AIBlockExtension.configure({
