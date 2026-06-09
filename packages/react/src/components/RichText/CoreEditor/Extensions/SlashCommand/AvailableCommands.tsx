@@ -215,7 +215,7 @@ const getGroupedCommands = ({
         ...(fileUploadConfig
           ? [
               {
-                title: "File",
+                title: translations.richTextEditor.file,
                 command: (editor: Editor) => {
                   // Create a file input to select a document/PDF
                   const input = document.createElement("input")

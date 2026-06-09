@@ -29,6 +29,21 @@ export interface FileUploadConfig {
 
 const DEFAULT_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 
+// `src` is round-tripped through persisted HTML (`data-src`), so a crafted
+// document could smuggle a `javascript:` URL into `window.open`. Consumers are
+// expected to sanitize, but validating the scheme here is cheap
+// defense-in-depth.
+const SAFE_URL_SCHEMES = ["https:", "http:", "blob:"]
+
+export const isSafeAttachmentUrl = (src: string): boolean => {
+  try {
+    const { protocol } = new URL(src, window.location.origin)
+    return SAFE_URL_SCHEMES.includes(protocol)
+  } catch {
+    return false
+  }
+}
+
 // PoC scope: PDFs first, plus a few common document types. The consumer can
 // narrow/extend this via `acceptedTypes`.
 export const DEFAULT_FILE_ACCEPTED_TYPES = [
@@ -48,6 +63,9 @@ const FileAttachmentNodeView = ({
   editor,
 }: NodeViewProps) => {
   const { src, filename, mimeType, uploading } = node.attrs
+  // Read at render time: React node views don't reliably re-render on
+  // `editor.setEditable()`. Safe today because NotesTextEditor fixes
+  // `readonly` at creation — revisit if editability ever becomes dynamic.
   const isEditable = editor.isEditable
   const translations = useI18n()
 
@@ -59,7 +77,7 @@ const FileAttachmentNodeView = ({
   const openInViewer = () => {
     // The browser renders PDFs natively, so a plain new-tab open doubles as the
     // viewer. A richer in-app viewer can be wired here later.
-    if (src) {
+    if (src && isSafeAttachmentUrl(src as string)) {
       window.open(src as string, "_blank", "noopener,noreferrer")
     }
   }
@@ -78,7 +96,7 @@ const FileAttachmentNodeView = ({
     <NodeViewWrapper className="mb-2">
       <div
         className={cn(
-          "group/file relative inline-flex w-fit max-w-full rounded-[10px]",
+          "relative inline-flex w-fit max-w-full rounded-[10px]",
           selected && "ring-2 ring-f1-border-selected-bold"
         )}
       >
@@ -275,6 +293,6 @@ export const insertFileFromFile = (
   editor: Editor,
   file: File,
   uploadConfig: FileUploadConfig
-) => {
-  handleFileUpload(editor, file, uploadConfig)
+): Promise<void> => {
+  return handleFileUpload(editor, file, uploadConfig)
 }
