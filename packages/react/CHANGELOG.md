@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.55.0](https://github.com/factorialco/f0/compare/f0-react-v2.54.0...f0-react-v2.55.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 6/6:** F0Wizard/F0WizardForm size prop + width deprecation (non-breaking) ([#4368](https://github.com/factorialco/f0/issues/4368)) ([7a948f2](https://github.com/factorialco/f0/commit/7a948f24d849bca76d7ae1ecb9f8db4a52f49792))
+
 ## [2.54.0](https://github.com/factorialco/f0/compare/f0-react-v2.53.0...f0-react-v2.54.0) (2026-06-09)
 
 
