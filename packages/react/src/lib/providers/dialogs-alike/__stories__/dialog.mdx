@@ -1,0 +1,422 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as DialogStories from "./dialog.stories"
+
+<Meta of={DialogStories} />
+
+# dialog
+
+## Introduction
+
+### Definition
+
+The `dialog` API provides a simplified, promise-based API for managing dialogs in React applications. It wraps the `F0Dialog` component internally, handling all state management and providing a streamlined developer experience.
+
+### Purpose
+
+- **Simplify dialog management:** Eliminate boilerplate code for dialog state, handlers, and conditional rendering
+- **Promise-based API:** Use async/await patterns for cleaner, more readable code
+- **Automatic state handling:** No need to manage `useState` hooks or dialog open/close logic
+- **Consistent experience:** Standardized dialog patterns across the application
+- **Less code:** Reduce the amount of code needed to display dialogs significantly
+
+## Why the dialog API?
+
+The `dialog` API was created to provide a simpler and smoother experience, avoiding the need to write a lot of code. Here's a comparison showing how much simpler it is to use the dialog API versus managing `F0Dialog` directly:
+
+### Before: Using F0Dialog directly
+
+When using `F0Dialog` directly, you need to manage state, handlers, and conditional rendering:
+
+```tsx
+import { useState } from "react"
+import { F0Dialog, F0Button } from "@factorialco/f0-react"
+
+function DeleteItemButton() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  const handleDelete = () => {
+    // Perform delete action
+    console.log("Item deleted")
+    setIsOpen(false)
+  }
+
+  const handleCancel = () => {
+    setIsOpen(false)
+  }
+
+  return (
+    <>
+      <F0Button label="Delete Item" onClick={() => setIsOpen(true)} />
+      {isOpen && (
+        <F0Dialog
+          isOpen={isOpen}
+          onClose={handleCancel}
+          title="Delete Item"
+          description="Are you sure you want to delete this item? This action cannot be undone."
+          primaryAction={{
+            label: "Delete",
+            onClick: handleDelete,
+          }}
+          secondaryAction={{
+            label: "Cancel",
+            onClick: handleCancel,
+          }}
+        >
+          <div>This action cannot be undone.</div>
+        </F0Dialog>
+      )}
+    </>
+  )
+}
+```
+
+### After: Using the dialog API
+
+With the `dialog` API, the same functionality is achieved with much less code:
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function DeleteItemButton() {
+  const handleClick = async () => {
+    const result = await dialog.confirm({
+      title: "Delete Item",
+      msg: "Are you sure you want to delete this item? This action cannot be undone.",
+    })
+
+    if (result) {
+      // Perform delete action
+      console.log("Item deleted")
+    }
+  }
+
+  return <F0Button label="Delete Item" onClick={handleClick} />
+}
+```
+
+The API handles all the state management, dialog rendering, and cleanup automatically. The promise-based API makes it easy to handle user responses with async/await.
+
+## Notification Dialogs
+
+Notification dialogs are centered, modal-style dialogs used to **inform the user** or **ask for a decision**. There are three ways to open one — they all render the same notification UI (an icon, title and message styled by a severity `type`), but they differ in the buttons they build for you:
+
+| Method                | Buttons it builds                                  | Resolves with                                              | Reach for it when…                                                                                                            |
+| --------------------- | -------------------------------------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `dialog.alert`        | One confirm button (default **Ok**)                | the confirm `value` (default `true`)                       | You only need to **inform** the user and have them acknowledge — there's no choice to make.                                   |
+| `dialog.confirm`      | Confirm **+** cancel (default **Ok** / **Cancel**) | `true` when confirmed, `false` when cancelled or dismissed | You need a **yes/no decision** before continuing — e.g. confirming a destructive action.                                      |
+| `dialog.notification` | Whatever you pass in `actions`                     | the clicked action's `value`                               | You need **custom actions** — custom labels/values, more than two buttons, a dropdown — beyond the `alert`/`confirm` presets. |
+
+`alert` and `confirm` are thin convenience wrappers over `notification`: they pre-build the `actions` for you. Use them for the common cases, and drop down to `notification` only when you need full control over the buttons.
+
+All three accept a severity `type` — `info` (default), `warning`, `critical` or `positive` — which sets the icon and color, plus a `title` and a `msg` body.
+
+### Notification (custom actions)
+
+The `notification` method is the general form: you provide the `actions` yourself, so it can render any combination of buttons. Use it when neither `alert` nor `confirm` fits.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showNotification = async () => {
+    await dialog.notification({
+      title: "Notification Title",
+      msg: "This is a notification message",
+      type: "critical",
+      actions: {
+        primary: {
+          value: true,
+          label: "Accept",
+        },
+      },
+    })
+  }
+
+  return <F0Button label="Show Notification" onClick={showNotification} />
+}
+```
+
+<Canvas of={DialogStories.Notification} />
+
+### Alert Dialog
+
+The `alert` method displays a simple alert dialog with a single confirmation button. It returns a promise that resolves when the user clicks the confirm button.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showAlert = async () => {
+    await dialog.alert({
+      title: "Alert Title",
+      msg: "This is an alert message",
+    })
+    console.log("Alert dismissed")
+  }
+
+  return <F0Button label="Show Alert" onClick={showAlert} />
+}
+```
+
+<Canvas of={DialogStories.Alert} />
+
+### Confirm Dialog
+
+The `confirm` method displays a confirmation dialog with both confirm and cancel buttons. It returns a promise that resolves to `true` if confirmed, or `false` if cancelled.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const handleDelete = async () => {
+    const result = await dialog.confirm({
+      title: "Delete Item",
+      msg: "Are you sure you want to delete this item?",
+    })
+
+    if (result) {
+      // User confirmed - proceed with deletion
+      console.log("Deleting item...")
+    } else {
+      // User cancelled
+      console.log("Deletion cancelled")
+    }
+  }
+
+  return <F0Button label="Delete" onClick={handleDelete} />
+}
+```
+
+<Canvas of={DialogStories.Confirm} />
+
+### Custom Dialog
+
+The `openDialog` method provides full control over the dialog content and actions. It accepts a dialog definition and returns a promise that resolves with the value of the action clicked.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+import { Delete, Pencil } from "@factorialco/f0-react/icons/app"
+
+function MyComponent() {
+  const showCustomDialog = async () => {
+    const result = await dialog.open({
+      title: "Dialog Title",
+      description: "Dialog Description",
+      content: <div>Custom dialog content goes here</div>,
+      actions: {
+        primary: {
+          value: "primary",
+          label: "Primary Action",
+        },
+        secondary: [
+          {
+            value: "delete",
+            icon: Delete,
+            label: "Delete",
+          },
+          {
+            value: "edit",
+            icon: Pencil,
+            label: "Edit",
+          },
+        ],
+      },
+    })
+
+    console.log("User selected:", result)
+  }
+
+  return <F0Button label="Open Dialog" onClick={showCustomDialog} />
+}
+```
+
+<Canvas of={DialogStories.Dialog} />
+
+## Advanced Usage
+
+### Promise-Based Actions
+
+The `DialogActionValue` can be a primitive value or a function that returns a Promise. When a function is provided, the dialog will remain open until the promise resolves, and all dialog actions will be disabled during the async operation (unless `nonBlocking` is set to `true`).
+
+#### Confirm with Async Operation
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const handleSave = async () => {
+    const result = await dialog.confirm(
+      "Save Changes",
+      "Do you want to save?",
+      {
+        confirm: {
+          value: async () => {
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            return "saved"
+          },
+          label: "Save",
+        },
+      }
+    )
+
+    console.log("Result:", result) // "saved" after promise resolves
+  }
+
+  return <F0Button label="Save" onClick={handleSave} />
+}
+```
+
+<Canvas of={DialogStories.ConfirmWithPromiseAndCustomLabel} />
+
+#### Dialog with Promise-Based Primary Actions
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showDialog = async () => {
+    const result = await dialog.open({
+      title: "Process Data",
+      description: "Choose an action",
+      content: <div>Processing options...</div>,
+      actions: {
+        primary: [
+          {
+            value: "quick",
+            label: "Quick Process",
+          },
+          {
+            value: async () => {
+              // Long-running operation
+              await new Promise((resolve) => setTimeout(resolve, 3000))
+              return "processed"
+            },
+            label: "Full Process",
+          },
+        ],
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <F0Button label="Process" onClick={showDialog} />
+}
+```
+
+<Canvas of={DialogStories.DialogWithDropdownAndPromises} />
+
+### keepOpen Property
+
+By default, clicking any action closes the dialog. When `keepOpen: true` is set on a `DialogAction`, the dialog **resolves the promise but stays open** — the item is not removed from the screen.
+
+The action's `value` (including a function `value`) still runs on **every** click, so `keepOpen` is ideal for "apply"-style actions that mutate something without dismissing the dialog. To actually close it afterwards, either click a different action that does _not_ set `keepOpen`, or call `dialog.close(id)` with the `id` you passed to `dialog.open`.
+
+> Note: a promise resolves only once. The `await dialog.open(...)` call returns the first time a `keepOpen` action is clicked, but the dialog remains visible and the action keeps firing on subsequent clicks.
+
+```tsx
+import { useState } from "react"
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const [count, setCount] = useState(0)
+
+  const showKeepOpenDialog = () => {
+    dialog.open({
+      id: "keep-open-demo",
+      title: "Keep Open",
+      content: <div>Click Increment a few times — the dialog stays open.</div>,
+      actions: {
+        primary: {
+          label: "Increment (keepOpen)",
+          keepOpen: true, // runs on every click, dialog stays open
+          value: () => {
+            setCount((c) => c + 1)
+            return Promise.resolve("incremented")
+          },
+        },
+        // No keepOpen → this action closes the dialog.
+        secondary: { value: "done", label: "Done" },
+      },
+    })
+  }
+
+  return <F0Button label="Open keep-open dialog" onClick={showKeepOpenDialog} />
+}
+```
+
+<Canvas of={DialogStories.KeepOpen} />
+
+### nonBlocking Property
+
+When an action's `value` is a promise-returning function, the dialog **blocks** while it runs: every action button is disabled and the close button is suppressed until the promise resolves (so the user can't dismiss the dialog or trigger another action mid-operation).
+
+Set `nonBlocking: true` on the action to opt out of that behavior — the other actions (and close) stay interactive while this action's promise is pending.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showNonBlockingDialog = async () => {
+    const result = await dialog.open({
+      title: "Non-Blocking Action",
+      content: <div>Click "Start", then notice "Cancel" is still enabled.</div>,
+      actions: {
+        primary: {
+          label: "Start (nonBlocking, 3s)",
+          nonBlocking: true, // other actions remain enabled while this runs
+          value: () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve("completed"), 3000)
+            ),
+        },
+        secondary: { value: "cancel", label: "Cancel" },
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return (
+    <F0Button
+      label="Open non-blocking dialog"
+      onClick={showNonBlockingDialog}
+    />
+  )
+}
+```
+
+<Canvas of={DialogStories.NonBlocking} />
+
+### Modal
+
+By default a dialog can be dismissed by clicking the overlay (outside the dialog) or pressing <kbd>Escape</kbd>. Pass `modal: true` to make the dialog **require an explicit action** — clicking outside plays a subtle shake animation instead of closing, and <kbd>Escape</kbd> is ignored. The only way to close a modal dialog is through one of its actions (or programmatically via `dialog.close(id)`).
+
+Use it for decisions the user must consciously resolve — e.g. confirming a destructive action or completing a required step — where an accidental dismissal would be costly.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showModalDialog = async () => {
+    const result = await dialog.open({
+      title: "Modal Dialog",
+      description:
+        "This dialog cannot be closed by clicking outside or pressing Escape.",
+      content: <div>Use one of the actions below to close it.</div>,
+      modal: true,
+      actions: {
+        primary: { value: "confirm", label: "Confirm" },
+        secondary: { value: "cancel", label: "Cancel" },
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <F0Button label="Open modal dialog" onClick={showModalDialog} />
+}
+```
+
+<Canvas of={DialogStories.Modal} />
