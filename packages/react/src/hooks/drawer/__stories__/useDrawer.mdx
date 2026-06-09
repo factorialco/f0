@@ -185,9 +185,47 @@ function MyComponent() {
 
 ## Advanced Usage
 
+### Multiple actions (dropdown)
+
+When `primary` or `secondary` is given an **array** of actions instead of a single one, the footer renders them as a dropdown menu. Each item resolves the `openDrawer` promise with its own `value`, and items can be individually `disabled`.
+
+```tsx
+import { useDrawer } from "@/hooks/drawer"
+import { Delete, Pencil } from "@/icons/app"
+
+function MyComponent() {
+  const { openDrawer } = useDrawer()
+
+  const showDrawer = async () => {
+    const result = await openDrawer({
+      title: "Drawer with Dropdown Actions",
+      description: "This drawer has multiple secondary actions",
+      content: <div>Check the actions menu</div>,
+      actions: {
+        primary: {
+          value: "primary",
+          label: "Primary Action",
+        },
+        secondary: [
+          { value: "delete", icon: Delete, label: "Delete" },
+          { value: "other", icon: Pencil, label: "Other" },
+          { value: "cancel", label: "Cancel", disabled: true },
+        ],
+      },
+    })
+
+    console.log("User selected:", result)
+  }
+
+  return <button onClick={showDrawer}>Open Drawer with Dropdown</button>
+}
+```
+
+<Canvas of={UseDrawerStories.DrawerWithDropdown} />
+
 ### Promise-Based Actions
 
-The `DialogActionValue` can be a primitive value or a function that returns a Promise. When a function is provided, the drawer will remain open until the promise resolves, and all drawer actions will be disabled during the async operation (unless `nonBlocking` is set to `true`).
+A `DialogActionValue` can be a primitive value **or** a function that returns a Promise. When a function is provided, the drawer stays open until the promise resolves, the triggering button shows a loading state, and all actions are disabled during the async operation (unless `nonBlocking` is set to `true`). The resolved value becomes the result of `openDrawer`.
 
 ```tsx
 import { useDrawer } from "@/hooks/drawer"
@@ -197,35 +235,30 @@ function MyComponent() {
 
   const showDrawer = async () => {
     const result = await openDrawer({
-      title: "Process Data",
-      description: "Choose an action",
-      content: <div>Processing options...</div>,
+      title: "Drawer with Async Action",
+      description: "The primary action takes time to resolve",
+      content: <div>Click the primary action to see the loading state</div>,
       actions: {
-        primary: [
-          {
-            value: "quick",
-            label: "Quick Process",
-          },
-          {
-            value: async () => {
-              // Long-running operation
-              await new Promise((resolve) => setTimeout(resolve, 3000))
-              return "processed"
-            },
-            label: "Full Process",
-          },
-        ],
+        primary: {
+          label: "Save (Async)",
+          value: () =>
+            new Promise((resolve) => setTimeout(() => resolve("Saved"), 2000)),
+        },
+        secondary: {
+          value: "cancel",
+          label: "Cancel",
+        },
       },
     })
 
     console.log("Result:", result)
   }
 
-  return <button onClick={showDrawer}>Process</button>
+  return <button onClick={showDrawer}>Save</button>
 }
 ```
 
-<Canvas of={UseDrawerStories.DrawerWithDropdownAndPromises} />
+<Canvas of={UseDrawerStories.DrawerWithPromises} />
 
 ### Type Reference
 
