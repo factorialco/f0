@@ -9,10 +9,10 @@ import {
   F0AvatarAlert,
 } from "../F0AvatarAlert"
 
-const meta: Meta<typeof F0AvatarAlert> = {
+const meta = {
   component: F0AvatarAlert,
   title: "Avatars/AvatarAlert",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   parameters: {
     docs: {
       description: {
@@ -37,7 +37,7 @@ const meta: Meta<typeof F0AvatarAlert> = {
       },
     },
   },
-}
+} satisfies Meta<typeof F0AvatarAlert>
 
 export default meta
 type Story = StoryObj<typeof F0AvatarAlert>
@@ -45,6 +45,10 @@ type Story = StoryObj<typeof F0AvatarAlert>
 const SIZES = alertAvatarSizes
 const TYPES = alertAvatarTypes
 export const Default: Story = {
+  args: { type: "info", size: "lg" },
+}
+
+export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex w-fit flex-col gap-2">
