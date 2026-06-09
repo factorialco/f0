@@ -80,7 +80,6 @@ import { dialog } from "@factorialco/f0-react"
 import { F0Button } from "@/components/F0Button"
 
 function DeleteItemButton() {
-
   const handleClick = async () => {
     const result = await dialog.confirm({
       title: "Delete Item",
@@ -109,7 +108,6 @@ By default, the severity level is `info`.
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const showNotification = async () => {
     await dialog.openNotification({
       title: "Notification Title",
@@ -138,9 +136,11 @@ The `alert` method displays a simple alert dialog with a single confirmation but
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const showAlert = async () => {
-    await dialog.alert({ title: "Alert Title", msg: "This is an alert message" })
+    await dialog.alert({
+      title: "Alert Title",
+      msg: "This is an alert message",
+    })
     console.log("Alert dismissed")
   }
 
@@ -158,7 +158,6 @@ The `confirm` method displays a confirmation dialog with both confirm and cancel
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const handleDelete = async () => {
     const result = await dialog.confirm({
       title: "Delete Item",
@@ -189,7 +188,6 @@ import { dialog } from "@factorialco/f0-react"
 import { Delete, Pencil } from "lucide-react"
 
 function MyComponent() {
-
   const showCustomDialog = async () => {
     const result = await dialog.open({
       title: "Dialog Title",
@@ -236,18 +234,21 @@ The `DialogActionValue` can be a primitive value or a function that returns a Pr
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const handleSave = async () => {
-    const result = await dialog.confirm("Save Changes", "Do you want to save?", {
-      confirm: {
-        value: async () => {
-          // Simulate API call
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          return "saved"
+    const result = await dialog.confirm(
+      "Save Changes",
+      "Do you want to save?",
+      {
+        confirm: {
+          value: async () => {
+            // Simulate API call
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+            return "saved"
+          },
+          label: "Save",
         },
-        label: "Save",
-      },
-    })
+      }
+    )
 
     console.log("Result:", result) // "saved" after promise resolves
   }
@@ -264,7 +265,6 @@ function MyComponent() {
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const showDialog = async () => {
     const result = await dialog.open({
       title: "Process Data",
@@ -305,7 +305,6 @@ When `keepOpen` is set to `true` on a `DialogAction`, the dialog will not close 
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const showMultiStepDialog = async () => {
     const result = await dialog.open({
       title: "Multi-Step Process",
@@ -350,7 +349,6 @@ When `nonBlocking` is set to `true` on a `DialogAction`, the dialog actions will
 import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-
   const showNonBlockingDialog = async () => {
     const result = await dialog.open({
       title: "Background Operation",

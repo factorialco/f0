@@ -162,7 +162,12 @@ const result = await drawer.open({
 Pass an `id` when opening, then call `drawer.close(id)` to close it from elsewhere (its promise resolves with `undefined`).
 
 ```tsx
-drawer.open({ id: "my-drawer", title: "...", content: <div />, actions: { primary: { label: "OK", value: true } } })
+drawer.open({
+  id: "my-drawer",
+  title: "...",
+  content: <div />,
+  actions: { primary: { label: "OK", value: true } },
+})
 
 // later, from anywhere:
 drawer.close("my-drawer")
