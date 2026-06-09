@@ -383,3 +383,35 @@ function MyComponent() {
 ```
 
 <Canvas of={DialogStories.NonBlocking} />
+
+### Modal
+
+By default a dialog can be dismissed by clicking the overlay (outside the dialog) or pressing <kbd>Escape</kbd>. Pass `modal: true` to make the dialog **require an explicit action** — clicking outside plays a subtle shake animation instead of closing, and <kbd>Escape</kbd> is ignored. The only way to close a modal dialog is through one of its actions (or programmatically via `dialog.close(id)`).
+
+Use it for decisions the user must consciously resolve — e.g. confirming a destructive action or completing a required step — where an accidental dismissal would be costly.
+
+```tsx
+import { dialog, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showModalDialog = async () => {
+    const result = await dialog.open({
+      title: "Modal Dialog",
+      description:
+        "This dialog cannot be closed by clicking outside or pressing Escape.",
+      content: <div>Use one of the actions below to close it.</div>,
+      modal: true,
+      actions: {
+        primary: { value: "confirm", label: "Confirm" },
+        secondary: { value: "cancel", label: "Cancel" },
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <F0Button label="Open modal dialog" onClick={showModalDialog} />
+}
+```
+
+<Canvas of={DialogStories.Modal} />
