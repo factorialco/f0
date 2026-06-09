@@ -1,4 +1,5 @@
 export * from "./CalendarEvent"
+export * from "./ProgressBarN"
 export * from "./CalendarEventList"
 export * from "./Highlights/exports"
 export * from "./IndicatorsList"
