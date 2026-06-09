@@ -143,7 +143,10 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       <Card
         ref={hasAlert ? undefined : ref}
         className={cn(
-          "group @container bg-f1-background shadow-none",
+          // Hover affordance without making the card a click target: the border
+          // and shadow react to hover, but there's no pointer cursor (the row
+          // isn't clickable — only its actions are).
+          "group @container bg-f1-background shadow-none transition-all hover:border-f1-border-hover hover:shadow-md",
           compact && "p-3",
           fullHeight && "h-full"
         )}
