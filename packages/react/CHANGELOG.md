@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.50.0](https://github.com/factorialco/f0/compare/f0-react-v2.49.0...f0-react-v2.50.0) (2026-06-09)
+
+
+### Features
+
+* **F0Slider:** add slider component ([#4285](https://github.com/factorialco/f0/issues/4285)) ([d2b2974](https://github.com/factorialco/f0/commit/d2b2974fafaed9dee10301ead8428c47e4c45311))
+
 ## [2.49.0](https://github.com/factorialco/f0/compare/f0-react-v2.48.0...f0-react-v2.49.0) (2026-06-08)
 
 
