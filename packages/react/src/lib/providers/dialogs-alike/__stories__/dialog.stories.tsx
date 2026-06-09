@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Pencil } from "lucide-react"
-import React, { useState } from "react"
+import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { Delete } from "@/icons/app"
+import { Delete, Pencil } from "@/icons/app"
 
-import { DialogActionValue } from "../../../lib/providers/dialogs-alike/types"
-import { useDialog } from "../useDialog"
+import { dialog } from "../imperative"
+import { DialogActionValue } from "../types"
 
 const meta = {
   title: "Dialogs",
@@ -31,10 +30,8 @@ type Story = StoryObj<typeof meta>
 // Basic Variants
 export const Default: Story = {
   render: () => {
-    const { openDialog, alert, confirm, openNotificationDialog } = useDialog()
-
     const dialogTrigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -55,12 +52,15 @@ export const Default: Story = {
     }
 
     const alertTrigger = async () => {
-      const res = await alert({ title: "Alert Title", msg: "Alert Message" })
+      const res = await dialog.alert({
+        title: "Alert Title",
+        msg: "Alert Message",
+      })
       console.log(res)
     }
 
     const notificationTrigger = async () => {
-      const res = await openNotificationDialog({
+      const res = await dialog.openNotification({
         title: "Notification Title",
         msg: "Notification Message",
         actions: {
@@ -74,7 +74,7 @@ export const Default: Story = {
     }
 
     const confirmTrigger = async () => {
-      const res = await confirm({
+      const res = await dialog.confirm({
         title: "Confirm Title",
         msg: "Confirm Message",
         type: "critical",
@@ -88,7 +88,7 @@ export const Default: Story = {
         },
       })
       if (res) {
-        alert({ title: "Item deleted", msg: "Item has been deleted" })
+        dialog.alert({ title: "Item deleted", msg: "Item has been deleted" })
       }
       console.log(res)
     }
@@ -175,11 +175,10 @@ export const Default: Story = {
 
 export const Notification: Story = {
   render: () => {
-    const { openNotificationDialog } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const notificationTrigger = async () => {
-      const res = await openNotificationDialog({
+      const res = await dialog.openNotification({
         title: "Notification Title",
         msg: "Notification Message",
         type: "positive",
@@ -207,11 +206,13 @@ export const Notification: Story = {
 
 export const Alert: Story = {
   render: () => {
-    const { alert } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await alert({ title: "Alert Title", msg: "Alert Message" })
+      const res = await dialog.alert({
+        title: "Alert Title",
+        msg: "Alert Message",
+      })
       setRes(res)
     }
 
@@ -261,11 +262,10 @@ export const Alert: Story = {
 
 export const Confirm: Story = {
   render: () => {
-    const { confirm } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await confirm({
+      const res = await dialog.confirm({
         title: "Confirm Title",
         msg: "Confirm Message",
       })
@@ -336,11 +336,10 @@ export const Confirm: Story = {
 
 export const ConfirmWithPromiseAndCustomLabel: Story = {
   render: () => {
-    const { confirm } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await confirm({
+      const res = await dialog.confirm({
         title: "Confirm Title",
         msg: "Confirm Message",
         confirm: {
@@ -400,11 +399,10 @@ export const ConfirmWithPromiseAndCustomLabel: Story = {
 
 export const Dialog: Story = {
   render: () => {
-    const { openDialog } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -509,11 +507,10 @@ export const Dialog: Story = {
 
 export const DialogFullScreen: Story = {
   render: () => {
-    const { openDialog } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Dialog Title",
         size: "fullscreen",
         description: "Dialog Description",
@@ -556,11 +553,10 @@ export const DialogFullScreen: Story = {
 
 export const DialogWithDropdownAndPromises: Story = {
   render: () => {
-    const { openDialog } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -611,11 +607,10 @@ export const DialogWithDropdownAndPromises: Story = {
 
 export const DialogTriggersADialog: Story = {
   render: () => {
-    const { openDialog, confirm } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -632,7 +627,7 @@ export const DialogTriggersADialog: Story = {
               value: async () => {
                 return `Confirm-result-${
                   (
-                    await confirm({
+                    await dialog.confirm({
                       title: "Confirm Title",
                       msg: "Confirm Message",
                     })
@@ -657,11 +652,10 @@ export const DialogTriggersADialog: Story = {
 
 export const DialogWithModule: Story = {
   render: () => {
-    const { openDialog } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Performance Review",
         description: "Quarterly performance review discussion",
         module: {
@@ -695,11 +689,10 @@ export const DialogWithModule: Story = {
 
 export const Modal: Story = {
   render: () => {
-    const { openDialog } = useDialog()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDialog({
+      const res = await dialog.open({
         title: "Modal Dialog",
         description:
           "This is a modal dialog that cannot be closed by clicking outside or pressing Escape",

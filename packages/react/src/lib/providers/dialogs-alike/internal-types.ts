@@ -1,9 +1,8 @@
-import { DrawerDefinitionInternal } from "@/hooks/drawer/types"
-
 import {
   DialogAction,
   DialogActionValuePrimitive,
   DialogDefinitionInternal,
+  DrawerDefinitionInternal,
 } from "./types"
 
 export type DialogAlikeDefinition =

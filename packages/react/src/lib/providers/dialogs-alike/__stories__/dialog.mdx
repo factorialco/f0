@@ -1,15 +1,15 @@
 import { Canvas, Meta } from "@storybook/addon-docs/blocks"
-import * as UseDialogStories from "./useDialog.stories"
+import * as DialogStories from "./dialog.stories"
 
-<Meta of={UseDialogStories} />
+<Meta of={DialogStories} />
 
-# useDialog Hook
+# dialog
 
 ## Introduction
 
 ### Definition
 
-The `useDialog` hook provides a simplified, promise-based API for managing dialogs in React applications. It wraps the `F0Dialog` component internally, handling all state management and providing a streamlined developer experience.
+The `dialog` API provides a simplified, promise-based API for managing dialogs in React applications. It wraps the `F0Dialog` component internally, handling all state management and providing a streamlined developer experience.
 
 ### Purpose
 
@@ -19,9 +19,9 @@ The `useDialog` hook provides a simplified, promise-based API for managing dialo
 - **Consistent experience:** Standardized dialog patterns across the application
 - **Less code:** Reduce the amount of code needed to display dialogs significantly
 
-## Why useDialog?
+## Why the dialog API?
 
-The `useDialog` hook was created to provide a simpler and smoother experience, avoiding the need to write a lot of code. Here's a comparison showing how much simpler it is to use the hook versus managing `F0Dialog` directly:
+The `dialog` API was created to provide a simpler and smoother experience, avoiding the need to write a lot of code. Here's a comparison showing how much simpler it is to use the dialog API versus managing `F0Dialog` directly:
 
 ### Before: Using F0Dialog directly
 
@@ -71,19 +71,18 @@ function DeleteItemButton() {
 }
 ```
 
-### After: Using useDialog hook
+### After: Using the dialog API
 
-With `useDialog`, the same functionality is achieved with much less code:
+With the `dialog` API, the same functionality is achieved with much less code:
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 import { F0Button } from "@/components/F0Button"
 
 function DeleteItemButton() {
-  const { confirm } = useDialog()
 
   const handleClick = async () => {
-    const result = await confirm({
+    const result = await dialog.confirm({
       title: "Delete Item",
       msg: "Are you sure you want to delete this item? This action cannot be undone.",
     })
@@ -98,7 +97,7 @@ function DeleteItemButton() {
 }
 ```
 
-The hook handles all the state management, dialog rendering, and cleanup automatically. The promise-based API makes it easy to handle user responses with async/await.
+The API handles all the state management, dialog rendering, and cleanup automatically. The promise-based API makes it easy to handle user responses with async/await.
 
 ## Notification Dialogs
 
@@ -107,13 +106,12 @@ Notification dialogs have different severity levels: `info`, `warning`, `critica
 By default, the severity level is `info`.
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { openNotificationDialog } = useDialog()
 
   const showNotification = async () => {
-    await openNotificationDialog({
+    await dialog.openNotification({
       title: "Notification Title",
       msg: "This is a notification message",
       type: "critical",
@@ -130,20 +128,19 @@ function MyComponent() {
 }
 ```
 
-<Canvas of={UseDialogStories.Notification} />
+<Canvas of={DialogStories.Notification} />
 
 ### Alert Dialog
 
 The `alert` method displays a simple alert dialog with a single confirmation button. It returns a promise that resolves when the user clicks the confirm button.
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { alert } = useDialog()
 
   const showAlert = async () => {
-    await alert({ title: "Alert Title", msg: "This is an alert message" })
+    await dialog.alert({ title: "Alert Title", msg: "This is an alert message" })
     console.log("Alert dismissed")
   }
 
@@ -151,20 +148,19 @@ function MyComponent() {
 }
 ```
 
-<Canvas of={UseDialogStories.Alert} />
+<Canvas of={DialogStories.Alert} />
 
 ### Confirm Dialog
 
 The `confirm` method displays a confirmation dialog with both confirm and cancel buttons. It returns a promise that resolves to `true` if confirmed, or `false` if cancelled.
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { confirm } = useDialog()
 
   const handleDelete = async () => {
-    const result = await confirm({
+    const result = await dialog.confirm({
       title: "Delete Item",
       msg: "Are you sure you want to delete this item?",
     })
@@ -182,21 +178,20 @@ function MyComponent() {
 }
 ```
 
-<Canvas of={UseDialogStories.Confirm} />
+<Canvas of={DialogStories.Confirm} />
 
 ### Custom Dialog
 
 The `openDialog` method provides full control over the dialog content and actions. It accepts a dialog definition and returns a promise that resolves with the value of the action clicked.
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 import { Delete, Pencil } from "lucide-react"
 
 function MyComponent() {
-  const { openDialog } = useDialog()
 
   const showCustomDialog = async () => {
-    const result = await openDialog({
+    const result = await dialog.open({
       title: "Dialog Title",
       description: "Dialog Description",
       content: <div>Custom dialog content goes here</div>,
@@ -227,7 +222,7 @@ function MyComponent() {
 }
 ```
 
-<Canvas of={UseDialogStories.Dialog} />
+<Canvas of={DialogStories.Dialog} />
 
 ## Advanced Usage
 
@@ -238,13 +233,12 @@ The `DialogActionValue` can be a primitive value or a function that returns a Pr
 #### Confirm with Async Operation
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { confirm } = useDialog()
 
   const handleSave = async () => {
-    const result = await confirm("Save Changes", "Do you want to save?", {
+    const result = await dialog.confirm("Save Changes", "Do you want to save?", {
       confirm: {
         value: async () => {
           // Simulate API call
@@ -262,18 +256,17 @@ function MyComponent() {
 }
 ```
 
-<Canvas of={UseDialogStories.ConfirmWithPromiseAndCustomLabel} />
+<Canvas of={DialogStories.ConfirmWithPromiseAndCustomLabel} />
 
 #### Dialog with Promise-Based Primary Actions
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { openDialog } = useDialog()
 
   const showDialog = async () => {
-    const result = await openDialog({
+    const result = await dialog.open({
       title: "Process Data",
       description: "Choose an action",
       content: <div>Processing options...</div>,
@@ -302,20 +295,19 @@ function MyComponent() {
 }
 ```
 
-<Canvas of={UseDialogStories.DialogWithDropdownAndPromises} />
+<Canvas of={DialogStories.DialogWithDropdownAndPromises} />
 
 ### keepOpen Property
 
 When `keepOpen` is set to `true` on a `DialogAction`, the dialog will not close automatically when that action is clicked. This is useful for multi-step dialogs or when you need manual control over when the dialog closes.
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { openDialog } = useDialog()
 
   const showMultiStepDialog = async () => {
-    const result = await openDialog({
+    const result = await dialog.open({
       title: "Multi-Step Process",
       content: <div>Step 1: Initial information</div>,
       actions: {
@@ -333,7 +325,7 @@ function MyComponent() {
 
     if (result === "next") {
       // Show next step dialog
-      await openDialog({
+      await dialog.open({
         title: "Multi-Step Process",
         content: <div>Step 2: Final confirmation</div>,
         actions: {
@@ -355,13 +347,12 @@ function MyComponent() {
 When `nonBlocking` is set to `true` on a `DialogAction`, the dialog actions will remain enabled during promise execution. By default, when an action's value is a promise-returning function, all dialog actions are disabled until the promise resolves. Use `nonBlocking: true` when you want users to be able to interact with other actions while one is processing.
 
 ```tsx
-import { useDialog } from "@/hooks/dialog"
+import { dialog } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const { openDialog } = useDialog()
 
   const showNonBlockingDialog = async () => {
-    const result = await openDialog({
+    const result = await dialog.open({
       title: "Background Operation",
       content: <div>You can cancel while processing...</div>,
       actions: {

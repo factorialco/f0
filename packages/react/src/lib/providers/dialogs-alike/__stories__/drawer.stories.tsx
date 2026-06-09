@@ -1,14 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Pencil } from "lucide-react"
-import React, { useState } from "react"
+import { useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { Delete } from "@/icons/app"
+import { Delete, Pencil } from "@/icons/app"
 
-import { DialogActionValue } from "../../../lib/providers/dialogs-alike/types"
-import { useDrawer } from "../useDrawer"
+import { drawer } from "../imperative"
+import { DialogActionValue } from "../types"
 
 const meta = {
   title: "Drawers",
@@ -16,7 +15,7 @@ const meta = {
     layout: "centered",
     docs: {
       description: {
-        component: ["A hook that allows to trigger a drawer."]
+        component: ["Imperative API to open drawers from anywhere."]
           .map((line) => `<p>${line}</p>`)
           .join("\n"),
       },
@@ -31,10 +30,8 @@ type Story = StoryObj<typeof meta>
 // Basic Variants
 export const Default: Story = {
   render: () => {
-    const { openDrawer } = useDrawer()
-
     const drawerTrigger = async () => {
-      const res = await openDrawer({
+      const res = await drawer.open({
         title: "Drawer Title",
         description: "Drawer Description",
         content: <div>Drawer Content</div>,
@@ -93,11 +90,10 @@ export const Default: Story = {
 
 export const DrawerLeft: Story = {
   render: () => {
-    const { openDrawer } = useDrawer()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDrawer({
+      const res = await drawer.open({
         title: "Left Drawer",
         description: "This drawer opens from the left",
         position: "left",
@@ -129,11 +125,10 @@ export const DrawerLeft: Story = {
 
 export const DrawerWithDropdown: Story = {
   render: () => {
-    const { openDrawer } = useDrawer()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDrawer({
+      const res = await drawer.open({
         title: "Drawer with Dropdown Actions",
         description: "This drawer has multiple secondary actions",
         content: <div>Check the actions menu</div>,
@@ -175,11 +170,10 @@ export const DrawerWithDropdown: Story = {
 
 export const DrawerWithPromises: Story = {
   render: () => {
-    const { openDrawer } = useDrawer()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDrawer({
+      const res = await drawer.open({
         title: "Drawer with Async Action",
         description: "The primary action takes time to resolve",
         content: <div>Click the primary action to see the loading state</div>,
@@ -211,11 +205,10 @@ export const DrawerWithPromises: Story = {
 
 export const DrawerWithModule: Story = {
   render: () => {
-    const { openDrawer } = useDrawer()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDrawer({
+      const res = await drawer.open({
         title: "Time Off Request",
         description: "Request time off for your vacation",
         module: {
@@ -249,11 +242,10 @@ export const DrawerWithModule: Story = {
 
 export const DrawerModal: Story = {
   render: () => {
-    const { openDrawer } = useDrawer()
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await openDrawer({
+      const res = await drawer.open({
         title: "Modal Drawer",
         description: "This drawer behaves like a modal (blocks interaction)",
         modal: true,
