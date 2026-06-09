@@ -142,7 +142,7 @@ const inputFieldStatusVariants = cva({
 })
 
 /**
- * @internal Design system primitive. Do NOT use in product code.
+ * Design system primitive. Do NOT use in product code.
  *
  * `F0InputField` is the shared chrome (label, status, icon, append, clear,
  * loading, focus/hover/disabled styles, a11y wiring) used by every writable
