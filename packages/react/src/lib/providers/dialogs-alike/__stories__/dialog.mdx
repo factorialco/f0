@@ -29,8 +29,7 @@ When using `F0Dialog` directly, you need to manage state, handlers, and conditio
 
 ```tsx
 import { useState } from "react"
-import { F0Dialog } from "@/components/F0Dialog"
-import { F0Button } from "@/components/F0Button"
+import { F0Dialog, F0Button } from "@factorialco/f0-react"
 
 function DeleteItemButton() {
   const [isOpen, setIsOpen] = useState(false)
@@ -76,8 +75,7 @@ function DeleteItemButton() {
 With the `dialog` API, the same functionality is achieved with much less code:
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
-import { F0Button } from "@/components/F0Button"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function DeleteItemButton() {
   const handleClick = async () => {
@@ -105,7 +103,7 @@ Notification dialogs have different severity levels: `info`, `warning`, `critica
 By default, the severity level is `info`.
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showNotification = async () => {
@@ -122,7 +120,7 @@ function MyComponent() {
     })
   }
 
-  return <button onClick={showNotification}>Show Notification</button>
+  return <F0Button label="Show Notification" onClick={showNotification} />
 }
 ```
 
@@ -133,7 +131,7 @@ function MyComponent() {
 The `alert` method displays a simple alert dialog with a single confirmation button. It returns a promise that resolves when the user clicks the confirm button.
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showAlert = async () => {
@@ -144,7 +142,7 @@ function MyComponent() {
     console.log("Alert dismissed")
   }
 
-  return <button onClick={showAlert}>Show Alert</button>
+  return <F0Button label="Show Alert" onClick={showAlert} />
 }
 ```
 
@@ -155,7 +153,7 @@ function MyComponent() {
 The `confirm` method displays a confirmation dialog with both confirm and cancel buttons. It returns a promise that resolves to `true` if confirmed, or `false` if cancelled.
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const handleDelete = async () => {
@@ -173,7 +171,7 @@ function MyComponent() {
     }
   }
 
-  return <button onClick={handleDelete}>Delete</button>
+  return <F0Button label="Delete" onClick={handleDelete} />
 }
 ```
 
@@ -184,7 +182,7 @@ function MyComponent() {
 The `openDialog` method provides full control over the dialog content and actions. It accepts a dialog definition and returns a promise that resolves with the value of the action clicked.
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 import { Delete, Pencil } from "lucide-react"
 
 function MyComponent() {
@@ -216,7 +214,7 @@ function MyComponent() {
     console.log("User selected:", result)
   }
 
-  return <button onClick={showCustomDialog}>Open Dialog</button>
+  return <F0Button label="Open Dialog" onClick={showCustomDialog} />
 }
 ```
 
@@ -231,7 +229,7 @@ The `DialogActionValue` can be a primitive value or a function that returns a Pr
 #### Confirm with Async Operation
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const handleSave = async () => {
@@ -253,7 +251,7 @@ function MyComponent() {
     console.log("Result:", result) // "saved" after promise resolves
   }
 
-  return <button onClick={handleSave}>Save</button>
+  return <F0Button label="Save" onClick={handleSave} />
 }
 ```
 
@@ -262,7 +260,7 @@ function MyComponent() {
 #### Dialog with Promise-Based Primary Actions
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showDialog = async () => {
@@ -291,7 +289,7 @@ function MyComponent() {
     console.log("Result:", result)
   }
 
-  return <button onClick={showDialog}>Process</button>
+  return <F0Button label="Process" onClick={showDialog} />
 }
 ```
 
@@ -302,7 +300,7 @@ function MyComponent() {
 When `keepOpen` is set to `true` on a `DialogAction`, the dialog will not close automatically when that action is clicked. This is useful for multi-step dialogs or when you need manual control over when the dialog closes.
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showMultiStepDialog = async () => {
@@ -337,7 +335,7 @@ function MyComponent() {
     }
   }
 
-  return <button onClick={showMultiStepDialog}>Start Process</button>
+  return <F0Button label="Start Process" onClick={showMultiStepDialog} />
 }
 ```
 
@@ -346,7 +344,7 @@ function MyComponent() {
 When `nonBlocking` is set to `true` on a `DialogAction`, the dialog actions will remain enabled during promise execution. By default, when an action's value is a promise-returning function, all dialog actions are disabled until the promise resolves. Use `nonBlocking: true` when you want users to be able to interact with other actions while one is processing.
 
 ```tsx
-import { dialog } from "@factorialco/f0-react"
+import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showNonBlockingDialog = async () => {
@@ -373,7 +371,7 @@ function MyComponent() {
     console.log("Result:", result)
   }
 
-  return <button onClick={showNonBlockingDialog}>Start</button>
+  return <F0Button label="Start" onClick={showNonBlockingDialog} />
 }
 ```
 
