@@ -2,6 +2,7 @@ import { avatarFor } from "./helpers"
 
 export type TrainingStatus = "active" | "draft"
 export type TrainingType = "internal" | "external"
+export type TrainingViewerRole = "editor" | "viewer"
 
 export type TrainingCategory = {
   id: string
@@ -93,6 +94,7 @@ export type Training = {
   scoreKnowledge?: number | null
   // FR/ES region flags used by conditional sections
   countryHint?: "es" | "fr" | "other"
+  viewerRole?: TrainingViewerRole | null
 }
 
 export const trainingCategories: TrainingCategory[] = [
@@ -159,6 +161,7 @@ export const trainings: Training[] = [
     scoreEffectiveness: 4.4,
     scoreKnowledge: 4.2,
     countryHint: "es",
+    viewerRole: "editor",
     classes: [
       {
         id: "cls-001a",
@@ -238,6 +241,7 @@ export const trainings: Training[] = [
     isModulesRequired: false,
     knowledgeTestRequired: true,
     courseValidityEnabled: true,
+    viewerRole: "viewer",
     classes: [
       {
         id: "cls-002a",
@@ -293,6 +297,7 @@ export const trainings: Training[] = [
     isModulesRequired: true,
     knowledgeTestRequired: false,
     courseValidityEnabled: false,
+    viewerRole: "editor",
     classes: [
       {
         id: "cls-003a",
@@ -346,6 +351,7 @@ export const trainings: Training[] = [
     isModulesRequired: false,
     knowledgeTestRequired: false,
     courseValidityEnabled: false,
+    viewerRole: "viewer",
     classes: [
       {
         id: "cls-004a",

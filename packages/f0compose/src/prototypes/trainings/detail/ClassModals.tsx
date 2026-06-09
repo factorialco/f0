@@ -71,7 +71,7 @@ const TITLES: Record<Exclude<ClassAction, null>, string> = {
   "edit-session": "Edit session",
   "cancel-session": "Cancel session",
   "edit-class": "Edit group",
-  "class-settings": "Group settings",
+  "class-settings": "Training group settings",
   "delete-class": "Delete group",
   "duplicate-class": "Duplicate group",
   "add-participants": "Add participants to group",
@@ -203,7 +203,7 @@ export function ClassModals({
         {action === "edit-class" && (
           <>
             <Input
-              label="Group name"
+              label="Training group name"
               value={groupName}
               onChange={(v) => setGroupName(v ?? "")}
             />
@@ -279,7 +279,7 @@ export function ClassModals({
         {action === "duplicate-class" && (
           <>
             <Input
-              label="New group name"
+              label="New training group name"
               value={duplicateName}
               onChange={(v) => setDuplicateName(v ?? "")}
             />

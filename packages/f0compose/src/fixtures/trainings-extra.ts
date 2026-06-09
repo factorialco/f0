@@ -494,7 +494,7 @@ export const trainingBudgets: TrainingBudget[] = [
     ownerEmployeeId: "emp-001",
     ownerEmployeeName: "Javier Molina",
     description:
-      "Exploration state: training group changes have been detected since costs were last saved.",
+      "Training budget for Communication skills groups across Madrid, France and Italy.",
     startDate: "2026-01-01",
     endDate: "2026-12-31",
     legalEntityId: "le-factorial-spain",

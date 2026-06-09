@@ -122,7 +122,7 @@ export function NewTrainingWizard({ isOpen, onClose, onCreated }: Props) {
       position="center"
       width="xl"
       title="New course draft"
-      description="Create the course draft with the same core information used by the upstream wizard. Groups, sessions and participants can be added from the course detail."
+      description="Create the course draft with the same core information used by the upstream wizard. Training groups, sessions and participants can be added from the course detail."
       primaryAction={{
         label: "Create",
         onClick: handleCreate,

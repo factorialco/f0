@@ -3,7 +3,6 @@ import {
   F0AvatarIcon,
   F0Box,
   F0Button,
-  F0Card,
   F0Dialog,
   F0Icon,
   F0Text,
@@ -28,6 +27,7 @@ import {
   Add,
   ArrowDown,
   ChartLine,
+  ChevronDown,
   ChevronUp,
   Delete,
   DollarBill,
@@ -44,6 +44,7 @@ import type {
   Training,
   TrainingBudget,
   TrainingBudgetMovement,
+  TrainingMovementLegalEntityCost,
 } from "@/fixtures"
 
 import {
@@ -66,15 +67,12 @@ import {
 import type { PrototypeMeta } from "../../../types"
 
 import {
+  getCostsByLegalEntityToggle,
   setCostsByLegalEntityToggle,
   useCostsByLegalEntityToggle,
+  useCostsByLegalEntityToggleVersion,
 } from "../../costsByLegalEntityToggleStore"
 import { trainingsTopNav } from "../../topNav"
-import {
-  markCostsUpdated,
-  useTriggeredChangedMovementIds,
-  useUpdatedMovementIds,
-} from "../../updatedCostsStore"
 
 export const meta: PrototypeMeta = {
   slug: "trainings-budgets",
@@ -255,6 +253,56 @@ function legalEntitiesForMovement(movement: TrainingBudgetMovement) {
   return participantsByLegalEntityForMovement(movement)
     .map(({ legalEntityId }) => findLegalEntity(legalEntityId))
     .filter((le): le is NonNullable<typeof le> => Boolean(le))
+}
+
+function movementWithCostBreakdown(
+  movement: TrainingBudgetMovement,
+  costsByLegalEntity: TrainingMovementLegalEntityCost[]
+): TrainingBudgetMovement {
+  const totalCost = costsByLegalEntity.reduce(
+    (sum, cost) => sum + cost.directCost + cost.indirectCost + cost.salaryCost,
+    0
+  )
+
+  return {
+    ...movement,
+    amountCents: Math.round(totalCost * 100),
+    costsByLegalEntity,
+  }
+}
+
+function movementWithAggregateCostBreakdown(
+  movement: TrainingBudgetMovement,
+  costBreakdown: Pick<
+    TrainingBudgetMovement,
+    "directCost" | "indirectCost" | "salaryCost"
+  >
+): TrainingBudgetMovement {
+  const { directCost, indirectCost, salaryCost } = costBreakdown
+  const totalCost = directCost + indirectCost + salaryCost
+
+  return {
+    ...movement,
+    amountCents: Math.round(totalCost * 100),
+    directCost,
+    indirectCost,
+    salaryCost,
+  }
+}
+
+function aggregateGrossCostFromMovement(movement: TrainingBudgetMovement) {
+  return movement.directCost + movement.indirectCost + movement.salaryCost
+}
+
+function shouldShowLegalEntityCosts(movement: TrainingBudgetMovement) {
+  const hasMultipleLEs = legalEntitiesForMovement(movement).length > 1
+  return getCostsByLegalEntityToggle(movement.groupId, hasMultipleLEs)
+}
+
+function displayedGrossCostFromMovement(movement: TrainingBudgetMovement) {
+  return shouldShowLegalEntityCosts(movement)
+    ? grossCostFromMovement(movement)
+    : aggregateGrossCostFromMovement(movement)
 }
 
 // ── URL routing ─────────────────────────────────────────────────────────────
@@ -900,23 +948,35 @@ function DetailView({
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isAddGroupOpen, setIsAddGroupOpen] = useState(false)
-  const updatedMovementIds = useUpdatedMovementIds()
-  const triggeredChangedMovementIds = useTriggeredChangedMovementIds()
-  const [isChangedCostsReviewOpen, setIsChangedCostsReviewOpen] =
-    useState(false)
   const [selectedMovement, setSelectedMovement] =
     useState<TrainingBudgetMovement | null>(null)
   const [extraMovements, setExtraMovements] = useState<
     TrainingBudgetMovement[]
   >([])
+  const [editedMovements, setEditedMovements] = useState<
+    Record<string, TrainingBudgetMovement>
+  >({})
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set())
+  const costsByLegalEntityToggleVersion = useCostsByLegalEntityToggleVersion()
 
   const movements = useMemo<TrainingBudgetMovement[]>(() => {
     if (!b) return []
     const base = movementsForBudget(b.id)
-    return [...base, ...extraMovements].filter((m) => !removedIds.has(m.id))
-  }, [b, extraMovements, removedIds])
-  const movementsVersion = movements.map((movement) => movement.id).join("-")
+    return [...base, ...extraMovements]
+      .map((m) => editedMovements[m.id] ?? m)
+      .filter((m) => !removedIds.has(m.id))
+  }, [b, extraMovements, editedMovements, removedIds])
+  const movementsVersion = movements
+    .map(
+      (movement) => `${movement.id}:${displayedGrossCostFromMovement(movement)}`
+    )
+    .concat(costsByLegalEntityToggleVersion)
+    .join("-")
+
+  const selectedMovementFromList = selectedMovement
+    ? (movements.find((movement) => movement.id === selectedMovement.id) ??
+      selectedMovement)
+    : null
 
   // Group movements by trainingId so the table can render a nested structure:
   // the parent row represents the training (with aggregated cost / participants
@@ -934,7 +994,7 @@ function DetailView({
     for (const [trainingId, list] of byTraining) {
       const first = list[0]
       const totalCents = list.reduce(
-        (s, m) => s + Math.round(grossCostFromMovement(m) * 100),
+        (s, m) => s + Math.round(displayedGrossCostFromMovement(m) * 100),
         0
       )
       const participants = list.reduce(
@@ -976,34 +1036,14 @@ function DetailView({
       ),
     [movements, trainingParents]
   )
-  const changedMovements = useMemo(
-    () =>
-      movements.filter(
-        (movement) =>
-          (Boolean(movement.costUpdateNotice) ||
-            triggeredChangedMovementIds.has(movement.id)) &&
-          !updatedMovementIds.has(movement.id)
-      ),
-    [movements, triggeredChangedMovementIds, updatedMovementIds]
-  )
-  const changedCostsSummary =
-    changedMovements.length === 0
-      ? ""
-      : `${changedMovements.length} ${
-          changedMovements.length === 1 ? "training group has" : "training groups have"
-        } changes that can affect this budget's cost figures. Review the affected groups before updating costs.`
-  const openChangedCostsReview = () => setIsChangedCostsReviewOpen(true)
-  const updateChangedCosts = () => {
-    markCostsUpdated(changedMovements.map((movement) => movement.id))
-    setIsChangedCostsReviewOpen(false)
-  }
-
   const goToTrainingGroup = (m: TrainingBudgetMovement) => {
-    navigate(`/p/trainings?training=${m.trainingId}&class=${m.groupId}`)
+    navigate(
+      `/p/trainings?training=${m.trainingId}&class=${m.groupId}&ctab=costs`
+    )
   }
 
-  const selectedMovementIndex = selectedMovement
-    ? movementNavigation.findIndex((m) => m.id === selectedMovement.id)
+  const selectedMovementIndex = selectedMovementFromList
+    ? movementNavigation.findIndex((m) => m.id === selectedMovementFromList.id)
     : -1
 
   const selectMovementAt = (index: number) => {
@@ -1022,7 +1062,7 @@ function DetailView({
       ],
       filters: {
         groupStatus: {
-          label: "Group status",
+          label: "Training group status",
           type: "in",
           options: {
             options: [
@@ -1194,10 +1234,10 @@ function DetailView({
   const total = b.totalAmount
   const spent = movements
     .filter((m) => m.paymentStatus === "spent")
-    .reduce((s, m) => s + grossCostFromMovement(m), 0)
+    .reduce((s, m) => s + displayedGrossCostFromMovement(m), 0)
   const pending = movements
     .filter((m) => m.paymentStatus === "pending")
-    .reduce((s, m) => s + grossCostFromMovement(m), 0)
+    .reduce((s, m) => s + displayedGrossCostFromMovement(m), 0)
   const committed = spent + pending
   const available = total - committed
 
@@ -1270,7 +1310,7 @@ function DetailView({
               },
             },
             {
-              label: "Groups",
+              label: "Training groups",
               value: { type: "text", content: String(groupsCount) },
             },
           ]}
@@ -1320,17 +1360,6 @@ function DetailView({
           <AmountWidget label="Available" value={fmtEurAmount(available)} />
         </div>
 
-        {changedMovements.length > 0 && (
-          <div className="px-6">
-            <F0Alert
-              variant="warning"
-              title="Costs changed"
-              description={changedCostsSummary}
-              action={{ label: "Review groups", onClick: openChangedCostsReview }}
-            />
-          </div>
-        )}
-
         <OneDataCollection
           key={movementsVersion}
           id="trainings/budgets/detail/v1"
@@ -1351,7 +1380,7 @@ function DetailView({
                     }),
                   },
                   {
-                    label: "Group status",
+                    label: "Training group status",
                     id: "groupStatus",
                     render: (item) =>
                       item.isParent
@@ -1392,7 +1421,9 @@ function DetailView({
                         ? { type: "text", value: "" }
                         : {
                             type: "text",
-                            value: fmtEurCompact(grossCostFromMovement(item)),
+                            value: fmtEurCompact(
+                              displayedGrossCostFromMovement(item)
+                            ),
                           },
                   },
                   {
@@ -1407,9 +1438,10 @@ function DetailView({
                         type: "text",
                         value:
                           participantCount > 0
-                            ? fmtEurCompact(
-                                grossCostFromMovement(item) / participantCount
-                              )
+                              ? fmtEurCompact(
+                                  displayedGrossCostFromMovement(item) /
+                                    participantCount
+                                )
                             : "-",
                       }
                     },
@@ -1535,29 +1567,21 @@ function DetailView({
           />
         )}
 
-        {isChangedCostsReviewOpen && (
-          <ChangedCostsReviewSidepanel
-            movements={changedMovements}
-            onOpenMovement={(movement) => {
-              setSelectedMovement(movement)
-              setIsChangedCostsReviewOpen(false)
-            }}
-            onUpdateCosts={updateChangedCosts}
-            onClose={() => setIsChangedCostsReviewOpen(false)}
-          />
-        )}
-
-        {selectedMovement && (
+        {selectedMovementFromList && (
           <TrainingGroupCostSidepanel
-            movement={selectedMovement}
-            costsChanged={changedMovements.some(
-              (movement) => movement.id === selectedMovement.id
-            )}
+            movement={selectedMovementFromList}
             hasPrevious={selectedMovementIndex > 0}
             hasNext={selectedMovementIndex < movementNavigation.length - 1}
             onPrevious={() => selectMovementAt(selectedMovementIndex - 1)}
             onNext={() => selectMovementAt(selectedMovementIndex + 1)}
-            onGoToGroup={() => goToTrainingGroup(selectedMovement)}
+            onGoToGroup={() => goToTrainingGroup(selectedMovementFromList)}
+            onCostChange={(nextMovement) => {
+              setEditedMovements((current) => ({
+                ...current,
+                [nextMovement.id]: nextMovement,
+              }))
+              setSelectedMovement(nextMovement)
+            }}
             onClose={() => setSelectedMovement(null)}
           />
         )}
@@ -1568,21 +1592,21 @@ function DetailView({
 
 function TrainingGroupCostSidepanel({
   movement,
-  costsChanged,
   hasPrevious,
   hasNext,
   onPrevious,
   onNext,
   onGoToGroup,
+  onCostChange,
   onClose,
 }: {
   movement: TrainingBudgetMovement
-  costsChanged: boolean
   hasPrevious: boolean
   hasNext: boolean
   onPrevious: () => void
   onNext: () => void
   onGoToGroup: () => void
+  onCostChange: (movement: TrainingBudgetMovement) => void
   onClose: () => void
 }) {
   const [activeTab, setActiveTab] = useState<"cost" | "participants">("cost")
@@ -1642,7 +1666,7 @@ function TrainingGroupCostSidepanel({
         />
         <F0Button
           label="Next group"
-          icon={ArrowDown}
+          icon={ChevronDown}
           hideLabel
           variant="outline"
           size="md"
@@ -1652,8 +1676,9 @@ function TrainingGroupCostSidepanel({
       </div>
       {activeTab === "cost" ? (
         <GroupSidepanelCostTab
+          key={movement.id}
           movement={movement}
-          costsChanged={costsChanged}
+          onCostChange={onCostChange}
         />
       ) : (
         <GroupSidepanelParticipantsTab movement={movement} />
@@ -1662,50 +1687,12 @@ function TrainingGroupCostSidepanel({
   )
 }
 
-function ChangedCostsReviewSidepanel({
-  movements,
-  onOpenMovement,
-  onUpdateCosts,
-  onClose,
-}: {
-  movements: TrainingBudgetMovement[]
-  onOpenMovement: (movement: TrainingBudgetMovement) => void
-  onUpdateCosts: () => void
-  onClose: () => void
-}) {
-  return (
-    <F0Dialog
-      isOpen
-      onClose={onClose}
-      position="right"
-      width="md"
-      title={`${movements.length} groups with cost changes`}
-      description="These groups have changes that can affect the budget's cost figures. Update costs once you have reviewed the list."
-      primaryAction={{ label: "Update costs", onClick: onUpdateCosts }}
-      secondaryAction={{ label: "Cancel", onClick: onClose }}
-      disableContentPadding
-    >
-      <F0Box display="flex" flexDirection="column" gap="md" padding="lg">
-        {movements.map((movement) => (
-          <F0Card
-            key={movement.id}
-            compact
-            title={movement.groupName}
-            description={movement.trainingName}
-            onClick={() => onOpenMovement(movement)}
-          />
-        ))}
-      </F0Box>
-    </F0Dialog>
-  )
-}
-
 function GroupSidepanelCostTab({
   movement,
-  costsChanged,
+  onCostChange,
 }: {
   movement: TrainingBudgetMovement
-  costsChanged: boolean
+  onCostChange: (movement: TrainingBudgetMovement) => void
 }) {
   const les = legalEntitiesForMovement(movement)
   const hasMultipleLEs = les.length > 1
@@ -1714,25 +1701,67 @@ function GroupSidepanelCostTab({
     hasMultipleLEs
   )
   const [openLeId, setOpenLeId] = useState<string | null>(les[0]?.id ?? null)
+  const [isTotalCostOpen, setIsTotalCostOpen] = useState(false)
+  const [legalEntityCosts, setLegalEntityCosts] = useState(() =>
+    breakdownByLegalEntityWithRealParticipants(movement)
+  )
+  const [aggregateCostBreakdown, setAggregateCostBreakdown] = useState(() => ({
+    directCost: movement.directCost,
+    indirectCost: movement.indirectCost,
+    salaryCost: movement.salaryCost,
+  }))
 
   const breakdownMap = new Map(
-    breakdownByLegalEntityWithRealParticipants(movement).map((cost) => [
-      cost.legalEntityId,
-      cost,
-    ])
+    legalEntityCosts.map((cost) => [cost.legalEntityId, cost])
   )
-  const grossCost = grossCostFromMovement(movement)
+  const assignedGrossCost = legalEntityCosts.reduce(
+    (sum, cost) => sum + cost.directCost + cost.indirectCost + cost.salaryCost,
+    0
+  )
+  const totalCostBreakdown = legalEntityCosts.reduce(
+    (total, cost) => ({
+      directCost: total.directCost + cost.directCost,
+      indirectCost: total.indirectCost + cost.indirectCost,
+      salaryCost: total.salaryCost + cost.salaryCost,
+    }),
+    { directCost: 0, indirectCost: 0, salaryCost: 0 }
+  )
+  const visibleTotalCostBreakdown =
+    showByLegalEntity && hasMultipleLEs
+      ? totalCostBreakdown
+      : aggregateCostBreakdown
+  const grossCost =
+    showByLegalEntity && hasMultipleLEs
+      ? assignedGrossCost
+      : aggregateCostBreakdown.directCost +
+        aggregateCostBreakdown.indirectCost +
+        aggregateCostBreakdown.salaryCost
+
+  const updateLegalEntityCost = (
+    legalEntityId: string,
+    key: "directCost" | "indirectCost" | "salaryCost",
+    value: number
+  ) => {
+    const nextCosts = legalEntityCosts.map((cost) =>
+      cost.legalEntityId === legalEntityId ? { ...cost, [key]: value } : cost
+    )
+    setLegalEntityCosts(nextCosts)
+    onCostChange(movementWithCostBreakdown(movement, nextCosts))
+  }
+
+  const updateTotalCostPart = (
+    key: "directCost" | "indirectCost" | "salaryCost",
+    value: number
+  ) => {
+    if (showByLegalEntity && hasMultipleLEs) return
+
+    const nextBreakdown = { ...aggregateCostBreakdown, [key]: value }
+    setAggregateCostBreakdown(nextBreakdown)
+    onCostChange(movementWithAggregateCostBreakdown(movement, nextBreakdown))
+  }
 
   return (
     <div className="flex flex-col gap-4 px-5 py-4">
-      {costsChanged && (
-        <F0Alert
-          variant="warning"
-          title="Costs changed"
-          description="This group's costs changed since they were last updated. Review the cost figures before updating costs."
-        />
-      )}
-
       {/* InputSelect Payment status — node 5033:79904 */}
       <div className="flex flex-col gap-2">
         <span className="text-f1-foreground-secondary text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
@@ -1756,35 +1785,122 @@ function GroupSidepanelCostTab({
             Total cost
           </span>
         </div>
-        <div className="border-f1-border bg-f1-background flex h-16 items-center gap-2.5 overflow-hidden rounded-xl border border-solid p-3">
-          <F0AvatarIcon size="lg" icon={Office} />
-          <div className="flex min-w-0 flex-1 flex-col justify-center">
-            <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
-              Total cost
-            </span>
-            <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-              {participantCountForMovement(movement)} participants
-            </span>
-          </div>
-          <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
-            {fmtFigmaEur(grossCost)}
-          </span>
-          <F0Icon icon={ArrowDown} size="sm" color="secondary" />
-        </div>
+        {isTotalCostOpen ? (
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            gap="2xl"
+            overflow="hidden"
+            padding="md"
+            border="default"
+            borderColor="default"
+            borderRadius="xl"
+            background="primary"
+          >
+            <button
+              type="button"
+              onClick={() => setIsTotalCostOpen(false)}
+              className="flex items-center gap-2.5 text-left"
+            >
+              <F0AvatarIcon size="lg" icon={Office} />
+              <F0Box
+                display="flex"
+                flexDirection="column"
+                justifyContent="center"
+                minWidth="0"
+                grow
+              >
+                <F0Text variant="label" content="Total cost" />
+                <F0Text
+                  variant="description"
+                  content={`${participantCountForMovement(movement)} participants`}
+                />
+              </F0Box>
+              <F0Text variant="label" content={fmtFigmaEur(grossCost)} />
+              <F0Icon icon={ChevronUp} size="sm" color="secondary" />
+            </button>
+            <F0Box display="grid" columns="3" gap="lg">
+              <LegalEntityInput
+                label="Direct cost"
+                value={visibleTotalCostBreakdown.directCost}
+                disabled={showByLegalEntity && hasMultipleLEs}
+                onChange={(value) => updateTotalCostPart("directCost", value)}
+              />
+              <LegalEntityInput
+                label="Indirect cost"
+                value={visibleTotalCostBreakdown.indirectCost}
+                disabled={showByLegalEntity && hasMultipleLEs}
+                onChange={(value) => updateTotalCostPart("indirectCost", value)}
+              />
+              <LegalEntityInput
+                label="Salary cost"
+                value={visibleTotalCostBreakdown.salaryCost}
+                disabled={showByLegalEntity && hasMultipleLEs}
+                onChange={(value) => updateTotalCostPart("salaryCost", value)}
+              />
+            </F0Box>
+          </F0Box>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setIsTotalCostOpen(true)}
+            className="border-f1-border bg-f1-background flex h-16 items-center gap-2.5 overflow-hidden rounded-xl border border-solid p-3 text-left"
+          >
+            <F0AvatarIcon size="lg" icon={Office} />
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              minWidth="0"
+              grow
+            >
+              <F0Text variant="label" content="Total cost" />
+              <F0Text
+                variant="description"
+                content={`${participantCountForMovement(movement)} participants`}
+              />
+            </F0Box>
+            <F0Text variant="label" content={fmtFigmaEur(grossCost)} />
+            <F0Icon icon={ArrowDown} size="sm" color="secondary" />
+          </button>
+        )}
       </div>
 
       {/* Costs by legal entity outer wrapper — node 5033:79687 */}
-      <div className="border-f1-border bg-f1-background flex flex-col gap-6 rounded-xl border border-solid px-2 py-4">
+      <F0Box
+        display="flex"
+        flexDirection="column"
+        gap="2xl"
+        paddingX="sm"
+        paddingY="lg"
+        border="default"
+        borderColor="default"
+        borderRadius="xl"
+        background="primary"
+      >
         {/* Toggle row card — node 5033:79689 (NO border, bg white) */}
-        <div className="bg-f1-background flex items-center gap-2.5 overflow-hidden rounded-xl p-3">
-          <div className="flex min-w-0 flex-1 flex-col justify-center">
-            <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
-              Costs by legal entity
-            </span>
-            <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-              Track and manage all costs per legal entity
-            </span>
-          </div>
+        <F0Box
+          display="flex"
+          alignItems="center"
+          gap="lg"
+          overflow="hidden"
+          padding="md"
+          borderRadius="xl"
+          background="primary"
+        >
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            justifyContent="center"
+            minWidth="0"
+            grow
+          >
+            <F0Text variant="label" content="Costs by legal entity" />
+            <F0Text
+              variant="description"
+              content="Track and manage all costs per legal entity"
+            />
+          </F0Box>
           <Switch
             title="Costs by legal entity"
             id={`budget-sidepanel-costs-by-legal-entity-${movement.id}`}
@@ -1795,11 +1911,11 @@ function GroupSidepanelCostTab({
             }
             disabled={!hasMultipleLEs}
           />
-        </div>
+        </F0Box>
 
         {/* Inner cards wrapper — node 5033:79690 (px-4, gap-6) */}
         {showByLegalEntity && hasMultipleLEs && (
-          <div className="flex flex-col gap-6 px-4">
+          <F0Box display="flex" flexDirection="column" gap="2xl" paddingX="lg">
             {les.map((le) => {
               const breakdown = breakdownMap.get(le.id)
               const isOpen = openLeId === le.id
@@ -1817,9 +1933,17 @@ function GroupSidepanelCostTab({
               if (isOpen && breakdown) {
                 // Expanded card — node 5033:79698 (gap-6 between header & inputs)
                 return (
-                  <div
+                  <F0Box
                     key={le.id}
-                    className="border-f1-border bg-f1-background flex flex-col gap-6 overflow-hidden rounded-xl border border-solid p-3"
+                    display="flex"
+                    flexDirection="column"
+                    gap="2xl"
+                    overflow="hidden"
+                    padding="md"
+                    border="default"
+                    borderColor="default"
+                    borderRadius="xl"
+                    background="primary"
                   >
                     <button
                       type="button"
@@ -1827,34 +1951,46 @@ function GroupSidepanelCostTab({
                       className="flex items-center gap-2.5 text-left"
                     >
                       <F0AvatarIcon size="lg" icon={Office} />
-                      <div className="flex h-10 min-w-0 flex-1 flex-col justify-center">
-                        <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
-                          {le.legalName}
-                        </span>
-                        <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-                          {participantCount} participants
-                        </span>
-                      </div>
-                      <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
-                        {fmtFigmaEur(total)}
-                      </span>
+                      <F0Box
+                        display="flex"
+                        flexDirection="column"
+                        justifyContent="center"
+                        minWidth="0"
+                        grow
+                      >
+                        <F0Text variant="label" content={le.legalName} />
+                        <F0Text
+                          variant="description"
+                          content={`${participantCount} participants`}
+                        />
+                      </F0Box>
+                      <F0Text variant="label" content={fmtFigmaEur(total)} />
                       <F0Icon icon={ChevronUp} size="sm" color="secondary" />
                     </button>
-                    <div className="grid grid-cols-3 gap-2.5">
+                    <F0Box display="grid" columns="3" gap="lg">
                       <LegalEntityInput
                         label="Direct cost"
                         value={breakdown.directCost}
+                        onChange={(value) =>
+                          updateLegalEntityCost(le.id, "directCost", value)
+                        }
                       />
                       <LegalEntityInput
                         label="Indirect cost"
                         value={breakdown.indirectCost}
+                        onChange={(value) =>
+                          updateLegalEntityCost(le.id, "indirectCost", value)
+                        }
                       />
                       <LegalEntityInput
                         label="Salary cost"
                         value={breakdown.salaryCost}
+                        onChange={(value) =>
+                          updateLegalEntityCost(le.id, "salaryCost", value)
+                        }
                       />
-                    </div>
-                  </div>
+                    </F0Box>
+                  </F0Box>
                 )
               }
 
@@ -1867,25 +2003,39 @@ function GroupSidepanelCostTab({
                   className="border-f1-border bg-f1-background flex h-16 items-center gap-2.5 overflow-hidden rounded-xl border border-solid p-3 text-left"
                 >
                   <F0AvatarIcon size="lg" icon={Office} />
-                  <div className="flex min-w-0 flex-1 flex-col justify-center">
-                    <span className="text-f1-foreground text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
-                      {le.legalName}
-                    </span>
-                    <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-                      {prefix}
-                      {participantCount} participants
-                    </span>
-                  </div>
-                  <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
-                    {fmtFigmaEur(total)}
-                  </span>
+                  <F0Box
+                    display="flex"
+                    flexDirection="column"
+                    justifyContent="center"
+                    minWidth="0"
+                    grow
+                  >
+                    <F0Text variant="label" content={le.legalName} />
+                    <F0Text
+                      variant="description"
+                      content={`${prefix}${participantCount} participants`}
+                    />
+                  </F0Box>
+                  <F0Text variant="label" content={fmtFigmaEur(total)} />
                   <F0Icon icon={ArrowDown} size="sm" color="secondary" />
                 </button>
               )
             })}
 
             {/* Summary list item — node 5033:81077 */}
-            <div className="border-f1-border-secondary bg-f1-background-secondary flex flex-col gap-2 overflow-hidden rounded-xl border border-solid py-2 pr-3 pl-4">
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              gap="md"
+              overflow="hidden"
+              paddingY="sm"
+              paddingRight="md"
+              paddingLeft="lg"
+              border="default"
+              borderColor="secondary"
+              borderRadius="xl"
+              background="secondary"
+            >
               {les.map((le) => {
                 const breakdown = breakdownMap.get(le.id)
                 const total = breakdown
@@ -1894,38 +2044,33 @@ function GroupSidepanelCostTab({
                     breakdown.salaryCost
                   : 0
                 return (
-                  <div
+                  <F0Box
                     key={le.id}
-                    className="flex items-center justify-between"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="between"
                   >
-                    <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-                      {le.legalName}
-                    </span>
-                    <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-                      {fmtFigmaEur(total)}
-                    </span>
-                  </div>
+                    <F0Text variant="description" content={le.legalName} />
+                    <F0Text variant="description" content={fmtFigmaEur(total)} />
+                  </F0Box>
                 )
               })}
               {/* Divider — node 5033:81086 */}
-              <div className="bg-f1-border-secondary h-px" />
-              <div className="flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
-                    Total cost
-                  </span>
-                  <span className="text-f1-foreground-secondary text-[14px] leading-[20px] tracking-[-0.07px]">
-                    Gross cost= Direct + Indirect + Salary
-                  </span>
-                </div>
-                <span className="text-f1-foreground text-[14px] leading-[20px] font-bold tracking-[-0.07px]">
-                  {fmtFigmaEur(grossCost)}
-                </span>
-              </div>
-            </div>
-          </div>
+              <F0Box height="0.5" width="full" background="secondary" />
+              <F0Box display="flex" alignItems="center" justifyContent="between">
+                <F0Box display="flex" flexDirection="column">
+                  <F0Text variant="label" content="Total cost" />
+                  <F0Text
+                    variant="description"
+                    content="Gross cost= Direct + Indirect + Salary"
+                  />
+                </F0Box>
+                <F0Text variant="label" content={fmtFigmaEur(grossCost)} />
+              </F0Box>
+            </F0Box>
+          </F0Box>
         )}
-      </div>
+      </F0Box>
     </div>
   )
 }
@@ -1999,22 +2144,29 @@ function GroupSidepanelParticipantsTab({
 function LegalEntityInput({
   label,
   value,
+  onChange,
+  disabled,
 }: {
   label: string
   value: number
+  onChange: (value: number) => void
+  disabled?: boolean
   plain?: boolean
 }) {
   return (
-    <div className="flex flex-1 flex-col gap-2">
-      <span className="text-f1-foreground-secondary text-[14px] leading-[20px] font-medium tracking-[-0.07px]">
-        {label}
-      </span>
-      <div className="border-f1-border bg-f1-background-tertiary flex h-10 items-center rounded-xl border border-solid pr-2 pl-3">
-        <span className="text-f1-foreground flex-1 text-[14px] leading-[20px] tracking-[-0.07px]">
-          {fmtFigmaEur(value)}
-        </span>
-      </div>
-    </div>
+    <F0Box display="flex" flexDirection="column" gap="md" grow>
+      <F0Text variant="label" content={label} />
+      <NumberInput
+        label={label}
+        hideLabel
+        value={value}
+        onChange={(nextValue) => onChange(nextValue ?? 0)}
+        step={50}
+        locale="en-US"
+        units="EUR"
+        disabled={disabled}
+      />
+    </F0Box>
   )
 }
 

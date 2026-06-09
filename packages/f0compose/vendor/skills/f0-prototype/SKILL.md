@@ -984,6 +984,40 @@ Both green. Plus visually:
 - Cells in OneDataCollection display values (not blank) — if blank, the `render` returns the wrong shape (see §11).
 - **Sort, search, and pagination all behave for real**: click a sortable column header → row order changes; type in the search box → rows narrow; navigate to page 2 → the table shows different rows. If any of those don't change anything visible, the corresponding handling in `fetchData` is missing — go back to Step 7.
 
+### Public demo-safe verification gate
+
+If the prototype will be shared outside the local dev session, local checks and
+HTTP 200 are NOT enough. Do not say "done", "ready", "safe to share",
+"verified", "todo ok", or any equivalent until the public preview URL passes a
+browser audit.
+
+Run this audit on the final shareable URL, not `localhost`:
+
+- Load every route and sub-view the user can share, including query-param views
+  such as `?dtab=`, `?view=`, `?wizard=`, modals, and role-specific URLs.
+- For every visible tab in the prototype main area, click it and verify it has
+  real content or a deliberate empty state. No decorative tabs.
+- For every visible CTA, row link, row action, dropdown item, modal action,
+  breadcrumb, and empty-state action in the prototype main area, click it and
+  verify it does not crash, leave the prototype family, or open a broken route.
+- Ignore global shell/sidebar links unless the change intentionally touched the
+  shell. Do not ignore links inside the prototype body/header.
+- If the prototype has roles or audiences, repeat the full audit for each role.
+  Never validate one role and infer the others.
+- For role-based prototypes, run a negative permissions audit: verify forbidden
+  CTAs are absent in the prototype main area for each non-admin role.
+- Fail the audit on `Unexpected Application Error`, `404`, blank page, uncaught
+  runtime exception, or navigation to another prototype family unless explicitly
+  intended.
+- Separate known global shell/agent console errors from prototype errors. List
+  them as residual risk; do not hide them.
+- Report a compact audit table before final handoff: route, role, visible
+  surfaces clicked, result, console status, and residual risk.
+
+If any public audit item fails, fix it before replying. If a large exhaustive
+click audit times out, split it into smaller route/role batches and continue.
+Do not downgrade the result to "verified" based on a partial audit.
+
 ### Modular structure check (for non-trivial prototypes)
 
 If the prototype has >1 tab, >1 table, or the entry exceeds ~150 lines, the
@@ -1012,6 +1046,8 @@ Before you reply, **verify it actually works**:
 3. If you tweaked an existing prototype, also curl its route.
 4. If the dev server isn't running, start it (`pnpm dev &`, wait ~3s) — never
    send the user a URL you haven't proven loads.
+5. If you provide a public preview or PR preview, run the public demo-safe
+   verification gate from Step 12 on that URL before saying it is ready.
 
 Then end EVERY turn with this exact structure:
 
@@ -1032,6 +1068,8 @@ Then end EVERY turn with this exact structure:
 🧪 Sanity check:
    - tsc: ✅
    - route 200: ✅
+   - public click audit: ✅ / not applicable
+   - console status: <clean, known global warnings only, or list blockers>
    - <anything else you verified, e.g. "presets switch and filter rows">
 
 ❓ Si algo no se ve bien o algo peta:

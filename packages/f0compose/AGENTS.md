@@ -23,6 +23,9 @@ target newer than vendor.
 - Be proactive: if the dev server isn't running, offer to start it
   (`pnpm dev` in the background) so the designer can see HMR in real
   time.
+- Before starting new Trainings prototype work, read `BASELINES.md` and
+  branch from the listed baseline. Do not start from another feature branch
+  unless the user explicitly asks for stacked work.
 
 ## Hard rules for prototypes
 
@@ -38,6 +41,12 @@ target newer than vendor.
 - Mocks: only from `@/fixtures`. Never inline arrays of 4+ items
   passed to a data component.
 - TypeScript strict. No `any`. No `as any`.
+- Direct HTML in prototype source is a hard failure. Do not write raw
+  `<div>`, `<span>`, `<p>`, `<button>`, `<a>`, `<img>`, `<ul>`, `<li>`,
+  `<table>`, or heading tags in `src/prototypes/**`. Use `F0Box`,
+  `F0Text`, `F0Button`, `F0Avatar`, `F0Icon`, `F0Link`, `F0Card`,
+  `OneDataCollection`, etc. A raw tag is only allowed with an inline
+  comment explaining the F0 gap and must be listed as a residual risk.
 
 ## Mandatory pre-edit checklist for UI work
 
@@ -88,6 +97,9 @@ For replicated production modules such as trainings, this checklist is stricter:
 - Every visible CTA/control must use the canonical F0 behavior for that
   component. If the component behavior/API is unknown, stop and inspect the
   stories/docs instead of inventing logic.
+- Figma-to-code parity is not an excuse to hand-roll F0 internals with raw
+  HTML. If a visible structure looks custom, first find the F0 component or
+  pattern that owns it; if none exists, ask or document the exception.
 - Do not hardcode Figma copy or values to make a wrong component look
   right. Use the correct component and data source; if mock data is missing,
   add it to `@/fixtures` or ask.
@@ -150,7 +162,19 @@ Antes de tocar UNA SOLA LÍNEA de un módulo replicado:
 ### 2. NO DECLARAR "HECHO" SIN
 
 - `pnpm tsc --noEmit` limpio.
+- `grep -rE "<(div|span|p|ul|li|button|a |img|table|h[1-6])\\b"` limpio en
+  los archivos del prototipo editados, salvo excepciones justificadas una por
+  una en la respuesta y en el handoff del prototipo.
 - Ruta HTTP 200 en cada sub-vista (`?dtab=`, `?wizard=`, modales).
+- Si hay URL publica/preview para compartir, auditoria PUBLICA click-by-click
+  en esa URL, no solo local ni solo HTTP 200.
+- Clickar cada tab, breadcrumb, CTA, accion de row, dropdown, modal y empty
+  state visible dentro del area principal del prototipo. Si hay roles, repetir
+  la auditoria completa por rol; nunca inferir un rol desde otro.
+- Verificar que ningun link/CTA visible sale de la familia de prototipo
+  esperada (`/p/<slug>...`) salvo que sea intencion explicita.
+- Separar errores conocidos de shell/chat/agent de errores del prototipo, y
+  listarlos como riesgo residual en vez de ocultarlos.
 - Comparación visual explícita con upstream (screenshot o descripción
   campo-a-campo).
 - Lista explícita de lo que quedó fuera, si algo queda fuera.

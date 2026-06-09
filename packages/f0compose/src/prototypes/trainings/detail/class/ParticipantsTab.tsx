@@ -10,8 +10,6 @@ import {
   ParticipantActionModal,
   type ParticipantAction,
 } from "../ParticipantActionModal"
-import { trainingBudgetMovements } from "@/fixtures"
-import { markCostsChanged } from "../../updatedCostsStore"
 
 const STATUS_LABEL: Record<ParticipantStatus, string> = {
   completed: "Completed",
@@ -95,14 +93,8 @@ export function ParticipantsTab({ klass }: Props) {
 
   const open = (action: ParticipantAction, name: string | null = null) =>
     setModal({ action, name, count: 1 })
-  const linkedMovement = trainingBudgetMovements.find(
-    (movement) => movement.groupId === klass.id
-  )
   const closeModal = () => setModal(null)
   const confirmParticipantAction = () => {
-    if (modal?.action === "add" || modal?.action === "delete") {
-      markCostsChanged(linkedMovement?.id)
-    }
     setModal(null)
   }
 

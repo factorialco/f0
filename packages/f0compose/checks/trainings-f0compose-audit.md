@@ -219,6 +219,29 @@ risks are not small visual differences; they are systemic:
 
 - Upstream route inventory: complete for top nav, list, course detail, group detail.
 
+## Training Permissions Role Gate
+
+Applies to `training-access-admin`, `training-access-editor`,
+`training-access-viewer`, and shared files under `training-access-shared`.
+
+- Course lists for non-admin roles must be filtered by the effective training
+  permission. Do not show all company trainings in `Can edit` or `Can view`.
+- `Can edit` may edit course content only. It must not execute admin or
+  operational mutations such as creating courses, importing/exporting training
+  data, creating groups, adding/removing/moving participants, creating sessions,
+  uploading materials or documents, creating surveys, exporting Fundae data,
+  opening the external Fundae portal from this flow, or adding/editing costs.
+- `Can view` must remain read-only. Navigation, search, filters, allowed detail
+  pages, and existing content previews are allowed; mutations are not.
+- Admin-only and operational CTAs in `Can edit` and `Can view` should remain
+  visible but disabled with permission copy, rather than becoming executable or
+  disappearing by accident. Row actions are the exception only when the F0 API
+  cannot render disabled row actions; in that case the mutation must not appear
+  as an executable row action.
+- PR handoff must explicitly mention both behaviours: course visibility is
+  permission-filtered, and admin/operational CTAs are intentionally disabled for
+  non-admin access roles.
+
 ## 2026-05-20 Delta: Group Changes Requiring Budget Update
 
 Scope checked:
@@ -261,7 +284,10 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/detail/NewClassWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/NewFormWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/class/SessionsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/ClassesTab.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/AdminModals.tsx`
 - `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
 - `packages/f0compose/src/prototypes/trainings/updatedCostsStore.ts`
 - `packages/f0compose/src/prototypes/trainings/tabs.ts`
@@ -295,7 +321,10 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/detail/NewClassWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/NewFormWizard.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/class/SessionsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/ClassesTab.tsx`
 - `packages/f0compose/src/prototypes/trainings/detail/CostsTab.tsx`
+- `packages/f0compose/src/prototypes/trainings/detail/AdminModals.tsx`
 - `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
 - `packages/f0compose/src/prototypes/trainings/updatedCostsStore.ts`
 - `packages/f0compose/src/prototypes/trainings/tabs.ts`
@@ -352,6 +381,33 @@ section updated before the local check passes.
 - `packages/f0compose/src/prototypes/trainings/costsByLegalEntityToggleStore.ts`
   keeps the prototype-only `Costs by legal entity` toggle synced by training
   group between the budget sidepanel and the group Costs tab.
+- `packages/f0compose/src/prototypes/trainings/detail/ClassDetail.tsx` and
+  `packages/f0compose/src/prototypes/trainings/detail/ClassesTab.tsx` and
+  `packages/f0compose/src/prototypes/trainings/detail/class/SessionsTab.tsx`
+  keep role-prototype deep links inside the active `/p/training-access-*`
+  prototype while preserving the original `/p/trainings?training=...` links for
+  the canonical Trainings prototype.
+- `packages/f0compose/src/prototypes/trainings/detail/AdminModals.tsx` now uses
+  the current local `F0Dialog` API (`isOpen` and `onClose`) so existing course
+  admin actions such as `Course settings` and `Revert to draft` open their
+  dialogs in both the canonical Trainings prototype and role-specific access
+  prototypes. This is a local API compatibility fix, not a product divergence
+  from upstream.
+- Role-prototype group sessions intentionally do not expose row deep links until
+  a session detail screen exists; visible session actions remain available for
+  editable roles.
+- 2026-05-21 Modjo feedback from Casa Tarradellas changes the cost split model:
+  participant-weighted legal entity costs remain a starting estimate, but admins
+  must be able to manually impute direct, indirect, salary, and subsidised costs
+  per legal entity because their real workflow is invoice/FUNDAE-credit based.
+- When `Costs by legal entity` is enabled in the group Costs tab, the single
+  `Subsidised cost` field is hidden from `Other costs` and appears inside each
+  legal entity cost sidepanel instead. This keeps the existing layout and avoids
+  introducing invoice or FUNDAE export flows in this focused prototype pass.
+- The group Costs tab and budget group sidepanel now show a warning when the
+  legal entity allocation no longer matches the group gross total. The warning
+  is intentionally non-blocking; it documents the calculation mismatch without
+  designing a larger reconciliation workflow.
 - Cost sidepanel visual parity remains blocked and must not be edited without a
   fresh Figma-scoped audit.
 

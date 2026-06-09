@@ -110,10 +110,8 @@ export function AdminModals({ action, training, onClose }: Props) {
 
   return (
     <F0Dialog
-      open={action !== null}
-      onOpenChange={(o: boolean) => {
-        if (!o) onClose()
-      }}
+      isOpen={action !== null}
+      onClose={onClose}
       width={isWide ? "lg" : "md"}
       title={TITLES[action]}
       description={training.name}

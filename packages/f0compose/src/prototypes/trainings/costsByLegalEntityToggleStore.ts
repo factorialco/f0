@@ -17,6 +17,22 @@ export function setCostsByLegalEntityToggle(groupId: string, value: boolean) {
   notify()
 }
 
+export function getCostsByLegalEntityToggle(
+  groupId: string,
+  defaultValue: boolean
+) {
+  return values.get(groupId) ?? defaultValue
+}
+
+export function useCostsByLegalEntityToggleVersion() {
+  return useSyncExternalStore(subscribe, () =>
+    Array.from(values.entries())
+      .map(([groupId, value]) => `${groupId}:${value ? "on" : "off"}`)
+      .sort()
+      .join("|")
+  )
+}
+
 export function useCostsByLegalEntityToggle(
   groupId: string,
   defaultValue: boolean

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react"
 import {
-  F0Alert,
+  F0AvatarIcon,
   F0Button,
+  F0Box,
   F0Dialog,
   F0Heading,
+  F0Icon,
   F0Text,
   F0Select,
 } from "@factorialco/f0-react"
@@ -23,12 +25,6 @@ import {
   setCostsByLegalEntityToggle,
   useCostsByLegalEntityToggle,
 } from "../costsByLegalEntityToggleStore"
-import {
-  markCostsChanged,
-  markCostsUpdated,
-  useTriggeredChangedMovementIds,
-  useUpdatedMovementIds,
-} from "../updatedCostsStore"
 import type { Training, TrainingClass, TrainingParticipant } from "@/fixtures"
 import {
   breakdownByLegalEntityFor,
@@ -49,6 +45,20 @@ import {
 
 type Props = { training: Training; klass?: TrainingClass }
 type PaymentStatus = "pending" | "paid" | ""
+type LegalEntityCostKey =
+  | "directCost"
+  | "indirectCost"
+  | "salaryCost"
+  | "subsidizedCost"
+
+type LegalEntityCostDraft = {
+  legalEntityId: string
+  participantsCount: number
+  directCost: number
+  indirectCost: number
+  salaryCost: number
+  subsidizedCost: number
+}
 
 function participantsForMovement(movement: (typeof trainingBudgetMovements)[number]) {
   return trainingParticipants.filter((p) => p.classId === movement.groupId)
@@ -105,6 +115,40 @@ function formatMoney(n: number, currency = "EUR"): string {
   })
 }
 
+function grossCostForLegalEntity(draft: LegalEntityCostDraft): number {
+  return draft.directCost + draft.indirectCost + draft.salaryCost
+}
+
+function buildLegalEntityCostDrafts(
+  movement: (typeof trainingBudgetMovements)[number],
+  totalSubsidizedCost: number
+): LegalEntityCostDraft[] {
+  const breakdown = legalEntityBreakdownForMovement(movement)
+  const grossTotal = breakdown.reduce(
+    (sum, item) => sum + item.directCost + item.indirectCost + item.salaryCost,
+    0
+  )
+  const participantTotal = breakdown.reduce(
+    (sum, item) => sum + item.participantsCount,
+    0
+  )
+
+  return breakdown.map((item) => {
+    const grossCost = item.directCost + item.indirectCost + item.salaryCost
+    const ratio =
+      grossTotal > 0
+        ? grossCost / grossTotal
+        : participantTotal > 0
+          ? item.participantsCount / participantTotal
+          : 0
+
+    return {
+      ...item,
+      subsidizedCost: Math.round(totalSubsidizedCost * ratio),
+    }
+  })
+}
+
 function CostBreakdownCard({
   emoji,
   title,
@@ -112,6 +156,7 @@ function CostBreakdownCard({
   value,
   onChange,
   action,
+  disabled,
 }: {
   emoji: string
   title: string
@@ -119,18 +164,28 @@ function CostBreakdownCard({
   value: number
   onChange: (n: number) => void
   action?: React.ReactNode
+  disabled?: boolean
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-      <div className="flex items-center gap-2">
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="md"
+      padding="lg"
+      border="default"
+      borderColor="secondary"
+      borderRadius="md"
+      background="primary"
+    >
+      <F0Box display="flex" alignItems="center" gap="md">
         <span aria-hidden className="text-xl">
           {emoji}
         </span>
         <F0Heading as="h4" variant="heading" content={title} />
-      </div>
+      </F0Box>
       <F0Text variant="description" content={description} />
-      <div className="mt-auto flex items-center gap-2 pt-2">
-        <div className="flex-1">
+      <F0Box display="flex" alignItems="center" gap="md" marginTop="auto">
+        <F0Box grow>
           <NumberInput
             label="Amount"
             hideLabel
@@ -139,93 +194,13 @@ function CostBreakdownCard({
             step={50}
             locale="en-US"
             units="EUR"
+            disabled={disabled}
           />
-        </div>
+        </F0Box>
         {action}
-      </div>
-    </div>
+      </F0Box>
+    </F0Box>
   )
-}
-
-function BudgetLinkBanner({
-  budgetId,
-  totalCost,
-  movement,
-}: {
-  budgetId: string | null
-  totalCost: number
-  movement: (typeof trainingBudgetMovements)[number] | null
-}) {
-  const updatedMovementIds = useUpdatedMovementIds()
-  const triggeredChangedMovementIds = useTriggeredChangedMovementIds()
-  const goToBudgets = () => {
-    window.location.href = budgetId
-      ? `/p/trainings-budgets?view=detail&budgetId=${budgetId}`
-      : "/p/trainings-budgets"
-  }
-
-  if (trainingBudgets.length === 0) {
-    return (
-      <F0Alert
-        variant="neutral"
-        title="No budgets yet"
-        description="Create a budget to start tracking training spend across your organisation."
-        action={{ label: "Create budget", onClick: goToBudgets }}
-      />
-    )
-  }
-
-  if (!budgetId) {
-    return (
-      <F0Alert
-        variant="neutral"
-        title="No budget linked"
-        description="Link this group to a budget so the spend is tracked against your training pool."
-        action={{ label: "View budgets", onClick: goToBudgets }}
-      />
-    )
-  }
-
-  const budget = trainingBudgets.find((b) => b.id === budgetId)
-  if (!budget) return null
-
-  const available = budget.remainingAmount
-  const isOverBudget = totalCost > available
-  const statusAlert = isOverBudget ? (
-    <F0Alert
-      variant="warning"
-      title="Over budget"
-      description={`This group exceeds ${budget.name} by ${formatMoney(totalCost - available, budget.currency)} (${budget.totalAmount > 0 ? (((totalCost - available) / budget.totalAmount) * 100).toFixed(1) : "0"}% of total budget).`}
-      action={{ label: "View budget", onClick: goToBudgets }}
-    />
-  ) : (
-    <F0Alert
-      variant="positive"
-      title={`Within ${budget.name}`}
-      description={`${formatMoney(available, budget.currency)} remaining after this group.`}
-      action={{ label: "View budget", onClick: goToBudgets }}
-    />
-  )
-
-  if (
-    movement &&
-    (movement.costUpdateNotice || triggeredChangedMovementIds.has(movement.id)) &&
-    !updatedMovementIds.has(movement.id)
-  ) {
-    return (
-      <div className="flex flex-col gap-3">
-        <F0Alert
-          variant="warning"
-          title="Costs changed"
-          description="This group's costs have changed. Update costs to refresh the figures shown here."
-          action={{ label: "Update costs", onClick: () => markCostsUpdated([movement.id]) }}
-        />
-        {statusAlert}
-      </div>
-    )
-  }
-
-  return statusAlert
 }
 
 export function CostsTab({ training, klass }: Props) {
@@ -264,11 +239,48 @@ export function CostsTab({ training, klass }: Props) {
   const [selectedLegalEntityId, setSelectedLegalEntityId] = useState<
     string | null
   >(null)
+  const canSplitByLegalEntity = linkedMovement
+    ? participantsByLegalEntityForMovement(linkedMovement).length > 1
+    : false
+  const costsByLegalEntityEnabled = useCostsByLegalEntityToggle(
+    linkedMovement?.groupId ?? "no-linked-group",
+    canSplitByLegalEntity
+  )
+  const [legalEntityCostDrafts, setLegalEntityCostDrafts] = useState<
+    LegalEntityCostDraft[]
+  >(() =>
+    linkedMovement
+      ? buildLegalEntityCostDrafts(linkedMovement, initialSubsidy)
+      : []
+  )
 
-  const totalCost = directCost + indirectCost + salaryCost
-  const netCost = Math.max(0, totalCost - subsidizedCost)
+  const legalEntityGrossCost = legalEntityCostDrafts.reduce(
+    (sum, item) => sum + grossCostForLegalEntity(item),
+    0
+  )
+  const totalCost = costsByLegalEntityEnabled
+    ? legalEntityGrossCost
+    : directCost + indirectCost + salaryCost
+  const legalEntitySubsidizedCost = legalEntityCostDrafts.reduce(
+    (sum, item) => sum + item.subsidizedCost,
+    0
+  )
+  const activeSubsidizedCost = costsByLegalEntityEnabled
+    ? legalEntitySubsidizedCost
+    : subsidizedCost
+  const netCost = Math.max(0, totalCost - activeSubsidizedCost)
   const perParticipant = Math.round(netCost / Math.max(participants, 1))
-  const markLinkedCostsChanged = () => markCostsChanged(linkedMovement?.id)
+  const handleLegalEntityCostChange = (
+    legalEntityId: string,
+    key: LegalEntityCostKey,
+    value: number
+  ) => {
+    setLegalEntityCostDrafts((current) =>
+      current.map((item) =>
+        item.legalEntityId === legalEntityId ? { ...item, [key]: value } : item
+      )
+    )
+  }
 
   const budgetOptions = [
     { value: "", label: "No budget linked" },
@@ -279,24 +291,27 @@ export function CostsTab({ training, klass }: Props) {
   ]
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
+    <F0Box display="flex" flexDirection="column" gap="2xl">
+      <F0Box display="flex" flexDirection="column" gap="xs">
         <F0Heading as="h3" variant="heading-large" content="Costs" />
         <F0Text
           variant="description"
           content="Track direct, indirect and salary costs for this group. Link to a budget to keep spending under control."
         />
-      </div>
-
-      <BudgetLinkBanner
-        budgetId={budgetId}
-        totalCost={totalCost}
-        movement={linkedMovement}
-      />
+      </F0Box>
 
       {/* Summary row */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="flex flex-col gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
+      <F0Box display="grid" columns="1" gap="xl" md={{ columns: "3" }}>
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="xs"
+          padding="lg"
+          border="default"
+          borderColor="secondary"
+          borderRadius="md"
+          background="primary"
+        >
           <F0Text variant="label" content="Total group cost" />
           <F0Text
             variant="description"
@@ -307,9 +322,18 @@ export function CostsTab({ training, klass }: Props) {
             variant="heading-large"
             content={formatMoney(totalCost, currency)}
           />
-        </div>
+        </F0Box>
 
-        <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="md"
+          padding="lg"
+          border="default"
+          borderColor="secondary"
+          borderRadius="md"
+          background="primary"
+        >
           <F0Text variant="label" content="Linked budget" />
           <F0Select<string>
             label="Linked budget"
@@ -318,13 +342,21 @@ export function CostsTab({ training, klass }: Props) {
             value={budgetId ?? ""}
             onChange={(v: string) => {
               setBudgetId(v || null)
-              markLinkedCostsChanged()
             }}
             options={budgetOptions}
           />
-        </div>
+        </F0Box>
 
-        <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="md"
+          padding="lg"
+          border="default"
+          borderColor="secondary"
+          borderRadius="md"
+          background="primary"
+        >
           <F0Text variant="label" content="Payment status" />
           <F0Select<PaymentStatus>
             label="Payment status"
@@ -333,7 +365,6 @@ export function CostsTab({ training, klass }: Props) {
             value={paymentStatus}
             onChange={(v: PaymentStatus) => {
               setPaymentStatus(v)
-              markLinkedCostsChanged()
             }}
             disabled={!budgetId}
             options={[
@@ -342,19 +373,19 @@ export function CostsTab({ training, klass }: Props) {
               { value: "paid", label: "Paid" },
             ]}
           />
-        </div>
-      </div>
+        </F0Box>
+      </F0Box>
 
       {/* Three cost breakdown cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <F0Box display="grid" columns="1" gap="xl" md={{ columns: "3" }}>
         <CostBreakdownCard
           emoji="💰"
           title="Direct cost"
           description="Provider fees, materials, room rental and other invoiced expenses."
           value={directCost}
+          disabled={costsByLegalEntityEnabled}
           onChange={(value) => {
             setDirectCost(value)
-            markLinkedCostsChanged()
           }}
         />
         <CostBreakdownCard
@@ -362,9 +393,9 @@ export function CostsTab({ training, klass }: Props) {
           title="Indirect cost"
           description="Overhead allocated to this group (HR, facilities, equipment amortisation)."
           value={indirectCost}
+          disabled={costsByLegalEntityEnabled}
           onChange={(value) => {
             setIndirectCost(value)
-            markLinkedCostsChanged()
           }}
         />
         <CostBreakdownCard
@@ -372,23 +403,33 @@ export function CostsTab({ training, klass }: Props) {
           title="Salary opportunity cost"
           description="Payroll cost of participants and instructors during training hours."
           value={salaryCost}
+          disabled={costsByLegalEntityEnabled}
           onChange={(value) => {
             setSalaryCost(value)
-            markLinkedCostsChanged()
           }}
           action={
             <F0Button
               label="Calculate"
               icon={Calculator}
               variant="outline"
+              disabled={costsByLegalEntityEnabled}
               onClick={() => setCalculatorOpen((v) => !v)}
             />
           }
         />
-      </div>
+      </F0Box>
 
       {calculatorOpen && (
-        <div className="flex flex-col gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="lg"
+          padding="lg"
+          border="default"
+          borderColor="secondary"
+          borderRadius="md"
+          background="primary"
+        >
           <F0Heading
             as="h4"
             variant="heading"
@@ -398,20 +439,20 @@ export function CostsTab({ training, klass }: Props) {
             variant="description"
             content={`Estimate based on average payroll cost per hour × ${participants} participants × training duration (${training.totalDuration}h).`}
           />
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1">
+          <F0Box display="grid" columns="3" gap="lg">
+            <F0Box display="flex" flexDirection="column" gap="xs">
               <F0Text variant="label" content="Avg. €/h" />
               <F0Heading as="h4" variant="heading" content="28 €" />
-            </div>
-            <div className="flex flex-col gap-1">
+            </F0Box>
+            <F0Box display="flex" flexDirection="column" gap="xs">
               <F0Text variant="label" content="Participants" />
               <F0Heading
                 as="h4"
                 variant="heading"
                 content={String(participants)}
               />
-            </div>
-            <div className="flex flex-col gap-1">
+            </F0Box>
+            <F0Box display="flex" flexDirection="column" gap="xs">
               <F0Text variant="label" content="Estimated" />
               <F0Heading
                 as="h4"
@@ -421,14 +462,13 @@ export function CostsTab({ training, klass }: Props) {
                   currency
                 )}
               />
-            </div>
-          </div>
-          <div className="flex gap-2">
+            </F0Box>
+          </F0Box>
+          <F0Box display="flex" gap="md">
             <F0Button
               label="Apply"
               onClick={() => {
                 setSalaryCost(28 * participants * training.totalDuration)
-                markLinkedCostsChanged()
                 setCalculatorOpen(false)
               }}
             />
@@ -437,68 +477,88 @@ export function CostsTab({ training, klass }: Props) {
               variant="outline"
               onClick={() => setCalculatorOpen(false)}
             />
-          </div>
-        </div>
+          </F0Box>
+        </F0Box>
       )}
 
       <CostsByLegalEntitySection
         movement={linkedMovement}
+        legalEntityCostDrafts={legalEntityCostDrafts}
+        onLegalEntityCostChange={handleLegalEntityCostChange}
         selectedLegalEntityId={selectedLegalEntityId}
         onOpenLegalEntity={setSelectedLegalEntityId}
         onCloseLegalEntity={() => setSelectedLegalEntityId(null)}
       />
 
       {/* Other costs */}
-      <section className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1">
-          <F0Heading as="h3" variant="heading" content="Other costs" />
-          <F0Text
-            variant="description"
-            content="This cost is not used to calculate the group total cost and is not included in the budget."
-          />
-        </div>
-        <div className="flex flex-col gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-          <div className="flex items-center gap-2">
-            <span aria-hidden className="text-xl">
-              🎟️
-            </span>
-            <F0Heading as="h4" variant="heading" content="Subsidised cost" />
-          </div>
-          <F0Text
-            variant="description"
-            content="Training expenses covered by financial aid or bonifications for this group."
-          />
-          <div className="max-w-xs">
-            <NumberInput
-              label="Subsidised amount"
-              hideLabel
-              value={subsidizedCost}
-              onChange={(v) => {
-                setSubsidizedCost(v ?? 0)
-                markLinkedCostsChanged()
-              }}
-              step={50}
-              locale="en-US"
-              units="EUR"
+      {!costsByLegalEntityEnabled && (
+        <F0Box display="flex" flexDirection="column" gap="lg">
+          <F0Box display="flex" flexDirection="column" gap="xs">
+            <F0Heading as="h3" variant="heading" content="Other costs" />
+            <F0Text
+              variant="description"
+              content="This cost is not used to calculate the group total cost and is not included in the budget."
             />
-          </div>
-          <F0Text
-            variant="small"
-            content={`Net after subsidies: ${formatMoney(netCost, currency)} · ${formatMoney(perParticipant, currency)} per participant`}
-          />
-        </div>
-      </section>
-    </div>
+          </F0Box>
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            gap="md"
+            padding="lg"
+            border="default"
+            borderColor="secondary"
+            borderRadius="md"
+            background="primary"
+          >
+            <F0Box display="flex" alignItems="center" gap="md">
+              <span aria-hidden className="text-xl">
+                🎟️
+              </span>
+              <F0Heading as="h4" variant="heading" content="Subsidised cost" />
+            </F0Box>
+            <F0Text
+              variant="description"
+              content="Training expenses covered by financial aid or bonifications for this group."
+            />
+            <F0Box maxWidth="80">
+              <NumberInput
+                label="Subsidised amount"
+                hideLabel
+                value={subsidizedCost}
+                onChange={(v) => {
+                  setSubsidizedCost(v ?? 0)
+                }}
+                step={50}
+                locale="en-US"
+                units="EUR"
+              />
+            </F0Box>
+            <F0Text
+              variant="small"
+              content={`Net after subsidies: ${formatMoney(netCost, currency)} · ${formatMoney(perParticipant, currency)} per participant`}
+            />
+          </F0Box>
+        </F0Box>
+      )}
+    </F0Box>
   )
 }
 
 function CostsByLegalEntitySection({
   movement,
+  legalEntityCostDrafts,
+  onLegalEntityCostChange,
   selectedLegalEntityId,
   onOpenLegalEntity,
   onCloseLegalEntity,
 }: {
   movement: (typeof trainingBudgetMovements)[number] | null
+  legalEntityCostDrafts: LegalEntityCostDraft[]
+  onLegalEntityCostChange: (
+    legalEntityId: string,
+    key: LegalEntityCostKey,
+    value: number
+  ) => void
   selectedLegalEntityId: string | null
   onOpenLegalEntity: (legalEntityId: string) => void
   onCloseLegalEntity: () => void
@@ -515,10 +575,7 @@ function CostsByLegalEntitySection({
   const isOn = useCostsByLegalEntityToggle(movement.groupId, canSplit)
 
   const breakdownMap = new Map(
-    legalEntityBreakdownForMovement(movement).map((b) => [
-      b.legalEntityId,
-      b,
-    ])
+    legalEntityCostDrafts.map((b) => [b.legalEntityId, b])
   )
   const selectedBreakdown = selectedLegalEntityId
     ? breakdownMap.get(selectedLegalEntityId)
@@ -531,15 +588,32 @@ function CostsByLegalEntitySection({
   )
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-4">
-      <div className="flex items-center justify-between gap-3 rounded-2xl bg-f1-background p-3">
-        <div className="flex flex-col gap-0">
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="xl"
+      padding="lg"
+      border="default"
+      borderColor="secondary"
+      borderRadius="xl"
+      background="primary"
+    >
+      <F0Box
+        display="flex"
+        alignItems="center"
+        justifyContent="between"
+        gap="lg"
+        padding="md"
+        borderRadius="2xl"
+        background="primary"
+      >
+        <F0Box display="flex" flexDirection="column" gap="none">
           <F0Text variant="label" content="Costs by legal entity" />
           <F0Text
             variant="description"
             content="Track and manage all costs per legal entity"
           />
-        </div>
+        </F0Box>
         <Switch
           title="Costs by legal entity"
           id={`training-costs-by-legal-entity-${movement.id}`}
@@ -550,14 +624,14 @@ function CostsByLegalEntitySection({
           }
           disabled={!canSplit}
         />
-      </div>
+      </F0Box>
 
       {isOn && (
-        <div className="flex flex-col gap-3">
+        <F0Box display="flex" flexDirection="column" gap="lg">
           {les.map((le) => {
             const breakdown = breakdownMap.get(le.id)
             const leTotal = breakdown
-              ? breakdown.directCost + breakdown.indirectCost + breakdown.salaryCost
+              ? grossCostForLegalEntity(breakdown)
               : 0
             const leParticipants = participants.filter(
               (p) => legalEntityForEmployee(p.employeeId)?.id === le.id
@@ -569,31 +643,28 @@ function CostsByLegalEntitySection({
                 type="button"
                 key={le.id}
                 onClick={() => onOpenLegalEntity(le.id)}
-                className="flex h-16 items-center gap-3 rounded-2xl border border-solid border-f1-border bg-f1-background p-3 text-left hover:bg-f1-background-hover"
+                className="border-f1-border bg-f1-background hover:bg-f1-background-hover flex h-16 items-center gap-3 rounded-2xl border border-solid p-3 text-left"
               >
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-f1-border-secondary bg-f1-background-secondary text-f1-foreground-secondary">
-                  <Office />
-                </span>
-                <div className="flex min-w-0 flex-1 flex-col gap-0">
+                <F0AvatarIcon size="lg" icon={Office} />
+                <F0Box
+                  display="flex"
+                  flexDirection="column"
+                  gap="none"
+                  minWidth="0"
+                  grow
+                >
                   <F0Text variant="label" content={le.legalName} />
                   <F0Text
                     variant="description"
                     content={`${le.countryCode} · ${participantsCount} ${participantsCount === 1 ? "participant" : "participants"}`}
                   />
-                </div>
-                <span className="whitespace-nowrap font-bold text-f1-foreground">
-                  {formatSidepanelMoney(leTotal)}
-                </span>
-                <span
-                  aria-hidden
-                  className="flex h-5 w-5 shrink-0 items-center justify-center text-f1-foreground-secondary"
-                >
-                  <ChevronRight />
-                </span>
+                </F0Box>
+                <F0Text variant="label" content={formatSidepanelMoney(leTotal)} />
+                <F0Icon icon={ChevronRight} size="sm" color="secondary" />
               </button>
             )
           })}
-        </div>
+        </F0Box>
       )}
 
       {selectedLegalEntityId && selectedLe && selectedBreakdown && (
@@ -601,63 +672,105 @@ function CostsByLegalEntitySection({
           movement={movement}
           legalEntity={selectedLe}
           breakdown={selectedBreakdown}
+          onCostChange={onLegalEntityCostChange}
           activeTab={sidepanelTab}
           onTabChange={setSidepanelTab}
           onClose={onCloseLegalEntity}
         />
       )}
-    </section>
+    </F0Box>
   )
 }
 
 function CostBreakdownList({
+  legalEntityId,
   direct,
   indirect,
   salary,
+  subsidized,
+  onCostChange,
 }: {
+  legalEntityId: string
   direct: number
   indirect: number
   salary: number
+  subsidized: number
+  onCostChange: (
+    legalEntityId: string,
+    key: LegalEntityCostKey,
+    value: number
+  ) => void
 }) {
   const total = direct + indirect + salary
   return (
-    <div className="flex flex-col">
-      <div className="flex h-[50px] items-center">
+    <F0Box display="flex" flexDirection="column">
+      <F0Box display="flex" alignItems="center" height="12">
         <F0Text content="Cost breakdown" variant="label" />
-      </div>
-      <div className="mt-2 divide-y divide-f1-border-secondary overflow-hidden rounded-xl border border-solid border-f1-border-secondary bg-f1-background">
+      </F0Box>
+      <F0Box
+        display="flex"
+        flexDirection="column"
+        overflow="hidden"
+        border="default"
+        borderColor="secondary"
+        borderRadius="xl"
+        background="primary"
+        divider="y"
+        dividerColor="secondary"
+        marginTop="sm"
+      >
         <CostBreakdownRow
           label="Direct cost"
           description="Course fees, venue rentals, and training materials"
           value={direct}
+          onChange={(value) => onCostChange(legalEntityId, "directCost", value)}
         />
         <CostBreakdownRow
           label="Indirect cost"
           description="Administrative overhead and support costs"
           value={indirect}
+          onChange={(value) => onCostChange(legalEntityId, "indirectCost", value)}
         />
         <CostBreakdownRow
           label="Salary cost"
           description="Cost of employees' time spent in training"
           value={salary}
+          onChange={(value) => onCostChange(legalEntityId, "salaryCost", value)}
         />
-      </div>
-      <div className="flex h-8 items-center py-4">
-        <div className="h-px w-full bg-f1-border-secondary" />
-      </div>
-      <div>
-        <div className="flex h-16 items-center justify-between rounded-xl border border-solid border-f1-border-secondary bg-f1-background px-4 py-2">
-          <div className="flex flex-col gap-0.5">
-            <F0Text content="Total cost" variant="label" />
-            <F0Text
-              content="Gross cost= Direct + Indirect + Salary"
-              variant="description"
-            />
-          </div>
-          <F0Text content={formatSidepanelMoney(total)} variant="label" />
-        </div>
-      </div>
-    </div>
+        <CostBreakdownRow
+          label="Subsidised cost"
+          description="Bonified or subsidised amount assigned to this legal entity"
+          value={subsidized}
+          onChange={(value) =>
+            onCostChange(legalEntityId, "subsidizedCost", value)
+          }
+        />
+      </F0Box>
+      <F0Box display="flex" alignItems="center" height="8" paddingY="lg">
+        <F0Box height="0.5" width="full" background="secondary" />
+      </F0Box>
+      <F0Box
+        display="flex"
+        alignItems="center"
+        justifyContent="between"
+        minHeight="16"
+        paddingX="lg"
+        paddingY="sm"
+        border="default"
+        borderColor="secondary"
+        borderRadius="xl"
+        background="primary"
+      >
+        <F0Box display="flex" flexDirection="column" gap="xs">
+          <F0Text content="Total cost" variant="label" />
+          <F0Text
+            content="Gross cost= Direct + Indirect + Salary"
+            variant="description"
+          />
+        </F0Box>
+        <F0Text content={formatSidepanelMoney(total)} variant="label" />
+      </F0Box>
+    </F0Box>
   )
 }
 
@@ -665,13 +778,19 @@ function LegalEntityCostsSidepanel({
   movement,
   legalEntity,
   breakdown,
+  onCostChange,
   activeTab,
   onTabChange,
   onClose,
 }: {
   movement: (typeof trainingBudgetMovements)[number]
   legalEntity: NonNullable<ReturnType<typeof findLegalEntity>>
-  breakdown: NonNullable<ReturnType<typeof breakdownByLegalEntityFor>[number]>
+  breakdown: LegalEntityCostDraft
+  onCostChange: (
+    legalEntityId: string,
+    key: LegalEntityCostKey,
+    value: number
+  ) => void
   activeTab: "cost" | "participants"
   onTabChange: (tab: "cost" | "participants") => void
   onClose: () => void
@@ -724,13 +843,16 @@ function LegalEntityCostsSidepanel({
       disableContentPadding
     >
       {activeTab === "cost" ? (
-        <div className="px-5 py-4">
+        <F0Box paddingX="xl" paddingY="lg">
           <CostBreakdownList
+            legalEntityId={legalEntity.id}
             direct={breakdown.directCost}
             indirect={breakdown.indirectCost}
             salary={breakdown.salaryCost}
+            subsidized={breakdown.subsidizedCost}
+            onCostChange={onCostChange}
           />
-        </div>
+        </F0Box>
       ) : (
         <LegalEntityParticipantsPanel
           classId={movement.groupId}
@@ -901,19 +1023,35 @@ function CostBreakdownRow({
   label,
   description,
   value,
+  onChange,
 }: {
   label: string
   description: string
   value: number
+  onChange: (value: number) => void
 }) {
   return (
     <div className="flex h-16 items-center justify-between px-4 py-2">
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5 [&_p]:truncate">
+      <F0Box
+        display="flex"
+        flexDirection="column"
+        gap="xs"
+        minWidth="0"
+        grow
+      >
         <F0Text content={label} variant="label" />
         <F0Text content={description} variant="description" />
-      </div>
-      <div className="flex h-12 shrink-0 items-center justify-end px-3 py-3">
-        <F0Text content={formatSidepanelMoney(value)} variant="body" />
+      </F0Box>
+      <div className="w-40 shrink-0">
+        <NumberInput
+          label={label}
+          hideLabel
+          value={value}
+          onChange={(nextValue) => onChange(nextValue ?? 0)}
+          step={50}
+          locale="en-US"
+          units="EUR"
+        />
       </div>
     </div>
   )
