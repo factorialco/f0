@@ -15,7 +15,7 @@ import {
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { ToolbarDivider } from "../Toolbar"
+import { ToolbarDivider, ToolbarDropdown } from "../Toolbar"
 
 interface TableBubbleMenuProps {
   editor: Editor
@@ -30,7 +30,6 @@ interface TableAction {
   onClick: () => void
   disabled: boolean
   active?: boolean
-  critical?: boolean
 }
 
 /**
@@ -41,7 +40,8 @@ interface TableAction {
  * text-formatting bubble menu, and is anchored to the bottom of the table so
  * it never overlaps with it. Actions render as a compact horizontal row of
  * icon buttons (with native tooltips) grouped by dividers, mirroring the
- * text-formatting toolbar.
+ * text-formatting toolbar. The destructive deletes are collapsed into a
+ * single trash dropdown so the three "delete" actions aren't ambiguous.
  */
 export const TableBubbleMenu = ({
   editor,
@@ -51,7 +51,8 @@ export const TableBubbleMenu = ({
   const translations = useI18n()
   const t = translations.richTextEditor.tableMenu
 
-  // Grouped so dividers can be inserted between groups.
+  // Direct quick-access icon buttons, grouped so dividers separate them.
+  // Inserts use directional arrows (where the new column/row will go).
   const groups: TableAction[][] = [
     [
       {
@@ -68,14 +69,6 @@ export const TableBubbleMenu = ({
         onClick: () => editor.chain().focus().addColumnAfter().run(),
         disabled: !editor.can().addColumnAfter(),
       },
-      {
-        key: "deleteColumn",
-        icon: Delete,
-        label: t.deleteColumn,
-        critical: true,
-        onClick: () => editor.chain().focus().deleteColumn().run(),
-        disabled: !editor.can().deleteColumn(),
-      },
     ],
     [
       {
@@ -91,14 +84,6 @@ export const TableBubbleMenu = ({
         label: t.addRowAfter,
         onClick: () => editor.chain().focus().addRowAfter().run(),
         disabled: !editor.can().addRowAfter(),
-      },
-      {
-        key: "deleteRow",
-        icon: Delete,
-        label: t.deleteRow,
-        critical: true,
-        onClick: () => editor.chain().focus().deleteRow().run(),
-        disabled: !editor.can().deleteRow(),
       },
     ],
     [
@@ -126,15 +111,27 @@ export const TableBubbleMenu = ({
         onClick: () => editor.chain().focus().toggleHeaderRow().run(),
         disabled: !editor.can().toggleHeaderRow(),
       },
-      {
-        key: "deleteTable",
-        icon: Delete,
-        label: t.deleteTable,
-        critical: true,
-        onClick: () => editor.chain().focus().deleteTable().run(),
-        disabled: !editor.can().deleteTable(),
-      },
     ],
+  ]
+
+  // The three destructive actions live behind a single trash dropdown so they
+  // are not confused with one another.
+  const deleteItems = [
+    {
+      icon: Delete,
+      label: t.deleteColumn,
+      onClick: () => editor.chain().focus().deleteColumn().run(),
+    },
+    {
+      icon: Delete,
+      label: t.deleteRow,
+      onClick: () => editor.chain().focus().deleteRow().run(),
+    },
+    {
+      icon: Delete,
+      label: t.deleteTable,
+      onClick: () => editor.chain().focus().deleteTable().run(),
+    },
   ]
 
   return (
@@ -165,11 +162,17 @@ export const TableBubbleMenu = ({
                 selected={action.active ?? false}
                 disabled={action.disabled}
                 onSelectedChange={action.onClick}
-                className={action.critical ? "text-f1-foreground-critical" : ""}
               />
             ))}
           </Fragment>
         ))}
+        <ToolbarDivider />
+        <ToolbarDropdown
+          darkMode
+          position="bottom"
+          activator={{ label: t.delete, icon: Delete }}
+          items={deleteItems}
+        />
       </div>
     </BubbleMenu>
   )
