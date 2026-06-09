@@ -1,6 +1,6 @@
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
-import { Fragment, useState } from "react"
+import { useState } from "react"
 
 import { F0ButtonToggle } from "@/components/F0ButtonToggle"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -13,10 +13,6 @@ interface ToolbarDropdownItem {
   onClick: () => void
   isActive?: boolean
   disabled?: boolean
-  /** Render a thin separator line above this item to start a new group. */
-  separator?: boolean
-  /** Visual emphasis for the item. "critical" is used for destructive actions. */
-  variant?: "ghost" | "critical"
 }
 
 interface ToolbarDropdownProps {
@@ -76,44 +72,32 @@ export const ToolbarDropdown = ({
                   darkMode && "dark"
                 )}
               >
-                {items.map((item, index) => {
-                  const itemDisabled = disabled || item.disabled
-                  return (
-                    <Fragment key={`${item.label}-${index}`}>
-                      {item.separator && index > 0 && (
-                        <div
-                          role="separator"
-                          className="mx-1 my-0.5 h-px bg-f1-border-secondary"
-                        />
-                      )}
-                      <Action
-                        variant="ghost"
-                        size="md"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          if (!itemDisabled) {
-                            item.onClick()
-                          }
-                        }}
-                        disabled={itemDisabled}
-                        aria-label={item.label}
-                        className={cn(
-                          actionVariants({
-                            variant: item.isActive
-                              ? "selected"
-                              : (item.variant ?? "ghost"),
-                          }),
-                          "justify-start"
-                        )}
-                      >
-                        <div className="flex items-center gap-1">
-                          <F0Icon icon={item.icon} size="md" />
-                          <span className="text-sm">{item.label}</span>
-                        </div>
-                      </Action>
-                    </Fragment>
-                  )
-                })}
+                {items.map((item, index) => (
+                  <Action
+                    key={`${item.label}-${index}`}
+                    variant="ghost"
+                    size="md"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      if (!disabled) {
+                        item.onClick()
+                      }
+                    }}
+                    disabled={disabled}
+                    aria-label={item.label}
+                    className={cn(
+                      actionVariants({
+                        variant: item.isActive ? "selected" : "ghost",
+                      }),
+                      "justify-start"
+                    )}
+                  >
+                    <div className="flex items-center gap-1">
+                      <F0Icon icon={item.icon} size="md" />
+                      <span className="text-sm">{item.label}</span>
+                    </div>
+                  </Action>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
