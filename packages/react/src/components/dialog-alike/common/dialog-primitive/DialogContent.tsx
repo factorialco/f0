@@ -108,7 +108,7 @@ export const DialogContent = forwardRef<
             ref={contentRef}
             className={cn(
               "relative flex w-[90%] flex-col rounded-xl bg-f1-background shadow-lg pointer-events-auto",
-              "group-data-[state=open]/dialog:animate-in group-data-[state=closed]/dialog:animate-out",
+              "group-data-[state=open]/dialog:animate-in group-data-[state=closed]/dialog:animate-out overflow-hidden",
               animationClassName(animation),
               className
             )}
