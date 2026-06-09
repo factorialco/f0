@@ -1121,9 +1121,11 @@ export default function TrainingsEnrollments() {
       creationYear: String(values.year ?? "2026"),
       courseType,
       enrollmentRule,
-      // A freshly created course has no training group yet → its settings show the
-      // "no group" assignment case (warning + create group).
-      groups: [],
+      // One-time: the system auto-creates one always-active training group at
+      // creation, so matching people are enrolled directly. Recurring: no group
+      // yet — matching people wait in pending group assignment until the TM
+      // creates the training groups.
+      groups: courseType === "with-editions" ? [] : ["Group 1"],
     }
     setCourses((currentCourses) => [newCourse, ...currentCourses])
     setToast(null)
@@ -1156,6 +1158,23 @@ export default function TrainingsEnrollments() {
     setCourses((currentCourses) =>
       currentCourses.map((course) =>
         course.id === courseId ? { ...course, status: "draft" } : course
+      )
+    )
+    setToast("draft")
+  }
+
+  // Creating a 2nd group in a one-time course converts it to recurring (irreversible).
+  // The original group stays as-is; the new group is just another training group.
+  const convertToRecurringAndAddGroup = (courseId: string) => {
+    setCourses((currentCourses) =>
+      currentCourses.map((course) =>
+        course.id === courseId
+          ? {
+              ...course,
+              courseType: "with-editions",
+              groups: [...course.groups, `Group ${course.groups.length + 1}`],
+            }
+          : course
       )
     )
     setToast("draft")
@@ -1197,6 +1216,7 @@ export default function TrainingsEnrollments() {
         toast={toast}
         onToast={setToast}
         onRevertToDraft={() => revertCourseToDraft(selectedCourse.id)}
+        onConvertToRecurring={() => convertToRecurringAndAddGroup(selectedCourse.id)}
       />
     )
   }
@@ -1958,6 +1978,15 @@ const inscripcionCopy = {
     warning: "This course doesn't have any groups yet. Matching people will stay pending group assignment until you create a group and assign them. Enrollment is not immediate.",
   },
   manualCallout: "Without automatic enrollment, you can always assign participants manually from the Participants list.",
+  // Shown before creating a 2nd group in a one-time course (→ converts to recurring).
+  conversion: {
+    title: "This course will become recurring",
+    bodyAutomatic:
+      "Creating another group changes this course from one-time to recurring. People already enrolled stay in their current group. From now on, people who match the criteria won't be enrolled directly — they'll go to pending group assignment for you to assign.",
+    bodyManual:
+      "Creating another group changes this course from one-time to recurring. People already enrolled stay in their current group.",
+    confirm: "Create group and continue",
+  },
 } as const
 
 const AUDIENCE_PREVIEW_AVATARS = [
@@ -1968,10 +1997,13 @@ const AUDIENCE_PREVIEW_AVATARS = [
   { firstName: "Elena", lastName: "Ruiz" },
 ]
 
-// Step 1 — course type selector (no editions / with editions)
-function CourseTypeField({ values, onUpdate }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void }) {
+// Step 1 — course type. Chosen at creation; NOT directly editable afterwards
+// (a one-time course only becomes recurring by creating a 2nd group). So settings
+// renders it read-only.
+function CourseTypeField({ values, onUpdate, readOnly = false }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void; readOnly?: boolean }) {
   const courseType = (values.courseType as string) ?? "no-editions"
   const copy = inscripcionCopy.courseType
+  const active = courseType === "with-editions" ? copy.withEditions : copy.noEditions
   return (
     <div className="flex flex-col gap-2">
       {/* Exact F0 input-field label style (matches the DS <label> markup) so
@@ -1979,20 +2011,28 @@ function CourseTypeField({ values, onUpdate }: { values: Record<string, unknown>
       <span className="text-base font-medium leading-normal text-f1-foreground-secondary">
         {copy.label}
       </span>
-      {/* Native F0 CardSelectableContainer in grouped mode: one bordered container
-          with the two types as rows (radio + title + description) and a divider
-          between — the Factorial pattern for picking one config, compact (not the
-          big floating cards) with both descriptions visible. */}
-      <CardSelectableContainer
-        grouped
-        label={copy.label}
-        value={courseType}
-        onChange={(val) => onUpdate("courseType", val ?? "no-editions")}
-        items={[
-          { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
-          { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
-        ]}
-      />
+      {readOnly ? (
+        // Settings: the type isn't editable here — show the current type as a value.
+        <div className="flex flex-col gap-0.5">
+          <F0Text variant="body" content={active.title} />
+          <F0Text variant="description" content={active.description} />
+        </div>
+      ) : (
+        // Native F0 CardSelectableContainer in grouped mode: one bordered container
+        // with the two types as rows (radio + title + description) and a divider
+        // between — the Factorial pattern for picking one config, compact (not the
+        // big floating cards) with both descriptions visible.
+        <CardSelectableContainer
+          grouped
+          label={copy.label}
+          value={courseType}
+          onChange={(val) => onUpdate("courseType", val ?? "no-editions")}
+          items={[
+            { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
+            { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
+          ]}
+        />
+      )}
     </div>
   )
 }
@@ -4144,7 +4184,7 @@ function EditCourseBasicSection({
           <F0Text content={course.name} variant="body" />
         </div>
       </div>
-      <CourseTypeField values={values} onUpdate={onUpdate} />
+      <CourseTypeField values={values} onUpdate={onUpdate} readOnly />
       <div className="flex flex-col gap-2">
         <F0Text content="Thumbnail" variant="label" />
         <F0Text content="Add an image to show as the course thumbnail in the Catalogue." variant="small" />
@@ -4260,15 +4300,25 @@ function CourseDetail({
   toast,
   onToast,
   onRevertToDraft,
+  onConvertToRecurring,
 }: {
   course: ExactCourse
   toast: ToastId
   onToast: (toast: ToastId) => void
   onRevertToDraft: () => void
+  onConvertToRecurring: () => void
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
   const [activeDialog, setActiveDialog] = useState<CourseActionDialogId>(null)
   const [classWizardOpen, setClassWizardOpen] = useState(false)
+  const [conversionOpen, setConversionOpen] = useState(false)
+  // The course type is never edited directly. Creating a 2nd group in a one-time
+  // course is the only path to recurring — and it asks for confirmation first.
+  const isOneTime = course.courseType !== "with-editions"
+  const handleCreateGroup = () => {
+    if (isOneTime && course.groups.length >= 1) setConversionOpen(true)
+    else setClassWizardOpen(true)
+  }
   const activeDetailTab = getValidParam(
     searchParams.get("dtab"),
     VALID_DETAIL_TABS,
@@ -4345,7 +4395,7 @@ function CourseDetail({
               course={course}
               activeDetailTab={activeDetailTab}
               onOpenDialog={setActiveDialog}
-              onOpenClassWizard={() => setClassWizardOpen(true)}
+              onOpenClassWizard={handleCreateGroup}
               onGoToSurveys={() =>
                 setSearchParams({ view: "detail", course: course.id, dtab: "surveys" })
               }
@@ -4364,6 +4414,27 @@ function CourseDetail({
             setClassWizardOpen(false)
             onToast("draft")
           }}
+        />
+        {/* Creating a 2nd group in a one-time course converts it to recurring.
+            The body differs depending on whether automatic enrollment is on. */}
+        <F0Dialog
+          isOpen={conversionOpen}
+          onClose={() => setConversionOpen(false)}
+          width="md"
+          title={inscripcionCopy.conversion.title}
+          description={
+            course.enrollmentRule
+              ? inscripcionCopy.conversion.bodyAutomatic
+              : inscripcionCopy.conversion.bodyManual
+          }
+          primaryAction={{
+            label: inscripcionCopy.conversion.confirm,
+            onClick: () => {
+              setConversionOpen(false)
+              onConvertToRecurring()
+            },
+          }}
+          secondaryAction={{ label: "Cancel", onClick: () => setConversionOpen(false) }}
         />
         <TrainingActionDialog
           detail={activeDialog && activeDialog !== "add-participants" ? getCourseActionDetail(activeDialog, course) : null}
@@ -4573,9 +4644,9 @@ function CourseGroupsTab({
           return paginateRecords(sorted, pagination, 20)
         },
       },
-      primaryActions: isNoEditions
-        ? undefined
-        : () => ({ label: "New training group", icon: Add, onClick: onOpenClassWizard }),
+      // Always available — in a one-time course, creating a 2nd group is what
+      // converts it to recurring (handled upstream with a confirmation).
+      primaryActions: () => ({ label: "New training group", icon: Add, onClick: onOpenClassWizard }),
       itemUrl: (group) => `/p/trainings-enrollments?view=group-detail&course=${course.id}&group=${encodeURIComponent(group.name)}`,
       itemActions: isNoEditions
         ? undefined
