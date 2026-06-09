@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ProgressBarN } from "./index"
+import { F0ProgressBar } from "../index"
 
-const meta: Meta<typeof ProgressBarN> = {
-  title: "Widgets/Charts/ProgressBarN",
-  component: ProgressBarN,
-  tags: ["autodocs", "experimental"],
+const meta = {
+  title: "F0ProgressBar",
+  component: F0ProgressBar,
+  tags: ["experimental"],
   parameters: {
     layout: "centered",
   },
@@ -16,10 +16,10 @@ const meta: Meta<typeof ProgressBarN> = {
       </div>
     ),
   ],
-}
+} satisfies Meta<typeof F0ProgressBar>
 
 export default meta
-type Story = StoryObj<typeof ProgressBarN>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -45,32 +45,12 @@ export const FiveSegments: Story = {
   },
 }
 
-export const CustomColors: Story = {
+export const CustomColorTokens: Story = {
   args: {
     segments: [
-      { value: 25, color: "#F0A22E" },
-      { value: 50, color: "#6B9DAD" },
-      { value: 25, color: "#C8697D" },
-    ],
-  },
-}
-
-export const AllGreen: Story = {
-  args: {
-    segments: [
-      { value: 33, color: "#1AB26B" },
-      { value: 33, color: "#1AB26B" },
-      { value: 34, color: "#1AB26B" },
-    ],
-  },
-}
-
-export const PartialWithGray: Story = {
-  args: {
-    segments: [
-      { value: 40, color: "#E5463D" },
-      { value: 30, color: "#D1D5DB" },
-      { value: 30, color: "#D1D5DB" },
+      { value: 25, color: "categorical-4" },
+      { value: 50, color: "categorical-6" },
+      { value: 25, color: "categorical-8" },
     ],
   },
 }

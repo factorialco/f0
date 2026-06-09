@@ -12,6 +12,7 @@ export * from "./F0BigNumber"
 export * from "./F0ActionBar"
 export * from "./CardSelectable"
 export * from "./F0Accordion"
+export * from "./F0ProgressBar"
 export * from "./OneChip"
 /**
  * @deprecated F0Box has moved to @/lib/F0Box. Import from there instead.
