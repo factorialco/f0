@@ -10,7 +10,7 @@ import { dialogsAlikeStore } from "../store"
 import { DialogActionValue } from "../types"
 
 const meta = {
-  title: "Dialogs",
+  title: "Dialogs API",
   parameters: {
     layout: "centered",
     docs: {

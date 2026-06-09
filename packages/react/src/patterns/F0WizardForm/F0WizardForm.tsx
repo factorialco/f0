@@ -207,6 +207,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
   onClose,
   title,
   width,
+  size,
   defaultStepIndex,
   nextLabel,
   previousLabel,
@@ -441,6 +442,7 @@ function F0WizardFormPerSection<T extends F0PerSectionSchema>({
       onClose={onClose}
       title={title}
       width={width}
+      size={size}
       defaultStepIndex={computedDefaultStepIndex}
       nextLabel={nextLabel}
       previousLabel={previousLabel}
@@ -582,6 +584,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
   onClose,
   title,
   width,
+  size,
   defaultStepIndex,
   nextLabel,
   previousLabel,
@@ -751,6 +754,7 @@ function F0WizardFormSingleSchema<TSchema extends F0FormSchema>({
       onClose={onClose}
       title={title}
       width={width}
+      size={size}
       defaultStepIndex={computedDefaultStepIndex}
       nextLabel={nextLabel}
       previousLabel={previousLabel}

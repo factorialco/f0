@@ -10,7 +10,7 @@ import { dialogsAlikeStore } from "../store"
 import { DialogActionValue } from "../types"
 
 const meta = {
-  title: "Drawers",
+  title: "Drawers API",
   parameters: {
     layout: "centered",
     docs: {
