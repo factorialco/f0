@@ -98,7 +98,7 @@ The API handles all the state management, dialog rendering, and cleanup automati
 
 ## Notification Dialogs
 
-The `openNotificationDialog` method displays a notification dialog which should be used to display messages to the user or ask for a confirmation.
+The `notification` method displays a notification dialog which should be used to display messages to the user or ask for a confirmation.
 Notification dialogs have different severity levels: `info`, `warning`, `critical` and `positive`.
 By default, the severity level is `info`.
 
@@ -107,7 +107,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showNotification = async () => {
-    await dialog.openNotification({
+    await dialog.notification({
       title: "Notification Title",
       msg: "This is a notification message",
       type: "critical",
@@ -297,51 +297,50 @@ function MyComponent() {
 
 ### keepOpen Property
 
-When `keepOpen` is set to `true` on a `DialogAction`, the dialog will not close automatically when that action is clicked. This is useful for multi-step dialogs or when you need manual control over when the dialog closes.
+By default, clicking any action closes the dialog. When `keepOpen: true` is set on a `DialogAction`, the dialog **resolves the promise but stays open** — the item is not removed from the screen.
+
+The action's `value` (including a function `value`) still runs on **every** click, so `keepOpen` is ideal for "apply"-style actions that mutate something without dismissing the dialog. To actually close it afterwards, either click a different action that does _not_ set `keepOpen`, or call `dialog.close(id)` with the `id` you passed to `dialog.open`.
+
+> Note: a promise resolves only once. The `await dialog.open(...)` call returns the first time a `keepOpen` action is clicked, but the dialog remains visible and the action keeps firing on subsequent clicks.
 
 ```tsx
+import { useState } from "react"
 import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
-  const showMultiStepDialog = async () => {
-    const result = await dialog.open({
-      title: "Multi-Step Process",
-      content: <div>Step 1: Initial information</div>,
+  const [count, setCount] = useState(0)
+
+  const showKeepOpenDialog = () => {
+    dialog.open({
+      id: "keep-open-demo",
+      title: "Keep Open",
+      content: <div>Click Increment a few times — the dialog stays open.</div>,
       actions: {
         primary: {
-          value: "next",
-          label: "Next",
-          keepOpen: true, // Dialog stays open
-        },
-        secondary: {
-          value: "cancel",
-          label: "Cancel",
-        },
-      },
-    })
-
-    if (result === "next") {
-      // Show next step dialog
-      await dialog.open({
-        title: "Multi-Step Process",
-        content: <div>Step 2: Final confirmation</div>,
-        actions: {
-          primary: {
-            value: "complete",
-            label: "Complete",
+          label: "Increment (keepOpen)",
+          keepOpen: true, // runs on every click, dialog stays open
+          value: () => {
+            setCount((c) => c + 1)
+            return Promise.resolve("incremented")
           },
         },
-      })
-    }
+        // No keepOpen → this action closes the dialog.
+        secondary: { value: "done", label: "Done" },
+      },
+    })
   }
 
-  return <F0Button label="Start Process" onClick={showMultiStepDialog} />
+  return <F0Button label="Open keep-open dialog" onClick={showKeepOpenDialog} />
 }
 ```
 
+<Canvas of={DialogStories.KeepOpen} />
+
 ### nonBlocking Property
 
-When `nonBlocking` is set to `true` on a `DialogAction`, the dialog actions will remain enabled during promise execution. By default, when an action's value is a promise-returning function, all dialog actions are disabled until the promise resolves. Use `nonBlocking: true` when you want users to be able to interact with other actions while one is processing.
+When an action's `value` is a promise-returning function, the dialog **blocks** while it runs: every action button is disabled and the close button is suppressed until the promise resolves (so the user can't dismiss the dialog or trigger another action mid-operation).
+
+Set `nonBlocking: true` on the action to opt out of that behavior — the other actions (and close) stay interactive while this action's promise is pending.
 
 ```tsx
 import { dialog, F0Button } from "@factorialco/f0-react"
@@ -349,31 +348,29 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 function MyComponent() {
   const showNonBlockingDialog = async () => {
     const result = await dialog.open({
-      title: "Background Operation",
-      content: <div>You can cancel while processing...</div>,
+      title: "Non-Blocking Action",
+      content: <div>Click "Start", then notice "Cancel" is still enabled.</div>,
       actions: {
         primary: {
-          value: async () => {
-            // Long-running operation
-            await new Promise((resolve) => setTimeout(resolve, 5000))
-            return "completed"
-          },
-          label: "Start Processing",
-          nonBlocking: true, // Other actions remain enabled
+          label: "Start (nonBlocking, 3s)",
+          nonBlocking: true, // other actions remain enabled while this runs
+          value: () =>
+            new Promise((resolve) =>
+              setTimeout(() => resolve("completed"), 3000)
+            ),
         },
-        secondary: {
-          value: "cancel",
-          label: "Cancel",
-        },
+        secondary: { value: "cancel", label: "Cancel" },
       },
     })
 
     console.log("Result:", result)
   }
 
-  return <F0Button label="Start" onClick={showNonBlockingDialog} />
+  return <F0Button label="Open non-blocking dialog" onClick={showNonBlockingDialog} />
 }
 ```
+
+<Canvas of={DialogStories.NonBlocking} />
 
 ## Type Reference
 

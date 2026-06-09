@@ -132,7 +132,7 @@ export const dialog = {
     openDialogInternal({ ...definition, variant: "default" }),
 
   /** Open a notification-style dialog (info/warning/critical/positive). */
-  openNotification: (
+  notification: (
     options: NotificationDialogOptions
   ): Promise<DialogActionValue> =>
     openDialogInternal({
@@ -148,7 +148,7 @@ export const dialog = {
   /** Notification dialog with a single confirm action (defaults to "Ok"). */
   alert: (options: AlertDialogOptions): Promise<DialogActionValue> => {
     const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return dialog.openNotification({
+    return dialog.notification({
       ...options,
       actions: {
         primary: {
@@ -162,7 +162,7 @@ export const dialog = {
   /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
   confirm: (options: ConfirmDialogOptions): Promise<DialogActionValue> => {
     const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return dialog.openNotification({
+    return dialog.notification({
       ...options,
       actions: {
         primary: {
