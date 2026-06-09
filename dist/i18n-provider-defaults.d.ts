@@ -694,6 +694,18 @@ export declare const defaultTranslations: {
         readonly task: "Task";
         readonly details: "Dropdown";
         readonly table: "Table";
+        readonly tableMenu: {
+            readonly addColumnBefore: "Add column before";
+            readonly addColumnAfter: "Add column after";
+            readonly deleteColumn: "Delete column";
+            readonly addRowBefore: "Add row before";
+            readonly addRowAfter: "Add row after";
+            readonly deleteRow: "Delete row";
+            readonly mergeCells: "Merge cells";
+            readonly splitCell: "Split cell";
+            readonly toggleHeaderRow: "Toggle header row";
+            readonly deleteTable: "Delete table";
+        };
         readonly video: "Video";
         readonly videoUrlPrompt: "Enter a YouTube or Vimeo URL";
         readonly videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL";
@@ -870,8 +882,13 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
+        };
+    }
 }
 
 
@@ -880,16 +897,6 @@ declare module "@tiptap/core" {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -906,8 +913,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -915,12 +924,15 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 

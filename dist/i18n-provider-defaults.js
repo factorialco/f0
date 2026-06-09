@@ -694,6 +694,18 @@ const e = {
     task: "Task",
     details: "Dropdown",
     table: "Table",
+    tableMenu: {
+      addColumnBefore: "Add column before",
+      addColumnAfter: "Add column after",
+      deleteColumn: "Delete column",
+      addRowBefore: "Add row before",
+      addRowAfter: "Add row after",
+      deleteRow: "Delete row",
+      mergeCells: "Merge cells",
+      splitCell: "Split cell",
+      toggleHeaderRow: "Toggle header row",
+      deleteTable: "Delete table"
+    },
     video: "Video",
     videoUrlPrompt: "Enter a YouTube or Vimeo URL",
     videoUrlInvalid: "Please enter a valid YouTube or Vimeo URL",
