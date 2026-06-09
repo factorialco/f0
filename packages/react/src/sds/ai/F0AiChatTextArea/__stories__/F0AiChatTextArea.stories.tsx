@@ -290,6 +290,7 @@ export const WithDisclaimer: Story = {
 export const WithFooter: Story = {
   args: {
     isWelcomeScreen: true,
+    fullscreen: true,
     footer: (
       <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
         Powered by Factorial AI · v0.1.0

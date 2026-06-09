@@ -19,9 +19,19 @@ export interface WelcomeScreenProps {
    * `F0AiChat` to wire the pong easter egg.
    */
   onClick?: () => void
+  /**
+   * Fullscreen welcome layout: the phrase is pushed to the bottom of the top
+   * half (instead of vertically centered) so it meets the composer — which
+   * rises to the top of the bottom half — around the vertical center.
+   */
+  fullscreen?: boolean
 }
 
-export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
+export const WelcomeScreen = ({
+  messages,
+  onClick,
+  fullscreen = false,
+}: WelcomeScreenProps) => {
   const [index, setIndex] = useState(0)
   const [chars, setChars] = useState(0)
   const [phase, setPhase] = useState<Phase>("starting")
@@ -79,7 +89,12 @@ export const WelcomeScreen = ({ messages, onClick }: WelcomeScreenProps) => {
     : undefined
 
   return (
-    <div className="flex w-full flex-1 items-center justify-center px-4">
+    <div
+      className={cn(
+        "flex w-full flex-1 justify-center px-4",
+        fullscreen ? "items-end pb-24" : "items-center"
+      )}
+    >
       <p
         key={index}
         role={interactive ? "button" : undefined}
