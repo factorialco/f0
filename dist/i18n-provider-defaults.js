@@ -704,6 +704,7 @@ const e = {
       mergeCells: "Merge cells",
       splitCell: "Split cell",
       toggleHeaderRow: "Toggle header row",
+      delete: "Delete",
       deleteTable: "Delete table"
     },
     video: "Video",
