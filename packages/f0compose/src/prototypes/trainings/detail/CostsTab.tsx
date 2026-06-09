@@ -2,18 +2,39 @@ import { useState } from "react"
 import {
   F0Alert,
   F0Button,
+  F0Dialog,
   F0Heading,
+  F0Icon,
   F0Text,
   F0Select,
 } from "@factorialco/f0-react"
-import { NumberInput } from "@factorialco/f0-react/dist/experimental"
-import { Calculator } from "@factorialco/f0-react/icons/app"
+import { NumberInput, Tooltip } from "@factorialco/f0-react/dist/experimental"
+import { Calculator, InfoCircleLine } from "@factorialco/f0-react/icons/app"
 
 import type { Training, TrainingClass } from "@/fixtures"
 import { trainingBudgets } from "@/fixtures"
 
 type Props = { training: Training; klass?: TrainingClass }
 type PaymentStatus = "pending" | "paid" | ""
+
+// Faithful to the upstream salary cost calculator:
+//   employee salary cost = (gross annual salary / annual working hours) x total course hours
+// summed across every participant. Fixtures don't carry per-employee gross
+// salaries, so we synthesise deterministic, realistic bands per participant.
+const ANNUAL_WORKING_HOURS = 1720
+const SALARY_BANDS = [32000, 41500, 48000, 55000, 62000, 68500]
+
+function grossAnnualForIndex(index: number): number {
+  return SALARY_BANDS[index % SALARY_BANDS.length]
+}
+
+function computeSalaryCost(participantCount: number, courseHours: number): number {
+  let total = 0
+  for (let i = 0; i < participantCount; i++) {
+    total += (grossAnnualForIndex(i) / ANNUAL_WORKING_HOURS) * courseHours
+  }
+  return Math.round(total * 100) / 100
+}
 
 function formatMoney(n: number, currency = "EUR"): string {
   return n.toLocaleString("en-GB", {
@@ -131,6 +152,86 @@ function BudgetLinkBanner({
   )
 }
 
+function SalaryCostCalculator({
+  computedSalary,
+  isCalculable,
+  errorLabel,
+  currency,
+  onApply,
+}: {
+  computedSalary: number
+  isCalculable: boolean
+  errorLabel: string
+  currency: string
+  onApply: (value: number) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [amount, setAmount] = useState<number>(computedSalary)
+
+  const openCalculator = () => {
+    setAmount(computedSalary)
+    setOpen(true)
+  }
+
+  const button = (
+    <F0Button
+      label="Calculate"
+      icon={Calculator}
+      variant="outline"
+      disabled={!isCalculable}
+      onClick={openCalculator}
+    />
+  )
+
+  return (
+    <>
+      {isCalculable ? button : <Tooltip label={errorLabel}>{button}</Tooltip>}
+      <F0Dialog
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        width="md"
+        title="Salary cost calculator"
+        primaryAction={{
+          label: "Apply",
+          onClick: () => {
+            onApply(amount)
+            setOpen(false)
+          },
+        }}
+        secondaryAction={{ label: "Cancel", onClick: () => setOpen(false) }}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-1">
+              <F0Text variant="label" content="Calculated salary cost" />
+              <Tooltip label="Employee salary cost: (Gross annual salary / Annual working hours) x Total course hours">
+                <span className="inline-flex">
+                  <F0Icon icon={InfoCircleLine} size="sm" />
+                </span>
+              </Tooltip>
+            </div>
+            <NumberInput
+              label="Calculated salary cost"
+              hideLabel
+              value={amount}
+              onChange={(v) => setAmount(v ?? 0)}
+              placeholder="0.00"
+              maxDecimals={2}
+              locale="en-US"
+              units={currency}
+            />
+          </div>
+          <F0Alert
+            variant="info"
+            title="This is calculated by multiplying the cost per hour of each employee by the total course hours."
+            description=""
+          />
+        </div>
+      </F0Dialog>
+    </>
+  )
+}
+
 export function CostsTab({ training, klass }: Props) {
   const currency = "EUR"
   const participants = klass?.participantCount ?? training.participantCount ?? 1
@@ -153,7 +254,17 @@ export function CostsTab({ training, klass }: Props) {
   const [subsidizedCost, setSubsidizedCost] = useState(initialSubsidy)
   const [budgetId, setBudgetId] = useState<string | null>("bud-001")
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("pending")
-  const [calculatorOpen, setCalculatorOpen] = useState(false)
+
+  // Salary cost calculator inputs (mirrors upstream validity rules)
+  const courseHours = training.totalDuration
+  const isCalculable = participants > 0 && courseHours > 0
+  const calculatorError =
+    participants <= 0
+      ? "The group has no participants"
+      : courseHours <= 0
+        ? "Group's sessions has no duration"
+        : ""
+  const computedSalary = computeSalaryCost(participants, courseHours)
 
   const totalCost = directCost + indirectCost + salaryCost
   const netCost = Math.max(0, totalCost - subsidizedCost)
@@ -242,73 +353,21 @@ export function CostsTab({ training, klass }: Props) {
         />
         <CostBreakdownCard
           emoji="📝"
-          title="Salary opportunity cost"
-          description="Payroll cost of participants and instructors during training hours."
+          title="Salary cost"
+          description="Cost of all employees' time spent on the course."
           value={salaryCost}
           onChange={setSalaryCost}
           action={
-            <F0Button
-              label="Calculate"
-              icon={Calculator}
-              variant="outline"
-              onClick={() => setCalculatorOpen((v) => !v)}
+            <SalaryCostCalculator
+              computedSalary={computedSalary}
+              isCalculable={isCalculable}
+              errorLabel={calculatorError}
+              currency={currency}
+              onApply={setSalaryCost}
             />
           }
         />
       </div>
-
-      {calculatorOpen && (
-        <div className="flex flex-col gap-3 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-4">
-          <F0Heading
-            as="h4"
-            variant="heading"
-            content="Salary cost calculator"
-          />
-          <F0Text
-            variant="description"
-            content={`Estimate based on average payroll cost per hour × ${participants} participants × training duration (${training.totalDuration}h).`}
-          />
-          <div className="grid grid-cols-3 gap-3">
-            <div className="flex flex-col gap-1">
-              <F0Text variant="label" content="Avg. €/h" />
-              <F0Heading as="h4" variant="heading" content="28 €" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text variant="label" content="Participants" />
-              <F0Heading
-                as="h4"
-                variant="heading"
-                content={String(participants)}
-              />
-            </div>
-            <div className="flex flex-col gap-1">
-              <F0Text variant="label" content="Estimated" />
-              <F0Heading
-                as="h4"
-                variant="heading"
-                content={formatMoney(
-                  28 * participants * training.totalDuration,
-                  currency
-                )}
-              />
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <F0Button
-              label="Apply"
-              onClick={() => {
-                setSalaryCost(28 * participants * training.totalDuration)
-                setCalculatorOpen(false)
-              }}
-            />
-            <F0Button
-              label="Cancel"
-              variant="outline"
-              onClick={() => setCalculatorOpen(false)}
-            />
-          </div>
-        </div>
-      )}
 
       {/* Other costs */}
       <section className="flex flex-col gap-3">
