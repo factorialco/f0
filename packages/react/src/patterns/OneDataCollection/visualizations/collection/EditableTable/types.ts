@@ -193,10 +193,13 @@ export type EditableTableColumnDefinition<
    *
    * Return `undefined` to hide the hint.
    *
+   * Use `position` to place the icon at the start (`"left"`, default) or end
+   * (`"right"`) of the cell content.
+   *
    * @example
    * cellHint: (item) => {
    *   if (item._inferredSalary != null && item.salary !== item._inferredSalary) {
-   *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})` }
+   *     return { icon: AlertCircle, message: `Differs from catalog (${item._inferredSalary})`, position: "right" }
    *   }
    * }
    */
@@ -205,6 +208,8 @@ export type EditableTableColumnDefinition<
         icon: IconType
         message: string
         iconColor?: F0IconProps["color"]
+        /** Where to place the icon relative to the cell content. Defaults to `"left"`. */
+        position?: "left" | "right"
       }
     | undefined
 }

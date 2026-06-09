@@ -24,7 +24,12 @@ export type EditableCellProps<R extends RecordType> = {
   ) => void
   item: R
   isLastColumn?: boolean
-  hint?: { icon: IconType; message: string; iconColor?: F0IconProps["color"] }
+  hint?: {
+    icon: IconType
+    message: string
+    iconColor?: F0IconProps["color"]
+    position?: "left" | "right"
+  }
 }
 
 /** The edit mode for a column cell in the editable table. */
