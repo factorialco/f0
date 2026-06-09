@@ -52,6 +52,12 @@ export const dialogsAlikeStore = {
     items = items.filter((item) => item.id !== id)
     emit()
   },
+  /** Remove all open items. Mainly useful to isolate Storybook stories/tests. */
+  clear() {
+    if (items.length === 0) return
+    items = EMPTY
+    emit()
+  },
   setDefaultActionLabels(labels: { ok: string; cancel: string }) {
     defaultActionLabels = labels
   },

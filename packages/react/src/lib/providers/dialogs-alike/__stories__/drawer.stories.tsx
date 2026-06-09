@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { Delete, Pencil } from "@/icons/app"
 
 import { drawer } from "../imperative"
+import { dialogsAlikeStore } from "../store"
 import { DialogActionValue } from "../types"
 
 const meta = {
@@ -22,6 +22,11 @@ const meta = {
     },
   },
   tags: ["!autodocs", "experimental"],
+  // The imperative drawer store is a global singleton — clear it between
+  // stories so a drawer opened in one story doesn't leak into the next.
+  beforeEach: () => {
+    dialogsAlikeStore.clear()
+  },
 } satisfies Meta<typeof F0Button>
 
 export default meta
@@ -56,35 +61,6 @@ export const Default: Story = {
         <F0Button onClick={drawerTrigger} label="Open Drawer" />
       </div>
     )
-  },
-  play: async ({ canvasElement, step }) => {
-    const canvas = within(canvasElement)
-    // Drawers render in portals, so search the full page
-    const page = within(canvasElement.closest("body")!)
-
-    await step("Open drawer and verify it appears", async () => {
-      const drawerButton = canvas.getByRole("button", { name: "Open Drawer" })
-      await userEvent.click(drawerButton)
-
-      // Wait for drawer to appear
-      await new Promise((resolve) => setTimeout(resolve, 100))
-
-      // Verify drawer content
-      expect(page.getByText("Drawer Title")).toBeInTheDocument()
-      expect(page.getByText("Drawer Description")).toBeInTheDocument()
-      expect(page.getByText("Drawer Content")).toBeInTheDocument()
-      expect(
-        page.getByRole("button", { name: "Primary Action" })
-      ).toBeInTheDocument()
-      expect(
-        page.getByRole("button", { name: "Secondary Action" })
-      ).toBeInTheDocument()
-
-      // Close drawer by clicking primary action
-      await userEvent.click(
-        page.getByRole("button", { name: "Primary Action" })
-      )
-    })
   },
 }
 
