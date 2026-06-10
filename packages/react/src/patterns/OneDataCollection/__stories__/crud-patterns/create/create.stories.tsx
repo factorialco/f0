@@ -190,7 +190,7 @@ function WizardDialogScenario() {
         isOpen={open}
         onClose={() => setOpen(false)}
         title="Create onboarding plan"
-        width="lg"
+        size="lg"
         submitLabel="Create plan"
         steps={[
           { title: "General information" },

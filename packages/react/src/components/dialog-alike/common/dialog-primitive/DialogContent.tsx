@@ -64,7 +64,10 @@ export const DialogContent = forwardRef<
       if (propContainer !== undefined) {
         setContainer(propContainer)
       } else {
-        setContainer(document.getElementById("content"))
+        // Prefer the app shell's `#content` element, but fall back to the
+        // document body so the dialog still renders in contexts that don't
+        // have it (Storybook docs, tests, components opened outside the shell).
+        setContainer(document.getElementById("content") ?? document.body)
       }
     }, [propContainer])
 
