@@ -169,11 +169,11 @@ export const getAvatarSize = (
   const sizeMap: Partial<
     Record<Exclude<AvatarSize, undefined>, F0AvatarModuleProps["size"]>
   > = {
-    "2xl": "md",
-    xl: "sm",
-    lg: "xs",
-    sm: "xs",
-    xs: "xxs",
+    "2xl": "sm",
+    xl: "xs",
+    lg: "2xs",
+    sm: "2xs",
+    xs: "3xs",
   } as const
 
   return size && sizeMap[size] ? (sizeMap[size] ?? sizeMap.sm) : sizeMap.sm

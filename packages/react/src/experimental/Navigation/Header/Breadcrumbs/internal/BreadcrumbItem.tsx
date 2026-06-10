@@ -68,7 +68,7 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
           "module" in item &&
           item.module &&
           (isOnly || isFirst) && (
-            <F0AvatarModule module={item.module} size={isOnly ? "lg" : "sm"} />
+            <F0AvatarModule module={item.module} size={isOnly ? "md" : "xs"} />
           )}
         <span className="truncate">
           {!isLoading && "label" in item ? item.label : ""}
