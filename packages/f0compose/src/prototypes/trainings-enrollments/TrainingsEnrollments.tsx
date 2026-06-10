@@ -617,9 +617,13 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
     salaryCost: index === 0 ? "7940.40 EUR" : "-",
     subsidizedCost: index === 0 ? "2000 EUR" : "-",
     creationYear: index === 0 ? "2026" : "2025",
-    courseType: index === 0 || index === 2 ? "with-editions" : "no-editions",
-    // Pending group assignment count — independent of mode. Index 0 (automatic)
-    // has pending; index 3 (manual) also has pending to show that case.
+    courseType:
+      index === 0 || index === 2 || index === 3 ? "with-editions" : "no-editions",
+    // Pending group assignment count — independent of mode, but only meaningful for
+    // recurring courses (one-time courses enrol people straight into their single
+    // group). Index 0 = automatic + pending; index 3 = manual recurring + pending,
+    // to show that manual courses also accumulate pending people (from requests and
+    // manual adds), not just automatic ones.
     pendingCount: index === 0 ? 12 : index === 3 ? 4 : 0,
     enrollmentRule: index === 0 ? {
       criteria: ["Team: Quality & Compliance", "Legal entity: Factorial ES"],
@@ -6246,24 +6250,13 @@ function getGroupActionDetail(dialog: GroupActionDialogId, groupName: string): T
   }
 }
 
-// "[mode] · [N] pending" line — amber on the pending count, the rest grey.
-function EnrollmentModeLine({ mode, count }: { mode: string; count: number }) {
-  return (
-    <div className="flex flex-wrap items-baseline gap-x-1">
-      <F0Text content={mode} variant="body" as="span" />
-      <F0Text content="·" variant="body" as="span" />
-      <span className="text-base font-normal leading-normal text-f1-foreground-warning">
-        {`${count} pending`}
-      </span>
-    </div>
-  )
-}
-
-// Enrollment status in the course overview sidebar. Read-only and styled exactly
-// like the other sidebar fields (bold label + value, no box / dot / edit link).
-// The only colour licence is the amber "[N] pending"; action links appear only
-// when there's an operational step to take. The overview just COUNTS pending —
-// it doesn't compute its cause (that lives in the Participants list).
+// Enrollment status in the course overview sidebar. Read-only, styled like the
+// other sidebar fields (bold label + value). When people are stuck in "pending
+// group assignment" it surfaces a warning F0Alert — this is the ONLY surface that
+// alerts the training manager (there's no notification yet), so the count and the
+// next action ("Assign to a group") need to be unmissable. Pending people can come
+// from automatic enrollment, approved requests or manual adds; the copy explains
+// the situation without breaking it down per source.
 function EnrollmentSidebarBlock({
   course,
   onViewPending,
@@ -6276,23 +6269,29 @@ function EnrollmentSidebarBlock({
   const rule = course.enrollmentRule
   const pending = course.pendingCount ?? 0
 
-  // Manual: no automatic rule (also covers "just created, not configured"). Pending
-  // can still happen here (requests, manual assignment without a group, etc.).
+  const pendingAlert =
+    pending > 0 ? (
+      <F0Alert
+        variant="warning"
+        title={`${pending} ${pending === 1 ? "person" : "people"} pending group assignment`}
+        description={
+          rule
+            ? "They matched the criteria, requested to join or were added manually, but aren't in a training group yet. Assign them to a group so they can start."
+            : "They requested to join or were added manually, but aren't in a training group yet. Assign them to a group so they can start."
+        }
+        action={{ label: "Assign to a group", onClick: () => onViewPending?.() }}
+      />
+    ) : null
+
+  // Manual: no automatic rule (also covers "just created, not configured").
   if (!rule) {
     return (
       <F0Box display="flex" flexDirection="column" gap="xs">
         <F0Text content="Enrollment" variant="label" />
-        {pending > 0 ? (
-          <>
-            <EnrollmentModeLine mode="Manual" count={pending} />
-            <EnrollmentActionLink label="View pending" onClick={onViewPending} />
-          </>
-        ) : (
-          <>
-            <F0Text content="Manual · added by hand from Participants" variant="body" />
-            <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
-          </>
-        )}
+        <F0Text content="Manual" variant="body" />
+        <F0Text content="Added by hand from the Participants list." variant="description" />
+        {pendingAlert}
+        <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
       </F0Box>
     )
   }
@@ -6305,13 +6304,9 @@ function EnrollmentSidebarBlock({
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
       <F0Text content="Enrollment" variant="label" />
-      {pending > 0 ? (
-        <EnrollmentModeLine mode="Automatic" count={pending} />
-      ) : (
-        <F0Text content="Automatic · active" variant="body" />
-      )}
-      <F0Text content={audience} variant="body" />
-      {pending > 0 && <EnrollmentActionLink label="View pending" onClick={onViewPending} />}
+      <F0Text content="Automatic · active" variant="body" />
+      <F0Text content={audience} variant="description" />
+      {pendingAlert}
     </F0Box>
   )
 }
