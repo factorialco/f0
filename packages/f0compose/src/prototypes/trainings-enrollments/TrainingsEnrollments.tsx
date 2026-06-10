@@ -1954,11 +1954,10 @@ const inscripcionCopy = {
     // added facet alone — so it stays truthful when the combination narrows.
     changeHint: (count: number) =>
       `${count} ${count === 1 ? "person" : "people"} already ${count === 1 ? "matches" : "match"} but ${count === 1 ? "isn't" : "aren't"} enrolled yet.`,
-    newOnly: "New people only",
-    newOnlyDescription: "From now on, as people match.",
-    addExisting: (count: number) => `Add the ${count} too`,
-    addExistingDescription: (count: number) =>
-      `Includes the ${count} who already match.`,
+    newOnly: "Don't enroll them now",
+    newOnlyDescription: "Only people who match from here on will be enrolled.",
+    addExisting: (count: number) => `Enroll the ${count} who already ${count === 1 ? "matches" : "match"}`,
+    addExistingDescription: "They're added now, and new matches keep being enrolled.",
   },
   // PATTERN B — "people are removed": a criterion was removed/swapped, or automatic
   // enrollment was turned off. Informational note (nobody is unenrolled).
@@ -4010,7 +4009,7 @@ function EditCourseEnrollmentSection({
                   {
                     value: "everyone",
                     title: inscripcionCopy.appliesTo.addExisting(addedCount),
-                    description: inscripcionCopy.appliesTo.addExistingDescription(addedCount),
+                    description: inscripcionCopy.appliesTo.addExistingDescription,
                   },
                 ]}
               />
