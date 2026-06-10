@@ -48,7 +48,7 @@ const F0AccordionBase = forwardRef<HTMLDivElement, F0AccordionProps>(
         {...rest}
         className={cn(
           "flex flex-col rounded-md border border-solid border-f1-border-secondary",
-          "overflow-hidden bg-f1-background"
+          "overflow-hidden bg-f1-background shadow"
         )}
       >
         {items.map((item, index) => (
