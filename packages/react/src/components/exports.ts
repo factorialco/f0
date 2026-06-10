@@ -55,6 +55,7 @@ export * from "../patterns/F0FormField"
  * @deprecated F0WizardForm has moved to @/patterns/F0WizardForm. Import from there instead.
  */
 export * from "../patterns/F0WizardForm"
+export * from "../patterns/F0Graph"
 export * from "./F0Heading"
 export * from "./F0Icon"
 export * from "./F0Link"
