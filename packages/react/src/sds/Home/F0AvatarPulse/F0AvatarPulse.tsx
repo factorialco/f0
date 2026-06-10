@@ -2,45 +2,14 @@ import { AnimatePresence, motion } from "motion/react"
 import { ComponentProps, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon, F0IconProps, IconType } from "@/components/F0Icon"
-import {
-  FaceNegative,
-  FaceNeutral,
-  FacePositive,
-  FaceSuperNegative,
-  FaceSuperPositive,
-  Reaction,
-} from "@/icons/app"
+import { F0Icon } from "@/components/F0Icon"
+import { Reaction } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
+import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { useI18n } from "@/lib/providers/i18n"
 import { Action } from "@/ui/Action"
 
-import { BaseAvatar } from "../internal/BaseAvatar"
-
-export const pulses = [
-  "superNegative",
-  "negative",
-  "neutral",
-  "positive",
-  "superPositive",
-] as const
-export type Pulse = (typeof pulses)[number]
-
-export const pulseIcon: Record<Pulse, IconType> = {
-  superNegative: FaceSuperNegative,
-  negative: FaceNegative,
-  neutral: FaceNeutral,
-  positive: FacePositive,
-  superPositive: FaceSuperPositive,
-}
-
-export const pulseIconColor: Record<Pulse, F0IconProps["color"]> = {
-  superNegative: "mood-super-negative",
-  negative: "mood-negative",
-  neutral: "mood-neutral",
-  positive: "mood-positive",
-  superPositive: "mood-super-positive",
-}
+import { BaseAvatar } from "@/components/avatars/internal/BaseAvatar"
 
 type BaseAvatarProps = ComponentProps<typeof BaseAvatar>
 

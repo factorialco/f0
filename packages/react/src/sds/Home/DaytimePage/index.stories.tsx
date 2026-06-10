@@ -9,7 +9,7 @@ import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { DaytimePage, DaytimePageProps } from "./index"
 
 const meta: Meta<typeof DaytimePage> = {
-  title: "DaytimePage",
+  title: "Home/DaytimePage",
   component: DaytimePage,
   tags: ["autodocs", "experimental"],
   parameters: {
