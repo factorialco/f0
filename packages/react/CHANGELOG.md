@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.55.1](https://github.com/factorialco/f0/compare/f0-react-v2.55.0...f0-react-v2.55.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** auto-grow rows for loaded content ([#4328](https://github.com/factorialco/f0/issues/4328)) ([b17e937](https://github.com/factorialco/f0/commit/b17e937ddf7077d4358ec3cb85527d78a5554f70))
+
 ## [2.55.0](https://github.com/factorialco/f0/compare/f0-react-v2.54.0...f0-react-v2.55.0) (2026-06-09)
 
 
