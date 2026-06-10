@@ -31,6 +31,7 @@ import type { PrototypeMeta } from "../../../types"
 import { ContentModals, type ContentAction } from "./ContentModals"
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "trainings-content",
   title: "Trainings — Content (builder + consumer)",
   description:
