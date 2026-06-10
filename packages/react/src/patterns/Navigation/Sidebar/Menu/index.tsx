@@ -12,6 +12,7 @@ import {
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { Badge } from "@/ui/badge"
 import { Counter } from "@/ui/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
@@ -35,6 +36,7 @@ import { DragProvider, useDragContext } from "./DragContext"
 export interface MenuItem extends NavigationItem {
   icon: IconType
   badge?: number
+  isNew?: boolean
 }
 
 type FavoriteMenuItem = (
@@ -74,6 +76,8 @@ const MenuItemContent = ({
   item: MenuItem
   active: boolean
 }) => {
+  const t = useI18n()
+
   return (
     <div className="flex w-full items-center justify-between">
       <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
@@ -87,7 +91,14 @@ const MenuItemContent = ({
         />
         <span>{item.label}</span>
       </div>
-      {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+      <div className="flex items-center gap-1.5">
+        {item.isNew && (
+          <Badge variant="info" className="px-1.5 py-0 text-xs">
+            {t.navigation.sidebar.new}
+          </Badge>
+        )}
+        {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+      </div>
     </div>
   )
 }
