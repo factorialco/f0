@@ -6,9 +6,11 @@ import type {
   ExceptionsRules,
   FlightClass,
   FxSource,
+  MealsPolicyDoc,
   MealsRules,
   OverrideRole,
   PerDiemSet,
+  PolicyDoc,
   PolicyRulesData,
   ReceiptsRules,
   ReimbursementsRules,
@@ -68,6 +70,158 @@ const seedMeals: MealsRules = {
   },
 }
 
+/**
+ * Seed the OPEN meals model (Direction A) from the fixed `seedMeals` so the
+ * rule-list view shows the standard policy before any co-creation. Custom /
+ * one-off rules only appear once the user describes them to One.
+ */
+function deriveMealsPolicy(m: MealsRules): MealsPolicyDoc {
+  const alcohol =
+    m.alcohol.allowance === "never"
+      ? "Not reimbursable"
+      : `${m.alcohol.allowance === "client-only" ? "Client meals only" : "Any meal"} · ≤ ${m.alcohol.capPercent}%`
+  const attendee = (req: AttendeeRequirement, threshold?: number) =>
+    req === "always"
+      ? "Always log attendees"
+      : req === "never"
+        ? "No logging required"
+        : `Log when over €${threshold}`
+  return {
+    groups: [
+      {
+        title: "Spending caps",
+        statements: [
+          { subject: "Solo meal — in office", value: `€${m.caps.solo.inOffice}`, note: "" },
+          { subject: "Solo meal — travelling", value: `€${m.caps.solo.travelling}`, note: "" },
+          { subject: "Team meal", value: `€${m.caps.team}`, note: "" },
+          { subject: "Client meal", value: `€${m.caps.client}`, note: "" },
+          { subject: "Hospitality / events", value: `€${m.caps.hospitality}`, note: "" },
+        ],
+      },
+      { title: "Alcohol", statements: [{ subject: "Alcohol", value: alcohol, note: "" }] },
+      {
+        title: "Attendees & logging",
+        statements: [
+          { subject: "Client meals", value: attendee(m.attendees.client), note: "" },
+          {
+            subject: "Team meals",
+            value: attendee(m.attendees.team, m.attendees.teamMealThreshold),
+            note: "",
+          },
+        ],
+      },
+      {
+        title: "Documentation",
+        statements: [
+          {
+            subject: "Client meals",
+            value: m.documentation.itemizedForClientMeals ? "Itemized receipt" : "Standard receipt",
+            note: "",
+          },
+          {
+            subject: `Any meal ≥ €${m.documentation.itemizedThreshold}`,
+            value: "Itemized receipt",
+            note: "",
+          },
+        ],
+      },
+      {
+        title: "Not reimbursable",
+        statements: m.notReimbursable.map((s) => ({ subject: s, value: "", note: "" })),
+      },
+    ],
+  }
+}
+
+/** Seed the OPEN Travel / Reimbursements / Receipts models from their fixed
+ * seeds, so each rule-list shows the standard policy before any co-creation. */
+function deriveTravelPolicy(t: TravelRules): PolicyDoc {
+  return {
+    groups: [
+      {
+        title: "Per diems",
+        statements: [
+          { subject: "Domestic — meals", value: `€${t.perDiems.domestic.meals}`, note: "" },
+          { subject: "Domestic — lodging", value: `€${t.perDiems.domestic.lodging}`, note: "" },
+          { subject: "Domestic — incidentals", value: `€${t.perDiems.domestic.incidentals}`, note: "" },
+          { subject: "International — meals", value: `€${t.perDiems.international.meals}`, note: "" },
+          { subject: "International — lodging", value: `€${t.perDiems.international.lodging}`, note: "" },
+          { subject: "International — incidentals", value: `€${t.perDiems.international.incidentals}`, note: "" },
+        ],
+      },
+      {
+        title: "Booking",
+        statements: [
+          { subject: "Flights — book ahead", value: `${t.booking.flightAdvanceDays} days`, note: "" },
+          { subject: "Highest flight class", value: t.booking.flightClass, note: "" },
+          { subject: "Highest hotel rating", value: `${t.booking.hotelMaxStars}★`, note: "" },
+        ],
+      },
+      {
+        title: "Mileage",
+        statements: [{ subject: "Mileage rate", value: `€${t.mileage.rate} / km`, note: "" }],
+      },
+    ],
+  }
+}
+
+function deriveReimbursementsPolicy(r: ReimbursementsRules): PolicyDoc {
+  return {
+    groups: [
+      {
+        title: "Timing",
+        statements: [
+          { subject: "Submission window", value: `${r.timing.submissionWindowDays} days`, note: "" },
+          { subject: "Approval SLA", value: `${r.timing.approvalSlaDays} days`, note: "" },
+        ],
+      },
+      {
+        title: "Currency",
+        statements: [
+          { subject: "Default currency", value: r.currency.defaultCurrency, note: "" },
+          { subject: "FX rate source", value: r.currency.fxSource, note: "" },
+        ],
+      },
+      {
+        title: "Payment methods",
+        statements: [
+          { subject: "Corporate card", value: r.paymentMethods.corporateCardAutoImport ? "Auto-imported" : "Manual entry", note: "" },
+          { subject: "Personal card", value: r.paymentMethods.personalCardManual ? "Manual entry" : "Auto-imported", note: "" },
+        ],
+      },
+    ],
+  }
+}
+
+function deriveReceiptsPolicy(rc: ReceiptsRules): PolicyDoc {
+  return {
+    groups: [
+      {
+        title: "Thresholds",
+        statements: [
+          { subject: "Receipt required above", value: `€${rc.requiredAbove}`, note: "" },
+          { subject: "Itemized receipt above", value: `€${rc.itemizedAbove}`, note: "" },
+        ],
+      },
+      {
+        title: "Accepted formats",
+        statements: [
+          { subject: "Photo", value: rc.formats.photo ? "Allowed" : "Not allowed", note: "" },
+          { subject: "PDF", value: rc.formats.pdf ? "Allowed" : "Not allowed", note: "" },
+          { subject: "Email forward", value: rc.formats.emailForward ? "Allowed" : "Not allowed", note: "" },
+        ],
+      },
+      {
+        title: "Retention",
+        statements: [
+          { subject: "Keep receipts", value: `${rc.retentionYears} years`, note: "" },
+          { subject: "Missing-receipt affidavit", value: rc.affidavitAllowed ? "Allowed" : "Not allowed", note: "" },
+        ],
+      },
+    ],
+  }
+}
+
 const seedTravel: TravelRules = {
   perDiems: {
     domestic: { meals: 50, lodging: 150, incidentals: 25 },
@@ -123,6 +277,61 @@ const seedExceptions: ExceptionsRules = {
 }
 
 /* ============================================================
+ * Co-creation merge
+ * ============================================================ */
+
+/** Normalize a title/subject for fuzzy matching (case- and
+ *  punctuation-insensitive) so "Spending caps" == "spending caps". */
+function normKey(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+}
+
+/**
+ * MERGE a generated DELTA doc into the current section doc instead of
+ * REPLACING it.
+ *
+ * The co-creation tools are stateless \u2014 they generate only the rule(s)
+ * the user is adding/changing right now. Replacing wholesale wiped the
+ * rest of the section (the reported bug). Instead we merge:
+ *   - group matched by normalized title \u2192 merge its statements in
+ *   - statement matched by normalized subject \u2192 update value/note (edit)
+ *   - otherwise append the statement (add)
+ *   - an incoming group with no title match \u2192 appended as a new group
+ *
+ * Existing groups/statements are preserved, and the merge is idempotent
+ * for a repeated identical delta (same subject updates in place rather
+ * than duplicating), which also makes it loop-safe.
+ */
+function mergePolicyDoc(prev: PolicyDoc, incoming: PolicyDoc): PolicyDoc {
+  const groups = prev.groups.map((g) => ({
+    ...g,
+    statements: g.statements.map((s) => ({ ...s })),
+  }))
+  for (const ig of incoming.groups ?? []) {
+    const eg = groups.find((g) => normKey(g.title) === normKey(ig.title))
+    if (!eg) {
+      groups.push({
+        title: ig.title,
+        statements: (ig.statements ?? []).map((s) => ({ ...s })),
+      })
+      continue
+    }
+    for (const is of ig.statements ?? []) {
+      const idx = eg.statements.findIndex(
+        (s) => normKey(s.subject) === normKey(is.subject)
+      )
+      if (idx >= 0) eg.statements[idx] = { ...eg.statements[idx], ...is }
+      else eg.statements.push({ ...is })
+    }
+  }
+  return { ...prev, groups }
+}
+
+/* ============================================================
  * Hook
  * ============================================================ */
 
@@ -130,6 +339,18 @@ const seedExceptions: ExceptionsRules = {
 export type SimpleMealCapTarget = "team" | "client" | "hospitality"
 
 export type PolicyRulesHandle = PolicyRulesData & {
+  // OPEN meals model (Direction A) — the rule-list view renders this, and
+  // co-creation (generateMealsPolicy → setMealsPolicy) replaces it wholesale.
+  mealsPolicy: MealsPolicyDoc
+  applyMealsPolicy: (next: MealsPolicyDoc) => void
+  travelPolicy: PolicyDoc
+  applyTravelPolicy: (next: PolicyDoc) => void
+  reimbursementsPolicy: PolicyDoc
+  applyReimbursementsPolicy: (next: PolicyDoc) => void
+  receiptsPolicy: PolicyDoc
+  applyReceiptsPolicy: (next: PolicyDoc) => void
+  // Bulk apply — replace the whole (fixed-model) Meals section at once
+  applyMeals: (next: MealsRules) => void
   // Meal caps
   setSoloInOfficeCap: (amount: number) => void
   setSoloTravellingCap: (amount: number) => void
@@ -185,11 +406,45 @@ export type PolicyRulesHandle = PolicyRulesData & {
 
 export function usePolicyRulesData(): PolicyRulesHandle {
   const [meals, setMeals] = useState<MealsRules>(seedMeals)
+  const [mealsPolicy, setMealsPolicyState] = useState<MealsPolicyDoc>(() =>
+    deriveMealsPolicy(seedMeals)
+  )
+  const [travelPolicy, setTravelPolicyState] = useState<PolicyDoc>(() =>
+    deriveTravelPolicy(seedTravel)
+  )
+  const [reimbursementsPolicy, setReimbursementsPolicyState] = useState<PolicyDoc>(() =>
+    deriveReimbursementsPolicy(seedReimbursements)
+  )
+  const [receiptsPolicy, setReceiptsPolicyState] = useState<PolicyDoc>(() =>
+    deriveReceiptsPolicy(seedReceipts)
+  )
   const [travel, setTravel] = useState<TravelRules>(seedTravel)
   const [reimbursements, setReimbursements] =
     useState<ReimbursementsRules>(seedReimbursements)
   const [receipts, setReceipts] = useState<ReceiptsRules>(seedReceipts)
   const [exceptions, setExceptions] = useState<ExceptionsRules>(seedExceptions)
+
+  // MERGE the generated delta into the current section (add/update rules
+  // in place) rather than replacing wholesale — co-creation generates only
+  // the rule(s) being added/changed, so a wholesale swap wiped the rest of
+  // the section. See `mergePolicyDoc`.
+  const applyMealsPolicy = useCallback((next: MealsPolicyDoc) => {
+    setMealsPolicyState((prev) => mergePolicyDoc(prev, next))
+  }, [])
+  const applyTravelPolicy = useCallback((next: PolicyDoc) => {
+    setTravelPolicyState((prev) => mergePolicyDoc(prev, next))
+  }, [])
+  const applyReimbursementsPolicy = useCallback((next: PolicyDoc) => {
+    setReimbursementsPolicyState((prev) => mergePolicyDoc(prev, next))
+  }, [])
+  const applyReceiptsPolicy = useCallback((next: PolicyDoc) => {
+    setReceiptsPolicyState((prev) => mergePolicyDoc(prev, next))
+  }, [])
+
+  // Replace the entire (fixed-model) Meals section at once.
+  const applyMeals = useCallback((next: MealsRules) => {
+    setMeals(next)
+  }, [])
 
   const setSoloInOfficeCap = useCallback((amount: number) => {
     setMeals((prev) => ({
@@ -438,6 +693,15 @@ export function usePolicyRulesData(): PolicyRulesHandle {
     reimbursements,
     receipts,
     exceptions,
+    mealsPolicy,
+    applyMealsPolicy,
+    travelPolicy,
+    applyTravelPolicy,
+    reimbursementsPolicy,
+    applyReimbursementsPolicy,
+    receiptsPolicy,
+    applyReceiptsPolicy,
+    applyMeals,
     setSoloInOfficeCap,
     setSoloTravellingCap,
     setMealCap,

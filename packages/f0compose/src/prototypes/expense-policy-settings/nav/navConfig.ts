@@ -35,11 +35,27 @@ export type PolicyRuleNavId =
   | "policy-receipts"
   | "policy-exceptions"
 
-export type NavEntryId = CoreNavId | PolicyRuleNavId
+/**
+ * Standalone ids — clickable rail entries that live outside the Core
+ * setup and Policy rules sections and have their own dedicated view.
+ * Currently just Card controls, which renders an empty state à la
+ * Exceptions. Routed by an explicit branch in
+ * ExpensePolicySettings.tsx, NOT via `isPolicyRuleNav`.
+ */
+export type StandaloneNavId = "card-controls"
+
+export type NavEntryId = CoreNavId | PolicyRuleNavId | StandaloneNavId
 
 export type NavEntry = {
   id: NavEntryId
   label: string
+  /**
+   * When true the entry renders greyed-out and is not clickable — a
+   * visual placeholder for a forthcoming surface that has no view yet
+   * (e.g. "Card controls"). Disabled entries are skipped by the
+   * section predicates and never become the active selection.
+   */
+  disabled?: boolean
 }
 
 export type NavSection = {
@@ -82,6 +98,17 @@ export const policyRulesSection: NavSection = {
 }
 
 /**
+ * Standalone entries — clickable, but not part of the Core setup or
+ * Policy rules sections, so they're invisible to `isPolicyRuleNav`.
+ * The canvas renderer routes them with an explicit branch (Card
+ * controls → CardControlsView, an empty state). They only surface in
+ * the flat `navEntriesInOrder` list the rail iterates.
+ */
+export const standaloneNavEntries: NavEntry[] = [
+  { id: "card-controls", label: "Card controls" },
+]
+
+/**
  * The order in which sections render in the left nav. A divider is
  * drawn between consecutive sections by the renderer.
  */
@@ -113,6 +140,7 @@ const NAV_ORDER: NavEntryId[] = [
   "policy-meals",
   "policy-travel",
   "policy-reimbursements",
+  "card-controls",
   "policy-receipts",
   "approval-flows",
   "certified-documents",
@@ -122,6 +150,7 @@ const NAV_ORDER: NavEntryId[] = [
 const ALL_ENTRIES: NavEntry[] = [
   ...coreNavSection.entries,
   ...policyRulesSection.entries,
+  ...standaloneNavEntries,
 ]
 
 export const navEntriesInOrder: NavEntry[] = NAV_ORDER.map(

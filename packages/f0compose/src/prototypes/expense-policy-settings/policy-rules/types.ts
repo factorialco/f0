@@ -130,6 +130,27 @@ export type MealsRules = {
   documentation: MealsDocumentation
 }
 
+/* ------------------------------------------------------------------
+ * OPEN meals model (co-creation Direction A)
+ *
+ * The Meals page can also be represented as an OPEN list of grouped
+ * policy statements rather than the fixed `MealsRules` fields above.
+ * This is what `generateMealsPolicy` produces and the rule-list view
+ * renders — it accepts ANY sensible rule (per-entity caps, per-meal
+ * caps, one-offs), not just the predefined fields. `value` is empty
+ * for a prose-only statement.
+ * ------------------------------------------------------------------ */
+
+export type MealsPolicyStatement = { subject: string; value: string; note: string }
+export type MealsPolicyGroup = { title: string; statements: MealsPolicyStatement[] }
+export type MealsPolicyDoc = { groups: MealsPolicyGroup[] }
+
+/* Generic aliases — the SAME open shape is now used for every co-created
+ * policy-rules section (Meals, Travel, Reimbursements, Receipts). */
+export type PolicyStatement = MealsPolicyStatement
+export type PolicyGroup = MealsPolicyGroup
+export type PolicyDoc = MealsPolicyDoc
+
 /* ============================================================
  * Section 5 \u2014 Travel
  * ============================================================ */

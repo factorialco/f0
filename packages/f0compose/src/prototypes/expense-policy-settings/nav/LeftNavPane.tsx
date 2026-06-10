@@ -61,6 +61,7 @@ export function LeftNavPane(props: {
               key={entry.id}
               label={entry.label}
               isActive={entry.id === props.activeId}
+              disabled={entry.disabled}
               onSelect={() => props.onSelect(entry.id)}
             />
           ))}
@@ -83,8 +84,29 @@ export function LeftNavPane(props: {
 function NavEntryRow(props: {
   label: string
   isActive: boolean
+  disabled?: boolean
   onSelect: () => void
 }) {
+  // Disabled entries (e.g. "Card controls") are placeholders with no
+  // view yet: render greyed-out, no click handler, default cursor.
+  if (props.disabled) {
+    return (
+      <div style={{ opacity: 0.4, cursor: "default" }} aria-disabled="true">
+        <F0Box
+          display="flex"
+          flexDirection="row"
+          alignItems="center"
+          paddingX="md"
+          paddingY="sm"
+          borderRadius="md"
+          background="transparent"
+        >
+          <F0Text content={props.label} variant="body" color="muted" />
+        </F0Box>
+      </div>
+    )
+  }
+
   return (
     <button
       type="button"

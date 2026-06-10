@@ -25,6 +25,7 @@ import { useApprovalFlowActions } from "./copilot/useApprovalFlowActions"
 import { useSetApprovalWorkflowAction } from "./copilot/useSetApprovalWorkflowAction"
 import { useExpenseTypesActions } from "./copilot/useExpenseTypesActions"
 import { usePolicyRulesActions } from "./copilot/usePolicyRulesActions"
+import { useSetPolicyAction } from "./copilot/useSetPolicyAction"
 import { useApplyInterviewAnswersAction } from "./copilot/useApplyInterviewAnswersAction"
 import { useGuidedTour } from "./copilot/useGuidedTour"
 import { useExposeContext } from "./copilot/useExposeContext"
@@ -42,6 +43,7 @@ import { useExpenseFormsSource } from "./forms/useExpenseFormsSource"
 import { LeftNavPane } from "./nav/LeftNavPane"
 import { useNavCompletion } from "./nav/useNavCompletion"
 import { ExceptionsView } from "./policy-rules/exceptions/ExceptionsView"
+import { CardControlsView } from "./policy-rules/card-controls/CardControlsView"
 import { MealsView } from "./policy-rules/meals/MealsView"
 import { ReceiptsView } from "./policy-rules/receipts/ReceiptsView"
 import { ReimbursementsView } from "./policy-rules/reimbursements/ReimbursementsView"
@@ -634,6 +636,29 @@ export default function ExpensePolicySettings() {
   // receipts/exceptions): the generic setPolicyRule tool so One can
   // actually mutate those fields when the user clicks a card's Edit.
   usePolicyRulesActions({ rules: policyRules })
+  // Co-creation for the OPEN policy-rules sections — One describes a section,
+  // a backend generate tool forces a validated { groups: [...] } object and the
+  // matching action below applies it to the rule-list view.
+  useSetPolicyAction({
+    actionName: "expensePolicyPrototype.setMealsPolicy",
+    sectionLabel: "Meals & hospitality",
+    apply: policyRules.applyMealsPolicy,
+  })
+  useSetPolicyAction({
+    actionName: "expensePolicyPrototype.setTravelPolicy",
+    sectionLabel: "Travel",
+    apply: policyRules.applyTravelPolicy,
+  })
+  useSetPolicyAction({
+    actionName: "expensePolicyPrototype.setReimbursementsPolicy",
+    sectionLabel: "Reimbursements",
+    apply: policyRules.applyReimbursementsPolicy,
+  })
+  useSetPolicyAction({
+    actionName: "expensePolicyPrototype.setReceiptsPolicy",
+    sectionLabel: "Receipts & evidence",
+    apply: policyRules.applyReceiptsPolicy,
+  })
   useRenderRegularSummaryAction({
     setupState,
     onLooksGood: () => {
@@ -941,6 +966,11 @@ export default function ExpensePolicySettings() {
               <ReceiptsView rules={policyRules} />
             ) : activeNavId === "policy-exceptions" ? (
               <ExceptionsView rules={policyRules} />
+            ) : activeNavId === "card-controls" ? (
+              // Card controls — standalone clickable entry with an
+              // empty state (mirrors Exceptions). Explicit branch so it
+              // doesn't fall through to the policy-rule placeholder.
+              <CardControlsView rules={policyRules} />
             ) : isPolicyRuleNav(activeNavId) ? (
               // Policy rules placeholder. Each entry under the
               // "Policy rules" section in the left nav (Meals &

@@ -104,7 +104,7 @@ export const aiChatConfig = {
   // this greeting is mainly a fallback for prototypes without a
   // scripted seed. Keep it generic.
   greeting:
-    "Hey — this is a design prototype. Each page sets up its own guided flow; typing free-form needs the Mastra agent running.",
+    "Hey — this is a design prototype. Each page has its own guided setup you can click through; free-form chat works when One is connected.",
   // The chat panel is resizable — drag the left edge to widen / narrow
   // it. ApplicationFrame already reserves the chosen width so the page
   // body reflows correctly.

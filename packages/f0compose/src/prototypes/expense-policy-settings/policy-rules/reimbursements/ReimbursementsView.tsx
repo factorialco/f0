@@ -2,13 +2,10 @@ import { F0Box } from "@factorialco/f0-react"
 
 import type { PolicyRulesHandle } from "../usePolicyRulesData"
 
-import { OneEditCard } from "../shared/OneEditCard"
+import { PolicyRuleList } from "../shared/PolicyRuleList"
 import { HeroBlock } from "./HeroBlock"
-import { CurrencyCard } from "./cards/CurrencyCard"
-import { PaymentMethodsCard } from "./cards/PaymentMethodsCard"
-import { TimingCard } from "./cards/TimingCard"
 
-/** Hero → Timing → Currency → Payment methods. */
+/** Reimbursements — open, co-created rule list (timing, currency, payment methods). */
 export function ReimbursementsView(props: { rules: PolicyRulesHandle }) {
   const { rules } = props
   return (
@@ -17,27 +14,11 @@ export function ReimbursementsView(props: { rules: PolicyRulesHandle }) {
         title="Reimbursements"
         description="Submission windows, approval SLAs, currency conversion, and payment-method handling."
       />
-      <OneEditCard label="reimbursement timing rule (windows & SLAs)">
-        <TimingCard
-          timing={rules.reimbursements.timing}
-          setSubmissionWindowDays={rules.setSubmissionWindowDays}
-          setApprovalSlaDays={rules.setApprovalSlaDays}
-        />
-      </OneEditCard>
-      <OneEditCard label="reimbursement currency handling">
-        <CurrencyCard
-          currency={rules.reimbursements.currency}
-          setDefaultCurrency={rules.setDefaultCurrency}
-          setFxSource={rules.setFxSource}
-        />
-      </OneEditCard>
-      <OneEditCard label="reimbursement payment-method handling">
-        <PaymentMethodsCard
-          paymentMethods={rules.reimbursements.paymentMethods}
-          setCorporateCardAutoImport={rules.setCorporateCardAutoImport}
-          setPersonalCardManual={rules.setPersonalCardManual}
-        />
-      </OneEditCard>
+      <PolicyRuleList
+        policy={rules.reimbursementsPolicy}
+        onChange={rules.applyReimbursementsPolicy}
+        sectionLabel="Reimbursements"
+      />
     </F0Box>
   )
 }

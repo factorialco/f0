@@ -1,147 +1,114 @@
-import { F0Box, F0Button, F0Card, F0Icon, F0Text } from "@factorialco/f0-react"
-import { Add, ArrowRight, CheckCircle, CrossedCircle, Person } from "@factorialco/f0-react/icons/app"
+import { F0Box, F0Button, F0Text } from "@factorialco/f0-react"
+import { Ai } from "@factorialco/f0-react/icons/app"
+import { useEffect, useRef, useState } from "react"
+
+import { useCopilotChat } from "@copilotkit/react-core"
 
 import { useAiChat } from "@/copilot"
 
-import {
-  flattenWorkflow,
-  type RenderAction,
-  type RenderClause,
-} from "../data/approvalWorkflow"
 import type { PolicyData } from "../data/usePolicyData"
+import { ApprovalCards } from "./ApprovalCards"
+import { ApprovalDiagramNested } from "./ApprovalDiagramNested"
 
 /**
- * Approval flows — renders the real approval **workflow document** as a
- * FLAT decision list of f0 Cards (one card per rule), NOT a nested tree.
+ * Approval flows — the generated approval **workflow document** rendered two
+ * ways, switchable via a toggle:
  *
- * The document's nested factor_program + router "else-if" chains (how
- * amount tiers are actually stored) are flattened by `flattenWorkflow`
- * into ordered clauses — "When <condition> → <outcome>" — so the screen
- * reads top-to-bottom like a rule list instead of cards-within-cards.
- * Plumbing (factor_program internals, the when-wiring, terminate, ids) is
- * hidden; review deadlines are surfaced. Editing hands to One, which
- * regenerates the whole document.
+ *   - **Tree** (default): the nested, non-linear diagram (`ApprovalDiagramNested`)
+ *     — condition-branched, shared leading approvers hoisted, conditions and
+ *     reviews interleaved at arbitrary depth. Best for SEEING the structure.
+ *   - **Cards** (`ApprovalCards`): a linear, stacked, Rippling-style rule list —
+ *     one expandable IF→THEN card per first-match-wins leaf. Best for scanning
+ *     "who signs off on an expense like this".
+ *
+ * Both render the SAME document (Cards reuses the Tree's `flattenDoc`), so
+ * cocreation + generation are identical regardless of which view is active.
+ * Editing is prompt-based via One — a global "Edit with One" plus a per-rule
+ * "Edit this rule" on each card (both open a scoped chat; One regenerates).
  */
 export function ApprovalWorkflowView(props: { policyData: PolicyData }) {
   const { approvalWorkflow } = props.policyData
-  const { sendMessage } = useAiChat()
-  const askOne = (content: string) => sendMessage(content)
+  const { sendMessage, setOpen } = useAiChat()
+  const { isLoading } = useCopilotChat()
 
-  const clauses = flattenWorkflow(approvalWorkflow)
+  // The "One is updating your flow…" overlay should ONLY show while One is
+  // actually generating a new flow — not while it's answering an edit
+  // invitation (global or per-rule), which changes nothing on the canvas.
+  // Clicking an Edit affordance sets this flag; we suppress the overlay until
+  // that exchange ends, then any subsequent real prompt shows it again.
+  const editInviteRef = useRef(false)
+  const [busy, setBusy] = useState(false)
+  const [mode, setMode] = useState<"tree" | "cards">("tree")
+  useEffect(() => {
+    if (isLoading) {
+      if (!editInviteRef.current) setBusy(true)
+    } else {
+      editInviteRef.current = false
+      setBusy(false)
+    }
+  }, [isLoading])
+
+  const editWithOne = () => {
+    editInviteRef.current = true
+    setOpen(true)
+    sendMessage("I want to edit the approval flow")
+  }
+
+  // Per-rule edit (Cards view) — opens One scoped to that one rule. Still goes
+  // through generation, so it stays as reliable as the global edit.
+  const editRule = (ruleTitle: string) => {
+    editInviteRef.current = true
+    setOpen(true)
+    sendMessage(
+      `I want to change the approval rule for "${ruleTitle}". What should it be?`
+    )
+  }
 
   return (
-    <div className="approval-flow-cards">
-      {/* Tighten the f0 Card footer (the Edit row): trim its top gap
-          (mt-4 + pt-4 ≈ 32px) and bottom. Scoped to this view. */}
-      <style>{
-        ".approval-flow-cards [class*=\"border-t-f1-border-secondary\"]{margin-top:6px !important;padding-top:8px !important;padding-bottom:2px !important;}"
-      }</style>
-      <F0Box display="flex" flexDirection="column" gap="lg">
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <F0Box
+        display="flex"
+        flexDirection="row"
+        alignItems="center"
+        justifyContent="between"
+        gap="md"
+      >
         <F0Text
           variant="description"
-          content="This is your expense approval flow, read top to bottom — the first rule that matches decides what happens. Ask One to add or change anything in plain language."
+          content="Your expense approval flow, read top to bottom — the first branch that matches decides what happens. To change anything, just describe it to One."
         />
-
-        <F0Box display="flex" flexDirection="column" gap="md">
-          {clauses.map((clause, i) => (
-            <ClauseCard
-              key={i}
-              clause={clause}
-              last={i === clauses.length - 1}
-              onEdit={() => askOne("I want to change my expense approval flow.")}
-            />
-          ))}
-
-          <F0Box>
-            <F0Button
-              variant="outline"
-              size="lg"
-              icon={Add}
-              label="Add a rule"
-              onClick={() =>
-                askOne(
-                  "Add a rule to my expense approval flow. Ask me for the condition (amount, category, team…) and what should happen."
-                )
-              }
-            />
-          </F0Box>
+        <F0Box display="flex" flexDirection="row" gap="sm" alignItems="center">
+          <F0Button
+            variant={mode === "tree" ? "default" : "outline"}
+            size="md"
+            label="Tree"
+            onClick={() => setMode("tree")}
+          />
+          <F0Button
+            variant={mode === "cards" ? "default" : "outline"}
+            size="md"
+            label="Cards"
+            onClick={() => setMode("cards")}
+          />
+          <F0Button
+            variant="default"
+            size="md"
+            icon={Ai}
+            label="Edit with One"
+            onClick={editWithOne}
+          />
         </F0Box>
       </F0Box>
-    </div>
-  )
-}
 
-/* ──────────────────────────────────────────────────────────────────── */
-
-/** One rule: a condition (title) → its outcome chain (inline, flat). */
-function ClauseCard(props: {
-  clause: RenderClause
-  last: boolean
-  onEdit: () => void
-}) {
-  const { clause, last } = props
-  const title =
-    clause.conditions.length > 0
-      ? clause.conditions.join(" · ")
-      : last
-        ? "Any other expense"
-        : "All expenses"
-
-  return (
-    <F0Card title={title} secondaryActions={[{ label: "Edit", onClick: props.onEdit }]}>
-      <F0Box display="flex" flexDirection="row" alignItems="center" gap="xs" flexWrap="wrap">
-        {clause.actions.map((action, i) => (
-          <F0Box
-            key={i}
-            display="flex"
-            flexDirection="row"
-            alignItems="center"
-            gap="xs"
-          >
-            {i > 0 && <F0Icon icon={ArrowRight} color="default" size="sm" />}
-            <ActionPill action={action} />
-          </F0Box>
-        ))}
-      </F0Box>
-    </F0Card>
-  )
-}
-
-/** A single outcome step as a compact inline pill (no nested card). */
-function ActionPill(props: { action: RenderAction }) {
-  const { action } = props
-  const { icon, color, label } = describe(action)
-  return (
-    <F0Box
-      display="inline-flex"
-      flexDirection="row"
-      alignItems="center"
-      gap="xs"
-      paddingX="sm"
-      paddingY="xs"
-      borderRadius="sm"
-      background="secondary"
-    >
-      <F0Icon icon={icon} color={color} size="sm" />
-      <F0Text variant="small" content={label} />
+      {mode === "tree" ? (
+        <ApprovalDiagramNested doc={approvalWorkflow} busy={busy} />
+      ) : (
+        <ApprovalCards
+          doc={approvalWorkflow}
+          busy={busy}
+          onEditRule={editRule}
+        />
+      )}
     </F0Box>
   )
-}
-
-function describe(action: RenderAction): {
-  icon: Parameters<typeof F0Icon>[0]["icon"]
-  color: "positive" | "warning" | "default"
-  label: string
-} {
-  switch (action.kind) {
-    case "auto-approve":
-      return { icon: CheckCircle, color: "positive", label: "Auto-approve" }
-    case "auto-decline":
-      return { icon: CrossedCircle, color: "warning", label: "Auto-decline" }
-    case "review": {
-      const who = action.approvers.join(" & ") || "A reviewer"
-      const label = action.deadline ? `${who} · ${action.deadline}` : who
-      return { icon: Person, color: "default", label }
-    }
-  }
 }
