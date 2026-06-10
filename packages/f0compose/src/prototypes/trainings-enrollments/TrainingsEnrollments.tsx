@@ -2103,13 +2103,6 @@ function WizardAudienceFilterPicker({
   const total = filterStateSummary(value).matchCount
   const shownAvatarCount = Math.min(total, 4)
   const hasMoreAvatars = total > 4
-  // F0AvatarList renders through OverflowList, which sizes itself to the measured
-  // container width. Inside this flex row that measures as ~0 on first paint, so it
-  // collapses every avatar into the "+N" counter (the "1 person matches → +1" bug).
-  // Give it an explicit width that fits the shown avatars (+ counter) so the real
-  // avatars render.
-  const avatarStackWidth =
-    (shownAvatarCount + (hasMoreAvatars ? 1 : 0)) * 26 + 8
   return (
     <div className="flex flex-col gap-3">
       <F0Select
@@ -2151,7 +2144,11 @@ function WizardAudienceFilterPicker({
               {/* Show at most `total` avatars (capped at 4) so the stack never
                   implies more people than actually match — e.g. "1 person matches"
                   shows a single avatar, not the full decorative set. */}
-              <div style={{ width: avatarStackWidth }}>
+              {/* w-fit sizes the wrapper to the avatars' intrinsic width so
+                  F0AvatarList's internal OverflowList doesn't collapse them into
+                  the "+N" counter, while keeping the stack tight against the
+                  label (no dead space from a fixed width). */}
+              <div className="w-fit">
                 <F0AvatarList
                   size="sm"
                   type="person"
