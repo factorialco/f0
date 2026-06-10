@@ -1,4 +1,5 @@
 export * from "@/patterns/OneFilterPicker/types"
+export * from "./adaptDataAdapterToInfiniteScroll"
 export * from "./types"
 export * from "./useData"
 export * from "./useDataSource"

@@ -13,6 +13,7 @@ import {
   BreadcrumbLink as ShadBreadcrumbLink,
 } from "@/ui/breadcrumb"
 
+import { BreadcrumbCollectionSelect } from "./BreadcrumbCollectionSelect"
 import { BreadcrumbSeparator } from "./BreadcrumbSeparator"
 
 interface BreadcrumbItemProps {
@@ -22,7 +23,7 @@ interface BreadcrumbItemProps {
   isFirst?: boolean
 }
 
-type ContentType = "loading" | "select" | "page" | "link"
+type ContentType = "loading" | "select" | "collection-select" | "page" | "link"
 
 const BreadcrumbItem = forwardRef<
   HTMLLIElement,
@@ -98,6 +99,10 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
               showSearchBox={item.searchbox}
             />
           </>
+        ),
+      "collection-select": "type" in item &&
+        item.type === "collection-select" && (
+          <BreadcrumbCollectionSelect item={item} />
         ),
       page: (
         <BreadcrumbPage aria-hidden="true" className="p-0">

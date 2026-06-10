@@ -210,6 +210,58 @@ export const WithSelectBreadcrumb: Story = {
   },
 }
 
+/**
+ * A jump-to select bound to a OneDataCollection: F0 reads the filters the
+ * list persisted under `collectionId`, seeds the declared `source`, and
+ * navigates via `getItemHref` — no mounted list needed (works on direct
+ * links). See `Navigation/Breadcrumbs` → WithCollectionBoundSelect for a
+ * filtered end-to-end example.
+ */
+export const WithCollectionBoundSelectBreadcrumb: Story = {
+  args: {
+    module: defaultModule,
+    breadcrumbs: [
+      { id: "employees", label: "Employees", href: "/employees" },
+      {
+        type: "collection-select",
+        id: "employee",
+        label: "Employee 1",
+        collectionId: "storybook/pageheader-employees/v1",
+        searchbox: true,
+        source: {
+          dataAdapter: {
+            paginationType: "infinite-scroll",
+            fetchData: ({ pagination }) => {
+              const employees = Array.from({ length: 50 }, (_, i) => ({
+                id: `${i + 1}`,
+                name: `Employee ${i + 1}`,
+              }))
+              const cursor =
+                "cursor" in pagination ? Number(pagination.cursor) || 0 : 0
+              const perPage = pagination.perPage ?? 10
+              return {
+                type: "infinite-scroll" as const,
+                records: employees.slice(cursor, cursor + perPage),
+                total: employees.length,
+                perPage,
+                cursor: String(cursor + perPage),
+                hasMore: cursor + perPage < employees.length,
+              }
+            },
+          },
+        },
+        mapOptions: (item) => ({
+          value: String(item.id),
+          label: String(item.name),
+          item,
+        }),
+        value: "1",
+        getItemHref: (value) => `#/employees/${value}`,
+      },
+    ],
+  },
+}
+
 export const WithEverything: Story = {
   args: {
     module: defaultModule,
