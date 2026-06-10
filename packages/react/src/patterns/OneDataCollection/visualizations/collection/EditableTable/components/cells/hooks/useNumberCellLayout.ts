@@ -35,7 +35,6 @@ export function useNumberCellLayout<R extends RecordType>(
     () =>
       new Intl.NumberFormat(locale, {
         maximumFractionDigits: config?.maxDecimals,
-        useGrouping: false,
       }),
     [locale, config?.maxDecimals]
   )

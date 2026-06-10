@@ -25,10 +25,15 @@ import { InputInternalProps } from "@/components/F0TextInput/internal"
 import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"
 
-const formatValue = (value: number, locale: string, maxDecimals?: number) =>
+const formatValue = (
+  value: number,
+  locale: string,
+  maxDecimals?: number,
+  useGrouping = false
+) =>
   new Intl.NumberFormat(locale, {
     maximumFractionDigits: maxDecimals,
-    useGrouping: false,
+    useGrouping,
   }).format(value)
 
 export interface NumberInputPopoverConfig {
@@ -159,6 +164,7 @@ export const NumberInputInternal = forwardRef<
     disabled,
     readonly,
     loading,
+    onBlur,
     ...props
   },
   ref
@@ -177,6 +183,7 @@ export const NumberInputInternal = forwardRef<
   const [draftValue, setDraftValue] = useState<number | null>(
     value != null ? value : null
   )
+  const [isFocused, setIsFocused] = useState(false)
 
   const localHint = useMemo(() => {
     if (hint !== undefined) {
@@ -218,6 +225,26 @@ export const NumberInputInternal = forwardRef<
   }, [isDeferredPopover, popoverOpen, value])
 
   const inputValue = isDeferredPopover ? draftValue : value
+
+  // Grouping separators are display-only: they would break extractNumber and
+  // caret handling, so the raw ungrouped string comes back while editing.
+  const displayValue = useMemo(() => {
+    if (isFocused) return fieldValue
+    const numericValue =
+      inputValue !== undefined
+        ? inputValue
+        : (extractNumber(fieldValue, { maxDecimals })?.value ?? null)
+    return numericValue != null
+      ? formatValue(numericValue, locale, maxDecimals, true)
+      : fieldValue
+  }, [isFocused, fieldValue, inputValue, locale, maxDecimals])
+
+  const handleFocus = () => setIsFocused(true)
+  const handleBlur = () => {
+    setIsFocused(false)
+    onBlur?.()
+  }
+
   const inputOnChange = useMemo(
     () =>
       isDeferredPopover
@@ -321,9 +348,11 @@ export const NumberInputInternal = forwardRef<
         type="text"
         ref={ref}
         id={inputId}
-        value={fieldValue}
+        value={displayValue}
         inputMode={maxDecimals === 0 ? "numeric" : "decimal"}
         onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         {...props}
         label={usesExternalMessages ? (label ?? "") : label}
         hideLabel={hideLabel || usesExternalMessages}
