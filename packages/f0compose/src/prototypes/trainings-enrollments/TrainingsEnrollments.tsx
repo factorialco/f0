@@ -2101,6 +2101,15 @@ function WizardAudienceFilterPicker({
     onChange(updated)
   }
   const total = filterStateSummary(value).matchCount
+  const shownAvatarCount = Math.min(total, 4)
+  const hasMoreAvatars = total > 4
+  // F0AvatarList renders through OverflowList, which sizes itself to the measured
+  // container width. Inside this flex row that measures as ~0 on first paint, so it
+  // collapses every avatar into the "+N" counter (the "1 person matches → +1" bug).
+  // Give it an explicit width that fits the shown avatars (+ counter) so the real
+  // avatars render.
+  const avatarStackWidth =
+    (shownAvatarCount + (hasMoreAvatars ? 1 : 0)) * 26 + 8
   return (
     <div className="flex flex-col gap-3">
       <F0Select
@@ -2142,13 +2151,15 @@ function WizardAudienceFilterPicker({
               {/* Show at most `total` avatars (capped at 4) so the stack never
                   implies more people than actually match — e.g. "1 person matches"
                   shows a single avatar, not the full decorative set. */}
-              <F0AvatarList
-                size="sm"
-                type="person"
-                avatars={AUDIENCE_PREVIEW_AVATARS.slice(0, Math.min(total, 4))}
-                max={4}
-                remainingCount={total > 4 ? total - 4 : undefined}
-              />
+              <div style={{ width: avatarStackWidth }}>
+                <F0AvatarList
+                  size="sm"
+                  type="person"
+                  avatars={AUDIENCE_PREVIEW_AVATARS.slice(0, shownAvatarCount)}
+                  max={4}
+                  remainingCount={hasMoreAvatars ? total - 4 : undefined}
+                />
+              </div>
               <F0Text variant="body" content={peopleMatchPhrase(total)} />
             </div>
             {pendingNote && (
@@ -2319,7 +2330,7 @@ function mockAudienceCount(optionValue: string): number {
 // single criterion. Drawing every criterion from the SAME population lets us
 // model the real matching semantics: within one facet criteria are OR'd (union
 // of these sets), and across different facets they are AND'd (intersection).
-const FILTER_POPULATION_SIZE = 180
+const FILTER_POPULATION_SIZE = 90
 function optionPersonSet(facetKey: string, optionValue: string): Set<number> {
   const size = mockAudienceCount(optionValue)
   const key = `${facetKey}::${optionValue}`
