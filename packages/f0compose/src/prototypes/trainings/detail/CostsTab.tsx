@@ -3,6 +3,7 @@ import {
   F0AvatarIcon,
   F0Button,
   F0Box,
+  F0Checkbox,
   F0Dialog,
   F0Heading,
   F0Icon,
@@ -18,6 +19,7 @@ import {
 import {
   Calculator,
   ChevronRight,
+  InfoCircle,
   Office,
 } from "@factorialco/f0-react/icons/app"
 
@@ -270,16 +272,23 @@ export function CostsTab({ training, klass }: Props) {
     : subsidizedCost
   const netCost = Math.max(0, totalCost - activeSubsidizedCost)
   const perParticipant = Math.round(netCost / Math.max(participants, 1))
+  const [showEditInfo, setShowEditInfo] = useState(false)
+  const [editInfoDismissed, setEditInfoDismissed] = useState(false)
   const handleLegalEntityCostChange = (
     legalEntityId: string,
     key: LegalEntityCostKey,
     value: number
   ) => {
+    if (!editInfoDismissed) setShowEditInfo(true)
     setLegalEntityCostDrafts((current) =>
       current.map((item) =>
         item.legalEntityId === legalEntityId ? { ...item, [key]: value } : item
       )
     )
+  }
+  const dismissEditInfo = () => {
+    setEditInfoDismissed(true)
+    setShowEditInfo(false)
   }
 
   const budgetOptions = [
@@ -488,11 +497,12 @@ export function CostsTab({ training, klass }: Props) {
         selectedLegalEntityId={selectedLegalEntityId}
         onOpenLegalEntity={setSelectedLegalEntityId}
         onCloseLegalEntity={() => setSelectedLegalEntityId(null)}
+        showEditBanner={showEditInfo}
+        onDismissEditBanner={dismissEditInfo}
       />
 
       {/* Other costs */}
-      {!costsByLegalEntityEnabled && (
-        <F0Box display="flex" flexDirection="column" gap="lg">
+      <F0Box display="flex" flexDirection="column" gap="lg">
           <F0Box display="flex" flexDirection="column" gap="xs">
             <F0Heading as="h3" variant="heading" content="Other costs" />
             <F0Text
@@ -531,6 +541,7 @@ export function CostsTab({ training, klass }: Props) {
                 step={50}
                 locale="en-US"
                 units="EUR"
+                disabled={costsByLegalEntityEnabled}
               />
             </F0Box>
             <F0Text
@@ -539,7 +550,6 @@ export function CostsTab({ training, klass }: Props) {
             />
           </F0Box>
         </F0Box>
-      )}
     </F0Box>
   )
 }
@@ -551,6 +561,8 @@ function CostsByLegalEntitySection({
   selectedLegalEntityId,
   onOpenLegalEntity,
   onCloseLegalEntity,
+  showEditBanner,
+  onDismissEditBanner,
 }: {
   movement: (typeof trainingBudgetMovements)[number] | null
   legalEntityCostDrafts: LegalEntityCostDraft[]
@@ -562,6 +574,8 @@ function CostsByLegalEntitySection({
   selectedLegalEntityId: string | null
   onOpenLegalEntity: (legalEntityId: string) => void
   onCloseLegalEntity: () => void
+  showEditBanner: boolean
+  onDismissEditBanner: () => void
 }) {
   if (!movement) return null
 
@@ -676,6 +690,8 @@ function CostsByLegalEntitySection({
           activeTab={sidepanelTab}
           onTabChange={setSidepanelTab}
           onClose={onCloseLegalEntity}
+          showEditBanner={showEditBanner}
+          onDismissEditBanner={onDismissEditBanner}
         />
       )}
     </F0Box>
@@ -782,6 +798,8 @@ function LegalEntityCostsSidepanel({
   activeTab,
   onTabChange,
   onClose,
+  showEditBanner,
+  onDismissEditBanner,
 }: {
   movement: (typeof trainingBudgetMovements)[number]
   legalEntity: NonNullable<ReturnType<typeof findLegalEntity>>
@@ -794,6 +812,8 @@ function LegalEntityCostsSidepanel({
   activeTab: "cost" | "participants"
   onTabChange: (tab: "cost" | "participants") => void
   onClose: () => void
+  showEditBanner: boolean
+  onDismissEditBanner: () => void
 }) {
   const tabs = [
     { id: "cost", label: "Cost", onClick: () => onTabChange("cost") },
@@ -843,7 +863,45 @@ function LegalEntityCostsSidepanel({
       disableContentPadding
     >
       {activeTab === "cost" ? (
-        <F0Box paddingX="xl" paddingY="lg">
+        <F0Box
+          paddingX="xl"
+          paddingY="lg"
+          display="flex"
+          flexDirection="column"
+          gap="lg"
+        >
+          {showEditBanner && (
+            <F0Box
+              display="flex"
+              flexDirection="column"
+              gap="md"
+              padding="md"
+              borderRadius="md"
+              background="info"
+            >
+              <F0Box display="flex" alignItems="start" gap="sm">
+                <F0Icon icon={InfoCircle} size="sm" color="info" />
+                <F0Text
+                  variant="body"
+                  content="Editing amounts for this legal entity affects the group's total cost."
+                />
+              </F0Box>
+              <F0Box display="flex" alignItems="center" gap="sm">
+                <F0Checkbox
+                  title="Don't show this again"
+                  hideLabel
+                  checked={false}
+                  onCheckedChange={(checked) => {
+                    if (checked === true) onDismissEditBanner()
+                  }}
+                />
+                <F0Text
+                  variant="description"
+                  content="Don't show this again"
+                />
+              </F0Box>
+            </F0Box>
+          )}
           <CostBreakdownList
             legalEntityId={legalEntity.id}
             direct={breakdown.directCost}
