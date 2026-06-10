@@ -4351,7 +4351,7 @@ function CourseDetail({
                 label: "Course type",
                 value: { type: "text", content: course.courseType === "with-editions" ? "Recurring" : "One-time" },
               },
-              { label: "Type", value: { type: "text", content: "Internal" } },
+              { label: "Provider", value: { type: "text", content: "Internal" } },
               { label: "Total duration", value: { type: "text", content: course.duration } },
               {
                 label: "Training groups",
