@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.57.0](https://github.com/factorialco/f0/compare/f0-react-v2.56.0...f0-react-v2.57.0) (2026-06-10)
+
+
+### Features
+
+* **datasource:** add fetchItemNeighbors adapter capability for id-relative item navigation ([#4401](https://github.com/factorialco/f0/issues/4401)) ([a4b82e8](https://github.com/factorialco/f0/commit/a4b82e885d5c53983cead916a38d59460f4676c8))
+
+## [2.56.0](https://github.com/factorialco/f0/compare/f0-react-v2.55.3...f0-react-v2.56.0) (2026-06-10)
+
+
+### Features
+
+* **datasource:** definition-fed collection item navigation with PageHeader wiring ([#4399](https://github.com/factorialco/f0/issues/4399)) ([e2dd3ea](https://github.com/factorialco/f0/commit/e2dd3ea68bbc7b6f520b9e6529a2428294554c56))
+
+## [2.55.3](https://github.com/factorialco/f0/compare/f0-react-v2.55.2...f0-react-v2.55.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0Form:** resolve defaultValues function at mount when defaultValuesParamsSchema is set ([#4398](https://github.com/factorialco/f0/issues/4398)) ([1a12744](https://github.com/factorialco/f0/commit/1a12744842d2aff094767db1290b311450bb21d9))
+
 ## [2.55.2](https://github.com/factorialco/f0/compare/f0-react-v2.55.1...f0-react-v2.55.2) (2026-06-10)
 
 

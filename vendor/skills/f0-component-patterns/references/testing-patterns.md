@@ -10,4 +10,4 @@ This file has moved. Load the **`f0-unit-testing`** skill for all unit test patt
 - Deferred promise pattern
 - Query priority and coverage rules
 
-**Skill location:** `packages/react/.skills/f0-unit-testing/SKILL.md`
+**Skill location:** `vendor/skills/f0-unit-testing/SKILL.md`

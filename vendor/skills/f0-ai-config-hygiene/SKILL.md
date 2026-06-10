@@ -14,7 +14,7 @@ All changes require human judgment.
 Load this skill when:
 
 - Adding a new rule to any `AGENTS.md`
-- Creating or modifying a `.skills/*/SKILL.md`
+- Creating or modifying a `vendor/skills/*/SKILL.md`
 - Modifying `.github/copilot-instructions.md`
 - Reviewing a PR that touches AI config files
 - Suspecting that two files have drifted out of sync
@@ -34,9 +34,9 @@ Other files that reference the same topic must **link** to the owner, not restat
 | 1     | `AGENTS.md` (root)                | Monorepo structure, key principles (TypeScript strict, pnpm, English), factorial-skills bootstrap                                    |
 | 1     | `.github/copilot-instructions.md` | Thin Copilot Chat / completion entry point only. Everything else defers to root AGENTS.md.                                           |
 | 2     | `packages/react/AGENTS.md`        | **All** F0 React component conventions: naming, folder structure, props, context, TypeScript, testing, styling, i18n, a11y, commands |
-| 3     | `.skills/*/SKILL.md`              | On-demand workflow orchestration and key-rules summary for a specific task. References AGENTS.md, never restates its rules.          |
-| 3     | `.skills/*/references/*.md`       | Detailed code examples, patterns, and templates that expand on AGENTS.md rules with implementation detail                            |
-| 3     | `.agents/skills/*/SKILL.md`       | External community skills. Treat as read-only; don't add F0-specific rules to them.                                                  |
+| 3     | `vendor/skills/*/SKILL.md`        | On-demand workflow orchestration and key-rules summary for a specific task. References AGENTS.md, never restates its rules.          |
+| 3     | `vendor/skills/*/references/*.md` | Detailed code examples, patterns, and templates that expand on AGENTS.md rules with implementation detail                            |
+| 3     | `vendor/skills/a11y/SKILL.md`     | External community skills (tracked in `/skills-lock.json`). Treat as read-only; don't add F0-specific rules to them.                 |
 
 ## Audit Workflow
 
@@ -48,9 +48,8 @@ Collect the full list of files to audit:
 /AGENTS.md
 /.github/copilot-instructions.md
 /packages/react/AGENTS.md
-/packages/react/.skills/*/SKILL.md
-/packages/react/.skills/*/references/*.md
-/packages/react/.agents/skills/*/SKILL.md
+/vendor/skills/*/SKILL.md
+/vendor/skills/*/references/*.md
 ```
 
 Read each file in full. Build a mental map of what topics each file covers.
