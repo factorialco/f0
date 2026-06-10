@@ -141,6 +141,7 @@ const e = {
     save: "Save",
     send: "Send",
     cancel: "Cancel",
+    ok: "Ok",
     delete: "Delete",
     copy: "Copy",
     paste: "Paste",
@@ -167,7 +168,9 @@ const e = {
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
     selectAllItems: "Select all {{total}} items",
-    apply: "Apply"
+    apply: "Apply",
+    saveAsPreset: "Save view",
+    editPreset: "Edit view"
   },
   status: {
     selected: {
@@ -237,6 +240,22 @@ const e = {
     },
     actions: {
       actions: "Actions"
+    },
+    presets: {
+      createTitle: "Save view",
+      createDescription: "Save the current filters, sorting, grouping and columns as a view.",
+      updateTitle: "Update view",
+      updateDescription: "Update this view's name and description.",
+      nameLabel: "Title",
+      namePlaceholder: "View name",
+      duplicateName: "A view with this name already exists",
+      descriptionLabel: "Description",
+      descriptionPlaceholder: "Optional description",
+      save: "Save",
+      delete: "Remove",
+      share: "Share view",
+      copiedToClipboard: "Copied to your clipboard",
+      cancel: "Cancel"
     },
     visualizations: {
       table: "Table view",
@@ -472,6 +491,14 @@ const e = {
       dismiss: "Dismiss"
     },
     attachFile: "Attach file",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    transcribing: "Transcribing…",
+    micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
     removeFile: "Remove",
     fileUploadError: "Upload failed",
     fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",

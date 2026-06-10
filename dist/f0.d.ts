@@ -54,6 +54,7 @@ import { F0AvatarPersonProps as F0AvatarPersonProps_2 } from './types';
 import { F0AvatarTeamProps as F0AvatarTeamProps_2 } from './F0AvatarTeam';
 import { F0DataChartProps as F0DataChartProps_2 } from './types';
 import { F0DialogInternalProps } from './internal-types';
+import { F0DrawerProps } from './F0Drawer';
 import { F0DurationInputProps as F0DurationInputProps_2 } from './types';
 import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
@@ -61,6 +62,8 @@ import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from '
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
 import { F0PdfViewerProps as F0PdfViewerProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
+import { F0SliderProps as F0SliderProps_2 } from './types';
+import { F0SliderSkeletonProps } from './F0SliderSkeleton';
 import { F0TagBalanceProps } from './types';
 import { F0TagCompanyProps } from './types';
 import { F0TagListProps } from './types';
@@ -91,7 +94,6 @@ import { HTMLInputTypeAttribute } from 'react';
 import { IconCellValue } from './types/icon';
 import { ImgHTMLAttributes } from 'react';
 import { InFilterOptions } from './InFilter/types';
-import { InputFieldProps as InputFieldProps_2 } from './f0';
 import { internalAvatarColors as internalAvatarColors_2 } from './f0';
 import { internalAvatarSizes as internalAvatarSizes_2 } from './f0';
 import { internalAvatarTypes as internalAvatarTypes_2 } from './f0';
@@ -157,6 +159,7 @@ import { TextCellValue as TextCellValue_2 } from './types/text';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { ValueDisplayRendererContext } from './f0';
 import { VariantProps } from 'cva';
+import { WithDataTestIdProps as WithDataTestIdProps_2 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_3 } from './f0';
 import { WithDataTestIdReturnType as WithDataTestIdReturnType_4 } from './f0';
@@ -603,6 +606,13 @@ export declare type AiChatProviderProps = {
      * File attachment configuration. When provided, enables file uploads in the chat.
      */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Voice dictation. When provided, a microphone button is shown in the
+     * composer: recorded audio is transcribed and the result fills the textarea
+     * (the user reviews and sends it as a normal text message). When omitted,
+     * the microphone is hidden.
+     */
+    onTranscribe?: TranscribeFn;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -738,7 +748,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -780,6 +790,7 @@ declare interface AiChatState {
     employeeCredits?: AiChatEmployeeCredits;
     creditWarning?: AiChatCreditWarning;
     fileAttachments?: AiChatFileAttachmentConfig;
+    onTranscribe?: TranscribeFn;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
@@ -954,6 +965,14 @@ export declare const aiTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
@@ -1030,6 +1049,11 @@ declare const alertAvatarVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare type AlertDialogOptions = NotificationDialogBaseOptions & {
+    /** The alert action (default: label "Ok", value true). */
+    confirm?: DialogSimpleAction;
+};
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
@@ -1422,7 +1446,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1447,6 +1471,7 @@ declare interface BaseHeaderProps_2 {
         actions?: MetadataAction[];
     };
     metadata?: MetadataProps["items"];
+    metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
 }
@@ -1559,13 +1584,13 @@ export declare type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" 
 /** Border width tokens */
 export declare type BorderWidthToken = "none" | "default" | "thick";
 
-export declare type BoxShadowToken = "none" | "md" | "lg" | "xl";
+export declare type BoxShadowToken = "none" | "sm" | "md" | "lg" | "xl";
 
 declare type BoxVariantProps = VariantProps<typeof boxVariants>;
 
 declare const boxVariants: (props?: ({
     zIndex?: "0" | "auto" | "10" | "20" | "50" | "40" | "30" | undefined;
-    boxShadow?: "none" | "lg" | "md" | "xl" | undefined;
+    boxShadow?: "none" | "lg" | "md" | "sm" | "xl" | undefined;
     divider?: "x" | "y" | undefined;
     dividerColor?: "info" | "bold" | "default" | "secondary" | "critical" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-bold" | undefined;
     overflow?: "hidden" | "auto" | "scroll" | "visible" | undefined;
@@ -1634,10 +1659,10 @@ declare const boxVariants: (props?: ({
 export declare type Breakpoint = "sm" | "md" | "lg" | "xl";
 
 /**
- * Builds a fresh `URLSearchParams` encoding a data collection `id` and state,
- * symmetric with {@link parseDataCollectionUrlParams}. Always sets `dc_id`.
+ * Builds a fresh `URLSearchParams` encoding a data collection's state, symmetric
+ * with {@link parseDataCollectionUrlParams}.
  */
-export declare const buildDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(id: string, state?: DataCollectionUrlState<CurrentFiltersState>) => URLSearchParams;
+export declare const buildDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(state?: DataCollectionUrlState<CurrentFiltersState>) => URLSearchParams;
 
 export declare const buildTranslations: (translations: TranslationsType) => TranslationsType;
 
@@ -1811,6 +1836,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The style of the button.
      */
     style?: React.CSSProperties;
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean;
 } & ({
     /**
      * The URL to navigate to when the button is clicked.
@@ -2032,6 +2062,22 @@ declare type CardAvatarVariant = AvatarVariant | {
 } | {
     type: "icon";
     icon: IconType;
+} | {
+    type: "module";
+    module: ModuleId;
+} | {
+    type: "alert";
+    variant: AlertAvatarProps["type"];
+} | {
+    type: "date";
+    date: Date;
+} | {
+    type: "pulse";
+    firstName: string;
+    lastName: string;
+    src?: string;
+    pulse?: Pulse;
+    onPulseClick: () => void;
 };
 
 /**
@@ -2245,6 +2291,33 @@ declare const cardPropertyRenderers: {
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
+
+declare interface CardRowConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the card row switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardRowStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
 
 declare interface CardSecondaryAction {
     label: string;
@@ -3033,6 +3106,13 @@ export declare function computeSectionEndIds(elements: SurveyFormBuilderElement[
 
 export declare const configurePdfWorker: (src?: string) => void;
 
+export declare type ConfirmDialogOptions = NotificationDialogBaseOptions & {
+    /** The confirm action (default: label "Ok", value true). */
+    confirm?: DialogSimpleAction;
+    /** The cancel action (default: label "Cancel", value false). */
+    cancel?: DialogSimpleAction;
+};
+
 export declare type ContentType = (typeof contentTypes)[number];
 
 export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
@@ -3508,25 +3588,27 @@ export declare type Data<R extends RecordType> = {
 
 /**
  * Every data collection URL param shares this prefix, so each filter is its own
- * readable param — e.g. `?dc_id=people/v1&dc_department=Sales&dc_search=ada`
- * instead of a single JSON blob.
+ * readable param — e.g. `?dc_department=Sales&dc_search=ada&dc_visualization=kanban`
+ * instead of a single JSON blob. Params are not scoped to a collection id, so
+ * this assumes a single URL-synced collection per page.
  */
 export declare const DATA_COLLECTION_URL_PARAM_PREFIX = "dc_";
 
 /**
  * The reserved (non-filter) param names. Individual filters are encoded as
- * `dc_<filterKey>`; these three names are written last (via `set`) so that on
- * the rare clash where a filter key is exactly `id`, `search` or `sort`, the
+ * `dc_<filterKey>`; these names are written last (via `set`) so that on the rare
+ * clash where a filter key is exactly `search`, `sort`, `view` or `page`, the
  * reserved param wins.
  */
 export declare const DATA_COLLECTION_URL_PARAMS: {
-    readonly id: "dc_id";
     readonly search: "dc_search";
     readonly sortings: "dc_sort";
     /** Active visualization type/key, e.g. `table` (omitted for the default one). */
-    readonly visualization: "dc_view";
+    readonly visualization: "dc_visualization";
     /** Current page (1-indexed; omitted for the first page). */
     readonly page: "dc_page";
+    /** Selected view id (omitted when no view is selected). */
+    readonly preset: "dc_view";
 };
 
 /**
@@ -3651,6 +3733,8 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     /** Per-visualization filter states, keyed by visualization index.
      *  Only present when visualizations declare per-view filter overrides. */
     visualizationFilters?: Record<string, CurrentFiltersState>;
+    /** User-created custom presets persisted alongside the rest of the state. */
+    customPresets?: PresetsDefinition<FiltersDefinition>;
 };
 
 export declare type DataCollectionStorage<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
@@ -3665,11 +3749,6 @@ export declare type DataCollectionStorageHandler<CurrentFiltersState extends Fil
 /** How {@link syncDataCollectionUrlParams} should update the browser history. */
 export declare type DataCollectionUrlHistoryMode = "replace" | "push" | "none";
 
-export declare type DataCollectionUrlParams<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
-    id: string;
-    state: DataCollectionUrlState<CurrentFiltersState>;
-};
-
 /** The subset of a data collection's state we read from / write to the URL. */
 export declare type DataCollectionUrlState<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = Pick<DataCollectionStorage<CurrentFiltersState>, "filters" | "search" | "sortings"> & {
     /**
@@ -3681,6 +3760,8 @@ export declare type DataCollectionUrlState<CurrentFiltersState extends FiltersSt
     visualization?: string;
     /** Current page (1-indexed). Not part of persisted storage — URL only. */
     page?: number;
+    /** Selected preset id (absent when no preset is selected). URL only. */
+    preset?: string;
 };
 
 /**
@@ -4218,6 +4299,7 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -4245,6 +4327,8 @@ export declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -4314,6 +4398,22 @@ export declare const defaultTranslations: {
         };
         readonly actions: {
             readonly actions: "Actions";
+        };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
         };
         readonly visualizations: {
             readonly table: "Table view";
@@ -4549,6 +4649,14 @@ export declare const defaultTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
@@ -4955,13 +5063,153 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "file";
 });
 
+/**
+ * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
+ * `DialogsAlikeLayoutProvider`) to be present in the tree.
+ *
+ * @example
+ * const result = await dialog.open({ title, content, actions: { primary: { label: "OK", value: true } } })
+ */
+export declare const dialog: {
+    /** Open a dialog. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
+    /** Open a notification-style dialog (info/warning/critical/positive). */
+    notification: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with a single confirm action (defaults to "Ok"). */
+    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
+    confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
+    /** Programmatically close a dialog by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
+
+export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
+    value: DialogActionValue;
+    keepOpen?: boolean;
+    nonBlocking?: boolean;
+};
+
+export declare type DialogActions = {
+    primary: DialogAction | DialogAction[];
+    secondary?: DialogAction | DialogAction[];
+};
+
+export declare type DialogActionValue = DialogActionValuePrimitive | (() => Promise<DialogActionValuePrimitive>);
+
+declare type DialogActionValuePrimitive = string | boolean | number | undefined | null;
+
+declare type DialogAlikeAction = {
+    value?: string;
+    label: string;
+    icon?: IconType;
+    onClick: () => void | Promise<void>;
+    disabled?: boolean;
+    loading?: boolean;
+    closeOnClick?: boolean;
+};
+
+declare type DialogAlikeActionsProps = {
+    primaryAction?: DialogAlikeAction | DialogAlikeAction[];
+    secondaryAction?: DialogAlikeAction | DialogAlikeAction[];
+};
+
+declare type DialogAlikePosition = (typeof dialogAlikePositions)[number];
+
+declare const dialogAlikePositions: readonly ["center", "left", "right", "fullscreen"];
+
+export declare type DialogControls = {
+    kind: "resource";
+    expand?: {
+        label: string;
+        onClick: () => void;
+    };
+    navigation?: NavigationProps;
+} | {
+    kind: "back";
+    label: string;
+    onClick: () => void;
+};
+
+export declare type DialogDefinition = {
+    size?: F0DialogSize;
+    id: DialogId;
+    title: string;
+    description?: string;
+    content: ReactNode;
+    actions: DialogActions;
+    keepOpen?: boolean;
+    /**
+     * If true, the dialog will be modal (cannot be closed by clicking outside or pressing Escape).
+     * @default false
+     */
+    modal?: boolean;
+    /**
+     * The module of the dialog.
+     */
+    module?: DialogModule;
+};
+
+export declare type DialogId = string;
+
+/**
+ * Module configuration shown in a dialog/drawer header.
+ *
+ * Kept in its own module (free of any F0Dialog/F0Drawer dependency) so the
+ * shared `dialog-alike/common` layer can reference it without creating a
+ * circular dependency back through `dialogs-alike/types`.
+ */
+declare type DialogModule = {
+    id: ModuleId;
+    label: string;
+    href: string;
+};
+
+declare type DialogNotificationType = (typeof dialogNotificationTypes)[number];
+
+/**
+ * The levels of the alert.
+ */
+declare const dialogNotificationTypes: readonly ["info", "warning", "critical", "positive"];
+
 export declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
 
+declare type DialogSimpleAction = {
+    label?: string;
+    value?: DialogActionValue;
+};
+
+declare const dialogSizes: readonly ["sm", "md", "lg", "xl", "fullscreen"];
+
 export declare type DialogWidth = (typeof dialogWidths)[number];
 
 declare const dialogWidths: readonly ["sm", "md", "lg", "xl"];
+
+declare type DialogWrapperContextType = {
+    open: boolean;
+    onClose: () => void;
+    shownBottomSheet: boolean;
+    position: DialogAlikePosition;
+    /**
+     * The dialog's content container element.
+     * Use this as the `portalContainer` prop for components like F0Select
+     * to ensure dropdowns render inside the dialog.
+     */
+    portalContainer: HTMLDivElement | null;
+};
+
+/**
+ * The props for the F0DialogProvider component.
+ */
+declare type DialogWrapperProviderProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    shownBottomSheet?: boolean;
+    position: DialogAlikePosition;
+    children: ReactNode;
+    portalContainer: HTMLDivElement | null;
+};
 
 /** Display modes */
 export declare type DisplayToken = "block" | "flex" | "inline" | "inline-flex" | "grid" | "none";
@@ -5012,6 +5260,54 @@ export declare type DragPayload<T = unknown> = {
     id: string;
     data?: T;
 };
+
+/**
+ * Imperative API for side drawers. Requires `<F0Provider>` to be present.
+ *
+ * @example
+ * const result = await drawer.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ */
+export declare const drawer: {
+    /** Open a drawer. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
+    /** Programmatically close a drawer by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
+
+export declare type DrawerDefinition = {
+    /** The size of the drawer. */
+    size?: DrawerSize;
+    /** The id of the drawer. Auto-generated if not provided. */
+    id: DialogId;
+    /** The title of the drawer. */
+    title: string;
+    /** The description of the drawer. */
+    description?: string;
+    /** The content of the drawer. */
+    content: ReactNode;
+    /** The actions of the drawer. */
+    actions: DialogActions;
+    /**
+     * If true, the drawer will not be closed automatically when an action is
+     * clicked. Useful for drawers that need to be closed manually.
+     */
+    keepOpen?: boolean;
+    /**
+     * The position of the drawer.
+     * @default "right"
+     */
+    position?: F0DrawerPosition;
+    /** If true, the drawer will be modal. */
+    modal?: boolean;
+    /** The module of the drawer. */
+    module?: DialogModule;
+};
+
+declare const drawerPositions: readonly ["left", "right"];
+
+declare type DrawerSize = (typeof drawerSizes)[number];
+
+declare const drawerSizes: readonly ["md"];
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -5099,6 +5395,14 @@ declare type DurationRenderIfCondition = NumberRenderIfCondition;
 export declare type DurationUnit = (typeof durationUnits)[number];
 
 export declare const durationUnits: readonly ["days", "hours", "minutes", "seconds"];
+
+/**
+ * Map of the attributes modified in a cell update, keyed by record key.
+ * Each entry is a `[previousValue, newValue]` tuple.
+ */
+declare type EditableTableCellChanges<R extends RecordType> = {
+    [K in keyof R]?: [R[K], R[K]];
+};
 
 /** The edit mode for a column cell in the editable table. */
 declare type EditableTableCellEditType = "text" | "number" | "money" | "date" | "select" | "multiselect" | "display-only" | "disabled";
@@ -5190,14 +5494,29 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     } | undefined;
 };
 
+/**
+ * Arguments passed to `onCellChange`.
+ */
+declare type EditableTableOnCellChangeParams<R extends RecordType> = {
+    /** The full row item with the change(s) applied. */
+    updatedItem: R;
+    /**
+     * Map of the modified attributes keyed by record key, where each entry is a
+     * `[previousValue, newValue]` tuple.
+     */
+    changes: EditableTableCellChanges<R>;
+};
+
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
     columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
     /**
-     * Called when a cell value changes with the full updated row.
+     * Called when a cell value changes. Receives an object with the full updated
+     * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
+     * record key, where each entry is a `[previousValue, newValue]` tuple.
      * Resolve with nothing for success, or `{ columnId: "message" }` to set errors.
      * Rejection sets an error on the edited column.
      */
-    onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>;
+    onCellChange: (params: EditableTableOnCellChangeParams<R>) => Promise<void | Record<string, string>>;
     /**
      * When provided, renders action buttons at the bottom of the root-level table.
      * Returns a single action, an array of actions, or undefined to hide the row.
@@ -5629,7 +5948,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -5640,7 +5959,7 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -5678,6 +5997,12 @@ export declare type F0AiChatTextAreaProps = {
     onPendingQuoteChange?: (quote: PendingQuote | null) => void;
     /** File attachment configuration. When omitted, attachments are disabled. */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Voice dictation. When provided, a microphone button is shown: recorded
+     * audio is transcribed and the transcript fills the textarea (the user
+     * reviews and sends it manually). When omitted, the microphone is hidden.
+     */
+    onTranscribe?: TranscribeFn;
     /** Async search used by the @-mention popover. When omitted, mentions are disabled. */
     searchPersons?: (query: string) => Promise<PersonProfile[]>;
     /**
@@ -5712,9 +6037,10 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
-     * When true, the composer adopts the fullscreen layout: the welcome
-     * footer is pushed to the bottom and the disclaimer is hidden so the
-     * footer is the only thing under the textarea.
+     * When true on the welcome screen, the composer adopts the fullscreen
+     * layout: the input slot grows to claim the bottom half (so the textarea
+     * rises toward the vertical center), and the welcome suggestions render
+     * below the textarea with their popover opening downward (instead of above).
      */
     fullscreen?: boolean;
 };
@@ -5944,6 +6270,9 @@ export declare type F0AiMessagesContainerProps = {
     onAssistantMessageRendered?: (message: Message_2) => void;
     /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
     autoScrollUserIntoView?: boolean;
+    /** Fullscreen welcome layout: pushes the welcome phrase to the bottom of the
+     *  top half so it meets the composer near the vertical center. */
+    fullscreen?: boolean;
     /**
      * Renders the markdown content of user/assistant messages. The connected
      * wrapper provides a CopilotKit + f0-markdown-renderers implementation;
@@ -6622,7 +6951,7 @@ export declare interface F0BoxProps extends Omit<React.ComponentPropsWithoutRef<
     xl?: ResponsiveStyleProps;
 }
 
-export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
+export declare const F0Button: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<ButtonInternalProps, "style" | "className" | "block" | "variant" | "pressed" | "append" | "compact" | "noAutoTooltip" | "noTitle"> & {
 variant?: Exclude<ButtonInternalProps["variant"], "ai">;
 } & RefAttributes<HTMLAnchorElement | HTMLButtonElement>>>;
 
@@ -6821,6 +7150,98 @@ compact?: boolean;
 
 export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
 
+export declare const F0CardRow: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardRowProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: ({ compact }: {
+compact?: boolean;
+}) => JSX_2.Element;
+}>;
+
+export declare interface F0CardRowProps {
+    /**
+     * The primary line of text.
+     */
+    title: string;
+    /**
+     * Optional secondary line shown beneath the title (wraps across multiple
+     * lines when long).
+     */
+    description?: string;
+    /**
+     * Optional avatar rendered at a fixed `lg` size on the left (the size is not
+     * configurable). Accepts any avatar type in the system: person, company, team,
+     * file, flag, icon, emoji, module, alert, date, pulse. Types without a `lg`
+     * variant (date, pulse) render at their intrinsic size.
+     */
+    avatar?: CardAvatarVariant;
+    /**
+     * The primary action button, shown at the trailing edge of the row.
+     */
+    primaryAction?: CardPrimaryAction;
+    /**
+     * Secondary actions (buttons) or a single link, shown before the primary action.
+     */
+    secondaryActions?: CardSecondaryAction[] | CardSecondaryLink;
+    /**
+     * Overflow (⋯) menu actions, rendered as the trailing control of the row.
+     */
+    otherActions?: DropdownItem[];
+    /**
+     * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
+     * instead of the standard actions. Provide either or both.
+     */
+    confirmAction?: CardRowConfirmAction;
+    /**
+     * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
+     */
+    rejectAction?: CardRowConfirmAction;
+    /**
+     * Resolved-state icon shown at the trailing edge in place of any actions — the
+     * outcome of a confirm/reject row, e.g.
+     * `{ icon: Check, variant: "positive", label: "Accepted" }`.
+     * Takes precedence over the action props.
+     */
+    status?: CardRowStatus;
+    /**
+     * Strikes through and dims the title/description, marking the row's subject as
+     * void or closed (e.g. a rejected request). Purely presentational — pair it
+     * with the matching `status` tag at the call site.
+     */
+    inactive?: boolean;
+    /**
+     * Compact layout: tighter padding and smaller controls.
+     */
+    compact?: boolean;
+    /**
+     * Container width at which the actions drop to their own line (below it) vs.
+     * sit inline (at/above it). `never` keeps them inline at every width.
+     * @default "never"
+     */
+    stackAt?: CardRowStackAt;
+    /**
+     * When set, the whole row becomes a link to this href.
+     */
+    link?: string;
+    /**
+     * Stretch to fill the height of its container.
+     */
+    fullHeight?: boolean;
+    /**
+     * Alert banner displayed above the row with a coloured header strip and matching
+     * border. Supports info, warning, critical and positive variants.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
+    /**
+     * Called when the row is clicked.
+     */
+    onClick?: () => void;
+    /**
+     * Disables the full-row overlay link so a parent can manage drag-and-drop while
+     * still allowing click navigation via `onClick`.
+     */
+    disableOverlayLink?: boolean;
+}
+
 declare interface F0CardSelectConfig {
     options: CardSelectOption[];
     hideLabel?: boolean;
@@ -6841,9 +7262,6 @@ declare type F0CardSelectField = F0BaseField & {
     renderIf?: CardSelectFieldRenderIf;
 };
 
-/**
- * @experimental This is an experimental component use it at your own risk
- */
 export declare const F0Checkbox: WithDataTestIdReturnType_3<typeof _F0Checkbox>;
 
 declare function _F0Checkbox({ title, onCheckedChange, id, disabled, indeterminate, checked, value, hideLabel, presentational, stopPropagation, name, required, ...rest }: CheckboxProps): JSX_2.Element;
@@ -6880,16 +7298,14 @@ displayName: string;
 }>;
 
 /**
- * Animated wrapper that mounts/unmounts the clarifying question panel.
+ * Clarifying question panel — content only, no mount animation.
  *
- * Uses Motion's native `height: "auto"` support — it measures the
- * content internally, so the same transition covers the initial
- * appearance, step changes with a different number of options, and
- * dismissal. No manual ResizeObserver.
+ * The parent slot (F0AiChatTextArea) owns the enter/exit animation so
+ * nested height animations don't conflict. Step-to-step transitions are
+ * still animated internally via F0ClarifyingPanelContent.
  *
- * Props-driven: the entire panel state (current step, navigation,
- * callbacks) lives in `clarifyingQuestion`. No coupling to `useAiChat`
- * — embedders can construct a state object themselves.
+ * When used standalone (e.g. Storybook), wrap in a motion.div with
+ * `overflow-hidden` and `height: 0 → "auto"`.
  */
 export declare const F0ClarifyingPanel: ({ clarifyingQuestion, isSubmitDisabled, }: F0ClarifyingPanelProps) => JSX_2.Element;
 
@@ -7622,6 +8038,10 @@ export declare type F0DialogActionsProps = {
     secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[];
 };
 
+export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
+
+export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -7669,6 +8089,22 @@ export declare type F0DialogSecondaryAction = {
 };
 
 export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
+
+declare type F0DialogSize = (typeof dialogSizes)[number];
+
+/**
+ * @experimental This is an experimental component use it at your own risk
+ */
+export declare const F0Drawer: {
+    (props: F0DrawerProps): JSX_2.Element;
+    displayName: string;
+};
+
+export declare type F0DrawerAction = DialogAlikeAction;
+
+export declare type F0DrawerActionsProps = DialogAlikeActionsProps;
+
+export declare type F0DrawerPosition = (typeof drawerPositions)[number];
 
 export declare type F0DropdownButtonProps<T = string> = {
     size?: ButtonDropdownSize;
@@ -8855,30 +9291,51 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
-export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
- * Props for the F0HILActionConfirmation component
+ * Props for the F0HILActionConfirmation component.
+ *
+ * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
+ * (reject) buttons at the trailing edge.
  */
 export declare type F0HILActionConfirmationProps = {
     /**
-     * Optional descriptive text shown above the action buttons
+     * The prompt shown as the row title (e.g. the action awaiting confirmation).
+     * Required — a confirmation without a prompt has no meaning.
      */
-    text?: string;
+    text: string;
     /**
-     * Text displayed on the confirmation button
+     * Optional secondary line shown beneath the title (single line, truncated).
+     */
+    description?: F0CardRowProps["description"];
+    /**
+     * Optional avatar rendered on the left of the row. Accepts any avatar type in
+     * the system (person, company, team, file, icon, emoji, …).
+     */
+    avatar?: F0CardRowProps["avatar"];
+    /**
+     * Container width at which the ✓/✗ actions drop onto their own line instead of
+     * staying inline. Prevents the buttons from overlapping the prompt in narrow
+     * containers. Set to `"never"` to keep them inline at every width.
+     * @default "sm"
+     */
+    stackAt?: F0CardRowProps["stackAt"];
+    /**
+     * Accessible label and tooltip for the confirm (✓) button.
      */
     confirmationText: string;
     /**
-     * Callback fired when the confirmation button is clicked
+     * Callback fired when the confirm button is clicked.
      */
     onConfirm: () => void;
     /**
-     * Text displayed on the cancel button
+     * Accessible label and tooltip for the reject (✗) button.
      */
     cancelText: string;
     /**
-     * Callback fired when the cancel button is clicked
+     * Callback fired when the reject button is clicked.
      */
     onCancel: () => void;
 };
@@ -9605,6 +10062,57 @@ export declare type F0SelectTagProp = string | {
 };
 
 /**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0Slider: ForwardRefExoticComponent<Omit<F0SliderProps_2 & RefAttributes<HTMLDivElement> & WithDataTestIdProps_2, "ref"> & RefAttributes<HTMLDivElement>> & Pick<ForwardRefExoticComponent<F0SliderProps_2 & RefAttributes<HTMLDivElement>>, never> & {
+    Skeleton: ({ hideLabel }: F0SliderSkeletonProps) => JSX_2.Element;
+};
+
+export declare interface F0SliderProps extends WithDataTestIdProps, DataAttributes_2 {
+    label: string;
+    ariaLabel?: string;
+    hideLabel?: boolean;
+    hint?: string;
+    status?: InputFieldStatus;
+    required?: boolean;
+    disabled?: boolean;
+    name?: string;
+    value?: number;
+    defaultValue?: number;
+    onChange?: (value: number) => void;
+    /**
+     * Fires once when the user commits a value: on pointer release after a drag,
+     * and on each discrete keyboard step. Use this — not `onChange` — to trigger
+     * expensive side effects such as mutations, so dragging does not fire one
+     * call per intermediate value.
+     */
+    onValueCommit?: (value: number) => void;
+    min: number;
+    max: number;
+    step?: number;
+    minLabel?: string;
+    maxLabel?: string;
+    /**
+     * Format the value for the floating tooltip. Receives the raw numeric value
+     * and must return the full localised string. The whole string is built by
+     * the consumer (instead of e.g. a `unit` prop concatenated by the component)
+     * so locales can reorder the phrase around the number — for example RTL
+     * languages or locales where the unit precedes the value.
+     */
+    formatValue?: (value: number) => string;
+    /**
+     * When to show the floating value tooltip above the thumb.
+     * - `"always"`: visible at all times.
+     * - `"onHover"`: visible while the slider is hovered, focused or being
+     *   dragged. Default.
+     * - `"never"`: never rendered.
+     */
+    showTooltip?: F0SliderTooltipMode;
+}
+
+export declare type F0SliderTooltipMode = (typeof sliderTooltipModes)[number];
+
+/**
  * Config for string fields rendered as grouped radio cards
  */
 declare type F0StringCardSelectConfig = F0BaseConfig & F0CardSelectConfig & {
@@ -10012,7 +10520,10 @@ declare interface F0WizardFormBaseProps {
     isOpen: boolean;
     onClose?: () => void;
     title?: string;
+    /** @deprecated Use `size` instead. */
     width?: DialogWidth;
+    /** The size of the wizard dialog. Preferred over the deprecated `width`. */
+    size?: F0DialogSize;
     defaultStepIndex?: number;
     nextLabel?: string;
     previousLabel?: string;
@@ -10125,12 +10636,7 @@ export declare interface F0ZodType<T extends ZodTypeAny = ZodTypeAny> {
  *
  * @removeIn 2.0.0
  */
-export declare const F1SearchBox: ForwardRefExoticComponent<    {
-value?: string;
-threshold?: number;
-debounceTime?: number;
-autoFocus?: boolean;
-} & Pick<InputFieldProps_2<string>, "onChange" | "name" | "size" | "onFocus" | "onBlur" | "loading" | "disabled" | "placeholder" | "clearable"> & RefAttributes<HTMLInputElement>>;
+export declare const F1SearchBox: typeof F0SearchInput;
 
 export declare type FeedbackConfig = {
     threadId: string;
@@ -11704,7 +12210,10 @@ declare interface MetadataProps {
      * If true and the metadata type is a list, it will be collapsed to the first item
      */
     collapse?: boolean;
+    rowGap?: MetadataRowGap;
 }
+
+declare type MetadataRowGap = "none" | "xs" | "sm" | "md";
 
 export declare interface MetricComputation {
     datasetId: string;
@@ -11858,6 +12367,21 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
     label: string;
 } & DataAttributes_2;
 
+declare type NavigationProps = {
+    previous?: {
+        url: string;
+        title: string;
+    };
+    next?: {
+        url: string;
+        title: string;
+    };
+    counter?: {
+        current: number;
+        total: number;
+    };
+};
+
 declare type NavTarget = HTMLAttributeAnchorTarget;
 
 /**
@@ -11950,6 +12474,15 @@ export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
     readonly patchType: unknown;
     constructor(patchType: unknown);
 }
+
+declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
+    msg: string;
+    type?: DialogNotificationType;
+};
+
+export declare type NotificationDialogOptions = NotificationDialogBaseOptions & {
+    actions: DialogActions;
+};
 
 declare type NumberCellConfig<R extends RecordType = RecordType> = {
     min?: number;
@@ -12404,6 +12937,23 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     displayCounter?: boolean;
     /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
     resultCount?: number;
+    /**
+     * Id of the currently selected preset. When provided together with
+     * `onSelectPreset`, preset selection is identity-based (the preset stays
+     * selected as the user changes state on top of it). When absent, the picker
+     * falls back to legacy exact-filter-match selection.
+     */
+    selectedPresetId?: string;
+    /** Selects a preset by id. Enables identity-based selection. */
+    onSelectPreset?: (presetId: string) => void;
+    /** Ids of presets that can be edited/deleted (user-created presets). */
+    editablePresetIds?: string[];
+    /** Opens the edit flow for a preset (hover icon on editable presets). */
+    onEditPreset?: (presetId: string) => void;
+    /** Whether to show the dashed "Save view" chip ("save" | "none"). */
+    presetActionState?: "save" | "none";
+    /** Opens the preset create/update dialog. */
+    onPresetAction?: () => void;
 };
 
 export declare type OneIconSize = (typeof oneIconSizes)[number];
@@ -12518,15 +13068,17 @@ export declare type PaginationInfo = Omit<PageBasedPaginatedResponse<unknown>, "
 export declare type PaginationType = "pages" | "infinite-scroll" | "no-pagination";
 
 /**
- * Parses the data collection identifier and state out of URL query params.
+ * Parses a data collection's state out of URL query params.
  *
  * @param input - A query string, a `URLSearchParams`, or omitted to read from
  *                `window.location.search`.
  * @param filtersDefinition - Needed to decode the `dc_<filterKey>` params back
  *                into correctly-typed filter values. Omit to skip filters.
- * @returns `{ id, state }`, or `null` when no `dc_id` is present.
+ * @returns The state encoded in the URL (empty when no `dc_` params are present).
+ *          Params are not scoped to a collection id — one synced collection per
+ *          page is assumed.
  */
-export declare const parseDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(input?: string | URLSearchParams, filtersDefinition?: FiltersDefinition) => DataCollectionUrlParams<CurrentFiltersState> | null;
+export declare const parseDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(input?: string | URLSearchParams, filtersDefinition?: FiltersDefinition) => DataCollectionUrlState<CurrentFiltersState>;
 
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
@@ -12651,22 +13203,65 @@ export declare type PositionToken = "static" | "relative" | "absolute" | "fixed"
 export declare const predefinedPresets: Record<string, DatePreset>;
 
 /**
- * Defines preset filter configurations that can be applied to a collection.
+ * Defines preset configurations that can be applied to a collection.
+ *
+ * A preset is a saveable snapshot of the collection view. Historically it only
+ * captured a group of filters; it can now also capture the sorting, view mode
+ * (visualization), grouping and column order/visibility. All non-filter fields are
+ * optional so existing filter-only presets remain valid.
+ *
  * @template Filters - The available filter configurations
  */
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
+    /**
+     * Stable identifier for the preset. Optional for developer-provided presets (a
+     * fallback id is derived from the label at merge time); user-created custom
+     * presets always carry a generated id.
+     */
+    id?: string;
     /** Display name for the preset */
     label: string;
+    /** Optional longer description, shown/edited in the preset form */
+    description?: string;
     /** Filter configuration to apply when this preset is selected.
      * Clicking a preset replaces all current filters with this value.
-     * The preset shows as selected only when the current filters exactly match this value.
      */
     filter: FiltersState<Filters>;
+    /**
+     * Captured sorting state (`SortingsState`). Typed loosely here to avoid forcing
+     * the `Sortings` generic onto every preset consumer; narrowed at the
+     * OneDataCollection boundary.
+     */
+    sortings?: unknown;
+    /** Captured grouping state (`GroupingState`). Typed loosely; see `sortings`. */
+    grouping?: unknown;
+    /** Captured view mode as the visualization index. */
+    visualization?: number;
+    /**
+     * Captured column order/visibility settings (`DataCollectionSettings`, shaped
+     * like `PresetSettings`). Typed loosely; narrowed at the OneDataCollection
+     * boundary.
+     */
+    settings?: unknown;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
 
 export declare type PresetsDefinition<Filters extends FiltersDefinition> = PresetDefinition<Filters>[];
+
+/**
+ * Structural snapshot of the visualization (column order/visibility) settings a
+ * preset can capture. Typed structurally (rather than importing
+ * `DataCollectionSettings`) to keep the filter pattern free of a dependency on
+ * OneDataCollection. Narrowed to `DataCollectionSettings` at the OneDataCollection
+ * boundary.
+ */
+export declare type PresetSettings = {
+    visualization?: Record<string, {
+        order?: string[];
+        hidden?: string[];
+    }>;
+};
 
 export declare type PrevNextDateNavigation = {
     prev: DateRange | false;
@@ -12714,7 +13309,7 @@ export declare const PrivacyModeProvider: React_2.FC<{
     children: ReactNode;
 }>;
 
-declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "block"];
 
 declare const privateProps_2: readonly ["withBorder"];
 
@@ -12924,7 +13519,11 @@ declare type Props_3 = {
     list?: TagCounterItem[];
 };
 
-declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "showBottomBorder">;
+declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
+
+declare type Pulse = (typeof pulses)[number];
+
+declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
 export declare type QuestionActionParams = {
     questionId: string;
@@ -13599,12 +14198,12 @@ export declare const selectSizes: readonly ["sm", "md"];
 declare type SelectValueType = string | number;
 
 /**
- * Writes a data collection's current filters/search/sortings onto an existing
- * query string, preserving any unrelated params. Every `dc_`-prefixed param is
- * rebuilt from `state`, so cleared filters drop out and an entirely empty state
- * leaves the URL free of `dc_` params (rather than a bare `?dc_id=<id>`).
+ * Writes a data collection's current state onto an existing query string,
+ * preserving any unrelated params. Every `dc_`-prefixed param is rebuilt from
+ * `state`, so cleared values drop out and an entirely empty state leaves the URL
+ * free of `dc_` params.
  */
-export declare const setDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(current: string | URLSearchParams | undefined, id: string, state: DataCollectionUrlState<CurrentFiltersState>) => URLSearchParams;
+export declare const setDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(current: string | URLSearchParams | undefined, state: DataCollectionUrlState<CurrentFiltersState>) => URLSearchParams;
 
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
@@ -13636,6 +14235,8 @@ declare type SimpleResult<T> = T[];
 
 /** Size tokens for width/height/min/max dimensions */
 export declare type SizeToken = "auto" | "full" | "screen" | "min" | "max" | "fit" | NumericSizeToken | FractionToken;
+
+export declare const sliderTooltipModes: readonly ["always", "onHover", "never"];
 
 /**
  * Type helper to extract keys from a SortingsDefinition
@@ -13899,14 +14500,14 @@ export declare type SurveySubmitAnswers = Record<string, string | number | boole
 declare type SwitchFieldRenderIf = BooleanRenderIfCondition | CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
 
 /**
- * Reflects a data collection's current filters/search/sortings into the URL.
+ * Reflects a data collection's current state into the URL.
  *
  * Pairs with {@link parseDataCollectionUrlParams} (which reads the other way).
  * `OneDataCollection` wires this up by default when an `id` is set.
  *
  * @returns The resulting query string (no leading `?`), or `null` under SSR.
  */
-export declare const syncDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(id: string, state: DataCollectionUrlState<CurrentFiltersState>, options?: {
+export declare const syncDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(state: DataCollectionUrlState<CurrentFiltersState>, options?: {
     history?: DataCollectionUrlHistoryMode;
 }) => string | null;
 
@@ -14501,6 +15102,25 @@ declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
     blocks: JSONContent[];
 }
 
+/**
+ * Transcribes a recorded audio blob to text (voice dictation). The returned
+ * promise resolves with the final transcript; `onPartial` delivers
+ * intermediate results for live textarea fill. When omitted from the chat
+ * config, the microphone button is not rendered.
+ */
+declare type TranscribeFn = (audio: Blob, options: TranscribeOptions) => Promise<string>;
+
+declare type TranscribeOptions = {
+    /**
+     * Primary channel for live dictation: fires with the cumulative transcript
+     * as it streams in, so the composer can fill the textarea while the user
+     * speaks. Implementations that don't stream may call it once at the end.
+     */
+    onPartial: (text: string) => void;
+    /** Aborted when the user cancels an in-flight transcription. */
+    signal?: AbortSignal;
+};
+
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
 declare type TranslationShape<T> = {
@@ -14908,6 +15528,8 @@ export declare const useEmojiConfetti: () => {
 export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | null;
 
 export declare const useF0Dialog: () => F0DialogContextType;
+
+export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
 
 /**
  * Hook to control F0Form programmatically.
@@ -15609,10 +16231,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -15620,8 +16240,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

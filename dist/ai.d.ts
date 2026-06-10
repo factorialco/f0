@@ -1,4 +1,5 @@
 import { AgentState } from '@livekit/components-react';
+import { AnchorHTMLAttributes } from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
 import { baseColors } from '@factorialco/f0-core';
 import { ClassValue } from 'cva';
@@ -14,6 +15,7 @@ import { F0TagTeamProps } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
+import { HTMLAttributeAnchorTarget } from 'react';
 import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
@@ -40,9 +42,117 @@ import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
 import { WithDataTestIdReturnType } from '../../../lib/data-testid';
 
+declare type ActionBaseProps = ActionCommonProps & DataAttributes;
+
+declare interface ActionCommonProps {
+    /**
+     * Tooltip
+     */
+    tooltip?: string | false;
+    /**
+     * The variant of the action.
+     */
+    variant?: ActionVariant;
+    /**
+     * The children of the action.
+     */
+    children: ReactNode;
+    /**
+     * The prepend of the action.
+     */
+    prepend?: ReactNode;
+    /**
+     * The append of the action.
+     */
+    append?: ReactNode;
+    /**
+     * The prepend outside (next to the button) of the action.
+     */
+    prependOutside?: ReactNode;
+    /**
+     * The append outside of the action.
+     */
+    appendOutside?: ReactNode;
+    /**
+     * The disabled state of the action.
+     */
+    disabled?: boolean;
+    /**
+     * The loading state of the action.
+     */
+    loading?: boolean;
+    /**
+     * The pressed state of the action.
+     */
+    pressed?: boolean;
+    /**
+     * The class name of the action.
+     */
+    className?: string;
+    /**
+     * The size of the action.
+     */
+    size?: ActionSize;
+    /**
+     * The font size of the action.
+     */
+    fontSize?: FontSize;
+    /**
+     * The render mode.
+     * @default "default"
+     */
+    mode?: "default" | "only";
+    /**
+     * The title of the action.
+     */
+    title?: string;
+    /**
+     * make the left and right padding of the action smaller.
+     */
+    compact?: boolean;
+    /**
+     * The aria label of the action.
+     */
+    "aria-label"?: string;
+    /**
+     * The tab index of the action.
+     */
+    tabIndex?: number;
+    /**
+     * Mouse enter event handler.
+     */
+    onMouseEnter?: React.MouseEventHandler<HTMLElement>;
+    /**
+     * Mouse leave event handler.
+     */
+    onMouseLeave?: React.MouseEventHandler<HTMLElement>;
+}
+
 export declare type ActionItemStatus = (typeof actionItemStatuses)[number];
 
 export declare const actionItemStatuses: readonly ["inProgress", "executing", "writing", "completed"];
+
+declare type ActionLinkProps = ActionBaseProps & {
+    href: string;
+    target?: NavTarget;
+    rel?: string;
+    onFocus?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLAnchorElement>) => void;
+    onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+    className?: string;
+};
+
+declare type ActionLinkVariant = (typeof actionLinkVariants)[number];
+
+declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
+
+declare type ActionSize = (typeof actionSizes)[number];
+
+declare const actionSizes: readonly ["sm", "md", "lg"];
+
+declare type ActionVariant = (typeof actionVariants)[number];
+
+declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
 
 /* Excluded from this release type: AgentState */
 
@@ -223,6 +333,13 @@ export declare type AiChatProviderProps = {
      * File attachment configuration. When provided, enables file uploads in the chat.
      */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Voice dictation. When provided, a microphone button is shown in the
+     * composer: recorded audio is transcribed and the result fills the textarea
+     * (the user reviews and sends it as a normal text message). When omitted,
+     * the microphone is hidden.
+     */
+    onTranscribe?: TranscribeFn;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -358,7 +475,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -400,6 +517,7 @@ declare interface AiChatState {
     employeeCredits?: AiChatEmployeeCredits;
     creditWarning?: AiChatCreditWarning;
     fileAttachments?: AiChatFileAttachmentConfig;
+    onTranscribe?: TranscribeFn;
     placeholders?: string[];
     setPlaceholders?: React.Dispatch<React.SetStateAction<string[]>>;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
@@ -574,6 +692,14 @@ export declare const aiTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
@@ -620,6 +746,26 @@ export declare const aiTranslations: {
         };
     };
 };
+
+declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
+    type: (typeof alertAvatarTypes)[number];
+    size?: (typeof alertAvatarSizes)[number];
+} & Partial<Pick<BaseAvatarProps, "aria-label" | "aria-labelledby">>;
+
+declare const alertAvatarSizes: readonly ["sm", "md", "lg"];
+
+declare const alertAvatarTypes: readonly ["critical", "warning", "info", "positive"];
+
+declare const alertAvatarVariants: (props?: ({
+    type?: "info" | "critical" | "warning" | "positive" | undefined;
+    size?: "lg" | "md" | "sm" | undefined;
+} & ({
+    class?: ClassValue;
+    className?: never;
+} | {
+    class?: never;
+    className?: ClassValue;
+})) | undefined) => string;
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
@@ -885,9 +1031,150 @@ export declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasC
     overflowHidden?: boolean;
 };
 
+/**
+ * An optional action button rendered in the alert header.
+ * Mutually exclusive with `dismissible` — only one can be shown at a time.
+ * Supply either `onClick` (handler) or `href` (navigation link), not both.
+ */
+declare type CardAlertAction = {
+    /** Label text for the action button. */
+    label: string;
+    /** Whether the action button is disabled. */
+    disabled?: boolean;
+} & ({
+    /** Called when the action button is clicked. */
+    onClick: () => void;
+    href?: never;
+} | {
+    /** URL to navigate to when the action button is clicked. */
+    href: string;
+    onClick?: never;
+});
+
+declare interface CardAlertBase {
+    /**
+     * The visual variant of the alert, which determines the color scheme and default icon.
+     */
+    variant: CardAlertVariant;
+    /**
+     * The title text displayed in the alert banner.
+     */
+    title: string;
+    /**
+     * Optional custom icon. When omitted, defaults to the icon that best represents the variant.
+     */
+    icon?: IconType;
+    /**
+     * Controls whether the alert is visible. Defaults to true.
+     * Use this together with onDismiss for controlled dismiss behaviour:
+     *   alert={{ ..., visible, dismissible: true, onDismiss: () => setVisible(false) }}
+     */
+    visible?: boolean;
+}
+
+declare type CardAlertDismissible = CardAlertBase & {
+    /** Renders a dismiss (×) button. Requires onDismiss. */
+    dismissible: true;
+    /**
+     * Called when the dismiss (×) button is clicked.
+     * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
+     */
+    onDismiss: () => void;
+    action?: never;
+};
+
+declare type CardAlertNonDismissible = CardAlertBase & {
+    dismissible?: false;
+    onDismiss?: never;
+    action?: never;
+};
+
+declare type CardAlertProps = CardAlertDismissible | CardAlertWithAction | CardAlertNonDismissible;
+
+declare type CardAlertVariant = (typeof cardAlertVariants)[number];
+
+declare const cardAlertVariants: readonly ["info", "warning", "critical", "positive"];
+
+declare type CardAlertWithAction = CardAlertBase & {
+    dismissible?: never;
+    onDismiss?: never;
+    /** Action button rendered in the alert header. Mutually exclusive with `dismissible`. */
+    action: CardAlertAction;
+};
+
+declare type CardAvatarVariant = AvatarVariant | {
+    type: "emoji";
+    emoji: string;
+} | {
+    type: "file";
+    file: File;
+} | {
+    type: "icon";
+    icon: IconType;
+} | {
+    type: "module";
+    module: ModuleId;
+} | {
+    type: "alert";
+    variant: AlertAvatarProps["type"];
+} | {
+    type: "date";
+    date: Date;
+} | {
+    type: "pulse";
+    firstName: string;
+    lastName: string;
+    src?: string;
+    pulse?: Pulse;
+    onPulseClick: () => void;
+};
+
 declare type CardInternalProps = F0AiInsightCardProps & {
     className?: string;
 };
+
+declare interface CardPrimaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+}
+
+declare interface CardRowConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the card row switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardRowStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
+declare interface CardSecondaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+}
+
+declare interface CardSecondaryLink extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
+    label: string;
+}
 
 export declare interface ChartComputation {
     datasetId: string;
@@ -1539,6 +1826,7 @@ export declare const defaultTranslations: {
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -1566,6 +1854,8 @@ export declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -1635,6 +1925,22 @@ export declare const defaultTranslations: {
         };
         readonly actions: {
             readonly actions: "Actions";
+        };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
         };
         readonly visualizations: {
             readonly table: "Table view";
@@ -1870,6 +2176,14 @@ export declare const defaultTranslations: {
             readonly dismiss: "Dismiss";
         };
         readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
         readonly removeFile: "Remove";
         readonly fileUploadError: "Upload failed";
         readonly fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.";
@@ -2248,6 +2562,26 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
  */
 declare type DistributiveOmit<T, K extends PropertyKey> = T extends unknown ? Omit<T, K> : never;
 
+declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
+
+declare type DropdownItemLabel = {
+    type: "label";
+    text: string;
+};
+
+declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
+    type?: "item";
+    onClick?: () => void;
+    icon?: IconType;
+    description?: string;
+    critical?: boolean;
+    avatar?: AvatarVariant;
+};
+
+declare type DropdownItemSeparator = {
+    type: "separator";
+};
+
 export declare const DropOverlay: ({ visible, onFilesDropped }: DropOverlayProps) => JSX_2.Element;
 
 declare interface DropOverlayProps {
@@ -2453,7 +2787,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -2464,7 +2798,7 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -2502,6 +2836,12 @@ export declare type F0AiChatTextAreaProps = {
     onPendingQuoteChange?: (quote: PendingQuote | null) => void;
     /** File attachment configuration. When omitted, attachments are disabled. */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Voice dictation. When provided, a microphone button is shown: recorded
+     * audio is transcribed and the transcript fills the textarea (the user
+     * reviews and sends it manually). When omitted, the microphone is hidden.
+     */
+    onTranscribe?: TranscribeFn;
     /** Async search used by the @-mention popover. When omitted, mentions are disabled. */
     searchPersons?: (query: string) => Promise<PersonProfile[]>;
     /**
@@ -2536,9 +2876,10 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
-     * When true, the composer adopts the fullscreen layout: the welcome
-     * footer is pushed to the bottom and the disclaimer is hidden so the
-     * footer is the only thing under the textarea.
+     * When true on the welcome screen, the composer adopts the fullscreen
+     * layout: the input slot grows to claim the bottom half (so the textarea
+     * rises toward the vertical center), and the welcome suggestions render
+     * below the textarea with their popover opening downward (instead of above).
      */
     fullscreen?: boolean;
 };
@@ -2636,6 +2977,9 @@ export declare type F0AiMessagesContainerProps = {
     onAssistantMessageRendered?: (message: Message) => void;
     /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
     autoScrollUserIntoView?: boolean;
+    /** Fullscreen welcome layout: pushes the welcome phrase to the bottom of the
+     *  top half so it meets the composer near the vertical center. */
+    fullscreen?: boolean;
     /**
      * Renders the markdown content of user/assistant messages. The connected
      * wrapper provides a CopilotKit + f0-markdown-renderers implementation;
@@ -2996,17 +3340,101 @@ export declare type F0CanvasPanelProps = {
     entities?: Record<string, CanvasEntityDefinition<any>>;
 };
 
+declare interface F0CardRowProps {
+    /**
+     * The primary line of text.
+     */
+    title: string;
+    /**
+     * Optional secondary line shown beneath the title (wraps across multiple
+     * lines when long).
+     */
+    description?: string;
+    /**
+     * Optional avatar rendered at a fixed `lg` size on the left (the size is not
+     * configurable). Accepts any avatar type in the system: person, company, team,
+     * file, flag, icon, emoji, module, alert, date, pulse. Types without a `lg`
+     * variant (date, pulse) render at their intrinsic size.
+     */
+    avatar?: CardAvatarVariant;
+    /**
+     * The primary action button, shown at the trailing edge of the row.
+     */
+    primaryAction?: CardPrimaryAction;
+    /**
+     * Secondary actions (buttons) or a single link, shown before the primary action.
+     */
+    secondaryActions?: CardSecondaryAction[] | CardSecondaryLink;
+    /**
+     * Overflow (⋯) menu actions, rendered as the trailing control of the row.
+     */
+    otherActions?: DropdownItem[];
+    /**
+     * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
+     * instead of the standard actions. Provide either or both.
+     */
+    confirmAction?: CardRowConfirmAction;
+    /**
+     * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
+     */
+    rejectAction?: CardRowConfirmAction;
+    /**
+     * Resolved-state icon shown at the trailing edge in place of any actions — the
+     * outcome of a confirm/reject row, e.g.
+     * `{ icon: Check, variant: "positive", label: "Accepted" }`.
+     * Takes precedence over the action props.
+     */
+    status?: CardRowStatus;
+    /**
+     * Strikes through and dims the title/description, marking the row's subject as
+     * void or closed (e.g. a rejected request). Purely presentational — pair it
+     * with the matching `status` tag at the call site.
+     */
+    inactive?: boolean;
+    /**
+     * Compact layout: tighter padding and smaller controls.
+     */
+    compact?: boolean;
+    /**
+     * Container width at which the actions drop to their own line (below it) vs.
+     * sit inline (at/above it). `never` keeps them inline at every width.
+     * @default "never"
+     */
+    stackAt?: CardRowStackAt;
+    /**
+     * When set, the whole row becomes a link to this href.
+     */
+    link?: string;
+    /**
+     * Stretch to fill the height of its container.
+     */
+    fullHeight?: boolean;
+    /**
+     * Alert banner displayed above the row with a coloured header strip and matching
+     * border. Supports info, warning, critical and positive variants.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
+    /**
+     * Called when the row is clicked.
+     */
+    onClick?: () => void;
+    /**
+     * Disables the full-row overlay link so a parent can manage drag-and-drop while
+     * still allowing click navigation via `onClick`.
+     */
+    disableOverlayLink?: boolean;
+}
+
 /**
- * Animated wrapper that mounts/unmounts the clarifying question panel.
+ * Clarifying question panel — content only, no mount animation.
  *
- * Uses Motion's native `height: "auto"` support — it measures the
- * content internally, so the same transition covers the initial
- * appearance, step changes with a different number of options, and
- * dismissal. No manual ResizeObserver.
+ * The parent slot (F0AiChatTextArea) owns the enter/exit animation so
+ * nested height animations don't conflict. Step-to-step transitions are
+ * still animated internally via F0ClarifyingPanelContent.
  *
- * Props-driven: the entire panel state (current step, navigation,
- * callbacks) lives in `clarifyingQuestion`. No coupling to `useAiChat`
- * — embedders can construct a state object themselves.
+ * When used standalone (e.g. Storybook), wrap in a motion.div with
+ * `overflow-hidden` and `height: 0 → "auto"`.
  */
 export declare const F0ClarifyingPanel: ({ clarifyingQuestion, isSubmitDisabled, }: F0ClarifyingPanelProps) => JSX_2.Element;
 
@@ -3020,30 +3448,51 @@ declare interface F0ClarifyingPanelProps {
     isSubmitDisabled?: boolean;
 }
 
-export declare const F0HILActionConfirmation: ({ text, confirmationText, onConfirm, cancelText, onCancel, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
- * Props for the F0HILActionConfirmation component
+ * Props for the F0HILActionConfirmation component.
+ *
+ * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
+ * (reject) buttons at the trailing edge.
  */
 export declare type F0HILActionConfirmationProps = {
     /**
-     * Optional descriptive text shown above the action buttons
+     * The prompt shown as the row title (e.g. the action awaiting confirmation).
+     * Required — a confirmation without a prompt has no meaning.
      */
-    text?: string;
+    text: string;
     /**
-     * Text displayed on the confirmation button
+     * Optional secondary line shown beneath the title (single line, truncated).
+     */
+    description?: F0CardRowProps["description"];
+    /**
+     * Optional avatar rendered on the left of the row. Accepts any avatar type in
+     * the system (person, company, team, file, icon, emoji, …).
+     */
+    avatar?: F0CardRowProps["avatar"];
+    /**
+     * Container width at which the ✓/✗ actions drop onto their own line instead of
+     * staying inline. Prevents the buttons from overlapping the prompt in narrow
+     * containers. Set to `"never"` to keep them inline at every width.
+     * @default "sm"
+     */
+    stackAt?: F0CardRowProps["stackAt"];
+    /**
+     * Accessible label and tooltip for the confirm (✓) button.
      */
     confirmationText: string;
     /**
-     * Callback fired when the confirmation button is clicked
+     * Callback fired when the confirm button is clicked.
      */
     onConfirm: () => void;
     /**
-     * Text displayed on the cancel button
+     * Accessible label and tooltip for the reject (✗) button.
      */
     cancelText: string;
     /**
-     * Callback fired when the cancel button is clicked
+     * Callback fired when the reject button is clicked.
      */
     onCancel: () => void;
 };
@@ -3054,6 +3503,12 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
+
+declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
+    variant?: ActionLinkVariant;
+    stopPropagation?: boolean;
+    href?: string;
+};
 
 export declare type F0Message = {
     id: string;
@@ -3275,6 +3730,10 @@ declare type FlagAvatarVariant = Extract<AvatarVariant, {
     type: "flag";
 }>;
 
+declare type FontSize = (typeof fontSizes)[number];
+
+declare const fontSizes: readonly ["sm", "md", "lg"];
+
 /**
  * A preset formatting instruction the LLM can specify instead of a
  * real formatter function. The wrapper component maps these to actual
@@ -3391,6 +3850,11 @@ declare type Join<T extends string[], D extends string> = T extends [] ? never :
 declare type Level = (typeof levels)[number];
 
 declare const levels: readonly ["info", "warning", "critical", "positive"];
+
+declare type LinkProps = AnchorHTMLAttributes<HTMLAnchorElement> & {
+    exactMatch?: boolean;
+    disabled?: boolean;
+};
 
 export declare const markdownRenderers: MarkdownTagRenderers;
 
@@ -3571,6 +4035,12 @@ declare const modules: {
     readonly timeoff: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly workflows: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
 };
+
+declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick"> & {
+    label: string;
+} & DataAttributes_2;
+
+declare type NavTarget = HTMLAttributeAnchorTarget;
 
 /**
  * Utility type to extract all possible paths from nested object.
@@ -3795,6 +4265,10 @@ declare type Props_2 = {
     customColor: string;
 });
 
+declare type Pulse = (typeof pulses)[number];
+
+declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
+
 export declare interface RadarComputation {
     datasetId: string;
     seriesColumn: string;
@@ -3992,6 +4466,25 @@ export declare interface ThreadGroup {
     key: DateGroup;
     threads: ChatThread[];
 }
+
+/**
+ * Transcribes a recorded audio blob to text (voice dictation). The returned
+ * promise resolves with the final transcript; `onPartial` delivers
+ * intermediate results for live textarea fill. When omitted from the chat
+ * config, the microphone button is not rendered.
+ */
+declare type TranscribeFn = (audio: Blob, options: TranscribeOptions) => Promise<string>;
+
+declare type TranscribeOptions = {
+    /**
+     * Primary channel for live dictation: fires with the cumulative transcript
+     * as it streams in, so the composer can fill the textarea while the user
+     * speaks. Implementations that don't stream may call it once at the end.
+     */
+    onPartial: (text: string) => void;
+    /** Aborted when the user cancels an in-flight transcription. */
+    signal?: AbortSignal;
+};
 
 declare type TranslationKey = Join<PathsToStringProps<typeof defaultTranslations>, ".">;
 
@@ -4261,10 +4754,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -4272,8 +4763,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
