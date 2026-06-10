@@ -1997,13 +1997,12 @@ const AUDIENCE_PREVIEW_AVATARS = [
   { firstName: "Elena", lastName: "Ruiz" },
 ]
 
-// Step 1 — course type. Chosen at creation; NOT directly editable afterwards
-// (a one-time course only becomes recurring by creating a 2nd group). So settings
-// renders it read-only.
-function CourseTypeField({ values, onUpdate, readOnly = false }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void; readOnly?: boolean }) {
+// Step 1 — course type. Chosen at creation only (not editable afterwards; a
+// one-time course becomes recurring solely by creating a 2nd group). In the
+// overview it's shown read-only in the header metadata.
+function CourseTypeField({ values, onUpdate }: { values: Record<string, unknown>; onUpdate: (field: string, value: unknown) => void }) {
   const courseType = (values.courseType as string) ?? "no-editions"
   const copy = inscripcionCopy.courseType
-  const active = courseType === "with-editions" ? copy.withEditions : copy.noEditions
   return (
     <div className="flex flex-col gap-2">
       {/* Exact F0 input-field label style (matches the DS <label> markup) so
@@ -2011,28 +2010,20 @@ function CourseTypeField({ values, onUpdate, readOnly = false }: { values: Recor
       <span className="text-base font-medium leading-normal text-f1-foreground-secondary">
         {copy.label}
       </span>
-      {readOnly ? (
-        // Settings: the type isn't editable here — show the current type as a value.
-        <div className="flex flex-col gap-0.5">
-          <F0Text variant="body" content={active.title} />
-          <F0Text variant="description" content={active.description} />
-        </div>
-      ) : (
-        // Native F0 CardSelectableContainer in grouped mode: one bordered container
-        // with the two types as rows (radio + title + description) and a divider
-        // between — the Factorial pattern for picking one config, compact (not the
-        // big floating cards) with both descriptions visible.
-        <CardSelectableContainer
-          grouped
-          label={copy.label}
-          value={courseType}
-          onChange={(val) => onUpdate("courseType", val ?? "no-editions")}
-          items={[
-            { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
-            { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
-          ]}
-        />
-      )}
+      {/* Native F0 CardSelectableContainer in grouped mode: one bordered container
+          with the two types as rows (radio + title + description) and a divider
+          between — the Factorial pattern for picking one config, compact (not the
+          big floating cards) with both descriptions visible. */}
+      <CardSelectableContainer
+        grouped
+        label={copy.label}
+        value={courseType}
+        onChange={(val) => onUpdate("courseType", val ?? "no-editions")}
+        items={[
+          { value: "no-editions", title: copy.noEditions.title, description: copy.noEditions.description },
+          { value: "with-editions", title: copy.withEditions.title, description: copy.withEditions.description },
+        ]}
+      />
     </div>
   )
 }
@@ -4129,7 +4120,7 @@ function EditCourseSettings({
           {/* Right content — capped width so the form reads as a contained block
               instead of stretching to the edge of the page. */}
           <div className="flex min-w-0 max-w-2xl flex-1 flex-col gap-8 pb-20">
-            {activeSection === "basic" && <EditCourseBasicSection course={course} values={values} onUpdate={updateValue} />}
+            {activeSection === "basic" && <EditCourseBasicSection course={course} />}
             {activeSection === "admin" && <EditCourseAdminSection course={course} />}
             {activeSection === "completion" && <EditCourseCompletionSection />}
             {activeSection === "enrollment" && (
@@ -4162,15 +4153,7 @@ function EditCourseSettings({
   )
 }
 
-function EditCourseBasicSection({
-  course,
-  values,
-  onUpdate,
-}: {
-  course: ExactCourse
-  values: Record<string, unknown>
-  onUpdate: (field: string, value: unknown) => void
-}) {
+function EditCourseBasicSection({ course }: { course: ExactCourse }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
@@ -4184,7 +4167,9 @@ function EditCourseBasicSection({
           <F0Text content={course.name} variant="body" />
         </div>
       </div>
-      <CourseTypeField values={values} onUpdate={onUpdate} readOnly />
+      {/* Course type is not editable in settings (it's a creation-time choice that
+          only changes by creating a 2nd group). It's shown read-only in the
+          overview header metadata instead. */}
       <div className="flex flex-col gap-2">
         <F0Text content="Thumbnail" variant="label" />
         <F0Text content="Add an image to show as the course thumbnail in the Catalogue." variant="small" />
@@ -4362,6 +4347,10 @@ function CourseDetail({
             title={course.name}
             status={{ label: "Status", text: "Published", variant: "positive" }}
             metadata={[
+              {
+                label: "Course type",
+                value: { type: "text", content: course.courseType === "with-editions" ? "Recurring" : "One-time" },
+              },
               { label: "Type", value: { type: "text", content: "Internal" } },
               { label: "Total duration", value: { type: "text", content: course.duration } },
               {
