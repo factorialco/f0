@@ -33,18 +33,24 @@ export const Default: Story = {
         items: [
           { label: "Home", icon: Icons.Home, href: "/", exactMatch: true },
           {
+            label: "Discover Factorial",
+            icon: Icons.Sparkles,
+            href: "/discover",
+            isNew: true,
+          },
+          {
+            label: "Notifications",
+            icon: Icons.Bell,
+            href: "/notifications",
+            badge: 3,
+          },
+          {
             label: "Inbox",
             icon: Icons.Envelope,
             href: "/inbox",
             badge: 6,
             isNew: true,
             "data-test": "foo",
-          },
-          {
-            label: "Discover Factorial",
-            icon: Icons.Sparkles,
-            href: "/discover",
-            isNew: true,
           },
         ],
         isRoot: true,
