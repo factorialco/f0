@@ -37,6 +37,7 @@ export const Default: Story = {
             icon: Icons.Envelope,
             href: "/inbox",
             badge: 6,
+            isNew: true,
             "data-test": "foo",
           },
           {
