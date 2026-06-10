@@ -2140,12 +2140,15 @@ function WizardAudienceFilterPicker({
             background="primary"
           >
             <div className="flex items-center gap-3">
+              {/* Show at most `total` avatars (capped at 4) so the stack never
+                  implies more people than actually match — e.g. "1 person matches"
+                  shows a single avatar, not the full decorative set. */}
               <F0AvatarList
                 size="sm"
                 type="person"
-                avatars={AUDIENCE_PREVIEW_AVATARS}
+                avatars={AUDIENCE_PREVIEW_AVATARS.slice(0, Math.min(total, 4))}
                 max={4}
-                remainingCount={Math.max(total - 4, 0)}
+                remainingCount={total > 4 ? total - 4 : undefined}
               />
               <F0Text variant="body" content={peopleMatchPhrase(total)} />
             </div>
