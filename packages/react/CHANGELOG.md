@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.56.0](https://github.com/factorialco/f0/compare/f0-react-v2.55.3...f0-react-v2.56.0) (2026-06-10)
+
+
+### Features
+
+* **datasource:** definition-fed collection item navigation with PageHeader wiring ([#4399](https://github.com/factorialco/f0/issues/4399)) ([e2dd3ea](https://github.com/factorialco/f0/commit/e2dd3ea68bbc7b6f520b9e6529a2428294554c56))
+
 ## [2.55.3](https://github.com/factorialco/f0/compare/f0-react-v2.55.2...f0-react-v2.55.3) (2026-06-10)
 
 
