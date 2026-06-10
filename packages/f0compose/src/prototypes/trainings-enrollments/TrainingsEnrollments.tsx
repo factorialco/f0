@@ -1950,8 +1950,10 @@ const inscripcionCopy = {
   // the count of affected people lives here (once), not in a separate alert.
   appliesTo: {
     changeLabel: (added: string) => `You added ${added}. Who should this apply to?`,
-    changeHint: (count: number, added: string) =>
-      `${count} ${count === 1 ? "person" : "people"} in ${added} ${count === 1 ? "matches" : "match"} but ${count === 1 ? "isn't" : "aren't"} enrolled yet.`,
+    // Count = people matching the FULL criteria now (AND across facets), not the
+    // added facet alone — so it stays truthful when the combination narrows.
+    changeHint: (count: number) =>
+      `${count} ${count === 1 ? "person" : "people"} already ${count === 1 ? "matches" : "match"} but ${count === 1 ? "isn't" : "aren't"} enrolled yet.`,
     newOnly: "New people only",
     newOnlyDescription: "From now on, as people match.",
     addExisting: (count: number) => `Add the ${count} too`,
@@ -2391,13 +2393,6 @@ function filterStateAdded(base: AudienceFilterState, next: AudienceFilterState):
 function filterStateRemoved(base: AudienceFilterState, next: AudienceFilterState): AudienceCriterion[] {
   const nextKeys = new Set(filterStateCriteria(next).map((c) => `${c.key}::${c.value}`))
   return filterStateCriteria(base).filter((c) => !nextKeys.has(`${c.key}::${c.value}`))
-}
-// Rebuild a FiltersState from a flat criteria list, so we can count the people a
-// subset of criteria (e.g. just the added ones) matches.
-function audienceStateFromCriteria(criteria: AudienceCriterion[]): AudienceFilterState {
-  const state: AudienceFilterState = {}
-  for (const c of criteria) state[c.key] = [...(state[c.key] ?? []), c.value]
-  return state
 }
 // "1 person matches" / "N people match" — correct singular/plural.
 function peopleMatchPhrase(count: number): string {
@@ -3940,7 +3935,10 @@ function EditCourseEnrollmentSection({
   const removed = filterStateRemoved(originalAudienceCriteria, criteria)
   const addedLabels = added.map((c) => c.label).join(", ")
   const removedLabels = removed.map((c) => c.label).join(", ")
-  const addedCount = filterStatePeopleMatch(audienceStateFromCriteria(added))
+  // People who match the FULL current criteria (AND across facets). The applies-to
+  // question only makes sense if the change actually leaves people to enroll — if
+  // the combination matches no one, there's nothing to apply to.
+  const matchCount = filterStateSummary(criteria).matchCount
 
   return (
     <div className="flex flex-col gap-6">
@@ -3970,14 +3968,16 @@ function EditCourseEnrollmentSection({
           />
 
           {/* Consequence of a criterion change, attached right under the criterion.
-              Added → scope question ("applies to"). Removed → reassurance note. */}
-          {added.length > 0 && (
+              Added → scope question ("applies to"), but only if the new combination
+              actually matches people (if it narrows to zero, there's nothing to add).
+              Removed → reassurance note. */}
+          {added.length > 0 && matchCount > 0 && (
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-0.5">
                 <F0Text variant="label" content={inscripcionCopy.appliesTo.changeLabel(addedLabels)} />
                 <F0Text
                   variant="description"
-                  content={inscripcionCopy.appliesTo.changeHint(addedCount, addedLabels)}
+                  content={inscripcionCopy.appliesTo.changeHint(matchCount)}
                 />
               </div>
               {/* Same native grouped CardSelectable as Course type, for consistency. */}
@@ -3994,8 +3994,8 @@ function EditCourseEnrollmentSection({
                   },
                   {
                     value: "everyone",
-                    title: inscripcionCopy.appliesTo.addExisting(addedCount),
-                    description: inscripcionCopy.appliesTo.addExistingDescription(addedCount),
+                    title: inscripcionCopy.appliesTo.addExisting(matchCount),
+                    description: inscripcionCopy.appliesTo.addExistingDescription(matchCount),
                   },
                 ]}
               />
