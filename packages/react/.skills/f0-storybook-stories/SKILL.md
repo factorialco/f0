@@ -90,7 +90,6 @@ Reference the component's exported const array — don't hardcode the options:
 
 ```tsx
 import { buttonSizes, buttonVariants } from "../F0Example"
-
 argTypes: {
   size: {
     control: "select",
@@ -100,23 +99,26 @@ argTypes: {
 }
 ```
 
-### Render-only stories must include `args`
+### Render-only stories with required props
 
-Stories that use a custom `render` function without inheriting args from the meta
-**must** include an explicit `args` property to satisfy the `Story` type constraint.
-Omitting `args` causes a TypeScript error when the meta has required props.
+When a story uses a custom `render` function and ignores the meta's args, the
+`Story` type still requires `args` to be present if the component has required
+props. In that case, provide a minimal `args` object so the story compiles —
+even if `render` does not consume them. (Stories that consume args from the
+meta or have no required component props don't need this.)
 
 ```tsx
-// WRONG — TS error: Property 'args' is missing
+// Triggers TS error only if F0Example has required props that
+// the meta does not already supply via args.
 export const Variants: Story = {
-  tags: ["!dev"],
+  tags: ["no-sidebar"],
   render: () => <div>...</div>,
 }
 
-// CORRECT — provide required args even if render ignores them
+// Provide minimal args to satisfy the required props.
 export const Variants: Story = {
-  tags: ["!dev"],
-  args: { items: [], onClick: () => {} }, // satisfy required props from Meta
+  tags: ["no-sidebar"],
+  args: { items: [], onClick: () => {} },
   render: () => <div>...</div>,
 }
 ```

@@ -20,6 +20,7 @@ Run after completing **any** of:
 **Skip when:**
 
 - The user explicitly says to skip checks
+- The change is documentation-only (`.md` files or code comments — no `.ts`/`.tsx`/`.mdx` changed)
 - The change is icon generation or other auto-generated files
 
 > **Note:** `.mdx` files are NOT skip candidates — they go through `oxfmt` formatting and must pass `format:check`.
@@ -220,7 +221,7 @@ source and its corresponding `__stories__/` directory and verify:
 ### Structural checks (conventions)
 1. A `.stories.tsx` file exists for every changed component
 2. Meta uses `satisfies Meta<typeof Component>` (not `as Meta`)
-3. Tags include `["autodocs", "stable"]` or `["autodocs", "experimental"]`
+3. Tags include `["stable"]` or `["experimental"]`, plus `"!autodocs"` whenever a manual MDX page exists (autodocs is enabled globally in `.storybook/preview.tsx`)
 4. A `Snapshot` story exists with `parameters: withSnapshot({})`
 5. ArgTypes for union props reference the component's const arrays
 
