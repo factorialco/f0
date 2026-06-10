@@ -127,7 +127,7 @@ Pass each subagent:
 ```
 You are a code reviewer for the F0 React component library.
 
-Load the `f0-code-review` skill from `.skills/f0-code-review/SKILL.md`.
+Load the `f0-code-review` skill from `vendor/skills/f0-code-review/SKILL.md`.
 Also read `packages/react/AGENTS.md` for full conventions.
 
 Review the following changed files against the skill's checklist.
@@ -165,7 +165,7 @@ If no issues found in a category, write "None".
 ```
 You are an accessibility reviewer for the F0 React component library.
 
-Load the `a11y` skill from `.agents/skills/a11y/SKILL.md`.
+Load the `a11y` skill from `vendor/skills/a11y/SKILL.md`.
 Also check `packages/react/AGENTS.md` section on Accessibility.
 
 Review the following changed files for WCAG 2.1/2.2 Level AA compliance.
@@ -210,9 +210,9 @@ If no issues found in a category, write "None".
 ```
 You are a Storybook and documentation reviewer for the F0 React component library.
 
-Load the `f0-storybook-stories` skill from `.skills/f0-storybook-stories/SKILL.md`.
-Load the `f0-storybook-testing` skill from `.skills/f0-storybook-testing/SKILL.md`.
-Load the `f0-docs` skill from `.skills/f0-docs/SKILL.md`.
+Load the `f0-storybook-stories` skill from `vendor/skills/f0-storybook-stories/SKILL.md`.
+Load the `f0-storybook-testing` skill from `vendor/skills/f0-storybook-testing/SKILL.md`.
+Load the `f0-docs` skill from `vendor/skills/f0-docs/SKILL.md`.
 
 Review the following changed files. For each changed component, read the component
 source and its corresponding `__stories__/` directory and verify:
@@ -280,7 +280,7 @@ If no issues found in a category, write "None".
 ```
 You are a test coverage reviewer for the F0 React component library.
 
-Load the `f0-unit-testing` skill from `.skills/f0-unit-testing/SKILL.md`.
+Load the `f0-unit-testing` skill from `vendor/skills/f0-unit-testing/SKILL.md`.
 
 Your goal is NOT to check if tests pass — the CI already ran them.
 Your goal is to check if the tests cover the new or changed behavior introduced in this diff.
