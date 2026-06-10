@@ -15,6 +15,7 @@ import {
   F0Icon,
   F0Link,
   F0Select,
+  F0TagAlert,
   F0TagRaw,
   F0Text,
   F0WizardForm,
@@ -6252,11 +6253,11 @@ function getGroupActionDetail(dialog: GroupActionDialogId, groupName: string): T
 
 // Enrollment status in the course overview sidebar. Read-only, styled like the
 // other sidebar fields (bold label + value). When people are stuck in "pending
-// group assignment" it surfaces a warning F0Alert — this is the ONLY surface that
-// alerts the training manager (there's no notification yet), so the count and the
-// next action ("Assign to a group") need to be unmissable. Pending people can come
-// from automatic enrollment, approved requests or manual adds; the copy explains
-// the situation without breaking it down per source.
+// group assignment" it surfaces a compact warning F0TagAlert — low-noise (the
+// overview already has a top alert for completion settings) but still signals the
+// training manager that something needs attention (there's no notification yet).
+// The whole pill is clickable and jumps to the Participants list pre-filtered to
+// "Pending group assignment", where the TM can assign people to a group.
 function EnrollmentSidebarBlock({
   course,
   onViewPending,
@@ -6271,16 +6272,14 @@ function EnrollmentSidebarBlock({
 
   const pendingAlert =
     pending > 0 ? (
-      <F0Alert
-        variant="warning"
-        title={`${pending} ${pending === 1 ? "person" : "people"} pending group assignment`}
-        description={
-          rule
-            ? "They matched the criteria, requested to join or were added manually, but aren't in a training group yet. Assign them to a group so they can start."
-            : "They requested to join or were added manually, but aren't in a training group yet. Assign them to a group so they can start."
-        }
-        action={{ label: "Assign to a group", onClick: () => onViewPending?.() }}
-      />
+      <button
+        type="button"
+        onClick={() => onViewPending?.()}
+        className="w-fit cursor-pointer"
+        aria-label={`${pending} pending group assignment — open in participants`}
+      >
+        <F0TagAlert level="warning" text={`${pending} pending group assignment`} />
+      </button>
     ) : null
 
   // Manual: no automatic rule (also covers "just created, not configured").
