@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.55.3](https://github.com/factorialco/f0/compare/f0-react-v2.55.2...f0-react-v2.55.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0Form:** resolve defaultValues function at mount when defaultValuesParamsSchema is set ([#4398](https://github.com/factorialco/f0/issues/4398)) ([1a12744](https://github.com/factorialco/f0/commit/1a12744842d2aff094767db1290b311450bb21d9))
+
 ## [2.55.2](https://github.com/factorialco/f0/compare/f0-react-v2.55.1...f0-react-v2.55.2) (2026-06-10)
 
 
