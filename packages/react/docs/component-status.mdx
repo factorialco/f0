@@ -10,6 +10,8 @@ Overview of all F0 components, their API stability, and documentation coverage.
 
 For the definition of each status level, see the [Maturity Model](/?path=/docs/components-maturity--docs) page.
 
+> **Looking for a richer view?** An expanded dashboard with adoption, age, test coverage, and promotion-readiness signals may be added in the future. For now, this table is generated nightly from the codebase.
+
 <Unstyled>
   <ComponentStatusTable />
 </Unstyled>
@@ -18,13 +20,15 @@ For the definition of each status level, see the [Maturity Model](/?path=/docs/c
 
 ## How to read this table
 
-| Column         | Description                                                                                                                                                     |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Component**  | Component name as it appears in Storybook                                                                                                                       |
-| **Zone**       | Source folder: `components` (stable public), `patterns` (composite), `sds` (satellite design systems), `kits`, `layouts`, `experimental` (legacy), `deprecated` |
-| **API Status** | Derived from the `tags` array in the story file. If no status tag is set, it shows as "No tag"                                                                  |
-| **Unit Tests** | Whether a `__tests__/` folder or `.test.tsx` file exists near the component                                                                                     |
-| **MDX Docs**   | Whether an `.mdx` documentation file exists alongside the stories                                                                                               |
+| Column         | Description                                                                                                                                            |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Component**  | Component name as it appears in Storybook                                                                                                              |
+| **Zone**       | Source folder: `components` (stable public), `patterns` (composite), `sds` (satellite design systems), `kits`, `layouts`, `experimental`, `deprecated` |
+| **API Status** | Derived from the `tags` array in the story file. If no status tag is set, it shows as "No tag"                                                         |
+| **Unit Tests** | Whether a `__tests__/` folder or `.test.tsx` file exists near the component                                                                            |
+| **MDX Docs**   | Whether an `.mdx` documentation file exists alongside the stories                                                                                      |
+
+> The **Internal** badge in the API Status column refers to components in `src/ui/` (Radix wrappers used only inside F0). It is **not** a maturity level — it's a folder convention. The three maturity levels are **Experimental**, **Stable**, and **Deprecated** (see [Component Maturity](/?path=/docs/components-maturity--docs)).
 
 ## How to update a component's status
 
@@ -32,7 +36,7 @@ Edit the `tags` array in the component's `.stories.tsx` file:
 
 ```tsx
 const meta: Meta<typeof F0MyComponent> = {
-  tags: ["autodocs", "stable"], // or "experimental", "deprecated", "internal"
+  tags: ["autodocs", "stable"], // or "experimental", "deprecated"
 }
 ```
 

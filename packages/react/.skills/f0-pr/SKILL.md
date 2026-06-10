@@ -55,6 +55,25 @@ chore(storybook): upgrade to v8
 refactor(F0Form): extract field validation hook
 ```
 
+### Lifecycle PR types
+
+For PRs that move a component along the F0 lifecycle, use these conventions. These map 1:1 to the "Type of change" checkboxes in `.github/PULL_REQUEST_TEMPLATE.md`.
+
+| PR type                  | Title example                                                | Notes                                                                                                                                                                                          |
+| ------------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New component            | `feat(F0Name): add experimental component (#1234)`           | Lands in `src/experimental/`. Link the proposal issue.                                                                                                                                         |
+| Component enhancement    | `feat(F0Name): add loading state`                            | Existing component, no breaking change. Includes variants of an existing component.                                                                                                            |
+| New pattern              | `feat(F0PatternName): add experimental pattern (#1234)`      | Composition of existing F0 components. Lands in `src/experimental/patterns/`. Link the proposal issue.                                                                                         |
+| Pattern variant          | `feat(F0PatternName): add bulk-actions variant`              | Variant or improvement of an existing pattern, no breaking change.                                                                                                                             |
+| Promotion                | `feat(F0Name): promote to stable (#5678)`                    | Plain `feat:` — promotion is not a breaking change (public import path unchanged). Document Phase 4 evidence in the body. Foundations only.                                                    |
+| Deprecation              | `chore(F0Name): deprecate, target removal in 2.0`            | Adds `@deprecated` + `@removeIn` + `@migration`. Update story tag to `"deprecated"`.                                                                                                            |
+| Removal                  | `feat(F0Name)!: remove deprecated component`                 | Deletes a component past its `@removeIn` version. The `!` marks it as a breaking change.                                                                                                       |
+| Bug fix                  | `fix(F0Name): respect disabled prop while loading`           | Corrects incorrect behavior. Include a regression test.                                                                                                                                        |
+| Documentation only       | `docs(F0Name): clarify slot composition`                     | MDX, `AGENTS.md`, skills, or other docs. No source changes. Format check + tsc not required.                                                                                                   |
+| Refactor / internal      | `refactor(F0Name): extract size variants into cva`           | No public API change, no behavior change. Existing tests must still pass unchanged. In stable zones, Foundations approval required; in experimental, the owning team can iterate freely.       |
+
+See `packages/react/docs/definition-of-done.mdx` for full lifecycle criteria and `packages/react/docs/contributions.mdx` for the contributor entry point.
+
 ## Step 4 — Ask for Missing Context
 
 Before writing the body, ask the user about anything not inferable from the diff:

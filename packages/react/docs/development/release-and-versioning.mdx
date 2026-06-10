@@ -1,3 +1,7 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Lifecycle/Release and Versioning" />
+
 # Versioning
 
 This project is following the [Semantic Versioning](https://semver.org/)
@@ -103,3 +107,46 @@ pnpm i github:factorialco/f0#COMMIT_SHA
 
 Visit https://github.com/factorialco/f0/branches/all?query=npm%2Falpha to get
 the list of the alpha branches and the commits
+
+---
+
+## Deprecation & Removal policy
+
+Components and props in F0 are removed in two stages: **deprecation** (mark as obsolete, keep working) and **removal** (delete the code). This policy makes the timeline predictable for consumers.
+
+### Deprecating a component or prop
+
+Add three JSDoc tags above the export. **All three are required.**
+
+```ts
+/**
+ * @deprecated Use F0NewComponent instead.
+ * @removeIn 2.0.0
+ * @migration https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/migrations/f0-old-to-new.md
+ */
+export const F0OldComponent = ...
+```
+
+| Tag           | Purpose                                                                              |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `@deprecated` | One-line replacement guidance. Triggers IDE warnings for consumers.                  |
+| `@removeIn`   | Target version when the code will be deleted. Use a future major version.            |
+| `@migration`  | Link to a migration guide explaining how to switch. Required even for trivial cases. |
+
+For deprecated components, also update the story tag to `deprecated`:
+
+```ts
+tags: ["autodocs", "deprecated"]
+```
+
+### Removal SLA
+
+- **Minimum 1 quarter (≥90 days)** between deprecation and removal.
+- Removal happens in the version declared in `@removeIn`.
+- Foundations runs a **quarterly cleanup** to delete components whose `@removeIn` version has shipped.
+
+### Why this policy
+
+F0 currently has 60+ accumulated `@deprecated` markers with no removal policy, because the project never bumps the major version. This policy commits Foundations to either bump the major version on schedule or extend `@removeIn` explicitly — never silent perpetual deprecation.
+
+For the full lifecycle (proposal → stable → deprecated → removed), see the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).

@@ -1,0 +1,137 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+
+<Meta title="Lifecycle/Definition of Done" />
+
+# Definition of Done
+
+This is the **technical contract** for an F0 component. Every component, regardless of who builds it, must satisfy these criteria to enter and stay at each maturity level. It is the source of truth referenced by the contribution and promotion skills, the design review, and the quality gate.
+
+For the human entry-point and "where do I start", see [Contributions](/?path=/docs/lifecycle-how-to-contribute--docs).
+
+---
+
+## Lifecycle phases
+
+| Phase            | Owner                  | Output                                                  |
+| ---------------- | ---------------------- | ------------------------------------------------------- |
+| 1. Problem       | Proposer               | GitHub issue + Foundations triage decision              |
+| 2. Design        | Proposer + Foundations | Figma design + API draft + design review                |
+| 3. Build         | Proposer's team        | Component in `experimental/` with stories, tests, docs  |
+| 4. Real use      | Proposer's team        | Adoption by ≥3 product teams in production              |
+| 5. Promote       | Foundations            | Component moved to `components/` (or other stable zone) |
+
+---
+
+## Phase 1 — Problem
+
+**Entry:** anyone identifies a recurring UI need.
+
+**Exit (DoD):**
+
+- A [Component proposal issue](https://github.com/factorialco/factorial-one/issues/new?template=component-proposal.yml) is open.
+- Foundations has triaged it (weekly cadence) with one of:
+  - `accepted` — fits F0; proceed to design.
+  - `accepted-as-domain` — valid need but belongs in a satellite design system (`sds/<area>/`), not core F0.
+  - `needs-info` — proposer must clarify before re-triage.
+  - `rejected` — does not fit F0 strategy; reason documented in the issue.
+
+---
+
+## Phase 2 — Design
+
+**Entry:** issue is `accepted` or `accepted-as-domain`.
+
+**Exit (DoD):**
+
+- Figma design exists and is linked from the issue.
+- A draft API (props, variants, slots) is documented in the issue.
+- A **design review** has been completed (see [Design Review](/?path=/docs/lifecycle-design-review--docs)) and all blocking comments are resolved.
+
+---
+
+## Phase 3 — Build
+
+**Entry:** design review approved.
+
+**Exit (DoD):**
+
+- Component lives in `src/experimental/<Category>/F0Name/` (or `src/sds/<area>/` for domain). See the [Where it goes](/?path=/docs/lifecycle-where-it-goes--docs) page to confirm the right subfolder by intended destination.
+- Story file with `tags: ["autodocs", "experimental"]`.
+- Unit tests (Vitest) cover the public API.
+- Storybook play function covers the primary user flow.
+- Axe a11y test passes.
+- MDX documentation reaches at least the **Acceptable** tier (see [`f0-docs`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-docs/SKILL.md)).
+- `f0-quality-gate` skill passes (typecheck, lint, format, tests).
+- PR merged.
+
+---
+
+## Phase 4 — Real use
+
+**Entry:** component released as `experimental` for at least one F0 version.
+
+**Exit (DoD) — two axes + re-confirmation:**
+
+**Demand axis (must hit all):**
+
+- Used by **≥3 product teams** in production (verified via cross-repo search in `factorialco` GitHub org).
+- No "would you remove this?" pushback from consumers in the last 30 days.
+
+**Maturity axis (must hit all):**
+
+- **No breaking changes for ≥60 days.**
+- **Zero open critical or high-severity bugs.**
+- `f0-quality-gate` passes including extended subagent reviews (a11y, design tokens, dark mode).
+- Component owner declares the API stable in the promotion issue.
+
+**Foundations re-confirmation:**
+
+- Foundations team explicitly approves promotion (no auto-promotion).
+
+> There is **no time minimum** beyond the 60-day no-breaking-changes window. A widely-adopted component can promote in 2 months; a niche one may stay experimental for a year.
+
+---
+
+## Phase 5 — Promote
+
+**Entry:** Phase 4 DoD met.
+
+**Exit (DoD):**
+
+- Component moved to `src/components/` (or `patterns/`, `kits/`, `layouts/`, `hooks/`) following the [`f0-experimental-component-migration`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-experimental-component-migration/SKILL.md) skill.
+- Story `tags` updated to `["autodocs", "stable"]`.
+- MDX docs at **Good** tier minimum (Gold encouraged).
+- Ownership transferred to Foundations in `CODEOWNERS`.
+- Promotion announced in `#f0` Slack and changelog.
+
+**SLA:** an F0 designer + Foundations engineer respond to a promotion request within **2 weeks**. We aim to reduce this once an integrated components dashboard and end-to-end automation of DoD criteria (≥3 teams, no breaking changes, no critical bugs) are in place.
+
+---
+
+## Maturity levels
+
+Three levels apply to every F0 component:
+
+| Level            | API stability                 | Owner        | Folder                                 |
+| ---------------- | ----------------------------- | ------------ | -------------------------------------- |
+| **Experimental** | May change                    | Creator team | `src/experimental/`, `src/sds/<area>/` |
+| **Stable**       | Backwards-compat only         | Foundations  | `src/components/`, `patterns/`, etc.   |
+| **Deprecated**   | Frozen, scheduled for removal | Owner        | Anywhere; flagged in JSDoc             |
+
+> `internal` (the Storybook tag and the `src/ui/` folder) is **not** a maturity level. See [Component Maturity](/?path=/docs/lifecycle-components-maturity--docs).
+
+---
+
+## Deprecation
+
+To deprecate, add three JSDoc tags above the export:
+
+```ts
+/**
+ * @deprecated Use F0NewComponent instead.
+ * @removeIn 2.0.0
+ * @migration https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/migrations/f0-old-to-new.md
+ */
+```
+
+Removal: minimum 1 quarter (≥90 days) after deprecation. Full policy: [Deprecation & Removal](/?path=/docs/lifecycle-release-and-versioning--docs).

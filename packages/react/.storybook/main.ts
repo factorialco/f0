@@ -65,7 +65,7 @@ const config: StorybookConfig = {
     },
     {
       directory: "../src/ui",
-      titlePrefix: "🔒 Internal",
+      titlePrefix: "UI Wrappers",
     },
     ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
