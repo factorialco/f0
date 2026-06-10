@@ -12,7 +12,7 @@ import { DataCollectionStorage } from "./types"
 
 /**
  * Every data collection URL param shares this prefix, so each filter is its own
- * readable param — e.g. `?dc_department=Sales&dc_search=ada&dc_view=kanban`
+ * readable param — e.g. `?dc_department=Sales&dc_search=ada&dc_visualization=kanban`
  * instead of a single JSON blob. Params are not scoped to a collection id, so
  * this assumes a single URL-synced collection per page.
  */
@@ -28,9 +28,11 @@ export const DATA_COLLECTION_URL_PARAMS = {
   search: "dc_search",
   sortings: "dc_sort",
   /** Active visualization type/key, e.g. `table` (omitted for the default one). */
-  visualization: "dc_view",
+  visualization: "dc_visualization",
   /** Current page (1-indexed; omitted for the first page). */
   page: "dc_page",
+  /** Selected view id (omitted when no view is selected). */
+  preset: "dc_view",
 } as const
 
 /** Separator for range-style values (number / date ranges): `from..to`. */
@@ -84,6 +86,8 @@ export type DataCollectionUrlState<
   visualization?: string
   /** Current page (1-indexed). Not part of persisted storage — URL only. */
   page?: number
+  /** Selected preset id (absent when no preset is selected). URL only. */
+  preset?: string
 }
 
 /** How {@link syncDataCollectionUrlParams} should update the browser history. */
@@ -308,6 +312,11 @@ export const parseDataCollectionUrlParams = <
     if (Number.isInteger(page) && page >= 1) state.page = page
   }
 
+  if (params.has(DATA_COLLECTION_URL_PARAMS.preset)) {
+    const preset = params.get(DATA_COLLECTION_URL_PARAMS.preset)
+    if (preset) state.preset = preset
+  }
+
   if (filtersDefinition) {
     const filters: Record<string, unknown> = {}
     let hasFilters = false
@@ -387,6 +396,9 @@ const writeStateToParams = <
   if (state.page && state.page > 1) {
     params.set(DATA_COLLECTION_URL_PARAMS.page, String(state.page))
   }
+  if (state.preset) {
+    params.set(DATA_COLLECTION_URL_PARAMS.preset, state.preset)
+  }
 }
 
 const hasActiveState = <
@@ -398,6 +410,7 @@ const hasActiveState = <
   !!state.sortings ||
   !!state.visualization ||
   (state.page !== undefined && state.page > 1) ||
+  !!state.preset ||
   (!!state.filters &&
     Object.values(state.filters).some(isUrlSerializableFilter))
 

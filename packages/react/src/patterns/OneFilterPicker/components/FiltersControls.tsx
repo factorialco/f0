@@ -17,6 +17,7 @@ import { getFilterType } from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
 import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
+import { getActiveFiltersValue } from "../internal/getActiveFiltersValue"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
@@ -107,7 +108,9 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   }
 
   const handleApplyFilters = () => {
-    onChange(localFiltersValue)
+    // Emit only active filters so a cleared set is applied as `{}` (unfiltered),
+    // not `{ key: emptyValue }` which could make the data source return nothing.
+    onChange(getActiveFiltersValue(filters, localFiltersValue, i18n))
     onOpenChange(false)
   }
 
@@ -119,7 +122,7 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     if (selectedFilterKey) {
       setSelectedFilterKey(null)
     } else {
-      onChange(localFiltersValue)
+      onChange(getActiveFiltersValue(filters, localFiltersValue, i18n))
       onOpenChange(false)
     }
   }

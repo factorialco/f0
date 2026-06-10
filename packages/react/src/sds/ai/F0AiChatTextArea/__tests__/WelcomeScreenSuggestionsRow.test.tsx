@@ -119,6 +119,39 @@ describe("WelcomeScreenSuggestionsRow", () => {
     expect(onItemHover).toHaveBeenLastCalledWith(null)
   })
 
+  it("opens the popover above the trigger by default", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    const item = await screen.findByRole("button", {
+      name: /april leave and overtime/i,
+    })
+    expect(item.closest("[data-side]")).toHaveAttribute("data-side", "top")
+  })
+
+  it("opens the popover below the trigger when side is bottom", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+        side="bottom"
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    const item = await screen.findByRole("button", {
+      name: /april leave and overtime/i,
+    })
+    expect(item.closest("[data-side]")).toHaveAttribute("data-side", "bottom")
+  })
+
   it("switches popover content when another group is opened", async () => {
     const user = userEvent.setup()
     zeroRender(

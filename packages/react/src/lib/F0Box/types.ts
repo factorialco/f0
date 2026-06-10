@@ -304,4 +304,4 @@ export type ZIndexToken = "auto" | "0" | "10" | "20" | "30" | "40" | "50"
 /** Border style */
 export type BorderStyleToken = "solid" | "dashed" | "dotted" | "double" | "none"
 
-export type BoxShadowToken = "none" | "md" | "lg" | "xl"
+export type BoxShadowToken = "none" | "sm" | "md" | "lg" | "xl"

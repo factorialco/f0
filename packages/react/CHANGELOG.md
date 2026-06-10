@@ -1,5 +1,97 @@
 # Changelog
 
+## [2.55.1](https://github.com/factorialco/f0/compare/f0-react-v2.55.0...f0-react-v2.55.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** auto-grow rows for loaded content ([#4328](https://github.com/factorialco/f0/issues/4328)) ([b17e937](https://github.com/factorialco/f0/commit/b17e937ddf7077d4358ec3cb85527d78a5554f70))
+
+## [2.55.0](https://github.com/factorialco/f0/compare/f0-react-v2.54.0...f0-react-v2.55.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 6/6:** F0Wizard/F0WizardForm size prop + width deprecation (non-breaking) ([#4368](https://github.com/factorialco/f0/issues/4368)) ([7a948f2](https://github.com/factorialco/f0/commit/7a948f24d849bca76d7ae1ecb9f8db4a52f49792))
+
+## [2.54.0](https://github.com/factorialco/f0/compare/f0-react-v2.53.0...f0-react-v2.54.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 5/6:** imperative provider + useDialog/useDrawer (additive) ([#4367](https://github.com/factorialco/f0/issues/4367)) ([5059cbe](https://github.com/factorialco/f0/commit/5059cbebc9e683983b80c217d4b18e4fd5379cf4))
+
+## [2.53.0](https://github.com/factorialco/f0/compare/f0-react-v2.52.0...f0-react-v2.53.0) (2026-06-09)
+
+
+### Features
+
+* **ai-chat:** center fullscreen welcome, prompts below textarea ([#4377](https://github.com/factorialco/f0/issues/4377)) ([8bbcc22](https://github.com/factorialco/f0/commit/8bbcc227e4934a22db64ed7bb69a4ccc550fdb8c))
+
+## [2.52.0](https://github.com/factorialco/f0/compare/f0-react-v2.51.0...f0-react-v2.52.0) (2026-06-09)
+
+
+### Features
+
+* **F0Dialog:** resource-aware header variant + opt-in metadata row gap ([#4313](https://github.com/factorialco/f0/issues/4313)) ([a92b0f2](https://github.com/factorialco/f0/commit/a92b0f2a5cd3789c73f4c5a49de46f725ef10f3a))
+
+## [2.51.0](https://github.com/factorialco/f0/compare/f0-react-v2.50.0...f0-react-v2.51.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 4/6:** new F0Drawer component (additive) ([#4366](https://github.com/factorialco/f0/issues/4366)) ([1a3cd91](https://github.com/factorialco/f0/commit/1a3cd9189bfcee531eb35cb8bee89243471cbc38))
+
+## [2.50.0](https://github.com/factorialco/f0/compare/f0-react-v2.49.0...f0-react-v2.50.0) (2026-06-09)
+
+
+### Features
+
+* **F0Slider:** add slider component ([#4285](https://github.com/factorialco/f0/issues/4285)) ([d2b2974](https://github.com/factorialco/f0/commit/d2b2974fafaed9dee10301ead8428c47e4c45311))
+
+## [2.49.0](https://github.com/factorialco/f0/compare/f0-react-v2.48.0...f0-react-v2.49.0) (2026-06-08)
+
+
+### Features
+
+* **dialog 3/6:** dialog-alike core + new F0Dialog (additive, subpath-only) ([#4365](https://github.com/factorialco/f0/issues/4365)) ([c29ac48](https://github.com/factorialco/f0/commit/c29ac48a3337a41b556e01f2ce4924f7cc88923c))
+
+## [2.48.0](https://github.com/factorialco/f0/compare/f0-react-v2.47.0...f0-react-v2.48.0) (2026-06-08)
+
+
+### Features
+
+* **OneDataCollection:** capture the full view in user-creatable presets ([#4344](https://github.com/factorialco/f0/issues/4344)) ([9b8fb10](https://github.com/factorialco/f0/commit/9b8fb10a28a777f8b99a6f42227b5d92c05afd9e))
+
+## [2.47.0](https://github.com/factorialco/f0/compare/f0-react-v2.46.0...f0-react-v2.47.0) (2026-06-08)
+
+
+### Features
+
+* **dialog 1/6:** foundation bits for dialog-alike (additive) ([#4363](https://github.com/factorialco/f0/issues/4363)) ([3ffc2e9](https://github.com/factorialco/f0/commit/3ffc2e910533562103ec58bdd80406f9a8943dfc))
+* **dialog 2/6:** private forked Dialog primitives (additive) ([#4364](https://github.com/factorialco/f0/issues/4364)) ([4ce7aae](https://github.com/factorialco/f0/commit/4ce7aae58f8819f0312218611369d20613f5a26d))
+
+## [2.46.0](https://github.com/factorialco/f0/compare/f0-react-v2.45.0...f0-react-v2.46.0) (2026-06-08)
+
+
+### Features
+
+* **sds:** render F0HILActionConfirmation with F0CardRow ([#4341](https://github.com/factorialco/f0/issues/4341)) ([e0c8cf0](https://github.com/factorialco/f0/commit/e0c8cf03b5706fb322685001d655acbbe1e9ee98))
+
+## [2.45.0](https://github.com/factorialco/f0/compare/f0-react-v2.44.0...f0-react-v2.45.0) (2026-06-08)
+
+
+### Features
+
+* **ui:** add F0CardRow component ([#4340](https://github.com/factorialco/f0/issues/4340)) ([806cd55](https://github.com/factorialco/f0/commit/806cd55c60d5a6b8765798e98ea3b68cc9a043b1))
+
+## [2.44.0](https://github.com/factorialco/f0/compare/f0-react-v2.43.0...f0-react-v2.44.0) (2026-06-08)
+
+
+### Features
+
+* **F0Box:** expose subtle "sm" boxShadow token ([#4354](https://github.com/factorialco/f0/issues/4354)) ([4b77a5c](https://github.com/factorialco/f0/commit/4b77a5c9db2f1fe58614577311da8bea13c58872))
+
 ## [2.43.0](https://github.com/factorialco/f0/compare/f0-react-v2.42.0...f0-react-v2.43.0) (2026-06-08)
 
 

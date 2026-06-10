@@ -20,6 +20,8 @@ interface PickerProps {
   size?: F0ButtonProps["size"]
   variant?: F0ButtonProps["variant"]
   lastEmojiReaction?: string
+  /** Accessible label / tooltip for the trigger button. */
+  label?: string
 }
 
 export function Picker({
@@ -28,6 +30,7 @@ export function Picker({
   size = "md",
   variant = "outline",
   lastEmojiReaction,
+  label = "Add reaction",
 }: PickerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -37,7 +40,7 @@ export function Picker({
         <ButtonInternal
           variant={variant}
           compact
-          label="Add reaction"
+          label={label}
           size={size}
           icon={lastEmojiReaction ? undefined : Reaction}
           emoji={lastEmojiReaction}

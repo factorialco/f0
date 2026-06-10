@@ -33,6 +33,7 @@ export * from "./F0Alert"
  * @deprecated F0Dialog has moved to @/patterns/F0Dialog. Import from there instead.
  */
 export * from "../patterns/F0Dialog"
+export * from "./dialog-alike/F0Drawer"
 export * from "./F0DurationInput"
 export * from "./F0NumberInput"
 export * from "./F0SearchInput"
@@ -58,6 +59,7 @@ export * from "./F0Heading"
 export * from "./F0Icon"
 export * from "./F0Link"
 export * from "./F0Select"
+export * from "./F0Slider"
 export * from "./F0Text"
 export * from "../sds/TimeLine"
 /**

@@ -47,11 +47,14 @@ const isPlainObject = (v: unknown): v is Record<string, unknown> =>
 // Index-based key (visualization type can repeat)
 const getVisualizationKey = (index: number): string => String(index)
 
-// Default filters for a never-visited viz: own preset > source preset > {}
+// Default filters for a never-visited viz. A visualization that declares its
+// own per-view presets defaults to its first one; otherwise the view starts
+// with no filter. Note: we intentionally do NOT fall back to the first *source*
+// preset — doing so silently filtered an unvisited view by that preset, which
+// made deselecting a preset reveal fewer items than the (neutral) preset itself.
 const getDefaultFiltersForVisualization = <Filters extends FiltersDefinition>(
   vizIndex: number,
-  visualizations: ReadonlyArray<VisualizationWithFilterOverrides<Filters>>,
-  sourcePresets: PresetsDefinition<Filters> | undefined
+  visualizations: ReadonlyArray<VisualizationWithFilterOverrides<Filters>>
 ): FiltersState<Filters> => {
   const viz = visualizations[vizIndex]
 
@@ -61,11 +64,6 @@ const getDefaultFiltersForVisualization = <Filters extends FiltersDefinition>(
     return vizPreset
       ? (vizPreset.filter as FiltersState<Filters>)
       : ({} as FiltersState<Filters>)
-  }
-
-  const sourcePreset = sourcePresets?.[0]
-  if (sourcePreset) {
-    return sourcePreset.filter as FiltersState<Filters>
   }
 
   return {} as FiltersState<Filters>
@@ -177,11 +175,7 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
       const nextState = visualizationFiltersMap[nextKey]
       pendingFiltersRef.current =
         nextState ??
-        getDefaultFiltersForVisualization(
-          currentVisualization,
-          visualizations,
-          sourcePresets
-        )
+        getDefaultFiltersForVisualization(currentVisualization, visualizations)
     } else if (sourceCurrentFilters !== prevSourceFiltersRef.current) {
       // Source filters updated — clear pending override
       pendingFiltersRef.current = null
@@ -204,11 +198,7 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
     const currentState = visualizationFiltersMap[currentKey]
     sourceSetCurrentFilters(
       currentState ??
-        getDefaultFiltersForVisualization(
-          currentVisualization,
-          visualizations,
-          sourcePresets
-        )
+        getDefaultFiltersForVisualization(currentVisualization, visualizations)
     )
     appliedInitRef.current = true
     // eslint-disable-next-line react-hooks/exhaustive-deps -- One-shot initialization after storage restore
@@ -240,8 +230,7 @@ export const usePerVisualizationFilters = <Filters extends FiltersDefinition>({
         nextState ??
           getDefaultFiltersForVisualization(
             currentVisualization,
-            visualizations,
-            sourcePresets
+            visualizations
           )
       )
     }
