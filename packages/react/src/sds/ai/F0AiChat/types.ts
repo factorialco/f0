@@ -276,6 +276,10 @@ export type AiChatTrackingOptions = {
   onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void
   onNewChat?: () => void
   onMessage?: (message: F0Message) => void
+  /** Mic button pressed — fires on intent, even if mic permission is later denied. */
+  onDictationStart?: () => void
+  /** Dictation discarded by the user, while recording or mid-transcription. */
+  onDictationCancel?: () => void
 }
 
 /**
