@@ -2334,9 +2334,9 @@ function optionPersonSet(facetKey: string, optionValue: string): Set<number> {
 
 // People matched by the whole audience: OR within each facet (union), AND across
 // facets (intersection) — same semantics as the OneFilterPicker.
-function filterStatePeopleMatch(state: AudienceFilterState): number {
+function filterStatePeopleSet(state: AudienceFilterState): Set<number> {
   const facetKeys = Object.keys(state).filter((key) => (state[key] ?? []).length > 0)
-  if (facetKeys.length === 0) return 0
+  if (facetKeys.length === 0) return new Set<number>()
   let matched: Set<number> | null = null
   for (const facetKey of facetKeys) {
     const union = new Set<number>()
@@ -2351,7 +2351,18 @@ function filterStatePeopleMatch(state: AudienceFilterState): number {
       matched = intersection
     }
   }
-  return matched ? matched.size : 0
+  return matched ?? new Set<number>()
+}
+function filterStatePeopleMatch(state: AudienceFilterState): number {
+  return filterStatePeopleSet(state).size
+}
+// People newly brought in by an edit: match the new criteria but NOT the original
+// (so they aren't enrolled yet). This is the actionable count for "applies to".
+function filterStateNewlyMatched(base: AudienceFilterState, next: AudienceFilterState): number {
+  const baseSet = filterStatePeopleSet(base)
+  let count = 0
+  for (const idx of filterStatePeopleSet(next)) if (!baseSet.has(idx)) count++
+  return count
 }
 
 function filterStateSummary(value: unknown): {
@@ -3935,10 +3946,11 @@ function EditCourseEnrollmentSection({
   const removed = filterStateRemoved(originalAudienceCriteria, criteria)
   const addedLabels = added.map((c) => c.label).join(", ")
   const removedLabels = removed.map((c) => c.label).join(", ")
-  // People who match the FULL current criteria (AND across facets). The applies-to
-  // question only makes sense if the change actually leaves people to enroll — if
-  // the combination matches no one, there's nothing to apply to.
-  const matchCount = filterStateSummary(criteria).matchCount
+  // People the edit NEWLY brings in (match now, weren't in the original audience,
+  // so aren't enrolled). The "applies to" question is only meaningful when the
+  // change actually adds people — broadening within a facet adds them; adding a
+  // narrowing facet (or hitting zero) adds none, so the block stays hidden.
+  const addedCount = filterStateNewlyMatched(originalAudienceCriteria, criteria)
 
   return (
     <div className="flex flex-col gap-6">
@@ -3971,13 +3983,13 @@ function EditCourseEnrollmentSection({
               Added → scope question ("applies to"), but only if the new combination
               actually matches people (if it narrows to zero, there's nothing to add).
               Removed → reassurance note. */}
-          {added.length > 0 && matchCount > 0 && (
+          {added.length > 0 && addedCount > 0 && (
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-0.5">
                 <F0Text variant="label" content={inscripcionCopy.appliesTo.changeLabel(addedLabels)} />
                 <F0Text
                   variant="description"
-                  content={inscripcionCopy.appliesTo.changeHint(matchCount)}
+                  content={inscripcionCopy.appliesTo.changeHint(addedCount)}
                 />
               </div>
               {/* Same native grouped CardSelectable as Course type, for consistency. */}
@@ -3994,8 +4006,8 @@ function EditCourseEnrollmentSection({
                   },
                   {
                     value: "everyone",
-                    title: inscripcionCopy.appliesTo.addExisting(matchCount),
-                    description: inscripcionCopy.appliesTo.addExistingDescription(matchCount),
+                    title: inscripcionCopy.appliesTo.addExisting(addedCount),
+                    description: inscripcionCopy.appliesTo.addExistingDescription(addedCount),
                   },
                 ]}
               />
