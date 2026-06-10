@@ -17,13 +17,13 @@ import type { PrototypeMeta } from "../types"
 
 export const meta: PrototypeMeta = {
   slug: "trainings",
-  title: "Trainings",
+  title: "Multiple legal entities — Training budget",
   description:
-    "Real Factorial Trainings module (Revamp): browse the full trainings list with status, participants, catalog and expiry indicators; open any training to see its Overview, Participants and Classes tabs with the same layout as production.",
+    "Manage a training budget across multiple legal entities: split a training group's costs per legal entity from the budget sidepanel and the group Costs tab (kept in sync), edit each entity's amounts, and see the impact on the group total.",
   category: "Talent",
   module: "trainings",
   audience: ["admin", "manager"],
-  tags: ["trainings", "learning", "lms", "compliance", "talent"],
+  tags: ["trainings", "budget", "legal-entities", "multi-entity", "talent"],
   createdAt: "2026-05-12",
 }
 
