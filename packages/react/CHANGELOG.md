@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.57.0](https://github.com/factorialco/f0/compare/f0-react-v2.56.0...f0-react-v2.57.0) (2026-06-10)
+
+
+### Features
+
+* **datasource:** add fetchItemNeighbors adapter capability for id-relative item navigation ([#4401](https://github.com/factorialco/f0/issues/4401)) ([a4b82e8](https://github.com/factorialco/f0/commit/a4b82e885d5c53983cead916a38d59460f4676c8))
+
 ## [2.56.0](https://github.com/factorialco/f0/compare/f0-react-v2.55.3...f0-react-v2.56.0) (2026-06-10)
 
 
