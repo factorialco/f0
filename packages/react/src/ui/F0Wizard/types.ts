@@ -1,7 +1,6 @@
 import { ReactNode } from "react"
 
 import { F0DialogSize } from "@/components/dialog-alike/F0Dialog"
-import { DialogWidth } from "@/patterns/F0Dialog"
 
 export interface F0WizardStep {
   title: string
@@ -27,9 +26,7 @@ export interface F0WizardProps {
   isOpen: boolean
   onClose?: () => void
   title?: string
-  /** @deprecated Use `size` instead. */
-  width?: DialogWidth
-  /** The size of the wizard dialog. Preferred over the deprecated `width`. */
+  /** The size of the wizard dialog. @default "xl" */
   size?: F0DialogSize
   defaultStepIndex?: number
   nextLabel?: string
