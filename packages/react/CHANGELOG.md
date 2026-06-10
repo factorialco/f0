@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.55.2](https://github.com/factorialco/f0/compare/f0-react-v2.55.1...f0-react-v2.55.2) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0Accordion:** vertical actions dots, spacing and card shadow ([#4396](https://github.com/factorialco/f0/issues/4396)) ([a350dcf](https://github.com/factorialco/f0/commit/a350dcfc06364d955887302d04f900d5174ba6ad))
+
 ## [2.55.1](https://github.com/factorialco/f0/compare/f0-react-v2.55.0...f0-react-v2.55.1) (2026-06-10)
 
 
