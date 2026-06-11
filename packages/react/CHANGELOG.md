@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.61.0](https://github.com/factorialco/f0/compare/f0-react-v2.60.0...f0-react-v2.61.0) (2026-06-11)
+
+
+### Features
+
+* **breadcrumbs:** collection-bound jump-to select seeded from persisted data collection state ([#4404](https://github.com/factorialco/f0/issues/4404)) ([f835a3a](https://github.com/factorialco/f0/commit/f835a3a49a926bc92501f193f6f5f21325abef51))
+
 ## [2.60.0](https://github.com/factorialco/f0/compare/f0-react-v2.59.0...f0-react-v2.60.0) (2026-06-11)
 
 
