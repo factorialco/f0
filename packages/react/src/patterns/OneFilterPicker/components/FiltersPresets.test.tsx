@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
@@ -482,5 +482,80 @@ describe("FiltersPresets - groups, separator and save chip", () => {
     expect(
       screen.queryByRole("button", { name: "Save view" })
     ).not.toBeInTheDocument()
+  })
+})
+
+describe("FiltersPresets - Loading transition", () => {
+  // OverflowList commits its visible/overflow split after render, so the
+  // loading→loaded flip produces one render where the new callbacks could see
+  // the numeric skeleton items. Regression for the f0-react 2.50.0 crash:
+  // "Cannot read properties of undefined (reading 'itemsCount')".
+  const CONTAINER_WIDTH = 800
+  const ITEM_WIDTH = 50
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      get() {
+        return CONTAINER_WIDTH
+      },
+    })
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      width: ITEM_WIDTH,
+      height: 32,
+      top: 0,
+      left: 0,
+      bottom: 32,
+      right: ITEM_WIDTH,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect)
+  })
+
+  afterEach(() => {
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth
+    vi.restoreAllMocks()
+  })
+
+  it("does not crash when presets finish loading after the skeleton phase", () => {
+    const presets: PresetsDefinition<FiltersDefinition> = [
+      {
+        id: "all",
+        label: "All expenses",
+        filter: {},
+        itemsCount: () => 5,
+      },
+      {
+        id: "pending",
+        label: "Pending",
+        filter: { status: ["pending"] },
+        itemsCount: () => 2,
+      },
+    ]
+
+    const { rerender } = zeroRender(
+      <FiltersPresets
+        presets={[]}
+        presetsLoading
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+      />
+    )
+
+    rerender(
+      <FiltersPresets
+        presets={presets}
+        presetsLoading={false}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        selectedPresetId="all"
+      />
+    )
+
+    expect(getVisibleByText("All expenses")).toBeInTheDocument()
+    expect(getVisibleByText("Pending")).toBeInTheDocument()
   })
 })
