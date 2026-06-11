@@ -19,7 +19,7 @@ type PendingNavigation =
     }
   | null
 
-const defaultIdProvider = (
+export const defaultIdProvider = (
   item: RecordType,
   index?: number
 ): DataSourceItemId =>

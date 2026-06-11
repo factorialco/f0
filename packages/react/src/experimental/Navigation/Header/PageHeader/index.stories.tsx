@@ -6,6 +6,9 @@ import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import {
+  BaseFetchOptions,
+  ItemNeighborsFetchOptions,
+  ItemNeighborsResponse,
   PageBasedPaginatedResponse,
   PaginatedFetchOptions,
   RecordType,
@@ -227,7 +230,31 @@ const collectionEmployees = Array.from({ length: 60 }, (_, i) => ({
 }))
 
 const EMPLOYEES_COLLECTION_ID = "storybook/pageheader-employees/v1"
-const EMPLOYEES_PER_PAGE = 50
+const EMPLOYEES_PER_PAGE = 10
+
+// The server-side query the mock "backend" applies on both endpoints: the
+// same filters, search, and sorting.
+const queryEmployees = (options: BaseFetchOptions<FiltersDefinition>) => {
+  const departments = options.filters.department as string[] | undefined
+  const search = options.search?.toLowerCase()
+  let results = collectionEmployees.filter(
+    (employee) =>
+      !departments?.length || departments.includes(employee.department)
+  )
+  if (search) {
+    results = results.filter((employee) =>
+      employee.name.toLowerCase().includes(search)
+    )
+  }
+  const sorting = options.sortings.find((s) => s.field === "name")
+  if (sorting) {
+    results = [...results].sort(
+      (a, b) =>
+        a.name.localeCompare(b.name) * (sorting.order === "asc" ? 1 : -1)
+    )
+  }
+  return results
+}
 
 // One declaration, two consumers: the breadcrumb jump-to select and the
 // item-navigation hook feeding the header arrows both fetch from this source,
@@ -251,24 +278,7 @@ const employeesSource = {
     paginationType: "pages" as const,
     perPage: EMPLOYEES_PER_PAGE,
     fetchData: (options: PaginatedFetchOptions<FiltersDefinition>) => {
-      const departments = options.filters.department as string[] | undefined
-      const search = options.search?.toLowerCase()
-      let results = collectionEmployees.filter(
-        (employee) =>
-          !departments?.length || departments.includes(employee.department)
-      )
-      if (search) {
-        results = results.filter((employee) =>
-          employee.name.toLowerCase().includes(search)
-        )
-      }
-      const sorting = options.sortings.find((s) => s.field === "name")
-      if (sorting) {
-        results = [...results].sort(
-          (a, b) =>
-            a.name.localeCompare(b.name) * (sorting.order === "asc" ? 1 : -1)
-        )
-      }
+      const results = queryEmployees(options)
       const currentPage =
         "currentPage" in options.pagination
           ? (options.pagination.currentPage ?? 1)
@@ -285,6 +295,34 @@ const employeesSource = {
               currentPage,
               pagesCount: Math.ceil(results.length / EMPLOYEES_PER_PAGE),
             }),
+          100
+        )
+      )
+    },
+    // The id-relative capability a real backend implements with cursor-by-id
+    // args (e.g. afterEmployeeId/beforeEmployeeId): the neighbors + position
+    // of an item under the same filters/sort, no page walking. Powers the
+    // header arrows beyond the loaded page and on deep links.
+    fetchItemNeighbors: (
+      options: ItemNeighborsFetchOptions<FiltersDefinition>
+    ) => {
+      const results = queryEmployees(options)
+      const index = results.findIndex(
+        (employee) => employee.id === String(options.id)
+      )
+      return new Promise<ItemNeighborsResponse<RecordType>>((resolve) =>
+        setTimeout(
+          () =>
+            resolve(
+              index === -1
+                ? { previous: null, next: null, total: results.length }
+                : {
+                    previous: results[index - 1] ?? null,
+                    next: results[index + 1] ?? null,
+                    position: index + 1,
+                    total: results.length,
+                  }
+            ),
           100
         )
       )
@@ -375,6 +413,11 @@ const CollectionBoundPageHeaderDemo = () => {
  * via `showFilters`), and the arrows walk the same filtered, sorted set with
  * a correct `current/total` counter, navigating through each item's
  * `itemUrl`.
+ *
+ * The data behaves like a real backend: pages of 10 (the 30 matching
+ * employees span 3 pages) and an id-relative `fetchItemNeighbors` capability.
+ * Past the loaded page — or landing deep via a direct link — the arrows and
+ * counter keep working through neighbors resolution instead of page walking.
  */
 export const WithCollectionBoundSelectBreadcrumb: Story = {
   render: () => {

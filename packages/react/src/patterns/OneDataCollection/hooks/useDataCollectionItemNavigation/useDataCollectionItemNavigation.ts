@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
+import type { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 import { usePageHeaderItemNavigation } from "@/experimental/Navigation/Header/PageHeader"
 import {
   FiltersDefinition,
@@ -7,9 +8,12 @@ import {
   GroupingDefinition,
   RecordType,
   SortingsDefinition,
+  SortingsStateMultiple,
   useData,
   useDataSourceItemNavigation,
+  useItemNeighbors,
 } from "@/hooks/datasource"
+import { defaultIdProvider } from "@/hooks/datasource/useDataSourceItemNavigation/useDataSourceItemNavigation"
 import {
   DataCollectionStorage,
   useDataCollectionStorage,
@@ -40,6 +44,13 @@ import {
  * Persisted state intentionally wins over `source.currentFilters` /
  * `currentSortings`: the definition values apply on mount and the hydrated
  * state lands right after, mirroring what the user last saw on the list.
+ *
+ * When the adapter implements the optional id-relative `fetchItemNeighbors`
+ * capability, gaps the loaded window can't answer (deep direct link to an
+ * item beyond the first page, or a neighbor past the window edge) are
+ * resolved backend-side under the same filters/sortings/search — prev/next
+ * and the counter then behave as if the whole filtered set were loaded.
+ * Without the capability, behavior is window-only as before.
  *
  * @example
  * ```tsx
@@ -199,6 +210,8 @@ export function useDataCollectionItemNavigation<
     )
   }, [hydration, collectionId])
 
+  const effectiveItemUrl = itemUrl ?? source.itemUrl
+
   const itemNavigation = useDataSourceItemNavigation<R>({
     dataSource,
     data,
@@ -207,20 +220,166 @@ export function useDataCollectionItemNavigation<
     loadMore,
     isLoading,
     idProvider,
-    itemUrl: itemUrl ?? source.itemUrl,
+    itemUrl: effectiveItemUrl,
     activeItemId,
     defaultActiveItemId,
     onActiveItemChange,
   })
 
-  const navigation = usePageHeaderItemNavigation<R>(itemNavigation, {
+  // ── Neighbors fallback ────────────────────────────────────────────────
+  // The loaded window can't always answer: on a deep direct link the active
+  // item is in no loaded page, and at a window edge the adjacent record
+  // exists but isn't loaded. When the adapter implements the optional
+  // id-relative `fetchItemNeighbors` capability, those gaps are resolved
+  // backend-side under the same filters/sortings/search — prev/next and the
+  // counter behave exactly as if the whole filtered set were loaded.
+
+  const neighborsId =
+    typeof itemNavigation.activeItemId === "string" ||
+    typeof itemNavigation.activeItemId === "number"
+      ? itemNavigation.activeItemId
+      : null
+
+  const windowHasItem = itemNavigation.activeItem !== null
+  const windowMissingNext =
+    windowHasItem && itemNavigation.nextItem === null && itemNavigation.hasNext
+  const windowMissingPrevious =
+    windowHasItem &&
+    itemNavigation.previousItem === null &&
+    itemNavigation.hasPrevious
+  const needsNeighbors =
+    neighborsId !== null &&
+    (!windowHasItem || windowMissingNext || windowMissingPrevious)
+
+  // Same composition fetchData receives (sorting first, grouping second).
+  const neighborsSortings: SortingsStateMultiple = [
+    ...(dataSource.currentSortings
+      ? [
+          {
+            field: dataSource.currentSortings.field as string,
+            order: dataSource.currentSortings.order,
+          },
+        ]
+      : []),
+    ...(dataSource.currentGrouping
+      ? [
+          {
+            field: dataSource.currentGrouping.field as string,
+            order: dataSource.currentGrouping.order ?? "asc",
+          },
+        ]
+      : []),
+  ]
+
+  const { neighbors, isSupported: neighborsSupported } = useItemNeighbors<
+    R,
+    Filters
+  >({
+    dataAdapter: dataSource.dataAdapter,
+    id: neighborsId,
+    filters: dataSource.currentFilters,
+    sortings: neighborsSortings,
+    search: dataSource.debouncedCurrentSearch,
+    // Loading gates: while the window is (initially or re)fetching it may
+    // still answer; resolve id-relatively only once it conclusively can't.
+    enabled:
+      enabled && hydrated && !isInitialLoading && !isLoading && needsNeighbors,
+    fetchParamsProvider: (options) => ({
+      ...options,
+      navigationFilters: dataSource.currentNavigationFilters,
+    }),
+  })
+
+  const effectiveIdProvider = useMemo(() => {
+    if (idProvider) return idProvider
+    if (dataSource.idProvider) {
+      return (item: R, index?: number) => dataSource.idProvider!(item, index)
+    }
+    return defaultIdProvider
+  }, [idProvider, dataSource.idProvider])
+
+  const navigationState = useMemo(() => {
+    if (!needsNeighbors || neighbors === null) return itemNavigation
+
+    // Window values win where present; neighbors fill the gaps. A null
+    // neighbor from the backend is a true collection edge.
+    const previousItem = itemNavigation.previousItem ?? neighbors.previous
+    const nextItem = itemNavigation.nextItem ?? neighbors.next
+    const urlOf = (item: R | null) =>
+      item && effectiveItemUrl ? (effectiveItemUrl(item) ?? null) : null
+
+    return {
+      ...itemNavigation,
+      previousItem,
+      nextItem,
+      previousItemUrl: itemNavigation.previousItemUrl ?? urlOf(previousItem),
+      nextItemUrl: itemNavigation.nextItemUrl ?? urlOf(nextItem),
+      absoluteIndex:
+        itemNavigation.absoluteIndex ??
+        (neighbors.position !== undefined ? neighbors.position - 1 : null),
+      totalItems: itemNavigation.totalItems ?? neighbors.total,
+      hasPrevious: itemNavigation.hasPrevious || previousItem !== null,
+      hasNext: itemNavigation.hasNext || nextItem !== null,
+      // Off-window the base goTo* no-op (no window index): jump straight to
+      // the resolved neighbor instead.
+      goToPrevious: windowHasItem
+        ? itemNavigation.goToPrevious
+        : () => {
+            if (neighbors.previous) {
+              itemNavigation.setActiveItemId(
+                effectiveIdProvider(neighbors.previous)
+              )
+            }
+          },
+      goToNext: windowHasItem
+        ? itemNavigation.goToNext
+        : () => {
+            if (neighbors.next) {
+              itemNavigation.setActiveItemId(
+                effectiveIdProvider(neighbors.next)
+              )
+            }
+          },
+    }
+  }, [
+    itemNavigation,
+    needsNeighbors,
+    neighbors,
+    windowHasItem,
+    effectiveItemUrl,
+    effectiveIdProvider,
+  ])
+
+  const navigation = usePageHeaderItemNavigation<R>(navigationState, {
     getItemTitle,
   })
 
+  // True from the render an off-window gap appears until neighbors resolve —
+  // unlike useItemNeighbors' isResolving, which only flips in an effect and
+  // would leave a one-render flicker.
+  const awaitingNeighbors =
+    enabled &&
+    hydrated &&
+    neighborsSupported &&
+    needsNeighbors &&
+    neighbors === null
+
+  // Hold the previous render-ready navigation while neighbors resolve for a
+  // new item, so header controls don't flicker on every off-window hop. The
+  // ref only ever stores non-null values: it is read exclusively while
+  // awaiting, where the last known navigation is the right thing to show.
+  const heldNavigationRef = useRef<NavigationProps | null>(null)
+  const heldNavigation =
+    navigation ?? (awaitingNeighbors ? heldNavigationRef.current : null)
+  useEffect(() => {
+    if (navigation !== null) heldNavigationRef.current = navigation
+  }, [navigation])
+
   return {
-    ...itemNavigation,
+    ...navigationState,
+    isNavigating: navigationState.isNavigating || awaitingNeighbors,
     isReady: hydrated && !isInitialLoading,
-    navigation,
+    navigation: heldNavigation,
     appliedCollectionState: hydration?.applied ?? null,
     dataSource,
     data,

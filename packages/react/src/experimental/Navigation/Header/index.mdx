@@ -226,7 +226,11 @@ The same wiring extends to the header's prev/next arrows: feed
 `source` + `collectionId` and pass its render-ready `navigation` result to
 PageHeader's `navigation` prop — arrows and the `current/total` counter then
 walk the same filtered, sorted set the breadcrumb select shows, navigating
-through each item's `itemUrl`. The story below demonstrates both together.
+through each item's `itemUrl`. When the adapter also implements the
+id-relative `fetchItemNeighbors` capability, items beyond the loaded page —
+including deep direct links — resolve their neighbors backend-side, so the
+arrows behave as if the whole filtered set were loaded. The story below
+demonstrates all of it together.
 
 <div
   className="header-container"
