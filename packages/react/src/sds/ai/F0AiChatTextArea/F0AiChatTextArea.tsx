@@ -8,6 +8,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
 import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
@@ -165,9 +166,14 @@ export const F0AiChatTextArea = ({
   })
   const canRecord = !!onTranscribe && recorder.isSupported
   const handleStartRecording = useCallback(() => {
+    tracking?.onDictationStart?.()
     dictationBaseRef.current = inputValue
     void recorder.start()
-  }, [inputValue, recorder])
+  }, [inputValue, recorder, tracking])
+  const handleCancelRecording = useCallback(() => {
+    tracking?.onDictationCancel?.()
+    recorder.cancel()
+  }, [recorder, tracking])
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
@@ -320,19 +326,49 @@ export const F0AiChatTextArea = ({
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
+  // Welcome suggestions row. On the welcome screen it sits above the textarea
+  // in sidepanel and below it in fullscreen (so the popover can open downward
+  // without covering the composer).
+  const showSuggestions =
+    isWelcomeScreen &&
+    !!welcomeScreenSuggestions &&
+    welcomeScreenSuggestions.length > 0 &&
+    !!onSuggestionClick
+
+  const suggestionsRow = showSuggestions ? (
+    <WelcomeScreenSuggestionsRow
+      suggestions={welcomeScreenSuggestions}
+      onItemClick={handleSuggestionClick}
+      onItemHover={setHoveredSuggestion}
+      side={fullscreen ? "bottom" : "top"}
+    />
+  ) : null
+
+  const isFullscreenWelcome = fullscreen && isWelcomeScreen
+
+  // Reveal the composer when the welcome screen gives way to the conversation
+  // (sending the first message) — the textarea drops from the centered welcome
+  // position to the bottom. Hide-before-paint + soft fade, same as the
+  // mode-change reveal. Only applied in fullscreen, where the textarea actually
+  // repositions (in sidepanel it already sits at the bottom). Mode toggles are
+  // handled one level up in F0AiChat, so this never double-fires.
+  const { motionProps: composerReveal } = useRevealOnChange(
+    isWelcomeScreen,
+    160,
+    0.5
+  )
+
   return (
-    <div ref={ref} className="flex flex-col items-center gap-2 px-4 pb-3 pt-2">
+    <motion.div
+      ref={ref}
+      className={cn(
+        "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
+        isFullscreenWelcome && "min-h-0 flex-1 justify-start -mt-20"
+      )}
+      {...(fullscreen ? composerReveal : {})}
+    >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {isWelcomeScreen &&
-          welcomeScreenSuggestions &&
-          welcomeScreenSuggestions.length > 0 &&
-          onSuggestionClick && (
-            <WelcomeScreenSuggestionsRow
-              suggestions={welcomeScreenSuggestions}
-              onItemClick={handleSuggestionClick}
-              onItemHover={setHoveredSuggestion}
-            />
-          )}
+        {suggestionsRow && !fullscreen && <div>{suggestionsRow}</div>}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <motion.form
             aria-busy={inProgress}
@@ -386,17 +422,43 @@ export const F0AiChatTextArea = ({
 
             <AnimatePresence initial={false}>
               {isClarifying ? (
-                <div key="clarifying">{clarifyingUI}</div>
+                <motion.div
+                  key="clarifying"
+                  className="overflow-hidden"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.22,
+                      ease: [0.4, 0, 1, 1],
+                    },
+                  }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                >
+                  {clarifyingUI}
+                </motion.div>
               ) : (
                 <motion.div
                   key="input"
                   className="overflow-hidden"
-                  initial={{ height: "auto", opacity: 1 }}
+                  initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.15,
+                      ease: [0.55, 0, 1, 0.45],
+                    },
+                  }}
                   transition={{
-                    duration: shouldReduceMotion ? 0 : 0.3,
-                    ease: "easeOut",
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
                   }}
                 >
                   {pendingQuote && (
@@ -479,7 +541,7 @@ export const F0AiChatTextArea = ({
                     recordingStream={recorder.stream}
                     onStartRecording={handleStartRecording}
                     onStopRecording={recorder.stop}
-                    onCancelRecording={recorder.cancel}
+                    onCancelRecording={handleCancelRecording}
                   />
                 </motion.div>
               )}
@@ -487,6 +549,17 @@ export const F0AiChatTextArea = ({
           </motion.form>
         </CreditWarningWrapper>
       </div>
+
+      {suggestionsRow && fullscreen && (
+        <div className="w-full max-w-content">{suggestionsRow}</div>
+      )}
+
+      {footer && isWelcomeScreen && fullscreen && (
+        <div className="w-full py-4 mx-auto flex max-w-content justify-center">
+          {footer}
+        </div>
+      )}
+
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
           <motion.div
@@ -511,14 +584,18 @@ export const F0AiChatTextArea = ({
             </span>
           </motion.div>
         ) : (
-          disclaimer?.text && (
+          disclaimer?.text &&
+          !isFullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
               className="flex w-full max-w-content flex-row items-center justify-center gap-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.3,
+                ease: "easeOut",
+              }}
             >
               {disclaimer.onClick ? (
                 <button
@@ -561,23 +638,6 @@ export const F0AiChatTextArea = ({
           )
         )}
       </AnimatePresence>
-      <AnimatePresence>
-        {footer && isWelcomeScreen && (
-          <motion.div
-            key="chat-footer"
-            className={cn(
-              "w-full py-4 mx-auto max-w-content",
-              fullscreen && "flex justify-center"
-            )}
-            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            {footer}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }

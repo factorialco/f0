@@ -57,6 +57,7 @@ interface BaseHeaderProps {
     actions?: MetadataAction[]
   }
   metadata?: MetadataProps["items"]
+  metadataRowGap?: MetadataProps["rowGap"]
   /** Renders a 1px bottom border at the very bottom of the header. */
   showBottomBorder?: boolean
 }
@@ -74,6 +75,7 @@ export function BaseHeader({
   otherActions = [],
   status,
   metadata = [],
+  metadataRowGap = "none",
   showBottomBorder = false,
 }: BaseHeaderProps) {
   const allMetadata: BaseHeaderProps["metadata"] = [
@@ -123,7 +125,10 @@ export function BaseHeader({
     <div
       className={cn(
         "resource-header px-page flex flex-col gap-3 pb-5 pt-3",
-        showBottomBorder && "border-b border-solid border-f1-border"
+        // `border-0` zeroes all sides first so this renders bottom-only even in apps that
+        // don't load the Tailwind preflight border reset (otherwise `border-solid` would
+        // light up all four sides at the CSS-initial `medium` width).
+        showBottomBorder && "border-0 border-b border-solid border-f1-border"
       )}
     >
       <div
@@ -165,7 +170,7 @@ export function BaseHeader({
 
         {allMetadata.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 md:hidden">
-            <Metadata items={allMetadata} />
+            <Metadata items={allMetadata} rowGap={metadataRowGap} />
           </div>
         )}
 
@@ -307,7 +312,7 @@ export function BaseHeader({
       </div>
       {allMetadata.length > 0 && (
         <div className="hidden flex-wrap items-center gap-x-3 gap-y-1 md:block">
-          <Metadata items={allMetadata} />
+          <Metadata items={allMetadata} rowGap={metadataRowGap} />
         </div>
       )}
     </div>

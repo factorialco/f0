@@ -111,6 +111,52 @@ export const Default: Story = {
 }
 
 /**
+ * A field whose `alert` resolves to `variant: "critical"` is treated as an
+ * error: the input shows error styling and the form cannot be submitted while
+ * the alert is active.
+ *
+ * Here, ordering more than the available stock (10) surfaces a critical alert
+ * and disables the submit button. Lower the quantity to 10 or below and the
+ * alert clears, re-enabling submission.
+ */
+export const CriticalAlertBlocksSubmit: Story = {
+  render() {
+    const formSchema = z.object({
+      quantity: f0FormField.number({
+        label: "Quantity",
+        placeholder: "How many units?",
+        helpText: "Only 10 units are in stock",
+        min: 0,
+        alert: ({ fieldValue }) =>
+          typeof fieldValue === "number" && fieldValue > 10
+            ? {
+                title: "Not enough stock",
+                description:
+                  "Only 10 units are available. Reduce the quantity to continue.",
+                variant: "critical" as const,
+              }
+            : null,
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "critical-alert-blocks-submit",
+      schema: formSchema,
+      defaultValues: {
+        quantity: 25,
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Form with fields arranged in rows using the `row` property.
  * Fields with the same `row` value are grouped horizontally.
  */
@@ -3035,6 +3081,87 @@ export const WithDefaultValuesParamsSchema: Story = {
         return { success: true, message: "Employee updated" }
       },
       submitConfig: { label: "Save Changes" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-section form definition with `defaultValuesParamsSchema`.
+ *
+ * Same as `WithDefaultValuesParamsSchema` but with a per-section schema:
+ * `defaultValues` is a function receiving typed params and returning values
+ * keyed by section ID. At mount time it's resolved with empty params (`{}`),
+ * showing loading indicators until the values arrive.
+ */
+export const WithDefaultValuesParamsSchemaPerSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField.text({
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField.text({
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField.email({
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+      }),
+    }
+
+    const employees: Record<
+      string,
+      { firstName: string; lastName: string; email: string }
+    > = {
+      "emp-1": {
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "jane.doe@factorial.co",
+      },
+      "emp-2": {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john.smith@factorial.co",
+      },
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "edit-employee-per-section",
+      schema,
+      sections: {
+        personal: { title: "Personal Information" },
+        contact: { title: "Contact Details" },
+      },
+      defaultValuesParamsSchema: z.object({
+        employeeId: z.string().describe("The ID of the employee to edit"),
+      }),
+      defaultValues: async ({ employeeId }) => {
+        await sleep(1500)
+        // At mount time params is {} so employeeId is undefined — fall back
+        const employee = employeeId ? employees[employeeId] : employees["emp-1"]
+        return {
+          personal: {
+            firstName: employee?.firstName ?? "",
+            lastName: employee?.lastName ?? "",
+          },
+          contact: { email: employee?.email ?? "" },
+        }
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
     })
 
     return <F0Form formDefinition={formDefinition} />

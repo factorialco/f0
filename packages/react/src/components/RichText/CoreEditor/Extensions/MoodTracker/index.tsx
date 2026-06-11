@@ -7,11 +7,7 @@ import {
 } from "@tiptap/react"
 import React, { useState } from "react"
 
-import {
-  Pulse,
-  pulseIcon,
-  pulseIconColor,
-} from "@/components/avatars/F0AvatarPulse"
+import { Pulse, pulseIcon, pulseIconColor } from "@/lib/mood"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"

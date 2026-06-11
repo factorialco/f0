@@ -2,9 +2,12 @@ import { ReactNode } from "react"
 
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { DropdownInternalProps } from "@/experimental/Navigation/Dropdown/internal"
+import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 import { TabsProps } from "@/patterns/Navigation/Tabs"
+import { ResourceHeaderProps } from "@/patterns/ResourceHeader"
 
 import {
+  DialogControls,
   DialogPosition,
   DialogWidth,
   F0DialogPrimaryAction,
@@ -22,6 +25,9 @@ export type F0DialogHeaderProps = {
     href: string
   }
   otherActions?: DropdownInternalProps["items"]
+  navigation?: NavigationProps
+  resourceHeader?: ResourceHeaderProps
+  controls?: DialogControls
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 export type F0DialogContextType = {
@@ -68,6 +74,9 @@ export type F0DialogInternalProps = {
   module?: F0DialogHeaderProps["module"]
   // Other actions to display in the header
   otherActions?: F0DialogHeaderProps["otherActions"]
+  navigation?: F0DialogHeaderProps["navigation"]
+  resourceHeader?: F0DialogHeaderProps["resourceHeader"]
+  controls?: F0DialogHeaderProps["controls"]
   // Custom content to render in the dialog
   children: ReactNode
   // Disable the default padding from the dialog content area

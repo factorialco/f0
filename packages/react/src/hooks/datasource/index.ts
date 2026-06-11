@@ -1,7 +1,9 @@
 export * from "@/patterns/OneFilterPicker/types"
+export * from "./itemNeighbors"
 export * from "./types"
 export * from "./useData"
 export * from "./useDataSource"
+export * from "./useDataSourceItemNavigation"
 export * from "./useGroups"
 export type {
   AllSelectionStatus,

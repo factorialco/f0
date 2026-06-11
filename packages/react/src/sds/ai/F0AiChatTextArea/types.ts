@@ -136,9 +136,10 @@ export type F0AiChatTextAreaProps = {
   ) => void
 
   /**
-   * When true, the composer adopts the fullscreen layout: the welcome
-   * footer is pushed to the bottom and the disclaimer is hidden so the
-   * footer is the only thing under the textarea.
+   * When true on the welcome screen, the composer adopts the fullscreen
+   * layout: the input slot grows to claim the bottom half (so the textarea
+   * rises toward the vertical center), and the welcome suggestions render
+   * below the textarea with their popover opening downward (instead of above).
    */
   fullscreen?: boolean
 }

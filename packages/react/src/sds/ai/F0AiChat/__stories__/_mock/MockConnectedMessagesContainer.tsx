@@ -163,6 +163,7 @@ export const MockConnectedMessagesContainer = ({
       onReplyQuote={onReplyQuote}
       isLoadingThread={isLoadingThread}
       autoScrollUserIntoView={visualizationMode !== "fullscreen"}
+      fullscreen={visualizationMode === "fullscreen"}
       freezeLayout={isClarifying}
       noShadows={noShadows}
       feedback={feedback}

@@ -1,7 +1,16 @@
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
+import {
+  type AlertAvatarProps,
+  F0AvatarAlert,
+} from "@/components/avatars/F0AvatarAlert"
+import { F0AvatarDate } from "@/components/avatars/F0AvatarDate"
 import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
+import {
+  F0AvatarModule,
+  type ModuleId,
+} from "@/components/avatars/F0AvatarModule"
 import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
@@ -10,6 +19,11 @@ type CardAvatarVariant =
   | { type: "emoji"; emoji: string }
   | { type: "file"; file: File }
   | { type: "icon"; icon: IconType }
+  | { type: "module"; module: ModuleId }
+  | { type: "alert"; variant: AlertAvatarProps["type"] }
+  | { type: "date"; date: Date }
+
+type CardAvatarSize = "sm" | "md" | "lg"
 
 interface CardAvatarProps {
   /**
@@ -26,33 +40,52 @@ interface CardAvatarProps {
    * Whether the avatar is displayed in a compact layout
    */
   compact?: boolean
+
+  /**
+   * Explicit size override. When omitted, the size derives from `compact`
+   * (sm) or the default vertical layout (lg). Passing a size also signals
+   * inline usage (e.g. the card row) and drops the vertical margin.
+   */
+  size?: CardAvatarSize
 }
 
 const AvatarRender = ({
   avatar,
-  compact = false,
+  size,
 }: {
   avatar: CardAvatarVariant
-  compact?: boolean
+  size: CardAvatarSize
 }) => {
   if (avatar.type === "emoji") {
-    return <F0AvatarEmoji emoji={avatar.emoji} size={compact ? "sm" : "lg"} />
+    return <F0AvatarEmoji emoji={avatar.emoji} size={size} />
   }
   if (avatar.type === "file") {
-    return <F0AvatarFile file={avatar.file} size={compact ? "sm" : "lg"} />
+    return <F0AvatarFile file={avatar.file} size={size} />
   }
   if (avatar.type === "icon") {
-    return <F0AvatarIcon icon={avatar.icon} size={compact ? "sm" : "lg"} />
+    return <F0AvatarIcon icon={avatar.icon} size={size} />
   }
-  return <F0Avatar avatar={avatar} size={compact ? "sm" : "lg"} />
+  if (avatar.type === "module") {
+    return <F0AvatarModule module={avatar.module} size={size} />
+  }
+  if (avatar.type === "alert") {
+    return <F0AvatarAlert type={avatar.variant} size={size} />
+  }
+  if (avatar.type === "date") {
+    // F0AvatarDate has a fixed intrinsic size (no size prop).
+    return <F0AvatarDate date={avatar.date} />
+  }
+  return <F0Avatar avatar={avatar} size={size} />
 }
 
 export function CardAvatar({
   avatar,
   overlay = false,
   compact = false,
+  size,
 }: CardAvatarProps) {
   const isRounded = avatar.type === "person"
+  const resolvedSize: CardAvatarSize = size ?? (compact ? "sm" : "lg")
 
   return (
     <div
@@ -62,11 +95,11 @@ export function CardAvatar({
           !compact &&
           "absolute -top-9 left-0 rounded-md ring-[3px] ring-f1-background",
         overlay && isRounded && "rounded-full",
-        compact && "mb-0"
+        (compact || size) && "mb-0"
       )}
       data-testid="card-avatar"
     >
-      <AvatarRender avatar={avatar} compact={compact} />
+      <AvatarRender avatar={avatar} size={resolvedSize} />
     </div>
   )
 }

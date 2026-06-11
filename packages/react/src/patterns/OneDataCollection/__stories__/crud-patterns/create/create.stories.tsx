@@ -190,7 +190,7 @@ function WizardDialogScenario() {
         isOpen={open}
         onClose={() => setOpen(false)}
         title="Create onboarding plan"
-        width="lg"
+        size="lg"
         submitLabel="Create plan"
         steps={[
           { title: "General information" },
@@ -277,7 +277,7 @@ function EditableTableAddRowScenario() {
             ...editableTableVisualization,
             options: {
               ...editableTableVisualization.options,
-              onCellChange: async (updatedResource) => {
+              onCellChange: async ({ updatedItem: updatedResource }) => {
                 setResources((currentResources) =>
                   currentResources.map((resource) =>
                     resource.id === updatedResource.id

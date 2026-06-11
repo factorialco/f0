@@ -591,6 +591,42 @@ function clip(s: string, max = 400): string {
 }
 
 /**
+ * Hard cap on the rendered comment, in bytes.
+ *
+ * Why: the workflow funnels this markdown through `$GITHUB_OUTPUT` into a
+ * downstream composite-action env var (`COMMENT_BODY`), which gets propagated
+ * to `actions/github-script@v7`'s node process. A multi-megabyte body pushes
+ * argv+envp past the kernel's `ARG_MAX` and exec fails with "Argument list
+ * too long" before the script even runs. GitHub's own PR-comment ceiling is
+ * 65,536 characters, so 60 KB also leaves headroom for the comment-id marker
+ * and any per-character byte overhead from UTF-8.
+ */
+const MAX_COMMENT_BYTES = 60_000
+
+/**
+ * Truncate the rendered comment to {@link MAX_COMMENT_BYTES}, appending a
+ * notice so reviewers know more changes exist. Truncation operates on whole
+ * lines so the markdown stays well-formed.
+ */
+function capCommentSize(lines: string[]): string[] {
+  let bytes = 0
+  const out: string[] = []
+  for (const line of lines) {
+    const lineBytes = Buffer.byteLength(line, "utf8") + 1 // + newline
+    if (bytes + lineBytes > MAX_COMMENT_BYTES) {
+      out.push("")
+      out.push(
+        "_…output truncated to keep the comment under GitHub's size limits — run `pnpm --filter @factorialco/f0-react check:api-surface` locally for the full diff._"
+      )
+      return out
+    }
+    out.push(line)
+    bytes += lineBytes
+  }
+  return out
+}
+
+/**
  * Render the PR comment body. Posted whether or not breaking changes exist, so
  * a prior "⚠️ breaking" comment is cleared to "✅" once resolved.
  */
@@ -668,7 +704,7 @@ export function buildCommentMarkdown(result: AnalysisResult): string {
     )
   }
 
-  return lines.join("\n")
+  return capCommentSize(lines).join("\n")
 }
 
 /* --------------------------------- main ---------------------------------- */

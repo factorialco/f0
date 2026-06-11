@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 
 export const dialogPositions = [
   "center",
@@ -48,3 +49,15 @@ export type F0DialogActionsProps = {
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
   secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[]
 }
+
+export type DialogControls =
+  | {
+      kind: "resource"
+      expand?: { label: string; onClick: () => void }
+      navigation?: NavigationProps
+    }
+  | {
+      kind: "back"
+      label: string
+      onClick: () => void
+    }

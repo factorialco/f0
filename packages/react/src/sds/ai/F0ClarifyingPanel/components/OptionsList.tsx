@@ -1,4 +1,7 @@
+import { motion } from "motion/react"
 import { useEffect, useRef, useState, type Ref } from "react"
+
+import { useReducedMotion } from "@/lib/a11y"
 
 import type { ClarifyingOption, ClarifyingSelectionMode } from "../types"
 
@@ -45,6 +48,8 @@ export const OptionsList = ({
   onToggleCustomActive,
   onConfirm,
 }: OptionsListProps) => {
+  const shouldReduceMotion = useReducedMotion()
+
   // Roving tabindex: index of the currently-focused option.
   // When nothing is selected, default to the first option.
   const initialTabStop = (() => {
@@ -104,18 +109,28 @@ export const OptionsList = ({
       aria-label={question}
     >
       {options.map((option, idx) => (
-        <OptionRow
+        <motion.div
           key={option.id}
-          ref={(el) => {
-            itemRefs.current[idx] = el
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.2,
+            ease: [0.4, 0, 0.2, 1],
+            delay: shouldReduceMotion ? 0 : 0.12 + idx * 0.06,
           }}
-          option={option}
-          isSelected={selectedOptionIds.includes(option.id)}
-          mode={mode}
-          isTabStop={mode === "single" ? idx === tabStopIndex : undefined}
-          onToggle={onToggleOption}
-          onKeyNavigate={handleKeyNavigate}
-        />
+        >
+          <OptionRow
+            ref={(el) => {
+              itemRefs.current[idx] = el
+            }}
+            option={option}
+            isSelected={selectedOptionIds.includes(option.id)}
+            mode={mode}
+            isTabStop={mode === "single" ? idx === tabStopIndex : undefined}
+            onToggle={onToggleOption}
+            onKeyNavigate={handleKeyNavigate}
+          />
+        </motion.div>
       ))}
 
       {allowCustomAnswer && (

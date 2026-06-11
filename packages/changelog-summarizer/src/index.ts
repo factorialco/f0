@@ -4,12 +4,25 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { resolve, join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { execSync } from "child_process";
-import { collectChangelogs } from "./collectors/changelog.js";
-import { collectCommits } from "./collectors/commits.js";
+import {
+  listMergedPRs,
+  fetchPrFiles,
+  fetchPrBodies,
+  type PrFile,
+} from "./collectors/github.js";
+import {
+  classifyMergedPrs,
+  parseConventionalTitle,
+  TYPES_NEEDING_FILES,
+  type PrWithFiles,
+} from "./collectors/prs.js";
+import { collectStoryIndex } from "./collectors/stories.js";
+import { FOUNDATIONS_AUTHORS } from "./foundations.js";
 import { resolveApiKey, resolveModel } from "./providers.js";
-import { generateSummary } from "./summarizer.js";
-import { buildContextMessage } from "./formatters/markdown.js";
-import type { Provider } from "./types.js";
+import { polishSummary, reconcileSummary } from "./summarizer.js";
+import { jsonToSlackText } from "./formatters/json-formatter.js";
+import { buildBlocks } from "./formatters/blockkit.js";
+import type { Provider, SummaryJson } from "./types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -104,54 +117,6 @@ function saveLastRunDate(repoRoot: string): void {
   }
 }
 
-function saveDebugFiles(
-  debugDir: string,
-  data: {
-    fromStr: string;
-    toStr: string;
-    changelogs: ReturnType<typeof collectChangelogs>;
-    commits: ReturnType<typeof collectCommits>;
-    systemPrompt: string;
-    contextMessage: string;
-  },
-): void {
-  mkdirSync(debugDir, { recursive: true });
-
-  writeFileSync(
-    join(debugDir, "changelogs.json"),
-    JSON.stringify(data.changelogs, null, 2),
-  );
-
-  writeFileSync(
-    join(debugDir, "commits.json"),
-    JSON.stringify(data.commits, null, 2),
-  );
-
-  writeFileSync(join(debugDir, "system-prompt.md"), data.systemPrompt);
-
-  writeFileSync(join(debugDir, "context-message.md"), data.contextMessage);
-
-  const meta = {
-    from: data.fromStr,
-    to: data.toStr,
-    changelogEntries: data.changelogs.length,
-    commits: data.commits.length,
-    generatedAt: new Date().toISOString(),
-  };
-  writeFileSync(join(debugDir, "meta.json"), JSON.stringify(meta, null, 2));
-
-  console.error(`[debug] Context saved to ${debugDir}/`);
-  console.error(
-    `[debug]   changelogs.json    — ${data.changelogs.length} entries`,
-  );
-  console.error(
-    `[debug]   commits.json       — ${data.commits.length} commits`,
-  );
-  console.error(`[debug]   system-prompt.md   — system prompt`);
-  console.error(`[debug]   context-message.md — full LLM user message`);
-  console.error(`[debug]   meta.json          — run metadata`);
-}
-
 async function main(): Promise<void> {
   const program = new Command();
 
@@ -195,6 +160,10 @@ async function main(): Promise<void> {
       "--debug-dir <path>",
       "Directory to save debug files (default: /tmp/changelog-summarizer-debug-{timestamp})",
     )
+    .option(
+      "--github-token <token>",
+      "GitHub token used to fetch PR descriptions (falls back to $GITHUB_TOKEN)",
+    )
     .parse(process.argv);
 
   const opts = program.opts<{
@@ -209,6 +178,7 @@ async function main(): Promise<void> {
     ignoreLastRun?: boolean;
     debug?: boolean;
     debugDir?: string;
+    githubToken?: string;
   }>();
 
   // Validate provider
@@ -253,73 +223,129 @@ async function main(): Promise<void> {
     }
     systemPrompt = readFileSync(promptPath, "utf-8");
   } else {
-    const defaultPromptPath = join(__dirname, "prompts", "default.md");
+    const defaultPromptPath = join(__dirname, "prompts", "product-v3.md");
     systemPrompt = readFileSync(defaultPromptPath, "utf-8");
   }
 
-  // Collect data
-  console.error("[collect] Reading changelogs…");
-  const changelogs = collectChangelogs(repoRoot, from, to);
-  console.error(`[collect] Found ${changelogs.length} changelog entries`);
+  // ---- Collect: merged PRs are the source of truth for what shipped ----
+  const githubToken = opts.githubToken ?? process.env["GITHUB_TOKEN"];
 
-  console.error("[collect] Reading commits…");
-  const commits = collectCommits(repoRoot, from, to);
-  console.error(`[collect] Found ${commits.length} commits`);
+  console.error("[collect] Fetching Storybook index…");
+  const storyIndex = await collectStoryIndex();
 
-  // Save debug files if requested
-  if (opts.debug) {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const debugDir =
-      opts.debugDir ?? `/tmp/changelog-summarizer-debug-${timestamp}`;
+  console.error("[collect] Listing merged PRs…");
+  const prs = await listMergedPRs(fromStr, toStr, githubToken);
 
-    const contextMessage = buildContextMessage(
-      changelogs,
-      commits,
-      fromStr,
-      toStr,
-    );
-
-    saveDebugFiles(debugDir, {
-      fromStr,
-      toStr,
-      changelogs,
-      commits,
-      systemPrompt,
-      contextMessage,
-    });
+  console.error("[collect] Fetching changed files / PR bodies…");
+  const withFiles: PrWithFiles[] = [];
+  for (const pr of prs) {
+    const { type, breaking } = parseConventionalTitle(pr.title);
+    let files: PrFile[] = [];
+    if (breaking || TYPES_NEEDING_FILES.has(type)) {
+      files = await fetchPrFiles(pr.number, githubToken);
+    }
+    let body: string | undefined;
+    if (breaking) {
+      body = (await fetchPrBodies([pr.number], githubToken)).get(pr.number)
+        ?.body;
+    }
+    withFiles.push({ ...pr, files, body });
   }
 
-  // Check for empty context
-  if (changelogs.length === 0 && commits.length === 0) {
-    console.error("[warn] No changes found for the given date range");
+  const facts = classifyMergedPrs(
+    withFiles,
+    storyIndex,
+    new Set(FOUNDATIONS_AUTHORS),
+  );
+
+  // Technical thread reply (for engineers): bug fixes + infra + thanks.
+  const threadParts: string[] = [];
+  if (facts.fixes.length > 0)
+    threadParts.push(`Fixes this week: ${facts.fixes.join("; ")}.`);
+  if (facts.infra.length > 0)
+    threadParts.push(`Infra & tooling: ${facts.infra.join("; ")}.`);
+  if (facts.contributors.length > 0)
+    threadParts.push(
+      `Thanks to ${facts.contributors.map((c) => `@${c}`).join(", ")}.`,
+    );
+
+  const skeleton: SummaryJson = {
+    ...facts.skeleton,
+    thread_details: threadParts.join(" "),
+  };
+
+  // Empty week → short placeholder.
+  const hasContent = Object.values(skeleton.sections).some((v) =>
+    Array.isArray(v) ? v.length > 0 : Boolean(v),
+  );
+  if (!hasContent) {
+    console.error("[warn] No product-visible changes for the given date range");
     const emptyMessage = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n_No changes this week._`;
-    if (opts.output) {
-      writeFileSync(resolve(opts.output), emptyMessage);
-    } else {
-      process.stdout.write(emptyMessage + "\n");
-    }
+    if (opts.output) writeFileSync(resolve(opts.output), emptyMessage);
+    else process.stdout.write(emptyMessage + "\n");
+    saveLastRunDate(repoRoot);
     return;
   }
 
-  // Generate summary
-  console.error(`[llm] Generating summary with ${provider}…`);
-  const summary = await generateSummary(model, systemPrompt, {
-    from: fromStr,
-    to: toStr,
-    changelogs,
-    commits,
-  });
+  // ---- Polish: the LLM rewrites each summary into product language with the
+  //      "why", bounded to the facts above (it may drop/merge, never invent).
+  //      If it fails, we publish the factual summary as-is.
+  let finalJson: SummaryJson = skeleton;
+  try {
+    console.error(`[llm] Polishing summary with ${provider}…`);
+    const polished = await polishSummary(model, systemPrompt, skeleton);
+    finalJson = reconcileSummary(skeleton, polished);
+  } catch (err) {
+    console.error(
+      `[llm] Polish failed (${err instanceof Error ? err.message : String(err)}) — using the factual summary`,
+    );
+  }
 
-  // Prepend a plain-text title line (used as the top-level Slack header block)
-  // followed by --- so the workflow parser treats it as the first section delimiter.
-  const output = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
+  if (opts.debug) {
+    const debugDir = opts.debugDir ?? "/tmp/changelog-summarizer-debug";
+    mkdirSync(debugDir, { recursive: true });
+    writeFileSync(
+      join(debugDir, "skeleton.json"),
+      JSON.stringify(skeleton, null, 2),
+    );
+    writeFileSync(
+      join(debugDir, "final.json"),
+      JSON.stringify(finalJson, null, 2),
+    );
+    console.error(`[debug] Wrote skeleton.json + final.json to ${debugDir}/`);
+  }
 
-  // Output
+  const summary =
+    jsonToSlackText(finalJson, storyIndex.urlByKey) ?? "_No changes this week._";
+
+  // Product-focused message only: title + the product sections. Bug fixes and
+  // infra are intentionally NOT published (too technical for this audience).
+  const publishText = `:f0-dev: F0 Weekly Summary (${fromStr} – ${toStr})\n---\n${summary}`;
+
+  // Pre-render the Block Kit payload so the workflow just posts it (no fragile
+  // bash parsing, and long sections are split under Slack's 3000-char limit).
+  const payload = JSON.stringify({ blocks: buildBlocks(publishText) }, null, 2);
+
   if (opts.output) {
-    writeFileSync(resolve(opts.output), output);
-    console.error(`[done] Summary written to ${opts.output}`);
+    const outputPath = resolve(opts.output);
+    writeFileSync(outputPath, publishText);
+    const blocksPath = outputPath.replace(/(\.[^./]+)?$/, ".blocks.json");
+    writeFileSync(blocksPath, payload);
+    console.error(`[done] Summary written to ${outputPath}`);
+    console.error(`[done] Block Kit payload written to ${blocksPath}`);
+
+    const githubOutput = process.env["GITHUB_OUTPUT"];
+    if (githubOutput) {
+      try {
+        writeFileSync(githubOutput, `blocks_file=${blocksPath}\n`, { flag: "a" });
+      } catch (err) {
+        console.warn(
+          `[done] Could not append blocks_file to GITHUB_OUTPUT: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+    }
   } else {
-    process.stdout.write(output + "\n");
+    process.stdout.write(publishText + "\n");
   }
 
   // Save last run date for next invocation

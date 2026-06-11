@@ -11,7 +11,7 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shine 3s ease-in-out infinite;
+  animation: shine 3s linear infinite;
 }
 
 @keyframes shine {
@@ -20,6 +20,14 @@
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shine-text {
+    animation: none;
+    -webkit-text-fill-color: #888;
+    background: none;
   }
 }
 

@@ -4,7 +4,13 @@ import path from "node:path"
 
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import { analyze, snapshotEntry, type EntryDiff } from "../check-api-surface"
+import {
+  analyze,
+  buildCommentMarkdown,
+  snapshotEntry,
+  type AnalysisResult,
+  type EntryDiff,
+} from "../check-api-surface"
 
 // Each test spins up TypeScript programs (the first parses the multi-megabyte
 // default lib), which is slower than a typical unit test on CI runners.
@@ -262,5 +268,50 @@ describe("check-api-surface — determinism", () => {
     expect(result.hasBreaking).toBe(false)
     expect(result.breakingTotal).toBe(0)
     expect(result.addedTotal).toBe(0)
+  })
+})
+
+describe("check-api-surface — comment size cap", () => {
+  it("truncates an enormous comment so it fits well under the GitHub PR-comment ceiling", () => {
+    // Synthesize many breaking changes with chunky before/after strings — this
+    // is the shape of a PR that reshapes a widely-referenced shared type and
+    // would otherwise blow past kernel ARG_MAX when funneled through composite
+    // action env vars.
+    const filler = "x".repeat(2000)
+    const breaking = Array.from({ length: 200 }, (_, i) => ({
+      name: `Export${i}`,
+      kind: "changed" as const,
+      reasons: [`\`prop${i}\` changed: \`string\` → \`number\``],
+      before: filler,
+      after: filler,
+    }))
+    const result: AnalysisResult = {
+      hasBreaking: true,
+      breakingTotal: breaking.length,
+      addedTotal: 0,
+      entries: [{ entry: "f0", breaking, added: [] }],
+    }
+
+    const md = buildCommentMarkdown(result)
+
+    // Comfortably under GitHub's 65,536-char comment ceiling (and under the
+    // ARG_MAX-driven ~60 KB cap the script enforces).
+    expect(Buffer.byteLength(md, "utf8")).toBeLessThanOrEqual(64_000)
+    // The header survives.
+    expect(md).toContain("Breaking public API changes")
+    // The truncation notice is appended.
+    expect(md).toMatch(/truncated/i)
+  })
+
+  it("leaves a small comment untouched", () => {
+    const result: AnalysisResult = {
+      hasBreaking: false,
+      breakingTotal: 0,
+      addedTotal: 1,
+      entries: [{ entry: "f0", breaking: [], added: ["NewThing"] }],
+    }
+    const md = buildCommentMarkdown(result)
+    expect(md).not.toMatch(/truncated/i)
+    expect(md).toContain("No breaking public API changes")
   })
 })

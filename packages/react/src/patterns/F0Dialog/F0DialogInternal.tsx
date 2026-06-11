@@ -78,6 +78,9 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
   description,
   module,
   otherActions,
+  navigation,
+  resourceHeader,
+  controls,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -138,11 +141,20 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     })
   }, [variant, position, localWidth])
 
+  if (resourceHeader && !isSidePosition) {
+    console.warn(
+      "F0Dialog: `resourceHeader` is only applicable to side panel positions (left/right)"
+    )
+  }
+
   const headerProps = {
     title,
     description,
     module,
     otherActions,
+    navigation,
+    resourceHeader,
+    controls,
     tabs,
     activeTabId,
     setActiveTabId,

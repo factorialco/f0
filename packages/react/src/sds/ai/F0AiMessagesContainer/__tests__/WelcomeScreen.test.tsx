@@ -38,4 +38,22 @@ describe("WelcomeScreen", () => {
     await user.keyboard(" ")
     expect(onClick).toHaveBeenCalledTimes(2)
   })
+
+  it("centers the phrase vertically by default", () => {
+    zeroRender(<WelcomeScreen messages={["Ask anything"]} />)
+    const container = screen
+      .getByLabelText("Ask anything")
+      .closest(".justify-center")
+    expect(container).toHaveClass("items-center")
+    expect(container).not.toHaveClass("items-end")
+  })
+
+  it("pushes the phrase to the bottom in fullscreen", () => {
+    zeroRender(<WelcomeScreen messages={["Ask anything"]} fullscreen />)
+    const container = screen
+      .getByLabelText("Ask anything")
+      .closest(".justify-center")
+    expect(container).toHaveClass("items-end")
+    expect(container).not.toHaveClass("items-center")
+  })
 })

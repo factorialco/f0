@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { ReactElement, useRef, useState } from "react"
+import { ReactElement, useContext, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
@@ -11,7 +11,7 @@ import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import { ChevronDown, ChevronLeft, ChevronUp, Menu } from "@/icons/app"
+import { ChevronLeft, Menu } from "@/icons/app"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
@@ -21,7 +21,20 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
+import { NavigationProps, PageNavigation } from "../PageNavigation"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
+import { PageHeaderNavigationContext } from "./PageHeaderNavigationContext"
+
+export {
+  PageHeaderNavigationContext,
+  PageHeaderNavigationProvider,
+  usePageHeaderNavigation,
+} from "./PageHeaderNavigationContext"
+export {
+  usePageHeaderItemNavigation,
+  type PageHeaderItemNavigationInput,
+  type UsePageHeaderItemNavigationConfig,
+} from "./usePageHeaderItemNavigation"
 
 export type PageAction = {
   label: string
@@ -38,21 +51,6 @@ export type PageAction = {
       actions: Array<{ label: string; href: string }>
     }
 )
-
-type NavigationProps = {
-  previous?: {
-    url: string
-    title: string
-  }
-  next?: {
-    url: string
-    title: string
-  }
-  counter?: {
-    current: number
-    total: number
-  }
-}
 
 type HeaderProps = {
   module: {
@@ -84,34 +82,6 @@ type HeaderProps = {
   oneSwitchAutoOpen?: boolean
 }
 
-function PageNavigationLink({
-  icon,
-  href,
-  label,
-  disabled,
-}: {
-  icon: IconType
-  href: string
-  label: string
-  disabled?: boolean
-}) {
-  const ref = useRef<HTMLAnchorElement>(null)
-  return (
-    <F0Button
-      href={href}
-      title={label}
-      aria-label={label}
-      disabled={disabled}
-      ref={ref}
-      size="sm"
-      variant="outline"
-      label={label}
-      icon={icon}
-      hideLabel
-    />
-  )
-}
-
 export function PageHeader({
   module,
   statusTag = undefined,
@@ -125,6 +95,10 @@ export function PageHeader({
   oneSwitchAutoOpen,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
+  const contextNavigation = useContext(PageHeaderNavigationContext)
+  // The prop always wins; context is the fallback for pages that inject
+  // navigation from below (e.g. useDataCollectionItemNavigation).
+  const effectiveNavigation = navigation ?? contextNavigation ?? undefined
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -234,33 +208,11 @@ export function PageHeader({
         )}
         {!embedded &&
           hasStatus &&
-          (navigation || hasActions || hasProductUpdates) && (
+          (effectiveNavigation || hasActions || hasProductUpdates) && (
             <div className="h-4 w-px bg-f1-border-secondary" />
           )}
-        {navigation && (
-          <div className="flex items-center gap-3">
-            {navigation.counter && (
-              <span className="text-sm text-f1-foreground-secondary">
-                {navigation.counter.current}/{navigation.counter.total}
-              </span>
-            )}
-            <div className="flex items-center gap-2">
-              <PageNavigationLink
-                icon={ChevronUp}
-                label={navigation.previous?.title || "Previous"}
-                href={navigation.previous?.url || ""}
-                disabled={!navigation.previous}
-              />
-              <PageNavigationLink
-                icon={ChevronDown}
-                label={navigation.next?.title || "Next"}
-                href={navigation.next?.url || ""}
-                disabled={!navigation.next}
-              />
-            </div>
-          </div>
-        )}
-        {navigation && hasActions && (
+        {effectiveNavigation && <PageNavigation {...effectiveNavigation} />}
+        {effectiveNavigation && hasActions && (
           <div className="h-4 w-px bg-f1-border-secondary" />
         )}
         {(hasProductUpdates || hasActions) && (

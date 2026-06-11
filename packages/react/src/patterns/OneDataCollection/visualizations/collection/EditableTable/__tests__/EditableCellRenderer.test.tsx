@@ -216,7 +216,8 @@ describe("EditableCellRenderer", () => {
       // onCellChange should have been called for both the name AND the email columns
       const emailCall = onCellChange.mock.calls.find(
         (call: unknown[]) =>
-          (call[0] as TestRecord).email === "admin@example.com"
+          (call[0] as { updatedItem: TestRecord }).updatedItem.email ===
+          "admin@example.com"
       )
       expect(emailCall).toBeDefined()
     })
