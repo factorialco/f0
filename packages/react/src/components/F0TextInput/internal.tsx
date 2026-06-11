@@ -10,12 +10,12 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 import { InputFieldProps } from "@/components/F0InputField"
 
-export type InputInternalProps<T extends string> = Pick<
+export type InputInternalProps = Pick<
   ComponentProps<typeof ShadcnInput>,
   "ref" | "id" | "aria-describedby" | "aria-invalid"
 > &
   Pick<
-    InputFieldProps<T>,
+    InputFieldProps<string>,
     | "autoFocus"
     | "required"
     | "disabled"
@@ -45,11 +45,11 @@ export type InputInternalProps<T extends string> = Pick<
     onPressEnter?: () => void
   }
 
-const InputInternal = <T extends string = string>({
+const InputInternal = ({
   type,
   onPressEnter,
   ...props
-}: InputInternalProps<T>) => {
+}: InputInternalProps) => {
   const [showPassword, setShowPassword] = useState(false)
 
   const localType = useMemo(() => {
@@ -61,7 +61,7 @@ const InputInternal = <T extends string = string>({
   }, [type, props.icon])
 
   const i18n = useI18n()
-  const buttonToggle: InputFieldProps<T>["buttonToggle"] = useMemo(() => {
+  const buttonToggle: InputFieldProps<string>["buttonToggle"] = useMemo(() => {
     if (type !== "password") {
       return props.buttonToggle
     }
@@ -78,7 +78,7 @@ const InputInternal = <T extends string = string>({
     <ShadcnInput
       {...props}
       type={localType}
-      onChange={(value) => props.onChange?.(value as T)}
+      onChange={(value) => props.onChange?.(value)}
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           onPressEnter?.()
