@@ -60,7 +60,7 @@ const meta: Meta<typeof EntitySelect> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div className="h-[520px] w-full">

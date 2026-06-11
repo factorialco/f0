@@ -7,7 +7,7 @@ import { VirtualList } from "./index"
 const meta: Meta<typeof VirtualList> = {
   title: "VirtualList",
   component: VirtualList,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   argTypes: {
     renderer: { table: { disable: true } },
     itemCount: { table: { disable: true } },

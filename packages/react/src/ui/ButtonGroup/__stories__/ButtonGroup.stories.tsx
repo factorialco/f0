@@ -12,7 +12,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   argTypes: {
     align: {
       control: "inline-radio",

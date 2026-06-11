@@ -12,7 +12,7 @@ import { SectionHeader } from "./index"
 const meta: Meta<typeof SectionHeader> = {
   component: SectionHeader,
   title: "Section header",
-  tags: ["experimental"],
+  tags: [],
   parameters: {
     layout: "padded",
   },

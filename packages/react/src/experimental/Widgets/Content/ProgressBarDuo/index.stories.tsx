@@ -5,7 +5,7 @@ import { ProgressBarDuo } from "./index"
 const meta: Meta<typeof ProgressBarDuo> = {
   title: "Widgets/Charts/ProgressBarDuo",
   component: ProgressBarDuo,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     value: 50,
     max: 100,

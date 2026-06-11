@@ -28,7 +28,7 @@ const meta = {
   title: "ButtonGroup/Patterns",
   component: ButtonGroup,
   parameters: { layout: "padded" },
-  tags: ["experimental"],
+  tags: [],
 } satisfies Meta<typeof ButtonGroup>
 
 export default meta

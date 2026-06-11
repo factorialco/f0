@@ -18,7 +18,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "no-sidebar"],
 } satisfies Meta<typeof Menu>
 
 export default meta

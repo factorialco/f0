@@ -87,7 +87,7 @@ This component supports **GitHub Flavored Markdown content**. You can use it by 
 `
 
 export const Default: Story = {
-  tags: ["experimental"],
+  tags: [],
   args: {
     content: htmlContent,
   },
@@ -95,7 +95,7 @@ export const Default: Story = {
 
 export const Markdown: Story = {
   parameters: { a11y: { skipCi: true } },
-  tags: ["experimental"],
+  tags: [],
   args: {
     content: markdownContent,
     format: "markdown",

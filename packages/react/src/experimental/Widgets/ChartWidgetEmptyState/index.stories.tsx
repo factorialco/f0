@@ -8,7 +8,7 @@ import { ChartWidgetEmptyState } from "./index"
 const meta: Meta<typeof ChartWidgetEmptyState> = {
   title: "Widgets/EmptyState",
   component: ChartWidgetEmptyState,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     title: "Performance",
     content: "See how Hugo's performance evolved over time",

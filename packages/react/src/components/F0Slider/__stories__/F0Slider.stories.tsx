@@ -9,7 +9,7 @@ import { sliderTooltipModes } from "../types"
 
 const meta = {
   component: F0Slider,
-  tags: ["experimental", "!autodocs"],
+  tags: ["!autodocs"],
   title: "F0Slider",
   parameters: {
     layout: "centered",

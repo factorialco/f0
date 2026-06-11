@@ -41,7 +41,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof KanbanLane>
 
 export default meta

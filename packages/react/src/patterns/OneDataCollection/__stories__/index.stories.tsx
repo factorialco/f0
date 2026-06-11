@@ -99,7 +99,7 @@ const meta = {
         "<p>Callback triggered when the state of the data collection changes. It gets the new state.</p>",
     },
   },
-  tags: ["autodocs", "experimental", "internal"],
+  tags: ["autodocs", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta

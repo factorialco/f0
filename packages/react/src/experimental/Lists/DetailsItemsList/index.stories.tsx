@@ -10,7 +10,7 @@ import { DetailsItemsList } from "./index"
 const meta: Meta = {
   title: "List/DetailsItemsList",
   component: DetailsItemsList,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     title: "Details",
     details: [

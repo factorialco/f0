@@ -11,7 +11,7 @@ import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
 const meta = {
   title: "Dropdown",
   component: Dropdown,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   argTypes: {
     disabled: {
       control: "boolean",

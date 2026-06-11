@@ -8,7 +8,7 @@ import { PrivateBox } from "./index"
 
 const meta: Meta = {
   title: "Profile/PrivateBox",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 type Story = StoryObj

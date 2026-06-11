@@ -9,7 +9,7 @@ import { F0SegmentedControl } from "../F0SegmentedControl"
 const meta = {
   title: "Components/F0SegmentedControl",
   component: F0SegmentedControl,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     items: [
       { value: "day", label: "Day" },

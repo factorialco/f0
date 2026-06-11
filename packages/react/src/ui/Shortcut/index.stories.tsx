@@ -17,7 +17,7 @@ const meta = {
       url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Web-Components?node-id=172-2793",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     keys: ["cmd", "k"],
   } satisfies ComponentProps<typeof Shortcut>,

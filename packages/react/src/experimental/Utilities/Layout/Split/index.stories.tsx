@@ -6,7 +6,7 @@ import { Split } from "./index"
 const meta = {
   title: "Layout/Blocks/Split",
   component: Split,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     gap: "4",
   },

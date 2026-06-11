@@ -13,7 +13,7 @@ import { ChartDecorator } from "./decorators"
 
 const meta = {
   title: "F0DataChart/Skeletons",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [ChartDecorator],
 } satisfies Meta
 

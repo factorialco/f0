@@ -12,6 +12,7 @@ import {
 
 const meta: Meta = {
   title: "Datasource/Examples",
+  tags: [],
   parameters: {
     a11y: {
       skipCi: true,

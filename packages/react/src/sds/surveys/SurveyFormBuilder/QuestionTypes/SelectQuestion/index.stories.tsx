@@ -11,7 +11,7 @@ import { SurveyFormBuilderElement } from "../../types"
 const meta: Meta<typeof SelectQuestion> = {
   title: "Surveys/SurveyFormBuilder/SelectQuestion",
   component: SelectQuestion,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args },

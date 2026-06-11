@@ -8,7 +8,7 @@ import { BasePostEvent, PostEvent } from "./index"
 const meta: Meta<typeof PostEvent> = {
   component: PostEvent,
   title: "Home/Communities/Post/PostEvent",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 export default meta

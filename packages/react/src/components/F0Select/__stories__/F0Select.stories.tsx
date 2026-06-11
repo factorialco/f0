@@ -324,7 +324,7 @@ const meta: Meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof F0Select>
 
 export default meta

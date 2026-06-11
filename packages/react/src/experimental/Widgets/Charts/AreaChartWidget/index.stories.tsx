@@ -8,7 +8,7 @@ import { AreaChartWidget } from "./index"
 const meta: Meta<typeof AreaChartWidget> = {
   title: "Widgets/Charts/AreaChartWidget",
   component: AreaChartWidget,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
     chromatic: { diffThreshold: 0.5 },

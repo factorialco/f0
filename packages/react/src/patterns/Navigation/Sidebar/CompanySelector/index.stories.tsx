@@ -5,7 +5,7 @@ import { CompanySelector } from "./index"
 const meta: Meta<typeof CompanySelector> = {
   title: "Sidebar/CompanySelector",
   component: CompanySelector,
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="max-w-[300px] bg-f1-background-tertiary p-3">

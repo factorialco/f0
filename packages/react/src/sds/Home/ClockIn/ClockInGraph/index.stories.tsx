@@ -5,7 +5,7 @@ import { ClockInGraph } from "./index"
 const meta: Meta<typeof ClockInGraph> = {
   title: "Home/ClockInGraph",
   component: ClockInGraph,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     trackedMinutes: 60 * 2 + 21,
     remainingMinutes: 60 * 4 + 39,

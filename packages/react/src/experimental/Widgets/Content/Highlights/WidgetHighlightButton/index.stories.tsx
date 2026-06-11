@@ -6,7 +6,7 @@ import { WidgetHighlightButton, WidgetHighlightButtonProps } from "./index"
 const meta: Meta<WidgetHighlightButtonProps> = {
   title: "Widgets/WidgetHighlightButton",
   component: WidgetHighlightButton,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

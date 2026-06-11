@@ -31,7 +31,7 @@ const FocusableElement = () => {
 const meta = {
   title: "Layout System",
   component: Layout.Page,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [PageDecorator],
   args: {
     children: (

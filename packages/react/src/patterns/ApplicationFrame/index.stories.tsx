@@ -435,7 +435,7 @@ const QuickActions = () => {
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
   },

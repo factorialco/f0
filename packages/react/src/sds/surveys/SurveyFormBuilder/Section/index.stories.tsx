@@ -6,7 +6,7 @@ import { SurveyFormBuilderProvider } from "../Context"
 const meta: Meta = {
   title: "Surveys/SurveyFormBuilder/Section",
   component: Section,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div className="max-w-[750px]">

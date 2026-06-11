@@ -25,7 +25,7 @@ const meta: Meta<typeof F0BigNumber> = {
       },
     },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["autodocs"],
   argTypes: {
     value: {
       control: "object",

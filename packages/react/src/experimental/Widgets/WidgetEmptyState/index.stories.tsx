@@ -8,7 +8,7 @@ import { WidgetEmptyState } from "./index"
 const meta: Meta<typeof WidgetEmptyState> = {
   title: "Widgets/WidgetEmptyState",
   component: WidgetEmptyState,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 export default meta

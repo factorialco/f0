@@ -9,6 +9,7 @@ import { CalloutSkeleton } from "./CalloutInternal"
 
 const meta = {
   title: "AI/AICallout",
+  tags: [],
   component: F0Callout,
   parameters: {
     layout: "centered",

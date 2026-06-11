@@ -6,7 +6,7 @@ import { Stack } from "./index"
 const meta = {
   title: "Layout/Blocks/Stack",
   component: Stack,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   render: (args) => (
     <Stack {...args}>
       {Array.from({ length: 10 }).map((_, i) => (

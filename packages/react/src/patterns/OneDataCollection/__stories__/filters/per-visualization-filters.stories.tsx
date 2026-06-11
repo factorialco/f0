@@ -18,7 +18,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["experimental", "internal"],
+  tags: ["internal"],
 } satisfies Meta
 
 export default meta

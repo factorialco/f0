@@ -7,7 +7,7 @@ import { TasksList, TasksListProps } from "./index"
 const meta: Meta<TasksListProps> = {
   title: "Profile/TasksList",
   component: TasksList,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

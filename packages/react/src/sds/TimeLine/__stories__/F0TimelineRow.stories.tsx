@@ -25,7 +25,7 @@ import { timelineRowStatuses } from "../types"
 const meta = {
   component: F0TimelineRow,
   title: "TimelineRow",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "padded",
     docs: {

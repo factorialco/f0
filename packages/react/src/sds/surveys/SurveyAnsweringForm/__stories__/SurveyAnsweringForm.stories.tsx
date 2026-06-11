@@ -317,7 +317,7 @@ function SurveyAnsweringFormStory(props: SurveyAnsweringFormStoryProps) {
 const meta: Meta<typeof SurveyAnsweringFormStory> = {
   title: "Surveys/SurveyAnsweringForm",
   component: SurveyAnsweringFormStory,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     elements: sampleElements,
     title: "Employee Review Q4",

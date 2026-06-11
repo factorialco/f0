@@ -9,6 +9,7 @@ import { courseModulesData, mockTOCData } from "./mocks"
 
 const meta: Meta<typeof F0TableOfContentPopover> = {
   title: "TableOfContentPopover",
+  tags: [],
   component: F0TableOfContentPopover,
   parameters: {
     layout: "centered",

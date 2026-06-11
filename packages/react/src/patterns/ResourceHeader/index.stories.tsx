@@ -13,7 +13,7 @@ import { ResourceHeader } from "./index"
 const meta: Meta<typeof ResourceHeader> = {
   title: "Resource header",
   component: ResourceHeader,
-  tags: ["stable"],
+  tags: [],
   parameters: {
     layout: "padded",
   },

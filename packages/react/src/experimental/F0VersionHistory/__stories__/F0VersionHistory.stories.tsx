@@ -46,6 +46,7 @@ const mockVersions: Version[] = [
 
 const meta: Meta<typeof F0VersionHistory> = {
   title: "VersionHistory",
+  tags: [],
   component: F0VersionHistory,
   parameters: {
     layout: "centered",

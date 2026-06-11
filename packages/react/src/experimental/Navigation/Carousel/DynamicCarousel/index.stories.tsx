@@ -9,7 +9,7 @@ import { DynamicCarousel } from "./index"
 const meta: Meta<typeof DynamicCarousel> = {
   title: "Carousel/DynamicCarousel",
   component: DynamicCarousel,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 export default meta

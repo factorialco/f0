@@ -4,6 +4,7 @@ import { SearchFilter } from "../SearchFilter"
 
 const meta = {
   title: "FilterPicker/Filters/SearchFilter",
+  tags: [],
   component: SearchFilter,
   parameters: {
     layout: "centered",

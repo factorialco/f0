@@ -5,7 +5,7 @@ import { WidgetAvatarsListItem, WidgetAvatarsListItemProps } from "./index"
 const meta: Meta<WidgetAvatarsListItemProps> = {
   title: "Widgets/WidgetAvatarsListItem",
   component: WidgetAvatarsListItem,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

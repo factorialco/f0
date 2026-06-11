@@ -54,7 +54,7 @@ const meta = {
       },
     },
   },
-  tags: ["experimental", "!autodocs"],
+  tags: ["!autodocs"],
 } satisfies Meta
 
 export default meta

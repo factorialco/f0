@@ -5,7 +5,7 @@ import { TaskItem, TaskItemProps } from "./index"
 const meta: Meta<TaskItemProps> = {
   title: "Profile/TaskItem",
   component: TaskItem,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

@@ -29,7 +29,7 @@ const primaryTabItemsWithVariants: TabItem[] = [
 const meta: Meta<typeof Tabs> = {
   title: "Navigation/Tabs",
   component: Tabs,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   argTypes: {
     secondary: {
       control: "boolean",

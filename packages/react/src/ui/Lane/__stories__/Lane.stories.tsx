@@ -33,7 +33,7 @@ const meta = {
       story: { inline: false, height: "750px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story, context) => {
       const containerHeight =
