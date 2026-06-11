@@ -3,12 +3,14 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
 
-import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
-import { F0AvatarPulse, F0AvatarPulseProps, pulses } from "../F0AvatarPulse"
+import { getBaseAvatarArgTypes } from "@/components/avatars/internal/BaseAvatar/__stories__/utils"
+import { pulses } from "@/lib/mood"
+
+import { F0AvatarPulse, F0AvatarPulseProps } from "../F0AvatarPulse"
 
 const meta: Meta<typeof F0AvatarPulse> = {
   component: F0AvatarPulse,
-  title: "Avatars/AvatarPulse",
+  title: "Home/AvatarPulse",
   tags: ["autodocs"],
   parameters: {
     docs: {
