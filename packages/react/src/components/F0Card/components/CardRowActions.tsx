@@ -330,6 +330,9 @@ export function CardRowActions({
   return wrap(
     <ButtonGroup
       primaryAction={primary}
+      primaryVariant={
+        primaryAction?.variant === "secondary" ? "outline" : "default"
+      }
       secondaryActions={secondaryItems}
       otherActions={otherActions}
       size={size}

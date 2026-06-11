@@ -10,6 +10,14 @@ export interface CardPrimaryAction {
   label: string
   icon?: IconType
   onClick: () => void
+  /**
+   * Visual emphasis of the primary action. `"secondary"` renders it as an
+   * outline button while keeping it pinned at the trailing edge (so a lone CTA
+   * never sheds into the "⋯" menu). Use it when the card's only action shouldn't
+   * carry full primary weight.
+   * @default "primary"
+   */
+  variant?: "primary" | "secondary"
 }
 
 export interface CardSecondaryAction {
@@ -87,6 +95,9 @@ export function CardActions({
           <F0Button
             label={primaryAction.label}
             icon={primaryAction.icon}
+            variant={
+              primaryAction.variant === "secondary" ? "outline" : undefined
+            }
             onClick={(e) => {
               e.stopPropagation()
               primaryAction.onClick()

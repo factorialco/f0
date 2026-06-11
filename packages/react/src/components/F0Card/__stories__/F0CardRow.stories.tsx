@@ -61,7 +61,8 @@ const meta: Meta<typeof F0CardRow> = {
     // serialized mock fn() source. They still appear in the args table.
     primaryAction: {
       control: false,
-      description: "Primary action button, pinned at the trailing edge.",
+      description:
+        'Primary action button, pinned at the trailing edge. Set `variant: "secondary"` to render it as an outline button while keeping it pinned (a lone CTA that never sheds into the ⋯ menu).',
     },
     secondaryActions: {
       control: false,
@@ -121,6 +122,23 @@ export const Default: Story = {
         onClick: fn(),
       },
     ],
+  },
+}
+
+/**
+ * A single CTA that shouldn't carry full primary weight: pass it as the
+ * `primaryAction` with `variant: "secondary"` to render an outline button. It
+ * stays pinned at the trailing edge and never collapses into the "⋯" menu, even
+ * in a narrow row — unlike a lone `secondaryActions` entry, which can shed.
+ */
+export const SecondaryPrimaryAction: Story = {
+  args: {
+    title: "Your export is ready to download",
+    primaryAction: {
+      label: "Download",
+      onClick: fn(),
+      variant: "secondary",
+    },
   },
 }
 

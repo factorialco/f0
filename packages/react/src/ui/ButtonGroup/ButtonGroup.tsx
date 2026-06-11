@@ -87,6 +87,12 @@ export type ButtonGroupSize = ButtonSize | { base: ButtonSize; md: ButtonSize }
 export interface ButtonGroupProps {
   /** The single primary action. A single object structurally guarantees ≤1 primary. */
   primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  /**
+   * Visual variant of the pinned primary node. `"outline"` renders it as an
+   * outline button while keeping it pinned (never shed into the "⋯" menu) — for
+   * a lone CTA that shouldn't carry full primary weight. @default "default"
+   */
+  primaryVariant?: "default" | "outline"
   /** Secondary actions (buttons / split buttons / inline separators), or a single link. */
   secondaryActions?: ButtonGroupSecondaryItem[] | ButtonGroupSecondaryLink
   /** Extra actions, always reachable through the "⋯" menu (supports separators / critical). */
@@ -176,14 +182,16 @@ const renderSecondaryLink = (
 
 const renderPrimaryNode = (
   action: ButtonGroupButton | ButtonGroupSplitAction,
-  size: ButtonSize
+  size: ButtonSize,
+  variant: "default" | "outline" = "default"
 ) =>
   isSplitAction(action)
-    ? renderSplitButton(action, size, "default")
-    : renderActionButton(action, size, "default")
+    ? renderSplitButton(action, size, variant)
+    : renderActionButton(action, size, variant)
 
 interface ButtonGroupBranchProps {
   primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  primaryVariant: "default" | "outline"
   secondaryItems: ButtonGroupSecondaryItem[]
   secondaryLink?: ButtonGroupSecondaryLink
   otherActions: DropdownItem[]
@@ -213,6 +221,7 @@ interface ButtonGroupBranchProps {
  */
 export function ButtonGroup({
   primaryAction,
+  primaryVariant = "default",
   secondaryActions,
   otherActions = [],
   size = "md",
@@ -259,6 +268,7 @@ export function ButtonGroup({
 
   const branchProps: ButtonGroupBranchProps = {
     primaryAction,
+    primaryVariant,
     secondaryItems,
     secondaryLink,
     otherActions,
@@ -296,6 +306,7 @@ export function ButtonGroup({
 /** Stacked (column) branch: everything visible, the menu is a mobile drawer. */
 function ButtonGroupStacked({
   primaryAction,
+  primaryVariant,
   secondaryItems,
   secondaryLink,
   otherActions,
@@ -317,7 +328,7 @@ function ButtonGroupStacked({
       {otherActions.length > 0 && <MobileDropdown items={otherActions} />}
       {stackedSecondaries}
       {secondaryLink && renderSecondaryLink(secondaryLink, size)}
-      {primaryAction && renderPrimaryNode(primaryAction, size)}
+      {primaryAction && renderPrimaryNode(primaryAction, size, primaryVariant)}
     </>
   )
 }
@@ -325,6 +336,7 @@ function ButtonGroupStacked({
 /** Row branch: width-measured overflow of plain secondaries into a "⋯" Dropdown. */
 function ButtonGroupRow({
   primaryAction,
+  primaryVariant,
   secondaryItems,
   secondaryLink,
   otherActions,
@@ -362,7 +374,7 @@ function ButtonGroupRow({
   const shownIds = new Set(shownPlain.map((action) => action.id))
 
   const primaryNode = primaryAction
-    ? renderPrimaryNode(primaryAction, size)
+    ? renderPrimaryNode(primaryAction, size, primaryVariant)
     : null
   const splitSecondaries = secondaryItems.filter(isSplitAction)
   const lastItem = secondaryItems[secondaryItems.length - 1]
