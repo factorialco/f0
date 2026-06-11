@@ -136,15 +136,26 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
+  // Only effective when the sidepanel is actually rendered (it provides the
+  // only way to switch between sections).
+  const showOnlySelectedSection =
+    showSectionsSidepanel &&
+    (styling?.showOnlySelectedSection ?? false) &&
+    !!sections &&
+    sectionIds.length > 0
+
   const handleSectionClick = useCallback(
     (sectionId: string) => {
+      // When only the selected section is shown, the content swaps in place —
+      // there is no anchor to scroll to.
+      if (showOnlySelectedSection) return
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" })
       }
     },
-    [name]
+    [name, showOnlySelectedSection]
   )
 
   const [activeSection, setActiveSection] = useState<string | undefined>(
@@ -178,7 +189,13 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           <div
             key={sectionId}
             id={generateAnchorId(name, sectionId)}
-            className={cn("scroll-mt-4", index !== 0 && SECTION_MARGIN)}
+            className={cn(
+              "scroll-mt-4",
+              index !== 0 && !showOnlySelectedSection && SECTION_MARGIN,
+              // Hide (rather than unmount) inactive sections so each
+              // section form keeps its values and dirty state.
+              showOnlySelectedSection && sectionId !== activeSection && "hidden"
+            )}
           >
             <F0FormSection
               formName={name}
@@ -628,6 +645,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const autoSaveFieldIdsRef = useRef(autoSaveFieldIds)
   autoSaveFieldIdsRef.current = autoSaveFieldIds
 
+  // Only effective when the sidepanel is actually rendered (it provides the
+  // only way to switch between sections).
+  const showOnlySelectedSection =
+    showSectionsSidepanel &&
+    (styling?.showOnlySelectedSection ?? false) &&
+    !!sections &&
+    sectionIds.length > 0
+
   // Track active section (the last clicked section)
   const [activeSection, setActiveSection] = useState<string | undefined>(
     sectionIds[0]
@@ -640,9 +665,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const handleSectionClick = useCallback(
     (sectionId: string) => {
       setActiveSection(sectionId)
+      const container = scrollContainerRef.current
+      if (showOnlySelectedSection) {
+        // The content swaps in place — reset the container scroll so the
+        // newly selected section starts at the top.
+        container?.scrollTo?.({ top: 0 })
+        return
+      }
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      const container = scrollContainerRef.current
       if (element && container) {
         // Scroll within the form's own scroll container to avoid
         // shifting parent containers (e.g. the canvas panel).
@@ -652,7 +683,44 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         })
       }
     },
-    [name]
+    [name, showOnlySelectedSection]
+  )
+
+  // Map each field to its owning section so error navigation can reveal the
+  // section of a field that is hidden by showOnlySelectedSection.
+  const fieldSectionMap = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const item of definition) {
+      if (item.type !== "section") continue
+      for (const child of item.section.fields) {
+        if (child.type === "field") {
+          map.set(child.field.id, item.id)
+        } else {
+          for (const field of child.fields) {
+            map.set(field.id, item.id)
+          }
+        }
+      }
+    }
+    return map
+  }, [definition])
+
+  const activeSectionRef = useRef(activeSection)
+  activeSectionRef.current = activeSection
+
+  // Before error navigation focuses a field, make sure its section is the
+  // selected one — otherwise the field is display:none and cannot be
+  // scrolled to or focused. useErrorNavigation defers the focus until this
+  // state update has committed.
+  const revealFieldSection = useCallback(
+    (fieldId: string) => {
+      if (!showOnlySelectedSection) return
+      const sectionId = fieldSectionMap.get(fieldId.split(".")[0])
+      if (sectionId && sectionId !== activeSectionRef.current) {
+        setActiveSection(sectionId)
+      }
+    },
+    [showOnlySelectedSection, fieldSectionMap]
   )
 
   // Convert sections to TOCItems for the TableOfContent component
@@ -762,6 +830,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   } = useErrorNavigation({
     formName: name,
     errors,
+    // Only pass the reveal callback when sections can actually be hidden, so
+    // regular forms keep the synchronous focus behavior.
+    onBeforeFocusField: showOnlySelectedSection
+      ? revealFieldSection
+      : undefined,
   })
 
   const resolvedActionBarLabel = (() => {
@@ -1224,7 +1297,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.id}
-                className={index !== 0 ? SECTION_MARGIN : ""}
+                className={cn(
+                  index !== 0 && !showOnlySelectedSection && SECTION_MARGIN,
+                  // Hide (rather than unmount) inactive sections so their
+                  // fields stay registered and keep their values, dirty
+                  // state, and validation.
+                  showOnlySelectedSection &&
+                    groupedItem.item.id !== activeSection &&
+                    "hidden"
+                )}
               >
                 <SectionRenderer section={groupedItem.item} />
               </div>
