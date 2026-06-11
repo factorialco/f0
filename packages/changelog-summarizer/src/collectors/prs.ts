@@ -203,6 +203,11 @@ export interface PrFacts {
   unclassified: string[];
 }
 
+// Explicit promotion in the PR title — catches "promote to stable" PRs that
+// only flip the tag / transfer CODEOWNERS without adding new MDX docs.
+const PROMOTE_RE =
+  /\bpromot\w+\b[^.]*\bstable\b|\bmark\w*\s+as\s+stable\b|\bstabili[sz]\w+\b/i;
+
 export function classifyMergedPrs(
   prs: PrWithFiles[],
   storyIndex?: StoryIndex,
@@ -247,20 +252,33 @@ export function classifyMergedPrs(
       continue;
     }
 
-    // 2. Stabilization — the component's manual MDX docs were added (the final
-    //    Definition-of-Done step). NOT inferred from the `stable` tag alone.
-    //    AND only counts if the author is on the F0/Foundations team: only
-    //    Foundations promotes to stable; other teams can ship new components
-    //    but can't mark something stable.
-    const stabilizedComps = stabilizedComponents(pr.files);
-    if (stabilizedComps.length > 0) {
+    // 2. Stabilization (Foundations only). Two signals:
+    //    (a) the PR ADDS the component's manual MDX docs (DoD complete), or
+    //    (b) the PR title is an explicit promotion ("promote … to stable",
+    //        "stabilize", "mark as stable") — e.g. a tag flip with no new docs.
+    //    The `stable` tag alone is NOT trusted, and only Foundations promotes:
+    //    other teams can ship new components but can't mark something stable.
+    const stabilizedComps = new Set(stabilizedComponents(pr.files));
+    if (PROMOTE_RE.test(pr.title)) {
+      const c = isComponentName(scope)
+        ? scope
+        : pr.files
+            .map((f) => componentFromMdxPath(f.filename))
+            .find((x): x is string => x !== null) ??
+          reactStories
+            .map((f) => componentFromStoryPath(f.filename))
+            .find((x): x is string => x !== null) ??
+          null;
+      if (c) stabilizedComps.add(c);
+    }
+    if (stabilizedComps.size > 0) {
       const byFoundations =
         !foundationsAuthors || foundationsAuthors.has(pr.author);
       if (byFoundations) {
         for (const component of stabilizedComps) {
           stabilized.push({
             component,
-            summary: "Now documented and stable — safe to use in production",
+            summary: "Now stable — safe to use in production",
             storybook: true,
             author: pr.author,
           });
@@ -268,8 +286,8 @@ export function classifyMergedPrs(
         contributors.add(pr.author);
         continue;
       }
-      // MDX docs added by a non-Foundations author → NOT a stable promotion.
-      // Fall through and let it be classified as an enhancement/other instead.
+      // Detected as a promotion but by a non-Foundations author → not stable.
+      // Fall through and let it be classified as an enhancement/other.
     }
 
     // 3. Breaking change
