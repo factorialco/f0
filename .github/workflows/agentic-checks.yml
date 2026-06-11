@@ -1,0 +1,101 @@
+name: Agentic Checks (Beta)
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    paths:
+      - "packages/react/**"
+
+jobs:
+  agentic-check:
+    name: ${{ matrix.emoji }} ${{ matrix.name }}
+    permissions:
+      contents: read
+      pull-requests: write
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: agentic-checks-${{ matrix.id }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        id:
+          - code-review
+          - a11y-review
+          - storybook-review
+          - test-coverage-review
+        include:
+          - id: code-review
+            name: Code Review
+            emoji: "\U0001F4CB"
+            prompt: .github/agent-prompts/code-review.md
+          - id: a11y-review
+            name: Accessibility Review
+            emoji: "\u267F"
+            prompt: .github/agent-prompts/a11y-review.md
+          - id: storybook-review
+            name: Storybook Review
+            emoji: "\U0001F4D6"
+            prompt: .github/agent-prompts/storybook-review.md
+          - id: test-coverage-review
+            name: Test Coverage Review
+            emoji: "\U0001F9EA"
+            prompt: .github/agent-prompts/test-coverage-review.md
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      COPILOT_GITHUB_TOKEN: ${{ secrets.AGENTIC_CHECKS }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PROMPT_FILE: ${{ matrix.prompt }}
+      CHECK_NAME: ${{ matrix.name }}
+      CHECK_EMOJI: ${{ matrix.emoji }}
+      MODEL: claude-opus-4.6
+    steps:
+      - name: Runner uptime
+        run: uptime
+
+      - name: Runner disk space
+        run: df -h
+
+      # --- Trust model: copy script + prompt from base branch ---
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+
+      - id: copy-trusted
+        name: Copy trusted script and prompt
+        run: |
+          if [ -f .github/scripts/agentic-check.sh ] && [ -f "$PROMPT_FILE" ]; then
+            cp .github/scripts/agentic-check.sh /tmp/agentic-check.sh
+            cp "$PROMPT_FILE" /tmp/prompt.md
+            echo "trusted=true" >> "$GITHUB_OUTPUT"
+            echo "Using trusted script and prompt from base branch"
+          else
+            echo "::warning::Script or prompt not found on base branch — skipping check (untrusted fallback disabled for security)"
+            echo "trusted=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # --- Checkout PR head (with full history for diff context) ---
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Restore trusted script and prompt
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: |
+          cp /tmp/agentic-check.sh .github/scripts/agentic-check.sh
+          cp /tmp/prompt.md "$PROMPT_FILE"
+
+      - name: Install Copilot CLI
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: npm install -g @github/copilot@1.0.7
+
+      - name: Run Agentic Check
+        if: steps.copy-trusted.outputs.trusted == 'true'
+        run: bash .github/scripts/agentic-check.sh
