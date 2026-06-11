@@ -3839,6 +3839,97 @@ describe("F0Form showOnlySelectedSection", () => {
   })
 })
 
+describe("F0Form sidepanel renderIf filtering", () => {
+  const buildConditionalSchema = () =>
+    z.object({
+      showExtra: f0FormField(z.boolean(), {
+        label: "Show extra",
+        fieldType: "checkbox",
+        section: "personal",
+      }),
+      name: f0FormField(z.string(), {
+        label: "Name",
+        section: "personal",
+      }),
+      extra: f0FormField(z.string().optional(), {
+        label: "Extra field",
+        section: "extra",
+      }),
+    })
+
+  const conditionalSections: Record<string, F0SectionConfig> = {
+    personal: { title: "Personal" },
+    extra: {
+      title: "Extra",
+      renderIf: ({ values }) => values.showExtra === true,
+    },
+  }
+
+  const getSidebar = (container: HTMLElement) => {
+    const sidebar = container.querySelector<HTMLElement>(".sticky")
+    expect(sidebar).toBeInTheDocument()
+    return sidebar!
+  }
+
+  it("omits conditionally-hidden sections from the sidepanel and adds them when the condition becomes true", async () => {
+    const user = userEvent.setup()
+
+    const { container } = render(
+      <F0Form
+        name="toc-renderif"
+        schema={buildConditionalSchema()}
+        defaultValues={{ showExtra: false, name: "", extra: "" }}
+        onSubmit={async () => ({ success: true })}
+        sections={conditionalSections}
+        styling={{ showSectionsSidepanel: true }}
+      />
+    )
+
+    const sidebar = getSidebar(container)
+
+    // The "extra" section is hidden by renderIf, so it must not be listed
+    expect(within(sidebar).getByText("Personal")).toBeInTheDocument()
+    expect(within(sidebar).queryByText("Extra")).not.toBeInTheDocument()
+
+    await user.click(screen.getByLabelText("Show extra"))
+
+    expect(within(sidebar).getByText("Extra")).toBeInTheDocument()
+  })
+
+  it("falls back to the first visible section when the active section is hidden by renderIf (showOnlySelectedSection)", async () => {
+    const user = userEvent.setup()
+
+    const { container } = render(
+      <F0Form
+        name="toc-renderif-fallback"
+        schema={buildConditionalSchema()}
+        defaultValues={{ showExtra: true, name: "", extra: "" }}
+        onSubmit={async () => ({ success: true })}
+        sections={conditionalSections}
+        styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+      />
+    )
+
+    const sidebar = getSidebar(container)
+
+    // Select the conditional section
+    await user.click(within(sidebar).getByText("Extra"))
+    const personalWrapper = document.getElementById(
+      generateAnchorId("toc-renderif-fallback", "personal")
+    )?.parentElement
+    expect(personalWrapper).toHaveClass("hidden")
+
+    // Disable the condition: the checkbox lives in the (hidden) personal
+    // section, but jsdom does not apply CSS classes, so it stays clickable
+    await user.click(screen.getByLabelText("Show extra"))
+
+    // The "extra" section disappears from the sidepanel and the first
+    // visible section becomes active again
+    expect(within(sidebar).queryByText("Extra")).not.toBeInTheDocument()
+    expect(personalWrapper).not.toHaveClass("hidden")
+  })
+})
+
 describe("F0Form renderIf hidden field layout", () => {
   it("wrapper div of a hidden field (renderIf=false) has the has-[>span.hidden]:hidden class so it does not impact layout", () => {
     const formSchema = z.object({

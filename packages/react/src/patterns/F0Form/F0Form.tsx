@@ -46,6 +46,7 @@ import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "./fields/FieldRenderer"
+import { evaluateRenderIf } from "./fields/utils"
 import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
@@ -671,7 +672,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   }, [definition])
 
   const activeSectionRef = useRef(activeSection)
-  activeSectionRef.current = activeSection
 
   // Before error navigation focuses a field, make sure its section is the
   // selected one — otherwise the field is display:none and cannot be
@@ -687,17 +687,6 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     },
     [showOnlySelectedSection, fieldSectionMap]
   )
-
-  // Convert sections to TOCItems for the TableOfContent component
-  const tocItems: TOCItem[] = useMemo(() => {
-    if (!sections || !showSectionsSidepanel) return []
-
-    return sectionIds.map((sectionId) => ({
-      id: sectionId,
-      label: sections[sectionId]?.title ?? sectionId,
-      onClick: () => handleSectionClick(sectionId),
-    }))
-  }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
   // Create custom error map for localized validation messages
   const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
@@ -726,6 +715,56 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     wasLoadingRef.current = isFormLoading
   }, [isFormLoading, defaultValues, form])
+
+  const hasConditionalSections = useMemo(
+    () =>
+      definition.some(
+        (item) => item.type === "section" && !!item.section.renderIf
+      ),
+    [definition]
+  )
+
+  // Subscribe to value changes only when a section's visibility can actually
+  // change — evaluating renderIf needs the latest values (same pattern as
+  // SectionRenderer, which evaluates the same conditions to hide content).
+  const formValuesForSections =
+    showSectionsSidepanel && hasConditionalSections ? form.watch() : undefined
+
+  // Sections whose renderIf currently evaluates to false are not rendered by
+  // SectionRenderer, so they must not be offered in the sidepanel either.
+  // Computed inline (not memoized) because watch() can return the same
+  // mutated object across renders.
+  const visibleSectionIds = formValuesForSections
+    ? definition
+        .filter((item): item is SectionDefinition => item.type === "section")
+        .filter(
+          (item) =>
+            !item.section.renderIf ||
+            evaluateRenderIf(item.section.renderIf, formValuesForSections)
+        )
+        .map((item) => item.id)
+    : sectionIds
+
+  // If the active section becomes hidden by renderIf, fall back to the first
+  // visible one.
+  const effectiveActiveSection =
+    activeSection && visibleSectionIds.includes(activeSection)
+      ? activeSection
+      : visibleSectionIds[0]
+
+  activeSectionRef.current = effectiveActiveSection
+
+  // Convert visible sections to TOCItems for the TableOfContent component.
+  // Built inline (not memoized) because visibleSectionIds is recomputed on
+  // every render when conditional sections exist.
+  const tocItems: TOCItem[] =
+    sections && showSectionsSidepanel
+      ? visibleSectionIds.map((sectionId) => ({
+          id: sectionId,
+          label: sections[sectionId]?.title ?? sectionId,
+          onClick: () => handleSectionClick(sectionId),
+        }))
+      : []
 
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
@@ -1191,7 +1230,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
                   // fields stay registered and keep their values, dirty
                   // state, and validation.
                   showOnlySelectedSection &&
-                    groupedItem.item.id !== activeSection &&
+                    groupedItem.item.id !== effectiveActiveSection &&
                     "hidden"
                 )}
               >
@@ -1234,7 +1273,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
               <F0TableOfContent
                 items={tocItems}
-                activeItem={activeSection}
+                activeItem={effectiveActiveSection}
                 scrollable={false}
               />
             </div>
