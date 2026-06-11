@@ -234,6 +234,18 @@ including deep direct links — resolve their neighbors backend-side, so the
 arrows behave as if the whole filtered set were loaded. The story below
 demonstrates all of it together.
 
+`useDataCollectionItemNavigation` exposes the arrows in two modes via
+`navigationMode`, both producing the same `NavigationProps` contract:
+
+- **`"url"`** (default) — each arrow is a link to the item's `itemUrl`. Use it
+  for full-page detail views where prev/next changes the route (the PageHeader
+  story above).
+- **`"callback"`** — each arrow calls `goToPrevious`/`goToNext`, swapping the
+  active item **in place with no URL change**. Use it for a mounted
+  sidepanel/dialog: pass the result to `F0Dialog`'s
+  `controls={{ kind: "resource", navigation }}` and drive `activeItemId` from
+  `onActiveItemChange`. See `Dialog` → _WithMountedSidepanelNavigation_.
+
 <div
   className="header-container"
   style={{

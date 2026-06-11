@@ -107,6 +107,7 @@ export function useDataCollectionItemNavigation<
     enabled = true,
     restorePersistedState = true,
     currentFilters: currentFiltersOverride,
+    navigationMode = "url",
     deps = [],
   } = props
 
@@ -384,6 +385,7 @@ export function useDataCollectionItemNavigation<
 
   const navigation = usePageHeaderItemNavigation<R>(navigationState, {
     getItemTitle,
+    mode: navigationMode,
   })
 
   // True from the render an off-window gap appears until neighbors resolve —

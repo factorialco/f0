@@ -24,6 +24,9 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
 
+import { PaginatedFetchOptions } from "@/hooks/datasource"
+import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
+
 import { F0Dialog } from "../index"
 import { dialogPositions, dialogWidths } from "../types"
 
@@ -414,6 +417,98 @@ export const WithResourceHeaderAndFullscreenPosition: Story = {
     ...WithResourceHeader.args,
     position: "fullscreen",
   },
+}
+
+/**
+ * Mounted-sidepanel navigation driven by `useDataCollectionItemNavigation` in
+ * **callback mode**. The list on the left stays mounted; opening a row sets an
+ * active id and the dialog shows that record. The header's
+ * `controls={{ kind: "resource", navigation }}` is fed the hook's render-ready
+ * `navigation` — but because the hook runs with `navigationMode: "callback"`,
+ * the prev/next arrows call `goToPrevious`/`goToNext` and swap the active item
+ * **in place, with no URL change / no remount** (the same `NavigationProps`
+ * contract PageHeader uses in url mode). The `current/total` counter still
+ * comes from the collection.
+ */
+const SIDEPANEL_EMPLOYEES = Array.from({ length: 8 }, (_, i) => ({
+  id: `${i + 1}`,
+  name: `Employee ${i + 1}`,
+  role: i % 2 === 0 ? "Engineer" : "Designer",
+}))
+
+const SIDEPANEL_COLLECTION_ID = "storybook/dialog-sidepanel-employees/v1"
+
+const sidepanelSource = {
+  // One declared page holds the whole set, so navigation resolves entirely
+  // from the loaded window — the focus here is the callback arrows, not the
+  // neighbors fallback (covered by the PageHeader story).
+  dataAdapter: {
+    paginationType: "pages" as const,
+    perPage: 50,
+    fetchData: (_options: PaginatedFetchOptions<Record<string, never>>) => ({
+      type: "pages" as const,
+      records: SIDEPANEL_EMPLOYEES,
+      total: SIDEPANEL_EMPLOYEES.length,
+      perPage: 50,
+      currentPage: 1,
+      pagesCount: 1,
+    }),
+  },
+}
+
+const MountedSidepanelDemo = (args: ComponentProps<typeof F0Dialog>) => {
+  const [activeId, setActiveId] = useState<string | null>(null)
+
+  const { navigation } = useDataCollectionItemNavigation({
+    source: sidepanelSource,
+    collectionId: SIDEPANEL_COLLECTION_ID,
+    activeItemId: activeId,
+    navigationMode: "callback",
+    onActiveItemChange: (id) => setActiveId(id === null ? null : String(id)),
+    getItemTitle: (employee) => String(employee.name),
+  })
+
+  const activeEmployee = SIDEPANEL_EMPLOYEES.find((e) => e.id === activeId)
+
+  return (
+    <div className="flex flex-col gap-2 p-4">
+      <span className="text-sm text-f1-foreground-secondary">
+        The list stays mounted; arrows in the panel navigate by id without
+        changing the URL.
+      </span>
+      {SIDEPANEL_EMPLOYEES.map((employee) => (
+        <F0Button
+          key={employee.id}
+          variant="outline"
+          label={`${employee.name} — ${employee.role}`}
+          onClick={() => setActiveId(employee.id)}
+        />
+      ))}
+      <F0Dialog
+        {...args}
+        isOpen={activeId !== null}
+        onClose={() => setActiveId(null)}
+        title={activeEmployee?.name ?? "Employee"}
+        controls={{ kind: "resource", navigation: navigation ?? undefined }}
+      >
+        <div className="flex flex-col gap-2 p-4">
+          <div className="text-lg font-semibold text-f1-foreground">
+            {activeEmployee?.name}
+          </div>
+          <div className="text-base text-f1-foreground-secondary">
+            {activeEmployee?.role}
+          </div>
+        </div>
+      </F0Dialog>
+    </div>
+  )
+}
+
+export const WithMountedSidepanelNavigation: Story = {
+  args: {
+    position: "right",
+  },
+  render: (args) => <MountedSidepanelDemo {...args} />,
 }
 
 export const WithFewItems: Story = {

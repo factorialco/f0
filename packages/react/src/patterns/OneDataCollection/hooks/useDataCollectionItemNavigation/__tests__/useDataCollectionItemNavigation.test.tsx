@@ -297,6 +297,62 @@ describe("useDataCollectionItemNavigation", () => {
     })
   })
 
+  describe("callback navigation mode", () => {
+    it("exposes onClick arrows (no urls) that advance the active item in-window", async () => {
+      const fetchData = makeFetchData()
+      const onActiveItemChange = vi.fn()
+
+      const { result } = zeroRenderHook(() =>
+        useDataCollectionItemNavigation({
+          source: makeSource(fetchData),
+          collectionId: "test/items/v1",
+          defaultActiveItemId: 2,
+          navigationMode: "callback",
+          onActiveItemChange,
+        })
+      )
+
+      await waitFor(() => expect(result.current.navigation).not.toBeNull())
+
+      // Callback mode: onClick handlers, no urls
+      expect(result.current.navigation?.next?.url).toBeUndefined()
+      expect(result.current.navigation?.previous?.url).toBeUndefined()
+      expect(result.current.navigation?.counter).toEqual({
+        current: 2,
+        total: 25,
+      })
+
+      result.current.navigation?.next?.onClick?.()
+      await waitFor(() => expect(result.current.activeItemId).toBe(3))
+      expect(onActiveItemChange).toHaveBeenCalledWith(3)
+    })
+
+    it("advances off-window via the neighbors fallback", async () => {
+      const fetchData = makeFetchData()
+      const fetchItemNeighbors = makeFetchItemNeighbors()
+
+      const { result } = zeroRenderHook(() =>
+        useDataCollectionItemNavigation({
+          source: makeSource(fetchData, fetchItemNeighbors),
+          collectionId: "test/items/v1",
+          // Item 15 lives on page 2 — resolved id-relatively
+          defaultActiveItemId: 15,
+          navigationMode: "callback",
+        })
+      )
+
+      await waitFor(() => expect(result.current.navigation).not.toBeNull())
+      expect(result.current.navigation?.next?.url).toBeUndefined()
+      expect(result.current.navigation?.counter).toEqual({
+        current: 15,
+        total: 25,
+      })
+
+      result.current.navigation?.next?.onClick?.()
+      await waitFor(() => expect(result.current.activeItemId).toBe(16))
+    })
+  })
+
   it("degrades gracefully when the active item is not in the loaded window", async () => {
     const fetchData = makeFetchData()
 
