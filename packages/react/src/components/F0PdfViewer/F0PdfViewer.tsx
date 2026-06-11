@@ -11,6 +11,7 @@ import {
 } from "react"
 
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import { Skeleton } from "@/ui/skeleton"
 import { Document, Page, type PDFDocumentProxy } from "@/ui/pdf"
 
 import { PdfLoadingState } from "./components/PdfLoadingState"
@@ -63,6 +64,10 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
 
     const totalPages =
       pagesToDisplay.length > 0 ? pagesToDisplay.length : pdf?.numPages
+
+    const sampleMetrics = pages.find(Boolean)
+    const pageSkeletonWidth = (sampleMetrics?.originalWidth ?? 595) * scale
+    const pageSkeletonHeight = (sampleMetrics?.originalHeight ?? 842) * scale
 
     const scaleOptions = useMemo(
       (): { value: F0PdfScale; label: string }[] => [
@@ -268,13 +273,17 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
             onDownload={onDownload}
           />
 
-          {!pdf && <PdfLoadingState label={pdfViewer.loading} />}
-
           {url && (
             <Document
               file={file}
               onLoadSuccess={onDocumentLoadSuccess}
-              loading={<PdfLoadingState label={pdfViewer.loading} />}
+              loading={
+                <PdfLoadingState
+                  label={pdfViewer.loading}
+                  width={pageSkeletonWidth}
+                  height={pageSkeletonHeight}
+                />
+              }
             >
               {pdf &&
                 Array.from({ length: totalPages ?? 0 }).map((_, index) => {
@@ -292,6 +301,14 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
                         pageNumber={pageNumber}
                         scale={scale}
                         rotate={rotation}
+                        loading={
+                          <Skeleton
+                            style={{
+                              width: pageSkeletonWidth,
+                              height: pageSkeletonHeight,
+                            }}
+                          />
+                        }
                         renderForms
                         renderTextLayer
                         inputRef={(reference) => {
