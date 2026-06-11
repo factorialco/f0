@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.58.0](https://github.com/factorialco/f0/compare/f0-react-v2.57.0...f0-react-v2.58.0) (2026-06-11)
+
+
+### Features
+
+* **ai-chat:** add dictation start/cancel tracking callbacks ([#4408](https://github.com/factorialco/f0/issues/4408)) ([9d49d92](https://github.com/factorialco/f0/commit/9d49d9265635713582ab19680f20348d21953f1b))
+
+
+### Bug Fixes
+
+* **ActionBar:** change button variant from ghost to outline  ([#4410](https://github.com/factorialco/f0/issues/4410)) ([a913e28](https://github.com/factorialco/f0/commit/a913e28ee3c5277442d4743eecc405d7846fc05c))
+
 ## [2.57.0](https://github.com/factorialco/f0/compare/f0-react-v2.56.0...f0-react-v2.57.0) (2026-06-10)
 
 
