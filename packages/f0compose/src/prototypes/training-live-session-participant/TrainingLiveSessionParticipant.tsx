@@ -1628,26 +1628,22 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
             </F0BoxWithClassName>
           </F0BoxWithClassName>
           <F0BoxWithClassName paddingTop="lg" paddingLeft="md" paddingRight="md" overflowY="auto" grow>
-            <F0Box gap="3xl">
-              <F0Box gap="xs">
+            <F0Box display="flex" flexDirection="column" gap="3xl">
+              <F0Box display="flex" flexDirection="column" gap="xs">
                 <F0Text content="Status" variant="label" />
                 <F0Box display="flex" justifyContent="start">
                   <F0TagStatus text={getSessionStatus(session).label} variant={getSessionStatus(session).status} />
                 </F0Box>
               </F0Box>
               <F0Box display="grid" columns="2" gap="xl">
-                <F0Box gap="xl" display="flex" flexDirection="column">
-                  <ParticipantDetailField label="Course name"><F0Text content={course.name} variant="body" /></ParticipantDetailField>
-                  <ParticipantDetailField label="Date"><F0Text content={session.scheduleLabel} variant="body" /></ParticipantDetailField>
-                  <ParticipantDetailField label="Location"><F0Text content="-" variant="body" /></ParticipantDetailField>
-                  <ParticipantDetailField label="Modality"><F0Box display="flex" alignItems="center" gap="sm"><F0Icon icon={Laptop} size="md" /><F0Text content={session.modality} variant="body" /></F0Box></ParticipantDetailField>
-                </F0Box>
-                <F0Box gap="xl" display="flex" flexDirection="column">
-                  <ParticipantDetailField label="Type"><F0TagRaw text={session.type === "self-paced" ? "Self-paced" : "Scheduled"} /></ParticipantDetailField>
-                  <ParticipantDetailField label="Hour"><F0Text content={session.scheduleLabel} variant="body" /></ParticipantDetailField>
-                  <ParticipantDetailField label="Link"><F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} onClick={() => onJoinSession(session)} /></F0Box></ParticipantDetailField>
-                  <ParticipantDetailField label="Instructors"><F0AvatarList avatars={[{ type: "person", firstName: "Adam", lastName: "Joseph" }]} size="sm" type="person" max={3} /></ParticipantDetailField>
-                </F0Box>
+                <ParticipantDetailField label="Course name"><F0Text content={course.name} variant="body" /></ParticipantDetailField>
+                <ParticipantDetailField label="Type"><F0TagRaw text={session.type === "self-paced" ? "Self-paced" : "Scheduled"} /></ParticipantDetailField>
+                <ParticipantDetailField label="Date"><F0Text content={session.scheduleLabel} variant="body" /></ParticipantDetailField>
+                <ParticipantDetailField label="Hour"><F0Text content={session.scheduleLabel} variant="body" /></ParticipantDetailField>
+                <ParticipantDetailField label="Location"><F0Text content="-" variant="body" /></ParticipantDetailField>
+                <ParticipantDetailField label="Link"><F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} onClick={() => onJoinSession(session)} /></F0Box></ParticipantDetailField>
+                <ParticipantDetailField label="Modality"><F0Box display="flex" alignItems="center" gap="sm"><F0Icon icon={Laptop} size="md" /><F0Text content={session.modality} variant="body" /></F0Box></ParticipantDetailField>
+                <ParticipantDetailField label="Instructors"><F0AvatarList avatars={[{ type: "person", firstName: "Adam", lastName: "Joseph" }]} size="sm" type="person" max={3} /></ParticipantDetailField>
               </F0Box>
               {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="Click ‘Join session’ and wait for the instructor to start the session." /> : null}
               <ParticipantDetailField label="Description"><F0Text content={course.description} variant="body" /></ParticipantDetailField>
@@ -1660,7 +1656,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
 }
 
 function ParticipantDetailField({ label, children }: { label: string; children: ReactNode }) {
-  return <F0Box gap="sm" paddingBottom="xl"><F0Text content={label} variant="label" />{children}</F0Box>
+  return <F0Box display="flex" flexDirection="column" gap="sm"><F0Text content={label} variant="label" />{children}</F0Box>
 }
 
 export function TrainingLiveSessionsInstructorExperience() {
