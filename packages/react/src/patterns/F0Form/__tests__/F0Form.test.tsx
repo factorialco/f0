@@ -4051,10 +4051,12 @@ describe("F0Form row layout", () => {
       />
     )
 
-    const rowEl = container.querySelector('[class*="xs:flex-row"]')
+    const rowEl = container.querySelector('[class*="@[480px]:flex-row"]')
     expect(rowEl).toBeInTheDocument()
-    // Stacks vertically below xs, side by side from xs up
-    expect(rowEl).toHaveClass("flex-col", "xs:flex-row")
+    // The row responds to its container width (not the viewport): stacks
+    // vertically below 480px of available space, side by side above
+    expect(rowEl).toHaveClass("flex-col", "@[480px]:flex-row")
+    expect(rowEl!.parentElement).toHaveClass("@container")
     // Each field spans the full width when stacked. In row mode the w-full
     // is inert: flex-1 sets flex-basis 0, which takes precedence over width
     // for main-axis sizing, so fields keep equal widths.
