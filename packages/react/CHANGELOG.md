@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.61.2](https://github.com/factorialco/f0/compare/f0-react-v2.61.1...f0-react-v2.61.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* **OverflowList:** never render stale items across an items-prop change ([#4422](https://github.com/factorialco/f0/issues/4422)) ([25b9366](https://github.com/factorialco/f0/commit/25b9366162565bc1898b8a7474fd92e72c96cea2))
+
 ## [2.61.1](https://github.com/factorialco/f0/compare/f0-react-v2.61.0...f0-react-v2.61.1) (2026-06-11)
 
 
