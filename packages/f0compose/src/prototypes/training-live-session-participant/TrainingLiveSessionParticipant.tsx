@@ -1649,7 +1649,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
                   <ParticipantDetailField label="Instructors"><F0AvatarList avatars={[{ type: "person", firstName: "Adam", lastName: "Joseph" }]} size="sm" type="person" max={3} /></ParticipantDetailField>
                 </F0Box>
               </F0Box>
-              {session.liveState === "waiting" ? <F0Alert variant="info" title="Session not started yet" description="Participants can join the waiting room until the instructor starts the session." /> : null}
+              {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="Click ‘Join session’ and wait for the instructor to start the session." /> : null}
               <ParticipantDetailField label="Description"><F0Text content={course.description} variant="body" /></ParticipantDetailField>
             </F0Box>
           </F0BoxWithClassName>
@@ -4815,7 +4815,7 @@ function SessionPrejoinScreen({
       onClose={onBack}
       title={`${session.name} · ${groupName}`}
       width="xl"
-      primaryAction={{ label: role === "instructor" ? "Start session" : "Join Call", onClick: onJoin }}
+      primaryAction={{ label: role === "instructor" ? "Start session" : "Join", onClick: onJoin }}
     >
       <F0Box display="flex" flexDirection="column" gap="lg">
         <F0BoxWithClassName display="flex" justifyContent="center" alignItems="center" background="secondary" borderRadius="xl" padding="lg" style={{ height: 432 }}>
@@ -4893,7 +4893,7 @@ function PrejoinSettingsDialog({ isOpen, onClose }: { isOpen: boolean; onClose: 
             icon={Bell}
           />
           <F0Select<string>
-            label="Blur background"
+            label="Background"
             value={background}
             onChange={(value: string) => setBackground(value)}
             options={[
@@ -4960,9 +4960,9 @@ function SessionNotesEditor({ session }: { session: GroupSessionRow }) {
   return (
     <NotesTextEditor
       titlePlaceholder="Training session notes"
-      placeholder="Write your private notes for this session…"
+      placeholder="Take notes with rich formatting, including bold text, lists, and links."
       initialEditorState={{ title: notes.title, content: notes.content }}
-      metadata={[{ label: "Notes", value: { type: "status", label: "Private", variant: "neutral" } }]}
+      metadata={[{ label: "Notes", value: { type: "status", label: "Only visible to you", variant: "neutral" } }]}
       onTitleChange={(title) => setSessionNotesTitle(session.id, title)}
       onChange={({ json }) => setSessionNotesContent(session.id, json ?? "")}
     />
@@ -5018,8 +5018,8 @@ function EndSessionModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onCl
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Review attendance"
-      description={`The session has ended. Attendance is set automatically from each person's time in the session — anyone below the ${COMPLETION_THRESHOLD_PCT}% minimum is marked Not attended. Change anyone if needed, then confirm. You can also edit it later from the Attendance tab.`}
+      title="Session ended — review attendance"
+      description={`Attendance is automatically calculated from time spent in the session; anyone below ${COMPLETION_THRESHOLD_PCT}% is marked as “Not attended”. You can also edit this later in the Attendance tab.`}
       width="xl"
       primaryAction={{ label: "Confirm attendance", onClick: onConfirm }}
     >
@@ -5113,7 +5113,7 @@ function CallTopBar({
             <F0BoxWithClassName display="flex" alignItems="center" gap="sm" background="critical" borderRadius="full" paddingX="md" paddingY="sm">
               <F0BoxWithClassName background="critical-bold" borderRadius="full" style={{ width: 9, height: 9 }} />
               <F0BoxWithClassName className="text-f1-foreground-critical" display="flex">
-                <F0Text content="In live" variant="body" />
+                <F0Text content="Live" variant="body" />
               </F0BoxWithClassName>
             </F0BoxWithClassName>
             <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
@@ -5122,7 +5122,7 @@ function CallTopBar({
         ) : isWaiting ? (
           <F0Box display="flex" alignItems="center" gap="md">
             <F0Icon icon={CalendarArrowRight} size="md" color="warning" />
-            <F0Text content="Class starts in" variant="body" />
+            <F0Text content="Session starts in" variant="body" />
             <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
             <F0Text content={formatCallDuration(clock.secondsToStart)} variant="body" />
           </F0Box>
@@ -5167,8 +5167,8 @@ function SessionWaitingRoomScreen({
           </F0BoxWithClassName>
           <F0Box display="flex" flexDirection="column" alignItems="center" gap="md">
             <F0Box display="flex" flexDirection="column" alignItems="center" gap="xs">
-              <F0Heading content="Waiting for the instructor" variant="heading" as="h1" />
-              <F0Text content="You will enter automatically when the instructor starts the session or lets you in." variant="description" />
+              <F0Heading content="Session hasn’t started yet" variant="heading" as="h1" />
+              <F0Text content="You’ll join automatically when the instructor starts the session or admits you." variant="description" />
             </F0Box>
             <F0Button label="Exit" variant="outline" onClick={onExit} />
           </F0Box>
@@ -5470,9 +5470,9 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
             type: "table",
             options: {
               columns: [
-                { id: "name", label: "Name", render: (row: SessionAttendanceRow) => personValue(row.name) },
+                { id: "name", label: "Participant", render: (row: SessionAttendanceRow) => personValue(row.name) },
                 { id: "attendance", label: "Attendance", render: (row: SessionAttendanceRow) => ({ type: "status" as const, value: attendanceStatusValue(row.attendance) }) },
-                { id: "completedHours", label: `Time attended (of ${SESSION_DURATION_MIN}m)`, render: (row: SessionAttendanceRow) => row.completedHours.split("/")[0] ?? row.completedHours },
+                { id: "completedHours", label: `Time in session (of ${SESSION_DURATION_MIN}m)`, render: (row: SessionAttendanceRow) => row.completedHours.split("/")[0] ?? row.completedHours },
               ],
             },
           },
