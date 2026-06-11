@@ -125,7 +125,7 @@ export const ActionBar = ({
             hideLabel
             type="button"
             icon={Microphone}
-            variant="ghost"
+            variant="outline"
             size="md"
             disabled={inProgress}
             onClick={onStartRecording}
