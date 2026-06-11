@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.59.0](https://github.com/factorialco/f0/compare/f0-react-v2.58.0...f0-react-v2.59.0) (2026-06-11)
+
+
+### Features
+
+* **avatars:** promote F0AvatarDate + F0AvatarAlert to stable ([#4385](https://github.com/factorialco/f0/issues/4385)) ([2ca1559](https://github.com/factorialco/f0/commit/2ca155974b519e8b55e1db12a1d9ad81163dd6ef))
+
 ## [2.58.0](https://github.com/factorialco/f0/compare/f0-react-v2.57.0...f0-react-v2.58.0) (2026-06-11)
 
 
