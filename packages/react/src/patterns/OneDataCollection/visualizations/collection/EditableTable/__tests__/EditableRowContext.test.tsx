@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import {
+  CELL_CHANGE_DEBOUNCE_MS,
   EditableRowProvider,
   useEditableRow,
 } from "../context/EditableRowContext"
@@ -286,7 +287,7 @@ describe("EditableRowContext", () => {
       expect(onCellChange).not.toHaveBeenCalled()
 
       await act(async () => {
-        vi.advanceTimersByTime(750)
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS)
       })
 
       expect(onCellChange).toHaveBeenCalledTimes(1)
@@ -304,20 +305,20 @@ describe("EditableRowContext", () => {
       fireEvent.click(screen.getByTestId("type-name-partial"))
 
       await act(async () => {
-        vi.advanceTimersByTime(400)
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS - 100)
       })
 
       // Second keystroke resets the debounce timer
       fireEvent.click(screen.getByTestId("type-name-full"))
 
       await act(async () => {
-        vi.advanceTimersByTime(400)
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS - 100)
       })
 
       expect(onCellChange).not.toHaveBeenCalled()
 
       await act(async () => {
-        vi.advanceTimersByTime(350)
+        vi.advanceTimersByTime(100)
       })
 
       expect(onCellChange).toHaveBeenCalledTimes(1)
@@ -361,7 +362,7 @@ describe("EditableRowContext", () => {
 
       // The debounce timer must not fire a duplicate save afterwards
       await act(async () => {
-        vi.advanceTimersByTime(1000)
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS * 2)
       })
 
       expect(onCellChange).toHaveBeenCalledTimes(2)
@@ -414,7 +415,7 @@ describe("EditableRowContext", () => {
       )
 
       await act(async () => {
-        vi.advanceTimersByTime(750)
+        vi.advanceTimersByTime(CELL_CHANGE_DEBOUNCE_MS)
       })
 
       expect(onCellChange).toHaveBeenCalledTimes(1)

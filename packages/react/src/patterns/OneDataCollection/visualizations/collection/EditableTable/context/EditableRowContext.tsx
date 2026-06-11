@@ -12,7 +12,7 @@ import type {
 } from "../types"
 
 /** How long to wait after the last keystroke before saving a typing cell. */
-export const CELL_CHANGE_DEBOUNCE_MS = 750
+export const CELL_CHANGE_DEBOUNCE_MS = 500
 
 export type CellChangeOptions = {
   /**
