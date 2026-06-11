@@ -41698,13 +41698,13 @@ function Ai({ field: t, sectionId: e }) {
   );
 }
 function Sa({ row: t, sectionId: e }) {
-  return /* @__PURE__ */ p(
+  return /* @__PURE__ */ p("div", { className: "@container", children: /* @__PURE__ */ p(
     "div",
     {
-      className: `flex xs:flex-row flex-col items-start ${Ly} [&>*]:flex-1 [&>*]:w-full`,
+      className: `flex @[480px]:flex-row flex-col items-start ${Ly} [&>*]:flex-1 [&>*]:w-full`,
       children: t.fields.map((n) => /* @__PURE__ */ p(Ai, { field: n, sectionId: e }, n.id))
     }
-  );
+  ) });
 }
 function Hx(t, e) {
   const n = t.renderIf;
