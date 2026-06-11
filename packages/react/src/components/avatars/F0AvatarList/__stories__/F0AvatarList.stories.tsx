@@ -70,8 +70,9 @@ const dummyFiles = [
 ]
 
 const dummyFlags = [
-  { name: "flag", flag: "es" },
-  { name: "flag", flag: "fr" },
+  { name: "Spain", flag: "es" },
+  { name: "France", flag: "fr" },
+  { name: "Germany", flag: "de" },
 ]
 
 function getDummyAvatar<
@@ -155,7 +156,7 @@ function getDummyAvatars<
 const meta: Meta<typeof F0AvatarList> = {
   component: F0AvatarList,
   title: "Avatars/AvatarList",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   args: {
     size: "md",
     type: "person",
@@ -187,65 +188,43 @@ const meta: Meta<typeof F0AvatarList> = {
       description: "The type of the avatars in the list",
     },
   },
-  decorators: [
-    (Story) => (
-      <div className="w-[270px]">
-        <Story />
-      </div>
-    ),
-  ],
 } satisfies Meta<typeof F0AvatarList>
 
 export default meta
 
 type Story = StoryObj<typeof F0AvatarList>
 
-export const Default: Story = {}
-
-export const Companies: Story = {
-  args: {
-    size: "md",
-    type: "company",
-    avatars: getDummyAvatars(3, "company"),
-  },
+export const Default: Story = {
+  args: { max: 3 },
 }
 
-export const Teams: Story = {
-  args: {
-    size: "md",
-    type: "team",
-    avatars: getDummyAvatars(3, "team"),
-  },
-}
-
-export const WithMaxAvatars: Story = {
-  args: {
-    ...Default.args,
-    type: "person",
-    avatars: getDummyAvatars(50, "person"),
-    max: 3,
-  },
-}
-
-export const LargeAvatarsList: Story = {
-  args: {
-    type: "person",
-    avatars: getDummyAvatars(50, "person"),
-  },
-}
-
-export const CompaniesWithMaxAvatars: Story = {
-  args: {
-    ...Companies.args,
-    type: "company",
-    avatars: getDummyAvatars(50, "company"),
-    max: 3,
-  },
+/**
+ * A list is homogeneous: every avatar shares the same `type`. AvatarList
+ * supports `person`, `team`, `company`, `flag` and `file`.
+ */
+export const AllTypes: Story = {
+  render: () => (
+    <div className="flex flex-row flex-wrap items-start gap-8">
+      {avatarVariants.map((type) => (
+        <div key={type} className="flex flex-col gap-1">
+          <span className="text-sm capitalize text-f1-foreground-secondary">
+            {type}
+          </span>
+          <F0AvatarList
+            type={type}
+            size="md"
+            max={3}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            avatars={getDummyAvatars(3, type) as any}
+          />
+        </div>
+      ))}
+    </div>
+  ),
 }
 
 export const WithRemainingCount: Story = {
   args: {
-    ...Default.args,
     type: "person",
     avatars: getDummyAvatars(7, "person"),
     remainingCount: 10,
@@ -274,37 +253,21 @@ function getDummyPeopleWithDescriptions(count: number) {
  */
 export const WithTooltipDescription: Story = {
   args: {
-    ...Default.args,
     type: "person",
     avatars: getDummyPeopleWithDescriptions(3),
-  },
-}
-
-/**
- * When `tooltipDescription` is present on overflowed avatars, the `+N` hover
- * popover renders the description as a secondary line under each name.
- * Default `tooltipScroll="vertical"` caps the popover height and scrolls.
- */
-export const OverflowPopoverWithDescriptions: Story = {
-  args: {
-    ...Default.args,
-    type: "person",
-    avatars: getDummyPeopleWithDescriptions(15),
     max: 3,
   },
 }
 
 /**
- * `tooltipScroll="none"` removes the popover height cap and lets it grow with
- * its content. Useful for short lists where scrolling is unnecessary.
+ * Hovering the `+N` counter opens a popover listing the hidden avatars by name.
+ * The popover caps its height and scrolls by default (`tooltipScroll="vertical"`).
  */
-export const OverflowPopoverNoScroll: Story = {
+export const OverflowPopover: Story = {
   args: {
-    ...Default.args,
     type: "person",
-    avatars: getDummyPeopleWithDescriptions(6),
+    avatars: getDummyAvatars(15, "person"),
     max: 3,
-    tooltipScroll: "none",
   },
 }
 
