@@ -5,10 +5,10 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarDate } from "../F0AvatarDate"
 
-const meta: Meta<typeof F0AvatarDate> = {
+const meta = {
   component: F0AvatarDate,
   title: "Avatars/AvatarDate",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   parameters: {
     docs: {
       description: {
@@ -25,7 +25,7 @@ const meta: Meta<typeof F0AvatarDate> = {
       description: "The date to display in the avatar",
     },
   },
-}
+} satisfies Meta<typeof F0AvatarDate>
 
 export default meta
 
@@ -38,6 +38,11 @@ export const Default: Story = {
   args: {
     date: exampleDate,
   },
+  // The Storybook "date" control emits a timestamp on change; coerce back to a
+  // Date so the control stays interactive without breaking the component.
+  render: ({ date, ...args }) => (
+    <F0AvatarDate date={new Date(date)} {...args} />
+  ),
 }
 
 export const Snapshot: Story = {
