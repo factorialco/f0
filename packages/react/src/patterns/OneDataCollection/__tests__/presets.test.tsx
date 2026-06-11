@@ -894,3 +894,40 @@ describe("OneDataCollection - share preset", () => {
     })
   })
 })
+
+describe("OneDataCollection - presets render resilience", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("keeps rendering and fetching data when the presets row throws during render", async () => {
+    // Silence React's error-boundary logging and our own degradation report
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+
+    renderHarness({
+      presets: [
+        {
+          id: "broken",
+          label: "Broken preset",
+          filter: {},
+          // Runs during the presets row render — simulates any render crash
+          // in FiltersPresets (e.g. the OverflowList stale-items regression)
+          itemsCount: () => {
+            throw new Error("presets render crash")
+          },
+        },
+      ],
+    })
+
+    // The collection survives: data is fetched and rows render
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+    expect(screen.getByText("Jane")).toBeInTheDocument()
+
+    // The presets row degraded to nothing instead of taking down the tree
+    expect(screen.queryByText("Broken preset")).not.toBeInTheDocument()
+    expect(consoleError).toHaveBeenCalledWith(
+      "[f0-react] FiltersPresets failed to render; hiding the presets row",
+      expect.any(Error)
+    )
+  })
+})
