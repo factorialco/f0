@@ -18,6 +18,22 @@ import type {
   EditableTableOnCellChangeParams,
 } from "../types"
 
+/**
+ * How long to wait after the last keystroke before notifying the parent
+ * via onCellChange for typing cells (text, number, money...).
+ */
+export const CELL_CHANGE_DEBOUNCE_MS = 750
+
+export type CellChangeOptions = {
+  /**
+   * When true, the optimistic local update still happens immediately but the
+   * onCellChange notification is deferred until the user stops typing for
+   * CELL_CHANGE_DEBOUNCE_MS. Subsequent changes reset the timer, so only the
+   * final value is committed.
+   */
+  debounce?: boolean
+}
+
 type EditableRowContextValue<R extends RecordType> = {
   /** The optimistic local copy of the item, updated immediately on change */
   localItem: R
@@ -26,9 +42,28 @@ type EditableRowContextValue<R extends RecordType> = {
   /** Per-column loading state keyed by column id */
   cellLoading: Record<string, boolean>
   /** Update a single field and notify the parent via onCellChange */
-  handleCellChange: (columnId: string, value: unknown) => void
+  handleCellChange: (
+    columnId: string,
+    value: unknown,
+    options?: CellChangeOptions
+  ) => void
   /** Apply multiple field updates at once, then call onCellChange once */
-  batchCellChanges: (updates: Record<string, unknown>) => void
+  batchCellChanges: (
+    updates: Record<string, unknown>,
+    options?: CellChangeOptions
+  ) => void
+}
+
+/**
+ * Accumulates debounced changes that have been applied locally but not yet
+ * committed to the parent. `previousValues` keeps the value each column had
+ * before the first change of the debounce session, so the committed change
+ * tuple spans the whole typing session rather than the last keystroke.
+ */
+type PendingCellChanges = {
+  timer: ReturnType<typeof setTimeout> | undefined
+  previousValues: Record<string, unknown>
+  updates: Record<string, unknown>
 }
 
 // React's createContext does not support per-usage generics.
@@ -63,90 +98,30 @@ export function EditableRowProvider<R extends RecordType>({
   const localItemRef = useRef(localItem)
   localItemRef.current = localItem
 
+  const pendingRef = useRef<PendingCellChanges | null>(null)
+
   useEffect(() => {
-    setLocalItem(item)
+    // Re-apply uncommitted debounced changes on top of the incoming item so a
+    // background reload doesn't clobber what the user is currently typing.
+    const pending = pendingRef.current
+    const next = pending ? ({ ...item, ...pending.updates } as R) : item
+    localItemRef.current = next
+    setLocalItem(next)
   }, [item])
 
-  const handleCellChange = useCallback(
-    (columnId: string, value: unknown) => {
-      const previousItem = localItemRef.current
-      const updatedItem = { ...previousItem, [columnId]: value } as R
-      localItemRef.current = updatedItem
-
-      const changes: EditableTableCellChanges<R> = {
-        [columnId]: [previousItem[columnId], value],
-      } as EditableTableCellChanges<R>
-
-      setLocalItem(updatedItem)
-
-      setCellErrors((prev) => {
-        if (columnId in prev) {
-          const { [columnId]: _, ...rest } = prev
-          return rest
-        }
-        return prev
-      })
-
-      setCellLoading((prev) => ({ ...prev, [columnId]: true }))
-
-      onCellChange({ updatedItem, changes })
-        .then((errors) => {
-          if (errors && Object.keys(errors).length > 0) {
-            setCellErrors((prev) => ({ ...prev, ...errors }))
-          }
-        })
-        .catch((error: unknown) => {
-          setCellErrors((prev) => ({
-            ...prev,
-            [columnId]:
-              error instanceof Error
-                ? error.message
-                : t("collections.editableTable.errors.saveFailed"),
-          }))
-        })
-        .finally(() => {
-          setCellLoading((prev) => ({ ...prev, [columnId]: false }))
-        })
-    },
-    [onCellChange, t]
-  )
-
-  const batchCellChanges = useCallback(
-    (updates: Record<string, unknown>) => {
-      const columnIds = Object.keys(updates)
-      if (columnIds.length === 0) return
-
-      const previousItem = localItemRef.current
-      const updatedItem = { ...previousItem, ...updates } as R
-      localItemRef.current = updatedItem
-
-      const changes: EditableTableCellChanges<R> = {}
-      for (const id of columnIds) {
-        ;(changes as Record<string, [unknown, unknown]>)[id] = [
-          previousItem[id],
-          updates[id],
-        ]
-      }
-
-      setLocalItem(updatedItem)
-
-      setCellErrors((prev) => {
+  const commitCellChanges = useCallback(
+    (
+      updatedItem: R,
+      changes: EditableTableCellChanges<R>,
+      columnIds: string[]
+    ) => {
+      setCellLoading((prev) => {
         const next = { ...prev }
-        let changed = false
         for (const id of columnIds) {
-          if (id in next) {
-            delete next[id]
-            changed = true
-          }
+          next[id] = true
         }
-        return changed ? next : prev
+        return next
       })
-
-      const loadingOn: Record<string, boolean> = {}
-      for (const id of columnIds) {
-        loadingOn[id] = true
-      }
-      setCellLoading((prev) => ({ ...prev, ...loadingOn }))
 
       onCellChange({ updatedItem, changes })
         .then((errors) => {
@@ -178,6 +153,98 @@ export function EditableRowProvider<R extends RecordType>({
         })
     },
     [onCellChange, t]
+  )
+
+  const flushPendingChanges = useCallback(() => {
+    const pending = pendingRef.current
+    if (!pending) return
+    if (pending.timer !== undefined) clearTimeout(pending.timer)
+    pendingRef.current = null
+
+    const columnIds = Object.keys(pending.previousValues)
+    const changes: EditableTableCellChanges<R> = {}
+    for (const id of columnIds) {
+      ;(changes as Record<string, [unknown, unknown]>)[id] = [
+        pending.previousValues[id],
+        localItemRef.current[id],
+      ]
+    }
+
+    commitCellChanges(localItemRef.current, changes, columnIds)
+  }, [commitCellChanges])
+
+  const flushPendingChangesRef = useRef(flushPendingChanges)
+  flushPendingChangesRef.current = flushPendingChanges
+
+  useEffect(() => {
+    // Don't lose the in-flight debounced change if the row unmounts
+    // (virtualization, leaving edit mode...) before the timer fires.
+    return () => flushPendingChangesRef.current()
+  }, [])
+
+  const applyCellChanges = useCallback(
+    (updates: Record<string, unknown>, options?: CellChangeOptions) => {
+      const columnIds = Object.keys(updates)
+      if (columnIds.length === 0) return
+
+      const previousItem = localItemRef.current
+      const updatedItem = { ...previousItem, ...updates } as R
+      localItemRef.current = updatedItem
+
+      setLocalItem(updatedItem)
+
+      setCellErrors((prev) => {
+        const next = { ...prev }
+        let changed = false
+        for (const id of columnIds) {
+          if (id in next) {
+            delete next[id]
+            changed = true
+          }
+        }
+        return changed ? next : prev
+      })
+
+      const existing = pendingRef.current
+      if (existing?.timer !== undefined) clearTimeout(existing.timer)
+
+      const previousValues: Record<string, unknown> = {}
+      for (const id of columnIds) {
+        previousValues[id] = previousItem[id]
+      }
+
+      pendingRef.current = {
+        timer: undefined,
+        // For columns already pending, keep the value they had before the
+        // debounce session started, not the one from the last keystroke.
+        previousValues: { ...previousValues, ...existing?.previousValues },
+        updates: { ...existing?.updates, ...updates },
+      }
+
+      if (options?.debounce) {
+        pendingRef.current.timer = setTimeout(
+          () => flushPendingChangesRef.current(),
+          CELL_CHANGE_DEBOUNCE_MS
+        )
+      } else {
+        flushPendingChanges()
+      }
+    },
+    [flushPendingChanges]
+  )
+
+  const handleCellChange = useCallback(
+    (columnId: string, value: unknown, options?: CellChangeOptions) => {
+      applyCellChanges({ [columnId]: value }, options)
+    },
+    [applyCellChanges]
+  )
+
+  const batchCellChanges = useCallback(
+    (updates: Record<string, unknown>, options?: CellChangeOptions) => {
+      applyCellChanges(updates, options)
+    },
+    [applyCellChanges]
   )
 
   return (

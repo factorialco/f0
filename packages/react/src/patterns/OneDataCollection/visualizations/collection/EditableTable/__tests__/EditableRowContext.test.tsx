@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest"
-import { act, screen, waitFor } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import {
@@ -42,6 +42,28 @@ function TestConsumer() {
         data-testid="update-name"
       >
         Update Name
+      </button>
+      <button
+        onClick={() =>
+          ctx.handleCellChange("name", "Typed N", { debounce: true })
+        }
+        data-testid="type-name-partial"
+      >
+        Type Name (partial)
+      </button>
+      <button
+        onClick={() =>
+          ctx.handleCellChange("name", "Typed Name", { debounce: true })
+        }
+        data-testid="type-name-full"
+      >
+        Type Name (full)
+      </button>
+      <button
+        onClick={() => ctx.handleCellChange("email", "new@example.com")}
+        data-testid="update-email"
+      >
+        Update Email
       </button>
     </div>
   )
@@ -236,6 +258,163 @@ describe("EditableRowContext", () => {
 
       await waitFor(() => {
         expect(screen.getByTestId("name")).toHaveTextContent("Jane Doe")
+      })
+    })
+  })
+
+  describe("debounced cell changes", () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it("updates localItem immediately but defers onCellChange until typing stops", async () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-partial"))
+
+      expect(screen.getByTestId("name")).toHaveTextContent("Typed N")
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      await act(async () => {
+        vi.advanceTimersByTime(750)
+      })
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+    })
+
+    it("commits only the last value when changes come in quick succession", async () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-partial"))
+
+      await act(async () => {
+        vi.advanceTimersByTime(400)
+      })
+
+      // Second keystroke resets the debounce timer
+      fireEvent.click(screen.getByTestId("type-name-full"))
+
+      await act(async () => {
+        vi.advanceTimersByTime(400)
+      })
+
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      await act(async () => {
+        vi.advanceTimersByTime(350)
+      })
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      // The change tuple spans the whole typing session
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: { ...testItem, name: "Typed Name" },
+        changes: { name: ["John Doe", "Typed Name"] },
+      })
+    })
+
+    it("flushes the pending debounced change together with an immediate change", async () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-partial"))
+      fireEvent.click(screen.getByTestId("update-email"))
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: {
+          ...testItem,
+          name: "Typed N",
+          email: "new@example.com",
+        },
+        changes: {
+          name: ["John Doe", "Typed N"],
+          email: ["john@example.com", "new@example.com"],
+        },
+      })
+
+      // The debounce timer must not fire a duplicate commit afterwards
+      await act(async () => {
+        vi.advanceTimersByTime(1000)
+      })
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+    })
+
+    it("flushes the pending debounced change on unmount", () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      const { unmount } = render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-partial"))
+      expect(onCellChange).not.toHaveBeenCalled()
+
+      unmount()
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: { ...testItem, name: "Typed N" },
+        changes: { name: ["John Doe", "Typed N"] },
+      })
+    })
+
+    it("keeps the pending typed value when the item prop changes mid-debounce", async () => {
+      const onCellChange = vi.fn().mockResolvedValue(undefined)
+
+      const { rerender } = render(
+        <EditableRowProvider item={testItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      fireEvent.click(screen.getByTestId("type-name-partial"))
+
+      // A background reload (e.g. a previous cell's save) replaces the item
+      const reloadedItem = { ...testItem, email: "reloaded@example.com" }
+      rerender(
+        <EditableRowProvider item={reloadedItem} onCellChange={onCellChange}>
+          <TestConsumer />
+        </EditableRowProvider>
+      )
+
+      // The typed value survives the reload; the rest syncs to the new item
+      expect(screen.getByTestId("name")).toHaveTextContent("Typed N")
+      expect(screen.getByTestId("email")).toHaveTextContent(
+        "reloaded@example.com"
+      )
+
+      await act(async () => {
+        vi.advanceTimersByTime(750)
+      })
+
+      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledWith({
+        updatedItem: { ...reloadedItem, name: "Typed N" },
+        changes: { name: ["John Doe", "Typed N"] },
       })
     })
   })
