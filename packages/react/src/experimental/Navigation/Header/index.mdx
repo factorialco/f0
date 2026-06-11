@@ -209,7 +209,9 @@ What F0 owns:
   filter definitions as an editable picker inside the dropdown, pre-applied
   with the seeded persisted filters, so users can refine the jump-to list in
   place. Off by default — the seeded filters are still applied, just not
-  editable.
+  editable. Pair it with `onFiltersChange` → the navigation hook's
+  `currentFilters` so the header arrows + counter follow the same refined
+  context after the user jumps to an item from it.
 - **Pagination**: a `pages` list adapter is transparently consumed as
   infinite scroll, so the same declaration the list uses works here.
 - **Navigation**: picking an option navigates to `getItemHref(value, item)`

@@ -482,6 +482,91 @@ describe("useDataCollectionItemNavigation", () => {
       expect(navigationSamples.slice(readyIndex)).not.toContain(false)
     })
 
+    it("controlled currentFilters win over the persisted filters", async () => {
+      const fetchData = makeFetchData()
+      const fetchItemNeighbors = makeFetchItemNeighbors()
+      const handler = makeStorageHandler({
+        filters: { department: ["Engineering"] },
+      })
+
+      const { result } = zeroRenderHook(
+        () =>
+          useDataCollectionItemNavigation({
+            source: makeSource(fetchData, fetchItemNeighbors),
+            collectionId: "test/items/v1",
+            activeItemId: 2,
+            currentFilters: { department: ["Design"] },
+          }),
+        { wrapper: withStorage(handler) }
+      )
+
+      await waitFor(() => expect(result.current.isReady).toBe(true))
+
+      // Exactly one fetch, with the override — not the persisted filters
+      expect(fetchData).toHaveBeenCalledTimes(1)
+      expect(fetchData.mock.calls[0][0].filters).toEqual({
+        department: ["Design"],
+      })
+    })
+
+    it("changing currentFilters re-resolves navigation under the new context", async () => {
+      const fetchData = makeFetchData()
+      const fetchItemNeighbors = makeFetchItemNeighbors()
+      const handler = makeStorageHandler({
+        filters: { department: ["Engineering"] },
+      })
+
+      const { result, rerender } = zeroRenderHook(
+        ({
+          activeItemId,
+          currentFilters,
+        }: {
+          activeItemId: number
+          currentFilters?: { department?: string[] }
+        }) =>
+          useDataCollectionItemNavigation({
+            source: makeSource(fetchData, fetchItemNeighbors),
+            collectionId: "test/items/v1",
+            activeItemId,
+            currentFilters,
+          }),
+        {
+          wrapper: withStorage(handler),
+          // Engineering item, persisted Engineering filters
+          initialProps: { activeItemId: 1, currentFilters: undefined },
+        }
+      )
+
+      await waitFor(() => expect(result.current.navigation).not.toBeNull())
+
+      // The user refines the dropdown filters to Design and picks a Design
+      // item beyond the new first page (Design = even ids, 12 items; 22 is
+      // its 11th)
+      rerender({
+        activeItemId: 22,
+        currentFilters: { department: ["Design"] },
+      })
+
+      await waitFor(() =>
+        expect(result.current.navigation?.counter).toEqual({
+          current: 11,
+          total: 12,
+        })
+      )
+      expect(result.current.previousItem?.id).toBe(20)
+      expect(result.current.nextItem?.id).toBe(24)
+      // The window refetched under the new filters
+      expect(
+        fetchData.mock.calls[fetchData.mock.calls.length - 1][0].filters
+      ).toEqual({ department: ["Design"] })
+      // Neighbors resolved under the new filters too
+      expect(
+        fetchItemNeighbors.mock.calls[
+          fetchItemNeighbors.mock.calls.length - 1
+        ][0].filters
+      ).toEqual({ department: ["Design"] })
+    })
+
     it("does not resolve neighbors when the window already answers", async () => {
       const fetchData = makeFetchData()
       const fetchItemNeighbors = makeFetchItemNeighbors()

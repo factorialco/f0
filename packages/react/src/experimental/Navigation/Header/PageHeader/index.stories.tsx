@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ForwardedRef, useCallback, useState } from "react"
 
 import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import {
   BaseFetchOptions,
@@ -337,6 +337,13 @@ const firstFilteredEmployee = [...collectionEmployees]
 const CollectionBoundPageHeaderDemo = () => {
   const [activeId, setActiveId] = useState(firstFilteredEmployee.id)
 
+  // The user can refine the filters inside the breadcrumb dropdown
+  // (`showFilters`); feeding them back to the navigation hook keeps the
+  // arrows + counter walking that same refined context.
+  const [navigationFilters, setNavigationFilters] = useState<
+    FiltersState<FiltersDefinition> | undefined
+  >(undefined)
+
   // Both controls navigate by URL: the header arrows through the source's
   // `itemUrl`, the breadcrumb select through `getItemHref`. The story plays
   // the app router's role with a LinkProvider that turns those navigations
@@ -364,6 +371,7 @@ const CollectionBoundPageHeaderDemo = () => {
     source: employeesSource,
     collectionId: EMPLOYEES_COLLECTION_ID,
     activeItemId: activeId,
+    currentFilters: navigationFilters,
     getItemTitle: (employee) => String(employee.name),
   })
 
@@ -396,6 +404,7 @@ const CollectionBoundPageHeaderDemo = () => {
             }),
             value: activeId,
             getItemHref: (value) => `#/employees/${value}`,
+            onFiltersChange: setNavigationFilters,
           },
         ]}
       />
@@ -418,6 +427,12 @@ const CollectionBoundPageHeaderDemo = () => {
  * employees span 3 pages) and an id-relative `fetchItemNeighbors` capability.
  * Past the loaded page — or landing deep via a direct link — the arrows and
  * counter keep working through neighbors resolution instead of page walking.
+ *
+ * Refining the filters inside the dropdown flows back through
+ * `onFiltersChange` → the hook's `currentFilters`, so after jumping to an
+ * item from the refined list the arrows and counter walk that same refined
+ * set (e.g. switch the department filter to Design and pick someone — the
+ * counter becomes n/30 of the Design set).
  */
 export const WithCollectionBoundSelectBreadcrumb: Story = {
   render: () => {

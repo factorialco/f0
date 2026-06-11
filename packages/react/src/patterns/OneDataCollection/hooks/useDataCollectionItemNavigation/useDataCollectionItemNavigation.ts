@@ -106,6 +106,7 @@ export function useDataCollectionItemNavigation<
     getItemTitle,
     enabled = true,
     restorePersistedState = true,
+    currentFilters: currentFiltersOverride,
     deps = [],
   } = props
 
@@ -141,11 +142,29 @@ export function useDataCollectionItemNavigation<
   storageHandlerRef.current = storageHandler
   const hydratedKeyRef = useRef<string | null>(null)
 
+  // Controlled filters override — applied value-keyed, never identity-keyed,
+  // so inline-recreated objects don't refetch.
+  const overrideFiltersKey =
+    currentFiltersOverride === undefined
+      ? null
+      : JSON.stringify(currentFiltersOverride)
+  const overrideFiltersRef = useRef(currentFiltersOverride)
+  overrideFiltersRef.current = currentFiltersOverride
+  const appliedOverrideKeyRef = useRef<string | null>(null)
+
+  const applyFiltersOverride = () => {
+    const override = overrideFiltersRef.current
+    if (override === undefined) return
+    appliedOverrideKeyRef.current = JSON.stringify(override)
+    dataSourceRef.current.setCurrentFilters(override)
+  }
+
   useEffect(() => {
     if (!enabled) return
     if (hydratedKeyRef.current === collectionId) return
     if (!restorePersistedState) {
       hydratedKeyRef.current = collectionId
+      applyFiltersOverride()
       setHydration({ key: collectionId, applied: null, settled: false })
       return
     }
@@ -170,13 +189,26 @@ export function useDataCollectionItemNavigation<
       }
       if (cancelled) return
       hydratedKeyRef.current = collectionId
+      // The controlled override wins over what storage seeded, applied
+      // before the fetch is enabled so the first fetch runs once with it.
+      applyFiltersOverride()
       setHydration({ key: collectionId, applied, settled: false })
     }
     hydrate()
     return () => {
       cancelled = true
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collectionId, enabled, restorePersistedState])
+
+  // Later override changes (e.g. the user refining filters in a
+  // collection-bound breadcrumb select) re-apply and refetch.
+  useEffect(() => {
+    if (!hydrated || overrideFiltersKey === null) return
+    if (appliedOverrideKeyRef.current === overrideFiltersKey) return
+    applyFiltersOverride()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, overrideFiltersKey])
 
   const {
     data,

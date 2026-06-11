@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
-import { RecordType } from "@/hooks/datasource"
+import { FiltersDefinition, FiltersState, RecordType } from "@/hooks/datasource"
 import { Link } from "@/lib/linkHandler"
 import { readDataCollectionStorage } from "@/lib/providers/datacollection/readDataCollectionStorage"
 
@@ -49,6 +49,12 @@ export function BreadcrumbCollectionSelect({
     []
   )
 
+  const stableOnFiltersChange = useCallback(
+    (filters: FiltersState<FiltersDefinition>) =>
+      latestRef.current.onFiltersChange?.(filters),
+    []
+  )
+
   // Programmatic navigation goes through a hidden Link so the app's
   // LinkProvider (SPA routing) is honored — same pattern PageHeader's
   // PageAction uses. Without a provider it falls back to a plain anchor.
@@ -80,6 +86,7 @@ export function BreadcrumbCollectionSelect({
         onChange={handleChange}
         value={item.value}
         showSearchBox={item.searchbox}
+        onFiltersChange={stableOnFiltersChange}
       />
       {pendingHref && (
         <Link

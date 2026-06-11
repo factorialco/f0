@@ -95,6 +95,14 @@ export interface UseDataCollectionItemNavigationProps<
    */
   restorePersistedState?: boolean
   /**
+   * Controlled filters for the navigation context — wins over the persisted
+   * list filters. Feed it the filters the user refined elsewhere (e.g. a
+   * collection-bound breadcrumb select's `onFiltersChange`) so prev/next and
+   * the counter follow that same context. Changing it refetches and
+   * re-resolves neighbors; `undefined` keeps the persisted/definition state.
+   */
+  currentFilters?: FiltersState<Filters>
+  /**
    * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
    * same convention as `useDataCollectionSource(source, deps)`.
    */

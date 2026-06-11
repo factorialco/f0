@@ -1,6 +1,6 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
 import { F0SelectItemObject, F0SelectItemProps } from "@/components/F0Select"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker"
+import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
 import { DropdownItemObject } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import {
@@ -99,6 +99,13 @@ export type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType & {
    * @default false
    */
   showFilters?: boolean
+  /**
+   * Called when the user edits the in-dropdown filters (`showFilters`).
+   * Feed the value to `useDataCollectionItemNavigation`'s `currentFilters`
+   * so the detail-page prev/next arrows and counter follow the same refined
+   * context the dropdown is showing.
+   */
+  onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void
 } & (
     | {
         /**
