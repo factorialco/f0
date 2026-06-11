@@ -1,5 +1,101 @@
 # Changelog
 
+## [2.61.1](https://github.com/factorialco/f0/compare/f0-react-v2.61.0...f0-react-v2.61.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **api-surface:** classify unions and intersections structurally ([#4418](https://github.com/factorialco/f0/issues/4418)) ([a95779d](https://github.com/factorialco/f0/commit/a95779d7dbbbc2a1ae2d17b19cd1511c2a801e8c))
+
+## [2.61.0](https://github.com/factorialco/f0/compare/f0-react-v2.60.0...f0-react-v2.61.0) (2026-06-11)
+
+
+### Features
+
+* **breadcrumbs:** collection-bound jump-to select seeded from persisted data collection state ([#4404](https://github.com/factorialco/f0/issues/4404)) ([f835a3a](https://github.com/factorialco/f0/commit/f835a3a49a926bc92501f193f6f5f21325abef51))
+
+## [2.60.0](https://github.com/factorialco/f0/compare/f0-react-v2.59.0...f0-react-v2.60.0) (2026-06-11)
+
+
+### Features
+
+* **avatars:** promote F0AvatarList to stable ([#4416](https://github.com/factorialco/f0/issues/4416)) ([75c121c](https://github.com/factorialco/f0/commit/75c121c78bd60df05c5730d1aad5c4c5618a9268))
+
+## [2.59.0](https://github.com/factorialco/f0/compare/f0-react-v2.58.0...f0-react-v2.59.0) (2026-06-11)
+
+
+### Features
+
+* **avatars:** promote F0AvatarDate + F0AvatarAlert to stable ([#4385](https://github.com/factorialco/f0/issues/4385)) ([2ca1559](https://github.com/factorialco/f0/commit/2ca155974b519e8b55e1db12a1d9ad81163dd6ef))
+
+## [2.58.0](https://github.com/factorialco/f0/compare/f0-react-v2.57.0...f0-react-v2.58.0) (2026-06-11)
+
+
+### Features
+
+* **ai-chat:** add dictation start/cancel tracking callbacks ([#4408](https://github.com/factorialco/f0/issues/4408)) ([9d49d92](https://github.com/factorialco/f0/commit/9d49d9265635713582ab19680f20348d21953f1b))
+
+
+### Bug Fixes
+
+* **ActionBar:** change button variant from ghost to outline  ([#4410](https://github.com/factorialco/f0/issues/4410)) ([a913e28](https://github.com/factorialco/f0/commit/a913e28ee3c5277442d4743eecc405d7846fc05c))
+
+## [2.57.0](https://github.com/factorialco/f0/compare/f0-react-v2.56.0...f0-react-v2.57.0) (2026-06-10)
+
+
+### Features
+
+* **datasource:** add fetchItemNeighbors adapter capability for id-relative item navigation ([#4401](https://github.com/factorialco/f0/issues/4401)) ([a4b82e8](https://github.com/factorialco/f0/commit/a4b82e885d5c53983cead916a38d59460f4676c8))
+
+## [2.56.0](https://github.com/factorialco/f0/compare/f0-react-v2.55.3...f0-react-v2.56.0) (2026-06-10)
+
+
+### Features
+
+* **datasource:** definition-fed collection item navigation with PageHeader wiring ([#4399](https://github.com/factorialco/f0/issues/4399)) ([e2dd3ea](https://github.com/factorialco/f0/commit/e2dd3ea68bbc7b6f520b9e6529a2428294554c56))
+
+## [2.55.3](https://github.com/factorialco/f0/compare/f0-react-v2.55.2...f0-react-v2.55.3) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0Form:** resolve defaultValues function at mount when defaultValuesParamsSchema is set ([#4398](https://github.com/factorialco/f0/issues/4398)) ([1a12744](https://github.com/factorialco/f0/commit/1a12744842d2aff094767db1290b311450bb21d9))
+
+## [2.55.2](https://github.com/factorialco/f0/compare/f0-react-v2.55.1...f0-react-v2.55.2) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0Accordion:** vertical actions dots, spacing and card shadow ([#4396](https://github.com/factorialco/f0/issues/4396)) ([a350dcf](https://github.com/factorialco/f0/commit/a350dcfc06364d955887302d04f900d5174ba6ad))
+
+## [2.55.1](https://github.com/factorialco/f0/compare/f0-react-v2.55.0...f0-react-v2.55.1) (2026-06-10)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** auto-grow rows for loaded content ([#4328](https://github.com/factorialco/f0/issues/4328)) ([b17e937](https://github.com/factorialco/f0/commit/b17e937ddf7077d4358ec3cb85527d78a5554f70))
+
+## [2.55.0](https://github.com/factorialco/f0/compare/f0-react-v2.54.0...f0-react-v2.55.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 6/6:** F0Wizard/F0WizardForm size prop + width deprecation (non-breaking) ([#4368](https://github.com/factorialco/f0/issues/4368)) ([7a948f2](https://github.com/factorialco/f0/commit/7a948f24d849bca76d7ae1ecb9f8db4a52f49792))
+
+## [2.54.0](https://github.com/factorialco/f0/compare/f0-react-v2.53.0...f0-react-v2.54.0) (2026-06-09)
+
+
+### Features
+
+* **dialog 5/6:** imperative provider + useDialog/useDrawer (additive) ([#4367](https://github.com/factorialco/f0/issues/4367)) ([5059cbe](https://github.com/factorialco/f0/commit/5059cbebc9e683983b80c217d4b18e4fd5379cf4))
+
+## [2.53.0](https://github.com/factorialco/f0/compare/f0-react-v2.52.0...f0-react-v2.53.0) (2026-06-09)
+
+
+### Features
+
+* **ai-chat:** center fullscreen welcome, prompts below textarea ([#4377](https://github.com/factorialco/f0/issues/4377)) ([8bbcc22](https://github.com/factorialco/f0/commit/8bbcc227e4934a22db64ed7bb69a4ccc550fdb8c))
+
 ## [2.52.0](https://github.com/factorialco/f0/compare/f0-react-v2.51.0...f0-react-v2.52.0) (2026-06-09)
 
 

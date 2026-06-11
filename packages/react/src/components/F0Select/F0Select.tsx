@@ -132,6 +132,7 @@ const F0SelectComponent = forwardRef(function Select<
     size = "sm",
     actions,
     onCreate,
+    onFiltersChange,
     source,
     label,
     icon,
@@ -1071,7 +1072,10 @@ const F0SelectComponent = forwardRef(function Select<
             onGroupingChange={localSource.setCurrentGrouping}
             filters={localSource.filters}
             currentFilters={localSource.currentFilters}
-            onFiltersChange={localSource.setCurrentFilters}
+            onFiltersChange={(filters) => {
+              localSource.setCurrentFilters(filters)
+              onFiltersChange?.(filters)
+            }}
             asList={asList}
             onFiltersOpenChange={setIsFiltersOpen}
             showPreview={showPreview}

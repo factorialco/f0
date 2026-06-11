@@ -59,12 +59,6 @@ describe("F0CardRow", () => {
       { type: "module", module: "goals" },
       { type: "alert", variant: "warning" },
       { type: "date", date: new Date(2026, 5, 5) },
-      {
-        type: "pulse",
-        firstName: "Jane",
-        lastName: "Cooper",
-        onPulseClick: vi.fn(),
-      },
     ]
 
     avatars.forEach((avatar) => {

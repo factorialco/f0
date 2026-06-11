@@ -73,11 +73,13 @@ export const DialogContent = forwardRef<
         setContainer(propContainer)
       } else {
         // Prefer the requested default target (e.g. the top-level overlay root
-        // for center modals), then fall back to `#content`. If neither exists,
-        // `null` lets Radix's portal default to `document.body`.
+        // for center modals), then the app shell's `#content`, and finally the
+        // document body so the dialog still renders in contexts that have
+        // neither (Storybook docs, tests, components opened outside the shell).
         setContainer(
           document.getElementById(defaultContainerId) ??
-            document.getElementById("content")
+            document.getElementById("content") ??
+            document.body
         )
       }
     }, [propContainer, defaultContainerId])
