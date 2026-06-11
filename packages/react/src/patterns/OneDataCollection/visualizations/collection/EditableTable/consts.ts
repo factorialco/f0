@@ -39,12 +39,11 @@ export const editableCellMap: Record<
 /**
  * Edit types backed by free-typing inputs. Changes coming from these cells
  * are debounced so onCellChange fires once when the user stops typing,
- * instead of on every keystroke. Discrete cells (select, date...) commit
+ * instead of on every keystroke. Discrete cells (select, date...) save
  * immediately.
  */
 export const typingEditTypes: ReadonlySet<EditableTableCellEditType> = new Set([
   "text",
   "number",
   "money",
-  "multiselect",
 ])

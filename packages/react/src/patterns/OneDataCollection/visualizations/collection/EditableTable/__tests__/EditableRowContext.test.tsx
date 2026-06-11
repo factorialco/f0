@@ -328,7 +328,7 @@ describe("EditableRowContext", () => {
       })
     })
 
-    it("flushes the pending debounced change together with an immediate change", async () => {
+    it("saves the pending debounced change before an immediate change", async () => {
       const onCellChange = vi.fn().mockResolvedValue(undefined)
 
       render(
@@ -340,25 +340,31 @@ describe("EditableRowContext", () => {
       fireEvent.click(screen.getByTestId("type-name-partial"))
       fireEvent.click(screen.getByTestId("update-email"))
 
-      expect(onCellChange).toHaveBeenCalledTimes(1)
-      expect(onCellChange).toHaveBeenCalledWith({
+      // The typed change is saved first, then the immediate one — in order
+      expect(onCellChange).toHaveBeenCalledTimes(2)
+      expect(onCellChange).toHaveBeenNthCalledWith(1, {
         updatedItem: {
           ...testItem,
           name: "Typed N",
           email: "new@example.com",
         },
-        changes: {
-          name: ["John Doe", "Typed N"],
-          email: ["john@example.com", "new@example.com"],
+        changes: { name: ["John Doe", "Typed N"] },
+      })
+      expect(onCellChange).toHaveBeenNthCalledWith(2, {
+        updatedItem: {
+          ...testItem,
+          name: "Typed N",
+          email: "new@example.com",
         },
+        changes: { email: ["john@example.com", "new@example.com"] },
       })
 
-      // The debounce timer must not fire a duplicate commit afterwards
+      // The debounce timer must not fire a duplicate save afterwards
       await act(async () => {
         vi.advanceTimersByTime(1000)
       })
 
-      expect(onCellChange).toHaveBeenCalledTimes(1)
+      expect(onCellChange).toHaveBeenCalledTimes(2)
     })
 
     it("flushes the pending debounced change on unmount", () => {
