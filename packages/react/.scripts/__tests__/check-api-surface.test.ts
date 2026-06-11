@@ -328,6 +328,141 @@ describe("check-api-surface — unions and intersections", () => {
   })
 })
 
+describe("check-api-surface — translations are summarized, not listed per export", () => {
+  // The real translations dictionary is large; the structural fallback for
+  // the inlined `defaultTranslations` object requires that scale, so the
+  // fixture carries a country-list-sized namespace.
+  const COUNTRY_MEMBERS = Array.from(
+    { length: 30 },
+    (_, i) => `c${i}: string`
+  ).join("; ")
+
+  /**
+   * A miniature of the real i18n surface: the inlined dictionary const, the
+   * `TranslationShape`/`TranslationsType` aliases, the `TranslationKey` path
+   * union, a `useI18n`-style intersection, and a component embedding the
+   * dictionary in its props — every shape that used to produce per-export
+   * noise when a translation key changed.
+   */
+  function i18nSurface({
+    pdfViewer = false,
+    withFilters = true,
+    extraActionKeys = "",
+    widgetProps = "{ id: string; i18n: TranslationsType }",
+  } = {}): string {
+    const keyPaths = [
+      "actions.save",
+      "actions.cancel",
+      ...(withFilters ? ["filters.search"] : []),
+      ...(pdfViewer ? ["pdfViewer.zoomIn", "pdfViewer.zoomOut"] : []),
+    ]
+    return `
+    declare const translations: {
+      actions: { save: string; cancel: string${extraActionKeys ? `; ${extraActionKeys}` : ""} };
+      ${withFilters ? "filters: { search: string };" : ""}
+      ${pdfViewer ? "pdfViewer: { zoomIn: string; zoomOut: string };" : ""}
+      countries: { ${COUNTRY_MEMBERS} };
+    };
+    export declare type TranslationShape<T> = { [K in keyof T]: T[K] extends string ? string : TranslationShape<T[K]> };
+    export declare type TranslationsType = TranslationShape<typeof translations>;
+    export declare type TranslationKey = ${keyPaths.map((k) => `"${k}"`).join(" | ")};
+    export declare const defaultTranslations: typeof translations;
+    export declare const buildTranslations: (translations: TranslationsType) => TranslationsType;
+    export declare const useI18n: () => TranslationsType & { t: (key: TranslationKey) => string };
+    export declare const Widget: (props: ${widgetProps}) => unknown;
+    `
+  }
+
+  it("mentions only that translations were added — no per-export entries", () => {
+    const result = analyze(
+      dirWith(i18nSurface()),
+      dirWith(i18nSurface({ pdfViewer: true }))
+    )
+    const diff = result.entries.find((e) => e.entry === "f0")!
+
+    // None of the exports embedding the dictionary is flagged individually.
+    expect(diff.breaking).toHaveLength(0)
+    // The change is collapsed to the root of the new namespace, once, even
+    // though it ripples through buildTranslations/defaultTranslations/
+    // useI18n/TranslationsType/TranslationKey/Widget.
+    expect(result.translations.added).toEqual(["pdfViewer"])
+    expect(result.translations.removed).toEqual([])
+    // Still breaking: consumers maintaining full translation objects must
+    // add the new keys.
+    expect(result.hasBreaking).toBe(true)
+    expect(result.breakingTotal).toBe(1)
+
+    const md = buildCommentMarkdown(result)
+    expect(md).toContain("Translation keys were **added**: `pdfViewer`")
+    // The comment carries no per-export breaking listing at all.
+    expect(md).not.toContain("- ✏️")
+    expect(md).not.toContain("- ❌")
+    expect(md).not.toMatch(/required `/)
+  })
+
+  it("mentions only that translations were moved/removed — no per-export entries", () => {
+    // `filters.search` moves to `actions.search`: its old namespace is gone
+    // (removed) and a key appears under an existing namespace (added).
+    const result = analyze(
+      dirWith(i18nSurface()),
+      dirWith(
+        i18nSurface({ withFilters: false, extraActionKeys: "search: string" })
+      )
+    )
+    const diff = result.entries.find((e) => e.entry === "f0")!
+
+    expect(diff.breaking).toHaveLength(0)
+    expect(result.translations.removed).toEqual(["filters"])
+    expect(result.translations.added).toEqual(["actions.search"])
+
+    const md = buildCommentMarkdown(result)
+    expect(md).toContain(
+      "Translation keys were **moved or removed**: `filters`"
+    )
+    expect(md).toContain("Translation keys were **added**: `actions.search`")
+    expect(md).not.toContain("- ✏️")
+    expect(md).not.toContain("- ❌")
+  })
+
+  it("still flags a real breaking change alongside the translations summary", () => {
+    const result = analyze(
+      dirWith(i18nSurface()),
+      dirWith(
+        i18nSurface({
+          pdfViewer: true,
+          widgetProps: "{ i18n: TranslationsType }", // `id` removed: breaking
+        })
+      )
+    )
+    const diff = result.entries.find((e) => e.entry === "f0")!
+
+    expect(names(diff)).toEqual(["Widget"])
+    const widget = diff.breaking.find((b) => b.name === "Widget")
+    expect(widget?.reasons?.some((r) => r.includes("id"))).toBe(true)
+    // The translation ripple does not leak into the export's reasons.
+    expect(widget?.reasons?.some((r) => r.includes("pdfViewer"))).toBe(false)
+    expect(result.translations.added).toEqual(["pdfViewer"])
+    // One real breaking change + the translations summary.
+    expect(result.breakingTotal).toBe(2)
+  })
+
+  it("does not treat a small all-string props type as translations", () => {
+    const result = analyze(
+      dirWith(
+        `export declare type LabelProps = { title: string; subtitle: string };`
+      ),
+      dirWith(
+        `export declare type LabelProps = { title: string; subtitle: string; badge: string };`
+      )
+    )
+    const diff = result.entries.find((e) => e.entry === "f0")!
+    // A required member added to a regular props type stays a regular
+    // per-export breaking change.
+    expect(names(diff)).toEqual(["LabelProps"])
+    expect(result.translations.added).toEqual([])
+  })
+})
+
 describe("check-api-surface — determinism", () => {
   it("reports no changes for identical surfaces in different directories", () => {
     // Same content, different temp dirs (different absolute paths): the
@@ -357,6 +492,7 @@ describe("check-api-surface — comment size cap", () => {
       hasBreaking: true,
       breakingTotal: breaking.length,
       addedTotal: 0,
+      translations: { added: [], removed: [] },
       entries: [{ entry: "f0", breaking, added: [] }],
     }
 
@@ -376,6 +512,7 @@ describe("check-api-surface — comment size cap", () => {
       hasBreaking: false,
       breakingTotal: 0,
       addedTotal: 1,
+      translations: { added: [], removed: [] },
       entries: [{ entry: "f0", breaking: [], added: ["NewThing"] }],
     }
     const md = buildCommentMarkdown(result)

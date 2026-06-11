@@ -34,6 +34,15 @@
  * prop added to a base type that feeds a union of prop variants (the
  * `F0SelectProps` shape) classifies as additive, not as "the union changed".
  *
+ * The shared translations dictionary (`TranslationsType` / `TranslationShape`
+ * / `TranslationKey`, plus the inlined `defaultTranslations` object) is
+ * recognized and compared by its key paths instead of structurally. That
+ * shape is embedded in dozens of exports (`buildTranslations`, `i18n`
+ * props/params, `useI18n`…), so classifying it per export would repeat the
+ * same key change many times over. Translation key changes are instead
+ * collected once per analysis and reported as a single "translation keys
+ * were added / moved or removed" summary.
+ *
  * Known simplification: leaf types (primitives, external types, non-object
  * unions/intersections) are compared by their normalized string, so a
  * *widening* of a leaf type (e.g. a prop `string` → `string | number`, which
@@ -71,6 +80,8 @@ const MAX_DEPTH = 4
  *    of object shapes are flattened into this (the checker merges members).
  *  - `callable`: a function/component, compared signature by signature.
  *  - `union`: a union, compared variant by variant (pairwise by position).
+ *  - `translations`: the shared translations dictionary, compared by its
+ *    dot-separated key paths and summarized once per analysis.
  *  - `opaque`: anything else (primitive, external type, non-object
  *    union/intersection constituents), compared by its normalized string.
  */
@@ -91,7 +102,10 @@ export type ApiItem =
       }>
     }
   | { k: "union"; members: ApiItem[] }
+  | { k: "translations"; keys: string[] }
   | { k: "opaque"; text: string }
+
+type TranslationsItem = Extract<ApiItem, { k: "translations" }>
 
 interface ExportSnapshot {
   kind: string
@@ -104,6 +118,13 @@ interface ExportSnapshot {
 
 type EntrySnapshot = Map<string, ExportSnapshot>
 
+/** Changed translation keys, collapsed to the root of each added/removed
+ * subtree (`pdfViewer` rather than every `pdfViewer.*` leaf). */
+export interface TranslationChanges {
+  added: string[]
+  removed: string[]
+}
+
 export interface EntryDiff {
   entry: Entry
   breaking: Array<{
@@ -114,6 +135,7 @@ export interface EntryDiff {
     after?: string
   }>
   added: string[]
+  translations?: TranslationChanges
   skipped?: "no-base" | "no-head"
 }
 
@@ -121,6 +143,7 @@ export interface AnalysisResult {
   hasBreaking: boolean
   breakingTotal: number
   addedTotal: number
+  translations: TranslationChanges
   entries: EntryDiff[]
 }
 
@@ -315,6 +338,170 @@ function isPlainObjectIntersection(type: ts.Type): boolean {
   )
 }
 
+/* ------------------------- translations detection ------------------------ */
+
+/** The i18n dictionary's public names (`_N` tolerates api-extractor's
+ * rollup-suffixed duplicates). `TranslationKey` is the union of every
+ * dot-separated key path; the others are the nested dictionary shape. */
+const TRANSLATION_TYPE_NAME_RE =
+  /^(TranslationShape|TranslationsType|TranslationKey|I18nStrings)(_\d+)?$/
+
+/** Deeper than the deepest real translation key, far above MAX_DEPTH — the
+ * dictionary is all strings so walking it fully is cheap and lets deep
+ * occurrences (e.g. `i18n` params at the expansion frontier) still resolve. */
+const TRANSLATION_KEY_WALK_DEPTH = 8
+
+/** Minimum leaf count for the *structural* fallback (the inlined
+ * `defaultTranslations` object, which carries no alias). Keeps small
+ * all-string props types classified member by member. */
+const MIN_STRUCTURAL_TRANSLATION_LEAVES = 20
+
+function isTranslationNamed(type: ts.Type): boolean {
+  const sym = type.aliasSymbol ?? type.getSymbol()
+  return !!sym && TRANSLATION_TYPE_NAME_RE.test(sym.getName())
+}
+
+/**
+ * Collect the dot-separated key paths of a translations dictionary: an
+ * object tree whose members are all required and whose leaves are all
+ * strings. Returns false (dictionary rejected) on anything else — call
+ * signatures, index signatures, optional or non-string members.
+ *
+ * When `rootIsNamed` is false (the structural fallback for anonymous object
+ * shapes), an embedded *named* translations type also rejects: that marks a
+ * props object that carries the dictionary (`{ id: string; i18n:
+ * TranslationsType }`), not the dictionary itself. A named root, by
+ * contrast, legitimately nests named members — `TranslationShape` is
+ * recursive, so the sub-namespaces of `TranslationsType` are themselves
+ * `TranslationShape<…>` instantiations.
+ */
+function collectTranslationLeafKeys(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  prefix: string,
+  depth: number,
+  rootIsNamed: boolean,
+  out: string[]
+): boolean {
+  if (depth <= 0) return false
+  if (
+    type.getCallSignatures().length > 0 ||
+    type.getConstructSignatures().length > 0 ||
+    checker.getIndexInfosOfType(type).length > 0
+  ) {
+    return false
+  }
+  const props = type.getProperties()
+  if (props.length === 0) return false
+  for (const p of props) {
+    if (p.flags & ts.SymbolFlags.Optional) return false
+    const decl = p.valueDeclaration ?? p.declarations?.[0]
+    const pt = decl
+      ? checker.getTypeOfSymbolAtLocation(p, decl)
+      : checker.getDeclaredTypeOfSymbol(p)
+    const keyPath = prefix ? `${prefix}.${p.getName()}` : p.getName()
+    if (pt.flags & ts.TypeFlags.StringLike) {
+      out.push(keyPath)
+      continue
+    }
+    if (!rootIsNamed && isTranslationNamed(pt)) return false
+    if (pt.flags & ts.TypeFlags.Object) {
+      if (
+        !collectTranslationLeafKeys(
+          pt,
+          checker,
+          keyPath,
+          depth - 1,
+          rootIsNamed,
+          out
+        )
+      ) {
+        return false
+      }
+      continue
+    }
+    return false
+  }
+  return true
+}
+
+// The same translations type is referenced from many exports (every `i18n`
+// prop/param), so memoize detection per checker type identity.
+const translationsDetectionCache = new WeakMap<
+  ts.Type,
+  TranslationsItem | null
+>()
+
+/**
+ * Recognize the translations dictionary and snapshot it as its sorted leaf
+ * key paths. Named forms (`TranslationsType`, `TranslationShape<…>`,
+ * `TranslationKey`, `I18nStrings`) are trusted outright; anonymous object
+ * shapes (the inlined `defaultTranslations`) must look like a large nested
+ * all-string dictionary to qualify.
+ */
+function detectTranslationsItem(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  dirAbsolute: string
+): TranslationsItem | undefined {
+  const cached = translationsDetectionCache.get(type)
+  if (cached !== undefined) return cached ?? undefined
+
+  const item = computeTranslationsItem(type, checker, dirAbsolute)
+  translationsDetectionCache.set(type, item ?? null)
+  return item
+}
+
+function computeTranslationsItem(
+  type: ts.Type,
+  checker: ts.TypeChecker,
+  dirAbsolute: string
+): TranslationsItem | undefined {
+  const named = isTranslationNamed(type)
+
+  // `TranslationKey`: a union of string-literal key paths.
+  if (type.isUnion()) {
+    if (!named) return undefined
+    const keys: string[] = []
+    for (const t of type.types) {
+      if (!t.isStringLiteral()) return undefined
+      keys.push(t.value)
+    }
+    return { k: "translations", keys: keys.sort() }
+  }
+
+  if (type.isIntersection()) return undefined
+  if (!(type.flags & ts.TypeFlags.Object)) return undefined
+  if (!named && isExternal(type, dirAbsolute)) return undefined
+
+  const keys: string[] = []
+  if (
+    !collectTranslationLeafKeys(
+      type,
+      checker,
+      "",
+      TRANSLATION_KEY_WALK_DEPTH,
+      named,
+      keys
+    )
+  ) {
+    return undefined
+  }
+  if (
+    !named &&
+    (keys.length < MIN_STRUCTURAL_TRANSLATION_LEAVES ||
+      !keys.some((k) => k.includes(".")))
+  ) {
+    return undefined
+  }
+  return { k: "translations", keys: keys.sort() }
+}
+
+/** Synthetic member under which a translations constituent of a flattened
+ * intersection (`TranslationsType & { t }`, the `useI18n` shape) is kept so
+ * its key changes stay summarized instead of leaking as member diffs. */
+const TRANSLATIONS_MEMBER = "«translations»"
+
 function buildApiItem(
   type: ts.Type,
   checker: ts.TypeChecker,
@@ -328,6 +515,12 @@ function buildApiItem(
       checker.typeToString(type, undefined, TYPE_TO_STRING_FLAGS)
     ),
   })
+
+  // Recognize the translations dictionary before any depth/shape handling so
+  // even occurrences at the expansion frontier (deep `i18n` props) resolve to
+  // their key paths instead of an opaque text or a member-by-member diff.
+  const translations = detectTranslationsItem(type, checker, dirAbsolute)
+  if (translations) return translations
 
   if (depth <= 0 || visited.has(type)) return opaque()
 
@@ -413,7 +606,24 @@ function buildApiItem(
       string,
       { optional: boolean; readonly: boolean; type: ApiItem }
     > = {}
+    // When a flattened intersection carries the translations dictionary as a
+    // constituent (`TranslationsType & { t }`), its members would otherwise
+    // merge into this object and re-surface as hundreds of member diffs. Pull
+    // those members out and keep the dictionary as a single translations item.
+    let intersectionTranslations: TranslationsItem | undefined
+    let translationOwnedMembers: ReadonlySet<string> = new Set()
+    if (type.isIntersection()) {
+      const parts = type.types
+        .map((t) => detectTranslationsItem(t, checker, dirAbsolute))
+        .filter((t): t is TranslationsItem => !!t)
+      if (parts.length > 0) {
+        const keys = [...new Set(parts.flatMap((p) => p.keys))].sort()
+        intersectionTranslations = { k: "translations", keys }
+        translationOwnedMembers = new Set(keys.map((k) => k.split(".")[0]))
+      }
+    }
     for (const p of props) {
+      if (translationOwnedMembers.has(p.getName())) continue
       const decl = p.valueDeclaration ?? p.declarations?.[0]
       const pt = decl
         ? checker.getTypeOfSymbolAtLocation(p, decl)
@@ -422,6 +632,13 @@ function buildApiItem(
         optional: !!(p.flags & ts.SymbolFlags.Optional),
         readonly: isReadonlySymbol(p),
         type: buildApiItem(pt, checker, dirAbsolute, depth - 1, next),
+      }
+    }
+    if (intersectionTranslations) {
+      members[TRANSLATIONS_MEMBER] = {
+        optional: false,
+        readonly: false,
+        type: intersectionTranslations,
       }
     }
     const index = indexInfos
@@ -449,24 +666,108 @@ function isReadonlySymbol(sym: ts.Symbol): boolean {
 
 /* ----------------------------- classification ---------------------------- */
 
-/** Compare two exports; returns the list of breaking reasons (empty = safe). */
+/** Mutable accumulator for translation key changes found while classifying —
+ * they are aggregated across exports instead of reported per export. */
+type TranslationCollector = { added: Set<string>; removed: Set<string> }
+
+/**
+ * Compare two exports; returns the list of breaking reasons (empty = safe)
+ * plus any translation key changes found along the way (reported separately,
+ * as a single summary for the whole analysis).
+ */
 export function classifyExport(
   before: ExportSnapshot,
   after: ExportSnapshot
-): string[] {
+): { reasons: string[]; translations: TranslationChanges } {
+  const tx: TranslationCollector = { added: new Set(), removed: new Set() }
+  let reasons: string[]
   if (before.kind !== after.kind) {
-    return [`kind changed (${before.kind} → ${after.kind})`]
-  }
-  if (before.typeParams !== after.typeParams) {
-    return [
+    reasons = [`kind changed (${before.kind} → ${after.kind})`]
+  } else if (before.typeParams !== after.typeParams) {
+    reasons = [
       `type parameters changed (${before.typeParams} → ${after.typeParams})`,
     ]
+  } else {
+    reasons = classifyItem(before.item, after.item, "", tx)
   }
-  return classifyItem(before.item, after.item, "")
+  return {
+    reasons,
+    translations: {
+      added: [...tx.added].sort(),
+      removed: [...tx.removed].sort(),
+    },
+  }
 }
 
 function at(path: string, name: string): string {
   return path ? `${path}.${name}` : name
+}
+
+/**
+ * Collapse changed leaf key paths to the root of each changed subtree: an
+ * added/removed key is reported as its shortest prefix that does not exist on
+ * the other side, so a whole new namespace reads `pdfViewer` rather than
+ * every `pdfViewer.*` leaf, while a single new key in an existing namespace
+ * reads `actions.newKey`.
+ */
+function collapseToChangedRoots(
+  changed: string[],
+  otherSide: string[]
+): string[] {
+  const otherPrefixes = new Set<string>()
+  for (const key of otherSide) {
+    const parts = key.split(".")
+    for (let i = 1; i <= parts.length; i++) {
+      otherPrefixes.add(parts.slice(0, i).join("."))
+    }
+  }
+  const roots = new Set<string>()
+  for (const key of changed) {
+    let root = key
+    const parts = key.split(".")
+    for (let i = 1; i <= parts.length; i++) {
+      const prefix = parts.slice(0, i).join(".")
+      if (!otherPrefixes.has(prefix)) {
+        root = prefix
+        break
+      }
+    }
+    roots.add(root)
+  }
+  return [...roots].sort()
+}
+
+/** Expand a translations snapshot back into a plain object item — fallback
+ * for when only one side was recognized as the dictionary (e.g. an anonymous
+ * dictionary crossing the structural detection threshold), so the comparison
+ * still classifies member by member. */
+function translationsToObjectItem(keys: string[]): ApiItem {
+  const root: Extract<ApiItem, { k: "object" }> = { k: "object", members: {} }
+  for (const key of keys) {
+    let node = root
+    const parts = key.split(".")
+    for (let i = 0; i < parts.length; i++) {
+      const isLeaf = i === parts.length - 1
+      if (isLeaf) {
+        node.members[parts[i]] = {
+          optional: false,
+          readonly: false,
+          type: { k: "opaque", text: "string" },
+        }
+      } else {
+        const existing = node.members[parts[i]]
+        if (!existing || existing.type.k !== "object") {
+          node.members[parts[i]] = {
+            optional: false,
+            readonly: false,
+            type: { k: "object", members: {} },
+          }
+        }
+        node = node.members[parts[i]].type as Extract<ApiItem, { k: "object" }>
+      }
+    }
+  }
+  return root
 }
 
 /**
@@ -475,7 +776,37 @@ function at(path: string, name: string): string {
  * a required member to optional is safe; removing a member, retyping it, adding
  * a required member, or tightening optional→required is breaking.
  */
-function classifyItem(before: ApiItem, after: ApiItem, path: string): string[] {
+function classifyItem(
+  before: ApiItem,
+  after: ApiItem,
+  path: string,
+  tx: TranslationCollector
+): string[] {
+  if (before.k === "translations" || after.k === "translations") {
+    if (before.k === "translations" && after.k === "translations") {
+      const baseKeys = new Set(before.keys)
+      const headKeys = new Set(after.keys)
+      const addedLeaves = after.keys.filter((k) => !baseKeys.has(k))
+      const removedLeaves = before.keys.filter((k) => !headKeys.has(k))
+      for (const root of collapseToChangedRoots(addedLeaves, before.keys)) {
+        tx.added.add(root)
+      }
+      for (const root of collapseToChangedRoots(removedLeaves, after.keys)) {
+        tx.removed.add(root)
+      }
+      // Summarized once at the analysis level — never a per-export reason.
+      return []
+    }
+    // Only one side was recognized as the dictionary: expand it back to a
+    // plain object so the comparison still classifies member by member.
+    before =
+      before.k === "translations"
+        ? translationsToObjectItem(before.keys)
+        : before
+    after =
+      after.k === "translations" ? translationsToObjectItem(after.keys) : after
+  }
+
   if (before.k !== after.k) {
     return [`${path || "type"} changed shape (${before.k} → ${after.k})`]
   }
@@ -496,7 +827,7 @@ function classifyItem(before: ApiItem, after: ApiItem, path: string): string[] {
     // from a change in a shared base dedupe into a single line.
     const reasons = new Set<string>()
     before.members.forEach((b, i) => {
-      for (const reason of classifyItem(b, after.members[i], path)) {
+      for (const reason of classifyItem(b, after.members[i], path, tx)) {
         reasons.add(reason)
       }
     })
@@ -515,7 +846,7 @@ function classifyItem(before: ApiItem, after: ApiItem, path: string): string[] {
       if (b.optional && !a.optional) {
         reasons.push(`\`${at(path, name)}\` became required`)
       }
-      reasons.push(...classifyItem(b.type, a.type, at(path, name)))
+      reasons.push(...classifyItem(b.type, a.type, at(path, name), tx))
     }
     for (const name of Object.keys(after.members)) {
       if (!before.members[name] && !after.members[name].optional) {
@@ -549,10 +880,10 @@ function classifyItem(before: ApiItem, after: ApiItem, path: string): string[] {
       } else {
         if (bp.optional && !ap.optional)
           reasons.push(`${label} became required`)
-        reasons.push(...classifyItem(bp.type, ap.type, at(path, ap.name)))
+        reasons.push(...classifyItem(bp.type, ap.type, at(path, ap.name), tx))
       }
     }
-    reasons.push(...classifyItem(bs.ret, as.ret, at(path, "return")))
+    reasons.push(...classifyItem(bs.ret, as.ret, at(path, "return"), tx))
     return reasons
   }
 
@@ -571,6 +902,8 @@ function diffEntry(
 
   const breaking: EntryDiff["breaking"] = []
   const added: string[] = []
+  const txAdded = new Set<string>()
+  const txRemoved = new Set<string>()
 
   for (const [name, b] of base) {
     const h = head.get(name)
@@ -578,7 +911,11 @@ function diffEntry(
       breaking.push({ name, kind: "removed", before: b.display })
       continue
     }
-    const reasons = classifyExport(b, h)
+    const { reasons, translations } = classifyExport(b, h)
+    for (const key of translations.added) txAdded.add(key)
+    for (const key of translations.removed) txRemoved.add(key)
+    // An export whose only change is the shared translations dictionary is
+    // covered by the analysis-level translations summary, not listed here.
     if (reasons.length > 0) {
       breaking.push({
         name,
@@ -595,7 +932,14 @@ function diffEntry(
 
   breaking.sort((a, b) => a.name.localeCompare(b.name))
   added.sort()
-  return { entry, breaking, added }
+  const diff: EntryDiff = { entry, breaking, added }
+  if (txAdded.size > 0 || txRemoved.size > 0) {
+    diff.translations = {
+      added: [...txAdded].sort(),
+      removed: [...txRemoved].sort(),
+    }
+  }
+  return diff
 }
 
 export function analyze(baseDir: string, headDir: string): AnalysisResult {
@@ -606,15 +950,48 @@ export function analyze(baseDir: string, headDir: string): AnalysisResult {
       snapshotEntry(headDir, entry)
     )
   )
-  const breakingTotal = entries.reduce((n, d) => n + d.breaking.length, 0)
+  const txAdded = new Set<string>()
+  const txRemoved = new Set<string>()
+  for (const d of entries) {
+    for (const key of d.translations?.added ?? []) txAdded.add(key)
+    for (const key of d.translations?.removed ?? []) txRemoved.add(key)
+  }
+  const translations: TranslationChanges = {
+    added: [...txAdded].sort(),
+    removed: [...txRemoved].sort(),
+  }
+  const translationsChanged =
+    translations.added.length > 0 || translations.removed.length > 0
+  // The translations summary counts as one breaking change: new required keys
+  // (or removed/moved ones) still break consumers maintaining full
+  // translation objects — they are just reported once instead of per export.
+  const breakingTotal =
+    entries.reduce((n, d) => n + d.breaking.length, 0) +
+    (translationsChanged ? 1 : 0)
   const addedTotal = entries.reduce((n, d) => n + d.added.length, 0)
-  return { hasBreaking: breakingTotal > 0, breakingTotal, addedTotal, entries }
+  return {
+    hasBreaking: breakingTotal > 0,
+    breakingTotal,
+    addedTotal,
+    translations,
+    entries,
+  }
 }
 
 /* ------------------------------- reporting ------------------------------- */
 
 function clip(s: string, max = 400): string {
   return s.length > max ? `${s.slice(0, max)} …` : s
+}
+
+/** Inline-code list of key roots, capped so a sweeping rename can't blow up
+ * the summary line. */
+function formatKeyList(keys: string[], max = 25): string {
+  const shown = keys
+    .slice(0, max)
+    .map((k) => `\`${k}\``)
+    .join(", ")
+  return keys.length > max ? `${shown} … and ${keys.length - max} more` : shown
 }
 
 /**
@@ -680,6 +1057,26 @@ export function buildCommentMarkdown(result: AnalysisResult): string {
   lines.push(
     "_Comparing `f0`, `experimental` and `ai` against `main`. Adding components, types, or optional props is safe. This check is non-blocking._"
   )
+
+  const tx = result.translations
+  if (tx.added.length > 0 || tx.removed.length > 0) {
+    lines.push("")
+    lines.push("### 🌐 Translations")
+    if (tx.added.length > 0) {
+      lines.push(
+        `- ➕ Translation keys were **added**: ${formatKeyList(tx.added)}`
+      )
+    }
+    if (tx.removed.length > 0) {
+      lines.push(
+        `- ➖ Translation keys were **moved or removed**: ${formatKeyList(tx.removed)}`
+      )
+    }
+    lines.push("")
+    lines.push(
+      "  _The translations dictionary is embedded in many public exports (`buildTranslations`, `defaultTranslations`, `i18n` props, …), so its changes are summarized here once instead of being flagged on every export. Consumers maintaining full translation objects must update them._"
+    )
+  }
 
   for (const d of entries) {
     if (d.skipped || d.breaking.length === 0) continue
@@ -792,6 +1189,16 @@ function main(): void {
         for (const reason of b.reasons ?? []) consola.log(`      • ${reason}`)
       }
     }
+  }
+  if (result.translations.added.length > 0) {
+    consola.info(
+      `translations: keys added — ${result.translations.added.join(", ")}`
+    )
+  }
+  if (result.translations.removed.length > 0) {
+    consola.info(
+      `translations: keys moved or removed — ${result.translations.removed.join(", ")}`
+    )
   }
   consola.log("")
   if (result.hasBreaking) {
