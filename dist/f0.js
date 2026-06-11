@@ -58574,24 +58574,25 @@ const nce = () => GF("(max-width: 560px)", {
   modal: a = !1,
   showOverlay: o = !0,
   size: s = "md",
-  fullHeight: l = !1
+  fullHeight: l = !1,
+  container: u
 }) => {
-  const [u, c] = he(null), f = oe((b) => {
-    c(b);
-  }, []), h = nce(), d = oe(
-    (b) => {
-      e?.(b);
+  const [c, f] = he(null), h = oe((_) => {
+    f(_);
+  }, []), d = nce(), v = oe(
+    (_) => {
+      e?.(_);
     },
     [e]
-  ), v = fe(void 0);
+  ), p = fe(void 0);
   _e(() => {
-    v.current === !0 && !r && t(), v.current = r;
+    p.current === !0 && !r && t(), p.current = r;
   }, [r, t]);
-  const p = se(() => n === "left" || n === "right", [n]), g = se(() => p ? "sm" : (s && n !== "center" && console.warn(
+  const g = se(() => n === "left" || n === "right", [n]), m = se(() => g ? "sm" : (s && n !== "center" && console.warn(
     "F0Dialog: `size` prop is only applicable to center position"
-  ), s), [p, s, n]), m = (b) => {
-    a && b.preventDefault();
-  }, y = {
+  ), s), [g, s, n]), y = (_) => {
+    a && _.preventDefault();
+  }, b = {
     left: "slideRight",
     right: "slideLeft",
     center: "zoom"
@@ -58602,9 +58603,9 @@ const nce = () => GF("(max-width: 560px)", {
       isOpen: r,
       onClose: t,
       position: n,
-      portalContainer: u ?? null,
+      portalContainer: c ?? null,
       shownBottomSheet: !0,
-      children: h ? /* @__PURE__ */ B(HF, { open: r, onOpenChange: d, children: [
+      children: d ? /* @__PURE__ */ B(HF, { open: r, onOpenChange: v, children: [
         /* @__PURE__ */ S(
           WF,
           {
@@ -58614,7 +58615,7 @@ const nce = () => GF("(max-width: 560px)", {
         /* @__PURE__ */ S(
           UF,
           {
-            ref: f,
+            ref: h,
             className: "max-h-full bg-f1-background",
             children: i
           }
@@ -58625,23 +58626,24 @@ const nce = () => GF("(max-width: 560px)", {
           tce,
           {
             open: r,
-            onOpenChange: d,
+            onOpenChange: v,
             modal: a,
             showOverlay: o,
             children: /* @__PURE__ */ S(
               b5,
               {
-                ref: f,
+                ref: h,
+                container: u,
                 wrapperClassName: ice({ position: n }),
                 className: te(
-                  ace({ size: g }),
+                  ace({ size: m }),
                   l && "h-full"
                 ),
-                animation: y[n],
-                onOpenAutoFocus: (b) => b.preventDefault(),
-                onEscapeKeyDown: m,
-                onPointerDownOutside: m,
-                onInteractOutside: m,
+                animation: b[n],
+                onOpenAutoFocus: (_) => _.preventDefault(),
+                onEscapeKeyDown: y,
+                onPointerDownOutside: y,
+                onInteractOutside: y,
                 children: i
               }
             )
