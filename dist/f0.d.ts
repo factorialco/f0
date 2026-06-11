@@ -537,6 +537,13 @@ export declare type AiChatProviderProps = {
      */
     resizable?: boolean;
     /**
+     * Which side of the screen the chat panel (and its canvas) docks to.
+     * POC flag for the cocreation experience; defaults to "right" so all
+     * existing product usage is unaffected.
+     * @default "right"
+     */
+    chatSide?: "left" | "right";
+    /**
      * The default visualization mode for the chat
      * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
      * @default "sidepanel"
@@ -747,7 +754,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "chatSide" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -777,6 +784,8 @@ declare interface AiChatState {
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
+    /** Which side the chat docks to. @default "right" */
+    chatSide?: "left" | "right";
     defaultVisualizationMode?: VisualizationMode;
     lockVisualizationMode?: boolean;
     historyEnabled?: boolean;
@@ -5798,7 +5807,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, chatSide, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -7046,7 +7055,7 @@ export declare type F0CanvasCardProps = {
  * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
  * `content`, `onClose` and `entities` directly.
  */
-export declare function F0CanvasPanel({ content, onClose, entities, }: F0CanvasPanelProps): ReactNode;
+export declare function F0CanvasPanel({ content, onClose, entities, chatSide, }: F0CanvasPanelProps): ReactNode;
 
 export declare namespace F0CanvasPanel {
     var displayName: string;
@@ -7059,6 +7068,11 @@ export declare type F0CanvasPanelProps = {
     onClose: () => void;
     /** Canvas entity registry keyed by `CanvasContent["type"]`. */
     entities?: Record<string, CanvasEntityDefinition<any>>;
+    /**
+     * Which side the chat docks to, so the canvas seam (rounding/padding/
+     * border) faces the chat. @default "right"
+     */
+    chatSide?: "left" | "right";
 };
 
 export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
@@ -9213,14 +9227,15 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
-export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
  * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
- * (reject) buttons at the trailing edge.
+ * (reject) buttons at the trailing edge. Omit the confirm/reject pairs to render
+ * a CTA-less informational row (e.g. a "created" confirmation card).
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -9245,21 +9260,35 @@ export declare type F0HILActionConfirmationProps = {
      */
     stackAt?: F0CardRowProps["stackAt"];
     /**
-     * Accessible label and tooltip for the confirm (✓) button.
+     * Optional secondary (outline) CTA rendered at the trailing edge — e.g. an
+     * "Open" link to the created resource. Renders only when no confirm/reject
+     * pair is set (those take precedence in `F0CardRow`).
      */
-    confirmationText: string;
+    action?: {
+        label: string;
+        onClick: () => void;
+    };
     /**
-     * Callback fired when the confirm button is clicked.
+     * Accessible label and tooltip for the confirm (✓) button. Omit (along with
+     * `onConfirm`) to drop the confirm button entirely.
      */
-    onConfirm: () => void;
+    confirmationText?: string;
     /**
-     * Accessible label and tooltip for the reject (✗) button.
+     * Callback fired when the confirm button is clicked. When omitted, no confirm
+     * (✓) button is rendered.
      */
-    cancelText: string;
+    onConfirm?: () => void;
     /**
-     * Callback fired when the reject button is clicked.
+     * Accessible label and tooltip for the reject (✗) button. Omit (along with
+     * `onCancel`) to drop the reject button entirely.
      */
-    onCancel: () => void;
+    cancelText?: string;
+    /**
+     * Callback fired when the reject button is clicked. When omitted, no reject
+     * (✗) button is rendered. With neither `onConfirm` nor `onCancel` the row has
+     * no CTA at all.
+     */
+    onCancel?: () => void;
 };
 
 export declare const F0Icon: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
@@ -16077,6 +16106,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
@@ -16123,11 +16157,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 

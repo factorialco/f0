@@ -520,6 +520,13 @@ declare type AiChatProviderProps = {
      */
     resizable?: boolean;
     /**
+     * Which side of the screen the chat panel (and its canvas) docks to.
+     * POC flag for the cocreation experience; defaults to "right" so all
+     * existing product usage is unaffected.
+     * @default "right"
+     */
+    chatSide?: "left" | "right";
+    /**
      * The default visualization mode for the chat
      * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
      * @default "sidepanel"
@@ -8871,6 +8878,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
@@ -8917,11 +8929,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 
