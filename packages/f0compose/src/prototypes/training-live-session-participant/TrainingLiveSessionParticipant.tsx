@@ -110,7 +110,7 @@ type CourseDetailTabId =
   | "documents"
   | "surveys"
 type GroupDetailTabId = "sessions" | "participants" | "materials" | "documents" | "costs"
-type SessionSidepanelTabId = "details" | "attendance" | "transcript"
+type SessionSidepanelTabId = "details" | "notes" | "attendance" | "transcript"
 type LiveSessionPanelId = "chat" | "notes" | null
 type LiveSessionRole = "participant" | "instructor"
 type ViewId =
@@ -4162,7 +4162,7 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
   const activeGroupTab = getValidParam(searchParams.get("gtab"), VALID_GROUP_TABS, "sessions") as GroupDetailTabId
   const activeSession = groupSessions.find((session) => session.id === searchParams.get("session")) ?? null
   const activeSessionEnded = activeSession ? endedSessionIds.includes(activeSession.id) : false
-  const availableSessionTabs = new Set<string>(["details", "attendance", "transcript"])
+  const availableSessionTabs = new Set<string>(["details", "notes", "attendance", "transcript"])
   const activeSessionTab = getValidParam(searchParams.get("stab"), availableSessionTabs, "details") as SessionSidepanelTabId
   const groupTabs = [
     { id: "sessions", label: "Sessions" },
@@ -4379,11 +4379,18 @@ function SessionSidepanel({
 
   const tabs: { id: SessionSidepanelTabId; label: string; disabled?: boolean; onClick: () => void }[] = [
     { id: "details", label: "Details", onClick: () => onTabChange("details") },
+    // Notes are the instructor's private prep/review space; participants don't see them.
+    ...(role === "instructor"
+      ? [{ id: "notes" as const, label: "Notes", onClick: () => onTabChange("notes") }]
+      : []),
     { id: "attendance", label: "Attendance", onClick: () => onTabChange("attendance") },
     { id: "transcript", label: "Transcript", disabled: !isEnded, onClick: () => isEnded ? onTabChange("transcript") : undefined },
   ]
 
-  const visibleTab = activeTab === "transcript" && !isEnded ? "details" : activeTab
+  const visibleTab =
+    (activeTab === "transcript" && !isEnded) || (activeTab === "notes" && role !== "instructor")
+      ? "details"
+      : activeTab
 
   return (
     <F0BoxWithClassName
@@ -4439,6 +4446,7 @@ function SessionSidepanel({
             />
             <F0BoxWithClassName style={{ paddingTop: 32 }}>
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
+              {visibleTab === "notes" ? <SessionNotesTab session={session} /> : null}
               {visibleTab === "attendance" ? <SessionAttendanceTable isEnded={isEnded} /> : null}
               {visibleTab === "transcript" ? <SessionTranscriptTab session={session} /> : null}
             </F0BoxWithClassName>
@@ -4924,19 +4932,55 @@ function LiveSessionChatDrawer() {
   )
 }
 
-function LiveSessionNotesDrawer() {
+// Instructor's private notes per session. Kept in a module-level store so the
+// same notes are shared across the three moments: prepared before (Notes tab in
+// the session detail), edited during (notes panel in the live room), and
+// reviewed after (Notes tab again). Prototype-only: no backend, lives in memory.
+type NotesEditorContent = NonNullable<ComponentProps<typeof NotesTextEditor>["initialEditorState"]>["content"]
+type SessionNotesState = { title: string; content: NotesEditorContent }
+const sessionNotesStore: Record<string, SessionNotesState> = {}
+
+function getSessionNotes(session: GroupSessionRow): SessionNotesState {
+  if (!sessionNotesStore[session.id]) {
+    sessionNotesStore[session.id] = { title: session.name, content: "" }
+  }
+  return sessionNotesStore[session.id]
+}
+function setSessionNotesContent(sessionId: string, content: NotesEditorContent) {
+  const current = sessionNotesStore[sessionId] ?? { title: "", content: "" }
+  sessionNotesStore[sessionId] = { ...current, content }
+}
+function setSessionNotesTitle(sessionId: string, title: string) {
+  const current = sessionNotesStore[sessionId] ?? { title: "", content: "" }
+  sessionNotesStore[sessionId] = { ...current, title }
+}
+
+function SessionNotesEditor({ session }: { session: GroupSessionRow }) {
+  const notes = getSessionNotes(session)
+  return (
+    <NotesTextEditor
+      titlePlaceholder="Training session notes"
+      placeholder="Write your private notes for this session…"
+      initialEditorState={{ title: notes.title, content: notes.content }}
+      metadata={[{ label: "Notes", value: { type: "status", label: "Private", variant: "neutral" } }]}
+      onTitleChange={(title) => setSessionNotesTitle(session.id, title)}
+      onChange={({ json }) => setSessionNotesContent(session.id, json ?? "")}
+    />
+  )
+}
+
+function SessionNotesTab({ session }: { session: GroupSessionRow }) {
+  return (
+    <F0BoxWithClassName display="flex" flexDirection="column" padding="md" style={{ cursor: "text", minHeight: 420 }}>
+      <SessionNotesEditor session={session} />
+    </F0BoxWithClassName>
+  )
+}
+
+function LiveSessionNotesDrawer({ session }: { session: GroupSessionRow }) {
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" height="full" padding="lg" style={{ cursor: "text", minHeight: 0 }}>
-      <NotesTextEditor
-        titlePlaceholder="Training session notes"
-        placeholder="Start getting your notes directly with all markdown options"
-        initialEditorState={{
-          title: "Fundamentos ISO 9001",
-          content: "",
-        }}
-        metadata={[{ label: "Notes", value: { type: "status", label: "Private", variant: "neutral" } }]}
-        onChange={() => undefined}
-      />
+      <SessionNotesEditor session={session} />
     </F0BoxWithClassName>
   )
 }
@@ -5188,7 +5232,7 @@ function SessionRoomScreen({
             </F0BoxWithClassName>
           ) : (
             <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={activePanelStyle}>
-              <LiveSessionNotesDrawer />
+              <LiveSessionNotesDrawer session={session} />
             </F0BoxWithClassName>
           )
         ) : null}
