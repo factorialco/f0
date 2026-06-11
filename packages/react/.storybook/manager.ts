@@ -26,11 +26,13 @@ addons.setConfig({
     {
       tags: "experimental",
       badge: {
-        text: "🚧",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Experimental",
+        text: "Experimental",
+        style: {
+          backgroundColor: "#fcefd9",
+          color: "#8a5a00",
+          borderColor: "#e8c07a",
+        },
+        tooltip: "Experimental — API may change",
       },
       display: {
         sidebar: ["component", "docs", "group"],
@@ -40,25 +42,29 @@ addons.setConfig({
     {
       tags: "stable",
       badge: {
-        text: "✅",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Stable",
+        text: "Stable",
+        style: {
+          backgroundColor: "#e3f5e9",
+          color: "#0f7a39",
+          borderColor: "#86cfa0",
+        },
+        tooltip: "Stable — owned by Foundations",
       },
       display: {
-        sidebar: false,
+        sidebar: ["component", "docs", "group"],
         toolbar: true,
       },
     },
     {
       tags: "deprecated",
       badge: {
-        text: "⛔",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Deprecated",
+        text: "Deprecated",
+        style: {
+          backgroundColor: "#fde8e8",
+          color: "#b42318",
+          borderColor: "#f1a9a0",
+        },
+        tooltip: "Deprecated — do not use in new code",
       },
       display: {
         sidebar: ["component", "docs", "group"],
@@ -68,11 +74,13 @@ addons.setConfig({
     {
       tags: "internal",
       badge: {
-        text: "🔒",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Internal",
+        text: "Internal",
+        style: {
+          backgroundColor: "#eceef2",
+          color: "#4b5563",
+          borderColor: "#cbd2dc",
+        },
+        tooltip: "Internal — not part of the public API",
       },
       display: {
         sidebar: ["component", "docs", "group"],

@@ -153,6 +153,16 @@
   body.dark .sidebar-header a[title="F0 Design System"] img {
     content: url("./f0-dark.svg");
   }
+
+  /* Hide the "Create a new story" sidebar button — not part of the F0 flow.
+     Stories are authored via the f0-storybook-stories conventions, not the
+     generic Storybook scaffolder. (No main.ts flag exists for this in SB10.) */
+  [aria-label="Create a new story"] {
+    display: none !important;
+  }
+
+  /* Tag-filter cleanup (Documentation/Play/no-sidebar) is done via JS below —
+     those filter rows use generated ids, so they can't be hidden by id CSS. */
 </style>
 
 <script>

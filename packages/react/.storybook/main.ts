@@ -90,6 +90,8 @@ const config: StorybookConfig = {
     },
     getAbsolutePath("@storybook/addon-designs"),
     getAbsolutePath("@storybook/addon-vitest"),
+    // Renders the maturity/DoD badges configured in manager.ts (tagBadges).
+    getAbsolutePath("storybook-addon-tag-badges"),
     // MCP server: exposes component docs/stories to AI agents via the MCP protocol.
     // In public (static) builds only the docs toolset is useful; dev and test require
     // a running Storybook server.
