@@ -217,6 +217,9 @@ type EmployeeMock = (typeof employeesMock)[number]
  * `getItemHref`. Here the persisted state (department = Engineering, sorted
  * by name) is written to localStorage before rendering — the dropdown only
  * lists Engineering employees, in name order, without the list mounted.
+ * With `showFilters` the dropdown also renders the declared filters as an
+ * editable picker, pre-applied with that seeded state, so users can refine
+ * the jump-to list in place.
  */
 export const WithCollectionBoundSelect: Story = {
   render: () => {
@@ -303,6 +306,7 @@ export const WithCollectionBoundSelect: Story = {
             collectionId: "storybook/employees-breadcrumb/v1",
             source,
             searchbox: true,
+            showFilters: true,
             mapOptions: (item) => {
               const employee = item as EmployeeMock
               return {

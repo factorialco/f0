@@ -205,6 +205,11 @@ What F0 owns:
   validated against the declared definitions and applied as
   `currentFilters`/`currentSortings`. The list's _search_ is never seeded —
   the select has its own searchbox. Empty storage → unfiltered fallback.
+- **In-dropdown filters** (`showFilters`): opt in to render the source's
+  filter definitions as an editable picker inside the dropdown, pre-applied
+  with the seeded persisted filters, so users can refine the jump-to list in
+  place. Off by default — the seeded filters are still applied, just not
+  editable.
 - **Pagination**: a `pages` list adapter is transparently consumed as
   infinite scroll, so the same declaration the list uses works here.
 - **Navigation**: picking an option navigates to `getItemHref(value, item)`
@@ -215,6 +220,13 @@ What F0 owns:
   `id` to remount and swap sources.
 - **Direct-link display**: the item `label` (and optional `defaultItem`)
   shows the current record instantly, before any options are fetched.
+
+The same wiring extends to the header's prev/next arrows: feed
+`useDataCollectionItemNavigation` (from `OneDataCollection`) the same
+`source` + `collectionId` and pass its render-ready `navigation` result to
+PageHeader's `navigation` prop — arrows and the `current/total` counter then
+walk the same filtered, sorted set the breadcrumb select shows, navigating
+through each item's `itemUrl`. The story below demonstrates both together.
 
 <div
   className="header-container"

@@ -24,6 +24,17 @@ export interface CollectionBoundSeedOptions {
   sortings?: boolean
 }
 
+export interface BuildCollectionBoundSourceOptions {
+  /** Which persisted state to seed. */
+  seed?: CollectionBoundSeedOptions
+  /**
+   * Keep the filter definitions in the built source so the select renders
+   * its in-dropdown filter picker (pre-applied with the seeded filters).
+   * @default false
+   */
+  showFilters?: boolean
+}
+
 /**
  * Builds the data source a collection-bound jump-to select fetches from:
  * the declared definition with the persisted OneDataCollection state seeded
@@ -32,9 +43,12 @@ export interface CollectionBoundSeedOptions {
  * - **Filters**: resolved per-visualization (`visualizationFilters` wins over
  *   `filters`), pruned to the keys declared in `source.filters` so stale
  *   persisted keys never reach the adapter, and applied as `currentFilters`.
- *   The filter/preset *definitions* are stripped from the result: the select
- *   applies the list's filters, it does not let users edit them — and
- *   F0Select would otherwise render its in-dropdown filter picker.
+ *   By default the filter/preset *definitions* are stripped from the result:
+ *   the select applies the list's filters, it does not let users edit them —
+ *   and F0Select would otherwise render its in-dropdown filter picker. Pass
+ *   `showFilters: true` to keep the filter definitions so users can refine
+ *   the jump-to list in the dropdown, starting from the seeded filters.
+ *   Presets are always stripped — they are list-page UI.
  * - **Sortings**: the persisted single `{ field, order } | null` is applied
  *   as `currentSortings` when the field is declared (`null` = the user
  *   explicitly cleared the sorting on the list).
@@ -49,10 +63,11 @@ export interface CollectionBoundSeedOptions {
 export function buildCollectionBoundSource(
   source: AnyDataSourceDefinition,
   storage: DataCollectionStorage | null,
-  seed?: CollectionBoundSeedOptions
+  options?: BuildCollectionBoundSourceOptions
 ): AnyDataSourceDefinition {
-  const seedFilters = seed?.filters ?? true
-  const seedSortings = seed?.sortings ?? true
+  const seedFilters = options?.seed?.filters ?? true
+  const seedSortings = options?.seed?.sortings ?? true
+  const showFilters = options?.showFilters ?? false
 
   let currentFilters = source.currentFilters
   if (seedFilters && storage) {
@@ -83,7 +98,7 @@ export function buildCollectionBoundSource(
   }
 
   const {
-    filters: _filters,
+    filters: sourceFilters,
     presets: _presets,
     presetsLoading: _presetsLoading,
     ...rest
@@ -91,6 +106,7 @@ export function buildCollectionBoundSource(
 
   return {
     ...rest,
+    ...(showFilters && sourceFilters ? { filters: sourceFilters } : {}),
     currentFilters,
     currentSortings,
     dataAdapter: adaptDataAdapterToInfiniteScroll(source.dataAdapter),

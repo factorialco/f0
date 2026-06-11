@@ -91,6 +91,14 @@ export type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType & {
   searchbox?: boolean
   /** Which persisted state to seed. @default { filters: true, sortings: true } */
   seed?: { filters?: boolean; sortings?: boolean }
+  /**
+   * Render the source's filter definitions as an editable filter picker
+   * inside the dropdown, pre-applied with the seeded persisted filters —
+   * letting users refine the jump-to list in place. When false the seeded
+   * filters are still applied, just not editable.
+   * @default false
+   */
+  showFilters?: boolean
 } & (
     | {
         /**

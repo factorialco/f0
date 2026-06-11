@@ -75,6 +75,18 @@ describe("buildCollectionBoundSource", () => {
     expect(result.currentFilters).toEqual({ department: ["Engineering"] })
   })
 
+  it("keeps the filter definitions when showFilters is set", () => {
+    const result = buildCollectionBoundSource(
+      source,
+      { filters: { department: ["Engineering"] } },
+      { showFilters: true }
+    )
+    expect(result.filters).toBe(source.filters)
+    expect(result.currentFilters).toEqual({ department: ["Engineering"] })
+    // Presets are list-page UI: stripped regardless
+    expect(result.presets).toBeUndefined()
+  })
+
   it("seeds a persisted sorting whose field is declared", () => {
     const result = buildCollectionBoundSource(source, {
       sortings: { field: "name", order: "desc" },
@@ -105,13 +117,13 @@ describe("buildCollectionBoundSource", () => {
       sortings: { field: "name" as const, order: "asc" as const },
     }
     const noFilters = buildCollectionBoundSource(source, storage, {
-      filters: false,
+      seed: { filters: false },
     })
     expect(noFilters.currentFilters).toBeUndefined()
     expect(noFilters.currentSortings).toEqual({ field: "name", order: "asc" })
 
     const noSortings = buildCollectionBoundSource(source, storage, {
-      sortings: false,
+      seed: { sortings: false },
     })
     expect(noSortings.currentFilters).toEqual({ department: ["Engineering"] })
     expect(noSortings.currentSortings).toBeUndefined()

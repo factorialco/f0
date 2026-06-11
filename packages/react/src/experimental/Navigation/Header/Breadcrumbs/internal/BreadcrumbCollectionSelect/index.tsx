@@ -37,7 +37,7 @@ export function BreadcrumbCollectionSelect({
     buildCollectionBoundSource(
       item.source,
       readDataCollectionStorage(item.collectionId),
-      item.seed
+      { seed: item.seed, showFilters: item.showFilters }
     )
   )
 
