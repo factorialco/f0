@@ -1,5 +1,26 @@
 # Changelog
 
+## [2.61.2](https://github.com/factorialco/f0/compare/f0-react-v2.61.1...f0-react-v2.61.2) (2026-06-11)
+
+
+### Bug Fixes
+
+* **OverflowList:** never render stale items across an items-prop change ([#4422](https://github.com/factorialco/f0/issues/4422)) ([25b9366](https://github.com/factorialco/f0/commit/25b9366162565bc1898b8a7474fd92e72c96cea2))
+
+## [2.61.1](https://github.com/factorialco/f0/compare/f0-react-v2.61.0...f0-react-v2.61.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **api-surface:** classify unions and intersections structurally ([#4418](https://github.com/factorialco/f0/issues/4418)) ([a95779d](https://github.com/factorialco/f0/commit/a95779d7dbbbc2a1ae2d17b19cd1511c2a801e8c))
+
+## [2.61.0](https://github.com/factorialco/f0/compare/f0-react-v2.60.0...f0-react-v2.61.0) (2026-06-11)
+
+
+### Features
+
+* **breadcrumbs:** collection-bound jump-to select seeded from persisted data collection state ([#4404](https://github.com/factorialco/f0/issues/4404)) ([f835a3a](https://github.com/factorialco/f0/commit/f835a3a49a926bc92501f193f6f5f21325abef51))
+
 ## [2.60.0](https://github.com/factorialco/f0/compare/f0-react-v2.59.0...f0-react-v2.60.0) (2026-06-11)
 
 

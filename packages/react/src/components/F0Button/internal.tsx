@@ -146,7 +146,7 @@ const ButtonInternal = forwardRef<
           block && "w-full",
           withoutDisabledAppearance &&
             disabled &&
-            "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default",
+            "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default [&[aria-disabled=true]]:opacity-100 [&[aria-disabled=true]]:cursor-default",
           className
         )}
         mode={hideLabel ? "only" : "default"}

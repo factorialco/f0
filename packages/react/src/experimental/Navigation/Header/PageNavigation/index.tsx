@@ -1,4 +1,4 @@
-import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 
@@ -29,11 +29,15 @@ function PageNavigationLink({
   disabled?: boolean
 }) {
   return (
-    <F0Button
+    <ButtonInternal
       href={href}
-      title={label}
+      title={disabled ? undefined : label}
       aria-label={label}
       disabled={disabled}
+      // A disabled arrow means "no previous/next element" — a tooltip (auto
+      // or native title) on it is just noise.
+      noAutoTooltip={disabled}
+      noTitle={disabled}
       size="sm"
       variant="outline"
       label={label}

@@ -3,6 +3,7 @@ import { useContext, useEffect, useMemo, useRef, useState } from "react"
 
 import { useEventEmitter } from "@/patterns/OneDataCollection/useEventEmitter"
 import { DataTestIdWrapper } from "@/lib/data-testid"
+import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 import { cn } from "@/lib/utils"
 
 import type { FiltersDefinition, FiltersMode, FiltersState } from "./types"
@@ -281,18 +282,29 @@ const FiltersPresets = () => {
 
   return (
     presets && (
-      <FiltersPresetsComponent
-        presets={presets}
-        presetsLoading={presetsLoading}
-        value={value}
-        onPresetsChange={handlePresetClick}
-        selectedPresetId={selectedPresetId}
-        onSelectPreset={handleSelectPreset}
-        editablePresetIds={editablePresetIds}
-        onEditPreset={onEditPreset}
-        presetActionState={presetActionState}
-        onPresetAction={onPresetAction}
-      />
+      // The presets row is non-critical chrome: if it throws while rendering,
+      // hide it instead of unmounting the whole collection (and its fetching)
+      <RenderErrorBoundary
+        onError={(error) =>
+          console.error(
+            "[f0-react] FiltersPresets failed to render; hiding the presets row",
+            error
+          )
+        }
+      >
+        <FiltersPresetsComponent
+          presets={presets}
+          presetsLoading={presetsLoading}
+          value={value}
+          onPresetsChange={handlePresetClick}
+          selectedPresetId={selectedPresetId}
+          onSelectPreset={handleSelectPreset}
+          editablePresetIds={editablePresetIds}
+          onEditPreset={onEditPreset}
+          presetActionState={presetActionState}
+          onPresetAction={onPresetAction}
+        />
+      </RenderErrorBoundary>
     )
   )
 }

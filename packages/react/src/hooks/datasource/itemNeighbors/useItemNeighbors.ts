@@ -6,6 +6,7 @@ import {
 } from "@/patterns/OneFilterPicker/types"
 
 import {
+  BaseFetchOptions,
   DataAdapter,
   ItemNeighborsId,
   ItemNeighborsResponse,
@@ -35,6 +36,13 @@ export interface UseItemNeighborsOptions<
    * @default true
    */
   enabled?: boolean
+  /**
+   * Extends/transforms the options passed to `fetchItemNeighbors`, mirroring
+   * `useData`'s option of the same name — e.g. OneDataCollection adds
+   * `navigationFilters`. The extended options also key the response cache,
+   * so extra context invalidates it correctly.
+   */
+  fetchParamsProvider?: <O extends BaseFetchOptions<Filters>>(options: O) => O
   onError?: (error: DataError) => void
 }
 
@@ -94,11 +102,16 @@ export function useItemNeighbors<
   sortings,
   search,
   enabled = true,
+  fetchParamsProvider,
   onError,
 }: UseItemNeighborsOptions<R, Filters>): UseItemNeighborsReturn<R> {
   const isSupported = dataAdapter.fetchItemNeighbors !== undefined
 
-  const contextKey = stableStringify({ filters, sortings, search })
+  const baseOptions: BaseFetchOptions<Filters> = { filters, sortings, search }
+  const resolvedOptions = fetchParamsProvider
+    ? fetchParamsProvider(baseOptions)
+    : baseOptions
+  const contextKey = stableStringify(resolvedOptions)
   const requestKey = id === null ? null : `${String(id)}|${contextKey}`
 
   const [resolved, setResolved] = useState<{
@@ -116,8 +129,8 @@ export function useItemNeighbors<
   adapterRef.current = dataAdapter
   const onErrorRef = useRef(onError)
   onErrorRef.current = onError
-  const optionsRef = useRef({ filters, sortings, search })
-  optionsRef.current = { filters, sortings, search }
+  const optionsRef = useRef(resolvedOptions)
+  optionsRef.current = resolvedOptions
 
   const latestKeyRef = useRef<string | null>(null)
   const cancelRef = useRef<(() => void) | null>(null)

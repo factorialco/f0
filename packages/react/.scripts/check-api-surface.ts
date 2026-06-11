@@ -29,11 +29,16 @@
  * rollup noise (the `F0TextInputProps_2` suffixes / dangling `./types` imports)
  * instead of diffing raw `.d.ts` text.
  *
- * Known simplification: leaf types (unions, primitives, external types) are
- * compared by their normalized string, so a *widening* of a leaf type (e.g. a
- * prop `string` → `string | number`, which is safe for an input) is reported as
- * breaking. Object/parameter shape changes — the common case — are classified
- * precisely.
+ * Unions are compared variant-by-variant (pairwise) and intersections of
+ * object shapes are flattened into one merged member set — so an optional
+ * prop added to a base type that feeds a union of prop variants (the
+ * `F0SelectProps` shape) classifies as additive, not as "the union changed".
+ *
+ * Known simplification: leaf types (primitives, external types, non-object
+ * unions/intersections) are compared by their normalized string, so a
+ * *widening* of a leaf type (e.g. a prop `string` → `string | number`, which
+ * is safe for an input) is reported as breaking. Object/parameter shape
+ * changes — the common case — are classified precisely.
  *
  * Usage:
  *   tsx .scripts/check-api-surface.ts --base <dir> --head <dir> [--json]
@@ -63,10 +68,12 @@ const MAX_DEPTH = 4
 
 /**
  * A normalized, structural representation of a type used for comparison.
- *  - `object`: an object/props type, compared member by member.
+ *  - `object`: an object/props type, compared member by member. Intersections
+ *    of object shapes are flattened into this (the checker merges members).
  *  - `callable`: a function/component, compared signature by signature.
- *  - `opaque`: anything else (union, primitive, external type), compared by
- *    its normalized string.
+ *  - `union`: a union, compared variant by variant (pairwise by position).
+ *  - `opaque`: anything else (primitive, external type, non-object
+ *    union/intersection constituents), compared by its normalized string.
  */
 export type ApiItem =
   | {
@@ -84,6 +91,7 @@ export type ApiItem =
         ret: ApiItem
       }>
     }
+  | { k: "union"; members: ApiItem[] }
   | { k: "opaque"; text: string }
 
 interface ExportSnapshot {
@@ -330,6 +338,15 @@ function isExternal(type: ts.Type, dirAbsolute: string): boolean {
   })
 }
 
+/** An intersection composed purely of object shapes (no primitives, no type
+ * parameters), which the checker can flatten into one merged member set. */
+function isPlainObjectIntersection(type: ts.Type): boolean {
+  if (!type.isIntersection()) return false
+  return type.types.every(
+    (t) => !!(t.flags & ts.TypeFlags.Object) || isPlainObjectIntersection(t)
+  )
+}
+
 function buildApiItem(
   type: ts.Type,
   checker: ts.TypeChecker,
@@ -345,8 +362,32 @@ function buildApiItem(
   })
 
   if (depth <= 0 || visited.has(type)) return opaque()
-  // Unions/intersections are compared as a whole (leaf), not member-expanded.
-  if (type.isUnion() || type.isIntersection()) return opaque()
+
+  // Union variants are compared pairwise (same position), so an optional
+  // prop added to a shared base that feeds several variants classifies as
+  // additive instead of "the whole union changed".
+  if (type.isUnion()) {
+    const next = new Set(visited).add(type)
+    return {
+      k: "union",
+      members: type.types.map((t) =>
+        buildApiItem(t, checker, dirAbsolute, depth - 1, next)
+      ),
+    }
+  }
+
+  // Intersections of plain object shapes fall through to the object branch
+  // as one merged member set (the checker's getProperties() combines the
+  // constituents). Anything else — branded primitives, callable
+  // constituents — stays an opaque leaf, compared by text as before.
+  if (
+    type.isIntersection() &&
+    (!isPlainObjectIntersection(type) ||
+      type.getCallSignatures().length > 0 ||
+      type.getConstructSignatures().length > 0)
+  ) {
+    return opaque()
+  }
 
   const callSigs = type.getCallSignatures()
   const ctorSigs = type.getConstructSignatures()
@@ -393,7 +434,8 @@ function buildApiItem(
   // stay opaque instead of leaking their prototype methods (e.g. the
   // program-specific `__@iterator@N`). Arrays/built-ins are Object types but
   // are caught by `isExternal` (declared in lib/node_modules) and stay opaque.
-  const isObjectType = !!(type.flags & ts.TypeFlags.Object)
+  const isObjectType =
+    !!(type.flags & ts.TypeFlags.Object) || type.isIntersection()
   const props = type.getProperties()
   const indexInfos = checker.getIndexInfosOfType(type)
   const isObjectLike = props.length > 0 || indexInfos.length > 0
@@ -474,6 +516,23 @@ function classifyItem(before: ApiItem, after: ApiItem, path: string): string[] {
     return before.text !== after.text
       ? [`${path || "type"} changed: \`${before.text}\` → \`${after.text}\``]
       : []
+  }
+
+  if (before.k === "union" && after.k === "union") {
+    if (before.members.length !== after.members.length) {
+      return [
+        `${path || "type"} union variants changed (${before.members.length} → ${after.members.length})`,
+      ]
+    }
+    // Variants are compared at the same path so identical reasons coming
+    // from a change in a shared base dedupe into a single line.
+    const reasons = new Set<string>()
+    before.members.forEach((b, i) => {
+      for (const reason of classifyItem(b, after.members[i], path)) {
+        reasons.add(reason)
+      }
+    })
+    return [...reasons]
   }
 
   if (before.k === "object" && after.k === "object") {

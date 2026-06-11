@@ -260,6 +260,108 @@ describe("check-api-surface — external type resolution", () => {
   })
 })
 
+describe("check-api-surface — unions and intersections", () => {
+  // The F0SelectProps shape: a shared base intersected into several variants,
+  // exported as a union, consumed by a component.
+  const variantUnion = (base: string) => `
+    export declare type SelectProps =
+      | (${base} & { clearable?: false; value?: string } & { source: { fetch: () => void }; options?: never })
+      | (${base} & { clearable?: false; value?: string } & { source?: never; options: Array<string> })
+      | (${base} & { clearable: true; value?: string } & { source: { fetch: () => void }; options?: never })
+      | (${base} & { clearable: true; value?: string } & { source?: never; options: Array<string> });
+    export declare const Select: (props: SelectProps) => unknown;
+  `
+  const UNION_BASE = variantUnion("{ open?: boolean; label: string }")
+
+  it("treats an optional prop added to a union-of-intersections base as safe", () => {
+    const diff = f0(
+      UNION_BASE,
+      variantUnion(
+        "{ open?: boolean; label: string; onFiltersChange?: (filters: Record<string, unknown>) => void }"
+      )
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
+  it("flags a required prop added to a union-of-intersections base", () => {
+    const diff = f0(
+      UNION_BASE,
+      variantUnion("{ open?: boolean; label: string; mode: string }")
+    )
+    const changed = diff.breaking.find((b) => b.name === "SelectProps")
+    expect(changed?.reasons?.some((r) => /required.*mode/i.test(r))).toBe(true)
+    // The same reason from every variant collapses into one line
+    expect(
+      changed?.reasons?.filter((r) => /required.*mode/i.test(r))
+    ).toHaveLength(1)
+  })
+
+  it("flags a prop removed from a union-of-intersections base", () => {
+    const diff = f0(UNION_BASE, variantUnion("{ label: string }"))
+    const changed = diff.breaking.find((b) => b.name === "SelectProps")
+    expect(changed?.reasons?.some((r) => r.includes("open"))).toBe(true)
+  })
+
+  it("flags a retyped prop inside a union variant", () => {
+    const diff = f0(
+      UNION_BASE,
+      variantUnion("{ open?: boolean; label: number }")
+    )
+    expect(names(diff)).toContain("SelectProps")
+  })
+
+  it("flags a change in the number of union variants", () => {
+    const diff = f0(
+      UNION_BASE,
+      `
+      export declare type SelectProps =
+        | ({ open?: boolean; label: string } & { clearable?: false; value?: string } & { source: { fetch: () => void }; options?: never })
+        | ({ open?: boolean; label: string } & { clearable?: false; value?: string } & { source?: never; options: Array<string> });
+      export declare const Select: (props: SelectProps) => unknown;
+      `
+    )
+    const changed = diff.breaking.find((b) => b.name === "SelectProps")
+    expect(changed?.reasons?.some((r) => /union variants/i.test(r))).toBe(true)
+  })
+
+  it("treats an optional prop added to a plain intersection as safe", () => {
+    const diff = f0(
+      `
+      export declare type CardProps = { title: string } & { footer?: string };
+      `,
+      `
+      export declare type CardProps = { title: string } & { footer?: string; sticky?: boolean };
+      `
+    )
+    expect(diff.breaking).toHaveLength(0)
+  })
+
+  it("flags a member removed from a plain intersection", () => {
+    const diff = f0(
+      `
+      export declare type CardProps = { title: string } & { footer?: string };
+      `,
+      `
+      export declare type CardProps = { title: string } & {};
+      `
+    )
+    const changed = diff.breaking.find((b) => b.name === "CardProps")
+    expect(changed?.reasons?.some((r) => r.includes("footer"))).toBe(true)
+  })
+
+  it("still compares non-object intersections (branded primitives) by text", () => {
+    const diff = f0(
+      `
+      export declare type Row = { id: string & { __brand: "id" } };
+      `,
+      `
+      export declare type Row = { id: number & { __brand: "id" } };
+      `
+    )
+    expect(names(diff)).toContain("Row")
+  })
+})
+
 describe("check-api-surface — determinism", () => {
   it("reports no changes for identical surfaces in different directories", () => {
     // Same content, different temp dirs (different absolute paths): the
