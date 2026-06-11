@@ -19,6 +19,5 @@
 }
 
 .F0PdfViewer__page .textLayer ::selection {
-  background-color: hsl(var(--selected-50));
-  color: hsl(var(--white-100));
+  background-color: hsl(var(--selected-50) / 0.3);
 }
