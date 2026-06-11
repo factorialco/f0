@@ -62,6 +62,15 @@ export const LayoutProvider: React.FC<
         })}
       >
         {children}
+        {/*
+         * Top-level portal target for modal dialogs. It lives above any app
+         * content (e.g. the ApplicationFrame's `isolate` stacking context, where
+         * the AI canvas/chat would otherwise paint over a dialog) but inside
+         * `#f0-layout`, so design tokens and the theme `.dark` class still apply.
+         * `display: contents` keeps it out of the flex layout; portaled dialogs
+         * position themselves with `fixed`.
+         */}
+        <div id="f0-overlay-root" className="contents" />
       </div>
     </LayoutContext.Provider>
   )
