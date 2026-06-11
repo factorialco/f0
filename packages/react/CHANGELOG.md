@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.61.1](https://github.com/factorialco/f0/compare/f0-react-v2.61.0...f0-react-v2.61.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **api-surface:** classify unions and intersections structurally ([#4418](https://github.com/factorialco/f0/issues/4418)) ([a95779d](https://github.com/factorialco/f0/commit/a95779d7dbbbc2a1ae2d17b19cd1511c2a801e8c))
+
 ## [2.61.0](https://github.com/factorialco/f0/compare/f0-react-v2.60.0...f0-react-v2.61.0) (2026-06-11)
 
 
