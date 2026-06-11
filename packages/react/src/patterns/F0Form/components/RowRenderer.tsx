@@ -11,11 +11,13 @@ interface RowRendererProps {
 /**
  * RowRenderer component that renders fields horizontally in a row layout.
  * Used for organizing related fields side by side with equal width.
+ * Below the xs breakpoint the row stacks vertically and each field
+ * takes the full width.
  */
 export function RowRenderer({ row, sectionId }: RowRendererProps) {
   return (
     <div
-      className={`flex xs:flex-row flex-col items-start ${FIELD_GAP} [&>*]:flex-1`}
+      className={`flex xs:flex-row flex-col items-start ${FIELD_GAP} [&>*]:flex-1 [&>*]:w-full`}
     >
       {row.fields.map((field) => (
         <FieldRenderer key={field.id} field={field} sectionId={sectionId} />
