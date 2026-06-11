@@ -121,10 +121,16 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
       ),
     }
 
+    // Select crumbs change label on every in-app navigation; animating their
+    // layout visibly stretches the trigger and can leave a residual scale
+    // transform when interrupted, so they opt out of the layout animation.
+    const isSelectType =
+      contentType === "select" || contentType === "collection-select"
+
     return (
       <motion.div
         ref={ref}
-        layout
+        layout={!isSelectType}
         className={cn(isLoading && "max-w-40")}
         transition={{ duration: 0.15 }}
       >
