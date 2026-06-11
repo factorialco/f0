@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.60.0](https://github.com/factorialco/f0/compare/f0-react-v2.59.0...f0-react-v2.60.0) (2026-06-11)
+
+
+### Features
+
+* **avatars:** promote F0AvatarList to stable ([#4416](https://github.com/factorialco/f0/issues/4416)) ([75c121c](https://github.com/factorialco/f0/commit/75c121c78bd60df05c5730d1aad5c4c5618a9268))
+
 ## [2.59.0](https://github.com/factorialco/f0/compare/f0-react-v2.58.0...f0-react-v2.59.0) (2026-06-11)
 
 
