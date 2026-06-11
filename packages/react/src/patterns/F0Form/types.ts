@@ -248,7 +248,9 @@ export type F0FormSubmitConfig =
  */
 export interface F0FormStylingConfig {
   /**
-   * Shows a sidebar with section navigation (Table of Contents)
+   * Shows a sidebar with section navigation (Table of Contents).
+   * Automatically hidden on small viewports (max-width 560px), where
+   * sections stack as in the regular layout.
    * @default false
    */
   showSectionsSidepanel?: boolean

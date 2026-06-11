@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
+import { useMediaQuery } from "usehooks-ts"
 import { z } from "zod"
 
 import type {
@@ -60,6 +61,16 @@ import { createZodErrorMap } from "./zodErrorMap"
  * before the form is silently submitted after the user stops editing.
  */
 const DEFAULT_AUTOSUBMIT_DELAY_MS = 800
+
+/**
+ * Small-screen detection matching the convention used by dialogs.
+ * On these viewports the sections sidepanel is hidden entirely — there is
+ * not enough horizontal space for navigation next to the form content.
+ */
+const useIsSmallScreen = () =>
+  useMediaQuery("(max-width: 560px)", {
+    initializeWithValue: false,
+  })
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -132,7 +143,11 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     useUpload,
   } = props
 
-  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  // The sidepanel is hidden entirely on small (mobile) viewports; sections
+  // then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
@@ -554,8 +569,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   const { useUpload } = props
 
-  // Resolve styling configuration
-  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  // Resolve styling configuration. The sidepanel is hidden entirely on
+  // small (mobile) viewports; sections then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
 
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
@@ -1171,7 +1189,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       className={cn(
         "flex flex-col w-full mx-auto max-w-content",
         className,
-        styling?.showSectionsSidepanel && "[&>div:last-child]:pb-6"
+        showSectionsSidepanel && "[&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}

@@ -1,6 +1,6 @@
 import userEvent from "@testing-library/user-event"
 import React, { useRef } from "react"
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
 import {
@@ -3927,6 +3927,111 @@ describe("F0Form sidepanel renderIf filtering", () => {
     // visible section becomes active again
     expect(within(sidebar).queryByText("Extra")).not.toBeInTheDocument()
     expect(personalWrapper).not.toHaveClass("hidden")
+  })
+})
+
+describe("F0Form sidepanel on small screens", () => {
+  const originalMatchMedia = window.matchMedia
+
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia
+  })
+
+  // Make the small-screen media query match, mirroring the global stub shape
+  const stubSmallScreen = () => {
+    window.matchMedia = ((query: string) => ({
+      matches: query === "(max-width: 560px)",
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })) as unknown as typeof window.matchMedia
+  }
+
+  const sections: Record<string, F0SectionConfig> = {
+    personal: { title: "Personal" },
+    contact: { title: "Contact" },
+  }
+
+  it("hides the sidepanel and stacks all sections on small screens (single schema)", async () => {
+    stubSmallScreen()
+
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name", section: "personal" }),
+      email: f0FormField(z.string(), { label: "Email", section: "contact" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="mobile-sidepanel"
+        schema={formSchema}
+        defaultValues={{ name: "", email: "" }}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+      />
+    )
+
+    // The sidepanel layout (scroll container + sticky sidebar) is not used
+    await waitFor(() => {
+      expect(
+        container.querySelector(".overflow-scroll")
+      ).not.toBeInTheDocument()
+    })
+    expect(container.querySelector(".sticky")).not.toBeInTheDocument()
+
+    // showOnlySelectedSection is disabled too: all sections stack
+    const personal = document.getElementById(
+      generateAnchorId("mobile-sidepanel", "personal")
+    )?.parentElement
+    const contact = document.getElementById(
+      generateAnchorId("mobile-sidepanel", "contact")
+    )?.parentElement
+    expect(personal).not.toHaveClass("hidden")
+    expect(contact).not.toHaveClass("hidden")
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Email")).toBeInTheDocument()
+  })
+
+  it("hides the sidepanel and stacks all sections on small screens (per-section schema)", async () => {
+    stubSmallScreen()
+
+    const schema = {
+      personal: z.object({
+        name: f0FormField(z.string(), { label: "Name" }),
+      }),
+      contact: z.object({
+        email: f0FormField(z.string(), { label: "Email" }),
+      }),
+    }
+
+    const { container } = render(
+      <F0Form
+        name="mobile-sidepanel-per-section"
+        schema={schema}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+      />
+    )
+
+    await waitFor(() => {
+      expect(container.querySelector(".sticky")).not.toBeInTheDocument()
+    })
+
+    expect(
+      document.getElementById(
+        generateAnchorId("mobile-sidepanel-per-section", "personal")
+      )
+    ).not.toHaveClass("hidden")
+    expect(
+      document.getElementById(
+        generateAnchorId("mobile-sidepanel-per-section", "contact")
+      )
+    ).not.toHaveClass("hidden")
   })
 })
 
