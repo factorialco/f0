@@ -4035,6 +4035,33 @@ describe("F0Form sidepanel on small screens", () => {
   })
 })
 
+describe("F0Form row layout", () => {
+  it("row fields stack and take the full width below the xs breakpoint", () => {
+    const formSchema = z.object({
+      from: f0FormField(z.string(), { label: "From", row: "dates" }),
+      to: f0FormField(z.string(), { label: "To", row: "dates" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="row-layout"
+        schema={formSchema}
+        defaultValues={{ from: "", to: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const rowEl = container.querySelector('[class*="xs:flex-row"]')
+    expect(rowEl).toBeInTheDocument()
+    // Stacks vertically below xs, side by side from xs up
+    expect(rowEl).toHaveClass("flex-col", "xs:flex-row")
+    // Each field spans the full width when stacked. In row mode the w-full
+    // is inert: flex-1 sets flex-basis 0, which takes precedence over width
+    // for main-axis sizing, so fields keep equal widths.
+    expect(rowEl).toHaveClass("[&>*]:w-full", "[&>*]:flex-1")
+  })
+})
+
 describe("F0Form renderIf hidden field layout", () => {
   it("wrapper div of a hidden field (renderIf=false) has the has-[>span.hidden]:hidden class so it does not impact layout", () => {
     const formSchema = z.object({
