@@ -41701,7 +41701,7 @@ function Sa({ row: t, sectionId: e }) {
   return /* @__PURE__ */ p(
     "div",
     {
-      className: `flex xs:flex-row flex-col items-start ${Ly} [&>*]:flex-1`,
+      className: `flex xs:flex-row flex-col items-start ${Ly} [&>*]:flex-1 [&>*]:w-full`,
       children: t.fields.map((n) => /* @__PURE__ */ p(Ai, { field: n, sectionId: e }, n.id))
     }
   );
