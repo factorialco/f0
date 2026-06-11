@@ -13,6 +13,7 @@ import {
   Minus,
   OlList,
   Quote,
+  Table,
   Video,
 } from "@/icons/app"
 import { I18nContextType } from "@/lib/providers/i18n"
@@ -230,6 +231,19 @@ const getGroupedCommands = ({
               .run()
           },
           icon: ChevronDown,
+        },
+        {
+          title: translations.richTextEditor.table,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+              .run()
+          },
+          icon: Table,
         },
         {
           title: translations.richTextEditor.codeBlock,

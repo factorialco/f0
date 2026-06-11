@@ -5,6 +5,8 @@ import { EnhanceActivator } from "../../RichTextEditor/Enhance"
 import { enhanceConfig, lastIntentType } from "../../RichTextEditor/utils/types"
 import { Toolbar, ToolbarDivider } from "../Toolbar"
 
+export { TableBubbleMenu } from "./TableBubbleMenu"
+
 interface EditorBubbleMenuProps {
   editor: Editor
   disableButtons: boolean

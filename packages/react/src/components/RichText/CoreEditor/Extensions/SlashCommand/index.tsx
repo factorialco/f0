@@ -36,6 +36,9 @@ const createSlashCommandExtension = ({
           allowSpaces: true,
           allowedPrefixes: [" ", "\n"],
           startOfLine: false,
+          // Block-level inserts (headings, lists, tables, images…) make no
+          // sense inside a table cell, so disable the slash menu there.
+          allow: ({ editor }: { editor: Editor }) => !editor.isActive("table"),
           command: ({
             editor,
             range,

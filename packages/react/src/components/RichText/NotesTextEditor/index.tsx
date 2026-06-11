@@ -16,7 +16,10 @@ import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { EditorBubbleMenu } from "@/components/RichText/CoreEditor"
+import {
+  EditorBubbleMenu,
+  TableBubbleMenu,
+} from "@/components/RichText/CoreEditor"
 import { Toolbar } from "@/components/RichText/CoreEditor"
 import { Handle, Plus } from "@/icons/app"
 import { DataTestIdWrapper, WithDataTestIdProps } from "@/lib/data-testid"
@@ -398,14 +401,17 @@ const NotesTextEditorComponent = forwardRef<
           </div>
         </ScrollArea>
         {!readonly && (
-          <EditorBubbleMenu
-            editorId={editorId}
-            editor={editor}
-            disableButtons={false}
-            isToolbarOpen={!showBubbleMenu}
-            isFullscreen={false}
-            plainHtmlMode={false}
-          />
+          <>
+            <EditorBubbleMenu
+              editorId={editorId}
+              editor={editor}
+              disableButtons={false}
+              isToolbarOpen={!showBubbleMenu}
+              isFullscreen={false}
+              plainHtmlMode={false}
+            />
+            <TableBubbleMenu editor={editor} editorId={editorId} />
+          </>
         )}
       </div>
     </DataTestIdWrapper>
