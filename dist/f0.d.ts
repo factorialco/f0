@@ -410,6 +410,21 @@ declare type ActionVariant = (typeof actionVariants)[number];
 
 declare const actionVariants: readonly ["default", "outline", "critical", "neutral", "ghost", "promote", "outlinePromote", "ai", "link", "unstyled", "mention"];
 
+/**
+ * Wraps a `pages`-paginated data adapter so it presents itself as
+ * `infinite-scroll`, letting page-based sources (the typical list adapter) be
+ * consumed by components that only support cursor pagination — e.g.
+ * `F0Select` and the breadcrumb jump-to select.
+ *
+ * The cursor is the stringified next page: `cursor: null` fetches page 1,
+ * `cursor: "3"` fetches page 3, and `hasMore` is derived from
+ * `currentPage < pagesCount`. All three `fetchData` return channels (sync,
+ * Promise, Observable of PromiseState) are mapped; loading/error emissions
+ * pass through untouched. Adapters that already are `infinite-scroll` /
+ * `no-pagination` are returned as-is (same reference).
+ */
+export declare const adaptDataAdapterToInfiniteScroll: <R extends RecordType, Filters extends FiltersDefinition>(dataAdapter: DataAdapter<R, Filters>) => DataAdapter<R, Filters>;
+
 declare type AddRowActionsResult = PrimaryActionItemDefinition | PrimaryActionItemDefinition[] | undefined;
 
 /* Excluded from this release type: AgentState */
@@ -818,6 +833,10 @@ export declare type AiChatTrackingOptions = {
     onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void;
     onNewChat?: () => void;
     onMessage?: (message: F0Message) => void;
+    /** Mic button pressed — fires on intent, even if mic permission is later denied. */
+    onDictationStart?: () => void;
+    /** Dictation discarded by the user, while recording or mid-transcription. */
+    onDictationCancel?: () => void;
 };
 
 /**
@@ -1058,6 +1077,11 @@ declare const alertAvatarVariants: (props?: ({
     class?: never;
     className?: ClassValue;
 })) | undefined) => string;
+
+export declare type AlertDialogOptions = NotificationDialogBaseOptions & {
+    /** The alert action (default: label "Ok", value true). */
+    confirm?: DialogSimpleAction;
+};
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
@@ -1422,6 +1446,14 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * side-effects on reactive adapters (e.g. Apollo watchQuery).
      */
     exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
+    /**
+     * Optional id-relative capability: fetch the immediate neighbours of an
+     * item under the current filters/sortings/search, without loading pages.
+     * Enables detail-page prev/next on direct links / hard refresh, where the
+     * item may not be in any loaded page window. One-shot semantics: when an
+     * Observable is returned, only the first settled emission is consumed.
+     */
+    fetchItemNeighbors?: (options: ItemNeighborsFetchOptions<Filters, Options>) => ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
 };
 
 /**
@@ -2075,13 +2107,6 @@ declare type CardAvatarVariant = AvatarVariant | {
 } | {
     type: "date";
     date: Date;
-} | {
-    type: "pulse";
-    firstName: string;
-    lastName: string;
-    src?: string;
-    pulse?: Pulse;
-    onPulseClick: () => void;
 };
 
 /**
@@ -3108,6 +3133,13 @@ declare const componentTypes: readonly ["layout", "info", "action", "form"];
 
 export declare function computeSectionEndIds(elements: SurveyFormBuilderElement[]): Set<string>;
 
+export declare type ConfirmDialogOptions = NotificationDialogBaseOptions & {
+    /** The confirm action (default: label "Ok", value true). */
+    confirm?: DialogSimpleAction;
+    /** The cancel action (default: label "Cancel", value false). */
+    cancel?: DialogSimpleAction;
+};
+
 export declare type ContentType = (typeof contentTypes)[number];
 
 export declare const contentTypes: readonly ["text", "person", "people", "team", "company", "alert", "balance", "sparkline"];
@@ -3962,6 +3994,8 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
 };
+
+export declare type DataSourceItemId = string | number | symbol;
 
 /**
  * Wrapper component that conditionally renders a `data-testid` attribute.
@@ -5051,6 +5085,41 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "file";
 });
 
+/**
+ * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
+ * `DialogsAlikeLayoutProvider`) to be present in the tree.
+ *
+ * @example
+ * const result = await dialog.open({ title, content, actions: { primary: { label: "OK", value: true } } })
+ */
+export declare const dialog: {
+    /** Open a dialog. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
+    /** Open a notification-style dialog (info/warning/critical/positive). */
+    notification: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with a single confirm action (defaults to "Ok"). */
+    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
+    confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
+    /** Programmatically close a dialog by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
+
+export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
+    value: DialogActionValue;
+    keepOpen?: boolean;
+    nonBlocking?: boolean;
+};
+
+export declare type DialogActions = {
+    primary: DialogAction | DialogAction[];
+    secondary?: DialogAction | DialogAction[];
+};
+
+export declare type DialogActionValue = DialogActionValuePrimitive | (() => Promise<DialogActionValuePrimitive>);
+
+declare type DialogActionValuePrimitive = string | boolean | number | undefined | null;
+
 declare type DialogAlikeAction = {
     value?: string;
     label: string;
@@ -5083,9 +5152,57 @@ export declare type DialogControls = {
     onClick: () => void;
 };
 
+export declare type DialogDefinition = {
+    size?: F0DialogSize;
+    id: DialogId;
+    title: string;
+    description?: string;
+    content: ReactNode;
+    actions: DialogActions;
+    keepOpen?: boolean;
+    /**
+     * If true, the dialog will be modal (cannot be closed by clicking outside or pressing Escape).
+     * @default false
+     */
+    modal?: boolean;
+    /**
+     * The module of the dialog.
+     */
+    module?: DialogModule;
+};
+
+export declare type DialogId = string;
+
+/**
+ * Module configuration shown in a dialog/drawer header.
+ *
+ * Kept in its own module (free of any F0Dialog/F0Drawer dependency) so the
+ * shared `dialog-alike/common` layer can reference it without creating a
+ * circular dependency back through `dialogs-alike/types`.
+ */
+declare type DialogModule = {
+    id: ModuleId;
+    label: string;
+    href: string;
+};
+
+declare type DialogNotificationType = (typeof dialogNotificationTypes)[number];
+
+/**
+ * The levels of the alert.
+ */
+declare const dialogNotificationTypes: readonly ["info", "warning", "critical", "positive"];
+
 export declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
+
+declare type DialogSimpleAction = {
+    label?: string;
+    value?: DialogActionValue;
+};
+
+declare const dialogSizes: readonly ["sm", "md", "lg", "xl", "fullscreen"];
 
 export declare type DialogWidth = (typeof dialogWidths)[number];
 
@@ -5166,7 +5283,53 @@ export declare type DragPayload<T = unknown> = {
     data?: T;
 };
 
+/**
+ * Imperative API for side drawers. Requires `<F0Provider>` to be present.
+ *
+ * @example
+ * const result = await drawer.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ */
+export declare const drawer: {
+    /** Open a drawer. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
+    /** Programmatically close a drawer by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
+
+export declare type DrawerDefinition = {
+    /** The size of the drawer. */
+    size?: DrawerSize;
+    /** The id of the drawer. Auto-generated if not provided. */
+    id: DialogId;
+    /** The title of the drawer. */
+    title: string;
+    /** The description of the drawer. */
+    description?: string;
+    /** The content of the drawer. */
+    content: ReactNode;
+    /** The actions of the drawer. */
+    actions: DialogActions;
+    /**
+     * If true, the drawer will not be closed automatically when an action is
+     * clicked. Useful for drawers that need to be closed manually.
+     */
+    keepOpen?: boolean;
+    /**
+     * The position of the drawer.
+     * @default "right"
+     */
+    position?: F0DrawerPosition;
+    /** If true, the drawer will be modal. */
+    modal?: boolean;
+    /** The module of the drawer. */
+    module?: DialogModule;
+};
+
 declare const drawerPositions: readonly ["left", "right"];
+
+declare type DrawerSize = (typeof drawerSizes)[number];
+
+declare const drawerSizes: readonly ["md"];
 
 declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
@@ -8023,6 +8186,8 @@ export declare type F0DialogSecondaryAction = {
 
 export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
 
+declare type F0DialogSize = (typeof dialogSizes)[number];
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -9778,6 +9943,12 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     onSearchChange?: (value: string) => void;
     searchValue?: string;
     onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
     className?: string;
     actions?: Action_2[];
@@ -10435,7 +10606,10 @@ declare interface F0WizardFormBaseProps {
     isOpen: boolean;
     onClose?: () => void;
     title?: string;
+    /** @deprecated Use `size` instead. */
     width?: DialogWidth;
+    /** The size of the wizard dialog. Preferred over the deprecated `width`. */
+    size?: F0DialogSize;
     defaultStepIndex?: number;
     nextLabel?: string;
     previousLabel?: string;
@@ -11699,6 +11873,44 @@ declare type ItemDefinition = {
 };
 
 /**
+ * Options for an id-relative neighbours fetch. Derived from the adapter's own
+ * fetch options, so extended adapters (e.g. OneDataCollection's, which add
+ * `navigationFilters`) carry their extra context automatically. Pagination is
+ * stripped: the request is relative to an item id, not to a page.
+ */
+export declare type ItemNeighborsFetchOptions<Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters> = BaseFetchOptions<Filters>> = Omit<Options, "pagination"> & {
+    /** Id of the reference item (as produced by the source's idProvider) */
+    id: ItemNeighborsId;
+};
+
+/**
+ * Identifier used to reference an item in id-relative fetches.
+ * Symbols are excluded on purpose: the id must be serializable so it can
+ * cross a network boundary to a backend.
+ */
+export declare type ItemNeighborsId = string | number;
+
+/**
+ * Result of an id-relative neighbours fetch.
+ *
+ * `previous`/`next` are the immediate neighbours of the reference item under
+ * the given filters/sortings/search, or null at the collection edges. If the
+ * reference item itself does not match the current filters, return
+ * `{ previous: null, next: null }` (optionally with `total`) — consumers
+ * disable navigation in that case.
+ */
+export declare type ItemNeighborsResponse<R> = {
+    previous: R | null;
+    next: R | null;
+    /** 1-indexed position of the reference item in the filtered+sorted collection */
+    position?: number;
+    /** Total number of records matching the current filters/search */
+    total?: number;
+};
+
+export declare type ItemNeighborsResult<R> = ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
+
+/**
  * Profile data for a job posting entity (ATS opening), resolved asynchronously
  * and displayed in the entity reference hover card.
  */
@@ -12296,6 +12508,20 @@ declare type NavigationProps = {
 
 declare type NavTarget = HTMLAttributeAnchorTarget;
 
+export declare type NeighborResolution<R extends RecordType> = {
+    /** Index of the active item within the loaded records, or -1 when not found */
+    activeIndex: number;
+    activeItem: R | null;
+    previousItem: R | null;
+    nextItem: R | null;
+    /**
+     * How the neighbours were resolved. "window" means they were located in the
+     * loaded records. Reserved extension point for id-relative adapter
+     * resolution (e.g. a `fetchItemNeighbors` capability).
+     */
+    resolvedBy: "window";
+};
+
 /**
  * Utility type to extract all possible paths from nested object.
  * Generates hyphenated paths from nested object structure
@@ -12386,6 +12612,15 @@ export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
     readonly patchType: unknown;
     constructor(patchType: unknown);
 }
+
+declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
+    msg: string;
+    type?: DialogNotificationType;
+};
+
+export declare type NotificationDialogOptions = NotificationDialogBaseOptions & {
+    actions: DialogActions;
+};
 
 declare type NumberCellConfig<R extends RecordType = RecordType> = {
     min?: number;
@@ -12937,6 +13172,14 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * side-effects on reactive adapters (e.g. Apollo watchQuery).
      */
     exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
+    /**
+     * Optional id-relative capability: fetch the immediate neighbours of an
+     * item under the current filters/sortings/search, without loading pages.
+     * Enables detail-page prev/next on direct links / hard refresh, where the
+     * item may not be in any loaded page window. One-shot semantics: when an
+     * Observable is returned, only the first settled emission is consumed.
+     */
+    fetchItemNeighbors?: (options: ItemNeighborsFetchOptions<Filters, Options>) => ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -13422,10 +13665,6 @@ declare type Props_3 = {
 
 declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
 
-declare type Pulse = (typeof pulses)[number];
-
-declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
-
 export declare type QuestionActionParams = {
     questionId: string;
     type: ActionType;
@@ -13741,6 +13980,34 @@ export declare interface ResolvedStepAnswer {
      */
     cancelled?: boolean;
 }
+
+/**
+ * Normalizes the three `fetchItemNeighbors` return channels (sync value,
+ * Promise, Observable of PromiseState) into a single one-shot Promise.
+ *
+ * Observables are consumed one-shot: the first emission carrying `data`
+ * resolves, the first emission carrying `error` rejects, and the
+ * subscription is closed either way — live updates are intentionally out of
+ * scope for neighbour resolution.
+ *
+ * `cancel()` unsubscribes/abandons the request: the returned promise then
+ * never settles, so a cancelled request can never reach consumer state.
+ */
+export declare function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
+    promise: Promise<ItemNeighborsResponse<R>>;
+    cancel: () => void;
+};
+
+/**
+ * Locates the active item and its immediate neighbours within the currently
+ * loaded records ("the window"). Pure — the single place neighbour resolution
+ * happens, so alternative resolution strategies can be merged at this point.
+ */
+export declare function resolveWindowNeighbors<R extends RecordType>({ records, activeItemId, idProvider, }: {
+    records: readonly R[];
+    activeItemId: DataSourceItemId | null;
+    idProvider: (item: R, index?: number) => DataSourceItemId;
+}): NeighborResolution<R>;
 
 declare type ResourceHeaderProps = Props_4;
 
@@ -15323,13 +15590,21 @@ declare type UseChatHistoryReturn = {
  * - paginationInfo: Pagination state and metadata if available
  * - setPage: Function to navigate to a specific page
  */
-export declare function useData<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataSource<R, Filters, Sortings, Grouping>, { filters, onError, fetchParamsProvider, onResponse, }?: UseDataOptions<R, Filters>, deps?: unknown[]): UseDataReturn<R>;
+export declare function useData<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataSource<R, Filters, Sortings, Grouping>, { filters, enabled, onError, fetchParamsProvider, onResponse, }?: UseDataOptions<R, Filters>, deps?: unknown[]): UseDataReturn<R>;
 
 /**
  * Hook options for useData
  */
 export declare interface UseDataOptions<R extends RecordType, Filters extends FiltersDefinition> {
     filters?: Partial<FiltersState<Filters>>;
+    /**
+     * When false, suspends all data fetching: the initial fetch effect does not
+     * run until `enabled` becomes true. Useful to delay the first fetch until
+     * async state (e.g. persisted filters) has been applied to the source.
+     * `isInitialLoading` stays true while disabled.
+     * @default true
+     */
+    enabled?: boolean;
     /**
      * A function that is called when an error occurs during data fetching.
      * It is called with the error object.
@@ -15404,6 +15679,72 @@ export declare interface UseDataReturn<R extends RecordType> {
  * - presets: Available filter presets
  */
 export declare function useDataSource<R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>({ defaultFilters, currentFilters: externalCurrentFilters, defaultGrouping: externalDefaultGrouping, currentGrouping: externalCurrentGrouping, filters, search, defaultSortings, currentSortings: externalCurrentSortings, dataAdapter, grouping, ...rest }: DataSourceDefinition<R, FiltersSchema, Sortings, Grouping>, deps?: ReadonlyArray<unknown>): DataSource<R, FiltersSchema, Sortings, Grouping>;
+
+export declare function useDataSourceItemNavigation<R extends RecordType>(props: UseDataSourceItemNavigationProps<R>): UseDataSourceItemNavigationReturn<R>;
+
+export declare interface UseDataSourceItemNavigationProps<R extends RecordType> {
+    /** The data source returned by `useDataSource`. Used to extract `idProvider` */
+    dataSource: {
+        idProvider?: <Item extends R>(item: Item, index?: number) => DataSourceItemId;
+    };
+    /** The data returned by `useData` */
+    data: Data<R>;
+    /** Pagination info returned by `useData` */
+    paginationInfo: PaginationInfo | null;
+    /** Navigate to a specific page (from `useData`) */
+    setPage: UseDataReturn<R>["setPage"];
+    /** Load more items for infinite-scroll (from `useData`) */
+    loadMore: UseDataReturn<R>["loadMore"];
+    /** Whether `useData` is currently loading data */
+    isLoading: boolean;
+    /** Overrides `dataSource.idProvider`. Extracts a unique ID from a record. Falls back to `item.id` */
+    idProvider?: (item: R, index?: number) => DataSourceItemId;
+    /** Returns the URL for a given item. Used to derive `nextItemUrl` / `previousItemUrl` */
+    itemUrl?: (item: R) => string | undefined;
+    /** Controlled active item ID */
+    activeItemId?: DataSourceItemId | null;
+    /** Default active item ID (uncontrolled) */
+    defaultActiveItemId?: DataSourceItemId | null;
+    /** Callback when active item changes */
+    onActiveItemChange?: (id: DataSourceItemId | null) => void;
+}
+
+export declare interface UseDataSourceItemNavigationReturn<R extends RecordType> {
+    /** The currently active item ID */
+    activeItemId: DataSourceItemId | null;
+    /** The currently active item record, or null if not found in loaded data */
+    activeItem: R | null;
+    /** The active item index within the currently loaded records */
+    activeIndex: number;
+    /** The active item index within the full collection when it can be inferred */
+    absoluteIndex: number | null;
+    /** Number of records currently loaded into the datasource */
+    loadedItemsCount: number;
+    /** Total number of matching records when pagination exposes it */
+    totalItems: number | undefined;
+    /** The previous loaded item record, or null if unavailable */
+    previousItem: R | null;
+    /** The next loaded item record, or null if unavailable */
+    nextItem: R | null;
+    /** URL of the active item (derived via `itemUrl`), or null if unavailable */
+    activeItemUrl: string | null;
+    /** Navigate to the next item. Fetches next page if at boundary */
+    goToNext: () => void;
+    /** Navigate to the previous item. Fetches previous page if at boundary */
+    goToPrevious: () => void;
+    /** Whether there is a next item (or more pages to load) */
+    hasNext: boolean;
+    /** Whether there is a previous item (or previous pages to load) */
+    hasPrevious: boolean;
+    /** Directly set the active item ID */
+    setActiveItemId: (id: DataSourceItemId | null) => void;
+    /** True while waiting for a page transition to resolve the pending navigation */
+    isNavigating: boolean;
+    /** URL of the next loaded item (derived via `itemUrl`), or null if unavailable */
+    nextItemUrl: string | null;
+    /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
+    previousItemUrl: string | null;
+}
 
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
@@ -15654,6 +15995,63 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
     openGroups: Record<string, boolean>;
     setGroupOpen: (key: string, open: boolean) => void;
 };
+
+/**
+ * Resolves the previous/next neighbours of an item through the adapter's
+ * optional id-relative `fetchItemNeighbors` capability.
+ *
+ * Built for detail-page navigation on direct links: when the active item is
+ * not in any loaded page window, this asks the backend for its immediate
+ * neighbours (plus position/total for the counter) under the current
+ * filters/sortings/search instead of walking pages.
+ *
+ * Semantics:
+ * - `neighbors` only ever reflects the current `{id, filters, sortings,
+ *   search}` — stale responses from superseded requests are dropped.
+ * - Responses are cached per request key, so navigating back and forth
+ *   between already-visited ids is instant. The cache is cleared whenever
+ *   filters/sortings/search change; errors are never cached.
+ * - When the capability is absent (`isSupported: false`), disabled, or the
+ *   id is null, nothing is fetched and `neighbors` stays null — consumers
+ *   keep their fallback behaviour.
+ */
+export declare function useItemNeighbors<R extends RecordType, Filters extends FiltersDefinition>({ dataAdapter, id, filters, sortings, search, enabled, fetchParamsProvider, onError, }: UseItemNeighborsOptions<R, Filters>): UseItemNeighborsReturn<R>;
+
+export declare interface UseItemNeighborsOptions<R extends RecordType, Filters extends FiltersDefinition> {
+    /** The adapter that may implement the `fetchItemNeighbors` capability */
+    dataAdapter: DataAdapter<R, Filters>;
+    /** Active item id. Null disables resolution (symbol ids cannot be used) */
+    id: ItemNeighborsId | null;
+    /** Current filters — same values `fetchData` receives */
+    filters: FiltersState<Filters>;
+    /** Current sortings — same composed array `fetchData` receives */
+    sortings: SortingsStateMultiple;
+    /** Current search — same value `fetchData` receives */
+    search?: string;
+    /**
+     * Gate: resolve only while true (e.g. only when the snapshot path failed
+     * to locate the item in the loaded window).
+     * @default true
+     */
+    enabled?: boolean;
+    /**
+     * Extends/transforms the options passed to `fetchItemNeighbors`, mirroring
+     * `useData`'s option of the same name — e.g. OneDataCollection adds
+     * `navigationFilters`. The extended options also key the response cache,
+     * so extra context invalidates it correctly.
+     */
+    fetchParamsProvider?: <O extends BaseFetchOptions<Filters>>(options: O) => O;
+    onError?: (error: DataError) => void;
+}
+
+export declare interface UseItemNeighborsReturn<R extends RecordType> {
+    /** True when the adapter implements `fetchItemNeighbors` */
+    isSupported: boolean;
+    /** Resolved neighbours for the CURRENT id+context, or null while unresolved */
+    neighbors: ItemNeighborsResponse<R> | null;
+    isResolving: boolean;
+    error: DataError | null;
+}
 
 export declare const usePrivacyMode: () => {
     enabled: boolean;
@@ -16106,11 +16504,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -16157,6 +16550,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 

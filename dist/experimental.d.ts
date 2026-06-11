@@ -24,6 +24,7 @@ import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
+import { Context } from 'react';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
@@ -80,6 +81,7 @@ import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
+import { Provider } from 'react';
 import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -636,6 +638,10 @@ declare type AiChatTrackingOptions = {
     onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void;
     onNewChat?: () => void;
     onMessage?: (message: F0Message) => void;
+    /** Mic button pressed — fires on intent, even if mic permission is later denied. */
+    onDictationStart?: () => void;
+    /** Dictation discarded by the user, while recording or mid-transcription. */
+    onDictationCancel?: () => void;
 };
 
 /**
@@ -732,6 +738,18 @@ export declare interface ApplicationFrameProps {
     sidebar: React.ReactNode;
     children: React.ReactNode;
 }
+
+/**
+ * The slice of persisted collection state that was actually applied to the
+ * data source during hydration. `sortings: null` means the user had
+ * explicitly cleared the sorting on the originating list.
+ */
+export declare type AppliedCollectionState<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
+    filters?: FiltersState<Filters>;
+    sortings?: SortingsState<Sortings>;
+    search?: string;
+    grouping?: GroupingState<R, Grouping>;
+};
 
 declare const ApprovalStep: FC<ApprovalStepProps>;
 
@@ -998,6 +1016,14 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * side-effects on reactive adapters (e.g. Apollo watchQuery).
      */
     exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
+    /**
+     * Optional id-relative capability: fetch the immediate neighbours of an
+     * item under the current filters/sortings/search, without loading pages.
+     * Enables detail-page prev/next on direct links / hard refresh, where the
+     * item may not be in any loaded page window. One-shot semantics: when an
+     * Observable is returned, only the first settled emission is consumed.
+     */
+    fetchItemNeighbors?: (options: ItemNeighborsFetchOptions<Filters, Options>) => ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
 };
 
 /**
@@ -1105,7 +1131,73 @@ declare type BreadcrumbBaseItemType = NavigationItem & {
     label: string;
 };
 
-export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType;
+/**
+ * A breadcrumb "jump-to" select bound to a OneDataCollection: the options are
+ * fetched from the declared `source`, seeded with the filters/sortings the
+ * list persisted under `collectionId` — so on the detail page (even via a
+ * direct link, with the list never mounted) the select only shows the items
+ * the user was looking at on the list.
+ *
+ * F0 owns the seeding, pagination handling (a `pages` adapter is transparently
+ * consumed as infinite scroll), current selection, navigation, and
+ * loop-safety: `source` is captured when the crumb mounts, so inline-recreated
+ * item objects never retrigger fetches. Give the item a new `id` to swap
+ * sources.
+ */
+export declare type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType & {
+    type: "collection-select";
+    /**
+     * The `id` of the OneDataCollection whose persisted state seeds the source
+     * (WITHOUT the `datacollection-` prefix). Empty/missing storage → the
+     * source is used unfiltered.
+     */
+    collectionId: string;
+    /** The declared data source — no mounted collection needed. */
+    source: DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>;
+    mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>;
+    /** Current item id (the record the detail page is showing). */
+    value?: string;
+    /**
+     * Fallback option so a direct link shows the current item as selected
+     * before/without it appearing in the fetched options. The item `label` is
+     * used as the trigger label until an option is selected.
+     */
+    defaultItem?: F0SelectItemObject<string, RecordType>;
+    searchbox?: boolean;
+    /** Which persisted state to seed. @default { filters: true, sortings: true } */
+    seed?: {
+        filters?: boolean;
+        sortings?: boolean;
+    };
+    /**
+     * Render the source's filter definitions as an editable filter picker
+     * inside the dropdown, pre-applied with the seeded persisted filters —
+     * letting users refine the jump-to list in place. When false the seeded
+     * filters are still applied, just not editable.
+     * @default false
+     */
+    showFilters?: boolean;
+    /**
+     * Called when the user edits the in-dropdown filters (`showFilters`).
+     * Feed the value to `useDataCollectionItemNavigation`'s `currentFilters`
+     * so the detail-page prev/next arrows and counter follow the same refined
+     * context the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
+} & ({
+    /**
+     * Href to navigate to when an option is picked, routed through the
+     * app's LinkProvider. Return undefined to skip navigation.
+     */
+    getItemHref: (value: string, item?: RecordType) => string | undefined;
+    onSelect?: (value: string, item?: RecordType) => void;
+} | {
+    getItemHref?: never;
+    /** Imperative escape hatch (e.g. router.push) when hrefs don't fit. */
+    onSelect: (value: string, item?: RecordType) => void;
+});
+
+export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType | BreadcrumbCollectionSelectItemType;
 
 export declare type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
     loading: true;
@@ -1517,13 +1609,6 @@ declare type CardAvatarVariant = AvatarVariant | {
 } | {
     type: "date";
     date: Date;
-} | {
-    type: "pulse";
-    firstName: string;
-    lastName: string;
-    src?: string;
-    pulse?: Pulse;
-    onPulseClick: () => void;
 };
 
 /**
@@ -2547,6 +2632,10 @@ declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersSta
     settings?: DataCollectionSettings;
 };
 
+declare type DataCollectionStorage<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
+    settings?: DataCollectionSettings;
+} & DataCollectionStatus<CurrentFiltersState>;
+
 declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeatures)[number];
 
 /**
@@ -2717,6 +2806,8 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
 };
+
+declare type DataSourceItemId = string | number | symbol;
 
 declare type DateCellConfig = {
     /** Earliest selectable date. Dates before this are disabled in the picker. */
@@ -4585,6 +4676,12 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     onSearchChange?: (value: string) => void;
     searchValue?: string;
     onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
     className?: string;
     actions?: Action[];
@@ -5619,6 +5716,42 @@ declare type ItemDefinition = {
     title: string;
     description?: string[];
     avatar?: AvatarVariant;
+};
+
+/**
+ * Options for an id-relative neighbours fetch. Derived from the adapter's own
+ * fetch options, so extended adapters (e.g. OneDataCollection's, which add
+ * `navigationFilters`) carry their extra context automatically. Pagination is
+ * stripped: the request is relative to an item id, not to a page.
+ */
+export declare type ItemNeighborsFetchOptions<Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters> = BaseFetchOptions<Filters>> = Omit<Options, "pagination"> & {
+    /** Id of the reference item (as produced by the source's idProvider) */
+    id: ItemNeighborsId;
+};
+
+/**
+ * Identifier used to reference an item in id-relative fetches.
+ * Symbols are excluded on purpose: the id must be serializable so it can
+ * cross a network boundary to a backend.
+ */
+export declare type ItemNeighborsId = string | number;
+
+/**
+ * Result of an id-relative neighbours fetch.
+ *
+ * `previous`/`next` are the immediate neighbours of the reference item under
+ * the given filters/sortings/search, or null at the collection edges. If the
+ * reference item itself does not match the current filters, return
+ * `{ previous: null, next: null }` (optionally with `total`) — consumers
+ * disable navigation in that case.
+ */
+export declare type ItemNeighborsResponse<R> = {
+    previous: R | null;
+    next: R | null;
+    /** 1-indexed position of the reference item in the filtered+sorted collection */
+    position?: number;
+    /** Total number of records matching the current filters/search */
+    total?: number;
 };
 
 export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, canDropInside, onDragOver, onDragLeave, onDrop, currentParentId, draggedItemId, }: TOCItemSectionHeaderProps): JSX_2.Element;
@@ -6799,6 +6932,27 @@ export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<
 
 export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps): JSX_2.Element;
 
+export declare type PageHeaderItemNavigationInput<R extends RecordType> = Pick<UseDataSourceItemNavigationReturn<R>, "previousItem" | "nextItem" | "previousItemUrl" | "nextItemUrl" | "absoluteIndex" | "totalItems" | "activeIndex">;
+
+export declare const PageHeaderNavigationContext: Context<NavigationProps | null>;
+
+/**
+ * Provider that lets a page component inject navigation data into PageHeader
+ * without needing to pass it down as a prop. PageHeader reads this context
+ * only when its own `navigation` prop is undefined, so the prop always wins.
+ *
+ * @example
+ * ```tsx
+ * const { navigation } = useDataCollectionItemNavigation({ source, collectionId, activeItemId })
+ * return (
+ *   <PageHeaderNavigationProvider value={navigation}>
+ *     <MyDetailPage />
+ *   </PageHeaderNavigationProvider>
+ * )
+ * ```
+ */
+export declare const PageHeaderNavigationProvider: Provider<NavigationProps | null>;
+
 export declare function PageNavigation({ previous, next, counter }: NavigationProps): JSX_2.Element;
 
 declare interface PageProps {
@@ -6829,6 +6983,14 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * side-effects on reactive adapters (e.g. Apollo watchQuery).
      */
     exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
+    /**
+     * Optional id-relative capability: fetch the immediate neighbours of an
+     * item under the current filters/sortings/search, without loading pages.
+     * Enables detail-page prev/next on direct links / hard refresh, where the
+     * item may not be in any loaded page window. One-shot semantics: when an
+     * Observable is returned, only the first settled emission is consumed.
+     */
+    fetchItemNeighbors?: (options: ItemNeighborsFetchOptions<Filters, Options>) => ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -7482,6 +7644,45 @@ declare type SectionProps = {
     onClickItem: (id: string) => void;
     onItemVisible?: (id: string) => void;
 };
+
+export declare interface SeedableDefinition<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> {
+    filters?: Filters;
+    sortings?: Sortings;
+    search?: SearchOptions;
+    grouping?: Grouping;
+}
+
+/**
+ * Applies a OneDataCollection's persisted state onto a data source's runtime
+ * setters, validating every piece against the declared definition first so
+ * stale persisted keys (schema drift, renamed filters) never reach the
+ * adapter.
+ *
+ * - Filters: resolved per-visualization (`visualizationFilters` wins over
+ *   `filters`), then pruned to the keys declared in `definition.filters`.
+ * - Sortings: a single `{ field, order } | null` — `null` is an explicit
+ *   user "clear sorting" and is applied; `undefined` keeps the defaults.
+ * - Search: applied only when the definition enables search.
+ * - Grouping: applied only when the persisted field is a declared groupBy —
+ *   grouping changes record order, and prev/next must match the list.
+ *
+ * Pure besides invoking the given setters. Returns what was applied, or null
+ * when the storage contributed nothing.
+ */
+export declare function seedFromStorage<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>(storage: DataCollectionStorage<FiltersState<Filters>>, definition: SeedableDefinition<R, Filters, Sortings, Grouping>, target: SeedTarget<R, Filters, Sortings, Grouping>): AppliedCollectionState<R, Filters, Sortings, Grouping> | null;
+
+export declare interface SeedTarget<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> {
+    setCurrentFilters: (filters: FiltersState<Filters>) => void;
+    setCurrentSortings: (sortings: {
+        field: keyof Sortings;
+        order: "asc" | "desc";
+    } | null) => void;
+    setCurrentSearch: (search: string | undefined) => void;
+    setCurrentGrouping: (grouping: {
+        field: keyof Grouping["groupBy"];
+        order?: "asc" | "desc";
+    } | undefined) => void;
+}
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -8357,6 +8558,122 @@ declare type UseDataCollectionDataReturn<R extends RecordType> = UseDataReturn<R
     summaries?: R;
 };
 
+/**
+ * Item navigation (prev/next + counter + PageHeader wiring) fed from a
+ * **declared** data collection source definition plus the `collectionId` of
+ * the originating list — not from a mounted collection.
+ *
+ * Because it never needs the list mounted, it works on a direct link / hard
+ * refresh of a detail page: the persisted filters/sortings/search the list
+ * wrote through the data collection storage handler are read by
+ * `collectionId`, validated against the definition, and seeded into the
+ * source before the first fetch (exactly one fetch, with the right state).
+ *
+ * Persisted state intentionally wins over `source.currentFilters` /
+ * `currentSortings`: the definition values apply on mount and the hydrated
+ * state lands right after, mirroring what the user last saw on the list.
+ *
+ * When the adapter implements the optional id-relative `fetchItemNeighbors`
+ * capability, gaps the loaded window can't answer (deep direct link to an
+ * item beyond the first page, or a neighbor past the window edge) are
+ * resolved backend-side under the same filters/sortings/search — prev/next
+ * and the counter then behave as if the whole filtered set were loaded.
+ * Without the capability, behavior is window-only as before.
+ *
+ * @example
+ * ```tsx
+ * const { navigation } = useDataCollectionItemNavigation({
+ *   source: employeesSourceDefinition, // same definition the list uses
+ *   collectionId: "organization/employees/v1", // same id the list uses
+ *   activeItemId: routeParams.employeeId,
+ *   getItemTitle: (employee) => employee.name,
+ * })
+ * return (
+ *   <PageHeaderNavigationProvider value={navigation}>
+ *     <EmployeeDetailPage />
+ *   </PageHeaderNavigationProvider>
+ * )
+ * ```
+ */
+export declare function useDataCollectionItemNavigation<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(props: UseDataCollectionItemNavigationProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): UseDataCollectionItemNavigationReturn<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+
+export declare interface UseDataCollectionItemNavigationProps<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> {
+    /**
+     * The declared data source definition — the same one the originating list
+     * passes to `useDataCollectionSource` / `OneDataCollection`. `itemUrl`
+     * comes from here unless overridden.
+     */
+    source: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    /**
+     * The `id` of the originating `OneDataCollection` (e.g.
+     * `organization/employees/v1`). Its persisted filters/sortings/search are
+     * read through the data collection storage handler and seeded into the
+     * source, so navigation matches what the user saw on the list — even on a
+     * direct link where the list was never mounted.
+     */
+    collectionId: string;
+    /** Controlled active item ID — typically the detail route param. */
+    activeItemId?: DataSourceItemId | null;
+    /** Default active item ID for uncontrolled usage. */
+    defaultActiveItemId?: DataSourceItemId | null;
+    /** Callback fired whenever the active item changes. */
+    onActiveItemChange?: (id: DataSourceItemId | null) => void;
+    /** Overrides the source idProvider. */
+    idProvider?: (item: R, index?: number) => DataSourceItemId;
+    /** Overrides `source.itemUrl`. */
+    itemUrl?: (item: R) => string | undefined;
+    /** Accessible titles for the PageHeader prev/next links. */
+    getItemTitle?: (item: R) => string;
+    /**
+     * Gates everything: while false neither the persisted state is read nor
+     * any data fetched.
+     * @default true
+     */
+    enabled?: boolean;
+    /**
+     * When false, skips reading the persisted collection state and fetches
+     * with the definition defaults.
+     * @default true
+     */
+    restorePersistedState?: boolean;
+    /**
+     * Controlled filters for the navigation context — wins over the persisted
+     * list filters. Feed it the filters the user refined elsewhere (e.g. a
+     * collection-bound breadcrumb select's `onFiltersChange`) so prev/next and
+     * the counter follow that same context. Changing it refetches and
+     * re-resolves neighbors; `undefined` keeps the persisted/definition state.
+     */
+    currentFilters?: FiltersState<Filters>;
+    /**
+     * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
+     * same convention as `useDataCollectionSource(source, deps)`.
+     */
+    deps?: ReadonlyArray<unknown>;
+}
+
+export declare interface UseDataCollectionItemNavigationReturn<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> extends UseDataSourceItemNavigationReturn<R> {
+    /** True once persisted state was applied AND the first fetch resolved. */
+    isReady: boolean;
+    /**
+     * Render-ready PageHeader navigation. Pass it to the `navigation` prop or
+     * inject it via `PageHeaderNavigationProvider`. Null while there is
+     * nothing useful to render (e.g. the active item is not in the loaded
+     * window on a deep direct link).
+     */
+    navigation: NavigationProps | null;
+    /**
+     * What was actually read and applied from the persisted collection state,
+     * or null when nothing was (empty storage, restore disabled, read error).
+     */
+    appliedCollectionState: AppliedCollectionState<R, Filters, Sortings, Grouping> | null;
+    /** The runtime data source created from the definition (escape hatch). */
+    dataSource: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    /** The fetched data backing the navigation (escape hatch). */
+    data: Data<R>;
+    paginationInfo: PaginationInfo | null;
+    isLoading: boolean;
+}
+
 export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
@@ -8364,6 +8681,14 @@ export declare const useDataCollectionSource: <R extends RecordType = RecordType
  */
 declare interface UseDataOptions<R extends RecordType, Filters extends FiltersDefinition> {
     filters?: Partial<FiltersState<Filters>>;
+    /**
+     * When false, suspends all data fetching: the initial fetch effect does not
+     * run until `enabled` becomes true. Useful to delay the first fetch until
+     * async state (e.g. persisted filters) has been applied to the source.
+     * `isInitialLoading` stays true while disabled.
+     * @default true
+     */
+    enabled?: boolean;
     /**
      * A function that is called when an error occurs during data fetching.
      * It is called with the error object.
@@ -8403,6 +8728,43 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+declare interface UseDataSourceItemNavigationReturn<R extends RecordType> {
+    /** The currently active item ID */
+    activeItemId: DataSourceItemId | null;
+    /** The currently active item record, or null if not found in loaded data */
+    activeItem: R | null;
+    /** The active item index within the currently loaded records */
+    activeIndex: number;
+    /** The active item index within the full collection when it can be inferred */
+    absoluteIndex: number | null;
+    /** Number of records currently loaded into the datasource */
+    loadedItemsCount: number;
+    /** Total number of matching records when pagination exposes it */
+    totalItems: number | undefined;
+    /** The previous loaded item record, or null if unavailable */
+    previousItem: R | null;
+    /** The next loaded item record, or null if unavailable */
+    nextItem: R | null;
+    /** URL of the active item (derived via `itemUrl`), or null if unavailable */
+    activeItemUrl: string | null;
+    /** Navigate to the next item. Fetches next page if at boundary */
+    goToNext: () => void;
+    /** Navigate to the previous item. Fetches previous page if at boundary */
+    goToPrevious: () => void;
+    /** Whether there is a next item (or more pages to load) */
+    hasNext: boolean;
+    /** Whether there is a previous item (or previous pages to load) */
+    hasPrevious: boolean;
+    /** Directly set the active item ID */
+    setActiveItemId: (id: DataSourceItemId | null) => void;
+    /** True while waiting for a page transition to resolve the pending navigation */
+    isNavigating: boolean;
+    /** URL of the next loaded item (derived via `itemUrl`), or null if unavailable */
+    nextItemUrl: string | null;
+    /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
+    previousItemUrl: string | null;
+}
+
 export declare function useExportAction<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, currentVisualization, filename, enabled, }: UseExportActionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): SecondaryActionItem;
 
 declare interface UseExportActionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> {
@@ -8418,6 +8780,35 @@ declare interface UseExportActionProps<R extends RecordType, Filters extends Fil
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
+
+/**
+ * Converts an item-navigation result into the `NavigationProps` shape that
+ * `PageHeader` accepts (directly or via `PageHeaderNavigationProvider`).
+ *
+ * URLs are read from `previousItemUrl` / `nextItemUrl`, which are computed by
+ * the `itemUrl` option on the navigation hook. A null URL omits that link
+ * (the button renders disabled). The counter is included only when both the
+ * absolute position and the total are known — never a misleading `0/n`.
+ *
+ * Returns null when there is nothing useful to render (no input, or the
+ * active item could not be located and no total is known), so it can be
+ * passed straight to `PageHeaderNavigationProvider`.
+ */
+export declare function usePageHeaderItemNavigation<R extends RecordType>(nav: PageHeaderItemNavigationInput<R> | null, config?: UsePageHeaderItemNavigationConfig<R>): NavigationProps | null;
+
+export declare interface UsePageHeaderItemNavigationConfig<R extends RecordType> {
+    /**
+     * Returns a human-readable title for a navigation link. Used as the
+     * accessible label on the prev/next buttons.
+     */
+    getItemTitle?: (item: R) => string;
+}
+
+/**
+ * Returns the navigation value injected by the nearest
+ * `PageHeaderNavigationProvider`, or null when no provider is present.
+ */
+export declare function usePageHeaderNavigation(): NavigationProps | null;
 
 export declare interface User {
     id: string;
@@ -8878,11 +9269,6 @@ declare module "gridstack" {
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
-}
-
-
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8929,6 +9315,11 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
+}
+
+
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
