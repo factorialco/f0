@@ -1,4 +1,4 @@
-import { F0CardRow } from "@/components/F0Card"
+import { F0CardRow } from "@/experimental/F0CardRow"
 
 import { F0HILActionConfirmationProps } from "./types"
 

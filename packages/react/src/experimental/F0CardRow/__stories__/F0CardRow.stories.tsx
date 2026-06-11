@@ -24,7 +24,7 @@ const meta: Meta<typeof F0CardRow> = {
       story: { inline: false, height: "160px" },
     },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["autodocs", "experimental"],
   // Explicit argTypes: docgen can't infer props through the
   // withDataTestId(withSkeleton(...)) wrapper, so we declare the controls here.
   argTypes: {

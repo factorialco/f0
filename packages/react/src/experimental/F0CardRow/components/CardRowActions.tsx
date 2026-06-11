@@ -14,7 +14,7 @@ import {
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
-} from "./CardActions"
+} from "@/components/F0Card/components/CardActions"
 
 // Pixel gap between the trailing controls — mirrors the `gap-2` used elsewhere.
 const GAP = 8
