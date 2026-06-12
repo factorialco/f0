@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.61.4](https://github.com/factorialco/f0/compare/f0-react-v2.61.3...f0-react-v2.61.4) (2026-06-12)
+
+
+### Bug Fixes
+
+* **datasource:** duck-type observable detection in fetch result handling ([#4431](https://github.com/factorialco/f0/issues/4431)) ([65cf833](https://github.com/factorialco/f0/commit/65cf833295b9bb3f77ad458f2c8e9f30ba420967))
+
 ## [2.61.3](https://github.com/factorialco/f0/compare/f0-react-v2.61.2...f0-react-v2.61.3) (2026-06-12)
 
 
