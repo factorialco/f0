@@ -246,6 +246,12 @@ demonstrates all of it together.
   `controls={{ kind: "resource", navigation }}` and drive `activeItemId` from
   `onActiveItemChange`. See `Dialog` → _WithMountedSidepanelNavigation_.
 
+For the mounted-dialog case, pair callback arrows with an "Open detail"
+escape hatch: feed `F0Dialog`'s `controls.expand` a `url` set to the hook's
+`activeItemUrl` (derived from the source's `itemUrl`). In-place arrows browse
+the set; the expand link jumps to the item's full-page view and is
+cmd/middle-clickable.
+
 <div
   className="header-container"
   style={{

@@ -24,7 +24,7 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
 
-import { PaginatedFetchOptions } from "@/hooks/datasource"
+import { PaginatedFetchOptions, RecordType } from "@/hooks/datasource"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 
 import { F0Dialog } from "../index"
@@ -429,6 +429,10 @@ export const WithResourceHeaderAndFullscreenPosition: Story = {
  * **in place, with no URL change / no remount** (the same `NavigationProps`
  * contract PageHeader uses in url mode). The `current/total` counter still
  * comes from the collection.
+ *
+ * The "Open detail" expand button is a real link to the active item's
+ * `itemUrl` (the hook's `activeItemUrl`): in-place arrows for browsing,
+ * `expand` to jump to the full-page view (cmd/middle-clickable).
  */
 const SIDEPANEL_EMPLOYEES = Array.from({ length: 8 }, (_, i) => ({
   id: `${i + 1}`,
@@ -439,6 +443,9 @@ const SIDEPANEL_EMPLOYEES = Array.from({ length: 8 }, (_, i) => ({
 const SIDEPANEL_COLLECTION_ID = "storybook/dialog-sidepanel-employees/v1"
 
 const sidepanelSource = {
+  // `itemUrl` powers the "Open detail" expand link (full-page view), while
+  // the arrows navigate in place — both derived from the same declaration.
+  itemUrl: (employee: RecordType) => `#/employees/${employee.id}`,
   // One declared page holds the whole set, so navigation resolves entirely
   // from the loaded window — the focus here is the callback arrows, not the
   // neighbors fallback (covered by the PageHeader story).
@@ -459,7 +466,7 @@ const sidepanelSource = {
 const MountedSidepanelDemo = (args: ComponentProps<typeof F0Dialog>) => {
   const [activeId, setActiveId] = useState<string | null>(null)
 
-  const { navigation } = useDataCollectionItemNavigation({
+  const { navigation, activeItemUrl } = useDataCollectionItemNavigation({
     source: sidepanelSource,
     collectionId: SIDEPANEL_COLLECTION_ID,
     activeItemId: activeId,
@@ -489,7 +496,13 @@ const MountedSidepanelDemo = (args: ComponentProps<typeof F0Dialog>) => {
         isOpen={activeId !== null}
         onClose={() => setActiveId(null)}
         title={activeEmployee?.name ?? "Employee"}
-        controls={{ kind: "resource", navigation: navigation ?? undefined }}
+        controls={{
+          kind: "resource",
+          expand: activeItemUrl
+            ? { label: "Open detail", url: activeItemUrl }
+            : undefined,
+          navigation: navigation ?? undefined,
+        }}
       >
         <div className="flex flex-col gap-2 p-4">
           <div className="text-lg font-semibold text-f1-foreground">
