@@ -1,0 +1,643 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./Card.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# Card
+
+Displays a single entity — a person, document, project, or job opening — as a self-contained, optionally clickable surface that groups an avatar, title, description, metadata, and actions. Use it in grids and galleries where each item needs visual weight and several pieces of information. For a dense, single-row list item use `F0CardRow`; for a plain styled container of arbitrary content use `F0Box`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>title</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Main heading of the card. Sentence case, no trailing period. Also used
+          as the accessible label for the full-card link.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>description</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Secondary line below the title. Truncated to 3 lines (2 when{" "}
+          <code>compact</code>).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>avatar</code>
+        </td>
+        <td>
+          <code>CardAvatarVariant</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Leading visual. Supports person, emoji, icon, file, module, date and
+          alert avatar types.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>image</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          URL of a banner image rendered at the top of the card. Pairs with{" "}
+          <code>imageFit</code>, <code>imageSize</code> and{" "}
+          <code>imageAspectRatio</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>imageFit</code>
+        </td>
+        <td>
+          <code>
+            "contain" | "cover" | "fit-width" | "fit-height" | "scale-down"
+          </code>
+        </td>
+        <td>
+          <code>"fit-width"</code>
+        </td>
+        <td>—</td>
+        <td>How the image is fitted within its container.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>imageSize</code>
+        </td>
+        <td>
+          <code>"xs" | "sm" | "md" | "lg" | "xl"</code>
+        </td>
+        <td>
+          <code>"sm"</code>
+        </td>
+        <td>—</td>
+        <td>
+          Height of the image container. Ignored when{" "}
+          <code>imageAspectRatio</code> is set.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>imageAspectRatio</code>
+        </td>
+        <td>
+          <code>"default" | "video"</code>
+        </td>
+        <td>
+          <code>"default"</code>
+        </td>
+        <td>—</td>
+        <td>
+          Constrain the image to a fixed aspect ratio instead of a fixed height.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>blurredBackground</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>true</code>
+        </td>
+        <td>—</td>
+        <td>
+          Show a blurred fill behind the image when it does not fill the
+          container.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>metadata</code>
+        </td>
+        <td>
+          <code>CardMetadata[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          List of icon + property rows (text, status, tag, date, progress bar,
+          file).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>children</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Custom content slot rendered in the card body. Interactive children
+          keep their own click behaviour even when a <code>link</code> is set.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>link</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Makes the whole card a navigation link via a full-card overlay anchor.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onClick</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Called when the card is clicked. Can be combined with `link`.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>primaryAction</code>
+        </td>
+        <td>
+          <code>CardPrimaryAction</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Filled button in the card footer ({"{ label, icon?, onClick }"}).</td>
+      </tr>
+      <tr>
+        <td>
+          <code>secondaryActions</code>
+        </td>
+        <td>
+          <code>CardSecondaryAction[] | CardSecondaryLink</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Outline buttons or a single link in the footer, beside the primary
+          action.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>otherActions</code>
+        </td>
+        <td>
+          <code>DropdownItem[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Overflow actions shown in a dropdown menu in the card's options
+          overlay.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>bookmark</code>
+        </td>
+        <td>
+          <code>CardBookmark</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Save toggle ({"{ bookmarked, onBookmarkChange, label? }"}) in the
+          options overlay. Outline when unsaved, filled when saved.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>selectable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Renders a selection checkbox in the options overlay.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>selected</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Controlled selected state. Applies the selected border and fill.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onSelect</code>
+        </td>
+        <td>
+          <code>(selected: boolean) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Called with the next selected state when the checkbox is toggled.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>alert</code>
+        </td>
+        <td>
+          <code>CardAlertProps</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Banner above the card with a coloured strip and matching border.
+          Supports info, warning, critical and positive variants, plus an
+          optional action or a dismiss button.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>compact</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Tighter padding and smaller avatar/title for denser layouts.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>fullHeight</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Stretch the card to fill its container's height — keeps cards aligned
+          in a grid row.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>subtleBorder</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Use a softer border (<code>border-f1-border-secondary</code>) for
+          low-emphasis surfaces.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>dataTestId</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Test identifier applied to the card root.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Variants
+
+The `alert` prop adds a banner strip above the card. The variant sets the colour
+and the default icon, and matches the card border so the whole card reads as one
+state.
+
+<Canvas of={Stories.AlertVariants} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Variant</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>info</code>
+        </td>
+        <td>Neutral context about the record — no action required.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>positive</code>
+        </td>
+        <td>Confirms a successful or healthy state for the record.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>warning</code>
+        </td>
+        <td>Something may need attention soon (e.g. pending changes).</td>
+      </tr>
+      <tr>
+        <td>
+          <code>critical</code>
+        </td>
+        <td>A problem affecting the record that needs prompt action.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+Reach for a Card when each item is an entity that benefits from visual grouping —
+an avatar, a few metadata rows, and optional actions — typically arranged in a
+grid or gallery.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use Card when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Browsing entities in a grid</td>
+        <td>
+          Each item is a person, document, project or job that needs an avatar,
+          metadata and actions together.
+        </td>
+      </tr>
+      <tr>
+        <td>The item is the entry point to a detail view</td>
+        <td>
+          The whole card should navigate somewhere — set <code>link</code> so
+          the entire surface is clickable.
+        </td>
+      </tr>
+      <tr>
+        <td>Bulk operations across items</td>
+        <td>
+          Items can be picked for a batch action — enable{" "}
+          <code>selectable</code> for a per-card checkbox.
+        </td>
+      </tr>
+      <tr>
+        <td>Media-led content</td>
+        <td>
+          A preview image carries meaning — pass <code>image</code> with an
+          appropriate <code>imageFit</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A dense, scannable list of many items in single rows</td>
+        <td>
+          <code>F0CardRow</code>
+        </td>
+      </tr>
+      <tr>
+        <td>A plain styled container for arbitrary, non-entity content</td>
+        <td>
+          <code>F0Box</code>
+        </td>
+      </tr>
+      <tr>
+        <td>A self-contained dashboard surface with its own actions and metrics</td>
+        <td>
+          <code>F0Widget</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Tabular data that needs aligned columns and sorting</td>
+        <td>A data table</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Keep cards focused — a title, a short description, a few metadata rows, and only the most relevant actions.",
+    guidelines: [
+      "Lead with the entity name as the title",
+      "Limit metadata to the fields that aid scanning",
+      "Reserve the footer for one primary action plus a couple of secondary ones",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't overload a card with every available field and action — it stops being scannable.",
+    guidelines: [
+      "Don't stack long paragraphs in the description",
+      "Don't add more than one primary action",
+      "Don't mix unrelated entities in the same card",
+    ],
+  }}
+/>
+
+### Content best practices
+
+- Title is sentence case with no trailing period; it names the entity.
+- Keep the description to one short, informative line — it truncates after 3
+  lines (2 when `compact`).
+- Action labels are imperative and short.
+  - **Correct:** "Refer", "Apply", "View more"
+  - **Incorrect:** "Referral", "Application submitted", "Click to view more"
+
+### Behavior
+
+- **Full-card link:** when `link` is set, the entire card becomes clickable via
+  a full-card overlay anchor that uses `title` as its accessible label. `onClick`
+  still fires alongside navigation.
+- **Interactive children stay interactive:** content inside `children` (links,
+  buttons, inputs, toggles) keeps its own pointer events and stops propagation,
+  so it works even when the card itself is a `link`.
+- **Image overlay controls:** when an `image` is present, the selection checkbox,
+  bookmark toggle and overflow menu move into an overlay on the image; otherwise
+  they sit in the top-right of the header.
+- **Bookmark visibility:** the bookmark toggle appears on hover and stays visible
+  while `bookmarked` is `true`, so the saved state is always recognisable.
+- **Controlled selection and dismiss:** `selected`/`onSelect` and the alert's
+  `visible`/`onDismiss` are controlled — the consumer owns the state.
+
+### Usage examples
+
+**Card with actions**
+
+Footer with a primary action plus secondary actions, for items that support
+direct operations.
+
+<Canvas of={Stories.WithActions} />
+
+**Clickable card**
+
+Set `link` to navigate to a detail view when the card is clicked.
+
+<Canvas of={Stories.WithLink} />
+
+**Selectable card**
+
+Enable `selectable` to support bulk operations across a grid of cards.
+
+<Canvas of={Stories.Selectable} />
+
+**Bookmarkable card**
+
+Pass `bookmark` to add a save toggle that does not trigger the card's link.
+
+<Canvas of={Stories.Bookmarkable} />
+
+**Card with image**
+
+A banner image rendered above the content, with overlay controls.
+
+<Canvas of={Stories.WithImage} />
+
+**Card with an alert**
+
+Surface a state on the record with an alert banner and an optional action.
+
+<Canvas of={Stories.WithAlertAction} />
+
+**Compact card**
+
+Denser padding and a smaller header for tighter layouts.
+
+<Canvas of={Stories.Compact} />
+
+**Card with custom content**
+
+Use `children` to render bespoke content inside the card body.
+
+<Canvas of={Stories.WithChildren} />
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Move focus to the card header (when clickable), then to any actions,
+          checkbox, bookmark or interactive children.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>
+          Activate the focused card header to follow the <code>link</code> and
+          fire <code>onClick</code>.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- When `link` is set, the card header exposes `role="button"` and the full-card
+  overlay anchor uses `title` as its `aria-label` — always provide a meaningful
+  `title` so the destination is announced.
+- The bookmark toggle uses its `label` (falling back to `title`) as the
+  accessible name, so the save control is announced even though it is icon-only.
+- The skeleton state sets `aria-busy="true"` and `aria-live="polite"` so loading
+  is announced while data is fetched.
+- Avatar images are decorative relative to the title; the title carries the
+  meaning. Ensure any `image` is supported by the `title` text, since it is used
+  as the image `alt`.

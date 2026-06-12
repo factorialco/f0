@@ -16,7 +16,7 @@ import { graphNodeStates, graphNodeVariants } from "../types"
 
 const meta = {
   component: F0GraphNode,
-  tags: ["stable", "!autodocs"],
+  tags: ["!autodocs"],
   title: "Graph/F0GraphNode",
   parameters: {
     layout: "centered",

@@ -42,7 +42,7 @@ function renderPerson(node: GraphNode<Person>, ctx: F0GraphNodeRenderContext) {
 const meta = {
   component: F0GraphControls,
   title: "Graph/F0GraphControls",
-  tags: ["stable", "!autodocs"],
+  tags: ["!autodocs"],
   parameters: {
     layout: "centered",
   },

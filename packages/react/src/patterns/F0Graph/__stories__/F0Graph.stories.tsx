@@ -24,7 +24,7 @@ import { F0GraphNode } from "../F0GraphNode"
 const meta = {
   title: "Graph/F0Graph",
   component: F0Graph<Employee>,
-  tags: ["stable", "!autodocs"],
+  tags: ["!autodocs"],
   decorators: [
     (Story) => (
       <div className="h-[600px] w-full bg-f1-background">

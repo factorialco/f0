@@ -86,7 +86,7 @@ const meta = {
       story: { inline: false, height: "320px" },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs", "stable"],
   argTypes: {
     imageFit: {
       control: "select",
