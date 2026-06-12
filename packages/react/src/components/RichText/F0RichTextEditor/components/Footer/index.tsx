@@ -8,7 +8,10 @@ import { Toolbar } from "@/components/RichText/internal"
 import { Check, Cross, Microphone, Paperclip, TextSize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
-import { EnhanceActivator } from "@/components/RichText/internal/Enhance"
+import {
+  AIEnhanceMenu,
+  EnhanceActivator,
+} from "@/components/RichText/internal/Enhance"
 import type { UseEnhanceReturn } from "@/components/RichText/internal/Enhance"
 import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
 import { type RecorderStatus } from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
@@ -65,6 +68,12 @@ const Footer = ({
     useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const [containerWidth, setContainerWidth] = useState(0)
+  // True while THIS footer's enhance menu is open (prompt → loading → review;
+  // the bubble menu flow never sets it). The footer content hides while the
+  // user writes the prompt and during review, but stays visible while loading.
+  const [enhanceMenuOpen, setEnhanceMenuOpen] = useState(false)
+  const hideFooterContent =
+    enhanceMenuOpen && !isFullscreen && !enhance.isLoading
 
   useEffect(() => {
     if (containerRef.current) {
@@ -152,6 +161,8 @@ const Footer = ({
           hideLabel={useLittleMode}
           menuWidth={containerWidth}
           menuContainerRef={containerRef}
+          onOpenChange={setEnhanceMenuOpen}
+          hideReviewPanel
         />
       )}
 
@@ -208,9 +219,30 @@ const Footer = ({
   return (
     <div
       ref={containerRef}
-      className="flex min-h-[56px] max-w-full items-center gap-2 py-3"
+      className="relative flex min-h-[56px] max-w-full items-center gap-2 py-3"
     >
-      <div className="relative flex flex-grow items-center gap-2">
+      {/* The footer content disappears while a footer-initiated enhance is in
+          flight; during review the menu shows up in its place, spanning the
+          whole footer width without a border. */}
+      {hideFooterContent && enhance.isAcceptChangesOpen && (
+        <div className="absolute inset-x-0 inset-y-0 z-20 flex items-center">
+          <AIEnhanceMenu
+            onSelect={() => {}}
+            enhancementOptions={[]}
+            inputPlaceholder=""
+            menuState="review"
+            onAccept={enhance.acceptChanges}
+            onReject={enhance.rejectChanges}
+            onRetry={enhance.retryChanges}
+          />
+        </div>
+      )}
+      <div
+        className={cn(
+          "relative flex flex-grow items-center gap-2",
+          hideFooterContent && "invisible"
+        )}
+      >
         {!isFullscreen && (
           <motion.div
             initial={{ width: 0 }}
@@ -282,13 +314,15 @@ const Footer = ({
         )}
       </div>
 
-      <ActionsMenu
-        primaryAction={primaryAction}
-        secondaryAction={secondaryAction}
-        useLittleMode={useLittleMode}
-        disableButtons={disableButtons}
-        isFullscreen={isFullscreen}
-      />
+      <div className={cn("contents", hideFooterContent && "invisible")}>
+        <ActionsMenu
+          primaryAction={primaryAction}
+          secondaryAction={secondaryAction}
+          useLittleMode={useLittleMode}
+          disableButtons={disableButtons}
+          isFullscreen={isFullscreen}
+        />
+      </div>
     </div>
   )
 }

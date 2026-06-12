@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
-import { ArrowUp, Check, Cross, Reset, SolidStop } from "@/icons/app"
+import { ArrowUp, SolidStop } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { F0ActionItem } from "@/sds/ai/F0ActionItem"
 import {
@@ -98,18 +98,20 @@ const AIEnhanceMenu = ({
           <motion.div
             className={cn(
               "relative isolate",
-              "flex w-full flex-row items-center gap-2 rounded-md bg-f1-background p-1.5 text-f1-foreground transition-all duration-200",
-              "border border-solid border-f1-background-tertiary",
-              "[--gradient-angle:180deg]",
-              "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']",
-              "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-md after:blur-[6px] after:content-['']",
-              "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
-              "from-[#E55619] via-[#A1ADE5] to-[#E51943]",
-              compactReview &&
-                !isIdle &&
-                "border border-solid border-f1-border-secondary",
-              useCompactReview && "drop-shadow-sm",
-              isIdle && "pl-4"
+              "flex w-full flex-row items-center gap-2 rounded-md bg-f1-background py-1.5 px-1.5 text-f1-foreground transition-all duration-200",
+              isIdle &&
+                cn(
+                  "[--gradient-angle:180deg]",
+                  "border border-solid border-f1-background-tertiary",
+                  "before:pointer-events-none before:absolute before:inset-0 before:z-[-1] before:rounded-[inherit] before:bg-f1-background before:content-['']",
+                  "after:pointer-events-none after:absolute after:inset-0.5 after:z-[-2] after:rounded-md after:blur-[6px] after:content-['']",
+                  "after:bg-[conic-gradient(from_var(--gradient-angle),var(--tw-gradient-stops))]",
+                  "from-[#E55619] via-[#A1ADE5] to-[#E51943]"
+                ),
+              useCompactReview &&
+                "border border-solid border-f1-border-secondary drop-shadow-md",
+              isIdle && "pl-4",
+              isReview && !useCompactReview && "px-0"
             )}
             onClick={() => {
               customInputRef.current?.focus()
@@ -182,20 +184,20 @@ const AIEnhanceMenu = ({
               >
                 <F0Button
                   variant="outline"
-                  icon={Reset}
                   label="Try again"
                   onClick={onRetry}
                 />
+                {useCompactReview && (
+                  <div className="h-4 w-px bg-f1-border rounded-full" />
+                )}
                 <div className="flex items-center gap-2">
                   <F0Button
                     variant="outline"
-                    icon={Cross}
                     label="Discard"
                     onClick={onReject}
                   />
                   <F0Button
                     variant="default"
-                    icon={Check}
                     label="Accept"
                     onClick={onAccept}
                   />

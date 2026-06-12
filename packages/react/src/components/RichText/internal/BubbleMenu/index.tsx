@@ -2,6 +2,8 @@ import { BubbleMenu, Editor, isTextSelection } from "@tiptap/react"
 import { NodeSelection } from "prosemirror-state"
 import { memo, useEffect, useRef, useState } from "react"
 
+import { cn } from "@/lib/utils"
+
 import { EnhanceActivator } from "../Enhance/EnhanceActivator"
 import type { UseEnhanceReturn } from "../Enhance/useEnhance"
 import { Toolbar, ToolbarDivider } from "../Toolbar"
@@ -121,7 +123,13 @@ export const EditorBubbleMenu = memo(function EditorBubbleMenu({
       {!isToolbarOpen && (!enhanceActive || shouldKeepEnhanceVisible) && (
         <div
           ref={bubbleMenuContainerRef}
-          className="dark z-50 flex w-max flex-row items-center gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-1.5 drop-shadow-sm"
+          className={cn(
+            "dark z-50 flex w-max flex-row items-center gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-1.5 drop-shadow-sm",
+            // Once the enhance flow starts (loading/review) the bubble bar
+            // disappears; it stays mounted so the activator's anchored review
+            // panel keeps working.
+            shouldKeepEnhanceVisible && "invisible"
+          )}
         >
           {enhance?.config && (
             <>

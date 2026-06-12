@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -146,8 +146,18 @@ describe("F0RichTextEditor voice dictation", () => {
       await screen.findByRole("button", { name: /record audio/i })
     )
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
+    // The dictation error reuses the enhance banner UI (its alert avatar also
+    // has role="alert"), so locate the banner via its message and assert the
+    // dismiss button within it.
+    const message = await screen.findByText(
       defaultTranslations.ai.micPermissionDenied
     )
+    const banner = message.closest("[role='alert']") as HTMLElement
+    expect(banner).not.toBeNull()
+    expect(
+      within(banner).getByRole("button", {
+        name: defaultTranslations.actions.close,
+      })
+    ).toBeInTheDocument()
   })
 })

@@ -32,6 +32,12 @@ interface UseEnhanceReturn {
   setError: (message: string | null) => void
   /** Clear the current error and re-enable the editor */
   clearError: () => void
+  /**
+   * Viewport bottom coordinate of the generated content when the review
+   * opened, so floating review UIs can position themselves below it instead
+   * of over it. Null when it couldn't be measured.
+   */
+  reviewAnchorTop: number | null
 }
 
 const clearNativeSelection = () => {
@@ -51,6 +57,7 @@ function useEnhance(
   const [isAcceptChangesOpen, setIsAcceptChangesOpen] = useState(false)
   const [lastIntent, setLastIntent] = useState<lastIntentType>(null)
   const [error, setErrorInternal] = useState<string | null>(null)
+  const [reviewAnchorTop, setReviewAnchorTop] = useState<number | null>(null)
 
   useEffect(() => {
     if (error && editor) {
@@ -84,14 +91,25 @@ function useEnhance(
           editor.setEditable(false)
           // Highlight the affected range while loading — for a full-document
           // enhance the range spans the whole content, so everything shines.
-          editor.commands.setEnhanceHighlight(range.from, range.to)
+          // The placeholder is what shines instead when there is no text yet.
+          editor.commands.setEnhanceHighlight(range.from, range.to, {
+            placeholder: i18n.richTextEditor.ai.loadingEnhanceLabel,
+          })
           ;(editor.view.dom as HTMLElement).blur()
           clearNativeSelection()
         },
-        onSuccess: () => {
+        onSuccess: ({ to }) => {
           // The shine highlight is only a loading affordance: drop it once the
           // enhancement is ready, leaving the text untouched (no selection).
           editor.commands.clearEnhanceHighlight()
+          // Anchor floating review UIs below the generated content so they
+          // never cover it. coordsAtPos needs a real layout (throws in jsdom).
+          try {
+            const pos = Math.max(0, Math.min(to, editor.state.doc.content.size))
+            setReviewAnchorTop(editor.view.coordsAtPos(pos).bottom)
+          } catch {
+            setReviewAnchorTop(null)
+          }
           setIsAcceptChangesOpen(true)
         },
         onError: (errorMsg?: string) => {
@@ -103,7 +121,12 @@ function useEnhance(
         customIntent,
       })
     },
-    [config, editor, i18n.richTextEditor.ai.defaultError]
+    [
+      config,
+      editor,
+      i18n.richTextEditor.ai.defaultError,
+      i18n.richTextEditor.ai.loadingEnhanceLabel,
+    ]
   )
 
   const acceptChanges = useCallback(() => {
@@ -150,6 +173,7 @@ function useEnhance(
       retryChanges,
       setError,
       clearError,
+      reviewAnchorTop,
     }),
     [
       config,
@@ -163,6 +187,7 @@ function useEnhance(
       retryChanges,
       setError,
       clearError,
+      reviewAnchorTop,
     ]
   )
 }

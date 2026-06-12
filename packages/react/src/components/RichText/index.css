@@ -70,6 +70,11 @@
   background-color: transparent !important;
 }
 
+.enhance-highlight-placeholder {
+  pointer-events: none;
+  user-select: none;
+}
+
 @keyframes enhance-highlight-border-flow {
   0% {
     background-position: 0 100%;

@@ -1,6 +1,13 @@
 import * as Popover from "@radix-ui/react-popover"
 import { AnimatePresence, motion } from "motion/react"
-import { RefObject, memo, useLayoutEffect, useRef, useState } from "react"
+import {
+  RefObject,
+  memo,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { ChangeTone } from "@/icons/ai"
@@ -18,6 +25,16 @@ interface EnhanceActivatorProps {
   menuWidth?: number
   menuContainerRef?: RefObject<HTMLElement | null>
   lockToViewportOnLock?: boolean
+  /**
+   * Notifies when this activator's menu opens/closes. The flag stays true for
+   * the whole flow it owns (prompt → loading → review) until it closes.
+   */
+  onOpenChange?: (open: boolean) => void
+  /**
+   * Suppress the built-in review panel: the consumer renders its own
+   * accept/discard UI (e.g. inline in the editor footer).
+   */
+  hideReviewPanel?: boolean
 }
 
 interface FrozenGeometry {
@@ -40,6 +57,8 @@ const EnhanceActivator = memo(function EnhanceActivator({
   menuWidth,
   menuContainerRef,
   lockToViewportOnLock = false,
+  onOpenChange,
+  hideReviewPanel = false,
 }: EnhanceActivatorProps) {
   const {
     config: enhanceConfig,
@@ -49,6 +68,7 @@ const EnhanceActivator = memo(function EnhanceActivator({
     acceptChanges: onAcceptChanges,
     rejectChanges: onRejectChanges,
     retryChanges: onRetryChanges,
+    reviewAnchorTop,
   } = enhance
   const i18n = useI18n()
   const enhanceButtonRef = useRef<HTMLButtonElement>(null)
@@ -174,10 +194,26 @@ const EnhanceActivator = memo(function EnhanceActivator({
     if (!isOwnerLocked && wasLocked) {
       setFrozenGeometry(null)
       setFrozenViewportPosition(null)
+      if (hideReviewPanel) {
+        // The review was handled by the consumer's own UI: close the flow so
+        // the popover doesn't reopen with the options menu.
+        flowOwnerRef.current = false
+        setOpen(false)
+      }
     }
 
     prevLockedRef.current = isOwnerLocked
-  }, [isLocked, computedAlignOffset, computedSideOffset, computedMenuWidth])
+  }, [
+    isLocked,
+    computedAlignOffset,
+    computedSideOffset,
+    computedMenuWidth,
+    hideReviewPanel,
+  ])
+
+  useEffect(() => {
+    onOpenChange?.(open)
+  }, [open, onOpenChange])
 
   const activeAlignOffset = frozenGeometry?.alignOffset ?? computedAlignOffset
   const activeSideOffset = frozenGeometry?.sideOffset ?? computedSideOffset
@@ -257,7 +293,12 @@ const EnhanceActivator = memo(function EnhanceActivator({
       </Popover.Trigger>
       <Popover.Portal container={document.body}>
         <AnimatePresence>
+          {/* While the enhancement is loading the shimmer on the content is the
+              only affordance: the menu stays hidden and reopens in review mode
+              (unless the consumer renders its own review UI). */}
           {open &&
+            !isLoadingEnhance &&
+            !(hideReviewPanel && isAcceptChangesOpen) &&
             (renderAsFixedLockedPanel ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -268,7 +309,12 @@ const EnhanceActivator = memo(function EnhanceActivator({
                 style={{
                   position: "fixed",
                   left: frozenViewportPosition.left,
-                  top: frozenViewportPosition.top,
+                  // In review, sit below the generated content (never over
+                  // it); fall back to the frozen spot if it wasn't measurable.
+                  top:
+                    isAcceptChangesOpen && reviewAnchorTop !== null
+                      ? Math.min(reviewAnchorTop + 8, window.innerHeight - 80)
+                      : frozenViewportPosition.top,
                   width:
                     lockToViewportOnLock && isAcceptChangesOpen
                       ? "fit-content"

@@ -6,34 +6,64 @@ import { Decoration, DecorationSet } from "prosemirror-view"
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     enhanceHighlight: {
-      setEnhanceHighlight: (from: number, to: number) => ReturnType
+      setEnhanceHighlight: (
+        from: number,
+        to: number,
+        options?: { placeholder?: string }
+      ) => ReturnType
       clearEnhanceHighlight: () => ReturnType
     }
   }
 }
 
-type EnhanceHighlightMeta = { from: number; to: number } | { clear: true }
+type EnhanceHighlightMeta =
+  | { from: number; to: number; placeholder?: string }
+  | { clear: true }
 
 const enhanceHighlightKey = new PluginKey<DecorationSet>("enhanceHighlight")
+
+const buildPlaceholderSpan = (placeholder: string): HTMLSpanElement => {
+  const span = document.createElement("span")
+  span.className = "enhance-highlight enhance-highlight-placeholder"
+  span.textContent = placeholder
+  return span
+}
 
 const createHighlightDecorations = (
   doc: ProseMirrorNode,
   from: number,
-  to: number
+  to: number,
+  placeholder?: string
 ): DecorationSet => {
   const docSize = doc.content.size
   const validFrom = Math.max(0, Math.min(from, docSize))
   const validTo = Math.max(validFrom, Math.min(to, docSize))
 
-  if (validFrom === validTo) {
-    return DecorationSet.empty
+  const hasText =
+    validFrom !== validTo &&
+    doc.textBetween(validFrom, validTo, " ").trim().length > 0
+
+  if (hasText) {
+    return DecorationSet.create(doc, [
+      Decoration.inline(validFrom, validTo, {
+        class: "enhance-highlight",
+      }),
+    ])
   }
 
-  return DecorationSet.create(doc, [
-    Decoration.inline(validFrom, validTo, {
-      class: "enhance-highlight",
-    }),
-  ])
+  // Nothing to shine on (empty document or whitespace-only range): without a
+  // visible affordance the editor just looks idle, so render the loading label
+  // as an inline widget that reuses the same shimmer effect.
+  if (placeholder) {
+    const position = validFrom === 0 && docSize > 0 ? 1 : validFrom
+    return DecorationSet.create(doc, [
+      Decoration.widget(position, () => buildPlaceholderSpan(placeholder), {
+        side: 0,
+      }),
+    ])
+  }
+
+  return DecorationSet.empty
 }
 
 const EnhanceHighlight = Extension.create({
@@ -42,12 +72,13 @@ const EnhanceHighlight = Extension.create({
   addCommands() {
     return {
       setEnhanceHighlight:
-        (from: number, to: number) =>
+        (from: number, to: number, options?: { placeholder?: string }) =>
         ({ tr, dispatch }) => {
           if (dispatch) {
             tr.setMeta(enhanceHighlightKey, {
               from,
               to,
+              placeholder: options?.placeholder,
             } satisfies EnhanceHighlightMeta)
           }
           return true
@@ -82,7 +113,12 @@ const EnhanceHighlight = Extension.create({
               if ("clear" in meta) {
                 return DecorationSet.empty
               }
-              return createHighlightDecorations(tr.doc, meta.from, meta.to)
+              return createHighlightDecorations(
+                tr.doc,
+                meta.from,
+                meta.to,
+                meta.placeholder
+              )
             }
             return tr.docChanged ? set.map(tr.mapping, tr.doc) : set
           },

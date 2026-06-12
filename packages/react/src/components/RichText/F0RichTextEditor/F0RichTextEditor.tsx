@@ -30,6 +30,7 @@ import "../index.css"
 import { Skeleton } from "@/ui/skeleton"
 
 import {
+  AIEnhanceMenu,
   EnhanceActivator,
   useEnhance,
 } from "@/components/RichText/internal/Enhance"
@@ -274,6 +275,13 @@ const F0RichTextEditorComponent = forwardRef<
       dictationErrorTimeoutRef.current = null
     }, DICTATION_ERROR_MS)
   }, [])
+  const dismissDictationError = useCallback(() => {
+    if (dictationErrorTimeoutRef.current) {
+      clearTimeout(dictationErrorTimeoutRef.current)
+      dictationErrorTimeoutRef.current = null
+    }
+    setDictationError(null)
+  }, [])
   useEffect(
     () => () => {
       if (dictationErrorTimeoutRef.current) {
@@ -405,61 +413,90 @@ const F0RichTextEditorComponent = forwardRef<
           </div>
 
           <AnimatePresence>
-            {isFullscreen &&
-              isToolbarOpen &&
-              (!enhance.disableButtons ||
-                enhance.isLoading ||
-                enhance.isAcceptChangesOpen) && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
-                  style={{ pointerEvents: "none" }}
+            {/* The floating toolbar disappears the moment an enhance kicks off
+                (disableButtons covers loading, review and error). */}
+            {isFullscreen && isToolbarOpen && !enhance.disableButtons && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+                style={{ pointerEvents: "none" }}
+              >
+                <div
+                  ref={fullscreenToolbarRef}
+                  className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
+                  style={{ pointerEvents: "auto" }}
                 >
-                  <div
-                    ref={fullscreenToolbarRef}
-                    className="absolute -bottom-4 left-1/2 z-50 max-w-[calc(100%-48px)] -translate-x-1/2 rounded-lg border border-solid border-f1-border-secondary bg-f1-background p-1.5 shadow-md"
-                    style={{ pointerEvents: "auto" }}
-                  >
-                    <div className="flex items-center gap-1">
-                      <F0Button
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setIsToolbarOpen(false)
-                          // Restore focus after state update to trigger BubbleMenu
-                          queueMicrotask(() => editor.commands.focus())
-                        }}
-                        variant="neutral"
-                        size="md"
-                        disabled={enhance.disableButtons}
-                        hideLabel
-                        label={i18n.actions.close}
-                        icon={Cross}
-                      />
-                      <ToolbarDivider />
-                      {enhanceConfig && (
-                        <>
-                          <EnhanceActivator
-                            enhance={enhance}
-                            disabled={enhance.disableButtons}
-                            menuWidth={fullscreenToolbarWidth}
-                            menuContainerRef={fullscreenToolbarRef}
-                          />
-                          <ToolbarDivider />
-                        </>
-                      )}
-                      <Toolbar
-                        editor={editor}
-                        isFullscreen={isFullscreen}
-                        disableButtons={enhance.disableButtons}
-                        plainHtmlMode={plainHtmlMode}
-                      />
-                    </div>
+                  <div className="flex items-center gap-1">
+                    <F0Button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        setIsToolbarOpen(false)
+                        // Restore focus after state update to trigger BubbleMenu
+                        queueMicrotask(() => editor.commands.focus())
+                      }}
+                      variant="neutral"
+                      size="md"
+                      disabled={enhance.disableButtons}
+                      hideLabel
+                      label={i18n.actions.close}
+                      icon={Cross}
+                    />
+                    <ToolbarDivider />
+                    {enhanceConfig && (
+                      <>
+                        <EnhanceActivator
+                          enhance={enhance}
+                          disabled={enhance.disableButtons}
+                          menuWidth={fullscreenToolbarWidth}
+                          menuContainerRef={fullscreenToolbarRef}
+                        />
+                        <ToolbarDivider />
+                      </>
+                    )}
+                    <Toolbar
+                      editor={editor}
+                      isFullscreen={isFullscreen}
+                      disableButtons={enhance.disableButtons}
+                      plainHtmlMode={plainHtmlMode}
+                    />
                   </div>
-                </motion.div>
-              )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* In review the floating toolbar disappears entirely and the
+              compact accept/discard menu takes its place. */}
+          <AnimatePresence>
+            {isFullscreen && isToolbarOpen && enhance.isAcceptChangesOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute bottom-10 left-0 right-0 z-[9998] flex w-full items-center justify-center"
+                style={{ pointerEvents: "none" }}
+              >
+                <div
+                  className="absolute -bottom-4 left-1/2 -translate-x-1/2"
+                  style={{ pointerEvents: "auto" }}
+                >
+                  <AIEnhanceMenu
+                    onSelect={() => {}}
+                    enhancementOptions={[]}
+                    inputPlaceholder=""
+                    menuState="review"
+                    compactReview
+                    onAccept={enhance.acceptChanges}
+                    onReject={enhance.rejectChanges}
+                    onRetry={enhance.retryChanges}
+                  />
+                </div>
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
 
@@ -499,9 +536,11 @@ const F0RichTextEditorComponent = forwardRef<
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
               >
-                <p className="text-sm font-medium text-f1-foreground-critical">
-                  {dictationError}
-                </p>
+                <EnhanceErrorBanner
+                  error={dictationError}
+                  onDismiss={dismissDictationError}
+                  dismissLabel={i18n.actions.close}
+                />
               </motion.div>
             )}
           </AnimatePresence>

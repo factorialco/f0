@@ -5,9 +5,15 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 interface EnhanceErrorBannerProps {
   error: string
   onDismiss: () => void
+  /** Overrides the dismiss button copy (defaults to the enhance one) */
+  dismissLabel?: string
 }
 
-const EnhanceErrorBanner = ({ error, onDismiss }: EnhanceErrorBannerProps) => {
+const EnhanceErrorBanner = ({
+  error,
+  onDismiss,
+  dismissLabel,
+}: EnhanceErrorBannerProps) => {
   const i18n = useI18n()
 
   return (
@@ -30,7 +36,7 @@ const EnhanceErrorBanner = ({ error, onDismiss }: EnhanceErrorBannerProps) => {
             e.preventDefault()
             onDismiss()
           }}
-          label={i18n.richTextEditor.ai.closeErrorButtonLabel}
+          label={dismissLabel ?? i18n.richTextEditor.ai.closeErrorButtonLabel}
           size="sm"
         />
       </div>
