@@ -76,16 +76,23 @@ export function seedFromStorage<
   const applied: AppliedCollectionState<R, Filters, Sortings, Grouping> = {}
   let anyApplied = false
 
-  // Filters — per-visualization resolution + pruning against the definition
+  // Filters — per-visualization resolution + pruning against the definition.
+  // An explicitly persisted empty state ({}) IS applied — it means the user
+  // cleared the filters, and the list hydrates it as cleared too. But empty
+  // BY PRUNING (every persisted key unknown — schema drift, not user intent)
+  // keeps the definition defaults, as before.
   const resolvedFilters = resolveDataCollectionFilters(storage)
-  if (resolvedFilters && definition.filters) {
+  if (resolvedFilters !== undefined && definition.filters) {
     const declaredFilters = definition.filters
     const pruned = Object.fromEntries(
       Object.entries(resolvedFilters).filter(([key]) =>
         isKeyOf(declaredFilters, key)
       )
     ) as FiltersState<Filters>
-    if (Object.keys(pruned).length > 0) {
+    if (
+      Object.keys(pruned).length > 0 ||
+      Object.keys(resolvedFilters).length === 0
+    ) {
       target.setCurrentFilters(pruned)
       applied.filters = pruned
       anyApplied = true
