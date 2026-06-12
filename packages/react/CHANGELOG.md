@@ -1,5 +1,37 @@
 # Changelog
 
+## [3.0.0](https://github.com/factorialco/f0/compare/f0-react-v2.61.5...f0-react-v3.0.0) (2026-06-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **f0-inputs:** 6 inputs migrate to forwardRef (component type identity changes, runtime-safe). F0NumberInput no longer exposes onPressEnter. F0TextInputProps is no longer generic (value: T -> string).
+
+### Features
+
+* **f0-inputs:** promote 6 text inputs to stable ([#4216](https://github.com/factorialco/f0/issues/4216)) ([fcb596e](https://github.com/factorialco/f0/commit/fcb596e623c6985e1bbb786ab7c1014427f2e82d))
+
+## [2.61.5](https://github.com/factorialco/f0/compare/f0-react-v2.61.4...f0-react-v2.61.5) (2026-06-12)
+
+
+### Bug Fixes
+
+* **F0CardRow:** remove whole-card click target ([#4376](https://github.com/factorialco/f0/issues/4376)) ([b057f40](https://github.com/factorialco/f0/commit/b057f4090501088737649c6047b0203ffd9fda46))
+
+## [2.61.4](https://github.com/factorialco/f0/compare/f0-react-v2.61.3...f0-react-v2.61.4) (2026-06-12)
+
+
+### Bug Fixes
+
+* **datasource:** duck-type observable detection in fetch result handling ([#4431](https://github.com/factorialco/f0/issues/4431)) ([65cf833](https://github.com/factorialco/f0/commit/65cf833295b9bb3f77ad458f2c8e9f30ba420967))
+
+## [2.61.3](https://github.com/factorialco/f0/compare/f0-react-v2.61.2...f0-react-v2.61.3) (2026-06-12)
+
+
+### Bug Fixes
+
+* **api-surface:** summarize translation key changes instead of flagging every export ([#4426](https://github.com/factorialco/f0/issues/4426)) ([72af4a7](https://github.com/factorialco/f0/commit/72af4a7469beb46a54a191ddd14d5ac12d52d9b2))
+
 ## [2.61.2](https://github.com/factorialco/f0/compare/f0-react-v2.61.1...f0-react-v2.61.2) (2026-06-11)
 
 

@@ -1,0 +1,109 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0TextInput.stories"
+
+<Meta of={Stories} />
+
+# F0TextInput
+
+`F0TextInput` is the canonical writable text field — a single-line input where the user types text, passwords or emails. It is a thin wrapper over [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) that adds two text-specific behaviors: automatic password mode and an `onPressEnter` shortcut.
+
+---
+
+## Overview
+
+### Anatomy
+
+<Canvas of={Stories.Primary} />
+
+<Controls of={Stories.Primary} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- Names, titles, descriptions and other free-form single-line text.
+- Email addresses, URLs, usernames, codes (e.g. invoice numbers, IDs that may include letters).
+- Passwords (use `type="password"` — see Behavior > Password mode).
+- Identifiers that look numeric but must preserve formatting: phone numbers, postal codes, credit cards. Pair with the right `autocomplete` and `inputMode`.
+
+#### When NOT to use
+
+- The value is a quantity. Use [F0NumberInput](?path=/docs/components-inputs-number-input--documentation).
+- The value is a duration in hours/minutes. Use [F0DurationInput](?path=/docs/components-inputs-duration-input--documentation).
+- The value is a search query. Use [F0SearchInput](?path=/docs/components-inputs-search-input--documentation).
+- The value is multi-line. Use F0TextAreaInput.
+
+---
+
+## Behavior
+
+### Type
+
+`type` accepts every native HTML input type **except `"number"`**, which is intentionally blocked at the type level — for numeric data use `F0NumberInput`. Common values: `"text"` (default), `"email"`, `"password"`, `"url"`, `"tel"`.
+
+`type="file"` is technically accepted but does not provide drag-and-drop, validation or preview — use the dedicated upload component for file uploads.
+
+### Password mode
+
+When `type="password"`:
+
+- A lock icon replaces any `icon` prop.
+- A trailing eye-toggle button appears, with i18n labels ("Show password" / "Hide password"), to flip between masked and visible text.
+- The `buttonToggle` prop becomes private — consumers cannot override the eye toggle while in password mode.
+
+<Canvas of={Stories.Password} />
+
+### Enter key
+
+`onPressEnter` fires when the user presses `Enter` while focused on the input. Useful for form-less search boxes, inline editing or single-field submit flows. It does not preventDefault — wrap in `<form onSubmit>` if you also want native form submission.
+
+---
+
+## Props
+
+The text-specific props are listed below. All other props (label, hint, status, error, size, clearable, maxLength, icon, hideLabel, autocomplete, transparent, loading, value, onChange, onBlur, name, required, disabled, autoFocus) come from [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation).
+
+### Text behavior
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>type</code>
+        </td>
+        <td>
+          <code>HTMLInputTypeAttribute</code> excluding <code>"number"</code>
+        </td>
+        <td>
+          Defaults to <code>"text"</code>. Use <code>"password"</code> to opt
+          into password mode.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onPressEnter</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>
+          Fires when the user presses <code>Enter</code> while the input has
+          focus.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>

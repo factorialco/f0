@@ -68,6 +68,29 @@ describe("resolveItemNeighbors", () => {
     await expect(promise).rejects.toBe(error)
   })
 
+  it("resolves a foreign observable (different class identity, e.g. Apollo's zen-observable copy)", async () => {
+    // Observable-like with `subscribe` but NOT an instance of this package's
+    // Observable class. Detection must be duck-typed, not `instanceof` —
+    // otherwise the observable falls into the Promise.resolve branch and the
+    // promise resolves to the observable itself instead of the response.
+    const foreignObservable = {
+      subscribe(observer: {
+        next: (state: PromiseState<ItemNeighborsResponse<TestRecord>>) => void
+      }) {
+        observer.next({ loading: false, data: response })
+        return { unsubscribe: vi.fn(), closed: true }
+      },
+    }
+    expect(foreignObservable).not.toBeInstanceOf(Observable)
+
+    const { promise } = resolveItemNeighbors<TestRecord>(
+      foreignObservable as unknown as Observable<
+        PromiseState<ItemNeighborsResponse<TestRecord>>
+      >
+    )
+    await expect(promise).resolves.toEqual(response)
+  })
+
   it("cancel() prevents a pending promise from settling", async () => {
     let resolveFetch: (value: ItemNeighborsResponse<TestRecord>) => void
     const pending = new Promise<ItemNeighborsResponse<TestRecord>>(

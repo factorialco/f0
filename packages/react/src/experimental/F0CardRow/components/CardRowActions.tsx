@@ -147,12 +147,9 @@ interface CardRowActionsProps {
  * maps straight through; `ButtonGroup` owns the row layout, the width-driven
  * overflow into the "⋯" menu, and pinning the primary at the trailing edge.
  *
- * The card adds two things on top:
- * - The wrapper stops click propagation so an action never triggers the row's
- *   own `onClick` / overlay-link navigation.
- * - `stackAt` drops the cluster onto its own full-width line (with a footer
- *   hairline) below a container breakpoint; the breakpoint mapping is shared
- *   with the row root via {@link cardRowClassName}.
+ * On top, `stackAt` drops the cluster onto its own full-width line (with a footer
+ * hairline) below a container breakpoint; the breakpoint mapping is shared with
+ * the row root via {@link cardRowClassName}.
  *
  * Pass `confirmAction` / `rejectAction` for the confirm/reject variant — reject
  * (✗, outline) then confirm (✓, solid primary), which replaces the standard
@@ -171,9 +168,8 @@ export function CardRowActions({
 }: CardRowActionsProps) {
   const size = compact ? "sm" : "md"
 
-  // Resolved state: a status tag replaces the actions. It's informational, so
-  // no click-stop / z-index — a row-level overlay link stays clickable through
-  // it. The outer flex drops it to its own line when stacked, with the footer.
+  // Resolved state: a status tag replaces the actions. It's informational.
+  // The outer flex drops it to its own line when stacked, with the footer.
   if (status) {
     return (
       <div
@@ -195,17 +191,13 @@ export function CardRowActions({
   }
 
   const wrapperClassName = cn(
-    "relative z-[1]",
     actionsWidthClassName[stackAt],
     stackedChrome[stackAt],
     stackAt !== "never" && compact && "mt-3 pt-3"
   )
 
   const wrap = (group: React.ReactNode) => (
-    // Keep action clicks from bubbling to the row's onClick / overlay link.
-    <div className={wrapperClassName} onClick={(e) => e.stopPropagation()}>
-      {group}
-    </div>
+    <div className={wrapperClassName}>{group}</div>
   )
 
   // Confirm/reject variant: reject (✗, outline) then confirm (✓, solid primary).
@@ -247,13 +239,7 @@ export function CardRowActions({
 
     const inline = (
       // Icon-only, inline at the trailing edge.
-      <div
-        className={cn(
-          "relative z-[1] min-w-0 flex-1",
-          inlineClusterVisibility[stackAt]
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={cn("min-w-0 flex-1", inlineClusterVisibility[stackAt])}>
         {variant(true)}
       </div>
     )
@@ -271,12 +257,10 @@ export function CardRowActions({
             flex column's stretch so the `-mx-4` footer bleeds symmetrically. */}
         <div
           className={cn(
-            "relative z-[1]",
             stackedClusterVisibility[stackAt],
             stackedChrome[stackAt],
             compact && "mt-3 pt-3"
           )}
-          onClick={(e) => e.stopPropagation()}
         >
           {variant(false)}
         </div>

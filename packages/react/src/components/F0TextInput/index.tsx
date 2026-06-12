@@ -20,4 +20,4 @@ export const Input = F0TextInput
  * @deprecated Renamed to `F0TextInputProps`. See the `Input` deprecation note.
  * @removeIn 2.0.0
  */
-export type InputProps<T extends string> = F0TextInputProps<T>
+export type InputProps = F0TextInputProps

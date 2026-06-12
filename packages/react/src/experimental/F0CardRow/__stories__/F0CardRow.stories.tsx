@@ -53,10 +53,6 @@ const meta: Meta<typeof F0CardRow> = {
       control: "boolean",
       description: "Stretch to fill the height of the container.",
     },
-    link: {
-      control: "text",
-      description: "When set, the whole row becomes a link to this href.",
-    },
     // Function-bearing props: disable the control so it doesn't dump the
     // serialized mock fn() source. They still appear in the args table.
     primaryAction: {
@@ -84,10 +80,6 @@ const meta: Meta<typeof F0CardRow> = {
     alert: {
       control: false,
       description: "Alert banner displayed above the row.",
-    },
-    onClick: {
-      action: "clicked",
-      description: "Called when the row is clicked.",
     },
   },
   decorators: [
