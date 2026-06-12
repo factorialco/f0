@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.0.0](https://github.com/factorialco/f0/compare/f0-react-v2.61.5...f0-react-v3.0.0) (2026-06-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **f0-inputs:** 6 inputs migrate to forwardRef (component type identity changes, runtime-safe). F0NumberInput no longer exposes onPressEnter. F0TextInputProps is no longer generic (value: T -> string).
+
+### Features
+
+* **f0-inputs:** promote 6 text inputs to stable ([#4216](https://github.com/factorialco/f0/issues/4216)) ([fcb596e](https://github.com/factorialco/f0/commit/fcb596e623c6985e1bbb786ab7c1014427f2e82d))
+
 ## [2.61.5](https://github.com/factorialco/f0/compare/f0-react-v2.61.4...f0-react-v2.61.5) (2026-06-12)
 
 
