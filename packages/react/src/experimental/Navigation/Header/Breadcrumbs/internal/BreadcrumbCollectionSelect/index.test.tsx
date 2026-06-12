@@ -144,6 +144,51 @@ afterEach(() => {
   driver.filtersChange = null
 })
 
+// Type-level regression (validated by tsc, not vitest): a source declared
+// over a CONCRETE record/filters type — including record-consuming callbacks
+// like `selectable` and a concretely-typed adapter — must be assignable to
+// the record-erased breadcrumb item with no casts. Before
+// CollectionSelectSourceDefinition's bivariant callbacks, strictFunctionTypes
+// rejected every such source.
+type ConcreteFilters = {
+  department: {
+    type: "in"
+    label: string
+    options: { options: { value: string; label: string }[] }
+  }
+}
+const concretelyTypedItem = (
+  fetchData: (options: PaginatedFetchOptions<ConcreteFilters>) => Promise<{
+    type: "pages"
+    records: Employee[]
+    total: number
+    perPage: number
+    currentPage: number
+    pagesCount: number
+  }>
+): BreadcrumbCollectionSelectItemType => ({
+  id: "employee",
+  type: "collection-select",
+  label: "Alice",
+  collectionId: COLLECTION_ID,
+  source: {
+    selectable: (employee: Employee) => employee.id,
+    dataAdapter: {
+      paginationType: "pages",
+      perPage: 10,
+      fetchData,
+    },
+  },
+  mapOptions: (employee: Employee) => ({
+    value: employee.id,
+    label: employee.name,
+    item: employee,
+  }),
+  getItemHref: (value: string, employee?: Employee) =>
+    employee ? `/employees/${value}` : undefined,
+})
+void concretelyTypedItem
+
 describe("BreadcrumbCollectionSelect", () => {
   it("seeds the persisted filters and sortings into the fetch", async () => {
     localStorage.setItem(
