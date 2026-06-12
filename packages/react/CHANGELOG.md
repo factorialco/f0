@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.61.3](https://github.com/factorialco/f0/compare/f0-react-v2.61.2...f0-react-v2.61.3) (2026-06-12)
+
+
+### Bug Fixes
+
+* **api-surface:** summarize translation key changes instead of flagging every export ([#4426](https://github.com/factorialco/f0/issues/4426)) ([72af4a7](https://github.com/factorialco/f0/commit/72af4a7469beb46a54a191ddd14d5ac12d52d9b2))
+
 ## [2.61.2](https://github.com/factorialco/f0/compare/f0-react-v2.61.1...f0-react-v2.61.2) (2026-06-11)
 
 
