@@ -1,7 +1,11 @@
 import { Observable } from "zen-observable-ts"
 
+import {
+  isObservableLike,
+  isPromiseLike,
+  PromiseState,
+} from "@/lib/promise-to-observable"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { PromiseState } from "@/lib/promise-to-observable"
 
 import {
   DataAdapter,
@@ -33,7 +37,10 @@ const mapFetchResult = <T, U>(
   result: T | Promise<T> | Observable<PromiseState<T>>,
   map: (value: T) => U
 ): U | Promise<U> | Observable<PromiseState<U>> => {
-  if (result instanceof Observable) {
+  // Duck-typed checks (not `instanceof`): the observable/promise may come
+  // from the consumer app's own zen-observable/Promise copy, whose class
+  // identity differs from the ones in f0's bundle.
+  if (isObservableLike<T>(result)) {
     return result.map((state): PromiseState<U> => {
       const data = state.data
       if (data === undefined || data === null) {
@@ -42,10 +49,10 @@ const mapFetchResult = <T, U>(
       return { loading: state.loading, error: state.error, data: map(data) }
     })
   }
-  if (result instanceof Promise) {
+  if (isPromiseLike<T>(result)) {
     return result.then(map)
   }
-  return map(result)
+  return map(result as T)
 }
 
 /**
