@@ -1951,6 +1951,13 @@ declare type CanvasCardAction = {
     onClose: () => void;
     /** When false, hides the Open/Close button but the card stays clickable. Default true. */
     showButton?: boolean;
+    /**
+     * When true the card is inert: the Open/Close button is hidden, the card
+     * no longer responds to clicks (no pointer cursor), and it fades to 50%
+     * opacity. Used to retire a superseded card while keeping it visible in the
+     * chat. Default false.
+     */
+    disabled?: boolean;
 } | {
     type: "custom";
     icon: IconType;
@@ -7314,10 +7321,6 @@ export declare interface F0CardRowProps {
      */
     stackAt?: CardRowStackAt;
     /**
-     * When set, the whole row becomes a link to this href.
-     */
-    link?: string;
-    /**
      * Stretch to fill the height of its container.
      */
     fullHeight?: boolean;
@@ -7328,12 +7331,22 @@ export declare interface F0CardRowProps {
      */
     alert?: CardAlertProps;
     /**
-     * Called when the row is clicked.
+     * Opt-in: makes the whole row a link to this href. The row only becomes a
+     * click target (pointer cursor + hover affordance + overlay link) when `link`
+     * or `onClick` is set — otherwise it's a static row whose only interactive
+     * parts are its actions.
+     */
+    link?: string;
+    /**
+     * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+     * into an explicit click target (pointer cursor + hover affordance). Use it
+     * for cards whose entire surface is the action (e.g. entry-point cards with no
+     * CTA button); leave it unset for rows that act only through their buttons.
      */
     onClick?: () => void;
     /**
-     * Disables the full-row overlay link so a parent can manage drag-and-drop while
-     * still allowing click navigation via `onClick`.
+     * Disables the full-row overlay link (used with `link`) so a parent can manage
+     * drag-and-drop while still allowing click navigation via `onClick`.
      */
     disableOverlayLink?: boolean;
 }
@@ -9392,7 +9405,7 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
-export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, status, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
@@ -9454,6 +9467,13 @@ export declare type F0HILActionConfirmationProps = {
      * no CTA at all.
      */
     onCancel?: () => void;
+    /**
+     * Resolved outcome of the row (e.g. accepted / rejected). Forwarded straight
+     * to `F0CardRow`'s `status`, which renders the outcome icon in place of the
+     * ✓/✗ actions (it takes precedence over them). Use it to flip a confirmation
+     * card to its done state once the user has acted.
+     */
+    status?: F0CardRowProps["status"];
 };
 
 export declare const F0Icon: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
@@ -9574,13 +9594,11 @@ export declare type F0NumberField = F0BaseField & F0NumberConfig & {
 export declare type F0NumberFieldConfig<R extends Record<string, unknown> = Record<string, unknown>> = F0NumberInputConfig | F0NumberMoneyConfig | F0NumberSelectConfig<R> | F0DurationFieldConfig;
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0NumberInput is the writable numeric field for forms — a box where the
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
  */
-export declare const F0NumberInput: (props: F0NumberInputProps) => JSX_2.Element;
+export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 /**
  * Config for number fields - number input
@@ -9859,13 +9877,6 @@ export declare type F0RichTextFieldConfig = F0BaseConfig & F0RichTextConfig & {
     fieldType: "richtext";
 };
 
-/**
- * @experimental This is an experimental component, use it at your own risk.
- *
- * F0SearchInput is the writable search field — a single-line text input
- * pre-configured with a search icon, `role="searchbox"`, debouncing, and
- * an optional minimum-length threshold before emitting changes.
- */
 export declare const F0SearchInput: ForwardRefExoticComponent<    {
 value?: string;
 threshold?: number;
@@ -10361,13 +10372,11 @@ export declare type F0TextareaField = F0BaseField & F0TextareaConfig & {
 };
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextAreaInput is the writable multi-line text field for forms — a box
- * where the user types longer text spanning multiple lines. For a single
- * line of text use F0TextInput.
+ * where the user types longer text spanning multiple lines (notes,
+ * descriptions, comments). For a single line of text use F0TextInput.
  */
-export declare const F0TextAreaInput: FC<F0TextAreaInputProps>;
+export declare const F0TextAreaInput: React.FC<F0TextAreaInputProps>;
 
 export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
@@ -10391,16 +10400,14 @@ export declare type F0TextField = F0BaseField & F0TextConfig & {
 };
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextInput is the writable text field for forms — a box where the user
- * types text, numbers (as text), passwords, emails, etc. It is the canonical
- * "text input" of F0. For numeric or duration data prefer F0NumberInput or
- * F0DurationInput respectively.
+ * types text, passwords, emails, etc. It is the canonical "text input" of
+ * F0. For numeric data use F0NumberInput; for durations use F0DurationInput;
+ * for queries use F0SearchInput.
  */
-export declare const F0TextInput: <T extends string>(props: F0TextInputProps<T>) => JSX_2.Element;
+export declare const F0TextInput: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-export declare type F0TextInputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_5)[number]>;
+export declare type F0TextInputProps = Omit<InputInternalProps, (typeof privateProps_5)[number]>;
 
 export declare type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {
     variant?: (typeof _allowedVariants_2)[number];
@@ -11719,7 +11726,7 @@ export declare function injectSectionEnds(items: FlatFormItem[], inSectionQuesti
  *
  * @removeIn 2.0.0
  */
-export declare const Input: <T extends string>(props: F0TextInputProps<T>) => JSX_2.Element;
+export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
@@ -11729,6 +11736,20 @@ declare type InputFieldInheritedProps = (typeof inputFieldInheritedProps)[number
 
 declare const inputFieldInheritedProps: readonly ["className", "label", "placeholder", "hideLabel", "size", "error", "disabled", "readonly", "required", "clearable", "labelIcon", "status", "hint", "loading", "transparent"];
 
+/**
+ * Design system primitive. Do NOT use in product code.
+ *
+ * `F0InputField` is the shared chrome (label, status, icon, append, clear,
+ * loading, focus/hover/disabled styles, a11y wiring) used by every writable
+ * F0 input. It is intentionally not exported from `@factorialco/f0-react`.
+ *
+ * Product code must use the dedicated `F0*Input` components instead:
+ *   - F0TextInput, F0NumberInput, F0SearchInput, F0TextAreaInput,
+ *     F0DurationInput, F0DatePicker, F0Select, ...
+ *
+ * Use `F0InputField` only when you are adding a new input type to the design
+ * system itself (e.g. F0CurrencyInput, F0PhoneInput, F0PercentageInput).
+ */
 declare type InputFieldProps<T> = {
     id?: string;
     autoFocus?: boolean;
@@ -11816,7 +11837,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -11825,7 +11846,7 @@ declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof I
  * @deprecated Renamed to `F0TextInputProps`. See the `Input` deprecation note.
  * @removeIn 2.0.0
  */
-export declare type InputProps<T extends string> = F0TextInputProps<T>;
+export declare type InputProps = F0TextInputProps;
 
 declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
@@ -12679,9 +12700,9 @@ declare type NumberFilterValue = {
  *
  * @removeIn 2.0.0
  */
-export declare const NumberInput: (props: F0NumberInputProps) => JSX_2.Element;
+export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Omit<InputInternalProps<string>, "value" | "type" | "onChange"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     locale: string;
     value?: number | null;
     step?: number;
@@ -16504,6 +16525,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -16550,11 +16576,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 

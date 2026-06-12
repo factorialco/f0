@@ -979,6 +979,13 @@ declare type CanvasCardAction = {
     onClose: () => void;
     /** When false, hides the Open/Close button but the card stays clickable. Default true. */
     showButton?: boolean;
+    /**
+     * When true the card is inert: the Open/Close button is hidden, the card
+     * no longer responds to clicks (no pointer cursor), and it fades to 50%
+     * opacity. Used to retire a superseded card while keeping it visible in the
+     * chat. Default false.
+     */
+    disabled?: boolean;
 } | {
     type: "custom";
     icon: IconType;
@@ -3463,10 +3470,6 @@ declare interface F0CardRowProps {
      */
     stackAt?: CardRowStackAt;
     /**
-     * When set, the whole row becomes a link to this href.
-     */
-    link?: string;
-    /**
      * Stretch to fill the height of its container.
      */
     fullHeight?: boolean;
@@ -3477,12 +3480,22 @@ declare interface F0CardRowProps {
      */
     alert?: CardAlertProps;
     /**
-     * Called when the row is clicked.
+     * Opt-in: makes the whole row a link to this href. The row only becomes a
+     * click target (pointer cursor + hover affordance + overlay link) when `link`
+     * or `onClick` is set — otherwise it's a static row whose only interactive
+     * parts are its actions.
+     */
+    link?: string;
+    /**
+     * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+     * into an explicit click target (pointer cursor + hover affordance). Use it
+     * for cards whose entire surface is the action (e.g. entry-point cards with no
+     * CTA button); leave it unset for rows that act only through their buttons.
      */
     onClick?: () => void;
     /**
-     * Disables the full-row overlay link so a parent can manage drag-and-drop while
-     * still allowing click navigation via `onClick`.
+     * Disables the full-row overlay link (used with `link`) so a parent can manage
+     * drag-and-drop while still allowing click navigation via `onClick`.
      */
     disableOverlayLink?: boolean;
 }
@@ -3509,7 +3522,7 @@ declare interface F0ClarifyingPanelProps {
     isSubmitDisabled?: boolean;
 }
 
-export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, status, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
@@ -3571,6 +3584,13 @@ export declare type F0HILActionConfirmationProps = {
      * no CTA at all.
      */
     onCancel?: () => void;
+    /**
+     * Resolved outcome of the row (e.g. accepted / rejected). Forwarded straight
+     * to `F0CardRow`'s `status`, which renders the outcome icon in place of the
+     * ✓/✗ actions (it takes precedence over them). Use it to flip a confirmation
+     * card to its done state once the user has acted.
+     */
+    status?: F0CardRowProps["status"];
 };
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
@@ -4795,6 +4815,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -4841,11 +4866,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 

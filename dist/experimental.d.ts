@@ -4583,23 +4583,14 @@ declare type F0Message = {
 };
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0NumberInput is the writable numeric field for forms — a box where the
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
  */
-export declare const F0NumberInput: (props: F0NumberInputProps) => JSX_2.Element;
+export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
 
-/**
- * @experimental This is an experimental component, use it at your own risk.
- *
- * F0SearchInput is the writable search field — a single-line text input
- * pre-configured with a search icon, `role="searchbox"`, debouncing, and
- * an optional minimum-length threshold before emitting changes.
- */
 export declare const F0SearchInput: ForwardRefExoticComponent<    {
 value?: string;
 threshold?: number;
@@ -4907,27 +4898,23 @@ declare interface F0TagStatusProps {
 declare const F0TagTeam: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextAreaInput is the writable multi-line text field for forms — a box
- * where the user types longer text spanning multiple lines. For a single
- * line of text use F0TextInput.
+ * where the user types longer text spanning multiple lines (notes,
+ * descriptions, comments). For a single line of text use F0TextInput.
  */
-export declare const F0TextAreaInput: FC<F0TextAreaInputProps>;
+export declare const F0TextAreaInput: React.FC<F0TextAreaInputProps>;
 
 export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextInput is the writable text field for forms — a box where the user
- * types text, numbers (as text), passwords, emails, etc. It is the canonical
- * "text input" of F0. For numeric or duration data prefer F0NumberInput or
- * F0DurationInput respectively.
+ * types text, passwords, emails, etc. It is the canonical "text input" of
+ * F0. For numeric data use F0NumberInput; for durations use F0DurationInput;
+ * for queries use F0SearchInput.
  */
-export declare const F0TextInput: <T extends string>(props: F0TextInputProps<T>) => JSX_2.Element;
+export declare const F0TextInput: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-export declare type F0TextInputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_3)[number]>;
+export declare type F0TextInputProps = Omit<InputInternalProps, (typeof privateProps_3)[number]>;
 
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
@@ -5580,12 +5567,26 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
  *
  * @removeIn 2.0.0
  */
-export declare const Input: <T extends string>(props: F0TextInputProps<T>) => JSX_2.Element;
+export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
+/**
+ * Design system primitive. Do NOT use in product code.
+ *
+ * `F0InputField` is the shared chrome (label, status, icon, append, clear,
+ * loading, focus/hover/disabled styles, a11y wiring) used by every writable
+ * F0 input. It is intentionally not exported from `@factorialco/f0-react`.
+ *
+ * Product code must use the dedicated `F0*Input` components instead:
+ *   - F0TextInput, F0NumberInput, F0SearchInput, F0TextAreaInput,
+ *     F0DurationInput, F0DatePicker, F0Select, ...
+ *
+ * Use `F0InputField` only when you are adding a new input type to the design
+ * system itself (e.g. F0CurrencyInput, F0PhoneInput, F0PercentageInput).
+ */
 declare type InputFieldProps<T> = {
     id?: string;
     autoFocus?: boolean;
@@ -5673,7 +5674,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -5682,7 +5683,7 @@ declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof I
  * @deprecated Renamed to `F0TextInputProps`. See the `Input` deprecation note.
  * @removeIn 2.0.0
  */
-export declare type InputProps<T extends string> = F0TextInputProps<T>;
+export declare type InputProps = F0TextInputProps;
 
 declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
@@ -6318,9 +6319,9 @@ declare type NumberFilterValue = {
  *
  * @removeIn 2.0.0
  */
-export declare const NumberInput: (props: F0NumberInputProps) => JSX_2.Element;
+export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Omit<InputInternalProps<string>, "value" | "type" | "onChange"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     locale: string;
     value?: number | null;
     step?: number;
@@ -9269,6 +9270,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -9315,11 +9321,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 
