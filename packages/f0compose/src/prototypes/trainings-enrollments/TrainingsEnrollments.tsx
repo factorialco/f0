@@ -20,7 +20,6 @@ import {
   F0Text,
   F0WizardForm,
   StandardLayout,
-  TwoColumnLayout,
   f0FormField,
   useF0FormDefinition,
   type CustomFieldRenderProps,
@@ -4404,6 +4403,24 @@ function CourseDetail({
         </>
       }
     >
+      {/* Overview owns its own padded two-column layout (matches the base proto),
+          so it renders outside StandardLayout; the other tabs stay inside it. */}
+      {activeDetailTab === "overview" ? (
+        <CourseOverviewTab
+          course={course}
+          toast={toast}
+          onGoToSurveys={() =>
+            setSearchParams({ view: "detail", course: course.id, dtab: "surveys" })
+          }
+          onCreateGroup={handleCreateGroup}
+          onSetUp={() =>
+            setSearchParams({ view: "edit-course", course: course.id, section: "enrollment" })
+          }
+          onViewPending={() =>
+            setSearchParams({ view: "detail", course: course.id, dtab: "participants", pfilter: "pending" })
+          }
+        />
+      ) : (
       <StandardLayout>
         <F0Box display="flex" flexDirection="column" gap="2xl">
           {toast && <FeedbackBanner toast={toast} />}
@@ -4412,17 +4429,10 @@ function CourseDetail({
               activeDetailTab={activeDetailTab}
               onOpenDialog={setActiveDialog}
               onOpenClassWizard={handleCreateGroup}
-              onGoToSurveys={() =>
-                setSearchParams({ view: "detail", course: course.id, dtab: "surveys" })
-              }
-              onSetUpEnrollment={() =>
-                setSearchParams({ view: "edit-course", course: course.id, section: "enrollment" })
-              }
-              onViewPending={() =>
-                setSearchParams({ view: "detail", course: course.id, dtab: "participants", pfilter: "pending" })
-              }
           />
         </F0Box>
+      </StandardLayout>
+      )}
         <NewTrainingGroupWizardDialog
           isOpen={classWizardOpen}
           onClose={() => setClassWizardOpen(false)}
@@ -4470,7 +4480,6 @@ function CourseDetail({
             onToast("settings")
           }}
         />
-      </StandardLayout>
     </Page>
   )
 }
@@ -4480,21 +4489,12 @@ function CourseDetailTabBody({
   activeDetailTab,
   onOpenDialog,
   onOpenClassWizard,
-  onGoToSurveys,
-  onSetUpEnrollment,
-  onViewPending,
 }: {
   course: ExactCourse
   activeDetailTab: CourseDetailTabId
   onOpenDialog: (dialog: CourseActionDialogId) => void
   onOpenClassWizard: () => void
-  onGoToSurveys: () => void
-  onSetUpEnrollment: () => void
-  onViewPending: () => void
 }) {
-  if (activeDetailTab === "overview") {
-    return <CourseOverviewTab course={course} onGoToSurveys={onGoToSurveys} onCreateGroup={onOpenClassWizard} onSetUp={onSetUpEnrollment} onViewPending={onViewPending} />
-  }
   if (activeDetailTab === "content") return <CourseContentTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "training-groups") return <CourseGroupsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
   if (activeDetailTab === "participants") return <CourseParticipantsTab onOpenDialog={onOpenDialog} />
@@ -4505,19 +4505,26 @@ function CourseDetailTabBody({
 
 function CourseOverviewTab({
   course,
+  toast,
   onGoToSurveys,
   onCreateGroup,
   onSetUp,
   onViewPending,
 }: {
   course: ExactCourse
+  toast: ToastId
   onGoToSurveys: () => void
   onCreateGroup: () => void
   onSetUp: () => void
   onViewPending: () => void
 }) {
-  const mainContent = (
-    <F0Box display="flex" flexDirection="column" gap="2xl">
+  // Two-column layout matching the trainings base proto: a single padded flex row
+  // (no StandardLayout / TwoColumnLayout wrappers, which produced asymmetric
+  // padding) — main content grows, sidebar is a fixed quarter-width column.
+  return (
+    <F0Box display="flex" gap="xl" padding="lg">
+      <F0Box display="flex" flexDirection="column" gap="2xl" grow={true}>
+        {toast && <FeedbackBanner toast={toast} />}
         <F0Box
           display="flex"
           justifyContent="between"
@@ -4552,12 +4559,8 @@ function CourseOverviewTab({
         <InfoSection title="Description" description={course.description} />
         <InfoSection title="Course validity" description={course.validity} />
       </F0Box>
-  )
-
-  return (
-    <TwoColumnLayout sideContent={<SideInfo course={course} onCreateGroup={onCreateGroup} onSetUp={onSetUp} onViewPending={onViewPending} />}>
-      {mainContent}
-    </TwoColumnLayout>
+      <SideInfo course={course} onCreateGroup={onCreateGroup} onSetUp={onSetUp} onViewPending={onViewPending} />
+    </F0Box>
   )
 }
 
@@ -6419,12 +6422,12 @@ function SideInfo({
   onViewPending?: () => void
 }) {
   return (
-    <F0BoxWithClassName
+    <F0Box
       display="flex"
       flexDirection="column"
-      gap="xl"
-      paddingLeft="xl"
-      style={{ flex: 1 }}
+      gap="lg"
+      shrink={false}
+      width="1/4"
     >
       <CourseThumbnailField course={course} />
       <EnrollmentSidebarBlock course={course} onViewPending={onViewPending} onSetUp={onSetUp} />
@@ -6443,33 +6446,22 @@ function SideInfo({
       <SidebarField label="Total salary cost" value={course.salaryCost} />
       <SidebarField label="Subsidized cost" value={course.subsidizedCost} />
       <SidebarField label="Creation year" value={course.creationYear} />
-    </F0BoxWithClassName>
+    </F0Box>
   )
 }
 
+// Course thumbnail as a clean hero image at the top of the overview sidebar —
+// no label, no card, fills the column width (matches the trainings base proto).
 function CourseThumbnailField({ course }: { course: ExactCourse }) {
-  const thumbnail = course.thumbnail
+  if (!course.thumbnail) return null
 
   return (
-    <F0Box display="flex" flexDirection="column" gap="sm">
-      <F0Text content="Course thumbnail" variant="label" />
-      {thumbnail ? (
-        <F0BoxWithClassName
-          borderRadius="md"
-          role="img"
-          aria-label={course.name}
-          style={{
-            backgroundImage: `url(${thumbnail})`,
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "contain",
-            height: 140,
-            maxWidth: 360,
-          }}
-        />
-      ) : (
-        <F0Text content="-" variant="body" />
-      )}
+    <F0Box display="flex" borderRadius="sm" overflow="hidden" height="xl">
+      <img
+        src={course.thumbnail}
+        alt={course.name}
+        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+      />
     </F0Box>
   )
 }
