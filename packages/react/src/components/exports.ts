@@ -101,6 +101,9 @@ export * from "../sds/surveys/exports"
 export * from "../sds/UpsellingKit/exports"
 // AI Components
 export * from "../ai/exports"
+// RichText Components
+export * from "./F0FileItem"
+export * from "./RichText/exports"
 // Analytics
 /**
  * @deprecated F0AnalyticsDashboard has moved to @/patterns/F0AnalyticsDashboard. Import from there instead.

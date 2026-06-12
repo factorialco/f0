@@ -179,8 +179,7 @@ export const iconVariants = cva({
     {
       variant: "ai",
       mode: "default",
-      class:
-        "[&_svg>circle]:[stroke:url(#ai-gradient)] [&_svg>path]:[fill:url(#ai-gradient)] [&_svg>rect]:[fill:url(#ai-gradient)]",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
     {
       variant: "link",
@@ -247,8 +246,7 @@ export const iconVariants = cva({
     {
       variant: "ai",
       mode: "only",
-      class:
-        "[&_svg>circle]:[stroke:url(#ai-gradient)] [&_svg>path]:[fill:url(#ai-gradient)] [&_svg>rect]:[fill:url(#ai-gradient)]",
+      class: "[&_svg:not([data-has-color])]:text-f1-icon",
     },
   ],
   defaultVariants: {
