@@ -111,93 +111,71 @@ const ButtonInternal = forwardRef<
   ) : null
 
   return (
-    <>
-      {variant === "ai" && (
-        <svg
-          width="0"
-          height="0"
-          style={{ position: "absolute", pointerEvents: "none" }}
-        >
-          <defs>
-            <linearGradient
-              id="ai-gradient"
-              x1="0%"
-              y1="0%"
-              x2="100%"
-              y2="100%"
-            >
-              <stop offset="0%" stopColor="#F1480C" />
-              <stop offset="100%" stopColor="#6780F9" />
-            </linearGradient>
-          </defs>
-        </svg>
+    <Action
+      variant={variant}
+      size={size}
+      disabled={disabled || isLoading}
+      ref={ref}
+      {...props}
+      tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
+      onClick={handleClick}
+      loading={isLoading}
+      className={cn(
+        "max-w-full",
+        block && "w-full",
+        withoutDisabledAppearance &&
+          disabled &&
+          "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default [&[aria-disabled=true]]:opacity-100 [&[aria-disabled=true]]:cursor-default",
+        className
       )}
-      <Action
-        variant={variant}
-        size={size}
-        disabled={disabled || isLoading}
-        ref={ref}
-        {...props}
-        tooltip={tooltip ?? (!noAutoTooltip && hideLabel && label)}
-        onClick={handleClick}
-        loading={isLoading}
+      mode={hideLabel ? "only" : "default"}
+      aria-label={ariaLabel || props.title || buttonLabel}
+      title={
+        noTitle
+          ? undefined
+          : props.title || (hideLabel ? buttonLabel : undefined)
+      }
+      compact={!!shouldHideLabel}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <div
         className={cn(
-          "max-w-full",
-          block && "w-full",
-          withoutDisabledAppearance &&
-            disabled &&
-            "disabled:pointer-events-none disabled:opacity-100 disabled:cursor-default [&[aria-disabled=true]]:opacity-100 [&[aria-disabled=true]]:cursor-default",
-          className
+          isLoading && "invisible",
+          "flex min-w-0 flex-1 items-center justify-center gap-1",
+          icon &&
+            !hideLabel &&
+            (iconPosition === "right" ? "-mr-[3px]" : "-ml-[3px]")
         )}
-        mode={hideLabel ? "only" : "default"}
-        aria-label={ariaLabel || props.title || buttonLabel}
-        title={
-          noTitle
-            ? undefined
-            : props.title || (hideLabel ? buttonLabel : undefined)
-        }
-        compact={!!shouldHideLabel}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
-        <div
-          className={cn(
-            isLoading && "invisible",
-            "flex min-w-0 flex-1 items-center justify-center gap-1",
-            icon &&
-              !hideLabel &&
-              (iconPosition === "right" ? "-mr-[3px]" : "-ml-[3px]")
-          )}
-        >
-          {iconPosition === "left" && iconNode}
-          {emoji && (
-            <EmojiImage
-              emoji={emoji}
-              size={size === "sm" ? "sm" : "md"}
-              alt={""}
-            />
-          )}
-          {!shouldHideLabel ? (
-            <OneEllipsis
-              className={cn(
-                shouldHideLabel && "sr-only",
-                fontSizeVariants({ fontSize: buttonFontSize })
-              )}
-              tag="span"
-            >
-              {buttonLabel}
-            </OneEllipsis>
-          ) : (
-            <span className="sr-only">{buttonLabel}</span>
-          )}
-          {iconPosition === "right" && iconNode}
-          {append}{" "}
-          {counterValue && (
-            <Counter value={counterValue} size="sm" type="selected" />
-          )}
-        </div>
-      </Action>
-    </>
+        {iconPosition === "left" && iconNode}
+        {emoji && (
+          <EmojiImage
+            emoji={emoji}
+            size={size === "sm" ? "sm" : "md"}
+            alt={""}
+          />
+        )}
+        {!shouldHideLabel ? (
+          <OneEllipsis
+            className={cn(
+              shouldHideLabel && "sr-only",
+              fontSizeVariants({ fontSize: buttonFontSize })
+            )}
+            tag="span"
+          >
+            {buttonLabel}
+          </OneEllipsis>
+        ) : (
+          <span className="sr-only">{buttonLabel}</span>
+        )}
+        {iconPosition === "right" && iconNode}
+        {append}{" "}
+        {counterValue && (
+          <Counter value={counterValue} size="sm" type="selected" />
+        )}
+      </div>
+    </Action>
   )
 })
 
