@@ -11,7 +11,7 @@ import { DaytimePage, DaytimePageProps } from "./index"
 const meta: Meta<typeof DaytimePage> = {
   title: "Home/DaytimePage",
   component: DaytimePage,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
   },

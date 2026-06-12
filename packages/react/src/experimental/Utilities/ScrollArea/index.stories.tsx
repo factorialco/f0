@@ -12,7 +12,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "no-sidebar"],
   args: {},
 } satisfies Meta<typeof ScrollArea>
 

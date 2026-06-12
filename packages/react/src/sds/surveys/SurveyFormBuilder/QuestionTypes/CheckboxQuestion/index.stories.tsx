@@ -9,7 +9,7 @@ import { SurveyFormBuilderProvider } from "../../Context"
 const meta: Meta<typeof CheckboxQuestion> = {
   title: "Surveys/SurveyFormBuilder/CheckboxQuestion",
   component: CheckboxQuestion,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args as QuestionElement },

@@ -21,7 +21,7 @@ const meta = {
       },
     },
   },
-  tags: ["!autodocs", "experimental"],
+  tags: ["!autodocs"],
   // The imperative dialog store is a global singleton — clear it between
   // stories so a dialog opened in one story doesn't leak into the next.
   beforeEach: () => {

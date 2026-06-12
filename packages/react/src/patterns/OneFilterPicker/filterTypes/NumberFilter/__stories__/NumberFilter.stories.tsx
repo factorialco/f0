@@ -4,6 +4,7 @@ import { NumberFilter } from "../NumberFilter"
 
 const meta = {
   title: "FilterPicker/Filters/NumberFilter",
+  tags: [],
   component: NumberFilter,
   parameters: {
     layout: "centered",

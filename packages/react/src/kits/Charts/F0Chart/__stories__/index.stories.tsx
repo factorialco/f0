@@ -6,7 +6,7 @@ import { ChartDecorator } from "./decorators"
 const meta = {
   component: F0Chart,
   title: "Charts/F0Chart",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

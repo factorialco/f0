@@ -5,7 +5,7 @@ import { Reactions } from "./index"
 const meta: Meta<typeof Reactions> = {
   component: Reactions,
   title: "Social/Reactions",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

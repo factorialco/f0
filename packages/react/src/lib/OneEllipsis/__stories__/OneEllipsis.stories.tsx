@@ -7,7 +7,7 @@ import { OneEllipsis, Tag, tags } from "../OneEllipsis"
 const meta = {
   title: "Ellipsis",
   component: OneEllipsis,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

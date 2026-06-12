@@ -89,6 +89,7 @@ const mockTOCData = (setActiveItem: (id: string) => void): TOCItem[] => [
 
 const meta: Meta<typeof F0TableOfContent> = {
   title: "Navigation/TableOfContent",
+  tags: [],
   component: F0TableOfContent,
   parameters: {
     layout: "centered",

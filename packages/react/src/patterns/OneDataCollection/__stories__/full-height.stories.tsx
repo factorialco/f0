@@ -13,7 +13,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div

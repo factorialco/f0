@@ -36,7 +36,7 @@ const meta: Meta<typeof F0Dialog> = {
       story: { inline: false, height: "720px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   argTypes: {
     position: {
       description: "The position of the dialog",

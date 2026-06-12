@@ -43,7 +43,7 @@ const dropdownItems = [
 const meta = {
   title: "F0Accordion",
   component: F0Accordion,
-  tags: ["experimental"],
+  tags: [],
   args: {
     items: baseItems,
   },

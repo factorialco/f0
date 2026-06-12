@@ -38,7 +38,7 @@ const meta = {
     },
     open: true,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story, { args }) => {
       const [isOpen, setIsOpen] = useState(true)

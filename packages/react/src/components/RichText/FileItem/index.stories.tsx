@@ -15,7 +15,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  tags: ["experimental"],
+  tags: [],
   args: {
     size: "lg",
     file: new File(["test"], "test.txt", { type: "text/plain" }),

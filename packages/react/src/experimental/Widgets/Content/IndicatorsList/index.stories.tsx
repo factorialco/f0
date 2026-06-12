@@ -26,7 +26,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     items: taskCategories,
   },

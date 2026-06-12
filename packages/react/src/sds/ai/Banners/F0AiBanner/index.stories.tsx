@@ -9,6 +9,7 @@ import { AiBannerSkeleton } from "./AiBannerInternal"
 
 const meta = {
   title: "AI/AiBanner",
+  tags: [],
   component: F0AiBanner,
   parameters: {
     layout: "centered",

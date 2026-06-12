@@ -25,7 +25,7 @@ import { PageHeader } from "./index"
 const meta = {
   title: "Navigation/PageHeader",
   component: PageHeader,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
   },

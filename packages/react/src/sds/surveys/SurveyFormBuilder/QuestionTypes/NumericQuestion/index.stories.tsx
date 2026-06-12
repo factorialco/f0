@@ -9,7 +9,7 @@ import { SurveyFormBuilderElement, QuestionElement } from "../../types"
 const meta: Meta<typeof NumericQuestion> = {
   title: "Surveys/SurveyFormBuilder/NumericQuestion",
   component: NumericQuestion,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args as QuestionElement },

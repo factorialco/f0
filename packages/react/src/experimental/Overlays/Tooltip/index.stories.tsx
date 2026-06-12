@@ -9,7 +9,7 @@ import { Tooltip } from "./index"
 const meta: Meta<typeof Tooltip> = {
   title: "Tooltip",
   component: Tooltip,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div className="flex h-32 items-center justify-center p-6">{Story()}</div>

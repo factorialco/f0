@@ -8,7 +8,7 @@ import { SidebarHeader } from "./index"
 const meta = {
   title: "Sidebar/Header",
   component: SidebarHeader,
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "no-sidebar"],
   decorators: [
     (Story) => {
       const [selected, setSelected] = useState("1")

@@ -14,7 +14,7 @@ import { F0GridStack, GridStackReactWidget } from "../index"
 const meta = {
   title: "Utilities/GridStack",
   component: F0GridStack,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     docs: {
       description: {

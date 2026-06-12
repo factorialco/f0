@@ -7,7 +7,7 @@ import { Switch } from "./index"
 
 const meta = {
   component: Switch,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   title: "Switch",
   parameters: {
     layout: "centered",

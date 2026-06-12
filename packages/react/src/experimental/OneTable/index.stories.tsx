@@ -23,7 +23,7 @@ import {
 const meta: Meta<typeof OneTable> = {
   title: "Table",
   component: OneTable,
-  tags: ["experimental"],
+  tags: [],
 }
 
 export default meta

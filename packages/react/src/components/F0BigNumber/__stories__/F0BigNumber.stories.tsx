@@ -9,23 +9,13 @@ import type { BigNumberProps } from "../types"
 
 import { F0BigNumber } from ".."
 
-const meta: Meta<typeof F0BigNumber> = {
+const meta = {
   component: F0BigNumber,
   title: "BigNumber",
   parameters: {
     layout: "centered",
-    docs: {
-      description: {
-        component: [
-          "A big number component that displays a large number with a label.",
-          "The component displays the value and the label, and the comparison value (if provided).",
-        ]
-          .map((line) => `<p>${line}</p>`)
-          .join(""),
-      },
-    },
   },
-  tags: ["autodocs", "stable"],
+  tags: ["!autodocs", "stable"],
   argTypes: {
     value: {
       control: "object",
@@ -65,6 +55,12 @@ const meta: Meta<typeof F0BigNumber> = {
     },
     ...dataTestIdArgs,
   },
+  args: {
+    // Default comparison with no numeric value: satisfies the required
+    // `comparison` prop while keeping the comparison tag hidden unless a
+    // story overrides it with a real value.
+    comparison: { numericValue: { value: undefined } },
+  },
   decorators: [
     (Story) => (
       <div className="h-60 w-80">
@@ -72,10 +68,10 @@ const meta: Meta<typeof F0BigNumber> = {
       </div>
     ),
   ],
-}
+} satisfies Meta<typeof F0BigNumber>
 
 export default meta
-type Story = StoryObj<typeof F0BigNumber>
+type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   args: {
@@ -105,6 +101,7 @@ export const WithDataTestId: Story = {
 }
 
 export const WithComparison: Story = {
+  tags: ["no-sidebar"],
   args: {
     value: {
       value: 1000000,
@@ -124,6 +121,7 @@ export const WithComparison: Story = {
 }
 
 export const WithTrend: Story = {
+  tags: ["no-sidebar"],
   args: {
     value: {
       value: 1000000,
@@ -144,6 +142,7 @@ export const WithTrend: Story = {
 }
 
 export const WithTrendInvertStatus: Story = {
+  tags: ["no-sidebar"],
   args: {
     value: {
       value: 1000000,
@@ -166,7 +165,16 @@ export const WithTrendInvertStatus: Story = {
   },
 }
 
+const placeholderArgs = {
+  value: { value: 1000000, units: "$", unitsPosition: "prepend" as const },
+  comparison: {
+    numericValue: { value: 900000, units: "$", unitsPosition: "prepend" as const },
+  },
+} satisfies BigNumberProps
+
 export const Skeleton: Story = {
+  tags: ["no-sidebar"],
+  args: placeholderArgs,
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex flex-col gap-2">
@@ -175,7 +183,32 @@ export const Skeleton: Story = {
   ),
 }
 
+export const DoDontDoCase: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    value: { value: 12450, units: "$", unitsPosition: "prepend" as const },
+    label: "Monthly revenue",
+    trend: true,
+    comparisonHint: "vs last month",
+    comparison: {
+      numericValue: { value: 10800, units: "$", unitsPosition: "prepend" as const },
+    },
+  },
+}
+
+export const DoDontDontCase: Story = {
+  tags: ["no-sidebar"],
+  args: {
+    value: { value: 12450, units: "$", unitsPosition: "prepend" as const },
+    label: "Revenue this month compared to the previous month after adjustments",
+    comparison: {
+      numericValue: { value: 10800, units: "$", unitsPosition: "prepend" as const },
+    },
+  },
+}
+
 export const Snapshot: Story = {
+  args: placeholderArgs,
   parameters: withSnapshot({}),
   render: () => {
     const args = {

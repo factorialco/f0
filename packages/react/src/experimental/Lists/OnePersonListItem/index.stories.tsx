@@ -9,7 +9,7 @@ import { OnePersonListItem } from "./index"
 const meta = {
   title: "List/OnePersonListItem",
   component: OnePersonListItem,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof OnePersonListItem>
 
 export default meta

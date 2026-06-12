@@ -33,7 +33,7 @@ const meta = {
         "<p>Callback triggered when a bulk action is performed. It gets the action name, and the same args as `inSelectItems`. ‼️ Please check the `onSelectItems` docs for more information.</p>",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta

@@ -7,7 +7,7 @@ import { EnhancementOption, FILE_TYPES, resultType, RichTextEditor } from "."
 const meta = {
   component: RichTextEditor,
   title: "Rich text/RichTextEditor",
-  tags: ["experimental"],
+  tags: [],
   argTypes: {
     title: {
       control: "text",
@@ -166,7 +166,7 @@ const users = [
 ]
 
 export const Default: Story = {
-  tags: ["experimental"],
+  tags: [],
   args: {
     title: "Ode to My Text Editor",
     onChange: (result: resultType) => {
@@ -256,7 +256,7 @@ export const Blank: Story = {
 type SkeletonStory = StoryObj<typeof RichTextEditor.Skeleton>
 
 export const Skeleton: SkeletonStory = {
-  tags: ["experimental"],
+  tags: [],
   render: () => <RichTextEditor.Skeleton />,
 }
 

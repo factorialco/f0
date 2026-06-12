@@ -5,6 +5,7 @@ import { LineChart } from "./index"
 const meta: Meta = {
   component: LineChart,
   title: "Charts/LineChart",
+  tags: [],
   argTypes: {
     lineType: {
       control: { type: "select", options: ["natural", "linear"] },

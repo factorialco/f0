@@ -51,7 +51,7 @@ const datasetsWithOnCreate: SurveyDatasets = {
 const meta: Meta<typeof DropdownSingleQuestion> = {
   title: "Surveys/SurveyFormBuilder/DropdownSingleQuestion",
   component: DropdownSingleQuestion,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args },

@@ -6,7 +6,7 @@ import { TwoColumnsList } from "./index"
 const meta: Meta = {
   title: "Widgets/Content/TwoColumnsList",
   component: TwoColumnsList,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "centered",
   },

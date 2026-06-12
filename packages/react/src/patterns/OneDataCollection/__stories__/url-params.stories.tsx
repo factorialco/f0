@@ -109,7 +109,7 @@ const meta = {
   parameters: {
     layout: "padded",
   },
-  tags: ["experimental"],
+  tags: [],
 } satisfies Meta<typeof UrlParamsExample>
 
 export default meta

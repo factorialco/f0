@@ -10,7 +10,7 @@ import { ChartDecorator } from "./decorators"
 const meta = {
   component: F0DataChart,
   title: "F0DataChart/Empty states",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [ChartDecorator],
   parameters: {
     docs: {

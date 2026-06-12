@@ -11,7 +11,7 @@ const meta = {
   render: (props) => <F0NumberInput key={JSON.stringify(props)} {...props} />,
   title: "Inputs/Number input",
   component: F0NumberInput,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     disabled: false,
     placeholder: "Placeholder text here",

@@ -9,7 +9,7 @@ import { SurveyFormBuilderProvider } from "../../Context"
 const meta: Meta<typeof FileQuestion> = {
   title: "Surveys/SurveyFormBuilder/FileQuestion",
   component: FileQuestion,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args as QuestionElement },

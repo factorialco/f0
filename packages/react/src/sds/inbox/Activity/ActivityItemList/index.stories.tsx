@@ -34,7 +34,7 @@ const meta: Meta<typeof ActivityItemList> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental", "internal"],
+  tags: ["autodocs", "internal"],
 }
 
 export default meta

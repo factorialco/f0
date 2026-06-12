@@ -18,7 +18,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental", "internal"],
+  tags: ["autodocs", "internal"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta

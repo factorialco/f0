@@ -7,7 +7,7 @@ import { F0TextAreaInput } from "../index"
 const meta = {
   title: "Inputs/Text area input",
   component: F0TextAreaInput,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     disabled: false,
     placeholder: "Placeholder text here",

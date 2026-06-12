@@ -6,7 +6,7 @@ import { AutoGrid } from "./index"
 const meta = {
   title: "Layout/Blocks/AutoGrid",
   component: AutoGrid,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     tileSize: "md",
     gap: "4",

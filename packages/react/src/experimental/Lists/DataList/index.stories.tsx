@@ -6,7 +6,7 @@ import { DataList } from "./index"
 const meta: Meta<typeof DataList> = {
   title: "List/DataList",
   component: DataList,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     children: (
       <>

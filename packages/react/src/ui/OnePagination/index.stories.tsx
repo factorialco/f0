@@ -61,7 +61,7 @@ const meta: Meta<typeof OnePagination> = {
     },
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 export default meta

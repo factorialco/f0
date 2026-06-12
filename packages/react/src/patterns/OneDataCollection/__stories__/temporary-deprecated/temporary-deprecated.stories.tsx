@@ -5,7 +5,7 @@ import { ExampleComponent } from "../mockData"
 const meta = {
   title: "Data Collection/Temporary or Deprecated features",
   component: ExampleComponent,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story) => (
       <div style={{ border: "1px red red" }}>

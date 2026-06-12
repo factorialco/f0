@@ -210,7 +210,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof OneDateNavigator>
 
 export default meta

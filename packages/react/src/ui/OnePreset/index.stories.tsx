@@ -11,7 +11,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   argTypes: {
     label: {
       description: "The label of the preset",

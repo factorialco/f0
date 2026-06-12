@@ -32,7 +32,7 @@ export const Default: Story = {
     module: "kudos",
     dismissable: false,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }
 
 export const Dismissable: Story = {
@@ -57,5 +57,5 @@ export const LMS: Story = {
     module: "lms",
     dismissable: false,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 }

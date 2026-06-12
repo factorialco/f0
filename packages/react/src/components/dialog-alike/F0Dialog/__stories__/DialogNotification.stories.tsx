@@ -18,7 +18,7 @@ const meta: Meta<typeof DialogNotificationInternal> = {
       story: { inline: false, height: "720px" },
     },
   },
-  tags: ["autodocs", "experimental", "internal"],
+  tags: ["autodocs", "internal"],
   argTypes: {
     type: {
       description: "The type of the notification.",

@@ -15,7 +15,7 @@ const meta = {
       url: "https://www.figma.com/design/pZzg1KTe9lpKTSGPUZa8OJ/Web-Components?node-id=252-8537&t=SrGKlGDdzYxFSTb8-4",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     value: 42,
     size: "md",

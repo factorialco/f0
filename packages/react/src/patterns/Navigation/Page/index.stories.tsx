@@ -18,7 +18,7 @@ type TabsProps = ComponentProps<typeof Tabs>
 const meta: Meta<typeof Page> = {
   title: "Navigation/Page",
   component: Page,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
   },

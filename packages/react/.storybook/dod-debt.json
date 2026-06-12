@@ -1,0 +1,97 @@
+{
+  "card": {
+    "name": "Card",
+    "gaps": [
+      "usage docs (MDX) missing"
+    ]
+  },
+  "datepicker": {
+    "name": "F0DatePicker",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "no unit tests"
+    ]
+  },
+  "inputs-duration-input": {
+    "name": "F0DurationInput",
+    "gaps": [
+      "usage docs (MDX) missing"
+    ]
+  },
+  "icon": {
+    "name": "F0Icon",
+    "gaps": [
+      "no unit tests",
+      "no Chromatic Snapshot story"
+    ]
+  },
+  "image": {
+    "name": "Image",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "no unit tests",
+      "no Chromatic Snapshot story"
+    ]
+  },
+  "emptystate": {
+    "name": "OneEmptyState",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "no unit tests",
+      "no Chromatic Snapshot story"
+    ]
+  },
+  "charts-radarchart": {
+    "name": "RadarChart",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "no unit tests",
+      "no Chromatic Snapshot story",
+      "story not using `satisfies Meta`"
+    ]
+  },
+  "await": {
+    "name": "Await",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "no unit tests",
+      "no Chromatic Snapshot story"
+    ]
+  },
+  "box": {
+    "name": "F0Box",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "no unit tests",
+      "no Chromatic Snapshot story"
+    ]
+  },
+  "forms-f0form": {
+    "name": "F0Form",
+    "gaps": [
+      "no Chromatic Snapshot story",
+      "story not using `satisfies Meta`",
+      "still wrapped in experimentalComponent()"
+    ]
+  },
+  "resource-header": {
+    "name": "ResourceHeader",
+    "gaps": [
+      "story not using `satisfies Meta`",
+      "still wrapped in experimentalComponent()"
+    ]
+  },
+  "ai-aiinsightcard": {
+    "name": "F0AiInsightCard",
+    "gaps": [
+      "usage docs (MDX) missing"
+    ]
+  },
+  "cannot-access-payroll-documents": {
+    "name": "F0AiProposalCard",
+    "gaps": [
+      "usage docs (MDX) missing",
+      "story not using `satisfies Meta`"
+    ]
+  }
+}

@@ -9,7 +9,7 @@ import { SidebarFooter } from "./index"
 const meta = {
   title: "Navigation/SidebarFooter",
   component: SidebarFooter,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof SidebarFooter>
 
 export default meta

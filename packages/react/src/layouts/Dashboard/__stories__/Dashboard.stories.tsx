@@ -22,7 +22,7 @@ const availableSizes = [
 const meta = {
   title: "Dashboard",
   component: Dashboard,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [
     (Story, { args }) => {
       const [widgets, setWidgets] = useState<

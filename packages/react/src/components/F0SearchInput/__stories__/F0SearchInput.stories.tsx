@@ -14,7 +14,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     placeholder: "",
   },

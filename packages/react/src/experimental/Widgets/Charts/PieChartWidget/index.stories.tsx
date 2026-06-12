@@ -16,7 +16,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   args: {
     ...containerStoryArgs,
     header: {

@@ -1,0 +1,218 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0BigNumber.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# BigNumber
+
+Highlights a single, high-priority metric — revenue, headcount, an attendance
+rate — as a large formatted value with an optional label and a comparison
+against a previous period. Use it as the headline figure in dashboards and
+summary cards. For a metric plotted over time use `F0DataChart`; for a compact
+status indicator use a tag or badge.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>Numeric | NumberWithFormatter | number</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          The headline figure. Accepts a raw number or a numeric object with
+          units and formatting options; rendered formatted at up to 2 decimal
+          places.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Caption describing what the value represents. Omit only when the surrounding context already names the metric.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>comparison</code>
+        </td>
+        <td>
+          <code>Numeric | NumberWithFormatter | number</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          The reference value to compare against (e.g. the previous period).
+          The comparison tag renders only when a comparison value is present.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>comparisonHint</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Short text shown next to the comparison tag to clarify the reference period (e.g. "vs last month").</td>
+      </tr>
+      <tr>
+        <td>
+          <code>trend</code>
+        </td>
+        <td>
+          <code>boolean | TrendConfig</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Enables the percentage change between <code>value</code> and{" "}
+          <code>comparison</code>. Pass <code>{`{ invertStatus: true }`}</code>{" "}
+          to flip the positive/negative coloring. Requires a comparison value.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use BigNumber when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A dashboard or summary card needs a headline metric</td>
+        <td>
+          One figure is the most important takeaway and should be readable at a
+          glance
+        </td>
+      </tr>
+      <tr>
+        <td>A metric is more meaningful relative to a prior period</td>
+        <td>
+          Pass <code>comparison</code> and <code>trend</code> so the reader sees
+          the change, not just the absolute value
+        </td>
+      </tr>
+      <tr>
+        <td>The underlying data is still loading</td>
+        <td>
+          Render <code>F0BigNumber.Skeleton</code> to hold the layout and signal
+          progress instead of shifting content when the value arrives
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Showing how a metric changes over time</td>
+        <td>
+          <code>F0DataChart</code>
+        </td>
+      </tr>
+      <tr>
+        <td>Comparing several metrics of equal importance side by side</td>
+        <td>
+          <code>F0Table</code> or a metrics grid
+        </td>
+      </tr>
+      <tr>
+        <td>A short status or category label, not a measured quantity</td>
+        <td>A tag or badge</td>
+      </tr>
+      <tr>
+        <td>Plain body copy that happens to contain a number</td>
+        <td>
+          <code>F0Text</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Keep the label short and add a comparison with a hint so the figure is interpretable on its own.",
+    children: <Canvas of={Stories.DoDontDoCase} sourceState="none" />,
+  }}
+  dont={{
+    description:
+      "Don't bury the value under a long label or show a comparison value with no hint about the reference period.",
+    children: <Canvas of={Stories.DoDontDontCase} sourceState="none" />,
+  }}
+/>
+
+### Content best practices
+
+- **Label**: Sentence case, no trailing period. Name the metric, not the calculation ("Monthly revenue", not "Sum of paid invoices this month")
+- **Label length**: Keep it to a few words so the value stays the focal point
+- **Comparison hint**: State the reference period plainly
+  - **Correct:** "vs last month", "vs Q3", "vs last year"
+  - **Incorrect:** "compared to the previous reporting period before adjustments"
+- **Units**: Provide units through the numeric `value` object (e.g. currency, percentage) rather than appending them to the label
+
+### Behavior
+
+- `value` and `comparison` accept either a raw `number` or a numeric object (`Numeric` / `NumberWithFormatter`). Values are formatted at up to 2 decimal places using the locale from the `l10n` provider, so the component must render inside that provider.
+- The comparison tag (`F0TagBalance`) renders only when a `comparison` value resolves to a finite number.
+- `trend` computes `(value − comparison) / comparison × 100`. The percentage is omitted when either side is missing or the comparison is zero, so no division-by-zero or misleading percentage is shown.
+- By default an increase is styled positive and a decrease negative. Pass `trend={{ invertStatus: true }}` for metrics where a lower number is better (e.g. absence rate, error count) so the coloring matches the desired direction.
+- `F0BigNumber.Skeleton` renders a loading placeholder that mirrors the label and value layout — use it while data is in flight.
+
+## Accessibility
+
+- The trend tag conveys direction through both the signed percentage and color. Color alone is not the only cue, so the change remains understandable without color perception.
+- When a lower value is the good outcome, set `invertStatus` so the coloring does not contradict the meaning — otherwise an improvement is shown in the "negative" color.
+- Provide a `label` (or a clear heading in the surrounding context) so the figure is not announced as a bare number with no meaning.

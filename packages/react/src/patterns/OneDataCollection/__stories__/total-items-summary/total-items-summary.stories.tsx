@@ -5,7 +5,7 @@ import { ExampleComponent } from "../mockData"
 const meta = {
   title: "Data Collection/Total Items Summary",
   component: ExampleComponent,
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
 } satisfies Meta<typeof ExampleComponent>
 
 export default meta

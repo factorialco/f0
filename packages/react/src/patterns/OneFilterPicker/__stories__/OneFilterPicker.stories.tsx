@@ -34,6 +34,7 @@ import {
 
 const meta = {
   title: "FilterPicker",
+  tags: [],
   component: (props: OneFilterPickerRootProps<FiltersDefinition>) => {
     return <OneFilterPickerComponent {...props} />
   },

@@ -8,7 +8,7 @@ import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 const meta = {
   component: F0DataChart,
   title: "F0DataChart/Heatmap",
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs"],
   decorators: [ChartDecorator],
 } satisfies Meta<typeof F0DataChart>
 

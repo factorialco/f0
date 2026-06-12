@@ -10,7 +10,7 @@ import { NotesTextEditor, NotesTextEditorSkeleton } from "./index"
 const meta: Meta<typeof NotesTextEditor> = {
   title: "Rich text/NotesTextEditor",
   component: NotesTextEditor,
-  tags: ["experimental"],
+  tags: [],
 }
 
 export default meta
