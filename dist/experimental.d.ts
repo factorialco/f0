@@ -514,6 +514,12 @@ declare type AiChatProviderProps = {
      * UI config — does not affect runtime behavior.
      */
     initialMessage?: string | string[];
+    /**
+     * Composer placeholder(s). A single entry renders statically; multiple
+     * entries animate (typewriter). Defaults to the i18n `ai.inputPlaceholder`
+     * when omitted. Purely UI config — does not affect runtime behavior.
+     */
+    placeholders?: string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     /**
