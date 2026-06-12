@@ -5,7 +5,7 @@ import { RadarChart } from "./index"
 const meta: Meta = {
   title: "Charts/RadarChart",
   component: RadarChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
   decorators: [
     (Story) => (
       <div className="h-80">

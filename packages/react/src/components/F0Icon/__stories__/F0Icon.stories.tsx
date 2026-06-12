@@ -33,7 +33,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
 } satisfies Meta<ComponentProps<typeof F0Icon>>
 
 export default meta

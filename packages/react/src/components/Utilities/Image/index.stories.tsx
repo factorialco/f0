@@ -10,7 +10,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs", "stable", "no-sidebar"],
   args: {
     src: heart,
     width: 100,

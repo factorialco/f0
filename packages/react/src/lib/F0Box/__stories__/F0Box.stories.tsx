@@ -324,7 +324,7 @@ const meta = {
     shrink: { control: "boolean" },
   },
   parameters: { layout: "padded" },
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
 } satisfies Meta<ComponentProps<typeof F0Box>>
 
 export default meta

@@ -55,7 +55,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
   decorators: [
     (Story) => (
       <div className="p-8">

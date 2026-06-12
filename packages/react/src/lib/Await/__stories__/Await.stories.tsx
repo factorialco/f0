@@ -69,7 +69,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
 } satisfies Meta<ComponentProps<typeof Await>>
 
 export default meta

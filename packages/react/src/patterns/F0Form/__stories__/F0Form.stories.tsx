@@ -30,7 +30,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 const meta: Meta = {
   title: "Forms/F0Form",
   component: F0Form,
-  tags: ["!autodocs"],
+  tags: ["stable", "!autodocs"],
   parameters: { a11y: { skipCi: true } },
 }
 

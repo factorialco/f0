@@ -33,7 +33,7 @@ const meta: Meta<F0AiProposalCardProps> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "stable"],
   argTypes: {
     module: {
       control: "select",
