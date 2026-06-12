@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.1](https://github.com/factorialco/f0/compare/f0-react-v3.0.0...f0-react-v3.0.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* **breadcrumbs:** collection-select survives item navigation + filter write-through to storage ([#4433](https://github.com/factorialco/f0/issues/4433)) ([5d2e361](https://github.com/factorialco/f0/commit/5d2e36155dc63e0982ad22015a8483069e4f41c1))
+
 ## [3.0.0](https://github.com/factorialco/f0/compare/f0-react-v2.61.5...f0-react-v3.0.0) (2026-06-12)
 
 
