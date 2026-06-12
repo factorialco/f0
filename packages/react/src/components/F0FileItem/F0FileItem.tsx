@@ -1,0 +1,96 @@
+import { cva } from "cva"
+import { forwardRef } from "react"
+
+import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
+import { F0Button } from "@/components/F0Button"
+import {
+  DropdownInternal,
+  DropdownItem,
+} from "@/experimental/Navigation/Dropdown/internal"
+import { CrossedCircle, Ellipsis } from "@/icons/app"
+import { withDataTestId } from "@/lib/data-testid"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
+import { cn } from "@/lib/utils"
+
+import type { F0FileItemProps, F0FileItemSize } from "./types"
+
+const fileItemVariants = cva({
+  base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary rounded-[10px]",
+  variants: {
+    size: {
+      md: "max-w-48 gap-2 py-0.5 pl-0.5 pr-1.5",
+      lg: "max-w-56 gap-2.5 p-1",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+})
+
+const avatarSizeMap: Record<F0FileItemSize, "sm" | "md"> = {
+  md: "md",
+  lg: "md",
+}
+
+const buttonSizeMap: Record<F0FileItemSize, "sm" | "md"> = {
+  md: "sm",
+  lg: "md",
+}
+
+const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
+  (
+    { file, actions = [], disabled = false, size = "md", className, ...props },
+    ref
+  ) => {
+    const hasActions = actions.length > 0
+    const singleAction = actions.length === 1 ? actions[0] : null
+
+    const dropdownItems: DropdownItem[] = actions.map((action) => ({
+      label: action.label,
+      icon: action.icon,
+      critical: action.critical,
+      onClick: disabled ? undefined : action.onClick,
+    }))
+
+    return (
+      <div
+        ref={ref}
+        className={cn(fileItemVariants({ size }), className)}
+        {...props}
+      >
+        <F0AvatarFile file={file} size={avatarSizeMap[size]} />
+        <OneEllipsis
+          className={cn(
+            "text-neutral-1000 grow text-sm font-medium",
+            !hasActions && "pr-3"
+          )}
+        >
+          {file.name}
+        </OneEllipsis>
+        {hasActions &&
+          (singleAction ? (
+            <F0Button
+              label={singleAction.label}
+              size={buttonSizeMap[size]}
+              icon={singleAction.icon ?? CrossedCircle}
+              disabled={disabled}
+              onClick={disabled ? undefined : singleAction.onClick}
+              hideLabel
+              variant="ghost"
+            />
+          ) : (
+            <DropdownInternal
+              items={dropdownItems}
+              icon={Ellipsis}
+              size={buttonSizeMap[size]}
+            />
+          ))}
+      </div>
+    )
+  }
+)
+_F0FileItem.displayName = "F0FileItem"
+
+const F0FileItem = withDataTestId(_F0FileItem)
+
+export { F0FileItem }

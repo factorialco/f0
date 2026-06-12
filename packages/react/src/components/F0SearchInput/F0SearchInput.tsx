@@ -118,6 +118,7 @@ const _F0SearchInput = forwardRef<HTMLInputElement, F0SearchInputProps>(
     )
   }
 )
+_F0SearchInput.displayName = "F0SearchInput"
 
 /**
  * @experimental This is an experimental component, use it at your own risk.

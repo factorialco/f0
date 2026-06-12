@@ -24,28 +24,58 @@
 }
 
 .preserved-selection {
-  @apply bg-f1-background-selected-bold/20;
+  @apply bg-f1-background-selected-hover;
 }
 
 .enhance-highlight {
   background: linear-gradient(
     90deg,
-    #e5561980,
-    #a1ade580,
-    #e5194380,
-    #e5561980
+    #888 0%,
+    #888 35%,
+    #f5f5f5 50%,
+    #888 65%,
+    #888 100%
   );
-  background-size: 300% 100%;
-  animation: enhance-gradient-move 3s linear infinite;
-  border-radius: 4px;
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear infinite;
 }
 
-@keyframes enhance-gradient-move {
+@keyframes shine {
   0% {
-    background-position: 0% 50%;
+    background-position: 200% 0;
   }
   100% {
-    background-position: 100% 50%;
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enhance-highlight {
+    animation: none;
+    -webkit-text-fill-color: #888;
+    background: none;
+  }
+}
+
+.enhance-highlight::selection,
+.enhance-highlight *::selection {
+  background-color: transparent !important;
+}
+
+.enhance-highlight::-moz-selection,
+.enhance-highlight *::-moz-selection {
+  background-color: transparent !important;
+}
+
+@keyframes enhance-highlight-border-flow {
+  0% {
+    background-position: 0 100%;
+  }
+  100% {
+    background-position: 100% 100%;
   }
 }
 
