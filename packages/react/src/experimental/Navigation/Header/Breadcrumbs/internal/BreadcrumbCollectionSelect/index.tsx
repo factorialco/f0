@@ -2,7 +2,12 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
 import { FiltersDefinition, FiltersState, RecordType } from "@/hooks/datasource"
 import { Link } from "@/lib/linkHandler"
-import { readDataCollectionStorage } from "@/lib/providers/datacollection/readDataCollectionStorage"
+import { useDataCollectionStorage } from "@/lib/providers/datacollection"
+import { notifyDataCollectionStorageChange } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
+import {
+  mergeDataCollectionFilters,
+  readDataCollectionStorage,
+} from "@/lib/providers/datacollection/readDataCollectionStorage"
 
 import { BreadcrumbCollectionSelectItemType } from "../../types"
 import { BreadcrumbSelect } from "../BreadcrumbSelect"
@@ -18,8 +23,12 @@ import { buildCollectionBoundSource } from "./buildCollectionBoundSource"
  *
  * 1. The persisted collection state is read exactly once (state initializer).
  * 2. `item.source` is captured on mount; later identity changes are ignored.
- *    `Breadcrumbs` keys items by `id`, so giving the item a new `id`
- *    remounts and re-captures — the documented way to swap sources.
+ *    `Breadcrumbs` keys collection-select items by `collectionId`, so
+ *    pointing the item at a different collection remounts and re-captures —
+ *    the documented way to swap sources. Changing only the item `id`/`value`
+ *    (walking items of the same collection, e.g. detail-page prev/next) does
+ *    NOT remount: the trigger updates through props, the seeded source and
+ *    its fetched dropdown page are kept.
  * 3. The seeded definition (and thus its dataAdapter) is built once, so the
  *    reference handed to F0Select never changes.
  * 4. `mapOptions`/`getItemHref`/`onSelect` are wrapped in stable callbacks
@@ -44,14 +53,40 @@ export function BreadcrumbCollectionSelect({
   const latestRef = useRef(item)
   latestRef.current = item
 
+  const storageHandler = useDataCollectionStorage()
+  const storageHandlerRef = useRef(storageHandler)
+  storageHandlerRef.current = storageHandler
+
   const stableMapOptions = useCallback(
     (record: RecordType) => latestRef.current.mapOptions(record),
     []
   )
 
+  // Editable filters (`showFilters`) write through to the collection's
+  // persisted state: the dropdown's filter picker edits "the list's filters",
+  // not a transient local copy. The write keeps every other persisted piece
+  // (sortings, search, settings, …) and updates the same slot
+  // `resolveDataCollectionFilters` reads, then notifies live collection-bound
+  // consumers (e.g. useDataCollectionItemNavigation re-seeds so prev/next +
+  // counter follow, and a later remount of this select re-seeds correctly).
   const stableOnFiltersChange = useCallback(
-    (filters: FiltersState<FiltersDefinition>) =>
-      latestRef.current.onFiltersChange?.(filters),
+    (filters: FiltersState<FiltersDefinition>) => {
+      const current = latestRef.current
+      current.onFiltersChange?.(filters)
+      if (!current.showFilters) return
+      const persist = async () => {
+        // NOTE: must await (not .then) — the default noop handler returns a
+        // plain object typed as a Promise.
+        const stored = await storageHandlerRef.current.get(current.collectionId)
+        await storageHandlerRef.current.set(
+          current.collectionId,
+          mergeDataCollectionFilters(stored ?? {}, filters)
+        )
+        notifyDataCollectionStorageChange(current.collectionId)
+      }
+      // Storage unavailable/unreadable → the dropdown still filters in-memory.
+      persist().catch(() => {})
+    },
     []
   )
 

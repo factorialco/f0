@@ -18,6 +18,7 @@ import {
   DataCollectionStorage,
   useDataCollectionStorage,
 } from "@/lib/providers/datacollection"
+import { subscribeToDataCollectionStorageChanges } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 
 import { ItemActionsDefinition } from "../../item-actions"
 import { NavigationFiltersDefinition } from "../../navigationFilters/types"
@@ -209,6 +210,44 @@ export function useDataCollectionItemNavigation<
     applyFiltersOverride()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated, overrideFiltersKey])
+
+  // Live re-seed: when another collection-bound consumer writes this
+  // collection's persisted state (e.g. the breadcrumb select's editable
+  // filters writing through), re-apply it so prev/next + counter follow
+  // without any app-side plumbing. The controlled override still wins: while
+  // it is set, the persisted filters are not seeded at all — applying them
+  // first and re-applying the override after would leak one fetch under the
+  // written filters.
+  useEffect(() => {
+    if (!enabled || !restorePersistedState) return
+    return subscribeToDataCollectionStorageChanges(collectionId, async () => {
+      try {
+        // NOTE: must await (not .then) — the default noop handler returns a
+        // plain object typed as a Promise.
+        const storage = (await storageHandlerRef.current.get(
+          collectionId
+        )) as DataCollectionStorage<FiltersState<Filters>>
+        if (!storage) return
+        const definition = dataSourceRef.current
+        seedFromStorage<R, Filters, Sortings, Grouping>(
+          storage,
+          {
+            filters:
+              overrideFiltersRef.current === undefined
+                ? definition.filters
+                : undefined,
+            sortings: definition.sortings,
+            search: definition.search,
+            grouping: definition.grouping,
+          },
+          definition
+        )
+      } catch {
+        // Unreadable persisted state — keep the current state.
+      }
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collectionId, enabled, restorePersistedState])
 
   const {
     data,

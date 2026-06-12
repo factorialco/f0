@@ -92,6 +92,13 @@ describe("seedFromStorage", () => {
     expect(applied?.filters).not.toHaveProperty("legacyFilter")
   })
 
+  it("applies an explicitly persisted empty filters state (user cleared them)", () => {
+    const target = makeTarget()
+    const applied = seedFromStorage({ filters: {} }, definition, target)
+    expect(target.setCurrentFilters).toHaveBeenCalledWith({})
+    expect(applied?.filters).toEqual({})
+  })
+
   it("applies nothing when every persisted filter key is unknown", () => {
     const target = makeTarget()
     const applied = seedFromStorage(

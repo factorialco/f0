@@ -14,6 +14,7 @@ import {
   DataCollectionStorageHandler,
   DataCollectionStorageProvider,
 } from "@/lib/providers/datacollection"
+import { notifyDataCollectionStorageChange } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { TestProviders, zeroRenderHook } from "@/testing/test-utils"
 
 import { DataCollectionSourceDefinition } from "../../useDataCollectionSource"
@@ -584,6 +585,111 @@ describe("useDataCollectionItemNavigation", () => {
       await new Promise((resolve) => setTimeout(resolve, 20))
 
       expect(fetchItemNeighbors).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("storage write notifications", () => {
+    it("re-seeds and refetches when another consumer writes the persisted state", async () => {
+      const fetchData = makeFetchData()
+      const fetchItemNeighbors = makeFetchItemNeighbors()
+      let stored: DataCollectionStorage = {
+        filters: { department: ["Design"] },
+      }
+      const handler = makeStorageHandler(() => Promise.resolve(stored))
+
+      const { result } = zeroRenderHook(
+        () =>
+          useDataCollectionItemNavigation({
+            source: makeSource(fetchData, fetchItemNeighbors),
+            collectionId: "test/items/v1",
+            // Design item: position 1 of 12 under the persisted filters
+            activeItemId: 2,
+          }),
+        { wrapper: withStorage(handler) }
+      )
+
+      await waitFor(() =>
+        expect(result.current.navigation?.counter).toEqual({
+          current: 1,
+          total: 12,
+        })
+      )
+
+      // e.g. the breadcrumb select's editable filters cleared the filters
+      // and wrote through to storage
+      stored = { filters: {} }
+      notifyDataCollectionStorageChange("test/items/v1")
+
+      // Unfiltered, item 2 is position 2 of 25
+      await waitFor(() =>
+        expect(result.current.navigation?.counter).toEqual({
+          current: 2,
+          total: 25,
+        })
+      )
+      expect(fetchData.mock.calls.at(-1)![0].filters).toEqual({})
+    })
+
+    it("the controlled currentFilters override still wins after a notified write", async () => {
+      const fetchData = makeFetchData()
+      const fetchItemNeighbors = makeFetchItemNeighbors()
+      let stored: DataCollectionStorage = {}
+      const handler = makeStorageHandler(() => Promise.resolve(stored))
+
+      const { result } = zeroRenderHook(
+        () =>
+          useDataCollectionItemNavigation({
+            source: makeSource(fetchData, fetchItemNeighbors),
+            collectionId: "test/items/v1",
+            activeItemId: 2,
+            currentFilters: { department: ["Design"] },
+          }),
+        { wrapper: withStorage(handler) }
+      )
+
+      await waitFor(() =>
+        expect(result.current.navigation?.counter).toEqual({
+          current: 1,
+          total: 12,
+        })
+      )
+
+      stored = { filters: { department: ["Engineering"] } }
+      notifyDataCollectionStorageChange("test/items/v1")
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      // Every fetch ran under the override; the written filters never leaked
+      for (const call of fetchData.mock.calls) {
+        expect(call[0].filters).toEqual({ department: ["Design"] })
+      }
+      expect(result.current.navigation?.counter).toEqual({
+        current: 1,
+        total: 12,
+      })
+    })
+
+    it("ignores notifications for other collection ids", async () => {
+      const fetchData = makeFetchData()
+      const handler = makeStorageHandler({})
+
+      const { result } = zeroRenderHook(
+        () =>
+          useDataCollectionItemNavigation({
+            source: makeSource(fetchData),
+            collectionId: "test/items/v1",
+            activeItemId: 1,
+          }),
+        { wrapper: withStorage(handler) }
+      )
+
+      await waitFor(() => expect(result.current.isReady).toBe(true))
+      expect(handler.get).toHaveBeenCalledTimes(1)
+
+      notifyDataCollectionStorageChange("other/collection/v1")
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      expect(handler.get).toHaveBeenCalledTimes(1)
+      expect(fetchData).toHaveBeenCalledTimes(1)
     })
   })
 

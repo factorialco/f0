@@ -4,6 +4,7 @@ import { forwardRef, PropsWithChildren, ReactNode } from "react"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
+import { getBreadcrumbKey } from "@/experimental/Navigation/Header/Breadcrumbs/getBreadcrumbKey"
 import { BreadcrumbItemType } from "@/experimental/Navigation/Header/Breadcrumbs/types"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
@@ -29,7 +30,7 @@ const BreadcrumbItem = forwardRef<
   HTMLLIElement,
   PropsWithChildren<BreadcrumbItemProps>
 >(({ item, isLast, isOnly = false, isFirst = false, children }, ref) => (
-  <ShadBreadcrumbItem key={item.id} ref={ref}>
+  <ShadBreadcrumbItem key={getBreadcrumbKey(item)} ref={ref}>
     {!isFirst && <BreadcrumbSeparator />}
     <BreadcrumbContent
       item={item}
