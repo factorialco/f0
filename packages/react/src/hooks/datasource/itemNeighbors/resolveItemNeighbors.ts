@@ -1,6 +1,6 @@
 import { Observable } from "zen-observable-ts"
 
-import { PromiseState } from "@/lib/promise-to-observable"
+import { isObservableLike, PromiseState } from "@/lib/promise-to-observable"
 
 import { ItemNeighborsResponse } from "../types/fetch.typings"
 
@@ -25,7 +25,9 @@ export function resolveItemNeighbors<R>(result: ItemNeighborsResult<R>): {
   promise: Promise<ItemNeighborsResponse<R>>
   cancel: () => void
 } {
-  if (result instanceof Observable) {
+  // Duck-typed (not `instanceof`): the observable may come from the consumer
+  // app's own zen-observable copy, whose class identity differs from f0's.
+  if (isObservableLike<ItemNeighborsResponse<R>>(result)) {
     let cancelled = false
     let subscription: ZenObservable.Subscription | null = null
     const promise = new Promise<ItemNeighborsResponse<R>>((resolve, reject) => {

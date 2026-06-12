@@ -185,4 +185,51 @@ describe("adaptDataAdapterToInfiniteScroll", () => {
     })
     expect(emissions[2]).toEqual({ loading: false, error, data: null })
   })
+
+  it("maps foreign observables (different class identity, e.g. Apollo's zen-observable copy)", async () => {
+    // Observable-like with `subscribe`/`map` but NOT an instance of this
+    // package's Observable class — like an Apollo observable built from the
+    // consumer app's own zen-observable copy. Detection must be duck-typed,
+    // not `instanceof`.
+    const foreignObservable = {
+      map(fn: (state: PromiseState<unknown>) => PromiseState<unknown>) {
+        return new Observable<PromiseState<unknown>>((subscriber) => {
+          subscriber.next(fn({ loading: false, data: pageResponse(1) }))
+          subscriber.complete()
+        })
+      },
+      subscribe() {
+        throw new Error("not used: map() already returns a real Observable")
+      },
+    }
+    expect(foreignObservable).not.toBeInstanceOf(Observable)
+
+    const adapted = adaptDataAdapterToInfiniteScroll<TestRecord, TestFilters>({
+      paginationType: "pages",
+      fetchData: () =>
+        foreignObservable as unknown as Observable<
+          PromiseState<PageBasedPaginatedResponse<TestRecord>>
+        >,
+    })
+
+    const result = adapted.fetchData(fetchOptions(null))
+    // Regression: with `instanceof` detection the foreign observable fell
+    // through to the sync branch and came back as `{ records: undefined }`.
+    expect(result).toBeInstanceOf(Observable)
+
+    const emissions: PromiseState<unknown>[] = []
+    await new Promise<void>((resolve) => {
+      ;(result as Observable<PromiseState<unknown>>).subscribe({
+        next: (state) => emissions.push(state),
+        complete: resolve,
+      })
+    })
+
+    expect(emissions[0].data).toMatchObject({
+      type: "infinite-scroll",
+      records: RECORDS,
+      cursor: "2",
+      hasMore: true,
+    })
+  })
 })
