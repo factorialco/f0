@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.1.0](https://github.com/factorialco/f0/compare/f0-react-v3.0.1...f0-react-v3.1.0) (2026-06-12)
+
+
+### Features
+
+* promote RichText to stable components with AI Enhance and F0 naming ([#3394](https://github.com/factorialco/f0/issues/3394)) ([193204e](https://github.com/factorialco/f0/commit/193204ea9718dfe496efc6fea1dc7a724f29a1b1))
+
 ## [3.0.1](https://github.com/factorialco/f0/compare/f0-react-v3.0.0...f0-react-v3.0.1) (2026-06-12)
 
 
