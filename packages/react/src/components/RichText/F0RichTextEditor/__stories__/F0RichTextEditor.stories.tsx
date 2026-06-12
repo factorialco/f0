@@ -3,24 +3,9 @@ import { fn } from "storybook/test"
 
 import { Summary } from "@/icons/ai"
 import { Alert, Globe } from "@/icons/app"
-import { type TranscribeFn } from "@/sds/ai/F0AiChat/types"
+import { mockEnhanceText, mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import { EnhancementOption, FILE_TYPES, F0RichTextEditor } from ".."
-
-// Simulates a streaming STT endpoint: emits the same transcript word by word
-// so the editor fills live without any backend (same as F0AiChatTextArea).
-const MOCK_TRANSCRIPT = "How many vacation days do I have left this year?"
-const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
-  const words = MOCK_TRANSCRIPT.split(" ")
-  let acc = ""
-  for (const word of words) {
-    if (signal?.aborted) break
-    await new Promise((r) => setTimeout(r, 140))
-    acc = acc ? `${acc} ${word}` : word
-    onPartial(acc)
-  }
-  return MOCK_TRANSCRIPT
-}
 
 const meta = {
   component: F0RichTextEditor,
@@ -200,21 +185,7 @@ export const Default: Story = {
     onTranscribe: mockTranscribe,
     mentionsConfig: { users: users },
     enhanceConfig: {
-      onEnhanceText: (params: {
-        text: string
-        selectedIntent?: string
-        customIntent?: string
-        context?: string
-      }) =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              success: !(params.selectedIntent === "error"),
-              error: "Error from AI",
-              text: `<b>This is an AI-enhanced response</b>`,
-            })
-          }, 2000)
-        }),
+      onEnhanceText: mockEnhanceText,
       enhancementOptions: enhancementOptions,
     },
     filesConfig: {

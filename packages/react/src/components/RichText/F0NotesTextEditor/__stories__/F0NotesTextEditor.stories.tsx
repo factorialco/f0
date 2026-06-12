@@ -3,6 +3,7 @@ import { fn } from "storybook/test"
 
 import { NewColor } from "@/components/tags/F0TagDot"
 import { Summary } from "@/icons/ai"
+import { mockEnhanceText } from "@/lib/storybook-utils/ai-mocks"
 import { AcademicCap, Alert, Globe, List, Placeholder } from "@/icons/app"
 
 import {
@@ -163,21 +164,7 @@ export const Default: Story = {
       onUpload: mockImageUpload,
     },
     enhanceConfig: {
-      onEnhanceText: (params: {
-        text: string
-        selectedIntent?: string
-        customIntent?: string
-        context?: string
-      }) =>
-        new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              success: !(params.selectedIntent === "error"),
-              error: "Error from AI, Jacob didn't finish his work",
-              text: `<b>Just imagine this is an AI response from our friend Jacob</b>`,
-            })
-          }, 2000)
-        }),
+      onEnhanceText: mockEnhanceText,
       enhancementOptions: enhancementOptions,
     },
     aiBlockConfig: {

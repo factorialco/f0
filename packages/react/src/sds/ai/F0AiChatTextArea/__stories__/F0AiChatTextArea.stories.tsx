@@ -4,6 +4,8 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
@@ -81,21 +83,6 @@ const FILE_UPLOAD_CONFIG: AiChatFileAttachmentConfig = {
   },
   allowedMimeTypes: ["image/*", "application/pdf", "text/plain"],
   maxFiles: 3,
-}
-
-// Simulates a streaming STT endpoint: emits the same transcript word by word
-// so the textarea fills live (Wispr Flow feel) without any backend.
-const MOCK_TRANSCRIPT = "How many vacation days do I have left this year?"
-const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
-  const words = MOCK_TRANSCRIPT.split(" ")
-  let acc = ""
-  for (const word of words) {
-    if (signal?.aborted) break
-    await new Promise((r) => setTimeout(r, 140))
-    acc = acc ? `${acc} ${word}` : word
-    onPartial(acc)
-  }
-  return MOCK_TRANSCRIPT
 }
 
 const CREDIT_WARNING: AiChatCreditWarning = {
