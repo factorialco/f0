@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.61.5](https://github.com/factorialco/f0/compare/f0-react-v2.61.4...f0-react-v2.61.5) (2026-06-12)
+
+
+### Bug Fixes
+
+* **F0CardRow:** remove whole-card click target ([#4376](https://github.com/factorialco/f0/issues/4376)) ([b057f40](https://github.com/factorialco/f0/commit/b057f4090501088737649c6047b0203ffd9fda46))
+
 ## [2.61.4](https://github.com/factorialco/f0/compare/f0-react-v2.61.3...f0-react-v2.61.4) (2026-06-12)
 
 
