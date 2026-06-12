@@ -196,6 +196,57 @@ describe("BreadcrumbCollectionSelect", () => {
     ).toBeGreaterThan(0)
   })
 
+  it("does not remount or refetch when walking items of the same collection (prev/next)", async () => {
+    const fetchData = makeFetchData()
+    const crumbs = (item: BreadcrumbCollectionSelectItemType) => [
+      { id: "employees", label: "Employees", href: "/employees" },
+      item,
+    ]
+
+    const { rerender } = render(
+      <Breadcrumbs breadcrumbs={crumbs(makeItem(fetchData))} />
+    )
+    await waitFor(() => expect(fetchData).toHaveBeenCalled())
+    const mountFetchCount = fetchData.mock.calls.length
+
+    // Detail-page prev/next: a NEW item id/value/label, same collectionId
+    rerender(
+      <Breadcrumbs
+        breadcrumbs={crumbs(
+          makeItem(fetchData, { id: "employee-2", value: "2", label: "Bob" })
+        )}
+      />
+    )
+
+    // The trigger follows the new item through props…
+    expect(
+      (await screen.findAllByRole("combobox", { name: "Bob" })).length
+    ).toBeGreaterThan(0)
+    // …without remounting the select: no new fetch of the dropdown page
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(fetchData).toHaveBeenCalledTimes(mountFetchCount)
+  })
+
+  it("remounts and refetches when the collectionId changes", async () => {
+    const fetchData = makeFetchData()
+
+    const { rerender } = render(
+      <Breadcrumbs breadcrumbs={[makeItem(fetchData)]} />
+    )
+    await waitFor(() => expect(fetchData).toHaveBeenCalled())
+    const mountFetchCount = fetchData.mock.calls.length
+
+    rerender(
+      <Breadcrumbs
+        breadcrumbs={[makeItem(fetchData, { collectionId: "test/teams/v1" })]}
+      />
+    )
+
+    await waitFor(() =>
+      expect(fetchData.mock.calls.length).toBeGreaterThan(mountFetchCount)
+    )
+  })
+
   it("navigates through the LinkProvider when an option is picked", async () => {
     const fetchData = makeFetchData()
     const navigatedTo = vi.fn()

@@ -23,8 +23,12 @@ import { buildCollectionBoundSource } from "./buildCollectionBoundSource"
  *
  * 1. The persisted collection state is read exactly once (state initializer).
  * 2. `item.source` is captured on mount; later identity changes are ignored.
- *    `Breadcrumbs` keys items by `id`, so giving the item a new `id`
- *    remounts and re-captures — the documented way to swap sources.
+ *    `Breadcrumbs` keys collection-select items by `collectionId`, so
+ *    pointing the item at a different collection remounts and re-captures —
+ *    the documented way to swap sources. Changing only the item `id`/`value`
+ *    (walking items of the same collection, e.g. detail-page prev/next) does
+ *    NOT remount: the trigger updates through props, the seeded source and
+ *    its fetched dropdown page are kept.
  * 3. The seeded definition (and thus its dataAdapter) is built once, so the
  *    reference handed to F0Select never changes.
  * 4. `mapOptions`/`getItemHref`/`onSelect` are wrapped in stable callbacks
