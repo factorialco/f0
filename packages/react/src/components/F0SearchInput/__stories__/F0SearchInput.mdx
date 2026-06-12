@@ -1,0 +1,282 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0SearchInput.stories"
+
+<Meta of={Stories} />
+
+# F0SearchInput
+
+`F0SearchInput` is the writable search field — a single-line text input pre-configured with a search icon, `role="searchbox"`, optional debouncing, and an optional minimum-length threshold before emitting changes.
+
+It shares the chrome conventions (sizes, focus ring, disabled and loading states) of every F0 writable input — see [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) for the chrome reference.
+
+---
+
+## Overview
+
+### Anatomy
+
+<Canvas of={Stories.Default} />
+
+- **Search icon**: `Search` icon rendered on the left. Not configurable — every search input shares the same affordance.
+- **Input area**: native `<input type="search">` with `role="searchbox"`.
+- **Placeholder**: rendered inside the input. `F0SearchInput` does not expose a `label` prop — `placeholder` doubles as the accessible name (falls back to `"Search"` when omitted).
+- **Clear button**: optional (`clearable`), rendered only while the value is non-empty.
+
+`F0SearchInput` defaults to `size="sm"` — the only F0 input that does so, because search fields most often live in compact toolbars. Override with `size="md"` for primary search surfaces (command palette, top-of-page search).
+
+<Controls of={Stories.Default} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- The user types a query that filters or searches a visible list, table or dataset.
+- Command palettes and global search surfaces.
+- Sidebar or toolbar filters where the input must stay compact.
+
+#### When NOT to use
+
+- The user enters free-form text that is not a search query. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
+- You need labels, status messages or hint text. `F0SearchInput` deliberately exposes none of those — search fields are self-explanatory and errors are surfaced by the result list, not the input.
+
+---
+
+## Behavior
+
+What `F0SearchInput` guarantees when used as a controlled input.
+
+A11y wiring: `type="search"`, `role="searchbox"`, the visible label is hidden and `placeholder` is used as the accessible name. The clear button (when `clearable`) carries `aria-label="Clear"`.
+
+### Threshold
+
+`threshold` is the minimum number of characters required before `onChange` fires. Clearing the field always fires `onChange("")` regardless of the threshold, so consumers can reset their result list.
+
+- `threshold={3}` with the user typing `"ab"` → `onChange` is not called.
+- `threshold={3}` with the user typing `"abc"` → `onChange("abc")` fires.
+- `threshold={3}` with the user clearing a non-empty value → `onChange("")` fires.
+
+<Canvas of={Stories.WithThreshold} />
+
+### Debounce
+
+`debounceTime` delays `onChange` by N milliseconds after the last keystroke, so consumers can avoid one request per character. The emitted value is always the **latest** keystroke at flush time, not the keystroke that started the timer.
+
+- `debounceTime={500}` with the user typing `"first"` then (after 200ms) `"second"` → `onChange("second")` fires once, ~500ms after `"second"`.
+
+<Canvas of={Stories.WithDebounce} />
+
+`threshold` and `debounceTime` compose: only keystrokes that meet the threshold start the debounce timer.
+
+### Clearable
+
+When `clearable` is `true` and the value is non-empty, a clear button is rendered. Clicking it fires `onChange("")` and refocuses the input. The clear button is hidden while `disabled`.
+
+<Canvas of={Stories.Clearable} />
+
+---
+
+## Props
+
+### General
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>size</code>
+        </td>
+        <td>
+          <code>"sm" | "md"</code>
+        </td>
+        <td>
+          Defaults to <code>"sm"</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>placeholder</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>
+          Visible placeholder. Also used as the accessible name; falls back to{" "}
+          <code>"Search"</code> when omitted.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>name</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>Form field name.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Value
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>Current query.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onChange</code>
+        </td>
+        <td>
+          <code>(value: string) =&gt; void</code>
+        </td>
+        <td>
+          Fires when the value meets <code>threshold</code> and, if{" "}
+          <code>debounceTime</code> is set, after the debounce flushes. Always
+          fires with <code>""</code> when the field is cleared.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>onFocus</code>
+        </td>
+        <td>
+          <code>(event) =&gt; void</code>
+        </td>
+        <td>Standard React focus handler.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onBlur</code>
+        </td>
+        <td>
+          <code>(event) =&gt; void</code>
+        </td>
+        <td>Standard React blur handler.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Search behavior
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>threshold</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          Minimum value length before <code>onChange</code> fires. Clearing
+          always fires regardless. Defaults to <code>0</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>debounceTime</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          Milliseconds to wait after the last keystroke before firing{" "}
+          <code>onChange</code>. Defaults to <code>0</code> (no debounce).
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### State
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>Blocks editing and removes the input from the tab order.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>loading</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>Replaces the clear/search affordance with a spinner.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>clearable</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          Renders a clear button while the value is non-empty. Defaults to{" "}
+          <code>false</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>autoFocus</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>Focuses the input on mount.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>

@@ -61,6 +61,7 @@
  */
 import { existsSync } from "node:fs"
 import path from "node:path"
+import { fileURLToPath } from "node:url"
 
 import consola from "consola"
 import ts from "typescript"
@@ -174,9 +175,40 @@ const COMPILER_OPTIONS: ts.CompilerOptions = {
 let sharedHost: ts.CompilerHost | undefined
 const sourceFileCache = new Map<string, ts.SourceFile | undefined>()
 
+// Bare specifiers (`react`, `@radix-ui/*`, …) must resolve against THIS
+// package's `node_modules`, not the directory the rolled `.d.ts` happens to
+// live in. CI compares snapshots from `_api/base` and `_api/head` — sibling
+// dirs with no `node_modules` — so without anchoring, `import { X } from
+// "react"` resolves to nothing, `ForwardRefExoticComponent` degrades to `any`,
+// and forwardRef components lose their call signature (classified `opaque`
+// instead of `callable`), falsely flagging a function → forwardRef migration as
+// a "callable → opaque" shape change. Anchor bare-import resolution at the
+// package root so external types resolve regardless of where the entry sits.
+const PACKAGE_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+)
+const MODULE_RESOLUTION_ANCHOR = path.join(PACKAGE_ROOT, "__api_anchor__.d.ts")
+
 function getCompilerHost(): ts.CompilerHost {
   if (sharedHost) return sharedHost
   const host = ts.createCompilerHost(COMPILER_OPTIONS)
+  // Relative imports resolve from the importing file (api-extractor's dangling
+  // `./types` rollup noise stays unresolved, as before); bare imports resolve
+  // from the package root so React/DOM types are found.
+  host.resolveModuleNameLiterals = (
+    moduleLiterals,
+    containingFile,
+    _redirectedReference,
+    options
+  ) =>
+    moduleLiterals.map((literal) => {
+      const name = literal.text
+      const importer = name.startsWith(".")
+        ? containingFile
+        : MODULE_RESOLUTION_ANCHOR
+      return ts.resolveModuleName(name, importer, options, host)
+    })
   const original = host.getSourceFile.bind(host)
   host.getSourceFile = (
     fileName,

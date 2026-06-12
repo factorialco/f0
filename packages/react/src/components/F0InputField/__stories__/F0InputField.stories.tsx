@@ -9,19 +9,6 @@ import { F0InputField, INPUTFIELD_SIZES } from "../"
 const meta = {
   title: "Primitives/F0InputField",
   component: F0InputField,
-  parameters: {
-    docs: {
-      description: {
-        component: [
-          "`F0InputField` is the shared **primitive** that every writable F0 input is composed on top of. It provides the visual chrome (label, status, icon, append tag, clear button, hint, error, loading) and the keyboard/a11y behaviour that the design system guarantees across every input",
-          "**Audience.** This page is for design-system contributors building a new type of input (for example `F0PercentageInput`, `F0CurrencyInput`, `F0PhoneInput`). In product code, always reach for the dedicated `F0*Input` component documented under the `Inputs/` group",
-          "**Contract.** Any new writable input added to the design system must be composed on top of `F0InputField` — never reimplement the chrome from scratch. This is how we keep visual and behavioural consistency across the whole input family",
-        ]
-          .map((text) => `<p>${text}.</p>`)
-          .join(""),
-      },
-    },
-  },
   argTypes: {
     label: {
       description:
@@ -105,7 +92,7 @@ const meta = {
       control: "text",
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["stable", "!autodocs"],
 } satisfies Meta<typeof F0InputField>
 
 export default meta
@@ -127,9 +114,8 @@ export const WithATextarea: Story = {
     value: "",
     placeholder: "This is the placeholder",
     onChange: () => {},
-    canGrow: true,
-    children: <textarea className="w-full" />,
-    icon: icons.Ai,
+    children: <textarea className="w-full resize-none" rows={3} />,
+    icon: icons.Pencil,
     clearable: true,
     maxLength: 100,
   },
@@ -255,6 +241,16 @@ export const HintMessage: Story = {
     icon: Search,
     clearable: true,
     hint: "This is the hint message",
+  },
+}
+
+export const StatusPrecedence: Story = {
+  args: {
+    ...Default.args,
+    icon: Search,
+    clearable: true,
+    hint: "This hint is hidden by the error below",
+    status: { type: "error", message: "Error wins over hint" },
   },
 }
 

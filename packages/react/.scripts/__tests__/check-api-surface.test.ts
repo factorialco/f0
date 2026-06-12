@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import {
   analyze,
   buildCommentMarkdown,
+  snapshotEntry,
   type AnalysisResult,
   type EntryDiff,
 } from "../check-api-surface"
@@ -223,6 +224,39 @@ describe("check-api-surface — does NOT flag non-breaking changes", () => {
       `
     )
     expect(diff.breaking).toHaveLength(0)
+  })
+})
+
+describe("check-api-surface — external type resolution", () => {
+  // Regression: the rolled `.d.ts` is analyzed from a temp dir with no adjacent
+  // `node_modules` (CI downloads the snapshots into sibling `_api/base` and
+  // `_api/head` dirs). Bare imports like `react` must still resolve against the
+  // package's own `node_modules`; otherwise `ForwardRefExoticComponent` degrades
+  // to `any`, loses its call signature, and a forwardRef component is misread as
+  // an `opaque` type — falsely flagging a function → forwardRef migration as a
+  // "callable → opaque" shape change.
+  it("resolves React types for a forwardRef component (callable, real props)", () => {
+    const dir = dirWith(
+      `
+      import { ForwardRefExoticComponent, RefAttributes } from "react";
+      export declare type WidgetProps = { id: string; size?: "s" | "m" };
+      export declare const Widget: ForwardRefExoticComponent<Omit<WidgetProps, "ref"> & RefAttributes<HTMLDivElement>>;
+      `
+    )
+    const widget = snapshotEntry(dir, "f0")!.get("Widget")!
+    expect(widget.item.k).toBe("callable")
+    // The props are resolved structurally, not collapsed to `any`.
+    expect(widget.display).toContain("WidgetProps")
+    expect(widget.display).not.toContain("<any>")
+  })
+
+  it("does not flag an unchanged forwardRef component", () => {
+    const surface = `
+      import { ForwardRefExoticComponent, RefAttributes } from "react";
+      export declare type WidgetProps = { id: string; size?: "s" | "m" };
+      export declare const Widget: ForwardRefExoticComponent<Omit<WidgetProps, "ref"> & RefAttributes<HTMLDivElement>>;
+    `
+    expect(f0(surface, surface).breaking).toHaveLength(0)
   })
 })
 
