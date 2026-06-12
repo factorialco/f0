@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify"
-import { forwardRef, useMemo } from "react"
+import { forwardRef, type HTMLAttributes, useMemo } from "react"
 import rehypeStringify from "rehype-stringify"
 import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
@@ -7,9 +7,24 @@ import remarkRehype from "remark-rehype"
 import { unified } from "unified"
 
 import { cn } from "@/lib/utils"
+import { experimentalComponent } from "@/lib/experimental"
 
 import "../index.css"
-import type { F0RichTextDisplayHandle, F0RichTextDisplayProps } from "./types"
+
+// Declared next to the component (not in a sibling types.ts) so api-extractor
+// rolls them into the bundled d.ts instead of emitting a broken './types' import.
+export interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+  content: string
+  className?: string
+  format?: "html" | "markdown"
+}
+
+export type F0RichTextDisplayHandle = HTMLDivElement
+
+/** @deprecated Use F0RichTextDisplayProps */
+export type RichTextDisplayProps = F0RichTextDisplayProps
+/** @deprecated Use F0RichTextDisplayHandle */
+export type RichTextDisplayHandle = F0RichTextDisplayHandle
 
 const PROCESSOR = unified()
   .use(remarkParse)
@@ -17,7 +32,7 @@ const PROCESSOR = unified()
   .use(remarkRehype)
   .use(rehypeStringify)
 
-const F0RichTextDisplay = forwardRef<
+const F0RichTextDisplayBase = forwardRef<
   F0RichTextDisplayHandle,
   F0RichTextDisplayProps
 >(function F0RichTextDisplay(
@@ -55,4 +70,15 @@ const F0RichTextDisplay = forwardRef<
   )
 })
 
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+const F0RichTextDisplay = experimentalComponent(
+  "F0RichTextDisplay",
+  F0RichTextDisplayBase
+)
+
 export { F0RichTextDisplay }
+
+/** @deprecated Use F0RichTextDisplay */
+export const RichTextDisplay = F0RichTextDisplay

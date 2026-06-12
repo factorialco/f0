@@ -9,10 +9,39 @@ import {
 } from "@/experimental/Navigation/Dropdown/internal"
 import { CrossedCircle, Ellipsis } from "@/icons/app"
 import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn } from "@/lib/utils"
 
-import type { F0FileItemProps, F0FileItemSize } from "./types"
+import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
+import type { IconType } from "@/components/F0Icon"
+import type { HTMLAttributes } from "react"
+
+// Declared next to the component (not in a sibling types.ts) so api-extractor
+// rolls them into the bundled d.ts instead of emitting a broken relative import.
+export type F0FileAction = {
+  icon?: IconType
+  label: string
+  onClick: () => void
+  critical?: boolean
+}
+
+export const f0FileItemSizes = ["md", "lg"] as const
+export type F0FileItemSize = (typeof f0FileItemSizes)[number]
+
+export interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+  file: File | FileDef
+  actions?: F0FileAction[]
+  disabled?: boolean
+  size?: F0FileItemSize
+}
+
+/** @deprecated Use F0FileAction */
+export type FileAction = F0FileAction
+/** @deprecated Use F0FileItemProps */
+export type FileItemProps = F0FileItemProps
+/** @deprecated Use F0FileItemSize */
+export type FileItemSize = F0FileItemSize
 
 const fileItemVariants = cva({
   base: "flex w-fit flex-row items-center overflow-hidden bg-f1-background-tertiary rounded-[10px]",
@@ -91,6 +120,15 @@ const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
 )
 _F0FileItem.displayName = "F0FileItem"
 
-const F0FileItem = withDataTestId(_F0FileItem)
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+const F0FileItem = experimentalComponent(
+  "F0FileItem",
+  withDataTestId(_F0FileItem)
+)
 
 export { F0FileItem }
+
+/** @deprecated Use F0FileItem */
+export const FileItem = F0FileItem

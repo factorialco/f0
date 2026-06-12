@@ -1,6 +1,11 @@
 import DragHandle from "@tiptap/extension-drag-handle-react"
 import { Node } from "@tiptap/pm/model"
-import { Editor, EditorContent, useEditor } from "@tiptap/react"
+import {
+  Editor,
+  EditorContent,
+  type JSONContent,
+  useEditor,
+} from "@tiptap/react"
 import { AnimatePresence, motion } from "motion/react"
 import {
   forwardRef,
@@ -19,6 +24,7 @@ import { F0Icon } from "@/components/F0Icon"
 import { EditorBubbleMenu } from "@/components/RichText/internal"
 import { useEnhance } from "@/components/RichText/internal/Enhance"
 import { Handle, Plus } from "@/icons/app"
+import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { ScrollArea } from "@/ui/scrollarea"
@@ -26,6 +32,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
 import {
+  type ImageUploadConfig,
   ImageUploadErrorType,
   insertImageFromFile,
 } from "../internal/Extensions/Image"
@@ -39,11 +46,68 @@ import { createNotesTextEditorExtensions } from "./extensions"
 import { Header } from "./components/Header"
 import { ImageUploadError } from "./components/ImageUploadError"
 import { Title } from "./components/Title"
+import type { F0AlertProps } from "@/components/F0Alert"
+import type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
+import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
 import type {
-  F0NotesTextEditorHandle,
-  F0NotesTextEditorProps,
-  F0NotesTextEditorSkeletonProps,
+  PrimaryActionButton,
+  PrimaryDropdownAction,
+} from "@/experimental/Information/utils"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+import type { enhanceConfig } from "../internal/Enhance/types"
+import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
+import type { Message, User } from "../internal/Extensions/Transcript"
+import type { HeaderStatusProps } from "./components/Header"
+import type {
+  NotesTextEditorPageDocumentPatch,
+  NotesTextEditorSnapshot,
 } from "./types"
+
+// Declared next to the component (not in the sibling types.ts) so api-extractor
+// rolls them into the bundled d.ts instead of emitting a broken relative import.
+export interface F0NotesTextEditorProps {
+  onChange: (value: { json: JSONContent | null; html: string | null }) => void
+  placeholder: string
+  initialEditorState?: { content?: JSONContent | string; title?: string }
+  readonly?: boolean
+  aiBlockConfig?: AIBlockConfig
+  imageUploadConfig?: ImageUploadConfig
+  enhanceConfig?: enhanceConfig
+  onTitleChange?: (title: string) => void
+  titlePlaceholder?: string
+  primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>
+  secondaryActions?: HeaderSecondaryAction[]
+  otherActions?: DropdownItem[]
+  metadata?: MetadataItem[]
+  status?: HeaderStatusProps
+  alert?: F0AlertProps
+}
+
+export interface F0NotesTextEditorSkeletonProps {
+  withHeader?: boolean
+  withTitle?: boolean
+  withToolbar?: boolean
+}
+
+export type F0NotesTextEditorHandle = {
+  clear: () => void
+  focus: () => void
+  setContent: (content: string) => void
+  applyPageDocumentPatch: (
+    patch: NotesTextEditorPageDocumentPatch
+  ) => NotesTextEditorSnapshot
+  insertAIBlock: () => void
+  insertTranscript: (title: string, users: User[], messages: Message[]) => void
+  pushContent: (content: string) => void
+  insertImage: (file: File) => void
+}
+
+/** @deprecated Use F0NotesTextEditorProps */
+export type NotesTextEditorProps = F0NotesTextEditorProps
+/** @deprecated Use F0NotesTextEditorHandle */
+export type NotesTextEditorHandle = F0NotesTextEditorHandle
+/** @deprecated Use F0NotesTextEditorSkeletonProps */
+export type NotesTextEditorSkeletonProps = F0NotesTextEditorSkeletonProps
 
 const F0NotesTextEditorComponent = forwardRef<
   F0NotesTextEditorHandle,
@@ -389,6 +453,7 @@ const F0NotesTextEditorComponent = forwardRef<
 export const F0NotesTextEditorSkeleton = ({
   withHeader = false,
   withTitle = true,
+  withToolbar = true,
 }: F0NotesTextEditorSkeletonProps) => {
   return (
     <div
@@ -405,6 +470,31 @@ export const F0NotesTextEditorSkeleton = ({
           <div className="flex items-center gap-2">
             <Skeleton className="h-8 w-16 rounded-md" />
             <Skeleton className="h-8 w-12 rounded-md" />
+          </div>
+        </div>
+      )}
+
+      {withToolbar && (
+        <div className="absolute bottom-8 left-1/2 z-50 flex -translate-x-1/2 flex-row items-center gap-[9px] rounded-lg bg-f1-background p-2 shadow-md">
+          <Skeleton className="h-8 w-8 rounded" />
+          <div className="flex items-center gap-0.5">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+          </div>
+          <div className="flex items-center gap-0.5">
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
+            <Skeleton className="h-8 w-8 rounded" />
           </div>
         </div>
       )}
@@ -431,7 +521,15 @@ export const F0NotesTextEditorSkeleton = ({
   )
 }
 
-export const F0NotesTextEditor = withSkeleton(
-  F0NotesTextEditorComponent,
-  F0NotesTextEditorSkeleton
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export const F0NotesTextEditor = experimentalComponent(
+  "F0NotesTextEditor",
+  withSkeleton(F0NotesTextEditorComponent, F0NotesTextEditorSkeleton)
 )
+
+/** @deprecated Use F0NotesTextEditor */
+export const NotesTextEditor = F0NotesTextEditor
+/** @deprecated Use F0NotesTextEditorSkeleton */
+export const NotesTextEditorSkeleton = F0NotesTextEditorSkeleton
