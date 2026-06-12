@@ -1,9 +1,10 @@
 import { forwardRef } from "react"
 
+import { F0Link } from "@/components/F0Link"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { withDataTestId } from "@/lib/data-testid"
 import { withSkeleton } from "@/lib/skeleton"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 import { Card } from "@/ui/Card"
 import { Skeleton } from "@/ui/skeleton"
 import { Text } from "@/ui/Text"
@@ -108,6 +109,28 @@ export interface F0CardRowProps {
    * Use `visible` + `onDismiss` for controlled dismiss behaviour.
    */
   alert?: CardAlertProps
+
+  /**
+   * Opt-in: makes the whole row a link to this href. The row only becomes a
+   * click target (pointer cursor + hover affordance + overlay link) when `link`
+   * or `onClick` is set — otherwise it's a static row whose only interactive
+   * parts are its actions.
+   */
+  link?: string
+
+  /**
+   * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+   * into an explicit click target (pointer cursor + hover affordance). Use it
+   * for cards whose entire surface is the action (e.g. entry-point cards with no
+   * CTA button); leave it unset for rows that act only through their buttons.
+   */
+  onClick?: () => void
+
+  /**
+   * Disables the full-row overlay link (used with `link`) so a parent can manage
+   * drag-and-drop while still allowing click navigation via `onClick`.
+   */
+  disableOverlayLink?: boolean
 }
 
 /**
@@ -133,22 +156,29 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       compact = false,
       fullHeight = false,
       alert,
+      link,
+      onClick,
+      disableOverlayLink = false,
       stackAt = "never",
     },
     ref
   ) {
     const hasAlert = !!alert && alert.visible !== false
+    // The row is a click target only when it explicitly opts in via `link` or
+    // `onClick`; otherwise it's static (only its actions are interactive). This
+    // keeps the hover affordance + pointer cursor tied to an actual click action.
+    const clickable = !!link || !!onClick
 
     const body = (
       <Card
         ref={hasAlert ? undefined : ref}
         className={cn(
-          // Hover affordance without making the card a click target: the border
-          // and shadow react to hover, but there's no pointer cursor (the row
-          // isn't clickable — only its actions are).
-          "group @container bg-f1-background shadow-none transition-all hover:border-f1-border-hover hover:shadow-md",
+          "group relative @container bg-f1-background shadow-none transition-all",
           compact && "p-3",
-          fullHeight && "h-full"
+          fullHeight && "h-full",
+          // Pointer + hover/focus affordance only when the whole row is clickable.
+          clickable &&
+            "cursor-pointer focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md"
         )}
         style={
           hasAlert
@@ -158,8 +188,20 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
               }
             : undefined
         }
+        onClick={onClick}
         data-testid="card"
       >
+        {link && !disableOverlayLink && (
+          <F0Link
+            href={link}
+            variant="unstyled"
+            className={cn("z-1 absolute inset-0 block rounded-xl", focusRing())}
+            aria-label={title}
+          >
+            &nbsp;
+          </F0Link>
+        )}
+
         <div className={cardRowClassName[stackAt]}>
           <div className="flex min-w-0 flex-row items-center gap-3">
             {avatar && <CardAvatar avatar={avatar} size="lg" />}

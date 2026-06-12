@@ -168,8 +168,9 @@ export function CardRowActions({
 }: CardRowActionsProps) {
   const size = compact ? "sm" : "md"
 
-  // Resolved state: a status tag replaces the actions. It's informational.
-  // The outer flex drops it to its own line when stacked, with the footer.
+  // Resolved state: a status tag replaces the actions. It's informational, so
+  // no click-stop / z-index — a row-level overlay link stays clickable through
+  // it. The outer flex drops it to its own line when stacked, with the footer.
   if (status) {
     return (
       <div
@@ -191,13 +192,17 @@ export function CardRowActions({
   }
 
   const wrapperClassName = cn(
+    "relative z-[1]",
     actionsWidthClassName[stackAt],
     stackedChrome[stackAt],
     stackAt !== "never" && compact && "mt-3 pt-3"
   )
 
   const wrap = (group: React.ReactNode) => (
-    <div className={wrapperClassName}>{group}</div>
+    // Keep action clicks from bubbling to the row's onClick / overlay link.
+    <div className={wrapperClassName} onClick={(e) => e.stopPropagation()}>
+      {group}
+    </div>
   )
 
   // Confirm/reject variant: reject (✗, outline) then confirm (✓, solid primary).
@@ -239,7 +244,13 @@ export function CardRowActions({
 
     const inline = (
       // Icon-only, inline at the trailing edge.
-      <div className={cn("min-w-0 flex-1", inlineClusterVisibility[stackAt])}>
+      <div
+        className={cn(
+          "relative z-[1] min-w-0 flex-1",
+          inlineClusterVisibility[stackAt]
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
         {variant(true)}
       </div>
     )
@@ -257,10 +268,12 @@ export function CardRowActions({
             flex column's stretch so the `-mx-4` footer bleeds symmetrically. */}
         <div
           className={cn(
+            "relative z-[1]",
             stackedClusterVisibility[stackAt],
             stackedChrome[stackAt],
             compact && "mt-3 pt-3"
           )}
+          onClick={(e) => e.stopPropagation()}
         >
           {variant(false)}
         </div>
