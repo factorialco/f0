@@ -96,7 +96,7 @@ const meta = {
     ...getInputFieldArgs(inputFieldInheritedProps),
     ...dataTestIdArgs,
   },
-  tags: ["autodocs", "stable"],
+  tags: ["autodocs"],
   decorators: [
     (Story, { args, parameters }) => {
       const width = parameters?.width || "300px"
