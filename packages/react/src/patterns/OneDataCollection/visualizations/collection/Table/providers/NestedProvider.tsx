@@ -3,6 +3,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useMemo,
   useState,
 } from "react"
 
@@ -22,11 +23,15 @@ const NestedDataContext = createContext<
   NestedDataContextValue<RecordType> | undefined
 >(undefined)
 
-export const NestedDataProvider = <R extends RecordType>({
-  children,
-}: {
-  children: ReactNode
-}) => {
+/**
+ * Creates the nested-data state (fetched children + expansion state).
+ * Exposed so the table can own the state and read it (e.g. to include
+ * expanded children in select-all), while still providing it through
+ * NestedDataProvider via the `value` prop.
+ */
+export const useNestedDataState = <
+  R extends RecordType,
+>(): NestedDataContextValue<R> => {
   const [fetchedData, setFetchedData] = useState<
     Record<string, ChildrenResponse<R>>
   >({})
@@ -59,17 +64,37 @@ export const NestedDataProvider = <R extends RecordType>({
     })
   }, [])
 
+  return useMemo(
+    () => ({
+      fetchedData,
+      updateFetchedData,
+      clearFetchedData,
+      expandedRowIds,
+      setRowExpanded,
+    }),
+    [
+      fetchedData,
+      updateFetchedData,
+      clearFetchedData,
+      expandedRowIds,
+      setRowExpanded,
+    ]
+  )
+}
+
+export const NestedDataProvider = <R extends RecordType>({
+  children,
+  value,
+}: {
+  children: ReactNode
+  /** Externally-owned state (from useNestedDataState). When omitted, the provider owns its own. */
+  value?: NestedDataContextValue<R>
+}) => {
+  const ownValue = useNestedDataState<R>()
+
   return (
     <NestedDataContext.Provider
-      value={
-        {
-          fetchedData,
-          updateFetchedData,
-          clearFetchedData,
-          expandedRowIds,
-          setRowExpanded,
-        } as NestedDataContextValue<RecordType>
-      }
+      value={(value ?? ownValue) as NestedDataContextValue<RecordType>}
     >
       {children}
     </NestedDataContext.Provider>

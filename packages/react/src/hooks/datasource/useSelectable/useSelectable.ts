@@ -20,6 +20,10 @@ import {
 } from "./typings"
 import { isGroupRecord, isRecordItem, parseSelectedState } from "./utils"
 
+// Stable default so callbacks/memos depending on `extraRecords` don't
+// recreate on every render when the prop is omitted.
+const NO_EXTRA_RECORDS: never[] = []
+
 /**
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
@@ -41,6 +45,7 @@ export function useSelectable<
   allPagesSelection,
   resetOnPageChange = true,
   preserveSelectionOnDatasetChange = false,
+  extraRecords = NO_EXTRA_RECORDS,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -91,11 +96,17 @@ export function useSelectable<
 
   const totalKnownItemsCount = useMemo(() => {
     // In page-only selection mode, only count items in current page
+    // (including visible extra records such as expanded nested children)
     if (isPageOnlySelection) {
-      return data.records?.length || 0
+      return (data.records?.length || 0) + extraRecords.length
     }
     return paginationInfo ? paginationInfo.total : data.records?.length
-  }, [paginationInfo, data.records?.length, isPageOnlySelection])
+  }, [
+    paginationInfo,
+    data.records?.length,
+    isPageOnlySelection,
+    extraRecords.length,
+  ])
 
   const currentPageIdentifier = useMemo(() => {
     if (!paginationInfo) return null
@@ -226,9 +237,10 @@ export function useSelectable<
     const items = localSelectedState.items || new Map()
 
     // In page-only selection mode, only include items from current page
+    // (including visible extra records such as expanded nested children)
     const currentPageItemIds = isPageOnlySelection
       ? new Set(
-          data.records
+          [...data.records, ...extraRecords]
             .map((record) => getSelectable?.(record))
             .filter((id): id is SelectionId => id !== undefined)
         )
@@ -261,6 +273,7 @@ export function useSelectable<
     localSelectedState.items,
     isPageOnlySelection,
     data.records,
+    extraRecords,
     getSelectable,
   ])
 
@@ -613,12 +626,15 @@ export function useSelectable<
           handleSelectGroupChange(allGroupIds, checked)
         }
       } else {
-        const allItemIds = data.records
+        // Include visible extra records (e.g. expanded nested children) so
+        // "select all" covers every selectable row currently on screen.
+        const allRecords = [...data.records, ...extraRecords]
+        const allItemIds = allRecords
           .map((record) => getSelectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)
 
         if (allItemIds.length > 0) {
-          handleSelectItemChangeInternal(allItemIds, checked)
+          handleSelectItemChangeInternal(allItemIds, checked, false, allRecords)
         }
       }
 
@@ -633,6 +649,7 @@ export function useSelectable<
       allSelectedCheck,
       isGrouped,
       data,
+      extraRecords,
       getSelectable,
       handleSelectGroupChange,
       handleSelectItemChangeInternal,
@@ -662,12 +679,15 @@ export function useSelectable<
           handleSelectGroupChange(allGroupIds, checked)
         }
       } else {
-        const allItemIds = data.records
+        // Include visible extra records (e.g. expanded nested children) so
+        // "select all items" also covers them.
+        const allRecords = [...data.records, ...extraRecords]
+        const allItemIds = allRecords
           .map((record) => getSelectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)
 
         if (allItemIds.length > 0) {
-          handleSelectItemChangeInternal(allItemIds, checked)
+          handleSelectItemChangeInternal(allItemIds, checked, false, allRecords)
         }
 
         setLocalSelectedState((current) => {
@@ -696,6 +716,7 @@ export function useSelectable<
       totalKnownItemsCount,
       isGrouped,
       data,
+      extraRecords,
       getSelectable,
       handleSelectGroupChange,
       handleSelectItemChangeInternal,

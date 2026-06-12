@@ -38,6 +38,7 @@ type Person = {
   name: string
   email: string
   displayName: string
+  hasChildren?: boolean
 }
 
 const testData: Person[] = [
@@ -2127,6 +2128,204 @@ describe("TableCollection", () => {
       await user.click(engineeringHeading)
 
       expect(onSelectItems.mock.calls.length).toBe(callCountAfterRender)
+    })
+  })
+
+  describe("selectable visibility and nested children selection", () => {
+    const parentPerson: Person = {
+      id: 1,
+      name: "Parent User",
+      email: "parent@example.com",
+      displayName: "Parent User",
+      hasChildren: true,
+    }
+
+    const childPeople: Person[] = [
+      {
+        id: 10,
+        name: "Child A",
+        email: "child.a@example.com",
+        displayName: "Child A",
+      },
+      {
+        id: 11,
+        name: "Child B",
+        email: "child.b@example.com",
+        displayName: "Child B",
+      },
+    ]
+
+    const createNestedSource = (
+      selectable: (item: Person) => number | undefined
+    ): DataCollectionSource<
+      Person,
+      TestFilters,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      TestNavigationFilters,
+      GroupingDefinition<Person>
+    > => ({
+      ...createTestSource([parentPerson]),
+      selectable,
+      itemsWithChildren: (item: Person) => !!item.hasChildren,
+      fetchChildren: () => ({
+        records: childPeople,
+        type: "basic" as const,
+      }),
+    })
+
+    it("hides the header select-all checkbox when no visible row is selectable", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={{ ...createTestSource(), selectable: () => undefined }}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      // selectable is defined but returns undefined for every row, so neither
+      // row checkboxes nor the header select-all checkbox should render
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument()
+    })
+
+    it("shows the header checkbox once async-loaded children are selectable and selects them all", async () => {
+      const user = userEvent.setup()
+      const onSelectItems = vi.fn()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource((item) =>
+            item.hasChildren ? undefined : item.id
+          )}
+          onSelectItems={onSelectItems}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent User")).toBeInTheDocument()
+      })
+
+      // Parent is not selectable and children are not loaded yet, so the
+      // header checkbox must be hidden
+      expect(screen.queryByRole("checkbox")).not.toBeInTheDocument()
+
+      // Expand the parent row to load its children asynchronously
+      const parentRow = screen.getByText("Parent User").closest("tr")!
+      const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
+      await user.click(chevron)
+
+      await waitFor(() => {
+        expect(screen.getByText("Child A")).toBeInTheDocument()
+      })
+
+      // Header checkbox appears now that selectable children are visible
+      const checkboxes = screen.getAllByRole("checkbox")
+      expect(checkboxes).toHaveLength(3) // header + 2 children
+
+      // Header select-all selects every visible selectable row (the children)
+      await user.click(checkboxes[0])
+
+      await waitFor(() => {
+        const headerCheckbox = screen.getAllByRole("checkbox")[0]
+        expect(headerCheckbox).toHaveAttribute("aria-checked", "true")
+      })
+
+      const childARow = screen.getByText("Child A").closest("tr")!
+      expect(within(childARow).getByRole("checkbox")).toHaveAttribute(
+        "aria-checked",
+        "true"
+      )
+      const childBRow = screen.getByText("Child B").closest("tr")!
+      expect(within(childBRow).getByRole("checkbox")).toHaveAttribute(
+        "aria-checked",
+        "true"
+      )
+
+      // The selection reported to the parent includes both children
+      expect(
+        onSelectItems.mock.calls.some(([selection]) =>
+          [10, 11].every((id) => selection.selectedIds.includes(id))
+        )
+      ).toBe(true)
+    })
+
+    it("deselects all visible children when the header checkbox is unchecked", async () => {
+      const user = userEvent.setup()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createNestedSource((item) =>
+            item.hasChildren ? undefined : item.id
+          )}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Parent User")).toBeInTheDocument()
+      })
+
+      const parentRow = screen.getByText("Parent User").closest("tr")!
+      const chevron = parentRow.querySelector("[class*='cursor-pointer']")!
+      await user.click(chevron)
+
+      await waitFor(() => {
+        expect(screen.getByText("Child A")).toBeInTheDocument()
+      })
+
+      // Select all, then deselect all via the header checkbox
+      await user.click(screen.getAllByRole("checkbox")[0])
+      await waitFor(() => {
+        expect(screen.getAllByRole("checkbox")[0]).toHaveAttribute(
+          "aria-checked",
+          "true"
+        )
+      })
+
+      await user.click(screen.getAllByRole("checkbox")[0])
+
+      await waitFor(() => {
+        screen.getAllByRole("checkbox").forEach((checkbox) => {
+          expect(checkbox).toHaveAttribute("aria-checked", "false")
+        })
+      })
     })
   })
 })

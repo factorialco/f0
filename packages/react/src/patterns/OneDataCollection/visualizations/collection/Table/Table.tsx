@@ -51,7 +51,10 @@ import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
-import { NestedDataProvider } from "./providers/NestedProvider"
+import {
+  NestedDataProvider,
+  useNestedDataState,
+} from "./providers/NestedProvider"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -223,6 +226,23 @@ export const TableCollection = <
   }
 
   /**
+   * Nested children state. Owned here (instead of inside NestedDataProvider)
+   * so async-loaded children of expanded rows can participate in selection.
+   */
+  const nestedData = useNestedDataState<R>()
+
+  // Children of expanded rows, loaded asynchronously via fetchChildren. They
+  // are visible on screen but not part of data.records, so they must be added
+  // explicitly to selection logic ("select all" + header checkbox state).
+  const visibleChildrenRecords = useMemo(
+    () =>
+      Object.entries(nestedData.fetchedData)
+        .filter(([rowId]) => nestedData.expandedRowIds[rowId])
+        .flatMap(([, response]) => response?.records ?? []),
+    [nestedData.fetchedData, nestedData.expandedRowIds]
+  )
+
+  /**
    * Item selection
    */
   const {
@@ -240,6 +260,7 @@ export const TableCollection = <
     onSelectItems,
     selectionMode: "multi",
     selectedState: source.defaultSelectedItems,
+    extraRecords: visibleChildrenRecords,
   })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
@@ -355,9 +376,19 @@ export const TableCollection = <
   // another page happen to equal the current page size.
   // Non-selectable rows (source.selectable returns undefined) are filtered out
   // so pages with mixed selectable/non-selectable rows still report correctly.
-  const currentPageSelectableIds = (data?.records ?? [])
+  // Visible children of expanded rows are included: they may be the only
+  // selectable rows when parents themselves are not selectable.
+  const currentPageSelectableIds = [
+    ...(data?.records ?? []),
+    ...visibleChildrenRecords,
+  ]
     .map((record) => source.selectable?.(record))
     .filter((id): id is SelectionId => id !== undefined)
+
+  // The header "select all" checkbox is only meaningful when at least one
+  // visible row is actually selectable. The column itself still renders (rows
+  // reserve the cell), but the checkbox is hidden.
+  const hasSelectableRows = currentPageSelectableIds.length > 0
 
   const allPageRowsSelected =
     currentPageSelectableIds.length > 0 &&
@@ -384,11 +415,9 @@ export const TableCollection = <
       ? i18n.status.selected.singular
       : i18n.status.selected.plural
 
-  const TableWrapper = tableWithChildren ? NestedDataProvider : Fragment
-
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <TableWrapper>
+      <NestedDataProvider value={nestedData}>
         <div
           className={cn(
             bordered &&
@@ -479,14 +508,16 @@ export const TableCollection = <
                     }
                   >
                     <div className="ml-3.5 flex w-full items-center justify-start">
-                      <F0Checkbox
-                        checked={isAllSelected}
-                        indeterminate={hasSelection && !isAllSelected}
-                        onCheckedChange={handleSelectAll}
-                        title={i18n.actions.selectAll}
-                        hideLabel
-                        disabled={data?.records.length === 0}
-                      />
+                      {hasSelectableRows && (
+                        <F0Checkbox
+                          checked={isAllSelected}
+                          indeterminate={hasSelection && !isAllSelected}
+                          onCheckedChange={handleSelectAll}
+                          title={i18n.actions.selectAll}
+                          hideLabel
+                          disabled={data?.records.length === 0}
+                        />
+                      )}
                     </div>
                   </TableHead>
                 )}
@@ -983,7 +1014,7 @@ export const TableCollection = <
           setPage={setPage}
           className="pb-4"
         />
-      </TableWrapper>
+      </NestedDataProvider>
     </div>
   )
 }
