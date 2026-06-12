@@ -233,6 +233,9 @@ export function CardRowActions({
           secondaryActions={reject ? [reject] : undefined}
           size={size}
           gap={GAP}
+          // The confirm/reject pair must always stay inline — the reject button
+          // must never shed into the "⋯" menu.
+          canOverflow={false}
         />
       )
     }
