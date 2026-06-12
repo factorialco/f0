@@ -58,6 +58,22 @@ describe("buildCollectionBoundSource", () => {
     expect(result.currentFilters).toEqual({ department: ["Engineering"] })
   })
 
+  it("seeds an explicitly persisted empty filters state (user cleared them)", () => {
+    const result = buildCollectionBoundSource(
+      { ...source, currentFilters: { department: ["Engineering"] } },
+      { filters: {} }
+    )
+    expect(result.currentFilters).toEqual({})
+  })
+
+  it("keeps the definition's currentFilters when every persisted key is unknown", () => {
+    const result = buildCollectionBoundSource(
+      { ...source, currentFilters: { department: ["Engineering"] } },
+      { filters: { legacyFilter: "stale" } }
+    )
+    expect(result.currentFilters).toEqual({ department: ["Engineering"] })
+  })
+
   it("keeps every persisted filter when the source declares none", () => {
     const result = buildCollectionBoundSource(
       { ...source, filters: undefined },
