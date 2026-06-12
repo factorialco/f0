@@ -56,3 +56,37 @@ export const resolveDataCollectionFilters = <
     storage.filters
   )
 }
+
+/**
+ * Write counterpart of `resolveDataCollectionFilters`: returns a new storage
+ * object with `filters` replaced, writing the SAME slot the resolver reads —
+ * when a per-visualization override exists for the persisted visualization,
+ * that slot is updated too, so a subsequent resolve sees the new filters
+ * instead of the stale override winning.
+ *
+ * Pure; the rest of the persisted state (sortings, search, settings, …) is
+ * preserved untouched.
+ */
+export const mergeDataCollectionFilters = <
+  CurrentFiltersState extends FiltersState<FiltersDefinition> =
+    FiltersState<FiltersDefinition>,
+>(
+  storage: DataCollectionStorage<CurrentFiltersState>,
+  filters: CurrentFiltersState
+): DataCollectionStorage<CurrentFiltersState> => {
+  const visualizationKey = String(storage.visualization ?? 0)
+  const hasVisualizationSlot =
+    storage.visualizationFilters?.[visualizationKey] !== undefined
+  return {
+    ...storage,
+    filters,
+    ...(hasVisualizationSlot
+      ? {
+          visualizationFilters: {
+            ...storage.visualizationFilters,
+            [visualizationKey]: filters,
+          },
+        }
+      : {}),
+  }
+}

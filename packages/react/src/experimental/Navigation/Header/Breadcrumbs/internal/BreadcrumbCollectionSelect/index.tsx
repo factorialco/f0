@@ -2,7 +2,12 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react"
 
 import { FiltersDefinition, FiltersState, RecordType } from "@/hooks/datasource"
 import { Link } from "@/lib/linkHandler"
-import { readDataCollectionStorage } from "@/lib/providers/datacollection/readDataCollectionStorage"
+import { useDataCollectionStorage } from "@/lib/providers/datacollection"
+import { notifyDataCollectionStorageChange } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
+import {
+  mergeDataCollectionFilters,
+  readDataCollectionStorage,
+} from "@/lib/providers/datacollection/readDataCollectionStorage"
 
 import { BreadcrumbCollectionSelectItemType } from "../../types"
 import { BreadcrumbSelect } from "../BreadcrumbSelect"
@@ -44,14 +49,40 @@ export function BreadcrumbCollectionSelect({
   const latestRef = useRef(item)
   latestRef.current = item
 
+  const storageHandler = useDataCollectionStorage()
+  const storageHandlerRef = useRef(storageHandler)
+  storageHandlerRef.current = storageHandler
+
   const stableMapOptions = useCallback(
     (record: RecordType) => latestRef.current.mapOptions(record),
     []
   )
 
+  // Editable filters (`showFilters`) write through to the collection's
+  // persisted state: the dropdown's filter picker edits "the list's filters",
+  // not a transient local copy. The write keeps every other persisted piece
+  // (sortings, search, settings, …) and updates the same slot
+  // `resolveDataCollectionFilters` reads, then notifies live collection-bound
+  // consumers (e.g. useDataCollectionItemNavigation re-seeds so prev/next +
+  // counter follow, and a later remount of this select re-seeds correctly).
   const stableOnFiltersChange = useCallback(
-    (filters: FiltersState<FiltersDefinition>) =>
-      latestRef.current.onFiltersChange?.(filters),
+    (filters: FiltersState<FiltersDefinition>) => {
+      const current = latestRef.current
+      current.onFiltersChange?.(filters)
+      if (!current.showFilters) return
+      const persist = async () => {
+        // NOTE: must await (not .then) — the default noop handler returns a
+        // plain object typed as a Promise.
+        const stored = await storageHandlerRef.current.get(current.collectionId)
+        await storageHandlerRef.current.set(
+          current.collectionId,
+          mergeDataCollectionFilters(stored ?? {}, filters)
+        )
+        notifyDataCollectionStorageChange(current.collectionId)
+      }
+      // Storage unavailable/unreadable → the dropdown still filters in-memory.
+      persist().catch(() => {})
+    },
     []
   )
 

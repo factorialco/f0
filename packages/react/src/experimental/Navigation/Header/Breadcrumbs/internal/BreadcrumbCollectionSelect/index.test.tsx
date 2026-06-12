@@ -9,6 +9,11 @@ import {
   RecordType,
 } from "@/hooks/datasource"
 import { LinkProvider } from "@/lib/linkHandler"
+import {
+  dataCollectionLocalStorageHandler,
+  DataCollectionStorageProvider,
+} from "@/lib/providers/datacollection"
+import { subscribeToDataCollectionStorageChanges } from "@/lib/providers/datacollection/dataCollectionStorageEvents"
 import { userEvent, zeroRender as render } from "@/testing/test-utils"
 
 import { Breadcrumbs } from "../../index"
@@ -29,6 +34,7 @@ global.ResizeObserver = class MockResizeObserver {
 // "pick" button that emits the selection a user click would produce.
 const driver = vi.hoisted(() => ({
   selection: null as { value: string; record?: unknown } | null,
+  filtersChange: null as Record<string, unknown> | null,
 }))
 
 vi.mock("../BreadcrumbSelect", async (importOriginal) => {
@@ -47,6 +53,18 @@ vi.mock("../BreadcrumbSelect", async (importOriginal) => {
               driver.selection!.record as Parameters<
                 NonNullable<typeof props.onChange>
               >[1]
+            )
+          }
+        />
+      )}
+      {driver.filtersChange && (
+        <button
+          aria-label="set-filters"
+          onClick={() =>
+            props.onFiltersChange?.(
+              driver.filtersChange as Parameters<
+                NonNullable<typeof props.onFiltersChange>
+              >[0]
             )
           }
         />
@@ -123,6 +141,7 @@ const makeItem = (
 afterEach(() => {
   localStorage.clear()
   driver.selection = null
+  driver.filtersChange = null
 })
 
 describe("BreadcrumbCollectionSelect", () => {
@@ -272,5 +291,123 @@ describe("BreadcrumbCollectionSelect", () => {
     await new Promise((resolve) => setTimeout(resolve, 20))
 
     expect(fetchData).toHaveBeenCalledTimes(1)
+  })
+
+  describe("editable filters write-through (showFilters)", () => {
+    const withStorageHandler = (children: React.ReactNode) => (
+      <DataCollectionStorageProvider
+        handler={dataCollectionLocalStorageHandler}
+      >
+        {children}
+      </DataCollectionStorageProvider>
+    )
+
+    it("persists filter changes to the collection storage, preserving the rest of the state", async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          filters: { department: ["Engineering"] },
+          sortings: { field: "name", order: "desc" },
+          search: "ali",
+        })
+      )
+      const fetchData = makeFetchData()
+      const onFiltersChange = vi.fn()
+      driver.filtersChange = { department: ["Design"] }
+
+      render(
+        withStorageHandler(
+          <BreadcrumbCollectionSelect
+            item={makeItem(fetchData, { showFilters: true, onFiltersChange })}
+          />
+        )
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "set-filters" }))
+
+      await waitFor(() => {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+        expect(stored.filters).toEqual({ department: ["Design"] })
+      })
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      expect(stored.sortings).toEqual({ field: "name", order: "desc" })
+      expect(stored.search).toBe("ali")
+      expect(onFiltersChange).toHaveBeenCalledWith({ department: ["Design"] })
+    })
+
+    it("updates the per-visualization slot when one exists, so a re-read resolves the new filters", async () => {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          visualization: 1,
+          filters: { department: ["Engineering"] },
+          visualizationFilters: { "1": { department: ["Engineering"] } },
+        })
+      )
+      const fetchData = makeFetchData()
+      driver.filtersChange = { department: ["Design"] }
+
+      render(
+        withStorageHandler(
+          <BreadcrumbCollectionSelect
+            item={makeItem(fetchData, { showFilters: true })}
+          />
+        )
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "set-filters" }))
+
+      await waitFor(() => {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+        expect(stored.visualizationFilters["1"]).toEqual({
+          department: ["Design"],
+        })
+      })
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+      expect(stored.filters).toEqual({ department: ["Design"] })
+    })
+
+    it("notifies subscribers of the collection id after the write", async () => {
+      const fetchData = makeFetchData()
+      const listener = vi.fn()
+      const unsubscribe = subscribeToDataCollectionStorageChanges(
+        COLLECTION_ID,
+        listener
+      )
+      driver.filtersChange = { department: ["Design"] }
+
+      render(
+        withStorageHandler(
+          <BreadcrumbCollectionSelect
+            item={makeItem(fetchData, { showFilters: true })}
+          />
+        )
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "set-filters" }))
+      await waitFor(() => expect(listener).toHaveBeenCalledTimes(1))
+      unsubscribe()
+    })
+
+    it("does not write storage when filters are not editable", async () => {
+      const fetchData = makeFetchData()
+      const onFiltersChange = vi.fn()
+      driver.filtersChange = { department: ["Design"] }
+
+      render(
+        withStorageHandler(
+          <BreadcrumbCollectionSelect
+            item={makeItem(fetchData, { onFiltersChange })}
+          />
+        )
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "set-filters" }))
+      await new Promise((resolve) => setTimeout(resolve, 20))
+
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+      // The consumer callback still fires
+      expect(onFiltersChange).toHaveBeenCalledWith({ department: ["Design"] })
+    })
   })
 })
