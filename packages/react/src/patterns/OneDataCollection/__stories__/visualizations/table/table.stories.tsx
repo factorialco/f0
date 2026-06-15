@@ -614,7 +614,12 @@ export const TableWithGroupedHeaders: Story = {
 export const StrikedRowsVisualization: Story = {
   render: () => {
     const records = [
-      { id: 1, name: "Alice Johnson", email: "alice@example.com", active: true },
+      {
+        id: 1,
+        name: "Alice Johnson",
+        email: "alice@example.com",
+        active: true,
+      },
       { id: 2, name: "Bob Smith", email: "bob@example.com", active: false },
       { id: 3, name: "Carol Lee", email: "carol@example.com", active: true },
       { id: 4, name: "Dan Park", email: "dan@example.com", active: false },
