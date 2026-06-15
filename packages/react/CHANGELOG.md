@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.7](https://github.com/factorialco/f0/compare/f0-react-v3.2.6...f0-react-v3.2.7) (2026-06-15)
+
+
+### Bug Fixes
+
+* **value-display:** simplify delta cell styling and align cell paddings ([#4461](https://github.com/factorialco/f0/issues/4461)) ([344a746](https://github.com/factorialco/f0/commit/344a7467c13a5036802d995161b8756020d14121))
+
 ## [3.2.6](https://github.com/factorialco/f0/compare/f0-react-v3.2.5...f0-react-v3.2.6) (2026-06-15)
 
 
