@@ -6554,7 +6554,22 @@ function SideInfo({
 // Course thumbnail as a clean hero image at the top of the overview sidebar —
 // no label, no card, fills the column width (matches the trainings base proto).
 function CourseThumbnailField({ course }: { course: ExactCourse }) {
-  if (!course.thumbnail) return null
+  // No image yet (e.g. Effective Communication): show an upload drop zone in the
+  // thumbnail's place so the slot is never empty and the TM can add one. Reuses
+  // the same dashed-border idiom as the course settings thumbnail field.
+  if (!course.thumbnail) {
+    return (
+      <button
+        type="button"
+        className="flex h-36 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-f1-border-secondary text-center"
+        aria-label="Add a course thumbnail"
+      >
+        <F0Icon icon={Upload} size="md" />
+        <F0Text content="Drag and drop or click here" variant="body" />
+        <F0Text content=".jpeg, .png, .gif or .webp" variant="small" />
+      </button>
+    )
+  }
 
   return (
     <F0Box display="flex" borderRadius="sm" overflow="hidden" height="xl">
