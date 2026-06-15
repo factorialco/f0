@@ -103,6 +103,16 @@ export interface UseDataCollectionItemNavigationProps<
    */
   currentFilters?: FiltersState<Filters>
   /**
+   * How the returned `navigation` arrows navigate:
+   * - `"url"` (default): links to each item's `itemUrl` — for full-page
+   *   detail views where prev/next changes the route.
+   * - `"callback"`: arrows call the controller's `goToPrevious`/`goToNext`,
+   *   swapping the active item in place with no URL change — for a mounted
+   *   sidepanel/dialog (drive `activeItemId` via `onActiveItemChange`).
+   * @default "url"
+   */
+  navigationMode?: "url" | "callback"
+  /**
    * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
    * same convention as `useDataCollectionSource(source, deps)`.
    */

@@ -126,14 +126,22 @@ export const F0DialogHeader = ({
 
     return (
       <>
-        {controls.expand && (
-          <ButtonInternal
-            variant="outline"
-            icon={Maximize}
-            onClick={controls.expand.onClick}
-            label={controls.expand.label}
-          />
-        )}
+        {controls.expand &&
+          (controls.expand.url !== undefined ? (
+            <ButtonInternal
+              variant="outline"
+              icon={Maximize}
+              href={controls.expand.url}
+              label={controls.expand.label}
+            />
+          ) : (
+            <ButtonInternal
+              variant="outline"
+              icon={Maximize}
+              onClick={controls.expand.onClick}
+              label={controls.expand.label}
+            />
+          ))}
         {controls.expand && controls.navigation && <Divider />}
         {controls.navigation && <PageNavigation {...controls.navigation} />}
       </>

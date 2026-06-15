@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.2.1](https://github.com/factorialco/f0/compare/f0-react-v3.2.0...f0-react-v3.2.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **datacollection:** keep kanban lanes from sticking on loading skeletons ([#4443](https://github.com/factorialco/f0/issues/4443)) ([35c25f4](https://github.com/factorialco/f0/commit/35c25f42e9d04c04d9017fd5b732d024e1b4c6a9))
+
+## [3.2.0](https://github.com/factorialco/f0/compare/f0-react-v3.1.0...f0-react-v3.2.0) (2026-06-15)
+
+
+### Features
+
+* **navigation:** id-based callback mode for prev/next arrows ([#4425](https://github.com/factorialco/f0/issues/4425)) ([cd1eb92](https://github.com/factorialco/f0/commit/cd1eb92728f12930ad397d8bfdb919f380597374))
+
+## [3.1.0](https://github.com/factorialco/f0/compare/f0-react-v3.0.1...f0-react-v3.1.0) (2026-06-12)
+
+
+### Features
+
+* promote RichText to stable components with AI Enhance and F0 naming ([#3394](https://github.com/factorialco/f0/issues/3394)) ([193204e](https://github.com/factorialco/f0/commit/193204ea9718dfe496efc6fea1dc7a724f29a1b1))
+
 ## [3.0.1](https://github.com/factorialco/f0/compare/f0-react-v3.0.0...f0-react-v3.0.1) (2026-06-12)
 
 
