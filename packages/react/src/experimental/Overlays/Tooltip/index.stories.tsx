@@ -50,10 +50,11 @@ export const WithDataTestId: Story = {
 }
 
 /**
- * The child element carries a native HTML `title` attribute. Without stripping
+ * The child element carries a native HTML `title` attribute. Without handling
  * it, the browser would show its own tooltip on hover in addition to the F0
  * one, leaving the user with two overlapping tooltips. Hover the button: only
- * the F0 tooltip shows.
+ * the F0 tooltip shows. The title text is preserved as an `aria-label` so the
+ * accessible name survives even though the native tooltip is gone.
  */
 export const ChildWithNativeTitle: Story = {
   args: {
@@ -68,7 +69,12 @@ export const ChildWithNativeTitle: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
     const trigger = canvas.getByTestId("native-title-trigger")
-    // The native `title` should be stripped so only the F0 tooltip renders.
+    // The native `title` is removed so only the F0 tooltip renders...
     await expect(trigger).not.toHaveAttribute("title")
+    // ...but the accessible name is preserved via aria-label.
+    await expect(trigger).toHaveAttribute(
+      "aria-label",
+      "Native browser tooltip"
+    )
   },
 }
