@@ -7,6 +7,7 @@ import {
   F0Dialog,
   F0Heading,
   F0Icon,
+  F0Link,
   F0Text,
   F0Select,
 } from "@factorialco/f0-react"
@@ -238,6 +239,7 @@ export function CostsTab({ training, klass }: Props) {
   )
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("pending")
   const [calculatorOpen, setCalculatorOpen] = useState(false)
+  const [costPerParticipantOpen, setCostPerParticipantOpen] = useState(false)
   const [selectedLegalEntityId, setSelectedLegalEntityId] = useState<
     string | null
   >(null)
@@ -272,6 +274,20 @@ export function CostsTab({ training, klass }: Props) {
     : subsidizedCost
   const netCost = Math.max(0, totalCost - activeSubsidizedCost)
   const perParticipant = Math.round(netCost / Math.max(participants, 1))
+  const groupCostBreakdown: LegalEntityCostDraft = {
+    legalEntityId: "group",
+    participantsCount: participants,
+    directCost: costsByLegalEntityEnabled
+      ? legalEntityCostDrafts.reduce((sum, item) => sum + item.directCost, 0)
+      : directCost,
+    indirectCost: costsByLegalEntityEnabled
+      ? legalEntityCostDrafts.reduce((sum, item) => sum + item.indirectCost, 0)
+      : indirectCost,
+    salaryCost: costsByLegalEntityEnabled
+      ? legalEntityCostDrafts.reduce((sum, item) => sum + item.salaryCost, 0)
+      : salaryCost,
+    subsidizedCost: activeSubsidizedCost,
+  }
   const [showEditInfo, setShowEditInfo] = useState(false)
   const [editInfoDismissed, setEditInfoDismissed] = useState(false)
   const handleLegalEntityCostChange = (
@@ -326,11 +342,26 @@ export function CostsTab({ training, klass }: Props) {
             variant="description"
             content="Sum of direct, indirect and salary costs."
           />
-          <F0Heading
-            as="h2"
-            variant="heading-large"
-            content={formatMoney(totalCost, currency)}
-          />
+          <F0Box
+            display="flex"
+            alignItems="baseline"
+            justifyContent="between"
+            gap="md"
+          >
+            <F0Heading
+              as="h2"
+              variant="heading-large"
+              content={formatMoney(totalCost, currency)}
+            />
+            {linkedMovement && (
+              <F0Link
+                variant="link"
+                onClick={() => setCostPerParticipantOpen(true)}
+              >
+                View per participant
+              </F0Link>
+            )}
+          </F0Box>
         </F0Box>
 
         <F0Box
@@ -550,7 +581,63 @@ export function CostsTab({ training, klass }: Props) {
             />
           </F0Box>
         </F0Box>
+
+      {linkedMovement && costPerParticipantOpen && (
+        <CostPerParticipantSidepanel
+          movement={linkedMovement}
+          breakdown={groupCostBreakdown}
+          onClose={() => setCostPerParticipantOpen(false)}
+        />
+      )}
     </F0Box>
+  )
+}
+
+function CostPerParticipantSidepanel({
+  movement,
+  breakdown,
+  onClose,
+}: {
+  movement: (typeof trainingBudgetMovements)[number]
+  breakdown: LegalEntityCostDraft
+  onClose: () => void
+}) {
+  const participants = participantsForMovement(movement)
+  const [dialogContainer, setDialogContainer] = useState<HTMLElement | null>(
+    null
+  )
+
+  useEffect(() => {
+    const container = document.createElement("div")
+    container.className = "fixed inset-0 z-50"
+    document.body.appendChild(container)
+    setDialogContainer(container)
+
+    return () => {
+      setDialogContainer(null)
+      container.remove()
+    }
+  }, [])
+
+  if (!dialogContainer) return null
+
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="right"
+      width="md"
+      title="Cost per participant"
+      description={movement.groupName}
+      container={dialogContainer}
+      disableContentPadding
+    >
+      <LegalEntityParticipantsPanel
+        classId={movement.groupId}
+        participants={participants}
+        breakdown={breakdown}
+      />
+    </F0Dialog>
   )
 }
 
