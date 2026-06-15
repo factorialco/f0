@@ -836,12 +836,11 @@ const groupParticipants: GroupParticipantRow[] = [
   { id: "p-13", name: "Ana Ruiz", team: "Diseño", jobTitle: "Product designer, I" },
 ]
 
-const courseParticipantStatuses: CourseParticipantRow["status"][] = [
+// Statuses used for participants who are NOT pending group assignment. The
+// pending ones are injected per-course so their count matches the overview.
+const nonPendingParticipantStatuses: CourseParticipantRow["status"][] = [
   "Ongoing", "Completed", "Ongoing", "Pending", "Completed",
-  "Ongoing", "Dropped out", "Completed", "Ongoing", "Pending group assignment",
-  "Completed", "Ongoing", "Pending", "Completed", "Ongoing",
-  "Completed", "Ongoing", "Pending group assignment", "Completed", "Ongoing",
-  "Dropped out", "Completed", "Ongoing", "Pending",
+  "Dropped out", "Completed", "Ongoing",
 ]
 const courseParticipantTeams = [
   "Engineering", "Sales", "Marketing", "Product", "Design",
@@ -850,7 +849,7 @@ const courseParticipantTeams = [
   "Sales", "HR", "Operations", "Product", "Marketing",
   "Engineering", "Finance", "Sales", "Design",
 ]
-const courseParticipants: CourseParticipantRow[] = [
+const courseParticipantNames = [
   "Alicia Anderson",
   "Amelia Álvarez",
   "Bernarda Barrios",
@@ -875,25 +874,46 @@ const courseParticipants: CourseParticipantRow[] = [
   "Sara Sánchez",
   "Scott Santos",
   "Susana Stanley",
-].map((name, index) => {
-  const status = courseParticipantStatuses[index] ?? "Ongoing"
-  const completed = status === "Completed"
-  const dropped = status === "Dropped out"
-  const pending = status === "Pending"
-  const waitlisted = status === "Pending group assignment"
-  return {
-    id: `course-participant-${index + 1}`,
-    name,
-    team: courseParticipantTeams[index] ?? "Engineering",
-    status,
-    certificate: completed ? "Issued" : "-",
-    completionDate: completed ? `2026-0${(index % 5) + 1}-${15 + (index % 12)}` : "Not set",
-    courseValidity: completed ? "2027-05-01" : "No date",
-    sessionAttendance: dropped || waitlisted || pending ? "-" : `${Math.min(index % 3 + 1, 3)}/3`,
-    knowledgeTestResults: completed ? "Passed" : dropped ? "-" : pending || waitlisted ? "-" : index % 4 === 0 ? "Pending" : "Passed",
-    moduleProgress: dropped || waitlisted || pending ? "0/3" : `${Math.min(index % 3 + 1, 3)}/3`,
-  }
-})
+]
+
+// Build a course's participant rows with exactly `pendingCount` people in
+// "Pending group assignment", spread evenly across the list, so the Participants
+// tab matches the count shown in the overview's enrollment alert.
+function buildCourseParticipants(pendingCount: number): CourseParticipantRow[] {
+  const total = courseParticipantNames.length
+  const capped = Math.min(Math.max(pendingCount, 0), total)
+  const pendingIndices = new Set<number>()
+  for (let i = 0; i < capped; i++) pendingIndices.add(Math.floor((i * total) / capped))
+  let nonPendingSeen = 0
+  return courseParticipantNames.map((name, index) => {
+    const status: CourseParticipantRow["status"] = pendingIndices.has(index)
+      ? "Pending group assignment"
+      : nonPendingParticipantStatuses[nonPendingSeen++ % nonPendingParticipantStatuses.length]
+    const completed = status === "Completed"
+    const dropped = status === "Dropped out"
+    const pending = status === "Pending"
+    const waitlisted = status === "Pending group assignment"
+    return {
+      id: `course-participant-${index + 1}`,
+      name,
+      team: courseParticipantTeams[index] ?? "Engineering",
+      status,
+      certificate: completed ? "Issued" : "-",
+      completionDate: completed ? `2026-0${(index % 5) + 1}-${15 + (index % 12)}` : "Not set",
+      courseValidity: completed ? "2027-05-01" : "No date",
+      sessionAttendance: dropped || waitlisted || pending ? "-" : `${Math.min(index % 3 + 1, 3)}/3`,
+      knowledgeTestResults: completed ? "Passed" : dropped ? "-" : pending || waitlisted ? "-" : index % 4 === 0 ? "Pending" : "Passed",
+      moduleProgress: dropped || waitlisted || pending ? "0/3" : `${Math.min(index % 3 + 1, 3)}/3`,
+    }
+  })
+}
+
+// Single source of truth for "pending group assignment" — only recurring courses
+// have it (one-time courses enrol straight into their single group). Used by both
+// the overview alert and the Participants tab so the numbers always match.
+function coursePendingCount(course: ExactCourse): number {
+  return course.courseType === "with-editions" ? (course.pendingCount ?? 0) : 0
+}
 
 const insightTeamCategories = ["Retail", "People", "Operations", "Finance"]
 const insightTeamSeries = [{ name: "Headcount", data: [24, 14, 12, 7] }]
@@ -4546,7 +4566,7 @@ function CourseDetailTabBody({
 }) {
   if (activeDetailTab === "content") return <CourseContentTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "training-groups") return <CourseGroupsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
-  if (activeDetailTab === "participants") return <CourseParticipantsTab onOpenDialog={onOpenDialog} />
+  if (activeDetailTab === "participants") return <CourseParticipantsTab course={course} onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "materials") return <CourseMaterialsTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "documents") return <CourseDocumentsTab onOpenDialog={onOpenDialog} />
   return <CourseSurveysTab onOpenDialog={onOpenDialog} />
@@ -4752,10 +4772,16 @@ function CourseGroupsTab({
   )
 }
 
-function CourseParticipantsTab({ onOpenDialog }: { onOpenDialog: (dialog: CourseActionDialogId) => void }) {
+function CourseParticipantsTab({ course, onOpenDialog }: { course: ExactCourse; onOpenDialog: (dialog: CourseActionDialogId) => void }) {
   // The overview's "View pending" link lands here with the pending filter pre-applied.
   const [searchParams] = useSearchParams()
   const pendingPreset = searchParams.get("pfilter") === "pending"
+  // Participants are derived from the course so the "Pending group assignment"
+  // count matches exactly what the overview's enrollment alert shows.
+  const participants = useMemo(
+    () => buildCourseParticipants(coursePendingCount(course)),
+    [course]
+  )
   const statusColor = (status: CourseParticipantRow["status"]): "positive" | "info" | "warning" | "critical" | "neutral" => {
     switch (status) {
       case "Completed": return "positive"
@@ -4824,7 +4850,7 @@ function CourseParticipantsTab({ onOpenDialog }: { onOpenDialog: (dialog: Course
         perPage: 25,
         fetchData: ({ filters, search, sortings = [], pagination }: FetchOptions) => {
           const term = (search ?? "").toLowerCase().trim()
-          const filtered = courseParticipants
+          const filtered = participants
             .filter((participant) => matchArray(filters?.status, participant.status))
             .filter((participant) => matchArray(filters?.team, participant.team))
             .filter((participant) => matchArray(filters?.knowledgeTestResults, participant.knowledgeTestResults))
@@ -4843,7 +4869,7 @@ function CourseParticipantsTab({ onOpenDialog }: { onOpenDialog: (dialog: Course
       bulkActions: () => ({ primary: [{ id: "remove", label: "Remove from course", icon: Delete, critical: true }] }),
       totalItemSummary: (total: number) => `${total} participants`,
     },
-    []
+    [participants, pendingPreset]
   )
 
   return (
@@ -6320,9 +6346,7 @@ function EnrollmentSidebarBlock({
   onSetUp?: () => void
 }) {
   const rule = course.enrollmentRule
-  // Pending group assignment only exists for recurring courses — one-time courses
-  // enrol people straight into their single always-active group.
-  const pending = course.courseType === "with-editions" ? (course.pendingCount ?? 0) : 0
+  const pending = coursePendingCount(course)
 
   const pendingAlert =
     pending > 0 ? (
