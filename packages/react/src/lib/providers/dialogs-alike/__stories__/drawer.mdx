@@ -7,10 +7,10 @@ import * as DrawerStories from "./drawer.stories"
 
 ## Introduction
 
-`drawer` is an imperative API for opening side drawers from anywhere in your app — including outside React (event handlers, callbacks, utilities). It wraps the `F0Drawer` component internally and handles all state management for you.
+The drawers API is an imperative API for opening side drawers from anywhere in your app — including outside React (event handlers, callbacks, utilities). It wraps the `F0Drawer` component internally and handles all state management for you.
 
 ```tsx
-import { drawer } from "@factorialco/f0-react"
+import { openDrawer, closeDrawer } from "@factorialco/f0-react"
 ```
 
 > Requires your app to be wrapped in `<F0Provider>` (which mounts the renderer that displays the drawers).
@@ -49,10 +49,10 @@ function EditItemButton() {
 }
 ```
 
-### After: using the `drawer` API
+### After: using the drawers API
 
 ```tsx
-import { drawer, F0Button } from "@factorialco/f0-react"
+import { openDrawer, F0Button } from "@factorialco/f0-react"
 
 function EditItemButton() {
   const handleClick = async () => {
@@ -76,10 +76,10 @@ function EditItemButton() {
 
 ## Basic Usage
 
-`drawer.open` accepts a drawer definition and returns a promise that resolves with the value of the action the user clicked.
+`openDrawer` accepts a drawer definition and returns a promise that resolves with the value of the action the user clicked.
 
 ```tsx
-import { drawer } from "@factorialco/f0-react"
+import { openDrawer } from "@factorialco/f0-react"
 
 const result = await openDrawer({
   title: "Drawer Title",
@@ -137,7 +137,7 @@ await openDrawer({
 
 ### Promise-Based Actions
 
-An action `value` can be a primitive **or** a function that returns a Promise. When a function is provided, the drawer stays open until the promise resolves, the button shows a loading state, and all actions are disabled during the async operation (unless `nonBlocking` is `true`). The resolved value becomes the result of `drawer.open`.
+An action `value` can be a primitive **or** a function that returns a Promise. When a function is provided, the drawer stays open until the promise resolves, the button shows a loading state, and all actions are disabled during the async operation (unless `nonBlocking` is `true`). The resolved value becomes the result of `openDrawer`.
 
 ```tsx
 const result = await openDrawer({
@@ -164,7 +164,7 @@ By default a drawer slides in alongside the page and can be dismissed by clickin
 Use it when the drawer holds a task the user should finish or explicitly cancel (e.g. an edit form with unsaved changes) rather than dismiss by accident.
 
 ```tsx
-import { drawer, F0Button } from "@factorialco/f0-react"
+import { openDrawer, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showModalDrawer = async () => {
