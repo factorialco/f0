@@ -33,8 +33,10 @@ describe("PageHeader navigation context", () => {
 
   it("renders navigation from the prop when prop is provided", () => {
     render(<PageHeader module={defaultModule} navigation={propNavigation} />)
-    expect(screen.getByTitle("Prop Previous")).toBeInTheDocument()
-    expect(screen.getByTitle("Prop Next")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Prop Previous" })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Prop Next" })).toBeInTheDocument()
     expect(screen.getByText("1/5")).toBeInTheDocument()
   })
 
@@ -44,8 +46,12 @@ describe("PageHeader navigation context", () => {
         <PageHeader module={defaultModule} />
       </PageHeaderNavigationProvider>
     )
-    expect(screen.getByTitle("Context Previous")).toBeInTheDocument()
-    expect(screen.getByTitle("Context Next")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Context Previous" })
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Context Next" })
+    ).toBeInTheDocument()
     expect(screen.getByText("2/10")).toBeInTheDocument()
   })
 
@@ -55,10 +61,12 @@ describe("PageHeader navigation context", () => {
         <PageHeader module={defaultModule} navigation={propNavigation} />
       </PageHeaderNavigationProvider>
     )
-    expect(screen.getByTitle("Prop Previous")).toBeInTheDocument()
-    expect(screen.getByTitle("Prop Next")).toBeInTheDocument()
+    expect(
+      screen.getByRole("link", { name: "Prop Previous" })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Prop Next" })).toBeInTheDocument()
     expect(screen.getByText("1/5")).toBeInTheDocument()
-    expect(screen.queryByTitle("Context Previous")).toBeNull()
+    expect(screen.queryByRole("link", { name: "Context Previous" })).toBeNull()
   })
 
   it("renders nothing when context value is null", () => {
@@ -67,7 +75,7 @@ describe("PageHeader navigation context", () => {
         <PageHeader module={defaultModule} />
       </PageHeaderNavigationProvider>
     )
-    expect(screen.queryByTitle("Previous")).toBeNull()
-    expect(screen.queryByTitle("Next")).toBeNull()
+    expect(screen.queryByRole("link", { name: /previous/i })).toBeNull()
+    expect(screen.queryByRole("link", { name: /next/i })).toBeNull()
   })
 })
