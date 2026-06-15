@@ -95,9 +95,7 @@ export function CardActions({
           <F0Button
             label={primaryAction.label}
             icon={primaryAction.icon}
-            variant={
-              primaryAction.variant === "outline" ? "outline" : undefined
-            }
+            variant={primaryAction.variant}
             onClick={(e) => {
               e.stopPropagation()
               primaryAction.onClick()
