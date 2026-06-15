@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.5](https://github.com/factorialco/f0/compare/f0-react-v3.2.4...f0-react-v3.2.5) (2026-06-15)
+
+
+### Bug Fixes
+
+* **Tooltip:** strip native title from child to avoid double tooltip ([#4451](https://github.com/factorialco/f0/issues/4451)) ([8f4075f](https://github.com/factorialco/f0/commit/8f4075fd584a2a85d22c328dedffe147b7edb238))
+
 ## [3.2.4](https://github.com/factorialco/f0/compare/f0-react-v3.2.3...f0-react-v3.2.4) (2026-06-15)
 
 
