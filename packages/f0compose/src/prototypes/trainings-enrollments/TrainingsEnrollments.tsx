@@ -6339,40 +6339,38 @@ function getGroupActionDetail(dialog: GroupActionDialogId, groupName: string): T
 }
 
 // Clickable "needs attention" row: N people matched but aren't in a group yet.
-// A Tag is a display component, so it must not be made clickable — this is an
-// F0Link (the same pattern real Factorial products use for clickable counts,
-// e.g. the integrations SyncBar). A warning-coloured icon flags it; a trailing
-// chevron signals it navigates. It jumps to Participants filtered to "Pending
-// group assignment". Sits below a divider so it reads as the action to take,
-// separate from the calm info above it.
+// A Tag is a display component, so it must not be made clickable — this is a
+// plain semantic <button> (a real interactive element) styled as a clean row:
+// a warning-coloured icon flags it, a trailing chevron signals it navigates.
+// No box/border — the amber icon and the hover highlight carry the affordance.
+// It jumps to Participants filtered to "Pending group assignment".
 function PendingGroupLink({ count, onClick }: { count: number; onClick?: () => void }) {
   return (
-    <div className="border-t border-solid border-f1-border-secondary pt-3">
-      <F0Link
-        variant="unstyled"
-        onClick={() => onClick?.()}
-        aria-label={`${count} ${count === 1 ? "person" : "people"} waiting for a group — open in participants`}
-      >
-        <div className="flex w-full items-center gap-2">
-          <F0Icon icon={Warning} size="sm" color="warning" />
-          <div className="flex-1">
-            <F0Text content={`${count} waiting for a group`} variant="body" />
-          </div>
-          <F0Icon icon={ChevronRight} size="sm" />
-        </div>
-      </F0Link>
-    </div>
+    <button
+      type="button"
+      onClick={() => onClick?.()}
+      aria-label={`${count} ${count === 1 ? "person" : "people"} waiting for a group — open in participants`}
+      className="-mx-2 flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-f1-background-secondary"
+    >
+      <F0Icon icon={Warning} size="sm" color="warning" />
+      <div className="flex-1">
+        <F0Text content={`${count} waiting for a group`} variant="body" />
+      </div>
+      <F0Icon icon={ChevronRight} size="sm" />
+    </button>
   )
 }
 
 // Enrollment status in the course overview sidebar. It answers two questions at a
 // glance: (1) is enrollment happening, and of what kind — an F0TagDot (the
 // component Factorial products use for a mode/type) shows "Automatic" (malibu)
-// vs "Manual" (smoke); for automatic, compact criteria tags show *who*. (2) is
-// there an action to take — when people matched but have no group yet, a divider
-// separates a clickable PendingGroupLink so the action reads apart from the info.
-// There is no "automatic · inactive" state in this model — a rule is either set
-// (automatic) or absent (manual) — so the mode tag never carries a status suffix.
+// vs "Manual" (smoke). (2) is there an action to take — when people matched but
+// have no group yet, a clickable PendingGroupLink surfaces it.
+// The criteria themselves are NOT shown here: across leading LMS/HRIS products
+// (Docebo, Cornerstone, SuccessFactors, Workday, 360Learning…) the rule lives in
+// a settings/edit screen, not the overview, which stays minimal. "Edit conditions"
+// deep-links to that screen. There is no "automatic · inactive" state in this
+// model — a rule is either set (automatic) or absent (manual).
 function EnrollmentSidebarBlock({
   course,
   onViewPending,
@@ -6385,46 +6383,21 @@ function EnrollmentSidebarBlock({
   const rule = course.enrollmentRule
   const pending = coursePendingCount(course)
 
-  // Manual: no automatic rule (also covers "just created, not configured").
-  // The "Manual" tag plus the "Set up automatic" link already convey the state,
-  // so there's no descriptive sentence to repeat it.
-  if (!rule) {
-    return (
-      <F0Box display="flex" flexDirection="column" gap="sm">
-        <F0Text content="Enrollment" variant="label" />
-        <div className="flex">
-          <F0TagDot color="smoke" text="Manual" />
-        </div>
-        {pending > 0 && <PendingGroupLink count={pending} onClick={onViewPending} />}
-        <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
-      </F0Box>
-    )
-  }
-
-  // Automatic. Criteria shown as compact tags, truncated so it never breaks layout.
-  const criteria = rule.criteria
-  const MAX_TAGS = 3
-  const shownCriteria = criteria.slice(0, MAX_TAGS)
-  const extraCriteria = criteria.length - shownCriteria.length
-
   return (
     <F0Box display="flex" flexDirection="column" gap="sm">
       <F0Text content="Enrollment" variant="label" />
       <div className="flex">
-        <F0TagDot color="malibu" text="Automatic" />
+        {rule ? (
+          <F0TagDot color="malibu" text="Automatic" />
+        ) : (
+          <F0TagDot color="smoke" text="Manual" />
+        )}
       </div>
-      {criteria.length > 0 && (
-        <F0Box display="flex" flexDirection="column" gap="xs">
-          <F0Text content="Enrolls anyone matching" variant="small" />
-          <F0Box display="flex" flexWrap="wrap" gap="xs">
-            {shownCriteria.map((item) => (
-              <F0TagRaw key={item} text={item} />
-            ))}
-            {extraCriteria > 0 && <F0TagRaw text={`+${extraCriteria} more`} />}
-          </F0Box>
-        </F0Box>
-      )}
       {pending > 0 && <PendingGroupLink count={pending} onClick={onViewPending} />}
+      <EnrollmentActionLink
+        label={rule ? "Edit conditions" : "Set up automatic enrollment"}
+        onClick={onSetUp}
+      />
     </F0Box>
   )
 }
