@@ -304,9 +304,10 @@ type CourseParticipantRow = {
   certificate: string
   completionDate: string
   courseValidity: string
-  sessionAttendance: string
   knowledgeTestResults: "Pending" | "Passed" | "Failed" | "-"
-  moduleProgress: string
+  // LMS content progress (modules completed / total). These courses have no
+  // sessions, so there's no attendance — content consumption is what matters.
+  lmsContent: string
 }
 type CourseResourceRow = {
   id: string
@@ -905,9 +906,8 @@ function buildCourseParticipants(pendingCount: number): CourseParticipantRow[] {
       certificate: completed ? "Issued" : "-",
       completionDate: completed ? `2026-0${(index % 5) + 1}-${15 + (index % 12)}` : "Not set",
       courseValidity: completed ? "2027-05-01" : "No date",
-      sessionAttendance: dropped || waitlisted || pending ? "-" : `${Math.min(index % 3 + 1, 3)}/3`,
       knowledgeTestResults: completed ? "Passed" : dropped ? "-" : pending || waitlisted ? "-" : index % 4 === 0 ? "Pending" : "Passed",
-      moduleProgress: dropped || waitlisted || pending ? "0/3" : `${Math.min(index % 3 + 1, 3)}/3`,
+      lmsContent: dropped || waitlisted || pending ? "0/3" : `${Math.min(index % 3 + 1, 3)}/3`,
     }
   })
 }
@@ -5037,9 +5037,8 @@ function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { co
               { id: "certificate", label: "Certificate", render: (participant: CourseParticipantRow) => participant.certificate },
               { id: "completionDate", label: "Completion date", sorting: "completionDate", render: (participant: CourseParticipantRow) => participant.completionDate },
               { id: "courseValidity", label: "Course validity", render: (participant: CourseParticipantRow) => participant.courseValidity },
-              { id: "sessionAttendance", label: "Session attendance", render: (participant: CourseParticipantRow) => participant.sessionAttendance },
+              { id: "lmsContent", label: "LMS content", render: (participant: CourseParticipantRow) => participant.lmsContent },
               { id: "knowledgeTestResults", label: "Knowledge test results", render: (participant: CourseParticipantRow) => participant.knowledgeTestResults },
-              { id: "moduleProgress", label: "Module progress", render: (participant: CourseParticipantRow) => participant.moduleProgress },
             ],
             frozenColumns: 1,
             allowColumnReordering: true,
