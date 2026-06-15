@@ -356,6 +356,7 @@ export function CostsTab({ training, klass }: Props) {
             {linkedMovement && (
               <F0Link
                 variant="link"
+                disabled={costsByLegalEntityEnabled}
                 onClick={() => setCostPerParticipantOpen(true)}
               >
                 View per participant
