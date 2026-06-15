@@ -19,7 +19,7 @@ import {
 } from "./types"
 
 // Programmatic-close callbacks, keyed by dialog/drawer id. Kept at module level
-// (not in a React ref) so `dialog.close(id)` / `drawer.close(id)` work from
+// (not in a React ref) so `closeDialog(id)` / `closeDrawer(id)` work from
 // anywhere.
 const closeCallbacks = new Map<DialogId, () => void>()
 
@@ -81,7 +81,7 @@ const openDialogInternal = (
     }
 
     closeCallbacks.set(id, onCloseDialog)
-    warnIfNoProvider("dialog.open()")
+    warnIfNoProvider("openDialog()")
     dialogsAlikeStore.addItem(item)
   })
 }
@@ -105,7 +105,7 @@ const openDrawerInternal = (
     }
 
     closeCallbacks.set(id, onCloseDialog)
-    warnIfNoProvider("drawer.open()")
+    warnIfNoProvider("openDrawer()")
     dialogsAlikeStore.addItem(item)
   })
 }
@@ -119,79 +119,82 @@ const close = (id: DialogId) => {
   }
 }
 
-/**
- * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
- * `DialogsAlikeLayoutProvider`) to be present in the tree.
- *
- * @example
- * const result = await dialog.open({ title, content, actions: { primary: { label: "OK", value: true } } })
- */
-export const dialog = {
-  /** Open a dialog. Resolves with the value of the action the user picked. */
-  open: (definition: Optional<DialogDefinition, "id">) =>
-    openDialogInternal({ ...definition, variant: "default" }),
-
-  /** Open a notification-style dialog (info/warning/critical/positive). */
-  notification: (
-    options: NotificationDialogOptions
-  ): Promise<DialogActionValue> =>
-    openDialogInternal({
-      type: options.type ?? "info",
-      variant: "notification",
-      description: options.msg,
-      id: options.id || nanoid(),
-      title: options.title,
-      content: <></>,
-      actions: options.actions,
-    }),
-
-  /** Notification dialog with a single confirm action (defaults to "Ok"). */
-  alert: (options: AlertDialogOptions): Promise<DialogActionValue> => {
-    const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return dialog.notification({
-      ...options,
-      actions: {
-        primary: {
-          value: options.confirm?.value ?? true,
-          label: options.confirm?.label || labels.ok,
-        },
-      },
-    })
-  },
-
-  /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
-  confirm: (options: ConfirmDialogOptions): Promise<DialogActionValue> => {
-    const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return dialog.notification({
-      ...options,
-      actions: {
-        primary: {
-          value: options.confirm?.value ?? true,
-          label: options.confirm?.label || labels.ok,
-        },
-        secondary: {
-          value: options.cancel?.value ?? false,
-          label: options.cancel?.label || labels.cancel,
-        },
-      },
-    })
-  },
-
-  /** Programmatically close a dialog by id (resolves its promise with undefined). */
-  close,
-}
+// -----------------------------------------------------------------------------
+// Public imperative API. These free functions open/close dialogs and drawers
+// from anywhere — including outside React. They require `<F0Provider>` (which
+// mounts `DialogsAlikeLayoutProvider`) to be present in the tree.
+// -----------------------------------------------------------------------------
 
 /**
- * Imperative API for side drawers. Requires `<F0Provider>` to be present.
+ * Open a dialog. Resolves with the value of the action the user picked.
  *
  * @example
- * const result = await drawer.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ * const result = await openDialog({ title, content, actions: { primary: { label: "OK", value: true } } })
  */
-export const drawer = {
-  /** Open a drawer. Resolves with the value of the action the user picked. */
-  open: (definition: Optional<DrawerDefinition, "id">) =>
-    openDrawerInternal({ ...definition, variant: "drawer" }),
+export const openDialog = (definition: Optional<DialogDefinition, "id">) =>
+  openDialogInternal({ ...definition, variant: "default" })
 
-  /** Programmatically close a drawer by id (resolves its promise with undefined). */
-  close,
+/** Open a notification-style dialog (info/warning/critical/positive). */
+export const notifyDialog = (
+  options: NotificationDialogOptions
+): Promise<DialogActionValue> =>
+  openDialogInternal({
+    type: options.type ?? "info",
+    variant: "notification",
+    description: options.msg,
+    id: options.id || nanoid(),
+    title: options.title,
+    content: <></>,
+    actions: options.actions,
+  })
+
+/** Notification dialog with a single confirm action (defaults to "Ok"). */
+export const alertDialog = (
+  options: AlertDialogOptions
+): Promise<DialogActionValue> => {
+  const labels = dialogsAlikeStore.getDefaultActionLabels()
+  return notifyDialog({
+    ...options,
+    actions: {
+      primary: {
+        value: options.confirm?.value ?? true,
+        label: options.confirm?.label || labels.ok,
+      },
+    },
+  })
 }
+
+/** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
+export const confirmDialog = (
+  options: ConfirmDialogOptions
+): Promise<DialogActionValue> => {
+  const labels = dialogsAlikeStore.getDefaultActionLabels()
+  return notifyDialog({
+    ...options,
+    actions: {
+      primary: {
+        value: options.confirm?.value ?? true,
+        label: options.confirm?.label || labels.ok,
+      },
+      secondary: {
+        value: options.cancel?.value ?? false,
+        label: options.cancel?.label || labels.cancel,
+      },
+    },
+  })
+}
+
+/** Programmatically close a dialog by id (resolves its promise with undefined). */
+export const closeDialog = (id: DialogId) => close(id)
+
+/**
+ * Open a drawer. Resolves with the value of the action the user picked.
+ *
+ * @example
+ * const result = await openDrawer({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ */
+export const openDrawer = (definition: Optional<DrawerDefinition, "id">) =>
+  openDrawerInternal({ ...definition, variant: "drawer" })
+
+/** Programmatically close a drawer by id (resolves its promise with undefined). */
+export const closeDrawer = (id: DialogId) => close(id)

@@ -79,7 +79,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function DeleteItemButton() {
   const handleClick = async () => {
-    const result = await dialog.confirm({
+    const result = await confirmDialog({
       title: "Delete Item",
       msg: "Are you sure you want to delete this item? This action cannot be undone.",
     })
@@ -119,7 +119,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showNotification = async () => {
-    await dialog.notification({
+    await notifyDialog({
       title: "Notification Title",
       msg: "This is a notification message",
       type: "critical",
@@ -147,7 +147,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showAlert = async () => {
-    await dialog.alert({
+    await alertDialog({
       title: "Alert Title",
       msg: "This is an alert message",
     })
@@ -169,7 +169,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const handleDelete = async () => {
-    const result = await dialog.confirm({
+    const result = await confirmDialog({
       title: "Delete Item",
       msg: "Are you sure you want to delete this item?",
     })
@@ -199,7 +199,7 @@ import { Delete, Pencil } from "@factorialco/f0-react/icons/app"
 
 function MyComponent() {
   const showCustomDialog = async () => {
-    const result = await dialog.open({
+    const result = await openDialog({
       title: "Dialog Title",
       description: "Dialog Description",
       content: <div>Custom dialog content goes here</div>,
@@ -245,7 +245,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const handleSave = async () => {
-    const result = await dialog.confirm(
+    const result = await confirmDialog(
       "Save Changes",
       "Do you want to save?",
       {
@@ -276,7 +276,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showDialog = async () => {
-    const result = await dialog.open({
+    const result = await openDialog({
       title: "Process Data",
       description: "Choose an action",
       content: <div>Processing options...</div>,
@@ -311,9 +311,9 @@ function MyComponent() {
 
 By default, clicking any action closes the dialog. When `keepOpen: true` is set on a `DialogAction`, the dialog **resolves the promise but stays open** — the item is not removed from the screen.
 
-The action's `value` (including a function `value`) still runs on **every** click, so `keepOpen` is ideal for "apply"-style actions that mutate something without dismissing the dialog. To actually close it afterwards, either click a different action that does _not_ set `keepOpen`, or call `dialog.close(id)` with the `id` you passed to `dialog.open`.
+The action's `value` (including a function `value`) still runs on **every** click, so `keepOpen` is ideal for "apply"-style actions that mutate something without dismissing the dialog. To actually close it afterwards, either click a different action that does _not_ set `keepOpen`, or call `closeDialog(id)` with the `id` you passed to `dialog.open`.
 
-> Note: a promise resolves only once. The `await dialog.open(...)` call returns the first time a `keepOpen` action is clicked, but the dialog remains visible and the action keeps firing on subsequent clicks.
+> Note: a promise resolves only once. The `await openDialog(...)` call returns the first time a `keepOpen` action is clicked, but the dialog remains visible and the action keeps firing on subsequent clicks.
 
 ```tsx
 import { useState } from "react"
@@ -323,7 +323,7 @@ function MyComponent() {
   const [count, setCount] = useState(0)
 
   const showKeepOpenDialog = () => {
-    dialog.open({
+    openDialog({
       id: "keep-open-demo",
       title: "Keep Open",
       content: <div>Click Increment a few times — the dialog stays open.</div>,
@@ -359,7 +359,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showNonBlockingDialog = async () => {
-    const result = await dialog.open({
+    const result = await openDialog({
       title: "Non-Blocking Action",
       content: <div>Click "Start", then notice "Cancel" is still enabled.</div>,
       actions: {
@@ -391,7 +391,7 @@ function MyComponent() {
 
 ### Modal
 
-By default a dialog can be dismissed by clicking the overlay (outside the dialog) or pressing <kbd>Escape</kbd>. Pass `modal: true` to make the dialog **require an explicit action** — clicking outside plays a subtle shake animation instead of closing, and <kbd>Escape</kbd> is ignored. The only way to close a modal dialog is through one of its actions (or programmatically via `dialog.close(id)`).
+By default a dialog can be dismissed by clicking the overlay (outside the dialog) or pressing <kbd>Escape</kbd>. Pass `modal: true` to make the dialog **require an explicit action** — clicking outside plays a subtle shake animation instead of closing, and <kbd>Escape</kbd> is ignored. The only way to close a modal dialog is through one of its actions (or programmatically via `closeDialog(id)`).
 
 Use it for decisions the user must consciously resolve — e.g. confirming a destructive action or completing a required step — where an accidental dismissal would be costly.
 
@@ -400,7 +400,7 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showModalDialog = async () => {
-    const result = await dialog.open({
+    const result = await openDialog({
       title: "Modal Dialog",
       description:
         "This dialog cannot be closed by clicking outside or pressing Escape.",

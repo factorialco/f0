@@ -11,7 +11,15 @@ export { experimentalComponent as experimental } from "./experimental"
 export { OneEllipsis } from "./OneEllipsis"
 export { PrivacyModeProvider, usePrivacyMode } from "./privacyMode"
 export * from "./providers/datacollection/exports"
-export { dialog, drawer } from "./providers/dialogs-alike"
+export {
+  openDialog,
+  notifyDialog,
+  alertDialog,
+  confirmDialog,
+  closeDialog,
+  openDrawer,
+  closeDrawer,
+} from "./providers/dialogs-alike"
 export type {
   DialogDefinition,
   DialogActions,
