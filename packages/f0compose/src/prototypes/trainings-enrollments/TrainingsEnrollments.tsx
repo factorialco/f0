@@ -123,7 +123,7 @@ type ViewId =
   | "budget-detail"
   | "survey-template-detail"
   | "edit-course"
-type ToastId = "copied" | "draft" | "published" | "export" | "template" | "settings" | "free-course" | null
+type ToastId = "copied" | "draft" | "published" | "export" | "template" | "settings" | "free-course" | "assigned" | null
 type CourseActionDialogId =
   | "course-settings"
   | "revert-course"
@@ -4667,6 +4667,7 @@ function CourseDetail({
               activeDetailTab={activeDetailTab}
               onOpenDialog={setActiveDialog}
               onOpenClassWizard={handleCreateGroup}
+              onToast={onToast}
           />
         </F0Box>
       </StandardLayout>
@@ -4727,15 +4728,17 @@ function CourseDetailTabBody({
   activeDetailTab,
   onOpenDialog,
   onOpenClassWizard,
+  onToast,
 }: {
   course: ExactCourse
   activeDetailTab: CourseDetailTabId
   onOpenDialog: (dialog: CourseActionDialogId) => void
   onOpenClassWizard: () => void
+  onToast: (toast: ToastId) => void
 }) {
   if (activeDetailTab === "content") return <CourseContentTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "training-groups") return <CourseGroupsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
-  if (activeDetailTab === "participants") return <CourseParticipantsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
+  if (activeDetailTab === "participants") return <CourseParticipantsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} onToast={onToast} />
   if (activeDetailTab === "materials") return <CourseMaterialsTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "documents") return <CourseDocumentsTab onOpenDialog={onOpenDialog} />
   return <CourseSurveysTab onOpenDialog={onOpenDialog} />
@@ -4941,10 +4944,75 @@ function CourseGroupsTab({
   )
 }
 
-function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { course: ExactCourse; onOpenDialog: (dialog: CourseActionDialogId) => void; onOpenClassWizard: () => void }) {
+// Bulk "Assign to group" flow. With existing groups it shows a group picker; with
+// none it prompts to create one directly (which opens the new-group wizard).
+function AssignToGroupDialog({
+  course,
+  isOpen,
+  onClose,
+  onConfirm,
+  onCreateGroup,
+}: {
+  course: ExactCourse
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  onCreateGroup: () => void
+}) {
+  const groups = course.groups
+  const [group, setGroup] = useState<string>(groups[0] ?? "")
+  if (!isOpen) return null
+
+  // No groups yet → there's nothing to assign into, so offer to create one.
+  if (groups.length === 0) {
+    return (
+      <F0Dialog
+        isOpen
+        onClose={onClose}
+        width="md"
+        title="Assign to a group"
+        description="This course doesn't have any training groups yet. Create one to assign these people into it."
+        primaryAction={{ label: "Create group", onClick: onCreateGroup }}
+        secondaryAction={{ label: "Cancel", onClick: onClose }}
+      />
+    )
+  }
+
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      width="md"
+      title="Assign to a group"
+      description="Choose the training group to assign the selected people into."
+      primaryAction={{ label: "Assign", onClick: onConfirm, disabled: !group }}
+      secondaryAction={{ label: "Cancel", onClick: onClose }}
+    >
+      <F0Box display="flex" flexDirection="column" gap="md">
+        <F0Select
+          options={groups.map((g) => ({ value: g, label: g }))}
+          value={group}
+          onChange={(value: string) => setGroup(value)}
+          label="Training group"
+          placeholder="Select a group"
+        />
+        <div className="flex">
+          <F0Link variant="link" onClick={onCreateGroup} prepend={<F0Icon icon={Add} size="xs" />}>
+            Create a new group instead
+          </F0Link>
+        </div>
+      </F0Box>
+    </F0Dialog>
+  )
+}
+
+function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard, onToast }: { course: ExactCourse; onOpenDialog: (dialog: CourseActionDialogId) => void; onOpenClassWizard: () => void; onToast: (toast: ToastId) => void }) {
   // The overview's "View pending" link lands here with the pending filter pre-applied.
   const [searchParams] = useSearchParams()
   const pendingPreset = searchParams.get("pfilter") === "pending"
+  // "Assign to group" bulk action opens a group picker (or a create-group prompt
+  // when the course has none yet).
+  const [assignOpen, setAssignOpen] = useState(false)
   // Participants are derived from the course so the "Pending group assignment"
   // count matches exactly what the overview's enrollment alert shows.
   const participants = useMemo(
@@ -5046,12 +5114,13 @@ function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { co
   )
 
   return (
+    <>
     <OneDataCollection
       id="trainings-enrollments/course-participants/v1"
       storage={false}
       source={source}
       onBulkAction={(action: string) => {
-        if (action === "assign-to-group") onOpenClassWizard()
+        if (action === "assign-to-group") setAssignOpen(true)
       }}
       visualizations={[
         {
@@ -5083,6 +5152,20 @@ function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { co
         },
       ]}
     />
+    <AssignToGroupDialog
+      course={course}
+      isOpen={assignOpen}
+      onClose={() => setAssignOpen(false)}
+      onConfirm={() => {
+        setAssignOpen(false)
+        onToast("assigned")
+      }}
+      onCreateGroup={() => {
+        setAssignOpen(false)
+        onOpenClassWizard()
+      }}
+    />
+    </>
   )
 }
 
@@ -7097,6 +7180,7 @@ function FeedbackBanner({ toast }: { toast: Exclude<ToastId, null> }) {
     template: "Template download started locally.",
     settings: "Training settings changed locally for this prototype.",
     "free-course": "Free AI Act course opened locally from the Training catalog.",
+    assigned: "Participants assigned to the group locally for the prototype.",
   }[toast]
 
   return (
