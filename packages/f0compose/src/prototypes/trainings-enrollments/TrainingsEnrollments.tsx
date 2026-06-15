@@ -119,7 +119,7 @@ type ViewId =
   | "budget-detail"
   | "survey-template-detail"
   | "edit-course"
-type ToastId = "copied" | "draft" | "export" | "template" | "settings" | "free-course" | null
+type ToastId = "copied" | "draft" | "published" | "export" | "template" | "settings" | "free-course" | null
 type CourseActionDialogId =
   | "course-settings"
   | "revert-course"
@@ -1117,6 +1117,9 @@ export default function TrainingsEnrollments() {
       code: typeof values.internalCode === "string" && values.internalCode.trim() ? values.internalCode.trim() : "DRAFT",
       status: "draft",
       participants: 0,
+      // Brand-new course: nobody enrolled yet, so nobody can be pending group
+      // assignment. (Without this it would inherit courses[0]'s pendingCount.)
+      pendingCount: 0,
       validityExpired: 0,
       catalogVisible: false,
       requirement: values.mandatoryCourse === true ? "mandatory" : "not-mandatory",
@@ -1165,6 +1168,15 @@ export default function TrainingsEnrollments() {
       )
     )
     setToast("draft")
+  }
+
+  const publishCourse = (courseId: string) => {
+    setCourses((currentCourses) =>
+      currentCourses.map((course) =>
+        course.id === courseId ? { ...course, status: "active" } : course
+      )
+    )
+    setToast("published")
   }
 
   // Creating a 2nd group in a one-time course converts it to recurring (irreversible).
@@ -1220,6 +1232,7 @@ export default function TrainingsEnrollments() {
         toast={toast}
         onToast={setToast}
         onRevertToDraft={() => revertCourseToDraft(selectedCourse.id)}
+        onPublish={() => publishCourse(selectedCourse.id)}
         onConvertToRecurring={() => convertToRecurringAndAddGroup(selectedCourse.id)}
       />
     )
@@ -4311,12 +4324,14 @@ function CourseDetail({
   toast,
   onToast,
   onRevertToDraft,
+  onPublish,
   onConvertToRecurring,
 }: {
   course: ExactCourse
   toast: ToastId
   onToast: (toast: ToastId) => void
   onRevertToDraft: () => void
+  onPublish: () => void
   onConvertToRecurring: () => void
 }) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -4371,7 +4386,14 @@ function CourseDetail({
           />
           <ResourceHeader
             title={course.name}
-            status={{ label: "Status", text: "Published", variant: "positive" }}
+            status={
+              course.status === "active"
+                ? { label: "Status", text: "Published", variant: "positive" }
+                : { label: "Status", text: "Draft", variant: "neutral" }
+            }
+            primaryAction={
+              course.status === "active" ? undefined : { label: "Publish", onClick: onPublish }
+            }
             metadata={[
               {
                 label: "Course type",
@@ -4392,11 +4414,16 @@ function CourseDetail({
                 icon: Settings,
                 onClick: () => setSearchParams({ view: "edit-course", course: course.id }),
               },
-              {
-                label: "Revert to draft",
-                icon: Archive,
-                onClick: () => setActiveDialog("revert-course"),
-              },
+              // "Revert to draft" only makes sense once the course is published.
+              ...(course.status === "active"
+                ? [
+                    {
+                      label: "Revert to draft",
+                      icon: Archive,
+                      onClick: () => setActiveDialog("revert-course"),
+                    },
+                  ]
+                : []),
             ]}
           />
           <Tabs key={activeDetailTab} tabs={detailTabsWithNav} activeTabId={activeDetailTab} />
@@ -6271,7 +6298,9 @@ function EnrollmentSidebarBlock({
   onSetUp?: () => void
 }) {
   const rule = course.enrollmentRule
-  const pending = course.pendingCount ?? 0
+  // Pending group assignment only exists for recurring courses — one-time courses
+  // enrol people straight into their single always-active group.
+  const pending = course.courseType === "with-editions" ? (course.pendingCount ?? 0) : 0
 
   const pendingAlert =
     pending > 0 ? (
@@ -6813,6 +6842,7 @@ function FeedbackBanner({ toast }: { toast: Exclude<ToastId, null> }) {
   const message = {
     copied: "Link copied, matching the production copy-link action.",
     draft: "Course state changed locally for the prototype.",
+    published: "Course published locally for the prototype.",
     export: "Export prepared locally. Production stays on the export route.",
     template: "Template download started locally.",
     settings: "Training settings changed locally for this prototype.",
