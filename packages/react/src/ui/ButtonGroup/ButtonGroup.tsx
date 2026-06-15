@@ -110,8 +110,6 @@ export interface ButtonGroupProps {
   otherActions?: DropdownItem[]
   /** Button + menu-trigger size. Responsive `{ base, md }` flips with `stack`. @default "md" */
   size?: ButtonGroupSize
-  /** Pixel gap between items. @default 8 */
-  gap?: number
   /** Row alignment. @default "end" */
   align?: "end" | "between"
   /** Stack into a column below the named viewport / container breakpoint. @default "none" */
@@ -130,6 +128,11 @@ export interface ButtonGroupProps {
 }
 
 const BREAKPOINT_PX = { sm: 640, md: 768, "container-md": 448 } as const
+
+// Fixed gap between items, in pixels. The visible spacing is rendered with the
+// `gap-md` Tailwind class; this constant feeds the width-measured overflow math
+// (which needs a number) and MUST stay in sync with the `gap-md` token (8px).
+const BUTTON_GROUP_GAP_PX = 8
 
 const isInlineSeparator = (
   item: ButtonGroupSecondaryItem
@@ -213,7 +216,6 @@ interface ButtonGroupBranchProps {
   secondaryLink?: ButtonGroupSecondaryLink
   otherActions: DropdownItem[]
   size: ButtonSize
-  gap: number
   align: "end" | "between"
   canOverflow: boolean
 }
@@ -242,7 +244,6 @@ export function ButtonGroup({
   secondaryActions,
   otherActions = [],
   size = "md",
-  gap = 8,
   align = "end",
   stack = "none",
   fullWidthOnStack = false,
@@ -290,7 +291,6 @@ export function ButtonGroup({
     secondaryLink,
     otherActions,
     size: resolvedSize,
-    gap,
     align,
     canOverflow,
   }
@@ -304,7 +304,7 @@ export function ButtonGroup({
           ? // Keep the pinned trailing items (splits, divider, primary) at their
             // natural width; only the first child — the flex-1 cluster — shrinks,
             // so the title truncates against it rather than squeezing the buttons.
-            "flex w-full items-center [&>*:not(:first-child)]:shrink-0"
+            "flex w-full items-center gap-md [&>*:not(:first-child)]:shrink-0"
           : buttonGroupVariants({
               align,
               stack,
@@ -313,7 +313,6 @@ export function ButtonGroup({
             }),
         className
       )}
-      style={{ gap }}
     >
       {isRowMode ? (
         <ButtonGroupRow key="row" {...branchProps} />
@@ -360,7 +359,6 @@ function ButtonGroupRow({
   secondaryLink,
   otherActions,
   size,
-  gap,
   align,
   canOverflow,
 }: ButtonGroupBranchProps) {
@@ -380,7 +378,7 @@ function ButtonGroupRow({
     visibleItems,
     overflowItems,
     isInitialized,
-  } = useOverflowCalculation(plainSecondaries, gap)
+  } = useOverflowCalculation(plainSecondaries, BUTTON_GROUP_GAP_PX)
 
   // `inert` isn't a typed JSX prop in this React version, so set it on the
   // measurement copy imperatively — it removes the copy from focus + a11y.
@@ -459,10 +457,9 @@ function ButtonGroupRow({
           // `[&>*]:shrink-0` keeps each rendered secondary, separator, link and
           // the "⋯" trigger at its natural width: the row overflows by shedding
           // into the menu, never by squeezing a button to nothing.
-          "relative flex min-w-0 flex-1 items-center [&>*]:shrink-0",
+          "relative flex min-w-0 flex-1 items-center gap-md [&>*]:shrink-0",
           align === "end" && "justify-end"
         )}
-        style={{ gap }}
       >
         {/* Hidden measurement copy, used to compute the visible/overflow split.
             Skipped when the group can't overflow — nothing is ever measured away. */}
@@ -470,8 +467,7 @@ function ButtonGroupRow({
           <div
             ref={measurementContainerRef}
             aria-hidden="true"
-            className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
-            style={{ gap }}
+            className="pointer-events-none invisible absolute left-0 top-0 flex items-center gap-md whitespace-nowrap"
           >
             {plainSecondaries.map((action) =>
               renderActionButton(action, size, "outline")

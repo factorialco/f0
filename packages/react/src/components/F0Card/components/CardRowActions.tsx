@@ -16,9 +16,6 @@ import {
   type CardSecondaryLink,
 } from "./CardActions"
 
-// Pixel gap between the trailing controls — mirrors the `gap-2` used elsewhere.
-const GAP = 8
-
 /**
  * Container breakpoint at which the card row switches between its inline and its
  * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
@@ -237,7 +234,6 @@ export function CardRowActions({
           primaryAction={confirm}
           secondaryActions={reject ? [reject] : undefined}
           size={size}
-          gap={GAP}
           // The confirm/reject pair must always stay inline — the reject button
           // must never shed into the "⋯" menu.
           canOverflow={false}
@@ -336,7 +332,6 @@ export function CardRowActions({
       secondaryActions={secondaryItems}
       otherActions={otherActions}
       size={size}
-      gap={GAP}
     />
   )
 }
