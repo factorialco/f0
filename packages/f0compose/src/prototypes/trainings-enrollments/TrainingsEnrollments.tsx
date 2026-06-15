@@ -6500,7 +6500,7 @@ function SideInfo({
     <F0Box
       display="flex"
       flexDirection="column"
-      gap="lg"
+      gap="2xl"
       shrink={false}
       width="1/4"
     >
