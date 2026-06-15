@@ -1,6 +1,6 @@
 import { forwardRef } from "react"
 
-import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Skeleton } from "@/ui/skeleton"
 
 import { withSkeleton } from "../../../../../lib/skeleton"
@@ -23,7 +23,7 @@ export const BasePostDescription = forwardRef<
   ref
 ) {
   return (
-    <RichTextDisplay
+    <F0RichTextDisplay
       ref={ref}
       id={id}
       content={content}

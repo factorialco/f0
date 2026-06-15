@@ -11,7 +11,7 @@ import { f0FormField } from "../f0Schema"
 // Mock the EditorBubbleMenu to avoid unhandled tippy.js errors in jsdom.
 // TipTap's BubbleMenu uses tippy.js which isn't available in jsdom, and its
 // focusHandler sets a setTimeout that fires after tests complete.
-vi.mock("@/components/RichText/CoreEditor/BubbleMenu", () => ({
+vi.mock("@/components/RichText/internal/BubbleMenu", () => ({
   EditorBubbleMenu: () => null,
 }))
 

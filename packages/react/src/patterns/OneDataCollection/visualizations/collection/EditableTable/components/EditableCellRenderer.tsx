@@ -4,7 +4,7 @@ import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
 
-import { editableCellMap } from "../consts"
+import { editableCellMap, typingEditTypes } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
@@ -68,6 +68,11 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
+  // Typing cells debounce the parent notification so it fires once when the
+  // user stops typing; discrete cells (select, date...) commit immediately.
+  const debounce =
+    cellEditType !== undefined && typingEditTypes.has(cellEditType)
+
   const onChange = (
     value: string | null,
     context?: { selectedItem?: RecordType }
@@ -87,12 +92,15 @@ export function EditableCellRenderer<
           },
         })
 
-        batchCellChanges({
-          [editableColumn.id]: value,
-          ...formulaUpdates,
-        })
+        batchCellChanges(
+          {
+            [editableColumn.id]: value,
+            ...formulaUpdates,
+          },
+          { debounce }
+        )
       } else {
-        handleCellChange(editableColumn.id, value)
+        handleCellChange(editableColumn.id, value, { debounce })
       }
     }
   }

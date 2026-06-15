@@ -53,10 +53,6 @@ const meta: Meta<typeof F0CardRow> = {
       control: "boolean",
       description: "Stretch to fill the height of the container.",
     },
-    link: {
-      control: "text",
-      description: "When set, the whole row becomes a link to this href.",
-    },
     // Function-bearing props: disable the control so it doesn't dump the
     // serialized mock fn() source. They still appear in the args table.
     primaryAction: {
@@ -83,10 +79,6 @@ const meta: Meta<typeof F0CardRow> = {
     alert: {
       control: false,
       description: "Alert banner displayed above the row.",
-    },
-    onClick: {
-      action: "clicked",
-      description: "Called when the row is clicked.",
     },
   },
   decorators: [
@@ -275,7 +267,7 @@ export const WithAlert: Story = {
 
 /**
  * The `avatar` prop accepts every single-avatar type in the system — person,
- * company, team, file, flag, icon, emoji, module, alert, date and pulse — each
+ * company, team, file, flag, icon, emoji, module, alert and date — each
  * rendered at a single, fixed size on the left (the size is not configurable).
  */
 export const AvatarTypes: Story = {
@@ -351,18 +343,6 @@ export const AvatarTypes: Story = {
         avatar={{ type: "date", date: new Date(2026, 5, 5) }}
         title="Team offsite"
         description="Date avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
-      />
-      <F0CardRow
-        avatar={{
-          type: "pulse",
-          firstName: "Jane",
-          lastName: "Cooper",
-          pulse: "positive",
-          onPulseClick: fn(),
-        }}
-        title="Jane Cooper"
-        description="Pulse avatar"
         primaryAction={{ label: "Open", onClick: fn() }}
       />
     </div>
