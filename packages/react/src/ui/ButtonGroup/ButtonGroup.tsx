@@ -103,6 +103,12 @@ export interface ButtonGroupProps {
   fullWidthOnStack?: boolean
   /** Reverse the stacked column so the primary lands on top. */
   reverseOnStack?: boolean
+  /**
+   * When `false`, secondary buttons never shed into the "⋯" menu — they always
+   * render inline (e.g. a confirm/reject pair that must never collapse).
+   * `otherActions` still populate the menu when present. @default true
+   */
+  canOverflow?: boolean
   className?: string
 }
 
@@ -190,6 +196,7 @@ interface ButtonGroupBranchProps {
   size: ButtonSize
   gap: number
   align: "end" | "between"
+  canOverflow: boolean
 }
 
 /**
@@ -221,6 +228,7 @@ export function ButtonGroup({
   stack = "none",
   fullWidthOnStack = false,
   reverseOnStack = false,
+  canOverflow = true,
   className,
 }: ButtonGroupProps) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -265,6 +273,7 @@ export function ButtonGroup({
     size: resolvedSize,
     gap,
     align,
+    canOverflow,
   }
 
   return (
@@ -273,7 +282,10 @@ export function ButtonGroup({
       role="group"
       className={cn(
         isRowMode
-          ? "flex w-full items-center"
+          ? // Keep the pinned trailing items (splits, divider, primary) at their
+            // natural width; only the first child — the flex-1 cluster — shrinks,
+            // so the title truncates against it rather than squeezing the buttons.
+            "flex w-full items-center [&>*:not(:first-child)]:shrink-0"
           : buttonGroupVariants({
               align,
               stack,
@@ -331,6 +343,7 @@ function ButtonGroupRow({
   size,
   gap,
   align,
+  canOverflow,
 }: ButtonGroupBranchProps) {
   // Only plain buttons are width-measured; splits + separators are pinned/excluded.
   // Memoized so the reference is stable across renders — a fresh array would
@@ -357,8 +370,14 @@ function ButtonGroupRow({
   }, [measurementContainerRef])
 
   // Before the first measurement, optimistically show everything to avoid a flash.
-  const shownPlain = isInitialized ? visibleItems : plainSecondaries
-  const overflowedPlain = isInitialized ? overflowItems : []
+  // When `canOverflow` is false the group never sheds: every secondary stays
+  // inline and nothing is measured away into the "⋯" menu.
+  const shownPlain = !canOverflow
+    ? plainSecondaries
+    : isInitialized
+      ? visibleItems
+      : plainSecondaries
+  const overflowedPlain = !canOverflow ? [] : isInitialized ? overflowItems : []
   const shownIds = new Set(shownPlain.map((action) => action.id))
 
   const primaryNode = primaryAction
@@ -418,22 +437,28 @@ function ButtonGroupRow({
       <div
         ref={containerRef}
         className={cn(
-          "relative flex min-w-0 flex-1 items-center",
+          // `[&>*]:shrink-0` keeps each rendered secondary, separator, link and
+          // the "⋯" trigger at its natural width: the row overflows by shedding
+          // into the menu, never by squeezing a button to nothing.
+          "relative flex min-w-0 flex-1 items-center [&>*]:shrink-0",
           align === "end" && "justify-end"
         )}
         style={{ gap }}
       >
-        {/* Hidden measurement copy, used to compute the visible/overflow split. */}
-        <div
-          ref={measurementContainerRef}
-          aria-hidden="true"
-          className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
-          style={{ gap }}
-        >
-          {plainSecondaries.map((action) =>
-            renderActionButton(action, size, "outline")
-          )}
-        </div>
+        {/* Hidden measurement copy, used to compute the visible/overflow split.
+            Skipped when the group can't overflow — nothing is ever measured away. */}
+        {canOverflow && (
+          <div
+            ref={measurementContainerRef}
+            aria-hidden="true"
+            className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
+            style={{ gap }}
+          >
+            {plainSecondaries.map((action) =>
+              renderActionButton(action, size, "outline")
+            )}
+          </div>
+        )}
 
         {menuItems.length > 0 && (
           <div ref={customOverflowIndicatorRef}>
