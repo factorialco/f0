@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.1](https://github.com/factorialco/f0/compare/f0-react-v3.2.0...f0-react-v3.2.1) (2026-06-15)
+
+
+### Bug Fixes
+
+* **datacollection:** keep kanban lanes from sticking on loading skeletons ([#4443](https://github.com/factorialco/f0/issues/4443)) ([35c25f4](https://github.com/factorialco/f0/commit/35c25f42e9d04c04d9017fd5b732d024e1b4c6a9))
+
 ## [3.2.0](https://github.com/factorialco/f0/compare/f0-react-v3.1.0...f0-react-v3.2.0) (2026-06-15)
 
 
