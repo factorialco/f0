@@ -17,6 +17,7 @@ import {
   F0Select,
   F0TagAlert,
   F0TagRaw,
+  F0TagStatus,
   F0Text,
   F0WizardForm,
   StandardLayout,
@@ -6336,13 +6337,15 @@ function getGroupActionDetail(dialog: GroupActionDialogId, groupName: string): T
   }
 }
 
-// Enrollment status in the course overview sidebar. Read-only, styled like the
-// other sidebar fields (bold label + value). When people are stuck in "pending
-// group assignment" it surfaces a compact warning F0TagAlert — low-noise (the
-// overview already has a top alert for completion settings) but still signals the
-// training manager that something needs attention (there's no notification yet).
-// The whole pill is clickable and jumps to the Participants list pre-filtered to
-// "Pending group assignment", where the TM can assign people to a group.
+// Enrollment status in the course overview sidebar. It answers two questions at a
+// glance: (1) is enrollment happening, and of what kind — a coloured F0TagStatus
+// shows "Automatic" (info) vs "Manual" (neutral); for automatic, compact criteria
+// tags show *who*. (2) is there an action to take — when people are stuck waiting
+// for a group it surfaces one warning F0TagAlert (the only amber element, so the
+// eye goes straight to it). The pill is clickable and jumps to the Participants
+// list pre-filtered to "Pending group assignment", where the TM assigns them.
+// There is no "automatic · inactive" state in this model — a rule is either set
+// (automatic) or absent (manual) — so the mode tag never carries a status suffix.
 function EnrollmentSidebarBlock({
   course,
   onViewPending,
@@ -6361,35 +6364,51 @@ function EnrollmentSidebarBlock({
         type="button"
         onClick={() => onViewPending?.()}
         className="w-fit cursor-pointer"
-        aria-label={`${pending} pending group assignment — open in participants`}
+        aria-label={`${pending} ${pending === 1 ? "person" : "people"} waiting for a group — open in participants`}
       >
-        <F0TagAlert level="warning" text={`${pending} pending group assignment`} />
+        <F0TagAlert level="warning" text={`${pending} waiting for a group`} />
       </button>
     ) : null
 
   // Manual: no automatic rule (also covers "just created, not configured").
   if (!rule) {
     return (
-      <F0Box display="flex" flexDirection="column" gap="xs">
+      <F0Box display="flex" flexDirection="column" gap="sm">
         <F0Text content="Enrollment" variant="label" />
-        <F0Text content="Manual" variant="body" />
-        <F0Text content="Added by hand from the Participants list." variant="description" />
+        <div className="flex">
+          <F0TagStatus variant="neutral" text="Manual" />
+        </div>
+        <F0Text
+          content="No one is enrolled automatically. Add people from the Participants list."
+          variant="description"
+        />
         {pendingAlert}
         <EnrollmentActionLink label="Set up automatic enrollment" onClick={onSetUp} />
       </F0Box>
     )
   }
 
-  // Automatic. "Who" summary, truncated by criteria count so it never breaks layout.
+  // Automatic. Criteria shown as compact tags, truncated so it never breaks layout.
   const criteria = rule.criteria
-  const audience =
-    criteria.length > 2 ? `${criteria[0]} · +${criteria.length - 1} more` : criteria.join(" · ")
+  const MAX_TAGS = 3
+  const shownCriteria = criteria.slice(0, MAX_TAGS)
+  const extraCriteria = criteria.length - shownCriteria.length
 
   return (
-    <F0Box display="flex" flexDirection="column" gap="xs">
+    <F0Box display="flex" flexDirection="column" gap="sm">
       <F0Text content="Enrollment" variant="label" />
-      <F0Text content="Automatic · active" variant="body" />
-      <F0Text content={audience} variant="description" />
+      <div className="flex">
+        <F0TagStatus variant="info" text="Automatic" />
+      </div>
+      <F0Text content="Anyone matching is enrolled automatically." variant="description" />
+      {criteria.length > 0 && (
+        <F0Box display="flex" flexWrap="wrap" gap="xs">
+          {shownCriteria.map((item) => (
+            <F0TagRaw key={item} text={item} />
+          ))}
+          {extraCriteria > 0 && <F0TagRaw text={`+${extraCriteria} more`} />}
+        </F0Box>
+      )}
       {pendingAlert}
     </F0Box>
   )
