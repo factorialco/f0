@@ -7,7 +7,6 @@ import {
   F0Dialog,
   F0Heading,
   F0Icon,
-  F0Link,
   F0Text,
   F0Select,
 } from "@factorialco/f0-react"
@@ -354,13 +353,13 @@ export function CostsTab({ training, klass }: Props) {
               content={formatMoney(totalCost, currency)}
             />
             {linkedMovement && (
-              <F0Link
-                variant="link"
+              <F0Button
+                label="View per participant"
+                variant="ghost"
+                size="sm"
                 disabled={costsByLegalEntityEnabled}
                 onClick={() => setCostPerParticipantOpen(true)}
-              >
-                View per participant
-              </F0Link>
+              />
             )}
           </F0Box>
         </F0Box>
