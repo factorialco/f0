@@ -67,7 +67,7 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
-  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
   cellRenderer?: React.ComponentType<
@@ -111,6 +111,7 @@ const referenceTypeClasses: Record<ReferenceType, string> = {
   none: "",
   striped:
     "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]",
+  striked: "[&_*]:line-through text-f1-foreground-secondary",
 }
 
 const RowComponentInner = <

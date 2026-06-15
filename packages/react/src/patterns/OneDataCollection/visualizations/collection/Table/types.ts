@@ -96,7 +96,7 @@ export type TableColumnDefinition<
     headerGroupId?: string
   }
 
-export type ReferenceType = "none" | "striped"
+export type ReferenceType = "none" | "striped" | "striked"
 
 export type TableVisualizationOptions<
   R extends RecordType,
@@ -129,10 +129,7 @@ export type TableVisualizationOptions<
    */
   allowColumnHiding?: boolean
 
-  /**
-   * Marks one or more rows as reference rows.
-   * Reference rows are rendered with a slanted background pattern across the full row.
-   */
+  /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
   /**
    * Labels for header groups. Keys are headerGroupId values used in column
