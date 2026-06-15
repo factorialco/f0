@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0](https://github.com/factorialco/f0/compare/f0-react-v3.1.0...f0-react-v3.2.0) (2026-06-15)
+
+
+### Features
+
+* **navigation:** id-based callback mode for prev/next arrows ([#4425](https://github.com/factorialco/f0/issues/4425)) ([cd1eb92](https://github.com/factorialco/f0/commit/cd1eb92728f12930ad397d8bfdb919f380597374))
+
 ## [3.1.0](https://github.com/factorialco/f0/compare/f0-react-v3.0.1...f0-react-v3.1.0) (2026-06-12)
 
 
