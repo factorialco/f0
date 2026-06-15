@@ -24,6 +24,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
   activeTabId,
   setActiveTabId,
   disableContentPadding,
+  container,
 }) => {
   const [localIsOpen, setLocalIsOpen] = useState(isOpen)
 
@@ -78,6 +79,7 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
       showOverlay={modal}
       fullHeight
       onOpenChange={setLocalIsOpen}
+      container={container}
     >
       {_memoizedDialogLayout}
     </DialogWrapper>

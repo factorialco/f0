@@ -84,6 +84,13 @@ export type DialogWrapperProps = {
    * @default false
    */
   fullHeight?: boolean
+
+  /**
+   * Override the DOM element the dialog content is portaled into. When omitted,
+   * the default target depends on `position` (center -> `#f0-overlay-root`,
+   * side -> `#content`). Pass `null` to portal to `document.body`.
+   */
+  container?: HTMLElement | null
 }
 /**
  * This is a helper component to wrap the dialog content in a drawer or dialog component.
@@ -101,6 +108,7 @@ export const DialogWrapper = ({
   showOverlay = true,
   size = "md",
   fullHeight = false,
+  container,
 }: DialogWrapperProps) => {
   // Use state to store the container element so we can trigger re-renders
   // when it's set. This ensures child components like F0Select get the
@@ -168,6 +176,12 @@ export const DialogWrapper = ({
       right: "slideLeft",
       center: "zoom",
     }
+
+  // Center modals portal to the top-level overlay root so they escape app
+  // stacking contexts (e.g. the ApplicationFrame `isolate` layer where the AI
+  // canvas/chat would paint over them). Side drawers stay docked in `#content`.
+  const defaultContainerId =
+    position === "center" ? "f0-overlay-root" : "content"
   return (
     <DialogWrapperProvider
       isOpen={isOpen}
@@ -198,6 +212,8 @@ export const DialogWrapper = ({
         >
           <DialogContent
             ref={setContentRef}
+            container={container}
+            defaultContainerId={defaultContainerId}
             wrapperClassName={dialogWrapperClassName({ position })}
             className={cn(
               dialogContentClassName({ size: localSize }),
