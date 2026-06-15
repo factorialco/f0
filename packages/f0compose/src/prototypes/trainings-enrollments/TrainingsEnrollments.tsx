@@ -188,6 +188,23 @@ type FetchOptions = {
 }
 type StateSetter<T> = (value: T | ((current: T) => T)) => void
 
+// Which completion criteria a course requires. This is the single source of
+// truth that drives the overview "Completion settings" summary, the settings
+// checklist, AND which progress columns the Participants table shows.
+type CompletionCriteria = {
+  modules: boolean // LMS content must be completed
+  attendance: boolean // sessions must be attended (no sessions → false)
+  knowledgeTest: boolean // a knowledge test must be passed
+}
+
+function completionCriteriaLabels(criteria: CompletionCriteria): string[] {
+  const labels: string[] = []
+  if (criteria.modules) labels.push("Complete all modules")
+  if (criteria.attendance) labels.push("100% attendance required")
+  if (criteria.knowledgeTest) labels.push("Pass knowledge test")
+  return labels
+}
+
 type ExactCourse = Omit<Training, "objectives" | "courseType"> & {
   thumbnail?: string | null
   validityExpired: number
@@ -207,6 +224,7 @@ type ExactCourse = Omit<Training, "objectives" | "courseType"> & {
   catalogVisible: boolean
   categories: string[]
   competencies: string[]
+  completionCriteria: CompletionCriteria
   courseType?: "no-editions" | "with-editions"
   // People in "Pending group assignment" for this course. Independent of the
   // enrollment mode — manual courses can have pending people too (from requests,
@@ -304,10 +322,11 @@ type CourseParticipantRow = {
   certificate: string
   completionDate: string
   courseValidity: string
-  knowledgeTestResults: "Pending" | "Passed" | "Failed" | "-"
-  // LMS content progress (modules completed / total). These courses have no
-  // sessions, so there's no attendance — content consumption is what matters.
-  lmsContent: string
+  knowledgeTestResults: "Not started" | "Pending" | "Passed" | "Failed"
+  // Progress against each completion criterion. Which of these columns the
+  // Participants table actually shows depends on the course's completionCriteria.
+  lmsContent: string // modules completed / total
+  sessionAttendance: string // sessions attended / total
 }
 type CourseResourceRow = {
   id: string
@@ -618,6 +637,12 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
     description:
       "This course provides a clear, practical introduction focused on concepts that any employee can understand and apply. Participants learn through short examples, activities and completion checks.",
     validity: index === 0 ? "1 year" : "No expiration",
+    // Completion criteria drive which progress columns the Participants table shows.
+    // One-time/self-paced courses (index 1) have no sessions → no attendance.
+    completionCriteria:
+      index === 1
+        ? { modules: true, attendance: false, knowledgeTest: true }
+        : { modules: true, attendance: true, knowledgeTest: true },
     totalCost: index === 0 ? "40 EUR" : "0 EUR",
     salaryCost: index === 0 ? "7940.40 EUR" : "-",
     subsidizedCost: index === 0 ? "2000 EUR" : "-",
@@ -906,8 +931,9 @@ function buildCourseParticipants(pendingCount: number): CourseParticipantRow[] {
       certificate: completed ? "Issued" : "-",
       completionDate: completed ? `2026-0${(index % 5) + 1}-${15 + (index % 12)}` : "Not set",
       courseValidity: completed ? "2027-05-01" : "No date",
-      knowledgeTestResults: completed ? "Passed" : dropped ? "-" : pending || waitlisted ? "-" : index % 4 === 0 ? "Pending" : "Passed",
+      knowledgeTestResults: completed ? "Passed" : dropped || pending || waitlisted ? "Not started" : index % 4 === 0 ? "Pending" : "Passed",
       lmsContent: dropped || waitlisted || pending ? "0/3" : `${Math.min(index % 3 + 1, 3)}/3`,
+      sessionAttendance: dropped || waitlisted || pending ? "0/3" : `${Math.min(index % 3 + 1, 3)}/3`,
     }
   })
 }
@@ -4475,7 +4501,7 @@ function EditCourseCompletionSection({ course }: { course: ExactCourse }) {
       />
       <SettingsField label="Completion criteria">
         <F0Box display="flex" flexDirection="column" gap="sm">
-          {["Complete all modules", "100% attendance required", "Pass knowledge test"].map((item) => (
+          {completionCriteriaLabels(course.completionCriteria).map((item) => (
             <F0Box key={item} display="flex" alignItems="center" gap="sm">
               <F0Icon icon={CheckCircle} size="sm" color="positive" />
               <F0Text content={item} variant="body" />
@@ -4974,6 +5000,7 @@ function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { co
           label: "Knowledge test",
           options: {
             options: [
+              { value: "Not started", label: "Not started" },
               { value: "Pending", label: "Pending" },
               { value: "Passed", label: "Passed" },
               { value: "Failed", label: "Failed" },
@@ -5037,8 +5064,17 @@ function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { co
               { id: "certificate", label: "Certificate", render: (participant: CourseParticipantRow) => participant.certificate },
               { id: "completionDate", label: "Completion date", sorting: "completionDate", render: (participant: CourseParticipantRow) => participant.completionDate },
               { id: "courseValidity", label: "Course validity", render: (participant: CourseParticipantRow) => participant.courseValidity },
-              { id: "lmsContent", label: "LMS content", render: (participant: CourseParticipantRow) => participant.lmsContent },
-              { id: "knowledgeTestResults", label: "Knowledge test results", render: (participant: CourseParticipantRow) => participant.knowledgeTestResults },
+              // Progress columns mirror the course's completion criteria: a course
+              // with no sessions hides Session attendance, etc.
+              ...(course.completionCriteria.modules
+                ? [{ id: "lmsContent", label: "LMS content", render: (participant: CourseParticipantRow) => participant.lmsContent }]
+                : []),
+              ...(course.completionCriteria.attendance
+                ? [{ id: "sessionAttendance", label: "Session attendance", render: (participant: CourseParticipantRow) => participant.sessionAttendance }]
+                : []),
+              ...(course.completionCriteria.knowledgeTest
+                ? [{ id: "knowledgeTestResults", label: "Knowledge test results", render: (participant: CourseParticipantRow) => participant.knowledgeTestResults }]
+                : []),
             ],
             frozenColumns: 1,
             allowColumnReordering: true,
@@ -6661,7 +6697,7 @@ function SideInfo({
       <EnrollmentSidebarBlock course={course} onViewPending={onViewPending} onSetUp={onSetUp} />
       <SidebarField
         label="Completion settings"
-        value="Complete all modules, 100% attendance required, Pass knowledge test"
+        value={completionCriteriaLabels(course.completionCriteria).join(", ")}
       />
       <SidebarField label="Subsidy" value="Non-subsidized" />
       <SidebarField label="Workflow" value="Not linked to Workflows" />
