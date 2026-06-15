@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.4](https://github.com/factorialco/f0/compare/f0-react-v3.2.3...f0-react-v3.2.4) (2026-06-15)
+
+
+### Bug Fixes
+
+* **dialog-alike:** portal center modals to a top-level overlay root ([#4421](https://github.com/factorialco/f0/issues/4421)) ([00018b5](https://github.com/factorialco/f0/commit/00018b55ebde8d4f6b5e070e33c42ff27ac8bee9))
+
 ## [3.2.3](https://github.com/factorialco/f0/compare/f0-react-v3.2.2...f0-react-v3.2.3) (2026-06-15)
 
 
