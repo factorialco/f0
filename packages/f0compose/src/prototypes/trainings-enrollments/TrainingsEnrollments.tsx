@@ -580,7 +580,7 @@ const myCoursesTabs = [
   { id: "my-surveys", label: "My surveys" },
 ] as const
 
-const exactCourses = trainings.slice(0, 4).map((training, index) => {
+const exactCourses = trainings.slice(0, 5).map((training, index) => {
   const upstreamNames = [
     "Fundamentos de la gestión de calidad con ISO 9001",
     "Merchandising visual y organización de tiendas",
@@ -592,13 +592,13 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
     "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=300&fit=crop",
     "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=600&h=300&fit=crop",
   ]
-  const name = upstreamNames[index] ?? training.name
+  const name = index === 4 ? "Prevención de riesgos laborales" : upstreamNames[index] ?? training.name
   const code = upstreamCodes[index] ?? training.code
   const validityExpired = index < 3 ? 0 : training.expiredParticipantCount
 
   return {
     ...training,
-    id: index === 0 ? "7" : index === 1 ? "5" : index === 2 ? "6" : training.id,
+    id: index === 0 ? "7" : index === 1 ? "5" : index === 2 ? "6" : index === 4 ? "8" : training.id,
     name,
     code,
     status: (index < 8 ? "active" : training.status) as "active" | "draft",
@@ -615,7 +615,9 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
         ? ["Edición - enero 2025", "Edición - noviembre 2025"]
         : index === 2
           ? ["Edición - Q1 2025", "Edición - Q2 2025"]
-          : ["Default group"],
+          : index === 4
+            ? [] // recurring course with pending people but no group yet
+            : ["Default group"],
     competencies:
       index === 0
         ? ["Gestión de cumplimiento."]
@@ -648,13 +650,13 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
     subsidizedCost: index === 0 ? "2000 EUR" : "-",
     creationYear: index === 0 ? "2026" : "2025",
     courseType:
-      index === 0 || index === 2 || index === 3 ? "with-editions" : "no-editions",
+      index === 0 || index === 2 || index === 3 || index === 4 ? "with-editions" : "no-editions",
     // Pending group assignment count — independent of mode, but only meaningful for
     // recurring courses (one-time courses enrol people straight into their single
     // group). Index 0 = automatic + pending; index 3 = manual recurring + pending,
     // to show that manual courses also accumulate pending people (from requests and
     // manual adds), not just automatic ones.
-    pendingCount: index === 0 ? 12 : index === 3 ? 4 : 0,
+    pendingCount: index === 0 ? 12 : index === 3 ? 4 : index === 4 ? 6 : 0,
     enrollmentRule: index === 0 ? {
       criteria: ["Team: Quality & Compliance", "Legal entity: Factorial ES"],
       appliesTo: "everyone",
@@ -671,6 +673,14 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
       appliesTo: "everyone",
       matchCount: 27,
       assignment: "direct",
+    } : index === 4 ? {
+      // Automatic enrollment with no group yet: matching people pile up as
+      // "pending group assignment" until a group is created.
+      criteria: ["Team: Operations"],
+      appliesTo: "everyone",
+      matchCount: 6,
+      waitlisted: 6,
+      assignment: "waitlist",
     } : undefined,
   }
 }) as unknown as ExactCourse[]
