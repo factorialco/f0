@@ -242,6 +242,15 @@ const F0RichTextEditorComponent = forwardRef<
     content: initialEditorState?.content || "",
     editable: !disabled,
     onUpdate: onEditorUpdate,
+    // Give the contenteditable an explicit textbox role and an accessible name;
+    // without this the editor is unnamed for screen readers and role+name queries.
+    editorProps: {
+      attributes: {
+        role: "textbox",
+        "aria-multiline": "true",
+        "aria-label": title,
+      },
+    },
     // Children subscribe to the editor state they need via useEditorState;
     // re-rendering the whole editor tree on every transaction is wasteful.
     shouldRerenderOnTransaction: false,

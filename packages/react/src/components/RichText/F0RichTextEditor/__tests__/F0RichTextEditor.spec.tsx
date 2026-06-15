@@ -13,6 +13,24 @@ import { F0RichTextEditor } from ".."
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
 import { UserPlatformProvider } from "@/lib/providers/user-platafform/UserPlatformProvider"
 
+test("exposes the title as the accessible name of the editor textbox", async () => {
+  render(
+    <UserPlatformProvider platform="mac">
+      <I18nProvider translations={defaultTranslations}>
+        <F0RichTextEditor
+          title="What was your main goal?"
+          placeholder="Placeholder..."
+          onChange={vi.fn()}
+        />
+      </I18nProvider>
+    </UserPlatformProvider>
+  )
+
+  expect(
+    await screen.findByRole("textbox", { name: "What was your main goal?" })
+  ).toBeInTheDocument()
+})
+
 test("calls onFullscreenChange callback when fullscreen mode changes", async () => {
   const onFullscreenChange = vi.fn()
 
