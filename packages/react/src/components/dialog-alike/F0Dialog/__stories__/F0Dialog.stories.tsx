@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { FC, useState } from "react"
+import { ComponentProps, FC, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -319,4 +319,56 @@ export const WithModuleAndFullscreenSize: Story = {
     ...WithModule.args,
     size: "fullscreen",
   },
+}
+
+// --- Demo: portaling out of an app stacking context -------------------------
+// Center modals portal to the top-level `#f0-overlay-root`, so they escape app
+// stacking contexts. This story puts a tinted "AI canvas" panel at `z-[21]`
+// inside a `relative isolate` container (mirroring ApplicationFrame, where the
+// AI canvas/chat paint at z-20/z-21) and shows the dialog still renders on top.
+
+const SimulatedCanvasLayer = () => (
+  <div className="pointer-events-none absolute inset-0 z-[21] flex items-start justify-center bg-f1-background-secondary pt-6">
+    <span className="rounded-md bg-f1-background px-3 py-1 font-medium shadow-md">
+      Simulated AI canvas — z-21
+    </span>
+  </div>
+)
+
+const STACKING_DEMO_ARGS = {
+  isOpen: true,
+  onClose: () => {},
+  primaryAction: {
+    label: "Got it",
+    onClick: () => {},
+    closeOnClick: true,
+  },
+  children: <ExampleList itemsCount={3} />,
+} satisfies Partial<ComponentProps<typeof F0Dialog>>
+
+/**
+ * Default behaviour: the dialog portals to `#f0-overlay-root` (outside the
+ * isolate), so it renders **above** the z-21 panel.
+ */
+export const EscapesAppStackingContext: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Center modals portal to the top-level `#f0-overlay-root`, escaping app stacking contexts. The tinted panel sits at `z-[21]` inside a `relative isolate` container (like ApplicationFrame's AI canvas/chat), yet the dialog renders on top because it lives outside that context. Before this fix the dialog was confined to `#content` inside the isolate and painted behind the panel.",
+      },
+    },
+  },
+  args: {
+    ...STACKING_DEMO_ARGS,
+    title: "I render above the z-21 layer",
+    description:
+      "Portaled to #f0-overlay-root, outside the simulated isolate stacking context.",
+  },
+  render: (args) => (
+    <div className="relative isolate h-[560px] w-full overflow-hidden rounded-md border border-solid border-f1-border-secondary">
+      <SimulatedCanvasLayer />
+      <F0Dialog {...args} />
+    </div>
+  ),
 }
