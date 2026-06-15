@@ -63,6 +63,7 @@ import {
   Sliders,
   Sparkles,
   People,
+  Person,
   Search,
   Upload,
 } from "@factorialco/f0-react/icons/app"
@@ -4566,7 +4567,7 @@ function CourseDetailTabBody({
 }) {
   if (activeDetailTab === "content") return <CourseContentTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "training-groups") return <CourseGroupsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
-  if (activeDetailTab === "participants") return <CourseParticipantsTab course={course} onOpenDialog={onOpenDialog} />
+  if (activeDetailTab === "participants") return <CourseParticipantsTab course={course} onOpenDialog={onOpenDialog} onOpenClassWizard={onOpenClassWizard} />
   if (activeDetailTab === "materials") return <CourseMaterialsTab onOpenDialog={onOpenDialog} />
   if (activeDetailTab === "documents") return <CourseDocumentsTab onOpenDialog={onOpenDialog} />
   return <CourseSurveysTab onOpenDialog={onOpenDialog} />
@@ -4772,7 +4773,7 @@ function CourseGroupsTab({
   )
 }
 
-function CourseParticipantsTab({ course, onOpenDialog }: { course: ExactCourse; onOpenDialog: (dialog: CourseActionDialogId) => void }) {
+function CourseParticipantsTab({ course, onOpenDialog, onOpenClassWizard }: { course: ExactCourse; onOpenDialog: (dialog: CourseActionDialogId) => void; onOpenClassWizard: () => void }) {
   // The overview's "View pending" link lands here with the pending filter pre-applied.
   const [searchParams] = useSearchParams()
   const pendingPreset = searchParams.get("pfilter") === "pending"
@@ -4866,7 +4867,10 @@ function CourseParticipantsTab({ course, onOpenDialog }: { course: ExactCourse; 
         },
       },
       selectable: (participant) => participant.id,
-      bulkActions: () => ({ primary: [{ id: "remove", label: "Remove from course", icon: Delete, critical: true }] }),
+      bulkActions: () => ({
+        primary: [{ id: "remove", label: "Remove from course", icon: Delete, critical: true }],
+        secondary: [{ id: "assign-to-group", label: "Assign to group", icon: Person }],
+      }),
       totalItemSummary: (total: number) => `${total} participants`,
     },
     [participants, pendingPreset]
@@ -4877,6 +4881,9 @@ function CourseParticipantsTab({ course, onOpenDialog }: { course: ExactCourse; 
       id="trainings-enrollments/course-participants/v1"
       storage={false}
       source={source}
+      onBulkAction={(action: string) => {
+        if (action === "assign-to-group") onOpenClassWizard()
+      }}
       visualizations={[
         {
           type: "table",
