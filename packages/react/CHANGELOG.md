@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.2](https://github.com/factorialco/f0/compare/f0-react-v3.2.1...f0-react-v3.2.2) (2026-06-15)
+
+
+### Bug Fixes
+
+* **EditableTable:** debounce onCellChange for typing cells ([#4412](https://github.com/factorialco/f0/issues/4412)) ([4f9819e](https://github.com/factorialco/f0/commit/4f9819e948509581c036c5fa4765c4f0e93665e8))
+
 ## [3.2.1](https://github.com/factorialco/f0/compare/f0-react-v3.2.0...f0-react-v3.2.1) (2026-06-15)
 
 
