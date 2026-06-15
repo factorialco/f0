@@ -1,4 +1,4 @@
-import type { F0CardRowProps } from "@/experimental/F0CardRow"
+import type { F0CardRowProps } from "@/components/F0Card"
 
 /**
  * Props for the F0HILActionConfirmation component.

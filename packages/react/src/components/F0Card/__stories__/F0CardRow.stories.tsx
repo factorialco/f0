@@ -7,6 +7,10 @@ import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
 
 import { F0CardRow } from "../F0CardRow"
 
+// Story handlers alert which control fired (on top of the Actions-panel spy),
+// so a docs reader can confirm exactly which button they pressed.
+const clickAlert = (label: string) => fn(() => alert(`${label} clicked`))
+
 const meta: Meta<typeof F0CardRow> = {
   component: F0CardRow,
   title: "Card Row",
@@ -17,6 +21,7 @@ const meta: Meta<typeof F0CardRow> = {
           "`F0CardRow` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
           "Use it for list rows, inline confirmations and dense layouts where a full `F0Card` is too heavy — e.g. a settings toggle row, a pending-approval item, or a selectable entity.",
           "Actions stay inline at every width by default. Set <code>stackAt</code> to collapse them onto their own line below a container breakpoint — secondary buttons fold into a left ⋯ menu while the primary stays pinned. For an approve/reject row, use the icon-only <code>confirmAction</code> / <code>rejectAction</code> variant. The avatar renders at a fixed size and accepts any avatar type in the system.",
+          "A row is either driven by its actions <em>or</em> by a whole-row click target (<code>link</code> / <code>onClick</code>) — not both. Pass <code>link</code>/<code>onClick</code> for entry-point cards whose entire surface is the action, and leave them unset for rows that act through their buttons.",
         ]
           .map((line) => `<p>${line}</p>`)
           .join("\n"),
@@ -36,7 +41,7 @@ const meta: Meta<typeof F0CardRow> = {
     avatar: {
       control: "object",
       description:
-        "Optional avatar rendered at md on the left. Any avatar type: person, team, company, file, flag, emoji, icon, module.",
+        "Optional avatar rendered at a fixed `lg` size on the left. Any avatar type: person, team, company, file, flag, emoji, icon, module, alert, date.",
     },
     stackAt: {
       control: "select",
@@ -49,6 +54,11 @@ const meta: Meta<typeof F0CardRow> = {
       control: "boolean",
       description: "Tighter padding and smaller controls.",
     },
+    inactive: {
+      control: "boolean",
+      description:
+        "Strikes through and dims the title/description (e.g. a voided or closed row). Purely presentational.",
+    },
     fullHeight: {
       control: "boolean",
       description: "Stretch to fill the height of the container.",
@@ -56,14 +66,19 @@ const meta: Meta<typeof F0CardRow> = {
     link: {
       control: "text",
       description:
-        "Opt-in: makes the whole row a link to this href (adds pointer + hover).",
+        "Opt-in: makes the whole row a link to this href — adds pointer + hover/focus affordance and a full-row overlay link. Mutually exclusive with action buttons.",
+    },
+    disableOverlayLink: {
+      control: "boolean",
+      description:
+        "Disables the full-row overlay link (used with `link`) so a parent can manage drag-and-drop while still allowing click navigation via `onClick`.",
     },
     // Function-bearing props: disable the control so it doesn't dump the
     // serialized mock fn() source. They still appear in the args table.
     primaryAction: {
       control: false,
       description:
-        'Primary action button, pinned at the trailing edge. Set `variant: "secondary"` to render it as an outline button while keeping it pinned (a lone CTA that never sheds into the ⋯ menu).',
+        'Primary action button, pinned at the trailing edge. Set `variant: "outline"` to render it as an outline button while keeping it pinned (a lone CTA that never sheds into the ⋯ menu).',
     },
     secondaryActions: {
       control: false,
@@ -82,14 +97,19 @@ const meta: Meta<typeof F0CardRow> = {
       control: false,
       description: "Reject (✗) icon-only action of the confirm/reject variant.",
     },
+    status: {
+      control: false,
+      description:
+        "Resolved-state icon (`{ icon, variant, label }`) shown at the trailing edge in place of any actions.",
+    },
     alert: {
       control: false,
       description: "Alert banner displayed above the row.",
     },
     onClick: {
-      action: "clicked",
+      control: false,
       description:
-        "Opt-in: called when the row is clicked (adds pointer + hover).",
+        "Opt-in: called when the whole row is clicked — adds pointer + hover/focus affordance. Mutually exclusive with action buttons.",
     },
   },
   decorators: [
@@ -116,12 +136,12 @@ export const Default: Story = {
     title: "Do you want to proceed?",
     primaryAction: {
       label: "Confirm",
-      onClick: fn(),
+      onClick: clickAlert("Confirm"),
     },
     secondaryActions: [
       {
         label: "Cancel",
-        onClick: fn(),
+        onClick: clickAlert("Cancel"),
       },
     ],
   },
@@ -129,18 +149,33 @@ export const Default: Story = {
 
 /**
  * A single CTA that shouldn't carry full primary weight: pass it as the
- * `primaryAction` with `variant: "secondary"` to render an outline button. It
+ * `primaryAction` with `variant: "outline"` to render an outline button. It
  * stays pinned at the trailing edge and never collapses into the "⋯" menu, even
  * in a narrow row — unlike a lone `secondaryActions` entry, which can shed.
  */
-export const SecondaryPrimaryAction: Story = {
+export const OutlinePrimaryAction: Story = {
   args: {
     title: "Your export is ready to download",
     primaryAction: {
       label: "Download",
-      onClick: fn(),
-      variant: "secondary",
+      onClick: clickAlert("Download"),
+      variant: "outline",
     },
+  },
+}
+
+/**
+ * Opt-in whole-row click target: pass `onClick` (or `link`) and the entire row
+ * becomes clickable — pointer cursor plus a hover/focus affordance. Use it for
+ * entry-point cards whose whole surface is the action. Such a row carries no
+ * action buttons: a row is driven by its buttons *or* by a row click, never both.
+ */
+export const ClickableRow: Story = {
+  args: {
+    avatar: { type: "module", module: "goals" },
+    title: "Company goals",
+    description: "Click anywhere on the row to open",
+    onClick: clickAlert("Row"),
   },
 }
 
@@ -159,8 +194,8 @@ export const ConfirmReject: Story = {
     title: "Jane Cooper",
     description: "Requested 3 days off",
     stackAt: "md",
-    rejectAction: { label: "Reject", onClick: fn() },
-    confirmAction: { label: "Approve", onClick: fn() },
+    rejectAction: { label: "Reject", onClick: clickAlert("Reject") },
+    confirmAction: { label: "Approve", onClick: clickAlert("Approve") },
   },
 }
 
@@ -216,13 +251,18 @@ export const Stacking: Story = {
     title: "Jane Cooper",
     description: "Drops to its own line below @md",
     stackAt: "md",
-    secondaryActions: [{ label: "Edit", onClick: fn() }],
+    secondaryActions: [{ label: "Edit", onClick: clickAlert("Edit") }],
     otherActions: [
-      { label: "Mail", icon: Envelope, onClick: fn() },
+      { label: "Mail", icon: Envelope, onClick: clickAlert("Mail") },
       { type: "separator" },
-      { label: "Delete", icon: Delete, onClick: fn(), critical: true },
+      {
+        label: "Delete",
+        icon: Delete,
+        onClick: clickAlert("Delete"),
+        critical: true,
+      },
     ],
-    primaryAction: { label: "Open", onClick: fn() },
+    primaryAction: { label: "Open", onClick: clickAlert("Open") },
   },
 }
 
@@ -238,25 +278,25 @@ export const WithAvatar: Story = {
     description: "Product designer",
     primaryAction: {
       label: "Open",
-      onClick: fn(),
+      onClick: clickAlert("Open"),
     },
     secondaryActions: [
       {
         label: "Edit",
-        onClick: fn(),
+        onClick: clickAlert("Edit"),
       },
     ],
     otherActions: [
       {
         label: "Mail",
         icon: Envelope,
-        onClick: fn(),
+        onClick: clickAlert("Mail"),
       },
       { type: "separator" },
       {
         label: "Delete",
         icon: Delete,
-        onClick: fn(),
+        onClick: clickAlert("Delete"),
         critical: true,
       },
     ],
@@ -279,12 +319,12 @@ export const WithAlert: Story = {
     },
     primaryAction: {
       label: "Renew",
-      onClick: fn(),
+      onClick: clickAlert("Renew"),
     },
     secondaryActions: [
       {
         label: "Dismiss",
-        onClick: fn(),
+        onClick: clickAlert("Dismiss"),
       },
     ],
   },
@@ -314,19 +354,19 @@ export const AvatarTypes: Story = {
         }}
         title="Jane Cooper"
         description="Person avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "company", name: "Acme Inc" }}
         title="Acme Inc"
         description="Company avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "team", name: "Design" }}
         title="Design Team"
         description="Team avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{
@@ -335,43 +375,43 @@ export const AvatarTypes: Story = {
         }}
         title="contract.pdf"
         description="File avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "flag", flag: "es" }}
         title="Spain"
         description="Flag avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "icon", icon: Briefcase }}
         title="Engineering"
         description="Icon avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "emoji", emoji: "🚀" }}
         title="Launch"
         description="Emoji avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "module", module: "goals" }}
         title="Goals"
         description="Module avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "alert", variant: "warning" }}
         title="Action required"
         description="Alert avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
       <F0CardRow
         avatar={{ type: "date", date: new Date(2026, 5, 5) }}
         title="Team offsite"
         description="Date avatar"
-        primaryAction={{ label: "Open", onClick: fn() }}
+        primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
     </div>
   ),

@@ -14,7 +14,7 @@ import {
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
-} from "@/components/F0Card/components/CardActions"
+} from "./CardActions"
 
 // Pixel gap between the trailing controls — mirrors the `gap-2` used elsewhere.
 const GAP = 8
@@ -304,12 +304,15 @@ export function CardRowActions({
         }
       : undefined
 
-  const primary: ButtonGroupButton | undefined = primaryAction
+  const primary:
+    | (ButtonGroupButton & { variant?: "default" | "outline" })
+    | undefined = primaryAction
     ? {
         id: "primary",
         label: primaryAction.label,
         icon: primaryAction.icon,
         onClick: primaryAction.onClick,
+        variant: primaryAction.variant,
       }
     : undefined
 
@@ -327,9 +330,6 @@ export function CardRowActions({
   return wrap(
     <ButtonGroup
       primaryAction={primary}
-      primaryVariant={
-        primaryAction?.variant === "secondary" ? "outline" : "default"
-      }
       secondaryActions={secondaryItems}
       otherActions={otherActions}
       size={size}

@@ -3,6 +3,7 @@ import { forwardRef } from "react"
 import { F0Link } from "@/components/F0Link"
 import { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { withDataTestId } from "@/lib/data-testid"
+import { experimentalComponent } from "@/lib/experimental"
 import { withSkeleton } from "@/lib/skeleton"
 import { cn, focusRing } from "@/lib/utils"
 import { Card } from "@/ui/Card"
@@ -13,17 +14,9 @@ import {
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
-} from "@/components/F0Card/components/CardActions"
-import {
-  CardAlertWrapper,
-  alertBorderColor,
-} from "@/components/F0Card/components/CardAlert"
-import {
-  CardAvatar,
-  type CardAvatarVariant,
-} from "@/components/F0Card/components/CardAvatar"
-import { type CardAlertProps } from "@/components/F0Card/types"
-
+} from "./components/CardActions"
+import { CardAlertWrapper, alertBorderColor } from "./components/CardAlert"
+import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
 import {
   CardRowActions,
   type CardRowConfirmAction,
@@ -31,6 +24,7 @@ import {
   type CardRowStatus,
   cardRowClassName,
 } from "./components/CardRowActions"
+import { type CardAlertProps } from "./types"
 
 export interface F0CardRowProps {
   /**
@@ -285,6 +279,12 @@ const F0CardRowSkeleton = ({ compact = false }: { compact?: boolean }) => {
   )
 }
 
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
 export const F0CardRow = withDataTestId(
-  withSkeleton(F0CardRowBase, F0CardRowSkeleton)
+  experimentalComponent(
+    "F0CardRow",
+    withSkeleton(F0CardRowBase, F0CardRowSkeleton)
+  )
 )

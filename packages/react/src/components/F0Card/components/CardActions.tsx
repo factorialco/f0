@@ -11,13 +11,13 @@ export interface CardPrimaryAction {
   icon?: IconType
   onClick: () => void
   /**
-   * Visual emphasis of the primary action. `"secondary"` renders it as an
-   * outline button while keeping it pinned at the trailing edge (so a lone CTA
-   * never sheds into the "⋯" menu). Use it when the card's only action shouldn't
-   * carry full primary weight.
-   * @default "primary"
+   * Visual emphasis of the primary action. `"outline"` renders it as an outline
+   * button while keeping it pinned at the trailing edge (so a lone CTA never
+   * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+   * full primary weight.
+   * @default "default"
    */
-  variant?: "primary" | "secondary"
+  variant?: "default" | "outline"
 }
 
 export interface CardSecondaryAction {
@@ -96,7 +96,7 @@ export function CardActions({
             label={primaryAction.label}
             icon={primaryAction.icon}
             variant={
-              primaryAction.variant === "secondary" ? "outline" : undefined
+              primaryAction.variant === "outline" ? "outline" : undefined
             }
             onClick={(e) => {
               e.stopPropagation()
