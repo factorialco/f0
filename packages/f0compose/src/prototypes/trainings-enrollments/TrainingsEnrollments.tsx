@@ -29,6 +29,7 @@ import {
   OneDataCollection,
   Page,
   PageHeader,
+  Input,
   NumberInput,
   ResourceHeader,
   SectionHeader,
@@ -4154,7 +4155,7 @@ function EditCourseSettings({
 
   const sections: { id: EditCourseSection; label: string; icon: ComponentProps<typeof F0Icon>["icon"]; isNew?: boolean }[] = [
     { id: "basic", label: "Basic information", icon: InfoCircle },
-    { id: "admin", label: "Admin information", icon: File },
+    { id: "admin", label: "Internal information", icon: File },
     { id: "completion", label: "Completion configuration", icon: CheckCircle },
     { id: "enrollment", label: "Enrollment", icon: People, isNew: true },
   ]
@@ -4206,7 +4207,7 @@ function EditCourseSettings({
           <div className="flex min-w-0 max-w-2xl flex-1 flex-col gap-8 pb-20">
             {activeSection === "basic" && <EditCourseBasicSection course={course} />}
             {activeSection === "admin" && <EditCourseAdminSection course={course} />}
-            {activeSection === "completion" && <EditCourseCompletionSection />}
+            {activeSection === "completion" && <EditCourseCompletionSection course={course} />}
             {activeSection === "enrollment" && (
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col gap-2">
@@ -4237,26 +4238,131 @@ function EditCourseSettings({
   )
 }
 
+// Option catalogs for the settings selectors. Real product uses a searchable
+// multi-select (Selector.Popover) for both competencies and categories; the F0
+// equivalent is F0Select with `multiple` + a search box. Values are the names so
+// a course's current selections resolve directly.
+const COMPETENCY_OPTIONS = [
+  "Gestión de cumplimiento.",
+  "Creatividad",
+  "Pensamiento estratégico",
+  "Comunicación efectiva",
+  "Liderazgo de equipos",
+  "Trabajo en equipo",
+  "Resolución de conflictos",
+  "Orientación a resultados",
+].map((name) => ({ value: name, label: name }))
+
+const CATEGORY_OPTIONS = [
+  "Creatividad",
+  "Experiencia de usuario",
+  "Gestión de conflictos",
+  "Liderazgo",
+  "Merchandising",
+  "Trabajo en equipo",
+  "Retail",
+].map((name) => ({ value: name, label: name }))
+
+// Course validity = how long a completion stays valid before it expires. Mirrors
+// the backend `valid_for` (integer 1–10 years). There is no separate
+// "recertification" concept in Factorial, and validity is independent of any
+// certificate — so this is the single expiry control.
+const COURSE_VALIDITY_OPTIONS = Array.from({ length: 10 }, (_, i) => ({
+  value: String(i + 1),
+  label: `${i + 1} ${i === 0 ? "year" : "years"}`,
+}))
+
+// Parse "10h 30m" / "6h 0m" → hours / minutes for the duration inputs.
+function parseDurationParts(duration: string): { hours: number; minutes: number } {
+  const h = /(\d+)\s*h/.exec(duration)
+  const m = /(\d+)\s*m/.exec(duration)
+  return { hours: h ? Number(h[1]) : 0, minutes: m ? Number(m[1]) : 0 }
+}
+
+// Section heading shared by every settings panel.
+function SettingsSectionHeading({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <F0Heading content={title} variant="heading" as="h2" />
+      <F0Text content={subtitle} variant="body" />
+    </div>
+  )
+}
+
+// A labelled field row: label + optional helper text + the control beneath.
+function SettingsField({
+  label,
+  helper,
+  children,
+}: {
+  label: string
+  helper?: string
+  children: ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <F0Text content={label} variant="label" />
+      {helper && <F0Text content={helper} variant="small" />}
+      {children}
+    </div>
+  )
+}
+
+// Apple-style settings card: title + description on the left, a Switch on the
+// right, and optional expandable content (e.g. the validity year select) that
+// only appears when the toggle is on.
+function SettingToggleRow({
+  title,
+  description,
+  checked,
+  onChange,
+  children,
+}: {
+  title: string
+  description: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  children?: ReactNode
+}) {
+  return (
+    <div className="rounded-lg border border-solid border-f1-border-secondary">
+      <div className="flex items-start justify-between gap-4 p-4">
+        <div className="flex flex-col gap-1">
+          <F0Text content={title} variant="label" />
+          <F0Text content={description} variant="small" />
+        </div>
+        <Switch checked={checked} onCheckedChange={onChange} title={title} hideLabel />
+      </div>
+      {checked && children && (
+        <div className="border-t border-solid border-f1-border-secondary p-4">{children}</div>
+      )}
+    </div>
+  )
+}
+
 function EditCourseBasicSection({ course }: { course: ExactCourse }) {
+  const initialDuration = parseDurationParts(course.duration)
+  const [name, setName] = useState(course.name)
+  const [objectives, setObjectives] = useState(course.objectives.join("\n"))
+  const [description, setDescription] = useState(course.description)
+  const [competencies, setCompetencies] = useState<string[]>(course.competencies)
+  const [hours, setHours] = useState<number>(initialDuration.hours)
+  const [minutes, setMinutes] = useState<number>(initialDuration.minutes)
+  const [mandatory, setMandatory] = useState(course.requirement === "mandatory")
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <F0Heading content="Basic information" variant="heading" as="h2" />
-        <F0Text content="Provide details to easily identify this course." variant="body" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Course name" variant="label" />
-        <F0Text content="Employees will identify this course by its assigned name" variant="small" />
-        <div className="rounded-lg border border-solid border-f1-border-secondary px-4 py-3">
-          <F0Text content={course.name} variant="body" />
-        </div>
-      </div>
+      <SettingsSectionHeading
+        title="Basic information"
+        subtitle="Provide details to easily identify this course."
+      />
+      <SettingsField label="Course name" helper="Employees will identify this course by its assigned name.">
+        <Input label="Course name" hideLabel value={name} onChange={(v) => setName(v)} />
+      </SettingsField>
       {/* Course type is not editable in settings (it's a creation-time choice that
           only changes by creating a 2nd group). It's shown read-only in the
           overview header metadata instead. */}
-      <div className="flex flex-col gap-2">
-        <F0Text content="Thumbnail" variant="label" />
-        <F0Text content="Add an image to show as the course thumbnail in the Catalogue." variant="small" />
+      <SettingsField label="Thumbnail" helper="Add an image to show as the course thumbnail in the Catalogue.">
         {course.thumbnail ? (
           <div
             className="h-36 max-w-sm rounded-lg border border-solid border-f1-border-secondary bg-cover bg-center"
@@ -4269,82 +4375,105 @@ function EditCourseBasicSection({ course }: { course: ExactCourse }) {
             <F0Text content="Upload .jpeg, .png, .gif or .webp files up to 200MB." variant="small" />
           </div>
         )}
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Objectives" variant="label" />
-        <F0Text content="Define this course's goals and outcomes." variant="small" />
-        <Textarea label="Objectives" hideLabel value={course.objectives.join("\n")} onChange={() => undefined} />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Description" variant="label" />
-        <Textarea label="Description" hideLabel value={course.description} onChange={() => undefined} />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Competencies" variant="label" />
-        <F0Text content="Select competencies to be developed with this course." variant="small" />
-        <F0Box display="flex" flexWrap="wrap" gap="sm">
-          {course.competencies.map((c) => (
-            <F0TagRaw key={c} text={c} />
-          ))}
-        </F0Box>
-      </div>
+      </SettingsField>
+      <SettingsField label="Objectives" helper="Define this course's goals and outcomes.">
+        <Textarea label="Objectives" hideLabel value={objectives} onChange={(v) => setObjectives(v)} />
+      </SettingsField>
+      <SettingsField label="Description">
+        <Textarea label="Description" hideLabel value={description} onChange={(v) => setDescription(v)} />
+      </SettingsField>
+      <SettingsField label="Competencies" helper="Select the competencies developed within this course.">
+        <F0Select
+          multiple
+          options={COMPETENCY_OPTIONS}
+          value={competencies}
+          onChange={(values: string[]) => setCompetencies(values)}
+          label="Competencies"
+          hideLabel
+          placeholder="Search competencies…"
+          icon={Search}
+          showSearchBox
+          searchBoxPlaceholder="Search competencies…"
+        />
+      </SettingsField>
+      <SettingsField label="Total course duration" helper="Time it takes to complete this course.">
+        <div className="flex gap-4">
+          <div className="flex flex-col gap-1">
+            <F0Text content="Hours" variant="small" />
+            <NumberInput label="Hours" hideLabel value={hours} onChange={(v) => setHours(v ?? 0)} size="md" min={0} maxDecimals={0} locale="en-US" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <F0Text content="Minutes" variant="small" />
+            <NumberInput label="Minutes" hideLabel value={minutes} onChange={(v) => setMinutes(v ?? 0)} size="md" min={0} max={59} maxDecimals={0} locale="en-US" />
+          </div>
+        </div>
+      </SettingsField>
+      <SettingToggleRow
+        title="Mandatory training"
+        description="Required for every assigned employee. They'll see it flagged as mandatory."
+        checked={mandatory}
+        onChange={setMandatory}
+      />
     </div>
   )
 }
 
 function EditCourseAdminSection({ course }: { course: ExactCourse }) {
+  const [code, setCode] = useState(course.code)
+  const [categories, setCategories] = useState<string[]>(course.categories)
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <F0Heading content="Admin information" variant="heading" as="h2" />
-        <F0Text content="Internal configuration for administrators." variant="body" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Internal code" variant="label" />
-        <div className="rounded-lg border border-solid border-f1-border-secondary px-4 py-3">
-          <F0Text content={course.code} variant="body" />
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Categories" variant="label" />
-        <F0Box display="flex" flexWrap="wrap" gap="sm">
-          {course.categories.length > 0
-            ? course.categories.map((c) => <F0TagRaw key={c} text={c} />)
-            : <F0Text content="No categories assigned" variant="body" />
-          }
-        </F0Box>
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Requirement" variant="label" />
-        <div className="rounded-lg border border-solid border-f1-border-secondary px-4 py-3">
-          <F0Text content={course.requirement === "mandatory" ? "Mandatory" : "Not mandatory"} variant="body" />
-        </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Total cost" variant="label" />
+      <SettingsSectionHeading
+        title="Internal information"
+        subtitle="Configuration for administrators — not shown to employees."
+      />
+      <SettingsField label="Internal code" helper="Your own reference code for this course.">
+        <Input label="Internal code" hideLabel value={code} onChange={(v) => setCode(v)} />
+      </SettingsField>
+      <SettingsField label="Categories" helper="Tag this course so it's easy to find and group.">
+        <F0Select
+          multiple
+          options={CATEGORY_OPTIONS}
+          value={categories}
+          onChange={(values: string[]) => setCategories(values)}
+          label="Categories"
+          hideLabel
+          placeholder="Search categories…"
+          icon={Search}
+          showSearchBox
+          searchBoxPlaceholder="Search categories…"
+        />
+      </SettingsField>
+      {/* Costs are computed from groups/sessions, so they stay read-only here. */}
+      <SettingsField label="Total cost">
         <div className="rounded-lg border border-solid border-f1-border-secondary px-4 py-3">
           <F0Text content={course.totalCost} variant="body" />
         </div>
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Salary cost" variant="label" />
+      </SettingsField>
+      <SettingsField label="Salary cost">
         <div className="rounded-lg border border-solid border-f1-border-secondary px-4 py-3">
           <F0Text content={course.salaryCost} variant="body" />
         </div>
-      </div>
+      </SettingsField>
     </div>
   )
 }
 
-function EditCourseCompletionSection() {
+function EditCourseCompletionSection({ course }: { course: ExactCourse }) {
+  // "No expiration" → validity off; otherwise it carries a year value.
+  const hasValidity = course.validity !== "No expiration"
+  const initialYears = /(\d+)/.exec(course.validity)?.[1] ?? "1"
+  const [validityOn, setValidityOn] = useState(hasValidity)
+  const [validYears, setValidYears] = useState(initialYears)
+
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <F0Heading content="Completion configuration" variant="heading" as="h2" />
-        <F0Text content="Define what participants need to do to complete this course." variant="body" />
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Completion criteria" variant="label" />
+      <SettingsSectionHeading
+        title="Completion configuration"
+        subtitle="Define what participants need to do to complete this course, and how long it stays valid."
+      />
+      <SettingsField label="Completion criteria">
         <F0Box display="flex" flexDirection="column" gap="sm">
           {["Complete all modules", "100% attendance required", "Pass knowledge test"].map((item) => (
             <F0Box key={item} display="flex" alignItems="center" gap="sm">
@@ -4353,13 +4482,24 @@ function EditCourseCompletionSection() {
             </F0Box>
           ))}
         </F0Box>
-      </div>
-      <div className="flex flex-col gap-2">
-        <F0Text content="Course validity" variant="label" />
-        <div className="rounded-lg border border-solid border-f1-border-secondary px-4 py-3">
-          <F0Text content="1 year" variant="body" />
-        </div>
-      </div>
+      </SettingsField>
+      <SettingToggleRow
+        title="Course validity"
+        description="The completion expires after a set time, and the person needs to take the course again."
+        checked={validityOn}
+        onChange={setValidityOn}
+      >
+        <SettingsField label="Valid for">
+          <F0Select
+            options={COURSE_VALIDITY_OPTIONS}
+            value={validYears}
+            onChange={(value: string) => setValidYears(value)}
+            label="Valid for"
+            hideLabel
+            placeholder="Select a period"
+          />
+        </SettingsField>
+      </SettingToggleRow>
     </div>
   )
 }
