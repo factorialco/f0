@@ -48,3 +48,27 @@ export const WithDataTestId: Story = {
     await expect(canvas.getByTestId("tooltip-test-id")).toBeInTheDocument()
   },
 }
+
+/**
+ * The child element carries a native HTML `title` attribute. Without stripping
+ * it, the browser would show its own tooltip on hover in addition to the F0
+ * one, leaving the user with two overlapping tooltips. Hover the button: only
+ * the F0 tooltip shows.
+ */
+export const ChildWithNativeTitle: Story = {
+  args: {
+    label: "Planned hours",
+    description: "Only the F0 tooltip should show — no native browser tooltip.",
+    children: (
+      <button title="Native browser tooltip" data-testid="native-title-trigger">
+        Hover me
+      </button>
+    ),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const trigger = canvas.getByTestId("native-title-trigger")
+    // The native `title` should be stripped so only the F0 tooltip renders.
+    await expect(trigger).not.toHaveAttribute("title")
+  },
+}
