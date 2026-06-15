@@ -637,7 +637,7 @@ const exactCourses = trainings.slice(0, 4).map((training, index) => {
       matchCount: 18,
       assignment: "direct",
     } : index === 2 ? {
-      criteria: ["Team: Customer Support", "Workplace: Madrid"],
+      criteria: ["Team: Customer Support", "Workplaces: Madrid"],
       appliesTo: "everyone",
       matchCount: 27,
       assignment: "direct",
@@ -2409,6 +2409,28 @@ function filterStateSummary(value: unknown): {
   return { criteria, matchCount: filterStatePeopleMatch(state) }
 }
 
+// Reverse of the facet labels ("Team" → "team") so a course's saved criteria
+// strings can be turned back into an AudienceFilterState.
+const audienceLabelToKey: Record<string, string> = Object.fromEntries(
+  Object.entries(enrollmentFilterDefinition).map(([key, def]) => [def.label, key])
+)
+
+// Rebuild the AudienceFilterState a course was created with from its saved
+// criteria strings, so course settings shows exactly the selected criteria — no
+// more, no less — instead of a hard-coded placeholder.
+function audienceStateFromCriteria(criteria: string[]): AudienceFilterState {
+  const state: AudienceFilterState = {}
+  for (const entry of criteria) {
+    const sep = entry.indexOf(": ")
+    if (sep === -1) continue
+    const key = audienceLabelToKey[entry.slice(0, sep)]
+    if (!key) continue
+    const value = entry.slice(sep + 2)
+    ;(state[key] ??= []).push(value)
+  }
+  return state
+}
+
 // A single facet-value criterion flattened from a FiltersState, with its display
 // label (e.g. "Team: Engineering"). Used to diff the edited audience against the
 // course's baseline so we can show the right add/remove edit messages.
@@ -4077,7 +4099,7 @@ function EditCourseSettings({
   // model as the creation picker) is what we diff against to decide which edit-mode
   // messages (added / removed) to show.
   const originalAudienceCriteria: AudienceFilterState = course.enrollmentRule
-    ? { team: ["Engineering"], workplace: ["Barcelona"] }
+    ? audienceStateFromCriteria(course.enrollmentRule.criteria)
     : {}
   const [values, setValues] = useState<Record<string, unknown>>(() => ({
     courseType: course.courseType ?? "no-editions",
