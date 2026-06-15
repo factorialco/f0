@@ -84,9 +84,26 @@ export interface ButtonGroupSecondaryLink {
 /** A constant size, or a responsive pair: `base` while stacked, `md` in the row. */
 export type ButtonGroupSize = ButtonSize | { base: ButtonSize; md: ButtonSize }
 
+/**
+ * The pinned primary action. A button or split action that also accepts an
+ * optional `variant`: `"outline"` renders it as an outline button while keeping
+ * it pinned (never shed into the "⋯" menu). @default variant "default"
+ */
+export type ButtonGroupPrimaryAction = (
+  | ButtonGroupButton
+  | ButtonGroupSplitAction
+) & {
+  variant?: "default" | "outline"
+}
+
 export interface ButtonGroupProps {
-  /** The single primary action. A single object structurally guarantees ≤1 primary. */
-  primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  /**
+   * The single primary action. A single object structurally guarantees ≤1 primary.
+   * Set `variant: "outline"` to render it as an outline button while keeping it
+   * pinned (never shed into the "⋯" menu) — for a lone CTA that shouldn't carry
+   * full primary weight. @default variant "default"
+   */
+  primaryAction?: ButtonGroupPrimaryAction
   /** Secondary actions (buttons / split buttons / inline separators), or a single link. */
   secondaryActions?: ButtonGroupSecondaryItem[] | ButtonGroupSecondaryLink
   /** Extra actions, always reachable through the "⋯" menu (supports separators / critical). */
@@ -181,15 +198,17 @@ const renderSecondaryLink = (
 )
 
 const renderPrimaryNode = (
-  action: ButtonGroupButton | ButtonGroupSplitAction,
+  action: ButtonGroupPrimaryAction,
   size: ButtonSize
-) =>
-  isSplitAction(action)
-    ? renderSplitButton(action, size, "default")
-    : renderActionButton(action, size, "default")
+) => {
+  const variant = action.variant ?? "default"
+  return isSplitAction(action)
+    ? renderSplitButton(action, size, variant)
+    : renderActionButton(action, size, variant)
+}
 
 interface ButtonGroupBranchProps {
-  primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  primaryAction?: ButtonGroupPrimaryAction
   secondaryItems: ButtonGroupSecondaryItem[]
   secondaryLink?: ButtonGroupSecondaryLink
   otherActions: DropdownItem[]
