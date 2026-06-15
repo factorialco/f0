@@ -245,20 +245,16 @@ import { dialog, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const handleSave = async () => {
-    const result = await confirmDialog(
-      "Save Changes",
-      "Do you want to save?",
-      {
-        confirm: {
-          value: async () => {
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 2000))
-            return "saved"
-          },
-          label: "Save",
+    const result = await confirmDialog("Save Changes", "Do you want to save?", {
+      confirm: {
+        value: async () => {
+          // Simulate API call
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          return "saved"
         },
-      }
-    )
+        label: "Save",
+      },
+    })
 
     console.log("Result:", result) // "saved" after promise resolves
   }
