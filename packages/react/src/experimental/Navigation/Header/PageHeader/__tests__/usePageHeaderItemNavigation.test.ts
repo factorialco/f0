@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { zeroRenderHook } from "@/testing/test-utils"
 
@@ -20,6 +20,10 @@ function makeInput(
     nextItem: { id: 3, name: "Third" },
     previousItemUrl: "/items/1",
     nextItemUrl: "/items/3",
+    hasPrevious: true,
+    hasNext: true,
+    goToPrevious: () => {},
+    goToNext: () => {},
     ...overrides,
   }
 }
@@ -92,9 +96,58 @@ describe("usePageHeaderItemNavigation", () => {
           nextItem: null,
           previousItemUrl: null,
           nextItemUrl: null,
+          hasPrevious: false,
+          hasNext: false,
         })
       )
     )
     expect(result.current).toBeNull()
+  })
+
+  describe("callback mode", () => {
+    it("wires onClick to goToPrevious/goToNext and omits urls", () => {
+      const goToPrevious = vi.fn()
+      const goToNext = vi.fn()
+      const { result } = zeroRenderHook(() =>
+        usePageHeaderItemNavigation(makeInput({ goToPrevious, goToNext }), {
+          mode: "callback",
+        })
+      )
+
+      expect(result.current?.previous?.url).toBeUndefined()
+      expect(result.current?.next?.url).toBeUndefined()
+
+      result.current?.previous?.onClick?.()
+      result.current?.next?.onClick?.()
+      expect(goToPrevious).toHaveBeenCalledTimes(1)
+      expect(goToNext).toHaveBeenCalledTimes(1)
+
+      // Counter unchanged from url mode
+      expect(result.current?.counter).toEqual({ current: 2, total: 10 })
+    })
+
+    it("gates arrow presence on hasPrevious/hasNext, not on urls", () => {
+      const { result } = zeroRenderHook(() =>
+        usePageHeaderItemNavigation(
+          // URLs present but hasPrevious false → no previous arrow in callback
+          // mode; hasNext true → next arrow despite this being callback-driven
+          makeInput({ hasPrevious: false, hasNext: true }),
+          { mode: "callback" }
+        )
+      )
+      expect(result.current?.previous).toBeUndefined()
+      expect(result.current?.next?.onClick).toBeTypeOf("function")
+    })
+
+    it("still uses getItemTitle for the arrow titles", () => {
+      const { result } = zeroRenderHook(() =>
+        usePageHeaderItemNavigation(makeInput(), {
+          mode: "callback",
+          getItemTitle: (item) => item.name,
+        })
+      )
+      expect(result.current?.previous?.title).toBe("First")
+      expect(result.current?.next?.title).toBe("Third")
+    })
   })
 })
