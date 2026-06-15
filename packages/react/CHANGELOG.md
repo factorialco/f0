@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.6](https://github.com/factorialco/f0/compare/f0-react-v3.2.5...f0-react-v3.2.6) (2026-06-15)
+
+
+### Bug Fixes
+
+* **ButtonGroup:** never collapse or squeeze a confirm/reject pair ([#4438](https://github.com/factorialco/f0/issues/4438)) ([916c724](https://github.com/factorialco/f0/commit/916c7241d3b8abd064f30a063b9fe96cef4ddf56))
+
 ## [3.2.5](https://github.com/factorialco/f0/compare/f0-react-v3.2.4...f0-react-v3.2.5) (2026-06-15)
 
 
