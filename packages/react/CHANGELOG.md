@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.3](https://github.com/factorialco/f0/compare/f0-react-v3.2.2...f0-react-v3.2.3) (2026-06-15)
+
+
+### Bug Fixes
+
+* **rich-text:** expose title as the editor textbox accessible name ([#4449](https://github.com/factorialco/f0/issues/4449)) ([8e0b41c](https://github.com/factorialco/f0/commit/8e0b41c30e0280c8383d435e0ad0c2026ef6a94f))
+
 ## [3.2.2](https://github.com/factorialco/f0/compare/f0-react-v3.2.1...f0-react-v3.2.2) (2026-06-15)
 
 
