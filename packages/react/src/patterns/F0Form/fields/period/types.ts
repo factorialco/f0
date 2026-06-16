@@ -12,9 +12,6 @@ import type { DateGranularity, F0DateConstraintProp } from "../date/types"
 // Period Field RenderIf Conditions
 // ============================================================================
 
-/**
- * Base for period-specific conditions
- */
 interface PeriodRenderIfBase {
   fieldId: string
 }
@@ -28,9 +25,6 @@ export type PeriodRenderIfCondition = PeriodRenderIfBase & {
   isEmpty: boolean
 }
 
-/**
- * All valid renderIf conditions for period fields
- */
 export type PeriodFieldRenderIf =
   | PeriodRenderIfCondition
   | CommonRenderIfCondition

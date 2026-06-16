@@ -38,7 +38,6 @@ export function PeriodFieldRenderer({
     [formField.value]
   )
 
-  // Store the full DatePickerValue as-is (no collapse to Date).
   const handleChange = (next: DatePickerValue | undefined) => {
     formField.onChange(next ?? null)
   }
