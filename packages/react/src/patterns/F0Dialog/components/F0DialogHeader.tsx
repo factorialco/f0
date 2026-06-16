@@ -8,7 +8,7 @@ import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/int
 import { PageNavigation } from "@/experimental/Navigation/Header/PageNavigation"
 import { Tabs } from "@/patterns/Navigation/Tabs"
 import CrossIcon from "@/icons/app/Cross"
-import { ChevronLeft, Ellipsis, Maximize } from "@/icons/app"
+import { ArrowLeft, Ellipsis, Maximize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { BreadcrumbList } from "@/ui/breadcrumb"
@@ -101,12 +101,14 @@ export const F0DialogHeader = ({
 
   const TabsStrip = () =>
     tabs ? (
-      <div className="-mx-2">
-        <Tabs
-          tabs={tabs}
-          activeTabId={activeTabId}
-          setActiveTabId={setActiveTabId}
-        />
+      <div className="overflow-hidden">
+        <div className="-mx-2">
+          <Tabs
+            tabs={tabs}
+            activeTabId={activeTabId}
+            setActiveTabId={setActiveTabId}
+          />
+        </div>
       </div>
     ) : null
 
@@ -117,7 +119,7 @@ export const F0DialogHeader = ({
       return (
         <ButtonInternal
           variant="outline"
-          icon={ChevronLeft}
+          icon={ArrowLeft}
           onClick={controls.onClick}
           label={controls.label}
         />
@@ -167,7 +169,9 @@ export const F0DialogHeader = ({
             <DialogTitle className="sr-only">
               {resourceHeader.title}
             </DialogTitle>
-            <BaseHeader {...resourceHeader} />
+            <div className="[&_.resource-header]:px-4">
+              <BaseHeader {...resourceHeader} />
+            </div>
           </>
         ) : (
           title && <DialogTitle className="sr-only">{title}</DialogTitle>
