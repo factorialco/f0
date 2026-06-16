@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0](https://github.com/factorialco/f0/compare/f0-react-v3.2.7...f0-react-v3.3.0) (2026-06-16)
+
+
+### Features
+
+* **OneDataCollection/table:** add "striked" variant to referenceRowType ([#4460](https://github.com/factorialco/f0/issues/4460)) ([ecd3d26](https://github.com/factorialco/f0/commit/ecd3d26d96cb1d854b3c0917779d6bd1ef1fcb3b))
+
 ## [3.2.7](https://github.com/factorialco/f0/compare/f0-react-v3.2.6...f0-react-v3.2.7) (2026-06-15)
 
 
