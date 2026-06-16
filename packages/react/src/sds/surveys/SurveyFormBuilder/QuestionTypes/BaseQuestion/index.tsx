@@ -186,7 +186,7 @@ export const BaseQuestion = ({
                   onChange={handleChangeTitle}
                   disabled={inputDisabled}
                   className={cn(
-                    "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                     showCursorNotAllowed && "cursor-not-allowed"
                   )}
                   style={TEXT_AREA_STYLE}
