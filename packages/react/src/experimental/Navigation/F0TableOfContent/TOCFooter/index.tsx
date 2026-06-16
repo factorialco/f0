@@ -15,7 +15,7 @@ export function TOCFooter({ actions }: TOCFooterProps) {
   return (
     <div
       className={cn(
-        "flex shrink-0 flex-col gap-0.5 border-0 border-t border-solid border-f1-border-secondary px-3 py-2"
+        "flex shrink-0 flex-col items-start gap-0.5 border-0 border-t border-solid border-f1-border-secondary px-3 py-2"
       )}
     >
       {actions.map((action, index) => (
@@ -27,7 +27,6 @@ export function TOCFooter({ actions }: TOCFooterProps) {
           icon={action.icon}
           disabled={action.disabled}
           onClick={() => action.onClick()}
-          block
         />
       ))}
     </div>
