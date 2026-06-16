@@ -32,9 +32,6 @@ describe("useSticky", () => {
   })
 
   it("falls back to minWidth when a frozen column has no explicit width", () => {
-    // Repro for the regression where the second frozen column landed at left:0
-    // (overlapping the first) because column[0].width was undefined and the
-    // reducer ignored its declared minWidth.
     const { result } = renderHook(() =>
       useSticky(2, [{ minWidth: 200 }, { minWidth: 100 }], false)
     )

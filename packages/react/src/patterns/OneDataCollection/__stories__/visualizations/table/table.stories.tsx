@@ -117,15 +117,9 @@ export const TableFrozenColsWithMinWidth: Story = {
     const nameTd = nameCell.closest("td")
     const emailTd = emailCell.closest("td")
 
-    // Both frozen columns get position: sticky.
     expect(nameTd && getComputedStyle(nameTd).position).toBe("sticky")
     expect(emailTd && getComputedStyle(emailTd).position).toBe("sticky")
-
-    // The first frozen column anchors at left:0.
     expect(nameTd && getComputedStyle(nameTd).left).toBe("0px")
-
-    // The second frozen column must offset by the first's minWidth (200px),
-    // not collapse to left:0 and overlap the first column.
     expect(emailTd && getComputedStyle(emailTd).left).toBe("200px")
   },
 }
