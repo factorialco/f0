@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.0](https://github.com/factorialco/f0/compare/f0-react-v3.3.0...f0-react-v3.4.0) (2026-06-16)
+
+
+### Features
+
+* headcount planning icons module app ([#4439](https://github.com/factorialco/f0/issues/4439)) ([17ef7bd](https://github.com/factorialco/f0/commit/17ef7bd99c7f51c6b379babc270b13bce173e643))
+
 ## [3.3.0](https://github.com/factorialco/f0/compare/f0-react-v3.2.7...f0-react-v3.3.0) (2026-06-16)
 
 
