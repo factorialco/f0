@@ -65,27 +65,31 @@ export const CategoryBarChartCell = (
   }
 
   return (
-    <TooltipProvider>
-      <div
-        className="flex w-full items-center"
-        style={{ minHeight: CELL_MIN_HEIGHT_PX, minWidth: 80 }}
-        data-cell-type="categoryBarChart"
-        role="img"
-        aria-label="Category bar chart"
-      >
-        <div className="flex h-2 w-full gap-0.5 overflow-hidden">
-          {dataPoints.map((point, index) => {
-            const percentage = (point.value / total) * 100
-            const color = point.color
-              ? getColor(point.color)
-              : getCategoricalColor(index)
+    <div
+      className="flex w-full items-center"
+      style={{ minHeight: CELL_MIN_HEIGHT_PX, minWidth: 80 }}
+      data-cell-type="categoryBarChart"
+      role="img"
+      aria-label="Category bar chart"
+    >
+      <div className="flex h-2 w-full gap-0.5 overflow-hidden">
+        {dataPoints.map((point, index) => {
+          const percentage = (point.value / total) * 100
+          const color = point.color
+            ? getColor(point.color)
+            : getCategoricalColor(index)
 
-            if (percentage === 0) return null
+          if (percentage === 0) return null
 
-            return (
-              <TooltipPrimitive key={point.name}>
+          return (
+            <TooltipProvider
+              key={point.name}
+              delayDuration={100}
+              disableHoverableContent
+            >
+              <TooltipPrimitive>
                 <TooltipTrigger
-                  className="h-full cursor-default overflow-hidden rounded-2xs"
+                  className="pointer-events-auto h-full cursor-default overflow-hidden rounded-2xs"
                   style={{ width: `${percentage}%` }}
                   asChild
                 >
@@ -98,7 +102,11 @@ export const CategoryBarChartCell = (
                   />
                 </TooltipTrigger>
                 {!args.hideTooltip && (
-                  <TooltipContent className="flex items-center gap-1 text-sm">
+                  <TooltipContent
+                    className="pointer-events-none z-[100] flex items-center gap-1 text-sm"
+                    side="top"
+                    sideOffset={6}
+                  >
                     <div
                       className="h-2.5 w-2.5 shrink-0 translate-y-px rounded-full"
                       style={{ backgroundColor: color }}
@@ -112,10 +120,10 @@ export const CategoryBarChartCell = (
                   </TooltipContent>
                 )}
               </TooltipPrimitive>
-            )
-          })}
-        </div>
+            </TooltipProvider>
+          )
+        })}
       </div>
-    </TooltipProvider>
+    </div>
   )
 }
