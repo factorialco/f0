@@ -611,6 +611,48 @@ export const TableWithGroupedHeaders: Story = {
   },
 }
 
+export const StrikedRowsVisualization: Story = {
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        name: "Alice Johnson",
+        email: "alice@example.com",
+        active: true,
+      },
+      { id: 2, name: "Bob Smith", email: "bob@example.com", active: false },
+      { id: 3, name: "Carol Lee", email: "carol@example.com", active: true },
+      { id: 4, name: "Dan Park", email: "dan@example.com", active: false },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    return (
+      <div style={{ maxWidth: 600 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                referenceRowType: (item) => (item.active ? "none" : "striked"),
+                columns: [
+                  { label: "Name", render: (item) => item.name, id: "name" },
+                  { label: "Email", render: (item) => item.email, id: "email" },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
 export const BorderedTable: Story = {
   render: () => {
     const records = [
