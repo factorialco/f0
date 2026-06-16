@@ -1,3 +1,4 @@
+import { expect, within } from "@storybook/test"
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useState, useMemo } from "react"
 
@@ -45,6 +46,88 @@ export const ReferenceRowsVisualization: Story = {
 
 export const TableFrozenCols: Story = {
   render: () => <ExampleComponent frozenColumns={2} />,
+}
+
+export const TableFrozenColsWithMinWidth: Story = {
+  render: () => {
+    const records = Array.from({ length: 6 }, (_, i) => ({
+      id: i + 1,
+      name: `Person ${i + 1}`,
+      email: `person${i + 1}@example.com`,
+      role: "Engineer",
+      department: "Product",
+      location: "Madrid",
+      manager: "Alice",
+    }))
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+    })
+
+    return (
+      <div style={{ maxWidth: 600 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 2,
+                columns: [
+                  {
+                    id: "name",
+                    label: "Name",
+                    minWidth: 200,
+                    render: (item) => item.name,
+                  },
+                  {
+                    id: "email",
+                    label: "Email",
+                    minWidth: 150,
+                    render: (item) => item.email,
+                  },
+                  { id: "role", label: "Role", render: (item) => item.role },
+                  {
+                    id: "department",
+                    label: "Department",
+                    render: (item) => item.department,
+                  },
+                  {
+                    id: "location",
+                    label: "Location",
+                    render: (item) => item.location,
+                  },
+                  {
+                    id: "manager",
+                    label: "Manager",
+                    render: (item) => item.manager,
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const nameCell = await canvas.findByText("Person 1")
+    const emailCell = await canvas.findByText("person1@example.com")
+    const nameTd = nameCell.closest("td")
+    const emailTd = emailCell.closest("td")
+
+    // Both frozen columns get position: sticky.
+    expect(nameTd && getComputedStyle(nameTd).position).toBe("sticky")
+    expect(emailTd && getComputedStyle(emailTd).position).toBe("sticky")
+
+    // The first frozen column anchors at left:0.
+    expect(nameTd && getComputedStyle(nameTd).left).toBe("0px")
+
+    // The second frozen column must offset by the first's minWidth (200px),
+    // not collapse to left:0 and overlap the first column.
+    expect(emailTd && getComputedStyle(emailTd).left).toBe("200px")
+  },
 }
 
 export const TableColumnOrderingAndHidden: Story = {
