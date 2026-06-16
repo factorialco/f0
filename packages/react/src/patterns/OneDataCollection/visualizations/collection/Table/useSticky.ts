@@ -23,7 +23,7 @@ export const useSticky = <
             left: columns
               .slice(0, Math.max(0, cellIndex))
               .reduce(
-                (acc, column) => acc + (column.width ?? 0),
+                (acc, column) => acc + (column.width ?? column.minWidth ?? 0),
                 checkColumnWidth
               ),
           }
