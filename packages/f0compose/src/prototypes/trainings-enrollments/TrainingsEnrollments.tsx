@@ -2017,7 +2017,11 @@ const inscripcionCopy = {
     addCriterion: "or",
     addGroup: "And also must match",
     removeGroup: "Remove group",
-    zeroMatch: "No one matches this combination. Check your criteria.",
+    // Forward-looking, non-blocking: a standing rule with zero matches today is
+    // valid (it enrols whoever matches later), but it's also worth a glance in
+    // case the combination is contradictory.
+    zeroMatch:
+      "No one matches these criteria yet. Anyone who matches later is enrolled automatically — double-check the combination if you expected matches.",
     // What happens to matching people, by course type (no "rule" wording at creation).
     enrolledNote: "People who match are enrolled right away.",
     waitlistNote: "People who match wait to be assigned to a training group.",
