@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.4.1](https://github.com/factorialco/f0/compare/f0-react-v3.4.0...f0-react-v3.4.1) (2026-06-16)
+
+
+### Bug Fixes
+
+* **OneDataCollection/table:** respect minWidth when offsetting frozen columns ([#4466](https://github.com/factorialco/f0/issues/4466)) ([f707da4](https://github.com/factorialco/f0/commit/f707da4c6c8bb9bd05c1f68be04df49ca736ccf4))
+
 ## [3.4.0](https://github.com/factorialco/f0/compare/f0-react-v3.3.0...f0-react-v3.4.0) (2026-06-16)
 
 
