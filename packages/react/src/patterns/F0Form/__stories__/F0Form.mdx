@@ -286,6 +286,28 @@ const formSchema = z.object({
 
 The base call accepts any Zod schema (`z.string()`, `z.number()`, `z.date()`, `z.enum()`, `z.object()`, `z.array()`, etc.) and any supported field config.
 
+## Period field
+
+`period` is a granularity-aware period selector (Year / Half year / Quarter / Month / Range). Unlike `date` — which stores a single `Date` and re-displays it with the first granularity — a `period` field keeps the **full value** (`{ value: { from, to }, granularity }`), so the chosen granularity and range are preserved.
+
+It has no shortcut: declare it with the base call and `z.custom<DatePickerValue>()`. Label, the required asterisk, size, and error handling are wired by the form automatically — no manual re-wiring.
+
+```tsx
+goalPeriod: f0FormField(z.custom<DatePickerValue>().optional(), {
+  label: "Goal period",
+  fieldType: "period",
+  granularities: ["year", "halfyear", "quarter", "month", "range"],
+  minDate: new Date(2024, 0, 1),
+  maxDate: new Date(2027, 11, 31),
+  // Optional: "long" (default → "01 Aug 2025") or "default" (dd/MM/yyyy)
+  displayFormat: "long",
+})
+```
+
+The granularity shown when empty is the first entry in `granularities`; pre-select a period by passing a `DatePickerValue` (with the desired `granularity`) in the form's `defaultValues`. `minDate` / `maxDate` accept a static `Date` or a function of the other field values, and `displayFormat` controls how the selected period reads in the input.
+
+<Canvas of={Stories.PeriodField} />
+
 ---
 
 # Guidelines

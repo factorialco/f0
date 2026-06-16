@@ -19,6 +19,7 @@ import type {
 import type { F0DateRangeConfig } from "./fields/daterange/types"
 import type { F0FileConfig } from "./fields/file/types"
 import type { F0NumberConfig } from "./fields/number/types"
+import type { F0PeriodConfig } from "./fields/period/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0SelectConfig } from "./fields/select/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
@@ -87,6 +88,7 @@ export type F0FieldType =
   | "time"
   | "datetime"
   | "daterange"
+  | "period"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -205,6 +207,7 @@ export type {
   F0DateConfig,
   F0TimeConfig,
   F0DateRangeConfig,
+  F0PeriodConfig,
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
@@ -377,6 +380,15 @@ export type F0DateRangeFieldConfig = F0BaseConfig &
   }
 
 /**
+ * Config for period fields (date navigator that preserves the full
+ * DatePickerValue: `{ value: { from, to }, granularity }`).
+ */
+export type F0PeriodFieldConfig = F0BaseConfig &
+  F0PeriodConfig & {
+    fieldType: "period"
+  }
+
+/**
  * Config for array fields with select (multi-select)
  * @typeParam T - The value type (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
@@ -496,6 +508,7 @@ export type F0FieldConfig<
   | F0ArrayConfig<T, R>
   | F0FileFieldConfig
   | F0ObjectConfig
+  | F0PeriodFieldConfig
   | F0StringCardSelectConfig
 
 /**
@@ -578,6 +591,15 @@ export function f0FormField<
   T extends z.ZodObject<z.ZodRawShape>,
   TConfig = undefined,
 >(schema: T, config: F0ObjectConfig<z.infer<T>, TConfig>): T & F0ZodType<T>
+
+/**
+ * Period field - date navigator that preserves the full DatePickerValue.
+ * Use with `z.custom<DatePickerValue>()` (or its optional/nullable wrappers).
+ */
+export function f0FormField<T extends ZodTypeAny>(
+  schema: T,
+  config: F0PeriodFieldConfig
+): T & F0ZodType<T>
 
 /**
  * Optional wrapper - inherits inner type's config

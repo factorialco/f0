@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useRef } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
+import type { DatePickerValue } from "@/components/F0DatePicker"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -1072,6 +1073,12 @@ export const AllFieldTypes: Story = {
         fromLabel: "Start",
         toLabel: "End",
       }),
+      periodField: f0FormField(z.custom<DatePickerValue>(), {
+        label: "Period Field",
+        fieldType: "period",
+        granularities: ["year", "halfyear", "quarter", "month", "range"],
+        helpText: "Keeps the full period (range + granularity)",
+      }),
       richTextField: f0FormField.richText({
         label: "Rich Text Field",
         placeholder: "Write something with formatting...",
@@ -1099,6 +1106,7 @@ export const AllFieldTypes: Story = {
         timeField: undefined,
         datetimeField: undefined,
         dateRangeField: undefined,
+        periodField: undefined,
         richTextField: { value: "" },
       },
       submitConfig: {
@@ -1106,6 +1114,49 @@ export const AllFieldTypes: Story = {
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Native `period` field — a granularity-aware period selector
+ * (Year / Half year / Quarter / Month / Range) backed by `F0DatePicker`.
+ *
+ * Unlike the `date` field, the form value keeps the full `DatePickerValue`
+ * (`{ value: { from, to }, granularity }`), so the chosen granularity and range
+ * survive. Label, required asterisk, size and error handling are wired by the
+ * form automatically — no manual re-wiring needed.
+ */
+export const PeriodField: Story = {
+  render() {
+    const formSchema = z.object({
+      goalPeriod: f0FormField(z.custom<DatePickerValue>(), {
+        label: "Goal period",
+        fieldType: "period",
+        granularities: ["year", "halfyear", "quarter", "month", "range"],
+        minDate: new Date(2024, 0, 1),
+        maxDate: new Date(2027, 11, 31),
+        helpText: "Pick the period this goal applies to",
+      }),
+      comparisonPeriod: f0FormField(z.custom<DatePickerValue>().optional(), {
+        label: "Comparison period",
+        fieldType: "period",
+        granularities: ["year", "quarter", "month"],
+        helpText: "Optional — leave empty to skip",
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "period-field",
+      schema: formSchema,
+      defaultValues: { goalPeriod: undefined, comparisonPeriod: undefined },
+      onSubmit: async ({ data }) => {
+        await sleep(600)
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
