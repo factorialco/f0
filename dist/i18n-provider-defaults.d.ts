@@ -135,6 +135,15 @@ export declare const defaultTranslations: {
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
     };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -705,7 +714,7 @@ export declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -870,6 +879,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -883,7 +897,9 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
         };
     }
@@ -916,11 +932,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 

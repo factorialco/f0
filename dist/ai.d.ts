@@ -16,6 +16,7 @@ import { f1Colors } from '@factorialco/f0-core';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { HTMLAttributeAnchorTarget } from 'react';
+import { HTMLAttributes } from 'react';
 import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
@@ -40,7 +41,8 @@ import { TagType } from '../../../f0';
 import { TeamItemProps } from './types';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
-import { WithDataTestIdReturnType } from '../../../lib/data-testid';
+import { WithDataTestIdReturnType } from '../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../../../lib/data-testid';
 
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
@@ -537,6 +539,10 @@ export declare type AiChatTrackingOptions = {
     onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void;
     onNewChat?: () => void;
     onMessage?: (message: F0Message) => void;
+    /** Mic button pressed — fires on intent, even if mic permission is later denied. */
+    onDictationStart?: () => void;
+    /** Dictation discarded by the user, while recording or mid-transcription. */
+    onDictationCancel?: () => void;
 };
 
 /**
@@ -1120,13 +1126,6 @@ declare type CardAvatarVariant = AvatarVariant | {
 } | {
     type: "date";
     date: Date;
-} | {
-    type: "pulse";
-    firstName: string;
-    lastName: string;
-    src?: string;
-    pulse?: Pulse;
-    onPulseClick: () => void;
 };
 
 declare type CardInternalProps = F0AiInsightCardProps & {
@@ -1137,6 +1136,14 @@ declare interface CardPrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
+    /**
+     * Visual emphasis of the primary action. `"outline"` renders it as an outline
+     * button while keeping it pinned at the trailing edge (so a lone CTA never
+     * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+     * full primary weight.
+     * @default "default"
+     */
+    variant?: "default" | "outline";
 }
 
 declare interface CardRowConfirmAction {
@@ -1820,6 +1827,15 @@ export declare const defaultTranslations: {
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
     };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -2390,7 +2406,7 @@ export declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -2529,7 +2545,7 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
 }[TagType_2] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-} | (ComponentProps<typeof FileItem> & {
+} | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
 
@@ -2886,7 +2902,7 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     quote: PendingQuote | null;
 };
 
-export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
+export declare const F0AiInsightCard: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
 }>;
 
@@ -3389,10 +3405,6 @@ declare interface F0CardRowProps {
      */
     stackAt?: CardRowStackAt;
     /**
-     * When set, the whole row becomes a link to this href.
-     */
-    link?: string;
-    /**
      * Stretch to fill the height of its container.
      */
     fullHeight?: boolean;
@@ -3403,12 +3415,22 @@ declare interface F0CardRowProps {
      */
     alert?: CardAlertProps;
     /**
-     * Called when the row is clicked.
+     * Opt-in: makes the whole row a link to this href. The row only becomes a
+     * click target (pointer cursor + hover affordance + overlay link) when `link`
+     * or `onClick` is set — otherwise it's a static row whose only interactive
+     * parts are its actions.
+     */
+    link?: string;
+    /**
+     * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+     * into an explicit click target (pointer cursor + hover affordance). Use it
+     * for cards whose entire surface is the action (e.g. entry-point cards with no
+     * CTA button); leave it unset for rows that act only through their buttons.
      */
     onClick?: () => void;
     /**
-     * Disables the full-row overlay link so a parent can manage drag-and-drop while
-     * still allowing click navigation via `onClick`.
+     * Disables the full-row overlay link (used with `link`) so a parent can manage
+     * drag-and-drop while still allowing click navigation via `onClick`.
      */
     disableOverlayLink?: boolean;
 }
@@ -3434,6 +3456,29 @@ declare interface F0ClarifyingPanelProps {
      */
     isSubmitDisabled?: boolean;
 }
+
+declare type F0FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+declare const F0FileItem: WithDataTestIdReturnType<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: F0FileAction[];
+    disabled?: boolean;
+    size?: F0FileItemSize;
+}
+
+declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
+
+declare const f0FileItemSizes: readonly ["md", "lg"];
 
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
@@ -3558,9 +3603,9 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
-declare const F0TagAlert: WithDataTestIdReturnType<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagBalance: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagBalance: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagBalanceProps = {
     /**
@@ -3592,7 +3637,7 @@ declare type F0TagBalanceProps = {
     formatterOptions?: undefined;
 });
 
-declare const F0TagCompany: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagCompany: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagListProps<T extends TagType_2> = {
     /**
@@ -3614,7 +3659,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     remainingCount?: number;
 };
 
-declare const F0TagPerson: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagPerson: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagRawProps = {
     /**
@@ -3647,7 +3692,7 @@ declare interface F0TagStatusProps {
     additionalAccessibleText?: string;
 }
 
-declare const F0TagTeam: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagTeam: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
@@ -3676,13 +3721,6 @@ export declare type FeedbackConfig = {
     }) => void;
 };
 
-declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
-
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -3691,27 +3729,6 @@ declare type FileDef = {
     name: string;
     type: string;
 };
-
-declare const FileItem: WithDataTestIdReturnType<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
-
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
-
-declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
 
 declare type FlagAvatarVariant = Extract<AvatarVariant, {
     type: "flag";
@@ -3983,6 +4000,7 @@ declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly headcount_planning: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4251,10 +4269,6 @@ declare type Props_2 = {
 } | {
     customColor: string;
 });
-
-declare type Pulse = (typeof pulses)[number];
-
-declare const pulses: readonly ["superNegative", "negative", "neutral", "positive", "superPositive"];
 
 export declare interface RadarComputation {
     datasetId: string;
@@ -4710,6 +4724,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -4723,7 +4742,9 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
         };
     }
@@ -4756,11 +4777,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 
