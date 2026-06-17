@@ -44,6 +44,13 @@ const eur = (n: number) =>
 const MODULO: Record<string, number> = { presencial: 13, teleformacion: 7.5, mixta: 11 }
 const moduloHora = (m: string) => MODULO[m] ?? 13
 
+// Fechas siempre en numérico DD/MM/AAAA (misma lógica en los 3 pasos).
+function padDateStr(s: string): string {
+  const p = s.split("/")
+  if (p.length !== 3) return s
+  return `${p[0].padStart(2, "0")}/${p[1].padStart(2, "0")}/${p[2]}`
+}
+
 function finDeadlineDic(fecha: string): DeadlineInfo | null {
   const d = parseSpanishDate(fecha)
   if (!d) return null
@@ -349,12 +356,15 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
   // ── Contenido + acciones del paso activo ──
   let stepNote: string | undefined
+  // Fecha de confirmación del paso (alta/comunicado) como campo apilado
+  // label/valor, MISMO tratamiento que "Plazos" en el paso fin.
+  let doneDate: { label: string; value: string } | undefined
   let secondary: ActionDef[] = [] // acciones de DECISIÓN (panel derecho): p.ej. Generar XML
   let onEdit: (() => void) | null = null // editar vive a la IZQUIERDA, con los datos
   let mainBody: React.ReactNode = null
 
   if (active === "alta") {
-    if (enFundae && af.fechaAlta) stepNote = `Dada de alta el ${af.fechaAlta}`
+    if (enFundae && af.fechaAlta) doneDate = { label: "Dada de alta el", value: padDateStr(af.fechaAlta) }
     onEdit = () => setEditing("alta")
     if (enFundae) secondary.push({ label: "Generar XML", onClick: () => setToast("XML de alta generado (demo).") })
     const modalidad = MODALIDAD_OPTIONS.find((o) => o.value === af.modalidad)?.label ?? af.modalidad
@@ -378,7 +388,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
       </F0Box>
     )
   } else if (active === "inicio") {
-    if (inicioCom) stepNote = `Comunicado el ${com.inicioAt}`
+    if (inicioCom) doneDate = { label: "Comunicado el", value: padDateStr(com.inicioAt ?? "") }
     onEdit = () => setEditing("inicio")
     const modalidad = MODALIDAD_OPTIONS.find((o) => o.value === inicio.modalidad)?.label ?? inicio.modalidad
     mainBody = (
@@ -421,7 +431,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
       </F0Box>
     )
   } else {
-    if (finCom) stepNote = `Comunicado el ${com.finAt}`
+    if (finCom) doneDate = { label: "Comunicado el", value: padDateStr(com.finAt ?? "") }
     onEdit = () => setEditing("fin")
     if (finCom) {
       secondary.push({ label: "Generar XML", onClick: () => setToast("XML de fin generado (demo).") })
@@ -431,25 +441,33 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
     mainBody = (
       <F0Box display="flex" flexDirection="column" gap="3xl">
         <Section title="Costes">
-          <F0Box display="flex" justifyContent="between" alignItems="end" gap="2xl">
-            {/* Titular: el total + su desglose */}
-            <F0Box display="flex" flexDirection="column" gap="xs">
+          {/* Desglose itemizado en una columna acotada: componentes → total
+              destacado (divisor encima) → tope del módulo como referencia.
+              Filas etiqueta/valor, mismo patrón que el panel de la derecha. */}
+          <F0Box display="flex" flexDirection="column" gap="sm" width="full">
+            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+              <F0Text variant="small" content="Directos" />
+              <F0Text variant="body" content={eur(Number(fin.costesDirectos || 0))} />
+            </F0Box>
+            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+              <F0Text variant="small" content="Indirectos" />
+              <F0Text variant="body" content={eur(Number(fin.costesIndirectos || 0))} />
+            </F0Box>
+            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+              <F0Text variant="small" content="Salariales" />
+              <F0Text variant="body" content={eur(Number(fin.costesSalariales || 0))} />
+            </F0Box>
+            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md" borderTop="default" borderColor="secondary" paddingTop="sm">
               <F0Text variant="label" content="Total invertido" />
               <F0Heading as="h3" variant="heading" content={eur(totalCostes)} />
-              <F0Text
-                variant="small"
-                content={`Directos ${eur(Number(fin.costesDirectos || 0))} · Indirectos ${eur(Number(fin.costesIndirectos || 0))} · Salariales ${eur(Number(fin.costesSalariales || 0))}`}
-              />
             </F0Box>
-            {/* El tope, aparte */}
-            <F0Box display="flex" flexDirection="column" gap="xs" alignItems="end" shrink={false}>
-              <F0Text variant="label" content="Máximo bonificable (módulo)" />
+            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+              <F0Text variant="small" content="Máximo bonificable (módulo)" />
               <F0Text variant="body" content={eur(maxBonif)} />
             </F0Box>
           </F0Box>
         </Section>
 
-        {/* Separación entre Costes y Participantes */}
         <F0Box borderTop="default" borderColor="secondary" />
 
         <FundaeParticipantsTable
@@ -484,6 +502,11 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
         ? finDl
         : null
 
+  // Fechas de "Plazos" en formato numérico consistente (DD/MM/AAAA), apiladas.
+  const numDate = (d: Date) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
+  const finRealNum = fin.fechaFinReal ? padDateStr(fin.fechaFinReal) : ""
+  const deadlineNum = activeDeadline ? numDate(activeDeadline.deadlineDate) : ""
+
   // Acción primaria del paso (barra inferior, patrón Atrás/Siguiente de las
   // referencias): avanzar el ciclo o pasar al siguiente paso ya hecho.
   // El CTA es SOLO para completar el paso (comunicar / dar de alta), y solo si
@@ -491,14 +514,14 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   let action: { label: string; onClick: () => void; disabled?: boolean } | null = null
   let actionHint: string | undefined
   if (active === "alta") {
-    if (!enFundae) action = { label: "Comunicar alta a FUNDAE", onClick: giveAlta }
+    if (!enFundae) action = { label: "Comunicar alta", onClick: giveAlta }
   } else if (active === "inicio") {
     if (!inicioCom) {
-      action = { label: "Revisar y comunicar inicio", onClick: () => openConfirm("inicio"), disabled: !enFundae }
+      action = { label: "Comunicar inicio", onClick: () => openConfirm("inicio"), disabled: !enFundae }
       if (!enFundae) actionHint = "Primero da de alta la acción formativa."
     }
   } else if (!finCom) {
-    action = { label: "Revisar y comunicar fin", onClick: () => openConfirm("fin"), disabled: !inicioCom }
+    action = { label: "Comunicar fin", onClick: () => openConfirm("fin"), disabled: !inicioCom }
     if (!inicioCom) actionHint = "Primero comunica el inicio del grupo."
   }
 
@@ -542,6 +565,19 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   // como "No bonificable", para no duplicar la cifra).
   const bannerIssues = issues.filter((c) => !/módulo/i.test(c.text))
 
+  // Divisores del panel derecho: el lead "Estado" ya lleva su borderBottom, así
+  // que la PRIMERA sección del cuerpo NO lleva borderTop (si no, dos rayas
+  // juntas). El resto sí, como separador entre secciones — igual que la izquierda.
+  const rightSections = [
+    showBreakdown && "bonif",
+    bannerIssues.length > 0 && "banner",
+    showBreakdown && "recup",
+    (activeDeadline || (active === "fin" && fin.fechaFinReal)) && "plazos",
+    doneDate && "done",
+    (action || stepNote || secondary.length > 0) && "action",
+  ].filter(Boolean) as string[]
+  const firstRight = rightSections[0]
+
   // ── Confirmación ──
   const checks = confirm === "inicio" ? inicioChecks : confirm === "fin" ? finChecks : []
   const canSend = checks.length > 0 && checks[0]!.ok
@@ -553,7 +589,8 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
     <F0Box display="flex" flexDirection="column" gap="2xl">
       {toast && <F0Alert variant="positive" title={toast} description="" />}
 
-      {/* Orientación compacta: grupo + en qué paso estás */}
+      {/* Orientación compacta: grupo + en qué paso estás (header propio de A:
+          stepper conectado, sin cajas). */}
       <F0Box display="flex" flexDirection="column" gap="3xl" paddingBottom="md">
         {classes.length > 1 && (
           <F0Box minWidth="56" maxWidth="72">
@@ -569,24 +606,34 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
         <TopSteps steps={steps} active={active} onSelect={goPhase} />
       </F0Box>
 
-      {/* Editar NO borra la pantalla: las dos columnas se mantienen; el
-          formulario aparece a la izquierda y el panel indica que estás editando. */}
-      <F0Box display="flex" gap="2xl" alignItems="stretch">
-          {/* IZQUIERDA — el trabajo (o el formulario, si editas). Editar vive
-              aquí, con los datos que toca. */}
-          <F0Box grow minWidth="0" display="flex" flexDirection="column" gap="lg">
-            {!isEditing && onEdit && (
-              <F0Box display="flex" justifyContent="end">
+      {/* Body: DATOS (izquierda, área de trabajo) + DECISIÓN (derecha, panel
+          contenido). Sin cabecera redundante (la barra de pasos ya dice el paso). */}
+      <F0Box display="flex" width="full" gap="2xl" alignItems="stretch">
+          {/* IZQUIERDA — el trabajo (o el formulario, si editas). SIN caja:
+              el divisor vertical separa las dos zonas. */}
+          <F0Box
+            grow
+            minWidth="0"
+            display="flex"
+            flexDirection="column"
+            gap="lg"
+          >
+            {/* Cabecera: rótulo de contexto + acción Editar (que edita TODOS los
+                datos del paso). Da lead y saca Editar del aire. */}
+            <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" minHeight="12" borderBottom="default" borderColor="secondary" paddingBottom="md">
+              <F0Heading as="h3" variant="heading" content="Datos del grupo" />
+              {!isEditing && onEdit && (
                 <F0Button label="Editar datos" variant="outline" onClick={onEdit} />
-              </F0Box>
-            )}
+              )}
+            </F0Box>
             {mainBody}
           </F0Box>
 
-          {/* Divider vertical: une las dos zonas sin meterlas en cajas */}
+          {/* Divisor vertical: une las dos zonas sin meterlas en cajas */}
           <F0Box shrink={false} borderLeft="default" borderColor="secondary" />
 
-          {/* DERECHA — la decisión: estado · resultado · costes · fechas · acción */}
+          {/* DERECHA — la DECISIÓN: estado · avisos · bonificación · recuperable
+              · plazos · acción. SIN caja. */}
           <F0Box
             shrink={false}
             width="80"
@@ -607,28 +654,14 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
             {/* SECCIÓN Estado — un ESTADO real (tag). Los avisos NO son el estado:
                 van en su banner debajo. */}
-            <F0Box display="flex" flexDirection="column" gap="sm">
+            <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" minHeight="12" borderBottom="default" borderColor="secondary" paddingBottom="md">
               <F0Heading as="h3" variant="heading" content="Estado" />
               <F0TagStatus text={stateText} variant={stateTone} />
             </F0Box>
 
-            {/* BANNER de avisos — uno por aviso (con su consecuencia). */}
-            {bannerIssues.length > 0 && (
-              <F0Box display="flex" flexDirection="column" gap="sm">
-                {bannerIssues.map((c, i) => (
-                  <F0Alert
-                    key={i}
-                    variant={c.warn ? "warning" : "critical"}
-                    title={c.text}
-                    description={c.advice ?? ""}
-                  />
-                ))}
-              </F0Box>
-            )}
-
             {/* SECCIÓN Bonificación — desglose de costes (Invertido / No bonificable). */}
             {showBreakdown && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop="default" borderColor="secondary" paddingTop="lg">
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "bonif" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "bonif" ? undefined : "lg"}>
                 <F0Heading as="h3" variant="heading" content="Bonificación" />
                 <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
                   <F0Text variant="small" content="Invertido" />
@@ -646,9 +679,25 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
               </F0Box>
             )}
 
+            {/* BANNER de avisos — bajo el desglose de Bonificación, que es lo que
+                explican (p. ej. "se bonifican 2 de 3"). En pasos sin desglose
+                cae justo tras Estado. */}
+            {bannerIssues.length > 0 && (
+              <F0Box display="flex" flexDirection="column" gap="sm">
+                {bannerIssues.map((c, i) => (
+                  <F0Alert
+                    key={i}
+                    variant={c.warn ? "warning" : "critical"}
+                    title={c.text}
+                    description={c.advice ?? ""}
+                  />
+                ))}
+              </F0Box>
+            )}
+
             {/* SECCIÓN Recuperable — su propio título + cifra, como las demás. */}
             {showBreakdown && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop="default" borderColor="secondary" paddingTop="lg">
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "recup" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "recup" ? undefined : "lg"}>
                 <F0Heading as="h3" variant="heading" content="Recuperable" />
                 <F0Heading as="h3" variant="heading-large" content={eur(recuperable)} />
               </F0Box>
@@ -656,27 +705,36 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
             {/* SECCIÓN Plazos — mismo patrón */}
             {(activeDeadline || (active === "fin" && fin.fechaFinReal)) && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop="default" borderColor="secondary" paddingTop="lg">
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "plazos" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "plazos" ? undefined : "lg"}>
                 <F0Heading as="h3" variant="heading" content="Plazos" />
                 {active === "fin" && fin.fechaFinReal && (
-                  <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+                  <F0Box display="flex" flexDirection="column" gap="xs">
                     <F0Text variant="small" content="Finalizó el" />
-                    <F0Text variant="body" content={fin.fechaFinReal} />
+                    <F0Text variant="body" content={finRealNum} />
                   </F0Box>
                 )}
                 {activeDeadline && (
-                  <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+                  <F0Box display="flex" flexDirection="column" gap="xs">
                     <F0Text variant="small" content="Plazo para comunicar" />
-                    <F0Text variant="body" content={activeDeadline.formattedDeadline} />
+                    <F0Text variant="body" content={deadlineNum} />
                   </F0Box>
                 )}
+              </F0Box>
+            )}
+
+            {/* FECHA de confirmación (alta/comunicado) — campo apilado label/valor,
+                MISMO tratamiento que "Plazos" en fin. */}
+            {doneDate && (
+              <F0Box display="flex" flexDirection="column" gap="xs" borderTop={firstRight === "done" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "done" ? undefined : "lg"}>
+                <F0Text variant="small" content={doneDate.label} />
+                <F0Text variant="body" content={doneDate.value} />
               </F0Box>
             )}
 
             {/* Acción: SOLO el CTA de completar (si el paso está por hacer).
                 Navegar entre pasos es libre por el stepper, no es un botón. */}
             {(action || stepNote || secondary.length > 0) && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop="default" borderColor="secondary" paddingTop="lg">
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "action" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "action" ? undefined : "lg"}>
                 {action && (
                   <F0Button label={action.label} variant="default" disabled={action.disabled} onClick={action.onClick} />
                 )}
@@ -700,7 +758,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
           title={confirm === "inicio" ? "Comunicar inicio a FUNDAE" : "Comunicar fin a FUNDAE"}
           description={confirm === "inicio" ? `Grupo ${cls.name} · inicio ${inicio.fechaInicio}` : `Grupo ${cls.name} · recuperas ${eur(maxBonif)} de ${eur(totalCostes)}`}
           primaryAction={{
-            label: !canSend ? "Faltan datos" : gated ? "Marca la casilla" : confExceso > 0 ? `Comunicar y asumir ${eur(confExceso)}` : risk ? "Comunicar igualmente" : "Comunicar a FUNDAE",
+            label: !canSend ? "Faltan datos" : gated ? "Marca la casilla" : confExceso > 0 ? `Comunicar y asumir ${eur(confExceso)}` : risk ? "Comunicar igualmente" : "Comunicar",
             disabled: !canSend || gated,
             onClick: () => { if (canSend && !gated) (confirm === "inicio" ? comunicarInicio() : comunicarFin()) },
           }}
