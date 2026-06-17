@@ -71,6 +71,7 @@ import {
   SolidStop,
   Sparkles,
   People,
+  Present,
   Reset,
   Upload,
   VideoRecorder,
@@ -5191,6 +5192,7 @@ function SessionRoomScreen({
 }) {
   const [microphoneEnabled, setMicrophoneEnabled] = useState(true)
   const [cameraEnabled, setCameraEnabled] = useState(true)
+  const [screenShareEnabled, setScreenShareEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [activePanel, setActivePanel] = useState<LiveSessionPanelId>(null)
   const isInstructor = role === "instructor"
@@ -5237,6 +5239,7 @@ function SessionRoomScreen({
           <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
           <F0Box height="4" width="0.5" background="secondary" />
           <F0ButtonToggle label={["Open chat", "Close chat"]} icon={[Comment, Comment]} selected={activePanel === "chat"} onSelectedChange={() => togglePanel("chat")} />
+          <F0ButtonToggle label={["Share screen", "Stop sharing"]} icon={[Present, Present]} selected={screenShareEnabled} onSelectedChange={setScreenShareEnabled} />
           {isInstructor ? (
             <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
           ) : null}
