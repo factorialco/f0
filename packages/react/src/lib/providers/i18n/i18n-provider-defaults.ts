@@ -31,6 +31,10 @@ export const defaultTranslations = {
       show: "Show password",
       hide: "Hide password",
     },
+    private: {
+      show: "Show",
+      hide: "Hide",
+    },
   },
   link: {
     opensInNewTab: "opens in new tab",

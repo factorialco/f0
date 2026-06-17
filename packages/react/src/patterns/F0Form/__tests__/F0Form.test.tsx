@@ -49,6 +49,31 @@ describe("F0Form", () => {
     expect(screen.getByText("Submit")).toBeInTheDocument()
   })
 
+  it("renders a private inputType as a masked field with an eye toggle", () => {
+    const formSchema = z.object({
+      ssn: f0FormField(z.string(), {
+        label: "Social security number",
+        inputType: "private",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-private"
+        schema={formSchema}
+        defaultValues={{ ssn: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const input = screen.getByLabelText("Social security number")
+    expect(input).toBeInTheDocument()
+    // Masked at rest, opted out of password managers, and toggleable.
+    expect(input).toHaveAttribute("type", "password")
+    expect(input).toHaveAttribute("data-1p-ignore")
+    expect(screen.getByRole("button", { name: /show/i })).toBeInTheDocument()
+  })
+
   it("renders form with custom submit label", () => {
     const formSchema = z.object({
       email: f0FormField(z.string().email(), {
