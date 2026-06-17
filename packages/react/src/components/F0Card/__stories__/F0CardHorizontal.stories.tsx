@@ -14,7 +14,7 @@ const clickAlert = (label: string) => fn(() => alert(`${label} clicked`))
 
 const meta: Meta<typeof F0CardHorizontal> = {
   component: F0CardHorizontal,
-  title: "Card Horizontal",
+  title: "CardHorizontal",
   parameters: {
     docs: {
       // Prose lives in F0CardHorizontal.mdx (autodocs disabled below).
