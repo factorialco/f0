@@ -6,6 +6,7 @@ import {
   F0Checkbox,
   F0Dialog,
   F0Select,
+  F0TagStatus,
   F0Text,
 } from "@factorialco/f0-react"
 import {
@@ -19,6 +20,7 @@ import {
   Delete,
   Filter,
   Link,
+  People,
   PersonPlus,
   Reset,
   Settings,
@@ -131,7 +133,12 @@ const initialAccess: DirectAccess[] = [
   { employeeId: "emp-003", role: "viewer" },
 ]
 
-const derivedInstructorIds = ["emp-003", "emp-012"]
+// Trainings admins have access to every training via their global permission,
+// so adding them here is a no-op. They are not listed in "People with access"
+// (admin is not a per-training role); in the search they appear as a labelled,
+// non-addable row so it's clear *why* they can't be added.
+const trainingsAdminIds = ["emp-001", "emp-004"]
+const trainingsAdminIdSet = new Set(trainingsAdminIds)
 
 const roleOptions: { value: EditableRole; label: string }[] = [
   { value: "editor", label: "Can edit" },
@@ -230,7 +237,7 @@ function findEmployee(employeeId: string) {
 }
 
 function roleLabel(role: DirectAccessRole) {
-  if (role === "author") return "Author"
+  if (role === "author") return "Owner"
   if (role === "editor") return "Can edit"
   return "Can view"
 }
@@ -355,7 +362,11 @@ export default function TrainingAccessAdmin() {
   }))
 
   const candidateOptions: CandidateOption[] = availablePersonOptions
-    .filter((option) => !option.disabled)
+    // Admins already have access to every training, so — exactly like people who
+    // are already in the access list — they are not offered as add candidates.
+    .filter(
+      (option) => !option.disabled && !trainingsAdminIdSet.has(option.value)
+    )
     .map((option) => ({
       ...option,
       employee: findEmployee(option.value),
@@ -413,22 +424,11 @@ export default function TrainingAccessAdmin() {
 
   const handlePeopleFiltersClear = () => setPeopleFilters(emptyPeopleFilters)
 
-  const instructorIdSet = useMemo(() => new Set(derivedInstructorIds), [])
-  const peopleWithAccess: AccessRowModel[] = [
-    ...directAccess.map((access) => ({
-      ...access,
-      source: instructorIdSet.has(access.employeeId)
-        ? ("direct-and-instructor" as const)
-        : ("direct" as const),
-    })),
-    ...derivedInstructorIds
-      .filter((employeeId) => !directEmployeeIds.has(employeeId))
-      .map((employeeId) => ({
-        employeeId,
-        role: "viewer" as const,
-        source: "instructor" as const,
-      })),
-  ]
+  // Instructor-derived access is intentionally hidden in this modal for now.
+  const peopleWithAccess: AccessRowModel[] = directAccess.map((access) => ({
+    ...access,
+    source: "direct" as const,
+  }))
 
   if (!selectedTraining) {
     return <AccessCoursesPage baseHref={BASE_HREF} role="admin" />
@@ -807,7 +807,7 @@ function ShareTrainingDialog({
 
         <F0Box display="flex" flexDirection="column" gap="sm">
           <F0Text content="People with access" variant="label" />
-          <F0Box display="flex" flexDirection="column" borderTop="default" borderColor="secondary">
+          <F0Box display="flex" flexDirection="column">
             {peopleWithAccess.map((access) => (
               <AccessRow
                 key={access.employeeId}
@@ -818,6 +818,8 @@ function ShareTrainingDialog({
             ))}
           </F0Box>
         </F0Box>
+
+        <GeneralAccessSection />
       </F0Box>
     </F0Dialog>
   )
@@ -1086,13 +1088,9 @@ function AccessRow({
   onRemoveAccess: (employeeId: string) => void
 }) {
   const employee = findEmployee(access.employeeId)
-  const isMutable = access.role !== "author" && access.source !== "instructor"
-  const supportingText =
-    access.role === "author"
-      ? "Created this course"
-      : access.source === "direct-and-instructor" || access.source === "instructor"
-        ? `${employee.email} · Instructor in class`
-        : employee.email
+  const isOwner = access.role === "author"
+  const isMutable = !isOwner
+  const supportingText = isOwner ? "Created this course" : employee.email
 
   return (
     <F0Box
@@ -1101,8 +1099,6 @@ function AccessRow({
       justifyContent="between"
       gap="md"
       paddingY="sm"
-      borderBottom="default"
-      borderColor="secondary"
     >
       <PersonCell employee={employee} supportingText={supportingText} />
       <F0Box display="flex" alignItems="center" gap="sm" shrink={false}>
@@ -1126,10 +1122,7 @@ function AccessRow({
             }}
           />
         ) : (
-          <F0Text
-            content={access.source === "instructor" ? "Instructor" : roleLabel(access.role)}
-            variant="small"
-          />
+          <F0TagStatus text={roleLabel(access.role)} variant="info" />
         )}
       </F0Box>
     </F0Box>
@@ -1149,6 +1142,38 @@ function PersonCell({
       <F0Box display="flex" flexDirection="column" gap="none">
         <F0Text content={employee.fullName} variant="body" />
         <F0Text content={supportingText} variant="description" />
+      </F0Box>
+    </F0Box>
+  )
+}
+
+// Inherited access shown the way Notion/Google do it: a "General access" group
+// row, not individual people and not a floating sentence. Admins get access via
+// their global permission, so they appear here as a read-only group entry with
+// the real admin faces stacked (no invented icon) and the same divider rhythm
+// and muted access label as the people list above.
+function GeneralAccessSection() {
+  return (
+    <F0Box display="flex" flexDirection="column" gap="sm">
+      <F0Text content="General access" variant="label" />
+      <F0Box
+        display="flex"
+        alignItems="center"
+        justifyContent="between"
+        gap="md"
+        paddingY="sm"
+      >
+        <F0Box display="flex" alignItems="center" gap="sm" grow>
+          <F0Avatar avatar={{ type: "icon", icon: People }} size="sm" />
+          <F0Box display="flex" flexDirection="column" gap="none">
+            <F0Text content="Trainings admins" variant="body" />
+            <F0Text
+              content="Anyone with the Trainings admin permission"
+              variant="description"
+            />
+          </F0Box>
+        </F0Box>
+        <F0Text content="Full access" variant="description" />
       </F0Box>
     </F0Box>
   )
