@@ -246,6 +246,49 @@ export const InfoHeader: Story = {
   ),
 }
 
+export const RichInfoHeader: Story = {
+  render: () => (
+    <OneTable>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead
+            info={{
+              title: "Average base salary",
+              meta: "Per employee · Per year · In EUR",
+              description:
+                "Mean base salary of active full-time and part-time employees. Not FTE-adjusted.",
+              action: {
+                label: "Learn more",
+                onClick: () => alert("Open data catalog on this field"),
+              },
+            }}
+          >
+            Base salary
+          </TableHead>
+          <TableHead
+            info={{
+              title: "Role",
+              description: "Access level assigned to the employee account.",
+            }}
+          >
+            Role
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sampleData.map((row) => (
+          <TableRow key={row.id}>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>€42,000</TableCell>
+            <TableCell>{row.role}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </OneTable>
+  ),
+}
+
 type SortState = "asc" | "desc" | undefined
 type SortColumn = "name" | "email" | "role"
 

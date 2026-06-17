@@ -2,6 +2,12 @@ import { AnimatePresence, motion } from "motion/react"
 
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { TableHead as TableHeadRoot } from "@/ui/table"
+import {
+  TooltipContent,
+  Tooltip as TooltipPrimitive,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/ui/tooltip"
 
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
@@ -10,6 +16,77 @@ import { cn, focusRing } from "../../../lib/utils"
 import { getColWidth } from "../utils/colWidth"
 import { ColumnWidth } from "../utils/sizes"
 import { useTable } from "../utils/TableContext"
+
+/**
+ * Rich header info shown in a hoverable card next to a column header. Unlike
+ * the plain-string `info` (which renders a short text tooltip), this supports a
+ * title, a muted meta line, a description, and an optional action — e.g. a
+ * "Learn more" link that opens a related detail surface.
+ */
+export type TableHeaderInfo = {
+  /** Bold title shown at the top of the card. Defaults to the column label. */
+  title?: string
+  /** Muted secondary line, e.g. "Per employee · Per year · In EUR". */
+  meta?: string
+  /** Description paragraph explaining what the column represents. */
+  description: string
+  /** Optional interactive action rendered as a link at the bottom of the card. */
+  action?: {
+    label: string
+    onClick: () => void
+  }
+}
+
+function HeaderInfoCard({ info }: { info: TableHeaderInfo }) {
+  return (
+    <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
+      {info.title && <p className="font-semibold">{info.title}</p>}
+      {info.meta && <p className="text-f1-foreground-secondary">{info.meta}</p>}
+      <p className="font-normal text-f1-foreground-secondary">
+        {info.description}
+      </p>
+      {info.action && (
+        <button
+          type="button"
+          onClick={info.action.onClick}
+          className={cn(
+            "mt-1 w-fit rounded-xs font-medium text-f1-foreground underline underline-offset-2",
+            focusRing()
+          )}
+        >
+          {info.action.label}
+        </button>
+      )}
+    </div>
+  )
+}
+
+function HeaderInfo({
+  info,
+  infoIcon,
+}: {
+  info: TableHeaderInfo
+  infoIcon: IconType
+}) {
+  return (
+    <TooltipProvider delayDuration={300} disableHoverableContent={false}>
+      <TooltipPrimitive>
+        <TooltipTrigger
+          className={cn(
+            "flex h-5 w-5 items-center justify-center rounded-xs text-f1-foreground-secondary",
+            focusRing()
+          )}
+          aria-label={info.title ?? info.description}
+        >
+          <F0Icon icon={infoIcon} size="sm" />
+        </TooltipTrigger>
+        <TooltipContent variant="surface" className="pointer-events-auto">
+          <HeaderInfoCard info={info} />
+        </TooltipContent>
+      </TooltipPrimitive>
+    </TooltipProvider>
+  )
+}
 
 interface TableHeadProps {
   children: React.ReactNode
@@ -47,10 +124,12 @@ interface TableHeadProps {
   onSortClick?: () => void
 
   /**
-   * Optional tooltip text. When provided, displays an info icon next to the header content
-   * that shows this text in a tooltip when hovered.
+   * Optional header info. When provided, displays an info icon next to the
+   * header content. Pass a string for a short text tooltip, or a
+   * {@link TableHeaderInfo} object for a richer hoverable card (title, meta
+   * line, description, and an optional action such as a "Learn more" link).
    */
-  info?: string
+  info?: string | TableHeaderInfo
 
   /**
    * Icon to display when info is provided.
@@ -129,17 +208,21 @@ export function TableHead({
           <div className="flex items-center">
             {info && (
               <div className="flex h-6 w-6 items-center justify-center text-f1-foreground-secondary">
-                <Tooltip label={info}>
-                  <div
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-xs",
-                      focusRing()
-                    )}
-                    tabIndex={0}
-                  >
-                    <F0Icon icon={infoIcon} size="sm" />
-                  </div>
-                </Tooltip>
+                {typeof info === "string" ? (
+                  <Tooltip label={info}>
+                    <div
+                      className={cn(
+                        "flex h-5 w-5 items-center justify-center rounded-xs",
+                        focusRing()
+                      )}
+                      tabIndex={0}
+                    >
+                      <F0Icon icon={infoIcon} size="sm" />
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <HeaderInfo info={info} infoIcon={infoIcon} />
+                )}
               </div>
             )}
             {onSortClick && (

@@ -8,7 +8,11 @@ import {
 import { RecordType } from "@/hooks/datasource"
 import { TranslationsType } from "@/lib/providers/i18n/i18n-provider-defaults"
 
+import type { TableHeaderInfo } from "@/experimental/OneTable"
+
 import { VisualizationType } from "./visualizations/collection/types"
+
+export type { TableHeaderInfo }
 
 export type RendererDefinition = ValueDisplayRendererDefinition
 
@@ -16,10 +20,12 @@ export type PropertyDefinition<T> = {
   label: string
 
   /**
-   * Optional tooltip text. When provided, displays an info icon next to the header content
-   * that shows this text in a tooltip when hovered.
+   * Optional header info. Pass a string for a short text tooltip, or a
+   * {@link TableHeaderInfo} object for a richer hoverable card (title, meta
+   * line, description, and an optional action). Only rendered by the table
+   * visualization's column headers.
    */
-  info?: string
+  info?: string | TableHeaderInfo
 
   /**
    * Function that extracts and formats the value from an item.
