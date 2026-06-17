@@ -23,6 +23,7 @@ import {
   type CardRowStackAt,
   type CardRowStatus,
   cardRowClassName,
+  cardRowLeadingAlignClassName,
 } from "./components/CardRowActions"
 import { type CardAlertProps } from "./types"
 
@@ -88,11 +89,6 @@ export interface F0CardRowProps {
   inactive?: boolean
 
   /**
-   * Compact layout: tighter padding and smaller controls.
-   */
-  compact?: boolean
-
-  /**
    * Container width at which the actions drop to their own line (below it) vs.
    * sit inline (at/above it). `never` keeps them inline at every width.
    * @default "never"
@@ -154,7 +150,6 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
       rejectAction,
       status,
       inactive = false,
-      compact = false,
       fullHeight = false,
       alert,
       link,
@@ -175,7 +170,6 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
         ref={hasAlert ? undefined : ref}
         className={cn(
           "group relative @container bg-f1-background shadow-none transition-all",
-          compact && "p-3",
           fullHeight && "h-full",
           // Pointer + hover/focus affordance only when the whole row is clickable.
           clickable &&
@@ -204,14 +198,24 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
         )}
 
         <div className={cardRowClassName[stackAt]}>
-          <div className="flex min-w-0 flex-row items-center gap-3">
+          <div
+            className={cn(
+              "flex min-w-0 flex-row gap-3",
+              // Centre a short single-line group against the taller controls, but
+              // let it fill from the top once it grows (see the class doc).
+              cardRowLeadingAlignClassName[stackAt],
+              // Keep the avatar pinned to the top so it stays aligned with the
+              // title when the row grows (e.g. a long wrapping description).
+              avatar ? "items-start" : "items-center"
+            )}
+          >
             {avatar && <CardAvatar avatar={avatar} size="lg" />}
             <div className="flex min-w-0 flex-col gap-0">
               <Text
                 variant="body"
                 content={title}
                 className={cn(
-                  "font-medium",
+                  "break-words font-medium",
                   inactive && "text-f1-foreground-secondary line-through"
                 )}
               />
@@ -219,7 +223,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
                 <Text
                   variant="description"
                   content={description}
-                  className={cn(inactive && "line-through")}
+                  className={cn("break-words", inactive && "line-through")}
                 />
               )}
             </div>
@@ -232,8 +236,8 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
             confirmAction={confirmAction}
             rejectAction={rejectAction}
             status={status}
-            compact={compact}
             stackAt={stackAt}
+            hasAvatar={!!avatar}
           />
         </div>
       </Card>
@@ -253,21 +257,16 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
 
 F0CardRowBase.displayName = "F0CardRow"
 
-const F0CardRowSkeleton = ({ compact = false }: { compact?: boolean }) => {
+const F0CardRowSkeleton = () => {
   return (
     <Card
-      className={cn(
-        "group relative bg-f1-background shadow-none",
-        compact && "p-3"
-      )}
+      className={cn("group relative bg-f1-background shadow-none")}
       aria-busy="true"
       aria-live="polite"
     >
       <div className="flex flex-row items-center justify-between gap-4">
         <div className="flex min-w-0 flex-row items-center gap-3">
-          <Skeleton
-            className={cn("h-10 w-10 rounded-full", compact && "h-8 w-8")}
-          />
+          <Skeleton className="h-10 w-10 rounded-full" />
           <div className="flex flex-col gap-1">
             <Skeleton className="h-3 w-32 rounded-md" />
             <Skeleton className="h-3 w-20 rounded-md" />
