@@ -23,6 +23,25 @@ export interface CategoryBarChartCellValue {
 
 const CELL_MIN_HEIGHT_PX = 40
 
+function formatPercentage(value: number, total: number): string {
+  const pct = (value / total) * 100
+  return pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)
+}
+
+function EmptyCell({ meta }: { meta: ValueDisplayRendererContext }) {
+  return (
+    <div
+      className={cn(
+        "text-f1-foreground-secondary",
+        meta.visualization === "table" && tableDisplayClassNames.text
+      )}
+      data-cell-type="categoryBarChart"
+    >
+      –
+    </div>
+  )
+}
+
 export const CategoryBarChartCell = (
   args: CategoryBarChartCellValue,
   meta: ValueDisplayRendererContext
@@ -30,49 +49,27 @@ export const CategoryBarChartCell = (
   const dataPoints = args?.dataPoints
 
   if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length === 0) {
-    return (
-      <div
-        className={cn(
-          "text-f1-foreground-secondary",
-          meta.visualization === "table" && tableDisplayClassNames.text
-        )}
-        data-cell-type="categoryBarChart"
-      >
-        –
-      </div>
-    )
+    return <EmptyCell meta={meta} />
   }
 
   const total = dataPoints.reduce((sum, point) => sum + point.value, 0)
 
   if (total === 0) {
-    return (
-      <div
-        className={cn(
-          "text-f1-foreground-secondary",
-          meta.visualization === "table" && tableDisplayClassNames.text
-        )}
-        data-cell-type="categoryBarChart"
-      >
-        –
-      </div>
-    )
-  }
-
-  const formatPercentage = (value: number): string => {
-    const pct = (value / total) * 100
-    return pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)
+    return <EmptyCell meta={meta} />
   }
 
   return (
     <div
-      className="flex w-full items-center"
+      className={cn(
+        "flex w-full items-center",
+        meta.visualization === "table" && "py-1"
+      )}
       style={{ minHeight: CELL_MIN_HEIGHT_PX, minWidth: 80 }}
       data-cell-type="categoryBarChart"
       role="img"
       aria-label="Category bar chart"
     >
-      <div className="flex h-2 w-full gap-0.5 overflow-hidden">
+      <div className="flex h-2 w-full gap-1 overflow-hidden">
         {dataPoints.map((point, index) => {
           const percentage = (point.value / total) * 100
           const color = point.color
@@ -83,7 +80,7 @@ export const CategoryBarChartCell = (
 
           return (
             <TooltipProvider
-              key={point.name}
+              key={`${point.name}-${index}`}
               delayDuration={100}
               disableHoverableContent
             >
@@ -97,7 +94,7 @@ export const CategoryBarChartCell = (
                     className="h-full w-full"
                     style={{ backgroundColor: color }}
                     role="img"
-                    aria-label={`${point.name}: ${point.value} (${formatPercentage(point.value)}%)`}
+                    aria-label={`${point.name}: ${point.value} (${formatPercentage(point.value, total)}%)`}
                     tabIndex={0}
                   />
                 </TooltipTrigger>
@@ -115,7 +112,7 @@ export const CategoryBarChartCell = (
                       {point.name}
                     </span>
                     <span className="font-mono font-medium tabular-nums text-f1-foreground-inverse dark:text-f1-foreground">
-                      {point.value} ({formatPercentage(point.value)}%)
+                      {point.value} ({formatPercentage(point.value, total)}%)
                     </span>
                   </TooltipContent>
                 )}

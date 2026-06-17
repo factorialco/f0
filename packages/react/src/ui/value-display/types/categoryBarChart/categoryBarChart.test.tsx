@@ -48,12 +48,8 @@ describe("CategoryBarChartCell", () => {
     expect(
       container.querySelector('[data-cell-type="categoryBarChart"]')
     ).toBeInTheDocument()
-    const segments =
-      container.querySelectorAll('[role="img"][aria-label]') ?? []
-    const segmentLabels = Array.from(segments)
-      .map((s) => s.getAttribute("aria-label"))
-      .filter((l) => l?.includes("%"))
-    expect(segmentLabels.length).toBe(2)
+    const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
+    expect(segments.length).toBe(2)
   })
 
   it("renders fallback dash when total is zero", () => {
@@ -99,5 +95,47 @@ describe("CategoryBarChartCell", () => {
     expect(
       container.querySelector('[aria-label="Remote: 5 (25%)"]')
     ).toBeInTheDocument()
+  })
+
+  it("applies custom color when provided", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [{ name: "Test", value: 10, color: "#FF0000" }],
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    const segment = container.querySelector('[role="img"][aria-label*="%"]')
+    expect(segment).toBeInTheDocument()
+    expect(segment?.getAttribute("style")).toContain("background-color")
+  })
+
+  it("still renders segments when hideTooltip is true", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [{ name: "Visible", value: 10 }],
+      hideTooltip: true,
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    expect(
+      container.querySelector('[role="img"][aria-label*="%"]')
+    ).toBeInTheDocument()
+    expect(
+      container.querySelector('[data-cell-type="categoryBarChart"]')
+    ).toBeInTheDocument()
+  })
+
+  it("handles duplicate names with unique keys", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [
+        { name: "Other", value: 5 },
+        { name: "Other", value: 3 },
+      ],
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
+    expect(segments.length).toBe(2)
   })
 })
