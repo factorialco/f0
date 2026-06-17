@@ -1,5 +1,6 @@
 /** Primary tabs for the Performance module. */
 export const moduleTabs = [
+  { id: "dashboards", label: "Dashboards" },
   { id: "reviews", label: "Reviews" },
   { id: "goals", label: "Goals" },
   { id: "feedback", label: "Feedback" },

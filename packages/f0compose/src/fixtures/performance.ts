@@ -568,6 +568,68 @@ export const feedbacks: Feedback[] = [
   { id: "fb-010", fromEmployeeId: "emp-009", toEmployeeId: "emp-005", type: "praise", visibility: "public", content: "Lin's documentation on the new charting API saved the team hours of onboarding time.", createdAt: "2026-05-01" },
 ]
 
+/**
+ * Review campaigns shown in the goals-strategy-map "Review" section — mirrors
+ * the production Performance > Reviews list (Spanish copy, participation rate
+ * bar, created-on date).
+ */
+export type ReviewCampaignStatus = "active" | "draft" | "finished" | "archived"
+
+export type ReviewCampaign = {
+  id: string
+  name: string
+  status: ReviewCampaignStatus
+  /** Completed reviewer submissions. Null while the campaign is a draft. */
+  completed: number | null
+  /** Total expected reviewer submissions. Null while the campaign is a draft. */
+  total: number | null
+  /** ISO YYYY-MM-DD. */
+  createdOn: string
+}
+
+export const reviewCampaigns: ReviewCampaign[] = [
+  {
+    id: "rc-001",
+    name: "Evaluación 180º - Junio 2026",
+    status: "active",
+    completed: 6,
+    total: 63,
+    createdOn: "2026-01-05",
+  },
+  {
+    id: "rc-002",
+    name: "Evaluación 180º - Septiembre 2026",
+    status: "draft",
+    completed: null,
+    total: null,
+    createdOn: "2026-01-06",
+  },
+  {
+    id: "rc-003",
+    name: "Evaluación 270º con puntuaciones ponderadas - Abril 2026",
+    status: "finished",
+    completed: 15,
+    total: 15,
+    createdOn: "2026-01-03",
+  },
+  {
+    id: "rc-004",
+    name: "Evaluación 180º - Junio 2025",
+    status: "finished",
+    completed: 35,
+    total: 35,
+    createdOn: "2025-01-05",
+  },
+  {
+    id: "rc-005",
+    name: "Evaluación 180º - Marzo 2026",
+    status: "finished",
+    completed: 55,
+    total: 55,
+    createdOn: "2026-01-02",
+  },
+]
+
 export const goals: Goal[] = [
   {
     id: "goal-001",

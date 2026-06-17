@@ -1,5 +1,5 @@
 import { StandardLayout } from "@factorialco/f0-react"
-import { OneEmptyState, ProductBlankslate, UpsellingBanner, UpsellingButton } from "@factorialco/f0-react"
+import { OneEmptyState, ProductBlankslate, UpsellingButton } from "@factorialco/f0-react"
 import {
   Page,
   PageHeader,
@@ -8,7 +8,12 @@ import {
 import { Sparkles } from "@factorialco/f0-react/icons/app"
 import { useSearchParams } from "react-router-dom"
 
+import { reviewCampaigns } from "@/fixtures/performance"
+
 import type { PrototypeMeta } from "../types"
+import { DashboardsTab } from "../performance/dashboards/DashboardsTab"
+import { ReviewDetailView } from "./review/ReviewDetailView"
+import { ReviewsListView } from "./review/ReviewsListView"
 import { TreeListView } from "./tree-list/TreeListView"
 import { TreeMapView } from "./tree-map/TreeMapView"
 import { CompensationBody } from "./compensation/CompensationBody"
@@ -22,7 +27,7 @@ export const meta: PrototypeMeta = {
   slug: "goals-strategy-map",
   title: "Performance",
   description:
-    "Performance module with Reviews, Goals (tree list + strategy map), Feedback and Compensation.",
+    "Performance module with Dashboards, Reviews, Goals (tree list + strategy map), Feedback and Compensation.",
   category: "Talent",
   module: "performance",
   audience: ["admin", "manager"],
@@ -38,9 +43,16 @@ export const meta: PrototypeMeta = {
 }
 
 // ── Primary tabs ────────────────────────────────────────────────────────
-type SectionId = "review" | "goals" | "feedback" | "compensation" | "training"
+type SectionId =
+  | "dashboards"
+  | "review"
+  | "goals"
+  | "feedback"
+  | "compensation"
+  | "training"
 
 const sectionTabs: { id: SectionId; label: string }[] = [
+  { id: "dashboards", label: "Dashboards" },
   { id: "review", label: "Review" },
   { id: "goals", label: "Goals" },
   { id: "feedback", label: "Feedback" },
@@ -68,11 +80,11 @@ export default function GoalsStrategyMap() {
   const activeSection: SectionId =
     rawSection && VALID_SECTIONS.has(rawSection)
       ? (rawSection as SectionId)
-      : "goals"
+      : "dashboards"
 
   const setSection = (id: string) => {
     const next = new URLSearchParams()
-    if (id !== "goals") next.set("section", id)
+    if (id !== "dashboards") next.set("section", id)
     setSearchParams(next)
   }
 
@@ -120,6 +132,19 @@ export default function GoalsStrategyMap() {
     onClick: () => setCompTab(t.id),
   }))
 
+  // ── Review detail sub-screen (distinct URL: ?section=review&id=…) ────
+  const reviewId = searchParams.get("id")
+  const goToReviewDetail = (id: string) =>
+    setSearchParams({ section: "review", id })
+  const goToReviewList = () => setSearchParams({ section: "review" })
+
+  if (activeSection === "review" && reviewId) {
+    const review = reviewCampaigns.find((r) => r.id === reviewId)
+    if (review) {
+      return <ReviewDetailView review={review} onBack={goToReviewList} />
+    }
+  }
+
   return (
     <Page
       header={
@@ -156,24 +181,9 @@ export default function GoalsStrategyMap() {
       }
     >
       <StandardLayout>
+        {activeSection === "dashboards" && <DashboardsTab />}
         {activeSection === "review" && (
-          <>
-            <UpsellingBanner
-              title="EU AI Act: train your team before August 2nd or get fined"
-              subtitle="Give your team the AI literacy training required under Article 4. Built-in courses and an automated audit trail keep compliance covered without extra admin work."
-              mediaUrl="https://images.pexels.com/photos/12541596/pexels-photo-12541596.jpeg?auto=compress&fit=crop&w=480&h=320&crop=center"
-              primaryAction={{
-                variant: "outline",
-                label: "Learn more",
-                onClick: () => {},
-              }}
-            />
-            <OneEmptyState
-              title="This is not done yet!"
-              description="but looking cool right? Let's keep vibing!"
-              emoji="🚀"
-            />
-          </>
+          <ReviewsListView onOpenReview={goToReviewDetail} />
         )}
         {activeSection === "goals" && (
           <>

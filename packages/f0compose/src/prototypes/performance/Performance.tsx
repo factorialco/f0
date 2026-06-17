@@ -8,6 +8,7 @@ import { useSearchParams } from "react-router-dom"
 
 import type { PrototypeMeta } from "../types"
 import { CompetenciesTab } from "./competencies/CompetenciesTab"
+import { DashboardsTab } from "./dashboards/DashboardsTab"
 import { FeedbackTab } from "./feedback/FeedbackTab"
 import { GoalsTab } from "./goals/GoalsTab"
 import { ReviewsTab } from "./reviews/ReviewsTab"
@@ -32,11 +33,11 @@ export default function Performance() {
 
   const rawTab = searchParams.get("tab")
   const activeTab: ModuleTabId =
-    rawTab && VALID_TABS.has(rawTab) ? (rawTab as ModuleTabId) : "reviews"
+    rawTab && VALID_TABS.has(rawTab) ? (rawTab as ModuleTabId) : "dashboards"
 
   const setActiveTab = (id: string) => {
     const next = new URLSearchParams(searchParams)
-    if (id === "reviews") next.delete("tab")
+    if (id === "dashboards") next.delete("tab")
     else next.set("tab", id)
     setSearchParams(next)
   }
@@ -66,6 +67,7 @@ export default function Performance() {
       }
     >
       <StandardLayout>
+        {activeTab === "dashboards" && <DashboardsTab />}
         {activeTab === "reviews" && <ReviewsTab />}
         {activeTab === "goals" && <GoalsTab />}
         {activeTab === "feedback" && <FeedbackTab />}
