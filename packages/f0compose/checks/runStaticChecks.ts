@@ -13,8 +13,9 @@
 import { parse } from "@babel/parser"
 import traverseDefault from "@babel/traverse"
 import * as t from "@babel/types"
+import { execFileSync } from "node:child_process"
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs"
-import { extname, join, relative } from "node:path"
+import { dirname, extname, join, relative, resolve } from "node:path"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const traverse: typeof traverseDefault =
@@ -87,6 +88,8 @@ export function runStaticChecks(
 
   const files = collectFiles(target)
   const violations: Violation[] = []
+
+  violations.push(...runReplicatedTrainingsAuditCheck(files, registryPath))
 
   for (const file of files) {
     const content = readFileSync(file, "utf8")
@@ -276,6 +279,173 @@ export function runStaticChecks(
     filesChecked: files.length,
     violations,
   }
+}
+
+function runReplicatedTrainingsAuditCheck(
+  files: string[],
+  registryPath: string
+): Violation[] {
+  const pkgRoot = resolve(dirname(registryPath), "..")
+  const repoRoot = resolve(pkgRoot, "..", "..")
+  const changedFiles = collectChangedGitFiles(repoRoot)
+  if (changedFiles.size === 0) return []
+
+  const changedTrainingFiles = files
+    .map((file) => ({ file, repoPath: toRepoPath(repoRoot, file) }))
+    .filter(({ repoPath }) => changedFiles.has(repoPath))
+    .filter(({ repoPath }) =>
+      repoPath.startsWith("packages/f0compose/src/prototypes/trainings/")
+    )
+
+  if (changedTrainingFiles.length === 0) return []
+
+  const changedAuditPaths = [...changedFiles].filter(
+    (file) =>
+      file.startsWith("packages/f0compose/checks/") &&
+      file.endsWith("-audit.md")
+  )
+  const changedAudits = changedAuditPaths.map((file) => ({
+    file,
+    content: readChangedAudit(repoRoot, file),
+  }))
+
+  if (changedAudits.length === 0) {
+    return changedTrainingFiles.map(({ file, repoPath }) =>
+      auditViolation(
+        file,
+        `Changed replicated Trainings file "${repoPath}" requires a changed audit markdown in packages/f0compose/checks/ before running this check.`
+      )
+    )
+  }
+
+  return changedTrainingFiles.flatMap(({ file, repoPath }) => {
+    const matchingAudits = changedAudits.filter(({ content }) =>
+      auditCoversTrainingFile(content, repoPath)
+    )
+    if (matchingAudits.length === 0) {
+      return [
+        auditViolation(
+          file,
+          `Changed replicated Trainings file "${repoPath}" is not covered by any changed audit. The audit must cite the exact file path.`
+        ),
+      ]
+    }
+
+    const matchingAudit = matchingAudits.find(
+      ({ content }) =>
+        requiredAuditMarkers.every((marker) => content.includes(marker)) &&
+        content.includes("frontend/src/modules/trainings")
+    )
+    if (!matchingAudit) {
+      const auditNames = matchingAudits.map(({ file }) => file).join(", ")
+      return [
+        auditViolation(
+          file,
+          `Changed replicated Trainings file "${repoPath}" is covered by audit file(s) without the required upstream parity gate: ${auditNames}.`
+        ),
+      ]
+    }
+
+    const missingSections = requiredAuditMarkers.filter(
+      (marker) => !matchingAudit.content.includes(marker)
+    )
+    if (missingSections.length > 0) {
+      return [
+        auditViolation(
+          file,
+          `Audit "${matchingAudit.file}" is missing required parity sections: ${missingSections.join(
+            ", "
+          )}.`
+        ),
+      ]
+    }
+
+    if (!matchingAudit.content.includes("frontend/src/modules/trainings")) {
+      return [
+        auditViolation(
+          file,
+          `Audit "${matchingAudit.file}" must cite the upstream Trainings module source under frontend/src/modules/trainings.`
+        ),
+      ]
+    }
+
+    return []
+  })
+}
+
+const requiredAuditMarkers = [
+  "## Current Delta Parity Gate",
+  "### Scope",
+  "### Upstream Sources Checked",
+  "### Local Files Checked",
+  "### Local vs Upstream Diff",
+  "### Verification",
+]
+
+function auditCoversTrainingFile(content: string, repoPath: string): boolean {
+  const packagePath = repoPath.replace("packages/f0compose/", "")
+  return content.includes(repoPath) || content.includes(packagePath)
+}
+
+function auditViolation(file: string, message: string): Violation {
+  return {
+    file,
+    line: 1,
+    column: 1,
+    rule: "upstream-parity-audit",
+    message,
+  }
+}
+
+function readChangedAudit(repoRoot: string, repoPath: string): string {
+  const absolutePath = resolve(repoRoot, repoPath)
+  if (!existsSync(absolutePath)) return ""
+  return readFileSync(absolutePath, "utf8")
+}
+
+function collectChangedGitFiles(repoRoot: string): Set<string> {
+  return new Set([
+    ...gitLines(repoRoot, ["diff", "--name-only"]),
+    ...gitLines(repoRoot, ["diff", "--name-only", "--cached"]),
+    ...gitLines(repoRoot, ["ls-files", "--others", "--exclude-standard"]),
+    ...gitBaseDiffLines(repoRoot),
+  ])
+}
+
+function gitBaseDiffLines(repoRoot: string): string[] {
+  const ref = process.env.F0COMPOSE_PARITY_BASE
+  if (!ref) return []
+  if (gitLines(repoRoot, ["rev-parse", "--verify", ref]).length === 0) {
+    return []
+  }
+  const base = gitOutput(repoRoot, ["merge-base", "HEAD", ref])
+  if (!base) return []
+  return gitLines(repoRoot, ["diff", "--name-only", `${base}...HEAD`])
+}
+
+function gitLines(repoRoot: string, args: string[]): string[] {
+  const output = gitOutput(repoRoot, args)
+  if (!output) return []
+  return output
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+function gitOutput(repoRoot: string, args: string[]): string {
+  try {
+    return execFileSync("git", args, {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim()
+  } catch {
+    return ""
+  }
+}
+
+function toRepoPath(repoRoot: string, file: string): string {
+  return relative(repoRoot, file).split("\\").join("/")
 }
 
 function loadRegistry(registryPath: string): RegistryShape {

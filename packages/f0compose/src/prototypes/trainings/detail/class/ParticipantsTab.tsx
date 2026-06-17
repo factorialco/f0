@@ -1,10 +1,6 @@
-import { useState } from "react"
-import {
-  F0AvatarPerson,
-  F0Button,
-  F0Heading,
-  F0Text,
-} from "@factorialco/f0-react"
+import { useMemo, useState } from "react"
+import { F0Box, F0Heading, F0Text } from "@factorialco/f0-react"
+import { OneDataCollection, useDataCollectionSource } from "@factorialco/f0-react/dist/experimental"
 import { Add, Delete } from "@factorialco/f0-react/icons/app"
 
 import type { Training, TrainingClass } from "@/fixtures"
@@ -22,27 +18,31 @@ const STATUS_LABEL: Record<ParticipantStatus, string> = {
   expired: "Expired",
 }
 
-const STATUS_CLASS: Record<ParticipantStatus, string> = {
-  completed: "bg-f1-background-positive text-f1-foreground-positive",
-  in_progress: "bg-f1-background-warning text-f1-foreground-warning",
-  not_started: "bg-f1-background-neutral text-f1-foreground-neutral",
-  expired: "bg-f1-background-critical text-f1-foreground-critical",
+const STATUS_VARIANT: Record<
+  ParticipantStatus,
+  "neutral" | "info" | "positive" | "warning" | "critical"
+> = {
+  completed: "positive",
+  in_progress: "warning",
+  not_started: "neutral",
+  expired: "critical",
 }
 
 type Row = {
+  id: string
+  firstName: string
+  lastName: string
   fullName: string
   src?: string
   status: ParticipantStatus
-}
-
-function Chip({ label, className }: { label: string; className: string }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium ${className}`}
-    >
-      {label}
-    </span>
-  )
+  certificate: string
+  completionDate: string
+  courseValidity: string
+  attendedSessions: number
+  totalSessions: number
+  knowledgeTestPassed: boolean | null
+  completedModules: number
+  totalModules: number
 }
 
 type Props = { training: Training; klass: TrainingClass }
@@ -70,93 +70,213 @@ export function ParticipantsTab({ klass }: Props) {
     ...Array(notStarted).fill("not_started" as ParticipantStatus),
   ]
 
-  const rows: Row[] = klass.participants.map((p, i) => ({
-    fullName: `${p.firstName} ${p.lastName}`.trim(),
-    src: p.src,
-    status: statuses[i] ?? "not_started",
-  }))
+  const rows: Row[] = useMemo(
+    () =>
+      klass.participants.map((p, i) => ({
+        id: `${p.firstName}-${p.lastName}-${i}`,
+        firstName: p.firstName,
+        lastName: p.lastName,
+        fullName: `${p.firstName} ${p.lastName}`.trim(),
+        src: p.src,
+        status: statuses[i] ?? "not_started",
+        certificate: i === 0 && completed > 0 ? "1 file" : "-",
+        completionDate: statuses[i] === "completed" ? "Not set" : "Not set",
+        courseValidity: "No date",
+        attendedSessions: statuses[i] === "completed" ? 0 : 0,
+        totalSessions: 0,
+        knowledgeTestPassed: null,
+        completedModules: 0,
+        totalModules: 0,
+      })),
+    [completed, klass.participants, statuses]
+  )
 
   const open = (action: ParticipantAction, name: string | null = null) =>
     setModal({ action, name, count: 1 })
+  const closeModal = () => setModal(null)
+  const confirmParticipantAction = () => {
+    setModal(null)
+  }
+
+  const source = useDataCollectionSource<Row>(
+    {
+      search: { enabled: true, sync: false },
+      selectable: (row) => row.id,
+      presets: [
+        {
+          label: "Pending group assignment",
+          filter: { status: ["not_started", "in_progress"] },
+        },
+        { label: "Expired", filter: { status: ["expired"] } },
+      ],
+      filters: {
+        status: {
+          type: "in",
+          label: "Status",
+          options: {
+            options: [
+              { label: "Enrolled", value: "not_started" },
+              { label: "In progress", value: "in_progress" },
+              { label: "Completed", value: "completed" },
+              { label: "Expired", value: "expired" },
+            ],
+          },
+        },
+      },
+      dataAdapter: {
+        fetchData: ({ filters, search }) => {
+          const statusFilter = Array.isArray(filters?.status)
+            ? (filters.status as string[])
+            : []
+          const term = (search ?? "").toLowerCase().trim()
+          const filtered = rows
+            .filter((row) =>
+              statusFilter.length === 0 ? true : statusFilter.includes(row.status)
+            )
+            .filter((row) =>
+              term === "" ? true : row.fullName.toLowerCase().includes(term)
+            )
+
+          return { records: filtered, totalCount: filtered.length }
+        },
+      },
+      primaryActions: () => ({
+        label: "Add participants",
+        icon: Add,
+        onClick: () => open("add"),
+      }),
+      secondaryActions: () => [
+        {
+          label: "Export certificates",
+          onClick: () => open("certificate", null),
+        },
+      ],
+      itemActions: (row) => [
+        {
+          label: "Assign to group",
+          onClick: () => open("add", row.fullName),
+        },
+        {
+          label: "Update completion date",
+          enabled: row.status === "completed",
+          onClick: () => open("due-date", row.fullName),
+        },
+        {
+          label: "View certificate",
+          enabled: row.certificate !== "-",
+          onClick: () => open("certificate", row.fullName),
+        },
+        {
+          label: "Delete participant",
+          icon: Delete,
+          critical: true,
+          onClick: () => open("delete", row.fullName),
+        },
+      ],
+    },
+    [rows]
+  )
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <F0Heading
-            as="h3"
-            variant="heading-large"
-            content={`Participants (${rows.length})`}
-          />
-          <F0Text
-            variant="description"
-            content="People enrolled in this group. Use the actions to add, remove, or certify them."
-          />
-        </div>
-        <F0Button
-          label="Add participants"
-          icon={Add}
-          onClick={() => open("add")}
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Heading
+          as="h3"
+          variant="heading-large"
+          content={`Participants (${rows.length})`}
         />
-      </div>
+        <F0Text
+          variant="description"
+          content="People enrolled in this group. Use the actions to add, remove, or certify them."
+        />
+      </F0Box>
 
-      {rows.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-md border border-dashed border-f1-border-secondary p-8 text-center">
-          <F0Heading as="h4" variant="heading" content="No participants yet" />
-          <F0Text
-            variant="description"
-            content="Add participants to start tracking their progress."
-          />
-        </div>
-      ) : (
-        <div className="flex flex-col rounded-md border border-solid border-f1-border-secondary">
-          {rows.map((r, idx) => (
-            <div
-              key={`${r.fullName}-${idx}`}
-              className={`flex items-center justify-between gap-3 p-3 ${
-                idx < rows.length - 1
-                  ? "border-b border-solid border-f1-border-secondary"
-                  : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <F0AvatarPerson
-                  firstName={r.fullName.split(" ")[0] ?? ""}
-                  lastName={r.fullName.split(" ").slice(1).join(" ")}
-                  src={r.src}
-                  size="small"
-                />
-                <F0Text variant="body" content={r.fullName} />
-              </div>
-              <div className="flex items-center gap-2">
-                <Chip
-                  label={STATUS_LABEL[r.status]}
-                  className={STATUS_CLASS[r.status]}
-                />
-                <F0Button
-                  label="Set due date"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => open("due-date", r.fullName)}
-                />
-                <F0Button
-                  label="Issue certificate"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => open("certificate", r.fullName)}
-                />
-                <F0Button
-                  label="Remove"
-                  icon={Delete}
-                  variant="outline"
-                  size="sm"
-                  onClick={() => open("delete", r.fullName)}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <OneDataCollection
+        id={`trainings/group-participants/${klass.id}/v1`}
+        source={source}
+        visualizations={[
+          {
+            type: "table",
+            options: {
+              columns: [
+                {
+                  label: "Participant",
+                  sorting: "fullName",
+                  render: (row) => ({
+                    type: "person",
+                    value: {
+                      firstName: row.firstName,
+                      lastName: row.lastName,
+                      src: row.src,
+                    },
+                  }),
+                },
+                {
+                  label: "Status",
+                  sorting: "status",
+                  render: (row) => ({
+                    type: "status",
+                    value: {
+                      status: row.status === "not_started" ? "neutral" : STATUS_VARIANT[row.status],
+                      label: row.status === "not_started" ? "Enrolled" : STATUS_LABEL[row.status],
+                    },
+                  }),
+                },
+                {
+                  label: "Certificate",
+                  render: (row) => ({ type: "text", value: row.certificate }),
+                },
+                {
+                  label: "Completion date",
+                  render: (row) => ({ type: "text", value: row.completionDate }),
+                },
+                {
+                  label: "Course validity",
+                  render: (row) => ({ type: "text", value: row.courseValidity }),
+                },
+                {
+                  label: "Session attendance",
+                  render: (row) => ({
+                    type: "percentage",
+                    value: {
+                      percentage:
+                        row.totalSessions > 0
+                          ? (row.attendedSessions / row.totalSessions) * 100
+                          : 0,
+                      label: `${row.attendedSessions}/${row.totalSessions}`,
+                    },
+                  }),
+                },
+                {
+                  label: "Knowledge test results",
+                  render: (row) => ({
+                    type: "status",
+                    value:
+                      row.knowledgeTestPassed === null
+                        ? { status: "warning", label: "Pending" }
+                        : row.knowledgeTestPassed
+                          ? { status: "positive", label: "Passed" }
+                          : { status: "critical", label: "Failed" },
+                  }),
+                },
+                {
+                  label: "Module progress",
+                  render: (row) => ({
+                    type: "percentage",
+                    value: {
+                      percentage:
+                        row.totalModules > 0
+                          ? (row.completedModules / row.totalModules) * 100
+                          : 0,
+                      label: `${row.completedModules}/${row.totalModules}`,
+                    },
+                  }),
+                },
+              ],
+            },
+          },
+        ]}
+      />
 
       {modal && (
         <ParticipantActionModal
@@ -164,9 +284,10 @@ export function ParticipantsTab({ klass }: Props) {
           action={modal.action}
           participantName={modal.name}
           count={modal.count}
-          onClose={() => setModal(null)}
+          onClose={closeModal}
+          onConfirm={confirmParticipantAction}
         />
       )}
-    </div>
+    </F0Box>
   )
 }

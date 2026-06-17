@@ -25,6 +25,7 @@ import { surveyAnswers, surveyTemplates, trainings } from "@/fixtures"
 import type { PrototypeMeta } from "../../../types"
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "trainings-surveys",
   title: "Trainings — Survey Templates",
   description:

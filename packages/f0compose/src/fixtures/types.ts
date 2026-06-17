@@ -18,6 +18,13 @@ export type Employee = {
   hireDate: string
   status: EmployeeStatus
   location: string
+  /**
+   * Optional synthetic annual gross salary in EUR. Used by prototypes that
+   * need to derive per-employee cost figures (e.g. training salary cost
+   * breakdowns). Not a payroll source of truth; values are invented per
+   * employee for realistic variation.
+   */
+  annualSalaryEur?: number
 }
 
 export type Department = {

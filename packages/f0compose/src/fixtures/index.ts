@@ -84,6 +84,15 @@ export {
   type ExpenseGroup,
 } from "./expenses"
 export {
+  legalEntities,
+  legalEntityCurrencyMap,
+  findLegalEntity,
+  legalEntityForEmployee,
+  legalEntityIdForEmployee,
+  legalEntitiesForCompany,
+  type LegalEntity,
+} from "./legal-entities"
+export {
   trainings,
   trainingCategories,
   trainingParticipants,
@@ -141,9 +150,19 @@ export {
   trainingProcesses,
   trainingBudgetMovements,
   movementsForBudget,
+  grossCostFromBreakdown,
+  grossCostFromMovement,
+  directCostFromMovement,
+  indirectCostFromMovement,
+  salaryCostFromMovement,
+  breakdownByLegalEntityFor,
+  hourlyRateForEmployee,
+  hoursCompletedForEmployee,
+  salaryCostForEmployeeInGroup,
   type Competency,
   type TrainingProcess,
   type TrainingBudgetMovement,
+  type TrainingMovementLegalEntityCost,
   type TrainingGroupStatus,
   type PaymentStatus,
 } from "./trainings-extra"

@@ -15,6 +15,7 @@ const REMINDERS = [
 ]
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "trainings-settings",
   title: "Trainings — Settings"
 ,

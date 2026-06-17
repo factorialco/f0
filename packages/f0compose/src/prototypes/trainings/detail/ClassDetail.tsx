@@ -4,7 +4,6 @@ import {
   ResourceHeader,
   Tabs,
 } from "@factorialco/f0-react/dist/experimental"
-import { Pencil } from "@factorialco/f0-react/icons/app"
 import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 
@@ -26,6 +25,8 @@ import { PageContent } from "../_shared/PageContent"
 type Props = {
   training: Training
   classId: string
+  baseHref?: string
+  trainingHref?: string
   onBackToList: () => void
   onBackToTraining: () => void
   onBackToClasses: () => void
@@ -68,8 +69,10 @@ function formatLongDate(iso: string | null): string {
 export function ClassDetail({
   training,
   classId,
-  onBackToList,
-  onBackToTraining,
+  baseHref = "/p/trainings",
+  trainingHref = `${baseHref}?training=${training.id}`,
+  onBackToList: _onBackToList,
+  onBackToTraining: _onBackToTraining,
   onBackToClasses: _onBackToClasses,
 }: Props) {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -116,14 +119,14 @@ export function ClassDetail({
             module={{
               id: "company_trainings",
               name: "Training",
-              href: "/p/trainings",
+              href: baseHref,
             }}
             breadcrumbs={[
-              { id: "list", label: "Training", onClick: onBackToList },
+              { id: "courses", label: "Courses", href: baseHref },
               {
                 id: training.id,
                 label: training.name,
-                onClick: onBackToTraining,
+                href: trainingHref,
               },
               { id: "missing", label: "Class not found" },
             ]}
@@ -179,14 +182,14 @@ export function ClassDetail({
               module={{
                 id: "company_trainings",
                 name: "Training",
-                href: "/p/trainings",
+                href: baseHref,
               }}
               breadcrumbs={[
-                { id: "list", label: "Training", onClick: onBackToList },
+                { id: "courses", label: "Courses", href: baseHref },
                 {
                   id: training.id,
                   label: training.name,
-                  onClick: onBackToTraining,
+                  href: trainingHref,
                 },
                 { id: klass.id, label: klass.name },
               ]}
@@ -237,17 +240,6 @@ export function ClassDetail({
                     ]
                   : []),
               ]}
-              secondaryActions={[
-                {
-                  label: "Delete",
-                  onClick: () => openClassAction("delete-class"),
-                },
-                {
-                  label: "Edit",
-                  icon: Pencil,
-                  onClick: () => openClassAction("edit-class"),
-                },
-              ]}
             />
             <Tabs key={activeTab} tabs={tabsWithNav} activeTabId={activeTab} />
           </>
@@ -258,6 +250,7 @@ export function ClassDetail({
             <ClassSessionsTab
               training={training}
               klass={klass}
+              baseHref={baseHref}
               onAction={openClassAction}
             />
           )}

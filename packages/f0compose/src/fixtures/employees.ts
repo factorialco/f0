@@ -289,6 +289,39 @@ export const employees: Employee[] = [
   },
 ]
 
+// Synthetic annual gross salaries in EUR, invented for prototype purposes.
+// Values vary per employee based on rough role/seniority to give realistic
+// per-person variation when derived figures are shown (e.g. training salary
+// cost breakdowns). Not a payroll source of truth.
+const ANNUAL_SALARY_BY_ID: Record<string, number> = {
+  "emp-001": 142000, // VP of Engineering
+  "emp-002": 96000,
+  "emp-003": 88500,
+  "emp-004": 71200,
+  "emp-005": 54800,
+  "emp-006": 48300,
+  "emp-007": 63900,
+  "emp-008": 105400,
+  "emp-009": 52100,
+  "emp-010": 39800,
+  "emp-011": 76500,
+  "emp-012": 58200,
+  "emp-013": 91300,
+  "emp-014": 67400,
+  "emp-015": 44100,
+  "emp-016": 82700,
+  "emp-017": 49600,
+  "emp-018": 36900,
+  "emp-019": 73800,
+  "emp-020": 41500,
+}
+
+for (const e of employees) {
+  if (ANNUAL_SALARY_BY_ID[e.id] !== undefined) {
+    e.annualSalaryEur = ANNUAL_SALARY_BY_ID[e.id]
+  }
+}
+
 export function findEmployee(id: string): Employee | undefined {
   return employees.find((e) => e.id === id)
 }

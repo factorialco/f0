@@ -30,6 +30,12 @@ export type PrototypeMeta = {
   createdAt: string
   /** Optional author display name. */
   author?: string
+  /**
+   * When true, the prototype is hidden from the catalog grid but its route
+   * (/p/:slug) still works. Used for sub-modules reached via in-prototype
+   * navigation (e.g. the Trainings Budgets/Requests/Insights tabs).
+   */
+  hidden?: boolean
 }
 
 /**

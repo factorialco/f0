@@ -15,6 +15,23 @@ they expect a clickable preview, not just code.
 
 Most people using f0compose are **designers and PMs with zero coding background**. Treat this as the default. Your job is to make them feel like they're using a no-code tool — they describe what they want, you do the rest. Never make them think about terminals, branches, install commands, ports, TypeScript errors, or git.
 
+### 🚧 Isolation rule (DO NOT skip — this broke other sessions once)
+
+Each project must stay isolated. Switching branches in the shared base folder
+and reusing the same dev-server port once clobbered the user's other open
+sessions and overlapped the preview. NEVER again:
+
+- **Work inside the project's OWN folder** (worktree/copy), e.g.
+  `~/code/f0-<project>/packages/f0compose`. **NEVER** work in, `git checkout` in,
+  or run `pnpm dev` in the shared base `~/code/f0` — it's the untouchable base
+  other sessions branch from.
+- **Each project uses its OWN port** for dev server and Vercel. Do NOT assume the
+  shared `5174` — use this project's `launch.json` port or a free dedicated one,
+  and make sure it doesn't collide with another running session.
+- **Catalog cards**: each deploy shows ONLY its own cards. Hide sibling
+  prototypes with the `hidden` flag in their `meta`. **NEVER delete siblings**
+  (deleting them breaks `topNav` → 404 tabs): restore + `hidden`, never delete.
+
 ### Default assumptions about the user
 
 - They don't know what `pnpm`, `git`, `tsc`, `Vite`, or "fixtures" mean. Don't use those words unless they use them first.
@@ -26,11 +43,11 @@ Most people using f0compose are **designers and PMs with zero coding background*
 
 When the user's first message implies they want to prototype something, run these checks **silently and in parallel** before asking anything:
 
-1. **Are we in `packages/f0compose/`?** Use the working directory the agent runs in. If not, `cd` there.
-2. **Is the dev server up on 5174?** `lsof -i :5174 | grep LISTEN`. If not, start it: `pnpm dev` in the background. Don't ask permission — they want to see results, not approve commands.
+1. **Are we in THIS project's `packages/f0compose/`?** Use the working directory the agent runs in — it must be the project's own folder (`~/code/f0-<project>/...`), NOT the shared base `~/code/f0`. If you're in the base, stop and relocate.
+2. **Is this project's dev server up?** Check its own port (from `launch.json`, e.g. `lsof -i :<port> | grep LISTEN`) — do NOT assume the shared `5174`. If not, start it: `pnpm dev` in the background on its own port. Don't ask permission — they want to see results, not approve commands.
 3. **Are dependencies installed?** Check `node_modules/.modules.yaml` exists. If missing, run `pnpm install` in the background and tell them: *"Estoy preparando el entorno, dame 30 segundos…"*
 4. **Are the skills synced?** Run `pnpm skills:sync` quietly — silently keeps `.claude/skills/` and `.opencode/skills/` fresh from `vendor/skills/`. (Already wired into `predev`, so usually a no-op.)
-5. **Are we on the right git branch?** `git branch --show-current`. If they're on `main`, ask once: *"¿Quieres que cambie a la rama `feat/f0compose` para empezar?"* and do `git checkout feat/f0compose && git pull` if yes.
+5. **Are we on this project's working branch?** `git branch --show-current`. Work on this project's own branch **inside its own folder**. NEVER `git checkout` to switch branches in the shared base `~/code/f0` (that clobbers other sessions). If unsaved changes exist, preserve them (commit/stash) — never reset or overwrite local work.
 
 After these checks, proceed to Step 0 (discovery interview).
 
@@ -984,6 +1001,40 @@ Both green. Plus visually:
 - Cells in OneDataCollection display values (not blank) — if blank, the `render` returns the wrong shape (see §11).
 - **Sort, search, and pagination all behave for real**: click a sortable column header → row order changes; type in the search box → rows narrow; navigate to page 2 → the table shows different rows. If any of those don't change anything visible, the corresponding handling in `fetchData` is missing — go back to Step 7.
 
+### Public demo-safe verification gate
+
+If the prototype will be shared outside the local dev session, local checks and
+HTTP 200 are NOT enough. Do not say "done", "ready", "safe to share",
+"verified", "todo ok", or any equivalent until the public preview URL passes a
+browser audit.
+
+Run this audit on the final shareable URL, not `localhost`:
+
+- Load every route and sub-view the user can share, including query-param views
+  such as `?dtab=`, `?view=`, `?wizard=`, modals, and role-specific URLs.
+- For every visible tab in the prototype main area, click it and verify it has
+  real content or a deliberate empty state. No decorative tabs.
+- For every visible CTA, row link, row action, dropdown item, modal action,
+  breadcrumb, and empty-state action in the prototype main area, click it and
+  verify it does not crash, leave the prototype family, or open a broken route.
+- Ignore global shell/sidebar links unless the change intentionally touched the
+  shell. Do not ignore links inside the prototype body/header.
+- If the prototype has roles or audiences, repeat the full audit for each role.
+  Never validate one role and infer the others.
+- For role-based prototypes, run a negative permissions audit: verify forbidden
+  CTAs are absent in the prototype main area for each non-admin role.
+- Fail the audit on `Unexpected Application Error`, `404`, blank page, uncaught
+  runtime exception, or navigation to another prototype family unless explicitly
+  intended.
+- Separate known global shell/agent console errors from prototype errors. List
+  them as residual risk; do not hide them.
+- Report a compact audit table before final handoff: route, role, visible
+  surfaces clicked, result, console status, and residual risk.
+
+If any public audit item fails, fix it before replying. If a large exhaustive
+click audit times out, split it into smaller route/role batches and continue.
+Do not downgrade the result to "verified" based on a partial audit.
+
 ### Modular structure check (for non-trivial prototypes)
 
 If the prototype has >1 tab, >1 table, or the entry exceeds ~150 lines, the
@@ -1012,6 +1063,8 @@ Before you reply, **verify it actually works**:
 3. If you tweaked an existing prototype, also curl its route.
 4. If the dev server isn't running, start it (`pnpm dev &`, wait ~3s) — never
    send the user a URL you haven't proven loads.
+5. If you provide a public preview or PR preview, run the public demo-safe
+   verification gate from Step 12 on that URL before saying it is ready.
 
 Then end EVERY turn with this exact structure:
 
@@ -1032,6 +1085,8 @@ Then end EVERY turn with this exact structure:
 🧪 Sanity check:
    - tsc: ✅
    - route 200: ✅
+   - public click audit: ✅ / not applicable
+   - console status: <clean, known global warnings only, or list blockers>
    - <anything else you verified, e.g. "presets switch and filter rows">
 
 ❓ Si algo no se ve bien o algo peta:

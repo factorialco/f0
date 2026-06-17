@@ -67,10 +67,24 @@ function formatSessionDate(s: TrainingSession): string {
 type Props = {
   training: Training
   klass: TrainingClass
+  baseHref?: string
   onAction: (action: ClassAction, session?: TrainingSession | null) => void
 }
 
-export function SessionsTab({ training, klass, onAction }: Props) {
+export function SessionsTab({
+  training,
+  klass,
+  baseHref = "/p/trainings",
+  onAction,
+}: Props) {
+  const sessionHref = (item: TrainingSession) => {
+    if (baseHref === "/p/trainings") {
+      return `/p/trainings?training=${training.id}&class=${klass.id}&session=${item.id}`
+    }
+
+    return `${baseHref}?dtab=groups&class=${klass.id}&session=${item.id}`
+  }
+
   const source = useDataCollectionSource<TrainingSession>(
     {
       search: { enabled: true, sync: false },
@@ -117,8 +131,7 @@ export function SessionsTab({ training, klass, onAction }: Props) {
           return { records: sorted, totalCount: sorted.length }
         },
       },
-      itemUrl: (item: TrainingSession) =>
-        `/p/trainings?training=${training.id}&class=${klass.id}&session=${item.id}`,
+      ...(baseHref === "/p/trainings" ? { itemUrl: sessionHref } : {}),
       primaryActions: () => ({
         label: "New session",
         icon: Add,
@@ -143,7 +156,7 @@ export function SessionsTab({ training, klass, onAction }: Props) {
         },
       ],
     },
-    [training.id, klass.id, onAction]
+    [training.id, klass.id, baseHref, onAction]
   )
 
   return (

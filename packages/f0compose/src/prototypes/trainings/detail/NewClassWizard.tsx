@@ -1,34 +1,18 @@
-import { useMemo } from "react"
+import { useEffect, useState } from "react"
 import {
-  F0WizardForm,
-  f0FormField,
-  useF0FormDefinition,
+  F0Avatar,
+  F0Box,
+  F0Button,
+  F0Checkbox,
+  F0Dialog,
+  F0Heading,
+  F0Icon,
+  F0Text,
 } from "@factorialco/f0-react"
-import type {
-  F0WizardFormStep,
-  F0FormSubmitResult,
-} from "@factorialco/f0-react"
-import { z } from "zod"
+import { Input, Textarea } from "@factorialco/f0-react/dist/experimental"
+import { Add, Delete, File, Link } from "@factorialco/f0-react/icons/app"
 
-import { trainings, employees, type TrainingClass } from "@/fixtures"
-
-// Mirrors upstream `modules/trainings/components/Revamp/NewClassWizard/`.
-//
-// Upstream step order (from useNewClassWizardSteps + step files):
-//   1. BasicInformationStep — name, startDate/endDate (row), FUNDAE code
-//                             (only if training.fundaeSubsidized), description
-//   2. EventDataStep        — sidebar title "Sessions"; list of trainingSessions
-//                             built via EventBox; we capture an optional
-//                             kickoff session as a sandbox shortcut.
-//   3. EmployeeSelectorStep — sidebar title "Participants"; just an employee
-//                             multi-picker (EmployeeSelectorV2 multi).
-//   4. CostsStep            — Budget → Direct cost → Indirect cost → Salary
-//                             cost (+ salary hint Alert) → Subsidiary cost.
-//   5. AttachmentsStep      — "Attach group resource"; upload files via
-//                             NewFileModal. Sandbox uses a textarea fallback.
-//
-// All labels below are the resolved i18n strings from
-// `frontend/src/translations/en.json`.
+import { employees, trainings, type TrainingClass } from "@/fixtures"
 
 type Props = {
   trainingId: string
@@ -37,197 +21,49 @@ type Props = {
   onCreated: (klass: TrainingClass) => void
 }
 
-// ── Option lists ─────────────────────────────────────────────────────────────
+type StepId = "details" | "sessions" | "employees" | "materials"
 
-const participantOptions = employees.map((e) => ({
-  value: e.id,
-  label: e.fullName,
-}))
-
-const budgetOptions = [
-  { value: "", label: "No budget linked" },
-  { value: "bdg-l-d", label: "L&D 2026 (EUR)" },
-  { value: "bdg-eng", label: "Engineering training (EUR)" },
-  { value: "bdg-sales", label: "Sales enablement (EUR)" },
-] as const
-
-// ── Step 1: Details (BasicInformationStep) ──────────────────────────────────
-// Upstream sidebar title is "Details", step title also "Details".
-
-const basicInfoSchema = z.object({
-  name: f0FormField.text({
-    label: "Group name",
-    placeholder: "Up to 140 characters",
-  }),
-  startDate: f0FormField.date({
-    label: "Start date",
-    row: "dates",
-  }),
-  endDate: f0FormField.date({
-    label: "End date",
-    row: "dates",
-  }),
-  codigoGrupo: f0FormField.text({
-    label: "Group code",
-    optional: true,
-    placeholder: "00001",
-    helpText:
-      "5-digit code used to register the group in FUNDAE. Group code is mandatory if you want to subsidize the course through FUNDAE.",
-  }),
-  description: f0FormField.textarea({
-    label: "Description",
-    optional: true,
-  }),
-})
-
-// ── Step 2: Sessions (EventDataStep) ────────────────────────────────────────
-// Upstream sidebar title "Sessions". Description: "Add sessions for this
-// group of participants to attend, such as lectures, discussions, or
-// activities, each with a designated time slot."
-//
-// Upstream renders an empty state + "Add session" button that opens an
-// EventBox. The sandbox prototype captures a single optional kickoff
-// session as a text shortcut. Use the class detail Sessions tab to add
-// more after creation.
-
-const sessionsSchema = z.object({
-  kickoffSessionName: f0FormField.text({
-    label: "Kickoff session name",
-    optional: true,
-    placeholder: "e.g. Kickoff & expectations",
-    helpText:
-      "Optional. If provided, a single kickoff session is created on the group start date. Add more sessions from the Sessions tab after creation.",
-  }),
-  kickoffLocation: f0FormField.text({
-    label: "Location or online link",
-    optional: true,
-    placeholder: "Room 4B · HQ Madrid · https://meet.factorialhr.com/…",
-  }),
-})
-
-// ── Step 3: Participants (EmployeeSelectorStep) ─────────────────────────────
-// Upstream title "Participants" + description "Select employess to
-// participate in this group" (typo present upstream — kept verbatim).
-
-const participantsSchema = z.object({
-  participantIds: f0FormField.multiSelect({
-    label: "Participants",
-    optional: true,
-    options: participantOptions,
-    placeholder: "Search employees…",
-  }),
-})
-
-// ── Step 4: Costs ────────────────────────────────────────────────────────────
-// Upstream order: Budget → Direct cost → Indirect cost → Salary cost (+
-// salary hint Alert) → Subsidiary cost. All fields stacked vertically.
-
-const costsSchema = z.object({
-  budgetId: f0FormField.select({
-    label: "Budget",
-    optional: true,
-    options: budgetOptions,
-    placeholder: "No budget linked",
-    helpText:
-      "Link this group to a training budget. Group costs will be reflected in the budget consumption.",
-  }),
-  cost: f0FormField.number({
-    label: "Direct cost",
-    optional: true,
-    min: 0,
-    placeholder: "0.00",
-    helpText:
-      "Training-related expenses, such as instructor fees, materials, venue, and logistics.",
-  }),
-  indirectCost: f0FormField.number({
-    label: "Indirect cost",
-    optional: true,
-    min: 0,
-    placeholder: "0.00",
-    helpText:
-      "General business expenses related to training, such as utilities and administrative fees.",
-  }),
-  salaryCost: f0FormField.number({
-    label: "Salary cost",
-    optional: true,
-    min: 0,
-    placeholder: "0.00",
-    helpText:
-      "Cost of all employees' time spent on the course. Formula: (Annual salary / Annual working hours) × Total course hours.",
-  }),
-  subsidizedCost: f0FormField.number({
-    label: "Subsidiary cost",
-    optional: true,
-    min: 0,
-    placeholder: "0.00",
-    helpText:
-      "Amount of training expenses covered by financial aid or subsidies for this group.",
-  }),
-})
-
-// ── Step 5: Attachments ──────────────────────────────────────────────────────
-// Upstream title "Attach group resource", description "Add documents,
-// including internal files and useful links, enhancing the learning
-// experience.", primary action button "Upload file" (icon paperclip)
-// opening a NewFileModal.
-
-const attachmentsSchema = z.object({
-  attachmentNames: f0FormField.textarea({
-    label: "Materials",
-    optional: true,
-    placeholder: "agenda.pdf, pre-read.pdf, certificate-template.docx",
-    helpText:
-      "Optional. One filename per line or comma-separated. Real file upload is available from the class detail Documents tab.",
-  }),
-})
-
-// ── Combined schema ──────────────────────────────────────────────────────────
-
-const schema = {
-  basicInfo: basicInfoSchema,
-  participants: participantsSchema,
-  sessions: sessionsSchema,
-  costs: costsSchema,
-  attachments: attachmentsSchema,
+type SessionDraft = {
+  id: string
+  name: string
+  startDate: string
+  startsAtHour: string
+  endsAtHour: string
+  modality: string
+  location: string
+  link: string
 }
 
-type Schema = typeof schema
+type MaterialDraft = {
+  id: string
+  title: string
+  type: "file" | "link"
+  detail: string
+}
 
-const steps: F0WizardFormStep[] = [
-  { title: "Details", sectionIds: ["basicInfo"] },
-  { title: "Sessions", sectionIds: ["sessions"] },
-  { title: "Participants", sectionIds: ["participants"] },
-  { title: "Costs", sectionIds: ["costs"] },
-  {
-    title: "Attach group resource",
-    sectionIds: ["attachments"],
-    nextLabel: "Save",
-  },
+const WIZARD_STEPS: { id: StepId; label: string }[] = [
+  { id: "details", label: "Details" },
+  { id: "sessions", label: "Sessions" },
+  { id: "employees", label: "Employees" },
+  { id: "materials", label: "Materials" },
 ]
 
-const sections = {
-  basicInfo: { title: "Details" },
-  sessions: { title: "Sessions" },
-  participants: { title: "Participants" },
-  costs: { title: "Costs" },
-  attachments: { title: "Attach group resource" },
-}
+const STEP_INDEX_BY_ID = WIZARD_STEPS.reduce<Record<StepId, number>>(
+  (acc, step, index) => ({ ...acc, [step.id]: index }),
+  {
+    details: 0,
+    sessions: 0,
+    employees: 0,
+    materials: 0,
+  }
+)
 
-const defaultValues = {
-  basicInfo: {
-    name: "",
-  },
-  participants: {
-    participantIds: [] as string[],
-  },
-  sessions: {},
-  costs: {
-    budgetId: "",
-  },
-  attachments: {},
-}
+const selectableEmployees = employees.slice(0, 8)
 
-// ── Component ────────────────────────────────────────────────────────────────
+const splitName = (fullName: string) => {
+  const [firstName = "", ...rest] = fullName.split(" ")
+  return { firstName, lastName: rest.join(" ") }
+}
 
 export function NewClassWizard({
   trainingId,
@@ -235,89 +71,608 @@ export function NewClassWizard({
   onClose,
   onCreated,
 }: Props) {
-  const handleSubmit = useMemo(
-    () =>
-      async (arg: {
-        sectionId: keyof Schema
-        data: unknown
-        fullData: {
-          basicInfo: z.infer<typeof basicInfoSchema>
-          participants: z.infer<typeof participantsSchema>
-          sessions: z.infer<typeof sessionsSchema>
-          costs: z.infer<typeof costsSchema>
-          attachments: z.infer<typeof attachmentsSchema>
-        }
-      }): Promise<F0FormSubmitResult> => {
-        if (arg.sectionId !== "attachments") return { success: true }
+  const [activeStep, setActiveStep] = useState<StepId>("details")
+  const [name, setName] = useState("")
+  const [code, setCode] = useState("")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [description, setDescription] = useState("")
+  const [sessionName, setSessionName] = useState("")
+  const [sessionStartDate, setSessionStartDate] = useState("")
+  const [sessionStartsAt, setSessionStartsAt] = useState("09:00")
+  const [sessionEndsAt, setSessionEndsAt] = useState("11:00")
+  const [sessionModality, setSessionModality] = useState("In person")
+  const [sessionLocation, setSessionLocation] = useState("")
+  const [sessionLink, setSessionLink] = useState("")
+  const [sessions, setSessions] = useState<SessionDraft[]>([])
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<string[]>([])
+  const [materialTitle, setMaterialTitle] = useState("")
+  const [materialType, setMaterialType] = useState<"file" | "link">("file")
+  const [materialDetail, setMaterialDetail] = useState("")
+  const [materials, setMaterials] = useState<MaterialDraft[]>([])
 
-        const training = trainings.find((t) => t.id === trainingId)
-        if (!training) return { success: false }
+  useEffect(() => {
+    if (!isOpen) return
+    setActiveStep("details")
+    setName("")
+    setCode("")
+    setStartDate("")
+    setEndDate("")
+    setDescription("")
+    setSessionName("")
+    setSessionStartDate("")
+    setSessionStartsAt("09:00")
+    setSessionEndsAt("11:00")
+    setSessionModality("In person")
+    setSessionLocation("")
+    setSessionLink("")
+    setSessions([])
+    setSelectedEmployeeIds([])
+    setMaterialTitle("")
+    setMaterialType("file")
+    setMaterialDetail("")
+    setMaterials([])
+  }, [isOpen])
 
-        const { basicInfo, participants, sessions, attachments } = arg.fullData
+  const handleCreate = () => {
+    const training = trainings.find((item) => item.id === trainingId)
+    if (!training) return
 
-        const participantIds = participants.participantIds ?? []
+    const selectedParticipants = selectableEmployees
+      .filter((employee) => selectedEmployeeIds.includes(employee.id))
+      .map((employee) => {
+        const { firstName, lastName } = splitName(employee.fullName)
+        return { firstName, lastName, src: employee.avatarUrl }
+      })
 
-        const participantList = participantIds
-          .map((id) => employees.find((e) => e.id === id))
-          .filter((e): e is NonNullable<typeof e> => Boolean(e))
-          .map((e) => {
-            const [firstName, ...rest] = e.fullName.split(" ")
-            return {
-              firstName: firstName ?? e.fullName,
-              lastName: rest.join(" "),
-              src: e.avatarUrl ?? "",
-            }
-          })
+    const newClass: TrainingClass = {
+      id: `cls-${Date.now()}`,
+      trainingId,
+      name: name.trim() || "Untitled group",
+      startDate: startDate || null,
+      endDate: endDate || null,
+      sessionCount: sessions.length,
+      participantCount: selectedParticipants.length,
+      completedAttendancesCount: 0,
+      totalAttendancesCount: selectedParticipants.length * Math.max(sessions.length, 1),
+      cost: "0",
+      indirectCost: "0",
+      salaryCost: "0",
+      participants: selectedParticipants,
+    }
 
-        const sessionCount = sessions.kickoffSessionName ? 1 : 0
-        const attachmentText = attachments.attachmentNames ?? ""
-        // attachments captured for completeness; the fixture TrainingClass
-        // shape doesn't store them, but we keep parity with upstream by
-        // accepting them in the wizard.
-        void attachmentText
+    training.classes.push(newClass)
+    void description
+    void code
+    void materials
+    onCreated(newClass)
+  }
 
-        const toIsoDate = (d: Date | null | undefined): string | null => {
-          if (!d) return null
-          const v = d instanceof Date ? d : new Date(d)
-          return Number.isNaN(v.getTime()) ? null : v.toISOString().slice(0, 10)
-        }
+  const currentStepIndex = STEP_INDEX_BY_ID[activeStep]
+  const isLastStep = currentStepIndex === WIZARD_STEPS.length - 1
+  const canLeaveDetails = name.trim() !== "" && startDate !== "" && endDate !== ""
 
-        const newClass: TrainingClass = {
-          id: `cls-${Date.now()}`,
-          trainingId,
-          name: basicInfo.name?.trim() || "Untitled group",
-          startDate: toIsoDate(basicInfo.startDate),
-          endDate: toIsoDate(basicInfo.endDate),
-          sessionCount,
-          participantCount: participantList.length,
-          completedAttendancesCount: 0,
-          totalAttendancesCount: 0,
-          participants: participantList,
-        }
+  const goToPreviousStep = () => {
+    const previousStep = WIZARD_STEPS[currentStepIndex - 1]
+    if (previousStep) setActiveStep(previousStep.id)
+  }
 
-        training.classes.push(newClass)
-        onCreated(newClass)
-        return { success: true }
+  const goToNextStep = () => {
+    if (activeStep === "details" && !canLeaveDetails) return
+    if (isLastStep) {
+      handleCreate()
+      return
+    }
+    const nextStep = WIZARD_STEPS[currentStepIndex + 1]
+    if (nextStep) setActiveStep(nextStep.id)
+  }
+
+  const addSession = () => {
+    const trimmedName = sessionName.trim()
+    if (!trimmedName) return
+    setSessions((current) => [
+      ...current,
+      {
+        id: `session-${Date.now()}`,
+        name: trimmedName,
+        startDate: sessionStartDate || startDate,
+        startsAtHour: sessionStartsAt,
+        endsAtHour: sessionEndsAt,
+        modality: sessionModality,
+        location: sessionLocation,
+        link: sessionLink,
       },
-    [trainingId, onCreated]
-  )
+    ])
+    setSessionName("")
+    setSessionStartDate("")
+    setSessionStartsAt("09:00")
+    setSessionEndsAt("11:00")
+    setSessionLocation("")
+    setSessionLink("")
+  }
 
-  const formDefinition = useF0FormDefinition({
-    name: "new-class-wizard",
-    schema,
-    sections,
-    defaultValues,
-    onSubmit: handleSubmit,
-  })
+  const toggleEmployee = (employeeId: string, checked: boolean) => {
+    setSelectedEmployeeIds((current) =>
+      checked
+        ? Array.from(new Set([...current, employeeId]))
+        : current.filter((id) => id !== employeeId)
+    )
+  }
+
+  const addMaterial = () => {
+    const trimmedTitle = materialTitle.trim()
+    if (!trimmedTitle) return
+    setMaterials((current) => [
+      ...current,
+      {
+        id: `material-${Date.now()}`,
+        title: trimmedTitle,
+        type: materialType,
+        detail: materialDetail.trim(),
+      },
+    ])
+    setMaterialTitle("")
+    setMaterialType("file")
+    setMaterialDetail("")
+  }
+
+  const renderStepContent = () => {
+    if (activeStep === "details") {
+      return (
+        <F0Box display="flex" flexDirection="column" gap="2xl">
+          <F0Box display="flex" flexDirection="column" gap="lg">
+            <F0Heading
+              as="h3"
+              variant="heading"
+              content="Training group details"
+            />
+            <Input
+              label="Training group name"
+              value={name}
+              onChange={(value) => setName(value ?? "")}
+              placeholder="e.g. Training group C - Q3"
+              maxLength={140}
+            />
+          </F0Box>
+
+          <F0Box display="grid" columns="2" gap="lg">
+            <Input
+              label="Start date"
+              type="date"
+              value={startDate}
+              onChange={(value) => setStartDate(value ?? "")}
+            />
+            <Input
+              label="End date"
+              type="date"
+              value={endDate}
+              onChange={(value) => setEndDate(value ?? "")}
+            />
+          </F0Box>
+
+          <F0Box display="flex" flexDirection="column" gap="sm">
+            <Input
+              label="Training group code"
+              value={code}
+              onChange={(value) => setCode(value ?? "")}
+              placeholder="00001"
+              maxLength={5}
+            />
+            <F0Text
+              variant="description"
+              content="If this group is subsidised, use the code assigned by Fundae. You can leave it empty and complete it later."
+            />
+          </F0Box>
+
+          <F0Box display="flex" flexDirection="column" gap="sm">
+            <F0Text variant="label" content="Description" />
+            <Textarea
+              label="Description"
+              value={description}
+              onChange={(value) => setDescription(value ?? "")}
+              rows={5}
+            />
+          </F0Box>
+        </F0Box>
+      )
+    }
+
+    if (activeStep === "sessions") {
+      return (
+        <F0Box display="flex" flexDirection="column" gap="2xl">
+          <F0Box display="flex" flexDirection="column" gap="sm">
+            <F0Heading as="h3" variant="heading" content="Sessions" />
+            <F0Text
+              variant="description"
+              content="Add the sessions that belong to this training group. Sessions can be scheduled or completed later from the group detail."
+            />
+          </F0Box>
+
+          <F0Box
+            display="flex"
+            flexDirection="column"
+            gap="lg"
+            padding="lg"
+            border="default"
+            borderColor="secondary"
+            borderRadius="lg"
+          >
+            <Input
+              label="Session name"
+              value={sessionName}
+              onChange={(value) => setSessionName(value ?? "")}
+              placeholder="e.g. Communication workshop"
+            />
+            <F0Box display="grid" columns="3" gap="lg">
+              <Input
+                label="Date"
+                type="date"
+                value={sessionStartDate}
+                onChange={(value) => setSessionStartDate(value ?? "")}
+              />
+              <Input
+                label="Starts at"
+                type="time"
+                value={sessionStartsAt}
+                onChange={(value) => setSessionStartsAt(value ?? "")}
+              />
+              <Input
+                label="Ends at"
+                type="time"
+                value={sessionEndsAt}
+                onChange={(value) => setSessionEndsAt(value ?? "")}
+              />
+            </F0Box>
+            <F0Box display="grid" columns="3" gap="lg">
+              <Input
+                label="Modality"
+                value={sessionModality}
+                onChange={(value) => setSessionModality(value ?? "")}
+                placeholder="In person, online or mixed"
+              />
+              <Input
+                label="Location"
+                value={sessionLocation}
+                onChange={(value) => setSessionLocation(value ?? "")}
+                placeholder="Room or address"
+              />
+              <Input
+                label="Meeting link"
+                value={sessionLink}
+                onChange={(value) => setSessionLink(value ?? "")}
+                placeholder="https://"
+              />
+            </F0Box>
+            <F0Box display="flex" justifyContent="end">
+              <F0Button
+                label="Add session"
+                icon={Add}
+                variant="outline"
+                onClick={addSession}
+                disabled={sessionName.trim() === ""}
+              />
+            </F0Box>
+          </F0Box>
+
+          <F0Box display="flex" flexDirection="column" gap="md">
+            <F0Text variant="label" content={`Sessions (${sessions.length})`} />
+            {sessions.length === 0 ? (
+              <F0Box
+                padding="lg"
+                border="default"
+                borderColor="secondary"
+                borderRadius="lg"
+                background="secondary"
+              >
+                <F0Text
+                  variant="description"
+                  content="No sessions added yet. You can continue without sessions and add them later."
+                />
+              </F0Box>
+            ) : (
+              sessions.map((session) => (
+                <F0Box
+                  key={session.id}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="between"
+                  gap="lg"
+                  padding="lg"
+                  border="default"
+                  borderColor="secondary"
+                  borderRadius="lg"
+                >
+                  <F0Box display="flex" flexDirection="column" gap="xs">
+                    <F0Text variant="label" content={session.name} />
+                    <F0Text
+                      variant="small"
+                      content={`${session.startDate || startDate} · ${session.startsAtHour}-${session.endsAtHour} · ${session.modality}`}
+                    />
+                    <F0Text
+                      variant="description"
+                      content={session.location || session.link || "Location pending"}
+                    />
+                  </F0Box>
+                  <F0Button
+                    label="Delete session"
+                    hideLabel
+                    icon={Delete}
+                    variant="ghost"
+                    onClick={() =>
+                      setSessions((current) =>
+                        current.filter((item) => item.id !== session.id)
+                      )
+                    }
+                  />
+                </F0Box>
+              ))
+            )}
+          </F0Box>
+        </F0Box>
+      )
+    }
+
+    if (activeStep === "employees") {
+      return (
+        <F0Box display="flex" flexDirection="column" gap="2xl">
+          <F0Box display="flex" flexDirection="column" gap="sm">
+            <F0Heading as="h3" variant="heading" content="Employees" />
+            <F0Text
+              variant="description"
+              content="Select the employees that should be enrolled in this training group. This mirrors the manual employee selector in production."
+            />
+          </F0Box>
+
+          <F0Box display="flex" flexDirection="column" gap="md">
+            <F0Text
+              variant="label"
+              content={`${selectedEmployeeIds.length} selected employees`}
+            />
+            <F0Box display="flex" flexDirection="column" gap="sm">
+              {selectableEmployees.map((employee) => {
+                const { firstName, lastName } = splitName(employee.fullName)
+                const checked = selectedEmployeeIds.includes(employee.id)
+                return (
+                  <F0Box
+                    key={employee.id}
+                    display="grid"
+                    columns="12"
+                    alignItems="center"
+                    gap="lg"
+                    padding="md"
+                    border="default"
+                    borderColor={checked ? "selected" : "secondary"}
+                    borderRadius="lg"
+                    background={checked ? "selected-secondary" : "primary"}
+                  >
+                    <F0Box colSpan="1">
+                      <F0Checkbox
+                        title={employee.fullName}
+                        hideLabel
+                        checked={checked}
+                        onCheckedChange={(nextChecked) =>
+                          toggleEmployee(employee.id, nextChecked)
+                        }
+                      />
+                    </F0Box>
+                    <F0Box colSpan="7" display="flex" alignItems="center" gap="md">
+                      <F0Avatar
+                        avatar={{
+                          type: "person",
+                          firstName,
+                          lastName,
+                          src: employee.avatarUrl,
+                        }}
+                        size="sm"
+                      />
+                      <F0Box display="flex" flexDirection="column" gap="xs">
+                        <F0Text variant="label" content={employee.fullName} />
+                        <F0Text variant="small" content={employee.email} />
+                      </F0Box>
+                    </F0Box>
+                    <F0Box colSpan="4" display="flex" flexDirection="column" gap="xs">
+                      <F0Text variant="small" content={employee.role} />
+                      <F0Text variant="description" content={employee.location} />
+                    </F0Box>
+                  </F0Box>
+                )
+              })}
+            </F0Box>
+          </F0Box>
+        </F0Box>
+      )
+    }
+
+    return (
+      <F0Box display="flex" flexDirection="column" gap="2xl">
+        <F0Box display="flex" flexDirection="column" gap="sm">
+          <F0Heading as="h3" variant="heading" content="Materials" />
+          <F0Text
+            variant="description"
+            content="Attach files or links that participants will use in this group. These will appear in the group materials area after saving."
+          />
+        </F0Box>
+
+        <F0Box
+          display="flex"
+          flexDirection="column"
+          gap="lg"
+          padding="lg"
+          border="default"
+          borderColor="secondary"
+          borderRadius="lg"
+        >
+          <Input
+            label="Material title"
+            value={materialTitle}
+            onChange={(value) => setMaterialTitle(value ?? "")}
+            placeholder="e.g. Communication workbook"
+          />
+          <F0Box display="grid" columns="2" gap="lg">
+            <Input
+              label="Type"
+              value={materialType === "file" ? "File" : "Link"}
+              onChange={(value) =>
+                setMaterialType(value?.toLowerCase() === "link" ? "link" : "file")
+              }
+              placeholder="File or Link"
+            />
+            <Input
+              label={materialType === "link" ? "URL" : "File name"}
+              value={materialDetail}
+              onChange={(value) => setMaterialDetail(value ?? "")}
+              placeholder={materialType === "link" ? "https://" : "workbook.pdf"}
+            />
+          </F0Box>
+          <F0Box display="flex" justifyContent="end">
+            <F0Button
+              label="Add material"
+              icon={Add}
+              variant="outline"
+              onClick={addMaterial}
+              disabled={materialTitle.trim() === ""}
+            />
+          </F0Box>
+        </F0Box>
+
+        <F0Box display="flex" flexDirection="column" gap="md">
+          <F0Text variant="label" content={`Materials (${materials.length})`} />
+          {materials.length === 0 ? (
+            <F0Box
+              padding="lg"
+              border="default"
+              borderColor="secondary"
+              borderRadius="lg"
+              background="secondary"
+            >
+              <F0Text
+                variant="description"
+                content="No materials added yet. You can continue without materials and upload them later."
+              />
+            </F0Box>
+          ) : (
+            materials.map((material) => (
+              <F0Box
+                key={material.id}
+                display="flex"
+                alignItems="center"
+                justifyContent="between"
+                gap="lg"
+                padding="lg"
+                border="default"
+                borderColor="secondary"
+                borderRadius="lg"
+              >
+                <F0Box display="flex" alignItems="center" gap="md">
+                  <F0Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    width="8"
+                    height="8"
+                    borderRadius="md"
+                    background="secondary"
+                  >
+                    <F0Icon icon={material.type === "file" ? File : Link} size="sm" />
+                  </F0Box>
+                  <F0Box display="flex" flexDirection="column" gap="xs">
+                    <F0Text variant="label" content={material.title} />
+                    <F0Text
+                      variant="description"
+                      content={material.detail || (material.type === "file" ? "File" : "Link")}
+                    />
+                  </F0Box>
+                </F0Box>
+                <F0Button
+                  label="Delete material"
+                  hideLabel
+                  icon={Delete}
+                  variant="ghost"
+                  onClick={() =>
+                    setMaterials((current) =>
+                      current.filter((item) => item.id !== material.id)
+                    )
+                  }
+                />
+              </F0Box>
+            ))
+          )}
+        </F0Box>
+      </F0Box>
+    )
+  }
 
   return (
-    <F0WizardForm
+    <F0Dialog
       isOpen={isOpen}
-      title="Create new group"
-      formDefinition={formDefinition}
-      steps={steps}
       onClose={onClose}
-      autoCloseOnLastStepSubmit
-    />
+      position="center"
+      width="xl"
+      title="New training group"
+      primaryAction={{
+        label: isLastStep ? "Save" : "Continue",
+        onClick: goToNextStep,
+        disabled: activeStep === "details" && !canLeaveDetails,
+      }}
+      secondaryAction={{
+        label: currentStepIndex === 0 ? "Cancel" : "Back",
+        onClick: currentStepIndex === 0 ? onClose : goToPreviousStep,
+      }}
+      disableContentPadding
+    >
+      <F0Box display="grid" columns="12" minHeight="96">
+        <F0Box
+          colSpan="3"
+          display="flex"
+          flexDirection="column"
+          gap="xs"
+          padding="lg"
+          background="secondary"
+          borderRight="default"
+          borderColor="secondary"
+        >
+          {WIZARD_STEPS.map((step, index) => {
+            const isActive = step.id === activeStep
+            const isDone = index < currentStepIndex
+            return (
+              <F0Box
+                key={step.id}
+                display="flex"
+                alignItems="center"
+                gap="md"
+                padding="md"
+                borderRadius="md"
+                background={isActive ? "selected" : "transparent"}
+              >
+                <F0Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  width="6"
+                  height="6"
+                  borderRadius="full"
+                  background={isActive || isDone ? "selected-bold" : "primary"}
+                  border="default"
+                  borderColor={isActive || isDone ? "selected-bold" : "secondary"}
+                >
+                  <F0Text
+                    variant={isActive || isDone ? "inverse" : "small"}
+                    content={String(index + 1)}
+                  />
+                </F0Box>
+                <F0Text
+                  variant={isActive ? "label" : "body"}
+                  content={step.label}
+                />
+              </F0Box>
+            )
+          })}
+        </F0Box>
+
+        <F0Box colSpan="9" padding="2xl" overflowY="auto">
+          {renderStepContent()}
+        </F0Box>
+      </F0Box>
+    </F0Dialog>
   )
 }

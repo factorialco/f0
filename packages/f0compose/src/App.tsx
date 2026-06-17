@@ -1,10 +1,11 @@
-import { F0Provider } from "@factorialco/f0-react"
 import { CopilotKit } from "@copilotkit/react-core"
+import { F0Provider } from "@factorialco/f0-react"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
+
 import { defaultI18nTranslations, defaultL10n } from "@/lib/providers"
 import { prototypeRegistry } from "@/prototypes/registry"
-import { FloatingControls } from "@/shell/FloatingControls"
 import { aiChatConfig } from "@/shell/aiChatConfig"
+import { FloatingControls } from "@/shell/FloatingControls"
 
 /**
  * Root layout. Wires F0Provider with:
@@ -58,6 +59,8 @@ export function App() {
       <FloatingControls />
     </F0Provider>
   )
+
+  if (!aiChatConfig.enabled) return inner
 
   return (
     <CopilotKit runtimeUrl={aiChatConfig.runtimeUrl} agent={aiChatConfig.agent}>

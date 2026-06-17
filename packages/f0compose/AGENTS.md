@@ -23,6 +23,9 @@ target newer than vendor.
 - Be proactive: if the dev server isn't running, offer to start it
   (`pnpm dev` in the background) so the designer can see HMR in real
   time.
+- Before starting new Trainings prototype work, read `BASELINES.md` and
+  branch from the listed baseline. Do not start from another feature branch
+  unless the user explicitly asks for stacked work.
 
 ## Hard rules for prototypes
 
@@ -38,6 +41,72 @@ target newer than vendor.
 - Mocks: only from `@/fixtures`. Never inline arrays of 4+ items
   passed to a data component.
 - TypeScript strict. No `any`. No `as any`.
+- Direct HTML in prototype source is a hard failure. Do not write raw
+  `<div>`, `<span>`, `<p>`, `<button>`, `<a>`, `<img>`, `<ul>`, `<li>`,
+  `<table>`, or heading tags in `src/prototypes/**`. Use `F0Box`,
+  `F0Text`, `F0Button`, `F0Avatar`, `F0Icon`, `F0Link`, `F0Card`,
+  `OneDataCollection`, etc. A raw tag is only allowed with an inline
+  comment explaining the F0 gap and must be listed as a residual risk.
+
+## Mandatory pre-edit checklist for UI work
+
+Before ANY UI edit in f0compose, write this checklist in the chat and fill it
+with concrete values. If any line cannot be filled, do not edit; inspect the
+missing source or ask one short question.
+
+- **Scope**: exact screen, component, Figma node (if applicable), and user-visible
+  problem. Include what is NOT in scope.
+- **Source checked**: list the exact files/nodes/docs already checked, for example
+  `AGENTS.md`, `f0-prototype`, `f0-design`, `generated/registry.json`, Figma
+  node IDs + screenshot, upstream module files, and relevant stories/docs.
+- **Allowed files**: exact files that may be edited in this step.
+- **Forbidden changes**: exact things that must not be touched, especially parent
+  tabs, unrelated sidepanels, fixtures, framework files, and unrelated CTAs.
+- **Component/API decision**: name the F0/f0compose/upstream pattern being used.
+  If the behavior/API is unknown, stop and inspect stories/docs instead of
+  inventing UI.
+- **Verification**: commands and browser checks that will be run before replying.
+
+For replicated production modules such as trainings, this checklist is stricter:
+
+- Do not add, remove, or change a CTA/control until upstream confirms it exists
+  or does not exist.
+- Do not remove a CTA because it “seems useless”; fix its route/modal if upstream
+  has that CTA.
+- Do not touch the main tab body when the scope is a sidepanel, row, dialog, or
+  nested component.
+- Do not touch a sidepanel when the scope is the main tab body.
+- If a Figma node covers only one subcomponent, edit only that subcomponent.
+- For visual issues such as borders, verify computed CSS in the browser before
+  claiming parity.
+
+## Hard rules for Figma-to-code edits
+
+- NEVER implement from memory when Figma is open. Use the currently
+  selected Figma node with MCP first, then use `get_screenshot` for the
+  same node. If multiple nodes are selected, inspect each relevant node by
+  ID before editing.
+- NEVER substitute a different Figma node because it looks similar. The
+  selected node is the source of truth; if it is ambiguous, stop and ask.
+- Before using or composing F0 UI, load `f0-prototype` and `f0-design`,
+  read `generated/registry.json`, and read the relevant component stories
+  or local `packages/react/.skills/` docs. Do this before editing.
+- If Figma shows an F0/Data Collection pattern, use the existing F0
+  component/pattern API. Do not hand-roll tables, toolbars, filter menus,
+  settings menus, CTAs, popovers, or fake interaction with custom `div`s.
+- Every visible CTA/control must use the canonical F0 behavior for that
+  component. If the component behavior/API is unknown, stop and inspect the
+  stories/docs instead of inventing logic.
+- Figma-to-code parity is not an excuse to hand-roll F0 internals with raw
+  HTML. If a visible structure looks custom, first find the F0 component or
+  pattern that owns it; if none exists, ask or document the exception.
+- Do not hardcode Figma copy or values to make a wrong component look
+  right. Use the correct component and data source; if mock data is missing,
+  add it to `@/fixtures` or ask.
+- Pixel parity means matching the selected node's structure: wrapper,
+  borders, radii, spacing, header/body split, sticky areas, and default
+  state. Removing or adding containers is only allowed when the selected
+  Figma node proves it.
 
 ## Component quirks (the LLM forgets these)
 
@@ -93,7 +162,19 @@ Antes de tocar UNA SOLA LÍNEA de un módulo replicado:
 ### 2. NO DECLARAR "HECHO" SIN
 
 - `pnpm tsc --noEmit` limpio.
+- `grep -rE "<(div|span|p|ul|li|button|a |img|table|h[1-6])\\b"` limpio en
+  los archivos del prototipo editados, salvo excepciones justificadas una por
+  una en la respuesta y en el handoff del prototipo.
 - Ruta HTTP 200 en cada sub-vista (`?dtab=`, `?wizard=`, modales).
+- Si hay URL publica/preview para compartir, auditoria PUBLICA click-by-click
+  en esa URL, no solo local ni solo HTTP 200.
+- Clickar cada tab, breadcrumb, CTA, accion de row, dropdown, modal y empty
+  state visible dentro del area principal del prototipo. Si hay roles, repetir
+  la auditoria completa por rol; nunca inferir un rol desde otro.
+- Verificar que ningun link/CTA visible sale de la familia de prototipo
+  esperada (`/p/<slug>...`) salvo que sea intencion explicita.
+- Separar errores conocidos de shell/chat/agent de errores del prototipo, y
+  listarlos como riesgo residual en vez de ocultarlos.
 - Comparación visual explícita con upstream (screenshot o descripción
   campo-a-campo).
 - Lista explícita de lo que quedó fuera, si algo queda fuera.
@@ -107,6 +188,53 @@ fix incremental.
 ### 4. LABELS Y COPYS
 
 Siempre desde `en.json` upstream. Cero invención.
+
+### 4.bis. DETALLES UI (borders, spacing, tipografía, iconos)
+
+Paridad NO es solo "se parece". Es:
+
+- **Borders**: tipo (`default`/`secondary`), radius (`md`/`lg`), color
+  exacto. Cada card del Figma se replica con el mismo borde — nunca
+  "más o menos parecido".
+- **Spacing**: padding interior de cards (`md`/`lg`), gap entre
+  elementos (`xs`/`sm`/`md`/`lg`/`xl`). Comparar pixel-aware:
+  ¿el subtítulo está pegado al título (`xs`) o separado (`md`)?
+- **Tipografía**: `F0Heading` vs `F0Text variant="label"` vs
+  `variant="description"` vs `variant="body"`. NUNCA elegir por
+  intuición; identificar contra Figma (size + weight + color).
+- **Iconos**: identificar cuál icono concreto (`Building`, `Box`,
+  `ChevronDown`, etc.) — NO sustituir por emoji si Figma usa icono
+  vectorial. Color del icono (`secondary`/`tertiary`/`positive`).
+- **Estados**: collapsed vs expanded de un row. Por defecto el row
+  debe estar COMO LO MUESTRE FIGMA por defecto. Si Figma muestra
+  collapsed con `⌄`, el componente arranca collapsed.
+- **Inputs**: dentro de grids, mantener gap y columna iguales al
+  Figma. Sufijo currency dentro del input, no como label aparte.
+- **Highlights de Figma (border azul + "T Label")** son metadata del
+  editor — NUNCA replicar como border real. Solo indica que ese
+  elemento usa un text token.
+
+### 4.ter. SHELL Y LAYOUT (no romper la página)
+
+Errores recurrentes a NO cometer:
+
+- **Header pegado al top**: el contenido del prototipo NO empieza al ras
+  de la línea del top bar. Aplicar el padding de página upstream
+  (`paddingTop="lg"` o el wrapper canónico). Comparar con cualquier
+  página real de Factorial: siempre hay aire entre top bar y `ResourceHeader`.
+- **Bloques pegados entre sí**: el contenedor raíz del prototipo usa
+  `F0Box display="flex" flexDirection="column" gap="xl"` (o `lg` según
+  módulo). Nunca dejar `SectionHeader` + banner + tabs sin separación.
+- **"Back to X" inventado**: PROHIBIDO. Upstream NO tiene links/botones
+  "Back to budgets" / "Back to trainings". La navegación atrás es
+  SIEMPRE via **breadcrumbs** (`Training > Courses > Comm. course > Group`).
+  Cada segmento del breadcrumb es clickable y lleva a una sub-vista
+  REAL del MISMO prototipo (nunca a otro `/p/`).
+- **Breadcrumbs**: replicar la cadena upstream exacta. Si no existe el
+  segmento intermedio, NO inventarlo — significa que la pantalla no
+  está enganchada bien al árbol.
+- **Spacing entre `ResourceHeader` y primer bloque**: `gap="xl"` en el
+  contenedor padre. Nunca `gap="xs"` ni `gap` ausente.
 
 ### 5. COMMITS
 

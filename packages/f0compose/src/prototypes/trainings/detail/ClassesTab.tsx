@@ -8,11 +8,11 @@ import type { Training, TrainingClass } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
 import { NewClassWizard } from "./NewClassWizard"
 
-type Props = { training: Training }
+type Props = { training: Training; baseHref?: string }
 
 type ConfirmKind = "duplicate" | "delete"
 
-export function ClassesTab({ training }: Props) {
+export function ClassesTab({ training, baseHref = "/p/trainings" }: Props) {
   const [showNewClass, setShowNewClass] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [searchParams, setSearchParams] = useSearchParams()
@@ -23,6 +23,9 @@ export function ClassesTab({ training }: Props) {
 
   const openClass = (c: TrainingClass) => {
     const next = new URLSearchParams(searchParams)
+    if (baseHref !== "/p/trainings") {
+      next.set("training", training.id)
+    }
     next.set("class", c.id)
     setSearchParams(next)
   }
@@ -95,7 +98,7 @@ export function ClassesTab({ training }: Props) {
         },
       },
       primaryActions: () => ({
-        label: "New group",
+        label: "New training group",
         icon: Add,
         onClick: () => setShowNewClass(true),
       }),
@@ -103,12 +106,12 @@ export function ClassesTab({ training }: Props) {
       itemActions: (c) => [
         { label: "Edit", icon: Pencil, onClick: () => openClass(c) },
         {
-          label: "Duplicate group",
+          label: "Duplicate training group",
           icon: LayersFront,
           onClick: () => setConfirm({ kind: "duplicate", klass: c }),
         },
         {
-          label: "Delete group",
+          label: "Delete training group",
           icon: Delete,
           onClick: () => setConfirm({ kind: "delete", klass: c }),
           critical: true,
@@ -126,12 +129,12 @@ export function ClassesTab({ training }: Props) {
       emptyStates={{
         "no-data": {
           emoji: "👥",
-          title: "No classes yet",
+          title: "No training groups yet",
           description:
-            "Classes group employees together to manage attendance, sessions and costs.",
+            "Training groups bring employees together to manage attendance, sessions and costs.",
           actions: [
             {
-              label: "New group",
+              label: "New training group",
               icon: Add,
               onClick: () => setShowNewClass(true),
               variant: "outline",
@@ -145,7 +148,7 @@ export function ClassesTab({ training }: Props) {
           options: {
             columns: [
               {
-                label: "Group",
+                label: "Training group",
                 render: (c) => ({ type: "text", value: c.name }),
               },
               {

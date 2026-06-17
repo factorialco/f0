@@ -457,9 +457,70 @@ export type TrainingBudget = {
   scopeName: string
   ownerEmployeeId: string
   ownerEmployeeName: string
+  // Optional human-readable description shown on the budget detail header.
+  // Mirrors the `description` field upstream FinanceBudget exposes.
+  description?: string
+  // Optional start date of the budget period (ISO yyyy-mm-dd). Shown in the
+  // detail header as the "Date" metadata. When absent, consumers fall back
+  // to Jan 1st of `year`.
+  startDate?: string
+  // Optional end date of the budget period (ISO yyyy-mm-dd). Mirrors the
+  // `effectiveUntil` field upstream `FinanceBudget` exposes; when absent we
+  // fall back to Dec 31 of `year`.
+  endDate?: string
+  // Optional: legal entity that owns this budget. Currency is derived from
+  // the legal entity at creation time (mirrors `FinanceBudget.legalEntityId`
+  // upstream). Pre-existing fixtures omit it; consumers that need the
+  // currency-from-LE behavior should rely on this when present.
+  legalEntityId?: string
+  // Optional unique people count for the budget summary. This can be lower than
+  // the sum of group participants when the same employee attends multiple groups.
+  peopleCount?: number
 }
 
 export const trainingBudgets: TrainingBudget[] = [
+  {
+    id: "bud-training-live-costs",
+    name: "Training budget 2026",
+    year: 2026,
+    totalAmount: 50000,
+    spentAmount: 0,
+    pendingAmount: 30000,
+    remainingAmount: 20000,
+    currency: "EUR",
+    status: "active",
+    scope: "company",
+    scopeName: "All employees",
+    ownerEmployeeId: "emp-001",
+    ownerEmployeeName: "Javier Molina",
+    description:
+      "Training budget for Communication skills groups across Madrid, France and Italy.",
+    startDate: "2026-01-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-factorial-spain",
+    peopleCount: 17,
+  },
+  {
+    id: "bud-training-2026",
+    name: "Training budget 2026",
+    year: 2026,
+    totalAmount: 50000,
+    spentAmount: 0,
+    pendingAmount: 30000,
+    remainingAmount: 20000,
+    currency: "EUR",
+    status: "active",
+    scope: "company",
+    scopeName: "All employees",
+    ownerEmployeeId: "emp-001",
+    ownerEmployeeName: "Javier Molina",
+    description:
+      "Training budget for Communication skills groups across Madrid, France and Italy.",
+    startDate: "2026-01-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-factorial-spain",
+    peopleCount: 17,
+  },
   {
     id: "bud-001",
     name: "Company-wide 2026",
@@ -474,6 +535,11 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "All employees",
     ownerEmployeeId: "emp-001",
     ownerEmployeeName: "Javier Molina",
+    description:
+      "The Training Budget 2026 represents the total financial resources your organization allocates during the year to support employee learning and development.",
+    startDate: "2026-04-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-001",
   },
   {
     id: "bud-002",
@@ -489,6 +555,11 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "Engineering",
     ownerEmployeeId: "emp-002",
     ownerEmployeeName: "Laura Soler",
+    description:
+      "Engineering-specific training budget covering technical conferences, certifications and platform learning subscriptions for the engineering organization.",
+    startDate: "2026-01-15",
+    endDate: "2026-12-31",
+    legalEntityId: "le-001",
   },
   {
     id: "bud-003",
@@ -504,6 +575,11 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "People",
     ownerEmployeeId: "emp-003",
     ownerEmployeeName: "Ana García",
+    description:
+      "Budget for the People & Talent department, used to fund manager workshops, leadership coaching and HR certifications.",
+    startDate: "2026-02-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-002",
   },
   {
     id: "bud-004",
@@ -519,6 +595,11 @@ export const trainingBudgets: TrainingBudget[] = [
     scopeName: "Retail",
     ownerEmployeeId: "emp-004",
     ownerEmployeeName: "Bernat Puig",
+    description:
+      "Draft budget for the Retail operations team. Will fund in-store coaching programs and mandatory compliance refreshers for store staff.",
+    startDate: "2026-03-01",
+    endDate: "2026-12-31",
+    legalEntityId: "le-003",
   },
 ]
 
@@ -1139,6 +1220,21 @@ export const trainingProcesses: TrainingProcess[] = [
 export type TrainingGroupStatus = "planned" | "ongoing" | "completed"
 export type PaymentStatus = "pending" | "spent"
 
+// Optional per-(movement, legalEntity) cost split. Mirrors the multi-entity
+// RFC frames 5/6/8: when this array is populated and the user toggles
+// "Costs by legal entity" ON in the sidepanel/Group detail, the three cost
+// figures shown to the user are the LE-scoped ones (not the movement-level
+// directCost/indirectCost/salaryCost, which act as the single-LE fallback
+// when this field is absent). Read-only at the budget level; editable only
+// from the Group detail Costs tab in upstream.
+export type TrainingMovementLegalEntityCost = {
+  legalEntityId: string
+  participantsCount: number
+  directCost: number
+  indirectCost: number
+  salaryCost: number
+}
+
 export type TrainingBudgetMovement = {
   id: string
   budgetId: string
@@ -1159,9 +1255,411 @@ export type TrainingBudgetMovement = {
   directCost: number
   indirectCost: number
   salaryCost: number
+  costsByLegalEntity?: TrainingMovementLegalEntityCost[]
+  costUpdateNotice?: {
+    title: string
+    description: string
+    change?: string
+    currentStatus?: string
+    impact?: string
+    details?: string[]
+  }
+}
+
+// Sum of direct+indirect+salary across LE breakdown (gross cost upstream).
+export function grossCostFromBreakdown(
+  breakdown: TrainingMovementLegalEntityCost[]
+): number {
+  return breakdown.reduce(
+    (acc, le) => acc + le.directCost + le.indirectCost + le.salaryCost,
+    0
+  )
+}
+
+// Total cost shown to the user: breakdown sum when set, else movement-level
+// gross cost.
+export function grossCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return grossCostFromBreakdown(movement.costsByLegalEntity)
+  }
+  return movement.directCost + movement.indirectCost + movement.salaryCost
+}
+
+// Per-bucket aggregates (Direct, Indirect, Salary) used in the Group detail
+// Costs page (frame 7) and breakdown card (frame 6 footer). When a movement
+// has a per-LE breakdown, the three figures are the sum of that column
+// across all LEs; otherwise they fall back to the movement-level field.
+export function directCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return movement.costsByLegalEntity.reduce((acc, le) => acc + le.directCost, 0)
+  }
+  return movement.directCost
+}
+
+export function indirectCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return movement.costsByLegalEntity.reduce(
+      (acc, le) => acc + le.indirectCost,
+      0
+    )
+  }
+  return movement.indirectCost
+}
+
+export function salaryCostFromMovement(movement: TrainingBudgetMovement): number {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    return movement.costsByLegalEntity.reduce((acc, le) => acc + le.salaryCost, 0)
+  }
+  return movement.salaryCost
+}
+
+// Resolve the per-LE cost breakdown for a movement. When the fixture defines
+// `costsByLegalEntity` explicitly (e.g. mov-001 mirroring the Figma), it is
+// returned verbatim. Otherwise costs are split PROPORTIONALLY by participant
+// count per LE — that's the semantic the toggle promises: "see all costs
+// split by legal entity".
+//
+// Returns one entry per legalEntityId provided, even when the sum is zero.
+export function breakdownByLegalEntityFor(
+  movement: TrainingBudgetMovement,
+  participantsByLegalEntity: Array<{ legalEntityId: string; count: number }>
+): TrainingMovementLegalEntityCost[] {
+  if (movement.costsByLegalEntity && movement.costsByLegalEntity.length > 0) {
+    // Honor the fixture; split any remaining movement cost across missing LEs.
+    const map = new Map(
+      movement.costsByLegalEntity.map((c) => [c.legalEntityId, c])
+    )
+    const missing = participantsByLegalEntity.filter(
+      ({ legalEntityId }) => !map.has(legalEntityId)
+    )
+    const missingParticipants = missing.reduce((sum, p) => sum + p.count, 0)
+    const defined = movement.costsByLegalEntity.reduce(
+      (acc, cost) => ({
+        directCost: acc.directCost + cost.directCost,
+        indirectCost: acc.indirectCost + cost.indirectCost,
+        salaryCost: acc.salaryCost + cost.salaryCost,
+      }),
+      { directCost: 0, indirectCost: 0, salaryCost: 0 }
+    )
+    const remaining = {
+      directCost: Math.max(0, movement.directCost - defined.directCost),
+      indirectCost: Math.max(0, movement.indirectCost - defined.indirectCost),
+      salaryCost: Math.max(0, movement.salaryCost - defined.salaryCost),
+    }
+
+    return participantsByLegalEntity.map(({ legalEntityId, count }) => {
+      const fixtureCost = map.get(legalEntityId)
+      if (fixtureCost) return fixtureCost
+      const ratio = missingParticipants > 0 ? count / missingParticipants : 0
+      return {
+        legalEntityId,
+        participantsCount: count,
+        directCost: Math.round(remaining.directCost * ratio),
+        indirectCost: Math.round(remaining.indirectCost * ratio),
+        salaryCost: Math.round(remaining.salaryCost * ratio),
+      }
+    })
+  }
+  const total = participantsByLegalEntity.reduce((s, p) => s + p.count, 0)
+  if (total === 0) {
+    return participantsByLegalEntity.map(({ legalEntityId, count }) => ({
+      legalEntityId,
+      participantsCount: count,
+      directCost: 0,
+      indirectCost: 0,
+      salaryCost: 0,
+    }))
+  }
+  return participantsByLegalEntity.map(({ legalEntityId, count }) => {
+    const ratio = count / total
+    return {
+      legalEntityId,
+      participantsCount: count,
+      directCost: Math.round(movement.directCost * ratio),
+      indirectCost: Math.round(movement.indirectCost * ratio),
+      salaryCost: Math.round(movement.salaryCost * ratio),
+    }
+  })
 }
 
 export const trainingBudgetMovements: TrainingBudgetMovement[] = [
+  // bud-training-live-costs — exploration state for automatic cost updates
+  {
+    id: "mov-live-costs-001",
+    budgetId: "bud-training-live-costs",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-madrid-morning",
+    groupName: "Madrid Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 3,
+    directCost: 7769,
+    indirectCost: 1942.59,
+    salaryCost: 288.41,
+    costUpdateNotice: {
+      title: "Group changed",
+      description:
+        "A participant was added after this group was added to the budget.",
+      change: "+1 participant",
+      impact: "+420.00 €",
+      currentStatus: "Included in current figures",
+      details: [
+        "+1 participant since last review",
+        "Salary cost increased by 132.00 €",
+        "Cost per participant changed from 3,333.00 € to 2,605.00 €",
+      ],
+    },
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 5179.33,
+        indirectCost: 1295.06,
+        salaryCost: 184.23,
+      },
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 1,
+        directCost: 2589.67,
+        indirectCost: 647.53,
+        salaryCost: 104.18,
+      },
+    ],
+  },
+  {
+    id: "mov-live-costs-002",
+    budgetId: "bud-training-live-costs",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-france-morning",
+    groupName: "France Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 5,
+    directCost: 7499,
+    indirectCost: 1875.18,
+    salaryCost: 625.82,
+    costUpdateNotice: {
+      title: "Group changed",
+      description:
+        "One participant now belongs to a different legal entity than when this group was added to the budget.",
+      change: "Legal entity split changed",
+      impact: "No total change",
+      currentStatus: "Split updated in current figures",
+      details: [
+        "Northstar BCN added to this group",
+        "Acme France participant count changed from 3 to 2",
+        "Budget split now includes 3 legal entities",
+      ],
+    },
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 240.45,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 151.39,
+      },
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 1,
+        directCost: 1499.8,
+        indirectCost: 375.04,
+        salaryCost: 233.98,
+      },
+    ],
+  },
+  {
+    id: "mov-live-costs-003",
+    budgetId: "bud-training-live-costs",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-italy-morning",
+    groupName: "Italy Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 10,
+    directCost: 7162.02,
+    indirectCost: 1790.51,
+    salaryCost: 1047.47,
+    costUpdateNotice: {
+      title: "Group changed",
+      description:
+        "Contract or salary data changed after this group was added to the budget.",
+      change: "Salary data changed",
+      impact: "+1,047.00 €",
+      currentStatus: "Included in current figures",
+      details: [
+        "Salary data changed for 2 participants",
+        "Salary cost increased from 878.00 € to 1,047.00 €",
+        "Cost per participant changed from 1,000.00 € to 1,105.00 €",
+      ],
+    },
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.26,
+        salaryCost: 379.17,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.25,
+        salaryCost: 668.3,
+      },
+    ],
+  },
+  // bud-training-2026 — Training budget 2026
+  {
+    id: "mov-training-2026-001",
+    budgetId: "bud-training-2026",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-madrid-morning",
+    groupName: "Madrid Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 3,
+    directCost: 7769,
+    indirectCost: 1942.59,
+    salaryCost: 288.41,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 5179.33,
+        indirectCost: 1295.06,
+        salaryCost: 184.23,
+      },
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 1,
+        directCost: 2589.67,
+        indirectCost: 647.53,
+        salaryCost: 104.18,
+      },
+    ],
+  },
+  {
+    id: "mov-training-2026-002",
+    budgetId: "bud-training-2026",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-france-morning",
+    groupName: "France Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 5,
+    directCost: 7499,
+    indirectCost: 1875.18,
+    salaryCost: 625.82,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-casa-tarraee",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 240.45,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 2,
+        directCost: 2999.6,
+        indirectCost: 750.07,
+        salaryCost: 151.39,
+      },
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 1,
+        directCost: 1499.8,
+        indirectCost: 375.04,
+        salaryCost: 233.98,
+      },
+    ],
+  },
+  {
+    id: "mov-training-2026-003",
+    budgetId: "bud-training-2026",
+    trainingId: "trn-communication-skills-2026",
+    trainingName: "Communication skills",
+    groupId: "cls-communication-italy-morning",
+    groupName: "Italy Group Morning Mayo 2026",
+    groupStatus: "completed",
+    startDate: "2026-03-26",
+    endDate: "2026-03-27",
+    amountCents: 1000000,
+    currency: "EUR",
+    trainingProvider: "Private",
+    trainingTeamId: "team-ppl",
+    trainingTeamName: "People",
+    paymentStatus: "pending",
+    participantsCount: 10,
+    directCost: 7162.02,
+    indirectCost: 1790.51,
+    salaryCost: 1047.47,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-bcn-casa-ee",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.26,
+        salaryCost: 379.17,
+      },
+      {
+        legalEntityId: "le-factorial-spain",
+        participantsCount: 5,
+        directCost: 3581.01,
+        indirectCost: 895.25,
+        salaryCost: 668.3,
+      },
+    ],
+  },
   // bud-001 — Company-wide 2026
   {
     id: "mov-001",
@@ -1180,9 +1678,35 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
     trainingTeamName: "Engineering",
     paymentStatus: "spent",
     participantsCount: 9,
-    directCost: 1200,
-    indirectCost: 180,
-    salaryCost: 2350,
+    // Frame 6 of the RFC ("Costs by legal entity" toggle ON): the three
+    // movement-level figures equal the sum of the LE breakdown so the
+    // OFF/ON views show the same totals.
+    directCost: 6240,
+    indirectCost: 1310,
+    salaryCost: 2450,
+    costsByLegalEntity: [
+      {
+        legalEntityId: "le-001",
+        participantsCount: 1,
+        directCost: 1240,
+        indirectCost: 310,
+        salaryCost: 517,
+      },
+      {
+        legalEntityId: "le-003",
+        participantsCount: 1,
+        directCost: 1600,
+        indirectCost: 300,
+        salaryCost: 583,
+      },
+      {
+        legalEntityId: "le-002",
+        participantsCount: 1,
+        directCost: 3400,
+        indirectCost: 700,
+        salaryCost: 1350,
+      },
+    ],
   },
   {
     id: "mov-002",
@@ -1337,3 +1861,49 @@ export const trainingBudgetMovements: TrainingBudgetMovement[] = [
 
 export const movementsForBudget = (budgetId: string): TrainingBudgetMovement[] =>
   trainingBudgetMovements.filter((m) => m.budgetId === budgetId)
+
+// ── Synthetic per-employee training cost data ───────────────────────────────
+// Hourly rate is derived from the employee's invented annualSalaryEur using a
+// standard ~1.760 productive hours/year. Hours completed for a given group
+// are derived deterministically from the (employeeId, groupId) pair so each
+// participant has their own value. Per-participant salary cost = rate × hours.
+// Not a payroll source of truth — purely prototype data.
+
+import { findEmployee } from "./employees"
+
+const ANNUAL_PRODUCTIVE_HOURS = 1760
+
+function hashCode(input: string): number {
+  let h = 0
+  for (let i = 0; i < input.length; i++) {
+    h = (h * 31 + input.charCodeAt(i)) | 0
+  }
+  return Math.abs(h)
+}
+
+/** Hourly rate in EUR derived from the employee's annual salary. */
+export function hourlyRateForEmployee(employeeId: string): number {
+  const emp = findEmployee(employeeId)
+  if (!emp?.annualSalaryEur) return 0
+  return Math.round((emp.annualSalaryEur / ANNUAL_PRODUCTIVE_HOURS) * 100) / 100
+}
+
+/** Stable hours-completed per employee for a given group, range 1.5–4.0h. */
+export function hoursCompletedForEmployee(
+  employeeId: string,
+  groupId: string
+): number {
+  const h = hashCode(`${employeeId}:${groupId}:hours`)
+  // 1.5 + (h % 251) / 100 => 1.50 … 4.00
+  return Math.round((1.5 + (h % 251) / 100) * 100) / 100
+}
+
+/** Per-employee salary cost in a group = hourlyRate × hoursCompleted. */
+export function salaryCostForEmployeeInGroup(
+  employeeId: string,
+  groupId: string
+): number {
+  const rate = hourlyRateForEmployee(employeeId)
+  const hours = hoursCompletedForEmployee(employeeId, groupId)
+  return Math.round(rate * hours * 100) / 100
+}
