@@ -73,7 +73,7 @@ export type ButtonGroupSecondaryItem =
   | ButtonGroupSplitAction
   | ButtonGroupInlineSeparator
 
-/** A single link rendered in place of secondary buttons (mirrors F0CardRow). */
+/** A single link rendered in place of secondary buttons (mirrors F0CardHorizontal). */
 export interface ButtonGroupSecondaryLink {
   label: string
   href: string

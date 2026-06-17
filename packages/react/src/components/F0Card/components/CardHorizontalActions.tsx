@@ -20,11 +20,11 @@ import {
 const GAP = 8
 
 /**
- * Container breakpoint at which the card row switches between its inline and its
+ * Container breakpoint at which the horizontal card switches between its inline and its
  * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
  * width.
  */
-export type CardRowStackAt = "sm" | "md" | "lg" | "never"
+export type CardHorizontalStackAt = "sm" | "md" | "lg" | "never"
 
 /**
  * Outer row layout: a stacked column that becomes an inline row at the chosen
@@ -37,7 +37,7 @@ export type CardRowStackAt = "sm" | "md" | "lg" | "never"
  * `@md` (28rem / 448px) — so using `@sm` here would (wrongly) stack *before*
  * `md`. `@xs < @md < @lg` keeps sm < md < lg as expected.
  */
-export const cardRowClassName: Record<CardRowStackAt, string> = {
+export const cardHorizontalClassName: Record<CardHorizontalStackAt, string> = {
   sm: "flex flex-col @xs:flex-row @xs:items-start @xs:justify-between @xs:gap-4",
   md: "flex flex-col @md:flex-row @md:items-start @md:justify-between @md:gap-4",
   lg: "flex flex-col @lg:flex-row @lg:items-start @lg:justify-between @lg:gap-4",
@@ -54,7 +54,10 @@ export const cardRowClassName: Record<CardRowStackAt, string> = {
  * is shorter than the row, so a tall wrapped group still fills from the top.
  * Scoped to the inline breakpoint so the stacked column keeps its default stretch.
  */
-export const cardRowLeadingAlignClassName: Record<CardRowStackAt, string> = {
+export const cardHorizontalLeadingAlignClassName: Record<
+  CardHorizontalStackAt,
+  string
+> = {
   sm: "@xs:self-center",
   md: "@md:self-center",
   lg: "@lg:self-center",
@@ -76,7 +79,7 @@ export const cardRowLeadingAlignClassName: Record<CardRowStackAt, string> = {
  * explicit `w-full` would clip the right edge, since a negative right margin
  * can't widen a fixed-width box. `never` is always inline.
  */
-const actionsWidthClassName: Record<CardRowStackAt, string> = {
+const actionsWidthClassName: Record<CardHorizontalStackAt, string> = {
   sm: "@xs:flex-1",
   md: "@md:flex-1",
   lg: "@lg:flex-1",
@@ -93,7 +96,7 @@ const actionsWidthClassName: Record<CardRowStackAt, string> = {
  * this keeps the controls centred on it whether the row is standard height or
  * grown, so no card-height check is needed.
  */
-const actionsAvatarOffsetClassName: Record<CardRowStackAt, string> = {
+const actionsAvatarOffsetClassName: Record<CardHorizontalStackAt, string> = {
   sm: "@xs:pt-1",
   md: "@md:pt-1",
   lg: "@lg:pt-1",
@@ -108,7 +111,7 @@ const actionsAvatarOffsetClassName: Record<CardRowStackAt, string> = {
  * centring lands it exactly, at any icon size. Inline-scoped; once stacked the
  * status keeps its natural height on its own line.
  */
-const statusAvatarSlotClassName: Record<CardRowStackAt, string> = {
+const statusAvatarSlotClassName: Record<CardHorizontalStackAt, string> = {
   sm: "@xs:min-h-10",
   md: "@md:min-h-10",
   lg: "@lg:min-h-10",
@@ -118,7 +121,7 @@ const statusAvatarSlotClassName: Record<CardRowStackAt, string> = {
 // Visibility of the icon-only inline cluster — shown at/above the breakpoint
 // (and always, for `never`). Pairs with `stackedClusterVisibility` below; only
 // the confirm/reject variant renders both, to swap icon-only ↔ labelled on stack.
-const inlineClusterVisibility: Record<CardRowStackAt, string> = {
+const inlineClusterVisibility: Record<CardHorizontalStackAt, string> = {
   sm: "hidden @xs:flex",
   md: "hidden @md:flex",
   lg: "hidden @lg:flex",
@@ -126,7 +129,7 @@ const inlineClusterVisibility: Record<CardRowStackAt, string> = {
 }
 
 // Visibility of the labelled stacked cluster — shown only below the breakpoint.
-const stackedClusterVisibility: Record<CardRowStackAt, string> = {
+const stackedClusterVisibility: Record<CardHorizontalStackAt, string> = {
   sm: "flex @xs:hidden",
   md: "flex @md:hidden",
   lg: "flex @lg:hidden",
@@ -135,14 +138,14 @@ const stackedClusterVisibility: Record<CardRowStackAt, string> = {
 
 // Footer-style separator shown while the actions sit on their own stacked line;
 // removed once they go inline at the breakpoint.
-const stackedChrome: Record<CardRowStackAt, string> = {
+const stackedChrome: Record<CardHorizontalStackAt, string> = {
   sm: "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @xs:mx-0 @xs:mt-0 @xs:border-t-0 @xs:px-0 @xs:pt-0",
   md: "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @md:mx-0 @md:mt-0 @md:border-t-0 @md:px-0 @md:pt-0",
   lg: "-mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4 @lg:mx-0 @lg:mt-0 @lg:border-t-0 @lg:px-0 @lg:pt-0",
   never: "",
 }
 
-export interface CardRowConfirmAction {
+export interface CardHorizontalConfirmAction {
   onClick: () => void
   /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
   label?: string
@@ -153,7 +156,7 @@ export interface CardRowConfirmAction {
  * Resolved state shown at the trailing edge in place of the actions: a coloured
  * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
  */
-export interface CardRowStatus {
+export interface CardHorizontalStatus {
   /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
   icon: IconType
   /** Colour family. */
@@ -174,23 +177,23 @@ const statusIconColor: Record<
   critical: "critical",
 }
 
-interface CardRowActionsProps {
+interface CardHorizontalActionsProps {
   primaryAction?: CardPrimaryAction
   secondaryActions?: CardSecondaryAction[] | CardSecondaryLink
   /** Overflow (⋯) menu actions — always live in the left "more" menu. */
   otherActions?: DropdownItem[]
   /** Confirm (✓) icon-only action — enables the confirm/reject variant. */
-  confirmAction?: CardRowConfirmAction
+  confirmAction?: CardHorizontalConfirmAction
   /** Reject (✗) icon-only action — enables the confirm/reject variant. */
-  rejectAction?: CardRowConfirmAction
+  rejectAction?: CardHorizontalConfirmAction
   /**
    * Resolved-state icon shown at the trailing edge in place of any actions
    * (e.g. the "Accepted" / "Rejected" outcome of a confirm/reject row).
    * Takes precedence over every action prop.
    */
-  status?: CardRowStatus
+  status?: CardHorizontalStatus
   /** Container breakpoint at which the actions drop to their own line. */
-  stackAt?: CardRowStackAt
+  stackAt?: CardHorizontalStackAt
   /**
    * Whether the row has a leading avatar. When true the trailing controls are
    * nudged down to sit on the avatar's centre line (see
@@ -200,21 +203,21 @@ interface CardRowActionsProps {
 }
 
 /**
- * Trailing actions for the card row — a thin adapter over {@link ButtonGroup}.
+ * Trailing actions for the horizontal card — a thin adapter over {@link ButtonGroup}.
  * The data-driven `primaryAction` / `secondaryActions` / `otherActions` triplet
  * maps straight through; `ButtonGroup` owns the row layout, the width-driven
  * overflow into the "⋯" menu, and pinning the primary at the trailing edge.
  *
  * On top, `stackAt` drops the cluster onto its own full-width line (with a footer
  * hairline) below a container breakpoint; the breakpoint mapping is shared with
- * the row root via {@link cardRowClassName}.
+ * the row root via {@link cardHorizontalClassName}.
  *
  * Pass `confirmAction` / `rejectAction` for the confirm/reject variant — reject
  * (✗, outline) then confirm (✓, solid primary), which replaces the standard
  * actions. Icon-only while inline; the buttons reveal their labels once the row
  * stacks onto its own line.
  */
-export function CardRowActions({
+export function CardHorizontalActions({
   primaryAction,
   secondaryActions,
   otherActions,
@@ -223,7 +226,7 @@ export function CardRowActions({
   status,
   stackAt = "never",
   hasAvatar = false,
-}: CardRowActionsProps) {
+}: CardHorizontalActionsProps) {
   const size = "md"
   // Centre the trailing controls on the avatar in a standard-height row.
   const avatarOffset = hasAvatar

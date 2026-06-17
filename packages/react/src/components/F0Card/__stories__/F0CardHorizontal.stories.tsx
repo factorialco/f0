@@ -5,20 +5,20 @@ import { fn } from "storybook/test"
 
 import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
 
-import { F0CardRow } from "../F0CardRow"
+import { F0CardHorizontal } from "../F0CardHorizontal"
 
 // Story handlers alert which control fired (on top of the Actions-panel spy),
 // so a docs reader can confirm exactly which button they pressed.
 const clickAlert = (label: string) => fn(() => alert(`${label} clicked`))
 
-const meta: Meta<typeof F0CardRow> = {
-  component: F0CardRow,
-  title: "Card Row",
+const meta: Meta<typeof F0CardHorizontal> = {
+  component: F0CardHorizontal,
+  title: "Card Horizontal",
   parameters: {
     docs: {
       description: {
         component: [
-          "`F0CardRow` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
+          "`F0CardHorizontal` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
           "Use it for list rows, inline confirmations and dense layouts where a full `F0Card` is too heavy — e.g. a settings toggle row, a pending-approval item, or a selectable entity.",
           "Actions stay inline at every width by default. Set <code>stackAt</code> to collapse them onto their own line below a container breakpoint — secondary buttons fold into a left ⋯ menu while the primary stays pinned. For an approve/reject row, use the icon-only <code>confirmAction</code> / <code>rejectAction</code> variant. The avatar renders at a fixed size and accepts any avatar type in the system.",
           "A row is either driven by its actions <em>or</em> by a whole-row click target (<code>link</code> / <code>onClick</code>) — not both. Pass <code>link</code>/<code>onClick</code> for entry-point cards whose entire surface is the action, and leave them unset for rows that act through their buttons.",
@@ -366,7 +366,7 @@ export const AvatarTypes: Story = {
   },
   render: () => (
     <div className="flex w-[640px] flex-col gap-3">
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{
           type: "person",
           firstName: "Jane",
@@ -377,19 +377,19 @@ export const AvatarTypes: Story = {
         description="Person avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "company", name: "Acme Inc" }}
         title="Acme Inc"
         description="Company avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "team", name: "Design" }}
         title="Design Team"
         description="Team avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{
           type: "file",
           file: { name: "contract.pdf", type: "application/pdf" },
@@ -398,37 +398,37 @@ export const AvatarTypes: Story = {
         description="File avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "flag", flag: "es" }}
         title="Spain"
         description="Flag avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "icon", icon: Briefcase }}
         title="Engineering"
         description="Icon avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "emoji", emoji: "🚀" }}
         title="Launch"
         description="Emoji avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "module", module: "goals" }}
         title="Goals"
         description="Module avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "alert", variant: "warning" }}
         title="Action required"
         description="Alert avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "date", date: new Date(2026, 5, 5) }}
         title="Team offsite"
         description="Date avatar"
