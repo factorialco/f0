@@ -1,6 +1,4 @@
 export interface F0GraphExpanderProps {
-  /** Pixel size of the square button. Defaults to 24. */
-  size?: number
   /** Number of children */
   count: number
   /** Whether the parent is expanded */

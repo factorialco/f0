@@ -238,7 +238,6 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const { count, parentId, parentWidth, parentName, loading } =
     data as ExpanderNodeData
   const expanded = expandCtx.expandedNodes.has(parentId)
-  const expanderSize = EXPANDER_SIZE[zoomCtx.zoomLevel]
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
   )
@@ -249,13 +248,8 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
     : undefined
 
   const ariaLabel = parentName
-    ? i18n.t(
-        count === 1
-          ? "graph.expander.expandWithParentSingular"
-          : "graph.expander.expandWithParentPlural",
-        { parent: parentName, count }
-      )
-    : i18n.t("graph.expander.expand", { count })
+    ? i18n.t("actions.expandItem", { title: parentName })
+    : i18n.t("actions.expand")
 
   return (
     <>
@@ -281,7 +275,6 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
         <F0GraphExpander
           count={count}
           expanded={expanded}
-          size={expanderSize}
           tabIndex={-1}
           onClick={() => actionsCtx.toggleExpand(parentId)}
           loading={loading || renderCfg?.deferredLoading}
@@ -335,8 +328,8 @@ function F0GraphCollapserWrapperInner({
     : undefined
 
   const ariaLabel = parentName
-    ? i18n.t("graph.expander.collapseWithParent", { parent: parentName })
-    : (collapseLabel ?? i18n.graph.expander.collapseDefault)
+    ? i18n.t("actions.collapseItem", { title: parentName })
+    : (collapseLabel ?? i18n.actions.collapse)
 
   return (
     <>

@@ -685,33 +685,6 @@ export const defaultTranslations = {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       navigation: "Graph navigation",
-      metadataSettings: "Metadata visibility",
-      tagTypeLabels: {
-        person: "People",
-        team: "Teams",
-        company: "Companies",
-        status: "Statuses",
-        alert: "Alerts",
-        balance: "Balances",
-        dot: "Tags",
-        raw: "Tags",
-      },
-    },
-    search: {
-      noResults: "No results",
-    },
-    detailPanel: {
-      details: "Details",
-      moreActions: "More actions",
-      resize: "Resize detail panel",
-    },
-    expander: {
-      collapse: "Collapse {{count}} items",
-      expand: "Expand {{count}} items",
-      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
-      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
-      collapseWithParent: "Collapse {{parent}}",
-      collapseDefault: "Collapse children",
     },
   },
   wizard: {
