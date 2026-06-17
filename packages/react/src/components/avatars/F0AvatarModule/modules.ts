@@ -32,6 +32,7 @@ export const modules = {
   "finance-treasury": ModuleIcons.Treasury,
   "finance-workspace": ModuleIcons.Reports,
   goals: ModuleIcons.Goals,
+  headcount_planning: ModuleIcons.HeadcountPlanning,
   get_started: ModuleIcons.Rocket,
   home: ModuleIcons.Home,
   hub: ModuleIcons.Hub,
