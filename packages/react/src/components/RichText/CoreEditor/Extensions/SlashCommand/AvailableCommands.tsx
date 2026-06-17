@@ -31,6 +31,21 @@ import {
 } from "../Image"
 import { parseVideoUrl } from "../VideoEmbed"
 
+// Open a native file picker and hand the chosen file to `onPick`. Shared by
+// the /image and /file commands so the picker glue lives in one place.
+const openFilePicker = (accept: string[], onPick: (file: File) => void) => {
+  const input = document.createElement("input")
+  input.type = "file"
+  input.accept = accept.join(",")
+  input.onchange = () => {
+    const file = input.files?.[0]
+    if (file) {
+      onPick(file)
+    }
+  }
+  input.click()
+}
+
 interface CommandItem {
   title: string
   icon?: IconType
@@ -196,17 +211,9 @@ const getGroupedCommands = ({
               {
                 title: "Image",
                 command: (editor: Editor) => {
-                  // Create a file input to select an image
-                  const input = document.createElement("input")
-                  input.type = "file"
-                  input.accept = DEFAULT_ACCEPTED_TYPES.join(",")
-                  input.onchange = () => {
-                    const file = input.files?.[0]
-                    if (file) {
-                      insertImageFromFile(editor, file, imageUploadConfig)
-                    }
-                  }
-                  input.click()
+                  openFilePicker(DEFAULT_ACCEPTED_TYPES, (file) =>
+                    insertImageFromFile(editor, file, imageUploadConfig)
+                  )
                 },
                 icon: Image,
               },
@@ -217,20 +224,11 @@ const getGroupedCommands = ({
               {
                 title: translations.richTextEditor.file,
                 command: (editor: Editor) => {
-                  // Create a file input to select a document/PDF
-                  const input = document.createElement("input")
-                  input.type = "file"
-                  input.accept = (
+                  openFilePicker(
                     fileUploadConfig.acceptedTypes ??
-                    DEFAULT_FILE_ACCEPTED_TYPES
-                  ).join(",")
-                  input.onchange = () => {
-                    const file = input.files?.[0]
-                    if (file) {
-                      insertFileFromFile(editor, file, fileUploadConfig)
-                    }
-                  }
-                  input.click()
+                      DEFAULT_FILE_ACCEPTED_TYPES,
+                    (file) => insertFileFromFile(editor, file, fileUploadConfig)
+                  )
                 },
                 icon: Paperclip,
               },

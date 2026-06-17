@@ -8,26 +8,24 @@ import {
 } from "@tiptap/react"
 
 import { FileItem } from "@/components/RichText/FileItem"
-import { Spinner } from "@/ui/Spinner"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
+
+import {
+  type BaseUploadConfig,
+  handleOptimisticUpload,
+  type UploadErrorType,
+} from "../shared/optimisticUpload"
 
 // Reuse the same error contract as the image uploader so the consumer only
 // needs to reason about one set of error states.
-export type FileUploadErrorType =
-  | "file-too-large"
-  | "invalid-type"
-  | "upload-failed"
+export type FileUploadErrorType = UploadErrorType
 
-export interface FileUploadConfig {
-  onUpload: (file: File) => Promise<{ url: string; signedId?: string }>
-  maxFileSize?: number
+export interface FileUploadConfig extends BaseUploadConfig {
   acceptedTypes?: string[]
-  onError?: (errorType: FileUploadErrorType) => void
 }
-
-const DEFAULT_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 
 // `src` is round-tripped through persisted HTML (`data-src`), so a crafted
 // document could smuggle a `javascript:` URL into `window.open`. Consumers are
@@ -55,6 +53,24 @@ export const DEFAULT_FILE_ACCEPTED_TYPES = [
   "text/plain",
   "text/csv",
 ]
+
+// Browsers report `file.type` inconsistently (empty string, or an alternate
+// MIME like `application/vnd.ms-excel` for a `.csv`), so we fall back to the
+// file extension. Extensions are derived from the accepted MIME types, keeping
+// `acceptedTypes` the single source of truth.
+const MIME_TO_EXTENSIONS: Record<string, string[]> = {
+  "application/pdf": [".pdf"],
+  "application/msword": [".doc"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [
+    ".docx",
+  ],
+  "application/vnd.ms-excel": [".xls", ".csv"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+    ".xlsx",
+  ],
+  "text/plain": [".txt"],
+  "text/csv": [".csv"],
+}
 
 const FileAttachmentNodeView = ({
   node,
@@ -111,7 +127,7 @@ const FileAttachmentNodeView = ({
           <FileItem
             file={file}
             size="lg"
-            className="cursor-pointer transition-colors hover:bg-f1-background-tertiary-hover"
+            className="hover:bg-f1-background-tertiary-hover cursor-pointer transition-colors"
             onClick={handleClick}
             // Delete is only available while editing; in readonly the chip
             // stays clickable (to open) but cannot be removed.
@@ -145,7 +161,13 @@ export const FileAttachmentExtension = Node.create({
     return {
       src: {
         default: null,
-        parseHTML: (element: HTMLElement) => element.getAttribute("data-src"),
+        // Sanitize at the data boundary: an unsafe scheme (e.g. `javascript:`)
+        // never enters the document model, so it cannot be persisted or
+        // re-rendered by any other consumer of the stored HTML.
+        parseHTML: (element: HTMLElement) => {
+          const raw = element.getAttribute("data-src")
+          return raw && isSafeAttachmentUrl(raw) ? raw : null
+        },
         renderHTML: (attributes: Record<string, unknown>) =>
           attributes.src ? { "data-src": attributes.src } : {},
       },
@@ -200,94 +222,51 @@ export const FileAttachmentExtension = Node.create({
   },
 })
 
-const handleFileUpload = async (
+// Browsers report `file.type` inconsistently (empty string, or an alternate
+// MIME), so we accept a file when either its MIME or its extension matches.
+const isAcceptedFileType = (file: File, acceptedTypes: string[]): boolean => {
+  const acceptedExtensions = acceptedTypes.flatMap(
+    (type) => MIME_TO_EXTENSIONS[type] ?? []
+  )
+  const extension = file.name.includes(".")
+    ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()
+    : ""
+  const typeOk = file.type !== "" && acceptedTypes.includes(file.type)
+  const extOk = extension !== "" && acceptedExtensions.includes(extension)
+  return typeOk || extOk
+}
+
+const handleFileUpload = (
   editor: Editor,
   file: File,
   uploadConfig: FileUploadConfig,
   pos?: number
-) => {
-  const maxSize = uploadConfig.maxFileSize ?? DEFAULT_MAX_SIZE
-  const acceptedTypes =
-    uploadConfig.acceptedTypes ?? DEFAULT_FILE_ACCEPTED_TYPES
-  const { onError } = uploadConfig
-
-  if (!acceptedTypes.includes(file.type)) {
-    onError?.("invalid-type")
-    return
-  }
-
-  if (file.size > maxSize) {
-    onError?.("file-too-large")
-    return
-  }
-
-  const previewUrl = URL.createObjectURL(file)
-  const uploadId = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`
-
-  const insertPos = pos ?? editor.state.selection.anchor
-  editor
-    .chain()
-    .focus()
-    .insertContentAt(insertPos, [
-      {
-        type: "fileAttachment",
-        attrs: {
-          src: previewUrl,
-          filename: file.name,
-          mimeType: file.type,
-          uploading: true,
-          "data-upload-id": uploadId,
-        },
-      },
-    ])
-    .run()
-
-  try {
-    const { url, signedId } = await uploadConfig.onUpload(file)
-
-    const { doc } = editor.state
-    let nodePos: number | null = null
-    doc.descendants((node, position) => {
-      if (
-        node.type.name === "fileAttachment" &&
-        node.attrs["data-upload-id"] === uploadId
-      ) {
-        nodePos = position
-        return false
-      }
-      return true
-    })
-
-    if (nodePos !== null) {
-      editor
-        .chain()
-        .setNodeSelection(nodePos)
-        .updateAttributes("fileAttachment", {
-          src: url,
-          signedId: signedId ?? null,
-          uploading: false,
-          "data-upload-id": null,
-        })
-        .run()
-    }
-  } catch {
-    onError?.("upload-failed")
-
-    const { doc } = editor.state
-    doc.descendants((node, position) => {
-      if (
-        node.type.name === "fileAttachment" &&
-        node.attrs["data-upload-id"] === uploadId
-      ) {
-        editor.chain().setNodeSelection(position).deleteSelection().run()
-        return false
-      }
-      return true
-    })
-  } finally {
-    URL.revokeObjectURL(previewUrl)
-  }
-}
+) =>
+  handleOptimisticUpload(
+    editor,
+    file,
+    uploadConfig,
+    {
+      nodeName: "fileAttachment",
+      validate: (f) =>
+        isAcceptedFileType(
+          f,
+          uploadConfig.acceptedTypes ?? DEFAULT_FILE_ACCEPTED_TYPES
+        )
+          ? null
+          : "invalid-type",
+      buildInsertAttrs: ({ previewUrl, file: f }) => ({
+        src: previewUrl,
+        filename: f.name,
+        mimeType: f.type,
+      }),
+      buildSettledAttrs: ({ url, signedId }) => ({
+        src: url,
+        signedId: signedId ?? null,
+      }),
+    },
+    pos
+  )
 
 export const insertFileFromFile = (
   editor: Editor,

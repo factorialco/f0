@@ -129,6 +129,41 @@ describe("insertFileFromFile", () => {
       expect(onError).toHaveBeenCalledWith("invalid-type")
       expect(findAttachments(editor)).toHaveLength(0)
     })
+
+    it("accepts a file by extension when the browser reports an empty mime type", async () => {
+      const editor = createEditor()
+      const onUpload = vi.fn(async () => ({
+        url: "https://cdn.example.com/a.csv",
+      }))
+      const onError = vi.fn()
+
+      // Some OS/browser combos report `file.type` as "" for a valid .csv.
+      await insertFileFromFile(
+        editor,
+        new File(["a,b,c"], "data.csv", { type: "" }),
+        { onUpload, onError }
+      )
+
+      expect(onError).not.toHaveBeenCalled()
+      expect(onUpload).toHaveBeenCalledOnce()
+      expect(findAttachments(editor)).toHaveLength(1)
+    })
+
+    it("rejects an empty-mime file whose extension is not allowed", async () => {
+      const editor = createEditor()
+      const onUpload = vi.fn()
+      const onError = vi.fn()
+
+      await insertFileFromFile(
+        editor,
+        new File(["zip-bytes"], "archive.zip", { type: "" }),
+        { onUpload, onError }
+      )
+
+      expect(onError).toHaveBeenCalledWith("invalid-type")
+      expect(onUpload).not.toHaveBeenCalled()
+      expect(findAttachments(editor)).toHaveLength(0)
+    })
   })
 
   describe("upload reconciliation", () => {
@@ -226,6 +261,49 @@ describe("insertFileFromFile", () => {
       upload.resolve({ url: "https://cdn.example.com/report.pdf" })
       await expect(result).resolves.toBeUndefined()
 
+      expect(findAttachments(editor)).toHaveLength(0)
+    })
+
+    it("resolves cleanly when the editor is destroyed mid-upload", async () => {
+      // Not registered in `editors` — this test owns its lifecycle so the
+      // afterEach hook does not double-destroy it.
+      const editor = new Editor({
+        extensions: [StarterKitExtension, FileAttachmentExtension],
+        content: "<p></p>",
+      })
+      const upload = deferred<{ url: string }>()
+      const onError = vi.fn()
+
+      const result = insertFileFromFile(editor, createPdfFile(), {
+        onUpload: vi.fn(() => upload.promise),
+        onError,
+      })
+
+      // User navigates away / closes the panel before the upload settles.
+      editor.destroy()
+      upload.resolve({ url: "https://cdn.example.com/report.pdf" })
+
+      // The reconcile must not touch the destroyed editor and must not throw.
+      await expect(result).resolves.toBeUndefined()
+      expect(onError).not.toHaveBeenCalled()
+    })
+
+    it("reports upload-failed (not an unhandled rejection) when preview creation throws", async () => {
+      const editor = createEditor()
+      const onError = vi.fn()
+
+      vi.mocked(URL.createObjectURL).mockImplementationOnce(() => {
+        throw new Error("no object url")
+      })
+
+      await expect(
+        insertFileFromFile(editor, createPdfFile(), {
+          onUpload: vi.fn(),
+          onError,
+        })
+      ).resolves.toBeUndefined()
+
+      expect(onError).toHaveBeenCalledWith("upload-failed")
       expect(findAttachments(editor)).toHaveLength(0)
     })
   })
