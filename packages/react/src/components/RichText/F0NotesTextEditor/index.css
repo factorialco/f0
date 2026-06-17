@@ -275,3 +275,11 @@ Placeholder component
 .notes-text-editor .resize-cursor {
   @apply cursor-col-resize;
 }
+
+/* The editor manages its own scrolling (ProseMirror scrolls the caret into view).
+   Browser scroll anchoring fights that: on each re-render it re-anchors and shifts
+   the viewport down — visibly on large documents. Disable it for the editor's
+   scroll container only. */
+.notes-text-editor-scroll [data-scroll-container] {
+  overflow-anchor: none;
+}
