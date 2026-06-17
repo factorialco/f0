@@ -153,7 +153,6 @@ interface CardRowActionsProps {
    * Takes precedence over every action prop.
    */
   status?: CardRowStatus
-  compact?: boolean
   /** Container breakpoint at which the actions drop to their own line. */
   stackAt?: CardRowStackAt
 }
@@ -180,10 +179,9 @@ export function CardRowActions({
   confirmAction,
   rejectAction,
   status,
-  compact = false,
   stackAt = "never",
 }: CardRowActionsProps) {
-  const size = compact ? "sm" : "md"
+  const size = "md"
 
   // Resolved state: a status tag replaces the actions. It's informational, so
   // no click-stop / z-index — a row-level overlay link stays clickable through
@@ -191,11 +189,7 @@ export function CardRowActions({
   if (status) {
     return (
       <div
-        className={cn(
-          "flex items-center justify-end",
-          stackedChrome[stackAt],
-          stackAt !== "never" && compact && "mt-3 pt-3"
-        )}
+        className={cn("flex items-center justify-end", stackedChrome[stackAt])}
       >
         <F0Icon
           icon={status.icon}
@@ -211,8 +205,7 @@ export function CardRowActions({
   const wrapperClassName = cn(
     "relative z-[1]",
     actionsWidthClassName[stackAt],
-    stackedChrome[stackAt],
-    stackAt !== "never" && compact && "mt-3 pt-3"
+    stackedChrome[stackAt]
   )
 
   const wrap = (group: React.ReactNode) => (
@@ -290,8 +283,7 @@ export function CardRowActions({
           className={cn(
             "relative z-[1]",
             stackedClusterVisibility[stackAt],
-            stackedChrome[stackAt],
-            compact && "mt-3 pt-3"
+            stackedChrome[stackAt]
           )}
           onClick={(e) => e.stopPropagation()}
         >

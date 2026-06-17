@@ -50,10 +50,6 @@ const meta: Meta<typeof F0CardRow> = {
         "Container width at which the actions drop to their own line. `never` keeps them inline at every width.",
       table: { defaultValue: { summary: "never" } },
     },
-    compact: {
-      control: "boolean",
-      description: "Tighter padding and smaller controls.",
-    },
     inactive: {
       control: "boolean",
       description:
