@@ -89,6 +89,13 @@ export type UseSelectableProps<
    * @default false
    */
   preserveSelectionOnDatasetChange?: boolean
+  /**
+   * Additional visible records that are not part of `data.records` but
+   * should participate in current-page selection (e.g. expanded nested
+   * children loaded asynchronously). They are included in "select all"
+   * and counted as part of the current page.
+   */
+  extraRecords?: readonly R[]
 }
 
 export type SelectionMeta<R extends RecordType> = {
