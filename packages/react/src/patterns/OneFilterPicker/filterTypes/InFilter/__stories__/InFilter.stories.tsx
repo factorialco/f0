@@ -398,3 +398,91 @@ export const WithDataSource: Story = {
     onChange: () => {},
   },
 }
+
+// Hierarchical nested options with multiple depth levels
+const NestedOptionsExample = () => {
+  const [selectedValues, setSelectedValues] = useState<string[]>([])
+  const [allFilters, setAllFilters] = useState<Record<string, unknown>>({})
+
+  const handleChange = (value: string[]) => {
+    setSelectedValues(value)
+    setAllFilters((prev) => ({ ...prev, team: value }))
+  }
+
+  const handleFilterChange = (key: string, value: unknown) => {
+    setAllFilters((prev) => ({ ...prev, [key]: value }))
+  }
+
+  return (
+    <InFilter<string>
+      schema={{
+        label: "Teams",
+        options: {
+          options: [
+            {
+              value: "people",
+              label: "People",
+              children: {
+                filterKey: "teamDepth1",
+                options: [
+                  {
+                    value: "people_2",
+                    label: "people_2",
+                    children: {
+                      filterKey: "teamDepth2",
+                      options: [
+                        {
+                          value: "people_3",
+                          label: "people_3",
+                          children: {
+                            filterKey: "teamDepth3",
+                            options: [
+                              { value: "people_4", label: "people_4" },
+                              { value: "people_4b", label: "people_4b" },
+                            ],
+                          },
+                        },
+                        { value: "people_3b", label: "people_3b" },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            {
+              value: "engineering",
+              label: "Engineering",
+              children: {
+                filterKey: "teamDepth1",
+                options: [
+                  {
+                    value: "frontend",
+                    label: "Frontend",
+                    children: {
+                      filterKey: "teamDepth2",
+                      options: [
+                        { value: "design-system", label: "Design System" },
+                        { value: "web-platform", label: "Web Platform" },
+                      ],
+                    },
+                  },
+                  { value: "backend", label: "Backend" },
+                  { value: "mobile", label: "Mobile" },
+                ],
+              },
+            },
+            { value: "marketing", label: "Marketing" },
+          ],
+        },
+      }}
+      value={selectedValues}
+      onChange={handleChange}
+      onFilterChange={handleFilterChange}
+      allFiltersValue={allFilters}
+    />
+  )
+}
+
+export const NestedOptions: Story = {
+  render: () => <NestedOptionsExample />,
+}
