@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.0](https://github.com/factorialco/f0/compare/f0-react-v3.5.1...f0-react-v3.6.0) (2026-06-17)
+
+
+### Features
+
+* **F0AudioPlayer:** add audio player for recordings ([#4349](https://github.com/factorialco/f0/issues/4349)) ([96ffe72](https://github.com/factorialco/f0/commit/96ffe728a84066c7f5212269e42c714dabd3fff9))
+
 ## [3.5.1](https://github.com/factorialco/f0/compare/f0-react-v3.5.0...f0-react-v3.5.1) (2026-06-17)
 
 
