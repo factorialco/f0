@@ -237,6 +237,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
             rejectAction={rejectAction}
             status={status}
             stackAt={stackAt}
+            hasAvatar={!!avatar}
           />
         </div>
       </Card>

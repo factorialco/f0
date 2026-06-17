@@ -83,6 +83,23 @@ const actionsWidthClassName: Record<CardRowStackAt, string> = {
   never: "flex-1",
 }
 
+/**
+ * Top nudge that vertically centres the trailing controls against the avatar.
+ * The row is top-aligned (`items-start`), so a button (shorter than the `lg`
+ * avatar) would otherwise sit a few pixels high. `pt-1` drops it onto the
+ * avatar's centre line. Applied only when the row has an avatar, and scoped to
+ * the inline breakpoint — once stacked the controls own their own line where the
+ * footer chrome owns the spacing. Because the avatar stays pinned to the top,
+ * this keeps the controls centred on it whether the row is standard height or
+ * grown, so no card-height check is needed.
+ */
+const actionsAvatarOffsetClassName: Record<CardRowStackAt, string> = {
+  sm: "@xs:pt-1",
+  md: "@md:pt-1",
+  lg: "@lg:pt-1",
+  never: "pt-1",
+}
+
 // Visibility of the icon-only inline cluster — shown at/above the breakpoint
 // (and always, for `never`). Pairs with `stackedClusterVisibility` below; only
 // the confirm/reject variant renders both, to swap icon-only ↔ labelled on stack.
@@ -159,6 +176,12 @@ interface CardRowActionsProps {
   status?: CardRowStatus
   /** Container breakpoint at which the actions drop to their own line. */
   stackAt?: CardRowStackAt
+  /**
+   * Whether the row has a leading avatar. When true the trailing controls are
+   * nudged down to sit on the avatar's centre line (see
+   * {@link actionsAvatarOffsetClassName}).
+   */
+  hasAvatar?: boolean
 }
 
 /**
@@ -184,8 +207,13 @@ export function CardRowActions({
   rejectAction,
   status,
   stackAt = "never",
+  hasAvatar = false,
 }: CardRowActionsProps) {
   const size = "md"
+  // Centre the trailing controls on the avatar in a standard-height row.
+  const avatarOffset = hasAvatar
+    ? actionsAvatarOffsetClassName[stackAt]
+    : undefined
 
   // Resolved state: a status tag replaces the actions. It's informational, so
   // no click-stop / z-index — a row-level overlay link stays clickable through
@@ -193,7 +221,11 @@ export function CardRowActions({
   if (status) {
     return (
       <div
-        className={cn("flex items-center justify-end", stackedChrome[stackAt])}
+        className={cn(
+          "flex items-center justify-end",
+          avatarOffset,
+          stackedChrome[stackAt]
+        )}
       >
         <F0Icon
           icon={status.icon}
@@ -209,6 +241,7 @@ export function CardRowActions({
   const wrapperClassName = cn(
     "relative z-[1]",
     actionsWidthClassName[stackAt],
+    avatarOffset,
     stackedChrome[stackAt]
   )
 
@@ -264,6 +297,7 @@ export function CardRowActions({
       <div
         className={cn(
           "relative z-[1] min-w-0 flex-1",
+          avatarOffset,
           inlineClusterVisibility[stackAt]
         )}
         onClick={(e) => e.stopPropagation()}
