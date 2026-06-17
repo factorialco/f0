@@ -415,7 +415,6 @@ export function useGraphRenderModel<T>({
           expanded: expandedNodes.has(exp.parentId),
           parentId: exp.parentId,
           parentWidth: BASE_W,
-          parentName: exp.parentId,
           loading: exp.loading,
         } as ExpanderNodeData,
       }
@@ -458,7 +457,6 @@ export function useGraphRenderModel<T>({
             parentId: parent.id,
             parentWidth: BASE_W,
             collapseLabel: controlLabels?.collapseChildren,
-            parentName: parent.id,
           } as CollapserNodeData,
         }
       })

@@ -67,7 +67,6 @@ export interface ExpanderNodeData {
   expanded: boolean
   parentId: string
   parentWidth: number
-  parentName?: string
   /**
    * `true` while the parent has been expanded but its children have not arrived
    * yet (lazy / on-demand loading). The expander stays visible and shows a
@@ -83,7 +82,6 @@ export interface CollapserNodeData {
   parentId: string
   parentWidth: number
   collapseLabel?: string
-  parentName?: string
 }
 
 export type CollapserRFNode = RFNode<CollapserNodeData>
@@ -235,8 +233,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const i18n = useI18n()
   if (!zoomCtx || !expandCtx || !actionsCtx) return null
 
-  const { count, parentId, parentWidth, parentName, loading } =
-    data as ExpanderNodeData
+  const { count, parentId, parentWidth, loading } = data as ExpanderNodeData
   const expanded = expandCtx.expandedNodes.has(parentId)
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -247,9 +244,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
     ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
-  const ariaLabel = parentName
-    ? i18n.t("actions.expandItem", { title: parentName })
-    : i18n.t("actions.expand")
+  const ariaLabel = i18n.t("actions.expand")
 
   return (
     <>
@@ -315,8 +310,7 @@ function F0GraphCollapserWrapperInner({
   const i18n = useI18n()
   if (!zoomCtx || !actionsCtx) return null
 
-  const { parentId, parentWidth, collapseLabel, parentName } =
-    data as CollapserNodeData
+  const { parentId, parentWidth, collapseLabel } = data as CollapserNodeData
   if (zoomCtx.zoomLevel === "dot") return null
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -327,9 +321,7 @@ function F0GraphCollapserWrapperInner({
     ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
-  const ariaLabel = parentName
-    ? i18n.t("actions.collapseItem", { title: parentName })
-    : (collapseLabel ?? i18n.actions.collapse)
+  const ariaLabel = collapseLabel ?? i18n.actions.collapse
 
   return (
     <>
