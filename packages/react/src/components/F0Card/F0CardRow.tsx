@@ -204,7 +204,14 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
         )}
 
         <div className={cardRowClassName[stackAt]}>
-          <div className="flex min-w-0 flex-row items-center gap-3">
+          <div
+            className={cn(
+              "flex min-w-0 flex-row gap-3",
+              // Keep the avatar pinned to the top so it stays aligned with the
+              // title when the row grows (e.g. a long wrapping description).
+              avatar ? "items-start" : "items-center"
+            )}
+          >
             {avatar && <CardAvatar avatar={avatar} size="lg" />}
             <div className="flex min-w-0 flex-col gap-0">
               <Text
