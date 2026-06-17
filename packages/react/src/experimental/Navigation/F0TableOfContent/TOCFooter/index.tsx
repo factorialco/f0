@@ -13,11 +13,7 @@ export function TOCFooter({ actions }: TOCFooterProps) {
   }
 
   return (
-    <div
-      className={cn(
-        "flex shrink-0 flex-col items-start gap-0.5 border-0 border-t border-solid border-f1-border-secondary px-3 py-2"
-      )}
-    >
+    <div className={cn("flex shrink-0 flex-col items-start gap-0.5 px-3 py-2")}>
       {actions.map((action, index) => (
         <ButtonInternal
           key={`toc-footer-action-${index}`}
