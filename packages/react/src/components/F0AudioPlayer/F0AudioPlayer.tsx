@@ -4,11 +4,11 @@ import { forwardRef } from "react"
 import { cn } from "@/lib/utils"
 
 import { AudioScrubber } from "./components/AudioScrubber"
+import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
 import type { F0AudioPlayerProps } from "./types"
 import { usePlayerController } from "./usePlayerController"
-import { formatPlaybackTime } from "./utils"
-import { timeVariants } from "./variants"
+import { getDataAttributes } from "./utils"
 
 const containerVariants = cva({
   base: "flex w-full items-center",
@@ -30,20 +30,10 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
       ariaLabel,
       size = "md",
       className,
-      playbackRates: _playbackRates,
-      playing: _playing,
-      defaultPlaying: _defaultPlaying,
-      onPlayingChange: _onPlayingChange,
-      onPlay: _onPlay,
-      onPause: _onPause,
-      onSeek: _onSeek,
-      onTimeUpdate: _onTimeUpdate,
-      onEnded: _onEnded,
-      onError: _onError,
-      ...rest
     } = props
 
     const controller = usePlayerController(props)
+    const dataAttributes = getDataAttributes(props)
 
     return (
       <div
@@ -51,7 +41,7 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
         role="group"
         aria-label={ariaLabel ?? "Audio player"}
         className={cn(containerVariants({ size }), className)}
-        {...rest}
+        {...dataAttributes}
       >
         <audio
           ref={controller.audioRef}
@@ -75,10 +65,11 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
           onSeek={controller.seek}
         />
 
-        <span className={timeVariants({ size })}>
-          {formatPlaybackTime(controller.currentTime)} /{" "}
-          {formatPlaybackTime(controller.duration)}
-        </span>
+        <PlaybackTime
+          currentTime={controller.currentTime}
+          duration={controller.duration}
+          size={size}
+        />
       </div>
     )
   }

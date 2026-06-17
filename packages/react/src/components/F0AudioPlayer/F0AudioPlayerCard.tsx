@@ -4,11 +4,11 @@ import { cn } from "@/lib/utils"
 
 import { AudioScrubber } from "./components/AudioScrubber"
 import { PlaybackMenu } from "./components/PlaybackMenu"
+import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
 import type { F0AudioPlayerCardProps } from "./types"
 import { usePlayerController } from "./usePlayerController"
-import { formatPlaybackTime } from "./utils"
-import { timeVariants } from "./variants"
+import { getDataAttributes } from "./utils"
 
 const F0AudioPlayerCardBase = forwardRef<
   HTMLDivElement,
@@ -25,31 +25,21 @@ const F0AudioPlayerCardBase = forwardRef<
     disabled = false,
     ariaLabel,
     size = "md",
-    playbackRates: _playbackRates,
-    playing: _playing,
-    defaultPlaying: _defaultPlaying,
-    onPlayingChange: _onPlayingChange,
-    onPlay: _onPlay,
-    onPause: _onPause,
-    onSeek: _onSeek,
-    onTimeUpdate: _onTimeUpdate,
-    onEnded: _onEnded,
-    onError: _onError,
-    ...rest
   } = props
 
   const controller = usePlayerController(props)
+  const dataAttributes = getDataAttributes(props)
 
   return (
     <div
       ref={ref}
       role="group"
-      aria-label={ariaLabel ?? "Audio player"}
+      aria-label={ariaLabel ?? title}
       className={cn(
         "flex flex-col gap-2.5 rounded-2xl border border-solid border-f1-border bg-f1-background p-3",
         className
       )}
-      {...rest}
+      {...dataAttributes}
     >
       <audio
         ref={controller.audioRef}
@@ -99,10 +89,11 @@ const F0AudioPlayerCardBase = forwardRef<
           onSeek={controller.seek}
         />
 
-        <span className={timeVariants({ size })}>
-          {formatPlaybackTime(controller.currentTime)} /{" "}
-          {formatPlaybackTime(controller.duration)}
-        </span>
+        <PlaybackTime
+          currentTime={controller.currentTime}
+          duration={controller.duration}
+          size={size}
+        />
       </div>
     </div>
   )

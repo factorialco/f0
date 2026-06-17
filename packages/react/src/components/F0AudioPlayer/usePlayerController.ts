@@ -1,4 +1,3 @@
-import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { RefObject, useEffect, useRef } from "react"
 
 import type { F0AudioPlayerProps } from "./types"
@@ -17,7 +16,6 @@ export const usePlayerController = (
 ): PlayerController => {
   const {
     playing,
-    defaultPlaying = false,
     onPlayingChange,
     playbackRates = [1, 1.5, 2],
     onPlay,
@@ -30,27 +28,16 @@ export const usePlayerController = (
 
   const audioRef = useRef<HTMLAudioElement>(null)
 
-  const [, setIsPlaying] = useControllableState<boolean>({
-    prop: playing,
-    defaultProp: defaultPlaying,
-    onChange: onPlayingChange,
-  })
-
   const player = useAudioPlayer(audioRef, {
-    onPlay: () => {
-      setIsPlaying(true)
-      onPlay?.()
-    },
-    onPause: () => {
-      setIsPlaying(false)
-      onPause?.()
-    },
+    onPlay,
+    onPause,
     onSeek,
     onTimeUpdate,
     onEnded,
     onError,
   })
 
+  // Drive the element from the controlled `playing` prop.
   useEffect(() => {
     if (playing === undefined) return
     if (playing && !player.isPlaying) {
@@ -59,6 +46,17 @@ export const usePlayerController = (
       player.pause()
     }
   }, [playing, player])
+
+  // `player.isPlaying` (from the audio element events) is the single source of
+  // truth. Notify the consumer only when it actually changes — including
+  // changes the consumer didn't initiate (e.g. autoplay blocked, playback
+  // ended) so a controlled parent never gets stuck out of sync.
+  const reportedPlaying = useRef(player.isPlaying)
+  useEffect(() => {
+    if (reportedPlaying.current === player.isPlaying) return
+    reportedPlaying.current = player.isPlaying
+    onPlayingChange?.(player.isPlaying)
+  }, [player.isPlaying, onPlayingChange])
 
   return {
     audioRef,

@@ -77,10 +77,10 @@ export const PlaybackMenu = ({
         {extraItems.length > 0 && (
           <>
             {showSpeed && <DropdownMenuSeparator />}
-            {extraItems.map((action, index) => (
+            {extraItems.map((action) => (
               <DropdownMenuItem
-                key={index}
-                onSelect={() => action.onClick?.()}
+                key={action.label}
+                onSelect={() => action.onClick()}
                 className={cn(
                   "gap-2 px-3 text-sm",
                   action.critical

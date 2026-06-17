@@ -8,7 +8,7 @@ export type F0AudioPlayerSize = (typeof audioPlayerSizes)[number]
 export interface AudioPlayerMenuAction {
   label: string
   icon?: IconType
-  onClick?: () => void
+  onClick: () => void
   critical?: boolean
 }
 

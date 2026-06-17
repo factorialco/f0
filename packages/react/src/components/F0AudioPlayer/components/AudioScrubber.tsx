@@ -72,8 +72,6 @@ export const AudioScrubber = ({
       max={max || 1}
       step={1}
       disabled={isDisabled}
-      aria-label="Seek"
-      aria-valuetext={`${formatPlaybackTime(value)} of ${formatPlaybackTime(max)}`}
       className={cn(
         "group relative flex w-full touch-none select-none items-center py-2",
         disabled && "opacity-50"
@@ -108,6 +106,7 @@ export const AudioScrubber = ({
 
       <SliderThumb
         aria-label="Seek"
+        aria-valuetext={`${formatPlaybackTime(value)} of ${formatPlaybackTime(max)}`}
         className="block size-3 opacity-0 focus-visible:outline-none"
       />
     </Slider>
