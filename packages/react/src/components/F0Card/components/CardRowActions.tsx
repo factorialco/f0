@@ -100,6 +100,21 @@ const actionsAvatarOffsetClassName: Record<CardRowStackAt, string> = {
   never: "pt-1",
 }
 
+/**
+ * When the row has an avatar, the status icon's slot is grown to the avatar's
+ * height (`lg` = 40px / `min-h-10`) so `items-center` drops the icon onto the
+ * avatar's centre line. The icon is shorter than a button, so the button's
+ * `pt-1` nudge would leave it a few pixels high — matching the slot height and
+ * centring lands it exactly, at any icon size. Inline-scoped; once stacked the
+ * status keeps its natural height on its own line.
+ */
+const statusAvatarSlotClassName: Record<CardRowStackAt, string> = {
+  sm: "@xs:min-h-10",
+  md: "@md:min-h-10",
+  lg: "@lg:min-h-10",
+  never: "min-h-10",
+}
+
 // Visibility of the icon-only inline cluster — shown at/above the breakpoint
 // (and always, for `never`). Pairs with `stackedClusterVisibility` below; only
 // the confirm/reject variant renders both, to swap icon-only ↔ labelled on stack.
@@ -223,7 +238,7 @@ export function CardRowActions({
       <div
         className={cn(
           "flex items-center justify-end",
-          avatarOffset,
+          hasAvatar && statusAvatarSlotClassName[stackAt],
           stackedChrome[stackAt]
         )}
       >
@@ -241,8 +256,10 @@ export function CardRowActions({
   const wrapperClassName = cn(
     "relative z-[1]",
     actionsWidthClassName[stackAt],
-    avatarOffset,
-    stackedChrome[stackAt]
+    // After stackedChrome: its `@{bp}:pt-0` reset and our `@{bp}:pt-1` are the
+    // same utility, so ours must come last to win once the row goes inline.
+    stackedChrome[stackAt],
+    avatarOffset
   )
 
   const wrap = (group: React.ReactNode) => (
