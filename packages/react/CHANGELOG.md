@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.1](https://github.com/factorialco/f0/compare/f0-react-v3.5.0...f0-react-v3.5.1) (2026-06-17)
+
+
+### Bug Fixes
+
+* **F0Dialog:** clip tab divider and refine resource side-panel header ([#4463](https://github.com/factorialco/f0/issues/4463)) ([5e881fd](https://github.com/factorialco/f0/commit/5e881fd661525147475a7062a41794eddba30ff8))
+
 ## [3.5.0](https://github.com/factorialco/f0/compare/f0-react-v3.4.1...f0-react-v3.5.0) (2026-06-17)
 
 
