@@ -303,6 +303,31 @@ export const WithAvatar: Story = {
   },
 }
 
+/**
+ * The title and description wrap when long, so the row grows to fit. The avatar
+ * and the trailing actions stay pinned to the top (rather than drifting to the
+ * vertical centre), so both keep aligning with the title's first line. Long
+ * unbroken strings — URLs, ids — break instead of overrunning the actions.
+ */
+export const LongContent: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description:
+      "Product designer leading the design system team across web and mobile, with a bio long enough to wrap onto several lines — ref https://example.com/people/jane-cooper-design-systems-lead-2026",
+    primaryAction: { label: "Open", onClick: clickAlert("Open") },
+    secondaryActions: [{ label: "Edit", onClick: clickAlert("Edit") }],
+  },
+  parameters: {
+    docs: { story: { inline: false, height: "220px" } },
+  },
+}
+
 export const WithAlert: Story = {
   args: {
     avatar: {

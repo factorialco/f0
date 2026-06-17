@@ -38,10 +38,27 @@ export type CardRowStackAt = "sm" | "md" | "lg" | "never"
  * `md`. `@xs < @md < @lg` keeps sm < md < lg as expected.
  */
 export const cardRowClassName: Record<CardRowStackAt, string> = {
-  sm: "flex flex-col @xs:flex-row @xs:items-center @xs:justify-between @xs:gap-4",
-  md: "flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4",
-  lg: "flex flex-col @lg:flex-row @lg:items-center @lg:justify-between @lg:gap-4",
-  never: "flex flex-row items-center justify-between gap-4",
+  sm: "flex flex-col @xs:flex-row @xs:items-start @xs:justify-between @xs:gap-4",
+  md: "flex flex-col @md:flex-row @md:items-start @md:justify-between @md:gap-4",
+  lg: "flex flex-col @lg:flex-row @lg:items-start @lg:justify-between @lg:gap-4",
+  never: "flex flex-row items-start justify-between gap-4",
+}
+
+/**
+ * Cross-axis alignment of the leading (avatar + text) group within the inline
+ * row. The row pins its items to the top (`items-start` above) so the avatar and
+ * actions stay level with the title's first line as the row grows. A leading
+ * group that's *shorter* than the trailing controls — e.g. a single line of text
+ * next to a taller button — should instead sit vertically centred against them.
+ * `self-center` does exactly that: it only takes visible effect while the group
+ * is shorter than the row, so a tall wrapped group still fills from the top.
+ * Scoped to the inline breakpoint so the stacked column keeps its default stretch.
+ */
+export const cardRowLeadingAlignClassName: Record<CardRowStackAt, string> = {
+  sm: "@xs:self-center",
+  md: "@md:self-center",
+  lg: "@lg:self-center",
+  never: "self-center",
 }
 
 /**

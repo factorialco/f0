@@ -23,6 +23,7 @@ import {
   type CardRowStackAt,
   type CardRowStatus,
   cardRowClassName,
+  cardRowLeadingAlignClassName,
 } from "./components/CardRowActions"
 import { type CardAlertProps } from "./types"
 
@@ -207,6 +208,9 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
           <div
             className={cn(
               "flex min-w-0 flex-row gap-3",
+              // Centre a short single-line group against the taller controls, but
+              // let it fill from the top once it grows (see the class doc).
+              cardRowLeadingAlignClassName[stackAt],
               // Keep the avatar pinned to the top so it stays aligned with the
               // title when the row grows (e.g. a long wrapping description).
               avatar ? "items-start" : "items-center"
@@ -218,7 +222,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
                 variant="body"
                 content={title}
                 className={cn(
-                  "font-medium",
+                  "break-words font-medium",
                   inactive && "text-f1-foreground-secondary line-through"
                 )}
               />
@@ -226,7 +230,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
                 <Text
                   variant="description"
                   content={description}
-                  className={cn(inactive && "line-through")}
+                  className={cn("break-words", inactive && "line-through")}
                 />
               )}
             </div>
