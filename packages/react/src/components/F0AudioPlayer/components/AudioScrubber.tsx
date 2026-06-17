@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Slider, SliderThumb, SliderTrack } from "@/ui/slider"
 
@@ -20,6 +21,7 @@ export const AudioScrubber = ({
   disabled,
   onSeek,
 }: AudioScrubberProps) => {
+  const i18n = useI18n()
   const [dragValue, setDragValue] = useState<number | null>(null)
 
   const max = duration > 0 ? duration : 0
@@ -105,8 +107,11 @@ export const AudioScrubber = ({
       )}
 
       <SliderThumb
-        aria-label="Seek"
-        aria-valuetext={`${formatPlaybackTime(value)} of ${formatPlaybackTime(max)}`}
+        aria-label={i18n.audioPlayer.seek}
+        aria-valuetext={i18n.t("audioPlayer.position", {
+          current: formatPlaybackTime(value),
+          total: formatPlaybackTime(max),
+        })}
         className="block size-3 opacity-0 focus-visible:outline-none"
       />
     </Slider>

@@ -1,6 +1,7 @@
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
 import { CheckCircle, Ellipsis } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
   DropdownMenu,
@@ -28,6 +29,7 @@ export const PlaybackMenu = ({
   disabled,
   extraItems = [],
 }: PlaybackMenuProps) => {
+  const i18n = useI18n()
   const showSpeed = playbackRates.length > 0
 
   return (
@@ -37,7 +39,7 @@ export const PlaybackMenu = ({
           variant="ghost"
           size="sm"
           icon={Ellipsis}
-          label="Recording options"
+          label={i18n.audioPlayer.options}
           hideLabel
           disabled={disabled}
         />
@@ -49,7 +51,7 @@ export const PlaybackMenu = ({
         {showSpeed && (
           <>
             <DropdownMenuLabel className="text-f1-foreground-secondary">
-              Playback speed
+              {i18n.audioPlayer.playbackSpeed}
             </DropdownMenuLabel>
             {playbackRates.map((rate) => {
               const selected = rate === playbackRate

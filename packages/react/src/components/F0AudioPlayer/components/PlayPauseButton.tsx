@@ -1,4 +1,5 @@
 import { SolidPause, SolidPlay } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import type { F0AudioPlayerSize } from "../types"
@@ -16,12 +17,13 @@ export const PlayPauseButton = ({
   size = "md",
   onToggle,
 }: PlayPauseButtonProps) => {
+  const i18n = useI18n()
   const Icon = isPlaying ? SolidPause : SolidPlay
 
   return (
     <button
       type="button"
-      aria-label={isPlaying ? "Pause" : "Play"}
+      aria-label={isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play}
       disabled={disabled}
       onClick={onToggle}
       className={cn(

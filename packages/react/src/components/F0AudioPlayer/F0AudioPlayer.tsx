@@ -1,6 +1,7 @@
 import { cva } from "cva"
 import { forwardRef } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { AudioScrubber } from "./components/AudioScrubber"
@@ -32,6 +33,7 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
       className,
     } = props
 
+    const i18n = useI18n()
     const controller = usePlayerController(props)
     const dataAttributes = getDataAttributes(props)
 
@@ -39,7 +41,7 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
       <div
         ref={ref}
         role="group"
-        aria-label={ariaLabel ?? "Audio player"}
+        aria-label={ariaLabel ?? i18n.audioPlayer.label}
         className={cn(containerVariants({ size }), className)}
         {...dataAttributes}
       >
