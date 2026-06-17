@@ -36,7 +36,6 @@ import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import { Editor } from '@tiptap/react';
 import { EmployeeItemProps } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -730,6 +729,10 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
+declare type AlertVariant = (typeof alertVariantOptions)[number];
+
+declare const alertVariantOptions: readonly ["info", "warning", "critical", "neutral", "positive"];
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -887,14 +890,6 @@ export declare type BannerAction = {
     variant?: "default" | "outline" | "ghost";
     icon?: IconType;
 };
-
-declare interface BannerProps {
-    icon: IconType;
-    title: string;
-    variant: BannerVariant;
-}
-
-declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
 
 export declare const BarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
@@ -1137,19 +1132,6 @@ declare type BreadcrumbBaseItemType = NavigationItem & {
     label: string;
 };
 
-/**
- * A breadcrumb "jump-to" select bound to a OneDataCollection: the options are
- * fetched from the declared `source`, seeded with the filters/sortings the
- * list persisted under `collectionId` — so on the detail page (even via a
- * direct link, with the list never mounted) the select only shows the items
- * the user was looking at on the list.
- *
- * F0 owns the seeding, pagination handling (a `pages` adapter is transparently
- * consumed as infinite scroll), current selection, navigation, and
- * loop-safety: `source` is captured when the crumb mounts, so inline-recreated
- * item objects never retrigger fetches. Give the item a new `id` to swap
- * sources.
- */
 export declare type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType & {
     type: "collection-select";
     /**
@@ -1159,8 +1141,9 @@ export declare type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType 
      */
     collectionId: string;
     /** The declared data source — no mounted collection needed. */
-    source: DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>;
-    mapOptions: (item: RecordType) => F0SelectItemProps<string, RecordType>;
+    source: CollectionSelectSourceDefinition;
+    /** Method syntax on purpose: bivariant, so concrete-record mappers fit. */
+    mapOptions(item: RecordType): F0SelectItemProps<string, RecordType>;
     /** Current item id (the record the detail page is showing). */
     value?: string;
     /**
@@ -1193,14 +1176,15 @@ export declare type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType 
 } & ({
     /**
      * Href to navigate to when an option is picked, routed through the
-     * app's LinkProvider. Return undefined to skip navigation.
+     * app's LinkProvider. Return undefined to skip navigation. Method
+     * syntax on purpose: bivariant, so concrete-record callbacks fit.
      */
-    getItemHref: (value: string, item?: RecordType) => string | undefined;
-    onSelect?: (value: string, item?: RecordType) => void;
+    getItemHref(value: string, item?: RecordType): string | undefined;
+    onSelect?(value: string, item?: RecordType): void;
 } | {
     getItemHref?: never;
     /** Imperative escape hatch (e.g. router.push) when hrefs don't fit. */
-    onSelect: (value: string, item?: RecordType) => void;
+    onSelect(value: string, item?: RecordType): void;
 });
 
 export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType | BreadcrumbCollectionSelectItemType;
@@ -1310,18 +1294,6 @@ export declare type BulkActionsDefinition<R extends RecordType, Filters extends 
 } | {
     warningMessage: string;
 };
-
-export declare interface ButtonConfig {
-    key: string;
-    icon: IconType;
-    active: (editor: Editor) => boolean;
-    onClick: (editor: Editor) => void;
-    label: string;
-    tooltip: {
-        label: string;
-        shortcut: string[];
-    };
-}
 
 declare type ButtonDropdownItem<T = string> = {
     /**
@@ -2214,6 +2186,15 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     /** Indicates the source visualization type */
     fromVisualization?: TableVisualizationType;
 } & VisualizationOptions;
+
+/**
+ * The record-erased source a collection-select breadcrumb accepts: a
+ * `DataSourceDefinition` whose callbacks (and data adapter) tolerate sources
+ * declared over concrete record/filter types.
+ */
+export declare type CollectionSelectSourceDefinition = WithBivariantCallbacks<Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "dataAdapter">> & {
+    dataAdapter: WithBivariantCallbacks<DataAdapter<RecordType, FiltersDefinition>>;
+};
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
     table: VisualizacionTypeDefinition<TableCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, TableVisualizationSettings>;
@@ -3594,6 +3575,7 @@ declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -3653,7 +3635,7 @@ declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -3764,7 +3746,7 @@ declare const defaultTranslations: {
     };
 };
 
-declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
+export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
     type: "delete_block";
     targetId: string;
 }
@@ -3802,7 +3784,7 @@ export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> &
 }[TagType_2] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-} | (ComponentProps<typeof FileItem> & {
+} | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
 
@@ -4099,17 +4081,25 @@ declare type EmptyStateType = (typeof emptyStatesTypes)[number];
 export declare type enhanceConfig = {
     onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
     enhancementOptions?: EnhancementOption[];
+    /** Notified when the user accepts the enhanced result (analytics hook) */
+    onAcceptChanges?: () => void;
+    /** Notified when the user discards the enhanced result (analytics hook) */
+    onRejectChanges?: () => void;
+    /** Notified when the user retries the enhancement (analytics hook) */
+    onRetryChanges?: () => void;
 };
 
 export declare type enhancedTextResponse = {
     success: boolean;
-    text: string;
+    /** Enhanced content: an HTML/plain string or a TipTap JSON document */
+    text: string | JSONContent;
     error?: string;
 };
 
 export declare type EnhancementOption = {
     id: string;
     label: string;
+    icon?: IconType;
     subOptions?: EnhancementOption[];
 };
 
@@ -4319,6 +4309,24 @@ export declare type F0AiBannerProps = AiBannerInternalProps;
 
 /** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
 declare type F0AIMessage = F0Message;
+
+declare interface F0AlertProps {
+    title: string;
+    description?: string;
+    action?: {
+        label: string;
+        disabled?: boolean;
+        onClick: () => void;
+    };
+    link?: {
+        label: string;
+        href: string;
+    };
+    icon?: IconType;
+    variant: AlertVariant;
+    /** Called when the user dismisses the alert. When provided, a close button is shown. */
+    onClose?: () => void;
+}
 
 declare const F0AvatarAlert: WithDataTestIdReturnType_5<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
@@ -4563,6 +4571,29 @@ export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalPr
 
 export declare type F0CalloutProps = CalloutInternalProps;
 
+export declare type F0FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0FileItem: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+export declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: F0FileAction[];
+    disabled?: boolean;
+    size?: F0FileItemSize;
+}
+
+export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
+
+export declare const f0FileItemSizes: readonly ["md", "lg"];
+
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
     size?: "lg" | "md" | "sm" | "xs";
@@ -4589,6 +4620,56 @@ declare type F0Message = {
 };
 
 /**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0NotesTextEditor: ForwardRefExoticComponent<F0NotesTextEditorProps & RefAttributes<F0NotesTextEditorHandle>> & {
+    Skeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0NotesTextEditorHandle = {
+    clear: () => void;
+    focus: () => void;
+    setContent: (content: string) => void;
+    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
+    insertAIBlock: () => void;
+    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
+    insertImage: (file: File) => void;
+};
+
+export declare interface F0NotesTextEditorProps {
+    onChange: (value: {
+        json: JSONContent | null;
+        html: string | null;
+    }) => void;
+    placeholder: string;
+    initialEditorState?: {
+        content?: JSONContent | string;
+        title?: string;
+    };
+    readonly?: boolean;
+    aiBlockConfig?: AIBlockConfig;
+    imageUploadConfig?: ImageUploadConfig;
+    enhanceConfig?: enhanceConfig;
+    onTitleChange?: (title: string) => void;
+    titlePlaceholder?: string;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: DropdownItem[];
+    metadata?: MetadataItem[];
+    status?: HeaderStatusProps;
+    alert?: F0AlertProps;
+}
+
+export declare const F0NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+
+export declare interface F0NotesTextEditorSkeletonProps {
+    withHeader?: boolean;
+    withTitle?: boolean;
+    withToolbar?: boolean;
+}
+
+/**
  * F0NumberInput is the writable numeric field for forms — a box where the
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
@@ -4596,6 +4677,70 @@ declare type F0Message = {
 export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
+
+export declare type F0RichTextDisplayHandle = HTMLDivElement;
+
+export declare interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+    content: string;
+    className?: string;
+    format?: "html" | "markdown";
+}
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0RichTextEditor: ForwardRefExoticComponent<F0RichTextEditorProps & RefAttributes<F0RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: F0RichTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0RichTextEditorHandle = {
+    clear: () => void;
+    clearFiles: () => void;
+    focus: () => void;
+    setError: (error: string | null) => void;
+    setContent: (content: string) => void;
+};
+
+export declare interface F0RichTextEditorProps {
+    mentionsConfig?: MentionsConfig;
+    enhanceConfig?: enhanceConfig;
+    filesConfig?: filesConfig;
+    secondaryAction?: secondaryActionsType;
+    primaryAction?: primaryActionType;
+    onChange: (result: resultType) => void;
+    maxCharacters?: number;
+    placeholder: string;
+    initialEditorState?: {
+        content?: string;
+        files?: File[];
+    };
+    title: string;
+    height?: heightType;
+    plainHtmlMode?: boolean;
+    fullScreenMode?: boolean;
+    onFullscreenChange?: (fullscreen: boolean) => void;
+    /** Whether the editor is disabled */
+    disabled?: boolean;
+    /** Whether the editor has an error state */
+    error?: boolean;
+    /** Whether the editor is in a loading state */
+    loading?: boolean;
+    /**
+     * Voice dictation: transcribes a recorded audio blob into text inserted at
+     * the cursor. Same contract as F0AiChatTextArea — when omitted, the
+     * microphone button is not rendered.
+     */
+    onTranscribe?: TranscribeFn;
+}
+
+export declare interface F0RichTextEditorSkeletonProps {
+    rows?: number;
+}
 
 export declare const F0SearchInput: ForwardRefExoticComponent<    {
 value?: string;
@@ -4989,12 +5134,8 @@ export declare const FILE_TYPES: {
     readonly MARKDOWN: "markdown";
 };
 
-export declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
+/** @deprecated Use F0FileAction */
+export declare type FileAction = F0FileAction;
 
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
@@ -5005,26 +5146,14 @@ declare type FileDef = {
     type: string;
 };
 
-export declare const FileItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
+/** @deprecated Use F0FileItem */
+export declare const FileItem: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
 
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
+/** @deprecated Use F0FileItemProps */
+export declare type FileItemProps = F0FileItemProps;
 
-export declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+/** @deprecated Use F0FileItemSize */
+export declare type FileItemSize = F0FileItemSize;
 
 export declare type filesConfig = {
     onFiles: (files: File[]) => void;
@@ -5354,7 +5483,15 @@ declare type GroupRecord<RecordType> = {
     records: RecordType[];
 };
 
-declare type HeaderProps = {
+export declare interface HeaderProps {
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    metadata?: MetadataItem[];
+    otherActions?: DropdownItem[];
+    status?: HeaderStatusProps;
+}
+
+declare type HeaderProps_2 = {
     module: {
         id: ModuleId;
         name: string;
@@ -5384,7 +5521,7 @@ declare type HeaderProps = {
     oneSwitchAutoOpen?: boolean;
 };
 
-declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
+export declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
 
 declare type HeaderSecondaryButtonAction = SecondaryAction & {
     hideLabel?: boolean;
@@ -5393,6 +5530,13 @@ declare type HeaderSecondaryButtonAction = SecondaryAction & {
 declare type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
     variant?: "outline";
 };
+
+export declare interface HeaderStatusProps {
+    label: string;
+    text: string;
+    variant: StatusVariant;
+    actions?: MetadataAction[];
+}
 
 declare interface HeatmapComputation {
     datasetId: string;
@@ -5691,13 +5835,13 @@ declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "
  */
 export declare type InputProps = F0TextInputProps;
 
-declare interface InsertAfterNotesTextEditorPageDocumentPatch {
+export declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
     targetId: string;
     blocks: JSONContent[];
 }
 
-declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
+export declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
     type: "insert_before";
     targetId: string;
     blocks: JSONContent[];
@@ -5860,25 +6004,6 @@ export declare type MentionedUser = {
     href?: string;
 };
 
-export declare interface MentionItemComponentProps {
-    item: MentionedUser;
-    index: number;
-    selected: boolean;
-}
-
-export declare interface MentionListRef {
-    onKeyDown: (props: {
-        event: KeyboardEvent;
-    }) => boolean;
-}
-
-export declare interface MentionNodeAttrs {
-    id: string;
-    label: string;
-    image_url?: string;
-    href?: string;
-}
-
 export declare type MentionsConfig = {
     onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined;
     users: MentionedUser[];
@@ -5929,11 +6054,11 @@ declare type MetadataCopyAction = {
     type: "copy";
 };
 
-declare function MetadataItem({ item }: {
+export declare function MetadataItem({ item }: {
     item: MetadataItem;
 }): JSX_2.Element;
 
-declare interface MetadataItem {
+export declare interface MetadataItem {
     label: string;
     value: MetadataItemValue;
     actions?: (MetadataAction | MetadataCopyAction)[];
@@ -5953,7 +6078,7 @@ declare interface MetadataItem {
     };
 }
 
-declare type MetadataItemValue = {
+export declare type MetadataItemValue = {
     type: "text";
     content: string;
 } | {
@@ -6166,18 +6291,24 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
 } & DataAttributes_2;
 
 export declare type NavigationProps = {
-    previous?: {
-        url: string;
-        title: string;
-    };
-    next?: {
-        url: string;
-        title: string;
-    };
+    previous?: NavigationTarget;
+    next?: NavigationTarget;
     counter?: {
         current: number;
         total: number;
     };
+};
+
+/**
+ * One prev/next target. Carry a `url` for full-page detail navigation
+ * (renders a link) OR an `onClick` for id-based navigation that swaps content
+ * in place — a mounted sidepanel/dialog that never changes the URL (renders a
+ * button). `onClick` wins when both are present.
+ */
+export declare type NavigationTarget = {
+    title: string;
+    url?: string;
+    onClick?: () => void;
 };
 
 declare type NavTarget = HTMLAttributeAnchorTarget;
@@ -6210,67 +6341,28 @@ declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+/** @deprecated Use F0NotesTextEditor */
+export declare const NotesTextEditor: ForwardRefExoticComponent<F0NotesTextEditorProps & RefAttributes<F0NotesTextEditorHandle>> & {
+    Skeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+};
 
-export declare interface NotesTextEditorHandle {
-    clear: () => void;
-    focus: () => void;
-    setContent: (content: string) => void;
-    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
-    insertAIBlock: () => void;
-    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
-    pushContent: (content: string) => void;
-    insertImage: (file: File) => void;
-}
+/** @deprecated Use F0NotesTextEditorHandle */
+export declare type NotesTextEditorHandle = F0NotesTextEditorHandle;
 
 export declare type NotesTextEditorPageDocumentPatch = TopLevelPrependNotesTextEditorPageDocumentPatch | TopLevelAppendNotesTextEditorPageDocumentPatch | InsertBeforeNotesTextEditorPageDocumentPatch | InsertAfterNotesTextEditorPageDocumentPatch | ReplaceBlockNotesTextEditorPageDocumentPatch | ReplaceContentNotesTextEditorPageDocumentPatch | DeleteBlockNotesTextEditorPageDocumentPatch;
 
-export declare class NotesTextEditorPatchTargetNotFoundError extends Error {
-    readonly code = "target_not_found";
-    readonly targetId: string;
-    constructor(targetId: string);
-}
+/** @deprecated Use F0NotesTextEditorProps */
+export declare type NotesTextEditorProps = F0NotesTextEditorProps;
 
-export declare interface NotesTextEditorProps extends WithDataTestIdProps {
-    onChange: (value: {
-        json: JSONContent | null;
-        html: string | null;
-    }) => void;
-    placeholder: string;
-    initialEditorState?: {
-        content?: JSONContent | string;
-        title?: string;
-    };
-    readonly?: boolean;
-    aiBlockConfig?: AIBlockConfig;
-    imageUploadConfig?: ImageUploadConfig;
-    onTitleChange?: (title: string) => void;
-    titlePlaceholder?: string;
-    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-    secondaryActions?: HeaderSecondaryAction[];
-    otherActions?: DropdownItem[];
-    metadata?: MetadataItem[];
-    banner?: BannerProps;
-    showBubbleMenu?: boolean;
-}
+/** @deprecated Use F0NotesTextEditorSkeleton */
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
-
-export declare interface NotesTextEditorSkeletonProps {
-    withHeader?: boolean;
-    withTitle?: boolean;
-    withToolbar?: boolean;
-}
+/** @deprecated Use F0NotesTextEditorSkeletonProps */
+export declare type NotesTextEditorSkeletonProps = F0NotesTextEditorSkeletonProps;
 
 export declare interface NotesTextEditorSnapshot {
     json: JSONContent | null;
     html: string | null;
-}
-
-export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
-    readonly code = "unsupported_patch_type";
-    readonly patchType: unknown;
-    constructor(patchType: unknown);
 }
 
 declare type NumberCellConfig<R extends RecordType = RecordType> = {
@@ -6937,9 +7029,9 @@ export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<
     pagesCount: number;
 };
 
-export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps): JSX_2.Element;
+export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps_2): JSX_2.Element;
 
-export declare type PageHeaderItemNavigationInput<R extends RecordType> = Pick<UseDataSourceItemNavigationReturn<R>, "previousItem" | "nextItem" | "previousItemUrl" | "nextItemUrl" | "absoluteIndex" | "totalItems" | "activeIndex">;
+export declare type PageHeaderItemNavigationInput<R extends RecordType> = Pick<UseDataSourceItemNavigationReturn<R>, "previousItem" | "nextItem" | "previousItemUrl" | "nextItemUrl" | "absoluteIndex" | "totalItems" | "activeIndex" | "hasPrevious" | "hasNext" | "goToPrevious" | "goToNext">;
 
 export declare const PageHeaderNavigationContext: Context<NavigationProps | null>;
 
@@ -7163,7 +7255,7 @@ declare type PrimaryAction_2 = BaseAction & {
     variant?: PrimaryActionVariant;
 };
 
-declare interface PrimaryActionButton extends PrimaryAction {
+export declare interface PrimaryActionButton extends PrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
@@ -7188,7 +7280,7 @@ export declare type primaryActionType = {
 
 declare type PrimaryActionVariant = "default" | "critical" | "neutral";
 
-declare interface PrimaryDropdownAction<T> extends PrimaryAction {
+export declare interface PrimaryDropdownAction<T> extends PrimaryAction {
     items: ButtonDropdownItem<T>[];
     value?: T;
     onClick: (value: T, item: ButtonDropdownItem<T>) => void;
@@ -7461,7 +7553,7 @@ declare type RecordPathValue<T, P extends string> = P extends keyof T ? T[P] : P
  */
 export declare type RecordType = Record<string, unknown>;
 
-declare type ReferenceType = "none" | "striped";
+declare type ReferenceType = "none" | "striped" | "striked";
 
 /**
  * A numeric value that can be formatted with an optional formatter and options.
@@ -7473,13 +7565,13 @@ declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericVa
 
 declare type RendererDefinition = ValueDisplayRendererDefinition;
 
-declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
+export declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
     type: "replace_block";
     targetId: string;
     block: JSONContent;
 }
 
-declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
+export declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     type: "replace_content";
     targetId: string;
     content: JSONContent[];
@@ -7520,59 +7612,28 @@ export declare type resultType = {
     mentionIds?: string[];
 };
 
-export declare const RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+/** @deprecated Use F0RichTextDisplay */
+export declare const RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
 
-export declare type RichTextDisplayHandle = HTMLDivElement;
+/** @deprecated Use F0RichTextDisplayHandle */
+export declare type RichTextDisplayHandle = F0RichTextDisplayHandle;
 
-export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
-    content: string;
-    className?: string;
-    format?: "html" | "markdown";
-}
+/** @deprecated Use F0RichTextDisplayProps */
+export declare type RichTextDisplayProps = F0RichTextDisplayProps;
 
-export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
+/** @deprecated Use F0RichTextEditor */
+export declare const RichTextEditor: ForwardRefExoticComponent<F0RichTextEditorProps & RefAttributes<F0RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: F0RichTextEditorSkeletonProps) => JSX_2.Element;
 };
 
-export declare type RichTextEditorHandle = {
-    clear: () => void;
-    clearFiles: () => void;
-    focus: () => void;
-    setError: (error: string | null) => void;
-    setContent: (content: string) => void;
-};
+/** @deprecated Use F0RichTextEditorHandle */
+export declare type RichTextEditorHandle = F0RichTextEditorHandle;
 
-export declare interface RichTextEditorProps {
-    mentionsConfig?: MentionsConfig;
-    enhanceConfig?: enhanceConfig;
-    filesConfig?: filesConfig;
-    secondaryAction?: secondaryActionsType;
-    primaryAction?: primaryActionType;
-    onChange: (result: resultType) => void;
-    onBlur?: () => void;
-    maxCharacters?: number;
-    placeholder: string;
-    initialEditorState?: {
-        content?: string;
-        files?: File[];
-    };
-    title: string;
-    height?: heightType;
-    plainHtmlMode?: boolean;
-    fullScreenMode?: boolean;
-    onFullscreenChange?: (fullscreen: boolean) => void;
-    /** Whether the editor is disabled */
-    disabled?: boolean;
-    /** Whether the editor has an error state */
-    error?: boolean;
-    /** Whether the editor is in a loading state */
-    loading?: boolean;
-    dataTestId?: string;
-}
+/** @deprecated Use F0RichTextEditorProps */
+export declare type RichTextEditorProps = F0RichTextEditorProps;
 
-declare interface RichTextEditorSkeletonProps {
-    rows?: number;
-}
+/** @deprecated Use F0RichTextEditorSkeletonProps */
+export declare type RichTextEditorSkeletonProps = F0RichTextEditorSkeletonProps;
 
 export declare const ScrollArea: WithDataTestIdReturnType<ForwardRefExoticComponent<Omit<Omit<ScrollAreaProps & RefAttributes<HTMLDivElement>, "ref"> & {
 showBar?: boolean;
@@ -8168,10 +8229,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
-    /**
-     * Marks one or more rows as reference rows.
-     * Reference rows are rendered with a slanted background pattern across the full row.
-     */
+    /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
      * Labels for header groups. Keys are headerGroupId values used in column
@@ -8426,38 +8484,6 @@ export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<Tog
     className?: ClassValue;
 })) | undefined) => string> & React_2.RefAttributes<HTMLButtonElement>>;
 
-export declare interface ToolbarButtonProps {
-    onClick?: () => void;
-    active?: boolean;
-    label: string;
-    disabled: boolean;
-    icon: IconType;
-    tooltip?: {
-        description?: string;
-        label?: string;
-        shortcut?: ComponentProps<typeof Shortcut>["keys"];
-    };
-    showLabel?: boolean;
-}
-
-export declare interface ToolbarDropdownItem {
-    label: string;
-    icon: IconType;
-    onClick: () => void;
-    isActive: boolean;
-}
-
-export declare interface ToolbarProps {
-    editor: Editor;
-    isFullscreen?: boolean;
-    disableButtons: boolean;
-    onClose?: () => void;
-    animationComplete?: boolean;
-    darkMode?: boolean;
-    showEmojiPicker?: boolean;
-    plainHtmlMode?: boolean;
-}
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -8478,12 +8504,12 @@ declare type TooltipInternalProps = {
 
 export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_7)[number]>;
 
-declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
+export declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
     type: "top_level_append";
     blocks: JSONContent[];
 }
 
-declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
+export declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
     type: "top_level_prepend";
     blocks: JSONContent[];
 }
@@ -8540,6 +8566,8 @@ declare namespace Types {
         OneEmptyStateProps
     }
 }
+
+export declare const UPLOAD_INPUT_ID = "rich-text-editor-upload-button";
 
 /**
  * Tracking options for the AI chat
@@ -8651,6 +8679,16 @@ export declare interface UseDataCollectionItemNavigationProps<R extends RecordTy
      * re-resolves neighbors; `undefined` keeps the persisted/definition state.
      */
     currentFilters?: FiltersState<Filters>;
+    /**
+     * How the returned `navigation` arrows navigate:
+     * - `"url"` (default): links to each item's `itemUrl` — for full-page
+     *   detail views where prev/next changes the route.
+     * - `"callback"`: arrows call the controller's `goToPrevious`/`goToNext`,
+     *   swapping the active item in place with no URL change — for a mounted
+     *   sidepanel/dialog (drive `activeItemId` via `onActiveItemChange`).
+     * @default "url"
+     */
+    navigationMode?: "url" | "callback";
     /**
      * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
      * same convention as `useDataCollectionSource(source, deps)`.
@@ -8790,16 +8828,18 @@ export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInf
 
 /**
  * Converts an item-navigation result into the `NavigationProps` shape that
- * `PageHeader` accepts (directly or via `PageHeaderNavigationProvider`).
+ * `PageHeader` and `F0Dialog` accept (directly or via
+ * `PageHeaderNavigationProvider`).
  *
- * URLs are read from `previousItemUrl` / `nextItemUrl`, which are computed by
- * the `itemUrl` option on the navigation hook. A null URL omits that link
- * (the button renders disabled). The counter is included only when both the
- * absolute position and the total are known — never a misleading `0/n`.
+ * In `"url"` mode (default) the arrows are links to `previousItemUrl` /
+ * `nextItemUrl` (computed from the hook's `itemUrl`); a null URL omits that
+ * arrow. In `"callback"` mode the arrows call `goToPrevious`/`goToNext` and
+ * presence is gated by `hasPrevious`/`hasNext` — for in-place navigation that
+ * never touches the URL. The counter is included only when both the absolute
+ * position and the total are known — never a misleading `0/n`.
  *
- * Returns null when there is nothing useful to render (no input, or the
- * active item could not be located and no total is known), so it can be
- * passed straight to `PageHeaderNavigationProvider`.
+ * Returns null when there is nothing useful to render, so it can be passed
+ * straight to `PageHeaderNavigationProvider`.
  */
 export declare function usePageHeaderItemNavigation<R extends RecordType>(nav: PageHeaderItemNavigationInput<R> | null, config?: UsePageHeaderItemNavigationConfig<R>): NavigationProps | null;
 
@@ -8809,6 +8849,16 @@ export declare interface UsePageHeaderItemNavigationConfig<R extends RecordType>
      * accessible label on the prev/next buttons.
      */
     getItemTitle?: (item: R) => string;
+    /**
+     * How the prev/next arrows navigate:
+     * - `"url"` (default): each arrow is a link to the item's `itemUrl` — for
+     *   full-page detail views where navigation changes the route.
+     * - `"callback"`: each arrow calls `goToPrevious`/`goToNext`, swapping the
+     *   active item in place — for a mounted sidepanel/dialog that never
+     *   changes the URL. Presence is gated by `hasPrevious`/`hasNext`.
+     * @default "url"
+     */
+    mode?: "url" | "callback";
 }
 
 /**
@@ -9199,6 +9249,36 @@ declare interface WiggleOptions {
     errorHighlight?: boolean;
 }
 
+/**
+ * A breadcrumb "jump-to" select bound to a OneDataCollection: the options are
+ * fetched from the declared `source`, seeded with the filters/sortings the
+ * list persisted under `collectionId` — so on the detail page (even via a
+ * direct link, with the list never mounted) the select only shows the items
+ * the user was looking at on the list.
+ *
+ * F0 owns the seeding, pagination handling (a `pages` adapter is transparently
+ * consumed as infinite scroll), current selection, navigation, and
+ * loop-safety: `source` is captured when the crumb mounts, so inline-recreated
+ * item objects never retrigger fetches. Give the item a new `id` to swap
+ * sources.
+ */
+/**
+ * Rewraps every function-valued member of `T` so its parameters are checked
+ * BIVARIANTLY (the method-syntax trick). The breadcrumb item union is
+ * record-erased (`RecordType`); under `strictFunctionTypes`, arrow-typed
+ * members like `selectable?: (item: R) => ...` or the adapter's
+ * `fetchData(options: PaginatedFetchOptions<Filters>)` would make a source
+ * declared over a CONCRETE record/filters type unassignable here. Sound in
+ * this context: each source is fully type-checked against its concrete types
+ * where it is declared, and the select only feeds records fetched from that
+ * same source back into these callbacks.
+ */
+declare type WithBivariantCallbacks<T> = {
+    [K in keyof T]: [NonNullable<T[K]>] extends [never] ? T[K] : NonNullable<T[K]> extends (...args: infer Args) => infer Return ? {
+        bivariant(...args: Args): Return;
+    }["bivariant"] : T[K];
+};
+
 declare type WithDataTestIdProps = {
     dataTestId?: string;
 };
@@ -9276,21 +9356,16 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -9307,15 +9382,22 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
 }
 
 

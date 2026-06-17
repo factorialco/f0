@@ -16,6 +16,7 @@ import { f1Colors } from '@factorialco/f0-core';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { HTMLAttributeAnchorTarget } from 'react';
+import { HTMLAttributes } from 'react';
 import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
@@ -41,7 +42,8 @@ import { TagType } from '../../../f0';
 import { TeamItemProps } from './types';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
-import { WithDataTestIdReturnType } from '../../../lib/data-testid';
+import { WithDataTestIdReturnType } from '../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../../../lib/data-testid';
 
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
@@ -1150,6 +1152,33 @@ declare type CardAvatarVariant = AvatarVariant | {
     date: Date;
 };
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 declare type CardInternalProps = F0AiInsightCardProps & {
     className?: string;
 };
@@ -1158,33 +1187,14 @@ declare interface CardPrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
-}
-
-declare interface CardRowConfirmAction {
-    onClick: () => void;
-    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
-    label?: string;
-    disabled?: boolean;
-}
-
-/**
- * Container breakpoint at which the card row switches between its inline and its
- * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
- * width.
- */
-declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
-
-/**
- * Resolved state shown at the trailing edge in place of the actions: a coloured
- * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
- */
-declare interface CardRowStatus {
-    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
-    icon: IconType;
-    /** Colour family. */
-    variant: StatusVariant;
-    /** Accessible label; the icon carries meaning, so this is required. */
-    label: string;
+    /**
+     * Visual emphasis of the primary action. `"outline"` renders it as an outline
+     * button while keeping it pinned at the trailing edge (so a lone CTA never
+     * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+     * full primary weight.
+     * @default "default"
+     */
+    variant?: "default" | "outline";
 }
 
 declare interface CardSecondaryAction {
@@ -2352,6 +2362,7 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -2411,7 +2422,7 @@ export declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -2550,7 +2561,7 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
 }[TagType_2] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-} | (ComponentProps<typeof FileItem> & {
+} | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
 
@@ -2940,7 +2951,7 @@ export declare interface F0AiChatWelcomeCardsProps {
     onSelect?: (message: string) => void;
 }
 
-export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
+export declare const F0AiInsightCard: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
 }>;
 
@@ -3414,7 +3425,7 @@ export declare type F0CanvasPanelProps = {
     chatSide?: "left" | "right";
 };
 
-declare interface F0CardRowProps {
+declare interface F0CardHorizontalProps {
     /**
      * The primary line of text.
      */
@@ -3447,18 +3458,18 @@ declare interface F0CardRowProps {
      * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
      * instead of the standard actions. Provide either or both.
      */
-    confirmAction?: CardRowConfirmAction;
+    confirmAction?: CardHorizontalConfirmAction;
     /**
      * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
      */
-    rejectAction?: CardRowConfirmAction;
+    rejectAction?: CardHorizontalConfirmAction;
     /**
      * Resolved-state icon shown at the trailing edge in place of any actions — the
      * outcome of a confirm/reject row, e.g.
      * `{ icon: Check, variant: "positive", label: "Accepted" }`.
      * Takes precedence over the action props.
      */
-    status?: CardRowStatus;
+    status?: CardHorizontalStatus;
     /**
      * Strikes through and dims the title/description, marking the row's subject as
      * void or closed (e.g. a rejected request). Purely presentational — pair it
@@ -3466,15 +3477,11 @@ declare interface F0CardRowProps {
      */
     inactive?: boolean;
     /**
-     * Compact layout: tighter padding and smaller controls.
-     */
-    compact?: boolean;
-    /**
      * Container width at which the actions drop to their own line (below it) vs.
      * sit inline (at/above it). `never` keeps them inline at every width.
      * @default "never"
      */
-    stackAt?: CardRowStackAt;
+    stackAt?: CardHorizontalStackAt;
     /**
      * Stretch to fill the height of its container.
      */
@@ -3528,12 +3535,35 @@ declare interface F0ClarifyingPanelProps {
     isSubmitDisabled?: boolean;
 }
 
+declare type F0FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+declare const F0FileItem: WithDataTestIdReturnType<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: F0FileAction[];
+    disabled?: boolean;
+    size?: F0FileItemSize;
+}
+
+declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
+
+declare const f0FileItemSizes: readonly ["md", "lg"];
+
 export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, status, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
- * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge. Omit the confirm/reject pairs to render
  * a CTA-less informational row (e.g. a "created" confirmation card).
@@ -3547,23 +3577,23 @@ export declare type F0HILActionConfirmationProps = {
     /**
      * Optional secondary line shown beneath the title (single line, truncated).
      */
-    description?: F0CardRowProps["description"];
+    description?: F0CardHorizontalProps["description"];
     /**
      * Optional avatar rendered on the left of the row. Accepts any avatar type in
      * the system (person, company, team, file, icon, emoji, …).
      */
-    avatar?: F0CardRowProps["avatar"];
+    avatar?: F0CardHorizontalProps["avatar"];
     /**
      * Container width at which the ✓/✗ actions drop onto their own line instead of
      * staying inline. Prevents the buttons from overlapping the prompt in narrow
      * containers. Set to `"never"` to keep them inline at every width.
      * @default "sm"
      */
-    stackAt?: F0CardRowProps["stackAt"];
+    stackAt?: F0CardHorizontalProps["stackAt"];
     /**
      * Optional secondary (outline) CTA rendered at the trailing edge — e.g. an
      * "Open" link to the created resource. Renders only when no confirm/reject
-     * pair is set (those take precedence in `F0CardRow`).
+     * pair is set (those take precedence in `F0CardHorizontal`).
      */
     action?: {
         label: string;
@@ -3592,11 +3622,11 @@ export declare type F0HILActionConfirmationProps = {
     onCancel?: () => void;
     /**
      * Resolved outcome of the row (e.g. accepted / rejected). Forwarded straight
-     * to `F0CardRow`'s `status`, which renders the outcome icon in place of the
+     * to `F0CardHorizontal`'s `status`, which renders the outcome icon in place of the
      * ✓/✗ actions (it takes precedence over them). Use it to flip a confirmation
      * card to its done state once the user has acted.
      */
-    status?: F0CardRowProps["status"];
+    status?: F0CardHorizontalProps["status"];
 };
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
@@ -3673,9 +3703,9 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
-declare const F0TagAlert: WithDataTestIdReturnType<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagBalance: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagBalance: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagBalanceProps = {
     /**
@@ -3707,7 +3737,7 @@ declare type F0TagBalanceProps = {
     formatterOptions?: undefined;
 });
 
-declare const F0TagCompany: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagCompany: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagListProps<T extends TagType_2> = {
     /**
@@ -3729,7 +3759,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     remainingCount?: number;
 };
 
-declare const F0TagPerson: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagPerson: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagRawProps = {
     /**
@@ -3762,7 +3792,7 @@ declare interface F0TagStatusProps {
     additionalAccessibleText?: string;
 }
 
-declare const F0TagTeam: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagTeam: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
@@ -3791,13 +3821,6 @@ export declare type FeedbackConfig = {
     }) => void;
 };
 
-declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
-
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -3806,27 +3829,6 @@ declare type FileDef = {
     name: string;
     type: string;
 };
-
-declare const FileItem: WithDataTestIdReturnType<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
-
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
-
-declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
 
 declare type FlagAvatarVariant = Extract<AvatarVariant, {
     type: "flag";
@@ -4821,21 +4823,16 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -4852,15 +4849,22 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
 }
 
 

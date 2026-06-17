@@ -41,7 +41,6 @@ import { DeltaCellValue } from './types/delta';
 import { DotTagCellValue } from './f0';
 import { DotTagCellValue as DotTagCellValue_2 } from './types/dotTag';
 import type * as echarts_2 from 'echarts';
-import { Editor } from '@tiptap/react';
 import { EmployeeItemProps } from './types';
 import { F0AccordionSkeletonProps } from './F0AccordionSkeleton';
 import { F0AnalyticsDashboardProps as F0AnalyticsDashboardProps_2 } from './types';
@@ -1307,14 +1306,6 @@ declare type BannerAction = {
     icon?: IconType;
 };
 
-declare interface BannerProps {
-    icon: IconType;
-    title: string;
-    variant: BannerVariant;
-}
-
-declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
-
 export declare const BarChart: WithDataTestIdReturnType_5<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
 label?: boolean;
@@ -1550,6 +1541,11 @@ declare type BaseQuestionProps = {
     required?: boolean;
     locked?: boolean;
     hiddenActions?: HiddenActions;
+    /**
+     * Optional alert rendered inside the card (authoring view only). Pair with
+     * `locked` to explain why a predefined question can't be edited or moved.
+     */
+    notice?: QuestionNotice;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -1688,7 +1684,7 @@ declare const boxVariants: (props?: ({
     bottom?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     left?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "3xl" | "4xl" | "5xl" | undefined;
     display?: "block" | "inline" | "flex" | "grid" | "inline-flex" | "none" | undefined;
-    position?: "fixed" | "sticky" | "absolute" | "relative" | "static" | undefined;
+    position?: "fixed" | "sticky" | "relative" | "static" | "absolute" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -1736,18 +1732,6 @@ declare type BulkActionsDefinition<R extends RecordType, Filters extends Filters
 } | {
     warningMessage: string;
 };
-
-export declare interface ButtonConfig {
-    key: string;
-    icon: IconType;
-    active: (editor: Editor) => boolean;
-    onClick: (editor: Editor) => void;
-    label: string;
-    tooltip: {
-        label: string;
-        shortcut: string[];
-    };
-}
 
 export declare type ButtonDropdownGroup<T = string> = {
     label?: string;
@@ -2149,6 +2133,33 @@ declare interface CardBookmark {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 export declare type CardImageAspectRatio = (typeof cardImageAspectRatios)[number];
 
 export declare const cardImageAspectRatios: readonly ["default", "video"];
@@ -2307,6 +2318,14 @@ declare interface CardPrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
+    /**
+     * Visual emphasis of the primary action. `"outline"` renders it as an outline
+     * button while keeping it pinned at the trailing edge (so a lone CTA never
+     * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+     * full primary weight.
+     * @default "default"
+     */
+    variant?: "default" | "outline";
 }
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
@@ -2333,33 +2352,6 @@ declare const cardPropertyRenderers: {
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
-
-declare interface CardRowConfirmAction {
-    onClick: () => void;
-    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
-    label?: string;
-    disabled?: boolean;
-}
-
-/**
- * Container breakpoint at which the card row switches between its inline and its
- * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
- * width.
- */
-declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
-
-/**
- * Resolved state shown at the trailing edge in place of the actions: a coloured
- * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
- */
-declare interface CardRowStatus {
-    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
-    icon: IconType;
-    /** Colour family. */
-    variant: StatusVariant;
-    /** Accessible label; the icon carries meaning, so this is required. */
-    label: string;
-}
 
 declare interface CardSecondaryAction {
     label: string;
@@ -4852,6 +4844,7 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -4911,7 +4904,7 @@ export declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -5049,7 +5042,7 @@ export declare function defineAvailableForm<TParams extends Record<string, unkno
  */
 export declare function defineAvailableForm<TSchema extends F0FormSchema>(definition: F0FormDefinitionSingleSchema<TSchema>): F0AiAvailableFormDefinition;
 
-declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
+export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
     type: "delete_block";
     targetId: string;
 }
@@ -5094,7 +5087,7 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
 }[TagType] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-} | (ComponentProps<typeof FileItem> & {
+} | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
 
@@ -5154,9 +5147,17 @@ declare const dialogAlikePositions: readonly ["center", "left", "right", "fullsc
 
 export declare type DialogControls = {
     kind: "resource";
+    /**
+     * "Open detail" affordance. Provide `url` to render a link to the
+     * resource's full-page view (routed through the app's `LinkProvider`,
+     * so it is cmd/middle-clickable) — typically the active item's
+     * `itemUrl` from `useDataCollectionItemNavigation`. Provide `onClick`
+     * for imperative expansion. `url` wins when both are set.
+     */
     expand?: {
         label: string;
-        onClick: () => void;
+        url?: string;
+        onClick?: () => void;
     };
     navigation?: NavigationProps;
 } | {
@@ -5344,7 +5345,7 @@ declare type DrawerSize = (typeof drawerSizes)[number];
 
 declare const drawerSizes: readonly ["md"];
 
-declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
+export declare type DropdownItem = DropdownItemObject | DropdownItemSeparator | DropdownItemLabel;
 
 declare type DropdownItemLabel = {
     type: "label";
@@ -5614,17 +5615,25 @@ declare type EmployeeCreditsUsage = {
 export declare type enhanceConfig = {
     onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
     enhancementOptions?: EnhancementOption[];
+    /** Notified when the user accepts the enhanced result (analytics hook) */
+    onAcceptChanges?: () => void;
+    /** Notified when the user discards the enhanced result (analytics hook) */
+    onRejectChanges?: () => void;
+    /** Notified when the user retries the enhancement (analytics hook) */
+    onRetryChanges?: () => void;
 };
 
 export declare type enhancedTextResponse = {
     success: boolean;
-    text: string;
+    /** Enhanced content: an HTML/plain string or a TipTap JSON document */
+    text: string | JSONContent;
     error?: string;
 };
 
 export declare type EnhancementOption = {
     id: string;
     label: string;
+    icon?: IconType;
     subOptions?: EnhancementOption[];
 };
 
@@ -7257,15 +7266,14 @@ compact?: boolean;
 }) => JSX_2.Element;
 }>;
 
-export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
-
-export declare const F0CardRow: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardRowProps & RefAttributes<HTMLDivElement>> & {
-Skeleton: ({ compact }: {
-compact?: boolean;
-}) => JSX_2.Element;
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0CardHorizontal: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
 }>;
 
-export declare interface F0CardRowProps {
+export declare interface F0CardHorizontalProps {
     /**
      * The primary line of text.
      */
@@ -7298,18 +7306,18 @@ export declare interface F0CardRowProps {
      * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
      * instead of the standard actions. Provide either or both.
      */
-    confirmAction?: CardRowConfirmAction;
+    confirmAction?: CardHorizontalConfirmAction;
     /**
      * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
      */
-    rejectAction?: CardRowConfirmAction;
+    rejectAction?: CardHorizontalConfirmAction;
     /**
      * Resolved-state icon shown at the trailing edge in place of any actions — the
      * outcome of a confirm/reject row, e.g.
      * `{ icon: Check, variant: "positive", label: "Accepted" }`.
      * Takes precedence over the action props.
      */
-    status?: CardRowStatus;
+    status?: CardHorizontalStatus;
     /**
      * Strikes through and dims the title/description, marking the row's subject as
      * void or closed (e.g. a rejected request). Purely presentational — pair it
@@ -7317,15 +7325,11 @@ export declare interface F0CardRowProps {
      */
     inactive?: boolean;
     /**
-     * Compact layout: tighter padding and smaller controls.
-     */
-    compact?: boolean;
-    /**
      * Container width at which the actions drop to their own line (below it) vs.
      * sit inline (at/above it). `never` keeps them inline at every width.
      * @default "never"
      */
-    stackAt?: CardRowStackAt;
+    stackAt?: CardHorizontalStackAt;
     /**
      * Stretch to fill the height of its container.
      */
@@ -7356,6 +7360,8 @@ export declare interface F0CardRowProps {
      */
     disableOverlayLink?: boolean;
 }
+
+export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
 
 declare interface F0CardSelectConfig {
     options: CardSelectOption[];
@@ -8369,6 +8375,13 @@ export declare type F0FieldConfig<T extends string | number = string | number, R
  */
 export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
 
+export declare type F0FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
 /**
  * F0 config options specific to file fields
  */
@@ -8429,6 +8442,22 @@ export declare type F0FileField = F0BaseField & {
  * Union of all file field configs
  */
 export declare type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0FileItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+export declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: F0FileAction[];
+    disabled?: boolean;
+    size?: F0FileItemSize;
+}
+
+export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
+
+export declare const f0FileItemSizes: readonly ["md", "lg"];
 
 export declare const F0FilterPickerContent: <Filters extends FiltersDefinition>(props: F0FilterPickerContentProps<Filters> & {
     dataTestId?: string;
@@ -9416,7 +9445,7 @@ export declare const F0HILActionConfirmation: ({ text, description, avatar, acti
 /**
  * Props for the F0HILActionConfirmation component.
  *
- * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge. Omit the confirm/reject pairs to render
  * a CTA-less informational row (e.g. a "created" confirmation card).
@@ -9430,23 +9459,23 @@ export declare type F0HILActionConfirmationProps = {
     /**
      * Optional secondary line shown beneath the title (single line, truncated).
      */
-    description?: F0CardRowProps["description"];
+    description?: F0CardHorizontalProps["description"];
     /**
      * Optional avatar rendered on the left of the row. Accepts any avatar type in
      * the system (person, company, team, file, icon, emoji, …).
      */
-    avatar?: F0CardRowProps["avatar"];
+    avatar?: F0CardHorizontalProps["avatar"];
     /**
      * Container width at which the ✓/✗ actions drop onto their own line instead of
      * staying inline. Prevents the buttons from overlapping the prompt in narrow
      * containers. Set to `"never"` to keep them inline at every width.
      * @default "sm"
      */
-    stackAt?: F0CardRowProps["stackAt"];
+    stackAt?: F0CardHorizontalProps["stackAt"];
     /**
      * Optional secondary (outline) CTA rendered at the trailing edge — e.g. an
      * "Open" link to the created resource. Renders only when no confirm/reject
-     * pair is set (those take precedence in `F0CardRow`).
+     * pair is set (those take precedence in `F0CardHorizontal`).
      */
     action?: {
         label: string;
@@ -9475,11 +9504,11 @@ export declare type F0HILActionConfirmationProps = {
     onCancel?: () => void;
     /**
      * Resolved outcome of the row (e.g. accepted / rejected). Forwarded straight
-     * to `F0CardRow`'s `status`, which renders the outcome icon in place of the
+     * to `F0CardHorizontal`'s `status`, which renders the outcome icon in place of the
      * ✓/✗ actions (it takes precedence over them). Use it to flip a confirmation
      * card to its done state once the user has acted.
      */
-    status?: F0CardRowProps["status"];
+    status?: F0CardHorizontalProps["status"];
 };
 
 export declare const F0Icon: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
@@ -9557,6 +9586,56 @@ export declare interface F0MoreInfoLink {
     href: string;
     /** Link label (defaults to "More information") */
     label?: string;
+}
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0NotesTextEditor: ForwardRefExoticComponent<F0NotesTextEditorProps & RefAttributes<F0NotesTextEditorHandle>> & {
+    Skeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0NotesTextEditorHandle = {
+    clear: () => void;
+    focus: () => void;
+    setContent: (content: string) => void;
+    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
+    insertAIBlock: () => void;
+    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
+    insertImage: (file: File) => void;
+};
+
+export declare interface F0NotesTextEditorProps {
+    onChange: (value: {
+        json: JSONContent | null;
+        html: string | null;
+    }) => void;
+    placeholder: string;
+    initialEditorState?: {
+        content?: JSONContent | string;
+        title?: string;
+    };
+    readonly?: boolean;
+    aiBlockConfig?: AIBlockConfig;
+    imageUploadConfig?: ImageUploadConfig;
+    enhanceConfig?: enhanceConfig;
+    onTitleChange?: (title: string) => void;
+    titlePlaceholder?: string;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: DropdownItem[];
+    metadata?: MetadataItem[];
+    status?: HeaderStatusProps;
+    alert?: F0AlertProps;
+}
+
+export declare const F0NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+
+export declare interface F0NotesTextEditorSkeletonProps {
+    withHeader?: boolean;
+    withTitle?: boolean;
+    withToolbar?: boolean;
 }
 
 /**
@@ -9865,6 +9944,70 @@ export declare interface F0RichTextConfig {
     height?: heightType;
     /** Whether to use plain HTML mode */
     plainHtmlMode?: boolean;
+}
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
+
+export declare type F0RichTextDisplayHandle = HTMLDivElement;
+
+export declare interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+    content: string;
+    className?: string;
+    format?: "html" | "markdown";
+}
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0RichTextEditor: ForwardRefExoticComponent<F0RichTextEditorProps & RefAttributes<F0RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: F0RichTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0RichTextEditorHandle = {
+    clear: () => void;
+    clearFiles: () => void;
+    focus: () => void;
+    setError: (error: string | null) => void;
+    setContent: (content: string) => void;
+};
+
+export declare interface F0RichTextEditorProps {
+    mentionsConfig?: MentionsConfig;
+    enhanceConfig?: enhanceConfig;
+    filesConfig?: filesConfig;
+    secondaryAction?: secondaryActionsType;
+    primaryAction?: primaryActionType;
+    onChange: (result: resultType) => void;
+    maxCharacters?: number;
+    placeholder: string;
+    initialEditorState?: {
+        content?: string;
+        files?: File[];
+    };
+    title: string;
+    height?: heightType;
+    plainHtmlMode?: boolean;
+    fullScreenMode?: boolean;
+    onFullscreenChange?: (fullscreen: boolean) => void;
+    /** Whether the editor is disabled */
+    disabled?: boolean;
+    /** Whether the editor has an error state */
+    error?: boolean;
+    /** Whether the editor is in a loading state */
+    loading?: boolean;
+    /**
+     * Voice dictation: transcribes a recorded audio blob into text inserted at
+     * the cursor. Same contract as F0AiChatTextArea — when omitted, the
+     * microphone button is not rendered.
+     */
+    onTranscribe?: TranscribeFn;
+}
+
+export declare interface F0RichTextEditorSkeletonProps {
+    rows?: number;
 }
 
 /**
@@ -10773,12 +10916,8 @@ export declare const FILE_TYPES: {
     readonly MARKDOWN: "markdown";
 };
 
-export declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
+/** @deprecated Use F0FileAction */
+export declare type FileAction = F0FileAction;
 
 export declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
@@ -10794,26 +10933,14 @@ declare type FileDef = {
  */
 declare type FileFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
 
-export declare const FileItem: WithDataTestIdReturnType_4<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
+/** @deprecated Use F0FileItem */
+export declare const FileItem: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
 
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
+/** @deprecated Use F0FileItemProps */
+export declare type FileItemProps = F0FileItemProps;
 
-export declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+/** @deprecated Use F0FileItemSize */
+export declare type FileItemSize = F0FileItemSize;
 
 declare type FileQuestionProps = BaseQuestionPropsForOtherQuestionComponents & {
     type: "file";
@@ -11455,7 +11582,15 @@ export declare type GroupRecord<RecordType> = {
  */
 export declare function hasF0Config(schema: ZodTypeAny): boolean;
 
-declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
+export declare interface HeaderProps {
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    metadata?: MetadataItem[];
+    otherActions?: DropdownItem[];
+    status?: HeaderStatusProps;
+}
+
+export declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
 
 declare type HeaderSecondaryButtonAction = SecondaryAction & {
     hideLabel?: boolean;
@@ -11464,6 +11599,13 @@ declare type HeaderSecondaryButtonAction = SecondaryAction & {
 declare type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
     variant?: "outline";
 };
+
+export declare interface HeaderStatusProps {
+    label: string;
+    text: string;
+    variant: StatusVariant;
+    actions?: MetadataAction[];
+}
 
 declare type HeadingTags = (typeof headingTags)[number];
 
@@ -11854,13 +11996,13 @@ declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "
  */
 export declare type InputProps = F0TextInputProps;
 
-declare interface InsertAfterNotesTextEditorPageDocumentPatch {
+export declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
     targetId: string;
     blocks: JSONContent[];
 }
 
-declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
+export declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
     type: "insert_before";
     targetId: string;
     blocks: JSONContent[];
@@ -12202,29 +12344,22 @@ export declare type MentionedUser = {
     href?: string;
 };
 
-export declare interface MentionItemComponentProps {
-    item: MentionedUser;
-    index: number;
-    selected: boolean;
-}
-
-export declare interface MentionListRef {
-    onKeyDown: (props: {
-        event: KeyboardEvent;
-    }) => boolean;
-}
-
-export declare interface MentionNodeAttrs {
-    id: string;
-    label: string;
-    image_url?: string;
-    href?: string;
-}
-
 export declare type MentionsConfig = {
     onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined;
     users: MentionedUser[];
 };
+
+/**
+ * Write counterpart of `resolveDataCollectionFilters`: returns a new storage
+ * object with `filters` replaced, writing the SAME slot the resolver reads —
+ * when a per-visualization override exists for the persisted visualization,
+ * that slot is updated too, so a subsequent resolve sees the new filters
+ * instead of the stale override winning.
+ *
+ * Pure; the rest of the persisted state (sortings, search, settings, …) is
+ * preserved untouched.
+ */
+export declare const mergeDataCollectionFilters: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(storage: DataCollectionStorage<CurrentFiltersState>, filters: CurrentFiltersState) => DataCollectionStorage<CurrentFiltersState>;
 
 export declare interface Message {
     userId: string;
@@ -12282,11 +12417,11 @@ declare type MetadataCopyAction = {
     type: "copy";
 };
 
-declare function MetadataItem({ item }: {
+export declare function MetadataItem({ item }: {
     item: MetadataItem;
 }): JSX_2.Element;
 
-declare interface MetadataItem {
+export declare interface MetadataItem {
     label: string;
     value: MetadataItemValue;
     actions?: (MetadataAction | MetadataCopyAction)[];
@@ -12306,7 +12441,7 @@ declare interface MetadataItem {
     };
 }
 
-declare type MetadataItemValue = {
+export declare type MetadataItemValue = {
     type: "text";
     content: string;
 } | {
@@ -12519,18 +12654,24 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
 } & DataAttributes_2;
 
 declare type NavigationProps = {
-    previous?: {
-        url: string;
-        title: string;
-    };
-    next?: {
-        url: string;
-        title: string;
-    };
+    previous?: NavigationTarget;
+    next?: NavigationTarget;
     counter?: {
         current: number;
         total: number;
     };
+};
+
+/**
+ * One prev/next target. Carry a `url` for full-page detail navigation
+ * (renders a link) OR an `onClick` for id-based navigation that swaps content
+ * in place — a mounted sidepanel/dialog that never changes the URL (renders a
+ * button). `onClick` wins when both are present.
+ */
+declare type NavigationTarget = {
+    title: string;
+    url?: string;
+    onClick?: () => void;
 };
 
 declare type NavTarget = HTMLAttributeAnchorTarget;
@@ -12577,67 +12718,28 @@ export declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+/** @deprecated Use F0NotesTextEditor */
+export declare const NotesTextEditor: ForwardRefExoticComponent<F0NotesTextEditorProps & RefAttributes<F0NotesTextEditorHandle>> & {
+    Skeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+};
 
-export declare interface NotesTextEditorHandle {
-    clear: () => void;
-    focus: () => void;
-    setContent: (content: string) => void;
-    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
-    insertAIBlock: () => void;
-    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
-    pushContent: (content: string) => void;
-    insertImage: (file: File) => void;
-}
+/** @deprecated Use F0NotesTextEditorHandle */
+export declare type NotesTextEditorHandle = F0NotesTextEditorHandle;
 
 export declare type NotesTextEditorPageDocumentPatch = TopLevelPrependNotesTextEditorPageDocumentPatch | TopLevelAppendNotesTextEditorPageDocumentPatch | InsertBeforeNotesTextEditorPageDocumentPatch | InsertAfterNotesTextEditorPageDocumentPatch | ReplaceBlockNotesTextEditorPageDocumentPatch | ReplaceContentNotesTextEditorPageDocumentPatch | DeleteBlockNotesTextEditorPageDocumentPatch;
 
-export declare class NotesTextEditorPatchTargetNotFoundError extends Error {
-    readonly code = "target_not_found";
-    readonly targetId: string;
-    constructor(targetId: string);
-}
+/** @deprecated Use F0NotesTextEditorProps */
+export declare type NotesTextEditorProps = F0NotesTextEditorProps;
 
-export declare interface NotesTextEditorProps extends WithDataTestIdProps {
-    onChange: (value: {
-        json: JSONContent | null;
-        html: string | null;
-    }) => void;
-    placeholder: string;
-    initialEditorState?: {
-        content?: JSONContent | string;
-        title?: string;
-    };
-    readonly?: boolean;
-    aiBlockConfig?: AIBlockConfig;
-    imageUploadConfig?: ImageUploadConfig;
-    onTitleChange?: (title: string) => void;
-    titlePlaceholder?: string;
-    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-    secondaryActions?: HeaderSecondaryAction[];
-    otherActions?: DropdownItem[];
-    metadata?: MetadataItem[];
-    banner?: BannerProps;
-    showBubbleMenu?: boolean;
-}
+/** @deprecated Use F0NotesTextEditorSkeleton */
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
-
-export declare interface NotesTextEditorSkeletonProps {
-    withHeader?: boolean;
-    withTitle?: boolean;
-    withToolbar?: boolean;
-}
+/** @deprecated Use F0NotesTextEditorSkeletonProps */
+export declare type NotesTextEditorSkeletonProps = F0NotesTextEditorSkeletonProps;
 
 export declare interface NotesTextEditorSnapshot {
     json: JSONContent | null;
     html: string | null;
-}
-
-export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
-    readonly code = "unsupported_patch_type";
-    readonly patchType: unknown;
-    constructor(patchType: unknown);
 }
 
 declare type NotificationDialogBaseOptions = Optional<Pick<DialogDefinition, "id" | "title">, "id"> & {
@@ -13446,7 +13548,7 @@ declare interface PrimaryAction {
     loading?: boolean;
 }
 
-declare interface PrimaryActionButton extends PrimaryAction {
+export declare interface PrimaryActionButton extends PrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
@@ -13469,7 +13571,7 @@ export declare type primaryActionType = {
     subActions?: subActionType[];
 };
 
-declare interface PrimaryDropdownAction<T> extends PrimaryAction {
+export declare interface PrimaryDropdownAction<T> extends PrimaryAction {
     items: ButtonDropdownItem<T>[];
     value?: T;
     onClick: (value: T, item: ButtonDropdownItem<T>) => void;
@@ -13718,6 +13820,19 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "checkbox";
 }, QuestionPropsToOmit>;
 
+/**
+ * An alert rendered inside a question card (authoring view only — never shown
+ * in the answering/preview form). Typically paired with `locked` to explain why
+ * a predefined question can't be edited, moved, or removed.
+ */
+export declare type QuestionNotice = {
+    /** Defaults to "info" when omitted. */
+    variant?: AlertVariant;
+    title: string;
+    description?: string;
+    icon?: IconType;
+};
+
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
 export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "dropdown-multi" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
@@ -13807,7 +13922,7 @@ declare type RecordPathValue<T, P extends string> = P extends keyof T ? T[P] : P
  */
 export declare type RecordType = Record<string, unknown>;
 
-declare type ReferenceType = "none" | "striped";
+declare type ReferenceType = "none" | "striped" | "striked";
 
 declare type RegularAction = BaseAction & {
     type: "regular";
@@ -13946,13 +14061,13 @@ declare interface RenderIfBase {
  */
 export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition;
 
-declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
+export declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
     type: "replace_block";
     targetId: string;
     block: JSONContent;
 }
 
-declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
+export declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     type: "replace_content";
     targetId: string;
     content: JSONContent[];
@@ -14104,59 +14219,28 @@ export declare type resultType = {
     mentionIds?: string[];
 };
 
-export declare const RichTextDisplay: WithDataTestIdReturnType_4<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+/** @deprecated Use F0RichTextDisplay */
+export declare const RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
 
-export declare type RichTextDisplayHandle = HTMLDivElement;
+/** @deprecated Use F0RichTextDisplayHandle */
+export declare type RichTextDisplayHandle = F0RichTextDisplayHandle;
 
-export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
-    content: string;
-    className?: string;
-    format?: "html" | "markdown";
-}
+/** @deprecated Use F0RichTextDisplayProps */
+export declare type RichTextDisplayProps = F0RichTextDisplayProps;
 
-export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
+/** @deprecated Use F0RichTextEditor */
+export declare const RichTextEditor: ForwardRefExoticComponent<F0RichTextEditorProps & RefAttributes<F0RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: F0RichTextEditorSkeletonProps) => JSX_2.Element;
 };
 
-export declare type RichTextEditorHandle = {
-    clear: () => void;
-    clearFiles: () => void;
-    focus: () => void;
-    setError: (error: string | null) => void;
-    setContent: (content: string) => void;
-};
+/** @deprecated Use F0RichTextEditorHandle */
+export declare type RichTextEditorHandle = F0RichTextEditorHandle;
 
-export declare interface RichTextEditorProps {
-    mentionsConfig?: MentionsConfig;
-    enhanceConfig?: enhanceConfig;
-    filesConfig?: filesConfig;
-    secondaryAction?: secondaryActionsType;
-    primaryAction?: primaryActionType;
-    onChange: (result: resultType) => void;
-    onBlur?: () => void;
-    maxCharacters?: number;
-    placeholder: string;
-    initialEditorState?: {
-        content?: string;
-        files?: File[];
-    };
-    title: string;
-    height?: heightType;
-    plainHtmlMode?: boolean;
-    fullScreenMode?: boolean;
-    onFullscreenChange?: (fullscreen: boolean) => void;
-    /** Whether the editor is disabled */
-    disabled?: boolean;
-    /** Whether the editor has an error state */
-    error?: boolean;
-    /** Whether the editor is in a loading state */
-    loading?: boolean;
-    dataTestId?: string;
-}
+/** @deprecated Use F0RichTextEditorProps */
+export declare type RichTextEditorProps = F0RichTextEditorProps;
 
-declare interface RichTextEditorSkeletonProps {
-    rows?: number;
-}
+/** @deprecated Use F0RichTextEditorSkeletonProps */
+export declare type RichTextEditorSkeletonProps = F0RichTextEditorSkeletonProps;
 
 /**
  * All valid renderIf conditions for richtext fields
@@ -14246,9 +14330,20 @@ export declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">
 
 declare type SectionProps = {
     id: string;
-    title: string;
+    /**
+     * Section heading. Optional — a section may have no title (e.g. a predefined,
+     * blocked section that leads with a `notice` instead). In the editable view an
+     * empty title shows a placeholder so authors can add one; when the section is
+     * locked/read-only an empty title is hidden entirely.
+     */
+    title?: string;
     description?: string;
     locked?: boolean;
+    /**
+     * Optional alert rendered above the section title (authoring view only). Pair
+     * with `locked` to explain why a predefined section can't be edited or moved.
+     */
+    notice?: QuestionNotice;
     questions?: QuestionElement[];
 };
 
@@ -14401,27 +14496,6 @@ declare type SelectValueType = string | number;
 export declare const setDataCollectionUrlParams: <CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>>(current: string | URLSearchParams | undefined, state: DataCollectionUrlState<CurrentFiltersState>) => URLSearchParams;
 
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
-
-/**
- * @experimental This is an experimental component use it at your own risk
- */
-declare const Shortcut: WithDataTestIdReturnType_3<typeof _Shortcut>;
-
-declare function _Shortcut({ keys, variant }: ShortcutProps): JSX_2.Element | null;
-
-declare interface ShortcutProps extends VariantProps<typeof shortcutVariants> {
-    keys: string[];
-}
-
-declare const shortcutVariants: (props?: ({
-    variant?: "default" | "inverse" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
 
 /**
  * Response structure for non-paginated data
@@ -14843,10 +14917,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
-    /**
-     * Marks one or more rows as reference rows.
-     * Reference rows are rendered with a slanted background pattern across the full row.
-     */
+    /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
      * Labels for header groups. Keys are headerGroupId values used in column
@@ -15260,44 +15331,12 @@ declare type toggleActionType = {
     hideLabel?: boolean;
 };
 
-export declare interface ToolbarButtonProps {
-    onClick?: () => void;
-    active?: boolean;
-    label: string;
-    disabled: boolean;
-    icon: IconType;
-    tooltip?: {
-        description?: string;
-        label?: string;
-        shortcut?: ComponentProps<typeof Shortcut>["keys"];
-    };
-    showLabel?: boolean;
-}
-
-export declare interface ToolbarDropdownItem {
-    label: string;
-    icon: IconType;
-    onClick: () => void;
-    isActive: boolean;
-}
-
-export declare interface ToolbarProps {
-    editor: Editor;
-    isFullscreen?: boolean;
-    disableButtons: boolean;
-    onClose?: () => void;
-    animationComplete?: boolean;
-    darkMode?: boolean;
-    showEmojiPicker?: boolean;
-    plainHtmlMode?: boolean;
-}
-
-declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
+export declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
     type: "top_level_append";
     blocks: JSONContent[];
 }
 
-declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
+export declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
     type: "top_level_prepend";
     blocks: JSONContent[];
 }
@@ -15362,6 +15401,8 @@ declare namespace Types {
  * Uses _def.typeName for reliable type checking across module boundaries
  */
 export declare function unwrapZodSchema(schema: ZodTypeAny): ZodTypeAny;
+
+export declare const UPLOAD_INPUT_ID = "rich-text-editor-upload-button";
 
 /**
  * Tracking options for the AI chat
@@ -16531,21 +16572,16 @@ declare module "gridstack" {
 }
 
 
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
-        };
-    }
+declare namespace Calendar {
+    var displayName: string;
 }
 
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -16562,15 +16598,22 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
 
 
-declare namespace Calendar {
-    var displayName: string;
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
+        };
+    }
 }
 
 
