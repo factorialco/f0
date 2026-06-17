@@ -17,6 +17,8 @@ import { ContentTab } from "./ContentTab"
 import { DocumentsTab } from "./DocumentsTab"
 import { FormsTab } from "./FormsTab"
 import { FundaeFlow } from "./fundae/FundaeFlow"
+import { FundaeFlowB } from "./fundae/FundaeFlowB"
+import { FundaeFlowC } from "./fundae/FundaeFlowC"
 import { OverviewTab } from "./OverviewTab"
 import { ParticipantsTab } from "./ParticipantsTab"
 import { type DetailTabId, detailTabs } from "../tabs"
@@ -196,7 +198,14 @@ export function TrainingsDetail({ training, onBack }: Props) {
         {activeTab === "attachments" && <AttachmentsTab training={training} />}
         {activeTab === "documents" && <DocumentsTab training={training} />}
         {activeTab === "surveys" && <FormsTab training={training} />}
-        {activeTab === "fundae" && <FundaeFlow training={training} />}
+        {activeTab === "fundae" &&
+          (searchParams.get("fv") === "b" ? (
+            <FundaeFlowB training={training} />
+          ) : searchParams.get("fv") === "c" ? (
+            <FundaeFlowC training={training} />
+          ) : (
+            <FundaeFlow training={training} />
+          ))}
 
         <AdminModals
           action={adminAction}
