@@ -62,6 +62,15 @@ export { documents } from "./documents"
 export { notifications } from "./notifications"
 export { commentThreads } from "./comments"
 export {
+  legalEntities,
+  findLegalEntity,
+  legalEntitiesForCompany,
+  legalEntityIdForEmployee,
+  legalEntityForEmployee,
+  legalEntityCurrencyMap,
+  type LegalEntity,
+} from "./legal-entities"
+export {
   jobs,
   candidates,
   type Job,

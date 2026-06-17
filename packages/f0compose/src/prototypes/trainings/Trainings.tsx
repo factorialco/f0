@@ -16,6 +16,7 @@ import { trainingsTopNav } from "./topNav"
 import type { PrototypeMeta } from "../types"
 
 export const meta: PrototypeMeta = {
+  hidden: true,
   slug: "trainings",
   title: "Trainings",
   description:
