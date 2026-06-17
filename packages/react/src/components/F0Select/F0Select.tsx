@@ -835,14 +835,21 @@ const F0SelectComponent = forwardRef(function Select<
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-  // Clear selection cache and local value when filters change
+  // Clear selection cache and local value when filters change.
+  // `preserveSelectionOnDatasetChange` keeps MANUAL selections across the
+  // change, but a "select all" is scoped to the query it was made under and is
+  // always dropped (mirrors useSelectable) — so clear the local value too, or
+  // the input badge would keep showing the stale select-all count.
   const previousFiltersRef = useRef(localSource.currentFilters)
   useEffect(() => {
     const prev = JSON.stringify(previousFiltersRef.current)
     const curr = JSON.stringify(localSource.currentFilters)
     if (prev !== curr) {
       previousFiltersRef.current = localSource.currentFilters
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+      if (
+        !disableSelectAll &&
+        (!preserveSelectionOnDatasetChange || !!selectedState.allSelected)
+      ) {
         selectedItemsCache.current.clear()
         setLocalValue([])
         hasUserInteracted.current = true
@@ -852,6 +859,7 @@ const F0SelectComponent = forwardRef(function Select<
     localSource.currentFilters,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
+    selectedState.allSelected,
   ])
 
   const collapsible = localSource.grouping?.collapsible ?? false
