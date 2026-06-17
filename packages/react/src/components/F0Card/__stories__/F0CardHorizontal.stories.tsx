@@ -5,6 +5,7 @@ import { fn } from "storybook/test"
 
 import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
 
+import { F0Card } from "../F0Card"
 import { F0CardHorizontal } from "../F0CardHorizontal"
 
 // Story handlers alert which control fired (on top of the Actions-panel spy),
@@ -16,20 +17,11 @@ const meta: Meta<typeof F0CardHorizontal> = {
   title: "Card Horizontal",
   parameters: {
     docs: {
-      description: {
-        component: [
-          "`F0CardHorizontal` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
-          "Use it for list rows, inline confirmations and dense layouts where a full `F0Card` is too heavy — e.g. a settings toggle row, a pending-approval item, or a selectable entity.",
-          "Actions stay inline at every width by default. Set <code>stackAt</code> to collapse them onto their own line below a container breakpoint — secondary buttons fold into a left ⋯ menu while the primary stays pinned. For an approve/reject row, use the icon-only <code>confirmAction</code> / <code>rejectAction</code> variant. The avatar renders at a fixed size and accepts any avatar type in the system.",
-          "A row is either driven by its actions <em>or</em> by a whole-row click target (<code>link</code> / <code>onClick</code>) — not both. Pass <code>link</code>/<code>onClick</code> for entry-point cards whose entire surface is the action, and leave them unset for rows that act through their buttons.",
-        ]
-          .map((line) => `<p>${line}</p>`)
-          .join("\n"),
-      },
+      // Prose lives in F0CardHorizontal.mdx (autodocs disabled below).
       story: { inline: false, height: "160px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   // Explicit argTypes: docgen can't infer props through the
   // withDataTestId(withSkeleton(...)) wrapper, so we declare the controls here.
   argTypes: {
@@ -443,4 +435,68 @@ export const AvatarTypes: Story = {
       </div>
     ),
   ],
+}
+
+const peopleRows = [
+  { firstName: "Jane", lastName: "Cooper", role: "Product designer" },
+  { firstName: "Cody", lastName: "Fisher", role: "Engineering manager" },
+  { firstName: "Esther", lastName: "Howard", role: "Sales lead" },
+]
+
+/**
+ * Do/don't visual (docs only, hidden from the sidebar): a dense, scannable list of
+ * `F0CardHorizontal` rows — the "do" example for choosing it over `F0Card`.
+ */
+export const ListOfRows: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    noMetaLayout: true,
+    docs: { story: { inline: false, height: "220px" } },
+  },
+  render: () => (
+    <div className="mx-auto flex w-[560px] flex-col gap-2">
+      {peopleRows.map((p) => (
+        <F0CardHorizontal
+          key={p.lastName}
+          avatar={{
+            type: "person",
+            firstName: p.firstName,
+            lastName: p.lastName,
+          }}
+          title={`${p.firstName} ${p.lastName}`}
+          description={p.role}
+          primaryAction={{ label: "Open", onClick: fn() }}
+        />
+      ))}
+    </div>
+  ),
+}
+
+/**
+ * Do/don't visual (docs only, hidden from the sidebar): `F0Card` forced into a
+ * single-row list — tall and hard to scan. The "don't" example.
+ */
+export const CardsAsRows: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    noMetaLayout: true,
+    docs: { story: { inline: false, height: "420px" } },
+  },
+  render: () => (
+    <div className="mx-auto flex w-[560px] flex-col gap-2">
+      {peopleRows.map((p) => (
+        <F0Card
+          key={p.lastName}
+          avatar={{
+            type: "person",
+            firstName: p.firstName,
+            lastName: p.lastName,
+          }}
+          title={`${p.firstName} ${p.lastName}`}
+          description={p.role}
+          primaryAction={{ label: "Open", onClick: fn() }}
+        />
+      ))}
+    </div>
+  ),
 }
