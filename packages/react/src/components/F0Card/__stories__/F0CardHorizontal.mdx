@@ -8,7 +8,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 A horizontal card for items shown as a **vertical stack of standalone cards** — an
 optional avatar, a title and an optional description on the left, actions on the
-right. Each item keeps its own surface and spacing (it is not a table row or a
+right. Each item keeps its own surface and spacing (it is not a table or a
 divided list); for a vertical, content-rich card with an image, metadata or
 selection, use `F0Card`.
 
@@ -108,7 +108,7 @@ than a couple of metadata facts, or a grid/tile layout.
       </tr>
       <tr>
         <td>
-          The item carries rich metadata — multiple property rows, tags, a progress
+          The item carries rich metadata — multiple property fields, tags, a progress
           bar
         </td>
         <td>
@@ -156,12 +156,12 @@ than a couple of metadata facts, or a grid/tile layout.
 <DoDonts
   do={{
     description: "Use F0CardHorizontal for a dense, scannable list.",
-    children: <Canvas of={Stories.ListOfRows} sourceState="none" />,
+    children: <Canvas of={Stories.HorizontalCardStack} sourceState="none" />,
   }}
   dont={{
     description:
       "Don't stack F0Card to fake a list of horizontal cards — it wastes vertical space and weakens scanning.",
-    children: <Canvas of={Stories.CardsAsRows} sourceState="none" />,
+    children: <Canvas of={Stories.VerticalCardStack} sourceState="none" />,
   }}
 />
 
@@ -203,7 +203,7 @@ state with `inactive`.
 
 An entry-point card whose entire surface opens the destination — no action buttons.
 
-<Canvas of={Stories.ClickableRow} />
+<Canvas of={Stories.ClickableCard} />
 
 **Responsive stacking**
 

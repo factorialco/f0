@@ -45,7 +45,7 @@ const meta: Meta<typeof F0CardHorizontal> = {
     inactive: {
       control: "boolean",
       description:
-        "Strikes through and dims the title/description (e.g. a voided or closed row). Purely presentational.",
+        "Strikes through and dims the title/description (e.g. a voided or closed card). Purely presentational.",
     },
     fullHeight: {
       control: "boolean",
@@ -54,12 +54,12 @@ const meta: Meta<typeof F0CardHorizontal> = {
     link: {
       control: "text",
       description:
-        "Opt-in: makes the whole row a link to this href — adds pointer + hover/focus affordance and a full-row overlay link. Mutually exclusive with action buttons.",
+        "Opt-in: makes the whole card a link to this href — adds pointer + hover/focus affordance and a full-card overlay link. Mutually exclusive with action buttons.",
     },
     disableOverlayLink: {
       control: "boolean",
       description:
-        "Disables the full-row overlay link (used with `link`) so a parent can manage drag-and-drop while still allowing click navigation via `onClick`.",
+        "Disables the full-card overlay link (used with `link`) so a parent can manage drag-and-drop while still allowing click navigation via `onClick`.",
     },
     // Function-bearing props: disable the control so it doesn't dump the
     // serialized mock fn() source. They still appear in the args table.
@@ -92,12 +92,12 @@ const meta: Meta<typeof F0CardHorizontal> = {
     },
     alert: {
       control: false,
-      description: "Alert banner displayed above the row.",
+      description: "Alert banner displayed above the card.",
     },
     onClick: {
       control: false,
       description:
-        "Opt-in: called when the whole row is clicked — adds pointer + hover/focus affordance. Mutually exclusive with action buttons.",
+        "Opt-in: called when the whole card is clicked — adds pointer + hover/focus affordance. Mutually exclusive with action buttons.",
     },
   },
   decorators: [
@@ -139,7 +139,7 @@ export const Default: Story = {
  * A single CTA that shouldn't carry full primary weight: pass it as the
  * `primaryAction` with `variant: "outline"` to render an outline button. It
  * stays pinned at the trailing edge and never collapses into the "⋯" menu, even
- * in a narrow row — unlike a lone `secondaryActions` entry, which can shed.
+ * in a narrow card — unlike a lone `secondaryActions` entry, which can shed.
  */
 export const OutlinePrimaryAction: Story = {
   args: {
@@ -153,23 +153,23 @@ export const OutlinePrimaryAction: Story = {
 }
 
 /**
- * Opt-in whole-row click target: pass `onClick` (or `link`) and the entire row
+ * Opt-in whole-card click target: pass `onClick` (or `link`) and the entire card
  * becomes clickable — pointer cursor plus a hover/focus affordance. Use it for
- * entry-point cards whose whole surface is the action. Such a row carries no
- * action buttons: a row is driven by its buttons *or* by a row click, never both.
+ * entry-point cards whose whole surface is the action. Such a card carries no
+ * action buttons: a card is driven by its buttons *or* by a whole-card click, never both.
  */
-export const ClickableRow: Story = {
+export const ClickableCard: Story = {
   args: {
     avatar: { type: "module", module: "goals" },
     title: "Company goals",
-    description: "Click anywhere on the row to open",
-    onClick: clickAlert("Row"),
+    description: "Click anywhere on the card to open",
+    onClick: clickAlert("Card"),
   },
 }
 
 /**
  * Confirm/reject variant: icon-only ✗ (reject) + ✓ (confirm) buttons instead of
- * the standard actions. Useful for inline approve/reject rows.
+ * the standard actions. Useful for inline approve/reject decisions.
  */
 export const ConfirmReject: Story = {
   args: {
@@ -188,7 +188,7 @@ export const ConfirmReject: Story = {
 }
 
 /**
- * Resolved state of a confirm/reject row: once a decision is made, pass `status`
+ * Resolved state of a confirm/reject card: once a decision is made, pass `status`
  * a coloured icon (`{ icon, variant, label }`, the `label` keeps it accessible)
  * to swap the buttons for the outcome. The accepted/rejected → positive/critical
  * mapping lives with the caller (here in the story).
@@ -292,7 +292,7 @@ export const WithAvatar: Story = {
 }
 
 /**
- * The title and description wrap when long, so the row grows to fit. The avatar
+ * The title and description wrap when long, so the card grows to fit. The avatar
  * and the trailing actions stay pinned to the top (rather than drifting to the
  * vertical centre), so both keep aligning with the title's first line. Long
  * unbroken strings — URLs, ids — break instead of overrunning the actions.
@@ -437,17 +437,17 @@ export const AvatarTypes: Story = {
   ],
 }
 
-const peopleRows = [
+const people = [
   { firstName: "Jane", lastName: "Cooper", role: "Product designer" },
   { firstName: "Cody", lastName: "Fisher", role: "Engineering manager" },
   { firstName: "Esther", lastName: "Howard", role: "Sales lead" },
 ]
 
 /**
- * Do/don't visual (docs only, hidden from the sidebar): a dense, scannable list of
- * `F0CardHorizontal` rows — the "do" example for choosing it over `F0Card`.
+ * Do/don't visual (docs only, hidden from the sidebar): a dense, scannable stack of
+ * `F0CardHorizontal` cards — the "do" example for choosing it over `F0Card`.
  */
-export const ListOfRows: Story = {
+export const HorizontalCardStack: Story = {
   tags: ["no-sidebar"],
   parameters: {
     noMetaLayout: true,
@@ -455,7 +455,7 @@ export const ListOfRows: Story = {
   },
   render: () => (
     <div className="mx-auto flex w-[560px] flex-col gap-2">
-      {peopleRows.map((p) => (
+      {people.map((p) => (
         <F0CardHorizontal
           key={p.lastName}
           avatar={{
@@ -473,10 +473,10 @@ export const ListOfRows: Story = {
 }
 
 /**
- * Do/don't visual (docs only, hidden from the sidebar): `F0Card` forced into a
- * single-row list — tall and hard to scan. The "don't" example.
+ * Do/don't visual (docs only, hidden from the sidebar): `F0Card` (vertical) stacked
+ * as if it were a list of cards — tall and hard to scan. The "don't" example.
  */
-export const CardsAsRows: Story = {
+export const VerticalCardStack: Story = {
   tags: ["no-sidebar"],
   parameters: {
     noMetaLayout: true,
@@ -484,7 +484,7 @@ export const CardsAsRows: Story = {
   },
   render: () => (
     <div className="mx-auto flex w-[560px] flex-col gap-2">
-      {peopleRows.map((p) => (
+      {people.map((p) => (
         <F0Card
           key={p.lastName}
           avatar={{
