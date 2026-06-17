@@ -31,19 +31,22 @@ describe("ButtonGroup — canOverflow", () => {
       screen.queryByRole("button", { name: "Toggle dropdown menu" })
     ).not.toBeInTheDocument()
 
-    // The hidden measurement copy is skipped: only the 3 real buttons exist.
+    // The hidden width-measurement copy is skipped entirely: no aria-hidden
+    // duplicate buttons, just the 3 real ones.
+    expect(container.querySelector('[aria-hidden="true"] button')).toBeNull()
     expect(container.querySelectorAll("button")).toHaveLength(3)
   })
 
-  it("allows secondaries to shed into the ⋯ menu by default (canOverflow true)", () => {
-    // Contrast with the case above: by default the group can overflow, so it
-    // renders the "⋯" trigger (in jsdom, where widths measure 0, the secondaries
-    // shed into it). With canOverflow={false} that trigger never appears.
-    render(<ButtonGroup secondaryActions={secondaries} />)
+  it("renders the hidden width-measurement copy by default (canOverflow true)", () => {
+    // The direct counterpart of the code change (`{canOverflow && <copy>}`): by
+    // default the group keeps the hidden aria-hidden duplicate it measures to
+    // decide what sheds. Deterministic — it doesn't depend on any width being
+    // measured, unlike asserting that something actually shed into the menu.
+    const { container } = render(<ButtonGroup secondaryActions={secondaries} />)
 
     expect(
-      screen.getByRole("button", { name: "Toggle dropdown menu" })
-    ).toBeInTheDocument()
+      container.querySelector('[aria-hidden="true"] button')
+    ).not.toBeNull()
   })
 
   it("still surfaces otherActions in the ⋯ menu when canOverflow is false", () => {
