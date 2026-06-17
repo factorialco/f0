@@ -66,17 +66,21 @@ export const cardRowLeadingAlignClassName: Record<CardRowStackAt, string> = {
  * top of its content, so a shrink-to-fit container would always shed the tail
  * into the menu — it needs a bound *wider* than its content. Inline (at/above
  * the breakpoint) we hand it the remaining row space via `flex-1`, with its own
- * `justify-end` keeping the buttons at the trailing edge. Once stacked we leave
- * it `auto`: the flex column stretches it to full width, and crucially that lets
- * the `-mx-4` full-bleed footer extend symmetrically — an explicit `w-full`
- * would clip the right edge, since a negative right margin can't widen a
- * fixed-width box. `never` is always inline.
+ * `justify-end` keeping the buttons at the trailing edge. We deliberately omit
+ * `min-w-0` so the wrapper keeps its min-content floor: a long leading title or
+ * description can't squeeze it to zero width (which would let the trailing
+ * button overrun the text and spill past the card edge). The row's `gap` then
+ * guarantees a little breathing room between the text and the buttons. Once
+ * stacked we leave it `auto`: the flex column stretches it to full width, and
+ * crucially that lets the `-mx-4` full-bleed footer extend symmetrically — an
+ * explicit `w-full` would clip the right edge, since a negative right margin
+ * can't widen a fixed-width box. `never` is always inline.
  */
 const actionsWidthClassName: Record<CardRowStackAt, string> = {
-  sm: "@xs:min-w-0 @xs:flex-1",
-  md: "@md:min-w-0 @md:flex-1",
-  lg: "@lg:min-w-0 @lg:flex-1",
-  never: "min-w-0 flex-1",
+  sm: "@xs:flex-1",
+  md: "@md:flex-1",
+  lg: "@lg:flex-1",
+  never: "flex-1",
 }
 
 // Visibility of the icon-only inline cluster — shown at/above the breakpoint
