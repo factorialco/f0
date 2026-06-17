@@ -15,6 +15,23 @@ they expect a clickable preview, not just code.
 
 Most people using f0compose are **designers and PMs with zero coding background**. Treat this as the default. Your job is to make them feel like they're using a no-code tool — they describe what they want, you do the rest. Never make them think about terminals, branches, install commands, ports, TypeScript errors, or git.
 
+### 🚧 Isolation rule (DO NOT skip — this broke other sessions once)
+
+Each project must stay isolated. Switching branches in the shared base folder
+and reusing the same dev-server port once clobbered the user's other open
+sessions and overlapped the preview. NEVER again:
+
+- **Work inside the project's OWN folder** (worktree/copy), e.g.
+  `~/code/f0-<project>/packages/f0compose`. **NEVER** work in, `git checkout` in,
+  or run `pnpm dev` in the shared base `~/code/f0` — it's the untouchable base
+  other sessions branch from.
+- **Each project uses its OWN port** for dev server and Vercel. Do NOT assume the
+  shared `5174` — use this project's `launch.json` port or a free dedicated one,
+  and make sure it doesn't collide with another running session.
+- **Catalog cards**: each deploy shows ONLY its own cards. Hide sibling
+  prototypes with the `hidden` flag in their `meta`. **NEVER delete siblings**
+  (deleting them breaks `topNav` → 404 tabs): restore + `hidden`, never delete.
+
 ### Default assumptions about the user
 
 - They don't know what `pnpm`, `git`, `tsc`, `Vite`, or "fixtures" mean. Don't use those words unless they use them first.
@@ -26,11 +43,11 @@ Most people using f0compose are **designers and PMs with zero coding background*
 
 When the user's first message implies they want to prototype something, run these checks **silently and in parallel** before asking anything:
 
-1. **Are we in `packages/f0compose/`?** Use the working directory the agent runs in. If not, `cd` there.
-2. **Is the dev server up on 5174?** `lsof -i :5174 | grep LISTEN`. If not, start it: `pnpm dev` in the background. Don't ask permission — they want to see results, not approve commands.
+1. **Are we in THIS project's `packages/f0compose/`?** Use the working directory the agent runs in — it must be the project's own folder (`~/code/f0-<project>/...`), NOT the shared base `~/code/f0`. If you're in the base, stop and relocate.
+2. **Is this project's dev server up?** Check its own port (from `launch.json`, e.g. `lsof -i :<port> | grep LISTEN`) — do NOT assume the shared `5174`. If not, start it: `pnpm dev` in the background on its own port. Don't ask permission — they want to see results, not approve commands.
 3. **Are dependencies installed?** Check `node_modules/.modules.yaml` exists. If missing, run `pnpm install` in the background and tell them: *"Estoy preparando el entorno, dame 30 segundos…"*
 4. **Are the skills synced?** Run `pnpm skills:sync` quietly — silently keeps `.claude/skills/` and `.opencode/skills/` fresh from `vendor/skills/`. (Already wired into `predev`, so usually a no-op.)
-5. **Are we on the right git branch?** `git branch --show-current`. If they're on `main`, ask once: *"¿Quieres que cambie a la rama `feat/f0compose` para empezar?"* and do `git checkout feat/f0compose && git pull` if yes.
+5. **Are we on this project's working branch?** `git branch --show-current`. Work on this project's own branch **inside its own folder**. NEVER `git checkout` to switch branches in the shared base `~/code/f0` (that clobbers other sessions). If unsaved changes exist, preserve them (commit/stash) — never reset or overwrite local work.
 
 After these checks, proceed to Step 0 (discovery interview).
 
