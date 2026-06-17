@@ -1,16 +1,22 @@
-import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
 import { ChevronDown, ChevronUp } from "@/icons/app"
 
+/**
+ * One prev/next target. Carry a `url` for full-page detail navigation
+ * (renders a link) OR an `onClick` for id-based navigation that swaps content
+ * in place — a mounted sidepanel/dialog that never changes the URL (renders a
+ * button). `onClick` wins when both are present.
+ */
+export type NavigationTarget = {
+  title: string
+  url?: string
+  onClick?: () => void
+}
+
 export type NavigationProps = {
-  previous?: {
-    url: string
-    title: string
-  }
-  next?: {
-    url: string
-    title: string
-  }
+  previous?: NavigationTarget
+  next?: NavigationTarget
   counter?: {
     current: number
     total: number
@@ -19,21 +25,40 @@ export type NavigationProps = {
 
 function PageNavigationLink({
   icon,
-  href,
-  label,
-  disabled,
+  target,
+  fallbackLabel,
 }: {
   icon: IconType
-  href: string
-  label: string
-  disabled?: boolean
+  target: NavigationTarget | undefined
+  fallbackLabel: string
 }) {
+  // No target → no previous/next element → disabled, no affordance.
+  const disabled = !target
+  const label = target?.title || fallbackLabel
+  // Prefer the id-based callback over a URL when both are provided.
+  const onClick = target?.onClick
+  const href = onClick ? undefined : target?.url
+
+  // `ButtonInternal` chooses anchor vs button by whether the `href` *key* is
+  // present. An enabled callback target renders as a button (so onClick
+  // fires); url and disabled targets stay on the link path — the disabled
+  // link renders a <span aria-disabled> that picks up the shared disabled
+  // styling (opacity + pointer-events-none). `type: "button"` keeps the
+  // callback arrow from submitting a surrounding form (e.g. a dialog body).
+  const elementProps = onClick
+    ? { onClick, type: "button" as const }
+    : { href: href ?? "" }
+
   return (
-    <F0Button
-      href={href}
-      title={label}
+    <ButtonInternal
+      {...elementProps}
+      title={disabled ? undefined : label}
       aria-label={label}
       disabled={disabled}
+      // A disabled arrow means "no previous/next element" — a tooltip (auto
+      // or native title) on it is just noise.
+      noAutoTooltip={disabled}
+      noTitle={disabled}
       size="sm"
       variant="outline"
       label={label}
@@ -54,15 +79,13 @@ export function PageNavigation({ previous, next, counter }: NavigationProps) {
       <div className="flex items-center gap-2">
         <PageNavigationLink
           icon={ChevronUp}
-          label={previous?.title || "Previous"}
-          href={previous?.url || ""}
-          disabled={!previous}
+          target={previous}
+          fallbackLabel="Previous"
         />
         <PageNavigationLink
           icon={ChevronDown}
-          label={next?.title || "Next"}
-          href={next?.url || ""}
-          disabled={!next}
+          target={next}
+          fallbackLabel="Next"
         />
       </div>
     </div>

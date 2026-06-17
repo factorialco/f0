@@ -10,6 +10,7 @@ export * from "../kits/Charts/exports"
 export * from "../kits/F0DataChart"
 export * from "./F0BigNumber"
 export * from "./F0ActionBar"
+export * from "./F0AudioPlayer"
 export * from "./CardSelectable"
 export * from "./F0Accordion"
 export * from "./OneChip"
@@ -101,6 +102,9 @@ export * from "../sds/surveys/exports"
 export * from "../sds/UpsellingKit/exports"
 // AI Components
 export * from "../ai/exports"
+// RichText Components
+export * from "./F0FileItem"
+export * from "./RichText/exports"
 // Analytics
 /**
  * @deprecated F0AnalyticsDashboard has moved to @/patterns/F0AnalyticsDashboard. Import from there instead.

@@ -407,7 +407,8 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
 
   const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
     useAsyncDefaultValues<Partial<z.infer<TSchema>>>(
-      def.asyncDefaultValues ?? def.defaultValues
+      def.asyncDefaultValues ?? def.defaultValuesFn ?? def.defaultValues,
+      def.defaultValuesParamsSchema
     )
 
   const adaptedOnSubmit = useCallback(
@@ -457,7 +458,8 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
 
   const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
     useAsyncDefaultValues<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>(
-      def.asyncDefaultValues ?? def.defaultValues
+      def.asyncDefaultValues ?? def.defaultValuesFn ?? def.defaultValues,
+      def.defaultValuesParamsSchema
     )
 
   const fullDataRef = useRef<Record<string, unknown>>(

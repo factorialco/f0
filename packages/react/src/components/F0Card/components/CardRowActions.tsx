@@ -147,12 +147,9 @@ interface CardRowActionsProps {
  * maps straight through; `ButtonGroup` owns the row layout, the width-driven
  * overflow into the "⋯" menu, and pinning the primary at the trailing edge.
  *
- * The card adds two things on top:
- * - The wrapper stops click propagation so an action never triggers the row's
- *   own `onClick` / overlay-link navigation.
- * - `stackAt` drops the cluster onto its own full-width line (with a footer
- *   hairline) below a container breakpoint; the breakpoint mapping is shared
- *   with the row root via {@link cardRowClassName}.
+ * On top, `stackAt` drops the cluster onto its own full-width line (with a footer
+ * hairline) below a container breakpoint; the breakpoint mapping is shared with
+ * the row root via {@link cardRowClassName}.
  *
  * Pass `confirmAction` / `rejectAction` for the confirm/reject variant — reject
  * (✗, outline) then confirm (✓, solid primary), which replaces the standard
@@ -241,6 +238,9 @@ export function CardRowActions({
           secondaryActions={reject ? [reject] : undefined}
           size={size}
           gap={GAP}
+          // The confirm/reject pair must always stay inline — the reject button
+          // must never shed into the "⋯" menu.
+          canOverflow={false}
         />
       )
     }
@@ -307,12 +307,15 @@ export function CardRowActions({
         }
       : undefined
 
-  const primary: ButtonGroupButton | undefined = primaryAction
+  const primary:
+    | (ButtonGroupButton & { variant?: "default" | "outline" })
+    | undefined = primaryAction
     ? {
         id: "primary",
         label: primaryAction.label,
         icon: primaryAction.icon,
         onClick: primaryAction.onClick,
+        variant: primaryAction.variant,
       }
     : undefined
 

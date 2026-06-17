@@ -3088,6 +3088,87 @@ export const WithDefaultValuesParamsSchema: Story = {
 }
 
 /**
+ * Per-section form definition with `defaultValuesParamsSchema`.
+ *
+ * Same as `WithDefaultValuesParamsSchema` but with a per-section schema:
+ * `defaultValues` is a function receiving typed params and returning values
+ * keyed by section ID. At mount time it's resolved with empty params (`{}`),
+ * showing loading indicators until the values arrive.
+ */
+export const WithDefaultValuesParamsSchemaPerSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField.text({
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField.text({
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField.email({
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+      }),
+    }
+
+    const employees: Record<
+      string,
+      { firstName: string; lastName: string; email: string }
+    > = {
+      "emp-1": {
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "jane.doe@factorial.co",
+      },
+      "emp-2": {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john.smith@factorial.co",
+      },
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "edit-employee-per-section",
+      schema,
+      sections: {
+        personal: { title: "Personal Information" },
+        contact: { title: "Contact Details" },
+      },
+      defaultValuesParamsSchema: z.object({
+        employeeId: z.string().describe("The ID of the employee to edit"),
+      }),
+      defaultValues: async ({ employeeId }) => {
+        await sleep(1500)
+        // At mount time params is {} so employeeId is undefined — fall back
+        const employee = employeeId ? employees[employeeId] : employees["emp-1"]
+        return {
+          personal: {
+            firstName: employee?.firstName ?? "",
+            lastName: employee?.lastName ?? "",
+          },
+          contact: { email: employee?.email ?? "" },
+        }
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Demonstrates using `formRef.current.actionBar.wiggle({ errorHighlight })`
  * to programmatically trigger the action bar wiggle animation from outside the form.
  *

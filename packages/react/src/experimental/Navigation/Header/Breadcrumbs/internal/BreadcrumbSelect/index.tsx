@@ -25,9 +25,17 @@ export function BreadcrumbSelect<T extends string, R = unknown>({
     props.onOpenChange?.(open)
   }
 
-  const [selectedLabel, setSelectedLabel] = useState(
-    props.placeholder || props.label
-  )
+  // The trigger label follows the `label`/`placeholder` props until the user
+  // picks an option (then the option's label wins, see
+  // handleChangeSelectedOption) — and re-follows them whenever they change,
+  // e.g. a detail page updating the crumb to the newly navigated-to record.
+  const externalLabel = props.placeholder || props.label
+  const [selectedLabel, setSelectedLabel] = useState(externalLabel)
+  const [prevExternalLabel, setPrevExternalLabel] = useState(externalLabel)
+  if (prevExternalLabel !== externalLabel) {
+    setPrevExternalLabel(externalLabel)
+    setSelectedLabel(externalLabel)
+  }
 
   const handleChange = (
     value: T,

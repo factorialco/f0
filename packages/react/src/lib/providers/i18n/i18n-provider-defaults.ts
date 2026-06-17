@@ -35,6 +35,15 @@ export const defaultTranslations = {
   link: {
     opensInNewTab: "opens in new tab",
   },
+  audioPlayer: {
+    label: "Audio player",
+    play: "Play",
+    pause: "Pause",
+    seek: "Seek",
+    options: "Recording options",
+    playbackSpeed: "Playback speed",
+    position: "{{current}} of {{total}}",
+  },
   actions: {
     add: "Add",
     edit: "Edit",
@@ -610,7 +619,7 @@ export const defaultTranslations = {
       blocks: "Blocks",
     },
     ai: {
-      enhanceButtonLabel: "Enhance",
+      enhanceButtonLabel: "Generate",
       loadingEnhanceLabel: "Loading...",
       defaultError: "An error occurred while loading",
       closeErrorButtonLabel: "Continue editing",

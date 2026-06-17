@@ -4,6 +4,7 @@ import { forwardRef, PropsWithChildren, ReactNode } from "react"
 import { F0AvatarModule } from "@/components/avatars/F0AvatarModule"
 import { BreadcrumbSelect } from "@/experimental/Navigation/Header"
 import { BreadcrumbSkeleton } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbSkeleton"
+import { getBreadcrumbKey } from "@/experimental/Navigation/Header/Breadcrumbs/getBreadcrumbKey"
 import { BreadcrumbItemType } from "@/experimental/Navigation/Header/Breadcrumbs/types"
 import { Link } from "@/lib/linkHandler"
 import { cn } from "@/lib/utils"
@@ -13,6 +14,7 @@ import {
   BreadcrumbLink as ShadBreadcrumbLink,
 } from "@/ui/breadcrumb"
 
+import { BreadcrumbCollectionSelect } from "./BreadcrumbCollectionSelect"
 import { BreadcrumbSeparator } from "./BreadcrumbSeparator"
 
 interface BreadcrumbItemProps {
@@ -22,13 +24,13 @@ interface BreadcrumbItemProps {
   isFirst?: boolean
 }
 
-type ContentType = "loading" | "select" | "page" | "link"
+type ContentType = "loading" | "select" | "collection-select" | "page" | "link"
 
 const BreadcrumbItem = forwardRef<
   HTMLLIElement,
   PropsWithChildren<BreadcrumbItemProps>
 >(({ item, isLast, isOnly = false, isFirst = false, children }, ref) => (
-  <ShadBreadcrumbItem key={item.id} ref={ref}>
+  <ShadBreadcrumbItem key={getBreadcrumbKey(item)} ref={ref}>
     {!isFirst && <BreadcrumbSeparator />}
     <BreadcrumbContent
       item={item}
@@ -99,6 +101,10 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
             />
           </>
         ),
+      "collection-select": "type" in item &&
+        item.type === "collection-select" && (
+          <BreadcrumbCollectionSelect item={item} />
+        ),
       page: (
         <BreadcrumbPage aria-hidden="true" className="p-0">
           {content}
@@ -116,10 +122,16 @@ const BreadcrumbContent = forwardRef<HTMLDivElement, BreadcrumbItemProps>(
       ),
     }
 
+    // Select crumbs change label on every in-app navigation; animating their
+    // layout visibly stretches the trigger and can leave a residual scale
+    // transform when interrupted, so they opt out of the layout animation.
+    const isSelectType =
+      contentType === "select" || contentType === "collection-select"
+
     return (
       <motion.div
         ref={ref}
-        layout
+        layout={!isSelectType}
         className={cn(isLoading && "max-w-40")}
         transition={{ duration: 0.15 }}
       >

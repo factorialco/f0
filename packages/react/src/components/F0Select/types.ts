@@ -42,6 +42,12 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
   onSearchChange?: (value: string) => void
   searchValue?: string
   onOpenChange?: (open: boolean) => void
+  /**
+   * Called when the user changes the in-dropdown filters (requires a `source`
+   * with filter definitions). Lets consumers keep an external context — e.g.
+   * detail-page navigation — in sync with what the dropdown is showing.
+   */
+  onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void
   searchEmptyMessage?: string
   className?: string
   actions?: Action[]

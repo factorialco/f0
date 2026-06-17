@@ -166,9 +166,14 @@ export const F0AiChatTextArea = ({
   })
   const canRecord = !!onTranscribe && recorder.isSupported
   const handleStartRecording = useCallback(() => {
+    tracking?.onDictationStart?.()
     dictationBaseRef.current = inputValue
     void recorder.start()
-  }, [inputValue, recorder])
+  }, [inputValue, recorder, tracking])
+  const handleCancelRecording = useCallback(() => {
+    tracking?.onDictationCancel?.()
+    recorder.cancel()
+  }, [recorder, tracking])
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
@@ -536,7 +541,7 @@ export const F0AiChatTextArea = ({
                     recordingStream={recorder.stream}
                     onStartRecording={handleStartRecording}
                     onStopRecording={recorder.stop}
-                    onCancelRecording={recorder.cancel}
+                    onCancelRecording={handleCancelRecording}
                   />
                 </motion.div>
               )}

@@ -10,6 +10,7 @@ import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
 import { F0Box } from "@/lib/F0Box"
+import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
@@ -27,7 +28,6 @@ import {
   type JobPostingProfile,
   type RequisitionProfile,
   type PersonProfile,
-  type TranscribeFn,
   type UploadedFile,
   type VacancyProfile,
 } from "@/sds/ai/F0AiChat/types"
@@ -349,21 +349,6 @@ const mockUploadFiles = (files: File[]): Promise<UploadedFile[]> =>
       )
     }, 1000)
   })
-
-// Simulates a streaming STT endpoint: streams the same transcript word by word
-// so the textarea fills live (Wispr Flow feel) without any backend.
-const MOCK_TRANSCRIPT = "How many vacation days do I have left this year?"
-const mockTranscribe: TranscribeFn = async (_audio, { onPartial, signal }) => {
-  const words = MOCK_TRANSCRIPT.split(" ")
-  let acc = ""
-  for (const word of words) {
-    if (signal?.aborted) break
-    await new Promise((r) => setTimeout(r, 140))
-    acc = acc ? `${acc} ${word}` : word
-    onPartial(acc)
-  }
-  return MOCK_TRANSCRIPT
-}
 
 const QuickActions = () => {
   const { sendMessage } = useMockAiChatRuntime()

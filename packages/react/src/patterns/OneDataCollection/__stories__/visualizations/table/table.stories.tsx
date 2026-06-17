@@ -1,4 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
+import { expect, within } from "storybook/test"
 import { useState, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
@@ -45,6 +46,82 @@ export const ReferenceRowsVisualization: Story = {
 
 export const TableFrozenCols: Story = {
   render: () => <ExampleComponent frozenColumns={2} />,
+}
+
+export const TableFrozenColsWithMinWidth: Story = {
+  render: () => {
+    const records = Array.from({ length: 6 }, (_, i) => ({
+      id: i + 1,
+      name: `Person ${i + 1}`,
+      email: `person${i + 1}@example.com`,
+      role: "Engineer",
+      department: "Product",
+      location: "Madrid",
+      manager: "Alice",
+    }))
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+    })
+
+    return (
+      <div style={{ maxWidth: 600 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 2,
+                columns: [
+                  {
+                    id: "name",
+                    label: "Name",
+                    minWidth: 200,
+                    render: (item) => item.name,
+                  },
+                  {
+                    id: "email",
+                    label: "Email",
+                    minWidth: 150,
+                    render: (item) => item.email,
+                  },
+                  { id: "role", label: "Role", render: (item) => item.role },
+                  {
+                    id: "department",
+                    label: "Department",
+                    render: (item) => item.department,
+                  },
+                  {
+                    id: "location",
+                    label: "Location",
+                    render: (item) => item.location,
+                  },
+                  {
+                    id: "manager",
+                    label: "Manager",
+                    render: (item) => item.manager,
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const nameCell = await canvas.findByText("Person 1")
+    const emailCell = await canvas.findByText("person1@example.com")
+    const nameTd = nameCell.closest("td")
+    const emailTd = emailCell.closest("td")
+
+    expect(nameTd && getComputedStyle(nameTd).position).toBe("sticky")
+    expect(emailTd && getComputedStyle(emailTd).position).toBe("sticky")
+    expect(nameTd && getComputedStyle(nameTd).left).toBe("0px")
+    expect(emailTd && getComputedStyle(emailTd).left).toBe("200px")
+  },
 }
 
 export const TableColumnOrderingAndHidden: Story = {
@@ -607,6 +684,48 @@ export const TableWithGroupedHeaders: Story = {
           },
         ]}
       />
+    )
+  },
+}
+
+export const StrikedRowsVisualization: Story = {
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        name: "Alice Johnson",
+        email: "alice@example.com",
+        active: true,
+      },
+      { id: 2, name: "Bob Smith", email: "bob@example.com", active: false },
+      { id: 3, name: "Carol Lee", email: "carol@example.com", active: true },
+      { id: 4, name: "Dan Park", email: "dan@example.com", active: false },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    return (
+      <div style={{ maxWidth: 600 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                referenceRowType: (item) => (item.active ? "none" : "striked"),
+                columns: [
+                  { label: "Name", render: (item) => item.name, id: "name" },
+                  { label: "Email", render: (item) => item.email, id: "email" },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
     )
   },
 }

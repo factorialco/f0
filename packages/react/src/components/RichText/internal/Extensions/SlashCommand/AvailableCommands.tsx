@@ -1,0 +1,290 @@
+import { Editor } from "@tiptap/react"
+
+import { IconType } from "@/components/F0Icon"
+import {
+  CheckDouble,
+  ChevronDown,
+  Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  Image,
+  List,
+  Minus,
+  OlList,
+  Paperclip,
+  Quote,
+  Video,
+} from "@/icons/app"
+import { I18nContextType } from "@/lib/providers/i18n"
+
+import { AIBlockConfig } from "../AIBlock"
+import {
+  DEFAULT_FILE_ACCEPTED_TYPES,
+  FileUploadConfig,
+  insertFileFromFile,
+} from "../FileAttachment"
+import {
+  DEFAULT_ACCEPTED_TYPES,
+  ImageUploadConfig,
+  insertImageFromFile,
+} from "../Image"
+import { parseVideoUrl } from "../VideoEmbed"
+
+// Open a native file picker and hand the chosen file to `onPick`. Shared by
+// the /image and /file commands so the picker glue lives in one place.
+const openFilePicker = (accept: string[], onPick: (file: File) => void) => {
+  const input = document.createElement("input")
+  input.type = "file"
+  input.accept = accept.join(",")
+  input.onchange = () => {
+    const file = input.files?.[0]
+    if (file) {
+      onPick(file)
+    }
+  }
+  input.click()
+}
+
+interface CommandItem {
+  title: string
+  icon?: IconType
+  emoji?: string
+  command: (editor: Editor) => void
+}
+
+interface CommandGroup {
+  title: string
+  commands: CommandItem[]
+}
+
+interface GetGroupedCommandsProps {
+  aiBlockConfig?: AIBlockConfig
+  translations: I18nContextType
+  imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
+}
+
+const getGroupedCommands = ({
+  aiBlockConfig,
+  translations,
+  imageUploadConfig,
+  fileUploadConfig,
+}: GetGroupedCommandsProps): CommandGroup[] => {
+  return [
+    // Only include AI Block group if config is provided
+    ...(aiBlockConfig?.buttons && aiBlockConfig.buttons.length > 0
+      ? [
+          {
+            title: aiBlockConfig.title,
+            commands: [
+              ...aiBlockConfig.buttons.map((button) => ({
+                title: button.label,
+                command: (editor: Editor) => {
+                  editor
+                    .chain()
+                    .focus()
+                    .executeAIAction(button.type, aiBlockConfig)
+                    .run()
+                },
+                icon: button.icon,
+              })),
+            ],
+          },
+        ]
+      : []),
+    {
+      title: translations.richTextEditor.groups.textStyles,
+      commands: [
+        {
+          title: translations.richTextEditor.heading1,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleHeading({ level: 1 })
+              .run()
+          },
+          icon: Heading1,
+        },
+        {
+          title: translations.richTextEditor.heading2,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleHeading({ level: 2 })
+              .run()
+          },
+          icon: Heading2,
+        },
+        {
+          title: translations.richTextEditor.heading3,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleHeading({ level: 3 })
+              .run()
+          },
+          icon: Heading3,
+        },
+      ],
+    },
+    {
+      title: translations.richTextEditor.groups.lists,
+      commands: [
+        {
+          title: translations.richTextEditor.bulletList,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleBulletList()
+              .run()
+          },
+          icon: List,
+        },
+        {
+          title: translations.richTextEditor.orderedList,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleOrderedList()
+              .run()
+          },
+          icon: OlList,
+        },
+        {
+          title: translations.richTextEditor.taskList,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleTaskList()
+              .run()
+          },
+          icon: CheckDouble,
+        },
+      ],
+    },
+    {
+      title: translations.richTextEditor.groups.blocks,
+      commands: [
+        ...(imageUploadConfig
+          ? [
+              {
+                title: "Image",
+                command: (editor: Editor) => {
+                  openFilePicker(DEFAULT_ACCEPTED_TYPES, (file) =>
+                    insertImageFromFile(editor, file, imageUploadConfig)
+                  )
+                },
+                icon: Image,
+              },
+            ]
+          : []),
+        ...(fileUploadConfig
+          ? [
+              {
+                title: translations.richTextEditor.file,
+                command: (editor: Editor) => {
+                  openFilePicker(
+                    fileUploadConfig.acceptedTypes ??
+                      DEFAULT_FILE_ACCEPTED_TYPES,
+                    (file) => insertFileFromFile(editor, file, fileUploadConfig)
+                  )
+                },
+                icon: Paperclip,
+              },
+            ]
+          : []),
+        {
+          title: translations.richTextEditor.video,
+          command: (editor: Editor) => {
+            const url = window.prompt(
+              translations.richTextEditor.videoUrlPrompt
+            )
+            if (url) {
+              const info = parseVideoUrl(url)
+              if (info) {
+                editor.commands.setVideoEmbed({ src: url })
+              } else {
+                window.alert(translations.richTextEditor.videoUrlInvalid)
+              }
+            }
+          },
+          icon: Video,
+        },
+        {
+          title: translations.richTextEditor.details,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .setDetails()
+              .run()
+          },
+          icon: ChevronDown,
+        },
+        {
+          title: translations.richTextEditor.codeBlock,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleCodeBlock()
+              .run()
+          },
+          icon: Code,
+        },
+        {
+          title: translations.richTextEditor.quote,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .toggleBlockquote()
+              .run()
+          },
+          icon: Quote,
+        },
+        {
+          title: translations.richTextEditor.divider,
+          command: (editor) => {
+            const { from, to } = editor.state.selection
+            editor
+              .chain()
+              .focus()
+              .setTextSelection({ from, to })
+              .setHorizontalRule()
+              .run()
+          },
+          icon: Minus,
+        },
+      ],
+    },
+  ]
+}
+
+export { getGroupedCommands }
+export type { AIBlockConfig, CommandGroup, CommandItem }
