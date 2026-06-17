@@ -132,7 +132,8 @@ const BREAKPOINT_PX = { sm: 640, md: 768, "container-md": 448 } as const
 // Fixed gap between items, in pixels. The visible spacing is rendered with the
 // `gap-md` Tailwind class; this constant feeds the width-measured overflow math
 // (which needs a number) and MUST stay in sync with the `gap-md` token (8px).
-const BUTTON_GROUP_GAP_PX = 8
+// Exported so a unit test can assert it against the token (see ButtonGroup.test).
+export const BUTTON_GROUP_GAP_PX = 8
 
 const isInlineSeparator = (
   item: ButtonGroupSecondaryItem
