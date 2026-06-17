@@ -1073,4 +1073,109 @@ describe("useSelectable", () => {
       })
     })
   })
+
+  // `preserveSelectionOnDatasetChange` governs MANUAL selection only. A
+  // "select all" is scoped to the query it was made under, so it always clears
+  // on a filter/search/sort change — i.e. it behaves as if the prop were false,
+  // regardless of the prop value. This prevents a filter-scoped select-all from
+  // ballooning or reporting a stale count when the dataset later changes.
+  describe("select-all is not preserved across dataset changes", () => {
+    const makeData = (ids: number[]): Data<TestRecord> => {
+      const records = ids.map((id) => ({
+        id,
+        name: `Item ${id}`,
+        group: "all",
+        [GROUP_ID_SYMBOL]: undefined,
+      }))
+      return {
+        type: "flat",
+        records,
+        groups: [
+          { key: "all", label: "All", records, itemCount: records.length },
+        ],
+      }
+    }
+
+    for (const preserve of [true, false]) {
+      it(`clears a "select all" when the filter changes (preserve=${preserve})`, async () => {
+        const sourceA = {
+          ...mockSource,
+          currentFilters: { department: ["A"] },
+        } as unknown as DataSource<TestRecord, never, never, never>
+
+        const { result, rerender } = renderHook(
+          ({ source }) =>
+            useSelectable({
+              data: makeData([1, 2]),
+              paginationInfo: null,
+              source,
+              onSelectItems: vi.fn(),
+              selectionMode: "multi",
+              allPagesSelection: true,
+              preserveSelectionOnDatasetChange: preserve,
+            }),
+          { initialProps: { source: sourceA } }
+        )
+
+        act(() => {
+          result.current.handleSelectAllItems(true)
+        })
+        await waitFor(() =>
+          expect(result.current.selectionStatus.allChecked).toBe(true)
+        )
+
+        // Change the filter — the select-all is scoped to filter A and must clear.
+        rerender({
+          source: {
+            ...sourceA,
+            currentFilters: { department: ["B"] },
+          } as unknown as DataSource<TestRecord, never, never, never>,
+        })
+
+        await waitFor(() => {
+          expect(result.current.selectedItems.size).toBe(0)
+          expect(result.current.selectionStatus.selectedCount).toBe(0)
+          expect(result.current.selectionStatus.allChecked).toBe(false)
+        })
+      })
+    }
+
+    it("still preserves MANUAL selections across a filter change when preserve=true", async () => {
+      const sourceA = {
+        ...mockSource,
+        currentFilters: { department: ["A"] },
+      } as unknown as DataSource<TestRecord, never, never, never>
+
+      const { result, rerender } = renderHook(
+        ({ source }) =>
+          useSelectable({
+            data: makeData([1, 2, 3]),
+            paginationInfo: null,
+            source,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+            allPagesSelection: true,
+            preserveSelectionOnDatasetChange: true,
+          }),
+        { initialProps: { source: sourceA } }
+      )
+
+      // Manual selection (not select-all): allSelectedCheck stays false.
+      act(() => {
+        result.current.handleSelectItemChange(1, true)
+        result.current.handleSelectItemChange(2, true)
+      })
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(2))
+
+      rerender({
+        source: {
+          ...sourceA,
+          currentFilters: { department: ["B"] },
+        } as unknown as DataSource<TestRecord, never, never, never>,
+      })
+
+      // Manual selections survive (the prop governs manual selection).
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(2))
+    })
+  })
 })

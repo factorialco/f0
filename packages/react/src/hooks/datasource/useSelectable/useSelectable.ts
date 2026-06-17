@@ -770,7 +770,14 @@ export function useSelectable<
       // When preserveSelectionOnDatasetChange is true, never clear on dataset
       // changes — used by selectors where search/filter is for finding items
       // to add to an existing selection.
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+      // `preserveSelectionOnDatasetChange` only governs MANUAL selection. A
+      // "select all" is scoped to the query it was made under, so it always
+      // clears on a dataset change (i.e. behaves as if the prop were false),
+      // regardless of the prop value.
+      if (
+        !disableSelectAll &&
+        (!preserveSelectionOnDatasetChange || allSelectedCheck)
+      ) {
         // Mark that we're clearing due to a dataset-identity change to prevent
         // the data-sync effect from restoring selections.
         justClearedByDatasetChange.current = true
@@ -787,6 +794,7 @@ export function useSelectable<
     clearSelectedItems,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
+    allSelectedCheck,
   ])
 
   // Clear selections when page changes, unless the user has triggered
