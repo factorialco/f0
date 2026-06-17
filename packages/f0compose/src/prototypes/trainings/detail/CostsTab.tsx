@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import {
   F0AvatarIcon,
   F0Button,
@@ -440,7 +440,7 @@ export function CostsTab({ training, klass }: Props) {
         />
         <CostBreakdownCard
           emoji="📝"
-          title="Salary opportunity cost"
+          title="Gross salary cost"
           description="Payroll cost of participants and instructors during training hours."
           value={salaryCost}
           disabled={costsByLegalEntityEnabled}
@@ -460,65 +460,15 @@ export function CostsTab({ training, klass }: Props) {
       </F0Box>
 
       {calculatorOpen && (
-        <F0Box
-          display="flex"
-          flexDirection="column"
-          gap="lg"
-          padding="lg"
-          border="default"
-          borderColor="secondary"
-          borderRadius="md"
-          background="primary"
-        >
-          <F0Heading
-            as="h4"
-            variant="heading"
-            content="Salary cost calculator"
-          />
-          <F0Text
-            variant="description"
-            content={`Estimate based on average payroll cost per hour × ${participants} participants × training duration (${training.totalDuration}h).`}
-          />
-          <F0Box display="grid" columns="3" gap="lg">
-            <F0Box display="flex" flexDirection="column" gap="xs">
-              <F0Text variant="label" content="Avg. €/h" />
-              <F0Heading as="h4" variant="heading" content="28 €" />
-            </F0Box>
-            <F0Box display="flex" flexDirection="column" gap="xs">
-              <F0Text variant="label" content="Participants" />
-              <F0Heading
-                as="h4"
-                variant="heading"
-                content={String(participants)}
-              />
-            </F0Box>
-            <F0Box display="flex" flexDirection="column" gap="xs">
-              <F0Text variant="label" content="Estimated" />
-              <F0Heading
-                as="h4"
-                variant="heading"
-                content={formatMoney(
-                  28 * participants * training.totalDuration,
-                  currency
-                )}
-              />
-            </F0Box>
-          </F0Box>
-          <F0Box display="flex" gap="md">
-            <F0Button
-              label="Apply"
-              onClick={() => {
-                setSalaryCost(28 * participants * training.totalDuration)
-                setCalculatorOpen(false)
-              }}
-            />
-            <F0Button
-              label="Cancel"
-              variant="outline"
-              onClick={() => setCalculatorOpen(false)}
-            />
-          </F0Box>
-        </F0Box>
+        <SalaryCostCalculatorDialog
+          calculatedValue={28 * participants * training.totalDuration}
+          currency={currency}
+          onApply={(value) => {
+            setSalaryCost(value)
+            setCalculatorOpen(false)
+          }}
+          onClose={() => setCalculatorOpen(false)}
+        />
       )}
 
       <CostsByLegalEntitySection
@@ -590,6 +540,84 @@ export function CostsTab({ training, klass }: Props) {
         />
       )}
     </F0Box>
+  )
+}
+
+function SalaryCostCalculatorDialog({
+  calculatedValue,
+  currency,
+  onApply,
+  onClose,
+}: {
+  calculatedValue: number
+  currency: string
+  onApply: (value: number) => void
+  onClose: () => void
+}) {
+  const [value, setValue] = useState(calculatedValue)
+  const [dialogContainer, setDialogContainer] = useState<HTMLElement | null>(
+    null
+  )
+
+  useEffect(() => {
+    const container = document.createElement("div")
+    container.className = "fixed inset-0 z-50"
+    document.body.appendChild(container)
+    setDialogContainer(container)
+
+    return () => {
+      setDialogContainer(null)
+      container.remove()
+    }
+  }, [])
+
+  if (!dialogContainer) return null
+
+  return (
+    <F0Dialog
+      isOpen
+      onClose={onClose}
+      position="center"
+      width="sm"
+      title="Salary cost calculator"
+      container={dialogContainer}
+      primaryAction={{
+        label: "Apply",
+        onClick: () => onApply(value),
+      }}
+    >
+      <F0Box display="flex" flexDirection="column" gap="lg">
+        <F0Box display="flex" flexDirection="column" gap="xs">
+          <F0Box display="flex" alignItems="center" gap="xs">
+            <F0Text variant="label" content="Calculated salary cost" />
+            <F0Icon icon={InfoCircle} size="xs" color="default" />
+          </F0Box>
+          <NumberInput
+            label="Calculated salary cost"
+            hideLabel
+            value={value}
+            onChange={(v) => setValue(v ?? 0)}
+            step={50}
+            locale="en-US"
+            units={currency}
+          />
+        </F0Box>
+        <F0Box
+          display="flex"
+          alignItems="start"
+          gap="sm"
+          padding="md"
+          borderRadius="md"
+          background="info"
+        >
+          <F0Icon icon={InfoCircle} size="sm" color="info" />
+          <F0Text
+            variant="body"
+            content="This is calculated by multiplying the cost per hour of each employee by the total course hours."
+          />
+        </F0Box>
+      </F0Box>
+    </F0Dialog>
   )
 }
 
@@ -791,6 +819,7 @@ function CostBreakdownList({
   indirect,
   salary,
   subsidized,
+  salaryCalculatedValue,
   onCostChange,
 }: {
   legalEntityId: string
@@ -798,6 +827,7 @@ function CostBreakdownList({
   indirect: number
   salary: number
   subsidized: number
+  salaryCalculatedValue: number
   onCostChange: (
     legalEntityId: string,
     key: LegalEntityCostKey,
@@ -805,6 +835,7 @@ function CostBreakdownList({
   ) => void
 }) {
   const total = direct + indirect + salary
+  const [calculatorOpen, setCalculatorOpen] = useState(false)
   return (
     <F0Box display="flex" flexDirection="column">
       <F0Box display="flex" alignItems="center" height="12">
@@ -835,10 +866,20 @@ function CostBreakdownList({
           onChange={(value) => onCostChange(legalEntityId, "indirectCost", value)}
         />
         <CostBreakdownRow
-          label="Salary cost"
+          label="Gross salary cost"
           description="Cost of employees' time spent in training"
           value={salary}
           onChange={(value) => onCostChange(legalEntityId, "salaryCost", value)}
+          action={
+            <F0Button
+              label="Calculate"
+              hideLabel
+              icon={Calculator}
+              variant="outline"
+              size="sm"
+              onClick={() => setCalculatorOpen(true)}
+            />
+          }
         />
         <CostBreakdownRow
           label="Subsidised cost"
@@ -873,6 +914,17 @@ function CostBreakdownList({
         </F0Box>
         <F0Text content={formatSidepanelMoney(total)} variant="label" />
       </F0Box>
+      {calculatorOpen && (
+        <SalaryCostCalculatorDialog
+          calculatedValue={salaryCalculatedValue}
+          currency="EUR"
+          onApply={(value) => {
+            onCostChange(legalEntityId, "salaryCost", value)
+            setCalculatorOpen(false)
+          }}
+          onClose={() => setCalculatorOpen(false)}
+        />
+      )}
     </F0Box>
   )
 }
@@ -914,6 +966,12 @@ function LegalEntityCostsSidepanel({
     (participant) =>
       participant.classId === movement.groupId &&
       legalEntityForEmployee(participant.employeeId).id === legalEntity.id
+  )
+  const calculatedSalary = participants.reduce(
+    (sum, participant) =>
+      sum +
+      salaryCostForEmployeeInGroup(participant.employeeId, movement.groupId),
+    0
   )
   const [dialogContainer, setDialogContainer] = useState<HTMLElement | null>(
     null
@@ -995,6 +1053,7 @@ function LegalEntityCostsSidepanel({
             indirect={breakdown.indirectCost}
             salary={breakdown.salaryCost}
             subsidized={breakdown.subsidizedCost}
+            salaryCalculatedValue={calculatedSalary}
             onCostChange={onCostChange}
           />
         </F0Box>
@@ -1169,11 +1228,13 @@ function CostBreakdownRow({
   description,
   value,
   onChange,
+  action,
 }: {
   label: string
   description: string
   value: number
   onChange: (value: number) => void
+  action?: ReactNode
 }) {
   return (
     <div className="flex h-16 items-center justify-between px-4 py-2">
@@ -1187,16 +1248,19 @@ function CostBreakdownRow({
         <F0Text content={label} variant="label" />
         <F0Text content={description} variant="description" />
       </F0Box>
-      <div className="w-40 shrink-0">
-        <NumberInput
-          label={label}
-          hideLabel
-          value={value}
-          onChange={(nextValue) => onChange(nextValue ?? 0)}
-          step={50}
-          locale="en-US"
-          units="EUR"
-        />
+      <div className="flex shrink-0 items-center gap-2">
+        {action}
+        <div className="w-40">
+          <NumberInput
+            label={label}
+            hideLabel
+            value={value}
+            onChange={(nextValue) => onChange(nextValue ?? 0)}
+            step={50}
+            locale="en-US"
+            units="EUR"
+          />
+        </div>
       </div>
     </div>
   )

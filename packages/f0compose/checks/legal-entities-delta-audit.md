@@ -1,6 +1,6 @@
 # Legal Entities Delta Audit
 
-Date: 2026-05-20
+Date: 2026-05-20 (last updated: 2026-06-17)
 
 Scope: only the new/staged legal-entity and multi-entity-budget changes.
 
@@ -72,3 +72,12 @@ There are unstaged changes beyond the staged legal-entity delta:
 
 These should not be bundled into the legal-entities delta unless explicitly
 accepted.
+
+## 2026-06-17 — Salary cost calculator + "Gross salary cost" rename
+
+| File                                                             | Change                                                                                                                                                                              | Why compliant                                                                                              |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `src/prototypes/trainings/detail/CostsTab.tsx`                   | Renamed the salary labels to **"Gross salary cost"** (cost card + cost-breakdown sidepanel rows)                                                                                   | Product copy alignment; consistent label across the cost surfaces                                          |
+| `src/prototypes/trainings/_modules/budgets/TrainingsBudgets.tsx` | Renamed the salary inputs to **"Gross salary cost"** (group total + per-legal-entity sidepanel)                                                                                    | Same label consistency across the budget sidepanel                                                         |
+| `src/prototypes/trainings/detail/CostsTab.tsx`                   | Replaced the inline salary-calculator box with a real modal `SalaryCostCalculatorDialog` (`F0Dialog position="center"`): a `NumberInput` (Calculated salary cost) + info callout + `primaryAction` Apply | Uses `F0Dialog` + F0 inputs instead of a hand-rolled inline panel; matches the upstream calculator modal    |
+| `src/prototypes/trainings/detail/CostsTab.tsx`                   | Added a **Calculate** affordance (`F0Button variant="outline" icon={Calculator} hideLabel`) on the Gross salary cost row of the legal-entity sidepanel; opens the calculator prefilled with that entity's computed salary | Compact F0 icon-button with accessible label + auto tooltip; per-entity calculation, Apply writes that entity's salary |

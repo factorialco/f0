@@ -1834,7 +1834,7 @@ function GroupSidepanelCostTab({
                 onChange={(value) => updateTotalCostPart("indirectCost", value)}
               />
               <LegalEntityInput
-                label="Salary cost"
+                label="Gross salary cost"
                 value={visibleTotalCostBreakdown.salaryCost}
                 disabled={showByLegalEntity && hasMultipleLEs}
                 onChange={(value) => updateTotalCostPart("salaryCost", value)}
@@ -1984,7 +1984,7 @@ function GroupSidepanelCostTab({
                         }
                       />
                       <LegalEntityInput
-                        label="Salary cost"
+                        label="Gross salary cost"
                         value={breakdown.salaryCost}
                         onChange={(value) =>
                           updateLegalEntityCost(le.id, "salaryCost", value)
