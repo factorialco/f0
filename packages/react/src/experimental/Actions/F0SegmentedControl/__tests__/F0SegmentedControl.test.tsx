@@ -78,6 +78,25 @@ describe("F0SegmentedControl", () => {
     expect(screen.getByText("Day").closest("button")).not.toBeDisabled()
   })
 
+  it("renders icon-only but keeps labels accessible when hideLabels is set", () => {
+    const items = [
+      { value: "list", label: "List", icon: List },
+      { value: "table", label: "Table", icon: Table },
+    ]
+    render(<F0SegmentedControl items={items} hideLabels />)
+    // Label stays in the DOM for screen readers, just visually hidden...
+    expect(screen.getByText("Table")).toHaveClass("sr-only")
+    // ...and the segment's accessible name is still the label.
+    expect(screen.getByRole("radio", { name: "Table" })).toBeInTheDocument()
+  })
+
+  it("keeps the label visible for items without an icon even with hideLabels", () => {
+    render(
+      <F0SegmentedControl items={[{ value: "a", label: "Alpha" }]} hideLabels />
+    )
+    expect(screen.getByText("Alpha")).not.toHaveClass("sr-only")
+  })
+
   it("renders icons when provided", () => {
     const items = [
       { value: "list", label: "List", icon: List },
