@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.5.0](https://github.com/factorialco/f0/compare/f0-react-v3.4.1...f0-react-v3.5.0) (2026-06-17)
+
+
+### Features
+
+* **avatars:** add headcount_planning to F0AvatarModule module map ([#4467](https://github.com/factorialco/f0/issues/4467)) ([f34e73a](https://github.com/factorialco/f0/commit/f34e73adcc43b8767a2264123287129b933868d3))
+
 ## [3.4.1](https://github.com/factorialco/f0/compare/f0-react-v3.4.0...f0-react-v3.4.1) (2026-06-16)
 
 
