@@ -21,9 +21,8 @@ export type PropertyDefinition<T> = {
 
   /**
    * Optional header info. Pass a string for a short text tooltip, or a
-   * {@link TableHeaderInfo} object for a richer hoverable card (title, meta
-   * line, description, and an optional action). Only rendered by the table
-   * visualization's column headers.
+   * {@link TableHeaderInfo} object to render your own content inside a
+   * hoverable card. Only rendered by the table visualization's column headers.
    */
   info?: string | TableHeaderInfo
 

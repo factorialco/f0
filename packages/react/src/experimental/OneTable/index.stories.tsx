@@ -246,6 +246,9 @@ export const InfoHeader: Story = {
   ),
 }
 
+// `info` only provides the hover surface — the consumer composes the card body
+// (here: title, muted meta line, description, and a "Learn more" action that
+// uses `close` to dismiss the card before opening another surface).
 export const RichInfoHeader: Story = {
   render: () => (
     <OneTable>
@@ -254,22 +257,43 @@ export const RichInfoHeader: Story = {
           <TableHead>Name</TableHead>
           <TableHead
             info={{
-              title: "Average base salary",
-              meta: "Per employee · Per year · In EUR",
-              description:
-                "Mean base salary of active full-time and part-time employees. Not FTE-adjusted.",
-              action: {
-                label: "Learn more",
-                onClick: () => alert("Open data catalog on this field"),
-              },
+              label: "About base salary",
+              render: ({ close }) => (
+                <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
+                  <p className="font-semibold">Average base salary</p>
+                  <p className="text-f1-foreground-secondary">
+                    Per employee · Per year · In EUR
+                  </p>
+                  <p className="font-normal text-f1-foreground-secondary">
+                    Mean base salary of active full-time and part-time
+                    employees. Not FTE-adjusted.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      close()
+                      alert("Open data catalog on this field")
+                    }}
+                    className="mt-1 w-fit font-medium underline underline-offset-2"
+                  >
+                    Learn more
+                  </button>
+                </div>
+              ),
             }}
           >
             Base salary
           </TableHead>
           <TableHead
             info={{
-              title: "Role",
-              description: "Access level assigned to the employee account.",
+              render: () => (
+                <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
+                  <p className="font-semibold">Role</p>
+                  <p className="font-normal text-f1-foreground-secondary">
+                    Access level assigned to the employee account.
+                  </p>
+                </div>
+              ),
             }}
           >
             Role

@@ -15,69 +15,40 @@ import { useTable } from "../utils/TableContext"
 
 /**
  * Rich header info shown in a hoverable card next to a column header. Unlike
- * the plain-string `info` (which renders a short text tooltip), this supports a
- * title, a muted meta line, a description, and an optional action — e.g. a
- * "Learn more" link that opens a related detail surface.
+ * the plain-string `info` (which renders a short text tooltip), this lets the
+ * consumer render arbitrary content inside the card: f0 owns the hover surface
+ * and the dismiss mechanism, the consumer owns the body.
  */
 export type TableHeaderInfo = {
-  /** Bold title shown at the top of the card. Defaults to the column label. */
-  title?: string
-  /** Muted secondary line, e.g. "Per employee · Per year · In EUR". */
-  meta?: string
-  /** Description paragraph explaining what the column represents. */
-  description: string
-  /** Optional interactive action rendered as a link at the bottom of the card. */
-  action?: {
-    label: string
-    onClick: () => void
-  }
-}
-
-function HeaderInfoCard({
-  info,
-  onAction,
-}: {
-  info: TableHeaderInfo
-  onAction?: () => void
-}) {
-  return (
-    <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
-      {info.title && <p className="font-semibold">{info.title}</p>}
-      {info.meta && <p className="text-f1-foreground-secondary">{info.meta}</p>}
-      <p className="font-normal text-f1-foreground-secondary">
-        {info.description}
-      </p>
-      {info.action && (
-        <button
-          type="button"
-          onClick={onAction ?? info.action.onClick}
-          className={cn(
-            "mt-1 w-fit rounded-xs font-medium text-f1-foreground underline underline-offset-2",
-            focusRing()
-          )}
-        >
-          {info.action.label}
-        </button>
-      )}
-    </div>
-  )
+  /**
+   * Renders the card body. Receives `close` to dismiss the card — call it when
+   * the content navigates away or opens another surface (e.g. a "Learn more"
+   * dialog), so the card never lingers over what it opened.
+   */
+  render: (api: { close: () => void }) => React.ReactNode
+  /**
+   * Accessible name for the info-icon trigger. Defaults to the column label
+   * when the header's children are a string.
+   */
+  label?: string
 }
 
 function HeaderInfo({
   info,
   infoIcon,
+  label,
 }: {
   info: TableHeaderInfo
   infoIcon: IconType
+  label?: string
 }) {
   const [open, setOpen] = useState(false)
-  const { action } = info
 
-  // Rich header info uses a HoverCard, not a Tooltip: the surface is
-  // hover-revealed but holds interactive content (the optional action), which
-  // is what HoverCard is for — Radix Tooltip is a non-interactive label
-  // primitive. We override HoverCard's dark default to a light surface per-call
-  // (same approach as `TagCounter`) rather than adding a primitive variant.
+  // f0 owns the hover surface (light card chrome, positioning, the info-icon
+  // trigger) and the dismiss mechanism; the consumer owns the body via
+  // `info.render`. A HoverCard (not a Tooltip) because the content is
+  // hover-revealed but may be interactive. The dark default surface is
+  // overridden to a light one per-call, matching `TagCounter`.
   return (
     <HoverCard
       open={open}
@@ -92,25 +63,13 @@ function HeaderInfo({
             "flex h-5 w-5 items-center justify-center rounded-xs text-f1-foreground-secondary",
             focusRing()
           )}
-          aria-label={info.title ?? info.description}
+          aria-label={info.label ?? label}
         >
           <F0Icon icon={infoIcon} size="sm" />
         </button>
       </HoverCardTrigger>
-      <HoverCardContent className="w-auto bg-f1-background px-2 py-1.5 text-f1-foreground shadow-md ring-1 ring-f1-border-secondary">
-        <HeaderInfoCard
-          info={info}
-          // Dismiss the card immediately when the action fires so it never
-          // lingers over the surface the action opens (e.g. a dialog).
-          onAction={
-            action
-              ? () => {
-                  setOpen(false)
-                  action.onClick()
-                }
-              : undefined
-          }
-        />
+      <HoverCardContent className="w-auto max-w-xs bg-f1-background px-2 py-1.5 text-f1-foreground shadow-md ring-1 ring-f1-border-secondary">
+        {info.render({ close: () => setOpen(false) })}
       </HoverCardContent>
     </HoverCard>
   )
@@ -154,8 +113,8 @@ interface TableHeadProps {
   /**
    * Optional header info. When provided, displays an info icon next to the
    * header content. Pass a string for a short text tooltip, or a
-   * {@link TableHeaderInfo} object for a richer hoverable card (title, meta
-   * line, description, and an optional action such as a "Learn more" link).
+   * {@link TableHeaderInfo} object to render your own content inside a
+   * hoverable card.
    */
   info?: string | TableHeaderInfo
 
@@ -249,7 +208,11 @@ export function TableHead({
                     </div>
                   </Tooltip>
                 ) : (
-                  <HeaderInfo info={info} infoIcon={infoIcon} />
+                  <HeaderInfo
+                    info={info}
+                    infoIcon={infoIcon}
+                    label={typeof children === "string" ? children : undefined}
+                  />
                 )}
               </div>
             )}

@@ -31,26 +31,27 @@ const renderHeader = (
     </OneTable>
   )
 
-const richInfo = (
-  overrides: Partial<TableHeaderInfo> = {}
-): TableHeaderInfo => ({
-  title: "Active headcount",
-  meta: "Per employee · Count distinct",
-  description: "Distinct active employees in the selected snapshot.",
-  ...overrides,
-})
-
 describe("TableHead rich header info", () => {
-  it("exposes the info trigger with an accessible label from the title", () => {
-    renderHeader(richInfo())
+  it("uses the column label as the info trigger's accessible name by default", () => {
+    renderHeader({ render: () => <p>Body</p> })
 
     expect(
       screen.getByRole("button", { name: "Active headcount" })
     ).toBeInTheDocument()
   })
 
-  it("reveals the title, meta line and description on hover", async () => {
-    renderHeader(richInfo())
+  it("uses info.label as the accessible name when provided", () => {
+    renderHeader({ label: "About active headcount", render: () => <p>Body</p> })
+
+    expect(
+      screen.getByRole("button", { name: "About active headcount" })
+    ).toBeInTheDocument()
+  })
+
+  it("renders the consumer-supplied content on hover", async () => {
+    renderHeader({
+      render: () => <p>Distinct active employees in the selected snapshot.</p>,
+    })
 
     await userEvent.hover(
       screen.getByRole("button", { name: "Active headcount" })
@@ -58,19 +59,28 @@ describe("TableHead rich header info", () => {
 
     expect(
       await screen.findByText(
-        "Per employee · Count distinct",
+        "Distinct active employees in the selected snapshot.",
         {},
         { timeout: 2000 }
       )
     ).toBeInTheDocument()
-    expect(
-      screen.getByText("Distinct active employees in the selected snapshot.")
-    ).toBeInTheDocument()
   })
 
-  it("fires the action and dismisses the card when the action is clicked", async () => {
-    const onClick = vi.fn()
-    renderHeader(richInfo({ action: { label: "Learn more", onClick } }))
+  it("passes a close handle that dismisses the card, alongside the consumer action", async () => {
+    const onAction = vi.fn()
+    renderHeader({
+      render: ({ close }) => (
+        <button
+          type="button"
+          onClick={() => {
+            close()
+            onAction()
+          }}
+        >
+          Learn more
+        </button>
+      ),
+    })
 
     await userEvent.hover(
       screen.getByRole("button", { name: "Active headcount" })
@@ -82,27 +92,10 @@ describe("TableHead rich header info", () => {
     )
     await userEvent.click(learnMore)
 
-    expect(onClick).toHaveBeenCalledTimes(1)
+    expect(onAction).toHaveBeenCalledTimes(1)
     await waitFor(() =>
       expect(screen.queryByText("Learn more")).not.toBeInTheDocument()
     )
-  })
-
-  it("omits the action button when no action is provided", async () => {
-    renderHeader(richInfo())
-
-    await userEvent.hover(
-      screen.getByRole("button", { name: "Active headcount" })
-    )
-    await screen.findByText(
-      "Distinct active employees in the selected snapshot.",
-      {},
-      { timeout: 2000 }
-    )
-
-    expect(
-      screen.queryByRole("button", { name: "Learn more" })
-    ).not.toBeInTheDocument()
   })
 
   it("renders a plain text tooltip when info is a string (backward compatible)", () => {
