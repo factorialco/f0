@@ -24,6 +24,7 @@ export * from "../kits/Charts/exports"
  */
 export * from "../components/F0ActionBar"
 export * from "./F0CardHorizontal"
+export * from "./F0SegmentedBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"
 export * from "./Information/exports"

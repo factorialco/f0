@@ -707,6 +707,10 @@ export const defaultTranslations = {
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
   },
+  segmentedBar: {
+    label: "Segmented bar",
+    valueText: "{{value}} of {{max}}",
+  },
 } as const
 
 type TranslationShape<T> = {
