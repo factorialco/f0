@@ -44,11 +44,9 @@ function HeaderInfo({
 }) {
   const [open, setOpen] = useState(false)
 
-  // f0 owns the hover surface (the dark info-card chrome, positioning, the
-  // info-icon trigger) and the dismiss mechanism; the consumer owns the body
-  // via `info.render`. A HoverCard (not a Tooltip) because the content is
-  // hover-revealed but may be interactive; it keeps HoverCard's default dark
-  // (inverse) surface, so consumer content should use inverse text tokens.
+  // HoverCard (not Tooltip): the content is hover-revealed but may be
+  // interactive. f0 owns the (dark) surface and the `close` handle; the
+  // consumer owns the body via `info.render` and uses inverse text tokens.
   return (
     <HoverCard
       open={open}

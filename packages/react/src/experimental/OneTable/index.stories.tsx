@@ -246,10 +246,8 @@ export const InfoHeader: Story = {
   ),
 }
 
-// `info` only provides the hover surface (a dark/inverse card) — the consumer
-// composes the body (here: a description, a muted meta line, and a "Learn more"
-// action that uses `close` to dismiss the card before opening another surface).
-// Content uses inverse text tokens since the surface is dark.
+// `info` only provides the (dark) hover surface — the consumer composes the
+// body here, using inverse text tokens and `close` to dismiss the card.
 export const RichInfoHeader: Story = {
   render: () => (
     <OneTable>
