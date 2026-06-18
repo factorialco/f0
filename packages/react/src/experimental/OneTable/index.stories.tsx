@@ -246,9 +246,10 @@ export const InfoHeader: Story = {
   ),
 }
 
-// `info` only provides the hover surface — the consumer composes the card body
-// (here: title, muted meta line, description, and a "Learn more" action that
-// uses `close` to dismiss the card before opening another surface).
+// `info` only provides the hover surface (a dark/inverse card) — the consumer
+// composes the body (here: a description, a muted meta line, and a "Learn more"
+// action that uses `close` to dismiss the card before opening another surface).
+// Content uses inverse text tokens since the surface is dark.
 export const RichInfoHeader: Story = {
   render: () => (
     <OneTable>
@@ -259,14 +260,10 @@ export const RichInfoHeader: Story = {
             info={{
               label: "About base salary",
               render: ({ close }) => (
-                <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
-                  <p className="font-semibold">Average base salary</p>
-                  <p className="text-f1-foreground-secondary">
-                    Per employee · Per year · In EUR
-                  </p>
-                  <p className="font-normal text-f1-foreground-secondary">
-                    Mean base salary of active full-time and part-time
-                    employees. Not FTE-adjusted.
+                <div className="flex flex-col gap-1 whitespace-normal text-left">
+                  <p>Annual base salary, in euros. Not FTE-adjusted.</p>
+                  <p className="text-f1-foreground-inverse-secondary">
+                    Per employee · Per year · In Euro
                   </p>
                   <button
                     type="button"
@@ -287,11 +284,8 @@ export const RichInfoHeader: Story = {
           <TableHead
             info={{
               render: () => (
-                <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
-                  <p className="font-semibold">Role</p>
-                  <p className="font-normal text-f1-foreground-secondary">
-                    Access level assigned to the employee account.
-                  </p>
+                <div className="flex flex-col gap-1 whitespace-normal text-left">
+                  <p>Access level assigned to the employee account.</p>
                 </div>
               ),
             }}

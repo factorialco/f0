@@ -44,11 +44,11 @@ function HeaderInfo({
 }) {
   const [open, setOpen] = useState(false)
 
-  // f0 owns the hover surface (light card chrome, positioning, the info-icon
-  // trigger) and the dismiss mechanism; the consumer owns the body via
-  // `info.render`. A HoverCard (not a Tooltip) because the content is
-  // hover-revealed but may be interactive. The dark default surface is
-  // overridden to a light one per-call, matching `TagCounter`.
+  // f0 owns the hover surface (the dark info-card chrome, positioning, the
+  // info-icon trigger) and the dismiss mechanism; the consumer owns the body
+  // via `info.render`. A HoverCard (not a Tooltip) because the content is
+  // hover-revealed but may be interactive; it keeps HoverCard's default dark
+  // (inverse) surface, so consumer content should use inverse text tokens.
   return (
     <HoverCard
       open={open}
@@ -68,7 +68,7 @@ function HeaderInfo({
           <F0Icon icon={infoIcon} size="sm" />
         </button>
       </HoverCardTrigger>
-      <HoverCardContent className="w-auto max-w-xs bg-f1-background px-2 py-1.5 text-f1-foreground shadow-md ring-1 ring-f1-border-secondary">
+      <HoverCardContent className="w-auto max-w-xs px-3 py-2 shadow-md">
         {info.render({ close: () => setOpen(false) })}
       </HoverCardContent>
     </HoverCard>
