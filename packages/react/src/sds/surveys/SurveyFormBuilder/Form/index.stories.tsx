@@ -50,8 +50,8 @@ export const Default: Story = {
         section: {
           id: "section-1",
           title: "Company-wide questions",
-          description:
-            "These questions are predefined and can't be edited, moved, or removed.",
+          // No `notice`: a locked section without one falls back to the default
+          // lock notice from the i18n provider.
           locked: true,
           questions: [
             {
@@ -378,8 +378,12 @@ export const WithBlockedSection: Story = {
         section: {
           id: "section-enps",
           title: "Predefined eNPS question",
-          description:
-            "This question powers your Employee NPS score, so it can't be edited, moved, or removed.",
+          // Section-level lock notice: questions without their own `lockedNote`
+          // inherit this; the eNPS question below overrides it with its own.
+          notice: {
+            description:
+              "This question powers your Employee NPS score, so it can't be edited, moved, or removed.",
+          },
           locked: true,
           questions: [
             {

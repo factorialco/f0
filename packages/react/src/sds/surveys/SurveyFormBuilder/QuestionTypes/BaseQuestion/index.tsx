@@ -131,18 +131,17 @@ export const BaseQuestion = ({
   const showCursorNotAllowed = !answering && inputDisabled
 
   // Blocked question: an instant, title-less tooltip shown on the lock icon. It
-  // prefers the question's own `lockedNote` (what this specific question is) and
-  // otherwise falls back to the section's explanation so a locked question
-  // always has something to say.
+  // prefers the question's own `lockedNote`, falls back to the parent section's
+  // `notice`, and finally to a default so a locked question always says
+  // something.
   const lockTooltipProps: { description: string } | null = !locked
     ? null
-    : lockedNote?.description
-      ? { description: lockedNote.description }
-      : containingSection?.notice?.description
-        ? { description: containingSection.notice.description }
-        : containingSection?.description
-          ? { description: containingSection.description }
-          : null
+    : {
+        description:
+          lockedNote?.description ??
+          containingSection?.notice?.description ??
+          t("surveyFormBuilder.labels.lockedNotice"),
+      }
 
   const questionCard = (
     <div
