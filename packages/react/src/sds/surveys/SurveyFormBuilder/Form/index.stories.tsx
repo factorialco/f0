@@ -49,8 +49,9 @@ export const Default: Story = {
         type: "section",
         section: {
           id: "section-1",
-          title: "Section 1",
-          description: "Section 1 description",
+          title: "Company-wide questions",
+          description:
+            "These questions are predefined and can't be edited, moved, or removed.",
           locked: true,
           questions: [
             {
@@ -354,6 +355,47 @@ export const WithAllowCreate: Story = {
             "The employees dataset does not have onCreate, so no toggle appears.",
           type: "dropdown-single" as const,
           datasetKey: "employees",
+        },
+      },
+    ],
+  },
+}
+
+/**
+ * A blocked, predefined question: `locked` disables its fields, removes its edit
+ * menu and drag handle, and makes its inputs non-interactive, while `notice`
+ * renders an in-card alert explaining why it's fixed. The remaining question
+ * stays fully editable. The notice never shows in the answering/preview form.
+ */
+export const WithBlockedQuestion: Story = {
+  args: {
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-enps",
+          title: "How likely are you to recommend us as a place to work?",
+          description: "0 is not at all likely, 10 is extremely likely.",
+          type: "rating" as const,
+          options: Array.from({ length: 11 }, (_, value) => ({
+            value,
+            label: String(value),
+          })),
+          required: true,
+          locked: true,
+          notice: {
+            title: "Predefined eNPS question",
+            description:
+              "This question powers your Employee NPS score, so it can't be edited, moved, or removed.",
+          },
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-reason",
+          title: "What's the main reason for your score?",
+          type: "longText" as const,
         },
       },
     ],

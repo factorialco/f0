@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react"
 
+import { F0Alert } from "@/components/F0Alert"
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { AcademicCap, Add, Check, CheckDouble } from "@/icons/app"
+import { AcademicCap, Add, Check, CheckDouble, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -41,6 +42,7 @@ export const BaseQuestion = ({
   locked: questionLocked,
   type: questionType,
   hiddenActions,
+  notice,
 }: BaseQuestionProps) => {
   const {
     onQuestionChange,
@@ -55,6 +57,8 @@ export const BaseQuestion = ({
   const containingSection = getSectionContainingQuestion(id)
 
   const locked = containingSection?.locked || questionLocked
+
+  const inLockedSection = !!containingSection?.locked
 
   const isWithinSection = !!containingSection
 
@@ -131,11 +135,34 @@ export const BaseQuestion = ({
     <div
       id={`co-creation-question-${id}`}
       className={cn(
-        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
-        !isDragging && !answering && "hover:border-f1-border-hover",
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border px-3 py-3",
+        // Blocked question: a not-allowed cursor signals it can't be edited.
+        // The `[&_*]` rule forces that cursor onto every descendant (inputs,
+        // textareas, options) so hovering anything inside the card keeps the
+        // not-allowed cursor, overriding their own (text/default) cursors.
+        // Inside a locked section the card keeps the default white fill (the
+        // section's muted grey panel sets it apart); a standalone blocked
+        // question still gets the muted grey fill to stand out on its own.
+        locked && !answering
+          ? cn(
+              "cursor-not-allowed [&_*]:!cursor-not-allowed",
+              inLockedSection
+                ? "bg-f1-background"
+                : "bg-f1-background-secondary"
+            )
+          : "bg-f1-background",
+        !isDragging && !answering && !locked && "hover:border-f1-border-hover",
         !answering || !!description ? "gap-4" : "gap-2"
       )}
     >
+      {notice && !answering && (
+        <F0Alert
+          variant={notice.variant ?? "info"}
+          title={notice.title}
+          description={notice.description}
+          icon={notice.icon}
+        />
+      )}
       <div className="flex flex-col gap-0.5">
         <div className="flex flex-row gap-2">
           <div className="relative w-full">
@@ -196,6 +223,22 @@ export const BaseQuestion = ({
                   !isWithinSection || !isSingleQuestionInSection
                 }
                 hiddenActions={hiddenActions}
+              />
+            </div>
+          )}
+          {!answering && locked && (
+            // Blocked question: a static lock sits where the actions "⋯" menu
+            // would be, signalling the card is predefined and can't be edited.
+            <div>
+              <F0Button
+                icon={LockLocked}
+                label={t("surveyFormBuilder.labels.locked")}
+                size="md"
+                variant="ghost"
+                tooltip={false}
+                hideLabel
+                disabled
+                withoutDisabledAppearance
               />
             </div>
           )}
