@@ -1,7 +1,7 @@
 import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
 import {
+  Tooltip,
   TooltipContent,
-  Tooltip as TooltipPrimitive,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
@@ -69,24 +69,20 @@ export const CategoryBarChartCell = (
       role="img"
       aria-label="Category bar chart"
     >
-      <div className="flex h-2 w-full gap-1 overflow-hidden">
-        {dataPoints.map((point, index) => {
-          const percentage = (point.value / total) * 100
-          const color = point.color
-            ? getColor(point.color)
-            : getCategoricalColor(index)
+      <TooltipProvider>
+        <div className="flex h-2 w-full gap-1 overflow-hidden">
+          {dataPoints.map((point, index) => {
+            const percentage = (point.value / total) * 100
+            const color = point.color
+              ? getColor(point.color)
+              : getCategoricalColor(index)
 
-          if (percentage === 0) return null
+            if (percentage === 0) return null
 
-          return (
-            <TooltipProvider
-              key={`${point.name}-${index}`}
-              delayDuration={100}
-              disableHoverableContent
-            >
-              <TooltipPrimitive>
+            return (
+              <Tooltip key={`${point.name}-${index}`}>
                 <TooltipTrigger
-                  className="pointer-events-auto h-full cursor-default overflow-hidden rounded-2xs"
+                  className="h-full cursor-default overflow-hidden rounded-2xs"
                   style={{ width: `${percentage}%` }}
                   asChild
                 >
@@ -99,11 +95,7 @@ export const CategoryBarChartCell = (
                   />
                 </TooltipTrigger>
                 {!args.hideTooltip && (
-                  <TooltipContent
-                    className="pointer-events-none z-[100] flex items-center gap-1 text-sm"
-                    side="top"
-                    sideOffset={6}
-                  >
+                  <TooltipContent className="flex items-center gap-1 text-sm">
                     <div
                       className="h-2.5 w-2.5 shrink-0 translate-y-px rounded-full"
                       style={{ backgroundColor: color }}
@@ -116,11 +108,11 @@ export const CategoryBarChartCell = (
                     </span>
                   </TooltipContent>
                 )}
-              </TooltipPrimitive>
-            </TooltipProvider>
-          )
-        })}
-      </div>
+              </Tooltip>
+            )
+          })}
+        </div>
+      </TooltipProvider>
     </div>
   )
 }
