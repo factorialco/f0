@@ -120,6 +120,65 @@ describe("SurveyFormBuilder", () => {
     expect(notAllowed.length).toBeGreaterThanOrEqual(2) // section header + question
   })
 
+  it("shows a lockedClarification alert for a locked section", () => {
+    const elements: SurveyFormBuilderElement[] = [
+      makeSection("s1", "Locked Section", [{ id: "q1", title: "Q1" }], true),
+    ]
+
+    render(
+      <SurveyFormBuilder
+        elements={elements}
+        onChange={vi.fn()}
+        lockedClarification={{
+          title: "This section is locked",
+          description: "Its questions are shared across surveys.",
+        }}
+      />
+    )
+
+    expect(screen.getByText("This section is locked")).toBeInTheDocument()
+    expect(
+      screen.getByText("Its questions are shared across surveys.")
+    ).toBeInTheDocument()
+  })
+
+  it("resolves a per-section lockedClarification map by section id", () => {
+    const elements: SurveyFormBuilderElement[] = [
+      makeSection("s1", "Section One", [{ id: "q1", title: "Q1" }], true),
+      makeSection("s2", "Section Two", [{ id: "q2", title: "Q2" }], true),
+    ]
+
+    render(
+      <SurveyFormBuilder
+        elements={elements}
+        onChange={vi.fn()}
+        lockedClarification={{
+          s1: { title: "First clarification" },
+          s2: { title: "Second clarification" },
+        }}
+      />
+    )
+
+    expect(screen.getByText("First clarification")).toBeInTheDocument()
+    expect(screen.getByText("Second clarification")).toBeInTheDocument()
+  })
+
+  it("does not show a lockedClarification alert for unlocked sections", () => {
+    const elements: SurveyFormBuilderElement[] = [
+      makeSection("s1", "Open Section", [{ id: "q1", title: "Q1" }], false),
+    ]
+
+    render(
+      <SurveyFormBuilder
+        elements={elements}
+        onChange={vi.fn()}
+        lockedClarification={{ title: "Should not appear" }}
+      />
+    )
+
+    expect(screen.queryByText("Should not appear")).not.toBeInTheDocument()
+  })
+
   it("shows confirmation dialog when moving the last question out of a section", async () => {
     // This test verifies the dialog appears. We cannot simulate real DnD with
     // Reorder.Group in jsdom, so we test the component state by providing

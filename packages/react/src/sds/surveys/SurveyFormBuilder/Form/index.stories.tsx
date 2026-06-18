@@ -89,6 +89,258 @@ export const Empty: Story = {
   },
 }
 
+export const LockedSectionWithClarification: Story = {
+  args: {
+    elements: [
+      {
+        type: "section",
+        section: {
+          id: "section-effectiveness",
+          title: "Overall effectiveness",
+          locked: true,
+          questions: [
+            {
+              id: "q-effectiveness",
+              title:
+                "How would you rate the overall effectiveness of the course?",
+              type: "select" as const,
+              required: true,
+              options: [
+                { value: "very-low", label: "Very low" },
+                { value: "low", label: "Low" },
+                { value: "average", label: "Average" },
+                { value: "high", label: "High" },
+                { value: "very-high", label: "Very high" },
+              ],
+            },
+            {
+              id: "q-recommend",
+              title: "How likely are you to recommend this course?",
+              type: "rating" as const,
+              required: true,
+              options: [
+                { value: 1, label: "1" },
+                { value: 2, label: "2" },
+                { value: 3, label: "3" },
+                { value: 4, label: "4" },
+                { value: 5, label: "5" },
+              ],
+            },
+            {
+              id: "q-comments",
+              title: "Any additional comments about the course?",
+              type: "longText" as const,
+            },
+          ],
+        },
+      },
+    ],
+    lockedClarification: {
+      title: "This section is locked",
+      description:
+        "Its questions are the same in every effectiveness survey, so results stay comparable across courses.",
+    },
+  },
+}
+
+export const LockedSectionsSharedClarification: Story = {
+  args: {
+    elements: [
+      {
+        type: "section",
+        section: {
+          id: "section-effectiveness",
+          title: "Overall effectiveness",
+          locked: true,
+          questions: [
+            {
+              id: "q-effectiveness",
+              title:
+                "How would you rate the overall effectiveness of the course?",
+              type: "select" as const,
+              required: true,
+              options: [
+                { value: "very-low", label: "Very low" },
+                { value: "low", label: "Low" },
+                { value: "average", label: "Average" },
+                { value: "high", label: "High" },
+                { value: "very-high", label: "Very high" },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "section-satisfaction",
+          title: "Satisfaction",
+          locked: true,
+          questions: [
+            {
+              id: "q-satisfaction",
+              title: "How satisfied are you with the course?",
+              type: "rating" as const,
+              required: true,
+              options: [
+                { value: 1, label: "1" },
+                { value: 2, label: "2" },
+                { value: 3, label: "3" },
+                { value: 4, label: "4" },
+                { value: 5, label: "5" },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+    // A single LockedClarification object is applied to every locked section.
+    lockedClarification: {
+      title: "This section is locked",
+      description:
+        "Its questions are standard across all effectiveness surveys, so results stay comparable across courses.",
+    },
+  },
+}
+
+export const LockedSectionsPerSectionClarification: Story = {
+  args: {
+    elements: [
+      {
+        type: "section",
+        section: {
+          id: "section-effectiveness",
+          title: "Overall effectiveness",
+          locked: true,
+          questions: [
+            {
+              id: "q-effectiveness",
+              title:
+                "How would you rate the overall effectiveness of the course?",
+              type: "select" as const,
+              required: true,
+              options: [
+                { value: "very-low", label: "Very low" },
+                { value: "low", label: "Low" },
+                { value: "average", label: "Average" },
+                { value: "high", label: "High" },
+                { value: "very-high", label: "Very high" },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "section-satisfaction",
+          title: "Satisfaction",
+          locked: true,
+          questions: [
+            {
+              id: "q-satisfaction",
+              title: "How satisfied are you with the course?",
+              type: "rating" as const,
+              required: true,
+              options: [
+                { value: 1, label: "1" },
+                { value: 2, label: "2" },
+                { value: 3, label: "3" },
+                { value: 4, label: "4" },
+                { value: 5, label: "5" },
+              ],
+            },
+          ],
+        },
+      },
+    ],
+    lockedClarification: {
+      "section-effectiveness": {
+        title: "This section is locked",
+        description:
+          "Its questions are the same in every effectiveness survey, so results stay comparable across courses.",
+        link: {
+          label: "Learn more",
+          href: "https://factorial.co",
+        },
+      },
+      "section-satisfaction": {
+        title: "Standard satisfaction questions",
+        description:
+          "These questions are managed centrally and can't be edited.",
+      },
+    },
+  },
+}
+
+export const MixedLockedAndUnlockedSections: Story = {
+  args: {
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-standalone",
+          title: "What is your full name?",
+          type: "text" as const,
+          required: true,
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "section-effectiveness",
+          title: "Overall effectiveness",
+          locked: true,
+          questions: [
+            {
+              id: "q-effectiveness",
+              title:
+                "How would you rate the overall effectiveness of the course?",
+              type: "select" as const,
+              required: true,
+              options: [
+                { value: "very-low", label: "Very low" },
+                { value: "low", label: "Low" },
+                { value: "average", label: "Average" },
+                { value: "high", label: "High" },
+                { value: "very-high", label: "Very high" },
+              ],
+            },
+          ],
+        },
+      },
+      {
+        type: "section",
+        section: {
+          id: "section-feedback",
+          title: "Your feedback",
+          description: "This section is fully editable.",
+          questions: [
+            {
+              id: "q-feedback-1",
+              title: "What did you enjoy most about the course?",
+              type: "longText" as const,
+            },
+            {
+              id: "q-feedback-2",
+              title: "What could be improved?",
+              type: "longText" as const,
+            },
+          ],
+        },
+      },
+    ],
+    // Only the locked section has an entry; the editable section is left out.
+    lockedClarification: {
+      "section-effectiveness": {
+        title: "This section is locked",
+        description:
+          "Its questions are the same in every effectiveness survey, so results stay comparable across courses.",
+      },
+    },
+  },
+}
+
 export const ApplyingChanges: Story = {
   args: {
     ...Default.args,

@@ -48,6 +48,7 @@ const _SurveyFormBuilder = ({
   applyingChanges,
   useUpload,
   datasets,
+  lockedClarification,
 }: SurveyFormBuilderProps) => {
   const shouldShowAddButton = !disabled
 
@@ -141,6 +142,7 @@ const _SurveyFormBuilder = ({
       allowedQuestionTypes={allowedQuestionTypes}
       useUpload={useUpload}
       datasets={datasets}
+      lockedClarification={lockedClarification}
     >
       <DragProvider>
         <DragSelectGuard>

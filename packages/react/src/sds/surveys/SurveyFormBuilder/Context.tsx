@@ -18,6 +18,7 @@ import {
 import {
   SurveyFormBuilderCallbacks,
   SurveyFormBuilderElement,
+  LockedClarification,
   QuestionElement,
   QuestionType,
   SectionElement,
@@ -35,11 +36,15 @@ type SurveyFormBuilderContextType = SurveyFormBuilderCallbacks & {
   getSectionContainingQuestion: (
     questionId: string
   ) => SectionElement | undefined
+  getLockedClarification: (sectionId: string) => LockedClarification | undefined
   isQuestionTypeAllowed: (questionType: QuestionType) => boolean
   errors?: Record<string, string>
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  lockedClarification?:
+    | LockedClarification
+    | Record<string, LockedClarification>
 }
 
 const SurveyFormBuilderContext = createContext<
@@ -58,6 +63,9 @@ type SurveyFormBuilderProviderProps = {
   onFieldBlur?: (questionId: string) => void
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  lockedClarification?:
+    | LockedClarification
+    | Record<string, LockedClarification>
 }
 
 export function SurveyFormBuilderProvider({
@@ -72,6 +80,7 @@ export function SurveyFormBuilderProvider({
   onFieldBlur,
   useUpload,
   datasets,
+  lockedClarification,
 }: SurveyFormBuilderProviderProps) {
   const elementsRef = useRef(elements)
   elementsRef.current = elements
@@ -395,6 +404,24 @@ export function SurveyFormBuilderProvider({
     return element?.type === "section" ? element.section : undefined
   }, [])
 
+  const getLockedClarification = useCallback(
+    (sectionId: string): LockedClarification | undefined => {
+      if (!lockedClarification) return undefined
+      // A single LockedClarification (has a string `title`) applies to every
+      // locked section; otherwise it's a per-section map keyed by section id.
+      if (
+        "title" in lockedClarification &&
+        typeof lockedClarification.title === "string"
+      ) {
+        return lockedClarification as LockedClarification
+      }
+      return (lockedClarification as Record<string, LockedClarification>)[
+        sectionId
+      ]
+    },
+    [lockedClarification]
+  )
+
   const isFirstRender = useRef(true)
 
   const isEmpty = !elements.length
@@ -431,6 +458,7 @@ export function SurveyFormBuilderProvider({
       onDuplicateElement: handleDuplicateElement,
       getIsSingleQuestionInSection,
       getSectionContainingQuestion,
+      getLockedClarification,
       disabled,
       answering,
       getQuestionById,
@@ -450,6 +478,7 @@ export function SurveyFormBuilderProvider({
       handleDuplicateElement,
       getIsSingleQuestionInSection,
       getSectionContainingQuestion,
+      getLockedClarification,
       disabled,
       answering,
       getQuestionById,

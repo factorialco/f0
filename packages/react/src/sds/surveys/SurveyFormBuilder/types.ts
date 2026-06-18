@@ -59,6 +59,22 @@ export type BaseQuestionOnChangeParams = {
 
 export type SectionElement = Omit<SectionProps, "onAction" | "onChange">
 
+export type SectionId = string
+
+/**
+ * Explanatory content shown in an F0Alert at the top of a locked section,
+ * clarifying to the form builder why the section (and its questions) can't
+ * be edited.
+ */
+export type LockedClarification = {
+  title: string
+  description?: string
+  link?: {
+    label: string
+    href: string
+  }
+}
+
 type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement"
 
 export type QuestionElement =
@@ -211,4 +227,13 @@ export type SurveyFormBuilderProps = {
   applyingChanges?: boolean
   useUpload?: UseFileUpload
   datasets?: SurveyDatasets
+  /**
+   * Optional explanatory content for locked sections, rendered as an F0Alert
+   * at the top of the section. Pass a single object to apply the same
+   * clarification to every locked section, or a map keyed by section id to
+   * provide a per-section clarification.
+   */
+  lockedClarification?:
+    | LockedClarification
+    | Record<SectionId, LockedClarification>
 }

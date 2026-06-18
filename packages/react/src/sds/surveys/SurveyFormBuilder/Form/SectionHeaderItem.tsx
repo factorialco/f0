@@ -1,5 +1,6 @@
 import { Reorder, useDragControls } from "motion/react"
 
+import { F0Alert } from "@/components/F0Alert"
 import { F0Icon } from "@/components/F0Icon"
 import { Handle } from "@/icons/app"
 import { cn } from "@/lib/utils"
@@ -24,7 +25,12 @@ export const SectionHeaderItem = ({
   const { isDragging, setIsDragging, setDraggedItemId, draggedItemId } =
     useDragContext()
   const dragControls = useDragControls()
-  const { disabled, answering } = useSurveyFormBuilderContext()
+  const { disabled, answering, getLockedClarification } =
+    useSurveyFormBuilderContext()
+
+  const lockedClarification = item.section.locked
+    ? getLockedClarification(item.section.id)
+    : undefined
 
   const isDraggingThisSection = draggedItemId === item.section.id
 
@@ -52,6 +58,16 @@ export const SectionHeaderItem = ({
       className={className}
     >
       <div className="w-full">
+        {lockedClarification && (
+          <div className="mb-3">
+            <F0Alert
+              variant="info"
+              title={lockedClarification.title}
+              description={lockedClarification.description}
+              link={lockedClarification.link}
+            />
+          </div>
+        )}
         <div className="group/element w-full">
           <div
             className={cn(

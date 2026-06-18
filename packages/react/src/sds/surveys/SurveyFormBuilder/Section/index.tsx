@@ -95,7 +95,10 @@ export const Section = ({
   return (
     <div
       id={`co-creation-section-${id}`}
-      className="group/section flex w-full flex-col gap-1 bg-f1-background"
+      className={cn(
+        "group/section flex w-full flex-col gap-1 bg-f1-background",
+        locked && "cursor-not-allowed"
+      )}
     >
       <div className="py-1 pl-5 pr-3">
         <div className="flex flex-row">

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { AcademicCap, Add, Check, CheckDouble } from "@/icons/app"
+import { AcademicCap, Add, Check, CheckDouble, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -132,8 +132,9 @@ export const BaseQuestion = ({
       id={`co-creation-question-${id}`}
       className={cn(
         "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
-        !isDragging && !answering && "hover:border-f1-border-hover",
-        !answering || !!description ? "gap-4" : "gap-2"
+        !isDragging && !answering && !locked && "hover:border-f1-border-hover",
+        !answering || !!description ? "gap-4" : "gap-2",
+        !answering && locked && "cursor-not-allowed bg-f1-background-secondary"
       )}
     >
       <div className="flex flex-col gap-0.5">
@@ -197,6 +198,11 @@ export const BaseQuestion = ({
                 }
                 hiddenActions={hiddenActions}
               />
+            </div>
+          )}
+          {!answering && locked && (
+            <div className="flex shrink-0 items-center px-2 py-1 text-f1-foreground-secondary">
+              <F0Icon icon={LockLocked} size="md" />
             </div>
           )}
         </div>
