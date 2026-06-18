@@ -34,7 +34,12 @@ export function InFilterFlatOption<T extends string>({
         <span className="min-w-0 flex-1">
           <OneEllipsis>{option.label}</OneEllipsis>
         </span>
-        <div className="shrink-0">
+        {/* The presentational checkbox is a Radix Checkbox; inside a <form> it
+            renders a hidden BubbleInput whose sync effect dispatches a click that
+            bubbles up to this row's onClick (onToggle), causing an infinite
+            select/deselect loop ("Maximum update depth exceeded"). The row itself
+            handles the click, so stop the checkbox-originated click here. */}
+        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
           <F0Checkbox
             id={optionId}
             title={option.label}
