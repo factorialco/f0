@@ -5000,7 +5000,7 @@ function EndSessionModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onCl
     <F0Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title="Session ended — review attendance"
+      title="Session ended. Review attendance"
       description={`Attendance is automatically calculated from time spent in the session; anyone below ${COMPLETION_THRESHOLD_PCT}% is marked as “Not attended”. You can also edit this later in the Attendance tab.`}
       width="xl"
       primaryAction={{ label: "Confirm attendance", onClick: onConfirm }}
