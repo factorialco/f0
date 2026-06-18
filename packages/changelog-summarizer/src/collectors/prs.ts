@@ -427,9 +427,18 @@ export function classifyMergedPrs(
   for (const e of breaking) claimed.add(ckey(e.component));
   const enhDeduped = enhancements.filter((e) => !claimed.has(ckey(e.component)));
 
+  // "What's new" only announces components that are actually browsable in
+  // Storybook — internal components with no docs page (e.g. PresetFormDialog)
+  // aren't something the team can go see/use, so we drop them from the section.
+  const browsableNew = storyIndex
+    ? newDeduped.filter(
+        (e) => resolveStoryUrl(e.component, storyIndex.urlByKey) !== null,
+      )
+    : newDeduped;
+
   const skeleton: SummaryJson = {
     sections: {
-      ...(newDeduped.length > 0 ? { new: newDeduped } : {}),
+      ...(browsableNew.length > 0 ? { new: browsableNew } : {}),
       ...(stabilized.length > 0 ? { stabilized } : {}),
       ...(enhDeduped.length > 0 ? { enhancements: enhDeduped } : {}),
       ...(breaking.length > 0 ? { breaking_changes: breaking } : {}),
