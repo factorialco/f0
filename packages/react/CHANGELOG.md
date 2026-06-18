@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.4](https://github.com/factorialco/f0/compare/f0-react-v3.8.3...f0-react-v3.8.4) (2026-06-18)
+
+
+### Bug Fixes
+
+* **rich-text:** disable scroll anchoring on the notes editor scroll container ([#4485](https://github.com/factorialco/f0/issues/4485)) ([4ffc269](https://github.com/factorialco/f0/commit/4ffc269494617edb4c5f320ab660f832882a3e2c))
+
 ## [3.8.3](https://github.com/factorialco/f0/compare/f0-react-v3.8.2...f0-react-v3.8.3) (2026-06-18)
 
 
