@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.6](https://github.com/factorialco/f0/compare/f0-react-v3.8.5...f0-react-v3.8.6) (2026-06-18)
+
+
+### Bug Fixes
+
+* **F0Dialog:** render center & fullscreen dialogs above the fullscreen AI chat ([#4507](https://github.com/factorialco/f0/issues/4507)) ([2a0fc7c](https://github.com/factorialco/f0/commit/2a0fc7c6b37bbaa483755725febc6ef16cda7de9))
+
 ## [3.8.5](https://github.com/factorialco/f0/compare/f0-react-v3.8.4...f0-react-v3.8.5) (2026-06-18)
 
 
