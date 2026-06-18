@@ -1,5 +1,68 @@
 # Changelog
 
+## [3.8.5](https://github.com/factorialco/f0/compare/f0-react-v3.8.4...f0-react-v3.8.5) (2026-06-18)
+
+
+### Bug Fixes
+
+* **ButtonGroup:** drop numeric gap prop for fixed gap-md ([#4459](https://github.com/factorialco/f0/issues/4459)) ([5f2d6d2](https://github.com/factorialco/f0/commit/5f2d6d23b9e8b1eb4f0609a515aeade74cf3751f))
+
+## [3.8.4](https://github.com/factorialco/f0/compare/f0-react-v3.8.3...f0-react-v3.8.4) (2026-06-18)
+
+
+### Bug Fixes
+
+* **rich-text:** disable scroll anchoring on the notes editor scroll container ([#4485](https://github.com/factorialco/f0/issues/4485)) ([4ffc269](https://github.com/factorialco/f0/commit/4ffc269494617edb4c5f320ab660f832882a3e2c))
+
+## [3.8.3](https://github.com/factorialco/f0/compare/f0-react-v3.8.2...f0-react-v3.8.3) (2026-06-18)
+
+
+### Bug Fixes
+
+* **F0CardRow:** align avatar & actions as the row grows ([#4477](https://github.com/factorialco/f0/issues/4477)) ([747e126](https://github.com/factorialco/f0/commit/747e126c0e5b1b44f6baa1e74988cebd8e72c447))
+
+## [3.8.2](https://github.com/factorialco/f0/compare/f0-react-v3.8.1...f0-react-v3.8.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* missing rename of SurveySampleQuestion component ([#4500](https://github.com/factorialco/f0/issues/4500)) ([353efab](https://github.com/factorialco/f0/commit/353efabfbcc5c9d6dac69a3655b5103bab5f1667))
+
+## [3.8.1](https://github.com/factorialco/f0/compare/f0-react-v3.8.0...f0-react-v3.8.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* add missing SurveySampleQuestion export ([#4498](https://github.com/factorialco/f0/issues/4498)) ([7cbefe7](https://github.com/factorialco/f0/commit/7cbefe72c67a71dc5a6359b855070f5a08385e70))
+
+## [3.8.0](https://github.com/factorialco/f0/compare/f0-react-v3.7.2...f0-react-v3.8.0) (2026-06-18)
+
+
+### Features
+
+* **surveys:** add SampleQuestion component ([#4493](https://github.com/factorialco/f0/issues/4493)) ([1419763](https://github.com/factorialco/f0/commit/14197634811ac2f61c5532f2f150a5fe64c7059e))
+
+## [3.7.2](https://github.com/factorialco/f0/compare/f0-react-v3.7.1...f0-react-v3.7.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** stop checkbox click bubbling to option row inside a form ([#4484](https://github.com/factorialco/f0/issues/4484)) ([6012294](https://github.com/factorialco/f0/commit/6012294ce1447152496863fffb076026f0259611))
+
+## [3.7.1](https://github.com/factorialco/f0/compare/f0-react-v3.7.0...f0-react-v3.7.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* **F0Select:** never preserve a select-all across dataset changes ([#4479](https://github.com/factorialco/f0/issues/4479)) ([3ad4aea](https://github.com/factorialco/f0/commit/3ad4aeae64179e57f4db11194d3412664cd0c1be))
+
+## [3.7.0](https://github.com/factorialco/f0/compare/f0-react-v3.6.0...f0-react-v3.7.0) (2026-06-17)
+
+
+### Features
+
+* **OneDataCollection:** graph (org chart) visualization ([#4311](https://github.com/factorialco/f0/issues/4311)) ([deb3350](https://github.com/factorialco/f0/commit/deb3350ed8bf3d7be392bab040bf4890dbd9aef4))
+
 ## [3.6.0](https://github.com/factorialco/f0/compare/f0-react-v3.5.1...f0-react-v3.6.0) (2026-06-17)
 
 

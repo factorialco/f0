@@ -137,14 +137,16 @@ export function useF0GraphActionsInternal(): F0GraphActionsContextValue | null {
 export interface F0GraphRenderConfigContextValue {
   renderEdge?: (
     edge: import("./types").GraphEdge,
-    variant: import("./F0GraphEdge").EdgeVariant
+    variant: import("./components/F0GraphEdge").EdgeVariant
   ) => ReactNode | null
   /**
    * Set of tag types currently visible. When undefined, F0GraphNode
    * renders all tags. Driven by the F0Graph `nodeTagTypes` /
    * `visibleTagTypes` props and the controls popover.
    */
-  visibleTagTypes?: ReadonlySet<import("./F0GraphNode").F0GraphNodeTagType>
+  visibleTagTypes?: ReadonlySet<
+    import("./components/F0GraphNode").F0GraphNodeTagType
+  >
   /**
    * `true` while a deferred payload is still loading. Used by
    * F0GraphNodeWrapper to set `deferredLoading` on the render context.

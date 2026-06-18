@@ -112,7 +112,10 @@ export function InFilterOptionRow<T extends string>({
             <span className="min-w-0 flex-1">
               <OneEllipsis>{option.label}</OneEllipsis>
             </span>
-            <div className="shrink-0">
+            {/* Stop the checkbox-originated click (Radix BubbleInput sync click
+                inside a <form>) from bubbling to this row's onToggle, which would
+                cause an infinite select/deselect loop. The row handles the click. */}
+            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
               <F0Checkbox
                 id={optionId}
                 title={option.label}

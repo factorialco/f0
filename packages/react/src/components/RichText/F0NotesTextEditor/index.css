@@ -275,3 +275,8 @@ Placeholder component
 .notes-text-editor .resize-cursor {
   @apply cursor-col-resize;
 }
+
+/* The editor manages its own scrolling (ProseMirror scrolls the caret into view) */
+.notes-text-editor-scroll [data-scroll-container] {
+  overflow-anchor: none;
+}

@@ -661,13 +661,37 @@ export function useSelectable<
         if (allGroupIds.length > 0) {
           handleSelectGroupChange(allGroupIds, checked)
         }
+      } else if (checked) {
+        // Behave as preserve=false at the moment select-all is clicked: select
+        // ONLY the current query's items, discarding any selections preserved
+        // from earlier filters/searches. Keeping them would inflate the count
+        // (e.g. "All selected (25)" when far fewer match the active filter).
+        // Subsequent pages load via the data-sync effect while select-all stays
+        // active, so all-pages selection still works.
+        setLocalSelectedState((current) => {
+          const newItems = new Map<SelectionId, SelectedItemState<R>>()
+          for (const record of data.records) {
+            const id = getSelectable?.(record)
+            if (id === undefined) continue
+            newItems.set(id, {
+              id,
+              checked: true,
+              item: record as WithGroupId<R>,
+            })
+          }
+          return {
+            ...current,
+            allSelected: true,
+            items: newItems,
+          }
+        })
       } else {
         const allItemIds = data.records
           .map((record) => getSelectable?.(record))
           .filter((id): id is SelectionId => id !== undefined)
 
         if (allItemIds.length > 0) {
-          handleSelectItemChangeInternal(allItemIds, checked)
+          handleSelectItemChangeInternal(allItemIds, false)
         }
 
         setLocalSelectedState((current) => {
@@ -675,8 +699,8 @@ export function useSelectable<
           let hasChanges = false
 
           for (const [id, itemState] of newItems.entries()) {
-            if (itemState.checked !== checked) {
-              newItems.set(id, { ...itemState, checked })
+            if (itemState.checked !== false) {
+              newItems.set(id, { ...itemState, checked: false })
               hasChanges = true
             }
           }
@@ -685,7 +709,7 @@ export function useSelectable<
 
           return {
             ...current,
-            allSelected: checked ? true : false,
+            allSelected: false,
             items: newItems,
           }
         })
@@ -770,7 +794,14 @@ export function useSelectable<
       // When preserveSelectionOnDatasetChange is true, never clear on dataset
       // changes — used by selectors where search/filter is for finding items
       // to add to an existing selection.
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+      // `preserveSelectionOnDatasetChange` only governs MANUAL selection. A
+      // "select all" is scoped to the query it was made under, so it always
+      // clears on a dataset change (i.e. behaves as if the prop were false),
+      // regardless of the prop value.
+      if (
+        !disableSelectAll &&
+        (!preserveSelectionOnDatasetChange || allSelectedCheck)
+      ) {
         // Mark that we're clearing due to a dataset-identity change to prevent
         // the data-sync effect from restoring selections.
         justClearedByDatasetChange.current = true
@@ -787,6 +818,7 @@ export function useSelectable<
     clearSelectedItems,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
+    allSelectedCheck,
   ])
 
   // Clear selections when page changes, unless the user has triggered

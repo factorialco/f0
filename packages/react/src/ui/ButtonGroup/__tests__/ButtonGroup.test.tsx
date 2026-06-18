@@ -1,8 +1,9 @@
+import { betweenSpacing } from "@factorialco/f0-core"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { ButtonGroup } from "../ButtonGroup"
+import { BUTTON_GROUP_GAP_PX, ButtonGroup } from "../ButtonGroup"
 
 // The width-driven overflow (useOverflowCalculation) can't be exercised in
 // jsdom — every element measures 0, so nothing ever sheds into the "⋯" menu.
@@ -31,19 +32,22 @@ describe("ButtonGroup — canOverflow", () => {
       screen.queryByRole("button", { name: "Toggle dropdown menu" })
     ).not.toBeInTheDocument()
 
-    // The hidden measurement copy is skipped: only the 3 real buttons exist.
+    // The hidden width-measurement copy is skipped entirely: no aria-hidden
+    // duplicate buttons, just the 3 real ones.
+    expect(container.querySelector('[aria-hidden="true"] button')).toBeNull()
     expect(container.querySelectorAll("button")).toHaveLength(3)
   })
 
-  it("allows secondaries to shed into the ⋯ menu by default (canOverflow true)", () => {
-    // Contrast with the case above: by default the group can overflow, so it
-    // renders the "⋯" trigger (in jsdom, where widths measure 0, the secondaries
-    // shed into it). With canOverflow={false} that trigger never appears.
-    render(<ButtonGroup secondaryActions={secondaries} />)
+  it("renders the hidden width-measurement copy by default (canOverflow true)", () => {
+    // The direct counterpart of the code change (`{canOverflow && <copy>}`): by
+    // default the group keeps the hidden aria-hidden duplicate it measures to
+    // decide what sheds. Deterministic — it doesn't depend on any width being
+    // measured, unlike asserting that something actually shed into the menu.
+    const { container } = render(<ButtonGroup secondaryActions={secondaries} />)
 
     expect(
-      screen.getByRole("button", { name: "Toggle dropdown menu" })
-    ).toBeInTheDocument()
+      container.querySelector('[aria-hidden="true"] button')
+    ).not.toBeNull()
   })
 
   it("still surfaces otherActions in the ⋯ menu when canOverflow is false", () => {
@@ -61,5 +65,15 @@ describe("ButtonGroup — canOverflow", () => {
     expect(
       screen.getByRole("button", { name: "Toggle dropdown menu" })
     ).toBeInTheDocument()
+  })
+})
+
+describe("ButtonGroup — gap token", () => {
+  // The visible spacing is rendered with the `gap-md` class, but the overflow
+  // math needs a number, so BUTTON_GROUP_GAP_PX duplicates the token's pixel
+  // value. This guard fails the moment the two drift apart.
+  it("keeps BUTTON_GROUP_GAP_PX in sync with the gap-md token", () => {
+    const gapMdPx = parseFloat(String(betweenSpacing.md)) * 16 // 0.5rem → 8px
+    expect(BUTTON_GROUP_GAP_PX).toBe(gapMdPx)
   })
 })

@@ -561,9 +561,17 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   // Mark user interaction when select all is used
+  // Tracks whether a "select all" is the current selection. Once the user
+  // clicks select-all, the selection is scoped to the query it was made under,
+  // so from that moment the component behaves as if
+  // `preserveSelectionOnDatasetChange` were false — any filter/search/sort
+  // change drops it. Survives the dataset-change clear (unlike reading the live
+  // `allSelected`, which may have already flipped by the time the effect runs).
+  const selectAllActiveRef = useRef(false)
   const handleSelectAllWithTracking = useCallback(
     (checked: boolean) => {
       hasUserInteracted.current = true
+      selectAllActiveRef.current = checked
       handleSelectAllItems(checked)
     },
     [handleSelectAllItems]
@@ -835,21 +843,42 @@ const F0SelectComponent = forwardRef(function Select<
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-  // Clear selection cache and local value when filters change
-  const previousFiltersRef = useRef(localSource.currentFilters)
+  // Clear the selection cache and local value when the dataset identity changes
+  // (filters/sortings/search). `preserveSelectionOnDatasetChange` keeps MANUAL
+  // selections across the change, but a "select all" is scoped to the query it
+  // was made under and is always dropped (mirrors useSelectable) — so clear the
+  // local value too. Otherwise the stale select-all re-seeds through the
+  // `selectedState` prop and the badge balloons to the new query's count (e.g.
+  // "All selected (25)"). We read `selectAllActiveRef` rather than the live
+  // `allSelected` because useSelectable may have already flipped it by now, and
+  // we key off the debounced search to stay in sync with useSelectable's clear.
+  const previousDatasetKeyRef = useRef<string | null>(null)
   useEffect(() => {
-    const prev = JSON.stringify(previousFiltersRef.current)
-    const curr = JSON.stringify(localSource.currentFilters)
-    if (prev !== curr) {
-      previousFiltersRef.current = localSource.currentFilters
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+    const key = JSON.stringify([
+      localSource.currentFilters,
+      localSource.currentSortings,
+      localSource.debouncedCurrentSearch,
+    ])
+    if (previousDatasetKeyRef.current === null) {
+      previousDatasetKeyRef.current = key
+      return
+    }
+    if (previousDatasetKeyRef.current !== key) {
+      previousDatasetKeyRef.current = key
+      if (
+        !disableSelectAll &&
+        (!preserveSelectionOnDatasetChange || selectAllActiveRef.current)
+      ) {
         selectedItemsCache.current.clear()
         setLocalValue([])
         hasUserInteracted.current = true
+        selectAllActiveRef.current = false
       }
     }
   }, [
     localSource.currentFilters,
+    localSource.currentSortings,
+    localSource.debouncedCurrentSearch,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
   ])

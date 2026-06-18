@@ -382,7 +382,7 @@ const F0NotesTextEditorComponent = forwardRef<
           </motion.div>
         )}
       </AnimatePresence>
-      <ScrollArea className="h-full gap-6">
+      <ScrollArea className="notes-text-editor-scroll h-full gap-6">
         {alert && (
           <div className="mx-auto w-full max-w-[824px] sm:px-14 px-0">
             <F0Alert {...alert} />
