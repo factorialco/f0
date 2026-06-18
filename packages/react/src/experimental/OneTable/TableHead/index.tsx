@@ -2,13 +2,8 @@ import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { TableHead as TableHeadRoot } from "@/ui/table"
-import {
-  TooltipContent,
-  Tooltip as TooltipPrimitive,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/ui/tooltip"
 
 import { F0Icon, IconType } from "../../../components/F0Icon"
 import { ArrowDown, InfoCircleLine } from "../../../icons/app"
@@ -78,10 +73,21 @@ function HeaderInfo({
   const [open, setOpen] = useState(false)
   const { action } = info
 
+  // Rich header info uses a HoverCard, not a Tooltip: the surface is
+  // hover-revealed but holds interactive content (the optional action), which
+  // is what HoverCard is for — Radix Tooltip is a non-interactive label
+  // primitive. We override HoverCard's dark default to a light surface per-call
+  // (same approach as `TagCounter`) rather than adding a primitive variant.
   return (
-    <TooltipProvider delayDuration={300} disableHoverableContent={false}>
-      <TooltipPrimitive open={open} onOpenChange={setOpen}>
-        <TooltipTrigger
+    <HoverCard
+      open={open}
+      onOpenChange={setOpen}
+      openDelay={300}
+      closeDelay={100}
+    >
+      <HoverCardTrigger asChild>
+        <button
+          type="button"
           className={cn(
             "flex h-5 w-5 items-center justify-center rounded-xs text-f1-foreground-secondary",
             focusRing()
@@ -89,24 +95,24 @@ function HeaderInfo({
           aria-label={info.title ?? info.description}
         >
           <F0Icon icon={infoIcon} size="sm" />
-        </TooltipTrigger>
-        <TooltipContent variant="surface" className="pointer-events-auto">
-          <HeaderInfoCard
-            info={info}
-            // Dismiss the tooltip immediately when the action fires so it never
-            // lingers over the surface the action opens (e.g. a dialog).
-            onAction={
-              action
-                ? () => {
-                    setOpen(false)
-                    action.onClick()
-                  }
-                : undefined
-            }
-          />
-        </TooltipContent>
-      </TooltipPrimitive>
-    </TooltipProvider>
+        </button>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-auto bg-f1-background px-2 py-1.5 text-f1-foreground shadow-md ring-1 ring-f1-border-secondary">
+        <HeaderInfoCard
+          info={info}
+          // Dismiss the card immediately when the action fires so it never
+          // lingers over the surface the action opens (e.g. a dialog).
+          onAction={
+            action
+              ? () => {
+                  setOpen(false)
+                  action.onClick()
+                }
+              : undefined
+          }
+        />
+      </HoverCardContent>
+    </HoverCard>
   )
 }
 
