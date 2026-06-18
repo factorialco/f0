@@ -18,6 +18,7 @@ export function TOCFooter({ actions }: TOCFooterProps) {
       {actions.map((action, index) => (
         <div
           key={`toc-footer-action-${index}`}
+          onClick={() => !action.disabled && action.onClick()}
           className={cn(
             "w-full flex flex-row justify-between py-1.5 px-2 rounded border border-solid border-transparent",
             !action.disabled && "cursor-pointer hover:bg-f1-background-hover",
