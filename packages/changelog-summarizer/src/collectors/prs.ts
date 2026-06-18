@@ -123,6 +123,44 @@ function newComponentFromTitle(
   };
 }
 
+// Organisational "area" folders a component dir sits directly inside.
+const AREA_SEGMENTS = new Set([
+  "components", "patterns", "kits", "lib", "library", "layouts", "hooks", "ui",
+  "experimental", "sds", "ai", "surveys", "home", "communities", "charts",
+  "navigation", "information", "actions", "inputs", "utilities", "data",
+  "datacollection", "visualizations", "post", "feedback", "forms",
+]);
+
+/**
+ * Detect a brand-new component from ADDED source files: the component's ROOT
+ * file (`index.tsx` or `<Component>.tsx`) added, with the component dir directly
+ * inside a known area folder. Catches new components whose PR title doesn't use
+ * the "add <Component> component" phrasing (e.g. "add slider" → F0Slider), while
+ * ignoring sub-files added inside an existing component.
+ */
+function newComponentFromFiles(
+  files: PrFile[],
+): { component: string; kind: "pattern" | "component" } | null {
+  const cands: Array<{ comp: string; depth: number; kind: "pattern" | "component" }> = [];
+  for (const f of files) {
+    if (f.status !== "added" || !f.filename.startsWith(REACT_SRC)) continue;
+    const parts = f.filename.split("/");
+    const file = parts[parts.length - 1];
+    const comp = parts[parts.length - 2];
+    const parent = parts[parts.length - 3];
+    if (!isComponentName(comp)) continue;
+    const isRoot = /^index\.tsx?$/.test(file) || file === `${comp}.tsx`;
+    if (!isRoot || !parent || !AREA_SEGMENTS.has(parent.toLowerCase())) continue;
+    cands.push({
+      comp,
+      depth: parts.length,
+      kind: /\/patterns\//.test(f.filename) ? "pattern" : "component",
+    });
+  }
+  cands.sort((a, b) => a.depth - b.depth);
+  return cands.length ? { component: cands[0].comp, kind: cands[0].kind } : null;
+}
+
 /**
  * Resolve a component name from the PR title — the last PascalCase / F0·One
  * token that actually exists in Storybook. Used when the conventional scope is
@@ -239,7 +277,13 @@ export function classifyMergedPrs(
     // 1. New component/pattern — the PR title introduces it ("add <Component>").
     //    Adding a feature to an existing component is NOT new — it's an
     //    enhancement.
-    const newComp = newComponentFromTitle(subject);
+    // Title signal works for any type; the file signal only for feat/perf so a
+    // `refactor` that MOVES a component (new file in a new path) isn't "new".
+    const newComp =
+      newComponentFromTitle(subject) ??
+      (type === "feat" || type === "perf"
+        ? newComponentFromFiles(pr.files)
+        : null);
     if (newComp) {
       newEntries.push({
         component: newComp.component,
@@ -372,11 +416,22 @@ export function classifyMergedPrs(
     });
   }
 
+  // One component → one section. Priority: stabilized > new > breaking >
+  // enhancements. A component promoted/new this week shouldn't also be repeated
+  // under Enhancements for its other PRs.
+  const claimed = new Set<string>();
+  const ckey = (c: string) => c.trim().toLowerCase();
+  for (const e of stabilized) claimed.add(ckey(e.component));
+  const newDeduped = newEntries.filter((e) => !claimed.has(ckey(e.component)));
+  for (const e of newDeduped) claimed.add(ckey(e.component));
+  for (const e of breaking) claimed.add(ckey(e.component));
+  const enhDeduped = enhancements.filter((e) => !claimed.has(ckey(e.component)));
+
   const skeleton: SummaryJson = {
     sections: {
-      ...(newEntries.length > 0 ? { new: newEntries } : {}),
+      ...(newDeduped.length > 0 ? { new: newDeduped } : {}),
       ...(stabilized.length > 0 ? { stabilized } : {}),
-      ...(enhancements.length > 0 ? { enhancements } : {}),
+      ...(enhDeduped.length > 0 ? { enhancements: enhDeduped } : {}),
       ...(breaking.length > 0 ? { breaking_changes: breaking } : {}),
     },
   };
