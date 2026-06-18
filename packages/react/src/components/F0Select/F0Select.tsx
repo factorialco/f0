@@ -844,17 +844,20 @@ const F0SelectComponent = forwardRef(function Select<
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
   // Clear the selection cache and local value when the dataset identity changes
-  // (filters/sortings). `preserveSelectionOnDatasetChange` keeps MANUAL
+  // (filters/sortings/search). `preserveSelectionOnDatasetChange` keeps MANUAL
   // selections across the change, but a "select all" is scoped to the query it
   // was made under and is always dropped (mirrors useSelectable) — so clear the
-  // local value too, or the input badge would keep showing the stale select-all
-  // count. We read `selectAllActiveRef` rather than the live `allSelected`
-  // because useSelectable may have already flipped it by the time this runs.
+  // local value too. Otherwise the stale select-all re-seeds through the
+  // `selectedState` prop and the badge balloons to the new query's count (e.g.
+  // "All selected (25)"). We read `selectAllActiveRef` rather than the live
+  // `allSelected` because useSelectable may have already flipped it by now, and
+  // we key off the debounced search to stay in sync with useSelectable's clear.
   const previousDatasetKeyRef = useRef<string | null>(null)
   useEffect(() => {
     const key = JSON.stringify([
       localSource.currentFilters,
       localSource.currentSortings,
+      localSource.debouncedCurrentSearch,
     ])
     if (previousDatasetKeyRef.current === null) {
       previousDatasetKeyRef.current = key
@@ -875,6 +878,7 @@ const F0SelectComponent = forwardRef(function Select<
   }, [
     localSource.currentFilters,
     localSource.currentSortings,
+    localSource.debouncedCurrentSearch,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
   ])
