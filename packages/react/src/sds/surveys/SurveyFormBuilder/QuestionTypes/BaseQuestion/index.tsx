@@ -134,7 +134,15 @@ export const BaseQuestion = ({
         "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
         !isDragging && !answering && !locked && "hover:border-f1-border-hover",
         !answering || !!description ? "gap-4" : "gap-2",
-        !answering && locked && "cursor-not-allowed bg-f1-background-secondary"
+        // When locked, the whole card uses the secondary background. Nested
+        // surfaces are made transparent so they reveal that same background
+        // uniformly — secondary is translucent, so painting them secondary
+        // again would stack and look darker than the root. This covers the
+        // answer-preview inputs/textareas rendered through F0InputField (which
+        // are otherwise tertiary while disabled).
+        !answering &&
+          locked &&
+          "cursor-not-allowed bg-f1-background-secondary [&_[data-testid=input-field-wrapper]]:!bg-transparent"
       )}
     >
       <div className="flex flex-col gap-0.5">

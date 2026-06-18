@@ -13,9 +13,11 @@ import { OnClickOptionActionParams, SelectOptionProps } from "./types"
 function RadioIndicator({
   checked,
   disabled,
+  locked,
 }: {
   checked: boolean
   disabled?: boolean
+  locked?: boolean
 }) {
   return (
     <div
@@ -24,7 +26,12 @@ function RadioIndicator({
         "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors",
         checked
           ? "bg-f1-background-selected-bold"
-          : "border border-solid border-f1-border bg-f1-background",
+          : cn(
+              "border border-solid border-f1-border",
+              // Transparent when locked so it reveals the (secondary) card
+              // background instead of stacking another translucent layer.
+              locked ? "bg-transparent" : "bg-f1-background"
+            ),
         disabled && "opacity-50"
       )}
     >
@@ -109,7 +116,12 @@ export const SelectOption = ({
     >
       <div
         className={cn(
-          "group relative flex min-h-9 items-center gap-3 rounded-md bg-f1-background py-0.5 pl-2 pr-0.5 hover:bg-f1-background-hover",
+          "group relative flex min-h-9 items-center gap-3 rounded-md py-0.5 pl-2 pr-0.5",
+          // Transparent when locked so the row blends into the secondary card
+          // background (no hover affordance since it isn't interactive).
+          locked
+            ? "bg-transparent"
+            : "bg-f1-background hover:bg-f1-background-hover",
           (disabled || answering) && "cursor-pointer",
           isDragging && "!cursor-grabbing active:!cursor-grabbing"
         )}
@@ -135,6 +147,7 @@ export const SelectOption = ({
             <RadioIndicator
               checked={answering ? !!selected : false}
               disabled={!answering}
+              locked={locked}
             />
           )}
         </div>

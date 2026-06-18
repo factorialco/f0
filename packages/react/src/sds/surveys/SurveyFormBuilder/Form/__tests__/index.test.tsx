@@ -163,6 +163,39 @@ describe("SurveyFormBuilder", () => {
     expect(screen.getByText("Second clarification")).toBeInTheDocument()
   })
 
+  it("does not select a rating option when its question is locked", async () => {
+    const user = userEvent.setup()
+    const onChange = vi.fn()
+    const elements: SurveyFormBuilderElement[] = [
+      {
+        type: "section",
+        section: {
+          id: "s1",
+          title: "Locked Section",
+          locked: true,
+          questions: [
+            {
+              id: "q-rating",
+              title: "Rate it",
+              type: "rating" as const,
+              options: [
+                { value: 1, label: "1" },
+                { value: 2, label: "2" },
+                { value: 3, label: "3" },
+              ],
+            },
+          ],
+        },
+      },
+    ]
+
+    render(<SurveyFormBuilder elements={elements} onChange={onChange} />)
+
+    await user.click(screen.getByTestId("score-edit-option-2"))
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it("does not show a lockedClarification alert for unlocked sections", () => {
     const elements: SurveyFormBuilderElement[] = [
       makeSection("s1", "Open Section", [{ id: "q1", title: "Q1" }], false),

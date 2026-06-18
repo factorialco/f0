@@ -17,8 +17,17 @@ export const BaseScoreQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: BaseScoreQuestionProps) => {
-  const { onQuestionChange, disabled, answering } =
-    useSurveyFormBuilderContext()
+  const {
+    onQuestionChange,
+    disabled,
+    answering,
+    getSectionContainingQuestion,
+  } = useSurveyFormBuilderContext()
+
+  const containingSection = getSectionContainingQuestion(
+    baseQuestionComponentProps.id
+  )
+  const locked = baseQuestionComponentProps.locked || containingSection?.locked
 
   const ratingType = detectRatingOptionType(options)
   const isEmojiMode = ratingType === "emojis"
@@ -54,7 +63,7 @@ export const BaseScoreQuestion = ({
             selected={value === option.value}
             onClick={handleChangeValue}
             onChangeLabel={handleChangeLabel}
-            disabled={disabled && !answering}
+            disabled={!answering && (disabled || locked)}
             isEmojiMode={answering ? false : isEmojiMode}
           />
         ))}
