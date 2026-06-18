@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.3](https://github.com/factorialco/f0/compare/f0-react-v3.8.2...f0-react-v3.8.3) (2026-06-18)
+
+
+### Bug Fixes
+
+* **F0CardRow:** align avatar & actions as the row grows ([#4477](https://github.com/factorialco/f0/issues/4477)) ([747e126](https://github.com/factorialco/f0/commit/747e126c0e5b1b44f6baa1e74988cebd8e72c447))
+
 ## [3.8.2](https://github.com/factorialco/f0/compare/f0-react-v3.8.1...f0-react-v3.8.2) (2026-06-18)
 
 
