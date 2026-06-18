@@ -1,10 +1,9 @@
-import { c as b, a as ye, f as oe, C as ge } from "./utils-BFYuLEg3.js";
-import { h as ga, B as pa, i as ba, j as xa, k as Dt, l as Be, m as Te, n as va, o as J, u as ce, T as ya, p as wa, q as Na, R as Ca, r as Ia, s as ka, t as Nt, v as ut, w as Ve, A as Le, x as Sa, y as Fa, z as U, E as Aa, G as La, H as xe, J as mn, K as Oa, L as Pa, M as H, N as hn, S as z, O as ke, Q as Ea, U as _a, V as Da, W as Ta, X as za, Y as Oe, Z as gn, _ as Ra, $ as we, a0 as Ue, a1 as Ba, e as pn, a2 as Ae, a3 as $a, a4 as bn, a5 as ie, a6 as X, a7 as xn, a8 as vn, a9 as Ma, aa as yn, ab as pe, ac as ae, ad as Wa, ae as ja, af as Va, ag as Ua, ah as ve, ai as Ye, aj as Ha, ak as Ga, al as Ka, am as qa, an as Je, ao as wn, ap as Ya, aq as Ja, ar as Za, as as He, at as Xa, au as Nn, av as Qa, aw as er, ax as tr, ay as nr, az as ar, aA as rr, aB as ir, aC as lr, aD as ft, aE as Cn, aF as mt, aG as In, aH as sr, aI as or, aJ as cr, aK as dr, aL as ur, aM as Ze, aN as Xe, aO as ht, aP as kn, aQ as fr, aR as Ct, aS as mr, aT as hr, aU as gr, aV as Re, aW as pr, aX as br, aY as $e, aZ as Tt, a_ as gt, a$ as xr, b0 as vr, a as yr, b as wr, b1 as Sn, b2 as Nr, g as Cr, F as Ir, b3 as kr, b4 as Fn, b5 as Sr, b6 as An, b7 as Ln, b8 as Fr, b9 as Ar, ba as Lr, bb as Or, bc as Pr, bd as Er, be as _r, bf as Dr, bg as Tr, bh as On, bi as zr, bj as Rr, bk as Br, bl as $r, bm as It, bn as kt, bo as St, bp as Pn, bq as Ft, br as En, bs as _n, bt as Mr, bu as Wr, bv as jr, bw as Vr, bx as Ur, by as Hr, bz as Gr, bA as Kr, bB as zt, bC as qr, bD as Yr, bE as Rt, bF as Bt, bG as $t, bH as Jr, bI as Zr, bJ as Xr, bK as Qr, bL as Dn, bM as ei, bN as ti } from "./F0CanvasPanel-B_jvSEjq.js";
-import { bZ as qc, bY as Yc, c9 as Jc, bV as Zc, bW as Xc, bO as Qc, cc as ed, bP as td, bQ as nd, cd as ad, bX as rd, c5 as id, c6 as ld, ca as sd, bR as od, b$ as cd, b_ as dd, bS as ud, bT as fd, c7 as md, ce as hd, c8 as gd, cb as pd, c4 as bd, c1 as xd, c3 as vd, c0 as yd, bU as wd, c2 as Nd } from "./F0CanvasPanel-B_jvSEjq.js";
+import { h as ga, B as pa, i as ba, j as xa, k as Dt, l as Be, m as Te, n as va, o as b, p as J, q as ye, u as oe, T as ya, r as wa, s as Na, R as Ca, t as Ia, v as ce, w as ka, x as Nt, y as ut, z as Ve, A as Le, E as Sa, G as Fa, H as U, J as Aa, K as La, L as xe, M as mn, N as Oa, O as Pa, Q as H, S as hn, U as z, V as ke, W as Ea, X as _a, Y as Da, Z as Ta, _ as za, $ as Oe, a0 as gn, a1 as Ra, a2 as we, a3 as Ue, a4 as Ba, e as pn, a5 as Ae, a6 as $a, a7 as bn, a8 as ie, a9 as X, aa as xn, ab as vn, ac as Ma, ad as yn, ae as pe, af as ae, ag as Wa, ah as ja, ai as Va, aj as Ua, ak as ve, al as Ye, am as Ha, an as Ga, ao as Ka, ap as qa, aq as Je, ar as wn, as as Ya, at as Ja, au as Za, av as He, aw as Xa, ax as Nn, ay as Qa, az as er, aA as tr, aB as nr, aC as ar, aD as rr, aE as ir, aF as lr, aG as ft, aH as Cn, aI as mt, aJ as In, aK as sr, aL as or, aM as cr, aN as dr, aO as ur, aP as Ze, aQ as Xe, aR as ht, aS as kn, aT as fr, aU as Ct, aV as mr, aW as hr, aX as gr, aY as Re, aZ as pr, a_ as br, a$ as $e, b0 as Tt, b1 as gt, b2 as xr, b3 as vr, a as yr, b as wr, b4 as Sn, b5 as Nr, g as Cr, F as Ir, b6 as kr, b7 as Fn, b8 as Sr, b9 as An, ba as Ln, bb as Fr, bc as Ar, bd as Lr, be as Or, bf as Pr, bg as Er, bh as _r, bi as Dr, bj as Tr, bk as On, bl as zr, bm as Rr, bn as Br, bo as $r, bp as ge, bq as It, br as kt, bs as St, bt as Pn, bu as Ft, bv as En, bw as _n, bx as Mr, by as Wr, bz as jr, bA as Vr, bB as Ur, bC as Hr, bD as Gr, bE as Kr, bF as zt, bG as qr, bH as Yr, bI as Rt, bJ as Bt, bK as $t, bL as Jr, bM as Zr, bN as Xr, bO as Qr, bP as Dn, bQ as ei, bR as ti } from "./F0CanvasPanel-DUO4iIQa.js";
+import { c1 as Kc, c0 as qc, cd as Yc, bZ as Jc, b_ as Zc, bS as Xc, cg as Qc, bT as ed, bU as td, ch as nd, b$ as ad, c9 as rd, ca as id, ce as ld, bV as sd, c3 as od, c2 as cd, bW as dd, bX as ud, cb as fd, ci as md, cc as hd, cf as gd, c8 as pd, c5 as bd, c7 as xd, c4 as vd, bY as yd, c6 as wd } from "./F0CanvasPanel-DUO4iIQa.js";
 import { jsx as e, jsxs as o, Fragment as Z } from "react/jsx-runtime";
 import ue, { forwardRef as G, useRef as j, useTransition as ni, useState as D, useLayoutEffect as Tn, useId as pt, useContext as Pe, createContext as Qe, useEffect as W, useCallback as ne, useMemo as q, Fragment as ai, isValidElement as ri, cloneElement as zn, Children as Rn } from "react";
-import { C as ii, P as li, a as Bn, M as si, p as oi, b as ci, R as Mt, c as $n, u as di, d as ui, e as fi, f as mi, g as hi, h as Mn, S as gi, A as pi, B as bi, L as xi, i as vi, V as yi, j as wi, k as Ni, l as Ci, O as Ii } from "./useDataCollectionSource-CCE4k9IR.js";
-import { r as Id, s as kd, o as Sd, H as Fd, t as Ad, z as Ld, a8 as Od, G as Pd, q as Ed, aa as _d, a9 as Dd, Q as Td, ad as zd, F as Rd, Y as Bd, U as $d, J as Md, af as Wd, K as jd, Z as Vd, _ as Ud, v as Hd, ab as Gd, ac as Kd, N as qd, $ as Yd, a5 as Jd, a7 as Zd, w as Xd, y as Qd, D as eu, W as tu, ae as nu, X as au, T as ru, ag as iu, x as lu, E as su, m as ou, n as cu, a1 as du, a2 as uu, a6 as fu, I as mu, a3 as hu, a0 as gu, a4 as pu } from "./useDataCollectionSource-CCE4k9IR.js";
+import { C as ii, P as li, a as Bn, M as si, p as oi, b as ci, R as Mt, c as $n, u as di, d as ui, e as fi, f as mi, g as hi, h as Mn, S as gi, A as pi, B as bi, L as xi, i as vi, V as yi, j as wi, k as Ni, l as Ci, O as Ii } from "./useDataCollectionSource-3nlB3zIW.js";
+import { r as Cd, s as Id, o as kd, H as Sd, t as Fd, z as Ad, a8 as Ld, G as Od, q as Pd, aa as Ed, a9 as _d, Q as Dd, ad as Td, F as zd, Y as Rd, U as Bd, J as $d, af as Md, K as Wd, Z as jd, _ as Vd, v as Ud, ab as Hd, ac as Gd, N as Kd, $ as qd, a5 as Yd, a7 as Jd, w as Zd, y as Xd, D as Qd, W as eu, ae as tu, X as nu, T as au, ag as ru, x as iu, E as lu, m as su, n as ou, a1 as cu, a2 as du, a6 as uu, I as fu, a3 as mu, a0 as hu, a4 as gu } from "./useDataCollectionSource-3nlB3zIW.js";
 const ki = ga("Search", [
   ["circle", { cx: "11", cy: "11", r: "8", key: "4ej97u" }],
   ["path", { d: "m21 21-4.3-4.3", key: "1qie3q" }]
@@ -388,7 +387,7 @@ const Un = ({
   className: t,
   disabled: n
 }) => {
-  const { enabled: a, setOpen: r, open: i } = et(), l = ce(), [s, c] = D(!1);
+  const { enabled: a, setOpen: r, open: i } = et(), l = oe(), [s, c] = D(!1);
   return a ? /* @__PURE__ */ e("div", { className: "flex items-center", children: /* @__PURE__ */ e(ya, { children: /* @__PURE__ */ o(wa, { delayDuration: 850, disableHoverableContent: !0, children: [
     /* @__PURE__ */ e(Na, { asChild: !0, children: /* @__PURE__ */ e(
       J.div,
@@ -420,7 +419,7 @@ const Un = ({
               "after:pointer-events-none after:absolute after:inset-0 after:rounded-full after:ring-1 after:ring-inset after:ring-f1-border after:transition-all after:content-[''] data-[state=checked]:after:ring-f1-border-inverse",
               "before:absolute before:inset-0 before:rounded-full before:bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] before:opacity-0 before:transition-all before:duration-300 before:content-[''] data-[state=checked]:before:opacity-100",
               n && "cursor-not-allowed opacity-50",
-              oe(),
+              ce(),
               t
             ),
             disabled: n,
@@ -527,7 +526,7 @@ const Ut = J.create(U), Ht = {
     {
       className: b(
         "flex h-6 w-6 items-center justify-center rounded",
-        oe()
+        ce()
       ),
       onClick: l,
       "aria-label": a,
@@ -909,8 +908,8 @@ const Ut = J.create(U), Ht = {
       )
     ] })
   ] });
-}, Ot = Qe(null), Xo = Ot.Provider;
-function Qo() {
+}, Ot = Qe(null), Zo = Ot.Provider;
+function Xo() {
   return Pe(Ot);
 }
 function Hi(t, n) {
@@ -935,7 +934,7 @@ function Hi(t, n) {
     a
   ]);
 }
-function ec({
+function Qo({
   module: t,
   statusTag: n = void 0,
   breadcrumbs: a = [],
@@ -1103,7 +1102,7 @@ function Gi({ action: t }) {
   );
 }
 const Ki = () => {
-  const t = ce();
+  const t = oe();
   return /* @__PURE__ */ o(
     J.div,
     {
@@ -1468,7 +1467,7 @@ const Ki = () => {
   (t, n) => /* @__PURE__ */ e(tl, { ref: n, ...t })
 ), al = ({ compact: t, variant: n }) => /* @__PURE__ */ e(nl, { compact: t, variant: n });
 qn.displayName = "F0Callout";
-const tc = ae(
+const ec = ae(
   ie(qn),
   al
 );
@@ -1485,7 +1484,7 @@ function rl({
         "flex w-full flex-row items-center gap-[6px] rounded-md p-[6px] pr-2 text-left transition-colors",
         n && "bg-f1-background-tertiary",
         a && "cursor-pointer hover:bg-f1-background-hover",
-        oe("focus-visible:ring-inset")
+        ce("focus-visible:ring-inset")
       ),
       onClick: a,
       disabled: !a,
@@ -1520,7 +1519,7 @@ function il({
         "flex w-full flex-col gap-[6px] rounded-md px-2 py-[6px] text-left transition-colors",
         r && "bg-f1-background-tertiary",
         a && "cursor-pointer hover:bg-f1-background-hover",
-        oe("focus-visible:ring-inset")
+        ce("focus-visible:ring-inset")
       ),
       onClick: a,
       disabled: !a,
@@ -1596,7 +1595,7 @@ function ll({
     }
   );
 }
-const nc = ie(
+const tc = ie(
   X("F0VersionHistory", ll)
 ), Yn = G(
   ({ height: t, itemCount: n, itemSize: a, className: r, renderer: i }, l) => {
@@ -2709,7 +2708,7 @@ const qt = ({
       )
     }
   );
-}, ac = (t) => {
+}, nc = (t) => {
   const [n, a] = D(
     (t.alwaysOpen || t.defaultOpen) ?? !1
   ), r = (w) => {
@@ -3195,7 +3194,7 @@ const xl = ({
   onEndReached: r,
   onEndReachedItemsThreshold: i = 5
 }) => {
-  const l = ce(), s = sr(t, "createdAt"), c = Object.values(s).slice().flatMap((u) => u.map((m) => m.id)).slice(-i), d = or((u) => {
+  const l = oe(), s = sr(t, "createdAt"), c = Object.values(s).slice().flatMap((u) => u.map((m) => m.id)).slice(-i), d = or((u) => {
     c.includes(u) && r?.();
   }, 1e3), f = Il(
     Object.entries(s).filter(([u, m]) => !!m.length)
@@ -3216,7 +3215,7 @@ const xl = ({
     n && new Array(Nl).fill(null).map((u, m) => /* @__PURE__ */ e(Pt.Skeleton, {}, m))
   ] });
 }, Sl = () => {
-  const t = ce();
+  const t = oe();
   return /* @__PURE__ */ o("div", { className: "flex flex-col gap-2 p-2", children: [
     /* @__PURE__ */ e(je.Skeleton, { title: t.date.groups.today, numItems: 1 }),
     /* @__PURE__ */ e(vt, {}),
@@ -3236,7 +3235,7 @@ const xl = ({
       }
     )
   ] });
-}, rc = X(
+}, ac = X(
   "ActivityItemList",
   ae(kl, Sl)
 ), Fl = {
@@ -3386,7 +3385,7 @@ const Pl = ({
       onClick: i,
       className: b(
         "relative flex flex-col rounded-xl border border-solid border-f1-border-secondary bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary no-underline transition-shadow hover:shadow",
-        oe()
+        ce()
       ),
       onMouseEnter: x ? void 0 : N,
       onMouseLeave: x ? void 0 : E,
@@ -3442,7 +3441,7 @@ const Pl = ({
       ] }) }) })
     ]
   }
-), ic = ae(Pl, El), lc = ({
+), rc = ae(Pl, El), ic = ({
   title: t,
   subtitle: n,
   buttonLabel: a,
@@ -3741,14 +3740,14 @@ const zl = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
   expanded: a,
   onClick: r
 }) => {
-  const i = ce();
+  const i = oe();
   return /* @__PURE__ */ e("div", { className: "text-base text-f1-foreground", children: /* @__PURE__ */ e(
     "button",
     {
       type: "button",
       className: b(
         "inline cursor-pointer rounded-none border-0 bg-transparent p-0 text-base text-f1-foreground underline underline-offset-2 hover:text-f1-foreground-secondary",
-        oe()
+        ce()
       ),
       "aria-controls": n,
       "aria-describedby": t,
@@ -3942,7 +3941,7 @@ const zl = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
                     content: l,
                     collapsed: S,
                     tabIndex: w ? -1 : void 0,
-                    className: b(w && oe())
+                    className: b(w && ce())
                   }
                 ),
                 y && L && !w && /* @__PURE__ */ e(
@@ -4015,7 +4014,7 @@ const zl = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
       /* @__PURE__ */ e(z, { className: "h-2.5 w-14 rounded-2xs" })
     ] })
   ] })
-] }), sc = ae(
+] }), lc = ae(
   Wl,
   jl
 ), na = ue.forwardRef(({ person: t, onClick: n, ...a }, r) => {
@@ -4094,7 +4093,7 @@ const zl = () => /* @__PURE__ */ o("div", { className: "flex flex-col justify-ar
   ] })
 ] });
 na.displayName = "OnePersonListItem";
-const oc = ie(
+const sc = ie(
   X(
     "OnePersonListItem",
     ae(na, Vl)
@@ -4137,16 +4136,16 @@ function Gl({
     }
   ) });
 }
-const cc = X(
+const oc = X(
   "ApplicationFrame",
   Hl
 ), Kl = ({ contentId: t }) => {
-  const n = ce();
+  const n = oe();
   return /* @__PURE__ */ e(
     "a",
     {
       href: `#${t}`,
-      className: oe(
+      className: ce(
         "absolute z-50 -translate-y-[1000px] translate-x-4 rounded-md bg-f1-background px-4 py-2.5 text-base font-medium text-f1-foreground no-underline transition-transform duration-200 focus-visible:translate-y-4"
       ),
       children: n.actions.skipToContent
@@ -4341,7 +4340,7 @@ const aa = ({
   pulse: l,
   onPulseClick: s
 }) => {
-  const c = ce(), [d, f] = D(!l);
+  const c = oe(), [d, f] = D(!l);
   return /* @__PURE__ */ e("div", { className: "relative h-10 w-10", children: /* @__PURE__ */ e(Le, { mode: "popLayout", initial: !!d, children: d ? /* @__PURE__ */ e(
     J.div,
     {
@@ -4581,7 +4580,7 @@ function ra({
   );
 }
 ra.displayName = "DaytimePage";
-const dc = ie(
+const cc = ie(
   X("DaytimePage", ra)
 );
 function Xl(t) {
@@ -4606,7 +4605,7 @@ function Ql({ label: t, options: n, hasNewUpdate: a }) {
         {
           className: b(
             "relative flex h-6 w-6 items-center justify-center rounded-full bg-f1-background-inverse text-f1-foreground-inverse shadow-md transition-all",
-            oe()
+            ce()
           ),
           "aria-label": t,
           children: [
@@ -4618,7 +4617,7 @@ function Ql({ label: t, options: n, hasNewUpdate: a }) {
     }
   );
 }
-const uc = ie(
+const dc = ie(
   X("OmniButton", Ql)
 );
 function ia({ children: t, header: n, embedded: a = !1 }) {
@@ -4637,7 +4636,7 @@ function ia({ children: t, header: n, embedded: a = !1 }) {
   );
 }
 ia.displayName = "Page";
-const fc = ie(X("Page", ia));
+const uc = ie(X("Page", ia));
 function es({
   companies: t,
   selected: n,
@@ -4683,7 +4682,7 @@ const ts = ({
   children: r,
   additionalOptions: i = []
 }) => {
-  const l = ce(), [s, c] = D(!1), d = q(
+  const l = oe(), [s, c] = D(!1), d = q(
     () => [
       ...t.map((u) => ({
         value: u.id,
@@ -4723,7 +4722,7 @@ const ts = ({
         {
           className: b(
             "group flex w-fit max-w-full flex-nowrap items-center justify-center gap-1 rounded p-1.5 text-f1-foreground transition-colors hover:bg-f1-background-hover data-[state=open]:bg-f1-background-hover",
-            oe()
+            ce()
           ),
           "data-testid": "company-selector-button",
           tabIndex: 0,
@@ -4767,7 +4766,7 @@ const ts = ({
     ]
   }
 );
-function mc({
+function fc({
   user: t,
   options: n,
   showActivityButton: a = !1,
@@ -4776,14 +4775,14 @@ function mc({
   onDropdownClick: l,
   hasActivityUpdates: s
 }) {
-  const c = ce();
+  const c = oe();
   return /* @__PURE__ */ o("div", { className: "flex flex-row items-center justify-between gap-1 p-3", children: [
     /* @__PURE__ */ e("div", { className: "min-w-0 flex-1", children: /* @__PURE__ */ e(Ae, { items: n, children: /* @__PURE__ */ o(
       "button",
       {
         className: b(
           "flex w-full max-w-full items-center gap-1.5 rounded p-1.5 font-medium transition-colors hover:bg-f1-background-secondary data-[state=open]:bg-f1-background-secondary",
-          oe("focus-visible:ring-inset")
+          ce("focus-visible:ring-inset")
         ),
         onClick: l,
         children: [
@@ -4892,7 +4891,7 @@ function as() {
     }
   );
 }
-function hc({
+function mc({
   companies: t,
   selected: n,
   onChange: a,
@@ -4965,7 +4964,7 @@ const ls = ({
       ...i,
       className: b(
         "flex cursor-pointer items-center rounded py-1.5 pl-1.5 pr-2 no-underline transition-colors",
-        oe("focus-visible:ring-inset"),
+        ce("focus-visible:ring-inset"),
         l ? "bg-f1-background-secondary text-f1-foreground" : "hover:bg-f1-background-secondary"
       ),
       children: /* @__PURE__ */ e(ls, { item: t, active: l })
@@ -4982,7 +4981,7 @@ const ls = ({
   onReorderFinish: c,
   isSortable: d = !0
 }) => {
-  const f = ce(), { isDragging: u, setIsDragging: m, draggedItemId: h, setDraggedItemId: p } = Et(), { isActive: g } = Nt(), x = g(t.href, { exact: t.exactMatch }), y = j(!1), [N, E] = D(!1), R = i === 0, _ = i === l - 1, O = l === 1, L = q(() => {
+  const f = oe(), { isDragging: u, setIsDragging: m, draggedItemId: h, setDraggedItemId: p } = Et(), { isActive: g } = Nt(), x = g(t.href, { exact: t.exactMatch }), y = j(!1), [N, E] = D(!1), R = i === 0, _ = i === l - 1, O = l === 1, L = q(() => {
     const A = [];
     return !O && !R && A.push({
       label: f.actions.moveUp,
@@ -5107,7 +5106,7 @@ const ls = ({
       {
         className: b(
           "group relative flex w-full select-none items-center gap-1 rounded px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
-          oe("focus-visible:ring-inset"),
+          ce("focus-visible:ring-inset"),
           a && "hidden"
         ),
         onClick: u,
@@ -5230,7 +5229,7 @@ const ls = ({
     }
   ) : p;
 };
-function gc({
+function hc({
   tree: t,
   onCollapse: n,
   onSort: a,
@@ -5278,7 +5277,7 @@ function cs({
   forceUpdate: d,
   disableDragging: f = !1
 }) {
-  const u = ce(), { isDragging: m } = Et(), h = t.some((v) => v.isRoot), p = t.filter((v) => !v.isRoot).length > 0, g = n.length > 0, x = j(null), [y, N] = D(s), E = s.length > 0;
+  const u = oe(), { isDragging: m } = Et(), h = t.some((v) => v.isRoot), p = t.filter((v) => !v.isRoot).length > 0, g = n.length > 0, x = j(null), [y, N] = D(s), E = s.length > 0;
   W(() => {
     JSON.stringify(s) !== JSON.stringify(y) && N(s);
   }, [s]);
@@ -5417,7 +5416,7 @@ const ds = ({
   tooltip: t,
   children: n
 }) => t ? /* @__PURE__ */ e(we, { description: t, children: n }) : n;
-function pc({
+function gc({
   onClick: t,
   placeholder: n,
   shortcut: a = ["cmd", "k"],
@@ -5429,7 +5428,7 @@ function pc({
       onClick: t,
       className: b(
         "mb-[calc(0.75rem-1px)] flex w-full cursor-pointer items-center justify-between rounded bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary p-1.5 text-f1-foreground-secondary ring-1 ring-inset ring-f1-border-secondary transition-all hover:ring-f1-border-hover",
-        oe()
+        ce()
       ),
       type: "button",
       ...r,
@@ -5470,7 +5469,7 @@ function us({
   footer: a,
   onFooterDropdownClick: r
 }) {
-  const { sidebarState: i, isSmallScreen: l } = Ee(), s = Ze(), [c, d] = ft({ threshold: 1 }), [f, u] = ft({ threshold: 1 }), m = ce(), h = {
+  const { sidebarState: i, isSmallScreen: l } = Ee(), s = Ze(), [c, d] = ft({ threshold: 1 }), [f, u] = ft({ threshold: 1 }), m = oe(), h = {
     x: {
       ease: i !== "locked" ? l ? [0.25, 0.46, 0.45, 0.94] : [0.175, 0.885, 0.32, 1.1] : [0, 0, 0.58, 1],
       duration: s ? 0 : i !== "locked" && !l ? 0.3 : 0.2
@@ -5539,7 +5538,7 @@ function us({
     }
   );
 }
-const bc = ie(us), fs = {
+const pc = ie(us), fs = {
   waiting: "neutral",
   pending: "neutral",
   approved: "positive",
@@ -5575,7 +5574,7 @@ const ps = ({
   status: a,
   approvers: r
 }) => {
-  const i = ce(), l = n === 1 ? i.approvals.requiredNumbers.one : i.approvals.requiredNumbers.other.replace(
+  const i = oe(), l = n === 1 ? i.approvals.requiredNumbers.one : i.approvals.requiredNumbers.other.replace(
     "{{count}}",
     n.toString()
   ), s = i.approvals.statuses[a], c = q(() => r.map((d) => {
@@ -5600,7 +5599,7 @@ const ps = ({
     /* @__PURE__ */ e("div", { className: "w-full", children: /* @__PURE__ */ e(On, { avatars: c, layout: "fill", type: "person", size: "md" }) })
   ] });
 }, bs = ({ steps: t }) => {
-  const a = ce().approvals.history, r = t.findIndex((i) => i.status === "pending");
+  const a = oe().approvals.history, r = t.findIndex((i) => i.status === "pending");
   return /* @__PURE__ */ o("div", { className: "flex w-full flex-col gap-4", children: [
     /* @__PURE__ */ e("h2", { className: "mb-2 text-lg font-semibold text-f1-foreground", children: a }),
     /* @__PURE__ */ o("div", { className: "flex flex-row gap-4", children: [
@@ -5632,7 +5631,7 @@ const ps = ({
       ] })) })
     ] })
   ] });
-}, xc = ie(
+}, bc = ie(
   X("OneApprovalHistory", bs)
 ), ct = (t, n) => typeof n == "string" && n in t;
 function on(t, n, a) {
@@ -5668,7 +5667,7 @@ function on(t, n, a) {
   }
   return i ? r : null;
 }
-function vc(t) {
+function xc(t) {
   const {
     source: n,
     collectionId: a,
@@ -6069,19 +6068,19 @@ const _t = {
       children: r
     }
   );
-}), yc = ge(
+}), vc = ge(
   {
     name: "Stack",
     type: "layout"
   },
   Is
-), wc = ge(
+), yc = ge(
   {
     name: "Split",
     type: "layout"
   },
   Ns
-), Nc = ge(
+), wc = ge(
   {
     name: "AutoGrid",
     type: "layout"
@@ -6353,37 +6352,37 @@ const _t = {
 ), Ws = X(
   "VerticalBarChartWidget",
   Ms
-), Cc = ge(
+), Nc = ge(
   {
     name: "AreaChartWidget",
     type: "info"
   },
   Ps
-), Ic = ge(
+), Cc = ge(
   {
     name: "BarChartWidget",
     type: "info"
   },
   _s
-), kc = ge(
+), Ic = ge(
   {
     name: "LineChartWidget",
     type: "info"
   },
   Ts
-), Sc = ge(
+), kc = ge(
   {
     name: "PieChartWidget",
     type: "info"
   },
   Rs
-), Fc = ge(
+), Sc = ge(
   {
     name: "VerticalBarChartWidget",
     type: "info"
   },
   Ws
-), Ac = ge(
+), Fc = ge(
   {
     name: "SummariesWidget",
     type: "info"
@@ -6728,7 +6727,7 @@ const _t = {
       }
     );
   }
-), Lc = ie(
+), Ac = ie(
   X("ChartWidgetEmptyState", Js)
 );
 function Zs(t, n) {
@@ -6844,7 +6843,7 @@ const at = function({
   );
 };
 at.displayName = "VerticalOverflowList";
-const Oc = ({
+const Lc = ({
   events: t,
   showAllItems: n,
   gap: a = 8,
@@ -6872,7 +6871,7 @@ const Oc = ({
     }
   ) : /* @__PURE__ */ e("div", { className: a, tabIndex: 1, children: n });
 };
-function Pc({
+function Oc({
   label: t,
   count: n,
   icon: a,
@@ -6914,7 +6913,7 @@ const Qs = G(
       ] })
     ] }, a);
   }
-), Ec = G(
+), Pc = G(
   function({ items: n }, a) {
     return /* @__PURE__ */ e(
       "div",
@@ -6948,7 +6947,7 @@ const Qs = G(
   );
   return t ? /* @__PURE__ */ e("a", { className: i, onClick: t, children: r }) : /* @__PURE__ */ e("div", { className: i, children: r });
 };
-function _c({
+function Ec({
   id: t,
   title: n,
   subtitle: a,
@@ -7054,7 +7053,7 @@ function wt({
     ] })
   ] });
 }
-function Dc({
+function _c({
   items: t,
   minSize: n = 184,
   onClickItem: a,
@@ -7072,7 +7071,7 @@ function Dc({
     }
   );
 }
-function Tc({
+function Dc({
   items: t,
   gap: n,
   minSize: a = 184,
@@ -7092,7 +7091,7 @@ function Tc({
 const ao = ({ title: t, info: n }) => /* @__PURE__ */ o("div", { className: "flex items-center justify-between", children: [
   /* @__PURE__ */ e("p", { className: "flex text-f1-foreground-secondary", children: t }),
   /* @__PURE__ */ e("div", { className: "max-w-32 flex-shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-right font-medium", children: n })
-] }), zc = G(
+] }), Tc = G(
   function({ title: n, titleValue: a, titleTooltip: r, list: i }, l) {
     return /* @__PURE__ */ o("div", { ref: l, className: "flex flex-col gap-2", children: [
       n && /* @__PURE__ */ o("div", { className: "flex items-center justify-between gap-2 font-medium", children: [
@@ -7113,7 +7112,7 @@ const ao = ({ title: t, info: n }) => /* @__PURE__ */ o("div", { className: "fle
     ] });
   }
 );
-function Rc({
+function zc({
   title: t,
   subtitle: n,
   data: a,
@@ -7321,7 +7320,7 @@ function co({
     }
   );
 }
-function Bc({
+function Rc({
   trackedMinutes: t,
   remainingMinutes: n,
   data: a = [],
@@ -7557,7 +7556,7 @@ function mo({
     }
   );
 }
-function $c({
+function Bc({
   tasks: t,
   onClickTask: n,
   hideIcons: a = !1,
@@ -7742,7 +7741,7 @@ const Uo = { sm: 340, md: 480, lg: 640 }, un = G(
       u
     )) }, l) }) }) });
   }
-), Ho = ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"], Mc = ae(un, () => /* @__PURE__ */ e(Dn, { children: /* @__PURE__ */ e(un, { children: Ho.map((t, n) => /* @__PURE__ */ e(Fe.Skeleton, { height: t }, n)) }) })), fn = ({ children: t }) => /* @__PURE__ */ e("div", { className: "flex min-h-40 flex-row items-stretch gap-4 text-f1-foreground @container [&>div]:min-w-[calc(100vw-64px)] @2xl:[&>div]:min-w-[calc(50vw-48px)]", children: t }), Wc = ae(
+), Ho = ["sm", "lg", "md", "md", "lg", "sm", "lg", "lg", "sm", "sm", "md", "md"], $c = ae(un, () => /* @__PURE__ */ e(Dn, { children: /* @__PURE__ */ e(un, { children: Ho.map((t, n) => /* @__PURE__ */ e(Fe.Skeleton, { height: t }, n)) }) })), fn = ({ children: t }) => /* @__PURE__ */ e("div", { className: "flex min-h-40 flex-row items-stretch gap-4 text-f1-foreground @container [&>div]:min-w-[calc(100vw-64px)] @2xl:[&>div]:min-w-[calc(50vw-48px)]", children: t }), Mc = ae(
   G(function({ children: n }, a) {
     return /* @__PURE__ */ e(Ye, { ref: a, showBar: !1, children: /* @__PURE__ */ e(fn, { children: n }) });
   }),
@@ -7772,7 +7771,7 @@ function Go({
     }
   );
 }
-const jc = ie(
+const Wc = ie(
   X("WidgetEmptyState", Go)
 ), fa = G(
   ({ title: t, children: n }, a) => (ei(
@@ -7785,9 +7784,9 @@ const jc = ie(
   ] }))
 );
 fa.displayName = "WidgetSection";
-const Vc = ie(
+const jc = ie(
   X("WidgetSection", fa)
-), Uc = ({
+), Vc = ({
   identifier: t,
   allowedRoutes: n,
   disallowedRoutes: a,
@@ -7798,7 +7797,7 @@ const Vc = ie(
     return n && n.length > 0 && (d += ` Allowed routes: ${n.join(", ")}`), a && a.length > 0 && (d += ` Disallowed routes: ${a.join(", ")}`), d;
   }, [t, n, a]);
   return s ? r : (i && console.error(c), null);
-}, Hc = ie(
+}, Uc = ie(
   ge(
     {
       name: "ScrollArea",
@@ -7808,163 +7807,163 @@ const Vc = ie(
   )
 );
 export {
-  rc as ActivityItemList,
+  ac as ActivityItemList,
   Sl as ActivityItemListSkeleton,
   Qi as AiPromotionChat,
   el as AiPromotionChatProvider,
-  cc as ApplicationFrame,
-  Id as AreaChart,
-  Cc as AreaChartWidget,
-  Nc as AutoGrid,
+  oc as ApplicationFrame,
+  Cd as AreaChart,
+  Nc as AreaChartWidget,
+  wc as AutoGrid,
   Fr as Badge,
-  kd as BarChart,
-  Ic as BarChartWidget,
+  Id as BarChart,
+  Cc as BarChartWidget,
   kl as BaseActivityItemList,
-  Sd as BaseBanner,
+  kd as BaseBanner,
   Pl as BaseCelebration,
   Wl as BaseCommunityPost,
-  qc as BaseTabs,
-  Yc as BreadcrumbSelect,
+  Kc as BaseTabs,
+  qc as BreadcrumbSelect,
   Oi as Breadcrumbs,
   yt as CalendarEvent,
-  Oc as CalendarEventList,
-  Fd as CardSelectableContainer,
+  Lc as CalendarEventList,
+  Sd as CardSelectableContainer,
   ii as Carousel,
-  Ad as CategoryBarChart,
-  Rc as CategoryBarSection,
-  ic as Celebration,
+  Fd as CategoryBarChart,
+  zc as CategoryBarSection,
+  rc as Celebration,
   El as CelebrationSkeleton,
-  Lc as ChartWidgetEmptyState,
-  Jc as Chip,
-  Bc as ClockInControls,
-  Ld as ComboChart,
-  sc as CommunityPost,
+  Ac as ChartWidgetEmptyState,
+  Yc as Chip,
+  Rc as ClockInControls,
+  Ad as ComboChart,
+  lc as CommunityPost,
   jl as CommunityPostSkeleton,
   es as CompanySelector,
   Je as Counter,
-  Mc as Dashboard,
-  dc as DaytimePage,
-  Zc as DetailsItem,
-  Xc as DetailsItemsList,
-  Od as Dialog,
+  $c as Dashboard,
+  cc as DaytimePage,
+  Jc as DetailsItem,
+  Zc as DetailsItemsList,
+  Ld as Dialog,
   Ae as Dropdown,
-  ac as EntitySelect,
-  Pd as F0ActionBar,
-  Ed as F0AiBanner,
+  nc as EntitySelect,
+  Od as F0ActionBar,
+  Pd as F0AiBanner,
   kn as F0AvatarModule,
-  Qc as F0ButtonToggle,
-  tc as F0Callout,
-  ed as F0FileItem,
-  _d as F0NotesTextEditor,
-  Dd as F0NotesTextEditorSkeleton,
-  Td as F0NumberInput,
+  Xc as F0ButtonToggle,
+  ec as F0Callout,
+  Qc as F0FileItem,
+  Ed as F0NotesTextEditor,
+  _d as F0NotesTextEditorSkeleton,
+  Dd as F0NumberInput,
   gr as F0RichTextDisplay,
-  zd as F0RichTextEditor,
-  td as F0SearchInput,
-  Rd as F0SegmentedControl,
-  Bd as F0TableOfContent,
-  $d as F0TextAreaInput,
-  nd as F0TextInput,
-  nc as F0VersionHistory,
-  Md as F1SearchBox,
-  Wd as FILE_TYPES,
-  ad as FileItem,
-  lc as HighlightBanner,
-  Ec as IndicatorsList,
-  jd as Input,
-  Vd as Item,
-  Ud as ItemSectionHeader,
-  Hd as LineChart,
-  kc as LineChartWidget,
-  gc as Menu,
-  rd as MobileDropdown,
-  Gd as NotesTextEditor,
-  Kd as NotesTextEditorSkeleton,
-  qd as NumberInput,
-  uc as OmniButton,
-  xc as OneApprovalHistory,
-  id as OneCalendar,
-  ld as OneCalendarInternal,
-  Yd as OneDataCollection,
-  Jd as OneDateNavigator,
+  Td as F0RichTextEditor,
+  ed as F0SearchInput,
+  zd as F0SegmentedControl,
+  Rd as F0TableOfContent,
+  Bd as F0TextAreaInput,
+  td as F0TextInput,
+  tc as F0VersionHistory,
+  $d as F1SearchBox,
+  Md as FILE_TYPES,
+  nd as FileItem,
+  ic as HighlightBanner,
+  Pc as IndicatorsList,
+  Wd as Input,
+  jd as Item,
+  Vd as ItemSectionHeader,
+  Ud as LineChart,
+  Ic as LineChartWidget,
+  hc as Menu,
+  ad as MobileDropdown,
+  Hd as NotesTextEditor,
+  Gd as NotesTextEditorSkeleton,
+  Kd as NumberInput,
+  dc as OmniButton,
+  bc as OneApprovalHistory,
+  rd as OneCalendar,
+  id as OneCalendarInternal,
+  qd as OneDataCollection,
+  Yd as OneDateNavigator,
   Ii as OneEmptyState,
-  Zd as OnePagination,
-  oc as OnePersonListItem,
-  Uc as OneRestrictComponent,
-  fc as Page,
-  ec as PageHeader,
+  Jd as OnePagination,
+  sc as OnePersonListItem,
+  Vc as OneRestrictComponent,
+  uc as Page,
+  Qo as PageHeader,
   Ot as PageHeaderNavigationContext,
-  Xo as PageHeaderNavigationProvider,
+  Zo as PageHeaderNavigationProvider,
   Ba as PageNavigation,
-  Xd as PieChart,
-  Sc as PieChartWidget,
+  Zd as PieChart,
+  kc as PieChartWidget,
   ks as PrivateBox,
-  Qd as ProgressBarChart,
-  eu as RadarChart,
+  Xd as ProgressBarChart,
+  Qd as RadarChart,
   Tl as Reactions,
-  tu as ResourceHeader,
-  sd as RichTextDisplay,
-  nu as RichTextEditor,
-  Hc as ScrollArea,
-  pc as SearchBar,
-  au as SectionHeader,
+  eu as ResourceHeader,
+  ld as RichTextDisplay,
+  tu as RichTextEditor,
+  Uc as ScrollArea,
+  gc as SearchBar,
+  nu as SectionHeader,
   He as Select,
   Tr as Shortcut,
-  bc as Sidebar,
-  mc as SidebarFooter,
-  hc as SidebarHeader,
+  pc as Sidebar,
+  fc as SidebarFooter,
+  mc as SidebarHeader,
   bn as Spinner,
-  wc as Split,
-  yc as Stack,
-  Ac as SummariesWidget,
-  od as Switch,
-  cd as Tabs,
-  dd as TabsSkeleton,
-  $c as TasksList,
-  ru as Textarea,
-  ud as ToggleGroup,
-  fd as ToggleGroupItem,
+  yc as Split,
+  vc as Stack,
+  Fc as SummariesWidget,
+  sd as Switch,
+  od as Tabs,
+  cd as TabsSkeleton,
+  Bc as TasksList,
+  au as Textarea,
+  dd as ToggleGroup,
+  ud as ToggleGroupItem,
   we as Tooltip,
-  zc as TwoColumnsList,
-  iu as UPLOAD_INPUT_ID,
-  lu as VerticalBarChart,
-  Fc as VerticalBarChartWidget,
+  Tc as TwoColumnsList,
+  ru as UPLOAD_INPUT_ID,
+  iu as VerticalBarChart,
+  Sc as VerticalBarChartWidget,
   bt as VirtualList,
-  md as WeekStartDay,
-  hd as Weekdays,
+  fd as WeekStartDay,
+  md as Weekdays,
   Fe as Widget,
-  _c as WidgetAvatarsListItem,
-  jc as WidgetEmptyState,
-  Pc as WidgetHighlightButton,
-  Dc as WidgetInboxList,
+  Ec as WidgetAvatarsListItem,
+  Wc as WidgetEmptyState,
+  Oc as WidgetHighlightButton,
+  _c as WidgetInboxList,
   cn as WidgetInboxListItem,
-  Vc as WidgetSection,
-  Tc as WidgetSimpleList,
+  jc as WidgetSection,
+  Dc as WidgetSimpleList,
   wt as WidgetSimpleListItem,
-  Wc as WidgetStrip,
-  su as actionBarStatuses,
-  ou as buttonToggleSizes,
-  cu as buttonToggleVariants,
-  gd as chipVariants,
-  du as downloadAsCSV,
-  pd as f0FileItemSizes,
-  uu as generateCSVContent,
-  bd as getGranularityDefinition,
-  xd as getGranularityDefinitions,
-  vd as getGranularitySimpleDefinition,
-  yd as granularityDefinitions,
-  wd as modules,
-  fu as predefinedPresets,
-  Nd as rangeSeparator,
+  Mc as WidgetStrip,
+  lu as actionBarStatuses,
+  su as buttonToggleSizes,
+  ou as buttonToggleVariants,
+  hd as chipVariants,
+  cu as downloadAsCSV,
+  gd as f0FileItemSizes,
+  du as generateCSVContent,
+  pd as getGranularityDefinition,
+  bd as getGranularityDefinitions,
+  xd as getGranularitySimpleDefinition,
+  vd as granularityDefinitions,
+  yd as modules,
+  uu as predefinedPresets,
+  wd as rangeSeparator,
   on as seedFromStorage,
-  mu as selectSizes,
+  fu as selectSizes,
   et as useAiPromotionChat,
-  hu as useDataCollectionData,
-  vc as useDataCollectionItemNavigation,
+  mu as useDataCollectionData,
+  xc as useDataCollectionItemNavigation,
   ui as useDataCollectionSource,
-  gu as useExportAction,
-  pu as useInfiniteScrollPagination,
+  hu as useExportAction,
+  gu as useInfiniteScrollPagination,
   Hi as usePageHeaderItemNavigation,
-  Qo as usePageHeaderNavigation,
+  Xo as usePageHeaderNavigation,
   Ee as useSidebar
 };
