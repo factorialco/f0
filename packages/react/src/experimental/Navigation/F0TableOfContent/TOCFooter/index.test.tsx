@@ -17,22 +17,20 @@ describe("TOCFooter", () => {
     expect(container).toBeEmptyDOMElement()
   })
 
-  it("renders one button per action", () => {
+  it("renders one row per action", () => {
     const actions: TOCAction[] = [
       { label: "Add section", onClick: vi.fn() },
       { label: "Import", onClick: vi.fn() },
     ]
     render(<TOCFooter actions={actions} />)
-    expect(
-      screen.getByRole("button", { name: "Add section" })
-    ).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Import" })).toBeInTheDocument()
+    expect(screen.getByText("Add section")).toBeInTheDocument()
+    expect(screen.getByText("Import")).toBeInTheDocument()
   })
 
-  it("calls onClick when a button is clicked", async () => {
+  it("calls onClick when an action is clicked", async () => {
     const onClick = vi.fn()
     render(<TOCFooter actions={[{ label: "Add section", onClick }]} />)
-    await userEvent.click(screen.getByRole("button", { name: "Add section" }))
+    await userEvent.click(screen.getByText("Add section"))
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
@@ -43,9 +41,7 @@ describe("TOCFooter", () => {
         actions={[{ label: "Add section", onClick, disabled: true }]}
       />
     )
-    const button = screen.getByRole("button", { name: "Add section" })
-    expect(button).toBeDisabled()
-    await userEvent.click(button)
+    await userEvent.click(screen.getByText("Add section"))
     expect(onClick).not.toHaveBeenCalled()
   })
 
