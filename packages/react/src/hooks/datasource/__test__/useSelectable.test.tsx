@@ -1177,5 +1177,62 @@ describe("useSelectable", () => {
       // Manual selections survive (the prop governs manual selection).
       await waitFor(() => expect(result.current.selectedItems.size).toBe(2))
     })
+
+    // Regression: with preserve=true, prior selections are kept across a filter
+    // change, then clicking "Select all" marked the WHOLE accumulated map as
+    // checked — so onSelectItems reported e.g. selectedIds of 25 while
+    // selectedCount (the filtered total) was 3. Select-all must select ONLY the
+    // current query's items (behaving as preserve=false at the click).
+    it("select-all selects only the current query, not the preserved accumulation", async () => {
+      const sourceA = {
+        ...mockSource,
+        currentFilters: { team: ["1"] },
+      } as unknown as DataSource<TestRecord, never, never, never>
+
+      const { result, rerender } = renderHook(
+        ({ source, data }) =>
+          useSelectable({
+            data,
+            paginationInfo: null,
+            source,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+            allPagesSelection: true,
+            preserveSelectionOnDatasetChange: true,
+          }),
+        { initialProps: { source: sourceA, data: makeData([1, 2, 3]) } }
+      )
+
+      // Accumulate manual selections under team 1.
+      act(() => {
+        result.current.handleSelectItemChange(1, true)
+        result.current.handleSelectItemChange(2, true)
+        result.current.handleSelectItemChange(3, true)
+      })
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(3))
+
+      // Switch to team 3 (2 matching rows); the 3 are preserved in the map.
+      rerender({
+        source: {
+          ...sourceA,
+          currentFilters: { team: ["3"] },
+        } as unknown as DataSource<TestRecord, never, never, never>,
+        data: makeData([4, 5]),
+      })
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(3))
+
+      // Select all under team 3: only the 2 current rows are selected — the
+      // preserved 1/2/3 are discarded. selectedIds and selectedCount agree.
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(2)
+        expect(result.current.selectionStatus.selectedCount).toBe(2)
+        expect(result.current.selectionStatus.selectedIds.sort()).toEqual([
+          4, 5,
+        ])
+      })
+    })
   })
 })
