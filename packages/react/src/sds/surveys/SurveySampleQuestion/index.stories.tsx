@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { SampleQuestion } from "."
+import { SurveySampleQuestion } from "."
 
-const meta: Meta<typeof SampleQuestion> = {
-  title: "Surveys/SampleQuestion",
-  component: SampleQuestion,
+const meta: Meta<typeof SurveySampleQuestion> = {
+  title: "Surveys/SurveySampleQuestion",
+  component: SurveySampleQuestion,
   tags: ["autodocs", "experimental"],
   parameters: { layout: "centered" },
   decorators: [
@@ -17,7 +17,7 @@ const meta: Meta<typeof SampleQuestion> = {
 }
 
 export default meta
-type Story = StoryObj<typeof SampleQuestion>
+type Story = StoryObj<typeof SurveySampleQuestion>
 
 export const Rating: Story = {
   args: {
