@@ -32,8 +32,8 @@ export const defaultTranslations = {
       hide: "Hide password",
     },
     private: {
-      show: "Show",
-      hide: "Hide",
+      show: "Show {{label}}",
+      hide: "Hide {{label}}",
     },
   },
   link: {

@@ -93,8 +93,15 @@ const InputInternal = ({
       }
     }
     if (type === "private") {
+      // Build the toggle's accessible name from the field label so screen-reader
+      // users can tell multiple private fields apart (e.g. "Show social security
+      // number"). The label feeds F0ButtonToggle's aria-label + title only — the
+      // toggle renders an icon, so there is no visible-text change.
       return {
-        label: [i18n.inputs.private.show, i18n.inputs.private.hide],
+        label: [
+          i18n.t("inputs.private.show", { label: props.label }),
+          i18n.t("inputs.private.hide", { label: props.label }),
+        ],
         icon: [EyeInvisible, EyeVisible],
         selected: showPassword,
         onChange: setShowPassword,
@@ -102,7 +109,7 @@ const InputInternal = ({
     }
     return props.buttonToggle
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPassword, type, props.buttonToggle])
+  }, [showPassword, type, props.buttonToggle, props.label])
 
   return (
     <ShadcnInput

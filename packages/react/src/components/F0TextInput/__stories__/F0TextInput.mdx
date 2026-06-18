@@ -136,7 +136,7 @@ When `type="password"`:
 - **No lock icon** — the consumer `icon` prop is respected (default: none), so the field does not read as a login credential.
 - **Password managers are disabled** — the field sets `autocomplete="off"` plus `data-1p-ignore`, `data-lpignore`, `data-bwignore` and `data-form-type="other"`, so 1Password, LastPass, Bitwarden and browser autofill never offer to save or fill it.
 
-A trailing eye-toggle with neutral "Show" / "Hide" labels flips between masked and visible text; as with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
+A trailing eye-toggle flips between masked and visible text; its accessible name is built from the field label (e.g. "Show social security number") so screen-reader users can tell multiple private fields apart. As with password mode, the `buttonToggle` prop is private. Use `type="password"` for the user's own login password, where autofill is helpful; use `type="private"` for secrets a password manager must never capture.
 
 <Canvas of={Stories.Private} />
 

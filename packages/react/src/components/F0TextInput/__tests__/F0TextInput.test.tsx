@@ -92,6 +92,15 @@ describe("F0TextInput", () => {
       expect(input.type).toBe("password")
     })
 
+    it("builds the eye-toggle accessible name from the field label", () => {
+      // So screen-reader users can tell multiple private fields apart.
+      render(<F0TextInput label="Social security number" type="private" />)
+
+      expect(
+        screen.getByRole("button", { name: "Show Social security number" })
+      ).toBeInTheDocument()
+    })
+
     it("does not render the lock icon that password forces", () => {
       // password forces a leading lock icon IN ADDITION to the eye toggle;
       // private renders only the eye toggle (no forced icon), so it must have
