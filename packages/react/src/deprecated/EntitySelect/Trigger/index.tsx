@@ -140,9 +140,14 @@ export const Trigger = ({
           "my-auto flex items-center pr-1",
           placeholder && "text-f1-foreground-secondary",
           value && "text-f1-foreground",
-          (flattenedList.length === 1 && !hiddenAvatar) || (icon && !value)
-            ? "pl-8"
-            : "pl-2"
+          // When an avatar or icon is shown, F0InputField already applies the
+          // size-aware left padding (pl-8 for sm, pl-9 for md) to clear it.
+          // Hardcoding pl-8 here would override pl-9 and glue the text to the
+          // avatar at size="md", so only set the left padding when there is none.
+          !(
+            (flattenedList.length === 1 && !hiddenAvatar) ||
+            (icon && !value)
+          ) && "pl-2"
         )}
       >
         <OneEllipsis
