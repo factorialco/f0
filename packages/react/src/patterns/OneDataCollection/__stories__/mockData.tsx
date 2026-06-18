@@ -416,6 +416,21 @@ export const getMockVisualizations = (options?: {
             order: options?.table?.allowColumnReordering ? 4 : undefined,
           },
           {
+            id: "genderSplit",
+            label: "Gender",
+            width: 160,
+            render: (item) => ({
+              type: "categoryBar",
+              value: {
+                items: [
+                  { label: "Female", value: 30 + (item.index % 4) * 10 },
+                  { label: "Male", value: 40 - (item.index % 3) * 5 },
+                  { label: "Non-binary", value: 15 + (item.index % 2) * 5 },
+                ],
+              },
+            }),
+          },
+          {
             id: "email2",
             label: "Email 2",
             render: (item) => item.email,
