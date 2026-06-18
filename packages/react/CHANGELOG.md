@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.2](https://github.com/factorialco/f0/compare/f0-react-v3.7.1...f0-react-v3.7.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** stop checkbox click bubbling to option row inside a form ([#4484](https://github.com/factorialco/f0/issues/4484)) ([6012294](https://github.com/factorialco/f0/commit/6012294ce1447152496863fffb076026f0259611))
+
 ## [3.7.1](https://github.com/factorialco/f0/compare/f0-react-v3.7.0...f0-react-v3.7.1) (2026-06-18)
 
 
