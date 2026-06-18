@@ -1,5 +1,4 @@
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
-import type { AlertVariant } from "@/components/F0Alert/types"
 import type { IconType } from "@/components/F0Icon/F0Icon"
 import type { F0SelectItemObject } from "@/components/F0Select/types"
 import type { DataSourceDefinition, RecordType } from "@/hooks/datasource"
@@ -52,16 +51,12 @@ export type HiddenAction =
 export type HiddenActions = ReadonlyArray<HiddenAction>
 
 /**
- * An alert rendered inside a question card (authoring view only — never shown
- * in the answering/preview form). Typically paired with `locked` to explain why
- * a predefined question can't be edited, moved, or removed.
+ * Explanation surfaced for a locked question (authoring view only — never shown
+ * in the answering/preview form). Rendered as a title-less tooltip on hover to
+ * say why a predefined question can't be edited, moved, or removed.
  */
 export type QuestionNotice = {
-  /** Defaults to "info" when omitted. */
-  variant?: AlertVariant
-  title: string
-  description?: string
-  icon?: IconType
+  description: string
 }
 
 export type BaseQuestionOnChangeParams = {
