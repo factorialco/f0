@@ -12,7 +12,6 @@ import {
   F0FormField,
   F0Heading,
   F0Icon,
-  F0Link,
   NotesTextEditor,
   F0Select,
   F0TagRaw,
@@ -72,7 +71,6 @@ import {
   Sparkles,
   Desktop,
   People,
-  Reset,
   Upload,
   VideoRecorder,
   VideoRecorderNegative,
@@ -609,13 +607,10 @@ const createSessionModalFields = {
     id: "meetingLink",
     type: "text",
     label: "Meeting link",
+    placeholder: "By default, the session runs in Factorial. Add your own link if you prefer.",
   },
   location: { id: "location", type: "text", label: "Location" },
 } satisfies Record<string, RenderableField>
-
-// Pre-filled Factorial live-room link for online/hybrid sessions; editable.
-const DEFAULT_FACTORIAL_LIVE_ROOM =
-  "https://app.factorialhr.com/live/r/iso-9001-edicion-2026"
 
 const sessionModalityOptions: Array<{
   value: SessionModalityValue
@@ -4472,7 +4467,7 @@ function SessionFormDialog({
     durationHours: 1,
     durationMinutes: 0,
     minimumAttendance: 75,
-    meetingLink: DEFAULT_FACTORIAL_LIVE_ROOM,
+    meetingLink: "",
     location: "",
     calendarInvites: false,
     reminders: false,
@@ -4501,7 +4496,7 @@ function SessionFormDialog({
     >
       <F0BoxWithClassName
         role="dialog"
-        aria-label={mode === "new" ? "Create session" : "Edit session"}
+        aria-label={mode === "new" ? "Create scheduled session" : "Edit scheduled session"}
         background="primary"
         borderRadius="lg"
         className="relative rounded-lg bg-f1-background shadow-2xl"
@@ -4521,10 +4516,9 @@ function SessionFormDialog({
         </F0BoxWithClassName>
         <F0BoxWithClassName style={{ margin: "56px 32px", width: 600 }}>
         <F0Box display="flex" flexDirection="column" gap="2xl">
-          <F0Heading content={mode === "new" ? "Create session" : "Edit session"} variant="heading-large" as="h2" />
+          <F0Heading content={mode === "new" ? "Create scheduled session" : "Edit scheduled session"} variant="heading-large" as="h2" />
           <F0BoxWithClassName style={{ padding: 16 }}>
           <F0Box display="flex" flexDirection="column" gap="2xl">
-            <F0FormField field={createSessionModalFields.type} value={values.sessionType} onChange={(value) => setValues((current) => ({ ...current, sessionType: value }))} />
             <F0FormField field={createSessionModalFields.name} value={values.sessionName} onChange={(value) => setValues((current) => ({ ...current, sessionName: value }))} />
             <F0Box display="grid" columns="3" gap="md">
               <F0FormField field={createSessionModalFields.date} value={values.sessionDate} onChange={(value) => setValues((current) => ({ ...current, sessionDate: value }))} />
@@ -4553,16 +4547,7 @@ function SessionFormDialog({
             {hasOnlineSession ? (
               <F0Box display="flex" flexDirection="column" gap="xs">
                 <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} />
-                {values.meetingLink === DEFAULT_FACTORIAL_LIVE_ROOM ? (
-                  <F0Text variant="description" content="Factorial sets up a live room for this session. Edit the link to use another provider." />
-                ) : (
-                  <F0Box display="flex" alignItems="center" gap="xs">
-                    <F0Icon icon={Reset} size="sm" />
-                    <F0Link onClick={() => setValues((current) => ({ ...current, meetingLink: DEFAULT_FACTORIAL_LIVE_ROOM }))}>
-                      Use Factorial room link
-                    </F0Link>
-                  </F0Box>
-                )}
+                <F0Text variant="description" content="You can change the link later from the session panel." />
               </F0Box>
             ) : null}
             <F0FormField field={createSessionModalFields.instructors} value={values.instructors} onChange={(value) => setValues((current) => ({ ...current, instructors: value }))} />
