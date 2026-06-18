@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.2](https://github.com/factorialco/f0/compare/f0-react-v3.8.1...f0-react-v3.8.2) (2026-06-18)
+
+
+### Bug Fixes
+
+* missing rename of SurveySampleQuestion component ([#4500](https://github.com/factorialco/f0/issues/4500)) ([353efab](https://github.com/factorialco/f0/commit/353efabfbcc5c9d6dac69a3655b5103bab5f1667))
+
 ## [3.8.1](https://github.com/factorialco/f0/compare/f0-react-v3.8.0...f0-react-v3.8.1) (2026-06-18)
 
 
