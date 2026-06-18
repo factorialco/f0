@@ -17,8 +17,18 @@ export const BaseScoreQuestion = ({
   value,
   ...baseQuestionComponentProps
 }: BaseScoreQuestionProps) => {
-  const { onQuestionChange, disabled, answering } =
-    useSurveyFormBuilderContext()
+  const {
+    onQuestionChange,
+    disabled,
+    answering,
+    getSectionContainingQuestion,
+  } = useSurveyFormBuilderContext()
+
+  // A question inside a locked section is non-interactive in the authoring
+  // view, but stays selectable for respondents (answering).
+  const locked = getSectionContainingQuestion(
+    baseQuestionComponentProps.id
+  )?.locked
 
   const ratingType = detectRatingOptionType(options)
   const isEmojiMode = ratingType === "emojis"
@@ -54,7 +64,7 @@ export const BaseScoreQuestion = ({
             selected={value === option.value}
             onClick={handleChangeValue}
             onChangeLabel={handleChangeLabel}
-            disabled={disabled && !answering}
+            disabled={(disabled || locked) && !answering}
             isEmojiMode={answering ? false : isEmojiMode}
           />
         ))}

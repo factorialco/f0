@@ -33,8 +33,12 @@ export const CheckboxQuestion = ({
   label: labelProp,
   ...baseQuestionComponentProps
 }: CheckboxQuestionProps) => {
-  const { onQuestionChange, answering, disabled } =
-    useSurveyFormBuilderContext()
+  const {
+    onQuestionChange,
+    answering,
+    disabled,
+    getSectionContainingQuestion,
+  } = useSurveyFormBuilderContext()
 
   const questionDisabled = useQuestionDisabled(baseQuestionComponentProps)
 
@@ -43,31 +47,31 @@ export const CheckboxQuestion = ({
   if (answering) {
     return (
       <BaseQuestion {...baseQuestionComponentProps}>
-        <div className="px-0.5">
-          <F0Checkbox
-            id={baseQuestionComponentProps.id}
-            checked={value ?? false}
-            onCheckedChange={(checked) => {
-              onQuestionChange?.({
-                ...baseQuestionComponentProps,
-                type: "checkbox",
-                label: labelProp,
-                value: checked || null,
-              })
-            }}
-            disabled={questionDisabled}
-            title={labelProp}
-          />
-        </div>
+        <F0Checkbox
+          id={baseQuestionComponentProps.id}
+          checked={value ?? false}
+          onCheckedChange={(checked) => {
+            onQuestionChange?.({
+              ...baseQuestionComponentProps,
+              type: "checkbox",
+              label: labelProp,
+              value: checked || null,
+            })
+          }}
+          disabled={questionDisabled}
+          title={labelProp}
+        />
       </BaseQuestion>
     )
   }
 
-  const inputDisabled = disabled || baseQuestionComponentProps.locked
+  const inputDisabled =
+    disabled ||
+    getSectionContainingQuestion(baseQuestionComponentProps.id)?.locked
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="flex items-start px-0.5">
+      <div className="flex items-start">
         <F0Checkbox checked={false} disabled hideLabel presentational />
         <textarea
           value={labelProp}

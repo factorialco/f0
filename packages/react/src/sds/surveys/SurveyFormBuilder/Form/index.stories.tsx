@@ -49,8 +49,9 @@ export const Default: Story = {
         type: "section",
         section: {
           id: "section-1",
-          title: "Section 1",
-          description: "Section 1 description",
+          title: "Company-wide questions",
+          description:
+            "These questions are predefined and can't be edited, moved, or removed.",
           locked: true,
           questions: [
             {
@@ -354,6 +355,55 @@ export const WithAllowCreate: Story = {
             "The employees dataset does not have onCreate, so no toggle appears.",
           type: "dropdown-single" as const,
           datasetKey: "employees",
+        },
+      },
+    ],
+  },
+}
+
+/**
+ * A blocked, predefined section: `locked` on the section disables its fields,
+ * removes its edit menu and drag handle, and makes the questions inside it
+ * non-interactive. Its title/description explain why it's fixed and surface as
+ * the "Locked" tag tooltip (and on hover over the questions). Questions can't be
+ * locked on their own — only via their section. The standalone question after
+ * it stays fully editable. The locked treatment never shows in the
+ * answering/preview form.
+ */
+export const WithBlockedSection: Story = {
+  args: {
+    elements: [
+      {
+        type: "section",
+        section: {
+          id: "section-enps",
+          title: "Predefined eNPS question",
+          description:
+            "This question powers your Employee NPS score, so it can't be edited, moved, or removed.",
+          locked: true,
+          questions: [
+            {
+              id: "q-enps",
+              title: "How likely are you to recommend us as a place to work?",
+              description: "0 is not at all likely, 10 is extremely likely.",
+              type: "rating" as const,
+              options: Array.from({ length: 11 }, (_, value) => ({
+                value,
+                label: String(value),
+              })),
+              required: true,
+              lockedNote:
+                "The standard eNPS question — its wording and 0–10 scale are fixed so scores stay comparable over time.",
+            },
+          ],
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-reason",
+          title: "What's the main reason for your score?",
+          type: "longText" as const,
         },
       },
     ],

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { AcademicCap, Add, Check, CheckDouble } from "@/icons/app"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { AcademicCap, Add, Check, CheckDouble, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -38,9 +39,9 @@ export const BaseQuestion = ({
   description,
   children,
   required,
-  locked: questionLocked,
   type: questionType,
   hiddenActions,
+  lockedNote,
 }: BaseQuestionProps) => {
   const {
     onQuestionChange,
@@ -54,7 +55,9 @@ export const BaseQuestion = ({
 
   const containingSection = getSectionContainingQuestion(id)
 
-  const locked = containingSection?.locked || questionLocked
+  // A question is only ever locked by being inside a locked section — it can't
+  // be locked on its own.
+  const locked = !!containingSection?.locked
 
   const isWithinSection = !!containingSection
 
@@ -127,12 +130,19 @@ export const BaseQuestion = ({
 
   const showCursorNotAllowed = !answering && inputDisabled
 
-  return (
+  const questionCard = (
     <div
       id={`co-creation-question-${id}`}
       className={cn(
-        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
-        !isDragging && !answering && "hover:border-f1-border-hover",
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-3",
+        // Blocked question: it lives inside a locked section, so the card keeps
+        // the default white fill (the section's muted grey panel sets it apart)
+        // and a not-allowed cursor signals it can't be edited. The `[&_*]` rule
+        // forces that cursor onto every descendant (inputs, textareas, options)
+        // so hovering anything inside the card keeps it, overriding their own
+        // (text/default) cursors.
+        locked && !answering && "cursor-not-allowed [&_*]:!cursor-not-allowed",
+        !isDragging && !answering && !locked && "hover:border-f1-border-hover",
         !answering || !!description ? "gap-4" : "gap-2"
       )}
     >
@@ -196,6 +206,22 @@ export const BaseQuestion = ({
                   !isWithinSection || !isSingleQuestionInSection
                 }
                 hiddenActions={hiddenActions}
+              />
+            </div>
+          )}
+          {!answering && locked && (
+            // Blocked question: a static lock sits where the actions "⋯" menu
+            // would be, signalling the card is predefined and can't be edited.
+            <div>
+              <F0Button
+                icon={LockLocked}
+                label={t("surveyFormBuilder.labels.locked")}
+                size="md"
+                variant="ghost"
+                tooltip={false}
+                hideLabel
+                disabled
+                withoutDisabledAppearance
               />
             </div>
           )}
@@ -349,4 +375,28 @@ export const BaseQuestion = ({
       )}
     </div>
   )
+
+  // Blocked question: an instant, title-less tooltip on hover. It prefers the
+  // question's own `lockedNote` (what this specific question is) and otherwise
+  // falls back to the section's explanation so a locked question always shows
+  // something.
+  const lockTooltipProps: { description: string } | null = !locked
+    ? null
+    : lockedNote
+      ? { description: lockedNote }
+      : containingSection?.notice?.description
+        ? { description: containingSection.notice.description }
+        : containingSection?.description
+          ? { description: containingSection.description }
+          : null
+
+  if (lockTooltipProps && !answering) {
+    return (
+      <Tooltip instant {...lockTooltipProps}>
+        {questionCard}
+      </Tooltip>
+    )
+  }
+
+  return questionCard
 }

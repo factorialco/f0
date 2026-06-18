@@ -303,8 +303,7 @@ export const useTableOfContentItems = (
           icon: getQuestionIcon(question.type as QuestionType),
           onClick: handleItemClick,
           ...(!disabled &&
-            !answering &&
-            !question.locked && {
+            !answering && {
               otherActions: buildQuestionActions(
                 question.id,
                 question.type as QuestionType,
