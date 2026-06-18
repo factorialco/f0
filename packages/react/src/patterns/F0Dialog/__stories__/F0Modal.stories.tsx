@@ -25,6 +25,10 @@ import { ActivityItemList } from "@/sds/inbox/Activity/ActivityItemList"
 import { Default as ActivityItemListDefault } from "@/sds/inbox/Activity/ActivityItemList/index.stories"
 
 import { PaginatedFetchOptions, RecordType } from "@/hooks/datasource"
+import {
+  expectDialogPaintsAboveChat,
+  FullscreenChatFrame,
+} from "@/lib/storybook-utils/aiChatStacking"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 
 import { F0Dialog } from "../index"
@@ -63,7 +67,11 @@ const meta: Meta<typeof F0Dialog> = {
     ...dataTestIdArgs,
   },
   decorators: [
-    (Story, { args: { isOpen, ...rest } }) => {
+    (Story, context) => {
+      const {
+        args: { isOpen, ...rest },
+        parameters,
+      } = context
       const [open, setOpen] = useState(isOpen)
 
       const handleClose = () => {
@@ -71,6 +79,12 @@ const meta: Meta<typeof F0Dialog> = {
       }
       const handleOpen = () => {
         setOpen(true)
+      }
+
+      // Stories that build their own ApplicationFrame (e.g. the fullscreen AI
+      // chat stacking demo) opt out of the default frame + open-button wrapper.
+      if (parameters.standaloneFrame) {
+        return <Story />
       }
 
       return (
@@ -540,5 +554,78 @@ export const WithFewItems: Story = {
       onClick: () => {},
     },
     children: <ExamplePersonList numberOfItems={3} />,
+  },
+}
+
+// --- Opening a dialog over the fullscreen AI chat ----------------------------
+// Mounts the real ApplicationFrame with the AI chat locked open in fullscreen
+// (painting at z-20 inside the isolate) and opens an F0Dialog on top of it.
+// Center and fullscreen dialogs portal to the top-level `#f0-overlay-root`, so
+// they — and their overlay — escape the isolate and render above the chat. The
+// play function hit-tests the dialog card to confirm the chat never covers it.
+
+const OVER_CHAT_TITLE = "On top of the fullscreen chat"
+
+export const OverFullscreenAiChat: Story = {
+  parameters: {
+    standaloneFrame: true,
+    layout: "fullscreen",
+    docs: {
+      description: {
+        story:
+          "A center F0Dialog opened while the AI chat is locked open in fullscreen. The chat paints at `z-20` inside the ApplicationFrame `isolate`; the dialog escapes to `#f0-overlay-root` so it renders above the chat instead of being trapped behind it in `#content`.",
+      },
+    },
+  },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    title: OVER_CHAT_TITLE,
+    description: "The dialog and its overlay sit above the fullscreen chat.",
+    primaryAction: {
+      label: "Got it",
+      onClick: () => {},
+    },
+    children: <ExampleList itemsCount={3} />,
+  },
+  render: (args) => (
+    <FullscreenChatFrame>
+      <F0Dialog {...args} />
+    </FullscreenChatFrame>
+  ),
+  play: async () => {
+    await expectDialogPaintsAboveChat({ title: OVER_CHAT_TITLE })
+  },
+}
+
+export const FullscreenDialogOverFullscreenAiChat: Story = {
+  parameters: {
+    standaloneFrame: true,
+    layout: "fullscreen",
+    docs: {
+      description: {
+        story:
+          'Same scenario with a `position="fullscreen"` dialog. It also portals to `#f0-overlay-root`, so it covers the fullscreen chat rather than being clipped by the isolate.',
+      },
+    },
+  },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    position: "fullscreen",
+    title: OVER_CHAT_TITLE,
+    primaryAction: {
+      label: "Got it",
+      onClick: () => {},
+    },
+    children: <ExamplePersonList numberOfItems={3} />,
+  },
+  render: (args) => (
+    <FullscreenChatFrame>
+      <F0Dialog {...args} />
+    </FullscreenChatFrame>
+  ),
+  play: async () => {
+    await expectDialogPaintsAboveChat({ title: OVER_CHAT_TITLE })
   },
 }
