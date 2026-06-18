@@ -27,11 +27,31 @@ type ParticipantRow = {
   fullName: string
   avatar: string
   nif: string
+  telefono: string
+  categoria: string
+  nivel: string
   horasAsistidas: number
   horasTotales: number
   apto: boolean
   diploma: boolean
 }
+
+// Catálogos FUNDAE (categoría profesional y nivel de estudios del participante).
+const CATEGORIAS_FUNDAE = [
+  "Directivo/a",
+  "Mando intermedio",
+  "Técnico/a",
+  "Trabajador/a cualificado/a",
+  "Trabajador/a no cualificado/a",
+]
+const NIVELES_FUNDAE = [
+  "Educación primaria",
+  "ESO / Graduado escolar",
+  "Bachillerato",
+  "FP grado medio",
+  "FP grado superior",
+  "Titulado/a universitario/a",
+]
 
 function buildRows(
   trainingId: string,
@@ -54,6 +74,9 @@ function mapRow(p: TrainingParticipant, idx: number): ParticipantRow {
     fullName: p.employeeName,
     avatar: p.employeeAvatar,
     nif: `${nifNumber}${nifLetter}`,
+    telefono: `6${String(11111111 + idx * 1234567).slice(0, 8)}`,
+    categoria: CATEGORIAS_FUNDAE[idx % CATEGORIAS_FUNDAE.length] as string,
+    nivel: NIVELES_FUNDAE[idx % NIVELES_FUNDAE.length] as string,
     horasAsistidas,
     horasTotales,
     apto: horasAsistidas >= 15,
@@ -240,6 +263,18 @@ export function FundaeParticipantsTable({
                 {
                   label: "NIF / NIE",
                   render: (r: ParticipantRow) => r.nif,
+                },
+                {
+                  label: "Teléfono",
+                  render: (r: ParticipantRow) => r.telefono,
+                },
+                {
+                  label: "Categoría profesional",
+                  render: (r: ParticipantRow) => r.categoria,
+                },
+                {
+                  label: "Nivel educativo",
+                  render: (r: ParticipantRow) => r.nivel,
                 },
                 {
                   label: "Horas asistidas",

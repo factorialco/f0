@@ -59,9 +59,12 @@ export function defaultInicio(training: Training, trainingClass: TrainingClass):
   const participantesReales = participantsForTraining(training.id).filter(
     (p) => p.classId === trainingClass.id || p.classId === null
   ).length
+  // Grupo de DEMO "a medias" (cls-001b): dejamos varios obligatorios vacíos
+  // para ver la validación con varios campos faltando (N>1).
+  const incompleto = trainingClass.id === "cls-001b"
   return {
     idAccion: training.codigoCurso ?? "00142",
-    idGrupo: trainingClass.fundaeConfig?.codigoGrupo ?? "0001",
+    idGrupo: incompleto ? "" : (trainingClass.fundaeConfig?.codigoGrupo ?? "0001"),
     descripcion: trainingClass.name,
     numeroParticipantes: participantesReales || trainingClass.participantCount || 12,
     fechaInicio: trainingClass.startDate
@@ -70,15 +73,15 @@ export function defaultInicio(training: Training, trainingClass: TrainingClass):
     fechaFin: trainingClass.endDate
       ? new Date(trainingClass.endDate).toLocaleDateString("es-ES")
       : "30/09/2026",
-    responsable: "María González Ruiz",
-    telefonoContacto: "934567890",
+    responsable: incompleto ? "" : "María González Ruiz",
+    telefonoContacto: incompleto ? "" : "934567890",
     modalidad: "presencial",
     centro: {
       tipoDocumentoCentro: "10",
       documentoCentro: "B66758231",
       nombreCentro: training.externalProvider ?? "Centro de Formación Empresarial S.L.",
       direccionDetallada: "Carrer d'Aragó 182, 3º",
-      codPostal: "08011",
+      codPostal: incompleto ? "" : "08011",
       localidad: "Barcelona",
     },
     lugarImparticion: {

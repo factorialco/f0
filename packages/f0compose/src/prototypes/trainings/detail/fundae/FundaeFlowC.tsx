@@ -36,13 +36,57 @@ import {
 
 type Phase = "alta" | "inicio" | "fin"
 type Tone = "neutral" | "info" | "positive" | "warning" | "critical"
-type ActionDef = { label: string; onClick: () => void }
 
 const eur = (n: number) =>
   n.toLocaleString("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0, useGrouping: true })
 
 const MODULO: Record<string, number> = { presencial: 13, teleformacion: 7.5, mixta: 11 }
 const moduloHora = (m: string) => MODULO[m] ?? 13
+
+// Color del nº del paso (header) según su estado, cuando aún no está hecho.
+const STEP_TONE_TEXT: Record<string, string> = {
+  info: "text-f1-foreground-info",
+  warning: "text-f1-foreground-warning",
+  critical: "text-f1-foreground-critical",
+  positive: "text-f1-foreground-positive",
+  neutral: "text-f1-foreground",
+}
+
+// Campos OBLIGATORIOS para FUNDAE por paso (esquema oficial): si falta alguno,
+// no se debe generar el fichero. Devuelve la lista de los que faltan.
+function requiredMissing(
+  phase: Phase,
+  af: AccionFormativaState,
+  inicio: InicioGrupoData,
+  fin: FinGrupoData
+): string[] {
+  const m: string[] = []
+  if (phase === "alta") {
+    if (!af.codigoFundae) m.push("Código FUNDAE")
+    if (!af.horas) m.push("Duración")
+    if (!af.modalidad) m.push("Modalidad")
+    if (!af.perfil) m.push("Perfil FUNDAE")
+  } else if (phase === "inicio") {
+    if (!inicio.idGrupo) m.push("Código de grupo")
+    if (!inicio.descripcion) m.push("Descripción")
+    if (!inicio.fechaInicio) m.push("Fecha de inicio")
+    if (!inicio.fechaFin) m.push("Fecha fin prevista")
+    if (!inicio.responsable) m.push("Responsable")
+    if (!inicio.telefonoContacto) m.push("Teléfono de contacto")
+    if (!inicio.centro?.localidad) m.push("Localidad del centro")
+    if (!inicio.centro?.codPostal) m.push("Código postal del centro")
+    inicio.tutores?.forEach((t, i) => {
+      if (!t.correoElectronico) m.push(`Correo del tutor ${i + 1}`)
+      if (!t.documento) m.push(`NIF del tutor ${i + 1}`)
+    })
+  } else {
+    if (!fin.fechaFinReal) m.push("Fecha de fin real")
+    if (!fin.costesDirectos) m.push("Costes directos")
+    if (!fin.costesIndirectos) m.push("Costes indirectos")
+    if (!fin.costesSalariales) m.push("Costes salariales")
+  }
+  return m
+}
 
 // Fechas siempre en numérico DD/MM/AAAA (misma lógica en los 3 pasos).
 function padDateStr(s: string): string {
@@ -84,11 +128,16 @@ function aptosFor(trainingId: string, cls: TrainingClass): { aptos: number; tota
 
 // ── Piezas de presentación (solo componentes f0) ───────────────────────
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value, required }: { label: string; value: string; required?: boolean }) {
+  const missing = required && !value
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
       <F0Text variant="label" content={label} />
-      <F0Text variant="body" content={value || "—"} />
+      {missing ? (
+        <F0Box display="flex"><F0TagStatus text="Falta" variant="warning" /></F0Box>
+      ) : (
+        <F0Text variant="body" content={value || "—"} />
+      )}
     </F0Box>
   )
 }
@@ -191,6 +240,9 @@ function AltaForm({ data, onCancel, onSave }: { data: AccionFormativaState; onCa
 
 function Flow({ training, af, setAf }: { training: Training; af: AccionFormativaState; setAf: (s: AccionFormativaState) => void }) {
   const classes = training.classes
+  // Opciones del selector MEMOIZADAS: si se recrea el array en cada render,
+  // F0Select entra en bucle ("Maximum update depth exceeded").
+  const groupOptions = useMemo(() => classes.map((c) => ({ value: c.id, label: c.name })), [classes])
   const [classId, setClassId] = useState(classes[0]?.id ?? "")
   const cls = useMemo(() => classes.find((c) => c.id === classId), [classes, classId])
 
@@ -285,14 +337,12 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   // Fecha de confirmación del paso (alta/comunicado) como campo apilado
   // label/valor, MISMO tratamiento que "Plazos" en el paso fin.
   let doneDate: { label: string; value: string } | undefined
-  let secondary: ActionDef[] = [] // acciones de DECISIÓN (panel derecho): p.ej. Generar XML
   let onEdit: (() => void) | null = null // editar vive a la IZQUIERDA, con los datos
   let mainBody: React.ReactNode = null
 
   if (active === "alta") {
     if (enFundae && af.fechaAlta) doneDate = { label: "Dada de alta el", value: padDateStr(af.fechaAlta) }
     onEdit = () => setEditing("alta")
-    if (enFundae) secondary.push({ label: "Generar XML", onClick: () => setToast("XML de alta generado (demo).") })
     const modalidad = MODALIDAD_OPTIONS.find((o) => o.value === af.modalidad)?.label ?? af.modalidad
     mainBody = (
       <F0Box display="flex" flexDirection="column" gap="3xl">
@@ -322,13 +372,13 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
         <Section title="Datos del grupo">
           <F0Box display="grid" columns="3" gap="2xl">
             <Field label="Código acción formativa" value={inicio.idAccion} />
-            <Field label="Código de grupo" value={inicio.idGrupo} />
-            <Field label="Descripción" value={inicio.descripcion} />
-            <Field label="Fecha de inicio" value={inicio.fechaInicio} />
-            <Field label="Fecha fin prevista" value={inicio.fechaFin} />
+            <Field label="Código de grupo" value={inicio.idGrupo} required />
+            <Field label="Descripción" value={inicio.descripcion} required />
+            <Field label="Fecha de inicio" value={inicio.fechaInicio} required />
+            <Field label="Fecha fin prevista" value={inicio.fechaFin} required />
             <Field label="Nº participantes" value={inicio.numeroParticipantes != null ? String(inicio.numeroParticipantes) : "—"} />
-            <Field label="Responsable" value={inicio.responsable} />
-            <Field label="Teléfono" value={inicio.telefonoContacto} />
+            <Field label="Responsable" value={inicio.responsable} required />
+            <Field label="Teléfono" value={inicio.telefonoContacto} required />
             <Field label="Modalidad" value={modalidad} />
           </F0Box>
         </Section>
@@ -337,8 +387,8 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
             <Field label="Nombre del centro" value={inicio.centro.nombreCentro} />
             <Field label="Documento" value={inicio.centro.documentoCentro} />
             <Field label="Dirección" value={inicio.centro.direccionDetallada} />
-            <Field label="Localidad" value={inicio.centro.localidad} />
-            <Field label="Código postal" value={inicio.centro.codPostal} />
+            <Field label="Localidad" value={inicio.centro.localidad} required />
+            <Field label="Código postal" value={inicio.centro.codPostal} required />
           </F0Box>
         </Section>
         <Section title="Horario">
@@ -359,9 +409,6 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   } else {
     if (finCom) doneDate = { label: "Comunicado el", value: padDateStr(com.finAt ?? "") }
     onEdit = () => setEditing("fin")
-    if (finCom) {
-      secondary.push({ label: "Generar XML", onClick: () => setToast("XML de fin generado (demo).") })
-    }
     // Izquierda = el trabajo (lo que verificas y editas): costes (arriba) +
     // participantes. Costes a todo el ancho, con jerarquía (no celdas planas).
     mainBody = (
@@ -409,7 +456,6 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   // Edición EN LÍNEA (no modal): sustituye el contenido del paso por su
   // formulario, con Guardar/Cancelar propios. Acciones de cabecera ocultas.
   if (editing === active) {
-    secondary = []
     stepNote = "Editando…"
     if (active === "alta") mainBody = <AltaForm data={af} onCancel={() => setEditing(null)} onSave={(d) => { setAf(d); setEditing(null) }} />
     else if (active === "inicio") mainBody = <InicioForm data={inicio} onCancel={() => setEditing(null)} onSave={(d) => { setInicio(d); setEditing(null) }} />
@@ -438,17 +484,12 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   // El CTA es SOLO para completar el paso (comunicar / dar de alta), y solo si
   // está por hacer. Navegar entre pasos es libre por el stepper — no es un botón.
   let action: { label: string; onClick: () => void; disabled?: boolean } | null = null
-  let actionHint: string | undefined
   if (active === "alta") {
     if (!enFundae) action = { label: "Comunicar alta", onClick: giveAlta }
   } else if (active === "inicio") {
-    if (!inicioCom) {
-      action = { label: "Comunicar inicio", onClick: () => openConfirm("inicio"), disabled: !enFundae }
-      if (!enFundae) actionHint = "Primero da de alta la acción formativa."
-    }
+    if (!inicioCom) action = { label: "Comunicar inicio", onClick: () => openConfirm("inicio"), disabled: !enFundae }
   } else if (!finCom) {
     action = { label: "Comunicar fin", onClick: () => openConfirm("fin"), disabled: !inicioCom }
-    if (!inicioCom) actionHint = "Primero comunica el inicio del grupo."
   }
 
   // ── Veredicto sintetizado del paso activo ──────────────────────────────
@@ -459,6 +500,13 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   const activeCom = active === "inicio" ? inicioCom : active === "fin" ? finCom : enFundae
   const datosOk = activeChecks.length === 0 ? true : activeChecks[0]!.ok
   const issues = activeChecks.filter((c) => !c.ok) // incidencias = lo que NO está en orden
+
+  // Campos obligatorios FUNDAE que faltan en el paso activo (validación antes de
+  // generar el fichero). Si hay alguno, se avisa y se bloquea la exportación.
+  const missing = requiredMissing(active, af, inicio, fin)
+  // Solo se BLOQUEA (avisar + deshabilitar generar) un paso PENDIENTE al que le
+  // faltan obligatorios. Un paso ya comunicado nunca sale bloqueado.
+  const blocked = !activeCom && missing.length > 0
 
   // ── Estructura del panel (elementos + jerarquía, sin ocultar info) ──
   // El resultado económico se presenta como DESGLOSE alineado: el 208 € es el
@@ -484,12 +532,17 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
     stateTone = "neutral"
   } else {
     stateText = "Comunicable"
-    stateTone = "positive"
+    stateTone = "info"
   }
 
   // Avisos para el BANNER: todos menos el del módulo (ese vive en "Bonificación"
   // como "No bonificable", para no duplicar la cifra).
-  const bannerIssues = issues.filter((c) => !/módulo/i.test(c.text))
+  // Un paso YA comunicado no muestra avisos de "puedes comunicar igualmente"
+  // ni incidencias de acción: su decisión es solo confirmación (estado + fecha).
+  // Banners = SOLO avisos reales (asistencia/75%). "Faltan datos" lo cubre la
+  // validación de obligatorios, y el plazo lo cubre la sección Plazos — no se
+  // duplican aquí. Un paso comunicado no muestra banners.
+  const bannerIssues = activeCom ? [] : issues.filter((c) => /asistencia|75%/i.test(c.text))
 
   // Divisores del panel derecho: el lead "Estado" ya lleva su borderBottom, así
   // que la PRIMERA sección del cuerpo NO lleva borderTop (si no, dos rayas
@@ -500,7 +553,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
     showBreakdown && "recup",
     (activeDeadline || (active === "fin" && fin.fechaFinReal)) && "plazos",
     doneDate && "done",
-    (action || stepNote || secondary.length > 0) && "action",
+    "action",
   ].filter(Boolean) as string[]
   const firstRight = rightSections[0]
 
@@ -523,15 +576,32 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
           pastilla blanca elevada; hechos = check verde. */}
       <div className="flex w-full items-center gap-1 rounded-lg bg-f1-background-secondary p-1">
         {classes.length > 1 && (
-          <div className="shrink-0">
-            <F0Select
-              label="Grupo formativo"
-              hideLabel
+          // Select NATIVO estilado para IMITAR a F0Select (que entra en bucle al
+          // abrirse en este build): misma caja h-8, rounded (10px), borde f1 +
+          // hover, fondo blanco, texto 14px y chevron a la derecha.
+          <div className="relative inline-flex h-8 shrink-0 items-center rounded border border-solid border-f1-border bg-f1-background transition-colors hover:border-f1-border-hover">
+            <select
+              aria-label="Grupo formativo"
               value={classId}
-              options={classes.map((c) => ({ value: c.id, label: c.name }))}
-              showSearchBox={classes.length > 5}
-              onChange={selectClass}
-            />
+              onChange={(e) => selectClass(e.target.value)}
+              className="h-full cursor-pointer appearance-none bg-transparent pl-3 pr-8 text-sm text-f1-foreground focus:outline-none"
+            >
+              {groupOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="pointer-events-none absolute right-2 h-4 w-4 text-f1-foreground-secondary"
+            >
+              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </div>
         )}
         {steps.map((s) => {
@@ -544,8 +614,8 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
               className={
                 "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors " +
                 (sel
-                  ? "bg-f1-background font-medium text-f1-foreground shadow-sm"
-                  : "text-f1-foreground-secondary hover:bg-f1-background-hover")
+                  ? "bg-f1-background font-semibold text-f1-foreground shadow-sm"
+                  : "font-medium text-f1-foreground hover:bg-f1-background-hover")
               }
             >
               <span
@@ -553,9 +623,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
                   "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs font-medium " +
                   (s.done
                     ? "border-transparent bg-f1-background-positive text-f1-foreground-positive"
-                    : sel
-                      ? "border-f1-border text-f1-foreground"
-                      : "border-f1-border text-f1-foreground-secondary")
+                    : "border-f1-border " + (STEP_TONE_TEXT[s.tone] ?? "text-f1-foreground-secondary"))
                 }
               >
                 {s.done ? "✓" : s.n}
@@ -601,12 +669,12 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
             width="80"
             display="flex"
             flexDirection="column"
-            gap="lg"
+            gap="xl"
             border="default"
             borderColor="secondary"
             borderRadius="lg"
             paddingX="lg"
-            paddingY="lg"
+            paddingY="xl"
           >
             {isEditing ? (
               <F0Box display="flex" flexDirection="column" gap="xs">
@@ -628,7 +696,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
             {/* SECCIÓN Bonificación — desglose de costes (Invertido / No bonificable). */}
             {showBreakdown && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "bonif" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "bonif" ? undefined : "lg"}>
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "bonif" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "bonif" ? undefined : "xl"}>
                 <F0Heading as="h3" variant="heading" content="Bonificación" />
                 <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
                   <F0Text variant="small" content="Invertido" />
@@ -664,7 +732,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
             {/* SECCIÓN Recuperable — su propio título + cifra, como las demás. */}
             {showBreakdown && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "recup" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "recup" ? undefined : "lg"}>
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "recup" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "recup" ? undefined : "xl"}>
                 <F0Heading as="h3" variant="heading" content="Recuperable" />
                 <F0Heading as="h3" variant="heading-large" content={eur(recuperable)} />
               </F0Box>
@@ -672,7 +740,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
             {/* SECCIÓN Plazos — mismo patrón */}
             {(activeDeadline || (active === "fin" && fin.fechaFinReal)) && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "plazos" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "plazos" ? undefined : "lg"}>
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "plazos" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "plazos" ? undefined : "xl"}>
                 <F0Heading as="h3" variant="heading" content="Plazos" />
                 {active === "fin" && fin.fechaFinReal && (
                   <F0Box display="flex" flexDirection="column" gap="xs">
@@ -684,6 +752,18 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
                   <F0Box display="flex" flexDirection="column" gap="xs">
                     <F0Text variant="small" content="Plazo para comunicar" />
                     <F0Text variant="body" content={deadlineNum} />
+                    <span
+                      className={
+                        "text-sm font-medium " +
+                        STEP_TONE_TEXT[
+                          activeDeadline.level === "info" ? "info" : activeDeadline.level === "warning" ? "warning" : "critical"
+                        ]
+                      }
+                    >
+                      {activeDeadline.daysRemaining < 0
+                        ? "Vencido — comunicar puede no bonificar"
+                        : `Te quedan ${activeDeadline.daysRemaining} ${activeDeadline.daysRemaining === 1 ? "día" : "días"}`}
+                    </span>
                   </F0Box>
                 )}
               </F0Box>
@@ -692,26 +772,49 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
             {/* FECHA de confirmación (alta/comunicado) — campo apilado label/valor,
                 MISMO tratamiento que "Plazos" en fin. */}
             {doneDate && (
-              <F0Box display="flex" flexDirection="column" gap="xs" borderTop={firstRight === "done" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "done" ? undefined : "lg"}>
+              <F0Box display="flex" flexDirection="column" gap="xs" borderTop={firstRight === "done" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "done" ? undefined : "xl"}>
                 <F0Text variant="small" content={doneDate.label} />
                 <F0Text variant="body" content={doneDate.value} />
               </F0Box>
             )}
 
-            {/* Acción: SOLO el CTA de completar (si el paso está por hacer).
-                Navegar entre pasos es libre por el stepper, no es un botón. */}
-            {(action || stepNote || secondary.length > 0) && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "action" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "action" ? undefined : "lg"}>
-                {action && (
-                  <F0Button label={action.label} variant="default" disabled={action.disabled} onClick={action.onClick} />
-                )}
-                {actionHint && <F0Text variant="small" content={actionHint} />}
-                {stepNote && <F0Text variant="small" content={stepNote} />}
-                {secondary.map((a) => (
-                  <F0Button key={a.label} label={a.label} variant="outline" onClick={a.onClick} />
-                ))}
+            {/* Validación de obligatorios + comunicar + EXPORTAR el fichero del
+                paso (XML/Excel/CSV). Si faltan campos required FUNDAE, se avisa
+                y se bloquean comunicar y exportar. */}
+            <F0Box display="flex" flexDirection="column" gap="lg" borderTop={firstRight === "action" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "action" ? undefined : "xl"}>
+              {/* Comunicar (acción primaria del paso) */}
+              {(action || stepNote) && (
+                <F0Box display="flex" flexDirection="column" gap="sm">
+                  {blocked && action && (
+                    <F0Alert
+                      variant="warning"
+                      title={missing.length === 1 ? "Falta 1 dato obligatorio" : `Faltan ${missing.length} datos obligatorios`}
+                      description=""
+                    />
+                  )}
+                  {action && (
+                    <F0Button label={action.label} variant="default" disabled={action.disabled || blocked} onClick={action.onClick} />
+                  )}
+                  {stepNote && <F0Text variant="small" content={stepNote} />}
+                </F0Box>
+              )}
+              {/* Generar fichero — divisor solo si hay un botón de comunicar
+                  encima (si es lo primero, basta el borde de la sección). */}
+              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={action || stepNote ? "default" : undefined} borderColor="secondary" paddingTop={action || stepNote ? "lg" : undefined}>
+                <F0Heading as="h3" variant="heading" content="Generar fichero" />
+                <F0Box display="flex" flexDirection="row" gap="sm">
+                  {(["XML", "Excel", "CSV"] as const).map((fmt) => (
+                    <F0Button
+                      key={fmt}
+                      variant="outline"
+                      label={fmt}
+                      disabled={blocked}
+                      onClick={() => setToast(`Fichero ${fmt} generado (demo).`)}
+                    />
+                  ))}
+                </F0Box>
               </F0Box>
-            )}
+            </F0Box>
               </>
             )}
           </F0Box>
