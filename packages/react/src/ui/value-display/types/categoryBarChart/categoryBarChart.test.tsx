@@ -97,9 +97,9 @@ describe("CategoryBarChartCell", () => {
     ).toBeInTheDocument()
   })
 
-  it("applies custom color when provided", () => {
+  it("applies token color when color is provided", () => {
     const args: CategoryBarChartCellValue = {
-      dataPoints: [{ name: "Test", value: 10, color: "#FF0000" }],
+      dataPoints: [{ name: "Test", value: 10, color: "categorical-3" }],
     }
 
     const { container } = render(CategoryBarChartCell(args, defaultMeta))

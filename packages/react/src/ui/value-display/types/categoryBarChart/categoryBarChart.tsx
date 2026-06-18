@@ -23,17 +23,6 @@ export interface CategoryBarChartCellValue {
 
 const CELL_MIN_HEIGHT_PX = 40
 
-function resolveColor(color: string | undefined, index: number): string {
-  if (!color) return getCategoricalColor(index)
-  if (
-    color.startsWith("#") ||
-    color.startsWith("rgb") ||
-    color.startsWith("hsl")
-  )
-    return color
-  return getColor(color)
-}
-
 function formatPercentage(value: number, total: number): string {
   const pct = (value / total) * 100
   return pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1)
@@ -83,7 +72,9 @@ export const CategoryBarChartCell = (
       <div className="flex h-2 w-full gap-1 overflow-hidden">
         {dataPoints.map((point, index) => {
           const percentage = (point.value / total) * 100
-          const color = resolveColor(point.color, index)
+          const color = point.color
+            ? getColor(point.color)
+            : getCategoricalColor(index)
 
           if (percentage === 0) return null
 
