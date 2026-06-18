@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { TableHead as TableHeadRoot } from "@/ui/table"
@@ -37,7 +38,13 @@ export type TableHeaderInfo = {
   }
 }
 
-function HeaderInfoCard({ info }: { info: TableHeaderInfo }) {
+function HeaderInfoCard({
+  info,
+  onAction,
+}: {
+  info: TableHeaderInfo
+  onAction?: () => void
+}) {
   return (
     <div className="flex max-w-xs flex-col gap-1 whitespace-normal p-1 text-left">
       {info.title && <p className="font-semibold">{info.title}</p>}
@@ -48,7 +55,7 @@ function HeaderInfoCard({ info }: { info: TableHeaderInfo }) {
       {info.action && (
         <button
           type="button"
-          onClick={info.action.onClick}
+          onClick={onAction ?? info.action.onClick}
           className={cn(
             "mt-1 w-fit rounded-xs font-medium text-f1-foreground underline underline-offset-2",
             focusRing()
@@ -68,9 +75,12 @@ function HeaderInfo({
   info: TableHeaderInfo
   infoIcon: IconType
 }) {
+  const [open, setOpen] = useState(false)
+  const { action } = info
+
   return (
     <TooltipProvider delayDuration={300} disableHoverableContent={false}>
-      <TooltipPrimitive>
+      <TooltipPrimitive open={open} onOpenChange={setOpen}>
         <TooltipTrigger
           className={cn(
             "flex h-5 w-5 items-center justify-center rounded-xs text-f1-foreground-secondary",
@@ -81,7 +91,19 @@ function HeaderInfo({
           <F0Icon icon={infoIcon} size="sm" />
         </TooltipTrigger>
         <TooltipContent variant="surface" className="pointer-events-auto">
-          <HeaderInfoCard info={info} />
+          <HeaderInfoCard
+            info={info}
+            // Dismiss the tooltip immediately when the action fires so it never
+            // lingers over the surface the action opens (e.g. a dialog).
+            onAction={
+              action
+                ? () => {
+                    setOpen(false)
+                    action.onClick()
+                  }
+                : undefined
+            }
+          />
         </TooltipContent>
       </TooltipPrimitive>
     </TooltipProvider>
