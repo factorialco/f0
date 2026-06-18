@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.1](https://github.com/factorialco/f0/compare/f0-react-v3.8.0...f0-react-v3.8.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* add missing SurveySampleQuestion export ([#4498](https://github.com/factorialco/f0/issues/4498)) ([7cbefe7](https://github.com/factorialco/f0/commit/7cbefe72c67a71dc5a6359b855070f5a08385e70))
+
 ## [3.8.0](https://github.com/factorialco/f0/compare/f0-react-v3.7.2...f0-react-v3.8.0) (2026-06-18)
 
 
