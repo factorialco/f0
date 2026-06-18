@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.5](https://github.com/factorialco/f0/compare/f0-react-v3.8.4...f0-react-v3.8.5) (2026-06-18)
+
+
+### Bug Fixes
+
+* **ButtonGroup:** drop numeric gap prop for fixed gap-md ([#4459](https://github.com/factorialco/f0/issues/4459)) ([5f2d6d2](https://github.com/factorialco/f0/commit/5f2d6d23b9e8b1eb4f0609a515aeade74cf3751f))
+
 ## [3.8.4](https://github.com/factorialco/f0/compare/f0-react-v3.8.3...f0-react-v3.8.4) (2026-06-18)
 
 
