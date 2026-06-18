@@ -22,10 +22,15 @@ export type BaseQuestionProps = {
   required?: boolean
   hiddenActions?: HiddenActions
   /**
-   * Optional notice shown in the lock tooltip when the question is locked (i.e.
-   * it sits inside a locked section). Use it to say what this specific question
-   * is — it takes precedence over the section's own `LockedSectionNotice`. It is
-   * NOT a lock flag: questions can only be locked via their section.
+   * Locks the question on its own — independent of any section. A question is
+   * also locked when its containing section is locked.
+   */
+  locked?: boolean
+  /**
+   * Optional notice shown in the lock tooltip when the question is locked. Use
+   * it to say what this specific question is — it takes precedence over the
+   * parent section's `LockedSectionNotice` and over the default question notice
+   * from the i18n provider.
    */
   lockedNote?: LockedQuestionNotice
 }

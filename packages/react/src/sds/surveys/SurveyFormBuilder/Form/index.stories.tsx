@@ -364,11 +364,11 @@ export const WithAllowCreate: Story = {
 /**
  * A blocked, predefined section: `locked` on the section disables its fields,
  * removes its edit menu and drag handle, and makes the questions inside it
- * non-interactive. Its title/description explain why it's fixed and surface as
- * the "Locked" tag tooltip (and on hover over the questions). Questions can't be
- * locked on their own — only via their section. The standalone question after
- * it stays fully editable. The locked treatment never shows in the
- * answering/preview form.
+ * non-interactive. The section's `notice` surfaces as the "Locked" tag tooltip;
+ * questions inside without their own `lockedNote` inherit it. The standalone
+ * question after it stays fully editable. The locked treatment never shows in
+ * the answering/preview form. (For locking individual questions outside a
+ * section, see "With Locked Questions".)
  */
 export const WithBlockedSection: Story = {
   args: {
@@ -410,6 +410,74 @@ export const WithBlockedSection: Story = {
           id: "q-reason",
           title: "What's the main reason for your score?",
           type: "longText" as const,
+        },
+      },
+    ],
+  },
+}
+
+/**
+ * Individually locked questions — `locked` on the question itself, with no
+ * surrounding section. Each shows the lock affordance instead of its actions
+ * menu and a tooltip on hover. The first two carry their own `lockedNote`
+ * (a predefined notice); the locked ones without a note fall back to the
+ * default question notice from the i18n provider
+ * (`surveyFormBuilder.labels.lockedQuestionNotice`). An editable question sits
+ * between them to show the lock is per-question.
+ */
+export const WithLockedQuestions: Story = {
+  args: {
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-legal-name",
+          title: "Full legal name",
+          type: "text" as const,
+          locked: true,
+          lockedNote: {
+            description:
+              "Synced from your HR profile, so it can't be edited here.",
+          },
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-employee-id",
+          title: "Employee ID",
+          type: "text" as const,
+          locked: true,
+          lockedNote: {
+            description:
+              "Assigned by the system and used to match your record.",
+          },
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-nickname",
+          title: "What should we call you?",
+          type: "text" as const,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-start-date",
+          title: "Start date",
+          type: "date" as const,
+          locked: true,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-department",
+          title: "Department",
+          type: "text" as const,
+          locked: true,
         },
       },
     ],

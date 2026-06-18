@@ -67,7 +67,8 @@ export const CheckboxQuestion = ({
 
   const inputDisabled =
     disabled ||
-    getSectionContainingQuestion(baseQuestionComponentProps.id)?.locked
+    getSectionContainingQuestion(baseQuestionComponentProps.id)?.locked ||
+    baseQuestionComponentProps.locked
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>

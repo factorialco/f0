@@ -114,27 +114,6 @@ export function useReorderHandler({
         finalItems = reorderedItems
       }
 
-      // Reject moves that would drop a foreign question into a locked section.
-      // A locked section's membership is frozen: only the questions that
-      // originally belonged to it may stay inside it. If any other question
-      // ends up within a locked section, bail out without calling onChange so
-      // the controlled list snaps the dragged item back to its origin.
-      if (lockedSectionIds.size > 0) {
-        let activeSectionId: string | null = null
-        for (const item of finalItems) {
-          if (item.type === "section-header") {
-            activeSectionId = item.id
-          } else if (item.type === "question" && activeSectionId) {
-            if (
-              lockedSectionIds.has(activeSectionId) &&
-              !originalSectionQuestions.get(activeSectionId)?.has(item.id)
-            ) {
-              return
-            }
-          }
-        }
-      }
-
       // Build set of all question IDs that originally belonged to any section.
       const allInSectionQuestionIds = new Set<string>()
       for (const qIds of originalSectionQuestions.values()) {
@@ -148,6 +127,32 @@ export function useReorderHandler({
         finalItems,
         allInSectionQuestionIds
       )
+
+      // Reject moves that would drop a foreign question into a locked section.
+      // A locked section's membership is frozen: only the questions that
+      // originally belonged to it may sit inside it. We walk the section-end-
+      // aware list (a `section-end` closes the active section) so siblings that
+      // live *outside* the locked section — including standalone items that
+      // follow it — are never mistaken for members. If a foreign question ends
+      // up inside a locked section, bail out without calling onChange so the
+      // controlled list snaps the dragged item back to its origin.
+      if (lockedSectionIds.size > 0) {
+        let activeSectionId: string | null = null
+        for (const item of withSectionEnds) {
+          if (item.type === "section-header") {
+            activeSectionId = item.id
+          } else if (item.type === "section-end") {
+            activeSectionId = null
+          } else if (item.type === "question" && activeSectionId) {
+            if (
+              lockedSectionIds.has(activeSectionId) &&
+              !originalSectionQuestions.get(activeSectionId)?.has(item.id)
+            ) {
+              return
+            }
+          }
+        }
+      }
 
       // Detect if a section lost its last question (would become empty).
       const sectionWillBecomeEmpty = [

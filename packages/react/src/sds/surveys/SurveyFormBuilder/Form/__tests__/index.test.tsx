@@ -178,14 +178,17 @@ describe("SurveyFormBuilder", () => {
 
     render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
 
-    // The note isn't shown inline — it surfaces as a tooltip on hover.
+    // The note isn't shown inline — it surfaces as a tooltip when hovering the
+    // lock icon (not anywhere on the card).
     const card = document.getElementById("co-creation-question-q1")
     expect(card).not.toBeNull()
     expect(
       screen.queryByText("This is the standard onboarding question.")
     ).not.toBeInTheDocument()
 
-    await userEvent.hover(card!)
+    const lockIcon = card!.querySelector('button[aria-label="Locked"]')
+    expect(lockIcon).not.toBeNull()
+    await userEvent.hover(lockIcon!.parentElement!)
 
     // Shows the question's own note…
     expect(

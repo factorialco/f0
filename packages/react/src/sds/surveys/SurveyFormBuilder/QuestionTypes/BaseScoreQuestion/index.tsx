@@ -26,9 +26,9 @@ export const BaseScoreQuestion = ({
 
   // A question inside a locked section is non-interactive in the authoring
   // view, but stays selectable for respondents (answering).
-  const locked = getSectionContainingQuestion(
-    baseQuestionComponentProps.id
-  )?.locked
+  const locked =
+    getSectionContainingQuestion(baseQuestionComponentProps.id)?.locked ||
+    baseQuestionComponentProps.locked
 
   const ratingType = detectRatingOptionType(options)
   const isEmojiMode = ratingType === "emojis"

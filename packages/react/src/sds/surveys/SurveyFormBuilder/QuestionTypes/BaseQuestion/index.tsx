@@ -41,6 +41,7 @@ export const BaseQuestion = ({
   required,
   type: questionType,
   hiddenActions,
+  locked: ownLocked,
   lockedNote,
 }: BaseQuestionProps) => {
   const {
@@ -55,9 +56,9 @@ export const BaseQuestion = ({
 
   const containingSection = getSectionContainingQuestion(id)
 
-  // A question is only ever locked by being inside a locked section — it can't
-  // be locked on its own.
-  const locked = !!containingSection?.locked
+  // A question is locked either on its own (`locked` prop) or by living inside a
+  // locked section.
+  const locked = !!containingSection?.locked || !!ownLocked
 
   const isWithinSection = !!containingSection
 
@@ -140,7 +141,7 @@ export const BaseQuestion = ({
         description:
           lockedNote?.description ??
           containingSection?.notice?.description ??
-          t("surveyFormBuilder.labels.lockedNotice"),
+          t("surveyFormBuilder.labels.lockedQuestionNotice"),
       }
 
   const questionCard = (
@@ -229,16 +230,21 @@ export const BaseQuestion = ({
             <div>
               {lockTooltipProps ? (
                 <Tooltip instant {...lockTooltipProps}>
-                  <F0Button
-                    icon={LockLocked}
-                    label={t("surveyFormBuilder.labels.locked")}
-                    size="md"
-                    variant="ghost"
-                    tooltip={false}
-                    hideLabel
-                    disabled
-                    withoutDisabledAppearance
-                  />
+                  {/* A disabled button doesn't fire hover events, so the
+                      tooltip hangs off this wrapper span (which stays
+                      pointer-interactive) rather than the button itself. */}
+                  <span className="inline-flex">
+                    <F0Button
+                      icon={LockLocked}
+                      label={t("surveyFormBuilder.labels.locked")}
+                      size="md"
+                      variant="ghost"
+                      tooltip={false}
+                      hideLabel
+                      disabled
+                      withoutDisabledAppearance
+                    />
+                  </span>
                 </Tooltip>
               ) : (
                 <F0Button
@@ -289,7 +295,7 @@ export const BaseQuestion = ({
           }
         />
       )}
-      {!disabled && !answering && !containingSection?.locked && (
+      {!disabled && !answering && !locked && (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",

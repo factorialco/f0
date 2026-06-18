@@ -23,6 +23,7 @@ export const Section = ({
   id,
   title = "",
   description,
+  notice,
   questions = [],
   locked,
   hideQuestions,
@@ -102,8 +103,10 @@ export const Section = ({
   }, [])
 
   // Blocked section: a white "LOCKED" tag sits at the rightmost of the title.
-  // The section description isn't shown inline; instead it's surfaced as a
-  // tooltip on the tag (see below).
+  // Hovering it surfaces why the section is blocked — its own
+  // `LockedSectionNotice`, falling back to the provider's default lock notice.
+  const lockedNoticeText =
+    notice?.description ?? t("surveyFormBuilder.labels.lockedSectionNotice")
   const lockedTag =
     locked && !answering ? (
       <F0TagRaw
@@ -148,15 +151,9 @@ export const Section = ({
               )}
               {lockedTag && (
                 <div className="ml-auto flex shrink-0 items-center">
-                  {description ? (
-                    // The description explains why the section is blocked; it
-                    // surfaces on hover/focus of the tag instead of inline.
-                    <Tooltip description={description} instant>
-                      <span className="inline-flex">{lockedTag}</span>
-                    </Tooltip>
-                  ) : (
-                    lockedTag
-                  )}
+                  <Tooltip description={lockedNoticeText} instant>
+                    <span className="inline-flex">{lockedTag}</span>
+                  </Tooltip>
                 </div>
               )}
               {!disabled && !answering && !locked && (
