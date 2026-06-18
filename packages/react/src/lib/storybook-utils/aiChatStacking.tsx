@@ -1,4 +1,4 @@
-import { ComponentProps, ReactNode } from "react"
+import { ComponentProps, ReactNode, useState } from "react"
 import { expect, waitFor, within } from "storybook/test"
 
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
@@ -31,23 +31,42 @@ const fullscreenChatAi: ComponentProps<typeof ApplicationFrame>["ai"] = {
   chatInput: <MockConnectedChatInput />,
 }
 
+// The chat's open + visualization-mode state is persisted to localStorage, so
+// a `sidepanel`/closed value left over from browsing other stories would
+// override `defaultVisualizationMode: "fullscreen"`. Clearing the keys before
+// the Ai provider initializes lets the fullscreen default take effect — with
+// no flash, since this runs in the parent's render before the provider mounts.
+const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
+const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
+
 /**
  * Renders the app shell with the AI chat locked open in fullscreen, then drops
  * `children` (the dialog under test) into the main content area. Pair with
  * {@link expectDialogPaintsAboveChat} in a `play` function to assert the dialog
  * stays on top of the chat.
  */
-export const FullscreenChatFrame = ({ children }: { children: ReactNode }) => (
-  <MockAiChatRuntimeProvider>
-    <ApplicationFrame
-      ai={fullscreenChatAi}
-      sidebar={<Sidebar {...SidebarStories.default.args} />}
-    >
-      <Page {...PageStories.Default.args} />
-      {children}
-    </ApplicationFrame>
-  </MockAiChatRuntimeProvider>
-)
+export const FullscreenChatFrame = ({ children }: { children: ReactNode }) => {
+  // Lazy initializer runs once, before the Ai provider reads localStorage.
+  useState(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(CHAT_OPEN_STORAGE_KEY)
+      window.localStorage.removeItem(CHAT_VISUALIZATION_MODE_STORAGE_KEY)
+    }
+    return null
+  })
+
+  return (
+    <MockAiChatRuntimeProvider>
+      <ApplicationFrame
+        ai={fullscreenChatAi}
+        sidebar={<Sidebar {...SidebarStories.default.args} />}
+      >
+        <Page {...PageStories.Default.args} />
+        {children}
+      </ApplicationFrame>
+    </MockAiChatRuntimeProvider>
+  )
+}
 
 /**
  * Verifies (in a real browser, via the Storybook test runner) that a center /
