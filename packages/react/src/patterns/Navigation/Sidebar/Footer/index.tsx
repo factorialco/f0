@@ -51,7 +51,7 @@ export function SidebarFooter({
               lastName={user.lastName}
               size="xs"
             />
-            <OneEllipsis>{`${user.firstName} ${user.lastName}`}</OneEllipsis>
+            <OneEllipsis className="text-f1-foreground">{`${user.firstName} ${user.lastName}`}</OneEllipsis>
           </button>
         </Dropdown>
       </div>

@@ -14,6 +14,7 @@ import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import {
   MockAiChatRuntimeProvider,
@@ -659,7 +660,7 @@ const meta: Meta<typeof ApplicationFrame> = {
         },
       ],
     },
-    sidebar: <Sidebar {...SidebarStories.default.args} />,
+    sidebar: <TabbedSidebar />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
 }
@@ -687,7 +688,7 @@ const DefaultStoryComponent = (
       <ApplicationFrame
         ai={withMockChatSlots(args.ai)}
         aiPromotion={args.aiPromotion}
-        sidebar={<Sidebar {...SidebarStories.default.args} />}
+        sidebar={<TabbedSidebar />}
       >
         <Page {...PageStories.Default.args} />
       </ApplicationFrame>
