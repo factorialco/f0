@@ -392,8 +392,10 @@ export const WithBlockedSection: Story = {
                 label: String(value),
               })),
               required: true,
-              lockedNote:
-                "The standard eNPS question — its wording and 0–10 scale are fixed so scores stay comparable over time.",
+              lockedNote: {
+                description:
+                  "The standard eNPS question — its wording and 0–10 scale are fixed so scores stay comparable over time.",
+              },
             },
           ],
         },

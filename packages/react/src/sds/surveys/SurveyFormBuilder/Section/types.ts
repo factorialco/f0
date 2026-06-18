@@ -1,4 +1,4 @@
-import { QuestionElement, QuestionNotice } from "../types"
+import { LockedSectionNotice, QuestionElement } from "../types"
 
 export type SectionProps = {
   id: string
@@ -12,9 +12,9 @@ export type SectionProps = {
   description?: string
   locked?: boolean
   /**
-   * Optional alert rendered above the section title (authoring view only). Pair
-   * with `locked` to explain why a predefined section can't be edited or moved.
+   * Optional explanation surfaced in the lock tooltip (authoring view only).
+   * Pair with `locked` to say why a predefined section can't be edited or moved.
    */
-  notice?: QuestionNotice
+  notice?: LockedSectionNotice
   questions?: QuestionElement[]
 }

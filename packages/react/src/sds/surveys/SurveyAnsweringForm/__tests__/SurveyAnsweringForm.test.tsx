@@ -217,7 +217,7 @@ describe("SurveyAnsweringForm", () => {
                 id: "q1",
                 title: "Name",
                 type: "text" as const,
-                notice: { description: "Author-only notice" },
+                lockedNote: { description: "Author-only notice" },
               },
             },
           ]}

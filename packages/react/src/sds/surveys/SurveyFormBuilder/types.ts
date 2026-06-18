@@ -51,11 +51,19 @@ export type HiddenAction =
 export type HiddenActions = ReadonlyArray<HiddenAction>
 
 /**
- * Explanation surfaced for a locked question (authoring view only — never shown
- * in the answering/preview form). Rendered as a title-less tooltip on hover to
- * say why a predefined question can't be edited, moved, or removed.
+ * Explanation surfaced in a locked item's lock tooltip (authoring view only —
+ * never shown in the answering/preview form), saying why it can't be edited,
+ * moved, or removed. Rendered as a title-less popover on hovering the lock.
+ *
+ * A section and an individual question each carry their own notice; a locked
+ * question prefers its own `LockedQuestionNotice` and otherwise falls back to
+ * the section's `LockedSectionNotice`.
  */
-export type QuestionNotice = {
+export type LockedSectionNotice = {
+  description: string
+}
+
+export type LockedQuestionNotice = {
   description: string
 }
 

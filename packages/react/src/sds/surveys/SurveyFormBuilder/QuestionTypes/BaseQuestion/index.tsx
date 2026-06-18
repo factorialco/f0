@@ -136,8 +136,8 @@ export const BaseQuestion = ({
   // always has something to say.
   const lockTooltipProps: { description: string } | null = !locked
     ? null
-    : lockedNote
-      ? { description: lockedNote }
+    : lockedNote?.description
+      ? { description: lockedNote.description }
       : containingSection?.notice?.description
         ? { description: containingSection.notice.description }
         : containingSection?.description

@@ -167,7 +167,9 @@ describe("SurveyFormBuilder", () => {
               id: "q1",
               title: "Blocked",
               type: "text",
-              lockedNote: "This is the standard onboarding question.",
+              lockedNote: {
+                description: "This is the standard onboarding question.",
+              },
             },
           ],
         },

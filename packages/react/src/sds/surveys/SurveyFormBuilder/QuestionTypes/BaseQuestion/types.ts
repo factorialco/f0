@@ -1,11 +1,17 @@
 import {
   HiddenAction,
   HiddenActions,
-  QuestionNotice,
+  LockedQuestionNotice,
+  LockedSectionNotice,
   QuestionType,
 } from "../../types"
 
-export type { HiddenAction, HiddenActions, QuestionNotice }
+export type {
+  HiddenAction,
+  HiddenActions,
+  LockedQuestionNotice,
+  LockedSectionNotice,
+}
 
 export type BaseQuestionProps = {
   id: string
@@ -16,12 +22,12 @@ export type BaseQuestionProps = {
   required?: boolean
   hiddenActions?: HiddenActions
   /**
-   * Optional note shown as a tooltip when the question is locked (i.e. it sits
-   * inside a locked section). Use it to say what this specific question is —
-   * distinct from the section's own lock explanation. It is NOT a lock flag:
-   * questions can only be locked via their section.
+   * Optional notice shown in the lock tooltip when the question is locked (i.e.
+   * it sits inside a locked section). Use it to say what this specific question
+   * is — it takes precedence over the section's own `LockedSectionNotice`. It is
+   * NOT a lock flag: questions can only be locked via their section.
    */
-  lockedNote?: string
+  lockedNote?: LockedQuestionNotice
 }
 
 export type BaseQuestionPropsForOtherQuestionComponents = Omit<
