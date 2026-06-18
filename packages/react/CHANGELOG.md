@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0](https://github.com/factorialco/f0/compare/f0-react-v3.6.0...f0-react-v3.7.0) (2026-06-17)
+
+
+### Features
+
+* **OneDataCollection:** graph (org chart) visualization ([#4311](https://github.com/factorialco/f0/issues/4311)) ([deb3350](https://github.com/factorialco/f0/commit/deb3350ed8bf3d7be392bab040bf4890dbd9aef4))
+
 ## [3.6.0](https://github.com/factorialco/f0/compare/f0-react-v3.5.1...f0-react-v3.6.0) (2026-06-17)
 
 

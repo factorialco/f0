@@ -961,6 +961,20 @@ export const getMockVisualizations = (options?: {
           : undefined,
       },
     },
+    graph: {
+      type: "graph",
+      options: {
+        title: (u) => u.name,
+        subtitle: (u) => u.role,
+        avatar: (u) => ({
+          type: "person",
+          firstName: u.name.split(" ")[0] ?? "",
+          lastName: u.name.split(" ")[1] ?? "",
+        }),
+        getChildrenCount: () => 0,
+        childrenFilters: () => ({}),
+      },
+    },
   }) as const
 // Example of using the object-based approach (recommended)
 export const sortings = {
