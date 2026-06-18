@@ -1,5 +1,5 @@
 /** A mocked rating-scale question (e.g. Very low → Very high). */
-export type SampleRatingQuestion = {
+type SampleRatingQuestion = {
   type: "rating"
   /** The question prompt shown above the scale */
   question: string
@@ -12,7 +12,7 @@ export type SampleRatingQuestion = {
 }
 
 /** A mocked single-choice question. */
-export type SampleChoiceQuestion = {
+type SampleChoiceQuestion = {
   type: "choice"
   /** The question prompt shown above the options */
   question: string
@@ -20,4 +20,6 @@ export type SampleChoiceQuestion = {
   options: string[]
 }
 
-export type SampleQuestionProps = SampleRatingQuestion | SampleChoiceQuestion
+export type SurveySampleQuestionProps =
+  | SampleRatingQuestion
+  | SampleChoiceQuestion
