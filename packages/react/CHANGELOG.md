@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.1](https://github.com/factorialco/f0/compare/f0-react-v3.7.0...f0-react-v3.7.1) (2026-06-18)
+
+
+### Bug Fixes
+
+* **F0Select:** never preserve a select-all across dataset changes ([#4479](https://github.com/factorialco/f0/issues/4479)) ([3ad4aea](https://github.com/factorialco/f0/commit/3ad4aeae64179e57f4db11194d3412664cd0c1be))
+
 ## [3.7.0](https://github.com/factorialco/f0/compare/f0-react-v3.6.0...f0-react-v3.7.0) (2026-06-17)
 
 
