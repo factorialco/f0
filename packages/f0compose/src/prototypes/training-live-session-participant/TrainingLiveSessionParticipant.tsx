@@ -70,8 +70,8 @@ import {
   Sliders,
   SolidStop,
   Sparkles,
+  Desktop,
   People,
-  Present,
   Reset,
   Upload,
   VideoRecorder,
@@ -5239,7 +5239,7 @@ function SessionRoomScreen({
           <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
           <F0Box height="4" width="0.5" background="secondary" />
           <F0ButtonToggle label={["Open chat", "Close chat"]} icon={[Comment, Comment]} selected={activePanel === "chat"} onSelectedChange={() => togglePanel("chat")} />
-          <F0ButtonToggle label={["Share screen", "Stop sharing"]} icon={[Present, Present]} selected={screenShareEnabled} onSelectedChange={setScreenShareEnabled} />
+          <F0ButtonToggle label={["Share screen", "Stop sharing"]} icon={[Desktop, Desktop]} selected={screenShareEnabled} onSelectedChange={setScreenShareEnabled} />
           {isInstructor ? (
             <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
           ) : null}
