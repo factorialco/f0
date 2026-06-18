@@ -38,10 +38,27 @@ export type CardRowStackAt = "sm" | "md" | "lg" | "never"
  * `md`. `@xs < @md < @lg` keeps sm < md < lg as expected.
  */
 export const cardRowClassName: Record<CardRowStackAt, string> = {
-  sm: "flex flex-col @xs:flex-row @xs:items-center @xs:justify-between @xs:gap-4",
-  md: "flex flex-col @md:flex-row @md:items-center @md:justify-between @md:gap-4",
-  lg: "flex flex-col @lg:flex-row @lg:items-center @lg:justify-between @lg:gap-4",
-  never: "flex flex-row items-center justify-between gap-4",
+  sm: "flex flex-col @xs:flex-row @xs:items-start @xs:justify-between @xs:gap-4",
+  md: "flex flex-col @md:flex-row @md:items-start @md:justify-between @md:gap-4",
+  lg: "flex flex-col @lg:flex-row @lg:items-start @lg:justify-between @lg:gap-4",
+  never: "flex flex-row items-start justify-between gap-4",
+}
+
+/**
+ * Cross-axis alignment of the leading (avatar + text) group within the inline
+ * row. The row pins its items to the top (`items-start` above) so the avatar and
+ * actions stay level with the title's first line as the row grows. A leading
+ * group that's *shorter* than the trailing controls — e.g. a single line of text
+ * next to a taller button — should instead sit vertically centred against them.
+ * `self-center` does exactly that: it only takes visible effect while the group
+ * is shorter than the row, so a tall wrapped group still fills from the top.
+ * Scoped to the inline breakpoint so the stacked column keeps its default stretch.
+ */
+export const cardRowLeadingAlignClassName: Record<CardRowStackAt, string> = {
+  sm: "@xs:self-center",
+  md: "@md:self-center",
+  lg: "@lg:self-center",
+  never: "self-center",
 }
 
 /**
@@ -49,17 +66,53 @@ export const cardRowClassName: Record<CardRowStackAt, string> = {
  * top of its content, so a shrink-to-fit container would always shed the tail
  * into the menu — it needs a bound *wider* than its content. Inline (at/above
  * the breakpoint) we hand it the remaining row space via `flex-1`, with its own
- * `justify-end` keeping the buttons at the trailing edge. Once stacked we leave
- * it `auto`: the flex column stretches it to full width, and crucially that lets
- * the `-mx-4` full-bleed footer extend symmetrically — an explicit `w-full`
- * would clip the right edge, since a negative right margin can't widen a
- * fixed-width box. `never` is always inline.
+ * `justify-end` keeping the buttons at the trailing edge. We deliberately omit
+ * `min-w-0` so the wrapper keeps its min-content floor: a long leading title or
+ * description can't squeeze it to zero width (which would let the trailing
+ * button overrun the text and spill past the card edge). The row's `gap` then
+ * guarantees a little breathing room between the text and the buttons. Once
+ * stacked we leave it `auto`: the flex column stretches it to full width, and
+ * crucially that lets the `-mx-4` full-bleed footer extend symmetrically — an
+ * explicit `w-full` would clip the right edge, since a negative right margin
+ * can't widen a fixed-width box. `never` is always inline.
  */
 const actionsWidthClassName: Record<CardRowStackAt, string> = {
-  sm: "@xs:min-w-0 @xs:flex-1",
-  md: "@md:min-w-0 @md:flex-1",
-  lg: "@lg:min-w-0 @lg:flex-1",
-  never: "min-w-0 flex-1",
+  sm: "@xs:flex-1",
+  md: "@md:flex-1",
+  lg: "@lg:flex-1",
+  never: "flex-1",
+}
+
+/**
+ * Top nudge that vertically centres the trailing controls against the avatar.
+ * The row is top-aligned (`items-start`), so a button (shorter than the `lg`
+ * avatar) would otherwise sit a few pixels high. `pt-1` drops it onto the
+ * avatar's centre line. Applied only when the row has an avatar, and scoped to
+ * the inline breakpoint — once stacked the controls own their own line where the
+ * footer chrome owns the spacing. Because the avatar stays pinned to the top,
+ * this keeps the controls centred on it whether the row is standard height or
+ * grown, so no card-height check is needed.
+ */
+const actionsAvatarOffsetClassName: Record<CardRowStackAt, string> = {
+  sm: "@xs:pt-1",
+  md: "@md:pt-1",
+  lg: "@lg:pt-1",
+  never: "pt-1",
+}
+
+/**
+ * When the row has an avatar, the status icon's slot is grown to the avatar's
+ * height (`lg` = 40px / `min-h-10`) so `items-center` drops the icon onto the
+ * avatar's centre line. The icon is shorter than a button, so the button's
+ * `pt-1` nudge would leave it a few pixels high — matching the slot height and
+ * centring lands it exactly, at any icon size. Inline-scoped; once stacked the
+ * status keeps its natural height on its own line.
+ */
+const statusAvatarSlotClassName: Record<CardRowStackAt, string> = {
+  sm: "@xs:min-h-10",
+  md: "@md:min-h-10",
+  lg: "@lg:min-h-10",
+  never: "min-h-10",
 }
 
 // Visibility of the icon-only inline cluster — shown at/above the breakpoint
@@ -136,9 +189,14 @@ interface CardRowActionsProps {
    * Takes precedence over every action prop.
    */
   status?: CardRowStatus
-  compact?: boolean
   /** Container breakpoint at which the actions drop to their own line. */
   stackAt?: CardRowStackAt
+  /**
+   * Whether the row has a leading avatar. When true the trailing controls are
+   * nudged down to sit on the avatar's centre line (see
+   * {@link actionsAvatarOffsetClassName}).
+   */
+  hasAvatar?: boolean
 }
 
 /**
@@ -163,10 +221,14 @@ export function CardRowActions({
   confirmAction,
   rejectAction,
   status,
-  compact = false,
   stackAt = "never",
+  hasAvatar = false,
 }: CardRowActionsProps) {
-  const size = compact ? "sm" : "md"
+  const size = "md"
+  // Centre the trailing controls on the avatar in a standard-height row.
+  const avatarOffset = hasAvatar
+    ? actionsAvatarOffsetClassName[stackAt]
+    : undefined
 
   // Resolved state: a status tag replaces the actions. It's informational, so
   // no click-stop / z-index — a row-level overlay link stays clickable through
@@ -176,8 +238,8 @@ export function CardRowActions({
       <div
         className={cn(
           "flex items-center justify-end",
-          stackedChrome[stackAt],
-          stackAt !== "never" && compact && "mt-3 pt-3"
+          hasAvatar && statusAvatarSlotClassName[stackAt],
+          stackedChrome[stackAt]
         )}
       >
         <F0Icon
@@ -194,8 +256,10 @@ export function CardRowActions({
   const wrapperClassName = cn(
     "relative z-[1]",
     actionsWidthClassName[stackAt],
+    // After stackedChrome: its `@{bp}:pt-0` reset and our `@{bp}:pt-1` are the
+    // same utility, so ours must come last to win once the row goes inline.
     stackedChrome[stackAt],
-    stackAt !== "never" && compact && "mt-3 pt-3"
+    avatarOffset
   )
 
   const wrap = (group: React.ReactNode) => (
@@ -250,6 +314,7 @@ export function CardRowActions({
       <div
         className={cn(
           "relative z-[1] min-w-0 flex-1",
+          avatarOffset,
           inlineClusterVisibility[stackAt]
         )}
         onClick={(e) => e.stopPropagation()}
@@ -273,8 +338,7 @@ export function CardRowActions({
           className={cn(
             "relative z-[1]",
             stackedClusterVisibility[stackAt],
-            stackedChrome[stackAt],
-            compact && "mt-3 pt-3"
+            stackedChrome[stackAt]
           )}
           onClick={(e) => e.stopPropagation()}
         >
