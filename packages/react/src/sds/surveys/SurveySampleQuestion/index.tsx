@@ -1,8 +1,8 @@
 import { F0Box, type F0BoxProps } from "@/lib/F0Box"
 
-import { SampleQuestionProps } from "./types"
+import { SurveySampleQuestionProps } from "./types"
 
-export type { SampleQuestionProps } from "./types"
+export type { SurveySampleQuestionProps } from "./types"
 
 /**
  * A non-interactive preview of a survey question, used to illustrate what a
@@ -10,7 +10,7 @@ export type { SampleQuestionProps } from "./types"
  * It is purely presentational — the inputs are mocked placeholders, not real
  * form fields.
  */
-export function SampleQuestion(props: SampleQuestionProps) {
+export function SurveySampleQuestion(props: SurveySampleQuestionProps) {
   return (
     <F0Box
       display="flex"
