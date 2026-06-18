@@ -1,4 +1,5 @@
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 import { TOCAction } from "../types"
@@ -15,15 +16,24 @@ export function TOCFooter({ actions }: TOCFooterProps) {
   return (
     <div className={cn("flex shrink-0 flex-col items-start gap-0.5 px-3 py-2")}>
       {actions.map((action, index) => (
-        <ButtonInternal
+        <div
           key={`toc-footer-action-${index}`}
-          variant="ghost"
-          size="md"
-          label={action.label}
-          icon={action.icon}
-          disabled={action.disabled}
-          onClick={() => action.onClick()}
-        />
+          className={cn(
+            "w-full flex flex-row justify-between py-1.5 px-2 rounded border border-solid border-transparent",
+            !action.disabled && "cursor-pointer hover:bg-f1-background-hover",
+            action.disabled && "cursor-not-allowed opacity-30"
+          )}
+        >
+          <OneEllipsis
+            lines={1}
+            className={cn(
+              "flex-grow text-[14px] font-medium text-f1-foreground-secondary transition-all"
+            )}
+          >
+            {action.label}
+          </OneEllipsis>
+          {action.icon && <F0Icon icon={action.icon} color="secondary" />}
+        </div>
       ))}
     </div>
   )
