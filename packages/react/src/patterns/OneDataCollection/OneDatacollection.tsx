@@ -27,6 +27,7 @@ import {
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { DataError } from "@/hooks/datasource/useData"
 import { useLayout } from "@/layouts/LayoutProvider"
+import { DATA_COLLECTION_URL_PARAMS } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
@@ -94,6 +95,31 @@ import { VisualizationRenderer } from "./visualizations/collection"
 
 const SUCCESS_DISMISS_MS = 1500
 const SHARE_COPIED_DISMISS_MS = 2000
+
+const coerceFilterLeavesToString = (value: unknown): unknown => {
+  if (Array.isArray(value)) return value.map(coerceFilterLeavesToString)
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, val]) => [
+        key,
+        coerceFilterLeavesToString(val),
+      ])
+    )
+  }
+  return value == null ? value : String(value)
+}
+
+const filtersMatchForDefaultPreset = (a: unknown, b: unknown): boolean =>
+  isEqual(coerceFilterLeavesToString(a), coerceFilterLeavesToString(b))
+
+const viewSnapshotsMatch = (
+  a: { filters?: unknown },
+  b: { filters?: unknown }
+): boolean =>
+  isEqual(
+    { ...a, filters: coerceFilterLeavesToString(a.filters) },
+    { ...b, filters: coerceFilterLeavesToString(b.filters) }
+  )
 
 /**
  * A component that renders a collection of data with filtering and visualization capabilities.
@@ -1065,11 +1091,12 @@ const OneDataCollectionComp = <
 
     if (!tracked.settled) {
       // Wait until the view first matches the preset before arming deselect.
-      if (isEqual(capturedState, tracked.snapshot)) tracked.settled = true
+      if (viewSnapshotsMatch(capturedState, tracked.snapshot))
+        tracked.settled = true
       return
     }
 
-    if (!isEqual(capturedState, tracked.snapshot)) {
+    if (!viewSnapshotsMatch(capturedState, tracked.snapshot)) {
       devSelectionRef.current = null
       preSelectionStateRef.current = null
       // Offer "Save view" after deselecting: the user diverged from a named view,
@@ -1363,6 +1390,32 @@ const OneDataCollectionComp = <
       setSessionBaseline(capturedState)
     }
   }, [storageReady, sessionBaseline, capturedState])
+
+  // On first load, highlight a `defaultSelected` preset whose filter is the boot
+  // filter — unless the URL (`dc_view`) or a restored marker already claimed the
+  // selection. Marker-only and once, so it never overrides the user.
+  const defaultPresetSelectionAppliedRef = useRef(false)
+  useEffect(() => {
+    if (defaultPresetSelectionAppliedRef.current || !storageReady) return
+    defaultPresetSelectionAppliedRef.current = true
+
+    if (selectedPresetId !== undefined) return
+    if (
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).has(
+        DATA_COLLECTION_URL_PARAMS.preset
+      )
+    ) {
+      return
+    }
+
+    const defaultPreset = mergedPresets.find(
+      (preset) =>
+        preset.defaultSelected === true &&
+        filtersMatchForDefaultPreset(preset.filter ?? {}, activeCurrentFilters)
+    )
+    if (defaultPreset?.id) setSelectedPresetId(defaultPreset.id)
+  }, [storageReady, selectedPresetId, mergedPresets, activeCurrentFilters])
 
   // Two-way sync between the collection state and the URL query params. Enabled
   // by default for any collection (no `id` required); opt out with
