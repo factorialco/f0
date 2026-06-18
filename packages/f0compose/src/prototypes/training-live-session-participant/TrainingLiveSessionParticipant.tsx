@@ -607,7 +607,7 @@ const createSessionModalFields = {
     id: "meetingLink",
     type: "text",
     label: "Meeting link",
-    placeholder: "By default, the session runs in Factorial. Add your own link if you prefer.",
+    helpText: "By default, the session runs in Factorial. Add your own link if you prefer.",
   },
   location: { id: "location", type: "text", label: "Location" },
 } satisfies Record<string, RenderableField>
@@ -4545,10 +4545,7 @@ function SessionFormDialog({
             </SessionToggleField>
             {hasPhysicalLocation ? <F0FormField field={createSessionModalFields.location} value={values.location} onChange={(value) => setValues((current) => ({ ...current, location: value }))} /> : null}
             {hasOnlineSession ? (
-              <F0Box display="flex" flexDirection="column" gap="xs">
-                <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} />
-                <F0Text variant="description" content="You can change the link later from the session panel." />
-              </F0Box>
+              <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} />
             ) : null}
             <F0FormField field={createSessionModalFields.instructors} value={values.instructors} onChange={(value) => setValues((current) => ({ ...current, instructors: value }))} />
             <F0FormField field={createSessionModalFields.frequency} value={values.frequency} onChange={(value) => setValues((current) => ({ ...current, frequency: value }))} />
