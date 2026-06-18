@@ -267,16 +267,18 @@ export declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -787,33 +789,6 @@ export declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -916,10 +891,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -927,8 +900,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

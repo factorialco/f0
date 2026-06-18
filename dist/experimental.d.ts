@@ -1312,6 +1312,16 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     "aria-label"?: string;
     /**
+     * Forwarded to the underlying button. Useful for buttons that toggle an
+     * expandable region (e.g. a tree/graph expander).
+     */
+    "aria-expanded"?: boolean;
+    /**
+     * Forwarded to the underlying button. Use `-1` to take the button out of the
+     * tab order (e.g. when a parent manages focus via roving tabindex).
+     */
+    tabIndex?: number;
+    /**
      * The variant of the button.
      */
     variant?: ActionButtonVariant;
@@ -2189,6 +2199,7 @@ declare type CollectionVisualizations<Record extends RecordType, Filters extends
     list: VisualizacionTypeDefinition<ListCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     card: VisualizacionTypeDefinition<CardCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     kanban: VisualizacionTypeDefinition<KanbanCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    graph: VisualizacionTypeDefinition<GraphCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, GraphVisualizationSettings>;
 };
 
 declare const collectionVisualizations: CollectionVisualizations<RecordType, FiltersDefinition, SortingsDefinition, SummariesDefinition, ItemActionsDefinition<RecordType>, NavigationFiltersDefinition, GroupingDefinition<RecordType>>;
@@ -2577,6 +2588,8 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
+    /** Rich search preview shown in the shared header search (all visualizations). */
+    searchPreview?: SearchPreview<R>;
 };
 
 /**
@@ -3177,16 +3190,18 @@ declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -3697,33 +3712,6 @@ declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -4582,6 +4570,9 @@ export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 export declare const f0FileItemSizes: readonly ["md", "lg"];
 
+/** Tag types that can be rendered in a node's metadata row. */
+declare type F0GraphNodeTagType = TagVariant["type"];
+
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
     size?: "lg" | "md" | "sm" | "xs";
@@ -4748,7 +4739,7 @@ export declare type F0SearchInputProps = {
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0SegmentedControl: {
-    ({ items, value, onChange, disabled, fullWidth, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
+    ({ items, value, onChange, disabled, fullWidth, hideLabels, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
     displayName: string;
 };
 
@@ -4780,6 +4771,12 @@ export declare interface F0SegmentedControlProps {
      * @default false
      */
     fullWidth?: boolean;
+    /**
+     * Render segments icon-only, keeping the label accessible to screen readers.
+     * Segments without an icon still show their label. Useful in tight headers.
+     * @default false
+     */
+    hideLabels?: boolean;
     /**
      * Accessible name for the segmented control. The underlying ToggleGroup
      * (single mode) renders as a `radiogroup`, which requires a name.
@@ -5421,6 +5418,97 @@ export declare const granularityDefinitions: {
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
+
+/**
+ * Configuration for the "graph" visualization (org-chart style).
+ *
+ * The hierarchy is fetched on demand from the same `dataAdapter` of the source:
+ * `childrenFilters(parentId)` returns the filter that the adapter understands as
+ * "the direct children of parentId" (`null` = the roots). Children are loaded
+ * when a node is expanded.
+ */
+declare type GraphVisualizationOptions<R extends RecordType, Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
+    /** Primary line of text for a node. */
+    title: (record: R) => string;
+    /** Secondary line of text for a node. */
+    subtitle?: (record: R) => string;
+    /** Avatar shown on the leading side of the node pill. */
+    avatar?: (record: R) => AvatarVariant;
+    /** Tags rendered in the node metadata row. */
+    tags?: (record: R) => TagVariant[];
+    /**
+     * Tag types present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata type (like configuring table columns).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
+    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Tag types that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /**
+     * Floating toolbar shown above a node while it is selected. Provide the
+     * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
+     */
+    nodeActions?: (record: R) => ReactNode;
+    /** Resolves a stable node id from a record. Defaults to `String(record.id)`. */
+    getNodeId?: (record: R) => string;
+    /** Number of children a node has. A node is expandable when this is `> 0`. */
+    getChildrenCount: (record: R) => number;
+    /**
+     * Returns the filters that, applied to the source `dataAdapter`, fetch the
+     * direct children of `parentId`. `parentId === null` must return the roots.
+     */
+    childrenFilters: (parentId: string | null) => Partial<FiltersState<Filters>>;
+    /**
+     * How many levels to load and expand on the initial render.
+     * - `0`: show only the roots; every level below loads on click.
+     * - `1` (default): also show the roots' direct children.
+     * - `2`: also pre-load the grandchildren for a fuller first view.
+     */
+    defaultExpandDepth?: number;
+    /**
+     * Id of a node to reveal: loads its ancestor path, expands the branch and
+     * centers/highlights it. Driven by the shared Data Collection search — set it
+     * from `searchPreview.onSelect`.
+     */
+    revealNodeId?: string;
+    /**
+     * Resolves the ancestor path (root → … → matched node) for a node so it can
+     * be revealed, returning the records in root-first order. Required for
+     * revealing nodes in branches that have not been expanded yet.
+     */
+    loadNodePath?: (nodeId: string) => Promise<R[]>;
+    /** Optional parent accessor used when linking the revealed ancestor path. */
+    getParentId?: (record: R) => string | null;
+    /**
+     * Id of the node representing the current user. When set, a "Find me" button
+     * is shown in the controls that centers the viewport on that node.
+     */
+    currentUserNodeId?: string;
+    /** Initial zoom preset passed through to F0Graph. */
+    zoomPreset?: ZoomPreset;
+    /**
+     * Smallest zoom the user can pan to (the zoom-out limit), passed through to
+     * F0Graph. Defaults to F0Graph's own default. Raise it (e.g. `0.3`) to keep
+     * the tree readable and avoid the most zoomed-out "dot" level.
+     */
+    minZoom?: number;
+    /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
+    maxZoom?: number;
+    /** Whether to render the zoom/fit controls. Defaults to `true`. */
+    showControls?: boolean;
+};
+
+declare type GraphVisualizationSettings = {
+    /** Metadata order (tag-type ids), matching the table column settings shape. */
+    order?: string[];
+    /** Hidden metadata (tag-type ids). */
+    hidden?: string[];
+};
 
 /**
  * Symbol used to identify the groupId in the data
@@ -7650,6 +7738,26 @@ declare type SearchOptions = {
     debounceTime?: number;
 };
 
+/**
+ * Optional rich search preview shown in the shared Data Collection search.
+ * When provided, typing in the header search renders a results dropdown with
+ * avatar + title + subtitle, consistent across every visualization. Selecting a
+ * result calls `onSelect` (e.g. the graph view reveals/centers the node).
+ */
+export declare type SearchPreview<R extends RecordType> = {
+    search: (query: string) => Promise<R[]>;
+    getId: (record: R) => string;
+    render: (record: R) => SearchPreviewResultData;
+    onSelect: (record: R) => void;
+};
+
+/** Data shown for a single row of the search preview dropdown. */
+export declare type SearchPreviewResultData = {
+    avatar?: AvatarVariant;
+    title: string;
+    subtitle?: string;
+};
+
 declare interface SecondaryAction extends PrimaryActionButton {
     variant?: "outline" | "critical" | "outlinePromote" | "promote";
 }
@@ -8998,27 +9106,32 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
     type: "card";
     /** Configuration options for card visualization */
     options: CardVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Kanban-based visualization type */
     type: "kanban";
     /** Configuration options for kanban visualization */
     options: KanbanVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Table-based visualization type */
     type: "table";
     /** Configuration options for table visualization */
     options: TableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Editable table-based visualization type */
     type: "editableTable";
     /** Configuration options for editable table visualization */
     options: EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** List-based visualization type */
     type: "list";
     /** Configuration options for list visualization */
     options: ListVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+    /** Graph/org-chart-based visualization type */
+    type: "graph";
+    /** Configuration options for graph visualization */
+    options: GraphVisualizationOptions<R, Filters, Sortings>;
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Human-readable label for the visualization */
     label: string;
     /** Icon to represent the visualization in UI */
@@ -9032,7 +9145,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
         onLoadError: OnLoadErrorCallback;
         source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     }) => JSX.Element;
-} & VisualizationFilterOverrides<Filters>);
+} & VisualizationFilterOverrides<Filters, Sortings>);
 
 /**
  * Optional per-visualization filter and preset overrides.
@@ -9041,7 +9154,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
  *
  * @template Filters - The filters type extending FiltersDefinition
  */
-export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
+export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition> = {
     /** Override which filters are available when this visualization is active.
      *  If not provided, the global source filters are used.
      *  Can be a subset of the source filters definition. */
@@ -9049,6 +9162,10 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
     /** Preset configuration used only when this visualization is active.
      *  These replace the global source presets for this visualization. */
     presets?: PresetsDefinition<Filters>;
+    /** Override which sortings are available when this visualization is active.
+     *  If not provided, the global source sortings are used. Pass `{}` to hide the
+     *  sort selector for views that don't support sorting (e.g. the org chart). */
+    sortings?: Partial<Sortings>;
 };
 
 /**
@@ -9305,6 +9422,26 @@ declare interface WithTooltipDescription {
     description?: string;
 }
 
+declare type ZoomPreset = keyof typeof zoomPresets;
+
+declare const zoomPresets: {
+    readonly default: {
+        readonly detail: 0.56;
+        readonly compact: 0.3;
+        readonly dot: 0.18;
+    };
+    readonly dense: {
+        readonly detail: 0.5;
+        readonly compact: 0.2;
+        readonly dot: 0.08;
+    };
+    readonly sparse: {
+        readonly detail: 0.85;
+        readonly compact: 0.45;
+        readonly dot: 0.15;
+    };
+};
+
 export { }
 
 
@@ -9383,10 +9520,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -9394,8 +9529,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
