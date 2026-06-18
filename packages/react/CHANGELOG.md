@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.8.0](https://github.com/factorialco/f0/compare/f0-react-v3.7.2...f0-react-v3.8.0) (2026-06-18)
+
+
+### Features
+
+* **surveys:** add SampleQuestion component ([#4493](https://github.com/factorialco/f0/issues/4493)) ([1419763](https://github.com/factorialco/f0/commit/14197634811ac2f61c5532f2f150a5fe64c7059e))
+
 ## [3.7.2](https://github.com/factorialco/f0/compare/f0-react-v3.7.1...f0-react-v3.7.2) (2026-06-18)
 
 
