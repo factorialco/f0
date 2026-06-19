@@ -164,7 +164,10 @@ const StackedToasts = ({
                     y: visualIndex * -10,
                     // Hidden items start smaller so they zoom in when becoming visible
                     scale: isVisible ? 1 - visualIndex * 0.05 : 0.9,
-                    opacity: isVisible ? 1 : 0,
+                    // Collapsed toasts sit on top of one another, so make them
+                    // translucent to convey depth (the front one too). They
+                    // become fully opaque once expanded or promoted to active.
+                    opacity: isVisible ? 0.75 - currentVisibleIndex * 0.15 : 0,
                     zIndex: visibleCount - currentVisibleIndex,
                     height: currentVisibleIndex === 0 ? "auto" : 0,
                   },
