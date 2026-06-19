@@ -24,6 +24,52 @@ describe("F0NumberInput", () => {
     expect(input).toHaveValue("123,46")
   })
 
+  describe("thousand separators", () => {
+    test("renders grouping separators when not focused", () => {
+      render(
+        <F0NumberInput
+          locale="es-ES"
+          value={5000.54}
+          maxDecimals={2}
+          label="Number Input"
+        />
+      )
+      const input = screen.getByRole("textbox")
+      expect(input).toHaveValue("5.000,54")
+    })
+
+    test("shows the raw value while focused and restores grouping on blur", async () => {
+      render(
+        <F0NumberInput
+          locale="es-ES"
+          value={5000}
+          maxDecimals={2}
+          label="Number Input"
+        />
+      )
+      const input = screen.getByRole("textbox")
+
+      await userEvent.click(input)
+      expect(input).toHaveValue("5000")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("5.000")
+    })
+
+    test("groups the typed value on blur in uncontrolled mode", async () => {
+      render(
+        <F0NumberInput locale="en-US" maxDecimals={2} label="Number Input" />
+      )
+      const input = screen.getByRole("textbox")
+
+      await userEvent.type(input, "12345.6")
+      expect(input).toHaveValue("12345.6")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("12,345.6")
+    })
+  })
+
   describe("when the value is null", () => {
     test("renders an empty input", () => {
       render(<F0NumberInput locale="en-US" value={null} label="Number Input" />)
