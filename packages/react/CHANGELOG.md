@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.10.0](https://github.com/factorialco/f0/compare/f0-react-v3.9.0...f0-react-v3.10.0) (2026-06-19)
+
+
+### Features
+
+* **SurveyFormBuilder:** lockable sections & questions ([#4512](https://github.com/factorialco/f0/issues/4512)) ([d38b29a](https://github.com/factorialco/f0/commit/d38b29a0d8a317c3deca9a994c0cbe776e0eaad3))
+
 ## [3.9.0](https://github.com/factorialco/f0/compare/f0-react-v3.8.6...f0-react-v3.9.0) (2026-06-19)
 
 
