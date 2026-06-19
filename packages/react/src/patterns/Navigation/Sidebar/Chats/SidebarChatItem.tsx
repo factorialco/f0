@@ -1,19 +1,9 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
-import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
-import { SidebarChat, SidebarChatPresence, SidebarChatStatus } from "./types"
-
-// Status is a consumer-controlled icon avatar with an accessible label.
-const StatusAvatar = ({ status }: { status: SidebarChatStatus }) => (
-  <span
-    className="flex-shrink-0 text-f1-foreground-tertiary"
-    title={status.label}
-  >
-    <F0AvatarIcon icon={status.icon} size="sm" aria-label={status.label} />
-  </span>
-)
+import { SidebarChat, SidebarChatPresence } from "./types"
+import { F0Icon } from "@/components/F0Icon/F0Icon"
 
 const PresenceDot = ({
   presence,
@@ -83,17 +73,29 @@ export const SidebarChatItem = ({
         className={cn(
           "line-clamp-1 flex-1",
           isUnread
-            ? "font-[900] text-f1-foreground"
-            : cn(
-                isActive ? "font-medium" : "font-normal",
-                "text-f1-foreground-secondary"
-              )
+            ? "font-semibold text-f1-foreground"
+            : "text-f1-foreground-secondary font-medium"
         )}
         lines={1}
       >
         {chat.label}
       </OneEllipsis>
-      {status && <StatusAvatar status={status} />}
+      {status && (
+        <F0Icon
+          icon={status.icon}
+          size="md"
+          aria-label={status.label}
+          color="secondary"
+        />
+      )}
+      {chat.unreadCount ? (
+        <div
+          aria-label={`${chat.unreadCount} unread`}
+          className="flex-shrink-0 rounded-md bg-f1-background-info px-1.5 py-0.5 text-center text-sm font-medium tabular-nums text-f1-foreground-info"
+        >
+          {chat.unreadCount}
+        </div>
+      ) : null}
     </button>
   )
 }

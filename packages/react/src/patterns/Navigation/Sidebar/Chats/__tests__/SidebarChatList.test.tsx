@@ -113,12 +113,18 @@ describe("SidebarChatList", () => {
     expect(onNewChat).toHaveBeenCalled()
   })
 
+  it("shows the per-chat unread count as a badge", () => {
+    renderList()
+    // raul has unreadCount: 3
+    expect(screen.getByText("3")).toBeInTheDocument()
+  })
+
   it("renders group titles and chats as buttons", () => {
     renderList()
     expect(screen.getByText("Direct messages")).toBeInTheDocument()
     expect(screen.getByText("Groups")).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Raúl Sigüenza Sánchez" })
+      screen.getByRole("button", { name: /Raúl Sigüenza Sánchez/ })
     ).toBeInTheDocument()
     expect(
       screen.getByRole("button", { name: "Roger Campos" })
@@ -129,7 +135,7 @@ describe("SidebarChatList", () => {
   it("marks the active chat from the provider as pressed", () => {
     renderList("raul")
     expect(
-      screen.getByRole("button", { name: "Raúl Sigüenza Sánchez" })
+      screen.getByRole("button", { name: /Raúl Sigüenza Sánchez/ })
     ).toHaveAttribute("aria-pressed", "true")
     expect(
       screen.getByRole("button", { name: "Roger Campos" })

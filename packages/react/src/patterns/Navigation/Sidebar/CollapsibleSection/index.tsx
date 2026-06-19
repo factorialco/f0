@@ -72,7 +72,7 @@ export const SidebarCollapsibleSection = ({
             <span
               className={cn(
                 "transition-colors",
-                highlighted && "font-[900] text-f1-foreground"
+                highlighted && "font-semibold text-f1-foreground"
               )}
             >
               {title}
