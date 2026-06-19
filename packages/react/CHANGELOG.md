@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.11.0](https://github.com/factorialco/f0/compare/f0-react-v3.10.0...f0-react-v3.11.0) (2026-06-19)
+
+
+### Features
+
+* **value-display:** add categoryBarChart cell renderer ([#4472](https://github.com/factorialco/f0/issues/4472)) ([a560633](https://github.com/factorialco/f0/commit/a5606333d9b9101483ac343e7e54a31b38ce5064))
+
 ## [3.10.0](https://github.com/factorialco/f0/compare/f0-react-v3.9.0...f0-react-v3.10.0) (2026-06-19)
 
 
