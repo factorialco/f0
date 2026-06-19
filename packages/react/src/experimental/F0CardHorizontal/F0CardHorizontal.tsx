@@ -14,9 +14,17 @@ import {
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
-} from "./components/CardActions"
-import { CardAlertWrapper, alertBorderColor } from "./components/CardAlert"
-import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
+} from "@/components/F0Card/components/CardActions"
+import {
+  CardAlertWrapper,
+  alertBorderColor,
+} from "@/components/F0Card/components/CardAlert"
+import {
+  CardAvatar,
+  type CardAvatarVariant,
+} from "@/components/F0Card/components/CardAvatar"
+import { type CardAlertProps } from "@/components/F0Card/types"
+
 import {
   CardHorizontalActions,
   type CardHorizontalConfirmAction,
@@ -25,7 +33,6 @@ import {
   cardHorizontalClassName,
   cardHorizontalLeadingAlignClassName,
 } from "./components/CardHorizontalActions"
-import { type CardAlertProps } from "./types"
 
 export interface F0CardHorizontalProps {
   /**

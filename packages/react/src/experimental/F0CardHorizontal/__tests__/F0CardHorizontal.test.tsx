@@ -23,8 +23,8 @@ vi.mock("@/ui/OverflowList/useOverflowCalculation", () => ({
   }),
 }))
 
-import type { CardSecondaryLink } from "../components/CardActions"
-import type { CardAvatarVariant } from "../components/CardAvatar"
+import type { CardSecondaryLink } from "@/components/F0Card/components/CardActions"
+import type { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 
 import { F0CardHorizontal } from "../F0CardHorizontal"
 

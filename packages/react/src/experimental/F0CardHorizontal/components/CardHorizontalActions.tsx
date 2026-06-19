@@ -14,7 +14,7 @@ import {
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
-} from "./CardActions"
+} from "@/components/F0Card/components/CardActions"
 
 /**
  * Container breakpoint at which the horizontal card switches between its inline and its
