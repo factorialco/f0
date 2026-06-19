@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { action } from "storybook/actions"
 
 import { F0Button } from "@/components/F0Button"
-import { New, People } from "@/icons/app"
+import { Clock, MicrophoneNegative, New, PalmTree, People } from "@/icons/app"
 
 import { SidebarChatList } from "./SidebarChatList"
 import {
@@ -41,13 +41,13 @@ export const exampleGroups: SidebarChatGroup[] = [
         label: "Alexander Whitmore-Brown",
         avatar: person("Alexander", "Whitmore-Brown", "/avatars/person02.jpg"),
         presence: "online",
-        status: { type: "emoji", emoji: "💤", label: "Muted" },
+        status: { icon: MicrophoneNegative, label: "Muted" },
       },
       {
         id: "jean-baptiste",
         label: "Jean-Baptiste Lefèvre",
         avatar: person("Jean-Baptiste", "Lefèvre", "/avatars/person03.jpg"),
-        status: { type: "emoji", emoji: "🌴", label: "On holidays" },
+        status: { icon: PalmTree, label: "On holidays" },
       },
       {
         id: "priyanka",
@@ -60,8 +60,7 @@ export const exampleGroups: SidebarChatGroup[] = [
         id: "mohammed",
         label: "Mohammed Al-Rashid",
         avatar: person("Mohammed", "Al-Rashid", "/avatars/person05.jpg"),
-        // Icon-avatar status (instead of an emoji) to show both are supported.
-        status: { type: "emoji", emoji: "🕖", label: "Away" },
+        status: { icon: Clock, label: "Away" },
       },
       {
         id: "anastasia",
@@ -81,7 +80,7 @@ export const exampleGroups: SidebarChatGroup[] = [
         avatar: person("Sofía", "Gutiérrez del Río", "/avatars/person08.jpg"),
         presence: "online",
         unreadCount: 1,
-        status: { type: "emoji", emoji: "💤", label: "Muted" },
+        status: { icon: MicrophoneNegative, label: "Muted" },
       },
     ],
   },

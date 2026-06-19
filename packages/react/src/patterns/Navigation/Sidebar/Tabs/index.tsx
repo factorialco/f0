@@ -4,7 +4,24 @@ import { Search } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
-import { Counter } from "@/ui/Counter"
+
+const PresenceDot = () => {
+  return (
+    <div className="bg-f1-background absolute -top-1 -right-1 w-3 h-3 flex items-center justify-center rounded-full">
+      <span
+        aria-hidden="true"
+        className={cn(
+          // The ring follows the item's hover/active state so the dot blends
+          // with the highlighted row background.
+          "ring-2 ring-f1-background-tertiary transition-[box-shadow]",
+          "ring-f1-background-secondary",
+          "h-2 w-2 rounded-full",
+          "bg-f1-background-critical-bold"
+        )}
+      />
+    </div>
+  )
+}
 
 export type SidebarTab = {
   id: string
@@ -72,7 +89,7 @@ const TabButton = ({
             <span className="block whitespace-nowrap pl-1.5">{tab.label}</span>
           </span>
         </span>
-        {tab.badge && <Counter value={tab.badge} size="sm" type="selected" />}
+        {tab.badge && <PresenceDot />}
       </div>
     </button>
   )

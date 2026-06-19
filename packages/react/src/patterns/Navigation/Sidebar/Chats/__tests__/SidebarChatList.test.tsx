@@ -1,6 +1,7 @@
 import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
+import { MicrophoneNegative, PalmTree } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { SidebarChatList } from "../SidebarChatList"
@@ -65,7 +66,7 @@ describe("SidebarChatList", () => {
                 id: "p",
                 label: "Person",
                 avatar: { type: "person", firstName: "P", lastName: "X" },
-                status: { type: "emoji", emoji: "🌴", label: "On holidays" },
+                status: { icon: PalmTree, label: "On holidays" },
               },
             ],
           },
@@ -77,7 +78,7 @@ describe("SidebarChatList", () => {
                 id: "c",
                 label: "Company",
                 avatar: { type: "company", name: "Co" },
-                status: { type: "emoji", emoji: "🔕", label: "Muted" },
+                status: { icon: MicrophoneNegative, label: "Muted" },
               },
             ],
           },

@@ -1,22 +1,17 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
-import { F0AvatarEmoji } from "@/components/avatars/F0AvatarEmoji"
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarChat, SidebarChatPresence, SidebarChatStatus } from "./types"
 
-// Status is fully consumer-controlled: an emoji or an icon avatar with a label.
+// Status is a consumer-controlled icon avatar with an accessible label.
 const StatusAvatar = ({ status }: { status: SidebarChatStatus }) => (
   <span
     className="flex-shrink-0 text-f1-foreground-tertiary"
     title={status.label}
   >
-    {status.type === "emoji" ? (
-      <F0AvatarEmoji emoji={status.emoji} size="sm" aria-label={status.label} />
-    ) : (
-      <F0AvatarIcon icon={status.icon} size="sm" aria-label={status.label} />
-    )}
+    <F0AvatarIcon icon={status.icon} size="sm" aria-label={status.label} />
   </span>
 )
 

@@ -4,14 +4,14 @@ import { IconType } from "@/components/F0Icon"
 export type SidebarChatPresence = "online" | "offline"
 
 /**
- * Status shown as a small avatar to the right of a person's name (people only).
- * The consumer fully controls it — pass an emoji or an icon avatar with an
- * accessible label. F0 does not hardcode any set of statuses.
+ * Status shown as a small icon avatar to the right of a person's name (people
+ * only). The consumer fully controls it — pass any icon with an accessible
+ * label. F0 does not hardcode any set of statuses.
  */
-export type SidebarChatStatus = { label: string } & (
-  | { type: "emoji"; emoji: string }
-  | { type: "icon"; icon: IconType }
-)
+export type SidebarChatStatus = {
+  icon: IconType
+  label: string
+}
 
 /**
  * A top-of-list action in the Messages tab (e.g. "New chat", "New group").
