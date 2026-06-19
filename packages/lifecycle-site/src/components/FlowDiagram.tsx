@@ -67,9 +67,28 @@ const edges: Edge[] = [
   { id: "e-deprecated-removed", source: "deprecated", target: "removed", label: "@removeIn version" },
 ]
 
+const phaseIds = new Set<string>(phases.map((p) => p.id))
+
+// Anchors for the non-phase nodes in the diagram. Phase nodes resolve to
+// their own `phase-<id>` anchor in PhaseSection; the lifecycle states below
+// jump to the maturity-levels section, and "Idea" jumps to Phase 0 (Discovery).
+const nonPhaseAnchors: Record<string, string> = {
+  idea: "phase-discovery",
+  stable: "maturity",
+  deprecated: "maturity",
+  removed: "maturity",
+}
+
+function anchorForNode(id: string): string | null {
+  if (phaseIds.has(id)) return `phase-${id}`
+  return nonPhaseAnchors[id] ?? null
+}
+
 export function FlowDiagram() {
   const handleNodeClick: NodeMouseHandler = (_evt, node) => {
-    const target = document.getElementById(`phase-${node.id}`)
+    const anchorId = anchorForNode(node.id)
+    if (!anchorId) return
+    const target = document.getElementById(anchorId)
     if (target) target.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
@@ -90,7 +109,7 @@ export function FlowDiagram() {
         <Background gap={24} size={1} color="#e5e7eb" />
       </ReactFlow>
       <p className="border-t border-ink/10 px-4 py-2 text-xs text-muted">
-        Click any phase node to jump to its details below.
+        Click any node to jump to its details below.
       </p>
     </div>
   )

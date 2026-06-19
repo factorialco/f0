@@ -124,8 +124,9 @@ export const ruleGroups: RuleGroup[] = [
       },
       {
         id: "ctr-triage-sla",
-        statement: "Foundations triages new proposals within 7 days.",
-        verifiability: "human-evidence",
+        statement:
+          "Foundations responds to new proposals based on team availability and as quickly as possible — there is no committed fixed SLA today.",
+        verifiability: "policy",
         source: "lifecycle-site/src/data/triage.ts",
       },
       {

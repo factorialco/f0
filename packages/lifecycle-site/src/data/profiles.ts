@@ -5,6 +5,8 @@
 // They are NOT exclusive — a single person can wear multiple hats.
 // These two roles cover anyone in Factorial who wants to contribute to F0.
 
+import type { PhaseId } from "./phases"
+
 export type ProfileId = "pd" | "pe"
 
 export type Profile = {
@@ -13,7 +15,7 @@ export type Profile = {
   shortDescription: string
   primaryTool: string
   responsibilities: string[]
-  appliesToPhases: ("discovery" | "problem" | "design" | "build" | "real-use" | "promote")[]
+  appliesToPhases: PhaseId[]
   typicalQuestions: string[]
   startHere: string
   skills: string[]
