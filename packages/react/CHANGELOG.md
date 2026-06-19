@@ -1,5 +1,16 @@
 # Changelog
 
+## [4.0.0](https://github.com/factorialco/f0/compare/f0-react-v3.12.0...f0-react-v4.0.0) (2026-06-19)
+
+
+### ⚠ BREAKING CHANGES
+
+* **F0Card:** rename F0CardRow to F0CardHorizontal ([#4483](https://github.com/factorialco/f0/issues/4483))
+
+### Code Refactoring
+
+* **F0Card:** rename F0CardRow to F0CardHorizontal ([#4483](https://github.com/factorialco/f0/issues/4483)) ([9184e40](https://github.com/factorialco/f0/commit/9184e406fca74da974bfd60003d60cffa2c61af1))
+
 ## [3.12.0](https://github.com/factorialco/f0/compare/f0-react-v3.11.0...f0-react-v3.12.0) (2026-06-19)
 
 
