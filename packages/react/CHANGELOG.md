@@ -1,5 +1,33 @@
 # Changelog
 
+## [3.12.0](https://github.com/factorialco/f0/compare/f0-react-v3.11.0...f0-react-v3.12.0) (2026-06-19)
+
+
+### Features
+
+* **F0TableOfContent:** add footer action buttons ([#4489](https://github.com/factorialco/f0/issues/4489)) ([b4358ca](https://github.com/factorialco/f0/commit/b4358cacee6a6d01e8edb5c6d19cc4457cab42f3))
+
+## [3.11.0](https://github.com/factorialco/f0/compare/f0-react-v3.10.0...f0-react-v3.11.0) (2026-06-19)
+
+
+### Features
+
+* **value-display:** add categoryBarChart cell renderer ([#4472](https://github.com/factorialco/f0/issues/4472)) ([a560633](https://github.com/factorialco/f0/commit/a5606333d9b9101483ac343e7e54a31b38ce5064))
+
+## [3.10.0](https://github.com/factorialco/f0/compare/f0-react-v3.9.0...f0-react-v3.10.0) (2026-06-19)
+
+
+### Features
+
+* **SurveyFormBuilder:** lockable sections & questions ([#4512](https://github.com/factorialco/f0/issues/4512)) ([d38b29a](https://github.com/factorialco/f0/commit/d38b29a0d8a317c3deca9a994c0cbe776e0eaad3))
+
+## [3.9.0](https://github.com/factorialco/f0/compare/f0-react-v3.8.6...f0-react-v3.9.0) (2026-06-19)
+
+
+### Features
+
+* **avatars:** align F0AvatarModule sizes to canonical scale + stabilize ([#4415](https://github.com/factorialco/f0/issues/4415)) ([426e013](https://github.com/factorialco/f0/commit/426e0134715175b69916f3c1fd5ea9957ebfd318))
+
 ## [3.8.6](https://github.com/factorialco/f0/compare/f0-react-v3.8.5...f0-react-v3.8.6) (2026-06-18)
 
 

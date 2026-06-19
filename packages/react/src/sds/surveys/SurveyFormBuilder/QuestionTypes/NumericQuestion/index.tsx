@@ -42,34 +42,32 @@ export const NumericQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
-        {answering ? (
-          <F0NumberInput
-            locale="en-US"
-            size="md"
-            value={value}
-            onChange={handleChangeText}
-            disabled={disabled}
-            label={t("surveyFormBuilder.answer.label")}
-            hideLabel={true}
-            required={baseQuestionComponentProps.required}
-            maxDecimals={0}
-            placeholder={placeholder}
-            icon={Numbers}
-          />
-        ) : (
-          <F0TextInput
-            type="text"
-            size="md"
-            value={placeholder}
-            onChange={() => {}}
-            disabled
-            label={t("surveyFormBuilder.answer.label")}
-            hideLabel={true}
-            icon={Numbers}
-          />
-        )}
-      </div>
+      {answering ? (
+        <F0NumberInput
+          locale="en-US"
+          size="md"
+          value={value}
+          onChange={handleChangeText}
+          disabled={disabled}
+          label={t("surveyFormBuilder.answer.label")}
+          hideLabel={true}
+          required={baseQuestionComponentProps.required}
+          maxDecimals={0}
+          placeholder={placeholder}
+          icon={Numbers}
+        />
+      ) : (
+        <F0TextInput
+          type="text"
+          size="md"
+          value={placeholder}
+          onChange={() => {}}
+          disabled
+          label={t("surveyFormBuilder.answer.label")}
+          hideLabel={true}
+          icon={Numbers}
+        />
+      )}
     </BaseQuestion>
   )
 }

@@ -77,7 +77,7 @@ export function F0CanvasCard({
     >
       <div className="flex w-full min-w-0 flex-row items-center gap-3">
         {avatar?.type === "module" && (
-          <F0AvatarModule module={avatar.module} size="lg" />
+          <F0AvatarModule module={avatar.module} size="md" />
         )}
         {avatar?.type === "file" && (
           <F0AvatarFile file={avatar.file} size="lg" />

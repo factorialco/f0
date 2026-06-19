@@ -44,7 +44,7 @@ export function CustomModal({
       >
         <div className="flex flex-row items-center justify-between px-4 py-4">
           <DialogTitle className="flex flex-row items-center gap-2 text-lg font-semibold text-f1-foreground">
-            {module && <F0AvatarModule module={module} size="lg" />}
+            {module && <F0AvatarModule module={module} size="md" />}
             {title}
           </DialogTitle>
           <ButtonInternal

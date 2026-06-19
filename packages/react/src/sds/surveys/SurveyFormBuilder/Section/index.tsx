@@ -2,8 +2,10 @@ import { Reorder } from "motion/react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
-import { Delete, Ellipsis, LayersFront } from "@/icons/app"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { Delete, Ellipsis, LayersFront, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -19,8 +21,9 @@ const TEXT_AREA_STYLE: object = {
 
 export const Section = ({
   id,
-  title,
+  title = "",
   description,
+  lockedNote,
   questions = [],
   locked,
   hideQuestions,
@@ -86,73 +89,118 @@ export const Section = ({
 
   const inputDisabled = disabled || locked || answering
 
+  // When the section is read-only (locked/disabled/answering) an empty title or
+  // description has nothing to show and no way to edit, so it's hidden. When the
+  // section is editable the inputs always render — empty ones surface a
+  // placeholder so authors can fill them in.
+  const showTitle = !inputDisabled || !!title
+  const showDescription = !inputDisabled || !!description
+
   const titleRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     titleRef.current?.focus({ preventScroll: true })
   }, [])
 
+  // Blocked section: a white "LOCKED" tag sits at the rightmost of the title.
+  // Hovering it surfaces why the section is blocked — its own
+  // `LockedSectionNotice`, falling back to the provider's default lock notice.
+  const lockedNoticeText =
+    lockedNote?.description ?? t("surveyFormBuilder.labels.lockedSectionNotice")
+  const lockedTag =
+    locked && !answering ? (
+      <F0TagRaw
+        text={t("surveyFormBuilder.labels.locked")}
+        icon={LockLocked}
+        className="bg-f1-background"
+      />
+    ) : null
+
   return (
     <div
       id={`co-creation-section-${id}`}
-      className="group/section flex w-full flex-col gap-1 bg-f1-background"
+      className={cn(
+        "group/section flex w-full flex-col gap-1",
+        // Blocked section: the muted grey panel comes from the wrapper in
+        // Form, so the header stays transparent (letting it show through) and
+        // a not-allowed cursor signals it can't be edited. Editable sections
+        // keep their white background.
+        locked && !answering ? "cursor-not-allowed" : "bg-f1-background"
+      )}
     >
-      <div className="py-1 pl-5 pr-3">
-        <div className="flex flex-row">
-          <input
-            ref={titleRef}
-            type="text"
-            aria-label={t("surveyFormBuilder.labels.title")}
-            value={title}
-            placeholder={t("surveyFormBuilder.labels.sectionTitlePlaceholder")}
-            onChange={handleChangeTitle}
-            disabled={inputDisabled}
-            className={cn(
-              "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
-              inputDisabled && "cursor-not-allowed"
-            )}
-          />
-          {!disabled && !answering && !locked && (
-            <div
-              className={cn(
-                "opacity-0 group-hover/section:opacity-100",
-                actionsDropdownOpen && "opacity-100"
-              )}
-            >
-              <Dropdown
-                items={actions}
-                icon={Ellipsis}
-                open={actionsDropdownOpen}
-                onOpenChange={setActionsDropdownOpen}
-                align="start"
-              >
-                <F0Button
-                  icon={Ellipsis}
-                  label={t("surveyFormBuilder.actions.actions")}
-                  size="md"
-                  variant="ghost"
-                  tooltip={false}
-                  hideLabel
+      {(showTitle || showDescription || (locked && !answering)) && (
+        <div className="py-1 pl-5 pr-3">
+          {(showTitle || (locked && !answering)) && (
+            <div className="flex flex-row items-center gap-2">
+              {showTitle && (
+                <input
+                  ref={titleRef}
+                  type="text"
+                  aria-label={t("surveyFormBuilder.labels.title")}
+                  value={title}
+                  placeholder={t(
+                    "surveyFormBuilder.labels.sectionTitlePlaceholder"
+                  )}
+                  onChange={handleChangeTitle}
+                  disabled={inputDisabled}
+                  className={cn(
+                    "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    inputDisabled && "cursor-not-allowed"
+                  )}
                 />
-              </Dropdown>
+              )}
+              {lockedTag && (
+                <div className="ml-auto flex shrink-0 items-center">
+                  <Tooltip description={lockedNoticeText} instant>
+                    <span className="inline-flex">{lockedTag}</span>
+                  </Tooltip>
+                </div>
+              )}
+              {!disabled && !answering && !locked && (
+                <div
+                  className={cn(
+                    "opacity-0 group-hover/section:opacity-100",
+                    actionsDropdownOpen && "opacity-100"
+                  )}
+                >
+                  <Dropdown
+                    items={actions}
+                    icon={Ellipsis}
+                    open={actionsDropdownOpen}
+                    onOpenChange={setActionsDropdownOpen}
+                    align="start"
+                  >
+                    <F0Button
+                      icon={Ellipsis}
+                      label={t("surveyFormBuilder.actions.actions")}
+                      size="md"
+                      variant="ghost"
+                      tooltip={false}
+                      hideLabel
+                    />
+                  </Dropdown>
+                </div>
+              )}
             </div>
           )}
+          {showDescription && !(locked && !answering) && (
+            <textarea
+              value={description}
+              aria-label={t("surveyFormBuilder.labels.description")}
+              placeholder={t(
+                "surveyFormBuilder.labels.sectionDescriptionPlaceholder"
+              )}
+              onChange={handleChangeDescription}
+              disabled={inputDisabled}
+              style={TEXT_AREA_STYLE}
+              className={cn(
+                "w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
+                inputDisabled && "cursor-not-allowed"
+              )}
+            />
+          )}
         </div>
-        <textarea
-          value={description}
-          aria-label={t("surveyFormBuilder.labels.description")}
-          placeholder={t(
-            "surveyFormBuilder.labels.sectionDescriptionPlaceholder"
-          )}
-          onChange={handleChangeDescription}
-          disabled={inputDisabled}
-          style={TEXT_AREA_STYLE}
-          className={cn(
-            "w-full resize-none text-f1-foreground-secondary placeholder:text-f1-foreground-tertiary disabled:text-f1-foreground-secondary [&::-webkit-search-cancel-button]:hidden",
-            inputDisabled && "cursor-not-allowed"
-          )}
-        />
-      </div>
+      )}
       {!hideQuestions && (
         <>
           <DragProvider>
