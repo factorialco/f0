@@ -3,10 +3,10 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
 
-import { Placeholder } from "@/icons/app"
+import { Add, Placeholder } from "@/icons/app"
 
 import { F0TableOfContent } from "../index"
-import { TOCItem, TOCItemAction } from "../types"
+import { TOCAction, TOCItem, TOCItemAction } from "../types"
 
 const mockOtherActions: TOCItemAction[] = [
   {
@@ -21,6 +21,14 @@ const mockOtherActions: TOCItemAction[] = [
     label: "Delete",
     onClick: fn(),
     icon: Placeholder,
+  },
+]
+
+const mockFooterActions: TOCAction[] = [
+  {
+    label: "Add section",
+    onClick: () => console.log("Add section"),
+    icon: Add,
   },
 ]
 
@@ -137,6 +145,11 @@ const meta: Meta<typeof F0TableOfContent> = {
       description:
         "Enable drag and drop reordering of items. When reordered, onReorder callback is called with hierarchical structure containing only IDs.",
     },
+    actions: {
+      control: false,
+      description:
+        "Array of action buttons pinned in a footer at the bottom of the panel. Each action has: label, onClick, optional icon, optional disabled.",
+    },
     onReorder: {
       action: "reordered",
       description:
@@ -238,6 +251,33 @@ export const HideChildrenCounter: Story = {
     docs: {
       description: {
         story: "Shows how to hide the children counter.",
+      },
+    },
+  },
+}
+
+export const WithFooterActions: Story = {
+  render: (args) => {
+    const [activeItem, setActiveItem] = useState("nested-child-1")
+
+    return (
+      <F0TableOfContent
+        {...args}
+        items={mockTOCData(setActiveItem)}
+        activeItem={activeItem}
+        className="h-full"
+        actions={mockFooterActions}
+        onReorder={(order) => {
+          console.log("Items reordered:", order)
+        }}
+      />
+    )
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Shows action buttons pinned in a footer at the bottom of the panel. The footer stays visible while the item list scrolls.",
       },
     },
   },
