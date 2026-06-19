@@ -4,9 +4,10 @@ import type { TextColor } from "../primitives/F0Text"
 
 import type { F0BannerLevel } from "./F0Banner.types"
 
-// Container layout + per-level background tint (f0-background-* 10% fills).
+// Full-bleed container (edge-to-edge, no rounded corners) + per-level
+// background tint (f0-background-* 10% fills).
 export const bannerVariants = tv({
-  base: "flex-row items-center gap-2 rounded-lg px-3 py-2",
+  base: "w-full flex-row items-center gap-2 px-3 py-2",
   variants: {
     level: {
       info: "bg-f0-background-info",

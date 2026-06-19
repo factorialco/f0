@@ -7,7 +7,7 @@ export declare const bannerVariants: import("tailwind-variants").TVReturnType<{
         positive: string;
         critical: string;
     };
-}, undefined, "flex-row items-center gap-2 rounded-lg px-3 py-2", {
+}, undefined, "w-full flex-row items-center gap-2 px-3 py-2", {
     level: {
         info: string;
         warning: string;
@@ -21,6 +21,6 @@ export declare const bannerVariants: import("tailwind-variants").TVReturnType<{
         positive: string;
         critical: string;
     };
-}, undefined, "flex-row items-center gap-2 rounded-lg px-3 py-2", unknown, unknown, undefined>>;
+}, undefined, "w-full flex-row items-center gap-2 px-3 py-2", unknown, unknown, undefined>>;
 export declare const F0_BANNER_TEXT_COLORS: Record<F0BannerLevel, TextColor>;
 //# sourceMappingURL=F0Banner.styles.d.ts.map
