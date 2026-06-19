@@ -254,6 +254,77 @@ export const Stacking: Story = {
   },
 }
 
+// Container widths spanning the `md` (448px) breakpoint, so the same card shows
+// its actions inline at the wider sizes and wrapped onto their own line at the
+// narrower ones. (The query is on the card's content box, so the flip sits a
+// little above the raw 448px once the card's own padding is accounted for.)
+const stackingWidths = [
+  { className: "w-[600px]", label: "600px — actions inline" },
+  { className: "w-[520px]", label: "520px — actions inline" },
+  { className: "w-[440px]", label: "440px — actions wrap to their own line" },
+  { className: "w-[360px]", label: "360px — actions wrap to their own line" },
+]
+
+/**
+ * `stackAt` reacts to the card's own width — a container query, not the viewport —
+ * with breakpoints `sm` (384px), `md` (448px) and `lg` (512px). At or above the
+ * breakpoint the actions sit inline at the trailing edge; below it they drop onto
+ * their own full-width line with a footer separator, and secondary buttons fold
+ * into the left ⋯ menu. The same `stackAt: "md"` card is shown across a ladder of
+ * widths — watch the actions jump to a new line once the card narrows past 448px.
+ */
+export const ResponsiveStacking: Story = {
+  parameters: {
+    noMetaLayout: true,
+    docs: { story: { inline: false, height: "660px" } },
+  },
+  render: () => (
+    <div className="flex w-full flex-col items-center gap-6 py-4">
+      {stackingWidths.map(({ className, label }) => (
+        <div key={className} className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-f1-foreground-secondary">
+            {label}
+          </span>
+          <div className={className}>
+            <F0CardHorizontal
+              avatar={{
+                type: "person",
+                firstName: "Jane",
+                lastName: "Cooper",
+                src: image,
+              }}
+              title="Jane Cooper"
+              description="Requested 3 days off"
+              stackAt="md"
+              secondaryActions={[
+                { label: "Edit", onClick: clickAlert("Edit") },
+              ]}
+              otherActions={[
+                { label: "Mail", icon: Envelope, onClick: clickAlert("Mail") },
+                { type: "separator" },
+                {
+                  label: "Delete",
+                  icon: Delete,
+                  onClick: clickAlert("Delete"),
+                  critical: true,
+                },
+              ]}
+              primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  decorators: [
+    (Story) => (
+      <div className="flex min-h-[calc(100vh-32px)] w-full justify-center">
+        <Story />
+      </div>
+    ),
+  ],
+}
+
 export const WithAvatar: Story = {
   args: {
     avatar: {

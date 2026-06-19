@@ -210,10 +210,13 @@ An entry-point card whose entire surface opens the destination — no action but
 
 **Responsive stacking**
 
-Below the `stackAt` breakpoint the actions drop onto their own line. Resize the card
-narrower than ~448px to see it.
+`stackAt` reacts to the card's own width (a container query, not the viewport), with
+breakpoints `sm` (384px), `md` (448px) and `lg` (512px). At or above the breakpoint the
+actions stay inline at the trailing edge; below it they drop onto their own full-width
+line with a separator, and secondary buttons fold into the left ⋯. The same
+`stackAt: "md"` card across a ladder of widths:
 
-<Canvas of={Stories.Stacking} />
+<Canvas of={Stories.ResponsiveStacking} />
 
 **Long content**
 
