@@ -211,7 +211,7 @@ const _SurveyFormBuilder = ({
                               index === 0 ? "" : "mt-8"
                             )}
                           >
-                            {groupItems.map((groupItem) => {
+                            {groupItems.map((groupItem, groupIndex) => {
                               if (groupItem.type === "section-header") {
                                 return (
                                   <SectionHeaderItem
@@ -224,12 +224,16 @@ const _SurveyFormBuilder = ({
                               if (groupItem.type === "question") {
                                 // The grey panel delimits the section, so the
                                 // "end of section" divider is suppressed here.
+                                // The first question sits closer to the header,
+                                // which has no inline description beneath it.
                                 return (
                                   <QuestionItem
                                     key={groupItem.id}
                                     item={groupItem}
                                     showEndOfSection={false}
-                                    className="mt-4"
+                                    className={
+                                      groupIndex === 1 ? "mt-2" : "mt-4"
+                                    }
                                   />
                                 )
                               }

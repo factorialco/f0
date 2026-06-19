@@ -162,7 +162,8 @@ export const BaseQuestion = ({
         // (text/default) cursors.
         locked && !answering && "cursor-not-allowed [&_*]:!cursor-not-allowed",
         !isDragging && !answering && !locked && "hover:border-f1-border-hover",
-        !answering || !!description ? "gap-4" : "gap-2"
+        // Tighten the title↔input gap when no description sits between them.
+        showDescription ? "gap-4" : "gap-2"
       )}
     >
       <div className="flex flex-col gap-0.5">
