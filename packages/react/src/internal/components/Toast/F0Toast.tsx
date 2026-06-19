@@ -20,7 +20,7 @@ import {
 } from "./types"
 
 const toastVariants = cva({
-  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg border p-3 shadow-lg bg-f1-background-inverse dark:bg-f1-background-inverse-secondary overflow-hidden",
+  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg border p-3 shadow-lg bg-f1-background-inverse overflow-hidden",
   variants: {
     variant: {
       error: "border-f1-border-critical",
@@ -234,7 +234,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
           {onClose && (
             <div className="dark flex-shrink-0">
               <F0Button
-                variant="ghost"
+                variant="outline"
                 icon={Cross}
                 size="sm"
                 hideLabel
