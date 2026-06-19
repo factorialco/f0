@@ -18,6 +18,15 @@ import {
   useState,
 } from "react"
 
+import type { F0AlertProps } from "@/components/F0Alert"
+import type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
+import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
+import type {
+  PrimaryActionButton,
+  PrimaryDropdownAction,
+} from "@/experimental/Information/utils"
+import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
+
 import { F0Alert } from "@/components/F0Alert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
@@ -28,32 +37,10 @@ import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { withSkeleton } from "@/lib/skeleton"
 import { ScrollArea } from "@/ui/scrollarea"
+
+import "./index.css"
 import { Skeleton } from "@/ui/skeleton"
 
-import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
-import {
-  type ImageUploadConfig,
-  ImageUploadErrorType,
-  insertImageFromFile,
-} from "../internal/Extensions/Image"
-import { EnhanceErrorBanner } from "../internal/Error"
-import "./index.css"
-import {
-  applyPageDocumentPatch,
-  getNotesTextEditorSnapshot,
-} from "./applyPageDocumentPatch"
-import { createNotesTextEditorExtensions } from "./extensions"
-import { Header } from "./components/Header"
-import { ImageUploadError } from "./components/ImageUploadError"
-import { Title } from "./components/Title"
-import type { F0AlertProps } from "@/components/F0Alert"
-import type { HeaderSecondaryAction } from "@/experimental/Information/Headers/BaseHeader"
-import type { MetadataItem } from "@/experimental/Information/Headers/Metadata"
-import type {
-  PrimaryActionButton,
-  PrimaryDropdownAction,
-} from "@/experimental/Information/utils"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { enhanceConfig } from "../internal/Enhance/types"
 import type { AIBlockConfig } from "../internal/Extensions/AIBlock"
 import type { Message, User } from "../internal/Extensions/Transcript"
@@ -62,6 +49,23 @@ import type {
   NotesTextEditorPageDocumentPatch,
   NotesTextEditorSnapshot,
 } from "./types"
+
+import { EnhanceErrorBanner } from "../internal/Error"
+import { documentHasMissingBlockIds } from "../internal/Extensions/BlockIdExtension"
+import { type FileUploadConfig } from "../internal/Extensions/FileAttachment"
+import {
+  type ImageUploadConfig,
+  ImageUploadErrorType,
+  insertImageFromFile,
+} from "../internal/Extensions/Image"
+import {
+  applyPageDocumentPatch,
+  getNotesTextEditorSnapshot,
+} from "./applyPageDocumentPatch"
+import { Header } from "./components/Header"
+import { ImageUploadError } from "./components/ImageUploadError"
+import { Title } from "./components/Title"
+import { createNotesTextEditorExtensions } from "./extensions"
 
 // Declared next to the component (not in the sibling types.ts) so api-extractor
 // rolls them into the bundled d.ts instead of emitting a broken relative import.
@@ -72,6 +76,7 @@ export interface F0NotesTextEditorProps {
   readonly?: boolean
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
   enhanceConfig?: enhanceConfig
   onTitleChange?: (title: string) => void
   titlePlaceholder?: string
@@ -120,6 +125,7 @@ const F0NotesTextEditorComponent = forwardRef<
     readonly = false,
     aiBlockConfig,
     imageUploadConfig,
+    fileUploadConfig,
     enhanceConfig: enhanceConfigProp,
     onTitleChange,
     primaryAction,
@@ -165,6 +171,20 @@ const F0NotesTextEditorComponent = forwardRef<
     [imageUploadConfig]
   )
 
+  // File uploads share the same error union/state as image uploads.
+  const fileUploadConfigWithError = useMemo(
+    () =>
+      fileUploadConfig
+        ? {
+            ...fileUploadConfig,
+            onError: (errorType: ImageUploadErrorType) => {
+              setError(errorType)
+            },
+          }
+        : undefined,
+    [fileUploadConfig]
+  )
+
   // Extensions are only read at editor creation; memo just avoids rebuilding
   // the config array (and its closures) on every render.
   const extensions = useMemo(
@@ -174,6 +194,7 @@ const F0NotesTextEditorComponent = forwardRef<
         translations,
         aiBlockConfig,
         imageUploadConfig: imageUploadConfigWithError,
+        fileUploadConfig: fileUploadConfigWithError,
         enhanceEnabled: !!enhanceConfigProp,
       }),
     [
@@ -181,6 +202,7 @@ const F0NotesTextEditorComponent = forwardRef<
       translations,
       aiBlockConfig,
       imageUploadConfigWithError,
+      fileUploadConfigWithError,
       enhanceConfigProp,
     ]
   )
@@ -384,7 +406,7 @@ const F0NotesTextEditorComponent = forwardRef<
       </AnimatePresence>
       <ScrollArea className="notes-text-editor-scroll h-full gap-6">
         {alert && (
-          <div className="mx-auto w-full max-w-[824px] sm:px-14 px-0">
+          <div className="mx-auto w-full max-w-[824px] px-0 sm:px-14">
             <F0Alert {...alert} />
           </div>
         )}
@@ -431,7 +453,7 @@ const F0NotesTextEditorComponent = forwardRef<
 
           <EditorContent
             editor={editor}
-            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:transition-[padding] [&>div]:duration-300 sm:[&>div]:px-14 [&>div]:px-0"
+            className="pb-28 [&>div]:mx-auto [&>div]:w-full [&>div]:max-w-[824px] [&>div]:px-0 [&>div]:transition-[padding] [&>div]:duration-300 sm:[&>div]:px-14"
           />
         </div>
       </ScrollArea>
