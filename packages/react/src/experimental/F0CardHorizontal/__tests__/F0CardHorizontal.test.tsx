@@ -23,14 +23,16 @@ vi.mock("@/ui/OverflowList/useOverflowCalculation", () => ({
   }),
 }))
 
-import type { CardSecondaryLink } from "../components/CardActions"
-import type { CardAvatarVariant } from "../components/CardAvatar"
+import type { CardSecondaryLink } from "@/components/F0Card/components/CardActions"
+import type { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 
-import { F0CardRow } from "../F0CardRow"
+import { F0CardHorizontal } from "../F0CardHorizontal"
 
-describe("F0CardRow", () => {
+describe("F0CardHorizontal", () => {
   it("renders title and description", () => {
-    render(<F0CardRow title="Jane Cooper" description="Product designer" />)
+    render(
+      <F0CardHorizontal title="Jane Cooper" description="Product designer" />
+    )
 
     expect(screen.getByText("Jane Cooper")).toBeInTheDocument()
     expect(screen.getByText("Product designer")).toBeInTheDocument()
@@ -38,7 +40,7 @@ describe("F0CardRow", () => {
 
   it("renders an avatar when provided", () => {
     render(
-      <F0CardRow
+      <F0CardHorizontal
         title="Jane Cooper"
         avatar={{ type: "person", firstName: "Jane", lastName: "Cooper" }}
       />
@@ -62,14 +64,16 @@ describe("F0CardRow", () => {
     ]
 
     avatars.forEach((avatar) => {
-      const { unmount } = render(<F0CardRow title="Title" avatar={avatar} />)
+      const { unmount } = render(
+        <F0CardHorizontal title="Title" avatar={avatar} />
+      )
       expect(screen.getByTestId("card-avatar")).toBeInTheDocument()
       unmount()
     })
   })
 
   it("does not make the card background a click target", () => {
-    render(<F0CardRow title="Not clickable" description="Just text" />)
+    render(<F0CardHorizontal title="Not clickable" description="Just text" />)
 
     // The row itself exposes no link/button role — only its actions do.
     expect(screen.queryByRole("link")).not.toBeInTheDocument()
@@ -80,7 +84,12 @@ describe("F0CardRow", () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
 
-    render(<F0CardRow title="Row" primaryAction={{ label: "Open", onClick }} />)
+    render(
+      <F0CardHorizontal
+        title="Row"
+        primaryAction={{ label: "Open", onClick }}
+      />
+    )
 
     await user.click(screen.getByRole("button", { name: "Open" }))
     expect(onClick).toHaveBeenCalledTimes(1)
@@ -91,7 +100,7 @@ describe("F0CardRow", () => {
     const onEdit = vi.fn()
 
     render(
-      <F0CardRow
+      <F0CardHorizontal
         title="Row"
         secondaryActions={[{ label: "Edit", onClick: onEdit }]}
         primaryAction={{ label: "Open", onClick: vi.fn() }}
@@ -109,7 +118,7 @@ describe("F0CardRow", () => {
       target: "_blank",
     }
 
-    render(<F0CardRow title="Row" secondaryActions={secondaryLink} />)
+    render(<F0CardHorizontal title="Row" secondaryActions={secondaryLink} />)
 
     const link = screen.getByRole("link", { name: "View more" })
     expect(link).toHaveAttribute("href", "/test-page")
@@ -121,7 +130,7 @@ describe("F0CardRow", () => {
     const onArchive = vi.fn()
 
     render(
-      <F0CardRow
+      <F0CardHorizontal
         title="Row"
         otherActions={[{ label: "Archive", onClick: onArchive }]}
       />
@@ -139,7 +148,9 @@ describe("F0CardRow", () => {
       const user = userEvent.setup()
       const onConfirm = vi.fn()
 
-      render(<F0CardRow title="Row" confirmAction={{ onClick: onConfirm }} />)
+      render(
+        <F0CardHorizontal title="Row" confirmAction={{ onClick: onConfirm }} />
+      )
 
       await user.click(screen.getByRole("button", { name: "Confirm" }))
       expect(onConfirm).toHaveBeenCalledTimes(1)
@@ -149,7 +160,9 @@ describe("F0CardRow", () => {
       const user = userEvent.setup()
       const onReject = vi.fn()
 
-      render(<F0CardRow title="Row" rejectAction={{ onClick: onReject }} />)
+      render(
+        <F0CardHorizontal title="Row" rejectAction={{ onClick: onReject }} />
+      )
 
       await user.click(screen.getByRole("button", { name: "Reject" }))
       expect(onReject).toHaveBeenCalledTimes(1)
@@ -157,7 +170,7 @@ describe("F0CardRow", () => {
 
     it("replaces the standard actions", () => {
       render(
-        <F0CardRow
+        <F0CardHorizontal
           title="Row"
           confirmAction={{ onClick: vi.fn() }}
           rejectAction={{ onClick: vi.fn() }}
@@ -178,7 +191,7 @@ describe("F0CardRow", () => {
   describe("status (resolved state)", () => {
     it("renders the status icon by its accessible label", () => {
       render(
-        <F0CardRow
+        <F0CardHorizontal
           title="Row"
           status={{ icon: Check, variant: "positive", label: "Accepted" }}
         />
@@ -189,7 +202,7 @@ describe("F0CardRow", () => {
 
     it("takes precedence over the action props", () => {
       render(
-        <F0CardRow
+        <F0CardHorizontal
           title="Row"
           status={{ icon: Cross, variant: "critical", label: "Rejected" }}
           primaryAction={{ label: "Open", onClick: vi.fn() }}
@@ -207,7 +220,9 @@ describe("F0CardRow", () => {
     })
 
     it("strikes through and dims the title when inactive", () => {
-      render(<F0CardRow title="Void request" description="Details" inactive />)
+      render(
+        <F0CardHorizontal title="Void request" description="Details" inactive />
+      )
 
       const title = screen.getByText("Void request")
       expect(title).toHaveClass("line-through")
@@ -218,7 +233,7 @@ describe("F0CardRow", () => {
 
   it("renders the alert banner when alert is provided", () => {
     render(
-      <F0CardRow
+      <F0CardHorizontal
         title="Row"
         alert={{ variant: "warning", title: "Action required" }}
       />
@@ -232,7 +247,7 @@ describe("F0CardRow", () => {
 
     values.forEach((stackAt) => {
       const { unmount } = render(
-        <F0CardRow
+        <F0CardHorizontal
           title="Row"
           stackAt={stackAt}
           primaryAction={{ label: "Open", onClick: vi.fn() }}

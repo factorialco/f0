@@ -3,33 +3,25 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import image from "@storybook-static/avatars/person04.jpg"
 import { fn } from "storybook/test"
 
+import { F0Card } from "@/components/F0Card"
 import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
 
-import { F0CardRow } from "../F0CardRow"
+import { F0CardHorizontal } from "../F0CardHorizontal"
 
 // Story handlers alert which control fired (on top of the Actions-panel spy),
 // so a docs reader can confirm exactly which button they pressed.
 const clickAlert = (label: string) => fn(() => alert(`${label} clicked`))
 
-const meta: Meta<typeof F0CardRow> = {
-  component: F0CardRow,
-  title: "Card Row",
+const meta: Meta<typeof F0CardHorizontal> = {
+  component: F0CardHorizontal,
+  title: "CardHorizontal",
   parameters: {
     docs: {
-      description: {
-        component: [
-          "`F0CardRow` is a compact, single-row card: an optional avatar on the left, a title with an optional description, and trailing actions on the right.",
-          "Use it for list rows, inline confirmations and dense layouts where a full `F0Card` is too heavy — e.g. a settings toggle row, a pending-approval item, or a selectable entity.",
-          "Actions stay inline at every width by default. Set <code>stackAt</code> to collapse them onto their own line below a container breakpoint — secondary buttons fold into a left ⋯ menu while the primary stays pinned. For an approve/reject row, use the icon-only <code>confirmAction</code> / <code>rejectAction</code> variant. The avatar renders at a fixed size and accepts any avatar type in the system.",
-          "A row is either driven by its actions <em>or</em> by a whole-row click target (<code>link</code> / <code>onClick</code>) — not both. Pass <code>link</code>/<code>onClick</code> for entry-point cards whose entire surface is the action, and leave them unset for rows that act through their buttons.",
-        ]
-          .map((line) => `<p>${line}</p>`)
-          .join("\n"),
-      },
+      // Prose lives in F0CardHorizontal.mdx (autodocs disabled below).
       story: { inline: false, height: "160px" },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   // Explicit argTypes: docgen can't infer props through the
   // withDataTestId(withSkeleton(...)) wrapper, so we declare the controls here.
   argTypes: {
@@ -53,7 +45,7 @@ const meta: Meta<typeof F0CardRow> = {
     inactive: {
       control: "boolean",
       description:
-        "Strikes through and dims the title/description (e.g. a voided or closed row). Purely presentational.",
+        "Strikes through and dims the title/description (e.g. a voided or closed card). Purely presentational.",
     },
     fullHeight: {
       control: "boolean",
@@ -62,12 +54,12 @@ const meta: Meta<typeof F0CardRow> = {
     link: {
       control: "text",
       description:
-        "Opt-in: makes the whole row a link to this href — adds pointer + hover/focus affordance and a full-row overlay link. Mutually exclusive with action buttons.",
+        "Opt-in: makes the whole card a link to this href — adds pointer + hover/focus affordance and a full-card overlay link. Mutually exclusive with action buttons.",
     },
     disableOverlayLink: {
       control: "boolean",
       description:
-        "Disables the full-row overlay link (used with `link`) so a parent can manage drag-and-drop while still allowing click navigation via `onClick`.",
+        "Disables the full-card overlay link (used with `link`) so a parent can manage drag-and-drop while still allowing click navigation via `onClick`.",
     },
     // Function-bearing props: disable the control so it doesn't dump the
     // serialized mock fn() source. They still appear in the args table.
@@ -100,12 +92,12 @@ const meta: Meta<typeof F0CardRow> = {
     },
     alert: {
       control: false,
-      description: "Alert banner displayed above the row.",
+      description: "Alert banner displayed above the card.",
     },
     onClick: {
       control: false,
       description:
-        "Opt-in: called when the whole row is clicked — adds pointer + hover/focus affordance. Mutually exclusive with action buttons.",
+        "Opt-in: called when the whole card is clicked — adds pointer + hover/focus affordance. Mutually exclusive with action buttons.",
     },
   },
   decorators: [
@@ -147,7 +139,7 @@ export const Default: Story = {
  * A single CTA that shouldn't carry full primary weight: pass it as the
  * `primaryAction` with `variant: "outline"` to render an outline button. It
  * stays pinned at the trailing edge and never collapses into the "⋯" menu, even
- * in a narrow row — unlike a lone `secondaryActions` entry, which can shed.
+ * in a narrow card — unlike a lone `secondaryActions` entry, which can shed.
  */
 export const OutlinePrimaryAction: Story = {
   args: {
@@ -161,23 +153,23 @@ export const OutlinePrimaryAction: Story = {
 }
 
 /**
- * Opt-in whole-row click target: pass `onClick` (or `link`) and the entire row
+ * Opt-in whole-card click target: pass `onClick` (or `link`) and the entire card
  * becomes clickable — pointer cursor plus a hover/focus affordance. Use it for
- * entry-point cards whose whole surface is the action. Such a row carries no
- * action buttons: a row is driven by its buttons *or* by a row click, never both.
+ * entry-point cards whose whole surface is the action. Such a card carries no
+ * action buttons: a card is driven by its buttons *or* by a whole-card click, never both.
  */
-export const ClickableRow: Story = {
+export const ClickableCard: Story = {
   args: {
     avatar: { type: "module", module: "goals" },
     title: "Company goals",
-    description: "Click anywhere on the row to open",
-    onClick: clickAlert("Row"),
+    description: "Click anywhere on the card to open",
+    onClick: clickAlert("Card"),
   },
 }
 
 /**
  * Confirm/reject variant: icon-only ✗ (reject) + ✓ (confirm) buttons instead of
- * the standard actions. Useful for inline approve/reject rows.
+ * the standard actions. Useful for inline approve/reject decisions.
  */
 export const ConfirmReject: Story = {
   args: {
@@ -196,7 +188,7 @@ export const ConfirmReject: Story = {
 }
 
 /**
- * Resolved state of a confirm/reject row: once a decision is made, pass `status`
+ * Resolved state of a confirm/reject card: once a decision is made, pass `status`
  * a coloured icon (`{ icon, variant, label }`, the `label` keeps it accessible)
  * to swap the buttons for the outcome. The accepted/rejected → positive/critical
  * mapping lives with the caller (here in the story).
@@ -262,6 +254,77 @@ export const Stacking: Story = {
   },
 }
 
+// Container widths spanning the `md` (448px) breakpoint, so the same card shows
+// its actions inline at the wider sizes and wrapped onto their own line at the
+// narrower ones. (The query is on the card's content box, so the flip sits a
+// little above the raw 448px once the card's own padding is accounted for.)
+const stackingWidths = [
+  { className: "w-[600px]", label: "600px — actions inline" },
+  { className: "w-[520px]", label: "520px — actions inline" },
+  { className: "w-[440px]", label: "440px — actions wrap to their own line" },
+  { className: "w-[360px]", label: "360px — actions wrap to their own line" },
+]
+
+/**
+ * `stackAt` reacts to the card's own width — a container query, not the viewport —
+ * with breakpoints `sm` (384px), `md` (448px) and `lg` (512px). At or above the
+ * breakpoint the actions sit inline at the trailing edge; below it they drop onto
+ * their own full-width line with a footer separator, and secondary buttons fold
+ * into the left ⋯ menu. The same `stackAt: "md"` card is shown across a ladder of
+ * widths — watch the actions jump to a new line once the card narrows past 448px.
+ */
+export const ResponsiveStacking: Story = {
+  parameters: {
+    noMetaLayout: true,
+    docs: { story: { inline: false, height: "660px" } },
+  },
+  render: () => (
+    <div className="flex w-full flex-col items-center gap-6 py-4">
+      {stackingWidths.map(({ className, label }) => (
+        <div key={className} className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-f1-foreground-secondary">
+            {label}
+          </span>
+          <div className={className}>
+            <F0CardHorizontal
+              avatar={{
+                type: "person",
+                firstName: "Jane",
+                lastName: "Cooper",
+                src: image,
+              }}
+              title="Jane Cooper"
+              description="Requested 3 days off"
+              stackAt="md"
+              secondaryActions={[
+                { label: "Edit", onClick: clickAlert("Edit") },
+              ]}
+              otherActions={[
+                { label: "Mail", icon: Envelope, onClick: clickAlert("Mail") },
+                { type: "separator" },
+                {
+                  label: "Delete",
+                  icon: Delete,
+                  onClick: clickAlert("Delete"),
+                  critical: true,
+                },
+              ]}
+              primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+  decorators: [
+    (Story) => (
+      <div className="flex min-h-[calc(100vh-32px)] w-full justify-center">
+        <Story />
+      </div>
+    ),
+  ],
+}
+
 export const WithAvatar: Story = {
   args: {
     avatar: {
@@ -300,7 +363,7 @@ export const WithAvatar: Story = {
 }
 
 /**
- * The title and description wrap when long, so the row grows to fit. The avatar
+ * The title and description wrap when long, so the card grows to fit. The avatar
  * and the trailing actions stay pinned to the top (rather than drifting to the
  * vertical centre), so both keep aligning with the title's first line. Long
  * unbroken strings — URLs, ids — break instead of overrunning the actions.
@@ -366,7 +429,7 @@ export const AvatarTypes: Story = {
   },
   render: () => (
     <div className="flex w-[640px] flex-col gap-3">
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{
           type: "person",
           firstName: "Jane",
@@ -377,19 +440,19 @@ export const AvatarTypes: Story = {
         description="Person avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "company", name: "Acme Inc" }}
         title="Acme Inc"
         description="Company avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "team", name: "Design" }}
         title="Design Team"
         description="Team avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{
           type: "file",
           file: { name: "contract.pdf", type: "application/pdf" },
@@ -398,37 +461,37 @@ export const AvatarTypes: Story = {
         description="File avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "flag", flag: "es" }}
         title="Spain"
         description="Flag avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "icon", icon: Briefcase }}
         title="Engineering"
         description="Icon avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "emoji", emoji: "🚀" }}
         title="Launch"
         description="Emoji avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "module", module: "goals" }}
         title="Goals"
         description="Module avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "alert", variant: "warning" }}
         title="Action required"
         description="Alert avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
-      <F0CardRow
+      <F0CardHorizontal
         avatar={{ type: "date", date: new Date(2026, 5, 5) }}
         title="Team offsite"
         description="Date avatar"
@@ -443,4 +506,68 @@ export const AvatarTypes: Story = {
       </div>
     ),
   ],
+}
+
+const people = [
+  { firstName: "Jane", lastName: "Cooper", role: "Product designer" },
+  { firstName: "Cody", lastName: "Fisher", role: "Engineering manager" },
+  { firstName: "Esther", lastName: "Howard", role: "Sales lead" },
+]
+
+/**
+ * Do/don't visual (docs only, hidden from the sidebar): a dense, scannable stack of
+ * `F0CardHorizontal` cards — the "do" example for choosing it over `F0Card`.
+ */
+export const HorizontalCardStack: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    noMetaLayout: true,
+    docs: { story: { inline: false, height: "220px" } },
+  },
+  render: () => (
+    <div className="mx-auto flex w-[560px] flex-col gap-2">
+      {people.map((p) => (
+        <F0CardHorizontal
+          key={p.lastName}
+          avatar={{
+            type: "person",
+            firstName: p.firstName,
+            lastName: p.lastName,
+          }}
+          title={`${p.firstName} ${p.lastName}`}
+          description={p.role}
+          primaryAction={{ label: "Open", onClick: fn() }}
+        />
+      ))}
+    </div>
+  ),
+}
+
+/**
+ * Do/don't visual (docs only, hidden from the sidebar): `F0Card` (vertical) stacked
+ * as if it were a list of cards — tall and hard to scan. The "don't" example.
+ */
+export const VerticalCardStack: Story = {
+  tags: ["no-sidebar"],
+  parameters: {
+    noMetaLayout: true,
+    docs: { story: { inline: false, height: "420px" } },
+  },
+  render: () => (
+    <div className="mx-auto flex w-[560px] flex-col gap-2">
+      {people.map((p) => (
+        <F0Card
+          key={p.lastName}
+          avatar={{
+            type: "person",
+            firstName: p.firstName,
+            lastName: p.lastName,
+          }}
+          title={`${p.firstName} ${p.lastName}`}
+          description={p.role}
+          primaryAction={{ label: "Open", onClick: fn() }}
+        />
+      ))}
+    </div>
+  ),
 }

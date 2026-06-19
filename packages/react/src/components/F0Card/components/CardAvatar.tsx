@@ -44,7 +44,7 @@ interface CardAvatarProps {
   /**
    * Explicit size override. When omitted, the size derives from `compact`
    * (sm) or the default vertical layout (lg). Passing a size also signals
-   * inline usage (e.g. the card row) and drops the vertical margin.
+   * inline usage (e.g. the horizontal card) and drops the vertical margin.
    */
   size?: CardAvatarSize
 }

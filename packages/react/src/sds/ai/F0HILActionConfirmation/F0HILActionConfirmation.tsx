@@ -1,4 +1,4 @@
-import { F0CardRow } from "@/components/F0Card"
+import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
 
 import { F0HILActionConfirmationProps } from "./types"
 
@@ -13,7 +13,7 @@ export const F0HILActionConfirmation = ({
   stackAt = "sm",
 }: F0HILActionConfirmationProps) => {
   return (
-    <F0CardRow
+    <F0CardHorizontal
       title={text}
       description={description}
       avatar={avatar}

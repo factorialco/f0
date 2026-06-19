@@ -14,20 +14,27 @@ import {
   type CardPrimaryAction,
   type CardSecondaryAction,
   type CardSecondaryLink,
-} from "./components/CardActions"
-import { CardAlertWrapper, alertBorderColor } from "./components/CardAlert"
-import { CardAvatar, type CardAvatarVariant } from "./components/CardAvatar"
+} from "@/components/F0Card/components/CardActions"
 import {
-  CardRowActions,
-  type CardRowConfirmAction,
-  type CardRowStackAt,
-  type CardRowStatus,
-  cardRowClassName,
-  cardRowLeadingAlignClassName,
-} from "./components/CardRowActions"
-import { type CardAlertProps } from "./types"
+  CardAlertWrapper,
+  alertBorderColor,
+} from "@/components/F0Card/components/CardAlert"
+import {
+  CardAvatar,
+  type CardAvatarVariant,
+} from "@/components/F0Card/components/CardAvatar"
+import { type CardAlertProps } from "@/components/F0Card/types"
 
-export interface F0CardRowProps {
+import {
+  CardHorizontalActions,
+  type CardHorizontalConfirmAction,
+  type CardHorizontalStackAt,
+  type CardHorizontalStatus,
+  cardHorizontalClassName,
+  cardHorizontalLeadingAlignClassName,
+} from "./components/CardHorizontalActions"
+
+export interface F0CardHorizontalProps {
   /**
    * The primary line of text.
    */
@@ -66,12 +73,12 @@ export interface F0CardRowProps {
    * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
    * instead of the standard actions. Provide either or both.
    */
-  confirmAction?: CardRowConfirmAction
+  confirmAction?: CardHorizontalConfirmAction
 
   /**
    * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
    */
-  rejectAction?: CardRowConfirmAction
+  rejectAction?: CardHorizontalConfirmAction
 
   /**
    * Resolved-state icon shown at the trailing edge in place of any actions — the
@@ -79,7 +86,7 @@ export interface F0CardRowProps {
    * `{ icon: Check, variant: "positive", label: "Accepted" }`.
    * Takes precedence over the action props.
    */
-  status?: CardRowStatus
+  status?: CardHorizontalStatus
 
   /**
    * Strikes through and dims the title/description, marking the row's subject as
@@ -93,7 +100,7 @@ export interface F0CardRowProps {
    * sit inline (at/above it). `never` keeps them inline at every width.
    * @default "never"
    */
-  stackAt?: CardRowStackAt
+  stackAt?: CardHorizontalStackAt
 
   /**
    * Stretch to fill the height of its container.
@@ -137,8 +144,8 @@ export interface F0CardRowProps {
  * (a container query on the card's width, not the viewport), so it reacts
  * correctly inside grids and columns.
  */
-const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
-  function F0CardRow(
+const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
+  function F0CardHorizontal(
     {
       title,
       description,
@@ -197,13 +204,13 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
           </F0Link>
         )}
 
-        <div className={cardRowClassName[stackAt]}>
+        <div className={cardHorizontalClassName[stackAt]}>
           <div
             className={cn(
               "flex min-w-0 flex-row gap-3",
               // Centre a short single-line group against the taller controls, but
               // let it fill from the top once it grows (see the class doc).
-              cardRowLeadingAlignClassName[stackAt],
+              cardHorizontalLeadingAlignClassName[stackAt],
               // Keep the avatar pinned to the top so it stays aligned with the
               // title when the row grows (e.g. a long wrapping description).
               avatar ? "items-start" : "items-center"
@@ -229,7 +236,7 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
             </div>
           </div>
 
-          <CardRowActions
+          <CardHorizontalActions
             primaryAction={primaryAction}
             secondaryActions={secondaryActions}
             otherActions={otherActions}
@@ -255,9 +262,9 @@ const F0CardRowBase = forwardRef<HTMLDivElement, F0CardRowProps>(
   }
 )
 
-F0CardRowBase.displayName = "F0CardRow"
+F0CardHorizontalBase.displayName = "F0CardHorizontal"
 
-const F0CardRowSkeleton = () => {
+const F0CardHorizontalSkeleton = () => {
   return (
     <Card
       className={cn("group relative bg-f1-background shadow-none")}
@@ -281,9 +288,9 @@ const F0CardRowSkeleton = () => {
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
-export const F0CardRow = withDataTestId(
+export const F0CardHorizontal = withDataTestId(
   experimentalComponent(
-    "F0CardRow",
-    withSkeleton(F0CardRowBase, F0CardRowSkeleton)
+    "F0CardHorizontal",
+    withSkeleton(F0CardHorizontalBase, F0CardHorizontalSkeleton)
   )
 )

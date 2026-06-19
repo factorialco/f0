@@ -23,6 +23,7 @@ export * from "../kits/Charts/exports"
  * @deprecated F0ActionBar has moved to @/components/F0ActionBar. Import from there instead.
  */
 export * from "../components/F0ActionBar"
+export * from "./F0CardHorizontal"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"
 export * from "./Information/exports"
