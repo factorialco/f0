@@ -60,11 +60,15 @@ describe("SidebarTabs", () => {
     expect(onClick).toHaveBeenCalled()
   })
 
-  it("renders a counter badge on a tab", () => {
+  it("shows an unread indicator on a tab when it has unread", () => {
     renderTabs({
       tabs: [tabs[0], { ...tabs[1], badge: 5 }],
       activeTab: "main",
     })
-    expect(screen.getByText("5")).toBeInTheDocument()
+    expect(
+      screen
+        .getByRole("button", { name: "Messages" })
+        .querySelector(".bg-f1-background-critical-bold")
+    ).not.toBeNull()
   })
 })

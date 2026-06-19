@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
-const PresenceDot = () => {
+const UnreadDot = () => {
   return (
     <div className="bg-f1-background absolute -top-1 -right-1 w-3 h-3 flex items-center justify-center rounded-full">
       <span
@@ -89,7 +89,7 @@ const TabButton = ({
             <span className="block whitespace-nowrap pl-1.5">{tab.label}</span>
           </span>
         </span>
-        {tab.badge && <PresenceDot />}
+        {tab.badge ? <UnreadDot /> : null}
       </div>
     </button>
   )
