@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.2](https://github.com/factorialco/f0/compare/f0-react-v4.0.1...f0-react-v4.0.2) (2026-06-19)
+
+
+### Bug Fixes
+
+* **PageHeader:** use left/right chevrons for prev/next navigation ([#4455](https://github.com/factorialco/f0/issues/4455)) ([ce04b2b](https://github.com/factorialco/f0/commit/ce04b2b0b158a9d9edb3ad65eaf5ed64174b57b3))
+
 ## [4.0.1](https://github.com/factorialco/f0/compare/f0-react-v4.0.0...f0-react-v4.0.1) (2026-06-19)
 
 
