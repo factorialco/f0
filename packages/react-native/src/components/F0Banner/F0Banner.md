@@ -33,6 +33,7 @@ import { F0Banner, F0Link } from "@factorialco/f0-react-native"
 | --------------- | ------------------------------------------------- | ----------- | ------------------------------------------------------------------------ |
 | `message`       | `string`                                          | required    | Banner message                                                           |
 | `level`         | `"info" \| "warning" \| "positive" \| "critical"` | required    | Drives icon, text color, and background tint                             |
+| `variant`       | `"global" \| "inline"`                            | `"global"`  | Placement treatment — see Variants below                                 |
 | `link`          | `ReactNode`                                       | `-`         | Trailing link slot (compose your own, e.g. `<F0Link size="sm" />`)       |
 | `action`        | `F0BannerAction`                                  | `-`         | Trailing action button (`label`, `onPress`, `loading`, `disabled`)       |
 | `loading`       | `boolean`                                         | `false`     | Show a trailing loading spinner tinted to the level                      |
@@ -51,11 +52,21 @@ Each level maps directly to the F0 semantic tokens:
 - `positive` — green (`f0-*-positive`)
 - `critical` — red (`f0-*-critical`)
 
+## Variants
+
+The same banner ships in two placement variants:
+
+- **`global`** (default) — full-bleed, squared corners, flat. Pin it to the top of the screen (place it outside any horizontally-padded container, below the safe-area). Squared + full-width is intentional, to read differently from the existing alert component.
+- **`inline`** — rounded corners + a drop shadow, for use inside page content where it needs separation from a light surface. It still fills its container width, so the inset comes from the parent's padding.
+
+> **Shadow tokens gap:** the `inline` shadow is applied via raw RN style props with **hardcoded, non-token values** (`bannerInlineShadow` in `F0Banner.styles.ts`). The react-native package has no shadow/elevation tokens yet and NativeWind `shadow-*` classes don't compile in RN. Replace these with real tokens once the f0 design system defines them.
+
 ## Runtime behavior
 
 - The action button is always rendered as `variant="outline"` `size="sm"` — the banner owns those so banners stay visually consistent
 - Dismissing is **manual only**: pressing the close button hides the banner (`return null`) and fires `onDismiss`. The banner never auto-hides on a timer — that behavior belongs to a future toast.
 - Once self-dismissed, the instance stays hidden until it unmounts/remounts
+- **No exit animation yet** — removal is instant, pending the f0 team's motion spec. When adopted, the F0-idiomatic approach is to wrap the root in an `Animated.View` with `exiting={FadeOut.duration(~200)}` and `ReduceMotion.System` (mirrors `AnimatedF0Text` and `F0Progress`).
 
 ## Accessibility
 

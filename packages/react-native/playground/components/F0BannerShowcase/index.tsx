@@ -88,6 +88,23 @@ export function F0BannerShowcase() {
           action={{ label: "Clock out", onPress: () => {} }}
         />
       </View>
+
+      <View className="gap-2">
+        <Text className="px-4 text-base font-semibold text-f0-foreground">
+          Inline variant (rounded + elevated, for in-content use)
+        </Text>
+        <View className="gap-2 px-4">
+          {F0_BANNER_LEVELS.map((level) => (
+            <F0Banner
+              key={level}
+              variant="inline"
+              level={level}
+              message="Some time entries failed to sync"
+              action={{ label: "Check", onPress: () => {} }}
+            />
+          ))}
+        </View>
+      </View>
     </ScrollView>
   )
 }

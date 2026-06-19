@@ -12,6 +12,12 @@ export const F0_BANNER_LEVELS = [
 
 export type F0BannerLevel = (typeof F0_BANNER_LEVELS)[number]
 
+// Placement variants: "global" (full-bleed, squared, flat — pinned to the top
+// of the screen) and "inline" (rounded + elevated — sits inside page content).
+export const F0_BANNER_VARIANTS = ["global", "inline"] as const
+
+export type F0BannerVariant = (typeof F0_BANNER_VARIANTS)[number]
+
 // Trailing action button — a curated subset of F0Button; the banner owns variant/size.
 export type F0BannerAction = Pick<
   F0ButtonProps,
@@ -23,6 +29,11 @@ export interface F0BannerProps {
   message: string
   /** Semantic level driving icon, colors, and background tint. */
   level: F0BannerLevel
+  /**
+   * Placement variant. `global` = full-bleed, squared, flat (top of screen);
+   * `inline` = rounded + elevated (inside page content). @default "global"
+   */
+  variant?: F0BannerVariant
   /** Trailing link slot, e.g. `<F0Link size="sm" href="…">Learn more</F0Link>`. */
   link?: ReactNode
   /** Trailing action button. */

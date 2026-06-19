@@ -29,6 +29,27 @@ describe("F0Banner", () => {
     expect(className).toContain("bg-f0-background-warning")
   })
 
+  it("global variant is squared with no shadow", () => {
+    render(<F0Banner level="info" message="Message" testID="banner" />)
+    const root = screen.getByTestId("banner")
+    expect(String(root.props.className ?? "")).not.toContain("rounded")
+    expect(root.props.style).toBeUndefined()
+  })
+
+  it("inline variant is rounded and elevated", () => {
+    render(
+      <F0Banner
+        level="info"
+        message="Message"
+        variant="inline"
+        testID="banner"
+      />
+    )
+    const root = screen.getByTestId("banner")
+    expect(String(root.props.className ?? "")).toContain("rounded-lg")
+    expect(root.props.style).toBeTruthy()
+  })
+
   it("renders a link slot and fires its press handler", () => {
     const onPress = jest.fn()
     render(
