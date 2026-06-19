@@ -1,0 +1,24 @@
+.shine-text {
+  background: linear-gradient(
+    90deg,
+    #888 0%,
+    #aaa 33%,
+    #888 50%,
+    #aaa 66%,
+    #888 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: orb-label-shine 2s ease-in-out infinite;
+}
+
+@keyframes orb-label-shine {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
