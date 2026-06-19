@@ -19,6 +19,7 @@ import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0CheckboxShowcase } from "../../components/F0CheckboxShowcase"
 import { F0ChipShowcase } from "../../components/F0ChipShowcase"
 import { F0CounterShowcase } from "../../components/F0CounterShowcase"
+import { F0BannerShowcase } from "../../components/F0BannerShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
@@ -57,6 +58,7 @@ type ComponentType =
   | "f0checkbox"
   | "f0chip"
   | "f0counter"
+  | "f0banner"
   | "f0icon"
   | "f0link"
   | "f0progress"
@@ -91,6 +93,7 @@ const componentOptions = [
   { value: "f0checkbox" as ComponentType, label: "F0Checkbox" },
   { value: "f0chip" as ComponentType, label: "F0Chip" },
   { value: "f0counter" as ComponentType, label: "F0Counter" },
+  { value: "f0banner" as ComponentType, label: "F0Banner" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0link" as ComponentType, label: "F0Link" },
   { value: "f0progress" as ComponentType, label: "F0Progress" },
@@ -158,6 +161,8 @@ export default function ComponentsShowcase() {
         return <F0ChipShowcase />
       case "f0counter":
         return <F0CounterShowcase />
+      case "f0banner":
+        return <F0BannerShowcase />
       case "f0icon":
         return <F0IconShowcase />
       case "f0link":

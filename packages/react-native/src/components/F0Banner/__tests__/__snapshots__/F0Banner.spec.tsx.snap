@@ -1,0 +1,368 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`F0Banner Snapshot - all levels: critical 1`] = `
+<View
+  accessibilityRole="alert"
+  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-critical"
+>
+  <View
+    accessibilityLabel="critical alert"
+    accessibilityRole="image"
+    className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-critical border-f0-border-critical"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-critical"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16m-.967-11.94a.97.97 0 1 1 1.935 0l-.303 3.9a.667.667 0 0 1-1.33 0zM13 15a1 1 0 1 1-2 0 1 1 0 0 1 2 0"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          propList={
+            [
+              "fill",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <Text
+    className="flex-1 no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-critical text-left"
+  >
+    Message
+  </Text>
+</View>
+`;
+
+exports[`F0Banner Snapshot - all levels: info 1`] = `
+<View
+  accessibilityRole="alert"
+  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-info"
+>
+  <View
+    accessibilityLabel="info alert"
+    accessibilityRole="image"
+    className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-info border-f0-border-info"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-info"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-8.65-2.9a.65.65 0 1 0 1.3 0V9a.65.65 0 1 0-1.3 0zm0 6a.65.65 0 1 0 1.3 0v-3a.65.65 0 1 0-1.3 0z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <Text
+    className="flex-1 no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-info text-left"
+  >
+    Message
+  </Text>
+</View>
+`;
+
+exports[`F0Banner Snapshot - all levels: positive 1`] = `
+<View
+  accessibilityRole="alert"
+  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-positive"
+>
+  <View
+    accessibilityLabel="positive alert"
+    accessibilityRole="image"
+    className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-positive border-f0-border-positive"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-positive"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-3.48-2.61a.65.65 0 1 0-1.04-.78l-4.05 5.4-2.47-2.47a.65.65 0 1 0-.92.92l3 3a.65.65 0 0 0 .98-.07z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <Text
+    className="flex-1 no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-positive text-left"
+  >
+    Message
+  </Text>
+</View>
+`;
+
+exports[`F0Banner Snapshot - all levels: warning 1`] = `
+<View
+  accessibilityRole="alert"
+  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-warning"
+>
+  <View
+    accessibilityLabel="warning alert"
+    accessibilityRole="image"
+    className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-warning border-f0-border-warning"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-warning"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M5.399 19c-1.525 0-2.489-1.638-1.748-2.971l6.6-11.882c.763-1.372 2.735-1.372 3.497 0l6.601 11.882c.74 1.333-.223 2.971-1.748 2.971zM12 7.5a.97.97 0 0 0-.967 1.045l.302 3.9a.667.667 0 0 0 1.33 0l.303-3.9A.97.97 0 0 0 12 7.5m0 8.987a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <Text
+    className="flex-1 no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-warning text-left"
+  >
+    Message
+  </Text>
+</View>
+`;
+
+exports[`F0Banner Snapshot - default 1`] = `
+<View
+  accessibilityRole="alert"
+  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-info"
+>
+  <View
+    accessibilityLabel="info alert"
+    accessibilityRole="image"
+    className="flex shrink-0 items-center justify-center overflow-hidden border border-solid h-6 w-6 rounded-sm bg-f0-background-info border-f0-border-info"
+  >
+    <RNSVGSvgView
+      align="xMidYMid"
+      bbHeight="100%"
+      bbWidth="100%"
+      className="shrink-0 w-4 h-4 stroke-sm text-f0-icon-info"
+      fill="none"
+      focusable={false}
+      meetOrSlice={0}
+      minX={0}
+      minY={0}
+      style={
+        [
+          {
+            "backgroundColor": "transparent",
+            "borderWidth": 0,
+          },
+          [
+            {},
+          ],
+          {
+            "flex": 0,
+            "height": "100%",
+            "width": "100%",
+          },
+        ]
+      }
+      vbHeight={24}
+      vbWidth={24}
+    >
+      <RNSVGGroup
+        fill={null}
+        propList={
+          [
+            "fill",
+          ]
+        }
+      >
+        <RNSVGPath
+          clipRule={0}
+          d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-8.65-2.9a.65.65 0 1 0 1.3 0V9a.65.65 0 1 0-1.3 0zm0 6a.65.65 0 1 0 1.3 0v-3a.65.65 0 1 0-1.3 0z"
+          fill={
+            {
+              "type": 2,
+            }
+          }
+          fillRule={0}
+          propList={
+            [
+              "fill",
+              "fillRule",
+            ]
+          }
+        />
+      </RNSVGGroup>
+    </RNSVGSvgView>
+  </View>
+  <Text
+    className="flex-1 no-underline normal-case tracking-normal text-[16px] leading-[24px] font-medium text-f0-foreground-info text-left"
+  >
+    Message
+  </Text>
+</View>
+`;
