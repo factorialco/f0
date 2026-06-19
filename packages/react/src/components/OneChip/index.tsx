@@ -3,7 +3,6 @@ import { cva, type VariantProps } from "cva"
 import { F0Avatar, type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { CrossedCircle } from "@/icons/app"
-import { experimentalComponent } from "@/lib/experimental"
 import { cn, focusRing } from "@/lib/utils"
 
 export const chipVariants = cva({
@@ -20,6 +19,9 @@ export const chipVariants = cva({
   },
 })
 
+export const chipVariantOptions = ["default", "selected"] as const
+export type ChipVariantOption = (typeof chipVariantOptions)[number]
+
 interface BaseChipProps extends VariantProps<typeof chipVariants> {
   /**
    * The label of the chip
@@ -32,10 +34,19 @@ interface BaseChipProps extends VariantProps<typeof chipVariants> {
   onClick?: () => void
 
   /**
-   * If defined, the close icon will be displayed and the chip will be clickable
+   * If defined, the close icon will be displayed and the chip will be clickable.
+   * Note: when onClose is provided, onClick is suppressed on the outer element
+   * to avoid nesting two interactive elements (ARIA spec). Only onClose is
+   * keyboard-accessible in that layout.
    * */
   onClose?: () => void
 
+  /**
+   * If true, dims the label and disables all interaction.
+   * When onClick is provided (and onClose is not), the element retains role="button"
+   * and aria-disabled="true" for screen readers; keyboard events are swallowed.
+   * Has no effect on the close button when only onClose is provided.
+   * */
   deactivated?: boolean
 }
 
@@ -59,12 +70,17 @@ type ChipVariants =
       icon?: undefined
     }
 
-export type ChipProps = BaseChipProps &
+export type F0ChipProps = BaseChipProps &
   ChipVariants & {
-    variant?: "default" | "selected"
+    variant?: ChipVariantOption
   }
 
-const _Chip = ({
+/**
+ * @deprecated Use F0ChipProps instead
+ */
+export type ChipProps = F0ChipProps
+
+const _F0Chip = ({
   deactivated,
   label,
   variant,
@@ -72,25 +88,48 @@ const _Chip = ({
   onClose,
   avatar,
   icon,
-}: ChipProps) => {
+}: F0ChipProps) => {
+  // When onClose is present the <button> is the sole interactive child; adding role="button"
+  // to the outer div too would nest two interactive elements, violating the ARIA spec.
+  // In that layout onClick on the outer div is also suppressed — only the close button is
+  // keyboard-accessible, which is the correct UX for a dismissible chip.
+  const hasButtonRole = !!onClick && !onClose
+
+  if (process.env.NODE_ENV !== "production" && onClick && onClose) {
+    console.warn(
+      "F0Chip: providing both onClick and onClose is not supported. " +
+        "onClick will be suppressed on the outer element to prevent ARIA nesting violations. " +
+        "Only onClose will be keyboard-accessible."
+    )
+  }
+
   return (
     <div
+      role={hasButtonRole ? "button" : undefined}
+      aria-disabled={hasButtonRole && deactivated ? "true" : undefined}
       className={cn(
         chipVariants({ variant }),
         onClose && "pr-1.5",
         avatar && "pl-0.5",
         avatar && avatar?.type !== "person" && "rounded-sm",
         icon && !avatar && "pl-1.5",
-        onClick && "cursor-pointer",
-        onClick && focusRing()
+        hasButtonRole && !deactivated && "cursor-pointer",
+        hasButtonRole && focusRing()
       )}
-      onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          onClick?.()
-        }
-      }}
-      tabIndex={onClick ? 0 : undefined}
+      onClick={hasButtonRole && !deactivated ? onClick : undefined}
+      onKeyDown={
+        hasButtonRole
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                if (!deactivated) {
+                  e.preventDefault()
+                  onClick?.()
+                }
+              }
+            }
+          : undefined
+      }
+      tabIndex={hasButtonRole ? 0 : undefined}
     >
       {avatar && <F0Avatar avatar={avatar} size="xs" />}
       <div className="flex items-center gap-0.5">
@@ -112,8 +151,7 @@ const _Chip = ({
               "[&_svg]:text-f1-icon-selected [&_svg]:hover:text-f1-icon-selected-hover [&_svg]:focus:text-f1-icon-selected-hover",
             focusRing()
           )}
-          tabIndex={0}
-          aria-label="Close"
+          aria-label={`Remove ${label}`}
         >
           <F0Icon icon={CrossedCircle} size="sm" />
         </button>
@@ -122,7 +160,11 @@ const _Chip = ({
   )
 }
 
+_F0Chip.displayName = "F0Chip"
+
+export const F0Chip = _F0Chip
+
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Use F0Chip instead
  */
-export const Chip = experimentalComponent("Chip", _Chip)
+export const Chip = _F0Chip

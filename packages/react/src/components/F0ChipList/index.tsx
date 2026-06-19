@@ -2,7 +2,10 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OverflowList } from "@/ui/OverflowList"
 
-import { Chip, type ChipProps } from "@/components/OneChip"
+import {
+  F0Chip as Chip,
+  type F0ChipProps as ChipProps,
+} from "@/components/OneChip"
 import { ChipCounter } from "./ChipCounter"
 
 type Props = {

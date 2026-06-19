@@ -1,28 +1,41 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, fn, userEvent, within } from "storybook/test"
 import { useState } from "react"
 
-import * as Icons from "../../icons/app"
-import { Chip } from "./index"
+import * as Icons from "@/icons/app"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { chipVariantOptions, F0Chip } from "./index"
 
 const meta = {
-  component: Chip,
+  component: F0Chip,
   title: "Chip/Chip",
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "stable"],
+  args: {
+    onClick: fn(),
+    onClose: fn(),
+  },
   argTypes: {
     label: {
       description: "The label of the chip",
     },
     variant: {
       description: "The variant of the chip",
-      options: ["default", "selected"],
-      control: { type: "select" },
+      options: chipVariantOptions,
+      control: "select",
+      table: {
+        type: { summary: chipVariantOptions.join(" | ") },
+      },
     },
     avatar: {
       description: "If defined, an avatar will be displayed in the chip",
+      control: false,
+      table: {
+        type: { summary: "AvatarVariant" },
+      },
     },
     icon: {
       control: "select",
@@ -34,8 +47,16 @@ const meta = {
       description:
         "If defined, the close icon will be displayed and the chip will be clickable",
     },
+    onClick: {
+      description: "If defined, the chip will be clickable",
+    },
+    deactivated: {
+      description:
+        "If true, the label is rendered with reduced opacity to indicate a deactivated state",
+      control: "boolean",
+    },
   },
-} satisfies Meta<typeof Chip>
+} satisfies Meta<typeof F0Chip>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -44,6 +65,22 @@ export const Default: Story = {
   args: {
     label: "Label",
     variant: "default",
+    onClick: undefined,
+    onClose: undefined,
+  },
+}
+
+export const Clickable: Story = {
+  args: {
+    label: "Label",
+    variant: "default",
+    onClose: undefined,
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement)
+    const chip = canvas.getByRole("button", { name: "Label" })
+    await userEvent.click(chip)
+    await expect(args.onClick).toHaveBeenCalledTimes(1)
   },
 }
 
@@ -51,6 +88,7 @@ export const WithClose: Story = {
   args: {
     label: "Label",
     variant: "default",
+    onClick: undefined,
   },
   render: () => {
     const [chips, setChips] = useState([
@@ -66,7 +104,7 @@ export const WithClose: Story = {
     return (
       <div className="flex flex-wrap gap-2">
         {chips.map((chip) => (
-          <Chip
+          <F0Chip
             key={chip.id}
             label={chip.label}
             variant="default"
@@ -76,12 +114,22 @@ export const WithClose: Story = {
       </div>
     )
   },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const closeBtn = canvas.getByRole("button", { name: "Remove First Chip" })
+    await userEvent.click(closeBtn)
+    await expect(
+      canvas.queryByRole("button", { name: "Remove First Chip" })
+    ).not.toBeInTheDocument()
+  },
 }
 
 export const WithAvatar: Story = {
   args: {
     label: "Dani Moreno",
     variant: "default",
+    onClick: undefined,
+    onClose: undefined,
     avatar: {
       type: "person",
       firstName: "Dani",
@@ -91,8 +139,8 @@ export const WithAvatar: Story = {
   },
   render: ({ icon: _icon, ...args }) => (
     <div className="flex flex-wrap gap-2">
-      <Chip {...args} />
-      <Chip
+      <F0Chip {...args} />
+      <F0Chip
         {...args}
         label="Design engineers"
         avatar={{
@@ -100,7 +148,7 @@ export const WithAvatar: Story = {
           name: "Design engineers",
         }}
       />
-      <Chip
+      <F0Chip
         {...args}
         label="Factorial"
         avatar={{
@@ -118,6 +166,8 @@ export const WithDeactivatedAvatarAndLabel: Story = {
     label: "Deactivated User",
     variant: "default",
     deactivated: true,
+    onClick: undefined,
+    onClose: undefined,
     avatar: {
       type: "person",
       deactivated: true,
@@ -128,7 +178,7 @@ export const WithDeactivatedAvatarAndLabel: Story = {
   },
   render: ({ icon: _icon, ...args }) => (
     <div className="flex flex-wrap gap-2">
-      <Chip {...args} />
+      <F0Chip {...args} />
     </div>
   ),
 }
@@ -137,6 +187,8 @@ export const WithIcon: Story = {
   args: {
     label: "Label",
     icon: Icons.Placeholder,
+    onClick: undefined,
+    onClose: undefined,
   },
 }
 
@@ -144,6 +196,7 @@ export const SelectedWithClose: Story = {
   args: {
     label: "Label",
     variant: "selected",
+    onClick: undefined,
   },
   render: () => {
     const [chips, setChips] = useState([
@@ -159,7 +212,7 @@ export const SelectedWithClose: Story = {
     return (
       <div className="flex flex-wrap gap-2">
         {chips.map((chip) => (
-          <Chip
+          <F0Chip
             key={chip.id}
             label={chip.label}
             variant="selected"
@@ -169,4 +222,47 @@ export const SelectedWithClose: Story = {
       </div>
     )
   },
+}
+
+export const Snapshot: Story = {
+  args: {
+    label: "Snapshot",
+    onClick: undefined,
+    onClose: undefined,
+  },
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex w-fit flex-col gap-2">
+      {/* default variant */}
+      <div className="flex flex-wrap gap-2">
+        <F0Chip label="Default" />
+        <F0Chip label="Clickable" onClick={() => {}} />
+        <F0Chip label="With close" onClose={() => {}} />
+        <F0Chip label="With icon" icon={Icons.Placeholder} />
+      </div>
+      {/* selected variant */}
+      <div className="flex flex-wrap gap-2">
+        <F0Chip label="Selected" variant="selected" />
+        <F0Chip
+          label="Selected + close"
+          variant="selected"
+          onClose={() => {}}
+        />
+      </div>
+      {/* deactivated */}
+      <div className="flex flex-wrap gap-2">
+        <F0Chip
+          label="Deactivated"
+          deactivated
+          avatar={{
+            type: "person",
+            firstName: "Deactivated",
+            lastName: "User",
+            src: "/avatars/person01.jpg",
+            deactivated: true,
+          }}
+        />
+      </div>
+    </div>
+  ),
 }
