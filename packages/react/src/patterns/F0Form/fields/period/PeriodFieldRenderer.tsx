@@ -59,6 +59,8 @@ export function PeriodFieldRenderer({
       maxDate={field.maxDate}
       presets={field.presets}
       displayFormat={field.displayFormat}
+      // Granularity switch is view-only; commit happens on cell selection.
+      selectOnCellOnly
       clearable={field.clearable}
       value={value}
       onChange={handleChange}
