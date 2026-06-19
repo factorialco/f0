@@ -8,14 +8,8 @@ import { F0AvatarAlert } from "../F0Avatar"
 import { F0Button } from "../F0Button"
 import { F0Text } from "../primitives/F0Text"
 
-import {
-  F0_BANNER_TEXT_COLORS,
-  bannerVariants,
-} from "./F0Banner.styles"
-import type {
-  F0BannerLevel,
-  F0BannerProps,
-} from "./F0Banner.types"
+import { F0_BANNER_TEXT_COLORS, bannerVariants } from "./F0Banner.styles"
+import type { F0BannerLevel, F0BannerProps } from "./F0Banner.types"
 
 const BANNER_SPINNER_SIZE = 16
 
@@ -28,9 +22,8 @@ const BANNER_SPINNER_COLOR_VARIABLES = [
 ] as const
 
 function BannerSpinner({ level }: { level: F0BannerLevel }) {
-  const [infoColor, warningColor, positiveColor, criticalColor] = useCSSVariable(
-    [...BANNER_SPINNER_COLOR_VARIABLES]
-  )
+  const [infoColor, warningColor, positiveColor, criticalColor] =
+    useCSSVariable([...BANNER_SPINNER_COLOR_VARIABLES])
 
   const colorByLevel = useMemo<
     Record<F0BannerLevel, string | number | undefined>
