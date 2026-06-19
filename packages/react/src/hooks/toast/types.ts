@@ -42,20 +42,11 @@ export type ToastOptions = {
     }
 )
 
-export type UseToastReturn = {
-  /**
-   * Add a new toast
-   * @param options The options for the toast
-   * @returns The id of the created toast
-   */
-  toast: (options: ToastOptions) => ToastId
-  /**
-   * Remove a toast by id
-   * @param id The id of the toast to remove
-   */
-  removeToast: (id: ToastId) => void
-  /**
-   * Clear all toasts
-   */
-  clearAll: () => void
+/**
+ * A toast as held by the store: the public options resolved into the props the
+ * `F0Toast` component renders, plus a stable `id` and an `onClose` callback.
+ */
+export type ToastProviderItem = F0ToastProps & {
+  id: ToastId
+  onClose: () => void
 }

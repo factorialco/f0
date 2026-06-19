@@ -9,9 +9,9 @@ import {
   toastVariants,
 } from "@/internal/components/Toast/types"
 
+import { closeAllToasts, closeToast, openToast } from "../imperative"
 import { ToastProvider } from "../ToastProvider"
 import { ToastId, ToastOptions } from "../types"
-import { useToast } from "../useToast"
 
 const meta = {
   title: "Toast",
@@ -60,7 +60,6 @@ const _FakeAppContainer = ({
 
 export const ToastPlayground: Story = {
   render: () => {
-    const { toast, removeToast, clearAll } = useToast()
     const [lastId, setLastId] = useState<ToastId[]>([])
 
     const [logger, setLogger] = useState<{ date: string; message: string }[]>(
@@ -169,7 +168,7 @@ export const ToastPlayground: Story = {
             message: `Toast ${options.title} created`,
           },
         ])
-        toast({ ...options, title: `${options.title} ${index}` })
+        openToast({ ...options, title: `${options.title} ${index}` })
         setIndex((prev) => prev + 1)
       }
     }
@@ -271,7 +270,7 @@ export const ToastPlayground: Story = {
               <F0Button
                 label="Create Persistent"
                 onClick={() => {
-                  const id = toast({
+                  const id = openToast({
                     title: "Persistent Toast",
                     description: "Click the remove button to close me",
                     persistent: true,
@@ -289,7 +288,7 @@ export const ToastPlayground: Story = {
                 onClick={() => {
                   if (lastId.length > 0) {
                     const idToRemove = lastId[lastId.length - 1]
-                    removeToast(idToRemove)
+                    closeToast(idToRemove)
                     setLastId((prev) => prev.slice(0, -1))
                   }
                 }}
@@ -297,7 +296,7 @@ export const ToastPlayground: Story = {
               <F0Button
                 label="Clear All"
                 onClick={() => {
-                  clearAll()
+                  closeAllToasts()
                   setLastId([])
                 }}
               />

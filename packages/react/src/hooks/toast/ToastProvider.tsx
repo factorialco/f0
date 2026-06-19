@@ -1,38 +1,24 @@
 import { AnimatePresence, motion } from "motion/react"
 import {
-  createContext,
   Fragment,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react"
 import { createPortal } from "react-dom"
 
 import { F0Toast } from "@/internal/components/Toast/F0Toast"
-import { F0ToastProps } from "@/internal/components/Toast/types"
 import { useIsMobile } from "@/lib/useIsDesktop"
 import { cn } from "@/lib/utils"
 
-import { ToastId } from "./types"
+import { toastStore } from "./store"
+import { ToastId, ToastProviderItem } from "./types"
 
-export type ToastProviderItem = F0ToastProps & {
-  id: ToastId
-  onClose: () => void
-}
-
-type ToastContextValue = {
-  addToast: (toast: ToastProviderItem) => void
-  removeToast: (id: ToastId) => void
-  clearAll: () => void
-}
-
-const toastContainerPositions = ["top-right"] as const
+const toastContainerPositions = ["bottom-left"] as const
 type ToastContainerPosition = (typeof toastContainerPositions)[number]
-
-const ToastContext = createContext<ToastContextValue | null>(null)
 
 type ToastProviderProps = {
   children: React.ReactNode
@@ -40,8 +26,8 @@ type ToastProviderProps = {
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
-  "top-right":
-    "justify-end items-start top-0 right-0 bottom-0 left-0 sm:left-auto",
+  "bottom-left":
+    "justify-start items-end top-0 right-0 bottom-0 left-0 sm:right-auto",
 } as const
 
 // How many toasts are shown fully expanded (not stacked)
@@ -163,7 +149,7 @@ const StackedToasts = ({
                 key={item.id}
                 initial={{
                   opacity: 0,
-                  x: 60,
+                  x: -60,
                   scale: 1 - visualIndex * 0.05,
                 }}
                 animate={isHovered ? "expanded" : "stacked"}
@@ -220,7 +206,7 @@ const StackedToasts = ({
 
 const ToastsContainer = ({
   items,
-  position = "top-right",
+  position = "bottom-left",
 }: {
   items: ToastProviderItem[]
   position?: ToastContainerPosition
@@ -360,7 +346,7 @@ const ToastsContainer = ({
                       key={item.id}
                       layout
                       // Promoted: start from stacked position (negative Y) and slide down
-                      // New: slide in from right
+                      // New: slide in from the left
                       initial={
                         isPromoted
                           ? {
@@ -369,7 +355,7 @@ const ToastsContainer = ({
                               y: promotionOffsetRef.current,
                               scale: 1,
                             }
-                          : { opacity: 0, x: 60, scale: 0.95 }
+                          : { opacity: 0, x: -60, scale: 0.95 }
                       }
                       animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
                       exit={{
@@ -398,41 +384,33 @@ export const ToastProvider = ({
     desktop: "#content",
   },
 }: ToastProviderProps) => {
-  const [items, setItems] = useState<ToastProviderItem[]>([])
+  const items = useSyncExternalStore(
+    toastStore.subscribe,
+    toastStore.getSnapshot,
+    toastStore.getServerSnapshot
+  )
+
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  const addToast = useCallback((toast: ToastProviderItem) => {
-    setItems((prev) => {
-      const existingIndex = prev.findIndex((item) => item.id === toast.id)
-      if (existingIndex !== -1) {
-        const next = [...prev]
-        next[existingIndex] = toast
-        return next
-      }
-      return [...prev, toast]
-    })
-  }, [])
-
-  const removeToast = useCallback((id: ToastId) => {
-    setItems((prev) => prev.filter((item) => item.id !== id))
-  }, [])
-
-  const clearAll = useCallback(() => {
-    setItems([])
-  }, [])
-
-  const contextValue = useMemo(
-    () => ({
-      addToast,
-      removeToast,
-      clearAll,
-    }),
-    [addToast, removeToast, clearAll]
+  // Elect a single renderer among all mounted providers. The store holds the
+  // toasts globally, so without this every mounted ToastProvider (e.g. one per
+  // Storybook canvas) would render the same toasts N times.
+  const rendererIdRef = useRef<number | null>(null)
+  const activeRendererId = useSyncExternalStore(
+    toastStore.subscribeRenderer,
+    toastStore.getActiveRendererId,
+    () => null
   )
+  useEffect(() => {
+    const { id, release } = toastStore.acquireRenderer()
+    rendererIdRef.current = id
+    return release
+  }, [])
+  const isRenderer = activeRendererId === rendererIdRef.current
 
   const isMobile = useIsMobile()
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null)
@@ -454,8 +432,9 @@ export const ToastProvider = ({
   }, [isMobile, portalTargets?.mobile, portalTargets?.desktop])
 
   return (
-    <ToastContext.Provider value={contextValue}>
-      {isMounted &&
+    <>
+      {isRenderer &&
+        isMounted &&
         typeof document !== "undefined" &&
         portalTarget != null &&
         createPortal(
@@ -465,14 +444,6 @@ export const ToastProvider = ({
           portalTarget
         )}
       {children}
-    </ToastContext.Provider>
+    </>
   )
-}
-
-export const useToastContext = () => {
-  const context = useContext(ToastContext)
-  if (!context) {
-    throw new Error("useToastContext must be used within a ToastProvider")
-  }
-  return context
 }
