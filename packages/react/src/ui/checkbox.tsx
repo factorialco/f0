@@ -30,7 +30,7 @@ const Checkbox = React.forwardRef<
           ref={ref}
           id={checkboxId}
           name={props.name || checkboxId}
-          aria-label={props.title}
+          aria-label={hideLabel ? props.title : undefined}
           className={cn(
             "relative h-6 w-6 shrink-0 rounded-sm text-f1-foreground-selected data-[state=checked]:text-f1-foreground-inverse",
             "after:absolute after:left-0.5 after:top-0.5 after:z-[1] after:h-5 after:w-5 after:rounded-xs after:border after:border-solid after:border-f1-border after:transition-[background-color,border-color] after:content-[''] hover:after:border-f1-border-hover data-[state=checked]:after:bg-f1-background-selected-bold hover:data-[state=checked]:after:border-transparent",
@@ -42,7 +42,7 @@ const Checkbox = React.forwardRef<
             focusRing("focus-visible:ring-offset-0"),
             className
           )}
-          checked={props.checked}
+          checked={indeterminate ? "indeterminate" : props.checked}
           onCheckedChange={props.onCheckedChange}
           disabled={disabled}
         >
@@ -67,7 +67,12 @@ const Checkbox = React.forwardRef<
           >
             {props.title}
             {required && (
-              <span className="ml-0.5 text-f1-foreground-critical">*</span>
+              <span
+                aria-hidden="true"
+                className="ml-0.5 text-f1-foreground-critical"
+              >
+                *
+              </span>
             )}
           </label>
         )}

@@ -134,10 +134,24 @@ describe("F0Checkbox", () => {
 
     const checkbox = screen.getByRole("checkbox")
 
-    expect(checkbox).toHaveAttribute("aria-label", "Accessible checkbox")
+    // Visible label is associated via htmlFor/id — no aria-label override
     expect(checkbox).toHaveAttribute("id", "accessible-id")
     expect(checkbox).toBeChecked()
     expect(checkbox).not.toBeDisabled()
+  })
+
+  it("sets aria-label when hideLabel is true", () => {
+    render(
+      <F0Checkbox
+        title="Hidden label checkbox"
+        hideLabel
+        checked={true}
+        disabled={false}
+      />
+    )
+
+    const checkbox = screen.getByRole("checkbox")
+    expect(checkbox).toHaveAttribute("aria-label", "Hidden label checkbox")
   })
 
   it("generates unique id when not provided", () => {
