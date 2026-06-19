@@ -50,8 +50,8 @@ export const Default: Story = {
         section: {
           id: "section-1",
           title: "Company-wide questions",
-          // No `notice`: a locked section without one falls back to the default
-          // lock notice from the i18n provider.
+          // No `lockedNote`: a locked section without one falls back to the
+          // default lock notice from the i18n provider.
           locked: true,
           questions: [
             {
@@ -364,8 +364,8 @@ export const WithAllowCreate: Story = {
 /**
  * A blocked, predefined section: `locked` on the section disables its fields,
  * removes its edit menu and drag handle, and makes the questions inside it
- * non-interactive. The section's `notice` surfaces as the "Locked" tag tooltip;
- * questions inside without their own `lockedNote` inherit it. The standalone
+ * non-interactive. The section's `lockedNote` surfaces as the "Locked" tag
+ * tooltip; questions inside without their own `lockedNote` inherit it. The standalone
  * question after it stays fully editable. The locked treatment never shows in
  * the answering/preview form. (For locking individual questions outside a
  * section, see "With Locked Questions".)
@@ -378,9 +378,9 @@ export const WithBlockedSection: Story = {
         section: {
           id: "section-enps",
           title: "Predefined eNPS question",
-          // Section-level lock notice: questions without their own `lockedNote`
+          // Section-level lock note: questions without their own `lockedNote`
           // inherit this; the eNPS question below overrides it with its own.
-          notice: {
+          lockedNote: {
             description:
               "This question powers your Employee NPS score, so it can't be edited, moved, or removed.",
           },

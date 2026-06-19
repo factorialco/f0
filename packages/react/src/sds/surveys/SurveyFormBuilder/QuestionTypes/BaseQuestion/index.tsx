@@ -138,14 +138,14 @@ export const BaseQuestion = ({
 
   // Blocked question: an instant, title-less tooltip shown on the lock icon. It
   // prefers the question's own `lockedNote`, falls back to the parent section's
-  // `notice`, and finally to a default so a locked question always says
+  // `lockedNote`, and finally to a default so a locked question always says
   // something.
   const lockTooltipProps: { description: string } | null = !locked
     ? null
     : {
         description:
           lockedNote?.description ??
-          containingSection?.notice?.description ??
+          containingSection?.lockedNote?.description ??
           t("surveyFormBuilder.labels.lockedQuestionNotice"),
       }
 

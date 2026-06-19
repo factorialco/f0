@@ -23,7 +23,7 @@ export const Section = ({
   id,
   title = "",
   description,
-  notice,
+  lockedNote,
   questions = [],
   locked,
   hideQuestions,
@@ -106,7 +106,7 @@ export const Section = ({
   // Hovering it surfaces why the section is blocked — its own
   // `LockedSectionNotice`, falling back to the provider's default lock notice.
   const lockedNoticeText =
-    notice?.description ?? t("surveyFormBuilder.labels.lockedSectionNotice")
+    lockedNote?.description ?? t("surveyFormBuilder.labels.lockedSectionNotice")
   const lockedTag =
     locked && !answering ? (
       <F0TagRaw
