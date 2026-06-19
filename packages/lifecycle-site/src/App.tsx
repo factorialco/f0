@@ -1,19 +1,100 @@
-import { useEffect, useState } from "react"
-import type React from "react"
-import { Hero } from "./components/Hero"
+import { useEffect, useState, type ReactNode } from "react"
 import { WhatIsF0 } from "./components/WhatIsF0"
 import { WhereF0Lives } from "./components/WhereF0Lives"
-import { ProfileSelector } from "./components/ProfileSelector"
-import { IntentSelector } from "./components/IntentSelector"
+import { MaturitySection } from "./components/MaturitySection"
 import { FlowDiagram } from "./components/FlowDiagram"
 import { PhaseSection } from "./components/PhaseSection"
-import { MaturitySection } from "./components/MaturitySection"
 import { DefinitionOfDone } from "./components/DefinitionOfDone"
+import { PrototypeSection } from "./components/PrototypeSection"
+import { ContributeSection } from "./components/ContributeSection"
 import { Troubleshooting } from "./components/Troubleshooting"
-import { RuleTabs } from "./components/RuleTabs"
 import { Footer } from "./components/Footer"
 import { RulesPage } from "./components/RulesPage"
-import type { ProfileId } from "./data/profiles"
+
+type SectionDef = {
+  id: string
+  title: string
+  blurb: string
+  render: () => ReactNode
+}
+
+type Part = {
+  label: string
+  tagline: string
+  sections: SectionDef[]
+}
+
+const PARTS: Part[] = [
+  {
+    label: "Understand F0",
+    tagline: "How F0 works as a system. Read these if you're new.",
+    sections: [
+      {
+        id: "what-is-f0",
+        title: "What is F0",
+        blurb: "What F0 is, what it solves, and what it isn't.",
+        render: () => <WhatIsF0 />,
+      },
+      {
+        id: "where-f0-lives",
+        title: "Where F0 lives",
+        blurb: "The tools F0 lives in — Storybook, Claude, the repo — and when to use each.",
+        render: () => <WhereF0Lives />,
+      },
+      {
+        id: "maturity",
+        title: "The 3 maturity levels",
+        blurb: "Experimental, stable, deprecated — the promise F0 makes at each stage.",
+        render: () => <MaturitySection />,
+      },
+      {
+        id: "flow",
+        title: "How a component is born",
+        blurb: "The journey from idea to stable, and eventually to deprecated.",
+        render: () => (
+          <div className="space-y-8">
+            <FlowDiagram />
+            <PhaseSection />
+          </div>
+        ),
+      },
+      {
+        id: "definition-of-done",
+        title: "Definition of Done",
+        blurb: "The bar a component must clear to earn each maturity level.",
+        render: () => <DefinitionOfDone />,
+      },
+    ],
+  },
+  {
+    label: "What can I do in F0",
+    tagline: "The jobs you come here for. Pick what you need to do.",
+    sections: [
+      {
+        id: "prototype",
+        title: "Prototype a screen",
+        blurb: "Build a screen out of what already exists. You use the design system.",
+        render: () => <PrototypeSection />,
+      },
+      {
+        id: "contribute",
+        title: "Contribute to F0",
+        blurb: "Add or change something in the design system itself.",
+        render: () => <ContributeSection />,
+      },
+      {
+        id: "troubleshooting",
+        title: "Stuck? Start here",
+        blurb: "The questions people hit most, and where to go for help.",
+        render: () => <Troubleshooting />,
+      },
+    ],
+  },
+]
+
+const SECTION_INDEX = new Map(
+  PARTS.flatMap((p) => p.sections.map((s) => [s.id, { section: s, part: p }] as const))
+)
 
 function useHashRoute(): string {
   const [hash, setHash] = useState<string>(() =>
@@ -29,124 +110,100 @@ function useHashRoute(): string {
 
 export function App() {
   const hash = useHashRoute()
+
   if (hash.startsWith("#/rules")) return <RulesPage />
-  return <Home />
+
+  const sectionId = hash.startsWith("#/s/") ? hash.slice("#/s/".length) : ""
+  const entry = SECTION_INDEX.get(sectionId)
+  if (entry) return <SectionView section={entry.section} partLabel={entry.part.label} />
+
+  return <Overview />
 }
 
-function Home() {
-  const [selectedProfile, setSelectedProfile] = useState<ProfileId | null>(null)
-
+function Overview() {
   return (
-    <main className="mx-auto max-w-6xl px-6 pb-24">
-      <Hero />
+    <main className="mx-auto max-w-4xl px-6 pb-24">
+      <header className="pt-20">
+        <p className="text-sm font-medium uppercase tracking-widest text-accent">
+          F0 — Factorial's design system
+        </p>
+        <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
+          Get started with F0
+        </h1>
+        <p className="mt-5 max-w-2xl text-lg text-muted">
+          Everything you need to understand and work with F0 — the components,
+          patterns and rules every Factorial product shares. Pick a topic below;
+          you'll get just that, nothing else to wade through.
+        </p>
+      </header>
 
-      {/* Onboarding — for anyone arriving for the first time */}
-      <Section
-        id="what-is-f0"
-        title="What is F0"
-        subtitle="30 seconds: what F0 is, what it solves, what it isn't."
-      >
-        <WhatIsF0 />
-      </Section>
-
-      <Section
-        id="where-f0-lives"
-        title="Where F0 lives"
-        subtitle="A map of the tools you'll use to interact with F0."
-      >
-        <WhereF0Lives />
-      </Section>
-
-      {/* Self-orientation — find your path */}
-      <Section
-        id="profile"
-        title="I am a…"
-        subtitle="Pick your role to see the responsibilities, tools and skills relevant to you."
-      >
-        <ProfileSelector selected={selectedProfile} onSelect={setSelectedProfile} />
-      </Section>
-
-      <Section
-        id="intent"
-        title="I want to…"
-        subtitle="Pick what you want to do. We'll show the steps end to end."
-      >
-        <IntentSelector />
-      </Section>
-
-      {/* The system — how F0 works */}
-      <Section
-        id="maturity"
-        title="The 3 maturity levels"
-        subtitle="The promise F0 makes to consumers at each stage of a component's life."
-      >
-        <MaturitySection />
-      </Section>
-
-      <Section
-        id="flow"
-        title="How a component is born"
-        subtitle="From idea to stable, told as the journey it actually is."
-      >
-        <FlowDiagram />
-      </Section>
-
-      <Section
-        id="phases"
-        title="The phases in detail"
-        subtitle="Each phase has a goal, gates and an owner."
-      >
-        <PhaseSection />
-      </Section>
-
-      <Section
-        id="definition-of-done"
-        title="Definition of Done"
-        subtitle="The technical contract — source of truth for the promotion skill, the design review and (eventually) the dashboard."
-      >
-        <DefinitionOfDone />
-      </Section>
-
-      {/* Reference — for when you need the technical map */}
-      <Section
-        id="rules"
-        title="The rules"
-        subtitle="Golden rules, lint, PR conventions and what to expect from Foundations."
-      >
-        <RuleTabs />
-      </Section>
-
-      <Section
-        id="troubleshooting"
-        title="Troubleshooting"
-        subtitle="If you're stuck — and how to ask for help."
-      >
-        <Troubleshooting />
-      </Section>
+      <div className="mt-16 space-y-14">
+        {PARTS.map((part) => (
+          <section key={part.label}>
+            <h2 className="text-2xl font-bold tracking-tight">{part.label}</h2>
+            <p className="mt-1 text-muted">{part.tagline}</p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {part.sections.map((s) => (
+                <a
+                  key={s.id}
+                  href={`#/s/${s.id}`}
+                  className="group flex flex-col rounded-2xl border border-ink/10 bg-white p-6 shadow-sm transition hover:border-accent/50 hover:shadow-md"
+                >
+                  <h3 className="text-lg font-semibold tracking-tight">{s.title}</h3>
+                  <p className="mt-2 flex-1 text-sm text-muted">{s.blurb}</p>
+                  <span className="mt-4 text-sm font-semibold text-accent group-hover:underline">
+                    Open →
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
 
       <Footer />
     </main>
   )
 }
 
-function Section({
-  id,
-  title,
-  subtitle,
-  children,
+function SectionView({
+  section,
+  partLabel,
 }: {
-  id: string
-  title: string
-  subtitle: string
-  children: React.ReactNode
+  section: SectionDef
+  partLabel: string
 }) {
+  // Land at the top when opening a topic.
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [section.id])
+
   return (
-    <section id={id} className="section-anchor mt-24">
-      <header className="mb-8">
-        <h2 className="text-3xl font-semibold tracking-tight">{title}</h2>
-        <p className="mt-2 text-muted">{subtitle}</p>
+    <main className="mx-auto max-w-5xl px-6 pb-24">
+      <header className="pt-12">
+        <a
+          href="#/"
+          className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
+        >
+          ← All topics
+        </a>
+        <p className="mt-6 text-xs font-semibold uppercase tracking-widest text-accent">
+          {partLabel}
+        </p>
+        <h1 className="mt-2 text-4xl font-semibold tracking-tight">{section.title}</h1>
+        <p className="mt-3 max-w-2xl text-lg text-muted">{section.blurb}</p>
       </header>
-      {children}
-    </section>
+
+      <div className="mt-12">{section.render()}</div>
+
+      <div className="mt-16 border-t border-ink/10 pt-8">
+        <a
+          href="#/"
+          className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+        >
+          ← Back to all topics
+        </a>
+      </div>
+    </main>
   )
 }

@@ -28,7 +28,7 @@ export const phases: Phase[] = [
       "Is the need recurrent (≥2 product teams)?",
       "Could a pattern, kit or composition solve it?",
     ],
-    owner: "Anyone proposing + Claude/OpenCode",
+    owner: "Anyone proposing + their AI agent",
     duration: "Minutes (a conversation, not a meeting)",
     skill: "f0-component-contribution",
     sourceLink:

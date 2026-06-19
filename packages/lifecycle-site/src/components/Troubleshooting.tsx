@@ -55,14 +55,14 @@ export function Troubleshooting() {
         <p className="font-medium text-ink">Stuck on something not listed here?</p>
         <ol className="mt-2 space-y-1.5 text-muted">
           <li>
-            <span className="font-medium text-ink">1. Ask Claude/OpenCode in the repo.</span>{" "}
+            <span className="font-medium text-ink">1. Ask your AI agent in the repo.</span>{" "}
             With F0 skills loaded, the agent reads the source of truth (code +
             MDX + skills) and usually answers most questions about components,
             patterns, rules and the lifecycle.
           </li>
           <li>
             <span className="font-medium text-ink">2. Ping #f0-support in Slack.</span>{" "}
-            If Claude can't help or the question needs a human, drop it there —
+            If the agent can't help or the question needs a human, drop it there —
             we will document the answer here.
           </li>
         </ol>

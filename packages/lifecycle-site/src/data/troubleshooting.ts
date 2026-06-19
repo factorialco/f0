@@ -55,19 +55,19 @@ export const faq: FaqEntry[] = [
     question: "Phase 0 says 'use what exists' but I can't find it.",
     audience: ["pd", "pe"],
     answer:
-      "Ask Claude: 'Is there an F0 component for X?' — Claude reads the full catalogue (including experimental and SDS folders, not just stable). If Claude confirms nothing exists, you've passed question 0.1. Move to question 0.2 (can existing be extended?).",
+      "Ask your agent: 'Is there an F0 component for X?' — it reads the full catalogue (including experimental and SDS folders, not just stable). If it confirms nothing exists, you've passed question 0.1. Move to question 0.2 (can existing be extended?).",
   },
   {
     question: "I want to skip Phase 0 because I'm sure my component should exist.",
     audience: ["pd", "pe"],
     answer:
-      "Phase 0 takes minutes (it's a conversation with Claude, not a meeting) and saves everyone wasted work later. It's not a gate — it's a fast self-check that helps you catch \"this already exists\" or \"this can be extended\" before you invest in a full proposal. The real review happens when an F0 designer reads your proposal issue.",
+      "Phase 0 takes minutes (it's a conversation with your agent, not a meeting) and saves everyone wasted work later. It's not a gate — it's a fast self-check that helps you catch \"this already exists\" or \"this can be extended\" before you invest in a full proposal. The real review happens when an F0 designer reads your proposal issue.",
   },
   {
     question: "My PR was reviewed and the reviewer wants me to load a skill I don't know.",
     audience: ["pe"],
     answer:
-      "All F0 skills live in packages/react/.skills/<skill-name>/SKILL.md. They are designed to be loaded by Claude/OpenCode automatically. If you're working manually, open the SKILL.md file and follow it step by step. The most-used skills are listed in the Skills table on the contributions page.",
+      "All F0 skills live in packages/react/.skills/<skill-name>/SKILL.md. They are designed to be loaded by your agent (OpenCode, the Copilot coding agent…) automatically. If you're working manually, open the SKILL.md file and follow it step by step. The most-used skills are listed in the Skills table on the contributions page.",
     links: [
       {
         label: "Skills directory",
