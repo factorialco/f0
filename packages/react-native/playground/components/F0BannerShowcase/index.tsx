@@ -7,11 +7,11 @@ import { F0Link } from "../../../src/components/F0Link"
 export function F0BannerShowcase() {
   return (
     <ScrollView
-      className="flex-1 px-4"
+      className="flex-1"
       contentContainerStyle={{ paddingBottom: 48, gap: 24 }}
     >
       <View className="gap-2">
-        <Text className="text-base font-semibold text-f0-foreground">
+        <Text className="px-4 text-base font-semibold text-f0-foreground">
           All levels
         </Text>
         <View className="gap-2">
@@ -22,7 +22,7 @@ export function F0BannerShowcase() {
       </View>
 
       <View className="gap-2">
-        <Text className="text-base font-semibold text-f0-foreground">
+        <Text className="px-4 text-base font-semibold text-f0-foreground">
           With link + action + spinner
         </Text>
         <View className="gap-2">
@@ -44,7 +44,7 @@ export function F0BannerShowcase() {
       </View>
 
       <View className="gap-2">
-        <Text className="text-base font-semibold text-f0-foreground">
+        <Text className="px-4 text-base font-semibold text-f0-foreground">
           Each affordance alone
         </Text>
         <View className="gap-2">
@@ -79,7 +79,7 @@ export function F0BannerShowcase() {
       </View>
 
       <View className="gap-2">
-        <Text className="text-base font-semibold text-f0-foreground">
+        <Text className="px-4 text-base font-semibold text-f0-foreground">
           Long message (wraps)
         </Text>
         <F0Banner

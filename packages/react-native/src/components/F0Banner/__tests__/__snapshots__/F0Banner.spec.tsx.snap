@@ -3,7 +3,7 @@
 exports[`F0Banner Snapshot - all levels: critical 1`] = `
 <View
   accessibilityRole="alert"
-  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-critical"
+  className="w-full flex-row items-center gap-2 px-3 py-2 bg-f0-background-critical"
 >
   <View
     accessibilityLabel="critical alert"
@@ -74,7 +74,7 @@ exports[`F0Banner Snapshot - all levels: critical 1`] = `
 exports[`F0Banner Snapshot - all levels: info 1`] = `
 <View
   accessibilityRole="alert"
-  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-info"
+  className="w-full flex-row items-center gap-2 px-3 py-2 bg-f0-background-info"
 >
   <View
     accessibilityLabel="info alert"
@@ -148,7 +148,7 @@ exports[`F0Banner Snapshot - all levels: info 1`] = `
 exports[`F0Banner Snapshot - all levels: positive 1`] = `
 <View
   accessibilityRole="alert"
-  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-positive"
+  className="w-full flex-row items-center gap-2 px-3 py-2 bg-f0-background-positive"
 >
   <View
     accessibilityLabel="positive alert"
@@ -222,7 +222,7 @@ exports[`F0Banner Snapshot - all levels: positive 1`] = `
 exports[`F0Banner Snapshot - all levels: warning 1`] = `
 <View
   accessibilityRole="alert"
-  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-warning"
+  className="w-full flex-row items-center gap-2 px-3 py-2 bg-f0-background-warning"
 >
   <View
     accessibilityLabel="warning alert"
@@ -296,7 +296,7 @@ exports[`F0Banner Snapshot - all levels: warning 1`] = `
 exports[`F0Banner Snapshot - default 1`] = `
 <View
   accessibilityRole="alert"
-  className="flex-row items-center gap-2 rounded-lg px-3 py-2 bg-f0-background-info"
+  className="w-full flex-row items-center gap-2 px-3 py-2 bg-f0-background-info"
 >
   <View
     accessibilityLabel="info alert"
