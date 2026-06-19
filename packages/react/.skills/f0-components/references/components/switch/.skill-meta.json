@@ -1,0 +1,11 @@
+{
+  "generatedAt": "2026-02-19T18:53:52.722Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "56ee8fbe314079b7d0e59694678dd6104202786ac4506b9437895257c479cd12",
+    "__stories__": "2e9983d809cafe057b66554e18e3ad4acb8fc7a9d137c08277c0ef36e50a8bae",
+    "https://ds.factorial.dev/?path=/docs/components-switch--documentation": "1a0759446953c4219124d3e28646aa25d4cb76ea650d354865a2cd7a742a0297"
+  }
+}

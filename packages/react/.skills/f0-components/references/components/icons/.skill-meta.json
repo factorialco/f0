@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-02-19T18:46:01.755Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__subPages__": "71d08cfb0a211fede9302e459ff6485a088ff8afd866f6ed2abeeb5060c868da",
+    "https://ds.factorial.dev/?path=/docs/foundations-icons-add-a-new-icon--documentation": "b68cdb50a8f3476faefff5ebfa17588b28e5e45de07ab3322d74e34b1909a998"
+  }
+}

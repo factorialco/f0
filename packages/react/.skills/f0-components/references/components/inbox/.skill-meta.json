@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-02-19T18:56:23.466Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "f2bffa0468b9bfac6015de6bf3cd6d03f5514d6c4aebfd241ef4cd8d83347330",
+    "__stories__": "b2444d44c9fc2e0081278244fb7ca0c8106659b5a1742fee13dd26dbb6fbbaa7",
+    "__subPages__": "ac329ac700af6874dfc211d1cdd0ca6bb4a2832222c57bf18e59417068e7e193",
+    "https://ds.factorial.dev/?path=/docs/sds-inbox-activity-activityitemlist--documentation": "19242bd55d9bf4f49ac01d62d528ab2e40ce706bfe70bd733f62b1ad225422c8",
+    "https://ds.factorial.dev/?path=/docs/sds-inbox-activityitem--documentation": "9631a4380b2b84d4ec6beecfc2c06e9f84ab61f73c0495955cf4eebbab84898b",
+    "https://ds.factorial.dev/?path=/docs/sds-inbox-approvalhistory--documentation": "6f3fd79d32d39af86c16f2aaeaecf25585a9317688250a00a239aa0ae3fcb125"
+  }
+}

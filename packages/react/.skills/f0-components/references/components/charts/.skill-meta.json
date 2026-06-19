@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-02-19T18:50:44.027Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "cc7b846cc24f1c7ff15d7bb818d398e8e8cb90a03151906f3dce9371f69feb9c",
+    "__stories__": "92b5984be5ed8266e62a1d4d183f001482e53715dc4bd725a892fb9555fef67b",
+    "__subPages__": "a76814d7fe2c81b3d7f5d77883051d47942610835b2718650e4a6b8869dc09f3",
+    "https://ds.factorial.dev/?path=/docs/components-charts-areachart--documentation": "ae75ecb39bb5dabbe2b070f981341c08fe01a85ae0335a250baeeefd6f2b590b",
+    "https://ds.factorial.dev/?path=/docs/components-charts-barchart--documentation": "4b1892881172ebe8cf167973d94ffdd4e2082c48fa73cb742efdbe501d1be851",
+    "https://ds.factorial.dev/?path=/docs/components-charts-categorybarchart--documentation": "43bce61047cf5ee90a01ef31badac4f0d4746120620d959d0b214552eb075374",
+    "https://ds.factorial.dev/?path=/docs/components-charts-combochart--documentation": "d2690c3d2fbe98b08b53ba145ef8032f50b09364d0b898c153529e8877033040",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart--documentation": "009b1775726c8c2adfcc1587b7117348f5c7ba7c5a8db9884884bd8c399789ab",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-area--documentation": "0107eb6295736743bfc7f504700a702e60b9e02720e3228503890769b97dc749",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-bar--documentation": "cf6cd9a79724363e29d7405dd5ae94a17a929991f8c157bfd6595888e9135206",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-bar-horizontal--documentation": "be77cc9aecb425cce604713440d42a386d11852f22adf39554d5a6843449bc95",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-funnel--documentation": "fd38ece999731ec9686af533b6b8437387ff6d3037c5c654620505ac2d15b90b",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-line--documentation": "be77cc9aecb425cce604713440d42a386d11852f22adf39554d5a6843449bc95",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-pie--documentation": "851ba885707bfa4abfb663d3964705ed30ae751085962470fa7079ce890a21a8",
+    "https://ds.factorial.dev/?path=/docs/components-charts-f0chart-radar--documentation": "fd38ece999731ec9686af533b6b8437387ff6d3037c5c654620505ac2d15b90b",
+    "https://ds.factorial.dev/?path=/docs/components-charts-linechart--documentation": "7f52c9d86de51fb31219d50e12d3903e3bcd49d005aec3a176118488ddca9505",
+    "https://ds.factorial.dev/?path=/docs/components-charts-piechart--documentation": "ec9896e9ddb36d2db944667e237f64613c67c130649e037de987297d34f1be82",
+    "https://ds.factorial.dev/?path=/docs/components-charts-progressbarduo--documentation": "544a5e6c8fba4d8a6aa7e70372f8affa885cd558551014bbd5aac93d63e61f6e",
+    "https://ds.factorial.dev/?path=/docs/components-charts-progresschart--documentation": "d4d9c30c3382d39e29d42f28d5faa6c5b62f30db14b2a469b52352d8cd833d77",
+    "https://ds.factorial.dev/?path=/docs/components-charts-radarchart--documentation": "68ec6aeb18c88a2fd8496d1573f9fb2e58cf53eab4add7623978d6ad6f76e86c",
+    "https://ds.factorial.dev/?path=/docs/components-charts-radialprogresschart--documentation": "16410c7cb1334f8b20e2e6f5813c515b17222e1a0f1fd5d876cd59e3d5094d12",
+    "https://ds.factorial.dev/?path=/docs/components-charts-verticalbarchart--documentation": "69259175e64a6b7a8305ccf18e32ce3309d5b1d160a41b85ba987a0d9cb9ed15"
+  }
+}

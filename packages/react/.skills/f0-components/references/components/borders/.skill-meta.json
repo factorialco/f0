@@ -1,0 +1,9 @@
+{
+  "generatedAt": "2026-02-19T18:45:44.491Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "https://ds.factorial.dev/?path=/docs/foundations-borders--documentation": "55f345ca97cd5f527cb71de597c1e0ff7b538c97f0312988ab36533b90c81b7b"
+  }
+}

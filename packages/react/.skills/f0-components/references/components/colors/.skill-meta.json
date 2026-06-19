@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-02-19T18:45:58.544Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__stories__": "2cb727e1effe296768856b7a09de6f64c33b27f50dd9cae68b477537a6a667be",
+    "https://ds.factorial.dev/?path=/docs/foundations-colors--documentation": "68580cb5b97e6fc879ae38ce7376f8f5f0d0641286d4a42fe2e2edb3b5c0f09c"
+  }
+}

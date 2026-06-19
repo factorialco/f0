@@ -1,0 +1,29 @@
+{
+  "generatedAt": "2026-02-19T18:55:51.925Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "9e1577631dd4941fd653b28e470f43d816dfcdfd47062263ace0baca3df0a829",
+    "__stories__": "883c073ebeb6a351c2cf46a071fa55bae0af9f4806218ee37e28a08c36b026ee",
+    "__subPages__": "fa8536d3f8b81ee14063e241a9f8ce6490b9f2d55015d26041850f4b2c694ca5",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0actionitem--documentation": "0e6948535bda006752158abdea5709c4ea20b6e21121c0028da684bd88e01abd",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0aichat--documentation": "024f2ce23b4cc49bd3edee1369d7e1cc2f6a012f606624a781ec1368e0742a44",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0aichat-assistantmessage--documentation": "ec3ff5218107dac70a908c2a44d167f9606f6f000640d561878c6d97742a5afb",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0aichat-chattextarea-with-context--documentation": "25d4116875b0d9b02a9c16f3693cd1685ab2563126c98bf16eef63b2b4154623",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0aichattextarea--documentation": "d011858e463a28b0b9708c9b0219a51edeab9bd31e1106ee9933f3f8c29dc821",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0aicollapsiblemessage--documentation": "5f4bef72f4ae3f8bd1f414cba79afe0c12730f1cb1842280f24694460dcb1555",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0auravoiceanimation--documentation": "e7db882e79ea96aec6a07e74b0b64a1f855f685070dbd9b60ff55e71893d9f04",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0hilactionconfirmation--documentation": "1373039a37786d2257725a4788fa60269d5fd7ff2b43ce6fb38a931893eeb2ed",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0markdownrenderers--documentation": "6a3ac909ff4b209c323debecc8ea7a9d268fe52fcd0372ae0c52a06d4dc8ad32",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0messagesources--documentation": "09a41a938bc5ca450a7aca862c945d847bb5325ca419d6e2d98c1dc3d3d9a211",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0oneicon--documentation": "556f0490f55406346886baeb05f2db4315661d4866d576d312b5f12ae67c0037",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0oneswitch--documentation": "d46d4847caf2d5f75f471c8ce48f52036859bd4655a6522258c61da8e0fe16be",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-f0thinking--documentation": "f54b015283640a928d3e2c1f00d5519a91098972a83f0cdb256c4ea7f04f983a",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-widgets-upsellkit-f0bookameetingcard--documentation": "0b95f559b1951d735d599e92b4ac8ccdc3236a6db2b428a12f87b608d9074a56",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-widgets-upsellkit-f0democard--documentation": "5bd7a43ae3802bf82357deca41a52ced46749e1bb37f59c3646f713f55d4d6b4",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-widgets-upsellkit-f0faqcard--documentation": "fcec3cecc284b6c196733f88a8742e931ff8a1731887881444334b7734a4431c",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-widgets-upsellkit-f0modulecard--documentation": "1179ac2403debee9296e90568ca63341bd3275c251a0aff509c360032a5b278e",
+    "https://ds.factorial.dev/?path=/docs/sds-ai-widgets-upsellkit-f0questioncard--documentation": "9428e2e8589cfc7041020892def5a74f816cfd60437e62efddd7c77eae72b388"
+  }
+}

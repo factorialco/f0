@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-02-19T18:49:02.305Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__props__": "14a079a036c6adef2c9421fdbe93d050669b54a997eed5108bfd82ea23972c2a",
+    "__stories__": "ba7ef9b3fa5509a0ba0dffcc20c5353515b6741b711f146bb92539550cd7e9e5",
+    "__subPages__": "7c110472eedeca46bf02408409acdefe5b5397da4fac79e2c4d21d9721f3a1d1",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatar--documentation": "0d55b5a43b839e099d39f86b563b76dcd8fa847e6cf858ef40100cd822d2546c",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avataralert--documentation": "2ceec0182b6ad424f3507784f9de1eeff263241cdf64a970d6f93d5ca9e56b66",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarcompany--documentation": "3d2c4a45514342917632a7f59ad7c4468d2ce59c46f6dca8f0141a094197326b",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatardate--documentation": "251720bbb70bafacf614f635c9c483be3b5f192b6962195933d9d478b368645b",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avataremoji--documentation": "6f8ae35a96c430fbdfa610dbddfeed8df83995fc77743c4900796738dd806d95",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarfile--documentation": "e02f0b38c7428e264015218af6a1b065af64722cfe37431c6e97347cbf35a1bb",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarflag--documentation": "f4945a70754e65419a56bfb392f9377377cff7b83b69ecd666bbb7781669cd3b",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avataricon--documentation": "3b875f1eaee1ae3cd2a4969bddc0a91b0f9e61f260de1ca565668e8656a3ed56",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarlist--documentation": "5536e82f7793a24cc85769e995f91f8f4edef93fc101ac19fc20540ad4921b11",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarmodule--documentation": "3b5680daaa49b2bb5a0f7b8ca8cd8ccd37919d278c821ee01f6d87f8c0896507",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarperson--documentation": "e2967fe9c66a12f8763cccef9d3309009adeb7819afcd144bff633c060dc0d45",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarpulse--documentation": "07de0f8682e58dccab3e4989dadeb4593f9766d0eda55b32abfbe12c1f705b56",
+    "https://ds.factorial.dev/?path=/docs/components-avatars-avatarteam--documentation": "499eb564232a5de2135bbf6f8836666ef78e841a983457d2f6bf0b2d3f7aa7e9"
+  }
+}

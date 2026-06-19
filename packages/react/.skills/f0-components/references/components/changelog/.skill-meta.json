@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-02-19T18:47:56.738Z",
+  "toolVersion": "0.1.0",
+  "provider": "google",
+  "model": "gemini-3-flash-preview",
+  "fileHashes": {
+    "__stories__": "c26f58c8f2dbe204c6feba6123cff8b66911304347855b2395aa5a9bb0dabfd8",
+    "https://ds.factorial.dev/?path=/docs/changelog--documentation": "669c0c46f33139188e19e1d8f98ba85b43aad4dc2eb5fc2164dfb3786dc22bd7"
+  }
+}
