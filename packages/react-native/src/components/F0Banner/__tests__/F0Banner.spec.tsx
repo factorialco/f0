@@ -7,17 +7,13 @@ import { F0_BANNER_LEVELS } from "../F0Banner.types"
 
 describe("F0Banner", () => {
   it("Snapshot - default", () => {
-    const { toJSON } = render(
-      <F0Banner level="info" message="Message" />
-    )
+    const { toJSON } = render(<F0Banner level="info" message="Message" />)
     expect(toJSON()).toMatchSnapshot()
   })
 
   it("Snapshot - all levels", () => {
     F0_BANNER_LEVELS.forEach((level) => {
-      const { toJSON } = render(
-        <F0Banner level={level} message="Message" />
-      )
+      const { toJSON } = render(<F0Banner level={level} message="Message" />)
       expect(toJSON()).toMatchSnapshot(level)
     })
   })
@@ -28,9 +24,7 @@ describe("F0Banner", () => {
   })
 
   it("applies the level background class", () => {
-    render(
-      <F0Banner level="warning" message="Message" testID="banner" />
-    )
+    render(<F0Banner level="warning" message="Message" testID="banner" />)
     const className = String(screen.getByTestId("banner").props.className ?? "")
     expect(className).toContain("bg-f0-background-warning")
   })
@@ -79,9 +73,7 @@ describe("F0Banner", () => {
 
   it("removes itself and fires onDismiss when dismissed", () => {
     const onDismiss = jest.fn()
-    render(
-      <F0Banner level="info" message="Dismiss me" onDismiss={onDismiss} />
-    )
+    render(<F0Banner level="info" message="Dismiss me" onDismiss={onDismiss} />)
     expect(screen.getByText("Dismiss me")).toBeTruthy()
 
     fireEvent.press(screen.getByTestId("f0-banner-dismiss"))

@@ -1,10 +1,7 @@
 import React from "react"
 import { ScrollView, Text, View } from "react-native"
 
-import {
-  F0Banner,
-  F0_BANNER_LEVELS,
-} from "../../../src/components/F0Banner"
+import { F0Banner, F0_BANNER_LEVELS } from "../../../src/components/F0Banner"
 import { F0Link } from "../../../src/components/F0Link"
 
 export function F0BannerShowcase() {
@@ -14,7 +11,7 @@ export function F0BannerShowcase() {
       contentContainerStyle={{ paddingBottom: 48, gap: 24 }}
     >
       <View className="gap-2">
-        <Text className="text-f0-foreground text-base font-semibold">
+        <Text className="text-base font-semibold text-f0-foreground">
           All levels
         </Text>
         <View className="gap-2">
@@ -25,7 +22,7 @@ export function F0BannerShowcase() {
       </View>
 
       <View className="gap-2">
-        <Text className="text-f0-foreground text-base font-semibold">
+        <Text className="text-base font-semibold text-f0-foreground">
           With link + action + spinner
         </Text>
         <View className="gap-2">
@@ -47,7 +44,7 @@ export function F0BannerShowcase() {
       </View>
 
       <View className="gap-2">
-        <Text className="text-f0-foreground text-base font-semibold">
+        <Text className="text-base font-semibold text-f0-foreground">
           Each affordance alone
         </Text>
         <View className="gap-2">
@@ -82,7 +79,7 @@ export function F0BannerShowcase() {
       </View>
 
       <View className="gap-2">
-        <Text className="text-f0-foreground text-base font-semibold">
+        <Text className="text-base font-semibold text-f0-foreground">
           Long message (wraps)
         </Text>
         <F0Banner

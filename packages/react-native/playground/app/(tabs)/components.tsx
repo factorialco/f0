@@ -14,17 +14,17 @@ import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
 import { F0AvatarShowcase } from "../../components/F0AvatarShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
+import { F0BannerShowcase } from "../../components/F0BannerShowcase"
 import { F0BlurViewShowcase } from "../../components/F0BlurViewShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0CheckboxShowcase } from "../../components/F0CheckboxShowcase"
 import { F0ChipShowcase } from "../../components/F0ChipShowcase"
 import { F0CounterShowcase } from "../../components/F0CounterShowcase"
-import { F0BannerShowcase } from "../../components/F0BannerShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
-import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0MetadataShowcase } from "../../components/F0MetadataShowcase"
+import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
 import { F0StepShowcase } from "../../components/F0StepShowcase"
 import { F0TabsShowcase } from "../../components/F0TabsShowcase"
@@ -201,7 +201,7 @@ export default function ComponentsShowcase() {
   }
 
   return (
-    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-f0-background" edges={["top", "bottom"]}>
       <View
         className="flex-1"
         style={{ backgroundColor: asString(f0Background) }}

@@ -29,18 +29,18 @@ import { F0Banner, F0Link } from "@factorialco/f0-react-native"
 
 ## Props
 
-| Prop            | Type                                     | Default     | Description                                                            |
-| --------------- | ---------------------------------------- | ----------- | ---------------------------------------------------------------------- |
-| `message`       | `string`                                 | required    | Banner message                                                         |
-| `level`         | `"info" \| "warning" \| "positive" \| "critical"` | required | Drives icon, text color, and background tint                  |
-| `link`          | `ReactNode`                              | `-`         | Trailing link slot (compose your own, e.g. `<F0Link size="sm" />`)     |
-| `action`        | `F0BannerAction`                         | `-`         | Trailing action button (`label`, `onPress`, `loading`, `disabled`)     |
-| `loading`       | `boolean`                                | `false`     | Show a trailing loading spinner tinted to the level                    |
-| `dismissible`   | `boolean`                                | `false`     | Show a close button that self-removes the banner. Implied by `onDismiss` |
-| `onDismiss`     | `() => void`                             | `-`         | Called after the user dismisses the banner                             |
-| `dismissLabel`  | `string`                                 | `"Dismiss"` | Accessible label for the dismiss button                                |
-| `numberOfLines` | `number`                                 | `-`         | Clamp the message to N lines. Defaults to unbounded (wraps)            |
-| `testID`        | `string`                                 | `-`         | Test id                                                                |
+| Prop            | Type                                              | Default     | Description                                                              |
+| --------------- | ------------------------------------------------- | ----------- | ------------------------------------------------------------------------ |
+| `message`       | `string`                                          | required    | Banner message                                                           |
+| `level`         | `"info" \| "warning" \| "positive" \| "critical"` | required    | Drives icon, text color, and background tint                             |
+| `link`          | `ReactNode`                                       | `-`         | Trailing link slot (compose your own, e.g. `<F0Link size="sm" />`)       |
+| `action`        | `F0BannerAction`                                  | `-`         | Trailing action button (`label`, `onPress`, `loading`, `disabled`)       |
+| `loading`       | `boolean`                                         | `false`     | Show a trailing loading spinner tinted to the level                      |
+| `dismissible`   | `boolean`                                         | `false`     | Show a close button that self-removes the banner. Implied by `onDismiss` |
+| `onDismiss`     | `() => void`                                      | `-`         | Called after the user dismisses the banner                               |
+| `dismissLabel`  | `string`                                          | `"Dismiss"` | Accessible label for the dismiss button                                  |
+| `numberOfLines` | `number`                                          | `-`         | Clamp the message to N lines. Defaults to unbounded (wraps)              |
+| `testID`        | `string`                                          | `-`         | Test id                                                                  |
 
 ## Levels
 
