@@ -57,7 +57,7 @@ export const SidebarChatItem = ({
       onClick={onClick}
       aria-pressed={isActive}
       className={cn(
-        "group flex w-full cursor-pointer items-center gap-2 rounded py-1.5 pl-1.5 pr-2 text-left transition-colors",
+        "group flex w-full cursor-pointer items-center gap-2 rounded py-2 pl-1.5 pr-2 text-left transition-colors",
         focusRing("focus-visible:ring-inset"),
         isActive
           ? "bg-f1-background-secondary"
@@ -71,31 +71,37 @@ export const SidebarChatItem = ({
       <OneEllipsis
         tag="span"
         className={cn(
-          "line-clamp-1 flex-1",
+          "line-clamp-1 flex-1 py-0.5",
           isUnread
-            ? "font-semibold text-f1-foreground"
+            ? "text-f1-foreground font-semibold "
             : "text-f1-foreground-secondary font-medium"
         )}
         lines={1}
       >
         {chat.label}
       </OneEllipsis>
-      {status && (
-        <F0Icon
-          icon={status.icon}
-          size="md"
-          aria-label={status.label}
-          color="secondary"
-        />
-      )}
-      {chat.unreadCount ? (
-        <div
-          aria-label={`${chat.unreadCount} unread`}
-          className="flex-shrink-0 rounded-md bg-f1-background-info px-1.5 py-0.5 text-center text-sm font-medium tabular-nums text-f1-foreground-info"
-        >
-          {chat.unreadCount}
+      {(status || chat.unreadCount) && (
+        <div className="gap-1 flex items-center justify-center">
+          {status && (
+            <div className="w-6 h-6 flex items-center justify-center">
+              <F0Icon
+                icon={status.icon}
+                size="md"
+                aria-label={status.label}
+                color="secondary"
+              />
+            </div>
+          )}
+          {chat.unreadCount && (
+            <div
+              aria-label={`${chat.unreadCount} unread`}
+              className="flex-shrink-0 flex items-center justify-center rounded-sm bg-f1-background-info px-0.5 min-w-6 h-6 text-center text-sm font-semibold tabular-nums text-f1-foreground-info border border-solid border-f1-border-info"
+            >
+              {chat.unreadCount > 99 ? "+99" : chat.unreadCount}
+            </div>
+          )}
         </div>
-      ) : null}
+      )}
     </button>
   )
 }

@@ -96,7 +96,7 @@ export const exampleGroups: SidebarChatGroup[] = [
           name: "Engineering",
           src: "/avatars/company01.jpg",
         },
-        unreadCount: 7,
+        unreadCount: 132,
       },
       {
         id: "product",

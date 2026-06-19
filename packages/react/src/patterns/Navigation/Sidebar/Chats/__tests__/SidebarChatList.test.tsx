@@ -113,6 +113,41 @@ describe("SidebarChatList", () => {
     expect(onNewChat).toHaveBeenCalled()
   })
 
+  it("orders unread conversations first within a group", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={[
+          {
+            id: "dms",
+            title: "Direct messages",
+            chats: [
+              {
+                id: "read",
+                label: "Read One",
+                avatar: { type: "person", firstName: "R", lastName: "O" },
+              },
+              {
+                id: "unread",
+                label: "Unread One",
+                avatar: { type: "person", firstName: "U", lastName: "O" },
+                unreadCount: 2,
+              },
+            ],
+          },
+        ]}
+      >
+        <SidebarChatList />
+      </SidebarChatProvider>
+    )
+    const readBtn = screen.getByRole("button", { name: /Read One/ })
+    const unreadBtn = screen.getByRole("button", { name: /Unread One/ })
+    // The unread chat is rendered before the read one.
+    expect(
+      readBtn.compareDocumentPosition(unreadBtn) &
+        Node.DOCUMENT_POSITION_PRECEDING
+    ).toBeTruthy()
+  })
+
   it("shows the per-chat unread count as a badge", () => {
     renderList()
     // raul has unreadCount: 3

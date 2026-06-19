@@ -65,10 +65,14 @@ describe("SidebarTabs", () => {
       tabs: [tabs[0], { ...tabs[1], badge: 5 }],
       activeTab: "main",
     })
+    // The unread dot is the only absolutely-positioned element in the tab.
     expect(
       screen
         .getByRole("button", { name: "Messages" })
-        .querySelector(".bg-f1-background-critical-bold")
+        .querySelector(".absolute")
     ).not.toBeNull()
+    expect(
+      screen.getByRole("button", { name: "Main" }).querySelector(".absolute")
+    ).toBeNull()
   })
 })

@@ -7,7 +7,12 @@ import { cn, focusRing } from "@/lib/utils"
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { SidebarChatItem } from "./SidebarChatItem"
 import { useSidebarChats } from "./SidebarChatProvider"
-import { SidebarChatAction } from "./types"
+import { SidebarChat, SidebarChatAction } from "./types"
+
+// By default, unread conversations float to the top of their group. Stable
+// sort, so chats keep their relative order within the read/unread partitions.
+const unreadFirst = (chats: SidebarChat[]): SidebarChat[] =>
+  [...chats].sort((a, b) => (b.unreadCount ? 1 : 0) - (a.unreadCount ? 1 : 0))
 
 /** Left-aligned, full-width ghost button for a top-of-list action. */
 const SidebarChatActionButton = ({ action }: { action: SidebarChatAction }) => (
@@ -61,7 +66,7 @@ export const SidebarChatList = ({
             highlightWhenCollapsed={hasUnread}
           >
             <AnimatePresence initial={false}>
-              {group.chats.map((chat) => (
+              {unreadFirst(group.chats).map((chat) => (
                 <motion.div
                   key={chat.id}
                   initial={{ opacity: 0 }}
