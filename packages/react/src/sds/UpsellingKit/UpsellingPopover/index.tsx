@@ -36,7 +36,7 @@ function _UpsellingPopover({
   isOpen,
   setIsOpen,
   label,
-  variant = "promote",
+  variant = "outlinePromote" as F0ButtonProps["variant"],
   size = "md",
   showIcon = true,
   side = "right",

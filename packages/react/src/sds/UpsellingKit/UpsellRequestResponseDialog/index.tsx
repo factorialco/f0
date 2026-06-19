@@ -110,7 +110,7 @@ const DialogActions = ({
       />
       {showSecondButton && (
         <F0Button
-          variant="promote"
+          variant="outlinePromote"
           label={successButtonLabel}
           onClick={() => {
             successButtonOnClick()
@@ -207,6 +207,7 @@ const _UpsellRequestResponseDialog = forwardRef<
 
 _UpsellRequestResponseDialog.displayName = "UpsellRequestResponseDialog"
 
+/** @deprecated */
 export const UpsellRequestResponseDialog = withDataTestId(
   _UpsellRequestResponseDialog
 )

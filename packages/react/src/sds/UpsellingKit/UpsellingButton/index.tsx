@@ -15,6 +15,7 @@ export interface LoadingStateProps {
 }
 
 export interface UpsellingButtonProps extends Omit<F0ButtonProps, "icon"> {
+  /** @deprecated Use "outlinePromote" instead */
   variant?: "promote" | "outlinePromote"
   /**
    * The text to be displayed in the button
@@ -75,7 +76,7 @@ function _UpsellingButton({
   loadingState,
   nextSteps,
   closeLabel,
-  variant = "promote",
+  variant = "outlinePromote",
   onModalStateChange,
   portalContainer,
   ...props

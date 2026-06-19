@@ -115,4 +115,5 @@ const _ProductBlankslate = forwardRef<HTMLDivElement, ProductBlankslateProps>(
 
 _ProductBlankslate.displayName = "ProductBlankslate"
 
+/** @deprecated */
 export const ProductBlankslate = withDataTestId(_ProductBlankslate)

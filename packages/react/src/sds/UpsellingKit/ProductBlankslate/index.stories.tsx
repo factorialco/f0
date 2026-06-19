@@ -13,7 +13,7 @@ const meta: Meta<typeof ProductBlankslate> = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   argTypes: {
     benefits: {
       control: { type: "object" },
@@ -34,7 +34,7 @@ const defaultArgs = {
   title:
     "Optimize and centralize your sales processes with quotes and invoices",
   image: "https://placehold.co/280x328", // 3:4 ratio
-  variant: "promote" as const,
+  variant: "outlinePromote" as const,
   benefits: [
     "Track every sale from quote to final invoice.",
     "Customize with client data, taxes, and discounts.",

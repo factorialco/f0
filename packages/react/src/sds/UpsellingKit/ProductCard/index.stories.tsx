@@ -7,7 +7,7 @@ import { ProductCard } from "./index"
 const meta: Meta<typeof ProductCard> = {
   title: "UpsellingKit/ProductCard",
   component: ProductCard,
-  tags: ["autodocs", "no-sidebar"],
+  tags: ["autodocs"],
   parameters: {
     layout: "fullscreen",
   },
