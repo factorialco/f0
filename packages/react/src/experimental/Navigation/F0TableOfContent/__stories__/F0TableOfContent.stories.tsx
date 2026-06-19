@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 import { expect, fn, within } from "storybook/test"
 
-import { Add, Delete, Placeholder } from "@/icons/app"
+import { Add, Placeholder } from "@/icons/app"
 
 import { F0TableOfContent } from "../index"
 import { TOCAction, TOCItem, TOCItemAction } from "../types"
@@ -29,11 +29,6 @@ const mockFooterActions: TOCAction[] = [
     label: "Add section",
     onClick: () => console.log("Add section"),
     icon: Add,
-  },
-  {
-    label: "Delete section",
-    onClick: () => console.log("Delete section"),
-    icon: Delete,
   },
 ]
 
