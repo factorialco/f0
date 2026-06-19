@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.0](https://github.com/factorialco/f0/compare/f0-react-v3.8.6...f0-react-v3.9.0) (2026-06-19)
+
+
+### Features
+
+* **avatars:** align F0AvatarModule sizes to canonical scale + stabilize ([#4415](https://github.com/factorialco/f0/issues/4415)) ([426e013](https://github.com/factorialco/f0/commit/426e0134715175b69916f3c1fd5ea9957ebfd318))
+
 ## [3.8.6](https://github.com/factorialco/f0/compare/f0-react-v3.8.5...f0-react-v3.8.6) (2026-06-18)
 
 
