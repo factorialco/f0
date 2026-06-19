@@ -8,7 +8,11 @@ import { F0AvatarAlert } from "../F0Avatar"
 import { F0Button } from "../F0Button"
 import { F0Text } from "../primitives/F0Text"
 
-import { F0_BANNER_TEXT_COLORS, bannerVariants } from "./F0Banner.styles"
+import {
+  F0_BANNER_TEXT_COLORS,
+  bannerInlineShadow,
+  bannerVariants,
+} from "./F0Banner.styles"
 import type { F0BannerLevel, F0BannerProps } from "./F0Banner.types"
 
 const BANNER_SPINNER_SIZE = 16
@@ -56,6 +60,7 @@ function BannerSpinner({ level }: { level: F0BannerLevel }) {
 const F0Banner = React.memo(function F0Banner({
   message,
   level,
+  variant = "global",
   link,
   action,
   loading = false,
@@ -84,7 +89,8 @@ const F0Banner = React.memo(function F0Banner({
     <View
       testID={testID}
       accessibilityRole="alert"
-      className={bannerVariants({ level })}
+      className={bannerVariants({ level, variant })}
+      style={variant === "inline" ? bannerInlineShadow : undefined}
     >
       <F0AvatarAlert alertType={level} size="sm" />
 

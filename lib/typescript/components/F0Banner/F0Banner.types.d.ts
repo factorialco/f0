@@ -2,12 +2,19 @@ import type { ReactNode } from "react";
 import type { F0ButtonProps } from "../F0Button";
 export declare const F0_BANNER_LEVELS: readonly ["info", "warning", "positive", "critical"];
 export type F0BannerLevel = (typeof F0_BANNER_LEVELS)[number];
+export declare const F0_BANNER_VARIANTS: readonly ["global", "inline"];
+export type F0BannerVariant = (typeof F0_BANNER_VARIANTS)[number];
 export type F0BannerAction = Pick<F0ButtonProps, "label" | "onPress" | "loading" | "disabled">;
 export interface F0BannerProps {
     /** Banner message. */
     message: string;
     /** Semantic level driving icon, colors, and background tint. */
     level: F0BannerLevel;
+    /**
+     * Placement variant. `global` = full-bleed, squared, flat (top of screen);
+     * `inline` = rounded + elevated (inside page content). @default "global"
+     */
+    variant?: F0BannerVariant;
     /** Trailing link slot, e.g. `<F0Link size="sm" href="…">Learn more</F0Link>`. */
     link?: ReactNode;
     /** Trailing action button. */
