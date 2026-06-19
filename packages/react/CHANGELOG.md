@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.1](https://github.com/factorialco/f0/compare/f0-react-v4.0.0...f0-react-v4.0.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **storybook:** render docs content inside I18nProvider ([#4520](https://github.com/factorialco/f0/issues/4520)) ([bc3ed04](https://github.com/factorialco/f0/commit/bc3ed0484ebf4ad931714db9a8561e6e12d52891))
+
 ## [4.0.0](https://github.com/factorialco/f0/compare/f0-react-v3.12.0...f0-react-v4.0.0) (2026-06-19)
 
 
