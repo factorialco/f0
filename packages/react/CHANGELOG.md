@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.12.0](https://github.com/factorialco/f0/compare/f0-react-v3.11.0...f0-react-v3.12.0) (2026-06-19)
+
+
+### Features
+
+* **F0TableOfContent:** add footer action buttons ([#4489](https://github.com/factorialco/f0/issues/4489)) ([b4358ca](https://github.com/factorialco/f0/commit/b4358cacee6a6d01e8edb5c6d19cc4457cab42f3))
+
 ## [3.11.0](https://github.com/factorialco/f0/compare/f0-react-v3.10.0...f0-react-v3.11.0) (2026-06-19)
 
 
