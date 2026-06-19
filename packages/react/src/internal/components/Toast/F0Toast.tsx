@@ -20,7 +20,7 @@ import {
 } from "./types"
 
 const toastVariants = cva({
-  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg border p-3 shadow-lg bg-f1-background-inverse overflow-hidden",
+  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg border p-3 shadow-lg bg-f1-foreground overflow-hidden",
   variants: {
     variant: {
       error: "border-f1-border-critical",
