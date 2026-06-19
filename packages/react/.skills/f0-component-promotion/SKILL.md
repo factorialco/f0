@@ -122,9 +122,9 @@ After merge:
 
 ---
 
-## SLA
+## Response time
 
-An F0 designer + Foundations engineer respond to a promotion request within **2 weeks**. We aim to reduce this once the components-dashboard is integrated in the standard workflow and the validation of DoD criteria (≥3 teams, no breaking changes, no critical bugs) is automated end-to-end.
+An F0 designer + Foundations engineer respond to promotion requests based on team availability and as quickly as possible — we don't commit to a fixed SLA today, as it depends on team size and current focus. For urgent or blocking cases, ping `#f0` in Slack.
 
 ---
 
