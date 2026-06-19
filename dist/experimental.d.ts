@@ -14,6 +14,7 @@ import { BarChartProps } from './experimental';
 import { BarSeriesCellValue } from './types/barSeries';
 import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
+import { CategoryBarChartCellValue } from './types/categoryBarChart';
 import { CategoryBarProps } from './CategoryBarChart';
 import { ChartConfig } from './experimental';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
@@ -24,6 +25,7 @@ import { CompanyCellValue as CompanyCellValue_2 } from './experimental';
 import { CompanyItemProps } from './types';
 import { ComponentProps } from 'react';
 import { CompoundCellValue } from './types/compound';
+import { Context } from 'react';
 import { CountCellValue } from './types/count';
 import { CountryCellValue } from './types/country';
 import { DateCellValue } from './types/date';
@@ -35,7 +37,6 @@ import { Dispatch } from 'react';
 import { DotTagCellValue } from './types/dotTag';
 import { DotTagCellValue as DotTagCellValue_2 } from './experimental';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
-import { Editor } from '@tiptap/react';
 import { EmployeeItemProps } from './types';
 import { F0SegmentedControlProps as F0SegmentedControlProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
@@ -80,6 +81,7 @@ import { ProgressBarCellValue } from './types/progressBar';
 import { ProgressBarCellValue as ProgressBarCellValue_2 } from './experimental';
 import { Props as Props_5 } from './types';
 import { PropsWithChildren } from 'react';
+import { Provider } from 'react';
 import { RadarChartProps } from './RadarChart';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -629,6 +631,10 @@ declare type AiChatTrackingOptions = {
     onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void;
     onNewChat?: () => void;
     onMessage?: (message: F0Message) => void;
+    /** Mic button pressed — fires on intent, even if mic permission is later denied. */
+    onDictationStart?: () => void;
+    /** Dictation discarded by the user, while recording or mid-transcription. */
+    onDictationCancel?: () => void;
 };
 
 /**
@@ -711,6 +717,10 @@ declare const alertAvatarVariants: (props?: ({
 
 declare type AlertTagProps = ComponentProps<typeof F0TagAlert>;
 
+declare type AlertVariant = (typeof alertVariantOptions)[number];
+
+declare const alertVariantOptions: readonly ["info", "warning", "critical", "neutral", "positive"];
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -725,6 +735,18 @@ export declare interface ApplicationFrameProps {
     sidebar: React.ReactNode;
     children: React.ReactNode;
 }
+
+/**
+ * The slice of persisted collection state that was actually applied to the
+ * data source during hydration. `sortings: null` means the user had
+ * explicitly cleared the sorting on the originating list.
+ */
+export declare type AppliedCollectionState<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
+    filters?: FiltersState<Filters>;
+    sortings?: SortingsState<Sortings>;
+    search?: string;
+    grouping?: GroupingState<R, Grouping>;
+};
 
 declare const ApprovalStep: FC<ApprovalStepProps>;
 
@@ -857,14 +879,6 @@ export declare type BannerAction = {
     icon?: IconType;
 };
 
-declare interface BannerProps {
-    icon: IconType;
-    title: string;
-    variant: BannerVariant;
-}
-
-declare type BannerVariant = "info" | "warning" | "critical" | "neutral" | "positive";
-
 export declare const BarChart: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<ChartPropsBase<ChartConfig> & {
 type?: "simple" | "stacked" | "stacked-by-sign";
 label?: boolean;
@@ -991,6 +1005,14 @@ export declare type BaseDataAdapter<R extends RecordType, Filters extends Filter
      * side-effects on reactive adapters (e.g. Apollo watchQuery).
      */
     exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
+    /**
+     * Optional id-relative capability: fetch the immediate neighbours of an
+     * item under the current filters/sortings/search, without loading pages.
+     * Enables detail-page prev/next on direct links / hard refresh, where the
+     * item may not be in any loaded page window. One-shot semantics: when an
+     * Observable is returned, only the first settled emission is consumed.
+     */
+    fetchItemNeighbors?: (options: ItemNeighborsFetchOptions<Filters, Options>) => ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
 };
 
 /**
@@ -1019,7 +1041,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1044,6 +1066,7 @@ declare interface BaseHeaderProps_2 {
         actions?: MetadataAction[];
     };
     metadata?: MetadataProps["items"];
+    metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
 }
@@ -1097,7 +1120,62 @@ declare type BreadcrumbBaseItemType = NavigationItem & {
     label: string;
 };
 
-export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType;
+export declare type BreadcrumbCollectionSelectItemType = BreadcrumbBaseItemType & {
+    type: "collection-select";
+    /**
+     * The `id` of the OneDataCollection whose persisted state seeds the source
+     * (WITHOUT the `datacollection-` prefix). Empty/missing storage → the
+     * source is used unfiltered.
+     */
+    collectionId: string;
+    /** The declared data source — no mounted collection needed. */
+    source: CollectionSelectSourceDefinition;
+    /** Method syntax on purpose: bivariant, so concrete-record mappers fit. */
+    mapOptions(item: RecordType): F0SelectItemProps<string, RecordType>;
+    /** Current item id (the record the detail page is showing). */
+    value?: string;
+    /**
+     * Fallback option so a direct link shows the current item as selected
+     * before/without it appearing in the fetched options. The item `label` is
+     * used as the trigger label until an option is selected.
+     */
+    defaultItem?: F0SelectItemObject<string, RecordType>;
+    searchbox?: boolean;
+    /** Which persisted state to seed. @default { filters: true, sortings: true } */
+    seed?: {
+        filters?: boolean;
+        sortings?: boolean;
+    };
+    /**
+     * Render the source's filter definitions as an editable filter picker
+     * inside the dropdown, pre-applied with the seeded persisted filters —
+     * letting users refine the jump-to list in place. When false the seeded
+     * filters are still applied, just not editable.
+     * @default false
+     */
+    showFilters?: boolean;
+    /**
+     * Called when the user edits the in-dropdown filters (`showFilters`).
+     * Feed the value to `useDataCollectionItemNavigation`'s `currentFilters`
+     * so the detail-page prev/next arrows and counter follow the same refined
+     * context the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
+} & ({
+    /**
+     * Href to navigate to when an option is picked, routed through the
+     * app's LinkProvider. Return undefined to skip navigation. Method
+     * syntax on purpose: bivariant, so concrete-record callbacks fit.
+     */
+    getItemHref(value: string, item?: RecordType): string | undefined;
+    onSelect?(value: string, item?: RecordType): void;
+} | {
+    getItemHref?: never;
+    /** Imperative escape hatch (e.g. router.push) when hrefs don't fit. */
+    onSelect(value: string, item?: RecordType): void;
+});
+
+export declare type BreadcrumbItemType = BreadcrumbLoadingItemType | BreadcrumbNavItemType | BreadcrumbSelectItemType | BreadcrumbCollectionSelectItemType;
 
 export declare type BreadcrumbLoadingItemType = Pick<BreadcrumbBaseItemType, "id"> & {
     loading: true;
@@ -1205,18 +1283,6 @@ export declare type BulkActionsDefinition<R extends RecordType, Filters extends 
     warningMessage: string;
 };
 
-export declare interface ButtonConfig {
-    key: string;
-    icon: IconType;
-    active: (editor: Editor) => boolean;
-    onClick: (editor: Editor) => void;
-    label: string;
-    tooltip: {
-        label: string;
-        shortcut: string[];
-    };
-}
-
 declare type ButtonDropdownItem<T = string> = {
     /**
      * The value of the item.
@@ -1246,6 +1312,16 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The aria-label of the button if not provided title or label will be used.
      */
     "aria-label"?: string;
+    /**
+     * Forwarded to the underlying button. Useful for buttons that toggle an
+     * expandable region (e.g. a tree/graph expander).
+     */
+    "aria-expanded"?: boolean;
+    /**
+     * Forwarded to the underlying button. Use `-1` to take the button out of the
+     * tab order (e.g. when a parent manages focus via roving tabindex).
+     */
+    tabIndex?: number;
     /**
      * The variant of the button.
      */
@@ -1329,6 +1405,11 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The style of the button.
      */
     style?: React.CSSProperties;
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean;
 } & ({
     /**
      * The URL to navigate to when the button is clicked.
@@ -1495,6 +1576,15 @@ declare type CardAvatarVariant = AvatarVariant | {
 } | {
     type: "icon";
     icon: IconType;
+} | {
+    type: "module";
+    module: ModuleId;
+} | {
+    type: "alert";
+    variant: AlertAvatarProps["type"];
+} | {
+    type: "date";
+    date: Date;
 };
 
 /**
@@ -2095,12 +2185,22 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     fromVisualization?: TableVisualizationType;
 } & VisualizationOptions;
 
+/**
+ * The record-erased source a collection-select breadcrumb accepts: a
+ * `DataSourceDefinition` whose callbacks (and data adapter) tolerate sources
+ * declared over concrete record/filter types.
+ */
+export declare type CollectionSelectSourceDefinition = WithBivariantCallbacks<Omit<DataSourceDefinition<RecordType, FiltersDefinition, SortingsDefinition, GroupingDefinition<RecordType>>, "dataAdapter">> & {
+    dataAdapter: WithBivariantCallbacks<DataAdapter<RecordType, FiltersDefinition>>;
+};
+
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
     table: VisualizacionTypeDefinition<TableCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, TableVisualizationSettings>;
     editableTable: VisualizacionTypeDefinition<EditableTableCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, EditableTableVisualizationSettings>;
     list: VisualizacionTypeDefinition<ListCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     card: VisualizacionTypeDefinition<CardCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     kanban: VisualizacionTypeDefinition<KanbanCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    graph: VisualizacionTypeDefinition<GraphCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, GraphVisualizationSettings>;
 };
 
 declare const collectionVisualizations: CollectionVisualizations<RecordType, FiltersDefinition, SortingsDefinition, SummariesDefinition, ItemActionsDefinition<RecordType>, NavigationFiltersDefinition, GroupingDefinition<RecordType>>;
@@ -2489,6 +2589,8 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
+    /** Rich search preview shown in the shared header search (all visualizations). */
+    searchPreview?: SearchPreview<R>;
 };
 
 /**
@@ -2504,11 +2606,17 @@ declare type DataCollectionStatus<CurrentFiltersState extends FiltersState<Filte
     /** Per-visualization filter states, keyed by visualization index.
      *  Only present when visualizations declare per-view filter overrides. */
     visualizationFilters?: Record<string, CurrentFiltersState>;
+    /** User-created custom presets persisted alongside the rest of the state. */
+    customPresets?: PresetsDefinition<FiltersDefinition>;
 };
 
 declare type DataCollectionStatusComplete<CurrentFiltersState extends FiltersState<FiltersDefinition>> = DataCollectionStatus<CurrentFiltersState> & {
     settings?: DataCollectionSettings;
 };
+
+declare type DataCollectionStorage<CurrentFiltersState extends FiltersState<FiltersDefinition> = FiltersState<FiltersDefinition>> = {
+    settings?: DataCollectionSettings;
+} & DataCollectionStatus<CurrentFiltersState>;
 
 declare type DataCollectionStorageFeature = (typeof dataCollectionStorageFeatures)[number];
 
@@ -2680,6 +2788,8 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
         pagination?: ChildrenPaginationInfo;
     }) => number | undefined;
 };
+
+declare type DataSourceItemId = string | number | symbol;
 
 declare type DateCellConfig = {
     /** Earliest selectable date. Dates before this are disabled in the picker. */
@@ -2949,12 +3059,22 @@ declare const defaultTranslations: {
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
     };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
         readonly save: "Save";
         readonly send: "Send";
         readonly cancel: "Cancel";
+        readonly ok: "Ok";
         readonly delete: "Delete";
         readonly copy: "Copy";
         readonly paste: "Paste";
@@ -2982,6 +3102,8 @@ declare const defaultTranslations: {
         readonly selectAll: "Select all";
         readonly selectAllItems: "Select all {{total}} items";
         readonly apply: "Apply";
+        readonly saveAsPreset: "Save view";
+        readonly editPreset: "Edit view";
     };
     readonly status: {
         readonly selected: {
@@ -3052,17 +3174,35 @@ declare const defaultTranslations: {
         readonly actions: {
             readonly actions: "Actions";
         };
+        readonly presets: {
+            readonly createTitle: "Save view";
+            readonly createDescription: "Save the current filters, sorting, grouping and columns as a view.";
+            readonly updateTitle: "Update view";
+            readonly updateDescription: "Update this view's name and description.";
+            readonly nameLabel: "Title";
+            readonly namePlaceholder: "View name";
+            readonly duplicateName: "A view with this name already exists";
+            readonly descriptionLabel: "Description";
+            readonly descriptionPlaceholder: "Optional description";
+            readonly save: "Save";
+            readonly delete: "Remove";
+            readonly share: "Share view";
+            readonly copiedToClipboard: "Copied to your clipboard";
+            readonly cancel: "Cancel";
+        };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -3440,6 +3580,9 @@ declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -3499,7 +3642,7 @@ declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -3573,33 +3716,6 @@ declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -3610,7 +3726,7 @@ declare const defaultTranslations: {
     };
 };
 
-declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
+export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
     type: "delete_block";
     targetId: string;
 }
@@ -3648,7 +3764,7 @@ export declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> &
 }[TagType_2] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-} | (ComponentProps<typeof FileItem> & {
+} | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
 
@@ -3770,6 +3886,14 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
 
+/**
+ * Map of the attributes modified in a cell update, keyed by record key.
+ * Each entry is a `[previousValue, newValue]` tuple.
+ */
+declare type EditableTableCellChanges<R extends RecordType> = {
+    [K in keyof R]?: [R[K], R[K]];
+};
+
 /** The edit mode for a column cell in the editable table. */
 declare type EditableTableCellEditType = "text" | "number" | "money" | "date" | "select" | "multiselect" | "display-only" | "disabled";
 
@@ -3860,14 +3984,29 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     } | undefined;
 };
 
+/**
+ * Arguments passed to `onCellChange`.
+ */
+declare type EditableTableOnCellChangeParams<R extends RecordType> = {
+    /** The full row item with the change(s) applied. */
+    updatedItem: R;
+    /**
+     * Map of the modified attributes keyed by record key, where each entry is a
+     * `[previousValue, newValue]` tuple.
+     */
+    changes: EditableTableCellChanges<R>;
+};
+
 declare type EditableTableVisualizationOptions<R extends RecordType, _Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition> = Omit<TableVisualizationOptions<R, _Filters, Sortings, Summaries>, "columns"> & {
     columns: ReadonlyArray<EditableTableColumnDefinition<R, Sortings, Summaries>>;
     /**
-     * Called when a cell value changes with the full updated row.
+     * Called when a cell value changes. Receives an object with the full updated
+     * row (`updatedItem`) and a `changes` map of the modified attributes, keyed by
+     * record key, where each entry is a `[previousValue, newValue]` tuple.
      * Resolve with nothing for success, or `{ columnId: "message" }` to set errors.
      * Rejection sets an error on the edited column.
      */
-    onCellChange: (updatedItem: R) => Promise<void | Record<string, string>>;
+    onCellChange: (params: EditableTableOnCellChangeParams<R>) => Promise<void | Record<string, string>>;
     /**
      * When provided, renders action buttons at the bottom of the root-level table.
      * Returns a single action, an array of actions, or undefined to hide the row.
@@ -3922,17 +4061,25 @@ declare type EmptyStateType = (typeof emptyStatesTypes)[number];
 export declare type enhanceConfig = {
     onEnhanceText: (params: enhanceTextParams) => Promise<enhancedTextResponse>;
     enhancementOptions?: EnhancementOption[];
+    /** Notified when the user accepts the enhanced result (analytics hook) */
+    onAcceptChanges?: () => void;
+    /** Notified when the user discards the enhanced result (analytics hook) */
+    onRejectChanges?: () => void;
+    /** Notified when the user retries the enhancement (analytics hook) */
+    onRetryChanges?: () => void;
 };
 
 export declare type enhancedTextResponse = {
     success: boolean;
-    text: string;
+    /** Enhanced content: an HTML/plain string or a TipTap JSON document */
+    text: string | JSONContent;
     error?: string;
 };
 
 export declare type EnhancementOption = {
     id: string;
     label: string;
+    icon?: IconType;
     subOptions?: EnhancementOption[];
 };
 
@@ -4143,6 +4290,24 @@ export declare type F0AiBannerProps = AiBannerInternalProps;
 /** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
 declare type F0AIMessage = F0Message;
 
+declare interface F0AlertProps {
+    title: string;
+    description?: string;
+    action?: {
+        label: string;
+        disabled?: boolean;
+        onClick: () => void;
+    };
+    link?: {
+        label: string;
+        href: string;
+    };
+    icon?: IconType;
+    variant: AlertVariant;
+    /** Called when the user dismisses the alert. When provided, a close button is shown. */
+    onClose?: () => void;
+}
+
 declare const F0AvatarAlert: WithDataTestIdReturnType_5<({ type, size, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledby, }: AlertAvatarProps_2) => JSX_2.Element>;
 
 declare type F0AvatarCompanyProps = {
@@ -4244,8 +4409,6 @@ export declare const F0AvatarModule: WithDataTestIdReturnType_5<typeof F0AvatarM
 /**
  * Module avatar
  * @description A component that displays a module avatar
- * @experimental
- * @returns
  */
 declare function F0AvatarModule_2({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
 
@@ -4386,6 +4549,32 @@ export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalPr
 
 export declare type F0CalloutProps = CalloutInternalProps;
 
+export declare type F0FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0FileItem: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+export declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: F0FileAction[];
+    disabled?: boolean;
+    size?: F0FileItemSize;
+}
+
+export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
+
+export declare const f0FileItemSizes: readonly ["md", "lg"];
+
+/** Tag types that can be rendered in a node's metadata row. */
+declare type F0GraphNodeTagType = TagVariant["type"];
+
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
     size?: "lg" | "md" | "sm" | "xs";
@@ -4412,23 +4601,128 @@ declare type F0Message = {
 };
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0NotesTextEditor: ForwardRefExoticComponent<F0NotesTextEditorProps & RefAttributes<F0NotesTextEditorHandle>> & {
+    Skeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0NotesTextEditorHandle = {
+    clear: () => void;
+    focus: () => void;
+    setContent: (content: string) => void;
+    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
+    insertAIBlock: () => void;
+    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
+    pushContent: (content: string) => void;
+    insertImage: (file: File) => void;
+};
+
+export declare interface F0NotesTextEditorProps {
+    onChange: (value: {
+        json: JSONContent | null;
+        html: string | null;
+    }) => void;
+    placeholder: string;
+    initialEditorState?: {
+        content?: JSONContent | string;
+        title?: string;
+    };
+    readonly?: boolean;
+    aiBlockConfig?: AIBlockConfig;
+    imageUploadConfig?: ImageUploadConfig;
+    enhanceConfig?: enhanceConfig;
+    onTitleChange?: (title: string) => void;
+    titlePlaceholder?: string;
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    otherActions?: DropdownItem[];
+    metadata?: MetadataItem[];
+    status?: HeaderStatusProps;
+    alert?: F0AlertProps;
+}
+
+export declare const F0NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+
+export declare interface F0NotesTextEditorSkeletonProps {
+    withHeader?: boolean;
+    withTitle?: boolean;
+    withToolbar?: boolean;
+}
+
+/**
  * F0NumberInput is the writable numeric field for forms — a box where the
  * user types a number. For arbitrary text use F0TextInput; for durations
  * (hours/minutes) use F0DurationInput.
  */
-export declare const F0NumberInput: (props: F0NumberInputProps) => JSX_2.Element;
+export declare const F0NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 export declare type F0NumberInputProps = Omit<NumberInputInternalProps, (typeof privateProps_4)[number]>;
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
- * F0SearchInput is the writable search field — a single-line text input
- * pre-configured with a search icon, `role="searchbox"`, debouncing, and
- * an optional minimum-length threshold before emitting changes.
+ * @experimental This is an experimental component, use it at your own risk
  */
+export declare const F0RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
+
+export declare type F0RichTextDisplayHandle = HTMLDivElement;
+
+export declare interface F0RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
+    content: string;
+    className?: string;
+    format?: "html" | "markdown";
+}
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+export declare const F0RichTextEditor: ForwardRefExoticComponent<F0RichTextEditorProps & RefAttributes<F0RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: F0RichTextEditorSkeletonProps) => JSX_2.Element;
+};
+
+export declare type F0RichTextEditorHandle = {
+    clear: () => void;
+    clearFiles: () => void;
+    focus: () => void;
+    setError: (error: string | null) => void;
+    setContent: (content: string) => void;
+};
+
+export declare interface F0RichTextEditorProps {
+    mentionsConfig?: MentionsConfig;
+    enhanceConfig?: enhanceConfig;
+    filesConfig?: filesConfig;
+    secondaryAction?: secondaryActionsType;
+    primaryAction?: primaryActionType;
+    onChange: (result: resultType) => void;
+    maxCharacters?: number;
+    placeholder: string;
+    initialEditorState?: {
+        content?: string;
+        files?: File[];
+    };
+    title: string;
+    height?: heightType;
+    plainHtmlMode?: boolean;
+    fullScreenMode?: boolean;
+    onFullscreenChange?: (fullscreen: boolean) => void;
+    /** Whether the editor is disabled */
+    disabled?: boolean;
+    /** Whether the editor has an error state */
+    error?: boolean;
+    /** Whether the editor is in a loading state */
+    loading?: boolean;
+    /**
+     * Voice dictation: transcribes a recorded audio blob into text inserted at
+     * the cursor. Same contract as F0AiChatTextArea — when omitted, the
+     * microphone button is not rendered.
+     */
+    onTranscribe?: TranscribeFn;
+}
+
+export declare interface F0RichTextEditorSkeletonProps {
+    rows?: number;
+}
+
 export declare const F0SearchInput: ForwardRefExoticComponent<    {
 value?: string;
 threshold?: number;
@@ -4447,7 +4741,7 @@ export declare type F0SearchInputProps = {
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0SegmentedControl: {
-    ({ items, value, onChange, disabled, fullWidth, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
+    ({ items, value, onChange, disabled, fullWidth, hideLabels, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
     displayName: string;
 };
 
@@ -4480,6 +4774,12 @@ export declare interface F0SegmentedControlProps {
      */
     fullWidth?: boolean;
     /**
+     * Render segments icon-only, keeping the label accessible to screen readers.
+     * Segments without an icon still show their label. Useful in tight headers.
+     * @default false
+     */
+    hideLabels?: boolean;
+    /**
      * Accessible name for the segmented control. The underlying ToggleGroup
      * (single mode) renders as a `radiogroup`, which requires a name.
      * Provide either `ariaLabel` or `ariaLabelledBy`.
@@ -4505,6 +4805,12 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
     onSearchChange?: (value: string) => void;
     searchValue?: string;
     onOpenChange?: (open: boolean) => void;
+    /**
+     * Called when the user changes the in-dropdown filters (requires a `source`
+     * with filter definitions). Lets consumers keep an external context — e.g.
+     * detail-page navigation — in sync with what the dropdown is showing.
+     */
+    onFiltersChange?: (filters: FiltersState<FiltersDefinition>) => void;
     searchEmptyMessage?: string;
     className?: string;
     actions?: Action[];
@@ -4709,6 +5015,10 @@ declare type F0TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -4730,27 +5040,23 @@ declare interface F0TagStatusProps {
 declare const F0TagTeam: WithDataTestIdReturnType_5<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextAreaInput is the writable multi-line text field for forms — a box
- * where the user types longer text spanning multiple lines. For a single
- * line of text use F0TextInput.
+ * where the user types longer text spanning multiple lines (notes,
+ * descriptions, comments). For a single line of text use F0TextInput.
  */
-export declare const F0TextAreaInput: FC<F0TextAreaInputProps>;
+export declare const F0TextAreaInput: React.FC<F0TextAreaInputProps>;
 
 export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2>, "disabled" | "onChange" | "value" | "placeholder" | "rows" | "cols" | "label" | "labelIcon" | "icon" | "hideLabel" | "maxLength" | "clearable" | "onBlur" | "onFocus" | "name" | "status" | "hint" | "error" | "size" | "loading" | "required" | "maxHeight">;
 
 /**
- * @experimental This is an experimental component, use it at your own risk.
- *
  * F0TextInput is the writable text field for forms — a box where the user
- * types text, numbers (as text), passwords, emails, etc. It is the canonical
- * "text input" of F0. For numeric or duration data prefer F0NumberInput or
- * F0DurationInput respectively.
+ * types text, passwords, emails, etc. It is the canonical "text input" of
+ * F0. For numeric data use F0NumberInput; for durations use F0DurationInput;
+ * for queries use F0SearchInput.
  */
-export declare const F0TextInput: <T extends string>(props: F0TextInputProps<T>) => JSX_2.Element;
+export declare const F0TextInput: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-export declare type F0TextInputProps<T extends string> = Omit<InputInternalProps<T>, (typeof privateProps_3)[number]>;
+export declare type F0TextInputProps = Omit<InputInternalProps, (typeof privateProps_3)[number]>;
 
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
@@ -4819,12 +5125,8 @@ export declare const FILE_TYPES: {
     readonly MARKDOWN: "markdown";
 };
 
-export declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
+/** @deprecated Use F0FileAction */
+export declare type FileAction = F0FileAction;
 
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
@@ -4835,26 +5137,14 @@ declare type FileDef = {
     type: string;
 };
 
-export declare const FileItem: WithDataTestIdReturnType_5<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
+/** @deprecated Use F0FileItem */
+export declare const FileItem: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
 
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
+/** @deprecated Use F0FileItemProps */
+export declare type FileItemProps = F0FileItemProps;
 
-export declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
+/** @deprecated Use F0FileItemSize */
+export declare type FileItemSize = F0FileItemSize;
 
 export declare type filesConfig = {
     onFiles: (files: File[]) => void;
@@ -5135,6 +5425,97 @@ export declare const granularityDefinitions: {
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
 
+declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
+
+/**
+ * Configuration for the "graph" visualization (org-chart style).
+ *
+ * The hierarchy is fetched on demand from the same `dataAdapter` of the source:
+ * `childrenFilters(parentId)` returns the filter that the adapter understands as
+ * "the direct children of parentId" (`null` = the roots). Children are loaded
+ * when a node is expanded.
+ */
+declare type GraphVisualizationOptions<R extends RecordType, Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
+    /** Primary line of text for a node. */
+    title: (record: R) => string;
+    /** Secondary line of text for a node. */
+    subtitle?: (record: R) => string;
+    /** Avatar shown on the leading side of the node pill. */
+    avatar?: (record: R) => AvatarVariant;
+    /** Tags rendered in the node metadata row. */
+    tags?: (record: R) => TagVariant[];
+    /**
+     * Tag types present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata type (like configuring table columns).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
+    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Tag types that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /**
+     * Floating toolbar shown above a node while it is selected. Provide the
+     * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
+     */
+    nodeActions?: (record: R) => ReactNode;
+    /** Resolves a stable node id from a record. Defaults to `String(record.id)`. */
+    getNodeId?: (record: R) => string;
+    /** Number of children a node has. A node is expandable when this is `> 0`. */
+    getChildrenCount: (record: R) => number;
+    /**
+     * Returns the filters that, applied to the source `dataAdapter`, fetch the
+     * direct children of `parentId`. `parentId === null` must return the roots.
+     */
+    childrenFilters: (parentId: string | null) => Partial<FiltersState<Filters>>;
+    /**
+     * How many levels to load and expand on the initial render.
+     * - `0`: show only the roots; every level below loads on click.
+     * - `1` (default): also show the roots' direct children.
+     * - `2`: also pre-load the grandchildren for a fuller first view.
+     */
+    defaultExpandDepth?: number;
+    /**
+     * Id of a node to reveal: loads its ancestor path, expands the branch and
+     * centers/highlights it. Driven by the shared Data Collection search — set it
+     * from `searchPreview.onSelect`.
+     */
+    revealNodeId?: string;
+    /**
+     * Resolves the ancestor path (root → … → matched node) for a node so it can
+     * be revealed, returning the records in root-first order. Required for
+     * revealing nodes in branches that have not been expanded yet.
+     */
+    loadNodePath?: (nodeId: string) => Promise<R[]>;
+    /** Optional parent accessor used when linking the revealed ancestor path. */
+    getParentId?: (record: R) => string | null;
+    /**
+     * Id of the node representing the current user. When set, a "Find me" button
+     * is shown in the controls that centers the viewport on that node.
+     */
+    currentUserNodeId?: string;
+    /** Initial zoom preset passed through to F0Graph. */
+    zoomPreset?: ZoomPreset;
+    /**
+     * Smallest zoom the user can pan to (the zoom-out limit), passed through to
+     * F0Graph. Defaults to F0Graph's own default. Raise it (e.g. `0.3`) to keep
+     * the tree readable and avoid the most zoomed-out "dot" level.
+     */
+    minZoom?: number;
+    /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
+    maxZoom?: number;
+    /** Whether to render the zoom/fit controls. Defaults to `true`. */
+    showControls?: boolean;
+};
+
+declare type GraphVisualizationSettings = {
+    /** Metadata order (tag-type ids), matching the table column settings shape. */
+    order?: string[];
+    /** Hidden metadata (tag-type ids). */
+    hidden?: string[];
+};
+
 /**
  * Symbol used to identify the groupId in the data
  */
@@ -5184,7 +5565,15 @@ declare type GroupRecord<RecordType> = {
     records: RecordType[];
 };
 
-declare type HeaderProps = {
+export declare interface HeaderProps {
+    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
+    secondaryActions?: HeaderSecondaryAction[];
+    metadata?: MetadataItem[];
+    otherActions?: DropdownItem[];
+    status?: HeaderStatusProps;
+}
+
+declare type HeaderProps_2 = {
     module: {
         id: ModuleId;
         name: string;
@@ -5214,7 +5603,7 @@ declare type HeaderProps = {
     oneSwitchAutoOpen?: boolean;
 };
 
-declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
+export declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
 
 declare type HeaderSecondaryButtonAction = SecondaryAction & {
     hideLabel?: boolean;
@@ -5223,6 +5612,13 @@ declare type HeaderSecondaryButtonAction = SecondaryAction & {
 declare type HeaderSecondaryDropdownAction = PrimaryDropdownAction<string> & {
     variant?: "outline";
 };
+
+export declare interface HeaderStatusProps {
+    label: string;
+    text: string;
+    variant: StatusVariant;
+    actions?: MetadataAction[];
+}
 
 declare interface HeatmapComputation {
     datasetId: string;
@@ -5403,12 +5799,26 @@ export declare type InfiniteScrollPaginatedResponse<TRecord> = BasePaginatedResp
  *
  * @removeIn 2.0.0
  */
-export declare const Input: <T extends string>(props: F0TextInputProps<T>) => JSX_2.Element;
+export declare const Input: ForwardRefExoticComponent<Omit<F0TextInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
 declare const Input_2: React_2.ForwardRefExoticComponent<Omit<React_2.InputHTMLAttributes<HTMLInputElement>, "onChange" | "size"> & Pick<InputFieldProps<string>, "label" | "onChange" | "size" | "icon" | "role" | "onFocus" | "onBlur" | "transparent" | "status" | "loading" | "disabled" | "maxLength" | "required" | "error" | "append" | "hideLabel" | "hint" | "labelIcon" | "onClickContent" | "readonly" | "clearable" | "autocomplete" | "onClear" | "isEmpty" | "emptyValue" | "hideMaxLength" | "appendTag" | "lengthProvider" | "buttonToggle"> & React_2.RefAttributes<HTMLInputElement>>;
 
 declare const INPUTFIELD_SIZES: readonly ["sm", "md"];
 
+/**
+ * Design system primitive. Do NOT use in product code.
+ *
+ * `F0InputField` is the shared chrome (label, status, icon, append, clear,
+ * loading, focus/hover/disabled styles, a11y wiring) used by every writable
+ * F0 input. It is intentionally not exported from `@factorialco/f0-react`.
+ *
+ * Product code must use the dedicated `F0*Input` components instead:
+ *   - F0TextInput, F0NumberInput, F0SearchInput, F0TextAreaInput,
+ *     F0DurationInput, F0DatePicker, F0Select, ...
+ *
+ * Use `F0InputField` only when you are adding a new input type to the design
+ * system itself (e.g. F0CurrencyInput, F0PhoneInput, F0PercentageInput).
+ */
 declare type InputFieldProps<T> = {
     id?: string;
     autoFocus?: boolean;
@@ -5496,7 +5906,7 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
-declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<T>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
+declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     type?: Exclude<HTMLInputTypeAttribute, "number">;
     onPressEnter?: () => void;
 };
@@ -5505,15 +5915,15 @@ declare type InputInternalProps<T extends string> = Pick<ComponentProps<typeof I
  * @deprecated Renamed to `F0TextInputProps`. See the `Input` deprecation note.
  * @removeIn 2.0.0
  */
-export declare type InputProps<T extends string> = F0TextInputProps<T>;
+export declare type InputProps = F0TextInputProps;
 
-declare interface InsertAfterNotesTextEditorPageDocumentPatch {
+export declare interface InsertAfterNotesTextEditorPageDocumentPatch {
     type: "insert_after";
     targetId: string;
     blocks: JSONContent[];
 }
 
-declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
+export declare interface InsertBeforeNotesTextEditorPageDocumentPatch {
     type: "insert_before";
     targetId: string;
     blocks: JSONContent[];
@@ -5539,6 +5949,42 @@ declare type ItemDefinition = {
     title: string;
     description?: string[];
     avatar?: AvatarVariant;
+};
+
+/**
+ * Options for an id-relative neighbours fetch. Derived from the adapter's own
+ * fetch options, so extended adapters (e.g. OneDataCollection's, which add
+ * `navigationFilters`) carry their extra context automatically. Pagination is
+ * stripped: the request is relative to an item id, not to a page.
+ */
+export declare type ItemNeighborsFetchOptions<Filters extends FiltersDefinition, Options extends BaseFetchOptions<Filters> = BaseFetchOptions<Filters>> = Omit<Options, "pagination"> & {
+    /** Id of the reference item (as produced by the source's idProvider) */
+    id: ItemNeighborsId;
+};
+
+/**
+ * Identifier used to reference an item in id-relative fetches.
+ * Symbols are excluded on purpose: the id must be serializable so it can
+ * cross a network boundary to a backend.
+ */
+export declare type ItemNeighborsId = string | number;
+
+/**
+ * Result of an id-relative neighbours fetch.
+ *
+ * `previous`/`next` are the immediate neighbours of the reference item under
+ * the given filters/sortings/search, or null at the collection edges. If the
+ * reference item itself does not match the current filters, return
+ * `{ previous: null, next: null }` (optionally with `total`) — consumers
+ * disable navigation in that case.
+ */
+export declare type ItemNeighborsResponse<R> = {
+    previous: R | null;
+    next: R | null;
+    /** 1-indexed position of the reference item in the filtered+sorted collection */
+    position?: number;
+    /** Total number of records matching the current filters/search */
+    total?: number;
 };
 
 export declare function ItemSectionHeader({ item, children, isActive, collapsible, isExpanded, onToggleExpanded, sortable, hideChildrenCounter, canDropInside, onDragOver, onDragLeave, onDrop, currentParentId, draggedItemId, }: TOCItemSectionHeaderProps): JSX_2.Element;
@@ -5640,25 +6086,6 @@ export declare type MentionedUser = {
     href?: string;
 };
 
-export declare interface MentionItemComponentProps {
-    item: MentionedUser;
-    index: number;
-    selected: boolean;
-}
-
-export declare interface MentionListRef {
-    onKeyDown: (props: {
-        event: KeyboardEvent;
-    }) => boolean;
-}
-
-export declare interface MentionNodeAttrs {
-    id: string;
-    label: string;
-    image_url?: string;
-    href?: string;
-}
-
 export declare type MentionsConfig = {
     onMentionQueryStringChanged?: (queryString: string) => Promise<MentionedUser[]> | undefined;
     users: MentionedUser[];
@@ -5709,11 +6136,11 @@ declare type MetadataCopyAction = {
     type: "copy";
 };
 
-declare function MetadataItem({ item }: {
+export declare function MetadataItem({ item }: {
     item: MetadataItem;
 }): JSX_2.Element;
 
-declare interface MetadataItem {
+export declare interface MetadataItem {
     label: string;
     value: MetadataItemValue;
     actions?: (MetadataAction | MetadataCopyAction)[];
@@ -5733,7 +6160,7 @@ declare interface MetadataItem {
     };
 }
 
-declare type MetadataItemValue = {
+export declare type MetadataItemValue = {
     type: "text";
     content: string;
 } | {
@@ -5788,7 +6215,10 @@ declare interface MetadataProps {
      * If true and the metadata type is a list, it will be collapsed to the first item
      */
     collapse?: boolean;
+    rowGap?: MetadataRowGap;
 }
+
+declare type MetadataRowGap = "none" | "xs" | "sm" | "md";
 
 declare interface MetricComputation {
     datasetId: string;
@@ -5802,7 +6232,7 @@ declare interface MetricComputation {
 export declare const MobileDropdown: ({ items, children, dataTestId }: DropdownProps) => JSX_2.Element;
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -5844,6 +6274,7 @@ export declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly headcount_planning: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -5942,19 +6373,25 @@ declare type NavigationItem = Pick<LinkProps, "href" | "exactMatch" | "onClick">
     label: string;
 } & DataAttributes_2;
 
-declare type NavigationProps = {
-    previous?: {
-        url: string;
-        title: string;
-    };
-    next?: {
-        url: string;
-        title: string;
-    };
+export declare type NavigationProps = {
+    previous?: NavigationTarget;
+    next?: NavigationTarget;
     counter?: {
         current: number;
         total: number;
     };
+};
+
+/**
+ * One prev/next target. Carry a `url` for full-page detail navigation
+ * (renders a link) OR an `onClick` for id-based navigation that swaps content
+ * in place — a mounted sidepanel/dialog that never changes the URL (renders a
+ * button). `onClick` wins when both are present.
+ */
+export declare type NavigationTarget = {
+    title: string;
+    url?: string;
+    onClick?: () => void;
 };
 
 declare type NavTarget = HTMLAttributeAnchorTarget;
@@ -5987,67 +6424,28 @@ declare interface NextStepsProps {
     items: StepItemProps[];
 }
 
-export declare const NotesTextEditor: ForwardRefExoticComponent<NotesTextEditorProps & RefAttributes<NotesTextEditorHandle>>;
+/** @deprecated Use F0NotesTextEditor */
+export declare const NotesTextEditor: ForwardRefExoticComponent<F0NotesTextEditorProps & RefAttributes<F0NotesTextEditorHandle>> & {
+    Skeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
+};
 
-export declare interface NotesTextEditorHandle {
-    clear: () => void;
-    focus: () => void;
-    setContent: (content: string) => void;
-    applyPageDocumentPatch: (patch: NotesTextEditorPageDocumentPatch) => NotesTextEditorSnapshot;
-    insertAIBlock: () => void;
-    insertTranscript: (title: string, users: User[], messages: Message[]) => void;
-    pushContent: (content: string) => void;
-    insertImage: (file: File) => void;
-}
+/** @deprecated Use F0NotesTextEditorHandle */
+export declare type NotesTextEditorHandle = F0NotesTextEditorHandle;
 
 export declare type NotesTextEditorPageDocumentPatch = TopLevelPrependNotesTextEditorPageDocumentPatch | TopLevelAppendNotesTextEditorPageDocumentPatch | InsertBeforeNotesTextEditorPageDocumentPatch | InsertAfterNotesTextEditorPageDocumentPatch | ReplaceBlockNotesTextEditorPageDocumentPatch | ReplaceContentNotesTextEditorPageDocumentPatch | DeleteBlockNotesTextEditorPageDocumentPatch;
 
-export declare class NotesTextEditorPatchTargetNotFoundError extends Error {
-    readonly code = "target_not_found";
-    readonly targetId: string;
-    constructor(targetId: string);
-}
+/** @deprecated Use F0NotesTextEditorProps */
+export declare type NotesTextEditorProps = F0NotesTextEditorProps;
 
-export declare interface NotesTextEditorProps extends WithDataTestIdProps {
-    onChange: (value: {
-        json: JSONContent | null;
-        html: string | null;
-    }) => void;
-    placeholder: string;
-    initialEditorState?: {
-        content?: JSONContent | string;
-        title?: string;
-    };
-    readonly?: boolean;
-    aiBlockConfig?: AIBlockConfig;
-    imageUploadConfig?: ImageUploadConfig;
-    onTitleChange?: (title: string) => void;
-    titlePlaceholder?: string;
-    primaryAction?: PrimaryActionButton | PrimaryDropdownAction<string>;
-    secondaryActions?: HeaderSecondaryAction[];
-    otherActions?: DropdownItem[];
-    metadata?: MetadataItem[];
-    banner?: BannerProps;
-    showBubbleMenu?: boolean;
-}
+/** @deprecated Use F0NotesTextEditorSkeleton */
+export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: F0NotesTextEditorSkeletonProps) => JSX_2.Element;
 
-export declare const NotesTextEditorSkeleton: ({ withHeader, withTitle, withToolbar, }: NotesTextEditorSkeletonProps) => JSX_2.Element;
-
-export declare interface NotesTextEditorSkeletonProps {
-    withHeader?: boolean;
-    withTitle?: boolean;
-    withToolbar?: boolean;
-}
+/** @deprecated Use F0NotesTextEditorSkeletonProps */
+export declare type NotesTextEditorSkeletonProps = F0NotesTextEditorSkeletonProps;
 
 export declare interface NotesTextEditorSnapshot {
     json: JSONContent | null;
     html: string | null;
-}
-
-export declare class NotesTextEditorUnsupportedPatchTypeError extends Error {
-    readonly code = "unsupported_patch_type";
-    readonly patchType: unknown;
-    constructor(patchType: unknown);
 }
 
 declare type NumberCellConfig<R extends RecordType = RecordType> = {
@@ -6102,9 +6500,9 @@ declare type NumberFilterValue = {
  *
  * @removeIn 2.0.0
  */
-export declare const NumberInput: (props: F0NumberInputProps) => JSX_2.Element;
+export declare const NumberInput: ForwardRefExoticComponent<Omit<F0NumberInputProps, "ref"> & RefAttributes<HTMLInputElement>>;
 
-declare type NumberInputInternalProps = Omit<InputInternalProps<string>, "value" | "type" | "onChange"> & {
+declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
     locale: string;
     value?: number | null;
     step?: number;
@@ -6428,6 +6826,8 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     csvExport?: boolean | {
         filename?: string;
     };
+    /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
+    initialVisualization?: number;
 };
 
 export declare const OneDateNavigator: typeof _OneDateNavigator;
@@ -6509,6 +6909,23 @@ declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     displayCounter?: boolean;
     /** Total number of items matching the current filters, displayed as "N results for:" prefix in the chips row */
     resultCount?: number;
+    /**
+     * Id of the currently selected preset. When provided together with
+     * `onSelectPreset`, preset selection is identity-based (the preset stays
+     * selected as the user changes state on top of it). When absent, the picker
+     * falls back to legacy exact-filter-match selection.
+     */
+    selectedPresetId?: string;
+    /** Selects a preset by id. Enables identity-based selection. */
+    onSelectPreset?: (presetId: string) => void;
+    /** Ids of presets that can be edited/deleted (user-created presets). */
+    editablePresetIds?: string[];
+    /** Opens the edit flow for a preset (hover icon on editable presets). */
+    onEditPreset?: (presetId: string) => void;
+    /** Whether to show the dashed "Save view" chip ("save" | "none"). */
+    presetActionState?: "save" | "none";
+    /** Opens the preset create/update dialog. */
+    onPresetAction?: () => void;
 };
 
 /**
@@ -6695,7 +7112,30 @@ export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<
     pagesCount: number;
 };
 
-export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps): JSX_2.Element;
+export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps_2): JSX_2.Element;
+
+export declare type PageHeaderItemNavigationInput<R extends RecordType> = Pick<UseDataSourceItemNavigationReturn<R>, "previousItem" | "nextItem" | "previousItemUrl" | "nextItemUrl" | "absoluteIndex" | "totalItems" | "activeIndex" | "hasPrevious" | "hasNext" | "goToPrevious" | "goToNext">;
+
+export declare const PageHeaderNavigationContext: Context<NavigationProps | null>;
+
+/**
+ * Provider that lets a page component inject navigation data into PageHeader
+ * without needing to pass it down as a prop. PageHeader reads this context
+ * only when its own `navigation` prop is undefined, so the prop always wins.
+ *
+ * @example
+ * ```tsx
+ * const { navigation } = useDataCollectionItemNavigation({ source, collectionId, activeItemId })
+ * return (
+ *   <PageHeaderNavigationProvider value={navigation}>
+ *     <MyDetailPage />
+ *   </PageHeaderNavigationProvider>
+ * )
+ * ```
+ */
+export declare const PageHeaderNavigationProvider: Provider<NavigationProps | null>;
+
+export declare function PageNavigation({ previous, next, counter }: NavigationProps): JSX_2.Element;
 
 declare interface PageProps {
     children?: React.ReactNode;
@@ -6725,6 +7165,14 @@ export declare type PaginatedDataAdapter<R extends RecordType, Filters extends F
      * side-effects on reactive adapters (e.g. Apollo watchQuery).
      */
     exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>;
+    /**
+     * Optional id-relative capability: fetch the immediate neighbours of an
+     * item under the current filters/sortings/search, without loading pages.
+     * Enables detail-page prev/next on direct links / hard refresh, where the
+     * item may not be in any loaded page window. One-shot semantics: when an
+     * Observable is returned, only the first settled emission is consumed.
+     */
+    fetchItemNeighbors?: (options: ItemNeighborsFetchOptions<Filters, Options>) => ItemNeighborsResponse<R> | Promise<ItemNeighborsResponse<R>> | Observable<PromiseState<ItemNeighborsResponse<R>>>;
 };
 
 export declare type PaginatedFetchOptions<Filters extends FiltersDefinition> = BaseFetchOptions<Filters> & {
@@ -6814,22 +7262,65 @@ declare type PostEventProps = {
 export declare const predefinedPresets: Record<string, DatePreset>;
 
 /**
- * Defines preset filter configurations that can be applied to a collection.
+ * Defines preset configurations that can be applied to a collection.
+ *
+ * A preset is a saveable snapshot of the collection view. Historically it only
+ * captured a group of filters; it can now also capture the sorting, view mode
+ * (visualization), grouping and column order/visibility. All non-filter fields are
+ * optional so existing filter-only presets remain valid.
+ *
  * @template Filters - The available filter configurations
  */
 export declare type PresetDefinition<Filters extends FiltersDefinition> = {
+    /**
+     * Stable identifier for the preset. Optional for developer-provided presets (a
+     * fallback id is derived from the label at merge time); user-created custom
+     * presets always carry a generated id.
+     */
+    id?: string;
     /** Display name for the preset */
     label: string;
+    /** Optional longer description, shown/edited in the preset form */
+    description?: string;
     /** Filter configuration to apply when this preset is selected.
      * Clicking a preset replaces all current filters with this value.
-     * The preset shows as selected only when the current filters exactly match this value.
      */
     filter: FiltersState<Filters>;
+    /**
+     * Captured sorting state (`SortingsState`). Typed loosely here to avoid forcing
+     * the `Sortings` generic onto every preset consumer; narrowed at the
+     * OneDataCollection boundary.
+     */
+    sortings?: unknown;
+    /** Captured grouping state (`GroupingState`). Typed loosely; see `sortings`. */
+    grouping?: unknown;
+    /** Captured view mode as the visualization index. */
+    visualization?: number;
+    /**
+     * Captured column order/visibility settings (`DataCollectionSettings`, shaped
+     * like `PresetSettings`). Typed loosely; narrowed at the OneDataCollection
+     * boundary.
+     */
+    settings?: unknown;
     /** Function to count the number of items that match the filter */
     itemsCount?: (filters: FiltersState<Filters>) => Promise<number | undefined> | number | undefined;
 };
 
 export declare type PresetsDefinition<Filters extends FiltersDefinition> = PresetDefinition<Filters>[];
+
+/**
+ * Structural snapshot of the visualization (column order/visibility) settings a
+ * preset can capture. Typed structurally (rather than importing
+ * `DataCollectionSettings`) to keep the filter pattern free of a dependency on
+ * OneDataCollection. Narrowed to `DataCollectionSettings` at the OneDataCollection
+ * boundary.
+ */
+export declare type PresetSettings = {
+    visualization?: Record<string, {
+        order?: string[];
+        hidden?: string[];
+    }>;
+};
 
 export declare type PrevNextDateNavigation = {
     prev: DateRange | false;
@@ -6847,7 +7338,7 @@ declare type PrimaryAction_2 = BaseAction & {
     variant?: PrimaryActionVariant;
 };
 
-declare interface PrimaryActionButton extends PrimaryAction {
+export declare interface PrimaryActionButton extends PrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
@@ -6872,7 +7363,7 @@ export declare type primaryActionType = {
 
 declare type PrimaryActionVariant = "default" | "critical" | "neutral";
 
-declare interface PrimaryDropdownAction<T> extends PrimaryAction {
+export declare interface PrimaryDropdownAction<T> extends PrimaryAction {
     items: ButtonDropdownItem<T>[];
     value?: T;
     onClick: (value: T, item: ButtonDropdownItem<T>) => void;
@@ -6880,7 +7371,7 @@ declare interface PrimaryDropdownAction<T> extends PrimaryAction {
 
 export declare const PrivateBox: FC<PropsWithChildren>;
 
-declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style"];
+declare const privateProps: readonly ["append", "className", "pressed", "compact", "noTitle", "noAutoTooltip", "style", "block"];
 
 declare const privateProps_2: readonly ["withBorder"];
 
@@ -6993,7 +7484,7 @@ declare type PropertyDefinition_2<T> = {
     hide?: (item: T) => boolean;
 };
 
-declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "showBottomBorder">;
+declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
 
 declare type Props_10<Id extends string | number = string | number> = {
     items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
@@ -7145,7 +7636,7 @@ declare type RecordPathValue<T, P extends string> = P extends keyof T ? T[P] : P
  */
 export declare type RecordType = Record<string, unknown>;
 
-declare type ReferenceType = "none" | "striped";
+declare type ReferenceType = "none" | "striped" | "striked";
 
 /**
  * A numeric value that can be formatted with an optional formatter and options.
@@ -7157,13 +7648,13 @@ declare type RelaxedNumericWithFormatter = Omit<NumericWithFormatter, "numericVa
 
 declare type RendererDefinition = ValueDisplayRendererDefinition;
 
-declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
+export declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
     type: "replace_block";
     targetId: string;
     block: JSONContent;
 }
 
-declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
+export declare interface ReplaceContentNotesTextEditorPageDocumentPatch {
     type: "replace_content";
     targetId: string;
     content: JSONContent[];
@@ -7188,7 +7679,7 @@ export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordTyp
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, showBottomBorder, }: Props) => JSX_2.Element;
+export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, }: Props) => JSX_2.Element;
 
 export declare type ResourceHeaderProps = Props;
 
@@ -7204,59 +7695,28 @@ export declare type resultType = {
     mentionIds?: string[];
 };
 
-export declare const RichTextDisplay: WithDataTestIdReturnType_5<ForwardRefExoticComponent<RichTextDisplayProps & RefAttributes<HTMLDivElement>>>;
+/** @deprecated Use F0RichTextDisplay */
+export declare const RichTextDisplay: ForwardRefExoticComponent<F0RichTextDisplayProps & RefAttributes<HTMLDivElement>>;
 
-export declare type RichTextDisplayHandle = HTMLDivElement;
+/** @deprecated Use F0RichTextDisplayHandle */
+export declare type RichTextDisplayHandle = F0RichTextDisplayHandle;
 
-export declare interface RichTextDisplayProps extends HTMLAttributes<HTMLDivElement> {
-    content: string;
-    className?: string;
-    format?: "html" | "markdown";
-}
+/** @deprecated Use F0RichTextDisplayProps */
+export declare type RichTextDisplayProps = F0RichTextDisplayProps;
 
-export declare const RichTextEditor: ForwardRefExoticComponent<RichTextEditorProps & RefAttributes<RichTextEditorHandle>> & {
-    Skeleton: ({ rows }: RichTextEditorSkeletonProps) => JSX_2.Element;
+/** @deprecated Use F0RichTextEditor */
+export declare const RichTextEditor: ForwardRefExoticComponent<F0RichTextEditorProps & RefAttributes<F0RichTextEditorHandle>> & {
+    Skeleton: ({ rows, }: F0RichTextEditorSkeletonProps) => JSX_2.Element;
 };
 
-export declare type RichTextEditorHandle = {
-    clear: () => void;
-    clearFiles: () => void;
-    focus: () => void;
-    setError: (error: string | null) => void;
-    setContent: (content: string) => void;
-};
+/** @deprecated Use F0RichTextEditorHandle */
+export declare type RichTextEditorHandle = F0RichTextEditorHandle;
 
-export declare interface RichTextEditorProps {
-    mentionsConfig?: MentionsConfig;
-    enhanceConfig?: enhanceConfig;
-    filesConfig?: filesConfig;
-    secondaryAction?: secondaryActionsType;
-    primaryAction?: primaryActionType;
-    onChange: (result: resultType) => void;
-    onBlur?: () => void;
-    maxCharacters?: number;
-    placeholder: string;
-    initialEditorState?: {
-        content?: string;
-        files?: File[];
-    };
-    title: string;
-    height?: heightType;
-    plainHtmlMode?: boolean;
-    fullScreenMode?: boolean;
-    onFullscreenChange?: (fullscreen: boolean) => void;
-    /** Whether the editor is disabled */
-    disabled?: boolean;
-    /** Whether the editor has an error state */
-    error?: boolean;
-    /** Whether the editor is in a loading state */
-    loading?: boolean;
-    dataTestId?: string;
-}
+/** @deprecated Use F0RichTextEditorProps */
+export declare type RichTextEditorProps = F0RichTextEditorProps;
 
-declare interface RichTextEditorSkeletonProps {
-    rows?: number;
-}
+/** @deprecated Use F0RichTextEditorSkeletonProps */
+export declare type RichTextEditorSkeletonProps = F0RichTextEditorSkeletonProps;
 
 export declare const ScrollArea: WithDataTestIdReturnType<ForwardRefExoticComponent<Omit<Omit<ScrollAreaProps & RefAttributes<HTMLDivElement>, "ref"> & {
 showBar?: boolean;
@@ -7282,6 +7742,26 @@ declare type SearchOptions = {
     sync?: boolean;
     /** Debounce time for search */
     debounceTime?: number;
+};
+
+/**
+ * Optional rich search preview shown in the shared Data Collection search.
+ * When provided, typing in the header search renders a results dropdown with
+ * avatar + title + subtitle, consistent across every visualization. Selecting a
+ * result calls `onSelect` (e.g. the graph view reveals/centers the node).
+ */
+export declare type SearchPreview<R extends RecordType> = {
+    search: (query: string) => Promise<R[]>;
+    getId: (record: R) => string;
+    render: (record: R) => SearchPreviewResultData;
+    onSelect: (record: R) => void;
+};
+
+/** Data shown for a single row of the search preview dropdown. */
+export declare type SearchPreviewResultData = {
+    avatar?: AvatarVariant;
+    title: string;
+    subtitle?: string;
 };
 
 declare interface SecondaryAction extends PrimaryActionButton {
@@ -7335,6 +7815,45 @@ declare type SectionProps = {
     onClickItem: (id: string) => void;
     onItemVisible?: (id: string) => void;
 };
+
+export declare interface SeedableDefinition<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> {
+    filters?: Filters;
+    sortings?: Sortings;
+    search?: SearchOptions;
+    grouping?: Grouping;
+}
+
+/**
+ * Applies a OneDataCollection's persisted state onto a data source's runtime
+ * setters, validating every piece against the declared definition first so
+ * stale persisted keys (schema drift, renamed filters) never reach the
+ * adapter.
+ *
+ * - Filters: resolved per-visualization (`visualizationFilters` wins over
+ *   `filters`), then pruned to the keys declared in `definition.filters`.
+ * - Sortings: a single `{ field, order } | null` — `null` is an explicit
+ *   user "clear sorting" and is applied; `undefined` keeps the defaults.
+ * - Search: applied only when the definition enables search.
+ * - Grouping: applied only when the persisted field is a declared groupBy —
+ *   grouping changes record order, and prev/next must match the list.
+ *
+ * Pure besides invoking the given setters. Returns what was applied, or null
+ * when the storage contributed nothing.
+ */
+export declare function seedFromStorage<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>(storage: DataCollectionStorage<FiltersState<Filters>>, definition: SeedableDefinition<R, Filters, Sortings, Grouping>, target: SeedTarget<R, Filters, Sortings, Grouping>): AppliedCollectionState<R, Filters, Sortings, Grouping> | null;
+
+export declare interface SeedTarget<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> {
+    setCurrentFilters: (filters: FiltersState<Filters>) => void;
+    setCurrentSortings: (sortings: {
+        field: keyof Sortings;
+        order: "asc" | "desc";
+    } | null) => void;
+    setCurrentSearch: (search: string | undefined) => void;
+    setCurrentGrouping: (grouping: {
+        field: keyof Grouping["groupBy"];
+        order?: "asc" | "desc";
+    } | undefined) => void;
+}
 
 /**
  * @experimental This is an experimental component use it at your own risk
@@ -7813,10 +8332,7 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
-    /**
-     * Marks one or more rows as reference rows.
-     * Reference rows are rendered with a slanted background pattern across the full row.
-     */
+    /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
      * Labels for header groups. Keys are headerGroupId values used in column
@@ -7959,6 +8475,14 @@ maxHeight?: number;
  */
 export declare type TextareaProps = F0TextAreaInputProps;
 
+/** A button rendered in the footer at the bottom of the table of contents */
+export declare type TOCAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
 export declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -8039,6 +8563,8 @@ export declare interface TOCProps {
     hideChildrenCounter?: boolean;
     /** Enable vertical scrolling when content overflows (default: true) */
     scrollable?: boolean;
+    /** Action buttons pinned in a footer at the bottom of the panel */
+    actions?: TOCAction[];
 }
 
 declare type toggleActionType = {
@@ -8071,38 +8597,6 @@ export declare const ToggleGroupItem: React_2.ForwardRefExoticComponent<Omit<Tog
     className?: ClassValue;
 })) | undefined) => string> & React_2.RefAttributes<HTMLButtonElement>>;
 
-export declare interface ToolbarButtonProps {
-    onClick?: () => void;
-    active?: boolean;
-    label: string;
-    disabled: boolean;
-    icon: IconType;
-    tooltip?: {
-        description?: string;
-        label?: string;
-        shortcut?: ComponentProps<typeof Shortcut>["keys"];
-    };
-    showLabel?: boolean;
-}
-
-export declare interface ToolbarDropdownItem {
-    label: string;
-    icon: IconType;
-    onClick: () => void;
-    isActive: boolean;
-}
-
-export declare interface ToolbarProps {
-    editor: Editor;
-    isFullscreen?: boolean;
-    disableButtons: boolean;
-    onClose?: () => void;
-    animationComplete?: boolean;
-    darkMode?: boolean;
-    showEmojiPicker?: boolean;
-    plainHtmlMode?: boolean;
-}
-
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -8123,12 +8617,12 @@ declare type TooltipInternalProps = {
 
 export declare type TooltipProps = Omit<TooltipInternalProps, (typeof privateProps_7)[number]>;
 
-declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
+export declare interface TopLevelAppendNotesTextEditorPageDocumentPatch {
     type: "top_level_append";
     blocks: JSONContent[];
 }
 
-declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
+export declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
     type: "top_level_prepend";
     blocks: JSONContent[];
 }
@@ -8186,6 +8680,8 @@ declare namespace Types {
     }
 }
 
+export declare const UPLOAD_INPUT_ID = "rich-text-editor-upload-button";
+
 /**
  * Tracking options for the AI chat
  */
@@ -8210,6 +8706,132 @@ declare type UseDataCollectionDataReturn<R extends RecordType> = UseDataReturn<R
     summaries?: R;
 };
 
+/**
+ * Item navigation (prev/next + counter + PageHeader wiring) fed from a
+ * **declared** data collection source definition plus the `collectionId` of
+ * the originating list — not from a mounted collection.
+ *
+ * Because it never needs the list mounted, it works on a direct link / hard
+ * refresh of a detail page: the persisted filters/sortings/search the list
+ * wrote through the data collection storage handler are read by
+ * `collectionId`, validated against the definition, and seeded into the
+ * source before the first fetch (exactly one fetch, with the right state).
+ *
+ * Persisted state intentionally wins over `source.currentFilters` /
+ * `currentSortings`: the definition values apply on mount and the hydrated
+ * state lands right after, mirroring what the user last saw on the list.
+ *
+ * When the adapter implements the optional id-relative `fetchItemNeighbors`
+ * capability, gaps the loaded window can't answer (deep direct link to an
+ * item beyond the first page, or a neighbor past the window edge) are
+ * resolved backend-side under the same filters/sortings/search — prev/next
+ * and the counter then behave as if the whole filtered set were loaded.
+ * Without the capability, behavior is window-only as before.
+ *
+ * @example
+ * ```tsx
+ * const { navigation } = useDataCollectionItemNavigation({
+ *   source: employeesSourceDefinition, // same definition the list uses
+ *   collectionId: "organization/employees/v1", // same id the list uses
+ *   activeItemId: routeParams.employeeId,
+ *   getItemTitle: (employee) => employee.name,
+ * })
+ * return (
+ *   <PageHeaderNavigationProvider value={navigation}>
+ *     <EmployeeDetailPage />
+ *   </PageHeaderNavigationProvider>
+ * )
+ * ```
+ */
+export declare function useDataCollectionItemNavigation<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(props: UseDataCollectionItemNavigationProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): UseDataCollectionItemNavigationReturn<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+
+export declare interface UseDataCollectionItemNavigationProps<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> {
+    /**
+     * The declared data source definition — the same one the originating list
+     * passes to `useDataCollectionSource` / `OneDataCollection`. `itemUrl`
+     * comes from here unless overridden.
+     */
+    source: DataCollectionSourceDefinition<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    /**
+     * The `id` of the originating `OneDataCollection` (e.g.
+     * `organization/employees/v1`). Its persisted filters/sortings/search are
+     * read through the data collection storage handler and seeded into the
+     * source, so navigation matches what the user saw on the list — even on a
+     * direct link where the list was never mounted.
+     */
+    collectionId: string;
+    /** Controlled active item ID — typically the detail route param. */
+    activeItemId?: DataSourceItemId | null;
+    /** Default active item ID for uncontrolled usage. */
+    defaultActiveItemId?: DataSourceItemId | null;
+    /** Callback fired whenever the active item changes. */
+    onActiveItemChange?: (id: DataSourceItemId | null) => void;
+    /** Overrides the source idProvider. */
+    idProvider?: (item: R, index?: number) => DataSourceItemId;
+    /** Overrides `source.itemUrl`. */
+    itemUrl?: (item: R) => string | undefined;
+    /** Accessible titles for the PageHeader prev/next links. */
+    getItemTitle?: (item: R) => string;
+    /**
+     * Gates everything: while false neither the persisted state is read nor
+     * any data fetched.
+     * @default true
+     */
+    enabled?: boolean;
+    /**
+     * When false, skips reading the persisted collection state and fetches
+     * with the definition defaults.
+     * @default true
+     */
+    restorePersistedState?: boolean;
+    /**
+     * Controlled filters for the navigation context — wins over the persisted
+     * list filters. Feed it the filters the user refined elsewhere (e.g. a
+     * collection-bound breadcrumb select's `onFiltersChange`) so prev/next and
+     * the counter follow that same context. Changing it refetches and
+     * re-resolves neighbors; `undefined` keeps the persisted/definition state.
+     */
+    currentFilters?: FiltersState<Filters>;
+    /**
+     * How the returned `navigation` arrows navigate:
+     * - `"url"` (default): links to each item's `itemUrl` — for full-page
+     *   detail views where prev/next changes the route.
+     * - `"callback"`: arrows call the controller's `goToPrevious`/`goToNext`,
+     *   swapping the active item in place with no URL change — for a mounted
+     *   sidepanel/dialog (drive `activeItemId` via `onActiveItemChange`).
+     * @default "url"
+     */
+    navigationMode?: "url" | "callback";
+    /**
+     * Forwarded to `useDataCollectionSource` for `dataAdapter` memoization,
+     * same convention as `useDataCollectionSource(source, deps)`.
+     */
+    deps?: ReadonlyArray<unknown>;
+}
+
+export declare interface UseDataCollectionItemNavigationReturn<R extends RecordType = RecordType, Filters extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>> extends UseDataSourceItemNavigationReturn<R> {
+    /** True once persisted state was applied AND the first fetch resolved. */
+    isReady: boolean;
+    /**
+     * Render-ready PageHeader navigation. Pass it to the `navigation` prop or
+     * inject it via `PageHeaderNavigationProvider`. Null while there is
+     * nothing useful to render (e.g. the active item is not in the loaded
+     * window on a deep direct link).
+     */
+    navigation: NavigationProps | null;
+    /**
+     * What was actually read and applied from the persisted collection state,
+     * or null when nothing was (empty storage, restore disabled, read error).
+     */
+    appliedCollectionState: AppliedCollectionState<R, Filters, Sortings, Grouping> | null;
+    /** The runtime data source created from the definition (escape hatch). */
+    dataSource: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
+    /** The fetched data backing the navigation (escape hatch). */
+    data: Data<R>;
+    paginationInfo: PaginationInfo | null;
+    isLoading: boolean;
+}
+
 export declare const useDataCollectionSource: <R extends RecordType = RecordType, FiltersSchema extends FiltersDefinition = FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition, Summaries extends SummariesDefinition = SummariesDefinition, ItemActions extends ItemActionsDefinition<R> = ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition = NavigationFiltersDefinition, Grouping extends GroupingDefinition<R> = GroupingDefinition<R>>(source: DataCollectionSourceDefinition<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, deps?: ReadonlyArray<unknown>) => DataCollectionSource<R, FiltersSchema, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
 
 /**
@@ -8217,6 +8839,14 @@ export declare const useDataCollectionSource: <R extends RecordType = RecordType
  */
 declare interface UseDataOptions<R extends RecordType, Filters extends FiltersDefinition> {
     filters?: Partial<FiltersState<Filters>>;
+    /**
+     * When false, suspends all data fetching: the initial fetch effect does not
+     * run until `enabled` becomes true. Useful to delay the first fetch until
+     * async state (e.g. persisted filters) has been applied to the source.
+     * `isInitialLoading` stays true while disabled.
+     * @default true
+     */
+    enabled?: boolean;
     /**
      * A function that is called when an error occurs during data fetching.
      * It is called with the error object.
@@ -8256,6 +8886,43 @@ declare interface UseDataReturn<R extends RecordType> {
     mergedFilters: FiltersState<FiltersDefinition>;
 }
 
+declare interface UseDataSourceItemNavigationReturn<R extends RecordType> {
+    /** The currently active item ID */
+    activeItemId: DataSourceItemId | null;
+    /** The currently active item record, or null if not found in loaded data */
+    activeItem: R | null;
+    /** The active item index within the currently loaded records */
+    activeIndex: number;
+    /** The active item index within the full collection when it can be inferred */
+    absoluteIndex: number | null;
+    /** Number of records currently loaded into the datasource */
+    loadedItemsCount: number;
+    /** Total number of matching records when pagination exposes it */
+    totalItems: number | undefined;
+    /** The previous loaded item record, or null if unavailable */
+    previousItem: R | null;
+    /** The next loaded item record, or null if unavailable */
+    nextItem: R | null;
+    /** URL of the active item (derived via `itemUrl`), or null if unavailable */
+    activeItemUrl: string | null;
+    /** Navigate to the next item. Fetches next page if at boundary */
+    goToNext: () => void;
+    /** Navigate to the previous item. Fetches previous page if at boundary */
+    goToPrevious: () => void;
+    /** Whether there is a next item (or more pages to load) */
+    hasNext: boolean;
+    /** Whether there is a previous item (or previous pages to load) */
+    hasPrevious: boolean;
+    /** Directly set the active item ID */
+    setActiveItemId: (id: DataSourceItemId | null) => void;
+    /** True while waiting for a page transition to resolve the pending navigation */
+    isNavigating: boolean;
+    /** URL of the next loaded item (derived via `itemUrl`), or null if unavailable */
+    nextItemUrl: string | null;
+    /** URL of the previous loaded item (derived via `itemUrl`), or null if unavailable */
+    previousItemUrl: string | null;
+}
+
 export declare function useExportAction<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>({ source, currentVisualization, filename, enabled, }: UseExportActionProps<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>): SecondaryActionItem;
 
 declare interface UseExportActionProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>> {
@@ -8271,6 +8938,47 @@ declare interface UseExportActionProps<R extends RecordType, Filters extends Fil
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
+
+/**
+ * Converts an item-navigation result into the `NavigationProps` shape that
+ * `PageHeader` and `F0Dialog` accept (directly or via
+ * `PageHeaderNavigationProvider`).
+ *
+ * In `"url"` mode (default) the arrows are links to `previousItemUrl` /
+ * `nextItemUrl` (computed from the hook's `itemUrl`); a null URL omits that
+ * arrow. In `"callback"` mode the arrows call `goToPrevious`/`goToNext` and
+ * presence is gated by `hasPrevious`/`hasNext` — for in-place navigation that
+ * never touches the URL. The counter is included only when both the absolute
+ * position and the total are known — never a misleading `0/n`.
+ *
+ * Returns null when there is nothing useful to render, so it can be passed
+ * straight to `PageHeaderNavigationProvider`.
+ */
+export declare function usePageHeaderItemNavigation<R extends RecordType>(nav: PageHeaderItemNavigationInput<R> | null, config?: UsePageHeaderItemNavigationConfig<R>): NavigationProps | null;
+
+export declare interface UsePageHeaderItemNavigationConfig<R extends RecordType> {
+    /**
+     * Returns a human-readable title for a navigation link. Used as the
+     * accessible label on the prev/next buttons.
+     */
+    getItemTitle?: (item: R) => string;
+    /**
+     * How the prev/next arrows navigate:
+     * - `"url"` (default): each arrow is a link to the item's `itemUrl` — for
+     *   full-page detail views where navigation changes the route.
+     * - `"callback"`: each arrow calls `goToPrevious`/`goToNext`, swapping the
+     *   active item in place — for a mounted sidepanel/dialog that never
+     *   changes the URL. Presence is gated by `hasPrevious`/`hasNext`.
+     * @default "url"
+     */
+    mode?: "url" | "callback";
+}
+
+/**
+ * Returns the navigation value injected by the nearest
+ * `PageHeaderNavigationProvider`, or null when no provider is present.
+ */
+export declare function usePageHeaderNavigation(): NavigationProps | null;
 
 export declare interface User {
     id: string;
@@ -8326,6 +9034,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
@@ -8414,27 +9123,32 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
     type: "card";
     /** Configuration options for card visualization */
     options: CardVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Kanban-based visualization type */
     type: "kanban";
     /** Configuration options for kanban visualization */
     options: KanbanVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Table-based visualization type */
     type: "table";
     /** Configuration options for table visualization */
     options: TableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Editable table-based visualization type */
     type: "editableTable";
     /** Configuration options for editable table visualization */
     options: EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** List-based visualization type */
     type: "list";
     /** Configuration options for list visualization */
     options: ListVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+    /** Graph/org-chart-based visualization type */
+    type: "graph";
+    /** Configuration options for graph visualization */
+    options: GraphVisualizationOptions<R, Filters, Sortings>;
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Human-readable label for the visualization */
     label: string;
     /** Icon to represent the visualization in UI */
@@ -8448,7 +9162,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
         onLoadError: OnLoadErrorCallback;
         source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     }) => JSX.Element;
-} & VisualizationFilterOverrides<Filters>);
+} & VisualizationFilterOverrides<Filters, Sortings>);
 
 /**
  * Optional per-visualization filter and preset overrides.
@@ -8457,7 +9171,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
  *
  * @template Filters - The filters type extending FiltersDefinition
  */
-export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
+export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition> = {
     /** Override which filters are available when this visualization is active.
      *  If not provided, the global source filters are used.
      *  Can be a subset of the source filters definition. */
@@ -8465,6 +9179,10 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
     /** Preset configuration used only when this visualization is active.
      *  These replace the global source presets for this visualization. */
     presets?: PresetsDefinition<Filters>;
+    /** Override which sortings are available when this visualization is active.
+     *  If not provided, the global source sortings are used. Pass `{}` to hide the
+     *  sort selector for views that don't support sorting (e.g. the org chart). */
+    sortings?: Partial<Sortings>;
 };
 
 /**
@@ -8654,6 +9372,36 @@ declare interface WiggleOptions {
     errorHighlight?: boolean;
 }
 
+/**
+ * A breadcrumb "jump-to" select bound to a OneDataCollection: the options are
+ * fetched from the declared `source`, seeded with the filters/sortings the
+ * list persisted under `collectionId` — so on the detail page (even via a
+ * direct link, with the list never mounted) the select only shows the items
+ * the user was looking at on the list.
+ *
+ * F0 owns the seeding, pagination handling (a `pages` adapter is transparently
+ * consumed as infinite scroll), current selection, navigation, and
+ * loop-safety: `source` is captured when the crumb mounts, so inline-recreated
+ * item objects never retrigger fetches. Give the item a new `id` to swap
+ * sources.
+ */
+/**
+ * Rewraps every function-valued member of `T` so its parameters are checked
+ * BIVARIANTLY (the method-syntax trick). The breadcrumb item union is
+ * record-erased (`RecordType`); under `strictFunctionTypes`, arrow-typed
+ * members like `selectable?: (item: R) => ...` or the adapter's
+ * `fetchData(options: PaginatedFetchOptions<Filters>)` would make a source
+ * declared over a CONCRETE record/filters type unassignable here. Sound in
+ * this context: each source is fully type-checked against its concrete types
+ * where it is declared, and the select only feeds records fetched from that
+ * same source back into these callbacks.
+ */
+declare type WithBivariantCallbacks<T> = {
+    [K in keyof T]: [NonNullable<T[K]>] extends [never] ? T[K] : NonNullable<T[K]> extends (...args: infer Args) => infer Return ? {
+        bivariant(...args: Args): Return;
+    }["bivariant"] : T[K];
+};
+
 declare type WithDataTestIdProps = {
     dataTestId?: string;
 };
@@ -8690,6 +9438,26 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
+
+declare type ZoomPreset = keyof typeof zoomPresets;
+
+declare const zoomPresets: {
+    readonly default: {
+        readonly detail: 0.56;
+        readonly compact: 0.3;
+        readonly dot: 0.18;
+    };
+    readonly dense: {
+        readonly detail: 0.5;
+        readonly compact: 0.2;
+        readonly dot: 0.08;
+    };
+    readonly sparse: {
+        readonly detail: 0.85;
+        readonly compact: 0.45;
+        readonly dot: 0.15;
+    };
+};
 
 export { }
 
@@ -8731,6 +9499,11 @@ declare module "gridstack" {
 }
 
 
+declare namespace Calendar {
+    var displayName: string;
+}
+
+
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         aiBlock: {
@@ -8744,7 +9517,9 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
         };
     }
@@ -8777,11 +9552,6 @@ declare module "@tiptap/core" {
             }) => ReturnType;
         };
     }
-}
-
-
-declare namespace Calendar {
-    var displayName: string;
 }
 
 
