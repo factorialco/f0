@@ -572,9 +572,8 @@ const createSessionModalFields = {
   endDate: { id: "endDate", type: "date", label: "End date" },
   startsAt: { id: "startsAt", type: "text", label: "Starts at", placeholder: "09:00" },
   endsAt: { id: "endsAt", type: "text", label: "Ends at", placeholder: "11:00" },
-  hours: { id: "durationHours", type: "number", label: "Hours", min: 0, maxDecimals: 0 },
-  minutes: { id: "durationMinutes", type: "number", label: "Minutes", min: 0, max: 59, maxDecimals: 0 },
-  minimumAttendance: { id: "minimumAttendance", type: "number", label: "Minimum attendance", min: 1, max: 100, maxDecimals: 0, units: "%", placeholder: "e.g. 75" },
+  duration: { id: "duration", type: "duration", label: "Duration", units: ["hours", "minutes"] },
+  minimumAttendance: { id: "minimumAttendance", type: "number", label: "Minimum to be marked as attended", min: 1, max: 100, maxDecimals: 0, units: "%", placeholder: "e.g. 75" },
   modality: {
     id: "modality",
     type: "select",
@@ -4464,8 +4463,7 @@ function SessionFormDialog({
     modality: "hybrid",
     frequency: "none",
     instructors: [],
-    durationHours: 1,
-    durationMinutes: 0,
+    durationSeconds: 3600,
     minimumAttendance: 75,
     meetingLink: "",
     location: "",
@@ -4477,16 +4475,13 @@ function SessionFormDialog({
 
   const hasOnlineSession = values.modality === "virtual" || values.modality === "hybrid"
   const hasPhysicalLocation = values.modality === "hybrid" || values.modality === "onsite"
-  const sessionDurationMin =
-    (Number(values.durationHours) || 0) * 60 + (Number(values.durationMinutes) || 0)
+  const sessionDurationMin = Math.round((Number(values.durationSeconds) || 0) / 60)
   const minAttendancePct = Number(values.minimumAttendance) || 0
   const minAttendanceMin = Math.round((minAttendancePct / 100) * sessionDurationMin)
   const minAttendanceHint =
-    minAttendancePct <= 1
-      ? "1% means just joining the session counts. Raise it to require more."
-      : sessionDurationMin > 0
-        ? `Must stay ≈ ${minAttendanceMin} min of this ${sessionDurationMin}-min session.`
-        : "Set the duration to see the equivalent in minutes."
+    sessionDurationMin > 0
+      ? `Minimum time a participant must attend to be counted as attended. About ${minAttendanceMin} min of this ${sessionDurationMin}-min session.`
+      : "Minimum time a participant must attend to be counted as attended."
 
   return (
     <F0BoxWithClassName
@@ -4525,12 +4520,9 @@ function SessionFormDialog({
               <F0FormField field={createSessionModalFields.startsAt} value={values.startsAt} onChange={(value) => setValues((current) => ({ ...current, startsAt: value }))} />
               <F0FormField field={createSessionModalFields.endsAt} value={values.endsAt} onChange={(value) => setValues((current) => ({ ...current, endsAt: value }))} />
             </F0Box>
-            <F0Box display="grid" columns="2" gap="md">
-              <F0FormField field={createSessionModalFields.hours} value={values.durationHours} onChange={(value) => setValues((current) => ({ ...current, durationHours: value }))} />
-              <F0FormField field={createSessionModalFields.minutes} value={values.durationMinutes} onChange={(value) => setValues((current) => ({ ...current, durationMinutes: value }))} />
-            </F0Box>
+            <F0FormField field={createSessionModalFields.duration} value={values.durationSeconds} onChange={(value) => setValues((current) => ({ ...current, durationSeconds: value }))} />
             <F0Box display="flex" flexDirection="column" gap="xs">
-              <F0BoxWithClassName className="w-48">
+              <F0BoxWithClassName className="w-72">
                 <F0FormField field={createSessionModalFields.minimumAttendance} value={values.minimumAttendance} onChange={(value) => setValues((current) => ({ ...current, minimumAttendance: value }))} />
               </F0BoxWithClassName>
               <F0Text variant="description" content={minAttendanceHint} />
@@ -5413,10 +5405,19 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
       // Both the Attendance tab and the end-session review modal use the same
       // table: status pills + multi-select + bulk "Mark as attended / not
       // attended", so the instructor edits the same way in both places.
-      secondaryActions: () =>
-        isEnded
-          ? [{ label: "Download connectivity log", icon: Download, onClick: () => undefined }]
-          : [],
+      // Attendance tab (ended): download actions as secondary (the pattern for
+      // export here) — the report shown as a visible button, the connectivity
+      // log in the actions menu.
+      secondaryActions:
+        !isModal && isEnded
+          ? {
+              expanded: 1,
+              actions: () => [
+                { label: "Attendance report", icon: Download, onClick: () => undefined },
+                { label: "Download connectivity log", icon: File, onClick: () => undefined },
+              ],
+            }
+          : undefined,
       selectable: (row: SessionAttendanceRow) => row.id,
       bulkActions: () => ({
         primary: [
