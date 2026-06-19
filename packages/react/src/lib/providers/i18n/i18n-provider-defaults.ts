@@ -560,6 +560,11 @@ export const defaultTranslations = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
+      locked: "Locked",
+      lockedSectionNotice:
+        "These questions are predefined and can't be edited, moved, or removed.",
+      lockedQuestionNotice:
+        "This question is predefined and can't be edited or removed.",
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription:

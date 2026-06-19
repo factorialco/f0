@@ -49,8 +49,9 @@ export const Default: Story = {
         type: "section",
         section: {
           id: "section-1",
-          title: "Section 1",
-          description: "Section 1 description",
+          title: "Company-wide questions",
+          // No `lockedNote`: a locked section without one falls back to the
+          // default lock notice from the i18n provider.
           locked: true,
           questions: [
             {
@@ -354,6 +355,129 @@ export const WithAllowCreate: Story = {
             "The employees dataset does not have onCreate, so no toggle appears.",
           type: "dropdown-single" as const,
           datasetKey: "employees",
+        },
+      },
+    ],
+  },
+}
+
+/**
+ * A blocked, predefined section: `locked` on the section disables its fields,
+ * removes its edit menu and drag handle, and makes the questions inside it
+ * non-interactive. The section's `lockedNote` surfaces as the "Locked" tag
+ * tooltip; questions inside without their own `lockedNote` inherit it. The standalone
+ * question after it stays fully editable. The locked treatment never shows in
+ * the answering/preview form. (For locking individual questions outside a
+ * section, see "With Locked Questions".)
+ */
+export const WithBlockedSection: Story = {
+  args: {
+    elements: [
+      {
+        type: "section",
+        section: {
+          id: "section-enps",
+          title: "Predefined eNPS question",
+          // Section-level lock note: questions without their own `lockedNote`
+          // inherit this; the eNPS question below overrides it with its own.
+          lockedNote: {
+            description:
+              "This question powers your Employee NPS score, so it can't be edited, moved, or removed.",
+          },
+          locked: true,
+          questions: [
+            {
+              id: "q-enps",
+              title: "How likely are you to recommend us as a place to work?",
+              description: "0 is not at all likely, 10 is extremely likely.",
+              type: "rating" as const,
+              options: Array.from({ length: 11 }, (_, value) => ({
+                value,
+                label: String(value),
+              })),
+              required: true,
+              lockedNote: {
+                description:
+                  "The standard eNPS question — its wording and 0–10 scale are fixed so scores stay comparable over time.",
+              },
+            },
+          ],
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-reason",
+          title: "What's the main reason for your score?",
+          type: "longText" as const,
+        },
+      },
+    ],
+  },
+}
+
+/**
+ * Individually locked questions — `locked` on the question itself, with no
+ * surrounding section. Each shows the lock affordance instead of its actions
+ * menu and a tooltip on hover. The first two carry their own `lockedNote`
+ * (a predefined notice); the locked ones without a note fall back to the
+ * default question notice from the i18n provider
+ * (`surveyFormBuilder.labels.lockedQuestionNotice`). An editable question sits
+ * between them to show the lock is per-question.
+ */
+export const WithLockedQuestions: Story = {
+  args: {
+    elements: [
+      {
+        type: "question",
+        question: {
+          id: "q-legal-name",
+          title: "Full legal name",
+          type: "text" as const,
+          locked: true,
+          lockedNote: {
+            description:
+              "Synced from your HR profile, so it can't be edited here.",
+          },
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-employee-id",
+          title: "Employee ID",
+          type: "text" as const,
+          locked: true,
+          lockedNote: {
+            description:
+              "Assigned by the system and used to match your record.",
+          },
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-nickname",
+          title: "What should we call you?",
+          type: "text" as const,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-start-date",
+          title: "Start date",
+          type: "date" as const,
+          locked: true,
+        },
+      },
+      {
+        type: "question",
+        question: {
+          id: "q-department",
+          title: "Department",
+          type: "text" as const,
+          locked: true,
         },
       },
     ],

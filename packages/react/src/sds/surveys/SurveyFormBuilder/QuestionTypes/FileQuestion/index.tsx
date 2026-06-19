@@ -79,21 +79,19 @@ export const FileQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
-        <F0FormField
-          field={field}
-          value={value ?? []}
-          onChange={(v) => {
-            onQuestionChange?.({
-              ...baseQuestionComponentProps,
-              type: "file",
-              value: (v as string[]) || null,
-            })
-          }}
-          disabled={disabled}
-          hideLabel
-        />
-      </div>
+      <F0FormField
+        field={field}
+        value={value ?? []}
+        onChange={(v) => {
+          onQuestionChange?.({
+            ...baseQuestionComponentProps,
+            type: "file",
+            value: (v as string[]) || null,
+          })
+        }}
+        disabled={disabled}
+        hideLabel
+      />
     </BaseQuestion>
   )
 }
