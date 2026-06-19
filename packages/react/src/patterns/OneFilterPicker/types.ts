@@ -142,6 +142,7 @@ export type PresetDefinition<Filters extends FiltersDefinition> = {
   itemsCount?: (
     filters: FiltersState<Filters>
   ) => Promise<number | undefined> | number | undefined
+  defaultSelected?: boolean
 }
 
 export type PresetsDefinition<Filters extends FiltersDefinition> =
