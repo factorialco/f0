@@ -12,8 +12,6 @@ export type SidebarTab = {
   icon: IconType
   /** Unread counter shown next to the tab. */
   badge?: number
-  /** Shows a small critical dot on the tab (e.g. mentions). */
-  hasNotification?: boolean
 }
 
 export type SidebarTabsProps = {
@@ -26,13 +24,6 @@ export type SidebarTabsProps = {
     onClick?: () => void
   }
 }
-
-const NotificationDot = () => (
-  <span
-    aria-hidden="true"
-    className="h-2 w-2 flex-shrink-0 rounded-full bg-f1-background-critical-bold"
-  />
-)
 
 /**
  * A single tab. Mirrors the F0Button `ghost`/`neutral` styling (same `Action`
@@ -81,11 +72,7 @@ const TabButton = ({
             <span className="block whitespace-nowrap pl-1.5">{tab.label}</span>
           </span>
         </span>
-        {tab.badge ? (
-          <Counter value={tab.badge} size="sm" type="selected" />
-        ) : tab.hasNotification ? (
-          <NotificationDot />
-        ) : null}
+        {tab.badge && <Counter value={tab.badge} size="sm" type="selected" />}
       </div>
     </button>
   )
