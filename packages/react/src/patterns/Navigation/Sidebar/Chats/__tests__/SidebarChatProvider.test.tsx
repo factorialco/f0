@@ -45,6 +45,17 @@ describe("SidebarChatProvider store", () => {
     expect(result.current.groups[0].chats).toHaveLength(2)
   })
 
+  it("counts unread conversations", () => {
+    const { result } = renderStore()
+    expect(result.current.unreadChatsCount).toBe(0)
+    act(() => result.current.setUnread("a", 3))
+    expect(result.current.unreadChatsCount).toBe(1)
+    act(() => result.current.setUnread("b", 5))
+    expect(result.current.unreadChatsCount).toBe(2)
+    act(() => result.current.setUnread("a", 0))
+    expect(result.current.unreadChatsCount).toBe(1)
+  })
+
   it("upsertChat inserts a new chat into a group", () => {
     const { result } = renderStore()
     act(() =>

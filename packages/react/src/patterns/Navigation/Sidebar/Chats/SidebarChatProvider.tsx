@@ -10,7 +10,15 @@ import {
 type SidebarChatState = {
   groups: SidebarChatGroup[]
   activeChatId?: string
+  unreadChatsCount: number
 }
+
+const countUnreadChats = (groups: SidebarChatGroup[]): number =>
+  groups.reduce(
+    (total, group) =>
+      total + group.chats.filter((c) => (c.unreadCount ?? 0) > 0).length,
+    0
+  )
 
 const StateContext = createContext<SidebarChatState | null>(null)
 const ActionsContext = createContext<SidebarChatActions | null>(null)
@@ -101,7 +109,11 @@ export const SidebarChatProvider = ({
   )
 
   const state = useMemo<SidebarChatState>(
-    () => ({ groups, activeChatId }),
+    () => ({
+      groups,
+      activeChatId,
+      unreadChatsCount: countUnreadChats(groups),
+    }),
     [groups, activeChatId]
   )
 

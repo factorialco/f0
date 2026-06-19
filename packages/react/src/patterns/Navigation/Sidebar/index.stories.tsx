@@ -8,7 +8,10 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Comment, Home } from "@/icons/app"
 
 import { SidebarChatList } from "./Chats/SidebarChatList"
-import { SidebarChatProvider } from "./Chats/SidebarChatProvider"
+import {
+  SidebarChatProvider,
+  useSidebarChats,
+} from "./Chats/SidebarChatProvider"
 import { exampleActions, exampleGroups } from "./Chats/index.stories"
 import { SidebarFooter } from "./Footer"
 import * as SidebarFooterStories from "./Footer/index.stories"
@@ -148,43 +151,54 @@ export const WithDataTestId: Story = {
  * right. Without tabs, keep composing the header with `SearchBar` (the
  * `Default` story) and the Sidebar stays exactly the same.
  */
-export const TabbedSidebar = () => {
+const TabbedSidebarInner = () => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState("home")
+  // The Messages tab shows a badge with the number of unread conversations.
+  const { unreadChatsCount } = useSidebarChats()
 
   return (
-    <SidebarChatProvider initialGroups={exampleGroups}>
-      <Sidebar
-        header={
-          <>
-            <SidebarHeader
-              {...SidebarHeaderStories.Default.args}
-              selected={company}
-              onChange={setCompany}
-            />
-            <SidebarTabs
-              tabs={[
-                { id: "home", label: "Home", icon: Home },
-                { id: "messages", label: "Messages", icon: Comment },
-              ]}
-              activeTab={tab}
-              onTabChange={setTab}
-              search={{ placeholder: "Search..." }}
-            />
-          </>
-        }
-        body={
-          tab === "messages" ? (
-            <SidebarChatList actions={exampleActions} />
-          ) : (
-            <Menu {...SidebarMenuStories.Default.args} />
-          )
-        }
-        footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
-      />
-    </SidebarChatProvider>
+    <Sidebar
+      header={
+        <>
+          <SidebarHeader
+            {...SidebarHeaderStories.Default.args}
+            selected={company}
+            onChange={setCompany}
+          />
+          <SidebarTabs
+            tabs={[
+              { id: "home", label: "Home", icon: Home },
+              {
+                id: "messages",
+                label: "Messages",
+                icon: Comment,
+                badge: unreadChatsCount || undefined,
+              },
+            ]}
+            activeTab={tab}
+            onTabChange={setTab}
+            search={{ placeholder: "Search..." }}
+          />
+        </>
+      }
+      body={
+        tab === "messages" ? (
+          <SidebarChatList actions={exampleActions} />
+        ) : (
+          <Menu {...SidebarMenuStories.Default.args} />
+        )
+      }
+      footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
+    />
   )
 }
+
+export const TabbedSidebar = () => (
+  <SidebarChatProvider initialGroups={exampleGroups}>
+    <TabbedSidebarInner />
+  </SidebarChatProvider>
+)
 
 export const WithTabs: Story = {
   render: () => <TabbedSidebar />,

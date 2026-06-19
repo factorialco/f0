@@ -59,6 +59,8 @@ export type SidebarChatStore = {
    * state is driven from here, not from the router.
    */
   activeChatId?: string
+  /** Number of conversations with unread messages (across all groups). */
+  unreadChatsCount: number
   /** Replace the whole tree. */
   setGroups: (groups: SidebarChatGroup[]) => void
   /** Set (or clear, with `null`) the active chat. */
@@ -77,5 +79,5 @@ export type SidebarChatStore = {
 
 export type SidebarChatActions = Omit<
   SidebarChatStore,
-  "groups" | "activeChatId"
+  "groups" | "activeChatId" | "unreadChatsCount"
 >

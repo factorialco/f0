@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { action } from "storybook/actions"
 
 import { F0Button } from "@/components/F0Button"
-import { Clock, New, People } from "@/icons/app"
+import { New, People } from "@/icons/app"
 
 import { SidebarChatList } from "./SidebarChatList"
 import {
@@ -61,7 +61,7 @@ export const exampleGroups: SidebarChatGroup[] = [
         label: "Mohammed Al-Rashid",
         avatar: person("Mohammed", "Al-Rashid", "/avatars/person05.jpg"),
         // Icon-avatar status (instead of an emoji) to show both are supported.
-        status: { type: "icon", icon: Clock, label: "Away" },
+        status: { type: "emoji", emoji: "🕖", label: "Away" },
       },
       {
         id: "anastasia",
