@@ -131,6 +131,11 @@ export const BaseQuestion = ({
 
   const showCursorNotAllowed = !answering && inputDisabled
 
+  // A read-only question (locked/disabled) with no description has nothing to
+  // edit, so hide the input rather than show an editable-looking placeholder.
+  // Editable questions always render it so authors can add one.
+  const showDescription = !inputDisabled || !!description
+
   // Blocked question: an instant, title-less tooltip shown on the lock icon. It
   // prefers the question's own `lockedNote`, falls back to the parent section's
   // `notice`, and finally to a default so a locked question always says
@@ -267,7 +272,7 @@ export const BaseQuestion = ({
               {description}
             </p>
           ) : null
-        ) : (
+        ) : showDescription ? (
           <textarea
             value={description}
             aria-label={t("surveyFormBuilder.labels.description")}
@@ -282,7 +287,7 @@ export const BaseQuestion = ({
             )}
             style={TEXT_AREA_STYLE}
           />
-        )}
+        ) : null}
       </div>
       {children}
       {answering && (
