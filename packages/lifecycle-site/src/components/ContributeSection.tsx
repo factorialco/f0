@@ -3,9 +3,9 @@ import {
   contributionScenarios,
   existingChecks,
   extendPrinciple,
-  kitNote,
-  placement,
-  sdsTest,
+  gatekeeping,
+  placementDecision,
+  placementKinds,
 } from "../data/contribute"
 
 export function ContributeSection() {
@@ -92,44 +92,59 @@ export function ContributeSection() {
         </div>
       </div>
 
-      {/* Where does it belong? */}
+      {/* Where it goes — the four homes */}
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
-          {placement.headline}
+          Where it goes
         </h3>
-        <p className="mt-2 max-w-2xl text-sm text-muted">{placement.intro}</p>
-        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {placement.options.map((o) => (
-            <div key={o.id} className="rounded-xl border border-ink/10 bg-white p-4">
-              <p className="font-semibold">{o.label}</p>
-              <p className="text-xs font-medium uppercase tracking-wider text-accent">
-                {o.owner}
-              </p>
-              <p className="mt-2 text-sm text-muted">{o.when}</p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {placementKinds.map((k) => (
+            <div key={k.id} className="rounded-xl border border-ink/10 bg-white p-5">
+              <p className="font-semibold">{k.label}</p>
+              <p className="mt-1.5 text-sm text-muted">{k.what}</p>
+              {k.examples && (
+                <p className="mt-2 text-xs text-muted">
+                  e.g. <span className="font-mono text-accent">{k.examples}</span>
+                </p>
+              )}
             </div>
           ))}
         </div>
+      </div>
 
-        {/* Anti-dumping test for SDS */}
-        <div className="mt-4 rounded-2xl border-2 border-accent/30 bg-accent/5 p-6">
-          <p className="text-base font-semibold">{sdsTest.question}</p>
-          <ul className="mt-3 space-y-1.5">
-            {sdsTest.rules.map((r) => (
-              <li key={r} className="flex gap-2 text-sm text-ink">
-                <span className="mt-0.5 shrink-0 text-accent" aria-hidden>
-                  ✓
-                </span>
-                <span>{r}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+      {/* SDS vs Kit quick decision */}
+      <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 p-6">
+        <h3 className="text-base font-semibold">{placementDecision.headline}</h3>
+        <ol className="mt-3 space-y-3">
+          {placementDecision.steps.map((s, idx) => (
+            <li key={idx} className="text-sm">
+              <p className="font-medium text-ink">
+                {idx + 1}. {s.question}
+              </p>
+              <p className="mt-0.5 text-muted">
+                <span className="font-semibold text-accent">Yes →</span> {s.yes}{" "}
+                <span className="ml-2 font-semibold">No →</span> {s.no}
+              </p>
+            </li>
+          ))}
+        </ol>
+      </div>
 
-        {/* Kit clarifier */}
-        <div className="mt-4 rounded-xl border border-ink/10 bg-paper p-4">
-          <p className="text-sm font-semibold">{kitNote.headline}</p>
-          <p className="mt-1 text-sm text-muted">{kitNote.body}</p>
-        </div>
+      {/* Gatekeeping */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          {gatekeeping.headline}
+        </h3>
+        <ul className="mt-3 space-y-1.5">
+          {gatekeeping.rules.map((r) => (
+            <li key={r} className="flex gap-2 text-sm text-ink">
+              <span className="mt-0.5 shrink-0 text-accent" aria-hidden>
+                ✓
+              </span>
+              <span>{r}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   )
