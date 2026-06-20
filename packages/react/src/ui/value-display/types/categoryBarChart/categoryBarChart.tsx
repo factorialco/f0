@@ -1,4 +1,8 @@
-import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
+import {
+  type ChartColorToken,
+  paletteColor,
+  resolveChartColorToken,
+} from "@/kits/F0DataChart/utils/colors"
 import {
   Tooltip,
   TooltipContent,
@@ -13,7 +17,12 @@ import { cn } from "@/lib/utils"
 export interface CategoryBarDataPoint {
   name: string
   value: number
-  color?: string
+  /**
+   * Color of the segment, constrained to the 15 chromatic F0 base-color
+   * tokens (e.g. `"viridian"`, `"yellow"`, `"barbie"`). When omitted, a color
+   * is auto-assigned by index from the shared chart palette.
+   */
+  color?: ChartColorToken
 }
 
 export interface CategoryBarChartCellValue {
@@ -74,8 +83,8 @@ export const CategoryBarChartCell = (
           {dataPoints.map((point, index) => {
             const percentage = (point.value / total) * 100
             const color = point.color
-              ? getColor(point.color)
-              : getCategoricalColor(index)
+              ? resolveChartColorToken(point.color)
+              : paletteColor(index)
 
             if (percentage === 0) return null
 

@@ -69,9 +69,9 @@ export const WithCustomColors: Story = {
         type: "categoryBarChart",
         value: {
           dataPoints: [
-            { name: "A", value: 40, color: "categorical-1" },
-            { name: "B", value: 30, color: "categorical-3" },
-            { name: "C", value: 20, color: "categorical-5" },
+            { name: "A", value: 40, color: "viridian" },
+            { name: "B", value: 30, color: "yellow" },
+            { name: "C", value: 20, color: "barbie" },
           ],
         },
       }),

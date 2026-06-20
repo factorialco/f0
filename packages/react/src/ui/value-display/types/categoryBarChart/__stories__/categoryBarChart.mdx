@@ -14,7 +14,7 @@ type value = {
   dataPoints: Array<{
     name: string          // category label shown in tooltip
     value: number         // absolute count
-    color?: string        // optional color name or hex; falls back to categorical palette
+    color?: ChartColorToken // optional F0 base-color token (e.g. "viridian", "yellow", "barbie"); falls back to the shared chart palette by index
   }>
   hideTooltip?: boolean   // when true, suppresses hover tooltips
 }
