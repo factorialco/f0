@@ -1,6 +1,13 @@
-import { forwardRef } from "react"
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
+import { motion } from "motion/react"
+import { forwardRef, useId, useState, type CSSProperties } from "react"
 
+import { F0Button } from "@/components/F0Button"
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
+import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 
 import { AudioScrubber } from "./components/AudioScrubber"
 import { PlaybackMenu } from "./components/PlaybackMenu"
@@ -25,10 +32,29 @@ const F0AudioPlayerCardBase = forwardRef<
     disabled = false,
     ariaLabel,
     size = "md",
+    details,
+    expanded,
+    defaultExpanded = false,
+    onExpandedChange,
+    detailsMaxHeight = 200,
   } = props
 
+  const i18n = useI18n()
   const controller = usePlayerController(props)
   const dataAttributes = getDataAttributes(props)
+  const shouldReduceMotion = useReducedMotion()
+  const detailsId = useId()
+
+  const hasDetails = Boolean(details && details.length > 0)
+  const [isExpanded = false, setExpanded] = useControllableState<boolean>({
+    prop: expanded,
+    defaultProp: defaultExpanded,
+    onChange: onExpandedChange,
+  })
+  const [activeTab, setActiveTab] = useState(details?.[0]?.value)
+  const activeContent =
+    details?.find((tab) => tab.value === activeTab)?.content ??
+    details?.[0]?.content
 
   return (
     <div
@@ -67,15 +93,30 @@ const F0AudioPlayerCardBase = forwardRef<
             )}
           </div>
         </div>
-        {(controller.playbackRates.length > 0 || actions) && (
-          <div className="shrink-0">
-            <PlaybackMenu
-              playbackRate={controller.playbackRate}
-              playbackRates={controller.playbackRates}
-              onRateChange={controller.setPlaybackRate}
-              disabled={disabled}
-              extraItems={actions}
-            />
+        {(hasDetails || controller.playbackRates.length > 0 || actions) && (
+          <div className="flex shrink-0 items-center gap-2">
+            {hasDetails && (
+              <F0Button
+                variant="outline"
+                size="sm"
+                label={
+                  isExpanded
+                    ? i18n.audioPlayer.hideDetail
+                    : i18n.audioPlayer.viewDetail
+                }
+                onClick={() => setExpanded(!isExpanded)}
+                aria-expanded={isExpanded}
+              />
+            )}
+            {(controller.playbackRates.length > 0 || actions) && (
+              <PlaybackMenu
+                playbackRate={controller.playbackRate}
+                playbackRates={controller.playbackRates}
+                onRateChange={controller.setPlaybackRate}
+                disabled={disabled}
+                extraItems={actions}
+              />
+            )}
           </div>
         )}
       </div>
@@ -95,6 +136,53 @@ const F0AudioPlayerCardBase = forwardRef<
           size={size}
         />
       </div>
+
+      {hasDetails && (
+        <motion.div
+          id={detailsId}
+          role="region"
+          aria-label={title}
+          initial={false}
+          animate={{
+            height: isExpanded ? "auto" : 0,
+            opacity: isExpanded ? 1 : 0,
+            visibility: isExpanded ? "visible" : "hidden",
+          }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.15,
+            ease: [0.165, 0.84, 0.44, 1],
+          }}
+          className="-mx-3 overflow-hidden"
+        >
+          <TabNavigation className="px-0">
+            {details?.map((tab) => (
+              <TabNavigationLink
+                key={tab.value}
+                active={tab.value === activeTab}
+                asChild
+              >
+                <button type="button" onClick={() => setActiveTab(tab.value)}>
+                  {tab.label}
+                </button>
+              </TabNavigationLink>
+            ))}
+          </TabNavigation>
+          <div className="px-3 pt-2.5">
+            <ScrollArea
+              style={
+                {
+                  "--audio-details-max-h": `${detailsMaxHeight}px`,
+                } as CSSProperties
+              }
+              className="[&_[data-scroll-container]]:max-h-[var(--audio-details-max-h)]"
+            >
+              <div className="break-words pr-1 text-sm text-f1-foreground">
+                {activeContent}
+              </div>
+            </ScrollArea>
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 })
