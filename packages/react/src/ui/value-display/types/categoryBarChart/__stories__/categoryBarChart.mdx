@@ -14,7 +14,7 @@ type value = {
   dataPoints: Array<{
     name: string          // category label shown in tooltip
     value: number         // absolute count
-    color?: string        // optional color name or hex; falls back to categorical palette
+    color?: CategoryBarColor // optional: a 15-palette base-color token (e.g. "viridian", "yellow", "barbie") OR a legacy token ("categorical-1"…"categorical-8", "feedback-*"); falls back to the categorical palette by index
   }>
   hideTooltip?: boolean   // when true, suppresses hover tooltips
 }
@@ -43,6 +43,10 @@ The cell inside a OneDataCollection-like table with clickable rows: tooltips ope
 #### WithCustomColors
 
 <Canvas of={CategoryBarChartStories.WithCustomColors} />
+
+#### LegacyColors
+
+<Canvas of={CategoryBarChartStories.LegacyColors} />
 
 #### HiddenTooltip
 
