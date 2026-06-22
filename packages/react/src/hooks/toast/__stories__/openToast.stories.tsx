@@ -73,13 +73,12 @@ export const ToastPlayground: Story = {
 
     const variants: {
       label: string
-      variant: F0ToastVariant
+      variant?: F0ToastVariant
       description: string
       actions?: F0ToastProps["actions"]
     }[] = [
       {
         label: "Default",
-        variant: "default",
         description: "This is a default toast notification",
         actions: [
           {

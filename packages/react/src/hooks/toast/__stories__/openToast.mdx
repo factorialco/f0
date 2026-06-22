@@ -52,12 +52,12 @@ openToast({
 
 ## Variants
 
-Toasts support four visual variants to communicate intent. The default variant is `"default"`.
+Toasts support four visual variants to communicate intent. When you don't pass a `variant`, the `"default"` variant is used — so there's no need to set it explicitly.
 
 ### Default
 
 ```tsx
-openToast({ variant: "default", title: "Changes saved" })
+openToast({ title: "Changes saved" })
 ```
 
 ### Success
@@ -89,7 +89,6 @@ Use a button action for in-page operations:
 ```tsx
 openToast({
   title: "Message deleted",
-  variant: "default",
   actions: {
     type: "button",
     label: "Undo",
@@ -163,7 +162,6 @@ Set `persistent: true` to keep a toast visible until the user manually closes it
 const id = openToast({
   title: "Uploading…",
   description: "Your file is being uploaded. Please wait.",
-  variant: "default",
   persistent: true,
 })
 
