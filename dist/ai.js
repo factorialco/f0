@@ -1,6 +1,6 @@
-import { C as e, D as r, c as t, F as o, a as i, f as n, g as F, d as C, e as A, I as l, P as d, b as u, u as m } from "./F0CanvasPanel-Dc4WicI1.js";
+import { C as e, D as r, c as t, F as o, a as i, f as n, g as F, d as C, e as A, I as l, P as d, b as u, u as m } from "./F0CanvasPanel-Dly01azz.js";
 import { defaultTranslations as c } from "./i18n-provider-defaults.js";
-import { A as P, s as v, t as f, w as g, l as p, i as T, q as y, x as S, p as x, r as H, j as V, e as b, g as k, k as w, F as M, h as O, a as D, n as j, m as q, o as z, b as B, f as E, v as L, c as R, d as G, u as J } from "./useChatHistory-CShD0bjA.js";
+import { A as P, s as v, t as f, w as g, l as p, i as T, q as y, x as S, p as x, r as H, j as V, e as b, g as k, k as w, F as M, h as O, a as D, n as j, m as q, o as z, b as B, f as E, v as L, c as R, d as G, u as J } from "./useChatHistory-DZe8b8eg.js";
 export {
   P as AiChatTranslationsProvider,
   e as ChatSpinner,
