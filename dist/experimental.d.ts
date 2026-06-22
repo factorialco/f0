@@ -7952,6 +7952,13 @@ export declare type SidebarChat = {
     label: string;
     /** Person / team / company avatar (F0Avatar variant). */
     avatar: AvatarVariant;
+    /**
+     * When true, the row renders as a skeleton (avatar + name placeholders) but
+     * keeps its position. Use it for the "cascade" case: the conversation is
+     * known (id, group, order) but its name/avatar haven't resolved yet. As each
+     * chat resolves, flip this to false and pass the real `label`/`avatar`.
+     */
+    loading?: boolean;
     onClick?: () => void;
     /** When > 0, the chat is rendered as unread (darker, bolder name). */
     unreadCount?: number;
@@ -7996,16 +8003,45 @@ export declare const SidebarChatItem: ({ chat, isActive, onClick, }: {
 }) => JSX_2.Element;
 
 /**
+ * A single chat row rendered as a skeleton. Matches `SidebarChatItem`'s layout
+ * and height (36px: a 24px avatar + the row's vertical padding) so the row
+ * doesn't shift when the real data resolves. Used for the "cascade" case — a
+ * known conversation whose name/avatar is still loading (`SidebarChat.loading`).
+ */
+export declare const SidebarChatItemSkeleton: ({ className, }: {
+    className?: string;
+}) => JSX_2.Element;
+
+/**
  * Body of the "Messages" tab: chat groups read from `SidebarChatProvider`.
  * Chats fade in/out as they are added/removed; live reordering from the store
  * is applied instantly (Slack-style), without layout projection — that avoids
  * the resize-like "bounce" when the tab mounts.
  */
-export declare const SidebarChatList: ({ actions, emptyState, }: {
+export declare const SidebarChatList: ({ actions, emptyState, loading, }: {
     /** Ghost actions rendered at the very top (e.g. New chat, New group). */
     actions?: SidebarChatAction[];
     /** Copy for the blank state shown when there are no chats. */
     emptyState?: SidebarChatEmptyState;
+    /**
+     * Whole-list loading: the conversations aren't known yet. Renders a generic
+     * skeleton instead of the blank state. Once any chats are known, pass them
+     * (with `loading` on the individual chats whose name is still resolving) and
+     * set this back to false — the per-chat skeletons take over (cascade).
+     */
+    loading?: boolean;
+}) => JSX_2.Element;
+
+/**
+ * Full-list skeleton shown while the conversations are still loading and the
+ * groups aren't known yet. A few placeholder groups, each with a 32px title row
+ * and some 36px chat rows.
+ */
+export declare const SidebarChatListSkeleton: ({ groups, rowsPerGroup, }: {
+    /** Number of placeholder groups. @default 2 */
+    groups?: number;
+    /** Placeholder rows per group. @default 4 */
+    rowsPerGroup?: number;
 }) => JSX_2.Element;
 
 export declare type SidebarChatPresence = "online" | "offline";
