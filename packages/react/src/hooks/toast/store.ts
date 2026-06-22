@@ -1,8 +1,8 @@
 import { ToastId, ToastProviderItem } from "./types"
 
 /**
- * Module-level store backing the imperative `openToast` / `closeToast` /
- * `closeAllToasts` API.
+ * Module-level store backing the imperative `toasts.open` / `toasts.close` /
+ * `toasts.closeAll` API.
  *
  * Open toasts live here (not in React state), so they can be opened from
  * anywhere — including outside React — via plain functions. The `ToastProvider`
@@ -49,7 +49,7 @@ export const toastStore = {
   },
   /**
    * Add a toast, or replace an existing one when an item with the same id is
-   * already open (so repeated `openToast({ id })` calls update in place).
+   * already open (so repeated `toasts.open({ id })` calls update in place).
    */
   addItem(item: ToastProviderItem) {
     const existingIndex = items.findIndex((current) => current.id === item.id)

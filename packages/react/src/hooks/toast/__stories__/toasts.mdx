@@ -1,23 +1,23 @@
 import { Canvas, Meta } from "@storybook/addon-docs/blocks"
-import * as OpenToastStories from "./openToast.stories"
+import * as ToastsStories from "./toasts.stories"
 
-<Meta of={OpenToastStories} />
+<Meta of={ToastsStories} />
 
-# openToast
+# Toasts
 
 ## Introduction
 
 ### Definition
 
-`openToast` is an imperative function for triggering toast notifications. It is **not a hook** — you can call it from anywhere (event handlers, async callbacks, even outside React), as long as your app is wrapped in `<F0Provider>` (which mounts the `ToastProvider`). Open toasts live in a module-level store that the provider renders into a portal.
+`toasts` is an imperative API for triggering toast notifications. Its methods are **not hooks** — you can call them from anywhere (event handlers, async callbacks, even outside React), as long as your app is wrapped in `<F0Provider>` (which mounts the `ToastProvider`). Open toasts live in a module-level store that the provider renders into a portal.
 
 ### Purpose
 
-- **No hook, no wiring:** Call `openToast(...)` directly — no hook to call, no `useState`, no conditional rendering
+- **No hook, no wiring:** Call `toasts.open(...)` directly — no hook to call, no `useState`, no conditional rendering
 - **Automatic lifecycle:** Toasts auto-dismiss after a configurable duration and clean up after themselves
 - **Consistent UX:** Standardized toast patterns with stacking, hover-to-expand, and smooth animations
 - **Flexible API:** Support for variants, descriptions, action buttons/links, custom durations, and persistent toasts
-- **Programmatic control:** Dismiss individual toasts (`closeToast`) or all at once (`closeAllToasts`) from anywhere in your code
+- **Programmatic control:** Dismiss individual toasts (`toasts.close`) or all at once (`toasts.closeAll`) from anywhere in your code
 
 The provider handles rendering, positioning, stacking, timers, and cleanup automatically.
 
@@ -28,11 +28,11 @@ The provider handles rendering, positioning, stacking, timers, and cleanup autom
 The minimum required option is `title`:
 
 ```tsx
-import { openToast } from "@/hooks/toast"
+import { toasts } from "@factorialco/f0-react"
 
 function MyComponent() {
   return (
-    <button onClick={() => openToast({ title: "Profile updated" })}>
+    <button onClick={() => toasts.open({ title: "Profile updated" })}>
       Save Profile
     </button>
   )
@@ -44,7 +44,7 @@ function MyComponent() {
 Use `description` to provide additional context below the title:
 
 ```tsx
-openToast({
+toasts.open({
   title: "File uploaded",
   description: "report-q4-2024.pdf has been uploaded successfully.",
 })
@@ -57,25 +57,25 @@ Toasts support four visual variants to communicate intent. When you don't pass a
 ### Default
 
 ```tsx
-openToast({ title: "Changes saved" })
+toasts.open({ title: "Changes saved" })
 ```
 
 ### Success
 
 ```tsx
-openToast({ variant: "success", title: "Payment processed" })
+toasts.open({ variant: "success", title: "Payment processed" })
 ```
 
 ### Warning
 
 ```tsx
-openToast({ variant: "warning", title: "Storage almost full" })
+toasts.open({ variant: "warning", title: "Storage almost full" })
 ```
 
 ### Error
 
 ```tsx
-openToast({ variant: "error", title: "Upload failed" })
+toasts.open({ variant: "error", title: "Upload failed" })
 ```
 
 ## Actions
@@ -87,7 +87,7 @@ Toasts can include up to two actions: one button and one link. Actions are dismi
 Use a button action for in-page operations:
 
 ```tsx
-openToast({
+toasts.open({
   title: "Message deleted",
   actions: {
     type: "button",
@@ -102,7 +102,7 @@ openToast({
 Use a link action to navigate the user to a related page:
 
 ```tsx
-openToast({
+toasts.open({
   title: "Report ready",
   variant: "success",
   actions: {
@@ -118,7 +118,7 @@ openToast({
 You can combine one button and one link:
 
 ```tsx
-openToast({
+toasts.open({
   title: "Export complete",
   variant: "success",
   actions: [
@@ -148,10 +148,10 @@ Override the duration (in milliseconds) via the `duration` option:
 
 ```tsx
 // Dismiss after 3 seconds
-openToast({ title: "Copied to clipboard", duration: 3000 })
+toasts.open({ title: "Copied to clipboard", duration: 3000 })
 
 // Dismiss after 30 seconds
-openToast({ title: "Background sync started", duration: 30000 })
+toasts.open({ title: "Background sync started", duration: 30000 })
 ```
 
 ### Persistent toasts
@@ -159,7 +159,7 @@ openToast({ title: "Background sync started", duration: 30000 })
 Set `persistent: true` to keep a toast visible until the user manually closes it or you dismiss it programmatically. When `persistent` is set, `duration` is ignored.
 
 ```tsx
-const id = openToast({
+const id = toasts.open({
   title: "Uploading…",
   description: "Your file is being uploaded. Please wait.",
   persistent: true,
@@ -167,21 +167,21 @@ const id = openToast({
 
 // Dismiss it later when done
 await uploadFile()
-closeToast(id)
+toasts.close(id)
 ```
 
 ## Programmatic Control
 
 ### Returning the toast ID
 
-`openToast()` returns the ID of the created toast, which you can use to remove it later:
+`toasts.open()` returns the ID of the created toast, which you can use to remove it later:
 
 ```tsx
-const id = openToast({ title: "Saving…", persistent: true })
+const id = toasts.open({ title: "Saving…", persistent: true })
 
 await save()
 
-closeToast(id)
+toasts.close(id)
 ```
 
 ### Custom ID
@@ -189,53 +189,74 @@ closeToast(id)
 Provide your own `id` to make referencing the toast easier — for example, to avoid duplicate toasts for the same resource:
 
 ```tsx
-openToast({
+toasts.open({
   id: "sync-status",
   title: "Syncing…",
   persistent: true,
 })
 
 // Calling with the same id again replaces the existing toast
-openToast({
+toasts.open({
   id: "sync-status",
   title: "Sync complete",
   variant: "success",
 })
 ```
 
-### closeToast
+### toasts.close
 
 Dismiss a specific toast by ID:
 
 ```tsx
-import { openToast, closeToast } from "@/hooks/toast"
+import { toasts } from "@factorialco/f0-react"
 
-const id = openToast({ title: "Processing…", persistent: true })
+const id = toasts.open({ title: "Processing…", persistent: true })
 
 // Later...
-closeToast(id)
+toasts.close(id)
 ```
 
-### closeAllToasts
+### toasts.closeAll
 
 Dismiss all currently visible toasts at once:
 
 ```tsx
-import { closeAllToasts } from "@/hooks/toast"
+import { toasts } from "@factorialco/f0-react"
 
 // e.g. on logout
-closeAllToasts()
+toasts.closeAll()
 ```
 
 ## Interactive Demo
 
-<Canvas of={OpenToastStories.ToastPlayground} />
+<Canvas of={ToastsStories.ToastPlayground} />
 
 ## Type Reference
 
+### toasts
+
+```tsx
+const toasts: {
+  /**
+   * Show a toast. Returns the id of the created toast.
+   */
+  open(options: ToastOptions): ToastId
+
+  /**
+   * Dismiss a toast by id.
+   */
+  close(id: ToastId): void
+
+  /**
+   * Dismiss all currently visible toasts.
+   */
+  closeAll(): void
+}
+```
+
 ### ToastOptions
 
-Options passed to the `openToast()` function.
+Options passed to `toasts.open()`.
 
 ```tsx
 type ToastOptions = {
@@ -282,30 +303,11 @@ type ToastOptions = {
       duration?: undefined
       /**
        * If true, the toast will not auto-dismiss.
-       * The user must close it manually, or call closeToast(id) / closeAllToasts().
+       * The user must close it manually, or call toasts.close(id) / toasts.closeAll().
        */
       persistent: true
     }
 )
-```
-
-### Functions
-
-```tsx
-/**
- * Show a toast. Returns the id of the created toast.
- */
-function openToast(options: ToastOptions): ToastId
-
-/**
- * Dismiss a toast by id.
- */
-function closeToast(id: ToastId): void
-
-/**
- * Dismiss all currently visible toasts.
- */
-function closeAllToasts(): void
 ```
 
 ### F0ToastVariant

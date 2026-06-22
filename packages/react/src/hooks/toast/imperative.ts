@@ -15,21 +15,10 @@ const warnIfNoProvider = (method: string) => {
   }
 }
 
-/**
- * Imperatively show a toast. Can be called from anywhere — no hook required —
- * as long as `<F0Provider>` (which mounts `ToastProvider`) is in the tree.
- *
- * @param options The options for the toast
- * @returns The id of the created toast (pass it to `closeToast` to dismiss it)
- *
- * @example
- * const id = openToast({ title: "Saved", variant: "success" })
- * closeToast(id)
- */
-export const openToast = (options: ToastOptions): ToastId => {
+const open = (options: ToastOptions): ToastId => {
   const id = options.id ?? nanoid()
 
-  warnIfNoProvider("openToast()")
+  warnIfNoProvider("toasts.open()")
 
   toastStore.addItem({
     duration: options.persistent ? undefined : DEFAULT_DURATION,
@@ -41,17 +30,38 @@ export const openToast = (options: ToastOptions): ToastId => {
   return id
 }
 
-/**
- * Dismiss a toast by id.
- * @param id The id returned by `openToast`
- */
-export const closeToast = (id: ToastId): void => {
+const close = (id: ToastId): void => {
   toastStore.removeItem(id)
 }
 
-/**
- * Dismiss every open toast.
- */
-export const closeAllToasts = (): void => {
+const closeAll = (): void => {
   toastStore.clear()
+}
+
+/**
+ * Imperative API for toast notifications. Can be called from anywhere — no hook
+ * required — as long as `<F0Provider>` (which mounts `ToastProvider`) is in the
+ * tree.
+ *
+ * @example
+ * import { toasts } from "@factorialco/f0-react"
+ *
+ * const id = toasts.open({ title: "Saved", variant: "success" })
+ * toasts.close(id)
+ * toasts.closeAll()
+ */
+export const toasts = {
+  /**
+   * Show a toast.
+   * @param options The options for the toast
+   * @returns The id of the created toast (pass it to `toasts.close` to dismiss it)
+   */
+  open,
+  /**
+   * Dismiss a toast by id.
+   * @param id The id returned by `toasts.open`
+   */
+  close,
+  /** Dismiss every open toast. */
+  closeAll,
 }

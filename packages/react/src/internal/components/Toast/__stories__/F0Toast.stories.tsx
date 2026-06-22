@@ -16,7 +16,7 @@ const meta: Meta<typeof F0Toast> = {
     docs: {
       description: {
         component:
-          "⚠️ This is an internal component that is not exported from the package public API. Use it via the `openToast` function.",
+          "⚠️ This is an internal component that is not exported from the package public API. Use it via the `toasts.open` function.",
       },
     },
   },

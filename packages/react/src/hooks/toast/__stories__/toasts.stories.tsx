@@ -9,7 +9,7 @@ import {
   toastVariants,
 } from "@/internal/components/Toast/types"
 
-import { closeAllToasts, closeToast, openToast } from "../imperative"
+import { toasts } from "../imperative"
 import { ToastProvider } from "../ToastProvider"
 import { ToastId, ToastOptions } from "../types"
 
@@ -167,7 +167,7 @@ export const ToastPlayground: Story = {
             message: `Toast ${options.title} created`,
           },
         ])
-        openToast({ ...options, title: `${options.title} ${index}` })
+        toasts.open({ ...options, title: `${options.title} ${index}` })
         setIndex((prev) => prev + 1)
       }
     }
@@ -269,7 +269,7 @@ export const ToastPlayground: Story = {
               <F0Button
                 label="Create Persistent"
                 onClick={() => {
-                  const id = openToast({
+                  const id = toasts.open({
                     title: "Persistent Toast",
                     description: "Click the remove button to close me",
                     persistent: true,
@@ -287,7 +287,7 @@ export const ToastPlayground: Story = {
                 onClick={() => {
                   if (lastId.length > 0) {
                     const idToRemove = lastId[lastId.length - 1]
-                    closeToast(idToRemove)
+                    toasts.close(idToRemove)
                     setLastId((prev) => prev.slice(0, -1))
                   }
                 }}
@@ -295,7 +295,7 @@ export const ToastPlayground: Story = {
               <F0Button
                 label="Clear All"
                 onClick={() => {
-                  closeAllToasts()
+                  toasts.closeAll()
                   setLastId([])
                 }}
               />
