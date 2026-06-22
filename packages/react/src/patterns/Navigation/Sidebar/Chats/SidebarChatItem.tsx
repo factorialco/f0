@@ -2,6 +2,7 @@ import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
+import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 
@@ -39,6 +40,12 @@ export const SidebarChatItem = ({
   isActive: boolean
   onClick: () => void
 }) => {
+  // Cascade loading: the conversation is known but its name/avatar aren't
+  // resolved yet — show a skeleton row in place (not interactive).
+  if (chat.loading) {
+    return <SidebarChatItemSkeleton />
+  }
+
   // Chats are not navigation links: unread is conveyed by a darker, bolder
   // name (Slack-style), not a counter.
   const isUnread = Boolean(chat.unreadCount)

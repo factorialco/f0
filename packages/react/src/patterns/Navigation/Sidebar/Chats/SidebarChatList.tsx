@@ -7,6 +7,7 @@ import { cn, focusRing } from "@/lib/utils"
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { SidebarChatItem } from "./SidebarChatItem"
 import { useSidebarChats } from "./SidebarChatProvider"
+import { SidebarChatListSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChatAction } from "./types"
 
 /** Copy shown when there are no chats at all. Override via the `emptyState` prop. */
@@ -48,17 +49,28 @@ const SidebarChatActionButton = ({ action }: { action: SidebarChatAction }) => (
 export const SidebarChatList = ({
   actions = [],
   emptyState,
+  loading = false,
 }: {
   /** Ghost actions rendered at the very top (e.g. New chat, New group). */
   actions?: SidebarChatAction[]
   /** Copy for the blank state shown when there are no chats. */
   emptyState?: SidebarChatEmptyState
+  /**
+   * Whole-list loading: the conversations aren't known yet. Renders a generic
+   * skeleton instead of the blank state. Once any chats are known, pass them
+   * (with `loading` on the individual chats whose name is still resolving) and
+   * set this back to false — the per-chat skeletons take over (cascade).
+   */
+  loading?: boolean
 }) => {
   const { groups, activeChatId, setActiveChat } = useSidebarChats()
   const shouldReduceMotion = useReducedMotion()
 
   const hasChats = groups.some((group) => group.chats.length > 0)
   const empty = { ...DEFAULT_EMPTY_STATE, ...emptyState }
+  // While loading with nothing known yet, show the skeleton — never the blank
+  // state (which means "you have no conversations").
+  const showSkeleton = loading && !hasChats
 
   return (
     <div className="flex w-full flex-col gap-2 bg-transparent px-3">
@@ -69,7 +81,8 @@ export const SidebarChatList = ({
           ))}
         </div>
       )}
-      {!hasChats && (
+      {showSkeleton && <SidebarChatListSkeleton />}
+      {!showSkeleton && !hasChats && (
         <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
           <span className="text-3xl" role="img" aria-hidden="true">
             {empty.emoji}
@@ -80,39 +93,40 @@ export const SidebarChatList = ({
           </p>
         </div>
       )}
-      {groups.map((group) => {
-        const hasUnread = group.chats.some((c) => c.unreadCount)
-        return (
-          <SidebarCollapsibleSection
-            key={group.id}
-            title={group.title}
-            isOpen={group.isOpen}
-            // Slack-style: when collapsed with unread chats, emphasise the title.
-            highlightWhenCollapsed={hasUnread}
-          >
-            <AnimatePresence initial={false}>
-              {group.chats.map((chat) => (
-                <motion.div
-                  key={chat.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
-                >
-                  <SidebarChatItem
-                    chat={chat}
-                    isActive={chat.id === activeChatId}
-                    onClick={() => {
-                      setActiveChat(chat.id)
-                      chat.onClick?.()
-                    }}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </SidebarCollapsibleSection>
-        )
-      })}
+      {!showSkeleton &&
+        groups.map((group) => {
+          const hasUnread = group.chats.some((c) => c.unreadCount)
+          return (
+            <SidebarCollapsibleSection
+              key={group.id}
+              title={group.title}
+              isOpen={group.isOpen}
+              // Slack-style: when collapsed with unread chats, emphasise the title.
+              highlightWhenCollapsed={hasUnread}
+            >
+              <AnimatePresence initial={false}>
+                {group.chats.map((chat) => (
+                  <motion.div
+                    key={chat.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+                  >
+                    <SidebarChatItem
+                      chat={chat}
+                      isActive={chat.id === activeChatId}
+                      onClick={() => {
+                        setActiveChat(chat.id)
+                        chat.onClick?.()
+                      }}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </SidebarCollapsibleSection>
+          )
+        })}
     </div>
   )
 }

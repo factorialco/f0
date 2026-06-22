@@ -177,6 +177,39 @@ export const Empty: Story = {
   ),
 }
 
+/**
+ * Whole-list skeleton shown while loading and nothing is known yet. The blank
+ * state is intentionally NOT shown here (that would read as "no conversations").
+ */
+export const Loading: Story = {
+  render: () => (
+    <SidebarChatProvider initialGroups={[]}>
+      <SidebarChatList actions={exampleActions} loading />
+    </SidebarChatProvider>
+  ),
+}
+
+/**
+ * Cascade: the conversations and groups are known, but some names/avatars are
+ * still resolving — those rows show a skeleton in place while the rest render
+ * normally. As each one resolves, flip its `loading` to false.
+ */
+export const CascadeLoading: Story = {
+  render: () => (
+    <SidebarChatProvider
+      initialGroups={exampleGroups.map((group, groupIndex) => ({
+        ...group,
+        chats: group.chats.map((chat, chatIndex) => ({
+          ...chat,
+          loading: (groupIndex + chatIndex) % 3 === 0,
+        })),
+      }))}
+    >
+      <SidebarChatList actions={exampleActions} />
+    </SidebarChatProvider>
+  ),
+}
+
 /** Demonstrates live updates + reordering driven from outside the list. */
 const LiveControls = () => {
   const { setUnread, reorder, setActiveChat } = useSidebarChatActions()

@@ -63,6 +63,66 @@ describe("SidebarChatList", () => {
     expect(screen.getByText("No chats yet")).toBeInTheDocument()
   })
 
+  it("shows a skeleton (not the blank state) while loading with no chats", () => {
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList loading />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByTestId("sidebar-chat-list-skeleton")).toBeInTheDocument()
+    expect(screen.queryByText("No chats yet")).not.toBeInTheDocument()
+  })
+
+  it("ignores the loading flag once chats are known (cascade takes over)", () => {
+    render(
+      <SidebarChatProvider initialGroups={groups}>
+        <SidebarChatList loading />
+      </SidebarChatProvider>
+    )
+    expect(
+      screen.queryByTestId("sidebar-chat-list-skeleton")
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /Raúl Sigüenza Sánchez/ })
+    ).toBeInTheDocument()
+  })
+
+  it("renders a loading chat as a skeleton row, keeping the others interactive", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={[
+          {
+            id: "dms",
+            title: "Direct messages",
+            chats: [
+              {
+                id: "loading",
+                label: "Loading One",
+                avatar: { type: "person", firstName: "L", lastName: "O" },
+                loading: true,
+              },
+              {
+                id: "ready",
+                label: "Ready One",
+                avatar: { type: "person", firstName: "R", lastName: "O" },
+              },
+            ],
+          },
+        ]}
+      >
+        <SidebarChatList />
+      </SidebarChatProvider>
+    )
+    // The loading chat is a skeleton — no interactive button with its name.
+    expect(
+      screen.queryByRole("button", { name: /Loading One/ })
+    ).not.toBeInTheDocument()
+    // The resolved chat renders normally.
+    expect(
+      screen.getByRole("button", { name: "Ready One" })
+    ).toBeInTheDocument()
+  })
+
   it("hides the blank state and lets the consumer override its copy", () => {
     // With chats present, the blank state is not rendered.
     renderList()

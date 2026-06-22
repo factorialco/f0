@@ -28,6 +28,13 @@ export type SidebarChat = {
   label: string
   /** Person / team / company avatar (F0Avatar variant). */
   avatar: AvatarVariant
+  /**
+   * When true, the row renders as a skeleton (avatar + name placeholders) but
+   * keeps its position. Use it for the "cascade" case: the conversation is
+   * known (id, group, order) but its name/avatar haven't resolved yet. As each
+   * chat resolves, flip this to false and pass the real `label`/`avatar`.
+   */
+  loading?: boolean
   onClick?: () => void
   /** When > 0, the chat is rendered as unread (darker, bolder name). */
   unreadCount?: number
