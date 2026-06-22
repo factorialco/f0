@@ -775,6 +775,15 @@ declare type AiChatProviderReturnValue = {
     setPanelContent: (content: SidePanelContent | null) => void;
     /** Clear the custom panel content and fall back to the F0.ai chat. */
     clearPanelContent: () => void;
+    /**
+     * Edge the whole side panel docks to — the AI chat, hosted content and the
+     * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
+     * chat-first experience (e.g. communications), where left is comfier to
+     * navigate between conversations.
+     */
+    panelSide: "left" | "right";
+    /** Set which edge the side panel docks to. */
+    setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
 } & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -7282,7 +7291,7 @@ export declare type F0CanvasCardProps = {
  * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
  * `content`, `onClose` and `entities` directly.
  */
-export declare function F0CanvasPanel({ content, onClose, entities, }: F0CanvasPanelProps): ReactNode;
+export declare function F0CanvasPanel({ content, onClose, entities, side, }: F0CanvasPanelProps): ReactNode;
 
 export declare namespace F0CanvasPanel {
     var displayName: string;
@@ -7295,6 +7304,12 @@ export declare type F0CanvasPanelProps = {
     onClose: () => void;
     /** Canvas entity registry keyed by `CanvasContent["type"]`. */
     entities?: Record<string, CanvasEntityDefinition<any>>;
+    /**
+     * Edge the adjacent chat panel docks to. The canvas hugs the seam on the
+     * opposite side, so the rounded corner / open border face the chat.
+     * Defaults to "right" (chat on the right -> canvas seam on its right).
+     */
+    side?: "left" | "right";
 };
 
 export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
