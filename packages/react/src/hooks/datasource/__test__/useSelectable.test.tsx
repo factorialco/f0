@@ -1235,4 +1235,130 @@ describe("useSelectable", () => {
       })
     })
   })
+
+  describe("Nested/tree data (registry-backed select all)", () => {
+    // Top-level rows are non-selectable parents; selectable rows are nested
+    // children absent from data.records, reported via getRenderedSelectableEntries.
+    const PARENT_IDS = new Set([1000, 2000])
+    const parentRecords = [
+      { id: 1000, name: "New headcount", group: "g" },
+      { id: 2000, name: "Actual headcount", group: "g" },
+    ].map((item) => ({ ...item, [GROUP_ID_SYMBOL]: undefined }))
+
+    const childRecords = [1, 2, 3, 4, 5, 6].map((id) => ({
+      id,
+      name: `Child ${id}`,
+      group: "g",
+      [GROUP_ID_SYMBOL]: undefined,
+    }))
+
+    const nestedData: Data<TestRecord> = {
+      type: "flat",
+      records: parentRecords,
+      groups: [
+        {
+          key: "all",
+          label: "All",
+          records: parentRecords,
+          itemCount: parentRecords.length,
+        },
+      ],
+    }
+
+    const nestedSource = {
+      ...mockSource,
+      selectable: (item: TestRecord) =>
+        PARENT_IDS.has(item.id) ? undefined : item.id,
+    } as typeof mockSource
+
+    const paginationInfo: PaginationInfo = {
+      type: "pages",
+      total: childRecords.length,
+      currentPage: 1,
+      perPage: childRecords.length,
+      pagesCount: 1,
+    }
+
+    const renderedEntries = () =>
+      childRecords.map((item) => [item.id, item] as [number, TestRecord])
+
+    it("handleSelectAll selects every rendered child row (not just data.records)", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectAll(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(6)
+        expect(
+          result.current.selectionStatus.selectedIds
+            .slice()
+            .sort((a, b) => Number(a) - Number(b))
+        ).toEqual([1, 2, 3, 4, 5, 6])
+      })
+    })
+
+    it("regression: without the registry, select-all is a no-op (data.records holds only non-selectable parents)", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          // getRenderedSelectableEntries intentionally omitted
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectAll(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(0)
+      })
+    })
+
+    it("handleSelectAllItems selects all rendered children and preserves the pre-existing selection (no wipe)", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectItemChange(childRecords[0], true)
+      })
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(1)
+      })
+
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(6)
+        expect(result.current.selectedItems.has(1)).toBe(true)
+      })
+    })
+  })
 })

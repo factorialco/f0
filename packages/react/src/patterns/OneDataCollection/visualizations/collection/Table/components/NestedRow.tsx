@@ -23,6 +23,7 @@ import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 import {
   GroupingDefinition,
   RecordType,
+  SelectionId,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
@@ -98,6 +99,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  registerSelectable?: (id: SelectionId, item: R) => void
+  unregisterSelectable?: (id: SelectionId) => void
 }
 
 const NestedRowContent = <
