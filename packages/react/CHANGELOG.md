@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.4](https://github.com/factorialco/f0/compare/f0-react-v4.0.3...f0-react-v4.0.4) (2026-06-22)
+
+
+### Bug Fixes
+
+* **SurveyFormBuilder:** foreground input text in dark mode ([#4471](https://github.com/factorialco/f0/issues/4471)) ([17e48d7](https://github.com/factorialco/f0/commit/17e48d70c274f97b2de3cf96e084ebb56d5c707d))
+
 ## [4.0.3](https://github.com/factorialco/f0/compare/f0-react-v4.0.2...f0-react-v4.0.3) (2026-06-22)
 
 
