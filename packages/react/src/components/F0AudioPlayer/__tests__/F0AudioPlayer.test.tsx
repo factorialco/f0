@@ -212,4 +212,53 @@ describe("F0AudioPlayerCard", () => {
     expect(screen.getByRole("button", { name: "Play" })).toBeDisabled()
     expect(screen.getByRole("button", { name: "View detail" })).toBeEnabled()
   })
+
+  it("links the toggle to the detail panel via aria-controls", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={DETAILS}
+        defaultExpanded
+      />
+    )
+    const toggle = screen.getByRole("button", { name: "Hide detail" })
+    const controls = toggle.getAttribute("aria-controls")
+    expect(controls).toBeTruthy()
+    const region = screen.getByRole("region")
+    expect(region).toHaveAttribute("id", controls)
+  })
+
+  it("falls back to the first tab when details change to a new set", async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={DETAILS}
+        defaultExpanded
+      />
+    )
+
+    // Select the second tab, then swap in a brand-new details array.
+    await user.click(screen.getByRole("button", { name: "Transcript" }))
+    rerender(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={[
+          { value: "notes", label: "Notes", content: <p>Notes text</p> },
+          { value: "score", label: "Score", content: <p>Score text</p> },
+        ]}
+        defaultExpanded
+      />
+    )
+
+    // The stale "transcript" selection is gone, so the first new tab is active.
+    expect(screen.getByText("Notes text")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Notes" })).toHaveAttribute(
+      "data-active",
+      "true"
+    )
+  })
 })

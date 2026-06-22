@@ -51,10 +51,14 @@ const F0AudioPlayerCardBase = forwardRef<
     defaultProp: defaultExpanded,
     onChange: onExpandedChange,
   })
-  const [activeTab, setActiveTab] = useState(details?.[0]?.value)
-  const activeContent =
-    details?.find((tab) => tab.value === activeTab)?.content ??
-    details?.[0]?.content
+  const [selectedTab, setSelectedTab] = useState(details?.[0]?.value)
+  // Guard against a stale selection if `details` changes (e.g. a recycled
+  // card in a list): fall back to the first tab so the highlight and content
+  // stay in sync.
+  const activeTab = details?.some((tab) => tab.value === selectedTab)
+    ? selectedTab
+    : details?.[0]?.value
+  const activeContent = details?.find((tab) => tab.value === activeTab)?.content
 
   return (
     <div
@@ -106,6 +110,7 @@ const F0AudioPlayerCardBase = forwardRef<
                 }
                 onClick={() => setExpanded(!isExpanded)}
                 aria-expanded={isExpanded}
+                aria-controls={detailsId}
               />
             )}
             {(controller.playbackRates.length > 0 || actions) && (
@@ -141,7 +146,7 @@ const F0AudioPlayerCardBase = forwardRef<
         <motion.div
           id={detailsId}
           role="region"
-          aria-label={title}
+          aria-label={i18n.audioPlayer.details}
           initial={false}
           animate={{
             height: isExpanded ? "auto" : 0,
@@ -161,7 +166,7 @@ const F0AudioPlayerCardBase = forwardRef<
                 active={tab.value === activeTab}
                 asChild
               >
-                <button type="button" onClick={() => setActiveTab(tab.value)}>
+                <button type="button" onClick={() => setSelectedTab(tab.value)}>
                   {tab.label}
                 </button>
               </TabNavigationLink>

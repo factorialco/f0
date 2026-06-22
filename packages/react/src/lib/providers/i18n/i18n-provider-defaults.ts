@@ -45,6 +45,7 @@ export const defaultTranslations = {
     position: "{{current}} of {{total}}",
     viewDetail: "View detail",
     hideDetail: "Hide detail",
+    details: "Recording details",
   },
   actions: {
     add: "Add",

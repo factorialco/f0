@@ -571,6 +571,7 @@ Render the controls in a non-interactive state while a recording is unavailable.
   semantics, not radio semantics).
 - Icons are decorative — the labels, title, and time text carry the meaning.
 - When `details` are provided, the "View detail" / "Hide detail" toggle exposes
-  `aria-expanded`, and the panel is a labelled `role="region"`. The Summary /
-  Transcript tabs reuse the same `TabNavigation` primitive as the page and
-  side-panel tabs, so they share its look and keyboard navigation.
+  `aria-expanded` and `aria-controls` pointing at the panel, which is a
+  labelled `role="region"`. The Summary / Transcript tabs reuse the same
+  `TabNavigation` primitive as the page and side-panel tabs, so they share its
+  look and keyboard navigation.
