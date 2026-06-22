@@ -17,8 +17,8 @@ import {
   type PendingQuote,
   type TranscribeFn,
   type VisualizationMode,
-  F0AiChatWelcomeCard,
-  WelcomeScreenSuggestion,
+  type F0AiChatWelcomeCard,
+  type WelcomeScreenSuggestion,
 } from "./types"
 
 /**

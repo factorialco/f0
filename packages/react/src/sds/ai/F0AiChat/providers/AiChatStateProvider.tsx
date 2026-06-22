@@ -15,15 +15,15 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
-import { AiChatProviderReturnValue, AiChatState } from "../internal-types"
+import type { AiChatProviderReturnValue, AiChatState } from "../internal-types"
 import {
   type AiChatMode,
   type CanvasContent,
   type PendingContext,
   type PendingQuote,
   type VisualizationMode,
-  F0AiChatWelcomeCard,
-  WelcomeScreenSuggestion,
+  type F0AiChatWelcomeCard,
+  type WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
 
