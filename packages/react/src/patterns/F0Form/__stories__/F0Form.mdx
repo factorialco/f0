@@ -403,6 +403,23 @@ Use `sections` to split a long form into named groups with independent submit bu
 
 <Canvas of={Stories.WithSectionsSidepanel} />
 
+## Styling
+
+The optional `styling` config controls the form layout:
+
+- `showSectionsSidepanel` — render a sticky table-of-contents sidebar for the form's sections (see the example above).
+- `noPadding` — remove the default `p-4` padding around the form content. Use it when embedding the form flush inside a host surface (e.g. an AI canvas panel) that already provides its own spacing. Defaults to `false`, so existing forms are unaffected.
+
+```tsx
+<F0Form
+  name="embedded"
+  schema={schema}
+  defaultValues={defaultValues}
+  onSubmit={onSubmit}
+  styling={{ noPadding: true }}
+/>
+```
+
 ## Conditional rendering
 
 Use `renderIf` to show or hide fields based on the values of other fields.
