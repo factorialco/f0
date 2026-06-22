@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.1](https://github.com/factorialco/f0/compare/f0-react-v4.3.0...f0-react-v4.3.1) (2026-06-22)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** support select-all in nested/tree tables (FCT-56547) ([#4540](https://github.com/factorialco/f0/issues/4540)) ([9b8866a](https://github.com/factorialco/f0/commit/9b8866a82d8afae0030bf050722710e04dcd54a6))
+
 ## [4.3.0](https://github.com/factorialco/f0/compare/f0-react-v4.2.0...f0-react-v4.3.0) (2026-06-22)
 
 
