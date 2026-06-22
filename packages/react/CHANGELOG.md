@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.0](https://github.com/factorialco/f0/compare/f0-react-v4.2.0...f0-react-v4.3.0) (2026-06-22)
+
+
+### Features
+
+* **hourDistribution:** per-datapoint neutralLabel for tooltip ([#4382](https://github.com/factorialco/f0/issues/4382)) ([09019e3](https://github.com/factorialco/f0/commit/09019e361d13818f9652e85c60bdb12eb873a0f3))
+
 ## [4.2.0](https://github.com/factorialco/f0/compare/f0-react-v4.1.0...f0-react-v4.2.0) (2026-06-22)
 
 
