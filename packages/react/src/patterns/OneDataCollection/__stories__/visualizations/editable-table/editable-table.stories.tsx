@@ -6,7 +6,13 @@ import { action } from "storybook/actions"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { Delete, Pencil } from "@/icons/app"
+import {
+  AlertCircle,
+  Delete,
+  InfoCircle,
+  LockLocked,
+  Pencil,
+} from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 
 import { OneDataCollection } from "../../.."
@@ -1602,6 +1608,97 @@ export const EditableTableWithStatusPillSelect: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-status-pill-select/v1"
+      />
+    )
+  },
+}
+
+/**
+ * Demonstrates `cellHint`: an icon with a tooltip rendered inside the cell.
+ * - Salary shows a left-positioned warning when the value diverges from the
+ *   role's reference salary.
+ * - Email shows a right-positioned info hint.
+ * - Role is disabled with a lock hint, showing the hint sits inside the
+ *   disabled cell (shared disabled background).
+ */
+export const EditableTableWithCellHint: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Editable table using `cellHint` to render an icon + tooltip inside a cell. The hint icon can be placed at the start (`position: 'left'`, default) or end (`position: 'right'`) of the cell content. On disabled cells the hint shares the disabled background instead of rendering on white.",
+      },
+    },
+  },
+  render: () => {
+    const REFERENCE_SALARY = 50000
+
+    const initialItems = generateMockUsers(8).map((user, index) => ({
+      ...user,
+      // Make every other row diverge from the reference salary
+      salary: index % 2 === 0 ? 65000 : REFERENCE_SALARY,
+    }))
+
+    const { dataAdapter, onCellChange } = useEditableTableData(initialItems)
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  editType: () => "text" as const,
+                  render: (item: MockUser) => item.name,
+                },
+                {
+                  label: "Email",
+                  id: "email",
+                  editType: () => "text" as const,
+                  render: (item: MockUser) => item.email,
+                  cellHint: () => ({
+                    icon: InfoCircle,
+                    message: "Used as the login identifier",
+                    position: "right" as const,
+                  }),
+                },
+                {
+                  label: "Salary",
+                  id: "salary",
+                  align: "right" as const,
+                  editType: () => "number" as const,
+                  numberConfig: { min: 0, units: "€" },
+                  render: (item: MockUser) => String(item.salary),
+                  cellHint: (item: MockUser) =>
+                    Number(item.salary) !== REFERENCE_SALARY
+                      ? {
+                          icon: AlertCircle,
+                          message: `Differs from reference salary (${REFERENCE_SALARY} €)`,
+                          iconColor: "warning" as const,
+                          position: "left" as const,
+                        }
+                      : undefined,
+                },
+                {
+                  label: "Role",
+                  id: "role",
+                  editType: () => "disabled" as const,
+                  render: (item: MockUser) => item.role,
+                  cellHint: () => ({
+                    icon: LockLocked,
+                    message: "Role is managed in the HR system",
+                  }),
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-cell-hint/v1"
       />
     )
   },

@@ -1,7 +1,8 @@
 import { ReactNode } from "react"
 
 import { F0Icon, type IconType, type F0IconProps } from "@/components/F0Icon"
-import { cn, focusRing } from "@/lib/utils"
+import { F0Box } from "@/lib/F0Box"
+import { cn } from "@/lib/utils"
 import {
   Tooltip,
   TooltipContent,
@@ -20,6 +21,7 @@ const cursorClass = {
 
 export function BaseCell({
   readonly = false,
+  disabled = false,
   showRightBorder = true,
   cursor = "text",
   isActive = false,
@@ -29,14 +31,47 @@ export function BaseCell({
   children,
 }: {
   readonly?: boolean
+  disabled?: boolean
   showRightBorder?: boolean
   cursor?: "text" | "pointer" | "default" | "not-allowed"
   isActive?: boolean
   error?: string
-  hint?: { icon: IconType; message: string; iconColor?: F0IconProps["color"] }
+  hint?: {
+    icon: IconType
+    message: string
+    iconColor?: F0IconProps["color"]
+    position?: "left" | "right"
+  }
   borderOnHover?: boolean
   children: ReactNode
 }) {
+  const hintIcon = hint && !error && (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <F0Box
+            role="img"
+            aria-label={hint.message}
+            display="flex"
+            alignItems="center"
+            shrink={false}
+            paddingX="xs"
+          >
+            <F0Icon icon={hint.icon} size="md" color={hint.iconColor} />
+          </F0Box>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="border-black/10 max-w-64 cursor-default text-f1-foreground shadow-md"
+        >
+          <span className="text-sm font-medium text-f1-foreground">
+            {hint.message}
+          </span>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+
   return (
     <div
       className={cn(
@@ -51,37 +86,14 @@ export function BaseCell({
             : borderOnHover
               ? "shadow-none [&:not(:focus-within)]:hover:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))] focus-within:relative focus-within:z-[1] focus-within:border-r-0 focus-within:bg-f1-background focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]"
               : "shadow-none",
-        readonly && "bg-f1-background-secondary"
+        readonly && "bg-f1-background-secondary",
+        disabled && "bg-f1-background-disabled"
       )}
     >
       <ErrorTooltip message={error}>
-        {hint && !error && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  aria-label={hint.message}
-                  className={cn(
-                    "pointer-events-auto flex shrink-0 cursor-pointer items-center rounded px-1",
-                    focusRing()
-                  )}
-                >
-                  <F0Icon icon={hint.icon} size="md" color={hint.iconColor} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="border-black/10 max-w-64 cursor-default text-f1-foreground shadow-md"
-              >
-                <span className="text-sm font-medium text-f1-foreground">
-                  {hint.message}
-                </span>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        {hint?.position !== "right" && hintIcon}
         <div className="min-w-0 flex-1">{children}</div>
+        {hint?.position === "right" && hintIcon}
       </ErrorTooltip>
     </div>
   )
