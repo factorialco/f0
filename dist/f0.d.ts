@@ -4115,6 +4115,8 @@ declare interface DatePickerPopupProps {
     asChild?: boolean;
     onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
     weekStartsOn?: WeekStartsOn;
+    /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
+    selectOnCellOnly?: boolean;
 }
 
 export declare const datepickerSizes: readonly ["sm", "md"];
@@ -8045,9 +8047,9 @@ declare type F0DateOrDateTimeFieldConfig = F0DateFieldConfig | F0TimeFieldConfig
 
 export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicker_2>;
 
-declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, ...inputProps }: F0DatePickerProps): JSX_2.Element;
+declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, selectOnCellOnly, ...inputProps }: F0DatePickerProps): JSX_2.Element;
 
-export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange"> & {
+export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
     showIcon?: boolean;
     /** Controls how the selected date is displayed in the input. Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy. */
     displayFormat?: DateStringFormat;
@@ -8359,7 +8361,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0FileField | F0CardSelectField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0RichTextField | F0FileField | F0CardSelectField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -8394,12 +8396,12 @@ export declare type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
  * @typeParam T - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0StringCardSelectConfig;
+export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0PeriodFieldConfig | F0StringCardSelectConfig;
 
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -8747,6 +8749,12 @@ export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>, V extends 
 export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>, TConfig = undefined>(schema: T, config: F0ObjectConfig<z.infer<T>, TConfig>): T & F0ZodType<T>;
 
 /**
+ * Period field - date navigator that preserves the full DatePickerValue.
+ * Use with `z.custom<DatePickerValue>()` (or its optional/nullable wrappers).
+ */
+export declare function f0FormField<T extends ZodTypeAny>(schema: T, config: F0PeriodFieldConfig): T & F0ZodType<T>;
+
+/**
  * Optional wrapper - inherits inner type's config
  * @typeParam V - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
@@ -8916,6 +8924,14 @@ export declare namespace f0FormField {
     export function dateRange(config: DateRangeConfig & {
         optional?: false | undefined;
     }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
+    /* Excluded from this release type: PeriodValueSchema */
+    /* Excluded from this release type: DatePeriodConfig */
+    export function datePeriod(config: DatePeriodConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> & F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>;
+    export function datePeriod(config: DatePeriodConfig & {
+        optional?: false | undefined;
+    }): PeriodValueSchema & F0ZodType<PeriodValueSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -9761,6 +9777,70 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     };
     /** When true, the tooltip is opened automatically for 3 seconds*/
     autoOpen?: boolean;
+};
+
+/**
+ * F0 config options specific to period fields.
+ *
+ * A period field reuses `F0DatePicker` exactly like the `date` field, but keeps
+ * the full `DatePickerValue` (`{ value: { from, to }, granularity }`) as the
+ * form value instead of collapsing it to a single `Date`. This lets a form
+ * declare a real "period" selector (Year / Half year / Quarter / Month / Range).
+ *
+ * Note: `clearable` is derived from the Zod schema (optional/nullable).
+ */
+export declare interface F0PeriodConfig {
+    /** Available granularities for the period picker */
+    granularities?: DateGranularity[];
+    /** Preset period options to display */
+    presets?: DatePreset[];
+    /**
+     * Controls how the selected period is displayed in the input.
+     * Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy.
+     */
+    displayFormat?: DateStringFormat;
+    /**
+     * Minimum selectable date.
+     * Can be a static Date or a function that receives form values for dynamic constraints.
+     * @example
+     * // Static constraint
+     * minDate: new Date("2024-01-01")
+     *
+     * // Dynamic constraint based on another field
+     * minDate: ({ values }) => values.startDate
+     */
+    minDate?: F0DateConstraintProp;
+    /**
+     * Maximum selectable date.
+     * Can be a static Date or a function that receives form values for dynamic constraints.
+     * @example
+     * // Static constraint
+     * maxDate: new Date("2025-12-31")
+     *
+     * // Dynamic constraint based on another field
+     * maxDate: ({ values }) => values.endDate
+     */
+    maxDate?: F0DateConstraintProp;
+}
+
+/**
+ * Period field with all properties for rendering.
+ * Includes properties derived from the Zod schema.
+ */
+export declare type F0PeriodField = F0BaseField & F0PeriodConfig & {
+    type: "period";
+    /** Whether the period can be cleared (derived from optional/nullable) */
+    clearable?: boolean;
+    /** Conditional rendering based on another field's value */
+    renderIf?: PeriodFieldRenderIf;
+};
+
+/**
+ * Config for period fields (date navigator that preserves the full
+ * DatePickerValue: `{ value: { from, to }, granularity }`).
+ */
+export declare type F0PeriodFieldConfig = F0BaseConfig & F0PeriodConfig & {
+    fieldType: "period";
 };
 
 /**
@@ -10740,6 +10820,39 @@ export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
     otherActions?: F0TimelineRowOtherAction[];
 }
 
+declare type F0ToastProps = {
+    /**
+     * The title of the toast
+     */
+    title?: string;
+    /**
+     * The description of the toast
+     */
+    description?: string;
+    /**
+     * The variant of the toast
+     */
+    variant?: F0ToastVariant;
+    /**
+     * The duration of the toast in milliseconds (if not provided, the toast will stay open until the user closes it)
+     */
+    duration?: number;
+    /**
+     * Whether the toast is paused. If true, the duraction timer will not tick in anycase
+     */
+    forcePauseTimer?: boolean;
+    /**
+     * The callback to be called when the toast is closed
+     */
+    onClose?: () => void;
+    /**
+     * The actions to display in the toast ()
+     */
+    actions?: ToastActionButton | [ToastActionButton] | ToastActionLink | [ToastActionLink] | [ToastActionButton, ToastActionLink];
+};
+
+declare type F0ToastVariant = (typeof toastVariants)[number];
+
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
  * shape so adapters (factorial, mock runtime) can map back and forth
@@ -10901,7 +11014,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -11773,6 +11886,8 @@ export declare interface HourDistributionDataPoint {
     justifiedAbsenceValue?: number;
     /** Renders a full-height neutral bar for justified non-working days without a minute baseline. */
     justifiedAbsenceFullDay?: boolean;
+    /** Per-point label for the neutral segment tooltip. Overrides the chart-level justifiedAbsenceLabel when set. */
+    neutralLabel?: string;
 }
 
 declare type I18nContextType = TranslationsType & {
@@ -13195,7 +13310,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_3<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -13209,6 +13324,8 @@ export declare interface OneCalendarInternalProps {
     maxDate?: Date;
     compact?: boolean;
     weekStartsOn?: WeekStartsOn;
+    /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
+    selectOnCellOnly?: boolean;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
@@ -13494,6 +13611,21 @@ declare type PendingContext = {
 declare type PendingQuote = {
     /** Plain-text selection (markdown stripped by the browser's toString()). */
     text: string;
+};
+
+declare type PeriodFieldRenderIf = PeriodRenderIfCondition | CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+declare interface PeriodRenderIfBase {
+    fieldId: string;
+}
+
+/**
+ * RenderIf conditions specific to period fields.
+ * The value is a `DatePickerValue` object, so only `isEmpty` is meaningful
+ * (same approach as date range fields).
+ */
+export declare type PeriodRenderIfCondition = PeriodRenderIfBase & {
+    isEmpty: boolean;
 };
 
 /**
@@ -14159,7 +14291,7 @@ declare interface RenderIfBase {
 /**
  * Union of all possible RenderIf conditions (used internally for evaluation)
  */
-export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition;
+export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition | PeriodRenderIfCondition;
 
 export declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
     type: "replace_block";
@@ -15432,6 +15564,111 @@ export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
 
+declare type ToastActionButton = {
+    type: "button";
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    /**
+     * If true, the toast will not be closed automatically when the action is clicked.
+     */
+    keepOpen?: boolean;
+};
+
+declare type ToastActionLink = {
+    type: "link";
+    label: string;
+    href: string;
+    /**
+     * If true, the toast will not be closed automatically when the action is clicked.
+     */
+    keepOpen?: boolean;
+};
+
+export declare type ToastId = string;
+
+export declare type ToastOptions = {
+    /**
+     * The title of the toast
+     */
+    title?: string;
+    /**
+     * The description of the toast
+     */
+    description?: string;
+    /**
+     * The variant of the toast
+     */
+    variant?: F0ToastVariant;
+    /**
+     * The actions to display in the toast
+     */
+    actions?: F0ToastProps["actions"];
+    /**
+     * Optional id for the toast. If not provided, a random id will be generated.
+     */
+    id?: ToastId;
+} & ({
+    /**
+     * The duration of the toast in milliseconds (if not provided, the toast will stay open until the user closes it)
+     * @default 5000
+     */
+    duration?: number;
+    /**
+     * Whether the toast should persist until the user closes it
+     */
+    persistent?: undefined;
+} | {
+    duration?: undefined;
+    persistent: true;
+});
+
+export declare const ToastProvider: ({ children, portalTargets, }: ToastProviderProps) => JSX_2.Element;
+
+/**
+ * A toast as held by the store: the public options resolved into the props the
+ * `F0Toast` component renders, plus a stable `id` and an `onClose` callback.
+ */
+export declare type ToastProviderItem = F0ToastProps & {
+    id: ToastId;
+    onClose: () => void;
+};
+
+declare type ToastProviderProps = {
+    children: React.ReactNode;
+    portalTargets?: Record<"mobile" | "desktop", string>;
+};
+
+/**
+ * Imperative API for toast notifications. Can be called from anywhere — no hook
+ * required — as long as `<F0Provider>` (which mounts `ToastProvider`) is in the
+ * tree.
+ *
+ * @example
+ * import { toasts } from "@factorialco/f0-react"
+ *
+ * const id = toasts.open({ title: "Saved", variant: "success" })
+ * toasts.close(id)
+ * toasts.closeAll()
+ */
+export declare const toasts: {
+    /**
+     * Show a toast.
+     * @param options The options for the toast
+     * @returns The id of the created toast (pass it to `toasts.close` to dismiss it)
+     */
+    open: (options: ToastOptions) => ToastId;
+    /**
+     * Dismiss a toast by id.
+     * @param id The id returned by `toasts.open`
+     */
+    close: (id: ToastId) => void;
+    /** Dismiss every open toast. */
+    closeAll: () => void;
+};
+
+declare const toastVariants: readonly ["error", "warning", "success", "default"];
+
 /** A button rendered in the footer at the bottom of the table of contents */
 declare type TOCAction = {
     label: string;
@@ -16242,6 +16479,16 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
 };
 
 /**
+ * Returns true when the viewport width is >= 640px (Tailwind's `sm` breakpoint).
+ */
+export declare const useIsDesktop: () => boolean;
+
+/**
+ * Returns true when the viewport width is < 640px (below Tailwind's `sm` breakpoint).
+ */
+export declare const useIsMobile: () => boolean;
+
+/**
  * Resolves the previous/next neighbours of an item through the adapter's
  * optional id-relative `fetchItemNeighbors` capability.
  *
@@ -16808,10 +17055,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -16819,8 +17064,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
