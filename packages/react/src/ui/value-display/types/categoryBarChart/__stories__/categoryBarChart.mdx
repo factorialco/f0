@@ -28,9 +28,27 @@ type value = {
 
 <Canvas of={CategoryBarChartStories.WorkLocation} />
 
+#### InsideClickableTableCell
+
+Replicates OneTable's cell mechanics (a `pointer-events-none` content wrapper plus a stretched navigation link). The chart segments re-enable pointer events so the tooltip opens on hover/focus while a click still navigates the row.
+
+<Canvas of={CategoryBarChartStories.InsideClickableTableCell} />
+
+#### DataCollectionExample
+
+The cell inside a OneDataCollection-like table with clickable rows: tooltips open on hover/focus while a click navigates the row.
+
+<Canvas of={CategoryBarChartStories.DataCollectionExample} />
+
 #### WithCustomColors
 
 <Canvas of={CategoryBarChartStories.WithCustomColors} />
+
+#### HiddenTooltip
+
+Set `hideTooltip: true` on the value to suppress the per-segment tooltip. Segments still render and stay focusable.
+
+<Canvas of={CategoryBarChartStories.HiddenTooltip} />
 
 #### Empty
 
