@@ -62460,7 +62460,7 @@ const bI = {
                   onChange: D,
                   disabled: z,
                   className: J(
-                    "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                     V && "cursor-not-allowed"
                   ),
                   style: bI
@@ -63150,7 +63150,7 @@ const Rde = {
                 ),
                 value: d,
                 onChange: C,
-                className: "flex-1 resize-none font-medium",
+                className: "flex-1 resize-none font-medium text-f1-foreground placeholder:text-f1-foreground-tertiary",
                 style: Rde
               }
             ) : /* @__PURE__ */ S("p", { className: "flex-1 font-medium", children: d }),
@@ -63594,7 +63594,7 @@ const Rde = {
                 onChange: g,
                 disabled: _,
                 className: J(
-                  "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                  "w-full text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                   _ && "cursor-not-allowed"
                 )
               }
