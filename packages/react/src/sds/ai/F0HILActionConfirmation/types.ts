@@ -6,6 +6,8 @@ import type { F0CardHorizontalProps } from "@/experimental/F0CardHorizontal"
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
  */
 export type F0HILActionConfirmationProps = {
   /**

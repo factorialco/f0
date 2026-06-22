@@ -30,6 +30,7 @@ type CanvasCardAction =
       hideLabel?: boolean
     }
 
+/** @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}. */
 export type F0CanvasCardProps = {
   /** Avatar to display: a module icon or a file-type badge */
   avatar?: CanvasCardAvatar
@@ -48,6 +49,13 @@ export type F0CanvasCardProps = {
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
  */
 export function F0CanvasCard({
   avatar,
