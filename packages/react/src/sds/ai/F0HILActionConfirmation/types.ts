@@ -8,6 +8,7 @@ import type { F0CardHorizontalProps } from "@/experimental/F0CardHorizontal"
  * (reject) buttons at the trailing edge.
  *
  * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export type F0HILActionConfirmationProps = {
   /**

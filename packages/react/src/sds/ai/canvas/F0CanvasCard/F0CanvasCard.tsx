@@ -30,7 +30,10 @@ type CanvasCardAction =
       hideLabel?: boolean
     }
 
-/** @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}. */
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export type F0CanvasCardProps = {
   /** Avatar to display: a module icon or a file-type badge */
   avatar?: CanvasCardAvatar
@@ -56,6 +59,7 @@ export type F0CanvasCardProps = {
  * wrapper). Don't add new usages; migrate the remaining one
  * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
  * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export function F0CanvasCard({
   avatar,

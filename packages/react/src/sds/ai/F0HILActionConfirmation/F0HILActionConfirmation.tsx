@@ -8,6 +8,7 @@ import { F0HILActionConfirmationProps } from "./types"
  * `rejectAction` for the pending state, `status` for the resolved outcome, and
  * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
  * don't add new usages.
+ * @removeIn 5.0.0
  */
 export const F0HILActionConfirmation = ({
   text,
