@@ -144,7 +144,7 @@ export const Section = ({
                   onChange={handleChangeTitle}
                   disabled={inputDisabled}
                   className={cn(
-                    "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    "w-full text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                     inputDisabled && "cursor-not-allowed"
                   )}
                 />
