@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.0](https://github.com/factorialco/f0/compare/f0-react-v4.0.4...f0-react-v4.1.0) (2026-06-22)
+
+
+### Features
+
+* **F0Form:** add native period field type ([#4470](https://github.com/factorialco/f0/issues/4470)) ([99998fc](https://github.com/factorialco/f0/commit/99998fc77a550c2e8c322090e94c34c904e374a0))
+
 ## [4.0.4](https://github.com/factorialco/f0/compare/f0-react-v4.0.3...f0-react-v4.0.4) (2026-06-22)
 
 
