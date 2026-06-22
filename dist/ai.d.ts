@@ -261,6 +261,11 @@ export declare type AiChatProviderProps = {
      */
     initialMessage?: string | string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    /**
+     * Action/prompt cards rendered below the composer on the fullscreen welcome
+     * screen. The chat owns layout and, for prompt cards, the send.
+     */
+    welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
      * Enable resizable chat window
@@ -390,6 +395,8 @@ declare type AiChatProviderReturnValue = {
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
     welcomeScreenSuggestions: WelcomeScreenSuggestion[];
     setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
+    welcomeScreenCards: F0AiChatWelcomeCard[];
+    setWelcomeScreenCards: React.Dispatch<React.SetStateAction<F0AiChatWelcomeCard[]>>;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -506,6 +513,7 @@ declare interface AiChatState {
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
     defaultVisualizationMode?: VisualizationMode;
@@ -2770,7 +2778,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -2781,7 +2789,7 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -2859,10 +2867,21 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
+     * Action/prompt cards rendered as a grid below the composer on the
+     * fullscreen welcome screen. Prompt cards (with a `message`) call
+     * `onCardSelect`; action cards (with an `onClick`) run their own handler.
+     */
+    welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
+     * Called with a prompt card's `message` when it's clicked. Wire this to the
+     * chat's send. Action cards bypass it via their own `onClick`.
+     */
+    onCardSelect?: (message: string) => void;
+    /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
-     * rises toward the vertical center), and the welcome suggestions render
-     * below the textarea with their popover opening downward (instead of above).
+     * rises toward the vertical center) and the welcome cards render below it.
+     * The welcome suggestions row sits above the composer in both layouts.
      */
     fullscreen?: boolean;
 };
@@ -2882,38 +2901,28 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     quote: PendingQuote | null;
 };
 
+/**
+ * A card shown below the composer on the fullscreen welcome screen, rendered
+ * as an `F0CardHorizontal`. Two kinds:
+ * - **Prompt cards** carry a `message` the chat sends when the card is clicked.
+ * - **Action cards** carry an `onClick` (e.g. open a dialog) which takes
+ *   precedence over `message`.
+ *
+ * Data-driven and runtime-agnostic — the chat owns the layout and, for prompt
+ * cards, the send.
+ */
 export declare type F0AiChatWelcomeCard = {
     icon: IconType;
     title: string;
     description?: string;
-    /** Prompt cards: sent to `onSelect` when the card is clicked. */
+    /** Prompt cards: the message the chat sends when the card is clicked. */
     message?: string;
     /**
      * Action cards: custom click handler (e.g. open a dialog). Takes precedence
-     * over `message`/`onSelect` when both are present.
+     * over `message` when both are present.
      */
     onClick?: () => void;
 };
-
-/**
- * @experimental This is an experimental component, use it at your own risk.
- *
- * Action cards shown below the chat text area on the F0AiChat welcome screen
- * (the chat `footer` slot). Two card kinds are supported: prompt cards (with a
- * `message`, clicking calls `onSelect`) and action cards (with an `onClick`,
- * which takes precedence). Data-driven and runtime-agnostic — the caller
- * supplies the cards and decides what `onSelect` does.
- */
-export declare function F0AiChatWelcomeCards({ cards, onSelect, }: F0AiChatWelcomeCardsProps): JSX_2.Element;
-
-export declare interface F0AiChatWelcomeCardsProps {
-    cards: F0AiChatWelcomeCard[];
-    /**
-     * Called with a prompt card's `message` when clicked. Wire this to the
-     * chat's `sendMessage`. Not needed when every card is an action card.
-     */
-    onSelect?: (message: string) => void;
-}
 
 export declare const F0AiInsightCard: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
