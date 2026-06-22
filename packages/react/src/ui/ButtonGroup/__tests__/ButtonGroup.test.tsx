@@ -50,6 +50,28 @@ describe("ButtonGroup — canOverflow", () => {
     ).not.toBeNull()
   })
 
+  // Regression guard: jsdom can't measure layout, but the squeeze bug was a pure
+  // class decision — the row cluster only carries `min-w-0` (which lets it shrink
+  // below its content) when the group can actually shed buttons into the "⋯"
+  // menu. When it can't overflow, the cluster must keep its min-content floor so
+  // a confirm/reject pair reserves its width instead of being squeezed to nothing.
+  it("keeps the row cluster's min-content floor (no min-w-0) when canOverflow is false", () => {
+    const { container } = render(
+      <ButtonGroup secondaryActions={secondaries} canOverflow={false} />
+    )
+    const cluster = container.querySelector('[role="group"]')
+      ?.firstElementChild as HTMLElement
+    expect(cluster.className).toContain("flex-1")
+    expect(cluster.className).not.toContain("min-w-0")
+  })
+
+  it("lets the row cluster shrink (min-w-0) when canOverflow is true", () => {
+    const { container } = render(<ButtonGroup secondaryActions={secondaries} />)
+    const cluster = container.querySelector('[role="group"]')
+      ?.firstElementChild as HTMLElement
+    expect(cluster.className).toContain("min-w-0")
+  })
+
   it("still surfaces otherActions in the ⋯ menu when canOverflow is false", () => {
     render(
       <ButtonGroup

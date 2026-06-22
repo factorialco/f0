@@ -458,7 +458,14 @@ function ButtonGroupRow({
           // `[&>*]:shrink-0` keeps each rendered secondary, separator, link and
           // the "⋯" trigger at its natural width: the row overflows by shedding
           // into the menu, never by squeezing a button to nothing.
-          "relative flex min-w-0 flex-1 items-center gap-md [&>*]:shrink-0",
+          "relative flex flex-1 items-center gap-md [&>*]:shrink-0",
+          // `min-w-0` only when the cluster can shed: it lets the cluster shrink
+          // below its content so the title truncates against it and plain
+          // secondaries spill into the "⋯" menu. When the group can't overflow
+          // (e.g. a confirm/reject pair), dropping `min-w-0` keeps the cluster's
+          // min-content floor so the buttons reserve their width and are never
+          // squeezed to nothing — there's no menu to catch what gets squeezed out.
+          canOverflow && "min-w-0",
           align === "end" && "justify-end"
         )}
       >

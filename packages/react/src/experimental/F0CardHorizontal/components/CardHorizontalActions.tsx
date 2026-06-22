@@ -309,10 +309,13 @@ export function CardHorizontalActions({
     }
 
     const inline = (
-      // Icon-only, inline at the trailing edge.
+      // Icon-only, inline at the trailing edge. Like the standard actions
+      // wrapper, we deliberately omit `min-w-0` so the box keeps its min-content
+      // floor: the confirm/reject pair reserves its width and the leading title
+      // truncates against it, instead of the buttons being squeezed to nothing.
       <div
         className={cn(
-          "relative z-[1] min-w-0 flex-1",
+          "relative z-[1] flex-1",
           avatarOffset,
           inlineClusterVisibility[stackAt]
         )}
