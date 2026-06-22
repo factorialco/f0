@@ -326,9 +326,9 @@ export const F0AiChatTextArea = ({
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
-  // Welcome suggestions row. On the welcome screen it sits above the textarea
-  // in sidepanel and below it in fullscreen (so the popover can open downward
-  // without covering the composer).
+  // Welcome suggestions row. On the welcome screen it always sits above the
+  // textarea (both sidepanel and fullscreen); the popover opens upward so it
+  // doesn't cover the composer.
   const showSuggestions =
     isWelcomeScreen &&
     !!welcomeScreenSuggestions &&
@@ -340,7 +340,7 @@ export const F0AiChatTextArea = ({
       suggestions={welcomeScreenSuggestions}
       onItemClick={handleSuggestionClick}
       onItemHover={setHoveredSuggestion}
-      side={fullscreen ? "bottom" : "top"}
+      side="top"
     />
   ) : null
 
@@ -368,7 +368,7 @@ export const F0AiChatTextArea = ({
       {...(fullscreen ? composerReveal : {})}
     >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {suggestionsRow && !fullscreen && <div>{suggestionsRow}</div>}
+        {suggestionsRow && <div>{suggestionsRow}</div>}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <motion.form
             aria-busy={inProgress}
@@ -549,10 +549,6 @@ export const F0AiChatTextArea = ({
           </motion.form>
         </CreditWarningWrapper>
       </div>
-
-      {suggestionsRow && fullscreen && (
-        <div className="w-full max-w-content">{suggestionsRow}</div>
-      )}
 
       {footer && isWelcomeScreen && fullscreen && (
         <div className="w-full py-4 mx-auto flex max-w-content justify-center">

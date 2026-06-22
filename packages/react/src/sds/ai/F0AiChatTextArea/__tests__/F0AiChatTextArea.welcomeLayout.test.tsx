@@ -39,7 +39,7 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
     ).toBeTruthy()
   })
 
-  it("renders the suggestions below the textarea in fullscreen mode", () => {
+  it("renders the suggestions above the textarea in fullscreen mode", () => {
     render(
       <F0AiChatTextArea
         onSubmit={() => {}}
@@ -52,9 +52,9 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
 
     const trigger = screen.getByRole("button", { name: /analyze/i })
     const textarea = screen.getByRole("textbox", { name: "Message" })
-    // trigger follows the textarea in document order → suggestions are below.
+    // textarea follows the trigger in document order → suggestions are above.
     expect(
-      textarea.compareDocumentPosition(trigger) &
+      trigger.compareDocumentPosition(textarea) &
         Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
