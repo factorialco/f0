@@ -260,12 +260,6 @@ export declare type AiChatProviderProps = {
      * UI config — does not affect runtime behavior.
      */
     initialMessage?: string | string[];
-    /**
-     * Composer placeholder(s). A single entry renders statically; multiple
-     * entries animate (typewriter). Defaults to the i18n `ai.inputPlaceholder`
-     * when omitted. Purely UI config — does not affect runtime behavior.
-     */
-    placeholders?: string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     /**
@@ -273,13 +267,6 @@ export declare type AiChatProviderProps = {
      * When enabled, the chat can be resized between 300px and 50% of the screen width
      */
     resizable?: boolean;
-    /**
-     * Which side of the screen the chat panel (and its canvas) docks to.
-     * POC flag for the cocreation experience; defaults to "right" so all
-     * existing product usage is unaffected.
-     * @default "right"
-     */
-    chatSide?: "left" | "right";
     /**
      * The default visualization mode for the chat
      * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
@@ -491,7 +478,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "chatSide" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -521,8 +508,6 @@ declare interface AiChatState {
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
-    /** Which side the chat docks to. @default "right" */
-    chatSide?: "left" | "right";
     defaultVisualizationMode?: VisualizationMode;
     lockVisualizationMode?: boolean;
     historyEnabled?: boolean;
@@ -987,13 +972,6 @@ declare type CanvasCardAction = {
     onClose: () => void;
     /** When false, hides the Open/Close button but the card stays clickable. Default true. */
     showButton?: boolean;
-    /**
-     * When true the card is inert: the Open/Close button is hidden, the card
-     * no longer responds to clicks (no pointer cursor), and it fades to 50%
-     * opacity. Used to retire a superseded card while keeping it visible in the
-     * chat. Default false.
-     */
-    disabled?: boolean;
 } | {
     type: "custom";
     icon: IconType;
@@ -1851,6 +1829,15 @@ export declare const defaultTranslations: {
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
     };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -1974,16 +1961,18 @@ export declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -2363,6 +2352,8 @@ export declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -2496,33 +2487,6 @@ export declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -2806,7 +2770,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, placeholders, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, chatSide, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -3405,7 +3369,7 @@ export declare type F0CanvasCardProps = {
  * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
  * `content`, `onClose` and `entities` directly.
  */
-export declare function F0CanvasPanel({ content, onClose, entities, chatSide, }: F0CanvasPanelProps): ReactNode;
+export declare function F0CanvasPanel({ content, onClose, entities, }: F0CanvasPanelProps): ReactNode;
 
 export declare namespace F0CanvasPanel {
     var displayName: string;
@@ -3418,11 +3382,6 @@ export declare type F0CanvasPanelProps = {
     onClose: () => void;
     /** Canvas entity registry keyed by `CanvasContent["type"]`. */
     entities?: Record<string, CanvasEntityDefinition<any>>;
-    /**
-     * Which side the chat docks to, so the canvas seam (rounding/padding/
-     * border) faces the chat. @default "right"
-     */
-    chatSide?: "left" | "right";
 };
 
 declare interface F0CardHorizontalProps {
@@ -3558,15 +3517,14 @@ declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 declare const f0FileItemSizes: readonly ["md", "lg"];
 
-export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, status, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
- * (reject) buttons at the trailing edge. Omit the confirm/reject pairs to render
- * a CTA-less informational row (e.g. a "created" confirmation card).
+ * (reject) buttons at the trailing edge.
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -3591,42 +3549,21 @@ export declare type F0HILActionConfirmationProps = {
      */
     stackAt?: F0CardHorizontalProps["stackAt"];
     /**
-     * Optional secondary (outline) CTA rendered at the trailing edge — e.g. an
-     * "Open" link to the created resource. Renders only when no confirm/reject
-     * pair is set (those take precedence in `F0CardHorizontal`).
+     * Accessible label and tooltip for the confirm (✓) button.
      */
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
+    confirmationText: string;
     /**
-     * Accessible label and tooltip for the confirm (✓) button. Omit (along with
-     * `onConfirm`) to drop the confirm button entirely.
+     * Callback fired when the confirm button is clicked.
      */
-    confirmationText?: string;
+    onConfirm: () => void;
     /**
-     * Callback fired when the confirm button is clicked. When omitted, no confirm
-     * (✓) button is rendered.
+     * Accessible label and tooltip for the reject (✗) button.
      */
-    onConfirm?: () => void;
+    cancelText: string;
     /**
-     * Accessible label and tooltip for the reject (✗) button. Omit (along with
-     * `onCancel`) to drop the reject button entirely.
+     * Callback fired when the reject button is clicked.
      */
-    cancelText?: string;
-    /**
-     * Callback fired when the reject button is clicked. When omitted, no reject
-     * (✗) button is rendered. With neither `onConfirm` nor `onCancel` the row has
-     * no CTA at all.
-     */
-    onCancel?: () => void;
-    /**
-     * Resolved outcome of the row (e.g. accepted / rejected). Forwarded straight
-     * to `F0CardHorizontal`'s `status`, which renders the outcome icon in place of the
-     * ✓/✗ actions (it takes precedence over them). Use it to flip a confirmation
-     * card to its done state once the user has acted.
-     */
-    status?: F0CardHorizontalProps["status"];
+    onCancel: () => void;
 };
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
@@ -3774,6 +3711,10 @@ declare type F0TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -4100,6 +4041,7 @@ declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly headcount_planning: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4840,8 +4782,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -4849,11 +4794,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

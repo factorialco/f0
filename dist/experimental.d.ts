@@ -14,6 +14,7 @@ import { BarChartProps } from './experimental';
 import { BarSeriesCellValue } from './types/barSeries';
 import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
+import { CategoryBarChartCellValue } from './types/categoryBarChart';
 import { CategoryBarProps } from './CategoryBarChart';
 import { ChartConfig } from './experimental';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
@@ -267,6 +268,10 @@ declare type ActionLinkProps = ActionBaseProps & {
     className?: string;
 };
 
+declare type ActionLinkVariant = (typeof actionLinkVariants)[number];
+
+declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
+
 declare type ActionProps = ActionLinkProps | ActionButtonProps;
 
 declare type ActionProps_2 = {
@@ -513,12 +518,6 @@ declare type AiChatProviderProps = {
      * UI config — does not affect runtime behavior.
      */
     initialMessage?: string | string[];
-    /**
-     * Composer placeholder(s). A single entry renders statically; multiple
-     * entries animate (typewriter). Defaults to the i18n `ai.inputPlaceholder`
-     * when omitted. Purely UI config — does not affect runtime behavior.
-     */
-    placeholders?: string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     /**
@@ -526,13 +525,6 @@ declare type AiChatProviderProps = {
      * When enabled, the chat can be resized between 300px and 50% of the screen width
      */
     resizable?: boolean;
-    /**
-     * Which side of the screen the chat panel (and its canvas) docks to.
-     * POC flag for the cocreation experience; defaults to "right" so all
-     * existing product usage is unaffected.
-     * @default "right"
-     */
-    chatSide?: "left" | "right";
     /**
      * The default visualization mode for the chat
      * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
@@ -1325,6 +1317,16 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      */
     "aria-label"?: string;
     /**
+     * Forwarded to the underlying button. Useful for buttons that toggle an
+     * expandable region (e.g. a tree/graph expander).
+     */
+    "aria-expanded"?: boolean;
+    /**
+     * Forwarded to the underlying button. Use `-1` to take the button out of the
+     * tab order (e.g. when a parent manages focus via roving tabindex).
+     */
+    tabIndex?: number;
+    /**
      * The variant of the button.
      */
     variant?: ActionButtonVariant;
@@ -1569,6 +1571,77 @@ declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasContentB
     overflowHidden?: boolean;
 };
 
+/**
+ * An optional action button rendered in the alert header.
+ * Mutually exclusive with `dismissible` — only one can be shown at a time.
+ * Supply either `onClick` (handler) or `href` (navigation link), not both.
+ */
+declare type CardAlertAction = {
+    /** Label text for the action button. */
+    label: string;
+    /** Whether the action button is disabled. */
+    disabled?: boolean;
+} & ({
+    /** Called when the action button is clicked. */
+    onClick: () => void;
+    href?: never;
+} | {
+    /** URL to navigate to when the action button is clicked. */
+    href: string;
+    onClick?: never;
+});
+
+declare interface CardAlertBase {
+    /**
+     * The visual variant of the alert, which determines the color scheme and default icon.
+     */
+    variant: CardAlertVariant;
+    /**
+     * The title text displayed in the alert banner.
+     */
+    title: string;
+    /**
+     * Optional custom icon. When omitted, defaults to the icon that best represents the variant.
+     */
+    icon?: IconType;
+    /**
+     * Controls whether the alert is visible. Defaults to true.
+     * Use this together with onDismiss for controlled dismiss behaviour:
+     *   alert={{ ..., visible, dismissible: true, onDismiss: () => setVisible(false) }}
+     */
+    visible?: boolean;
+}
+
+declare type CardAlertDismissible = CardAlertBase & {
+    /** Renders a dismiss (×) button. Requires onDismiss. */
+    dismissible: true;
+    /**
+     * Called when the dismiss (×) button is clicked.
+     * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
+     */
+    onDismiss: () => void;
+    action?: never;
+};
+
+declare type CardAlertNonDismissible = CardAlertBase & {
+    dismissible?: false;
+    onDismiss?: never;
+    action?: never;
+};
+
+declare type CardAlertProps = CardAlertDismissible | CardAlertWithAction | CardAlertNonDismissible;
+
+declare type CardAlertVariant = (typeof cardAlertVariants)[number];
+
+declare const cardAlertVariants: readonly ["info", "warning", "critical", "positive"];
+
+declare type CardAlertWithAction = CardAlertBase & {
+    dismissible?: never;
+    onDismiss?: never;
+    /** Action button rendered in the alert header. Mutually exclusive with `dismissible`. */
+    action: CardAlertAction;
+};
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -1594,6 +1667,33 @@ declare type CardAvatarVariant = AvatarVariant | {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 declare type CardImageAspectRatio = (typeof cardImageAspectRatios)[number];
 
 declare const cardImageAspectRatios: readonly ["default", "video"];
@@ -1617,6 +1717,20 @@ declare type CardMetadataProperty = {
         value: Parameters<(typeof valueDisplayRenderers)[K]>[0];
     };
 }[CardPropertyType];
+
+declare interface CardPrimaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    /**
+     * Visual emphasis of the primary action. `"outline"` renders it as an outline
+     * button while keeping it pinned at the trailing edge (so a lone CTA never
+     * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+     * full primary weight.
+     * @default "default"
+     */
+    variant?: "default" | "outline";
+}
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
@@ -1642,6 +1756,16 @@ declare const cardPropertyRenderers: {
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
+
+declare interface CardSecondaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+}
+
+declare interface CardSecondaryLink extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
+    label: string;
+}
 
 declare type CardSelectableAvatarVariant = AvatarVariant | {
     type: "emoji";
@@ -2202,6 +2326,7 @@ declare type CollectionVisualizations<Record extends RecordType, Filters extends
     list: VisualizacionTypeDefinition<ListCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     card: VisualizacionTypeDefinition<CardCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     kanban: VisualizacionTypeDefinition<KanbanCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    graph: VisualizacionTypeDefinition<GraphCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, GraphVisualizationSettings>;
 };
 
 declare const collectionVisualizations: CollectionVisualizations<RecordType, FiltersDefinition, SortingsDefinition, SummariesDefinition, ItemActionsDefinition<RecordType>, NavigationFiltersDefinition, GroupingDefinition<RecordType>>;
@@ -2572,12 +2697,6 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     primaryActions?: PrimaryActionsDefinitionFn;
     /** Label for the primary actions dropdown trigger button */
     primaryActionsLabel?: string;
-    /**
-     * When `true`, clicking the main split button also opens the dropdown instead
-     * of triggering the first action. Use when all choices are equally discoverable
-     * (e.g. a "Create" button that reveals "Create with AI / Manual / Templates").
-     */
-    primaryActionsOpenOnClick?: boolean;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
     /** Available summaries fields. If not provided, summaries is not allowed. */
@@ -2596,6 +2715,8 @@ export declare type DataCollectionSourceDefinition<R extends RecordType = Record
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
+    /** Rich search preview shown in the shared header search (all visualizations). */
+    searchPreview?: SearchPreview<R>;
 };
 
 /**
@@ -3064,6 +3185,15 @@ declare const defaultTranslations: {
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
     };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -3187,16 +3317,18 @@ declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -3576,6 +3708,8 @@ declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -3709,33 +3843,6 @@ declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -4429,8 +4536,6 @@ export declare const F0AvatarModule: WithDataTestIdReturnType_5<typeof F0AvatarM
 /**
  * Module avatar
  * @description A component that displays a module avatar
- * @experimental
- * @returns
  */
 declare function F0AvatarModule_2({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
 
@@ -4571,6 +4676,101 @@ export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalPr
 
 export declare type F0CalloutProps = CalloutInternalProps;
 
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0CardHorizontal: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare interface F0CardHorizontalProps {
+    /**
+     * The primary line of text.
+     */
+    title: string;
+    /**
+     * Optional secondary line shown beneath the title (wraps across multiple
+     * lines when long).
+     */
+    description?: string;
+    /**
+     * Optional avatar rendered at a fixed `lg` size on the left (the size is not
+     * configurable). Accepts any avatar type in the system: person, company, team,
+     * file, flag, icon, emoji, module, alert, date, pulse. Types without a `lg`
+     * variant (date, pulse) render at their intrinsic size.
+     */
+    avatar?: CardAvatarVariant;
+    /**
+     * The primary action button, shown at the trailing edge of the row.
+     */
+    primaryAction?: CardPrimaryAction;
+    /**
+     * Secondary actions (buttons) or a single link, shown before the primary action.
+     */
+    secondaryActions?: CardSecondaryAction[] | CardSecondaryLink;
+    /**
+     * Overflow (⋯) menu actions, rendered as the trailing control of the row.
+     */
+    otherActions?: DropdownItem[];
+    /**
+     * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
+     * instead of the standard actions. Provide either or both.
+     */
+    confirmAction?: CardHorizontalConfirmAction;
+    /**
+     * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
+     */
+    rejectAction?: CardHorizontalConfirmAction;
+    /**
+     * Resolved-state icon shown at the trailing edge in place of any actions — the
+     * outcome of a confirm/reject row, e.g.
+     * `{ icon: Check, variant: "positive", label: "Accepted" }`.
+     * Takes precedence over the action props.
+     */
+    status?: CardHorizontalStatus;
+    /**
+     * Strikes through and dims the title/description, marking the row's subject as
+     * void or closed (e.g. a rejected request). Purely presentational — pair it
+     * with the matching `status` tag at the call site.
+     */
+    inactive?: boolean;
+    /**
+     * Container width at which the actions drop to their own line (below it) vs.
+     * sit inline (at/above it). `never` keeps them inline at every width.
+     * @default "never"
+     */
+    stackAt?: CardHorizontalStackAt;
+    /**
+     * Stretch to fill the height of its container.
+     */
+    fullHeight?: boolean;
+    /**
+     * Alert banner displayed above the row with a coloured header strip and matching
+     * border. Supports info, warning, critical and positive variants.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
+    /**
+     * Opt-in: makes the whole row a link to this href. The row only becomes a
+     * click target (pointer cursor + hover affordance + overlay link) when `link`
+     * or `onClick` is set — otherwise it's a static row whose only interactive
+     * parts are its actions.
+     */
+    link?: string;
+    /**
+     * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+     * into an explicit click target (pointer cursor + hover affordance). Use it
+     * for cards whose entire surface is the action (e.g. entry-point cards with no
+     * CTA button); leave it unset for rows that act only through their buttons.
+     */
+    onClick?: () => void;
+    /**
+     * Disables the full-row overlay link (used with `link`) so a parent can manage
+     * drag-and-drop while still allowing click navigation via `onClick`.
+     */
+    disableOverlayLink?: boolean;
+}
+
 export declare type F0FileAction = {
     icon?: IconType;
     label: string;
@@ -4594,12 +4794,21 @@ export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 export declare const f0FileItemSizes: readonly ["md", "lg"];
 
+/** Tag types that can be rendered in a node's metadata row. */
+declare type F0GraphNodeTagType = TagVariant["type"];
+
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
     size?: "lg" | "md" | "sm" | "xs";
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
+
+declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
+    variant?: ActionLinkVariant;
+    stopPropagation?: boolean;
+    href?: string;
+};
 
 declare type F0Message = {
     id: string;
@@ -4760,7 +4969,7 @@ export declare type F0SearchInputProps = {
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0SegmentedControl: {
-    ({ items, value, onChange, disabled, fullWidth, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
+    ({ items, value, onChange, disabled, fullWidth, hideLabels, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
     displayName: string;
 };
 
@@ -4792,6 +5001,12 @@ export declare interface F0SegmentedControlProps {
      * @default false
      */
     fullWidth?: boolean;
+    /**
+     * Render segments icon-only, keeping the label accessible to screen readers.
+     * Segments without an icon still show their label. Useful in tight headers.
+     * @default false
+     */
+    hideLabels?: boolean;
     /**
      * Accessible name for the segmented control. The underlying ToggleGroup
      * (single mode) renders as a `radiogroup`, which requires a name.
@@ -5028,6 +5243,10 @@ declare type F0TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -5433,6 +5652,97 @@ export declare const granularityDefinitions: {
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
+
+/**
+ * Configuration for the "graph" visualization (org-chart style).
+ *
+ * The hierarchy is fetched on demand from the same `dataAdapter` of the source:
+ * `childrenFilters(parentId)` returns the filter that the adapter understands as
+ * "the direct children of parentId" (`null` = the roots). Children are loaded
+ * when a node is expanded.
+ */
+declare type GraphVisualizationOptions<R extends RecordType, Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
+    /** Primary line of text for a node. */
+    title: (record: R) => string;
+    /** Secondary line of text for a node. */
+    subtitle?: (record: R) => string;
+    /** Avatar shown on the leading side of the node pill. */
+    avatar?: (record: R) => AvatarVariant;
+    /** Tags rendered in the node metadata row. */
+    tags?: (record: R) => TagVariant[];
+    /**
+     * Tag types present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata type (like configuring table columns).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
+    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Tag types that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /**
+     * Floating toolbar shown above a node while it is selected. Provide the
+     * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
+     */
+    nodeActions?: (record: R) => ReactNode;
+    /** Resolves a stable node id from a record. Defaults to `String(record.id)`. */
+    getNodeId?: (record: R) => string;
+    /** Number of children a node has. A node is expandable when this is `> 0`. */
+    getChildrenCount: (record: R) => number;
+    /**
+     * Returns the filters that, applied to the source `dataAdapter`, fetch the
+     * direct children of `parentId`. `parentId === null` must return the roots.
+     */
+    childrenFilters: (parentId: string | null) => Partial<FiltersState<Filters>>;
+    /**
+     * How many levels to load and expand on the initial render.
+     * - `0`: show only the roots; every level below loads on click.
+     * - `1` (default): also show the roots' direct children.
+     * - `2`: also pre-load the grandchildren for a fuller first view.
+     */
+    defaultExpandDepth?: number;
+    /**
+     * Id of a node to reveal: loads its ancestor path, expands the branch and
+     * centers/highlights it. Driven by the shared Data Collection search — set it
+     * from `searchPreview.onSelect`.
+     */
+    revealNodeId?: string;
+    /**
+     * Resolves the ancestor path (root → … → matched node) for a node so it can
+     * be revealed, returning the records in root-first order. Required for
+     * revealing nodes in branches that have not been expanded yet.
+     */
+    loadNodePath?: (nodeId: string) => Promise<R[]>;
+    /** Optional parent accessor used when linking the revealed ancestor path. */
+    getParentId?: (record: R) => string | null;
+    /**
+     * Id of the node representing the current user. When set, a "Find me" button
+     * is shown in the controls that centers the viewport on that node.
+     */
+    currentUserNodeId?: string;
+    /** Initial zoom preset passed through to F0Graph. */
+    zoomPreset?: ZoomPreset;
+    /**
+     * Smallest zoom the user can pan to (the zoom-out limit), passed through to
+     * F0Graph. Defaults to F0Graph's own default. Raise it (e.g. `0.3`) to keep
+     * the tree readable and avoid the most zoomed-out "dot" level.
+     */
+    minZoom?: number;
+    /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
+    maxZoom?: number;
+    /** Whether to render the zoom/fit controls. Defaults to `true`. */
+    showControls?: boolean;
+};
+
+declare type GraphVisualizationSettings = {
+    /** Metadata order (tag-type ids), matching the table column settings shape. */
+    order?: string[];
+    /** Hidden metadata (tag-type ids). */
+    hidden?: string[];
+};
 
 /**
  * Symbol used to identify the groupId in the data
@@ -6150,7 +6460,7 @@ declare interface MetricComputation {
 export declare const MobileDropdown: ({ items, children, dataTestId }: DropdownProps) => JSX_2.Element;
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -6192,6 +6502,7 @@ export declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly headcount_planning: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -7661,6 +7972,26 @@ declare type SearchOptions = {
     debounceTime?: number;
 };
 
+/**
+ * Optional rich search preview shown in the shared Data Collection search.
+ * When provided, typing in the header search renders a results dropdown with
+ * avatar + title + subtitle, consistent across every visualization. Selecting a
+ * result calls `onSelect` (e.g. the graph view reveals/centers the node).
+ */
+export declare type SearchPreview<R extends RecordType> = {
+    search: (query: string) => Promise<R[]>;
+    getId: (record: R) => string;
+    render: (record: R) => SearchPreviewResultData;
+    onSelect: (record: R) => void;
+};
+
+/** Data shown for a single row of the search preview dropdown. */
+export declare type SearchPreviewResultData = {
+    avatar?: AvatarVariant;
+    title: string;
+    subtitle?: string;
+};
+
 declare interface SecondaryAction extends PrimaryActionButton {
     variant?: "outline" | "critical" | "outlinePromote" | "promote";
 }
@@ -8372,6 +8703,14 @@ maxHeight?: number;
  */
 export declare type TextareaProps = F0TextAreaInputProps;
 
+/** A button rendered in the footer at the bottom of the table of contents */
+export declare type TOCAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
 export declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -8452,6 +8791,8 @@ export declare interface TOCProps {
     hideChildrenCounter?: boolean;
     /** Enable vertical scrolling when content overflows (default: true) */
     scrollable?: boolean;
+    /** Action buttons pinned in a footer at the bottom of the panel */
+    actions?: TOCAction[];
 }
 
 declare type toggleActionType = {
@@ -8921,6 +9262,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
@@ -9009,27 +9351,32 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
     type: "card";
     /** Configuration options for card visualization */
     options: CardVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Kanban-based visualization type */
     type: "kanban";
     /** Configuration options for kanban visualization */
     options: KanbanVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Table-based visualization type */
     type: "table";
     /** Configuration options for table visualization */
     options: TableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Editable table-based visualization type */
     type: "editableTable";
     /** Configuration options for editable table visualization */
     options: EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** List-based visualization type */
     type: "list";
     /** Configuration options for list visualization */
     options: ListVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+    /** Graph/org-chart-based visualization type */
+    type: "graph";
+    /** Configuration options for graph visualization */
+    options: GraphVisualizationOptions<R, Filters, Sortings>;
+} & VisualizationFilterOverrides<Filters, Sortings>) | ({
     /** Human-readable label for the visualization */
     label: string;
     /** Icon to represent the visualization in UI */
@@ -9043,7 +9390,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
         onLoadError: OnLoadErrorCallback;
         source: DataCollectionSource<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>;
     }) => JSX.Element;
-} & VisualizationFilterOverrides<Filters>);
+} & VisualizationFilterOverrides<Filters, Sortings>);
 
 /**
  * Optional per-visualization filter and preset overrides.
@@ -9052,7 +9399,7 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
  *
  * @template Filters - The filters type extending FiltersDefinition
  */
-export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
+export declare type VisualizationFilterOverrides<Filters extends FiltersDefinition, Sortings extends SortingsDefinition = SortingsDefinition> = {
     /** Override which filters are available when this visualization is active.
      *  If not provided, the global source filters are used.
      *  Can be a subset of the source filters definition. */
@@ -9060,6 +9407,10 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
     /** Preset configuration used only when this visualization is active.
      *  These replace the global source presets for this visualization. */
     presets?: PresetsDefinition<Filters>;
+    /** Override which sortings are available when this visualization is active.
+     *  If not provided, the global source sortings are used. Pass `{}` to hide the
+     *  sort selector for views that don't support sorting (e.g. the org chart). */
+    sortings?: Partial<Sortings>;
 };
 
 /**
@@ -9316,6 +9667,26 @@ declare interface WithTooltipDescription {
     description?: string;
 }
 
+declare type ZoomPreset = keyof typeof zoomPresets;
+
+declare const zoomPresets: {
+    readonly default: {
+        readonly detail: 0.56;
+        readonly compact: 0.3;
+        readonly dot: 0.18;
+    };
+    readonly dense: {
+        readonly detail: 0.5;
+        readonly compact: 0.2;
+        readonly dot: 0.08;
+    };
+    readonly sparse: {
+        readonly detail: 0.85;
+        readonly compact: 0.45;
+        readonly dot: 0.15;
+    };
+};
+
 export { }
 
 
@@ -9373,8 +9744,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -9382,11 +9756,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

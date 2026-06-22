@@ -17,6 +17,7 @@ import { baseColors } from '@factorialco/f0-core';
 import { BigNumberProps as BigNumberProps_2 } from './types';
 import { BlockContentExtraProps } from './blocks/BlockContent';
 import { BlockProps } from './blocks/Block';
+import { CategoryBarChartCellValue } from './types/categoryBarChart';
 import { CategoryBarProps } from './CategoryBarChart';
 import { ChartConfig } from './f0';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
@@ -44,6 +45,8 @@ import type * as echarts_2 from 'echarts';
 import { EmployeeItemProps } from './types';
 import { F0AccordionSkeletonProps } from './F0AccordionSkeleton';
 import { F0AnalyticsDashboardProps as F0AnalyticsDashboardProps_2 } from './types';
+import { F0AudioPlayerCardProps as F0AudioPlayerCardProps_2 } from './types';
+import { F0AudioPlayerProps as F0AudioPlayerProps_2 } from './types';
 import { F0AvatarCompanyProps as F0AvatarCompanyProps_2 } from './types';
 import { F0AvatarDateProps } from './F0AvatarDate';
 import { F0AvatarEmojiProps as F0AvatarEmojiProps_2 } from './F0AvatarEmoji';
@@ -543,12 +546,6 @@ export declare type AiChatProviderProps = {
      * UI config — does not affect runtime behavior.
      */
     initialMessage?: string | string[];
-    /**
-     * Composer placeholder(s). A single entry renders statically; multiple
-     * entries animate (typewriter). Defaults to the i18n `ai.inputPlaceholder`
-     * when omitted. Purely UI config — does not affect runtime behavior.
-     */
-    placeholders?: string[];
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     /**
@@ -556,13 +553,6 @@ export declare type AiChatProviderProps = {
      * When enabled, the chat can be resized between 300px and 50% of the screen width
      */
     resizable?: boolean;
-    /**
-     * Which side of the screen the chat panel (and its canvas) docks to.
-     * POC flag for the cocreation experience; defaults to "right" so all
-     * existing product usage is unaffected.
-     * @default "right"
-     */
-    chatSide?: "left" | "right";
     /**
      * The default visualization mode for the chat
      * When set to "fullscreen", the chat starts in fullscreen mode and auto-opens
@@ -774,7 +764,7 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
-} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "chatSide" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
+} & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
     /** Open the canvas panel with the given content */
@@ -804,8 +794,6 @@ declare interface AiChatState {
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
-    /** Which side the chat docks to. @default "right" */
-    chatSide?: "left" | "right";
     defaultVisualizationMode?: VisualizationMode;
     lockVisualizationMode?: boolean;
     historyEnabled?: boolean;
@@ -1180,6 +1168,33 @@ export declare type AttachedFile = {
     errorMessage?: string;
 };
 
+export declare interface AudioPlayerControls extends AudioPlayerState {
+    play: () => void;
+    pause: () => void;
+    toggle: () => void;
+    seek: (seconds: number) => void;
+    setPlaybackRate: (rate: number) => void;
+}
+
+export declare interface AudioPlayerMenuAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    critical?: boolean;
+}
+
+export declare const audioPlayerSizes: readonly ["sm", "md"];
+
+export declare interface AudioPlayerState {
+    isPlaying: boolean;
+    currentTime: number;
+    duration: number;
+    buffered: number;
+    playbackRate: number;
+    isLoading: boolean;
+    error: MediaError | null;
+}
+
 /**
  * An item that can be passed in the `availableFormDefinitions` array.
  * Accepts either a plain {@link F0AiAvailableFormDefinition} or the result
@@ -1539,13 +1554,19 @@ declare type BaseQuestionProps = {
     type: QuestionType;
     children: React.ReactNode;
     required?: boolean;
-    locked?: boolean;
     hiddenActions?: HiddenActions;
     /**
-     * Optional alert rendered inside the card (authoring view only). Pair with
-     * `locked` to explain why a predefined question can't be edited or moved.
+     * Locks the question on its own — independent of any section. A question is
+     * also locked when its containing section is locked.
      */
-    notice?: QuestionNotice;
+    locked?: boolean;
+    /**
+     * Optional notice shown in the lock tooltip when the question is locked. Use
+     * it to say what this specific question is — it takes precedence over the
+     * parent section's `LockedSectionNotice` and over the default question notice
+     * from the i18n provider.
+     */
+    lockedNote?: LockedQuestionNotice;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -1640,11 +1661,11 @@ declare const boxVariants: (props?: ({
     borderBottom?: "none" | "default" | "thick" | undefined;
     borderLeft?: "none" | "default" | "thick" | undefined;
     borderRight?: "none" | "default" | "thick" | undefined;
-    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
+    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -1779,6 +1800,16 @@ declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "clas
      * The aria-label of the button if not provided title or label will be used.
      */
     "aria-label"?: string;
+    /**
+     * Forwarded to the underlying button. Useful for buttons that toggle an
+     * expandable region (e.g. a tree/graph expander).
+     */
+    "aria-expanded"?: boolean;
+    /**
+     * Forwarded to the underlying button. Use `-1` to take the button out of the
+     * tab order (e.g. when a parent manages focus via roving tabindex).
+     */
+    tabIndex?: number;
     /**
      * The variant of the button.
      */
@@ -1941,13 +1972,6 @@ declare type CanvasCardAction = {
     onClose: () => void;
     /** When false, hides the Open/Close button but the card stays clickable. Default true. */
     showButton?: boolean;
-    /**
-     * When true the card is inert: the Open/Close button is hidden, the card
-     * no longer responds to clicks (no pointer cursor), and it fades to 50%
-     * opacity. Used to retire a superseded card while keeping it visible in the
-     * chat. Default false.
-     */
-    disabled?: boolean;
 } | {
     type: "custom";
     icon: IconType;
@@ -2292,7 +2316,8 @@ declare type CardInternalProps_2 = F0AiInsightCardProps & {
 };
 
 declare type CardMetadata = {
-    icon: IconType;
+    /** Leading icon. Optional — when omitted the row renders just the value. */
+    icon?: IconType;
     property: Exclude<CardMetadataProperty, {
         type: "file";
     }>;
@@ -3055,6 +3080,7 @@ declare type CollectionVisualizations<Record extends RecordType, Filters extends
     list: VisualizacionTypeDefinition<ListCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     card: VisualizacionTypeDefinition<CardCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
     kanban: VisualizacionTypeDefinition<KanbanCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>>;
+    graph: VisualizacionTypeDefinition<GraphCollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping>, GraphVisualizationSettings>;
 };
 
 declare const collectionVisualizations: CollectionVisualizations<RecordType, FiltersDefinition, SortingsDefinition, SummariesDefinition, ItemActionsDefinition<RecordType>, NavigationFiltersDefinition, GroupingDefinition<RecordType>>;
@@ -3732,12 +3758,6 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     primaryActions?: PrimaryActionsDefinitionFn;
     /** Label for the primary actions dropdown trigger button */
     primaryActionsLabel?: string;
-    /**
-     * When `true`, clicking the main split button also opens the dropdown instead
-     * of triggering the first action. Use when all choices are equally discoverable
-     * (e.g. a "Create" button that reveals "Create with AI / Manual / Templates").
-     */
-    primaryActionsOpenOnClick?: boolean;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
     /** Available summaries fields. If not provided, summaries is not allowed. */
@@ -3756,6 +3776,8 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     itemPreFilter?: (item: R) => boolean;
     /** Lanes configuration */
     lanes?: ReadonlyArray<Lane<Filters>>;
+    /** Rich search preview shown in the shared header search (all visualizations). */
+    searchPreview?: SearchPreview<R>;
 };
 
 /**
@@ -4333,6 +4355,15 @@ export declare const defaultTranslations: {
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
     };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+    };
     readonly actions: {
         readonly add: "Add";
         readonly edit: "Edit";
@@ -4456,16 +4487,18 @@ export declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -4845,6 +4878,8 @@ export declare const defaultTranslations: {
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
             readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -4978,33 +5013,6 @@ export declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -5992,7 +6000,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, placeholders, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, chatSide, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -6650,6 +6658,110 @@ declare type F0AssistantMessageExtraProps = {
     renderMarkdown?: (content: string) => ReactNode;
 };
 
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0AudioPlayer: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0AudioPlayerProps_2 & RefAttributes<HTMLDivElement>>>;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0AudioPlayerCard: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0AudioPlayerCardProps_2 & RefAttributes<HTMLDivElement>>>;
+
+export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
+    /**
+     * The title shown in the card header (e.g. "AI Call with Alex Williams").
+     */
+    title: string;
+    /**
+     * An optional subtitle shown under the title (e.g. "May 9, 2025 - 10:00am").
+     */
+    subtitle?: string;
+    /**
+     * Extra actions appended to the kebab menu below the playback-speed options
+     * (after a separator) — e.g. a download or copy-link action. The kebab itself
+     * is always rendered by the card.
+     */
+    actions?: AudioPlayerMenuAction[];
+}
+
+export declare interface F0AudioPlayerProps extends WithDataTestIdProps, DataAttributes_2 {
+    /**
+     * The audio source URL.
+     */
+    src: string;
+    /**
+     * How much of the audio to preload.
+     * @default "metadata"
+     */
+    preload?: "none" | "metadata" | "auto";
+    /**
+     * Start playing as soon as the audio is ready.
+     * @default false
+     */
+    autoPlay?: boolean;
+    /**
+     * Controlled playing state. Pair with `onPlayingChange`.
+     */
+    playing?: boolean;
+    /**
+     * Initial playing state when uncontrolled.
+     * @default false
+     */
+    defaultPlaying?: boolean;
+    /**
+     * Fired when the playing state changes (play or pause).
+     */
+    onPlayingChange?: (playing: boolean) => void;
+    /**
+     * Playback rates offered in the speed menu. Pass an empty array to hide the
+     * speed options.
+     * @default [1, 1.5, 2]
+     */
+    playbackRates?: number[];
+    /**
+     * Fired when playback starts.
+     */
+    onPlay?: () => void;
+    /**
+     * Fired when playback pauses.
+     */
+    onPause?: () => void;
+    /**
+     * Fired when the user seeks, with the target position in seconds.
+     */
+    onSeek?: (seconds: number) => void;
+    /**
+     * Fired on every time update, with the current position in seconds.
+     */
+    onTimeUpdate?: (seconds: number) => void;
+    /**
+     * Fired when playback reaches the end.
+     */
+    onEnded?: () => void;
+    /**
+     * Fired when the audio fails to load or play.
+     */
+    onError?: (error: MediaError | null) => void;
+    /**
+     * Disables all controls.
+     * @default false
+     */
+    disabled?: boolean;
+    /**
+     * Accessible label for the player region.
+     */
+    ariaLabel?: string;
+    /**
+     * The size of the player.
+     * @default "md"
+     */
+    size?: F0AudioPlayerSize;
+    className?: string;
+}
+
+export declare type F0AudioPlayerSize = (typeof audioPlayerSizes)[number];
+
 export declare function F0AuraVoiceAnimation({ size, state, color, colorShift, audioTrack, themeMode, className, ref, ...props }: F0AuraVoiceAnimationProps & ComponentProps<"div"> & VariantProps<typeof F0AuraVoiceAnimationVariants>): JSX_2.Element;
 
 export declare interface F0AuraVoiceAnimationProps {
@@ -6807,8 +6919,6 @@ export declare const F0AvatarModule: WithDataTestIdReturnType_4<typeof F0AvatarM
 /**
  * Module avatar
  * @description A component that displays a module avatar
- * @experimental
- * @returns
  */
 declare function F0AvatarModule_2({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
 
@@ -7136,14 +7246,6 @@ declare type F0ButtonDropdownSplitProps<T = string> = F0ButtonDropdownBaseProps<
      */
     value?: T;
     /**
-     * When `true`, clicking the main button also opens the dropdown instead of
-     * triggering the selected item's action. The main button acts as a labeled
-     * trigger — useful when all choices are equally discoverable (e.g. a "Create"
-     * button that opens a "Create with AI / Create Manual / Templates" menu).
-     * @default false
-     */
-    openOnClick?: boolean;
-    /**
      * Called when the main button or a dropdown item is clicked.
      * @param value The value of the item that was clicked.
      * @param item The item that was clicked.
@@ -7240,7 +7342,7 @@ export declare type F0CanvasCardProps = {
  * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
  * `content`, `onClose` and `entities` directly.
  */
-export declare function F0CanvasPanel({ content, onClose, entities, chatSide, }: F0CanvasPanelProps): ReactNode;
+export declare function F0CanvasPanel({ content, onClose, entities, }: F0CanvasPanelProps): ReactNode;
 
 export declare namespace F0CanvasPanel {
     var displayName: string;
@@ -7253,11 +7355,6 @@ export declare type F0CanvasPanelProps = {
     onClose: () => void;
     /** Canvas entity registry keyed by `CanvasContent["type"]`. */
     entities?: Record<string, CanvasEntityDefinition<any>>;
-    /**
-     * Which side the chat docks to, so the canvas seam (rounding/padding/
-     * border) faces the chat. @default "right"
-     */
-    chatSide?: "left" | "right";
 };
 
 export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
@@ -7266,14 +7363,7 @@ compact?: boolean;
 }) => JSX_2.Element;
 }>;
 
-/**
- * @experimental This is an experimental component, use it at your own risk.
- */
-export declare const F0CardHorizontal: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
-Skeleton: () => JSX_2.Element;
-}>;
-
-export declare interface F0CardHorizontalProps {
+declare interface F0CardHorizontalProps {
     /**
      * The primary line of text.
      */
@@ -9415,6 +9505,9 @@ export declare interface F0FormValidationResult {
     rootError?: string;
 }
 
+/** Tag types that can be rendered in a node's metadata row. */
+declare type F0GraphNodeTagType = TagVariant["type"];
+
 export declare const F0GridStack: WithDataTestIdReturnType_7<    {
 ({ options, widgets, onChange, className, static: isStatic, forcePositionSync, }: F0GridStackProps_2): JSX_2.Element;
 displayName: string;
@@ -9440,15 +9533,14 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
-export declare const F0HILActionConfirmation: ({ text, description, avatar, action, confirmationText, onConfirm, cancelText, onCancel, status, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
+export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
- * (reject) buttons at the trailing edge. Omit the confirm/reject pairs to render
- * a CTA-less informational row (e.g. a "created" confirmation card).
+ * (reject) buttons at the trailing edge.
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -9473,42 +9565,21 @@ export declare type F0HILActionConfirmationProps = {
      */
     stackAt?: F0CardHorizontalProps["stackAt"];
     /**
-     * Optional secondary (outline) CTA rendered at the trailing edge — e.g. an
-     * "Open" link to the created resource. Renders only when no confirm/reject
-     * pair is set (those take precedence in `F0CardHorizontal`).
+     * Accessible label and tooltip for the confirm (✓) button.
      */
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
+    confirmationText: string;
     /**
-     * Accessible label and tooltip for the confirm (✓) button. Omit (along with
-     * `onConfirm`) to drop the confirm button entirely.
+     * Callback fired when the confirm button is clicked.
      */
-    confirmationText?: string;
+    onConfirm: () => void;
     /**
-     * Callback fired when the confirm button is clicked. When omitted, no confirm
-     * (✓) button is rendered.
+     * Accessible label and tooltip for the reject (✗) button.
      */
-    onConfirm?: () => void;
+    cancelText: string;
     /**
-     * Accessible label and tooltip for the reject (✗) button. Omit (along with
-     * `onCancel`) to drop the reject button entirely.
+     * Callback fired when the reject button is clicked.
      */
-    cancelText?: string;
-    /**
-     * Callback fired when the reject button is clicked. When omitted, no reject
-     * (✗) button is rendered. With neither `onConfirm` nor `onCancel` the row has
-     * no CTA at all.
-     */
-    onCancel?: () => void;
-    /**
-     * Resolved outcome of the row (e.g. accepted / rejected). Forwarded straight
-     * to `F0CardHorizontal`'s `status`, which renders the outcome icon in place of the
-     * ✓/✗ actions (it takes precedence over them). Use it to flip a confirmation
-     * card to its done state once the user has acted.
-     */
-    status?: F0CardHorizontalProps["status"];
+    onCancel: () => void;
 };
 
 export declare const F0Icon: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<Omit<F0IconProps, "ref"> & RefAttributes<SVGSVGElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
@@ -11180,6 +11251,8 @@ declare type FontSize = (typeof fontSizes)[number];
 
 declare const fontSizes: readonly ["sm", "md", "lg"];
 
+export declare const formatPlaybackTime: (seconds: number) => string;
+
 /**
  * A preset formatting instruction the LLM can specify instead of a
  * real formatter function. The wrapper component maps these to actual
@@ -11470,6 +11543,97 @@ export declare const granularityDefinitions: {
 };
 
 export declare type GranularityDefinitionSimple = Pick<GranularityDefinition, "toRangeString" | "toString">;
+
+declare type GraphCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, GraphVisualizationOptions<Record, Filters, Sortings>>;
+
+/**
+ * Configuration for the "graph" visualization (org-chart style).
+ *
+ * The hierarchy is fetched on demand from the same `dataAdapter` of the source:
+ * `childrenFilters(parentId)` returns the filter that the adapter understands as
+ * "the direct children of parentId" (`null` = the roots). Children are loaded
+ * when a node is expanded.
+ */
+declare type GraphVisualizationOptions<R extends RecordType, Filters extends FiltersDefinition, _Sortings extends SortingsDefinition> = {
+    /** Primary line of text for a node. */
+    title: (record: R) => string;
+    /** Secondary line of text for a node. */
+    subtitle?: (record: R) => string;
+    /** Avatar shown on the leading side of the node pill. */
+    avatar?: (record: R) => AvatarVariant;
+    /** Tags rendered in the node metadata row. */
+    tags?: (record: R) => TagVariant[];
+    /**
+     * Tag types present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata type (like configuring table columns).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
+    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /** Tag types that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    /**
+     * Floating toolbar shown above a node while it is selected. Provide the
+     * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
+     */
+    nodeActions?: (record: R) => ReactNode;
+    /** Resolves a stable node id from a record. Defaults to `String(record.id)`. */
+    getNodeId?: (record: R) => string;
+    /** Number of children a node has. A node is expandable when this is `> 0`. */
+    getChildrenCount: (record: R) => number;
+    /**
+     * Returns the filters that, applied to the source `dataAdapter`, fetch the
+     * direct children of `parentId`. `parentId === null` must return the roots.
+     */
+    childrenFilters: (parentId: string | null) => Partial<FiltersState<Filters>>;
+    /**
+     * How many levels to load and expand on the initial render.
+     * - `0`: show only the roots; every level below loads on click.
+     * - `1` (default): also show the roots' direct children.
+     * - `2`: also pre-load the grandchildren for a fuller first view.
+     */
+    defaultExpandDepth?: number;
+    /**
+     * Id of a node to reveal: loads its ancestor path, expands the branch and
+     * centers/highlights it. Driven by the shared Data Collection search — set it
+     * from `searchPreview.onSelect`.
+     */
+    revealNodeId?: string;
+    /**
+     * Resolves the ancestor path (root → … → matched node) for a node so it can
+     * be revealed, returning the records in root-first order. Required for
+     * revealing nodes in branches that have not been expanded yet.
+     */
+    loadNodePath?: (nodeId: string) => Promise<R[]>;
+    /** Optional parent accessor used when linking the revealed ancestor path. */
+    getParentId?: (record: R) => string | null;
+    /**
+     * Id of the node representing the current user. When set, a "Find me" button
+     * is shown in the controls that centers the viewport on that node.
+     */
+    currentUserNodeId?: string;
+    /** Initial zoom preset passed through to F0Graph. */
+    zoomPreset?: ZoomPreset;
+    /**
+     * Smallest zoom the user can pan to (the zoom-out limit), passed through to
+     * F0Graph. Defaults to F0Graph's own default. Raise it (e.g. `0.3`) to keep
+     * the tree readable and avoid the most zoomed-out "dot" level.
+     */
+    minZoom?: number;
+    /** Largest zoom the user can pan to (the zoom-in limit), passed through to F0Graph. */
+    maxZoom?: number;
+    /** Whether to render the zoom/fit controls. Defaults to `true`. */
+    showControls?: boolean;
+};
+
+declare type GraphVisualizationSettings = {
+    /** Metadata order (tag-type ids), matching the table column settings shape. */
+    order?: string[];
+    /** Hidden metadata (tag-type ids). */
+    hidden?: string[];
+};
 
 export declare type GridStackReactOptions = Omit<GridStackOptions, "children">;
 
@@ -12254,6 +12418,23 @@ export declare interface LoadingStateProps {
     label: string;
 }
 
+export declare type LockedQuestionNotice = {
+    description: string;
+};
+
+/**
+ * Explanation surfaced in a locked item's lock tooltip (authoring view only —
+ * never shown in the answering/preview form), saying why it can't be edited,
+ * moved, or removed. Rendered as a title-less popover on hovering the lock.
+ *
+ * A section and an individual question each carry their own `lockedNote`; a
+ * locked question prefers its own `LockedQuestionNotice` and otherwise falls
+ * back to the section's `LockedSectionNotice`.
+ */
+export declare type LockedSectionNotice = {
+    description: string;
+};
+
 /** Margin tokens (spacing + auto for centering) */
 export declare type MarginToken = SpacingToken | "auto";
 
@@ -12536,7 +12717,7 @@ declare type MimeType_2 = "image" | "video" | "audio" | "text" | "application" |
 export { MimeType_2 as MimeType }
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -12578,6 +12759,7 @@ export declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly headcount_planning: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -13820,19 +14002,6 @@ export declare type QuestionElement = Omit<TextQuestionProps, QuestionPropsToOmi
     type: "checkbox";
 }, QuestionPropsToOmit>;
 
-/**
- * An alert rendered inside a question card (authoring view only — never shown
- * in the answering/preview form). Typically paired with `locked` to explain why
- * a predefined question can't be edited, moved, or removed.
- */
-export declare type QuestionNotice = {
-    /** Defaults to "info" when omitted. */
-    variant?: AlertVariant;
-    title: string;
-    description?: string;
-    icon?: IconType;
-};
-
 declare type QuestionPropsToOmit = "onAction" | "onChange" | "onAddNewElement";
 
 export declare type QuestionType = "rating" | "select" | "multi-select" | "dropdown-single" | "dropdown-multi" | "text" | "longText" | "numeric" | "link" | "date" | "file" | "checkbox";
@@ -14265,6 +14434,28 @@ export declare type RowSpanToken = "1" | "2" | "3" | "4" | "5" | "6" | "full";
 /** Grid row count (1–6 + none) */
 export declare type RowsToken = "1" | "2" | "3" | "4" | "5" | "6" | "none";
 
+/** A mocked single-choice question. */
+declare type SampleChoiceQuestion = {
+    type: "choice";
+    /** The question prompt shown above the options */
+    question: string;
+    /** The answer options, rendered as non-interactive radio rows */
+    options: string[];
+};
+
+/** A mocked rating-scale question (e.g. Very low → Very high). */
+declare type SampleRatingQuestion = {
+    type: "rating";
+    /** The question prompt shown above the scale */
+    question: string;
+    /** Number of rating steps to render (default 5) */
+    steps?: number;
+    /** Caption under the lowest step */
+    minLabel?: string;
+    /** Caption under the highest step */
+    maxLabel?: string;
+};
+
 export declare type SearchFilterDefinition = BaseFilterDefinition<"search">;
 
 declare type SearchOptions = {
@@ -14274,6 +14465,26 @@ declare type SearchOptions = {
     sync?: boolean;
     /** Debounce time for search */
     debounceTime?: number;
+};
+
+/**
+ * Optional rich search preview shown in the shared Data Collection search.
+ * When provided, typing in the header search renders a results dropdown with
+ * avatar + title + subtitle, consistent across every visualization. Selecting a
+ * result calls `onSelect` (e.g. the graph view reveals/centers the node).
+ */
+declare type SearchPreview<R extends RecordType> = {
+    search: (query: string) => Promise<R[]>;
+    getId: (record: R) => string;
+    render: (record: R) => SearchPreviewResultData;
+    onSelect: (record: R) => void;
+};
+
+/** Data shown for a single row of the search preview dropdown. */
+declare type SearchPreviewResultData = {
+    avatar?: AvatarVariant;
+    title: string;
+    subtitle?: string;
 };
 
 declare interface SecondaryAction extends PrimaryActionButton {
@@ -14332,18 +14543,18 @@ declare type SectionProps = {
     id: string;
     /**
      * Section heading. Optional — a section may have no title (e.g. a predefined,
-     * blocked section that leads with a `notice` instead). In the editable view an
-     * empty title shows a placeholder so authors can add one; when the section is
-     * locked/read-only an empty title is hidden entirely.
+     * blocked section that leads with a `lockedNote` instead). In the editable
+     * view an empty title shows a placeholder so authors can add one; when the
+     * section is locked/read-only an empty title is hidden entirely.
      */
     title?: string;
     description?: string;
     locked?: boolean;
     /**
-     * Optional alert rendered above the section title (authoring view only). Pair
-     * with `locked` to explain why a predefined section can't be edited or moved.
+     * Optional explanation surfaced in the lock tooltip (authoring view only).
+     * Pair with `locked` to say why a predefined section can't be edited or moved.
      */
-    notice?: QuestionNotice;
+    lockedNote?: LockedSectionNotice;
     questions?: QuestionElement[];
 };
 
@@ -14764,6 +14975,16 @@ export declare type SurveyFormSubmitResult = {
     errors?: Record<string, string>;
 };
 
+/**
+ * A non-interactive preview of a survey question, used to illustrate what a
+ * given survey type produces (for example inside the survey type selector).
+ * It is purely presentational — the inputs are mocked placeholders, not real
+ * form fields.
+ */
+export declare function SurveySampleQuestion(props: SurveySampleQuestionProps): JSX_2.Element;
+
+export declare type SurveySampleQuestionProps = SampleRatingQuestion | SampleChoiceQuestion;
+
 export declare function SurveySteppedLoadingSkeleton(): JSX_2.Element;
 
 export declare type SurveySubmitAnswers = Record<string, string | number | boolean | string[] | Date | null>;
@@ -15046,6 +15267,10 @@ export declare type TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -15276,6 +15501,14 @@ export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
 
+/** A button rendered in the footer at the bottom of the table of contents */
+declare type TOCAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
 declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -15321,6 +15554,8 @@ declare interface TOCProps {
     hideChildrenCounter?: boolean;
     /** Enable vertical scrolling when content overflows (default: true) */
     scrollable?: boolean;
+    /** Action buttons pinned in a footer at the bottom of the panel */
+    actions?: TOCAction[];
 }
 
 declare type toggleActionType = {
@@ -15550,6 +15785,17 @@ declare interface UpsellRequestResponseDialogProps {
 export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
+
+export declare const useAudioPlayer: (audioRef: RefObject<HTMLAudioElement>, callbacks?: UseAudioPlayerCallbacks) => AudioPlayerControls;
+
+declare interface UseAudioPlayerCallbacks {
+    onPlay?: () => void;
+    onPause?: () => void;
+    onSeek?: (seconds: number) => void;
+    onTimeUpdate?: (seconds: number) => void;
+    onEnded?: () => void;
+    onError?: (error: MediaError | null) => void;
+}
 
 /**
  * Hook returning the canvas entity definition for `type` from the registry
@@ -16355,6 +16601,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
@@ -16532,6 +16779,26 @@ export declare type ZIndexToken = "auto" | "0" | "10" | "20" | "30" | "40" | "50
  */
 declare type ZodTypeName = "ZodString" | "ZodNumber" | "ZodBoolean" | "ZodDate" | "ZodEnum" | "ZodArray" | "ZodObject" | "ZodOptional" | "ZodNullable" | "ZodDefault" | "ZodLiteral" | "ZodEffects";
 
+declare type ZoomPreset = keyof typeof zoomPresets;
+
+declare const zoomPresets: {
+    readonly default: {
+        readonly detail: 0.56;
+        readonly compact: 0.3;
+        readonly dot: 0.18;
+    };
+    readonly dense: {
+        readonly detail: 0.5;
+        readonly compact: 0.2;
+        readonly dot: 0.08;
+    };
+    readonly sparse: {
+        readonly detail: 0.85;
+        readonly compact: 0.45;
+        readonly dot: 0.15;
+    };
+};
+
 export { }
 
 
@@ -16589,8 +16856,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -16598,11 +16868,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
