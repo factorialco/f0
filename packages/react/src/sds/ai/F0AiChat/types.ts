@@ -293,7 +293,22 @@ export type AiChatProviderProps = {
    * UI config — does not affect runtime behavior.
    */
   initialMessage?: string | string[]
+  /**
+   * Grouped suggestions rendered as outline buttons above the composer on the
+   * welcome screen. Optional and independent of `welcomeScreenCards` — provide
+   * either, both, or neither, in any counts. No hard limit on the number of
+   * groups yet.
+   */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  /**
+   * Action/prompt cards rendered below the composer on the fullscreen welcome
+   * screen. The chat owns layout and, for prompt cards, the send.
+   *
+   * Optional and independent of `welcomeScreenSuggestions` — provide either,
+   * both, or neither, in any counts. At most 4 cards are rendered (the row is a
+   * 2×2 grid); extras are dropped.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   /**
    * Enable resizable chat window
@@ -417,12 +432,36 @@ export type WelcomeScreenSuggestionItem = {
 
 /**
  * A welcome-screen group rendered as an outline button in the welcome row.
- * Clicking the group opens a popover listing its `items`.
+ * Clicking the group opens a popover listing its `items`. The number of groups
+ * is not capped yet (unlike welcome cards, which top out at 4).
  */
 export type WelcomeScreenSuggestion = {
   icon: IconType
   label: string
   items: WelcomeScreenSuggestionItem[]
+}
+
+/**
+ * A card shown below the composer on the fullscreen welcome screen, rendered
+ * as an `F0CardHorizontal`. Two kinds:
+ * - **Prompt cards** carry a `message` the chat sends when the card is clicked.
+ * - **Action cards** carry an `onClick` (e.g. open a dialog) which takes
+ *   precedence over `message`.
+ *
+ * Data-driven and runtime-agnostic — the chat owns the layout and, for prompt
+ * cards, the send. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
+ */
+export type F0AiChatWelcomeCard = {
+  icon: IconType
+  title: string
+  description?: string
+  /** Prompt cards: the message the chat sends when the card is clicked. */
+  message?: string
+  /**
+   * Action cards: custom click handler (e.g. open a dialog). Takes precedence
+   * over `message` when both are present.
+   */
+  onClick?: () => void
 }
 
 /**

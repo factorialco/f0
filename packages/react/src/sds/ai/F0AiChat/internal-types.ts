@@ -17,6 +17,7 @@ import {
   type PendingQuote,
   type TranscribeFn,
   type VisualizationMode,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
 } from "./types"
 
@@ -33,6 +34,7 @@ export interface AiChatState {
   chatMessages?: React.ReactNode
   chatInput?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
   defaultVisualizationMode?: VisualizationMode
@@ -83,6 +85,10 @@ export type AiChatProviderReturnValue = {
   welcomeScreenSuggestions: WelcomeScreenSuggestion[]
   setWelcomeScreenSuggestions: React.Dispatch<
     React.SetStateAction<WelcomeScreenSuggestion[]>
+  >
+  welcomeScreenCards: F0AiChatWelcomeCard[]
+  setWelcomeScreenCards: React.Dispatch<
+    React.SetStateAction<F0AiChatWelcomeCard[]>
   >
   onThumbsUp?: (
     message: F0AIMessage,
