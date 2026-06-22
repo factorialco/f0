@@ -109,6 +109,7 @@ const F0AiChatComponent = ({
     chatHeader,
     chatMessages,
     chatInput,
+    panelContent,
   } = useAiChat()
   const translations = useI18n()
 
@@ -132,6 +133,22 @@ const F0AiChatComponent = ({
 
   if (!enabled) {
     return null
+  }
+
+  // Custom side-panel content takes precedence over the chat. It's hosted in
+  // the same SidebarWindow, so it inherits resize + fullscreen. The `id` key
+  // unmounts the previous content when switching (only one at a time).
+  if (panelContent) {
+    return (
+      <SidebarWindow>
+        <div
+          key={panelContent.id}
+          className="flex h-full w-full flex-col overflow-hidden"
+        >
+          {panelContent.content}
+        </div>
+      </SidebarWindow>
+    )
   }
 
   if (mode === "voice" && VoiceMode) {

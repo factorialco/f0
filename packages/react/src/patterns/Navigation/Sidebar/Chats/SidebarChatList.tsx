@@ -9,6 +9,19 @@ import { SidebarChatItem } from "./SidebarChatItem"
 import { useSidebarChats } from "./SidebarChatProvider"
 import { SidebarChatAction } from "./types"
 
+/** Copy shown when there are no chats at all. Override via the `emptyState` prop. */
+export type SidebarChatEmptyState = {
+  emoji?: string
+  title?: string
+  description?: string
+}
+
+const DEFAULT_EMPTY_STATE: Required<SidebarChatEmptyState> = {
+  emoji: "💬",
+  title: "No chats yet",
+  description: "Start a conversation — the synergy won't build itself.",
+}
+
 /** Left-aligned, full-width ghost button for a top-of-list action. */
 const SidebarChatActionButton = ({ action }: { action: SidebarChatAction }) => (
   <button
@@ -34,12 +47,18 @@ const SidebarChatActionButton = ({ action }: { action: SidebarChatAction }) => (
  */
 export const SidebarChatList = ({
   actions = [],
+  emptyState,
 }: {
   /** Ghost actions rendered at the very top (e.g. New chat, New group). */
   actions?: SidebarChatAction[]
+  /** Copy for the blank state shown when there are no chats. */
+  emptyState?: SidebarChatEmptyState
 }) => {
   const { groups, activeChatId, setActiveChat } = useSidebarChats()
   const shouldReduceMotion = useReducedMotion()
+
+  const hasChats = groups.some((group) => group.chats.length > 0)
+  const empty = { ...DEFAULT_EMPTY_STATE, ...emptyState }
 
   return (
     <div className="flex w-full flex-col gap-2 bg-transparent px-3">
@@ -48,6 +67,17 @@ export const SidebarChatList = ({
           {actions.map((action) => (
             <SidebarChatActionButton key={action.label} action={action} />
           ))}
+        </div>
+      )}
+      {!hasChats && (
+        <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
+          <span className="text-3xl" role="img" aria-hidden="true">
+            {empty.emoji}
+          </span>
+          <p className="font-medium text-f1-foreground">{empty.title}</p>
+          <p className="text-sm text-f1-foreground-secondary">
+            {empty.description}
+          </p>
         </div>
       )}
       {groups.map((group) => {

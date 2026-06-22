@@ -21,6 +21,7 @@ import {
   type CanvasContent,
   type PendingContext,
   type PendingQuote,
+  type SidePanelContent,
   type VisualizationMode,
   WelcomeScreenSuggestion,
 } from "../types"
@@ -235,6 +236,23 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const openGame = useCallback((game: "pong") => setActiveGame(game), [])
   const closeGame = useCallback(() => setActiveGame(null), [])
 
+  // Generic side-panel content. When set, `<F0AiChat />` renders it inside the
+  // same SidebarWindow shell instead of the chat — so any view (a conversation,
+  // …) inherits resize + fullscreen. Setting content opens the panel, mirroring
+  // `openCanvas`. Only one content at a time: a single state slot.
+  const [panelContent, setPanelContentState] =
+    useState<SidePanelContent | null>(null)
+  const setPanelContent = useCallback(
+    (content: SidePanelContent | null) => {
+      setPanelContentState(content)
+      if (content && !open) {
+        setOpen(true)
+      }
+    },
+    [open, setOpen]
+  )
+  const clearPanelContent = useCallback(() => setPanelContentState(null), [])
+
   return (
     <AiChatStateContext.Provider
       value={{
@@ -296,6 +314,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPendingContext,
         pendingQuote,
         setPendingQuote,
+        panelContent,
+        setPanelContent,
+        clearPanelContent,
       }}
     >
       {children}
@@ -327,6 +348,7 @@ const NULL_KEYS = new Set<ProviderKey>([
   "pendingContext",
   "pendingQuote",
   "activeGame",
+  "panelContent",
 ])
 
 const UNDEFINED_KEYS = new Set<ProviderKey>([

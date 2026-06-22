@@ -15,6 +15,7 @@ import {
   type F0AIMessage,
   type PendingContext,
   type PendingQuote,
+  type SidePanelContent,
   type TranscribeFn,
   type VisualizationMode,
   WelcomeScreenSuggestion,
@@ -174,6 +175,19 @@ export type AiChatProviderReturnValue = {
   pendingQuote: PendingQuote | null
   /** Set the pending quote (pass null to clear). */
   setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
+  /**
+   * Content currently hosted in the side panel, or `null` to show the F0.ai
+   * chat. Only one is mounted at a time — see {@link SidePanelContent}.
+   */
+  panelContent: SidePanelContent | null
+  /**
+   * Mount `content` in the side panel (replacing whatever was there) and open
+   * the panel. Pass `null` to fall back to the AI chat. The previous content
+   * is unmounted thanks to the `id` key.
+   */
+  setPanelContent: (content: SidePanelContent | null) => void
+  /** Clear the custom panel content and fall back to the F0.ai chat. */
+  clearPanelContent: () => void
 } & Pick<
   AiChatState,
   | "agent"

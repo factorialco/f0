@@ -141,7 +141,7 @@ export const exampleGroups: SidebarChatGroup[] = [
 ]
 
 const meta = {
-  title: "Sidebar/ChatList",
+  title: "Navigation/Sidebar/ChatList",
   component: SidebarChatList,
   parameters: { layout: "centered" },
   decorators: [
@@ -151,7 +151,7 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "experimental"],
 } satisfies Meta<typeof SidebarChatList>
 
 export default meta
@@ -163,6 +163,15 @@ export const Default: Story = {
       initialGroups={exampleGroups}
       initialActiveChatId="priyanka"
     >
+      <SidebarChatList actions={exampleActions} />
+    </SidebarChatProvider>
+  ),
+}
+
+/** Blank state shown when the user hasn't started any conversation yet. */
+export const Empty: Story = {
+  render: () => (
+    <SidebarChatProvider initialGroups={[]}>
       <SidebarChatList actions={exampleActions} />
     </SidebarChatProvider>
   ),

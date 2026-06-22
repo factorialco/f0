@@ -54,6 +54,29 @@ const renderList = (initialActiveChatId?: string) =>
   )
 
 describe("SidebarChatList", () => {
+  it("shows a blank state when there are no chats", () => {
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByText("No chats yet")).toBeInTheDocument()
+  })
+
+  it("hides the blank state and lets the consumer override its copy", () => {
+    // With chats present, the blank state is not rendered.
+    renderList()
+    expect(screen.queryByText("No chats yet")).not.toBeInTheDocument()
+
+    // Custom copy is used when provided and there are no chats.
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList emptyState={{ title: "All quiet" }} />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByText("All quiet")).toBeInTheDocument()
+  })
+
   it("shows a status icon for people but not for groups", () => {
     const { container } = render(
       <SidebarChatProvider
@@ -113,7 +136,7 @@ describe("SidebarChatList", () => {
     expect(onNewChat).toHaveBeenCalled()
   })
 
-  it("orders unread conversations first within a group", () => {
+  it("renders chats in the order provided (no reordering by the list)", () => {
     render(
       <SidebarChatProvider
         initialGroups={[
@@ -141,10 +164,10 @@ describe("SidebarChatList", () => {
     )
     const readBtn = screen.getByRole("button", { name: /Read One/ })
     const unreadBtn = screen.getByRole("button", { name: /Unread One/ })
-    // The unread chat is rendered before the read one.
+    // Order is owned by the consumer: the list preserves it (read stays first).
     expect(
       readBtn.compareDocumentPosition(unreadBtn) &
-        Node.DOCUMENT_POSITION_PRECEDING
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 
