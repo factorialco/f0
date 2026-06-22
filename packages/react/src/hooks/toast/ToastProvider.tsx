@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import { createPortal } from "react-dom"
+import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
 import { F0Toast } from "@/ui/Toast/F0Toast"
 import { useIsMobile } from "@/lib/useIsDesktop"
@@ -26,9 +27,15 @@ type ToastProviderProps = {
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
-  "bottom-left":
-    "justify-start items-end top-0 right-0 bottom-0 left-0 sm:right-auto",
+  "bottom-left": "items-end justify-start",
 } as const
+
+// The toast layer paints from `#f0-overlay-root` (above the fullscreen AI chat
+// and any dialog), but is positioned to overlay this element's box — the main
+// content region — so it sits in the content's bottom-left corner and never
+// covers the sidebar. Falls back to the full viewport when the element is
+// absent (e.g. outside ApplicationFrame).
+const toastAnchorSelector = "#content"
 
 // How many toasts are shown fully expanded (not stacked)
 const maxActiveToasts = 3
@@ -212,6 +219,12 @@ const ToastsContainer = ({
   position?: ToastContainerPosition
 }) => {
   const isMobile = useIsMobile()
+  // Position the (fixed) toast layer over the content region so it stays in the
+  // content's bottom-left corner instead of the viewport's — i.e. clear of the
+  // sidebar — while still painting from the overlay root above everything else.
+  const [anchorStyle, setAnchorStyle] = useState<React.CSSProperties>({
+    inset: 0,
+  })
   const prevStackedIdsRef = useRef<Set<ToastId>>(new Set())
   const promotingIdsRef = useRef<Set<ToastId>>(new Set())
   const promotedAccumulatorRef = useRef<Set<ToastId>>(new Set())
@@ -309,12 +322,47 @@ const ToastsContainer = ({
     setForcePause(isHovered)
   }, [])
 
+  // Track the content region's box so the fixed toast layer overlays it exactly
+  // (kept in sync on resize/scroll). Falls back to the full viewport when the
+  // anchor element isn't present.
+  useIsomorphicLayoutEffect(() => {
+    if (typeof document === "undefined" || !hasItems) return
+
+    const anchor = document.querySelector<HTMLElement>(toastAnchorSelector)
+    if (!anchor) {
+      setAnchorStyle({ inset: 0 })
+      return
+    }
+
+    const update = () => {
+      const rect = anchor.getBoundingClientRect()
+      setAnchorStyle({
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+      })
+    }
+
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(anchor)
+    window.addEventListener("resize", update)
+    window.addEventListener("scroll", update, true)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener("resize", update)
+      window.removeEventListener("scroll", update, true)
+    }
+  }, [hasItems])
+
   return (
     <div
       className={cn(
-        "pointer-events-none fixed top-0 left-0 right-0 z-[100] flex overflow-x-hidden overflow-y-auto w-full h-full",
+        "pointer-events-none fixed z-[100] flex overflow-x-hidden overflow-y-auto",
         toastContainerPositionClasses[position]
       )}
+      style={anchorStyle}
     >
       <AnimatePresence>
         {hasItems && (

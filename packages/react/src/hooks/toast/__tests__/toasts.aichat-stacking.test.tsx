@@ -88,6 +88,26 @@ describe("toasts over a fullscreen AI chat + dialog", () => {
     expect(container?.className).toContain("z-[100]")
   })
 
+  it("anchors the toast layer to the content region, not the full viewport", async () => {
+    render(
+      <ToastProvider>
+        <div />
+      </ToastProvider>
+    )
+
+    act(() => {
+      toasts.open({ title: "Anchored to content" })
+    })
+    await within(overlayRoot).findByText("Anchored to content")
+
+    // With #content present the fixed layer is sized to its box (explicit
+    // geometry) so it sits in the content's bottom-left corner — clear of the
+    // sidebar — rather than filling the viewport (`inset: 0`).
+    const container = overlayRoot.firstElementChild as HTMLElement
+    expect(container.style.width).not.toBe("")
+    expect(container.style.inset).toBe("")
+  })
+
   it("keeps the overlay root outside the isolate so it paints above the chat", () => {
     render(
       <ToastProvider>
