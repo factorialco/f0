@@ -61,7 +61,7 @@ export function SelectCell<R extends RecordType>({
     : ({} as const)
 
   return (
-    <BaseCell error={error} isActive={isOpen} hint={hint}>
+    <BaseCell error={error} isActive={isOpen} hint={hint} cursor="pointer">
       <div
         className={cn(
           "flex w-full min-w-0 h-full",

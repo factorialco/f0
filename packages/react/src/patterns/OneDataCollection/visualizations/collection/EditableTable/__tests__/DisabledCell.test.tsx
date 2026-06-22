@@ -35,6 +35,11 @@ describe("DisabledCell", () => {
     expect(screen.getByText("John Doe")).toBeInTheDocument()
   })
 
+  it("applies not-allowed cursor", () => {
+    const { container } = render(<DisabledCell {...defaultProps} />)
+    expect(container.firstChild).toHaveClass("cursor-not-allowed")
+  })
+
   it("renders a hint icon when hint is provided", () => {
     render(
       <DisabledCell
