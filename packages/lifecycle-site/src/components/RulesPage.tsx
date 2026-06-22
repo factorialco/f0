@@ -26,7 +26,7 @@ const verifiabilityLabel: Record<Verifiability, string> = {
 const verifiabilityChip: Record<Verifiability, string> = {
   automated: "bg-stable/10 text-stable",
   "human-evidence": "bg-experimental/10 text-experimental",
-  policy: "bg-ink/5 text-ink",
+  policy: "bg-white/5 text-ink",
 }
 
 const statusButton: Record<Status, { active: string; idle: string }> = {
@@ -164,7 +164,7 @@ export function RulesPage() {
       </header>
 
       {/* Sticky session summary */}
-      <div className="sticky top-0 z-10 -mx-6 mt-10 border-b border-ink/10 bg-paper/95 px-6 py-3 backdrop-blur">
+      <div className="sticky top-0 z-10 -mx-6 mt-10 border-b border-white/10 bg-paper/95 px-6 py-3 backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <FilterChip
@@ -218,7 +218,7 @@ export function RulesPage() {
           {contradictions.map((c) => (
             <li
               key={c.id}
-              className="rounded-lg border border-deprecated/20 bg-white p-4"
+              className="rounded-lg border border-deprecated/20 bg-surface p-4"
             >
               <p className="text-sm font-semibold">{c.title}</p>
               <p className="mt-1 text-sm text-muted">{c.detail}</p>
@@ -230,7 +230,7 @@ export function RulesPage() {
       {/* Sections → Groups */}
       <div className="mt-12 space-y-16">
         {visibleGroups.length === 0 && (
-          <p className="rounded-xl border border-dashed border-ink/20 bg-white p-8 text-center text-sm text-muted">
+          <p className="rounded-xl border border-dashed border-white/20 bg-surface p-8 text-center text-sm text-muted">
             No rules match the current filter.
           </p>
         )}
@@ -245,7 +245,7 @@ export function RulesPage() {
           )
           return (
             <section key={sec.id} id={`section-${sec.id}`}>
-              <header className="mb-6 border-b border-ink/10 pb-4">
+              <header className="mb-6 border-b border-white/10 pb-4">
                 <div className="flex items-baseline gap-3">
                   <span className="text-3xl" aria-hidden>
                     {sec.emoji}
@@ -281,7 +281,7 @@ export function RulesPage() {
         })}
       </div>
 
-      <footer className="mt-16 border-t border-ink/10 pt-6 text-xs text-muted">
+      <footer className="mt-16 border-t border-white/10 pt-6 text-xs text-muted">
         <p>
           Source-of-truth files are linked per rule. State lives in{" "}
           <code className="font-mono">sessionStorage</code> only — closing this
@@ -322,19 +322,19 @@ function GroupCard({
   }, [group.rules, statuses])
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-ink/10 bg-white">
+    <article className="overflow-hidden rounded-2xl border border-white/10 bg-surface">
       <button
         type="button"
         onClick={onToggleOpen}
         aria-expanded={isOpen}
-        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left hover:bg-ink/[0.02]"
+        className="flex w-full items-start justify-between gap-4 px-5 py-4 text-left hover:bg-white/[0.02]"
       >
         <div className="min-w-0">
           <h3 className="text-base font-semibold tracking-tight">{group.title}</h3>
           <p className="mt-1 text-sm text-muted">{group.intent}</p>
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className="rounded-full bg-ink/5 px-2 py-0.5 text-[11px] font-semibold text-ink">
+          <span className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] font-semibold text-ink">
             {group.rules.length}
           </span>
           <SmallCount n={counts.validated} tone="stable" />
@@ -347,9 +347,9 @@ function GroupCard({
       </button>
 
       {isOpen && (
-        <div className="border-t border-ink/10">
+        <div className="border-t border-white/10">
           {group.glossary && group.glossary.length > 0 && (
-            <dl className="grid gap-3 border-b border-ink/10 bg-ink/[0.02] px-5 py-4 sm:grid-cols-2">
+            <dl className="grid gap-3 border-b border-white/10 bg-white/[0.02] px-5 py-4 sm:grid-cols-2">
               {group.glossary.map((g) => (
                 <div key={g.term}>
                   <dt className="text-xs font-semibold uppercase tracking-wider text-accent">
@@ -360,7 +360,7 @@ function GroupCard({
               ))}
             </dl>
           )}
-          <ul className="divide-y divide-ink/10">
+          <ul className="divide-y divide-white/10">
             {group.rules.map((r) => (
               <RuleRow
                 key={r.id}
@@ -466,7 +466,7 @@ function RuleRow({
             onChange={(e) => onSetChangeNote(e.target.value)}
             placeholder="e.g. new wording, missing case, owner to confirm…"
             rows={2}
-            className="w-full resize-y rounded-md border border-deprecated/30 bg-white p-2 text-sm text-ink placeholder:text-muted focus:border-deprecated focus:outline-none focus:ring-2 focus:ring-deprecated/20"
+            className="w-full resize-y rounded-md border border-deprecated/30 bg-surface p-2 text-sm text-ink placeholder:text-muted focus:border-deprecated focus:outline-none focus:ring-2 focus:ring-deprecated/20"
           />
           {changeNote.trim() === "" && (
             <p className="mt-1 text-[11px] text-muted">
@@ -517,7 +517,7 @@ function FilterChip({
 }) {
   const toneClasses = {
     accent: active ? "bg-accent text-white border-accent" : "border-accent/30 text-accent",
-    ink: active ? "bg-ink text-white border-ink" : "border-ink/20 text-ink",
+    ink: active ? "bg-ink text-paper border-ink" : "border-white/20 text-ink",
     stable: active ? "bg-stable text-white border-stable" : "border-stable/30 text-stable",
     experimental: active
       ? "bg-experimental text-white border-experimental"

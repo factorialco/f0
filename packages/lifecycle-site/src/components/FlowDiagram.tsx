@@ -9,7 +9,7 @@ import "@xyflow/react/dist/style.css"
 import { phases } from "../data/phases"
 
 const nodeBase =
-  "rounded-xl border-2 border-ink/10 bg-white px-4 py-3 text-sm font-medium shadow-sm"
+  "rounded-xl border-2 border-white/15 bg-surface2 px-4 py-3 text-sm font-medium text-ink shadow-sm"
 
 const nodes: Node[] = [
   {
@@ -63,8 +63,26 @@ const edges: Edge[] = [
     animated: true,
   })),
   { id: "e-promote-stable", source: "promote", target: "stable", animated: true },
-  { id: "e-stable-deprecated", source: "stable", target: "deprecated", label: "after ≥1 quarter" },
-  { id: "e-deprecated-removed", source: "deprecated", target: "removed", label: "@removeIn version" },
+  {
+    id: "e-stable-deprecated",
+    source: "stable",
+    target: "deprecated",
+    label: "after ≥1 quarter",
+    labelStyle: { fill: "#f4f4f5", fontSize: 11 },
+    labelBgStyle: { fill: "#1f1f1f" },
+    labelBgPadding: [6, 3],
+    labelBgBorderRadius: 4,
+  },
+  {
+    id: "e-deprecated-removed",
+    source: "deprecated",
+    target: "removed",
+    label: "@removeIn version",
+    labelStyle: { fill: "#f4f4f5", fontSize: 11 },
+    labelBgStyle: { fill: "#1f1f1f" },
+    labelBgPadding: [6, 3],
+    labelBgBorderRadius: 4,
+  },
 ]
 
 const phaseIds = new Set<string>(phases.map((p) => p.id))
@@ -93,22 +111,29 @@ export function FlowDiagram() {
   }
 
   return (
-    <div className="h-[420px] rounded-2xl border border-ink/10 bg-white">
+    <div className="h-[420px] rounded-2xl border border-white/10 bg-surface">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodeClick={handleNodeClick}
         fitView
-        fitViewOptions={{ padding: 0.15 }}
+        fitViewOptions={{ padding: 0.18 }}
         nodesDraggable={false}
         nodesConnectable={false}
+        elementsSelectable={false}
+        nodesFocusable={false}
+        edgesFocusable={false}
         zoomOnScroll={false}
-        panOnScroll
+        zoomOnPinch={false}
+        zoomOnDoubleClick={false}
+        panOnScroll={false}
+        panOnDrag={false}
+        preventScrolling={false}
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={24} size={1} color="#e5e7eb" />
+        <Background gap={24} size={1} color="#2a2a2a" />
       </ReactFlow>
-      <p className="border-t border-ink/10 px-4 py-2 text-xs text-muted">
+      <p className="border-t border-white/10 px-4 py-2 text-xs text-muted">
         Click any node to jump to its details below.
       </p>
     </div>

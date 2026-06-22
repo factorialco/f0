@@ -23,7 +23,7 @@ const REPO = "https://github.com/factorialco/factorial-one/blob/main/"
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t border-ink/10 pt-10">
+    <footer className="mt-24 border-t border-white/10 pt-10">
       <div className="grid gap-10 md:grid-cols-2">
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">

@@ -4,13 +4,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#0b0b0c",
-        paper: "#fafaf9",
-        muted: "#6b7280",
-        accent: "#3b82f6",
+        // Dark brand theme (from the f0 brand kit)
+        paper: "#0b0b0b", // page background (near-black)
+        surface: "#161616", // cards / panels
+        surface2: "#1f1f1f", // raised panels
+        ink: "#f4f4f5", // primary text (light)
+        muted: "#9a9a9a", // secondary text
+        // F0 brand red
+        accent: "#ff6364", // coral red — links, interactive, on dark
+        accentDeep: "#e51943", // deep crimson — solid fills
         experimental: "#f59e0b",
-        stable: "#10b981",
-        deprecated: "#ef4444",
+        stable: "#34d399",
+        deprecated: "#ff6364",
       },
       fontFamily: {
         sans: ["ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],

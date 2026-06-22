@@ -43,7 +43,7 @@ export function WhatIsF0() {
         </Card>
       </div>
 
-      <div className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-white/10 bg-surface p-6 shadow-sm">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">
           Why a lifecycle?
         </h3>
@@ -60,7 +60,7 @@ export function WhatIsF0() {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <article className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm">
+    <article className="rounded-2xl border border-white/10 bg-surface p-6 shadow-sm">
       <h3 className="text-base font-semibold">{title}</h3>
       <div className="mt-4">{children}</div>
     </article>

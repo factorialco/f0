@@ -7,7 +7,7 @@ export function PhaseSection() {
         <article
           key={p.id}
           id={`phase-${p.id}`}
-          className="section-anchor flex flex-col rounded-2xl border border-ink/10 bg-white p-6 shadow-sm"
+          className="section-anchor flex flex-col rounded-2xl border border-white/10 bg-surface p-6 shadow-sm"
         >
           <header className="flex items-baseline gap-3">
             <span className="text-3xl font-bold text-accent">{p.number}</span>
@@ -27,7 +27,7 @@ export function PhaseSection() {
             ))}
           </ul>
 
-          <dl className="mt-5 grid grid-cols-1 gap-2 border-t border-ink/10 pt-4 text-xs">
+          <dl className="mt-5 grid grid-cols-1 gap-2 border-t border-white/10 pt-4 text-xs">
             <div className="flex justify-between gap-3">
               <dt className="text-muted">Owner</dt>
               <dd className="text-right font-medium">{p.owner}</dd>

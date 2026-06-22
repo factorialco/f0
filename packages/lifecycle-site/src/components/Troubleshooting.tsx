@@ -25,7 +25,7 @@ export function Troubleshooting() {
           className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
             filter === null
               ? "border-accent bg-accent text-white"
-              : "border-ink/10 bg-white hover:border-accent"
+              : "border-white/10 bg-surface hover:border-accent"
           }`}
         >
           All
@@ -37,7 +37,7 @@ export function Troubleshooting() {
             className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
               filter === a
                 ? "border-accent bg-accent text-white"
-                : "border-ink/10 bg-white hover:border-accent"
+                : "border-white/10 bg-surface hover:border-accent"
             }`}
           >
             {audienceLabels[a] ?? a}
@@ -51,7 +51,7 @@ export function Troubleshooting() {
         ))}
       </div>
 
-      <div className="rounded-xl border border-dashed border-ink/20 bg-white p-5 text-sm">
+      <div className="rounded-xl border border-dashed border-white/20 bg-surface p-5 text-sm">
         <p className="font-medium text-ink">Stuck on something not listed here?</p>
         <ol className="mt-2 space-y-1.5 text-muted">
           <li>
@@ -75,7 +75,7 @@ function FaqItem({ entry }: { entry: (typeof faq)[number] }) {
   const [open, setOpen] = useState(false)
 
   return (
-    <article className="rounded-2xl border border-ink/10 bg-white shadow-sm">
+    <article className="rounded-2xl border border-white/10 bg-surface shadow-sm">
       <button
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between gap-4 p-5 text-left"
@@ -84,12 +84,12 @@ function FaqItem({ entry }: { entry: (typeof faq)[number] }) {
         <span className="text-xl text-accent">{open ? "−" : "+"}</span>
       </button>
       {open && (
-        <div className="border-t border-ink/10 p-5">
+        <div className="border-t border-white/10 p-5">
           <div className="mb-3 flex flex-wrap gap-1.5">
             {entry.audience.map((a) => (
               <span
                 key={a}
-                className="rounded-full bg-ink/5 px-2 py-0.5 text-[11px] font-medium"
+                className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] font-medium"
               >
                 {audienceLabels[a] ?? a}
               </span>

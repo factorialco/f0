@@ -9,6 +9,7 @@ import { PrototypeSection } from "./components/PrototypeSection"
 import { ContributeSection } from "./components/ContributeSection"
 import { Troubleshooting } from "./components/Troubleshooting"
 import { Footer } from "./components/Footer"
+import { HeroMatrix } from "./components/HeroMatrix"
 import { RulesPage } from "./components/RulesPage"
 
 type SectionDef = {
@@ -120,24 +121,41 @@ export function App() {
   return <Overview />
 }
 
+function Wordmark({ className = "" }: { className?: string }) {
+  return (
+    <a
+      href="#/"
+      aria-label="F0 home"
+      className={`inline-flex items-baseline text-2xl font-bold lowercase tracking-tighter text-ink ${className}`}
+    >
+      f0
+    </a>
+  )
+}
+
 function Overview() {
   return (
-    <main className="mx-auto max-w-4xl px-6 pb-24">
-      <header className="pt-20">
-        <p className="text-sm font-medium uppercase tracking-widest text-accent">
-          F0 — Factorial's design system
-        </p>
-        <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
-          Get started with F0
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg text-muted">
-          Everything you need to understand and work with F0 — the components,
-          patterns and rules every Factorial product shares. Pick a topic below;
-          you'll get just that, nothing else to wade through.
-        </p>
+    <>
+      <header className="relative min-h-[55vh] overflow-hidden border-b border-white/10">
+        <HeroMatrix />
+        <div className="relative mx-auto max-w-4xl px-6 pb-16 pt-10">
+          <Wordmark />
+          <p className="mt-10 text-sm font-medium uppercase tracking-widest text-accent">
+            F0 — Factorial's design system
+          </p>
+          <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
+            Get started with F0
+          </h1>
+          <p className="mt-5 max-w-2xl text-lg text-muted">
+            Everything you need to understand and work with F0 — the components,
+            patterns and rules every Factorial product shares. Pick a topic below;
+            you'll get just that, nothing else to wade through.
+          </p>
+        </div>
       </header>
 
-      <div className="mt-16 space-y-14">
+      <main className="mx-auto max-w-4xl px-6 pb-24">
+        <div className="mt-16 space-y-14">
         {PARTS.map((part) => (
           <section key={part.label}>
             <h2 className="text-2xl font-bold tracking-tight">{part.label}</h2>
@@ -147,7 +165,7 @@ function Overview() {
                 <a
                   key={s.id}
                   href={`#/s/${s.id}`}
-                  className="group flex flex-col rounded-2xl border border-ink/10 bg-white p-6 shadow-sm transition hover:border-accent/50 hover:shadow-md"
+                  className="group flex flex-col rounded-2xl border border-white/10 bg-surface p-6 shadow-sm transition hover:border-accent/50 hover:shadow-md"
                 >
                   <h3 className="text-lg font-semibold tracking-tight">{s.title}</h3>
                   <p className="mt-2 flex-1 text-sm text-muted">{s.blurb}</p>
@@ -161,8 +179,9 @@ function Overview() {
         ))}
       </div>
 
-      <Footer />
-    </main>
+        <Footer />
+      </main>
+    </>
   )
 }
 
@@ -180,7 +199,8 @@ function SectionView({
 
   return (
     <main className="mx-auto max-w-5xl px-6 pb-24">
-      <header className="pt-12">
+      <header className="pt-8">
+        <Wordmark className="mb-8" />
         <a
           href="#/"
           className="inline-flex items-center gap-1 text-sm text-muted hover:text-ink"
@@ -196,7 +216,7 @@ function SectionView({
 
       <div className="mt-12">{section.render()}</div>
 
-      <div className="mt-16 border-t border-ink/10 pt-8">
+      <div className="mt-16 border-t border-white/10 pt-8">
         <a
           href="#/"
           className="inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"

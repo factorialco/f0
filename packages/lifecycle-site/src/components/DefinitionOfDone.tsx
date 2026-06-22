@@ -48,7 +48,7 @@ export function DefinitionOfDone() {
               className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${
                 isActive
                   ? `border-transparent ${a.chip} ring-2 ${a.ring}`
-                  : "border-ink/10 bg-white text-ink hover:border-ink/30"
+                  : "border-white/10 bg-surface text-ink hover:border-white/30"
               }`}
             >
               <span className={`h-2 w-2 rounded-full ${a.dot}`} />
@@ -59,7 +59,7 @@ export function DefinitionOfDone() {
         })}
       </div>
 
-      <article className="rounded-2xl border border-ink/10 bg-white p-6 shadow-sm">
+      <article className="rounded-2xl border border-white/10 bg-surface p-6 shadow-sm">
         <header className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h3 className="text-xl font-semibold">{active.label} — checklist</h3>
@@ -79,7 +79,7 @@ export function DefinitionOfDone() {
           {active.criteria.map((c) => (
             <li
               key={c.id}
-              className="flex gap-3 rounded-lg border border-ink/5 bg-paper p-3"
+              className="flex gap-3 rounded-lg border border-white/5 bg-paper p-3"
             >
               <span
                 className={`mt-1 h-2 w-2 shrink-0 rounded-full ${accent.dot}`}

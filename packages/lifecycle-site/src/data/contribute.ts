@@ -60,6 +60,7 @@ export type ContributionScenario = {
   title: string
   example: string
   flow: string[] // ordered hand-offs, last item is the end state
+  expects: string[] // what it takes to land it well
 }
 
 export const contributionScenarios: ContributionScenario[] = [
@@ -71,19 +72,36 @@ export const contributionScenarios: ContributionScenario[] = [
       "You build it in src/experimental/, tagged experimental",
       "Foundations promotes it to stable once it meets the Definition of Done",
     ],
+    expects: [
+      "A real, recurring need — ≥2 use cases from different teams (a designer can waive this for clearly foundational primitives)",
+      "Passes design review: coherent with F0, sensible API",
+      "Unit tests + a Storybook story (play function / snapshot)",
+      "MDX docs that explain when to use it and when not to",
+      "f0-quality-gate green (typecheck, lint, format, tests)",
+      "To reach stable later: the full Definition of Done + Foundations sign-off",
+    ],
   },
   {
     id: "missing-prop",
     title: "A missing property on an existing component",
     example: "A stable or experimental component is almost right but lacks a prop.",
     flow: ["You contribute the new property", "Foundations validates it"],
+    expects: [
+      "Backward-compatible — no breaking change to the existing API",
+      "Tests cover the new prop",
+      "Story and MDX updated to show it",
+      "Quality gate green; the component's owner validates the change",
+    ],
   },
   {
     id: "only-my-product",
     title: "Something only your product needs",
     example: "Bespoke UI for one screen, no shared identity or reuse.",
-    flow: [
-      "It doesn't belong in F0 — keep it in your product monolith",
+    flow: ["It doesn't belong in F0 — keep it in your product monolith"],
+    expects: [
+      "Build it from F0 components where you can",
+      "Follow your product's own standards — F0 doesn't gate it",
+      "If the need later spreads across teams, revisit: it may become a kit or a core component",
     ],
   },
 ]

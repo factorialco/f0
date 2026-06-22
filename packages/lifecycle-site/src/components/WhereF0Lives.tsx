@@ -72,7 +72,7 @@ export function WhereF0Lives() {
         {sourceOfTruth.why}
       </p>
 
-      <ul className="divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-white">
+      <ul className="divide-y divide-white/10 rounded-2xl border border-white/10 bg-surface">
         {surfaces.map((s) => (
           <li
             key={s.name}
