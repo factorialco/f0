@@ -113,26 +113,27 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
       onClose?.()
     }, [onClose])
 
-    // Timer logic
+    // Timer logic — tick the remaining time down to 0. The close itself is
+    // triggered by the effect below, so we never call onClose (which updates the
+    // parent toast store) from inside a state updater during render.
     useEffect(() => {
       if (!duration || duration <= 0 || isPaused || forcePauseTimer) {
         return
       }
 
       const interval = setInterval(() => {
-        setRemainingTime((prev) => {
-          const next = prev - 16
-          if (next <= 0) {
-            clearInterval(interval)
-            handleClose()
-            return 0
-          }
-          return next
-        })
+        setRemainingTime((prev) => Math.max(prev - 16, 0))
       }, 16)
 
       return () => clearInterval(interval)
-    }, [duration, isPaused, handleClose, forcePauseTimer])
+    }, [duration, isPaused, forcePauseTimer])
+
+    // Close once the timer has run out.
+    useEffect(() => {
+      if (duration && duration > 0 && remainingTime <= 0) {
+        handleClose()
+      }
+    }, [remainingTime, duration, handleClose])
 
     const handleMouseEnter = () => {
       if (duration && duration > 0) {
@@ -207,7 +208,8 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                 {buttonActions.map((buttonAction) => (
                   <F0Button
                     key={`button-${buttonAction.label}`}
-                    {...buttonAction}
+                    label={buttonAction.label}
+                    icon={buttonAction.icon}
                     variant="outline"
                     size="sm"
                     onClick={() =>
