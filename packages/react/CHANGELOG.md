@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.0.3](https://github.com/factorialco/f0/compare/f0-react-v4.0.2...f0-react-v4.0.3) (2026-06-22)
+
+
+### Bug Fixes
+
+* **F0CardHorizontal:** reserve action button width so the confirm/reject pair never shrinks ([#4525](https://github.com/factorialco/f0/issues/4525)) ([10b0b0b](https://github.com/factorialco/f0/commit/10b0b0b901cf16e8b3e4f45236cf58b60c072b66))
+
 ## [4.0.2](https://github.com/factorialco/f0/compare/f0-react-v4.0.1...f0-react-v4.0.2) (2026-06-19)
 
 
