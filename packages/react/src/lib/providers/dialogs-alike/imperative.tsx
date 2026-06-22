@@ -19,7 +19,7 @@ import {
 } from "./types"
 
 // Programmatic-close callbacks, keyed by dialog/drawer id. Kept at module level
-// (not in a React ref) so `dialog.close(id)` / `drawer.close(id)` work from
+// (not in a React ref) so `dialogs.close(id)` / `drawers.close(id)` work from
 // anywhere.
 const closeCallbacks = new Map<DialogId, () => void>()
 
@@ -81,7 +81,7 @@ const openDialogInternal = (
     }
 
     closeCallbacks.set(id, onCloseDialog)
-    warnIfNoProvider("dialog.open()")
+    warnIfNoProvider("dialogs.open()")
     dialogsAlikeStore.addItem(item)
   })
 }
@@ -105,7 +105,7 @@ const openDrawerInternal = (
     }
 
     closeCallbacks.set(id, onCloseDialog)
-    warnIfNoProvider("drawer.open()")
+    warnIfNoProvider("drawers.open()")
     dialogsAlikeStore.addItem(item)
   })
 }
@@ -119,36 +119,47 @@ const close = (id: DialogId) => {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Public imperative API. The `dialogs` and `drawers` namespaces open/close
+// dialogs and drawers from anywhere — including outside React. They require
+// `<F0Provider>` (which mounts `DialogsAlikeLayoutProvider`) to be present in
+// the tree.
+// -----------------------------------------------------------------------------
+
+const notification = (
+  options: NotificationDialogOptions
+): Promise<DialogActionValue> =>
+  openDialogInternal({
+    type: options.type ?? "info",
+    variant: "notification",
+    description: options.msg,
+    id: options.id || nanoid(),
+    title: options.title,
+    content: <></>,
+    actions: options.actions,
+  })
+
 /**
  * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
  * `DialogsAlikeLayoutProvider`) to be present in the tree.
  *
  * @example
- * const result = await dialog.open({ title, content, actions: { primary: { label: "OK", value: true } } })
+ * import { dialogs } from "@factorialco/f0-react"
+ *
+ * const result = await dialogs.open({ title, content, actions: { primary: { label: "OK", value: true } } })
  */
-export const dialog = {
+export const dialogs = {
   /** Open a dialog. Resolves with the value of the action the user picked. */
   open: (definition: Optional<DialogDefinition, "id">) =>
     openDialogInternal({ ...definition, variant: "default" }),
 
   /** Open a notification-style dialog (info/warning/critical/positive). */
-  notification: (
-    options: NotificationDialogOptions
-  ): Promise<DialogActionValue> =>
-    openDialogInternal({
-      type: options.type ?? "info",
-      variant: "notification",
-      description: options.msg,
-      id: options.id || nanoid(),
-      title: options.title,
-      content: <></>,
-      actions: options.actions,
-    }),
+  notification,
 
   /** Notification dialog with a single confirm action (defaults to "Ok"). */
   alert: (options: AlertDialogOptions): Promise<DialogActionValue> => {
     const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return dialog.notification({
+    return notification({
       ...options,
       actions: {
         primary: {
@@ -160,9 +171,9 @@ export const dialog = {
   },
 
   /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
-  confirm: (options: ConfirmDialogOptions): Promise<DialogActionValue> => {
+  confirmation: (options: ConfirmDialogOptions): Promise<DialogActionValue> => {
     const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return dialog.notification({
+    return notification({
       ...options,
       actions: {
         primary: {
@@ -185,9 +196,11 @@ export const dialog = {
  * Imperative API for side drawers. Requires `<F0Provider>` to be present.
  *
  * @example
- * const result = await drawer.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ * import { drawers } from "@factorialco/f0-react"
+ *
+ * const result = await drawers.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
  */
-export const drawer = {
+export const drawers = {
   /** Open a drawer. Resolves with the value of the action the user picked. */
   open: (definition: Optional<DrawerDefinition, "id">) =>
     openDrawerInternal({ ...definition, variant: "drawer" }),

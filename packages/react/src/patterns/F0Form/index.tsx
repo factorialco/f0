@@ -131,6 +131,13 @@ export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"
 export { evaluateRenderIf } from "./fields/utils"
 export { generateAnchorId } from "./context"
 
+// `openFormDialog` is the building block behind `forms.open({ mode: "dialog" })`
+// (assembled in `patterns/forms`). It is not part of the public surface.
+export type {
+  OpenFormDialogOptions,
+  OpenFormDialogResult,
+} from "./openFormDialog"
+
 // Export form control hook
 export { useF0Form } from "./useF0Form"
 export type {

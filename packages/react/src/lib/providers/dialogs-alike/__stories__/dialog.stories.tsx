@@ -5,7 +5,7 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Delete, Pencil } from "@/icons/app"
 
-import { dialog } from "../imperative"
+import { dialogs } from "../imperative"
 import { dialogsAlikeStore } from "../store"
 import { DialogActionValue } from "../types"
 
@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => {
     const dialogTrigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -57,7 +57,7 @@ export const Default: Story = {
     }
 
     const alertTrigger = async () => {
-      const res = await dialog.alert({
+      const res = await dialogs.alert({
         title: "Alert Title",
         msg: "Alert Message",
       })
@@ -65,7 +65,7 @@ export const Default: Story = {
     }
 
     const notificationTrigger = async () => {
-      const res = await dialog.notification({
+      const res = await dialogs.notification({
         title: "Notification Title",
         msg: "Notification Message",
         actions: {
@@ -79,7 +79,7 @@ export const Default: Story = {
     }
 
     const confirmTrigger = async () => {
-      const res = await dialog.confirm({
+      const res = await dialogs.confirmation({
         title: "Confirm Title",
         msg: "Confirm Message",
         type: "critical",
@@ -93,7 +93,7 @@ export const Default: Story = {
         },
       })
       if (res) {
-        dialog.alert({ title: "Item deleted", msg: "Item has been deleted" })
+        dialogs.alert({ title: "Item deleted", msg: "Item has been deleted" })
       }
       console.log(res)
     }
@@ -120,7 +120,7 @@ export const Notification: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const notificationTrigger = async () => {
-      const res = await dialog.notification({
+      const res = await dialogs.notification({
         title: "Notification Title",
         msg: "Notification Message",
         type: "positive",
@@ -151,7 +151,7 @@ export const Alert: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await dialog.alert({
+      const res = await dialogs.alert({
         title: "Alert Title",
         msg: "Alert Message",
       })
@@ -172,7 +172,7 @@ export const Confirm: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await dialog.confirm({
+      const res = await dialogs.confirmation({
         title: "Confirm Title",
         msg: "Confirm Message",
       })
@@ -193,7 +193,7 @@ export const ConfirmWithPromiseAndCustomLabel: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const alertTrigger = async () => {
-      const res = await dialog.confirm({
+      const res = await dialogs.confirmation({
         title: "Confirm Title",
         msg: "Confirm Message",
         confirm: {
@@ -223,7 +223,7 @@ export const Dialog: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -268,7 +268,7 @@ export const DialogFullScreen: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Dialog Title",
         size: "fullscreen",
         description: "Dialog Description",
@@ -314,7 +314,7 @@ export const DialogWithDropdownAndPromises: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -368,7 +368,7 @@ export const DialogTriggersADialog: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Dialog Title",
         description: "Dialog Description",
         content: <div>Dialog Content</div>,
@@ -385,7 +385,7 @@ export const DialogTriggersADialog: Story = {
               value: async () => {
                 return `Confirm-result-${
                   (
-                    await dialog.confirm({
+                    await dialogs.confirmation({
                       title: "Confirm Title",
                       msg: "Confirm Message",
                     })
@@ -413,7 +413,7 @@ export const DialogWithModule: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Performance Review",
         description: "Quarterly performance review discussion",
         module: {
@@ -448,13 +448,13 @@ export const DialogWithModule: Story = {
 // `keepOpen`: the action resolves the promise but the dialog is NOT removed,
 // so it stays open. The action's `value` function still runs on every click,
 // which makes it ideal for "apply"-style actions. Close it with a non-keepOpen
-// action (here "Done") or `dialog.close(id)`.
+// action (here "Done") or `dialogs.close(id)`.
 export const KeepOpen: Story = {
   render: () => {
     const [count, setCount] = useState(0)
 
     const trigger = () => {
-      dialog.open({
+      dialogs.open({
         id: "keep-open-demo",
         title: "Keep Open",
         description:
@@ -497,7 +497,7 @@ export const NonBlocking: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const result = await dialog.open({
+      const result = await dialogs.open({
         title: "Non-Blocking Action",
         description:
           'The primary action runs for 3s. Because it is nonBlocking, "Cancel" stays clickable while it runs.',
@@ -536,7 +536,7 @@ export const Modal: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await dialog.open({
+      const res = await dialogs.open({
         title: "Modal Dialog",
         description:
           "This is a modal dialog that cannot be closed by clicking outside or pressing Escape",

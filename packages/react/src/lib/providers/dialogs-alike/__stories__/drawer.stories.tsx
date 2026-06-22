@@ -5,7 +5,7 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Delete, Pencil } from "@/icons/app"
 
-import { drawer } from "../imperative"
+import { drawers } from "../imperative"
 import { dialogsAlikeStore } from "../store"
 import { DialogActionValue } from "../types"
 
@@ -36,7 +36,7 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   render: () => {
     const drawerTrigger = async () => {
-      const res = await drawer.open({
+      const res = await drawers.open({
         title: "Drawer Title",
         description: "Drawer Description",
         content: <div>Drawer Content</div>,
@@ -69,7 +69,7 @@ export const DrawerLeft: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await drawer.open({
+      const res = await drawers.open({
         title: "Left Drawer",
         description: "This drawer opens from the left",
         position: "left",
@@ -104,7 +104,7 @@ export const DrawerWithDropdown: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await drawer.open({
+      const res = await drawers.open({
         title: "Drawer with Dropdown Actions",
         description: "This drawer has multiple secondary actions",
         content: <div>Check the actions menu</div>,
@@ -149,7 +149,7 @@ export const DrawerWithPromises: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await drawer.open({
+      const res = await drawers.open({
         title: "Drawer with Async Action",
         description: "The primary action takes time to resolve",
         content: <div>Click the primary action to see the loading state</div>,
@@ -184,7 +184,7 @@ export const DrawerWithModule: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await drawer.open({
+      const res = await drawers.open({
         title: "Time Off Request",
         description: "Request time off for your vacation",
         module: {
@@ -221,7 +221,7 @@ export const DrawerModal: Story = {
     const [res, setRes] = useState<DialogActionValue>(undefined)
 
     const trigger = async () => {
-      const res = await drawer.open({
+      const res = await drawers.open({
         title: "Modal Drawer",
         description: "This drawer behaves like a modal (blocks interaction)",
         modal: true,
