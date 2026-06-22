@@ -253,6 +253,10 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   )
   const clearPanelContent = useCallback(() => setPanelContentState(null), [])
 
+  // Which edge the whole panel docks to (AI chat, hosted content and canvas).
+  // Defaults to "right"; hosts flip it to "left" for a chat-first experience.
+  const [panelSide, setPanelSide] = useState<"left" | "right">("right")
+
   return (
     <AiChatStateContext.Provider
       value={{
@@ -317,6 +321,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         panelContent,
         setPanelContent,
         clearPanelContent,
+        panelSide,
+        setPanelSide,
       }}
     >
       {children}
@@ -375,6 +381,7 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   chatWidth: DEFAULT_CHAT_WIDTH,
+  panelSide: "right",
   visualizationMode: "sidepanel",
   mode: "chat",
   shouldPlayEntranceAnimation: true,

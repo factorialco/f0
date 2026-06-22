@@ -188,6 +188,15 @@ export type AiChatProviderReturnValue = {
   setPanelContent: (content: SidePanelContent | null) => void
   /** Clear the custom panel content and fall back to the F0.ai chat. */
   clearPanelContent: () => void
+  /**
+   * Edge the whole side panel docks to — the AI chat, hosted content and the
+   * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
+   * chat-first experience (e.g. communications), where left is comfier to
+   * navigate between conversations.
+   */
+  panelSide: "left" | "right"
+  /** Set which edge the side panel docks to. */
+  setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>
 } & Pick<
   AiChatState,
   | "agent"

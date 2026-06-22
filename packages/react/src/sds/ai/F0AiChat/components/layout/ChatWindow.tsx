@@ -28,8 +28,12 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
     processDroppedFiles,
     activeGame,
     closeGame,
+    panelSide,
   } = useAiChat()
   const isCanvasMode = visualizationMode === "canvas"
+  // Hosts dock the whole panel left for a chat-first experience (communications);
+  // the default is right. The AI chat follows the panel side too.
+  const isLeft = panelSide === "left"
 
   const dragCounterRef = useRef(0)
   const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
@@ -102,7 +106,10 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
       {open && (
         <motion.div
           key="chat-wrapper"
-          className="bg-f1-transparent pointer-events-auto relative ml-auto flex h-full dark:bg-f1-background md:py-1 md:pr-1"
+          className={cn(
+            "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background md:py-1",
+            isLeft ? "mr-auto md:pl-1" : "ml-auto md:pr-1"
+          )}
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
           }
@@ -112,32 +119,40 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
           }}
           exit={{ opacity: 0, width: 0 }}
           transition={wrapperTransition}
-          style={{ transformOrigin: "right center" }}
+          style={{ transformOrigin: isLeft ? "left center" : "right center" }}
           onAnimationComplete={() => {
             if (shouldPlayEntranceAnimation) {
               setShouldPlayEntranceAnimation(false)
             }
           }}
         >
-          {resizable && !fullscreen && !isSmallScreen && (
+          {/* Resize seam: inner (left) edge for a right-docked panel, inner
+              (right) edge for a left-docked one — so it renders after the card. */}
+          {resizable && !fullscreen && !isSmallScreen && !isLeft && (
             <ResizeHandle
               onResize={handleResize}
               onReset={resetChatWidth}
               isResizing={isResizing}
               setIsResizing={setIsResizing}
               isCanvasMode={isCanvasMode}
+              side="right"
             />
           )}
           <div
             aria-hidden={!open}
             className={cn(
               "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",
-              isCanvasMode && "border-l-transparent",
               // In canvas mode the chat sits flush against the canvas with
-              // only the ResizeHandle (1px) between them. Dropping the left
+              // only the ResizeHandle (1px) between them. Dropping the seam-side
               // border avoids stacking canvas-border + handle + chat-border
               // = 3px of visual separation; the handle is the single seam.
-              isCanvasMode ? "xs:rounded-r-xl" : "xs:rounded-xl"
+              isCanvasMode &&
+                (isLeft ? "border-r-transparent" : "border-l-transparent"),
+              isCanvasMode
+                ? isLeft
+                  ? "xs:rounded-l-xl"
+                  : "xs:rounded-r-xl"
+                : "xs:rounded-xl"
             )}
             onDragEnter={handleDragEnter}
             onDragOver={handleDragOver}
@@ -169,6 +184,16 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
             )}
             {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
           </div>
+          {resizable && !fullscreen && !isSmallScreen && isLeft && (
+            <ResizeHandle
+              onResize={handleResize}
+              onReset={resetChatWidth}
+              isResizing={isResizing}
+              setIsResizing={setIsResizing}
+              isCanvasMode={isCanvasMode}
+              side="left"
+            />
+          )}
         </motion.div>
       )}
     </AnimatePresence>

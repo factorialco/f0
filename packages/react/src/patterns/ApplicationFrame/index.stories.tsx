@@ -977,7 +977,15 @@ const ConversationsSidebarInner = () => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState("home")
   const { unreadChatsCount, setActiveChat } = useSidebarChats()
-  const { clearPanelContent, setOpen, open, panelContent } = useAiChat()
+  const { clearPanelContent, setOpen, open, panelContent, setPanelSide } =
+    useAiChat()
+
+  // This demo is "communications present": dock the whole panel (AI chat +
+  // conversations) on the left, where it's comfier to navigate between chats.
+  useEffect(() => {
+    setPanelSide("left")
+    return () => setPanelSide("right")
+  }, [setPanelSide])
 
   // A conversation is "selected" only while it's the one on view in the side
   // panel. Opening the AI chat (panelContent cleared) or closing the panel

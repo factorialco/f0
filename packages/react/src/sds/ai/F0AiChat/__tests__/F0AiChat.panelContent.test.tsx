@@ -9,11 +9,15 @@ import {
 } from "../providers/AiChatStateProvider"
 
 const Controls = () => {
-  const { setOpen, setPanelContent, clearPanelContent } = useAiChat()
+  const { setOpen, setPanelContent, clearPanelContent, setPanelSide } =
+    useAiChat()
   return (
     <div>
       <button type="button" onClick={() => setOpen(true)}>
         open
+      </button>
+      <button type="button" onClick={() => setPanelSide("left")}>
+        dock-left
       </button>
       <button
         type="button"
@@ -77,5 +81,20 @@ describe("F0AiChat side-panel content", () => {
     await userEvent.click(screen.getByText("clear"))
     expect(screen.queryByText("FAKE A")).not.toBeInTheDocument()
     expect(screen.getByText("CHAT MESSAGES")).toBeInTheDocument()
+  })
+
+  it("docks the panel right by default and left when the host flips the side", async () => {
+    const { container } = renderChat()
+    await userEvent.click(screen.getByText("open"))
+
+    // Default: right-docked (pushed right with ml-auto).
+    expect(container.querySelector(".ml-auto")).not.toBeNull()
+    expect(container.querySelector(".mr-auto")).toBeNull()
+
+    await userEvent.click(screen.getByText("dock-left"))
+
+    // Left-docked: pushed left with mr-auto.
+    expect(container.querySelector(".mr-auto")).not.toBeNull()
+    expect(container.querySelector(".ml-auto")).toBeNull()
   })
 })

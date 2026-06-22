@@ -50,4 +50,15 @@ describe("AiChatStateProvider panel content", () => {
     expect(result.current.panelContent).toBeNull()
     expect(result.current.open).toBe(true)
   })
+
+  it("defaults the panel side to right and lets the host flip it to left", () => {
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+    expect(result.current.panelSide).toBe("right")
+
+    act(() => {
+      result.current.setPanelSide("left")
+    })
+
+    expect(result.current.panelSide).toBe("left")
+  })
 })
