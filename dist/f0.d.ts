@@ -17,6 +17,7 @@ import { baseColors } from '@factorialco/f0-core';
 import { BigNumberProps as BigNumberProps_2 } from './types';
 import { BlockContentExtraProps } from './blocks/BlockContent';
 import { BlockProps } from './blocks/Block';
+import { CategoryBarChartCellValue } from './types/categoryBarChart';
 import { CategoryBarProps } from './CategoryBarChart';
 import { ChartConfig } from './f0';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
@@ -1551,8 +1552,19 @@ declare type BaseQuestionProps = {
     type: QuestionType;
     children: React.ReactNode;
     required?: boolean;
-    locked?: boolean;
     hiddenActions?: HiddenActions;
+    /**
+     * Locks the question on its own — independent of any section. A question is
+     * also locked when its containing section is locked.
+     */
+    locked?: boolean;
+    /**
+     * Optional notice shown in the lock tooltip when the question is locked. Use
+     * it to say what this specific question is — it takes precedence over the
+     * parent section's `LockedSectionNotice` and over the default question notice
+     * from the i18n provider.
+     */
+    lockedNote?: LockedQuestionNotice;
 };
 
 declare type BaseQuestionPropsForOtherQuestionComponents = Omit<BaseQuestionProps, "children" | "onChange">;
@@ -1647,11 +1659,11 @@ declare const boxVariants: (props?: ({
     borderBottom?: "none" | "default" | "thick" | undefined;
     borderLeft?: "none" | "default" | "thick" | undefined;
     borderRight?: "none" | "default" | "thick" | undefined;
-    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
-    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xl" | "full" | "3xl" | "2xs" | undefined;
+    borderRadius?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusTopRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomLeft?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
+    borderRadiusBottomRight?: "none" | "lg" | "md" | "sm" | "xs" | "xl" | "2xs" | "2xl" | "full" | "3xl" | undefined;
     borderStyle?: "none" | "dashed" | "dotted" | "double" | "solid" | undefined;
     background?: "info" | "bold" | "secondary" | "inverse" | "critical" | "accent" | "warning" | "positive" | "promote" | "selected" | "critical-bold" | "transparent" | "overlay" | "primary" | "tertiary" | "inverse-secondary" | "accent-bold" | "info-bold" | "warning-bold" | "positive-bold" | "selected-secondary" | "selected-bold" | undefined;
     width?: SizeToken_2 | undefined;
@@ -2143,6 +2155,33 @@ declare interface CardBookmark {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 export declare type CardImageAspectRatio = (typeof cardImageAspectRatios)[number];
 
 export declare const cardImageAspectRatios: readonly ["default", "video"];
@@ -2336,33 +2375,6 @@ declare const cardPropertyRenderers: {
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
-
-declare interface CardRowConfirmAction {
-    onClick: () => void;
-    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
-    label?: string;
-    disabled?: boolean;
-}
-
-/**
- * Container breakpoint at which the card row switches between its inline and its
- * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
- * width.
- */
-declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
-
-/**
- * Resolved state shown at the trailing edge in place of the actions: a coloured
- * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
- */
-declare interface CardRowStatus {
-    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
-    icon: IconType;
-    /** Colour family. */
-    variant: StatusVariant;
-    /** Accessible label; the icon carries meaning, so this is required. */
-    label: string;
-}
 
 declare interface CardSecondaryAction {
     label: string;
@@ -4862,6 +4874,9 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -6840,8 +6855,6 @@ export declare const F0AvatarModule: WithDataTestIdReturnType_4<typeof F0AvatarM
 /**
  * Module avatar
  * @description A component that displays a module avatar
- * @experimental
- * @returns
  */
 declare function F0AvatarModule_2({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
 
@@ -7286,18 +7299,7 @@ compact?: boolean;
 }) => JSX_2.Element;
 }>;
 
-export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
-
-/**
- * @experimental This is an experimental component, use it at your own risk.
- */
-export declare const F0CardRow: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardRowProps & RefAttributes<HTMLDivElement>> & {
-Skeleton: ({ compact }: {
-compact?: boolean;
-}) => JSX_2.Element;
-}>;
-
-export declare interface F0CardRowProps {
+declare interface F0CardHorizontalProps {
     /**
      * The primary line of text.
      */
@@ -7330,18 +7332,18 @@ export declare interface F0CardRowProps {
      * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
      * instead of the standard actions. Provide either or both.
      */
-    confirmAction?: CardRowConfirmAction;
+    confirmAction?: CardHorizontalConfirmAction;
     /**
      * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
      */
-    rejectAction?: CardRowConfirmAction;
+    rejectAction?: CardHorizontalConfirmAction;
     /**
      * Resolved-state icon shown at the trailing edge in place of any actions — the
      * outcome of a confirm/reject row, e.g.
      * `{ icon: Check, variant: "positive", label: "Accepted" }`.
      * Takes precedence over the action props.
      */
-    status?: CardRowStatus;
+    status?: CardHorizontalStatus;
     /**
      * Strikes through and dims the title/description, marking the row's subject as
      * void or closed (e.g. a rejected request). Purely presentational — pair it
@@ -7349,15 +7351,11 @@ export declare interface F0CardRowProps {
      */
     inactive?: boolean;
     /**
-     * Compact layout: tighter padding and smaller controls.
-     */
-    compact?: boolean;
-    /**
      * Container width at which the actions drop to their own line (below it) vs.
      * sit inline (at/above it). `never` keeps them inline at every width.
      * @default "never"
      */
-    stackAt?: CardRowStackAt;
+    stackAt?: CardHorizontalStackAt;
     /**
      * Stretch to fill the height of its container.
      */
@@ -7388,6 +7386,8 @@ export declare interface F0CardRowProps {
      */
     disableOverlayLink?: boolean;
 }
+
+export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
 
 declare interface F0CardSelectConfig {
     options: CardSelectOption[];
@@ -9469,7 +9469,7 @@ export declare const F0HILActionConfirmation: ({ text, description, avatar, conf
 /**
  * Props for the F0HILActionConfirmation component.
  *
- * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
  */
@@ -9482,19 +9482,19 @@ export declare type F0HILActionConfirmationProps = {
     /**
      * Optional secondary line shown beneath the title (single line, truncated).
      */
-    description?: F0CardRowProps["description"];
+    description?: F0CardHorizontalProps["description"];
     /**
      * Optional avatar rendered on the left of the row. Accepts any avatar type in
      * the system (person, company, team, file, icon, emoji, …).
      */
-    avatar?: F0CardRowProps["avatar"];
+    avatar?: F0CardHorizontalProps["avatar"];
     /**
      * Container width at which the ✓/✗ actions drop onto their own line instead of
      * staying inline. Prevents the buttons from overlapping the prompt in narrow
      * containers. Set to `"never"` to keep them inline at every width.
      * @default "sm"
      */
-    stackAt?: F0CardRowProps["stackAt"];
+    stackAt?: F0CardHorizontalProps["stackAt"];
     /**
      * Accessible label and tooltip for the confirm (✓) button.
      */
@@ -12349,6 +12349,23 @@ export declare interface LoadingStateProps {
     label: string;
 }
 
+export declare type LockedQuestionNotice = {
+    description: string;
+};
+
+/**
+ * Explanation surfaced in a locked item's lock tooltip (authoring view only —
+ * never shown in the answering/preview form), saying why it can't be edited,
+ * moved, or removed. Rendered as a title-less popover on hovering the lock.
+ *
+ * A section and an individual question each carry their own `lockedNote`; a
+ * locked question prefers its own `LockedQuestionNotice` and otherwise falls
+ * back to the section's `LockedSectionNotice`.
+ */
+export declare type LockedSectionNotice = {
+    description: string;
+};
+
 /** Margin tokens (spacing + auto for centering) */
 export declare type MarginToken = SpacingToken | "auto";
 
@@ -12631,7 +12648,7 @@ declare type MimeType_2 = "image" | "video" | "audio" | "text" | "application" |
 export { MimeType_2 as MimeType }
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -14348,6 +14365,28 @@ export declare type RowSpanToken = "1" | "2" | "3" | "4" | "5" | "6" | "full";
 /** Grid row count (1–6 + none) */
 export declare type RowsToken = "1" | "2" | "3" | "4" | "5" | "6" | "none";
 
+/** A mocked single-choice question. */
+declare type SampleChoiceQuestion = {
+    type: "choice";
+    /** The question prompt shown above the options */
+    question: string;
+    /** The answer options, rendered as non-interactive radio rows */
+    options: string[];
+};
+
+/** A mocked rating-scale question (e.g. Very low → Very high). */
+declare type SampleRatingQuestion = {
+    type: "rating";
+    /** The question prompt shown above the scale */
+    question: string;
+    /** Number of rating steps to render (default 5) */
+    steps?: number;
+    /** Caption under the lowest step */
+    minLabel?: string;
+    /** Caption under the highest step */
+    maxLabel?: string;
+};
+
 export declare type SearchFilterDefinition = BaseFilterDefinition<"search">;
 
 declare type SearchOptions = {
@@ -14433,9 +14472,20 @@ export declare type SectionElement = Omit<SectionProps, "onAction" | "onChange">
 
 declare type SectionProps = {
     id: string;
-    title: string;
+    /**
+     * Section heading. Optional — a section may have no title (e.g. a predefined,
+     * blocked section that leads with a `lockedNote` instead). In the editable
+     * view an empty title shows a placeholder so authors can add one; when the
+     * section is locked/read-only an empty title is hidden entirely.
+     */
+    title?: string;
     description?: string;
     locked?: boolean;
+    /**
+     * Optional explanation surfaced in the lock tooltip (authoring view only).
+     * Pair with `locked` to say why a predefined section can't be edited or moved.
+     */
+    lockedNote?: LockedSectionNotice;
     questions?: QuestionElement[];
 };
 
@@ -14720,6 +14770,11 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
 /** Inline mode: read-only rendering embedded in the page, no dialog */
 declare interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
     inline: true;
+    /**
+     * Hide the built-in ResourceHeader (title + description). Useful when the
+     * embedding page already renders its own resource header above the form.
+     */
+    hideResourceHeader?: boolean;
     mode?: never;
     module?: never;
     position?: never;
@@ -14850,6 +14905,16 @@ export declare type SurveyFormSubmitResult = {
     success: false;
     errors?: Record<string, string>;
 };
+
+/**
+ * A non-interactive preview of a survey question, used to illustrate what a
+ * given survey type produces (for example inside the survey type selector).
+ * It is purely presentational — the inputs are mocked placeholders, not real
+ * form fields.
+ */
+export declare function SurveySampleQuestion(props: SurveySampleQuestionProps): JSX_2.Element;
+
+export declare type SurveySampleQuestionProps = SampleRatingQuestion | SampleChoiceQuestion;
 
 export declare function SurveySteppedLoadingSkeleton(): JSX_2.Element;
 
@@ -15133,6 +15198,10 @@ export declare type TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -15363,6 +15432,14 @@ export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
 
+/** A button rendered in the footer at the bottom of the table of contents */
+declare type TOCAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
 declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -15408,6 +15485,8 @@ declare interface TOCProps {
     hideChildrenCounter?: boolean;
     /** Enable vertical scrolling when content overflows (default: true) */
     scrollable?: boolean;
+    /** Action buttons pinned in a footer at the bottom of the panel */
+    actions?: TOCAction[];
 }
 
 declare type toggleActionType = {
@@ -16453,6 +16532,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue_2, _meta: ValueDisplayRendererContext_2) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
+    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly company: (args: CompanyCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
     readonly team: (args: TeamCellValue_2, meta: ValueDisplayRendererContext_2) => JSX_2.Element;
