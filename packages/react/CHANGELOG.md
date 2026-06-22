@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.3.2](https://github.com/factorialco/f0/compare/f0-react-v4.3.1...f0-react-v4.3.2) (2026-06-22)
+
+
+### Bug Fixes
+
+* **value-display:** fix categoryBarChart tooltip in clickable cells ([#4544](https://github.com/factorialco/f0/issues/4544)) ([fe6da10](https://github.com/factorialco/f0/commit/fe6da10c41d2517eb7b3a6cdf07d54a7175881e7))
+
 ## [4.3.1](https://github.com/factorialco/f0/compare/f0-react-v4.3.0...f0-react-v4.3.1) (2026-06-22)
 
 
