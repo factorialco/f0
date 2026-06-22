@@ -12,6 +12,7 @@ import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
 
 import { FormCardValueFormatterProvider } from "@/sds/ai/F0AiChat/providers/FormCardValueFormatterProvider"
 
+import { ToastProvider } from "../../../hooks/toast/ToastProvider"
 import { ImageContextValue, ImageProvider } from "../../imageHandler"
 import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
@@ -146,11 +147,20 @@ export const F0Provider: React.FC<{
                         handler={dataCollectionStorageHandler}
                       >
                         <DialogsAlikeLayoutProvider>
-                          <FormComponentContext.Provider value={formComponent}>
-                            <FormCardValueFormatterProvider>
-                              {children}
-                            </FormCardValueFormatterProvider>
-                          </FormComponentContext.Provider>
+                          <ToastProvider
+                            portalTargets={{
+                              mobile: "#f0-overlay-root",
+                              desktop: "#f0-overlay-root",
+                            }}
+                          >
+                            <FormComponentContext.Provider
+                              value={formComponent}
+                            >
+                              <FormCardValueFormatterProvider>
+                                {children}
+                              </FormCardValueFormatterProvider>
+                            </FormComponentContext.Provider>
+                          </ToastProvider>
                         </DialogsAlikeLayoutProvider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>
