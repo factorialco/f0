@@ -40,6 +40,7 @@ const F0AiChatProviderComponent = ({
   chatMessages,
   chatInput,
   welcomeScreenSuggestions,
+  welcomeScreenCards,
   disclaimer,
   resizable = false,
   defaultVisualizationMode,
@@ -72,6 +73,7 @@ const F0AiChatProviderComponent = ({
       chatMessages={chatMessages}
       chatInput={chatInput}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
+      welcomeScreenCards={welcomeScreenCards}
       disclaimer={disclaimer}
       resizable={resizable}
       defaultVisualizationMode={defaultVisualizationMode}

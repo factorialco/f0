@@ -294,6 +294,11 @@ export type AiChatProviderProps = {
    */
   initialMessage?: string | string[]
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  /**
+   * Action/prompt cards rendered below the composer on the fullscreen welcome
+   * screen. The chat owns layout and, for prompt cards, the send.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   /**
    * Enable resizable chat window
@@ -423,6 +428,29 @@ export type WelcomeScreenSuggestion = {
   icon: IconType
   label: string
   items: WelcomeScreenSuggestionItem[]
+}
+
+/**
+ * A card shown below the composer on the fullscreen welcome screen, rendered
+ * as an `F0CardHorizontal`. Two kinds:
+ * - **Prompt cards** carry a `message` the chat sends when the card is clicked.
+ * - **Action cards** carry an `onClick` (e.g. open a dialog) which takes
+ *   precedence over `message`.
+ *
+ * Data-driven and runtime-agnostic — the chat owns the layout and, for prompt
+ * cards, the send.
+ */
+export type F0AiChatWelcomeCard = {
+  icon: IconType
+  title: string
+  description?: string
+  /** Prompt cards: the message the chat sends when the card is clicked. */
+  message?: string
+  /**
+   * Action cards: custom click handler (e.g. open a dialog). Takes precedence
+   * over `message` when both are present.
+   */
+  onClick?: () => void
 }
 
 /**

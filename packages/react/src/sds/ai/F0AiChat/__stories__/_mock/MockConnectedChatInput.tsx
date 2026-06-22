@@ -33,6 +33,7 @@ export const MockConnectedChatInput = () => {
     visualizationMode,
     creditWarning,
     welcomeScreenSuggestions,
+    welcomeScreenCards,
     tracking,
     openGame,
   } = useAiChat()
@@ -70,6 +71,13 @@ export const MockConnectedChatInput = () => {
     [sendMessage, tracking]
   )
 
+  const handleCardSelect = useCallback(
+    (message: string) => {
+      sendMessage(message)
+    },
+    [sendMessage]
+  )
+
   return (
     <F0AiChatTextArea
       ref={containerRef}
@@ -91,6 +99,8 @@ export const MockConnectedChatInput = () => {
       fullscreen={fullscreen}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       onSuggestionClick={handleSuggestionClick}
+      welcomeScreenCards={welcomeScreenCards}
+      onCardSelect={handleCardSelect}
     />
   )
 }

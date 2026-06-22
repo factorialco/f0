@@ -9,6 +9,7 @@ import type {
   PersonProfile,
   TranscribeFn,
   UploadedFile,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../F0AiChat/types"
@@ -136,10 +137,22 @@ export type F0AiChatTextAreaProps = {
   ) => void
 
   /**
+   * Action/prompt cards rendered as a grid below the composer on the
+   * fullscreen welcome screen. Prompt cards (with a `message`) call
+   * `onCardSelect`; action cards (with an `onClick`) run their own handler.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
+  /**
+   * Called with a prompt card's `message` when it's clicked. Wire this to the
+   * chat's send. Action cards bypass it via their own `onClick`.
+   */
+  onCardSelect?: (message: string) => void
+
+  /**
    * When true on the welcome screen, the composer adopts the fullscreen
    * layout: the input slot grows to claim the bottom half (so the textarea
-   * rises toward the vertical center), and the welcome suggestions render
-   * below the textarea with their popover opening downward (instead of above).
+   * rises toward the vertical center) and the welcome cards render below it.
+   * The welcome suggestions row sits above the composer in both layouts.
    */
   fullscreen?: boolean
 }

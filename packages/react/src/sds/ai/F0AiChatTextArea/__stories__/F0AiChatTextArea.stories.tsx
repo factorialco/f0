@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import { File, Marketplace } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
@@ -12,6 +13,7 @@ import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
+  F0AiChatWelcomeCard,
   PendingContext,
   PendingQuote,
   PersonProfile,
@@ -91,6 +93,21 @@ const CREDIT_WARNING: AiChatCreditWarning = {
   onDismiss: () => console.log("dismiss clicked"),
 }
 
+const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
+  {
+    icon: File,
+    title: "Empty survey",
+    description: "Start from scratch",
+    message: "Create an empty survey.",
+  },
+  {
+    icon: Marketplace,
+    title: "Templates",
+    description: "Browse pre-made surveys",
+    onClick: () => console.log("open templates"),
+  },
+]
+
 const noop = () => {}
 
 const buildClarifyingState = (
@@ -135,6 +152,7 @@ type WrapperProps = {
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
   inProgress?: boolean
@@ -151,6 +169,7 @@ const Wrapper = ({
   creditWarning,
   disclaimer,
   footer,
+  welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
   inProgress,
@@ -194,6 +213,13 @@ const Wrapper = ({
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
+        welcomeScreenCards={welcomeScreenCards}
+        onCardSelect={(message) =>
+          setSubmissions((prev) => [
+            ...prev,
+            { text: message, files: [], context: null, quote: null },
+          ])
+        }
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
       />
@@ -308,6 +334,15 @@ export const FullscreenWelcome: Story = {
         Powered by Factorial AI · v0.1.0
       </p>
     ),
+  },
+}
+
+export const WithWelcomeCards: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenCards: WELCOME_CARDS,
+    disclaimer: DISCLAIMER,
   },
 }
 

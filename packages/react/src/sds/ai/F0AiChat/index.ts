@@ -24,6 +24,7 @@ export type {
   DashboardCanvasContent,
   DataDownloadCanvasContent,
   F0AIMessage,
+  F0AiChatWelcomeCard,
   F0Message,
   F0ToolCall,
   FormCanvasContent,
