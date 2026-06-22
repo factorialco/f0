@@ -228,6 +228,8 @@ const RowComponentInner = <
         headerGroups={headerGroups}
         key={key}
         fromVisualization={fromVisualization}
+        registerSelectable={registerSelectable}
+        unregisterSelectable={unregisterSelectable}
       />
     )
   }
