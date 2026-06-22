@@ -5,6 +5,7 @@ import {
   extendPrinciple,
   placementKinds,
 } from "../data/contribute"
+import { CreationDecisionFlow } from "./CreationDecisionFlow"
 
 export function ContributeSection() {
   return (
@@ -60,6 +61,20 @@ export function ContributeSection() {
           {extendPrinciple.headline}
         </h3>
         <p className="mt-2 text-sm text-ink">{extendPrinciple.body}</p>
+      </div>
+
+      {/* The decision flow — visual overview */}
+      <div>
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          The whole decision, at a glance
+        </h3>
+        <p className="mt-1 text-sm text-muted">
+          Every proposal walks down the same spine. Each question either sends you
+          to a faster answer on the right, or one step deeper.
+        </p>
+        <div className="mt-3">
+          <CreationDecisionFlow />
+        </div>
       </div>
 
       {/* Step 2 — scenarios */}

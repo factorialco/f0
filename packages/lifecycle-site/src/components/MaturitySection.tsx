@@ -24,6 +24,13 @@ export function MaturitySection() {
               </span>
               <p className="mt-4 text-sm font-medium">{m.promise}</p>
 
+              <div className={`mt-4 rounded-xl border ${c.border} ${c.bg} p-3`}>
+                <p className={`text-xs font-semibold uppercase tracking-wider ${c.text}`}>
+                  Can I use it in my designs?
+                </p>
+                <p className="mt-1 text-sm text-ink">{m.canIUse}</p>
+              </div>
+
               <h4 className="mt-5 text-xs font-semibold uppercase tracking-wider text-muted">
                 Rules
               </h4>

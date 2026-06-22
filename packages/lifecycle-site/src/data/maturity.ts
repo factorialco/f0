@@ -8,6 +8,8 @@ export type Maturity = {
   label: string
   badgeColor: "experimental" | "stable" | "deprecated"
   promise: string
+  /** Plain answer to "can I use this in my designs / product?" */
+  canIUse: string
   rules: string[]
   examples: string
   storybookTag: string
@@ -21,6 +23,8 @@ export const maturityLevels: Maturity[] = [
     badgeColor: "experimental",
     promise:
       "API may change. Use at your own risk. No guarantee of backwards compatibility.",
+    canIUse:
+      "Yes. They're shipped and work for their documented use cases. Know that the API can change without a major version, only documented cases are guaranteed, and long-term upkeep isn't promised. Great for prototyping and new features — adopting them is exactly what earns them a promotion to stable.",
     rules: [
       "Lives under src/experimental/<area>/",
       "Wrapped in experimentalComponent() at export",
@@ -37,6 +41,8 @@ export const maturityLevels: Maturity[] = [
     badgeColor: "stable",
     promise:
       "Public API. Breaking changes require a major version bump. Safe to depend on in production.",
+    canIUse:
+      "Yes, freely. Safe to depend on in production — breaking changes only come with a major version bump and a migration guide.",
     rules: [
       "Lives in its target folder (components/, patterns/, ui/, etc.)",
       "No experimentalComponent() wrapper",
@@ -53,6 +59,8 @@ export const maturityLevels: Maturity[] = [
     badgeColor: "deprecated",
     promise:
       "Will be removed. Continue to work for at least one quarter (≥90 days). Migrate to the suggested replacement.",
+    canIUse:
+      "Not for new work. It still works for now (≥1 quarter), but it's on its way out — use the suggested replacement instead.",
     rules: [
       "JSDoc requires THREE tags: @deprecated, @removeIn vX.Y.Z, @migration <url>",
       "Story tagged 'deprecated'",

@@ -10,6 +10,12 @@ export type FaqEntry = {
 
 export const faq: FaqEntry[] = [
   {
+    question: "Can I use experimental components in my designs?",
+    audience: ["pd", "pe"],
+    answer:
+      "Yes. Experimental components are shipped and work for their documented use cases. Just know the API can change without a major version bump, only documented cases are guaranteed, and long-term upkeep isn't promised. They're great for prototyping and new features — and adopting them is exactly what helps them get promoted to stable. Steer clear of deprecated components for new work.",
+  },
+  {
     question: "My proposal was rejected. What now?",
     audience: ["pd", "pe"],
     answer:
@@ -22,10 +28,10 @@ export const faq: FaqEntry[] = [
       "Foundations reviews proposals based on team availability and as quickly as possible — there's no fixed SLA today. If your proposal is urgent or blocking work, ping #f0-support in Slack with a link to the issue. Do NOT start building before Foundations responds — work may be wasted if outcome is rejection or accepted-as-domain.",
   },
   {
-    question: "I don't know if my component should be in core F0 or in SDS.",
+    question: "Should it be a core component, a kit, or an SDS?",
     audience: ["pd", "pe"],
     answer:
-      "Foundations decides this in triage. Rule of thumb: core F0 = used by ≥2 product domains; SDS = specific to one domain (e.g. payroll, recruitment). When in doubt, mark it as 'unsure' in the proposal and let triage decide.",
+      "It's about visual identity, not domain. SDS = a system with its OWN tokens/colors/typography (e.g. the AI or upselling brand). Kit = a functional grouping on core F0 tokens reused by ≥2 products (charts, social). Generic and core-styled → a core F0 component. If only your product uses it, keep it in your monolith. Foundations approves anything new under sds/ or kits/ — full rules in where-it-goes.mdx.",
   },
   {
     question: "Quality gate is failing. What do I do?",
