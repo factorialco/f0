@@ -1,4 +1,4 @@
-import { F0ToastVariant, F0ToastProps } from "@/internal/components/Toast/types"
+import { F0ToastVariant, F0ToastProps } from "@/ui/Toast/types"
 
 export type ToastId = string
 

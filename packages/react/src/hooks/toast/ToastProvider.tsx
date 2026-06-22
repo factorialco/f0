@@ -10,7 +10,7 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 
-import { F0Toast } from "@/internal/components/Toast/F0Toast"
+import { F0Toast } from "@/ui/Toast/F0Toast"
 import { useIsMobile } from "@/lib/useIsDesktop"
 import { cn } from "@/lib/utils"
 

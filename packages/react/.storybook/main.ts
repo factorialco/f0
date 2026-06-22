@@ -67,10 +67,6 @@ const config: StorybookConfig = {
       directory: "../src/ui",
       titlePrefix: "🔒 Internal",
     },
-    {
-      directory: "../src/internal",
-      titlePrefix: "🔒 Internal",
-    },
     ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
   staticDirs: ["../public", "./static"],

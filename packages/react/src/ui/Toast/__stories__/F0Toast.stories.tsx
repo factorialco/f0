@@ -9,7 +9,7 @@ import { F0Toast } from "../F0Toast"
 
 const meta: Meta<typeof F0Toast> = {
   component: F0Toast,
-  title: "Components/Toast",
+  title: "Toast",
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
