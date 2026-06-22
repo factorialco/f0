@@ -62192,7 +62192,7 @@ const tI = {
                   onChange: D,
                   disabled: z,
                   className: J(
-                    "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                     V && "cursor-not-allowed"
                   ),
                   style: tI
@@ -62882,7 +62882,7 @@ const ade = {
                 ),
                 value: d,
                 onChange: C,
-                className: "flex-1 resize-none font-medium",
+                className: "flex-1 resize-none font-medium text-f1-foreground placeholder:text-f1-foreground-tertiary",
                 style: ade
               }
             ) : /* @__PURE__ */ S("p", { className: "flex-1 font-medium", children: d }),
@@ -63326,7 +63326,7 @@ const ade = {
                 onChange: g,
                 disabled: x,
                 className: J(
-                  "w-full text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                  "w-full text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                   x && "cursor-not-allowed"
                 )
               }
