@@ -546,10 +546,20 @@ export declare type AiChatProviderProps = {
      * UI config — does not affect runtime behavior.
      */
     initialMessage?: string | string[];
+    /**
+     * Grouped suggestions rendered as outline buttons above the composer on the
+     * welcome screen. Optional and independent of `welcomeScreenCards` — provide
+     * either, both, or neither, in any counts. No hard limit on the number of
+     * groups yet.
+     */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     /**
      * Action/prompt cards rendered below the composer on the fullscreen welcome
      * screen. The chat owns layout and, for prompt cards, the send.
+     *
+     * Optional and independent of `welcomeScreenSuggestions` — provide either,
+     * both, or neither, in any counts. At most 4 cards are rendered (the row is a
+     * 2×2 grid); extras are dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
@@ -6091,6 +6101,9 @@ export declare type F0AiChatTextAreaProps = {
      * the welcome screen. Clicking a group opens a single popover (above the
      * row, left-aligned, spanning the composer width) with that group's items.
      * Hovering an item previews its prompt in the textarea placeholder.
+     *
+     * Optional and independent of `welcomeScreenCards` — the two can have
+     * different counts. No hard limit on the number of groups yet.
      */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     /** Called when the user clicks a sub-suggestion. Receives the picked
@@ -6100,6 +6113,10 @@ export declare type F0AiChatTextAreaProps = {
      * Action/prompt cards rendered as a grid below the composer on the
      * fullscreen welcome screen. Prompt cards (with a `message`) call
      * `onCardSelect`; action cards (with an `onClick`) run their own handler.
+     *
+     * Optional and independent of `welcomeScreenSuggestions` — the two can have
+     * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
+     * dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     /**
@@ -6139,7 +6156,7 @@ export declare type F0AiChatTextAreaSubmitPayload = {
  *   precedence over `message`.
  *
  * Data-driven and runtime-agnostic — the chat owns the layout and, for prompt
- * cards, the send.
+ * cards, the send. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
  */
 export declare type F0AiChatWelcomeCard = {
     icon: IconType;
@@ -16679,7 +16696,8 @@ export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartD
 
 /**
  * A welcome-screen group rendered as an outline button in the welcome row.
- * Clicking the group opens a popover listing its `items`.
+ * Clicking the group opens a popover listing its `items`. The number of groups
+ * is not capped yet (unlike welcome cards, which top out at 4).
  */
 export declare type WelcomeScreenSuggestion = {
     icon: IconType;
