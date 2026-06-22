@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
-import { dialog, drawer } from "../imperative"
+import { dialogs, drawers } from "../imperative"
 import { dialogsAlikeStore } from "../store"
 
 // The imperative API stores raw items in the module store and exposes
@@ -26,9 +26,9 @@ describe("imperative dialog / drawer API", () => {
     warnSpy.mockRestore()
   })
 
-  describe("dialog.open", () => {
+  describe("dialogs.open", () => {
     it("adds a default-variant item to the store", () => {
-      dialog.open({
+      dialogs.open({
         id: "d1",
         title: "Title",
         description: "Desc",
@@ -44,7 +44,7 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("resolves with the clicked action value and removes the item", async () => {
-      const promise = dialog.open({
+      const promise = dialogs.open({
         id: "d1",
         title: "Title",
         content: "content",
@@ -59,7 +59,7 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("resolves undefined and removes the item when closed (overlay/esc)", async () => {
-      const promise = dialog.open({
+      const promise = dialogs.open({
         id: "d1",
         title: "Title",
         content: "content",
@@ -73,7 +73,7 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("keeps the item open after a keepOpen action (but still resolves)", async () => {
-      const promise = dialog.open({
+      const promise = dialogs.open({
         id: "d1",
         title: "Title",
         content: "content",
@@ -91,7 +91,7 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("auto-generates an id when none is provided", () => {
-      dialog.open({
+      dialogs.open({
         title: "Title",
         content: "content",
         actions: { primary: { value: "ok", label: "OK" } },
@@ -101,16 +101,16 @@ describe("imperative dialog / drawer API", () => {
     })
   })
 
-  describe("dialog.close", () => {
+  describe("dialogs.close", () => {
     it("closes an open dialog by id and resolves its promise with undefined", async () => {
-      const promise = dialog.open({
+      const promise = dialogs.open({
         id: "d1",
         title: "Title",
         content: "content",
         actions: { primary: { value: "ok", label: "OK" } },
       })
 
-      dialog.close("d1")
+      dialogs.close("d1")
 
       await expect(promise).resolves.toBeUndefined()
       expect(dialogsAlikeStore.getSnapshot()).toHaveLength(0)
@@ -118,14 +118,14 @@ describe("imperative dialog / drawer API", () => {
 
     it("falls back to removing the item if no close callback is registered", () => {
       dialogsAlikeStore.addItem({ id: "orphan" } as any)
-      dialog.close("orphan")
+      dialogs.close("orphan")
       expect(dialogsAlikeStore.getSnapshot()).toHaveLength(0)
     })
   })
 
-  describe("dialog.notification", () => {
+  describe("dialogs.notification", () => {
     it("adds a notification-variant item defaulting to type 'info'", () => {
-      dialog.notification({
+      dialogs.notification({
         title: "Heads up",
         msg: "Something happened",
         actions: { primary: { value: "ok", label: "OK" } },
@@ -138,7 +138,7 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("honors an explicit type", () => {
-      dialog.notification({
+      dialogs.notification({
         title: "Careful",
         msg: "Warning",
         type: "warning",
@@ -148,9 +148,9 @@ describe("imperative dialog / drawer API", () => {
     })
   })
 
-  describe("dialog.alert", () => {
+  describe("dialogs.alert", () => {
     it("builds a single primary action with the default 'ok' label", () => {
-      dialog.alert({ title: "Done", msg: "Saved" })
+      dialogs.alert({ title: "Done", msg: "Saved" })
       const item = currentItem()
       expect(item.variant).toBe("notification")
       expect(item.actions.primary.label).toBe("Ok")
@@ -163,21 +163,21 @@ describe("imperative dialog / drawer API", () => {
         ok: "Aceptar",
         cancel: "Cancelar",
       })
-      dialog.alert({ title: "Done", msg: "Saved" })
+      dialogs.alert({ title: "Done", msg: "Saved" })
       expect(currentItem().actions.primary.label).toBe("Aceptar")
     })
 
     it("resolves with the confirm value when clicked", async () => {
-      const promise = dialog.alert({ title: "Done", msg: "Saved" })
+      const promise = dialogs.alert({ title: "Done", msg: "Saved" })
       const item = currentItem()
       item.onClickAction(item.actions.primary, true)
       await expect(promise).resolves.toBe(true)
     })
   })
 
-  describe("dialog.confirm", () => {
+  describe("dialogs.confirm", () => {
     it("builds primary + secondary actions with default ok/cancel labels", () => {
-      dialog.confirm({ title: "Sure?", msg: "Confirm this" })
+      dialogs.confirm({ title: "Sure?", msg: "Confirm this" })
       const item = currentItem()
       expect(item.actions.primary.label).toBe("Ok")
       expect(item.actions.primary.value).toBe(true)
@@ -186,14 +186,14 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("resolves false when the cancel action is clicked", async () => {
-      const promise = dialog.confirm({ title: "Sure?", msg: "Confirm this" })
+      const promise = dialogs.confirm({ title: "Sure?", msg: "Confirm this" })
       const item = currentItem()
       item.onClickAction(item.actions.secondary, false)
       await expect(promise).resolves.toBe(false)
     })
 
     it("supports custom confirm value and label", () => {
-      dialog.confirm({
+      dialogs.confirm({
         title: "Delete?",
         msg: "This cannot be undone",
         confirm: { value: "deleted", label: "Delete" },
@@ -204,9 +204,9 @@ describe("imperative dialog / drawer API", () => {
     })
   })
 
-  describe("drawer.open", () => {
+  describe("drawers.open", () => {
     it("adds a drawer-variant item to the store", () => {
-      drawer.open({
+      drawers.open({
         id: "dr1",
         title: "Edit",
         content: "form",
@@ -218,7 +218,7 @@ describe("imperative dialog / drawer API", () => {
     })
 
     it("resolves with the clicked value and removes the item", async () => {
-      const promise = drawer.open({
+      const promise = drawers.open({
         id: "dr1",
         title: "Edit",
         content: "form",
@@ -230,14 +230,14 @@ describe("imperative dialog / drawer API", () => {
       expect(dialogsAlikeStore.getSnapshot()).toHaveLength(0)
     })
 
-    it("can be closed programmatically with drawer.close", async () => {
-      const promise = drawer.open({
+    it("can be closed programmatically with drawers.close", async () => {
+      const promise = drawers.open({
         id: "dr1",
         title: "Edit",
         content: "form",
         actions: { primary: { value: "save", label: "Save" } },
       })
-      drawer.close("dr1")
+      drawers.close("dr1")
       await expect(promise).resolves.toBeUndefined()
       expect(dialogsAlikeStore.getSnapshot()).toHaveLength(0)
     })
@@ -245,7 +245,7 @@ describe("imperative dialog / drawer API", () => {
 
   describe("provider warning", () => {
     it("warns when no <F0Provider> is mounted", () => {
-      dialog.open({
+      dialogs.open({
         title: "Title",
         content: "content",
         actions: { primary: { value: "ok", label: "OK" } },
@@ -257,7 +257,7 @@ describe("imperative dialog / drawer API", () => {
 
     it("does not warn when a renderer is mounted", () => {
       const handle = dialogsAlikeStore.acquireRenderer()
-      dialog.open({
+      dialogs.open({
         title: "Title",
         content: "content",
         actions: { primary: { value: "ok", label: "OK" } },
