@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.0](https://github.com/factorialco/f0/compare/f0-react-v4.3.2...f0-react-v4.4.0) (2026-06-22)
+
+
+### Features
+
+* namespaced `dialogs`/`drawers` API + `forms.open({ mode })` helper ([#4447](https://github.com/factorialco/f0/issues/4447)) ([6c15134](https://github.com/factorialco/f0/commit/6c151341e36265390beb9acdac831c332838e55d))
+
 ## [4.3.2](https://github.com/factorialco/f0/compare/f0-react-v4.3.1...f0-react-v4.3.2) (2026-06-22)
 
 
