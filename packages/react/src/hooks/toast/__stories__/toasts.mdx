@@ -9,11 +9,11 @@ import * as ToastsStories from "./toasts.stories"
 
 ### Definition
 
-`toasts` is an imperative API for triggering toast notifications. Its methods are **not hooks** — you can call them from anywhere (event handlers, async callbacks, even outside React), as long as your app is wrapped in `<F0Provider>` (which mounts the `ToastProvider`). Open toasts live in a module-level store that the provider renders into a portal.
+`toasts` is an imperative API for triggering toast notifications. You can call its methods from anywhere (event handlers, async callbacks, even outside React), as long as your app is wrapped in `<F0Provider>` (which mounts the `ToastProvider`). Open toasts live in a module-level store that the provider renders into a portal.
 
 ### Purpose
 
-- **No hook, no wiring:** Call `toasts.open(...)` directly — no hook to call, no `useState`, no conditional rendering
+- **No wiring:** Call `toasts.open(...)` directly — no `useState`, no conditional rendering
 - **Automatic lifecycle:** Toasts auto-dismiss after a configurable duration and clean up after themselves
 - **Consistent UX:** Standardized toast patterns with stacking, hover-to-expand, and smooth animations
 - **Flexible API:** Support for variants, descriptions, action buttons/links, custom durations, and persistent toasts

@@ -20,13 +20,13 @@ import {
 } from "./types"
 
 const toastVariants = cva({
-  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg border border-solid p-3 shadow-lg bg-f1-foreground overflow-hidden",
+  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg p-3 shadow-lg bg-f1-foreground overflow-hidden",
   variants: {
     variant: {
-      error: "border-f1-icon-critical",
-      warning: "border-f1-icon-warning",
-      success: "border-f1-icon-positive",
-      default: "border-f1-border-inverse py-3 px-4",
+      error: "",
+      warning: "",
+      success: "",
+      default: "py-3 px-4",
     },
   },
   defaultVariants: {
