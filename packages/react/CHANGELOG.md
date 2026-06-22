@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/factorialco/f0/compare/f0-react-v4.1.0...f0-react-v4.2.0) (2026-06-22)
+
+
+### Features
+
+* **toast:** add toast notifications (openToast) with stacking, mobile support, and docs ([#4530](https://github.com/factorialco/f0/issues/4530)) ([2ccbd20](https://github.com/factorialco/f0/commit/2ccbd20aba2660d4619630a79b190bdf4b9e20a8))
+
 ## [4.1.0](https://github.com/factorialco/f0/compare/f0-react-v4.0.4...f0-react-v4.1.0) (2026-06-22)
 
 
