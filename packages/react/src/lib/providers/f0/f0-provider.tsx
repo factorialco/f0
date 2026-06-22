@@ -149,8 +149,8 @@ export const F0Provider: React.FC<{
                         <DialogsAlikeLayoutProvider>
                           <ToastProvider
                             portalTargets={{
-                              mobile: "body",
-                              desktop: "#content",
+                              mobile: "#f0-overlay-root",
+                              desktop: "#f0-overlay-root",
                             }}
                           >
                             <FormComponentContext.Provider

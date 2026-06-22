@@ -312,7 +312,7 @@ const ToastsContainer = ({
   return (
     <div
       className={cn(
-        "pointer-events-none absolute top-0 left-0 right-0 z-[100] flex overflow-x-hidden overflow-y-auto w-full h-full",
+        "pointer-events-none fixed top-0 left-0 right-0 z-[100] flex overflow-x-hidden overflow-y-auto w-full h-full",
         toastContainerPositionClasses[position]
       )}
     >
@@ -380,8 +380,12 @@ const ToastsContainer = ({
 export const ToastProvider = ({
   children,
   portalTargets = {
-    mobile: "body",
-    desktop: "#content",
+    // Portal into the top-level overlay root (outside the ApplicationFrame
+    // `isolate` where the fullscreen AI chat paints at z-20, and where dialogs
+    // also portal). Combined with the container's z-[100] this keeps toasts on
+    // top of the fullscreen chat and any open dialog (which sit at z-50).
+    mobile: "#f0-overlay-root",
+    desktop: "#f0-overlay-root",
   },
 }: ToastProviderProps) => {
   const items = useSyncExternalStore(
