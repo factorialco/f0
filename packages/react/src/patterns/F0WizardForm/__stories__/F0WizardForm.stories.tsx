@@ -108,6 +108,71 @@ export const SingleSchema: Story = {
 }
 
 // =============================================================================
+// Native period field
+// =============================================================================
+
+const goalWizardSchema = z.object({
+  name: f0FormField(z.string().min(1), {
+    label: "Goal name",
+    section: "details",
+    placeholder: "e.g. Increase activation rate",
+  }),
+  goalPeriod: f0FormField.datePeriod({
+    label: "Goal period",
+    section: "details",
+    granularities: ["year", "halfyear", "quarter", "month", "range"],
+    minDate: new Date(2024, 0, 1),
+    maxDate: new Date(2027, 11, 31),
+    helpText: "Pick the period this goal applies to",
+  }),
+})
+
+function GoalPeriodWizardStory() {
+  const [open, setOpen] = useState(true)
+
+  const definition = useF0FormDefinition({
+    name: "new-goal",
+    schema: goalWizardSchema,
+    defaultValues: { goalPeriod: undefined },
+    sections: {
+      details: { title: "Goal details" },
+    },
+    onSubmit: async ({ data }) => {
+      console.log("Goal submitted:", data)
+      await new Promise((r) => setTimeout(r, 1000))
+      return { success: true, message: "Goal saved successfully" }
+    },
+  })
+
+  return (
+    <ApplicationFrame
+      {...(ApplicationFrameStoryMeta.args as ComponentProps<
+        typeof ApplicationFrame
+      >)}
+    >
+      <div className="flex flex-1 items-center justify-center">
+        <F0Button label="Open wizard" onClick={() => setOpen(true)} />
+        <F0WizardForm
+          formDefinition={definition}
+          isOpen={open}
+          onClose={() => setOpen(false)}
+          title="New goal"
+        />
+      </div>
+    </ApplicationFrame>
+  )
+}
+
+/**
+ * Wizard with the native `period` field — the granularity-aware period selector
+ * used by the "New goal" flow. The form value keeps the full `DatePickerValue`
+ * (range + granularity); label, required asterisk and size are wired automatically.
+ */
+export const WithPeriodField: Story = {
+  render: () => <GoalPeriodWizardStory />,
+}
+
+// =============================================================================
 // Per-section schema stories
 // =============================================================================
 

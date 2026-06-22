@@ -1072,6 +1072,11 @@ export const AllFieldTypes: Story = {
         fromLabel: "Start",
         toLabel: "End",
       }),
+      periodField: f0FormField.datePeriod({
+        label: "Period Field",
+        granularities: ["year", "halfyear", "quarter", "month", "range"],
+        helpText: "Keeps the full period (range + granularity)",
+      }),
       richTextField: f0FormField.richText({
         label: "Rich Text Field",
         placeholder: "Write something with formatting...",
@@ -1099,6 +1104,7 @@ export const AllFieldTypes: Story = {
         timeField: undefined,
         datetimeField: undefined,
         dateRangeField: undefined,
+        periodField: undefined,
         richTextField: { value: "" },
       },
       submitConfig: {
@@ -1106,6 +1112,48 @@ export const AllFieldTypes: Story = {
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Native `period` field — a granularity-aware period selector
+ * (Year / Half year / Quarter / Month / Range) backed by `F0DatePicker`.
+ *
+ * Unlike the `date` field, the form value keeps the full `DatePickerValue`
+ * (`{ value: { from, to }, granularity }`), so the chosen granularity and range
+ * survive. Label, required asterisk, size and error handling are wired by the
+ * form automatically — no manual re-wiring needed.
+ */
+export const PeriodField: Story = {
+  render() {
+    const formSchema = z.object({
+      goalPeriod: f0FormField.datePeriod({
+        label: "Goal period",
+        granularities: ["year", "halfyear", "quarter", "month", "range"],
+        minDate: new Date(2024, 0, 1),
+        maxDate: new Date(2027, 11, 31),
+        helpText: "Pick the period this goal applies to",
+      }),
+      comparisonPeriod: f0FormField.datePeriod({
+        label: "Comparison period",
+        granularities: ["year", "quarter", "month"],
+        helpText: "Optional — leave empty to skip",
+        optional: true,
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "period-field",
+      schema: formSchema,
+      defaultValues: { goalPeriod: undefined, comparisonPeriod: undefined },
+      onSubmit: async ({ data }) => {
+        await sleep(600)
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
