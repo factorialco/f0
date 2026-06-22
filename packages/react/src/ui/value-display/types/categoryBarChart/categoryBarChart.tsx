@@ -82,7 +82,7 @@ export const CategoryBarChartCell = (
             return (
               <Tooltip key={`${point.name}-${index}`}>
                 <TooltipTrigger
-                  className="h-full cursor-default overflow-hidden rounded-2xs"
+                  className="pointer-events-auto h-full cursor-default overflow-hidden rounded-2xs"
                   style={{ width: `${percentage}%` }}
                   asChild
                 >
@@ -97,13 +97,13 @@ export const CategoryBarChartCell = (
                 {!args.hideTooltip && (
                   <TooltipContent className="flex items-center gap-1 text-sm">
                     <div
-                      className="h-2.5 w-2.5 shrink-0 translate-y-px rounded-full"
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
                       style={{ backgroundColor: color }}
                     />
-                    <span className="pl-0.5 pr-2 text-f1-foreground-inverse-secondary dark:text-f1-foreground-secondary">
+                    <span className="pl-0.5 pr-2 text-f1-foreground-inverse-secondary">
                       {point.name}
                     </span>
-                    <span className="font-mono font-medium tabular-nums text-f1-foreground-inverse dark:text-f1-foreground">
+                    <span className="font-mono font-medium tabular-nums text-f1-foreground-inverse">
                       {point.value} ({formatPercentage(point.value, total)}%)
                     </span>
                   </TooltipContent>

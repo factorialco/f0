@@ -125,6 +125,23 @@ describe("CategoryBarChartCell", () => {
     ).toBeInTheDocument()
   })
 
+  it("enables pointer events on segments so the tooltip works inside a clickable table cell", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [
+        { name: "Female", value: 12 },
+        { name: "Male", value: 8 },
+      ],
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
+    expect(segments.length).toBeGreaterThan(0)
+    segments.forEach((segment) => {
+      expect(segment).toHaveClass("pointer-events-auto")
+    })
+  })
+
   it("handles duplicate names with unique keys", () => {
     const args: CategoryBarChartCellValue = {
       dataPoints: [
