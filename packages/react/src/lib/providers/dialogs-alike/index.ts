@@ -1,5 +1,5 @@
 export * from "./DialogsAlikeLayoutProvider"
-export { dialog, drawer } from "./imperative"
+export { dialogs, drawers } from "./imperative"
 export type {
   DialogDefinition,
   DialogActions,
