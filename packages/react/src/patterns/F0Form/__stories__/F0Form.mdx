@@ -1,5 +1,6 @@
 import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import * as Stories from "./F0Form.stories"
+import * as WizardStories from "../../F0WizardForm/__stories__/F0WizardForm.stories"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 <Meta of={Stories} />
@@ -426,9 +427,91 @@ Use `disabled` as a function to conditionally enable or disable fields, with opt
 
 <Canvas of={Stories.ServerValidation} />
 
-## Form in dialog
+## Opening a form imperatively — `forms.open`
+
+`forms.open({ formDefinition, as })` opens a form from anywhere — no `useState` /
+`useF0Form` / `formRef` wiring — and `await`s the outcome. Choose the
+presentation with `as`: `"dialog"` for a single-screen form, or `"wizard"` for a
+multi-step [`F0WizardForm`](?path=/docs/patterns-forms-f0wizardform--documentation).
+Requires `<F0Provider>` to be mounted.
+
+### As a dialog
+
+Pass `mode: "dialog"` to open the form in a single-screen dialog:
+
+```tsx
+import { forms, f0FormField, useF0FormDefinition } from "@factorialco/f0-react"
+import { z } from "zod"
+
+const formDefinition = useF0FormDefinition({
+  name: "add-member",
+  schema: z.object({
+    name: f0FormField.text({ label: "Name", minLength: 2 }),
+    email: f0FormField.email({ label: "Email" }),
+  }),
+  defaultValues: { name: "", email: "" },
+  onSubmit: async ({ data }) => {
+    await save(data)
+    return { success: true }
+  },
+})
+
+const result = await forms.open({
+  formDefinition,
+  mode: "dialog",
+  title: "Add team member",
+  description: "They will receive an invitation email.",
+})
+
+if (result.submitted) {
+  // result.data is the validated, typed form values
+}
+```
+
+Behavior:
+
+- **Submit succeeds** → the dialog closes and the promise resolves with
+  `{ submitted: true, data }`.
+- **Validation fails** → the dialog stays open with inline field errors.
+- **Cancel / close button** → resolves with `{ submitted: false }`.
+
+The dialog is **modal by default**, so an outside click or Escape won't dismiss
+it (and discard in-progress input) — pass `modal: false` to allow that. The
+dialog footer supplies the submit and cancel buttons (override their labels with
+`labels: { submit, cancel }`), so you don't need `submitConfig.hideSubmitButton`
+— `forms.open` sets it for you.
 
 <Canvas of={Stories.FormInDialog} />
+
+### As a wizard
+
+Pass `mode: "wizard"` to open the same typed definition as a multi-step
+[`F0WizardForm`](?path=/docs/patterns-forms-f0wizardform--documentation). Group
+fields into steps with `sections` on the definition; `forms.open` resolves once
+the **final** step submits:
+
+```tsx
+const result = await forms.open({
+  formDefinition,
+  mode: "wizard",
+  title: "Add employee",
+})
+
+if (result.completed) {
+  // result.data is the validated, typed full-form values
+}
+```
+
+Behavior:
+
+- **Final step submits successfully** → the wizard auto-closes and the promise
+  resolves with `{ completed: true, data }`.
+- **Dismissed / closed** → resolves with `{ completed: false }`.
+
+If the definition uses `linkAfterLastStepSubmit`, the page navigates away and the
+promise will not resolve.
+
+<Canvas of={WizardStories.OpenFormWizard} />
 
 ## File fields
 

@@ -9,6 +9,8 @@ import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
+import { forms } from "@/patterns/forms"
+
 import { F0WizardForm, useF0FormDefinition } from "../index"
 
 const meta: Meta<typeof F0WizardForm> = {
@@ -20,7 +22,7 @@ const meta: Meta<typeof F0WizardForm> = {
       story: { inline: false, height: "720px" },
     },
   },
-  tags: ["autodocs"],
+  tags: ["!autodocs"],
 }
 
 export default meta
@@ -170,6 +172,71 @@ function GoalPeriodWizardStory() {
  */
 export const WithPeriodField: Story = {
   render: () => <GoalPeriodWizardStory />,
+}
+
+// =============================================================================
+// Imperative forms.open (wizard)
+// =============================================================================
+
+/**
+ * Live demo for `forms.open({ mode: "wizard" })`. The API is documented in the
+ * [F0Form docs](?path=/docs/patterns-forms-f0form--documentation).
+ */
+function OpenFormWizardStory() {
+  const [lastResult, setLastResult] = useState<string | null>(null)
+
+  const definition = useF0FormDefinition({
+    name: "open-wizard-single",
+    schema: singleSchema,
+    defaultValues: { email: "alicia.keys@factorial.co" },
+    sections: {
+      general: { title: "General information" },
+      personal: { title: "Personal details" },
+      work: { title: "Work details" },
+    },
+    onSubmit: async ({ data }) => {
+      console.log("Form submitted:", data)
+      await new Promise((r) => setTimeout(r, 1500))
+      return { success: true, message: "Employee saved successfully" }
+    },
+  })
+
+  const handleOpen = async () => {
+    const result = await forms.open({
+      formDefinition: definition,
+      mode: "wizard",
+      title: "Add employee",
+    })
+    setLastResult(
+      result.completed
+        ? `Completed: ${result.data.firstName ?? result.data.email}`
+        : "Dismissed"
+    )
+  }
+
+  return (
+    <ApplicationFrame
+      {...(ApplicationFrameStoryMeta.args as ComponentProps<
+        typeof ApplicationFrame
+      >)}
+    >
+      <div className="flex flex-1 flex-col items-center justify-center gap-3">
+        <F0Button label="Open wizard" onClick={handleOpen} />
+        {lastResult && (
+          <p className="text-f1-foreground-secondary">{lastResult}</p>
+        )}
+      </div>
+    </ApplicationFrame>
+  )
+}
+
+export const OpenFormWizard: Story = {
+  // `forms.open` mounts a fixed, centered modal via a portal. On the inline docs
+  // page many `F0Provider`s coexist (one per canvas), so the portal target is
+  // ambiguous and the modal mispositions. Render this demo in its own iframe so
+  // it has a single provider and the wizard centers correctly.
+  parameters: { docs: { story: { inline: false, height: "640px" } } },
+  render: () => <OpenFormWizardStory />,
 }
 
 // =============================================================================
