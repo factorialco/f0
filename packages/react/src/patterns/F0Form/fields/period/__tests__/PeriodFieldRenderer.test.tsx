@@ -2,33 +2,25 @@ import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
-import { DatePickerValue } from "@/components/F0DatePicker"
 import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { F0Form } from "../../../F0Form"
-import { f0FormField, inferFieldType } from "../../../f0Schema"
+import { f0FormField } from "../../../f0Schema"
 import { isFieldRequired } from "../../schema"
 import { getSchemaDefinition } from "../../../useSchemaDefinition"
 
-const quarter2026Q2: DatePickerValue = {
+const quarter2026Q2 = {
   value: { from: new Date(2026, 3, 1), to: new Date(2026, 5, 30) },
-  granularity: "quarter",
+  granularity: "quarter" as const,
 }
 
 describe("period field — schema introspection", () => {
-  it("infers the period field type from fieldType: 'period'", () => {
-    const schema = z.custom<DatePickerValue>()
-    const config = { label: "Goal period", fieldType: "period" } as const
-    expect(inferFieldType(schema, config)).toBe("period")
-  })
-
   it("creates a period field that propagates granularities/presets/min/max", () => {
     const minDate = new Date(2025, 0, 1)
     const maxDate = new Date(2027, 11, 31)
     const formSchema = z.object({
-      goalPeriod: f0FormField(z.custom<DatePickerValue>(), {
+      goalPeriod: f0FormField.datePeriod({
         label: "Goal period",
-        fieldType: "period",
         granularities: ["year", "halfyear", "quarter", "month", "range"],
         minDate,
         maxDate,
@@ -71,29 +63,19 @@ describe("period field — schema introspection", () => {
     expect(fieldItem.field.displayFormat).toBe("default")
   })
 
-  it("derives clearable from the optional schema", () => {
+  it("derives clearable from the optional flag", () => {
     const required = z.object({
-      p: f0FormField(z.custom<DatePickerValue>(), {
-        label: "P",
-        fieldType: "period",
-      }),
+      p: f0FormField.datePeriod({ label: "P" }),
     })
     const optional = z.object({
-      p: f0FormField(z.custom<DatePickerValue>().optional(), {
-        label: "P",
-        fieldType: "period",
-      }),
+      p: f0FormField.datePeriod({ label: "P", optional: true }),
     })
 
     const requiredField = (
-      getSchemaDefinition(required)[0] as {
-        field: { clearable?: boolean }
-      }
+      getSchemaDefinition(required)[0] as { field: { clearable?: boolean } }
     ).field
     const optionalField = (
-      getSchemaDefinition(optional)[0] as {
-        field: { clearable?: boolean }
-      }
+      getSchemaDefinition(optional)[0] as { field: { clearable?: boolean } }
     ).field
 
     expect(requiredField.clearable).toBe(false)
@@ -101,9 +83,14 @@ describe("period field — schema introspection", () => {
   })
 
   it("marks a non-optional period as required", () => {
-    expect(isFieldRequired(z.custom<DatePickerValue>(), "period")).toBe(true)
     expect(
-      isFieldRequired(z.custom<DatePickerValue>().optional(), "period")
+      isFieldRequired(f0FormField.datePeriod({ label: "P" }), "period")
+    ).toBe(true)
+    expect(
+      isFieldRequired(
+        f0FormField.datePeriod({ label: "P", optional: true }),
+        "period"
+      )
     ).toBe(false)
   })
 })
@@ -111,9 +98,8 @@ describe("period field — schema introspection", () => {
 describe("period field — rendering", () => {
   it("renders the label with a required asterisk for non-optional periods", () => {
     const formSchema = z.object({
-      goalPeriod: f0FormField(z.custom<DatePickerValue>(), {
+      goalPeriod: f0FormField.datePeriod({
         label: "Goal period",
-        fieldType: "period",
         granularities: ["year", "quarter"],
       }),
     })
@@ -132,10 +118,10 @@ describe("period field — rendering", () => {
 
   it("omits the asterisk for optional periods", () => {
     const formSchema = z.object({
-      goalPeriod: f0FormField(z.custom<DatePickerValue>().optional(), {
+      goalPeriod: f0FormField.datePeriod({
         label: "Goal period",
-        fieldType: "period",
         granularities: ["year", "quarter"],
+        optional: true,
       }),
     })
 
@@ -151,14 +137,13 @@ describe("period field — rendering", () => {
     expect(screen.getByText(/Goal period/)).not.toHaveTextContent("*")
   })
 
-  it("preserves the full DatePickerValue (granularity + range) through submit", async () => {
+  it("preserves the full period value (granularity + range) through submit", async () => {
     const user = userEvent.setup()
     const onSubmit = vi.fn().mockResolvedValue({ success: true })
 
     const formSchema = z.object({
-      goalPeriod: f0FormField(z.custom<DatePickerValue>(), {
+      goalPeriod: f0FormField.datePeriod({
         label: "Goal period",
-        fieldType: "period",
         granularities: ["year", "halfyear", "quarter", "month", "range"],
       }),
     })
@@ -181,7 +166,7 @@ describe("period field — rendering", () => {
     // The value round-trips untouched: granularity and full range are kept,
     // unlike the `date` field which collapses the value to a single Date.
     const submitted = onSubmit.mock.calls[0][0] as {
-      goalPeriod: DatePickerValue
+      goalPeriod: { granularity: string }
     }
     expect(submitted.goalPeriod).toEqual(quarter2026Q2)
     expect(submitted.goalPeriod.granularity).toBe("quarter")
@@ -192,19 +177,19 @@ describe("period field — rendering", () => {
     const onSubmit = vi.fn().mockResolvedValue({ success: true })
 
     const formSchema = z.object({
-      goalPeriod: f0FormField(z.custom<DatePickerValue>().optional(), {
+      goalPeriod: f0FormField.datePeriod({
         label: "Goal period",
-        fieldType: "period",
         granularities: ["year", "quarter"],
+        optional: true,
       }),
     })
 
-    // null default exercises the `value ?? undefined` read path without crashing
+    // null default exercises the cleared-value read path without crashing
     render(
       <F0Form
         name="period-empty"
         schema={formSchema}
-        defaultValues={{ goalPeriod: null as unknown as DatePickerValue }}
+        defaultValues={{ goalPeriod: null as never }}
         onSubmit={onSubmit}
       />
     )

@@ -4,7 +4,6 @@ import { ComponentProps, useState } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import type { DatePickerValue } from "@/components/F0DatePicker"
 import { f0FormField } from "@/patterns/F0Form/f0Schema"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
@@ -118,10 +117,9 @@ const goalWizardSchema = z.object({
     section: "details",
     placeholder: "e.g. Increase activation rate",
   }),
-  goalPeriod: f0FormField(z.custom<DatePickerValue>(), {
+  goalPeriod: f0FormField.datePeriod({
     label: "Goal period",
     section: "details",
-    fieldType: "period",
     granularities: ["year", "halfyear", "quarter", "month", "range"],
     minDate: new Date(2024, 0, 1),
     maxDate: new Date(2027, 11, 31),

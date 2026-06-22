@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo, useRef } from "react"
 import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
-import type { DatePickerValue } from "@/components/F0DatePicker"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -1073,9 +1072,8 @@ export const AllFieldTypes: Story = {
         fromLabel: "Start",
         toLabel: "End",
       }),
-      periodField: f0FormField(z.custom<DatePickerValue>(), {
+      periodField: f0FormField.datePeriod({
         label: "Period Field",
-        fieldType: "period",
         granularities: ["year", "halfyear", "quarter", "month", "range"],
         helpText: "Keeps the full period (range + granularity)",
       }),
@@ -1135,19 +1133,18 @@ export const AllFieldTypes: Story = {
 export const PeriodField: Story = {
   render() {
     const formSchema = z.object({
-      goalPeriod: f0FormField(z.custom<DatePickerValue>(), {
+      goalPeriod: f0FormField.datePeriod({
         label: "Goal period",
-        fieldType: "period",
         granularities: ["year", "halfyear", "quarter", "month", "range"],
         minDate: new Date(2024, 0, 1),
         maxDate: new Date(2027, 11, 31),
         helpText: "Pick the period this goal applies to",
       }),
-      comparisonPeriod: f0FormField(z.custom<DatePickerValue>().optional(), {
+      comparisonPeriod: f0FormField.datePeriod({
         label: "Comparison period",
-        fieldType: "period",
         granularities: ["year", "quarter", "month"],
         helpText: "Optional — leave empty to skip",
+        optional: true,
       }),
     })
 

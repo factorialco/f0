@@ -1203,6 +1203,48 @@ export namespace f0FormField {
     )
   }
 
+  // ---- datePeriod ----------------------------------------------------------
+
+  /** @internal */
+  type PeriodValueSchema = z.ZodObject<{
+    value: z.ZodObject<{ from: z.ZodDate; to: z.ZodDate }>
+    granularity: z.ZodEnum<
+      ["day", "week", "month", "quarter", "halfyear", "year", "range"]
+    >
+  }>
+  /** @internal */
+  type DatePeriodConfig = Omit<F0PeriodFieldConfig, "fieldType"> & {
+    optional?: boolean
+  }
+
+  export function datePeriod(
+    config: DatePeriodConfig & { optional: true }
+  ): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> &
+    F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>
+  export function datePeriod(
+    config: DatePeriodConfig & { optional?: false | undefined }
+  ): PeriodValueSchema & F0ZodType<PeriodValueSchema>
+  export function datePeriod({ optional, ...config }: DatePeriodConfig) {
+    const base = z.object({
+      value: z.object({ from: z.date(), to: z.date() }),
+      granularity: z.enum([
+        "day",
+        "week",
+        "month",
+        "quarter",
+        "halfyear",
+        "year",
+        "range",
+      ]),
+    })
+    // nullish so a user-cleared value (stored as null) still validates
+    const schema = optional ? base.nullish() : base
+    return f0FormField(
+      schema as never,
+      { ...config, fieldType: "period" } as never
+    )
+  }
+
   // ---- richText ------------------------------------------------------------
 
   /** @internal */
