@@ -213,22 +213,6 @@ describe("F0AudioPlayerCard", () => {
     expect(screen.getByRole("button", { name: "View detail" })).toBeEnabled()
   })
 
-  it("links the toggle to the detail panel via aria-controls", () => {
-    render(
-      <F0AudioPlayerCard
-        src="test.mp3"
-        title="AI Call"
-        details={DETAILS}
-        defaultExpanded
-      />
-    )
-    const toggle = screen.getByRole("button", { name: "Hide detail" })
-    const controls = toggle.getAttribute("aria-controls")
-    expect(controls).toBeTruthy()
-    const region = screen.getByRole("region")
-    expect(region).toHaveAttribute("id", controls)
-  })
-
   it("falls back to the first tab when details change to a new set", async () => {
     const user = userEvent.setup()
     const { rerender } = render(

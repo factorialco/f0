@@ -31,11 +31,6 @@ export type ButtonInternalProps = Pick<
      */
     "aria-expanded"?: boolean
     /**
-     * Forwarded to the underlying button. Use together with `aria-expanded` to
-     * point at the id of the region the button shows/hides.
-     */
-    "aria-controls"?: string
-    /**
      * Forwarded to the underlying button. Use `-1` to take the button out of the
      * tab order (e.g. when a parent manages focus via roving tabindex).
      */

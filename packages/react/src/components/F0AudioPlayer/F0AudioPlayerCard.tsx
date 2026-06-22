@@ -1,6 +1,6 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { motion } from "motion/react"
-import { forwardRef, useId, useState, type CSSProperties } from "react"
+import { forwardRef, useState, type CSSProperties } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { useReducedMotion } from "@/lib/a11y"
@@ -43,7 +43,6 @@ const F0AudioPlayerCardBase = forwardRef<
   const controller = usePlayerController(props)
   const dataAttributes = getDataAttributes(props)
   const shouldReduceMotion = useReducedMotion()
-  const detailsId = useId()
 
   const hasDetails = Boolean(details && details.length > 0)
   const [isExpanded = false, setExpanded] = useControllableState<boolean>({
@@ -110,7 +109,6 @@ const F0AudioPlayerCardBase = forwardRef<
                 }
                 onClick={() => setExpanded(!isExpanded)}
                 aria-expanded={isExpanded}
-                aria-controls={detailsId}
               />
             )}
             {(controller.playbackRates.length > 0 || actions) && (
@@ -144,7 +142,6 @@ const F0AudioPlayerCardBase = forwardRef<
 
       {hasDetails && (
         <motion.div
-          id={detailsId}
           role="region"
           aria-label={i18n.audioPlayer.details}
           initial={false}
