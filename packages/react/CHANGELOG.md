@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.5.0](https://github.com/factorialco/f0/compare/f0-react-v4.4.1...f0-react-v4.5.0) (2026-06-23)
+
+
+### Features
+
+* **F0AudioPlayer:** add expandable detail panel with Summary/Transcript tabs ([#4528](https://github.com/factorialco/f0/issues/4528)) ([cacb961](https://github.com/factorialco/f0/commit/cacb961d25fe8e305dc2f94164ed7d324aed1888))
+
 ## [4.4.1](https://github.com/factorialco/f0/compare/f0-react-v4.4.0...f0-react-v4.4.1) (2026-06-23)
 
 
