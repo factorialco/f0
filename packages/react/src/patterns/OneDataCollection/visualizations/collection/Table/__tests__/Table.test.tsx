@@ -964,6 +964,144 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("header click", () => {
+    it("renders the header label as a button and calls onHeaderClick when clicked", async () => {
+      const user = userEvent.setup()
+      const onHeaderClick = vi.fn()
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={[
+            {
+              label: "name",
+              render: (item: Person) => item.name,
+              onHeaderClick,
+            },
+            { label: "email", render: (item: Person) => item.email },
+          ]}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const headers = screen.getAllByRole("columnheader")
+      const nameHeader = headers.find((h) => h.textContent?.includes("name"))!
+      const headerButton = within(nameHeader).getByRole("button", {
+        name: "name",
+      })
+
+      await user.click(headerButton)
+
+      expect(onHeaderClick).toHaveBeenCalledTimes(1)
+    })
+
+    it("does not render the header label as a button when onHeaderClick is not provided", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const headers = screen.getAllByRole("columnheader")
+      const nameHeader = headers.find((h) => h.textContent?.includes("name"))!
+
+      expect(within(nameHeader).queryByRole("button")).not.toBeInTheDocument()
+    })
+
+    it("supports onHeaderClick independently of sorting on the same column", async () => {
+      const user = userEvent.setup()
+      const onHeaderClick = vi.fn()
+      const setCurrentSortingsMock = vi.fn()
+
+      const modifiedSource = {
+        ...createTestSource(),
+        currentSortings: null,
+        setCurrentSortings: setCurrentSortingsMock,
+        sortings: {
+          name: { label: "Name" },
+        },
+      }
+
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={[
+            {
+              label: "name",
+              render: (item: Person) => item.name,
+              sorting: "name" as const,
+              onHeaderClick,
+            },
+            { label: "email", render: (item: Person) => item.email },
+          ]}
+          source={modifiedSource}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const nameHeader = screen.getAllByRole("columnheader")[0]
+
+      // Clicking the label button triggers onHeaderClick, not sorting
+      const labelButton = within(nameHeader).getByRole("button", {
+        name: "name",
+      })
+      await user.click(labelButton)
+      expect(onHeaderClick).toHaveBeenCalledTimes(1)
+      expect(setCurrentSortingsMock).not.toHaveBeenCalled()
+
+      // Clicking the separate sort button triggers sorting, not onHeaderClick
+      const sortButton = within(nameHeader).getByRole("button", {
+        name: "Sort",
+      })
+      await user.click(sortButton)
+      expect(setCurrentSortingsMock).toHaveBeenCalled()
+      expect(onHeaderClick).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe("column visibility", () => {
     it("hides columns with hidden: true on first render", async () => {
       const columnsWithHidden = [

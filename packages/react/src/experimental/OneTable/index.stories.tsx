@@ -328,6 +328,49 @@ export const Sortable: Story = {
   },
 }
 
+export const ClickableHeader: Story = {
+  render: () => {
+    const [lastClicked, setLastClicked] = useState<string | null>(null)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <span className="text-f1-foreground-secondary">
+          {lastClicked
+            ? `Last header clicked: ${lastClicked}`
+            : "Click a column header to trigger its action (e.g. open a side panel)."}
+        </span>
+        <OneTable>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Name</TableHead>
+              <TableHead onHeaderClick={() => setLastClicked("Email")}>
+                Email
+              </TableHead>
+              {/* onHeaderClick works independently of sorting and can coexist with it */}
+              <TableHead
+                onHeaderClick={() => setLastClicked("Role")}
+                onSortClick={() => setLastClicked("Role (sorted)")}
+                sortState="asc"
+              >
+                Role
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sampleData.map((row) => (
+              <TableRow key={row.id}>
+                <TableCell>{row.name}</TableCell>
+                <TableCell>{row.email}</TableCell>
+                <TableCell>{row.role}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </OneTable>
+      </div>
+    )
+  },
+}
+
 export const StickyColumn: Story = {
   render: () => (
     <OneTable>

@@ -789,3 +789,78 @@ export const BorderedTable: Story = {
     )
   },
 }
+
+export const TableWithClickableHeaders: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Columns can define an `onHeaderClick` callback that turns the column header label into an interactive button. " +
+          "This is useful for opening a side panel scoped to the clicked column (e.g. a month/period column). " +
+          "It works independently of sorting.",
+      },
+    },
+  },
+  render: () => {
+    const records = [
+      { id: 1, name: "Alice Johnson", jan: "1.200 €", feb: "1.350 €" },
+      { id: 2, name: "Bob Smith", jan: "980 €", feb: "1.020 €" },
+      { id: 3, name: "Carol Lee", jan: "1.450 €", feb: "1.500 €" },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: async () => ({ records }),
+      },
+    })
+
+    const [lastClicked, setLastClicked] = useState<string | null>(null)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <span className="text-f1-foreground-secondary">
+          {lastClicked
+            ? `Opened panel for: ${lastClicked}`
+            : "Click a month header to open its (mock) side panel."}
+        </span>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  {
+                    label: "Name",
+                    render: (item) => ({
+                      type: "person" as const,
+                      value: {
+                        firstName: item.name.split(" ")[0],
+                        lastName: item.name.split(" ")[1],
+                      },
+                    }),
+                    id: "name",
+                  },
+                  {
+                    label: "January",
+                    align: "right",
+                    render: (item) => item.jan,
+                    id: "jan",
+                    onHeaderClick: () => setLastClicked("January"),
+                  },
+                  {
+                    label: "February",
+                    align: "right",
+                    render: (item) => item.feb,
+                    id: "feb",
+                    onHeaderClick: () => setLastClicked("February"),
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
