@@ -15,6 +15,14 @@ const ScrollArea = forwardRef<
   ElementRef<typeof ScrollAreaPrimitive.Root>,
   ComponentPropsWithoutRef<typeof ScrollAreaPrimitive.Root> & {
     showBar?: boolean
+    /**
+     * Classes applied to the scroll viewport. Use this (rather than
+     * `className`, which targets the root) to constrain the scrollable height
+     * — e.g. `max-h-56`. The root only sets `max-height`, which is not a
+     * definite height, so a `max-h-*` there leaves the viewport's `height:100%`
+     * unresolved and the content clips instead of scrolling.
+     */
+    viewportClassName?: string
     viewportRef?: React.RefObject<HTMLDivElement>
     onScrollTop?: () => void
     onScrollBottom?: () => void
@@ -30,6 +38,7 @@ const ScrollArea = forwardRef<
       className,
       children,
       showBar = true,
+      viewportClassName,
       viewportRef,
       onScrollTop,
       onScrollBottom,
@@ -76,7 +85,10 @@ const ScrollArea = forwardRef<
       >
         <ScrollAreaPrimitive.Viewport
           ref={localViewportRef}
-          className="size-full snap-none rounded-[inherit] [&>div]:!block"
+          className={cn(
+            "size-full snap-none rounded-[inherit] [&>div]:!block",
+            viewportClassName
+          )}
           tabIndex={0}
           data-scroll-container
         >

@@ -56,7 +56,7 @@ export const SortAndHideSettings = ({
 
   return (
     <div className="relative -mr-2 flex flex-col gap-2">
-      <ScrollArea className="max-h-56">
+      <ScrollArea viewportClassName="max-h-56">
         <SortAndHideList
           items={items}
           onChange={onChange}
