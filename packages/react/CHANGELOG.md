@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.11.0](https://github.com/factorialco/f0/compare/f0-react-v4.10.0...f0-react-v4.11.0) (2026-06-23)
+
+
+### Features
+
+* **F0TextInput:** add private input type ([#4456](https://github.com/factorialco/f0/issues/4456)) ([30d6ca1](https://github.com/factorialco/f0/commit/30d6ca10ecdc985e4ad9bbf9a8b6921521c25c0e))
+
 ## [4.10.0](https://github.com/factorialco/f0/compare/f0-react-v4.9.1...f0-react-v4.10.0) (2026-06-23)
 
 
