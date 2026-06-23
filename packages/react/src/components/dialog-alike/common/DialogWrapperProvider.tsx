@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext } from "react"
 
-import { DialogAlikePosition as Position } from "./types"
+import type { DialogAlikePosition as Position } from "./types"
 
 export type DialogWrapperContextType = {
   open: boolean

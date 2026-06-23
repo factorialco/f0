@@ -16,20 +16,9 @@ import {
   F0DialogSecondaryActionItem,
 } from "./types"
 
-export type F0DialogHeaderProps = {
-  title?: string
-  description?: string
-  module?: {
-    id: ModuleId
-    label: string
-    href: string
-  }
-  otherActions?: DropdownInternalProps["items"]
-  navigation?: NavigationProps
-  resourceHeader?: ResourceHeaderProps
-  controls?: DialogControls
-} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
-
+// Mirrors the shape of the dialog-alike `DialogWrapperContextType` (the actual
+// runtime context). Kept under this name so the public `F0DialogContext` export
+// keeps its original `Context<F0DialogContextType>` type signature.
 export type F0DialogContextType = {
   open: boolean
   onClose: () => void
@@ -43,14 +32,19 @@ export type F0DialogContextType = {
   portalContainer: HTMLDivElement | null
 }
 
-export type F0DialogProviderProps = {
-  isOpen: boolean
-  onClose: () => void
-  shownBottomSheet?: boolean
-  position: DialogPosition
-  children: ReactNode
-  portalContainer: HTMLDivElement | null
-}
+export type F0DialogHeaderProps = {
+  title?: string
+  description?: string
+  module?: {
+    id: ModuleId
+    label: string
+    href: string
+  }
+  otherActions?: DropdownInternalProps["items"]
+  navigation?: NavigationProps
+  resourceHeader?: ResourceHeaderProps
+  controls?: DialogControls
+} & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 export type F0DialogInternalProps = {
   // Whether the dialog is open
