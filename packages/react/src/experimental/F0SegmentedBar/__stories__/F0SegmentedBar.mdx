@@ -185,7 +185,7 @@ configurations.
 
 - Decide the colour on the consumer side by mapping the score to a token; the component performs no score → colour logic.
 - Keep `max` small and constant within a given list so bars stay comparable.
-- Pass a `label` (e.g. the competency name) so the bar is self-describing for assistive technology.
+- Pass a `label` (e.g. the competency name) — it is required so the bar is always self-describing for assistive technology.
 
 ## Content Best Practices
 
@@ -213,8 +213,8 @@ configurations.
 
 - Uses `role="progressbar"` with `aria-valuemin`, `aria-valuemax` and `aria-valuenow` reflecting the clamped score.
 - `aria-valuetext` announces `"{value} of {max}"` so screen readers read the rating rather than a raw number.
-- `aria-label` is set from `label`, falling back to a translated generic "Segmented bar" when no label is given, so the bar always has an accessible name.
-- All component-owned strings (`aria-valuetext`, the fallback label) are resolved through `useI18n()`.
+- `aria-label` is set from the required `label`, so the bar always has an accessible name.
+- `aria-valuetext` is resolved through `useI18n()`, reusing the shared `audioPlayer.position` (`"{{current}} of {{total}}"`) string.
 
 ---
 
@@ -286,14 +286,12 @@ import { F0SegmentedBar } from "@factorialco/f0-react"
       </tr>
       <tr>
         <td>
-          <code>label</code>
+          <code>label</code> <span className="text-red-500">*</span>
         </td>
         <td>
           <code>string</code>
         </td>
-        <td>
-          <code>"Segmented bar"</code>
-        </td>
+        <td>-</td>
         <td>
           Accessible label (e.g. the competency name). Sets{" "}
           <code>aria-label</code>.

@@ -26,13 +26,13 @@ const F0SegmentedBarBase = forwardRef<HTMLDivElement, F0SegmentedBarProps>(
       <div
         ref={ref}
         role="progressbar"
-        aria-label={label ?? i18n.t("segmentedBar.label")}
+        aria-label={label}
         aria-valuemin={0}
         aria-valuemax={segmentCount}
         aria-valuenow={filled}
-        aria-valuetext={i18n.t("segmentedBar.valueText", {
-          value: filled,
-          max: segmentCount,
+        aria-valuetext={i18n.t("audioPlayer.position", {
+          current: filled,
+          total: segmentCount,
         })}
         className={cn("flex h-2 w-full gap-1")}
       >

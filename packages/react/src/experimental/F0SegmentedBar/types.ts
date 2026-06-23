@@ -10,5 +10,5 @@ export interface F0SegmentedBarProps extends WithDataTestIdProps {
   value: number
   max: number
   color?: SegmentColorToken
-  label?: string
+  label: string
 }

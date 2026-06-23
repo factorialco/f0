@@ -10,12 +10,19 @@ const getSegments = () =>
 
 describe("F0SegmentedBar", () => {
   it("renders `max` segments", () => {
-    render(<F0SegmentedBar value={2} max={3} />)
+    render(<F0SegmentedBar value={2} max={3} label="UX Design" />)
     expect(getSegments()).toHaveLength(3)
   })
 
   it("fills `value` segments with the resolved colour and leaves the rest on the track", () => {
-    render(<F0SegmentedBar value={2} max={3} color="feedback-positive" />)
+    render(
+      <F0SegmentedBar
+        value={2}
+        max={3}
+        color="feedback-positive"
+        label="UX Design"
+      />
+    )
     const segments = getSegments()
 
     expect(segments[0]).toHaveStyle({
@@ -30,14 +37,14 @@ describe("F0SegmentedBar", () => {
   })
 
   it("defaults the filled colour to categorical-1", () => {
-    render(<F0SegmentedBar value={1} max={2} />)
+    render(<F0SegmentedBar value={1} max={2} label="UX Design" />)
     expect(getSegments()[0]).toHaveStyle({
       backgroundColor: getColor("categorical-1"),
     })
   })
 
   it("clamps `value` greater than `max`", () => {
-    render(<F0SegmentedBar value={5} max={3} />)
+    render(<F0SegmentedBar value={5} max={3} label="UX Design" />)
     const bar = screen.getByRole("progressbar")
     expect(bar).toHaveAttribute("aria-valuenow", "3")
     expect(bar).toHaveAttribute("aria-valuetext", "3 of 3")
@@ -49,7 +56,7 @@ describe("F0SegmentedBar", () => {
   })
 
   it("clamps `value` below zero", () => {
-    render(<F0SegmentedBar value={-2} max={3} />)
+    render(<F0SegmentedBar value={-2} max={3} label="UX Design" />)
     const bar = screen.getByRole("progressbar")
     expect(bar).toHaveAttribute("aria-valuenow", "0")
     getSegments().forEach((segment) => {
@@ -68,16 +75,8 @@ describe("F0SegmentedBar", () => {
     expect(bar).toHaveAttribute("aria-valuetext", "2 of 3")
   })
 
-  it("falls back to a translated label when none is provided", () => {
-    render(<F0SegmentedBar value={1} max={3} />)
-    expect(screen.getByRole("progressbar")).toHaveAttribute(
-      "aria-label",
-      "Segmented bar"
-    )
-  })
-
   it("renders no segments and does not throw when max <= 0", () => {
-    render(<F0SegmentedBar value={2} max={0} />)
+    render(<F0SegmentedBar value={2} max={0} label="UX Design" />)
     const bar = screen.getByRole("progressbar")
     expect(bar.children).toHaveLength(0)
     expect(bar).toHaveAttribute("aria-valuemax", "0")
@@ -85,7 +84,14 @@ describe("F0SegmentedBar", () => {
   })
 
   it("floors a fractional value instead of over-filling", () => {
-    render(<F0SegmentedBar value={2.5} max={3} color="feedback-positive" />)
+    render(
+      <F0SegmentedBar
+        value={2.5}
+        max={3}
+        color="feedback-positive"
+        label="UX Design"
+      />
+    )
     const bar = screen.getByRole("progressbar")
     expect(bar).toHaveAttribute("aria-valuenow", "2")
     expect(bar).toHaveAttribute("aria-valuetext", "2 of 3")
@@ -97,7 +103,9 @@ describe("F0SegmentedBar", () => {
   })
 
   it("does not leak NaN when max or value is not finite", () => {
-    render(<F0SegmentedBar value={Number.NaN} max={Number.NaN} />)
+    render(
+      <F0SegmentedBar value={Number.NaN} max={Number.NaN} label="UX Design" />
+    )
     const bar = screen.getByRole("progressbar")
     expect(bar.children).toHaveLength(0)
     expect(bar).toHaveAttribute("aria-valuemax", "0")
@@ -105,7 +113,13 @@ describe("F0SegmentedBar", () => {
   })
 
   it("does not throw when max is Infinity", () => {
-    render(<F0SegmentedBar value={2} max={Number.POSITIVE_INFINITY} />)
+    render(
+      <F0SegmentedBar
+        value={2}
+        max={Number.POSITIVE_INFINITY}
+        label="UX Design"
+      />
+    )
     const bar = screen.getByRole("progressbar")
     expect(bar.children).toHaveLength(0)
     expect(bar).toHaveAttribute("aria-valuemax", "0")

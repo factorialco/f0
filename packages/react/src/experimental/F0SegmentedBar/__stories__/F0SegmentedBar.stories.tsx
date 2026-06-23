@@ -11,6 +11,7 @@ const meta = {
   args: {
     value: 2,
     max: 3,
+    label: "Competency",
   },
 } satisfies Meta<typeof F0SegmentedBar>
 
