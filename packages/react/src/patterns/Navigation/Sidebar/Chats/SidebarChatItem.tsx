@@ -1,5 +1,6 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
@@ -40,6 +41,8 @@ export const SidebarChatItem = ({
   isActive: boolean
   onClick: () => void
 }) => {
+  const i18n = useI18n()
+
   // Cascade loading: the conversation is known but its name/avatar aren't
   // resolved yet — show a skeleton row in place (not interactive).
   if (chat.loading) {
@@ -79,13 +82,15 @@ export const SidebarChatItem = ({
         tag="span"
         className={cn(
           "line-clamp-1 flex-1 py-0.5",
-          isUnread
-            ? "text-f1-foreground font-semibold "
-            : "text-f1-foreground-secondary font-medium"
+          chat.typing
+            ? "text-f1-foreground-secondary font-medium italic"
+            : isUnread
+              ? "text-f1-foreground font-semibold "
+              : "text-f1-foreground-secondary font-medium"
         )}
         lines={1}
       >
-        {chat.label}
+        {chat.typing ? i18n.chat.writing : chat.label}
       </OneEllipsis>
       {(status || chat.unreadCount) && (
         <div className="gap-1 flex items-center justify-center">

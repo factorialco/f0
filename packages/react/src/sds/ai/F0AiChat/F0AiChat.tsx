@@ -35,6 +35,7 @@ export interface F0AiChatProps {
 
 const F0AiChatProviderComponent = ({
   enabled = false,
+  side,
   initialMessage,
   chatHeader,
   chatMessages,
@@ -64,6 +65,7 @@ const F0AiChatProviderComponent = ({
   return (
     <AiChatStateProvider
       enabled={enabled}
+      side={side}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}

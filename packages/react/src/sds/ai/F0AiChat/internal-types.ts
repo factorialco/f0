@@ -28,6 +28,8 @@ import {
  */
 export interface AiChatState {
   enabled: boolean
+  /** Initial edge the panel docks to. @default "right" */
+  side?: "left" | "right"
   agent?: string
   initialMessage?: string | string[]
   chatHeader?: React.ReactNode

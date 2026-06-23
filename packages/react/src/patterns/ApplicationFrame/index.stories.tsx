@@ -1,19 +1,15 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps, useEffect, useMemo, useState } from "react"
+import { ComponentProps, useCallback, useEffect, useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
-import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, IconType } from "@/components/F0Icon"
 import {
   ChartVerticalBars,
   Comment,
-  Cross,
   Home,
   Lightbulb,
-  Maximize,
-  Minimize,
   New,
   Pencil,
   Search,
@@ -25,16 +21,13 @@ import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
-import {
-  exampleActions,
-  exampleGroups,
-} from "@/patterns/Navigation/Sidebar/Chats/index.stories"
+import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
 import { SidebarChatList } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatList"
 import {
   SidebarChatProvider,
+  useSidebarChatActions,
   useSidebarChats,
 } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatProvider"
-import { SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
 import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
 import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
@@ -45,6 +38,12 @@ import { Menu } from "@/patterns/Navigation/Sidebar/Menu"
 import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
+import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
+import {
+  MockChatAppProvider,
+  useConversationRuntime,
+  useMockChatGroups,
+} from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
@@ -729,13 +728,15 @@ const DefaultStoryComponent = (
 export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
-      <ApplicationFrame
-        ai={withMockChatSlots(args.ai)}
-        aiPromotion={args.aiPromotion}
-        sidebar={<ConversationsSidebar />}
-      >
-        <Page {...PageStories.Default.args} />
-      </ApplicationFrame>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{ ...withMockChatSlots(args.ai), side: "left" }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar />}
+        >
+          <Page {...PageStories.Default.args} />
+        </ApplicationFrame>
+      </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
   play: async ({ canvasElement }) => {
@@ -750,8 +751,9 @@ export const Default: Story = {
     // a time.
     await userEvent.click(canvas.getByRole("button", { name: "Messages" }))
     await userEvent.click(canvas.getByRole("button", { name: /María José/i }))
+    // The mocked conversation mounts in the panel: its composer is present.
     await expect(
-      await canvas.findByText(/fake conversation with/i)
+      await canvas.findByPlaceholderText(/write something here/i)
     ).toBeInTheDocument()
   },
 }
@@ -912,58 +914,33 @@ export const WithEmployeeCredits: Story = {
 }
 
 /**
- * A "mega fake" conversation hosted in the side panel. It has no runtime and
- * no data — its only point is to prove that arbitrary content dropped into the
- * panel inherits the chat's resize + fullscreen, because it lives inside the
- * same `SidebarWindow`. It drives fullscreen/close straight from `useAiChat()`.
+ * A fully-mocked conversation hosted in the side panel, driven by the shared
+ * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
+ * fullscreen/close to the panel via `useAiChat()`.
  */
-const FakeConversation = ({ name }: { name: string }) => {
+const MockChatPanel = ({ convId }: { convId: string }) => {
+  const runtime = useConversationRuntime(convId)
   const {
     visualizationMode,
     setVisualizationMode,
     setOpen,
     clearPanelContent,
   } = useAiChat()
-  const fullscreen = visualizationMode === "fullscreen"
+  const isFullscreen = visualizationMode === "fullscreen"
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <div className="flex items-center justify-between border-b border-solid border-0 border-f1-border-secondary px-4 py-3">
-        <span className="font-medium text-f1-foreground">{name}</span>
-        <div className="flex items-center gap-0.5">
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label={fullscreen ? "Exit fullscreen" : "Fullscreen"}
-            icon={fullscreen ? Minimize : Maximize}
-            onClick={() =>
-              setVisualizationMode(fullscreen ? "sidepanel" : "fullscreen")
-            }
-          />
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label="Close"
-            icon={Cross}
-            onClick={() => {
-              clearPanelContent()
-              setOpen(false)
-            }}
-          />
-        </div>
-      </div>
-      <div className="flex flex-1 flex-col gap-3 overflow-auto p-4">
-        <div className="max-w-[80%] self-start rounded-xl bg-f1-background-secondary px-3 py-2 text-sm text-f1-foreground">
-          Hey! This is a fake conversation with {name}.
-        </div>
-        <div className="max-w-[80%] self-end rounded-xl bg-f1-background-inverse px-3 py-2 text-sm text-f1-foreground-inverse">
-          Try resizing the panel or going fullscreen — same feel as the AI chat.
-        </div>
-        <div className="max-w-[80%] self-start rounded-xl bg-f1-background-secondary px-3 py-2 text-sm text-f1-foreground">
-          Pick another conversation in the sidebar and this one unmounts.
-        </div>
-      </div>
-    </div>
+    <F0ChatProvider runtime={runtime}>
+      <F0Chat
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() =>
+          setVisualizationMode(isFullscreen ? "sidepanel" : "fullscreen")
+        }
+        onClose={() => {
+          clearPanelContent()
+          setOpen(false)
+        }}
+      />
+    </F0ChatProvider>
   )
 }
 
@@ -976,16 +953,28 @@ const FakeConversation = ({ name }: { name: string }) => {
 const ConversationsSidebarInner = () => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState("home")
-  const { unreadChatsCount, setActiveChat } = useSidebarChats()
-  const { clearPanelContent, setOpen, open, panelContent, setPanelSide } =
+  const { unreadChatsCount } = useSidebarChats()
+  const { setGroups, setActiveChat } = useSidebarChatActions()
+  const { setPanelContent, clearPanelContent, setOpen, open, panelContent } =
     useAiChat()
 
-  // This demo is "communications present": dock the whole panel (AI chat +
-  // conversations) on the left, where it's comfier to navigate between chats.
+  // Clicking a conversation mounts it in the side panel (one at a time).
+  const onSelect = useCallback(
+    (convId: string) => {
+      setPanelContent({
+        id: convId,
+        content: <MockChatPanel convId={convId} />,
+      })
+    },
+    [setPanelContent]
+  )
+
+  // Groups come from the shared mock store, so unread badges / presence / mute
+  // are live and clear as conversations are read.
+  const groups = useMockChatGroups(onSelect)
   useEffect(() => {
-    setPanelSide("left")
-    return () => setPanelSide("right")
-  }, [setPanelSide])
+    setGroups(groups)
+  }, [groups, setGroups])
 
   // A conversation is "selected" only while it's the one on view in the side
   // panel. Opening the AI chat (panelContent cleared) or closing the panel
@@ -1049,26 +1038,8 @@ const ConversationsSidebarInner = () => {
  * content at a time. Used by the `Default` story.
  */
 const ConversationsSidebar = () => {
-  const { setPanelContent } = useAiChat()
-
-  const groups = useMemo<SidebarChatGroup[]>(
-    () =>
-      exampleGroups.map((group) => ({
-        ...group,
-        chats: group.chats.map((chat) => ({
-          ...chat,
-          onClick: () =>
-            setPanelContent({
-              id: chat.id,
-              content: <FakeConversation name={chat.label} />,
-            }),
-        })),
-      })),
-    [setPanelContent]
-  )
-
   return (
-    <SidebarChatProvider initialGroups={groups}>
+    <SidebarChatProvider>
       <ConversationsSidebarInner />
     </SidebarChatProvider>
   )

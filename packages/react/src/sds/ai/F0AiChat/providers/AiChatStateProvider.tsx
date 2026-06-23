@@ -52,6 +52,7 @@ const noop = () => {}
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
+  side = "right",
   agent: initialAgent,
   initialMessage: initialInitialMessage,
   chatHeader,
@@ -254,8 +255,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const clearPanelContent = useCallback(() => setPanelContentState(null), [])
 
   // Which edge the whole panel docks to (AI chat, hosted content and canvas).
-  // Defaults to "right"; hosts flip it to "left" for a chat-first experience.
-  const [panelSide, setPanelSide] = useState<"left" | "right">("right")
+  // Initialised from the `side` prop ("right" by default); hosts can also flip
+  // it at runtime via `setPanelSide` for a chat-first experience.
+  const [panelSide, setPanelSide] = useState<"left" | "right">(side)
 
   return (
     <AiChatStateContext.Provider

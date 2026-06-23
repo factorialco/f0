@@ -299,6 +299,12 @@ export type AiChatTrackingOptions = {
 export type AiChatProviderProps = {
   enabled?: boolean
   /**
+   * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+   * Hosts set "left" for a chat-first experience (e.g. communications).
+   * @default "right"
+   */
+  side?: "left" | "right"
+  /**
    * Greeting phrase(s) shown by the welcome screen when the chat is empty.
    * A single string renders once; an array rotates through phrases. Purely
    * UI config — does not affect runtime behavior.

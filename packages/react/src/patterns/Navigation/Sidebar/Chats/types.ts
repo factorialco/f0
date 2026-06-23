@@ -38,6 +38,8 @@ export type SidebarChat = {
   onClick?: () => void
   /** When > 0, the chat is rendered as unread (darker, bolder name). */
   unreadCount?: number
+  /** When true, the name is replaced by a live "Writing…" label. */
+  typing?: boolean
   presence?: SidebarChatPresence
   /** Status icon shown to the right of the name. People only. */
   status?: SidebarChatStatus
