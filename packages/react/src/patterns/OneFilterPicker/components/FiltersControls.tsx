@@ -4,7 +4,7 @@ import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0DialogContext } from "@/components/dialog-alike/F0Dialog"
+import { DialogWrapperContext as F0DialogContext } from "@/components/dialog-alike/common/DialogWrapperProvider"
 import { FilterPickerInternal } from "@/patterns/F0FilterPickerContent/internal"
 import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
