@@ -43499,7 +43499,13 @@ function dN(t) {
     ) }),
     /* @__PURE__ */ m("div", { className: "sticky bottom-0 top-0 w-px bg-f1-border-secondary" }),
     /* @__PURE__ */ m("div", { className: "flex w-full justify-center px-4 py-2", children: _ })
-  ] }) : /* @__PURE__ */ m("div", { className: G("flex justify-center", !y && "p-4"), children: _ });
+  ] }) : /* @__PURE__ */ m(
+    "div",
+    {
+      className: y ? "flex justify-center" : "flex justify-center p-4",
+      children: _
+    }
+  );
 }
 function Vee(t) {
   return "formDefinition" in t && t.formDefinition != null;
@@ -43966,7 +43972,13 @@ function fN(t) {
       ) }),
       /* @__PURE__ */ m("div", { className: "sticky bottom-0 top-0 mr-4 w-px bg-f1-border-secondary" }),
       /* @__PURE__ */ m("div", { className: "flex w-full justify-center px-4 py-2", children: Yt })
-    ] }) : /* @__PURE__ */ m("div", { className: G("flex justify-center", !b && "p-4"), children: Yt }),
+    ] }) : /* @__PURE__ */ m(
+      "div",
+      {
+        className: b ? "flex justify-center" : "flex justify-center p-4",
+        children: Yt
+      }
+    ),
     !M && /* @__PURE__ */ m(
       kE,
       {
