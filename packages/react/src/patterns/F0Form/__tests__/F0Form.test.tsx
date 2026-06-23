@@ -3662,6 +3662,72 @@ describe("F0Form sections sidepanel scroll", () => {
     expect(stickyElement).toBeInTheDocument()
     expect(stickyElement).toHaveClass("top-0")
   })
+
+  it("keeps the default content padding (p-4) when noPadding is not set", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="padding-default"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(container.querySelector(".justify-center.p-4")).toBeInTheDocument()
+  })
+
+  it("removes the content padding when styling.noPadding is true (single schema)", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="padding-single-no-padding"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+        styling={{ noPadding: true }}
+      />
+    )
+
+    // The centered wrapper is still there, just without the p-4 padding.
+    expect(
+      container.querySelector(".justify-center.p-4")
+    ).not.toBeInTheDocument()
+    expect(container.querySelector(".justify-center")).toBeInTheDocument()
+  })
+
+  it("removes the content padding when styling.noPadding is true (per-section schema)", () => {
+    const formSchema = {
+      personal: z.object({
+        name: f0FormField(z.string(), { label: "Name" }),
+      }),
+    }
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: { title: "Personal" },
+    }
+
+    const { container } = render(
+      <F0Form
+        name="padding-per-section-no-padding"
+        schema={formSchema}
+        defaultValues={{ personal: { name: "" } }}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ noPadding: true }}
+      />
+    )
+
+    expect(
+      container.querySelector(".justify-center.p-4")
+    ).not.toBeInTheDocument()
+  })
 })
 
 describe("F0Form renderIf hidden field layout", () => {
