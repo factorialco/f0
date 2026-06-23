@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.5.1](https://github.com/factorialco/f0/compare/f0-react-v4.5.0...f0-react-v4.5.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** restore checkbox click selection in InFilter ([#4554](https://github.com/factorialco/f0/issues/4554)) ([b3ca375](https://github.com/factorialco/f0/commit/b3ca37535684658ade5224021c7cf9c84e7e9937))
+
 ## [4.5.0](https://github.com/factorialco/f0/compare/f0-react-v4.4.1...f0-react-v4.5.0) (2026-06-23)
 
 
