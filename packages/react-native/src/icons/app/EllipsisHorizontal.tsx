@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Circle } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgEllipsisHorizontal = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,9 +9,10 @@ const SvgEllipsisHorizontal = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Circle cx={12} cy={12} r={1.5} fill="currentColor" />
-    <Circle cx={6.5} cy={12} r={1.5} fill="currentColor" />
-    <Circle cx={17.5} cy={12} r={1.5} fill="currentColor" />
+    <Path
+      fill="currentColor"
+      d="M10.5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0M16 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0M5 12a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0"
+    />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgEllipsisHorizontal)

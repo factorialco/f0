@@ -10,16 +10,8 @@ const SvgArrowDown = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m18 13-6 6-6-6"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 5v13.5"
+      fill="currentColor"
+      d="M12 3.838c.497 0 .9.404.9.9v12.359l4.739-4.757a.9.9 0 0 1 1.274 1.27l-6.275 6.3a.9.9 0 0 1-1.138.112l-.137-.113-6.276-6.298a.9.9 0 0 1 1.275-1.27l4.739 4.756V4.738a.9.9 0 0 1 .9-.9"
     />
   </Svg>
 )

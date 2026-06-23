@@ -10,9 +10,8 @@ const SvgCloud = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinejoin="round"
-      d="M12 6a4 4 0 0 1 4 4 4 4 0 0 1 0 8H8a4 4 0 0 1 0-8 4 4 0 0 1 4-4Z"
+      fill="currentColor"
+      d="M12.001 5.1a4.9 4.9 0 0 1 4.828 4.071 4.9 4.9 0 0 1-.828 9.73H8a4.9 4.9 0 0 1-.83-9.73 4.9 4.9 0 0 1 4.83-4.07m0 1.8a3.1 3.1 0 0 0-3.1 3.1.9.9 0 0 1-.9.9 3.1 3.1 0 0 0 0 6.2h8a3.1 3.1 0 0 0 0-6.2.9.9 0 0 1-.9-.9A3.1 3.1 0 0 0 12 6.9"
     />
   </Svg>
 )
