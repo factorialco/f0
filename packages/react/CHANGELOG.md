@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.1](https://github.com/factorialco/f0/compare/f0-react-v4.9.0...f0-react-v4.9.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **EditableTable:** fade disabled cell text (FCT-56243) ([#4547](https://github.com/factorialco/f0/issues/4547)) ([11b23ae](https://github.com/factorialco/f0/commit/11b23ae97cf1da9923bfab019e96566f4e5a17db))
+
 ## [4.9.0](https://github.com/factorialco/f0/compare/f0-react-v4.8.0...f0-react-v4.9.0) (2026-06-23)
 
 
