@@ -20,7 +20,8 @@ export function DisabledCell<R extends RecordType>({
           editableColumn.align === "right" ? "justify-end" : "",
           "flex p-4 min-h-12 items-center border-0 h-full",
           "bg-f1-background-disabled h-full",
-          "w-full"
+          "w-full",
+          "[&_*]:text-f1-foreground-secondary"
         )}
       >
         {renderProperty(item, editableColumn, "editableTable", i18n)}
