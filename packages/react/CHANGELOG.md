@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.10.0](https://github.com/factorialco/f0/compare/f0-react-v4.9.1...f0-react-v4.10.0) (2026-06-23)
+
+
+### Features
+
+* **F0Form:** add noPadding styling option ([#4535](https://github.com/factorialco/f0/issues/4535)) ([6bbfb00](https://github.com/factorialco/f0/commit/6bbfb00ea5cd21d4e4488d1ab49d0c32b00eea96))
+
 ## [4.9.1](https://github.com/factorialco/f0/compare/f0-react-v4.9.0...f0-react-v4.9.1) (2026-06-23)
 
 
