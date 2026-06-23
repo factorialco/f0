@@ -1,6 +1,8 @@
 import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 import { TableHead as TableHeadRoot } from "@/ui/table"
 
 import { F0Icon, IconType } from "../../../components/F0Icon"
@@ -10,6 +12,79 @@ import { cn, focusRing } from "../../../lib/utils"
 import { getColWidth } from "../utils/colWidth"
 import { ColumnWidth } from "../utils/sizes"
 import { useTable } from "../utils/TableContext"
+
+export type TableHeaderInfo = {
+  title: string
+  description: string
+  link?: {
+    label: string
+    onClick: () => void
+  }
+  /**
+   * Accessible name for the info-icon trigger. Defaults to the column label
+   * when the header's children are a string.
+   */
+  label?: string
+}
+
+function HeaderInfo({
+  info,
+  infoIcon,
+  label,
+}: {
+  info: TableHeaderInfo
+  infoIcon: IconType
+  label?: string
+}) {
+  const [open, setOpen] = useState(false)
+
+  // HoverCard (not Tooltip): the content is hover-revealed but may contain a
+  // link action, while the plain string path remains a non-interactive Tooltip.
+  return (
+    <HoverCard
+      open={open}
+      onOpenChange={setOpen}
+      openDelay={300}
+      closeDelay={100}
+    >
+      <HoverCardTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "flex h-5 w-5 items-center justify-center rounded-xs text-f1-foreground-secondary",
+            focusRing()
+          )}
+          aria-label={info.label ?? label}
+        >
+          <F0Icon icon={infoIcon} size="sm" />
+        </button>
+      </HoverCardTrigger>
+      <HoverCardContent className="w-auto max-w-xs px-3 py-2 shadow-md">
+        <div className="flex flex-col gap-1 whitespace-normal text-left">
+          <p>{info.title}</p>
+          <p className="text-f1-foreground-inverse-secondary">
+            {info.description}
+          </p>
+          {info.link && (
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false)
+                info.link?.onClick()
+              }}
+              className={cn(
+                "mt-1 w-fit rounded-xs font-medium text-f1-foreground-inverse underline underline-offset-2 transition-colors hover:text-f1-foreground-inverse-secondary",
+                focusRing()
+              )}
+            >
+              {info.link.label}
+            </button>
+          )}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
+  )
+}
 
 interface TableHeadProps {
   children: React.ReactNode
@@ -47,10 +122,11 @@ interface TableHeadProps {
   onSortClick?: () => void
 
   /**
-   * Optional tooltip text. When provided, displays an info icon next to the header content
-   * that shows this text in a tooltip when hovered.
+   * Optional header info. When provided, displays an info icon next to the
+   * header content. Pass a string for a short text tooltip, or a
+   * {@link TableHeaderInfo} object for a structured hoverable card.
    */
-  info?: string
+  info?: string | TableHeaderInfo
 
   /**
    * Icon to display when info is provided.
@@ -129,17 +205,25 @@ export function TableHead({
           <div className="flex items-center">
             {info && (
               <div className="flex h-6 w-6 items-center justify-center text-f1-foreground-secondary">
-                <Tooltip label={info}>
-                  <div
-                    className={cn(
-                      "flex h-5 w-5 items-center justify-center rounded-xs",
-                      focusRing()
-                    )}
-                    tabIndex={0}
-                  >
-                    <F0Icon icon={infoIcon} size="sm" />
-                  </div>
-                </Tooltip>
+                {typeof info === "string" ? (
+                  <Tooltip label={info}>
+                    <div
+                      className={cn(
+                        "flex h-5 w-5 items-center justify-center rounded-xs",
+                        focusRing()
+                      )}
+                      tabIndex={0}
+                    >
+                      <F0Icon icon={infoIcon} size="sm" />
+                    </div>
+                  </Tooltip>
+                ) : (
+                  <HeaderInfo
+                    info={info}
+                    infoIcon={infoIcon}
+                    label={typeof children === "string" ? children : undefined}
+                  />
+                )}
               </div>
             )}
             {onSortClick && (

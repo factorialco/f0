@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react"
 
-import { F0Dialog } from "@/patterns/F0Dialog"
+import { F0Dialog } from "@/components/dialog-alike/F0Dialog"
 import { F0TextInput } from "@/components/F0TextInput"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -53,10 +53,9 @@ export const FeedbackModal = ({
 
   return (
     <F0Dialog
-      position="center"
       isOpen
       onClose={handleClose}
-      width="md"
+      size="md"
       title={title}
       container={null}
       primaryAction={{

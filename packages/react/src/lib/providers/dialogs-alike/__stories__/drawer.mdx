@@ -7,17 +7,17 @@ import * as DrawerStories from "./drawer.stories"
 
 ## Introduction
 
-`drawer` is an imperative API for opening side drawers from anywhere in your app — including outside React (event handlers, callbacks, utilities). It wraps the `F0Drawer` component internally and handles all state management for you.
+The drawers API is an imperative API for opening side drawers from anywhere in your app — including outside React (event handlers, callbacks, utilities). It wraps the `F0Drawer` component internally and handles all state management for you.
 
 ```tsx
-import { drawer } from "@factorialco/f0-react"
+import { drawers } from "@factorialco/f0-react"
 ```
 
 > Requires your app to be wrapped in `<F0Provider>` (which mounts the renderer that displays the drawers).
 
 ### Why imperative functions?
 
-- **No hooks, no boilerplate:** call `drawer.open(...)` directly — no `useState`, no conditional rendering, no `useDrawer()`.
+- **No hooks, no boilerplate:** call `drawers.open(...)` directly — no `useState`, no conditional rendering, no `useDrawer()`.
 - **Promise-based:** `await` the result; it resolves with the `value` of the action the user picked.
 - **Callable anywhere:** from components, event handlers, or plain functions.
 
@@ -49,14 +49,14 @@ function EditItemButton() {
 }
 ```
 
-### After: using the `drawer` API
+### After: using the drawers API
 
 ```tsx
-import { drawer, F0Button } from "@factorialco/f0-react"
+import { drawers, F0Button } from "@factorialco/f0-react"
 
 function EditItemButton() {
   const handleClick = async () => {
-    const result = await drawer.open({
+    const result = await drawers.open({
       title: "Edit Item",
       content: <div>Form content goes here...</div>,
       actions: {
@@ -76,12 +76,12 @@ function EditItemButton() {
 
 ## Basic Usage
 
-`drawer.open` accepts a drawer definition and returns a promise that resolves with the value of the action the user clicked.
+`drawers.open` accepts a drawer definition and returns a promise that resolves with the value of the action the user clicked.
 
 ```tsx
-import { drawer } from "@factorialco/f0-react"
+import { drawers } from "@factorialco/f0-react"
 
-const result = await drawer.open({
+const result = await drawers.open({
   title: "Drawer Title",
   description: "Drawer Description",
   content: <div>Custom drawer content goes here</div>,
@@ -101,7 +101,7 @@ console.log("User selected:", result)
 Drawers can be positioned on the `left` or `right` (default).
 
 ```tsx
-await drawer.open({
+await drawers.open({
   title: "Left Drawer",
   position: "left",
   content: <div>Content...</div>,
@@ -118,7 +118,7 @@ await drawer.open({
 When `primary` or `secondary` is given an **array** of actions, the footer renders them as a dropdown menu. Each item resolves the promise with its own `value`, and items can be individually `disabled`.
 
 ```tsx
-await drawer.open({
+await drawers.open({
   title: "Drawer with Dropdown Actions",
   description: "This drawer has multiple secondary actions",
   content: <div>Check the actions menu</div>,
@@ -137,10 +137,10 @@ await drawer.open({
 
 ### Promise-Based Actions
 
-An action `value` can be a primitive **or** a function that returns a Promise. When a function is provided, the drawer stays open until the promise resolves, the button shows a loading state, and all actions are disabled during the async operation (unless `nonBlocking` is `true`). The resolved value becomes the result of `drawer.open`.
+An action `value` can be a primitive **or** a function that returns a Promise. When a function is provided, the drawer stays open until the promise resolves, the button shows a loading state, and all actions are disabled during the async operation (unless `nonBlocking` is `true`). The resolved value becomes the result of `drawers.open`.
 
 ```tsx
-const result = await drawer.open({
+const result = await drawers.open({
   title: "Drawer with Async Action",
   description: "The primary action takes time to resolve",
   content: <div>Click the primary action to see the loading state</div>,
@@ -159,16 +159,16 @@ const result = await drawer.open({
 
 ### Modal
 
-By default a drawer slides in alongside the page and can be dismissed by clicking outside or pressing <kbd>Escape</kbd>. Pass `modal: true` to add a backdrop overlay that **blocks interaction with the rest of the page** and makes the drawer require an explicit action — clicking outside no longer dismisses it and <kbd>Escape</kbd> is ignored. Close it through one of its actions or programmatically via `drawer.close(id)`.
+By default a drawer slides in alongside the page and can be dismissed by clicking outside or pressing <kbd>Escape</kbd>. Pass `modal: true` to add a backdrop overlay that **blocks interaction with the rest of the page** and makes the drawer require an explicit action — clicking outside no longer dismisses it and <kbd>Escape</kbd> is ignored. Close it through one of its actions or programmatically via `drawers.close(id)`.
 
 Use it when the drawer holds a task the user should finish or explicitly cancel (e.g. an edit form with unsaved changes) rather than dismiss by accident.
 
 ```tsx
-import { drawer, F0Button } from "@factorialco/f0-react"
+import { drawers, F0Button } from "@factorialco/f0-react"
 
 function MyComponent() {
   const showModalDrawer = async () => {
-    const result = await drawer.open({
+    const result = await drawers.open({
       title: "Modal Drawer",
       description: "This drawer blocks interaction with the page behind it.",
       content: <div>Use one of the actions below to close it.</div>,
@@ -190,10 +190,10 @@ function MyComponent() {
 
 ### Closing programmatically
 
-Pass an `id` when opening, then call `drawer.close(id)` to close it from elsewhere (its promise resolves with `undefined`).
+Pass an `id` when opening, then call `drawers.close(id)` to close it from elsewhere (its promise resolves with `undefined`).
 
 ```tsx
-drawer.open({
+drawers.open({
   id: "my-drawer",
   title: "...",
   content: <div />,
@@ -201,5 +201,5 @@ drawer.open({
 })
 
 // later, from anywhere:
-drawer.close("my-drawer")
+drawers.close("my-drawer")
 ```

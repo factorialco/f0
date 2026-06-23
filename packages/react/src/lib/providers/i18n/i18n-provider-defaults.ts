@@ -35,6 +35,10 @@ export const defaultTranslations = {
       show: "Show password",
       hide: "Hide password",
     },
+    private: {
+      show: "Show {{label}}",
+      hide: "Hide {{label}}",
+    },
   },
   link: {
     opensInNewTab: "opens in new tab",
@@ -47,6 +51,9 @@ export const defaultTranslations = {
     options: "Recording options",
     playbackSpeed: "Playback speed",
     position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details",
   },
   actions: {
     add: "Add",
@@ -317,6 +324,7 @@ export const defaultTranslations = {
       "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
@@ -612,6 +620,11 @@ export const defaultTranslations = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
+      locked: "Locked",
+      lockedSectionNotice:
+        "These questions are predefined and can't be edited, moved, or removed.",
+      lockedQuestionNotice:
+        "This question is predefined and can't be edited or removed.",
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription:

@@ -11,7 +11,7 @@ export { experimentalComponent as experimental } from "./experimental"
 export { OneEllipsis } from "./OneEllipsis"
 export { PrivacyModeProvider, usePrivacyMode } from "./privacyMode"
 export * from "./providers/datacollection/exports"
-export { dialog, drawer } from "./providers/dialogs-alike"
+export { dialogs, drawers } from "./providers/dialogs-alike"
 export type {
   DialogDefinition,
   DialogActions,
@@ -27,4 +27,5 @@ export { F0EventCatcherProvider } from "./providers/events"
 export { buildTranslations } from "./providers/i18n"
 export type { TranslationsType } from "./providers/i18n"
 export { defaultTranslations } from "./providers/i18n/i18n-provider-defaults"
+export { useIsDesktop, useIsMobile } from "./useIsDesktop"
 export { useXRay } from "./xray"

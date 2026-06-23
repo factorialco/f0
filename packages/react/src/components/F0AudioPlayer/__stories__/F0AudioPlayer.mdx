@@ -264,6 +264,53 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
           <code>onClick</code>, and <code>critical</code> flag.
         </td>
       </tr>
+      <tr>
+        <td>
+          <code>details</code>
+        </td>
+        <td>
+          <code>AudioPlayerDetailTab[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Tabbed content revealed by a "View detail" toggle in the header — each
+          tab has a <code>value</code>, a (translated) <code>label</code>, and{" "}
+          <code>content</code>. Omit to render a plain recording card.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>expanded</code> / <code>defaultExpanded</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Controlled / initial expanded state of the detail panel. Pair{" "}
+          <code>expanded</code> with <code>onExpandedChange</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>detailsMaxHeight</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          <code>200</code>
+        </td>
+        <td>—</td>
+        <td>
+          Max height (px) of the scrollable detail area before its content
+          scrolls.
+        </td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -420,6 +467,12 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
   exposed through `F0AudioPlayerCard`'s kebab. The bare `F0AudioPlayer` has no
   speed control. Pass `playbackRates={[]}` to show only the `actions` in the
   kebab.
+- **Expandable details are optional.** Pass `details` to add a "View detail"
+  toggle that expands the card into a tabbed, scrollable panel (e.g. a Summary
+  and a Transcript). Without `details` the card is unchanged. The toggle stays
+  usable even when the player is `disabled` (that only governs audio controls),
+  the panel is height-capped by `detailsMaxHeight` (default `200px`) and scrolls
+  beyond it, and tab labels come from the consumer already translated.
 
 ### Usage examples
 
@@ -435,6 +488,16 @@ Append items such as a download to the kebab via `actions` — they render below
 the speed options, after a separator.
 
 <Canvas of={Stories.CardWithActions} />
+
+**Card with expandable details**
+
+Pass `details` to add a "View detail" toggle. Expanding the card reveals a
+tabbed panel (here, a Summary and a Transcript) inside a height-restricted
+scroll area.
+
+<Canvas of={Stories.CardWithDetails} />
+
+<Canvas of={Stories.CardWithDetailsExpanded} />
 
 **Disabled**
 
@@ -507,3 +570,7 @@ Render the controls in a non-interactive state while a recording is unavailable.
   is conveyed visually with a check icon (the options use standard menu
   semantics, not radio semantics).
 - Icons are decorative — the labels, title, and time text carry the meaning.
+- When `details` are provided, the "View detail" / "Hide detail" toggle exposes
+  `aria-expanded`, and the panel is a labelled `role="region"`. The Summary /
+  Transcript tabs reuse the same `TabNavigation` primitive as the page and
+  side-panel tabs, so they share its look and keyboard navigation.

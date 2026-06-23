@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -13,6 +14,10 @@ import CheckDoubleIcon from "@/icons/app/CheckDouble"
 import CrossIcon from "@/icons/app/Cross"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
+import {
+  expectDialogPaintsAboveChat,
+  FullscreenChatFrame,
+} from "@/lib/storybook-utils/aiChatStacking"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes.ts"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks.ts"
@@ -63,7 +68,11 @@ const meta: Meta<typeof F0Dialog> = {
     },
   },
   decorators: [
-    (Story, { args: { isOpen, ...rest } }) => {
+    (Story, context) => {
+      const {
+        args: { isOpen, ...rest },
+        parameters,
+      } = context
       const [open, setOpen] = useState(isOpen)
 
       const handleClose = () => {
@@ -71,6 +80,13 @@ const meta: Meta<typeof F0Dialog> = {
       }
       const handleOpen = () => {
         setOpen(true)
+      }
+
+      // Stories that build their own ApplicationFrame (e.g. the fullscreen AI
+      // chat stacking demo) opt out of the default open-button + centering
+      // wrapper and drive the dialog themselves.
+      if (parameters.standaloneFrame) {
+        return <Story />
       }
 
       return (
@@ -112,6 +128,20 @@ export const Default: Story = {
       closeOnClick: true,
     },
     children: <ExampleList itemsCount={20} />,
+  },
+}
+
+export const WithDataTestId: Story = {
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    title: "Dialog with Test ID",
+    dataTestId: "my-test-dialog",
+    children: <ExampleList itemsCount={2} />,
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    await expect(canvas.getByTestId("my-test-dialog")).toBeInTheDocument()
   },
 }
 
@@ -371,4 +401,45 @@ export const EscapesAppStackingContext: Story = {
       <F0Dialog {...args} />
     </div>
   ),
+}
+
+// --- Opening a dialog over the real fullscreen AI chat -----------------------
+// The previous story simulates the isolate with a tinted panel. This one mounts
+// the actual ApplicationFrame with the AI chat locked open in fullscreen
+// (painting at z-20 inside the isolate) and opens a center F0Dialog on top of
+// it. The play function asserts the dialog stays above the chat.
+
+const OVER_CHAT_TITLE = "On top of the fullscreen chat"
+
+export const OverFullscreenAiChat: Story = {
+  parameters: {
+    standaloneFrame: true,
+    layout: "fullscreen",
+    docs: {
+      description: {
+        story:
+          "Opens a center F0Dialog while the AI chat is locked open in fullscreen. The chat paints at `z-20` inside the ApplicationFrame `isolate`; the dialog escapes to `#f0-overlay-root` so it — and its overlay — render above the chat. The play function hit-tests the dialog card to confirm nothing from the chat paints over it.",
+      },
+    },
+  },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    title: OVER_CHAT_TITLE,
+    description: "The dialog and its overlay sit above the fullscreen chat.",
+    primaryAction: {
+      label: "Got it",
+      onClick: () => {},
+      closeOnClick: true,
+    },
+    children: <ExampleList itemsCount={3} />,
+  },
+  render: (args) => (
+    <FullscreenChatFrame>
+      <F0Dialog {...args} />
+    </FullscreenChatFrame>
+  ),
+  play: async () => {
+    await expectDialogPaintsAboveChat({ title: OVER_CHAT_TITLE })
+  },
 }

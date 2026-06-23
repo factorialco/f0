@@ -1,3 +1,5 @@
+import { ReactNode } from "react"
+
 import { IconType } from "@/components/F0Icon"
 import { DataAttributes } from "@/global.types"
 import { WithDataTestIdProps } from "@/lib/data-testid"
@@ -10,6 +12,15 @@ export interface AudioPlayerMenuAction {
   icon?: IconType
   onClick: () => void
   critical?: boolean
+}
+
+export interface AudioPlayerDetailTab {
+  /** Stable value used to identify the tab. */
+  value: string
+  /** Visible (already translated) tab label, e.g. "Summary". */
+  label: string
+  /** Tab panel content, rendered inside a scrollable area. */
+  content: ReactNode
 }
 
 export interface F0AudioPlayerProps
@@ -121,4 +132,34 @@ export interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
    * is always rendered by the card.
    */
   actions?: AudioPlayerMenuAction[]
+
+  /**
+   * Tabbed detail content revealed by a "View detail" toggle in the header
+   * (e.g. a Summary and a Transcript tab). When omitted or empty, no toggle and
+   * no panel are rendered and the card behaves like a plain recording player.
+   */
+  details?: AudioPlayerDetailTab[]
+
+  /**
+   * Controlled expanded state of the detail panel. Pair with
+   * `onExpandedChange`.
+   */
+  expanded?: boolean
+
+  /**
+   * Initial expanded state of the detail panel when uncontrolled.
+   * @default false
+   */
+  defaultExpanded?: boolean
+
+  /**
+   * Fired when the detail panel expands or collapses.
+   */
+  onExpandedChange?: (expanded: boolean) => void
+
+  /**
+   * Max height (in pixels) of the scrollable detail area before it scrolls.
+   * @default 200
+   */
+  detailsMaxHeight?: number
 }

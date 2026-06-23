@@ -1,6 +1,6 @@
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { IconType } from "@/components/F0Icon"
-import { ChevronDown, ChevronUp } from "@/icons/app"
+import { ChevronLeft, ChevronRight } from "@/icons/app"
 
 /**
  * One prev/next target. Carry a `url` for full-page detail navigation
@@ -78,12 +78,12 @@ export function PageNavigation({ previous, next, counter }: NavigationProps) {
       )}
       <div className="flex items-center gap-2">
         <PageNavigationLink
-          icon={ChevronUp}
+          icon={ChevronLeft}
           target={previous}
           fallbackLabel="Previous"
         />
         <PageNavigationLink
-          icon={ChevronDown}
+          icon={ChevronRight}
           target={next}
           fallbackLabel="Next"
         />

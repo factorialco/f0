@@ -51,6 +51,7 @@ export type {
   F0DateFieldConfig,
   F0DateTimeFieldConfig,
   F0DateRangeFieldConfig,
+  F0PeriodFieldConfig,
   F0ArrayConfig,
   F0CustomFieldConfig,
   F0RichTextFieldConfig,
@@ -71,6 +72,7 @@ export type {
   SelectRenderIfCondition,
   DateRenderIfCondition,
   DateRangeRenderIfCondition,
+  PeriodRenderIfCondition,
   // Field-specific configs
   F0TextConfig,
   F0NumberConfig,
@@ -85,6 +87,7 @@ export type {
   F0DateTimeConfig,
   F0DateTimeField,
   F0DateRangeConfig,
+  F0PeriodConfig,
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
@@ -97,6 +100,7 @@ export type {
   F0SwitchField,
   F0DateField,
   F0DateRangeField,
+  F0PeriodField,
   F0RichTextField,
   F0FileField,
   F0CustomField,
@@ -126,6 +130,13 @@ export { useSchemaDefinition, getSchemaDefinition } from "./useSchemaDefinition"
 // Export utilities
 export { evaluateRenderIf } from "./fields/utils"
 export { generateAnchorId } from "./context"
+
+// `openFormDialog` is the building block behind `forms.open({ mode: "dialog" })`
+// (assembled in `patterns/forms`). It is not part of the public surface.
+export type {
+  OpenFormDialogOptions,
+  OpenFormDialogResult,
+} from "./openFormDialog"
 
 // Export form control hook
 export { useF0Form } from "./useF0Form"

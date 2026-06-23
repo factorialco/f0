@@ -10,6 +10,7 @@ import {
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Counter } from "@/ui/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
@@ -27,6 +28,7 @@ import { DragProvider, useDragContext } from "./DragContext"
 export interface MenuItem extends NavigationItem {
   icon: IconType
   badge?: number
+  tag?: string
 }
 
 type FavoriteMenuItem = (
@@ -68,7 +70,7 @@ const MenuItemContent = ({
 }) => {
   return (
     <div className="flex w-full items-center justify-between">
-      <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
+      <div className="flex min-w-0 items-center gap-1.5 font-medium text-f1-foreground">
         <F0Icon
           icon={item.icon}
           size="md"
@@ -79,7 +81,12 @@ const MenuItemContent = ({
         />
         <span>{item.label}</span>
       </div>
-      {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+      {(item.tag || item.badge) && (
+        <div className="flex flex-shrink-0 items-center gap-1.5">
+          {item.tag && <F0TagRaw text={item.tag} />}
+          {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+        </div>
+      )}
     </div>
   )
 }

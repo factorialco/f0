@@ -1,8 +1,9 @@
+import { betweenSpacing } from "@factorialco/f0-core"
 import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
-import { ButtonGroup } from "../ButtonGroup"
+import { BUTTON_GROUP_GAP_PX, ButtonGroup } from "../ButtonGroup"
 
 // The width-driven overflow (useOverflowCalculation) can't be exercised in
 // jsdom — every element measures 0, so nothing ever sheds into the "⋯" menu.
@@ -49,6 +50,28 @@ describe("ButtonGroup — canOverflow", () => {
     ).not.toBeNull()
   })
 
+  // Regression guard: jsdom can't measure layout, but the squeeze bug was a pure
+  // class decision — the row cluster only carries `min-w-0` (which lets it shrink
+  // below its content) when the group can actually shed buttons into the "⋯"
+  // menu. When it can't overflow, the cluster must keep its min-content floor so
+  // a confirm/reject pair reserves its width instead of being squeezed to nothing.
+  it("keeps the row cluster's min-content floor (no min-w-0) when canOverflow is false", () => {
+    const { container } = render(
+      <ButtonGroup secondaryActions={secondaries} canOverflow={false} />
+    )
+    const cluster = container.querySelector('[role="group"]')
+      ?.firstElementChild as HTMLElement
+    expect(cluster.className).toContain("flex-1")
+    expect(cluster.className).not.toContain("min-w-0")
+  })
+
+  it("lets the row cluster shrink (min-w-0) when canOverflow is true", () => {
+    const { container } = render(<ButtonGroup secondaryActions={secondaries} />)
+    const cluster = container.querySelector('[role="group"]')
+      ?.firstElementChild as HTMLElement
+    expect(cluster.className).toContain("min-w-0")
+  })
+
   it("still surfaces otherActions in the ⋯ menu when canOverflow is false", () => {
     render(
       <ButtonGroup
@@ -64,5 +87,15 @@ describe("ButtonGroup — canOverflow", () => {
     expect(
       screen.getByRole("button", { name: "Toggle dropdown menu" })
     ).toBeInTheDocument()
+  })
+})
+
+describe("ButtonGroup — gap token", () => {
+  // The visible spacing is rendered with the `gap-md` class, but the overflow
+  // math needs a number, so BUTTON_GROUP_GAP_PX duplicates the token's pixel
+  // value. This guard fails the moment the two drift apart.
+  it("keeps BUTTON_GROUP_GAP_PX in sync with the gap-md token", () => {
+    const gapMdPx = parseFloat(String(betweenSpacing.md)) * 16 // 0.5rem → 8px
+    expect(BUTTON_GROUP_GAP_PX).toBe(gapMdPx)
   })
 })

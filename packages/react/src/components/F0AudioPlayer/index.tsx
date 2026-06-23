@@ -6,6 +6,7 @@ import { F0AudioPlayerCardBase } from "./F0AudioPlayerCard"
 
 export type {
   AudioPlayerMenuAction,
+  AudioPlayerDetailTab,
   F0AudioPlayerProps,
   F0AudioPlayerCardProps,
   F0AudioPlayerSize,

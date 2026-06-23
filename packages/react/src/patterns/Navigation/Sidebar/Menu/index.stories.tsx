@@ -43,6 +43,7 @@ export const Default: Story = {
             label: "Discover Factorial",
             icon: Icons.Sparkles,
             href: "/discover",
+            tag: "New",
           },
         ],
         isRoot: true,

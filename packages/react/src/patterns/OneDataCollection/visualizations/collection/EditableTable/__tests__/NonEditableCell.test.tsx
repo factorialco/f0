@@ -35,6 +35,11 @@ describe("NonEditableCell", () => {
     expect(screen.getByText("John Doe")).toBeInTheDocument()
   })
 
+  it("applies default cursor", () => {
+    const { container } = render(<NonEditableCell {...defaultProps} />)
+    expect(container.firstChild).toHaveClass("cursor-default")
+  })
+
   it("renders a hint icon when hint is provided", () => {
     render(
       <NonEditableCell

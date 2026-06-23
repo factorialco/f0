@@ -79,6 +79,56 @@ export const WithDataTestId: Story = {
   args: { dataTestId: "audio-player" },
 }
 
+// Sample copy lifted from the design, long enough to demonstrate the
+// height-restricted scrollable transcript.
+const SAMPLE_SUMMARY =
+  "The AI call confirmed that Alex is available for night shifts and weekends, " +
+  "lives in Barajas with a commute under 40 minutes, is comfortable with " +
+  "physically demanding work, owns a motorcycle, and has salary expectations " +
+  "within range. He also confirmed a strong background in warehouse and " +
+  "logistics operations, but said he would only be able to start in 2 weeks. " +
+  "The main concern from the call is that he showed limited evidence of " +
+  "previous experience using digital tools for picking, which remains a key " +
+  "mandatory requirement for this role."
+
+const SAMPLE_TRANSCRIPT = Array.from({ length: 8 }, (_, i) =>
+  i % 2 === 0
+    ? "Interviewer: Can you tell me about your availability for night shifts and weekends?"
+    : "Alex: Yes, I'm fully available for night shifts and weekends, and my commute is under 40 minutes."
+).join("\n\n")
+
+const DETAILS = [
+  { value: "summary", label: "Summary", content: <p>{SAMPLE_SUMMARY}</p> },
+  {
+    value: "transcript",
+    label: "Transcript",
+    content: <p className="whitespace-pre-line">{SAMPLE_TRANSCRIPT}</p>,
+  },
+]
+
+// Collapsed by default — the "View detail" button toggles the tabbed panel.
+export const CardWithDetails: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    details: DETAILS,
+  },
+}
+
+// Same card, starting expanded so the Summary/Transcript tabs are visible.
+export const CardWithDetailsExpanded: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    details: DETAILS,
+    defaultExpanded: true,
+  },
+}
+
 export const Snapshot: Story = {
   ...withSnapshot({}),
   render: (args) => (
@@ -89,6 +139,13 @@ export const Snapshot: Story = {
         {...args}
         title="AI Call with Alex Williams"
         subtitle="May 9, 2025 - 10:00am"
+      />
+      <F0AudioPlayerCard
+        {...args}
+        title="AI Call with Alex Williams"
+        subtitle="May 9, 2025 - 10:00am"
+        details={DETAILS}
+        defaultExpanded
       />
     </div>
   ),

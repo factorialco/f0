@@ -2,7 +2,7 @@ import { z } from "zod"
 
 import { Delete, Share } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
-import { F0Dialog } from "@/patterns/F0Dialog"
+import { F0Dialog } from "@/components/dialog-alike/F0Dialog"
 import { f0FormField, F0Form, useF0Form } from "@/patterns/F0Form"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 

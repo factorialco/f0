@@ -1,5 +1,4 @@
 import type { ModuleId } from "@/components/avatars/F0AvatarModule"
-import type { DialogPosition } from "@/patterns/F0Dialog/types"
 import type { UseFileUpload } from "@/patterns/F0Form/fields/file/types"
 import type { F0FormErrorTriggerMode } from "@/patterns/F0Form/types"
 import type { ResourceHeaderProps } from "@/patterns/ResourceHeader"
@@ -37,6 +36,9 @@ export type SurveyFormSubmitResult =
 
 export type SurveyAnsweringFormMode = "stepped" | "all-questions"
 
+/** Where the answering dialog is anchored. */
+export type SurveyDialogPosition = "center" | "left" | "right" | "fullscreen"
+
 type SurveyAnsweringFormModule = {
   id: ModuleId
   label: string
@@ -64,7 +66,7 @@ interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps 
   inline?: false
   mode: SurveyAnsweringFormMode
   module: SurveyAnsweringFormModule
-  position?: DialogPosition
+  position?: SurveyDialogPosition
   isOpen: boolean
   onClose: () => void
   allowToChangeFullscreen?: boolean
@@ -75,6 +77,11 @@ interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps 
 /** Inline mode: read-only rendering embedded in the page, no dialog */
 interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
   inline: true
+  /**
+   * Hide the built-in ResourceHeader (title + description). Useful when the
+   * embedding page already renders its own resource header above the form.
+   */
+  hideResourceHeader?: boolean
   mode?: never
   module?: never
   position?: never
