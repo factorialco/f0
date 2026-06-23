@@ -248,10 +248,21 @@ export type F0FormSubmitConfig =
  */
 export interface F0FormStylingConfig {
   /**
-   * Shows a sidebar with section navigation (Table of Contents)
+   * Shows a sidebar with section navigation (Table of Contents).
+   * Automatically hidden on small viewports (max-width 560px), where
+   * sections stack as in the regular layout.
    * @default false
    */
   showSectionsSidepanel?: boolean
+  /**
+   * Renders only the section selected in the sidepanel instead of stacking
+   * all sections. Useful for large forms where showing every section at once
+   * is overwhelming. Hidden sections stay mounted so their values, dirty
+   * state, and validation are preserved.
+   * Has no effect unless `showSectionsSidepanel` is true.
+   * @default false
+   */
+  showOnlySelectedSection?: boolean
 }
 
 /**

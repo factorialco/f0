@@ -403,6 +403,29 @@ Use `sections` to split a long form into named groups with independent submit bu
 
 <Canvas of={Stories.WithSectionsSidepanel} />
 
+## Only selected section
+
+For large forms, set `showOnlySelectedSection: true` on the `styling` prop to render only the currently selected section instead of stacking all sections at once. Navigation items in the sidepanel remain the same; only the visible content changes.
+
+<Canvas of={Stories.WithOnlySelectedSection} />
+
+**Behaviour details:**
+
+- **Value preservation** — hidden sections remain mounted (via `display: none`), so field values, dirty state, and validation are preserved across section switches.
+- **Error navigation** — if submission triggers validation errors in a hidden section, F0Form automatically reveals that section before focusing the offending field.
+- **Conditional sections** — sections whose `renderIf` evaluates to false are excluded from the sidepanel and skipped during section switching.
+- **Small screens** — the sidepanel (and therefore `showOnlySelectedSection`) is automatically disabled on viewports ≤ 560 px, where all sections stack vertically instead.
+- **Row layout** — fields grouped with the same `row` key switch to a stacked vertical layout when their container is narrower than 480 px (container query), so rows stay readable next to the sidepanel at medium viewport widths.
+
+```tsx
+const formDefinition = useF0FormDefinition({ ... })
+
+<F0Form
+  formDefinition={formDefinition}
+  styling={{ showSectionsSidepanel: true, showOnlySelectedSection: true }}
+/>
+```
+
 ## Conditional rendering
 
 Use `renderIf` to show or hide fields based on the values of other fields.

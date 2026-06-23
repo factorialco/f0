@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { DefaultValues, Path, useForm } from "react-hook-form"
+import { useMediaQuery } from "usehooks-ts"
 import { z } from "zod"
 
 import type {
@@ -46,6 +47,7 @@ import { F0FormContext, generateAnchorId } from "./context"
 import { useF0AiFormRegistry } from "./F0AiFormRegistry"
 import { CardSelectDepsContext } from "./fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "./fields/FieldRenderer"
+import { evaluateRenderIf } from "./fields/utils"
 import {
   buildCardSelectContentMap,
   groupContiguousSwitches,
@@ -59,6 +61,16 @@ import { createZodErrorMap } from "./zodErrorMap"
  * before the form is silently submitted after the user stops editing.
  */
 const DEFAULT_AUTOSUBMIT_DELAY_MS = 800
+
+/**
+ * Small-screen detection matching the convention used by dialogs.
+ * On these viewports the sections sidepanel is hidden entirely — there is
+ * not enough horizontal space for navigation next to the form content.
+ */
+const useIsSmallScreen = () =>
+  useMediaQuery("(max-width: 560px)", {
+    initializeWithValue: false,
+  })
 
 /**
  * Flatten RHF FieldErrors into a dot-path → message map.
@@ -131,19 +143,34 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     useUpload,
   } = props
 
-  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  // The sidepanel is hidden entirely on small (mobile) viewports; sections
+  // then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
+  // Only effective when the sidepanel is actually rendered (it provides the
+  // only way to switch between sections).
+  const showOnlySelectedSection =
+    showSectionsSidepanel &&
+    (styling?.showOnlySelectedSection ?? false) &&
+    !!sections &&
+    sectionIds.length > 0
+
   const handleSectionClick = useCallback(
     (sectionId: string) => {
+      // When only the selected section is shown, the content swaps in place —
+      // there is no anchor to scroll to.
+      if (showOnlySelectedSection) return
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
       if (element) {
         element.scrollIntoView({ behavior: "smooth", block: "start" })
       }
     },
-    [name]
+    [name, showOnlySelectedSection]
   )
 
   const [activeSection, setActiveSection] = useState<string | undefined>(
@@ -177,7 +204,13 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
           <div
             key={sectionId}
             id={generateAnchorId(name, sectionId)}
-            className={cn("scroll-mt-4", index !== 0 && SECTION_MARGIN)}
+            className={cn(
+              "scroll-mt-4",
+              index !== 0 && !showOnlySelectedSection && SECTION_MARGIN,
+              // Hide (rather than unmount) inactive sections so each
+              // section form keeps its values and dirty state.
+              showOnlySelectedSection && sectionId !== activeSection && "hidden"
+            )}
           >
             <F0FormSection
               formName={name}
@@ -536,8 +569,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   const { useUpload } = props
 
-  // Resolve styling configuration
-  const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  // Resolve styling configuration. The sidepanel is hidden entirely on
+  // small (mobile) viewports; sections then stack as in the regular layout.
+  const isSmallScreen = useIsSmallScreen()
+  const showSectionsSidepanel =
+    (styling?.showSectionsSidepanel ?? false) && !isSmallScreen
 
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
@@ -593,6 +629,14 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       .map((section) => section.id)
   }, [definition])
 
+  // Only effective when the sidepanel is actually rendered (it provides the
+  // only way to switch between sections).
+  const showOnlySelectedSection =
+    showSectionsSidepanel &&
+    (styling?.showOnlySelectedSection ?? false) &&
+    !!sections &&
+    sectionIds.length > 0
+
   // Track active section (the last clicked section)
   const [activeSection, setActiveSection] = useState<string | undefined>(
     sectionIds[0]
@@ -605,9 +649,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const handleSectionClick = useCallback(
     (sectionId: string) => {
       setActiveSection(sectionId)
+      const container = scrollContainerRef.current
+      if (showOnlySelectedSection) {
+        // The content swaps in place — reset the container scroll so the
+        // newly selected section starts at the top.
+        container?.scrollTo?.({ top: 0 })
+        return
+      }
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      const container = scrollContainerRef.current
       if (element && container) {
         // Scroll within the form's own scroll container to avoid
         // shifting parent containers (e.g. the canvas panel).
@@ -617,19 +667,44 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         })
       }
     },
-    [name]
+    [name, showOnlySelectedSection]
   )
 
-  // Convert sections to TOCItems for the TableOfContent component
-  const tocItems: TOCItem[] = useMemo(() => {
-    if (!sections || !showSectionsSidepanel) return []
+  // Map each field to its owning section so error navigation can reveal the
+  // section of a field that is hidden by showOnlySelectedSection.
+  const fieldSectionMap = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const item of definition) {
+      if (item.type !== "section") continue
+      for (const child of item.section.fields) {
+        if (child.type === "field") {
+          map.set(child.field.id, item.id)
+        } else {
+          for (const field of child.fields) {
+            map.set(field.id, item.id)
+          }
+        }
+      }
+    }
+    return map
+  }, [definition])
 
-    return sectionIds.map((sectionId) => ({
-      id: sectionId,
-      label: sections[sectionId]?.title ?? sectionId,
-      onClick: () => handleSectionClick(sectionId),
-    }))
-  }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
+  const activeSectionRef = useRef(activeSection)
+
+  // Before error navigation focuses a field, make sure its section is the
+  // selected one — otherwise the field is display:none and cannot be
+  // scrolled to or focused. useErrorNavigation defers the focus until this
+  // state update has committed.
+  const revealFieldSection = useCallback(
+    (fieldId: string) => {
+      if (!showOnlySelectedSection) return
+      const sectionId = fieldSectionMap.get(fieldId.split(".")[0])
+      if (sectionId && sectionId !== activeSectionRef.current) {
+        setActiveSection(sectionId)
+      }
+    },
+    [showOnlySelectedSection, fieldSectionMap]
+  )
 
   // Create custom error map for localized validation messages
   const errorMap = useMemo(() => createZodErrorMap(i18n), [i18n])
@@ -658,6 +733,56 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     wasLoadingRef.current = isFormLoading
   }, [isFormLoading, defaultValues, form])
+
+  const hasConditionalSections = useMemo(
+    () =>
+      definition.some(
+        (item) => item.type === "section" && !!item.section.renderIf
+      ),
+    [definition]
+  )
+
+  // Subscribe to value changes only when a section's visibility can actually
+  // change — evaluating renderIf needs the latest values (same pattern as
+  // SectionRenderer, which evaluates the same conditions to hide content).
+  const formValuesForSections =
+    showSectionsSidepanel && hasConditionalSections ? form.watch() : undefined
+
+  // Sections whose renderIf currently evaluates to false are not rendered by
+  // SectionRenderer, so they must not be offered in the sidepanel either.
+  // Computed inline (not memoized) because watch() can return the same
+  // mutated object across renders.
+  const visibleSectionIds = formValuesForSections
+    ? definition
+        .filter((item): item is SectionDefinition => item.type === "section")
+        .filter(
+          (item) =>
+            !item.section.renderIf ||
+            evaluateRenderIf(item.section.renderIf, formValuesForSections)
+        )
+        .map((item) => item.id)
+    : sectionIds
+
+  // If the active section becomes hidden by renderIf, fall back to the first
+  // visible one.
+  const effectiveActiveSection =
+    activeSection && visibleSectionIds.includes(activeSection)
+      ? activeSection
+      : visibleSectionIds[0]
+
+  activeSectionRef.current = effectiveActiveSection
+
+  // Convert visible sections to TOCItems for the TableOfContent component.
+  // Built inline (not memoized) because visibleSectionIds is recomputed on
+  // every render when conditional sections exist.
+  const tocItems: TOCItem[] =
+    sections && showSectionsSidepanel
+      ? visibleSectionIds.map((sectionId) => ({
+          id: sectionId,
+          label: sections[sectionId]?.title ?? sectionId,
+          onClick: () => handleSectionClick(sectionId),
+        }))
+      : []
 
   const rootError = form.formState.errors.root
   const { isDirty, isSubmitting, errors } = form.formState
@@ -695,6 +820,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   } = useErrorNavigation({
     formName: name,
     errors,
+    // Only pass the reveal callback when sections can actually be hidden, so
+    // regular forms keep the synchronous focus behavior.
+    onBeforeFocusField: showOnlySelectedSection
+      ? revealFieldSection
+      : undefined,
   })
 
   const resolvedActionBarLabel = (() => {
@@ -1059,7 +1189,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       className={cn(
         "flex flex-col w-full mx-auto max-w-content",
         className,
-        styling?.showSectionsSidepanel && "[&>div:last-child]:pb-6"
+        showSectionsSidepanel && "[&>div:last-child]:pb-6"
       )}
     >
       {/* Render definition items with switch grouping */}
@@ -1112,7 +1242,15 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             return (
               <div
                 key={groupedItem.item.id}
-                className={index !== 0 ? SECTION_MARGIN : ""}
+                className={cn(
+                  index !== 0 && !showOnlySelectedSection && SECTION_MARGIN,
+                  // Hide (rather than unmount) inactive sections so their
+                  // fields stay registered and keep their values, dirty
+                  // state, and validation.
+                  showOnlySelectedSection &&
+                    groupedItem.item.id !== effectiveActiveSection &&
+                    "hidden"
+                )}
               >
                 <SectionRenderer section={groupedItem.item} />
               </div>
@@ -1153,7 +1291,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             <div className="sticky top-0 h-fit shrink-0 self-start pt-2">
               <F0TableOfContent
                 items={tocItems}
-                activeItem={activeSection}
+                activeItem={effectiveActiveSection}
                 scrollable={false}
               />
             </div>

@@ -58,6 +58,14 @@ interface UseErrorNavigationOptions {
   formName: string
   /** Field errors from react-hook-form */
   errors: FieldErrors
+  /**
+   * Called right before a field is focused (auto-focus on new errors and
+   * prev/next navigation). Lets the form reveal the field first — e.g.
+   * switching the visible section when only the selected section is shown.
+   * When provided, the focus itself is deferred to the next macrotask so a
+   * state-driven reveal can commit before the element is scrolled to.
+   */
+  onBeforeFocusField?: (fieldId: string) => void
 }
 
 interface UseErrorNavigationReturn {
@@ -136,7 +144,31 @@ function focusElement(
 export function useErrorNavigation({
   formName,
   errors,
+  onBeforeFocusField,
 }: UseErrorNavigationOptions): UseErrorNavigationReturn {
+  // Ref-mirror so the effect and callbacks below always see the latest
+  // callback without re-subscribing.
+  const onBeforeFocusFieldRef = useRef(onBeforeFocusField)
+  onBeforeFocusFieldRef.current = onBeforeFocusField
+
+  // Focuses a field, first giving the form a chance to reveal it. The reveal
+  // may set React state (e.g. switch the visible section), so the focus is
+  // deferred until after that update has committed.
+  const focusField = useCallback(
+    (fieldId: string) => {
+      const reveal = onBeforeFocusFieldRef.current
+      if (!reveal) {
+        focusFieldByLookup(formName, fieldId, { highlight: true })
+        return
+      }
+      reveal(fieldId)
+      setTimeout(() => {
+        focusFieldByLookup(formName, fieldId, { highlight: true })
+      }, 0)
+    },
+    [formName]
+  )
+
   // Extract field error keys (excluding root error).
   // Object.keys(errors) order is unstable — RHF may reorder keys when it
   // re-validates a single field on blur (e.g. focusing a text input blurs the
@@ -202,14 +234,14 @@ export function useErrorNavigation({
 
     if (newErrorKey) {
       // Focus the field with the new error and trigger animation
-      focusFieldByLookup(formName, newErrorKey, { highlight: true })
+      focusField(newErrorKey)
 
       // Track the newly focused field
       setCurrentFieldId(newErrorKey)
     }
 
     prevErrorKeysRef.current = currentErrorKeys
-  }, [fieldErrors, formName])
+  }, [fieldErrors, formName, focusField])
 
   // Navigate to a specific error by index (with wrap-around)
   const navigateToError = useCallback(
@@ -224,9 +256,9 @@ export function useErrorNavigation({
       const fieldId = errors[wrappedIndex]
       setCurrentFieldId(fieldId)
 
-      focusFieldByLookup(formName, fieldId, { highlight: true })
+      focusField(fieldId)
     },
-    [formName]
+    [focusField]
   )
 
   const goToPreviousError = useCallback(() => {
