@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.4.1](https://github.com/factorialco/f0/compare/f0-react-v4.4.0...f0-react-v4.4.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **EditableTable:** apply correct cursor per cell type ([#4532](https://github.com/factorialco/f0/issues/4532)) ([a343391](https://github.com/factorialco/f0/commit/a343391a7afa5b6c92813d9ba0cb66bfc560894b))
+
 ## [4.4.0](https://github.com/factorialco/f0/compare/f0-react-v4.3.2...f0-react-v4.4.0) (2026-06-22)
 
 
