@@ -43,6 +43,9 @@ export const defaultTranslations = {
     options: "Recording options",
     playbackSpeed: "Playback speed",
     position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details",
   },
   actions: {
     add: "Add",

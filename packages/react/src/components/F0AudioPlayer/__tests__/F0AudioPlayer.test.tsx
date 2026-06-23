@@ -125,4 +125,124 @@ describe("F0AudioPlayerCard", () => {
     // The f0 Dropdown defers item onClick by ~200ms.
     await waitFor(() => expect(getAudio().playbackRate).toBe(1.5))
   })
+
+  const DETAILS = [
+    { value: "summary", label: "Summary", content: <p>Summary text</p> },
+    {
+      value: "transcript",
+      label: "Transcript",
+      content: <p>Transcript text</p>,
+    },
+  ]
+
+  it("does not render a detail toggle when no details are given", () => {
+    render(<F0AudioPlayerCard src="test.mp3" title="AI Call" />)
+    expect(
+      screen.queryByRole("button", { name: "View detail" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("toggles the detail panel and flips the button label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0AudioPlayerCard src="test.mp3" title="AI Call" details={DETAILS} />
+    )
+
+    const toggle = screen.getByRole("button", { name: "View detail" })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+
+    await user.click(toggle)
+    const hide = screen.getByRole("button", { name: "Hide detail" })
+    expect(hide).toHaveAttribute("aria-expanded", "true")
+
+    await user.click(hide)
+    expect(screen.getByRole("button", { name: "View detail" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
+  })
+
+  it("switches between the summary and transcript tabs", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={DETAILS}
+        defaultExpanded
+      />
+    )
+
+    expect(screen.getByText("Summary text")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("radio", { name: "Transcript" }))
+    expect(screen.getByText("Transcript text")).toBeInTheDocument()
+  })
+
+  it("supports a controlled expanded state", async () => {
+    const user = userEvent.setup()
+    const onExpandedChange = vi.fn()
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={DETAILS}
+        expanded={false}
+        onExpandedChange={onExpandedChange}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: "View detail" }))
+    expect(onExpandedChange).toHaveBeenCalledWith(true)
+    // Still collapsed because the prop didn't change (controlled).
+    expect(
+      screen.getByRole("button", { name: "View detail" })
+    ).toBeInTheDocument()
+  })
+
+  it("keeps the detail toggle usable while the player is disabled", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={DETAILS}
+        disabled
+      />
+    )
+    expect(screen.getByRole("button", { name: "Play" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "View detail" })).toBeEnabled()
+  })
+
+  it("falls back to the first tab when details change to a new set", async () => {
+    const user = userEvent.setup()
+    const { rerender } = render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={DETAILS}
+        defaultExpanded
+      />
+    )
+
+    // Select the second tab, then swap in a brand-new details array.
+    await user.click(screen.getByRole("radio", { name: "Transcript" }))
+    rerender(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        details={[
+          { value: "notes", label: "Notes", content: <p>Notes text</p> },
+          { value: "score", label: "Score", content: <p>Score text</p> },
+        ]}
+        defaultExpanded
+      />
+    )
+
+    // The stale "transcript" selection is gone, so the first new tab is active.
+    expect(screen.getByText("Notes text")).toBeInTheDocument()
+    expect(screen.getByRole("radio", { name: "Notes" })).toHaveAttribute(
+      "data-state",
+      "on"
+    )
+  })
 })

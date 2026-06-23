@@ -1,6 +1,13 @@
-import { forwardRef } from "react"
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
+import { motion } from "motion/react"
+import { forwardRef, useState, type CSSProperties } from "react"
 
+import { F0Button } from "@/components/F0Button"
+import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
+import { useReducedMotion } from "@/lib/a11y"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { ScrollArea } from "@/ui/scrollarea"
 
 import { AudioScrubber } from "./components/AudioScrubber"
 import { PlaybackMenu } from "./components/PlaybackMenu"
@@ -25,10 +32,32 @@ const F0AudioPlayerCardBase = forwardRef<
     disabled = false,
     ariaLabel,
     size = "md",
+    details,
+    expanded,
+    defaultExpanded = false,
+    onExpandedChange,
+    detailsMaxHeight = 200,
   } = props
 
+  const i18n = useI18n()
   const controller = usePlayerController(props)
   const dataAttributes = getDataAttributes(props)
+  const shouldReduceMotion = useReducedMotion()
+
+  const hasDetails = Boolean(details && details.length > 0)
+  const [isExpanded = false, setExpanded] = useControllableState<boolean>({
+    prop: expanded,
+    defaultProp: defaultExpanded,
+    onChange: onExpandedChange,
+  })
+  const [selectedTab, setSelectedTab] = useState(details?.[0]?.value)
+  // Guard against a stale selection if `details` changes (e.g. a recycled
+  // card in a list): fall back to the first tab so the highlight and content
+  // stay in sync.
+  const activeTab = details?.some((tab) => tab.value === selectedTab)
+    ? selectedTab
+    : details?.[0]?.value
+  const activeContent = details?.find((tab) => tab.value === activeTab)?.content
 
   return (
     <div
@@ -57,25 +86,40 @@ const F0AudioPlayerCardBase = forwardRef<
             onToggle={controller.toggle}
           />
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-medium text-f1-foreground">
+            <span className="truncate text-base font-medium text-f1-foreground">
               {title}
             </span>
             {subtitle && (
-              <span className="truncate text-sm text-f1-foreground-secondary">
+              <span className="truncate text-base text-f1-foreground-secondary">
                 {subtitle}
               </span>
             )}
           </div>
         </div>
-        {(controller.playbackRates.length > 0 || actions) && (
-          <div className="shrink-0">
-            <PlaybackMenu
-              playbackRate={controller.playbackRate}
-              playbackRates={controller.playbackRates}
-              onRateChange={controller.setPlaybackRate}
-              disabled={disabled}
-              extraItems={actions}
-            />
+        {(hasDetails || controller.playbackRates.length > 0 || actions) && (
+          <div className="flex shrink-0 items-center gap-2">
+            {hasDetails && (
+              <F0Button
+                variant="outline"
+                size="sm"
+                label={
+                  isExpanded
+                    ? i18n.audioPlayer.hideDetail
+                    : i18n.audioPlayer.viewDetail
+                }
+                onClick={() => setExpanded(!isExpanded)}
+                aria-expanded={isExpanded}
+              />
+            )}
+            {(controller.playbackRates.length > 0 || actions) && (
+              <PlaybackMenu
+                playbackRate={controller.playbackRate}
+                playbackRates={controller.playbackRates}
+                onRateChange={controller.setPlaybackRate}
+                disabled={disabled}
+                extraItems={actions}
+              />
+            )}
           </div>
         )}
       </div>
@@ -95,6 +139,52 @@ const F0AudioPlayerCardBase = forwardRef<
           size={size}
         />
       </div>
+
+      {hasDetails && (
+        <motion.div
+          role="region"
+          aria-label={i18n.audioPlayer.details}
+          initial={false}
+          animate={{
+            height: isExpanded ? "auto" : 0,
+            marginTop: isExpanded ? 0 : "-0.625rem",
+            opacity: isExpanded ? 1 : 0,
+            visibility: isExpanded ? "visible" : "hidden",
+          }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.15,
+            ease: [0.165, 0.84, 0.44, 1],
+          }}
+          className="overflow-hidden"
+        >
+          <F0SegmentedControl
+            fullWidth
+            ariaLabel={i18n.audioPlayer.details}
+            value={activeTab}
+            onChange={setSelectedTab}
+            items={
+              details?.map((tab) => ({
+                value: tab.value,
+                label: tab.label,
+              })) ?? []
+            }
+          />
+          <div className="pt-2.5">
+            <ScrollArea
+              style={
+                {
+                  "--audio-details-max-h": `${detailsMaxHeight}px`,
+                } as CSSProperties
+              }
+              className="[&_[data-scroll-container]]:max-h-[var(--audio-details-max-h)]"
+            >
+              <div className="break-words pr-1 text-base text-f1-foreground">
+                {activeContent}
+              </div>
+            </ScrollArea>
+          </div>
+        </motion.div>
+      )}
     </div>
   )
 })
