@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.9.0](https://github.com/factorialco/f0/compare/f0-react-v4.8.0...f0-react-v4.9.0) (2026-06-23)
+
+
+### Features
+
+* **ai:** add F0AiProcessingOverlay ([#4533](https://github.com/factorialco/f0/issues/4533)) ([69be359](https://github.com/factorialco/f0/commit/69be359cba275d650332d655b5dc32f50da2593b))
+
 ## [4.8.0](https://github.com/factorialco/f0/compare/f0-react-v4.7.0...f0-react-v4.8.0) (2026-06-23)
 
 
