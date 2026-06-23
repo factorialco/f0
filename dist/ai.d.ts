@@ -16,9 +16,11 @@ import { f1Colors } from '@factorialco/f0-core';
 import { ForwardedRef } from 'react';
 import { ForwardRefExoticComponent } from 'react';
 import { HTMLAttributeAnchorTarget } from 'react';
+import { HTMLAttributes } from 'react';
 import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
+import { NamedExoticComponent } from 'react';
 import { Props as Props_3 } from './types';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -40,7 +42,8 @@ import { TagType } from '../../../f0';
 import { TeamItemProps } from './types';
 import { TrackReferenceOrPlaceholder } from '@livekit/components-react';
 import { VariantProps } from 'cva';
-import { WithDataTestIdReturnType } from '../../../lib/data-testid';
+import { WithDataTestIdReturnType } from '../../lib/data-testid';
+import { WithDataTestIdReturnType as WithDataTestIdReturnType_2 } from '../../../lib/data-testid';
 
 declare type ActionBaseProps = ActionCommonProps & DataAttributes;
 
@@ -605,6 +608,7 @@ export declare const aiTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -1126,6 +1130,33 @@ declare type CardAvatarVariant = AvatarVariant | {
     date: Date;
 };
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 declare type CardInternalProps = F0AiInsightCardProps & {
     className?: string;
 };
@@ -1134,33 +1165,14 @@ declare interface CardPrimaryAction {
     label: string;
     icon?: IconType;
     onClick: () => void;
-}
-
-declare interface CardRowConfirmAction {
-    onClick: () => void;
-    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
-    label?: string;
-    disabled?: boolean;
-}
-
-/**
- * Container breakpoint at which the card row switches between its inline and its
- * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
- * width.
- */
-declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
-
-/**
- * Resolved state shown at the trailing edge in place of the actions: a coloured
- * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
- */
-declare interface CardRowStatus {
-    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
-    icon: IconType;
-    /** Colour family. */
-    variant: StatusVariant;
-    /** Accessible label; the icon carries meaning, so this is required. */
-    label: string;
+    /**
+     * Visual emphasis of the primary action. `"outline"` renders it as an outline
+     * button while keeping it pinned at the trailing edge (so a lone CTA never
+     * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+     * full primary weight.
+     * @default "default"
+     */
+    variant?: "default" | "outline";
 }
 
 declare interface CardSecondaryAction {
@@ -1800,6 +1812,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -1816,6 +1832,18 @@ export declare const defaultTranslations: {
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
+    };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -1940,16 +1968,18 @@ export declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -2082,6 +2112,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -2327,6 +2358,9 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -2386,7 +2420,7 @@ export declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -2460,33 +2494,6 @@ export declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -2525,7 +2532,7 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
 }[TagType_2] | {
     type: "avatar-list";
     avatarList: F0AvatarListProps;
-} | (ComponentProps<typeof FileItem> & {
+} | (ComponentProps<typeof F0FileItem> & {
     type: "file";
 });
 
@@ -2882,7 +2889,7 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     quote: PendingQuote | null;
 };
 
-export declare const F0AiInsightCard: WithDataTestIdReturnType<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
+export declare const F0AiInsightCard: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
 }>;
 
@@ -3016,6 +3023,34 @@ export declare const F0AiPong: ({ onClose }: F0AiPongProps) => JSX_2.Element;
 
 declare interface F0AiPongProps {
     onClose: () => void;
+}
+
+/**
+ * Wraps a panel/canvas that F0AiChat is regenerating. While `active`, the
+ * content blurs and stops receiving pointer events, and a centered pill — the
+ * One icon plus an "Applying changes" label — floats over it, so the user gets
+ * clear feedback that the surface is being updated and shouldn't be edited.
+ *
+ * Mirrors the survey form-builder "applying changes" affordance, lifted into
+ * the F0AiChat family so any surface paired with the chat can reuse it.
+ */
+export declare const F0AiProcessingOverlay: NamedExoticComponent<F0AiProcessingOverlayProps>;
+
+export declare interface F0AiProcessingOverlayProps {
+    /**
+     * When `true`, the wrapped content is blurred and locked
+     * (`pointer-events-none`) and the floating status pill is shown over it.
+     */
+    active: boolean;
+    /**
+     * Pill label. Defaults to the translated "Applying changes"
+     * (`ai.applyingChanges`).
+     */
+    label?: string;
+    /** Extra classes for the wrapper element. */
+    className?: string;
+    /** The panel/canvas content the assistant is editing. */
+    children: ReactNode;
 }
 
 export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
@@ -3275,6 +3310,14 @@ declare type F0AvatarTeamProps = {
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export declare function F0CanvasCard({ avatar, title, description, isActive, action, children, }: F0CanvasCardProps): JSX_2.Element;
 
@@ -3282,6 +3325,10 @@ export declare namespace F0CanvasCard {
     var displayName: string;
 }
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export declare type F0CanvasCardProps = {
     /** Avatar to display: a module icon or a file-type badge */
     avatar?: CanvasCardAvatar;
@@ -3323,7 +3370,7 @@ export declare type F0CanvasPanelProps = {
     entities?: Record<string, CanvasEntityDefinition<any>>;
 };
 
-declare interface F0CardRowProps {
+declare interface F0CardHorizontalProps {
     /**
      * The primary line of text.
      */
@@ -3356,18 +3403,18 @@ declare interface F0CardRowProps {
      * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
      * instead of the standard actions. Provide either or both.
      */
-    confirmAction?: CardRowConfirmAction;
+    confirmAction?: CardHorizontalConfirmAction;
     /**
      * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
      */
-    rejectAction?: CardRowConfirmAction;
+    rejectAction?: CardHorizontalConfirmAction;
     /**
      * Resolved-state icon shown at the trailing edge in place of any actions — the
      * outcome of a confirm/reject row, e.g.
      * `{ icon: Check, variant: "positive", label: "Accepted" }`.
      * Takes precedence over the action props.
      */
-    status?: CardRowStatus;
+    status?: CardHorizontalStatus;
     /**
      * Strikes through and dims the title/description, marking the row's subject as
      * void or closed (e.g. a rejected request). Purely presentational — pair it
@@ -3375,19 +3422,11 @@ declare interface F0CardRowProps {
      */
     inactive?: boolean;
     /**
-     * Compact layout: tighter padding and smaller controls.
-     */
-    compact?: boolean;
-    /**
      * Container width at which the actions drop to their own line (below it) vs.
      * sit inline (at/above it). `never` keeps them inline at every width.
      * @default "never"
      */
-    stackAt?: CardRowStackAt;
-    /**
-     * When set, the whole row becomes a link to this href.
-     */
-    link?: string;
+    stackAt?: CardHorizontalStackAt;
     /**
      * Stretch to fill the height of its container.
      */
@@ -3399,12 +3438,22 @@ declare interface F0CardRowProps {
      */
     alert?: CardAlertProps;
     /**
-     * Called when the row is clicked.
+     * Opt-in: makes the whole row a link to this href. The row only becomes a
+     * click target (pointer cursor + hover affordance + overlay link) when `link`
+     * or `onClick` is set — otherwise it's a static row whose only interactive
+     * parts are its actions.
+     */
+    link?: string;
+    /**
+     * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+     * into an explicit click target (pointer cursor + hover affordance). Use it
+     * for cards whose entire surface is the action (e.g. entry-point cards with no
+     * CTA button); leave it unset for rows that act only through their buttons.
      */
     onClick?: () => void;
     /**
-     * Disables the full-row overlay link so a parent can manage drag-and-drop while
-     * still allowing click navigation via `onClick`.
+     * Disables the full-row overlay link (used with `link`) so a parent can manage
+     * drag-and-drop while still allowing click navigation via `onClick`.
      */
     disableOverlayLink?: boolean;
 }
@@ -3431,14 +3480,48 @@ declare interface F0ClarifyingPanelProps {
     isSubmitDisabled?: boolean;
 }
 
+declare type F0FileAction = {
+    icon?: IconType;
+    label: string;
+    onClick: () => void;
+    critical?: boolean;
+};
+
+/**
+ * @experimental This is an experimental component, use it at your own risk
+ */
+declare const F0FileItem: WithDataTestIdReturnType<ForwardRefExoticComponent<F0FileItemProps & RefAttributes<HTMLDivElement>>>;
+
+declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
+    file: File | FileDef;
+    actions?: F0FileAction[];
+    disabled?: boolean;
+    size?: F0FileItemSize;
+}
+
+declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
+
+declare const f0FileItemSizes: readonly ["md", "lg"];
+
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
- * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -3449,19 +3532,19 @@ export declare type F0HILActionConfirmationProps = {
     /**
      * Optional secondary line shown beneath the title (single line, truncated).
      */
-    description?: F0CardRowProps["description"];
+    description?: F0CardHorizontalProps["description"];
     /**
      * Optional avatar rendered on the left of the row. Accepts any avatar type in
      * the system (person, company, team, file, icon, emoji, …).
      */
-    avatar?: F0CardRowProps["avatar"];
+    avatar?: F0CardHorizontalProps["avatar"];
     /**
      * Container width at which the ✓/✗ actions drop onto their own line instead of
      * staying inline. Prevents the buttons from overlapping the prompt in narrow
      * containers. Set to `"never"` to keep them inline at every width.
      * @default "sm"
      */
-    stackAt?: F0CardRowProps["stackAt"];
+    stackAt?: F0CardHorizontalProps["stackAt"];
     /**
      * Accessible label and tooltip for the confirm (✓) button.
      */
@@ -3554,9 +3637,9 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
-declare const F0TagAlert: WithDataTestIdReturnType<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagAlert: WithDataTestIdReturnType_2<ForwardRefExoticComponent<Props_3 & RefAttributes<HTMLDivElement>>>;
 
-declare const F0TagBalance: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
+declare const F0TagBalance: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagBalanceProps_2 & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagBalanceProps = {
     /**
@@ -3588,7 +3671,7 @@ declare type F0TagBalanceProps = {
     formatterOptions?: undefined;
 });
 
-declare const F0TagCompany: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagCompany: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagCompanyProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagListProps<T extends TagType_2> = {
     /**
@@ -3610,7 +3693,7 @@ declare type F0TagListProps<T extends TagType_2> = {
     remainingCount?: number;
 };
 
-declare const F0TagPerson: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagPerson: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagPersonProps & RefAttributes<HTMLDivElement>>>;
 
 declare type F0TagRawProps = {
     /**
@@ -3625,6 +3708,10 @@ declare type F0TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -3643,7 +3730,7 @@ declare interface F0TagStatusProps {
     additionalAccessibleText?: string;
 }
 
-declare const F0TagTeam: WithDataTestIdReturnType<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
+declare const F0TagTeam: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0TagTeamProps & RefAttributes<HTMLDivElement>>>;
 
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
@@ -3672,13 +3759,6 @@ export declare type FeedbackConfig = {
     }) => void;
 };
 
-declare type FileAction = {
-    icon?: IconType;
-    label: string;
-    onClick: () => void;
-    critical?: boolean;
-};
-
 declare type FileAvatarVariant = Extract<AvatarVariant, {
     type: "file";
 }>;
@@ -3687,27 +3767,6 @@ declare type FileDef = {
     name: string;
     type: string;
 };
-
-declare const FileItem: WithDataTestIdReturnType<ForwardRefExoticComponent<FileItemProps & RefAttributes<HTMLDivElement>>>;
-
-declare interface FileItemProps extends React.HTMLAttributes<HTMLDivElement> {
-    file: File | FileDef;
-    actions?: FileAction[];
-    disabled?: boolean;
-    size?: FileItemSize;
-}
-
-declare type FileItemSize = NonNullable<VariantProps<typeof fileItemVariants>["size"]>;
-
-declare const fileItemVariants: (props?: ({
-    size?: "lg" | "md" | undefined;
-} & ({
-    class?: ClassValue;
-    className?: never;
-} | {
-    class?: never;
-    className?: ClassValue;
-})) | undefined) => string;
 
 declare type FlagAvatarVariant = Extract<AvatarVariant, {
     type: "flag";
@@ -3979,6 +4038,7 @@ declare const modules: {
     readonly "finance-treasury": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly "finance-workspace": ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly goals: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
+    readonly headcount_planning: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly get_started: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly home: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
     readonly hub: ForwardRefExoticComponent<Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>>;
@@ -4720,7 +4780,9 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
         };
     }

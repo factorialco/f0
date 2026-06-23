@@ -118,6 +118,10 @@ const e = {
   navigation: {
     sidebar: {
       label: "Main navigation",
+      search: "Search",
+      tabs: {
+        label: "Sidebar sections"
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company"
@@ -134,6 +138,18 @@ const e = {
   },
   link: {
     opensInNewTab: "opens in new tab"
+  },
+  audioPlayer: {
+    label: "Audio player",
+    play: "Play",
+    pause: "Pause",
+    seek: "Seek",
+    options: "Recording options",
+    playbackSpeed: "Playback speed",
+    position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details"
   },
   actions: {
     add: "Add",
@@ -258,16 +274,18 @@ const e = {
       cancel: "Cancel"
     },
     visualizations: {
-      table: "Table view",
-      editableTable: "Editable table view",
-      card: "Card view",
-      list: "List view",
-      kanban: "Kanban view",
+      table: "Table",
+      editableTable: "Editable table",
+      card: "Card",
+      list: "List",
+      kanban: "Kanban",
+      graph: "Graph",
       pagination: {
         of: "of"
       },
       settings: "{{visualizationName}} settings",
-      reset: "Reset to default"
+      reset: "Reset to default",
+      viewSelectorLabel: "Select view"
     },
     table: {
       settings: {
@@ -400,6 +418,7 @@ const e = {
     inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
@@ -645,6 +664,9 @@ const e = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
+      locked: "Locked",
+      lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.",
+      lockedQuestionNotice: "This question is predefined and can't be edited or removed.",
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?"
@@ -704,7 +726,7 @@ const e = {
       blocks: "Blocks"
     },
     ai: {
-      enhanceButtonLabel: "Enhance",
+      enhanceButtonLabel: "Generate",
       loadingEnhanceLabel: "Loading...",
       defaultError: "An error occurred while loading",
       closeErrorButtonLabel: "Continue editing",
@@ -777,34 +799,7 @@ const e = {
       fitToView: "Fit to view",
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
-      navigation: "Graph navigation",
-      metadataSettings: "Metadata visibility",
-      tagTypeLabels: {
-        person: "People",
-        team: "Teams",
-        company: "Companies",
-        status: "Statuses",
-        alert: "Alerts",
-        balance: "Balances",
-        dot: "Tags",
-        raw: "Tags"
-      }
-    },
-    search: {
-      noResults: "No results"
-    },
-    detailPanel: {
-      details: "Details",
-      moreActions: "More actions",
-      resize: "Resize detail panel"
-    },
-    expander: {
-      collapse: "Collapse {{count}} items",
-      expand: "Expand {{count}} items",
-      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
-      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
-      collapseWithParent: "Collapse {{parent}}",
-      collapseDefault: "Collapse children"
+      navigation: "Graph navigation"
     }
   },
   wizard: {

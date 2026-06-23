@@ -118,6 +118,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -134,6 +138,18 @@ export declare const defaultTranslations: {
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
+    };
+    readonly audioPlayer: {
+        readonly label: "Audio player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly seek: "Seek";
+        readonly options: "Recording options";
+        readonly playbackSpeed: "Playback speed";
+        readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -258,16 +274,18 @@ export declare const defaultTranslations: {
             readonly cancel: "Cancel";
         };
         readonly visualizations: {
-            readonly table: "Table view";
-            readonly editableTable: "Editable table view";
-            readonly card: "Card view";
-            readonly list: "List view";
-            readonly kanban: "Kanban view";
+            readonly table: "Table";
+            readonly editableTable: "Editable table";
+            readonly card: "Card";
+            readonly list: "List";
+            readonly kanban: "Kanban";
+            readonly graph: "Graph";
             readonly pagination: {
                 readonly of: "of";
             };
             readonly settings: "{{visualizationName}} settings";
             readonly reset: "Reset to default";
+            readonly viewSelectorLabel: "Select view";
         };
         readonly table: {
             readonly settings: {
@@ -400,6 +418,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -645,6 +664,9 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -704,7 +726,7 @@ export declare const defaultTranslations: {
             readonly blocks: "Blocks";
         };
         readonly ai: {
-            readonly enhanceButtonLabel: "Enhance";
+            readonly enhanceButtonLabel: "Generate";
             readonly loadingEnhanceLabel: "Loading...";
             readonly defaultError: "An error occurred while loading";
             readonly closeErrorButtonLabel: "Continue editing";
@@ -778,33 +800,6 @@ export declare const defaultTranslations: {
             readonly zoomIn: "Zoom in";
             readonly zoomOut: "Zoom out";
             readonly navigation: "Graph navigation";
-            readonly metadataSettings: "Metadata visibility";
-            readonly tagTypeLabels: {
-                readonly person: "People";
-                readonly team: "Teams";
-                readonly company: "Companies";
-                readonly status: "Statuses";
-                readonly alert: "Alerts";
-                readonly balance: "Balances";
-                readonly dot: "Tags";
-                readonly raw: "Tags";
-            };
-        };
-        readonly search: {
-            readonly noResults: "No results";
-        };
-        readonly detailPanel: {
-            readonly details: "Details";
-            readonly moreActions: "More actions";
-            readonly resize: "Resize detail panel";
-        };
-        readonly expander: {
-            readonly collapse: "Collapse {{count}} items";
-            readonly expand: "Expand {{count}} items";
-            readonly expandWithParentSingular: "Expand {{parent}}, {{count}} child";
-            readonly expandWithParentPlural: "Expand {{parent}}, {{count}} children";
-            readonly collapseWithParent: "Collapse {{parent}}";
-            readonly collapseDefault: "Collapse children";
         };
     };
     readonly wizard: {
@@ -887,7 +882,9 @@ declare module "@tiptap/core" {
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number) => ReturnType;
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
             clearEnhanceHighlight: () => ReturnType;
         };
     }
