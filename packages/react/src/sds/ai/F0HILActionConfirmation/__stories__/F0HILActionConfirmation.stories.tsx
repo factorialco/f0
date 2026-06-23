@@ -16,7 +16,7 @@ const meta = {
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "deprecated"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-[480px]">
