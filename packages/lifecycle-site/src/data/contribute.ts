@@ -7,36 +7,39 @@
 // to extend what exists, not to add another snowflake.
 
 // ── Step 1: the gate question ───────────────────────────────────────────────
+// This module exists to filter out proposals that shouldn't happen: things
+// already solved, things that only need extending, or things that don't
+// belong in the system at all. Rule these three out before proposing anything.
 
-export type ExistingCheck = {
-  id: "experimental" | "stable" | "kit-sds"
+export type RedundancyCheck = {
+  id: "exists" | "extend" | "product-only"
   label: string
-  where: string
+  verdict: string // the short consequence if this is true
   description: string
 }
 
-// Where to look before creating anything new.
-export const existingChecks: ExistingCheck[] = [
+// The three reasons a new component is probably NOT needed.
+export const redundancyChecks: RedundancyCheck[] = [
   {
-    id: "stable",
-    label: "Stable components",
-    where: "core F0",
+    id: "exists",
+    label: "It already exists",
+    verdict: "use it",
     description:
-      "Production-ready, owned by Foundations. If one fits, just use it.",
+      "A stable or experimental component — or a kit / satellite system — may already cover this. Ask the F0 agent or browse Storybook before proposing anything.",
   },
   {
-    id: "experimental",
-    label: "Experimental components",
-    where: "core F0",
+    id: "extend",
+    label: "It just needs extending",
+    verdict: "extend, don't add",
     description:
-      "Already being built. It may cover your need or be close enough to extend.",
+      "Often the real answer is a new prop, a variant, or composing components you already have — not a whole new component.",
   },
   {
-    id: "kit-sds",
-    label: "Kits & satellite systems",
-    where: "kits/ and sds/",
+    id: "product-only",
+    label: "It's only for your product",
+    verdict: "keep it local",
     description:
-      "Functional groupings (Charts, Social…) and branded satellite systems (AI, upselling). One may already have what you need.",
+      "Bespoke UI for one screen, with no shared identity or reuse, belongs in your product monolith — not in F0.",
   },
 ]
 
@@ -59,49 +62,34 @@ export type ContributionScenario = {
   id: string
   title: string
   example: string
-  flow: string[] // ordered hand-offs, last item is the end state
-  expects: string[] // what it takes to land it well
+  expects: string[] // the quality bar — what it takes to land it well
 }
 
+// The two ways you actually change F0 (product-only is filtered out at the
+// gate, so it isn't a case here). Each lists the quality bar it must clear.
 export const contributionScenarios: ContributionScenario[] = [
   {
     id: "new-generic",
     title: "A new generic component",
     example: "A new kind of input, card or button any product could use.",
-    flow: [
-      "You build it in src/experimental/, tagged experimental",
-      "Foundations promotes it to stable once it meets the Definition of Done",
-    ],
     expects: [
       "A real, recurring need — ≥2 use cases from different teams (a designer can waive this for clearly foundational primitives)",
       "Passes design review: coherent with F0, sensible API",
       "Unit tests + a Storybook story (play function / snapshot)",
       "MDX docs that explain when to use it and when not to",
       "f0-quality-gate green (typecheck, lint, format, tests)",
-      "To reach stable later: the full Definition of Done + Foundations sign-off",
+      "Lands as experimental; the full Definition of Done + Foundations sign-off is what later promotes it to stable",
     ],
   },
   {
     id: "missing-prop",
     title: "A missing property on an existing component",
     example: "A stable or experimental component is almost right but lacks a prop.",
-    flow: ["You contribute the new property", "Foundations validates it"],
     expects: [
       "Backward-compatible — no breaking change to the existing API",
       "Tests cover the new prop",
       "Story and MDX updated to show it",
       "Quality gate green; the component's owner validates the change",
-    ],
-  },
-  {
-    id: "only-my-product",
-    title: "Something only your product needs",
-    example: "Bespoke UI for one screen, no shared identity or reuse.",
-    flow: ["It doesn't belong in F0 — keep it in your product monolith"],
-    expects: [
-      "Build it from F0 components where you can",
-      "Follow your product's own standards — F0 doesn't gate it",
-      "If the need later spreads across teams, revisit: it may become a kit or a core component",
     ],
   },
 ]

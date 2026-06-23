@@ -6,102 +6,83 @@ import {
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 
-const W = 270
-const EW = 240
-const EX = 360
-const GAP = 150
+const W = 320
+const CENTER = 0
+const EXIT_X = 400
 
-const gate =
+const startCls =
+  "rounded-xl border-2 border-accent/50 bg-accent/10 px-4 py-3 text-sm font-semibold text-accent shadow-sm"
+const triageCls =
+  "rounded-xl border-2 border-accent/60 bg-accent/10 px-4 py-3 text-sm font-semibold text-accent shadow-sm"
+const step =
   "rounded-xl border-2 border-white/15 bg-surface2 px-4 py-3 text-sm font-medium text-ink shadow-sm"
 const action =
   "rounded-xl border-2 border-accent/30 bg-accent/5 px-4 py-3 text-sm font-medium text-ink shadow-sm"
-const exitGreen =
-  "rounded-xl border-2 border-stable/40 bg-stable/5 px-4 py-3 text-sm font-medium text-stable shadow-sm"
-const exitBlue =
-  "rounded-xl border-2 border-blue-400/40 bg-blue-400/5 px-4 py-3 text-sm text-blue-300 shadow-sm"
 const exitGrey =
   "rounded-xl border-2 border-white/10 bg-paper px-4 py-3 text-sm text-muted shadow-sm"
+const stableNode =
+  "rounded-xl border-2 border-stable/60 bg-stable/10 px-4 py-3 text-sm font-semibold text-stable shadow-sm"
 
 const nodes: Node[] = [
   {
     id: "start",
-    position: { x: 0, y: 0 },
-    data: { label: "I want to create something new in F0" },
+    position: { x: CENTER, y: 0 },
+    data: { label: "I want to add or change something in F0" },
     style: { width: W },
-    className:
-      "rounded-xl border-2 border-accent/50 bg-accent/10 px-4 py-3 text-sm font-semibold text-accent shadow-sm",
+    className: startCls,
   },
   {
-    id: "q-exists",
-    position: { x: 0, y: GAP },
-    data: { label: "Does something similar already exist in F0?" },
+    id: "triage",
+    position: { x: CENTER, y: 130 },
+    data: {
+      label: "Triage with Claude first — with the system context, does this belong in F0, and where (core / kit / sds)?",
+    },
     style: { width: W },
-    className: gate,
+    className: triageCls,
   },
   {
-    id: "q-extend",
-    position: { x: 0, y: GAP * 2 },
-    data: { label: "Can it be extended without breaking other users?" },
-    style: { width: W },
-    className: gate,
+    id: "exit",
+    position: { x: EXIT_X, y: 150 },
+    data: { label: "Already exists / can be extended, or it's product-only → use it or keep it in your codebase" },
+    style: { width: 280 },
+    className: exitGrey,
   },
   {
-    id: "q-teams",
-    position: { x: 0, y: GAP * 3 },
-    data: { label: "Will ≥2 teams need this generically?" },
-    style: { width: W },
-    className: gate,
-  },
-  {
-    id: "proposal",
-    position: { x: 0, y: GAP * 4 },
-    data: { label: "Open a Proposal issue" },
+    id: "propose",
+    position: { x: CENTER, y: 300 },
+    data: {
+      label: "Low effort? Bring a proposal — a PR via the Composer (it detects placement and can create the component in F0) or a Figma design",
+    },
     style: { width: W },
     className: action,
   },
   {
-    id: "review",
-    position: { x: 0, y: GAP * 5 },
-    data: { label: "Foundations reviews & triages" },
+    id: "support",
+    position: { x: CENTER, y: 460 },
+    data: { label: "Post it in #f0-support — the Foundations channel: they give feedback and guide you" },
+    style: { width: W },
+    className: step,
+  },
+  {
+    id: "iterate",
+    position: { x: CENTER, y: 590 },
+    data: { label: "Proposal → PR, with the final review on the PR" },
     style: { width: W },
     className: action,
   },
   {
-    id: "build",
-    position: { x: 0, y: GAP * 6 },
-    data: { label: "Build in src/experimental/ → promote to stable" },
+    id: "merge",
+    position: { x: CENTER, y: 720 },
+    data: { label: "Merges as experimental" },
     style: { width: W },
-    className:
-      "rounded-xl border-2 border-stable/60 bg-stable/10 px-4 py-3 text-sm font-semibold text-stable shadow-sm",
-  },
-  // Exit nodes (right column)
-  {
-    id: "exit-use",
-    position: { x: EX, y: GAP },
-    data: { label: "Use it as-is — or open an Enhancement issue" },
-    style: { width: EW },
-    className: exitGreen,
+    className: action,
   },
   {
-    id: "exit-enhance",
-    position: { x: EX, y: GAP * 2 },
-    data: { label: "Open an Enhancement issue in F0" },
-    style: { width: EW },
-    className: exitBlue,
-  },
-  {
-    id: "exit-monolith",
-    position: { x: EX, y: GAP * 3 },
-    data: { label: "Keep it in your product codebase" },
-    style: { width: EW },
-    className: exitGrey,
-  },
-  {
-    id: "exit-declined",
-    position: { x: EX, y: GAP * 5 },
-    data: { label: "Declined or needs more info — comment on the issue" },
-    style: { width: EW },
-    className: exitGrey,
+    id: "stable",
+    position: { x: CENTER, y: 850 },
+    data: { label: "Adoption drives promotion → Stable" },
+    style: { width: W },
+    className: stableNode,
   },
 ]
 
@@ -113,16 +94,13 @@ const edgeOpts = {
 }
 
 const edges: Edge[] = [
-  { id: "e-start-q1", source: "start", target: "q-exists", ...edgeOpts },
-  { id: "e-q1-yes", source: "q-exists", target: "exit-use", label: "Yes →", ...edgeOpts },
-  { id: "e-q1-no", source: "q-exists", target: "q-extend", label: "No", ...edgeOpts },
-  { id: "e-q2-yes", source: "q-extend", target: "exit-enhance", label: "Yes →", ...edgeOpts },
-  { id: "e-q2-no", source: "q-extend", target: "q-teams", label: "No", ...edgeOpts },
-  { id: "e-q3-no", source: "q-teams", target: "exit-monolith", label: "No →", ...edgeOpts },
-  { id: "e-q3-yes", source: "q-teams", target: "proposal", label: "Yes", ...edgeOpts },
-  { id: "e-proposal-review", source: "proposal", target: "review", ...edgeOpts },
-  { id: "e-review-declined", source: "review", target: "exit-declined", label: "Declined →", ...edgeOpts },
-  { id: "e-review-build", source: "review", target: "build", label: "Accepted ✓", ...edgeOpts },
+  { id: "e-start-triage", source: "start", target: "triage", ...edgeOpts },
+  { id: "e-triage-exit", source: "triage", target: "exit", label: "Not in F0", ...edgeOpts },
+  { id: "e-triage-propose", source: "triage", target: "propose", label: "Belongs in F0", ...edgeOpts },
+  { id: "e-propose-support", source: "propose", target: "support", ...edgeOpts },
+  { id: "e-support-iterate", source: "support", target: "iterate", ...edgeOpts },
+  { id: "e-iterate-merge", source: "iterate", target: "merge", ...edgeOpts },
+  { id: "e-merge-stable", source: "merge", target: "stable", ...edgeOpts },
 ]
 
 export function CreationDecisionFlow() {
@@ -132,7 +110,7 @@ export function CreationDecisionFlow() {
         nodes={nodes}
         edges={edges}
         fitView
-        fitViewOptions={{ padding: 0.1 }}
+        fitViewOptions={{ padding: 0.08 }}
         nodesDraggable={false}
         nodesConnectable={false}
         elementsSelectable={false}

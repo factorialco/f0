@@ -1,9 +1,9 @@
 import {
   checkPrompts,
   contributionScenarios,
-  existingChecks,
   extendPrinciple,
   placementKinds,
+  redundancyChecks,
 } from "../data/contribute"
 import { CreationDecisionFlow } from "./CreationDecisionFlow"
 
@@ -19,19 +19,20 @@ export function ContributeSection() {
           Do I need to create a new component?
         </h3>
         <p className="mt-2 text-muted">
-          Before proposing anything, check whether something already covers your
-          need. Look in all three places — ask the F0 agent or browse Storybook.
+          Most ideas don't need one — they're already solved, only need
+          extending, or don't belong in the system at all. Rule these three out
+          before proposing anything.
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          {existingChecks.map((c) => (
+          {redundancyChecks.map((c) => (
             <div
               key={c.id}
               className="rounded-xl border border-white/10 bg-paper p-4"
             >
               <p className="font-semibold">{c.label}</p>
               <p className="text-xs font-medium uppercase tracking-wider text-accent">
-                {c.where}
+                → {c.verdict}
               </p>
               <p className="mt-2 text-sm text-muted">{c.description}</p>
             </div>
@@ -66,22 +67,63 @@ export function ContributeSection() {
       {/* The decision flow — visual overview */}
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
-          The whole decision, at a glance
+          How it gets into F0
         </h3>
         <p className="mt-1 text-sm text-muted">
-          Every proposal walks down the same spine. Each question either sends you
-          to a faster answer on the right, or one step deeper.
+          The whole point is that nobody builds something we end up rejecting.
+          So you align <em>before</em> you invest — and the heavier the change,
+          the more you align.
         </p>
+        <ol className="mt-3 space-y-2">
+          <li className="flex gap-3 text-sm">
+            <span className="mt-0.5 shrink-0 font-mono text-accent">1</span>
+            <span>
+              <span className="font-semibold text-ink">Triage with Claude first.</span>{" "}
+              With the system context, it evaluates whether this should live in F0
+              at all — and where (core / kit / sds). If it already exists, can be
+              extended, or is product-only, you stop here.
+            </span>
+          </li>
+          <li className="flex gap-3 text-sm">
+            <span className="mt-0.5 shrink-0 font-mono text-accent">2</span>
+            <span>
+              <span className="font-semibold text-ink">If it's low effort, bring a proposal.</span>{" "}
+              Come with something concrete — a PR through the Composer, which can
+              detect placement and create the component in F0, or a Figma design.
+            </span>
+          </li>
+          <li className="flex gap-3 text-sm">
+            <span className="mt-0.5 shrink-0 font-mono text-accent">3</span>
+            <span>
+              <span className="font-semibold text-ink">Post it in #f0-support.</span>{" "}
+              That's the Foundations team's channel — they give feedback and guide
+              you. This early sign-off (design included) is what keeps your work
+              from being thrown away.
+            </span>
+          </li>
+          <li className="flex gap-3 text-sm">
+            <span className="mt-0.5 shrink-0 font-mono text-accent">4</span>
+            <span>
+              <span className="font-semibold text-ink">Iterate to a PR.</span> Go from
+              proposal to PR, with the final review on the PR itself; it merges as
+              experimental — and adoption drives promotion to stable.
+            </span>
+          </li>
+        </ol>
         <div className="mt-3">
           <CreationDecisionFlow />
         </div>
       </div>
 
-      {/* Step 2 — scenarios */}
+      {/* Step 2 — the quality bar per kind of change */}
       <div>
         <h3 className="text-sm font-semibold uppercase tracking-wider text-muted">
-          If you do need to change F0, find your case
+          What's expected of each kind of change
         </h3>
+        <p className="mt-1 text-sm text-muted">
+          Once you're actually changing F0, this is the bar your contribution
+          has to clear — by the kind of change you're making.
+        </p>
         <div className="mt-3 grid gap-4 md:grid-cols-2">
           {contributionScenarios.map((s) => (
             <article
@@ -90,32 +132,16 @@ export function ContributeSection() {
             >
               <h4 className="text-lg font-semibold tracking-tight">{s.title}</h4>
               <p className="mt-1 text-sm italic text-muted">{s.example}</p>
-              <ol className="mt-4 space-y-2">
-                {s.flow.map((step, idx) => (
-                  <li key={idx} className="flex gap-3 text-sm">
+              <ul className="mt-4 space-y-1.5">
+                {s.expects.map((e) => (
+                  <li key={e} className="flex gap-2 text-sm text-muted">
                     <span className="mt-0.5 shrink-0 text-accent" aria-hidden>
-                      {idx === s.flow.length - 1 ? "✓" : "→"}
+                      ·
                     </span>
-                    <span>{step}</span>
+                    <span>{e}</span>
                   </li>
                 ))}
-              </ol>
-
-              <div className="mt-5 flex-1 border-t border-white/10 pt-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-                  What's expected
-                </p>
-                <ul className="mt-2 space-y-1.5">
-                  {s.expects.map((e) => (
-                    <li key={e} className="flex gap-2 text-sm text-muted">
-                      <span className="mt-0.5 shrink-0 text-accent" aria-hidden>
-                        ·
-                      </span>
-                      <span>{e}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              </ul>
             </article>
           ))}
         </div>
