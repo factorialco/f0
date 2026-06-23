@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.8.0](https://github.com/factorialco/f0/compare/f0-react-v4.7.0...f0-react-v4.8.0) (2026-06-23)
+
+
+### Features
+
+* **Sidebar:** add tabs and live chat system ([#4510](https://github.com/factorialco/f0/issues/4510)) ([6b9640a](https://github.com/factorialco/f0/commit/6b9640a85c3de825ca89c8231353b6adbe29a762))
+
 ## [4.7.0](https://github.com/factorialco/f0/compare/f0-react-v4.6.0...f0-react-v4.7.0) (2026-06-23)
 
 
