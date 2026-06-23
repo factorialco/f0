@@ -31,7 +31,9 @@ export * from "./F0ChipList"
 export * from "./F0DatePicker"
 export * from "./F0Alert"
 /**
- * @deprecated F0Dialog has moved to @/patterns/F0Dialog. Import from there instead.
+ * @deprecated This `F0Dialog` is a backward-compatible shim. Use `F0Dialog`
+ * from `@/components/dialog-alike/F0Dialog` for center/fullscreen dialogs, or
+ * `F0Drawer` from `@/components/dialog-alike/F0Drawer` for side panels.
  */
 export * from "../patterns/F0Dialog"
 export * from "./dialog-alike/F0Drawer"

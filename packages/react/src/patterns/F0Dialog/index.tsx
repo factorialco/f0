@@ -3,11 +3,20 @@ import { experimentalComponent } from "@/lib/experimental"
 
 import { F0Dialog as F0DialogComponent } from "./F0Dialog"
 
+/**
+ * @deprecated These context utilities are re-exported from the dialog-alike
+ * implementation. Import them from `@/components/dialog-alike/F0Dialog` instead.
+ */
 export {
-  F0DialogContext,
-  F0DialogProvider,
-  useF0Dialog,
-} from "./components/F0DialogProvider"
+  DialogWrapperContext as F0DialogContext,
+  DialogWrapperProvider as F0DialogProvider,
+  useDialogWrapperContext as useF0Dialog,
+} from "@/components/dialog-alike/common/DialogWrapperProvider"
+/**
+ * @deprecated Use the types from `@/components/dialog-alike/F0Dialog`
+ * (`F0DialogSize`, `F0DialogAction`, `F0DialogActionsProps`) or
+ * `@/components/dialog-alike/F0Drawer` instead.
+ */
 export type {
   DialogControls,
   DialogPosition,
@@ -20,7 +29,10 @@ export type {
 } from "./types"
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Use `F0Dialog` from `@/components/dialog-alike/F0Dialog` for
+ * center/fullscreen dialogs, or `F0Drawer` from
+ * `@/components/dialog-alike/F0Drawer` for side panels. This is a
+ * backward-compatible shim that maps the legacy props onto those components.
  */
 const F0Dialog = withDataTestId(
   experimentalComponent("F0Dialog", F0DialogComponent)

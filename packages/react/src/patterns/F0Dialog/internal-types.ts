@@ -30,28 +30,6 @@ export type F0DialogHeaderProps = {
   controls?: DialogControls
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
-export type F0DialogContextType = {
-  open: boolean
-  onClose: () => void
-  shownBottomSheet: boolean
-  position: DialogPosition
-  /**
-   * The dialog's content container element.
-   * Use this as the `portalContainer` prop for components like F0Select
-   * to ensure dropdowns render inside the dialog.
-   */
-  portalContainer: HTMLDivElement | null
-}
-
-export type F0DialogProviderProps = {
-  isOpen: boolean
-  onClose: () => void
-  shownBottomSheet?: boolean
-  position: DialogPosition
-  children: ReactNode
-  portalContainer: HTMLDivElement | null
-}
-
 export type F0DialogInternalProps = {
   // Whether the dialog is open
   isOpen: boolean

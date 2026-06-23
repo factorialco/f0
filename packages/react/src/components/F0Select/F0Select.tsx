@@ -13,7 +13,7 @@ import {
 } from "react"
 import { useDebounceCallback } from "usehooks-ts"
 
-import { F0DialogContext } from "@/patterns/F0Dialog"
+import { F0DialogContext } from "@/components/dialog-alike/F0Dialog"
 import { F0Button } from "@/components/F0Button"
 import { Plus } from "@/icons/app"
 import {

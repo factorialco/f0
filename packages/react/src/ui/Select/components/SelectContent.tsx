@@ -13,7 +13,7 @@ import {
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
-import { F0DialogContext } from "@/patterns/F0Dialog"
+import { F0DialogContext } from "@/components/dialog-alike/F0Dialog"
 import { ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
 
