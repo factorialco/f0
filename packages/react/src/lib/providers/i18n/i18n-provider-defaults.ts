@@ -18,6 +18,10 @@ export const defaultTranslations = {
   navigation: {
     sidebar: {
       label: "Main navigation",
+      search: "Search",
+      tabs: {
+        label: "Sidebar sections",
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company",
