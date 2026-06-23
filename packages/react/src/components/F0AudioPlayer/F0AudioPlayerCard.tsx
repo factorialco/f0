@@ -3,11 +3,11 @@ import { motion } from "motion/react"
 import { forwardRef, useState, type CSSProperties } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
-import { TabNavigation, TabNavigationLink } from "@/ui/tab-navigation"
 
 import { AudioScrubber } from "./components/AudioScrubber"
 import { PlaybackMenu } from "./components/PlaybackMenu"
@@ -147,6 +147,7 @@ const F0AudioPlayerCardBase = forwardRef<
           initial={false}
           animate={{
             height: isExpanded ? "auto" : 0,
+            marginTop: isExpanded ? 0 : "-0.625rem",
             opacity: isExpanded ? 1 : 0,
             visibility: isExpanded ? "visible" : "hidden",
           }}
@@ -154,22 +155,21 @@ const F0AudioPlayerCardBase = forwardRef<
             duration: shouldReduceMotion ? 0 : 0.15,
             ease: [0.165, 0.84, 0.44, 1],
           }}
-          className="-mx-3 overflow-hidden"
+          className="overflow-hidden"
         >
-          <TabNavigation className="px-0">
-            {details?.map((tab) => (
-              <TabNavigationLink
-                key={tab.value}
-                active={tab.value === activeTab}
-                asChild
-              >
-                <button type="button" onClick={() => setSelectedTab(tab.value)}>
-                  {tab.label}
-                </button>
-              </TabNavigationLink>
-            ))}
-          </TabNavigation>
-          <div className="px-3 pt-2.5">
+          <F0SegmentedControl
+            fullWidth
+            ariaLabel={i18n.audioPlayer.details}
+            value={activeTab}
+            onChange={setSelectedTab}
+            items={
+              details?.map((tab) => ({
+                value: tab.value,
+                label: tab.label,
+              })) ?? []
+            }
+          />
+          <div className="pt-2.5">
             <ScrollArea
               style={
                 {

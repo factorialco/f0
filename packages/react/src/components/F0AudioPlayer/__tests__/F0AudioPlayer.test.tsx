@@ -175,7 +175,7 @@ describe("F0AudioPlayerCard", () => {
 
     expect(screen.getByText("Summary text")).toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: "Transcript" }))
+    await user.click(screen.getByRole("radio", { name: "Transcript" }))
     expect(screen.getByText("Transcript text")).toBeInTheDocument()
   })
 
@@ -225,7 +225,7 @@ describe("F0AudioPlayerCard", () => {
     )
 
     // Select the second tab, then swap in a brand-new details array.
-    await user.click(screen.getByRole("button", { name: "Transcript" }))
+    await user.click(screen.getByRole("radio", { name: "Transcript" }))
     rerender(
       <F0AudioPlayerCard
         src="test.mp3"
@@ -240,9 +240,9 @@ describe("F0AudioPlayerCard", () => {
 
     // The stale "transcript" selection is gone, so the first new tab is active.
     expect(screen.getByText("Notes text")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Notes" })).toHaveAttribute(
-      "data-active",
-      "true"
+    expect(screen.getByRole("radio", { name: "Notes" })).toHaveAttribute(
+      "data-state",
+      "on"
     )
   })
 })
