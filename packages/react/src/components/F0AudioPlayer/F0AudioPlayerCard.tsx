@@ -86,11 +86,11 @@ const F0AudioPlayerCardBase = forwardRef<
             onToggle={controller.toggle}
           />
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-medium text-f1-foreground">
+            <span className="truncate text-base font-medium text-f1-foreground">
               {title}
             </span>
             {subtitle && (
-              <span className="truncate text-sm text-f1-foreground-secondary">
+              <span className="truncate text-base text-f1-foreground-secondary">
                 {subtitle}
               </span>
             )}
@@ -178,7 +178,7 @@ const F0AudioPlayerCardBase = forwardRef<
               }
               className="[&_[data-scroll-container]]:max-h-[var(--audio-details-max-h)]"
             >
-              <div className="break-words pr-1 text-sm text-f1-foreground">
+              <div className="break-words pr-1 text-base text-f1-foreground">
                 {activeContent}
               </div>
             </ScrollArea>
