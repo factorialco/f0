@@ -112,10 +112,19 @@ export function InFilterOptionRow<T extends string>({
             <span className="min-w-0 flex-1">
               <OneEllipsis>{option.label}</OneEllipsis>
             </span>
-            {/* Stop the checkbox-originated click (Radix BubbleInput sync click
-                inside a <form>) from bubbling to this row's onToggle, which would
-                cause an infinite select/deselect loop. The row handles the click. */}
-            <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+            {/* The presentational checkbox is purely visual — the row handles
+                the click via onToggle. `pointer-events-none` lets a real click on
+                the checkbox fall through to the row's onToggle. Inside a <form>
+                Radix renders a hidden BubbleInput whose sync effect dispatches a
+                synthetic click on each `checked` change; that click (target = the
+                hidden <input>) bubbles here and would re-trigger onToggle in an
+                infinite loop, so stop just that one. */}
+            <div
+              className="pointer-events-none shrink-0"
+              onClick={(e) => {
+                if (e.target instanceof HTMLInputElement) e.stopPropagation()
+              }}
+            >
               <F0Checkbox
                 id={optionId}
                 title={option.label}
