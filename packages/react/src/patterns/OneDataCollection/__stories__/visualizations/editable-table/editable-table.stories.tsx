@@ -336,6 +336,53 @@ export const EditableTableWithEditableCallback: Story = {
   },
 }
 
+export const EditableTableWithDisabledCells: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Disabled cells (`editType: () => 'disabled'`) render with the disabled background and secondary foreground color, so they read as inactive (FCT-56243). Here the Role column is disabled; Email stays editable for contrast.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.editType !== undefined && col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "disabled" as const,
+                  }
+                }
+                return col
+              }),
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-disabled-cells/v1"
+      />
+    )
+  },
+}
+
 export const EditableTableWithColumnReordering: Story = {
   parameters: {
     docs: {
