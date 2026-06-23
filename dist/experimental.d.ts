@@ -14,6 +14,7 @@ import { BarChartProps } from './experimental';
 import { BarSeriesCellValue } from './types/barSeries';
 import { baseColors } from '@factorialco/f0-core';
 import { ButtonHTMLAttributes } from 'react';
+import { CategoryBarChartCellValue } from './types/categoryBarChart';
 import { CategoryBarProps } from './CategoryBarChart';
 import { ChartConfig } from './experimental';
 import { ChartConfig as ChartConfig_2 } from './utils/types';
@@ -267,6 +268,10 @@ declare type ActionLinkProps = ActionBaseProps & {
     className?: string;
 };
 
+declare type ActionLinkVariant = (typeof actionLinkVariants)[number];
+
+declare const actionLinkVariants: readonly ["link", "unstyled", "mention"];
+
 declare type ActionProps = ActionLinkProps | ActionButtonProps;
 
 declare type ActionProps_2 = {
@@ -507,6 +512,12 @@ declare type AiChatFileAttachmentConfig = {
  */
 declare type AiChatProviderProps = {
     enabled?: boolean;
+    /**
+     * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+     * Hosts set "left" for a chat-first experience (e.g. communications).
+     * @default "right"
+     */
+    side?: "left" | "right";
     /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
@@ -1566,6 +1577,77 @@ declare type CanvasEntityDefinition<T extends CanvasContentBase = CanvasContentB
     overflowHidden?: boolean;
 };
 
+/**
+ * An optional action button rendered in the alert header.
+ * Mutually exclusive with `dismissible` — only one can be shown at a time.
+ * Supply either `onClick` (handler) or `href` (navigation link), not both.
+ */
+declare type CardAlertAction = {
+    /** Label text for the action button. */
+    label: string;
+    /** Whether the action button is disabled. */
+    disabled?: boolean;
+} & ({
+    /** Called when the action button is clicked. */
+    onClick: () => void;
+    href?: never;
+} | {
+    /** URL to navigate to when the action button is clicked. */
+    href: string;
+    onClick?: never;
+});
+
+declare interface CardAlertBase {
+    /**
+     * The visual variant of the alert, which determines the color scheme and default icon.
+     */
+    variant: CardAlertVariant;
+    /**
+     * The title text displayed in the alert banner.
+     */
+    title: string;
+    /**
+     * Optional custom icon. When omitted, defaults to the icon that best represents the variant.
+     */
+    icon?: IconType;
+    /**
+     * Controls whether the alert is visible. Defaults to true.
+     * Use this together with onDismiss for controlled dismiss behaviour:
+     *   alert={{ ..., visible, dismissible: true, onDismiss: () => setVisible(false) }}
+     */
+    visible?: boolean;
+}
+
+declare type CardAlertDismissible = CardAlertBase & {
+    /** Renders a dismiss (×) button. Requires onDismiss. */
+    dismissible: true;
+    /**
+     * Called when the dismiss (×) button is clicked.
+     * The consumer is responsible for hiding the alert (e.g. by setting visible: false).
+     */
+    onDismiss: () => void;
+    action?: never;
+};
+
+declare type CardAlertNonDismissible = CardAlertBase & {
+    dismissible?: false;
+    onDismiss?: never;
+    action?: never;
+};
+
+declare type CardAlertProps = CardAlertDismissible | CardAlertWithAction | CardAlertNonDismissible;
+
+declare type CardAlertVariant = (typeof cardAlertVariants)[number];
+
+declare const cardAlertVariants: readonly ["info", "warning", "critical", "positive"];
+
+declare type CardAlertWithAction = CardAlertBase & {
+    dismissible?: never;
+    onDismiss?: never;
+    /** Action button rendered in the alert header. Mutually exclusive with `dismissible`. */
+    action: CardAlertAction;
+};
+
 declare type CardAvatarVariant = AvatarVariant | {
     type: "emoji";
     emoji: string;
@@ -1591,6 +1673,33 @@ declare type CardAvatarVariant = AvatarVariant | {
  */
 declare type CardCollectionProps<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = CollectionProps<Record, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping, CardVisualizationOptions<Record, Filters, Sortings>>;
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 declare type CardImageAspectRatio = (typeof cardImageAspectRatios)[number];
 
 declare const cardImageAspectRatios: readonly ["default", "video"];
@@ -1614,6 +1723,20 @@ declare type CardMetadataProperty = {
         value: Parameters<(typeof valueDisplayRenderers)[K]>[0];
     };
 }[CardPropertyType];
+
+declare interface CardPrimaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+    /**
+     * Visual emphasis of the primary action. `"outline"` renders it as an outline
+     * button while keeping it pinned at the trailing edge (so a lone CTA never
+     * sheds into the "⋯" menu). Use it when the card's only action shouldn't carry
+     * full primary weight.
+     * @default "default"
+     */
+    variant?: "default" | "outline";
+}
 
 declare type CardPropertyDefinition<T> = PropertyDefinition_2<T> & {
     icon?: IconType;
@@ -1639,6 +1762,16 @@ declare const cardPropertyRenderers: {
 };
 
 declare type CardPropertyType = keyof typeof cardPropertyRenderers;
+
+declare interface CardSecondaryAction {
+    label: string;
+    icon?: IconType;
+    onClick: () => void;
+}
+
+declare interface CardSecondaryLink extends Pick<F0LinkProps, "href" | "target" | "disabled"> {
+    label: string;
+}
 
 declare type CardSelectableAvatarVariant = AvatarVariant | {
     type: "emoji";
@@ -2848,6 +2981,8 @@ declare interface DatePickerPopupProps {
     asChild?: boolean;
     onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
     weekStartsOn?: WeekStartsOn;
+    /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
+    selectOnCellOnly?: boolean;
 }
 
 export declare type DatePickerValue = {
@@ -3058,6 +3193,10 @@ declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -3070,6 +3209,9 @@ declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -3338,6 +3480,7 @@ declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -3482,6 +3625,54 @@ declare const defaultTranslations: {
             };
         };
     };
+    readonly chat: {
+        readonly placeholder: "Write something here..";
+        readonly send: "Send message";
+        readonly close: "Close";
+        readonly muted: "Muted";
+        readonly expand: "Expand";
+        readonly collapse: "Collapse";
+        readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly dropFilesHere: "Drop your files here";
+        readonly removeFile: "Remove";
+        readonly today: "Today";
+        readonly yesterday: "Yesterday";
+        readonly sent: "Sent";
+        readonly read: "Read";
+        readonly readBy: "Read by {{count}}";
+        readonly writing: "Writing…";
+        readonly isTyping: "{{name}} is writing…";
+        readonly twoTyping: "{{first}} and {{second}} are writing…";
+        readonly severalTyping: "Several people are writing…";
+        readonly copy: "Copy";
+        readonly copied: "Copied";
+        readonly delete: "Delete";
+        readonly deletedMessage: "Message deleted";
+        readonly moreActions: "Message actions";
+        readonly info: "Info";
+        readonly messageInfo: "Message info";
+        readonly sentAt: "Sent";
+        readonly readByLabel: "Read by {{count}}";
+        readonly noReadsYet: "No one has read this yet";
+        readonly loadMore: "Load more";
+        readonly viewProfile: "View profile";
+        readonly reply: "Reply";
+        readonly react: "Add reaction";
+        readonly download: "Download";
+        readonly removeQuote: "Remove quote";
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly newMessages: "New messages";
+        readonly unreadCount: "{{count}} unread";
+        readonly emptyConversation: "No messages yet";
+        readonly connecting: "Connecting…";
+        readonly error: "Couldn't load this conversation";
+        readonly loadingOlder: "Loading earlier messages…";
+    };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
         readonly barChartVertical: "Bar (vertical)";
@@ -3583,6 +3774,9 @@ declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -4409,8 +4603,6 @@ export declare const F0AvatarModule: WithDataTestIdReturnType_5<typeof F0AvatarM
 /**
  * Module avatar
  * @description A component that displays a module avatar
- * @experimental
- * @returns
  */
 declare function F0AvatarModule_2({ size, module, ...props }: F0AvatarModuleProps): JSX_2.Element;
 
@@ -4551,6 +4743,281 @@ export declare const F0Callout: ForwardRefExoticComponent<Omit<CalloutInternalPr
 
 export declare type F0CalloutProps = CalloutInternalProps;
 
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0CardHorizontal: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare interface F0CardHorizontalProps {
+    /**
+     * The primary line of text.
+     */
+    title: string;
+    /**
+     * Optional secondary line shown beneath the title (wraps across multiple
+     * lines when long).
+     */
+    description?: string;
+    /**
+     * Optional avatar rendered at a fixed `lg` size on the left (the size is not
+     * configurable). Accepts any avatar type in the system: person, company, team,
+     * file, flag, icon, emoji, module, alert, date, pulse. Types without a `lg`
+     * variant (date, pulse) render at their intrinsic size.
+     */
+    avatar?: CardAvatarVariant;
+    /**
+     * The primary action button, shown at the trailing edge of the row.
+     */
+    primaryAction?: CardPrimaryAction;
+    /**
+     * Secondary actions (buttons) or a single link, shown before the primary action.
+     */
+    secondaryActions?: CardSecondaryAction[] | CardSecondaryLink;
+    /**
+     * Overflow (⋯) menu actions, rendered as the trailing control of the row.
+     */
+    otherActions?: DropdownItem[];
+    /**
+     * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
+     * instead of the standard actions. Provide either or both.
+     */
+    confirmAction?: CardHorizontalConfirmAction;
+    /**
+     * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
+     */
+    rejectAction?: CardHorizontalConfirmAction;
+    /**
+     * Resolved-state icon shown at the trailing edge in place of any actions — the
+     * outcome of a confirm/reject row, e.g.
+     * `{ icon: Check, variant: "positive", label: "Accepted" }`.
+     * Takes precedence over the action props.
+     */
+    status?: CardHorizontalStatus;
+    /**
+     * Strikes through and dims the title/description, marking the row's subject as
+     * void or closed (e.g. a rejected request). Purely presentational — pair it
+     * with the matching `status` tag at the call site.
+     */
+    inactive?: boolean;
+    /**
+     * Container width at which the actions drop to their own line (below it) vs.
+     * sit inline (at/above it). `never` keeps them inline at every width.
+     * @default "never"
+     */
+    stackAt?: CardHorizontalStackAt;
+    /**
+     * Stretch to fill the height of its container.
+     */
+    fullHeight?: boolean;
+    /**
+     * Alert banner displayed above the row with a coloured header strip and matching
+     * border. Supports info, warning, critical and positive variants.
+     * Use `visible` + `onDismiss` for controlled dismiss behaviour.
+     */
+    alert?: CardAlertProps;
+    /**
+     * Opt-in: makes the whole row a link to this href. The row only becomes a
+     * click target (pointer cursor + hover affordance + overlay link) when `link`
+     * or `onClick` is set — otherwise it's a static row whose only interactive
+     * parts are its actions.
+     */
+    link?: string;
+    /**
+     * Opt-in: called when the row is clicked. Like `link`, it turns the whole row
+     * into an explicit click target (pointer cursor + hover affordance). Use it
+     * for cards whose entire surface is the action (e.g. entry-point cards with no
+     * CTA button); leave it unset for rows that act only through their buttons.
+     */
+    onClick?: () => void;
+    /**
+     * Disables the full-row overlay link (used with `link`) so a parent can manage
+     * drag-and-drop while still allowing click navigation via `onClick`.
+     */
+    disableOverlayLink?: boolean;
+}
+
+/**
+ * Headless chat surface — header, transcript and composer — driven entirely by
+ * the {@link F0ChatRuntime} from a surrounding `F0ChatProvider`. Panel controls
+ * (fullscreen / close) are wired by the host so F0Chat stays transport-agnostic.
+ */
+export declare const F0Chat: (props: F0ChatProps) => ReactNode;
+
+export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment;
+
+/** The conversation currently shown in the panel (header + behaviour differs by type). */
+export declare type F0ChatChannel = {
+    id: string;
+    type: F0ChatChannelType;
+    title: string;
+    avatar: AvatarVariant;
+    /** DM only — the other person's presence. */
+    presence?: "online" | "offline";
+    muted?: boolean;
+    /** Group only. */
+    memberCount?: number;
+    /** DM only — the counterpart, used for the header identity hover card. */
+    user?: F0ChatUser;
+};
+
+export declare type F0ChatChannelType = "dm" | "group";
+
+export declare type F0ChatFileAttachment = {
+    kind: "file";
+    url: string;
+    name: string;
+    size?: number;
+    mimeType?: string;
+    /** 0–100 while uploading; undefined once done. */
+    progress?: number;
+};
+
+export declare type F0ChatImageAttachment = {
+    kind: "image";
+    url: string;
+    thumbnailUrl?: string;
+    name: string;
+    mimeType?: string;
+    width?: number;
+    height?: number;
+};
+
+export declare type F0ChatMessage = {
+    id: string;
+    author: F0ChatUser;
+    body: string;
+    /** ISO timestamp. */
+    createdAt: string;
+    isMine: boolean;
+    status?: F0ChatMessageStatus;
+    /** When the message was read (DM read receipt), ISO. */
+    readAt?: string;
+    reactions?: F0ChatReaction[];
+    attachments?: F0ChatAttachment[];
+    replyTo?: F0ChatMessageReply;
+    /** Group read receipts. */
+    readByCount?: number;
+    /**
+     * Soft-deleted tombstone — render an italic "[Message deleted]" placeholder
+     * instead of the body (Stream keeps these when a message is deleted after the
+     * unsend window). Hard-deleted messages are removed from `messages` entirely.
+     */
+    deleted?: boolean;
+};
+
+export declare type F0ChatMessageReply = {
+    id: string;
+    author: F0ChatUser;
+    body: string;
+    /** Attachments of the quoted message (preview thumbnail / file name). */
+    attachments?: F0ChatAttachment[];
+};
+
+/** iMessage-style delivery state — only meaningful for messages I sent. */
+export declare type F0ChatMessageStatus = "sending" | "sent" | "read" | "failed";
+
+export declare type F0ChatProps = {
+    /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
+    isFullscreen?: boolean;
+    /** Toggle the hosting panel's fullscreen. Hidden when omitted. */
+    onToggleFullscreen?: () => void;
+    /** Close the hosting panel. Hidden when omitted. */
+    onClose?: () => void;
+};
+
+/**
+ * Makes a chat {@link F0ChatRuntime} available to the F0Chat UI. The host owns
+ * the runtime (mock in stories, GetStream adapter in factorial); F0 only reads it.
+ */
+export declare const F0ChatProvider: ({ runtime, children, }: {
+    runtime: F0ChatRuntime;
+    children: ReactNode;
+}) => ReactNode;
+
+export declare type F0ChatReaction = {
+    emoji: string;
+    count: number;
+    reactedByMe: boolean;
+    users?: F0ChatUser[];
+};
+
+/** A person who has read a message, for the message-info reader list. */
+export declare type F0ChatReader = {
+    user: F0ChatUser;
+    /** When they read it (ISO). */
+    readAt?: string;
+};
+
+/** A page of readers — cursor-based so a message read by hundreds paginates. */
+export declare type F0ChatReadersPage = {
+    readers: F0ChatReader[];
+    /** Opaque cursor for the next page, or null when exhausted. */
+    nextCursor: string | null;
+    /** Total number of readers (drives the "Read by N" count). */
+    total: number;
+};
+
+/**
+ * The data + actions a host provides to drive the chat UI. F0 is headless: it
+ * never touches the transport (GetStream, websockets, …). A mock runtime powers
+ * Storybook; factorial implements this against GetStream after the bump.
+ */
+export declare type F0ChatRuntime = {
+    currentUserId: string;
+    channel: F0ChatChannel;
+    status: F0ChatStatus;
+    /** Oldest → newest. */
+    messages: F0ChatMessage[];
+    /** Users currently typing (excluding me). */
+    typingUsers: F0ChatUser[];
+    hasMoreOlder: boolean;
+    loadingOlder: boolean;
+    /** Count of incoming messages below the user's last-read position. */
+    unreadCount: number;
+    /** Id of the first unread message — where the "new messages" divider goes. */
+    firstUnreadId: string | null;
+    sendMessage: (input: F0ChatSendInput) => void;
+    retryMessage: (id: string) => void;
+    loadOlder: () => void;
+    toggleReaction: (messageId: string, emoji: string) => void;
+    deleteMessage: (id: string) => void;
+    /** Called as the user types so the runtime can emit typing.start/stop. */
+    onInputActivity: () => void;
+    uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
+    /** Voice dictation — same signature as the AI chat (streams partials). */
+    transcribe?: TranscribeFn;
+    markRead?: () => void;
+    /**
+     * Fetch the next page of people who have read a message, for the info panel.
+     * Cursor-based + infinite scroll. The page size is owned by the runtime/host
+     * (not the UI), so it isn't passed in.
+     */
+    getMessageReaders?: (messageId: string, opts: {
+        cursor?: string | null;
+    }) => Promise<F0ChatReadersPage>;
+};
+
+export declare type F0ChatSendInput = {
+    body: string;
+    attachments?: F0ChatAttachment[];
+    replyToId?: string;
+};
+
+export declare type F0ChatStatus = "connecting" | "ready" | "error";
+
+/** A participant in a conversation. */
+export declare type F0ChatUser = {
+    id: string;
+    name: string;
+    avatar?: AvatarVariant;
+    /** Secondary line for the hover card (e.g. job title). */
+    subtitle?: string;
+    /** Link to the person's profile, shown as "View profile" in the hover card. */
+    profileHref?: string;
+};
+
 export declare type F0FileAction = {
     icon?: IconType;
     label: string;
@@ -4583,6 +5050,12 @@ declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<type
     state?: "normal" | "animate";
     color?: "default" | "currentColor" | `#${string}` | Lowercase<NestedKeyOf<typeof f1Colors.icon>>;
 }
+
+declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
+    variant?: ActionLinkVariant;
+    stopPropagation?: boolean;
+    href?: string;
+};
 
 declare type F0Message = {
     id: string;
@@ -4738,6 +5211,18 @@ export declare type F0SearchInputProps = {
     debounceTime?: number;
     autoFocus?: boolean;
 } & Pick<InputFieldProps<string>, "size" | "loading" | "clearable" | "placeholder" | "disabled" | "onBlur" | "onFocus" | "onChange" | "name">;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0SegmentedBar: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0SegmentedBarProps & RefAttributes<HTMLDivElement>>>;
+
+export declare interface F0SegmentedBarProps extends WithDataTestIdProps {
+    value: number;
+    max: number;
+    color?: SegmentColorToken;
+    label: string;
+}
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
@@ -5017,6 +5502,10 @@ declare type F0TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -5905,7 +6394,12 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
 declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
-    type?: Exclude<HTMLInputTypeAttribute, "number">;
+    /**
+     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
+     * masked like a password but with no lock icon and with password managers
+     * disabled. It never reaches the DOM (mapped to text/password internally).
+     */
+    type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
 };
 
@@ -6103,6 +6597,7 @@ export declare interface MenuCategory {
 export declare interface MenuItem extends NavigationItem {
     icon: IconType;
     badge?: number;
+    tag?: string;
 }
 
 export declare interface MenuProps {
@@ -6230,7 +6725,7 @@ declare interface MetricComputation {
 export declare const MobileDropdown: ({ items, children, dataTestId }: DropdownProps) => JSX_2.Element;
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "xxs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -6687,7 +7182,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_2<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -6701,6 +7196,8 @@ export declare interface OneCalendarInternalProps {
     maxDate?: Date;
     compact?: boolean;
     weekStartsOn?: WeekStartsOn;
+    /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
+    selectOnCellOnly?: boolean;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
@@ -7454,10 +7951,11 @@ declare interface PromiseState<T> {
 declare type PropertyDefinition_2<T> = {
     label: string;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card. Only
+     * rendered by the table visualization's column headers.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Function that extracts and formats the value from an item.
      * Should return an object matching the expected args for the specified renderer type.
@@ -7853,6 +8351,8 @@ export declare interface SeedTarget<R extends RecordType, Filters extends Filter
     } | undefined) => void;
 }
 
+export declare type SegmentColorToken = `categorical-${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}` | "feedback-positive" | "feedback-neutral" | "feedback-negative";
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -7962,6 +8462,8 @@ export declare type SidebarChat = {
     onClick?: () => void;
     /** When > 0, the chat is rendered as unread (darker, bolder name). */
     unreadCount?: number;
+    /** When true, the name is replaced by a live "Writing…" label. */
+    typing?: boolean;
     presence?: SidebarChatPresence;
     /** Status icon shown to the right of the name. People only. */
     status?: SidebarChatStatus;
@@ -8444,6 +8946,20 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
+declare type TableHeaderInfo = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the info-icon trigger. Defaults to the column label
+     * when the header's children are a string.
+     */
+    label?: string;
+};
+
 declare interface TableHeadProps {
     children: React.ReactNode;
     /**
@@ -8480,10 +8996,11 @@ declare interface TableHeadProps {
      */
     onSortClick?: () => void;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. When provided, displays an info icon next to the
+     * header content. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Icon to display when info is provided.
      * @default InfoCircleLine
@@ -8676,6 +9193,14 @@ maxHeight?: number;
  */
 export declare type TextareaProps = F0TextAreaInputProps;
 
+/** A button rendered in the footer at the bottom of the table of contents */
+export declare type TOCAction = {
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    disabled?: boolean;
+};
+
 export declare type TOCItem<Depth extends 1 | 2 | 3 | 4 = 1> = BaseTOCItem & {
     children?: NextDepth<Depth> extends never ? never : TOCItem<NextDepth<Depth>>[];
 };
@@ -8756,6 +9281,8 @@ export declare interface TOCProps {
     hideChildrenCounter?: boolean;
     /** Enable vertical scrolling when content overflows (default: true) */
     scrollable?: boolean;
+    /** Action buttons pinned in a footer at the bottom of the panel */
+    actions?: TOCAction[];
 }
 
 declare type toggleActionType = {
@@ -8824,7 +9351,7 @@ export declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
  * intermediate results for live textarea fill. When omitted from the chat
  * config, the microphone button is not rendered.
  */
-declare type TranscribeFn = (audio: Blob, options: TranscribeOptions) => Promise<string>;
+export declare type TranscribeFn = (audio: Blob, options: TranscribeOptions) => Promise<string>;
 
 declare type TranscribeOptions = {
     /**
@@ -9126,6 +9653,9 @@ declare interface UseExportActionProps<R extends RecordType, Filters extends Fil
     enabled?: boolean;
 }
 
+/** Read the chat runtime. Throws when used outside an {@link F0ChatProvider}. */
+export declare function useF0Chat(): F0ChatRuntime;
+
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
 };
@@ -9235,6 +9765,7 @@ declare const valueDisplayRenderers: {
     readonly percentage: (args: PercentageCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly progressBar: (args: ProgressBarCellValue, _meta: ValueDisplayRendererContext) => JSX_2.Element | null;
     readonly barSeries: (args: BarSeriesCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
+    readonly categoryBarChart: (args: CategoryBarChartCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly hourDistribution: (args: HourDistributionCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly company: (args: CompanyCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;
     readonly team: (args: TeamCellValue, meta: ValueDisplayRendererContext) => JSX_2.Element;

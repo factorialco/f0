@@ -20,6 +20,7 @@ import { HTMLAttributes } from 'react';
 import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
+import { NamedExoticComponent } from 'react';
 import { Props as Props_3 } from './types';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -253,6 +254,12 @@ export declare type AiChatMode = "chat" | "voice";
  */
 export declare type AiChatProviderProps = {
     enabled?: boolean;
+    /**
+     * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+     * Hosts set "left" for a chat-first experience (e.g. communications).
+     * @default "right"
+     */
+    side?: "left" | "right";
     /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
@@ -521,6 +528,8 @@ declare type AiChatProviderReturnValue = {
  */
 declare interface AiChatState {
     enabled: boolean;
+    /** Initial edge the panel docks to. @default "right" */
+    side?: "left" | "right";
     agent?: string;
     initialMessage?: string | string[];
     chatHeader?: React.ReactNode;
@@ -629,6 +638,7 @@ export declare const aiTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -1150,6 +1160,33 @@ declare type CardAvatarVariant = AvatarVariant | {
     date: Date;
 };
 
+declare interface CardHorizontalConfirmAction {
+    onClick: () => void;
+    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
+    label?: string;
+    disabled?: boolean;
+}
+
+/**
+ * Container breakpoint at which the horizontal card switches between its inline and its
+ * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
+ * width.
+ */
+declare type CardHorizontalStackAt = "sm" | "md" | "lg" | "never";
+
+/**
+ * Resolved state shown at the trailing edge in place of the actions: a coloured
+ * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
+ */
+declare interface CardHorizontalStatus {
+    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
+    icon: IconType;
+    /** Colour family. */
+    variant: StatusVariant;
+    /** Accessible label; the icon carries meaning, so this is required. */
+    label: string;
+}
+
 declare type CardInternalProps = F0AiInsightCardProps & {
     className?: string;
 };
@@ -1166,33 +1203,6 @@ declare interface CardPrimaryAction {
      * @default "default"
      */
     variant?: "default" | "outline";
-}
-
-declare interface CardRowConfirmAction {
-    onClick: () => void;
-    /** Accessible label and tooltip. Defaults to "Confirm" / "Reject". */
-    label?: string;
-    disabled?: boolean;
-}
-
-/**
- * Container breakpoint at which the card row switches between its inline and its
- * stacked (actions-on-their-own-line) layout. `never` keeps it inline at every
- * width.
- */
-declare type CardRowStackAt = "sm" | "md" | "lg" | "never";
-
-/**
- * Resolved state shown at the trailing edge in place of the actions: a coloured
- * icon (e.g. `Check` for accepted, `Cross` for rejected) carrying the outcome.
- */
-declare interface CardRowStatus {
-    /** The icon to render (e.g. `Check` for accepted, `Cross` for rejected). */
-    icon: IconType;
-    /** Colour family. */
-    variant: StatusVariant;
-    /** Accessible label; the icon carries meaning, so this is required. */
-    label: string;
 }
 
 declare interface CardSecondaryAction {
@@ -1849,6 +1859,10 @@ export declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -1861,6 +1875,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -2129,6 +2146,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -2273,6 +2291,54 @@ export declare const defaultTranslations: {
             };
         };
     };
+    readonly chat: {
+        readonly placeholder: "Write something here..";
+        readonly send: "Send message";
+        readonly close: "Close";
+        readonly muted: "Muted";
+        readonly expand: "Expand";
+        readonly collapse: "Collapse";
+        readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly dropFilesHere: "Drop your files here";
+        readonly removeFile: "Remove";
+        readonly today: "Today";
+        readonly yesterday: "Yesterday";
+        readonly sent: "Sent";
+        readonly read: "Read";
+        readonly readBy: "Read by {{count}}";
+        readonly writing: "Writing…";
+        readonly isTyping: "{{name}} is writing…";
+        readonly twoTyping: "{{first}} and {{second}} are writing…";
+        readonly severalTyping: "Several people are writing…";
+        readonly copy: "Copy";
+        readonly copied: "Copied";
+        readonly delete: "Delete";
+        readonly deletedMessage: "Message deleted";
+        readonly moreActions: "Message actions";
+        readonly info: "Info";
+        readonly messageInfo: "Message info";
+        readonly sentAt: "Sent";
+        readonly readByLabel: "Read by {{count}}";
+        readonly noReadsYet: "No one has read this yet";
+        readonly loadMore: "Load more";
+        readonly viewProfile: "View profile";
+        readonly reply: "Reply";
+        readonly react: "Add reaction";
+        readonly download: "Download";
+        readonly removeQuote: "Remove quote";
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly newMessages: "New messages";
+        readonly unreadCount: "{{count}} unread";
+        readonly emptyConversation: "No messages yet";
+        readonly connecting: "Connecting…";
+        readonly error: "Couldn't load this conversation";
+        readonly loadingOlder: "Loading earlier messages…";
+    };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
         readonly barChartVertical: "Bar (vertical)";
@@ -2374,6 +2440,9 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";
@@ -2790,7 +2859,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -3036,6 +3105,34 @@ export declare const F0AiPong: ({ onClose }: F0AiPongProps) => JSX_2.Element;
 
 declare interface F0AiPongProps {
     onClose: () => void;
+}
+
+/**
+ * Wraps a panel/canvas that F0AiChat is regenerating. While `active`, the
+ * content blurs and stops receiving pointer events, and a centered pill — the
+ * One icon plus an "Applying changes" label — floats over it, so the user gets
+ * clear feedback that the surface is being updated and shouldn't be edited.
+ *
+ * Mirrors the survey form-builder "applying changes" affordance, lifted into
+ * the F0AiChat family so any surface paired with the chat can reuse it.
+ */
+export declare const F0AiProcessingOverlay: NamedExoticComponent<F0AiProcessingOverlayProps>;
+
+export declare interface F0AiProcessingOverlayProps {
+    /**
+     * When `true`, the wrapped content is blurred and locked
+     * (`pointer-events-none`) and the floating status pill is shown over it.
+     */
+    active: boolean;
+    /**
+     * Pill label. Defaults to the translated "Applying changes"
+     * (`ai.applyingChanges`).
+     */
+    label?: string;
+    /** Extra classes for the wrapper element. */
+    className?: string;
+    /** The panel/canvas content the assistant is editing. */
+    children: ReactNode;
 }
 
 export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
@@ -3295,6 +3392,14 @@ declare type F0AvatarTeamProps = {
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export declare function F0CanvasCard({ avatar, title, description, isActive, action, children, }: F0CanvasCardProps): JSX_2.Element;
 
@@ -3302,6 +3407,10 @@ export declare namespace F0CanvasCard {
     var displayName: string;
 }
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export declare type F0CanvasCardProps = {
     /** Avatar to display: a module icon or a file-type badge */
     avatar?: CanvasCardAvatar;
@@ -3349,7 +3458,7 @@ export declare type F0CanvasPanelProps = {
     side?: "left" | "right";
 };
 
-declare interface F0CardRowProps {
+declare interface F0CardHorizontalProps {
     /**
      * The primary line of text.
      */
@@ -3382,18 +3491,18 @@ declare interface F0CardRowProps {
      * Confirm/reject variant: renders an icon-only ✗ (reject) + ✓ (confirm) pair
      * instead of the standard actions. Provide either or both.
      */
-    confirmAction?: CardRowConfirmAction;
+    confirmAction?: CardHorizontalConfirmAction;
     /**
      * Reject (✗) action of the confirm/reject variant. See {@link confirmAction}.
      */
-    rejectAction?: CardRowConfirmAction;
+    rejectAction?: CardHorizontalConfirmAction;
     /**
      * Resolved-state icon shown at the trailing edge in place of any actions — the
      * outcome of a confirm/reject row, e.g.
      * `{ icon: Check, variant: "positive", label: "Accepted" }`.
      * Takes precedence over the action props.
      */
-    status?: CardRowStatus;
+    status?: CardHorizontalStatus;
     /**
      * Strikes through and dims the title/description, marking the row's subject as
      * void or closed (e.g. a rejected request). Purely presentational — pair it
@@ -3401,15 +3510,11 @@ declare interface F0CardRowProps {
      */
     inactive?: boolean;
     /**
-     * Compact layout: tighter padding and smaller controls.
-     */
-    compact?: boolean;
-    /**
      * Container width at which the actions drop to their own line (below it) vs.
      * sit inline (at/above it). `never` keeps them inline at every width.
      * @default "never"
      */
-    stackAt?: CardRowStackAt;
+    stackAt?: CardHorizontalStackAt;
     /**
      * Stretch to fill the height of its container.
      */
@@ -3486,14 +3591,25 @@ declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 declare const f0FileItemSizes: readonly ["md", "lg"];
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
- * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -3504,19 +3620,19 @@ export declare type F0HILActionConfirmationProps = {
     /**
      * Optional secondary line shown beneath the title (single line, truncated).
      */
-    description?: F0CardRowProps["description"];
+    description?: F0CardHorizontalProps["description"];
     /**
      * Optional avatar rendered on the left of the row. Accepts any avatar type in
      * the system (person, company, team, file, icon, emoji, …).
      */
-    avatar?: F0CardRowProps["avatar"];
+    avatar?: F0CardHorizontalProps["avatar"];
     /**
      * Container width at which the ✓/✗ actions drop onto their own line instead of
      * staying inline. Prevents the buttons from overlapping the prompt in narrow
      * containers. Set to `"never"` to keep them inline at every width.
      * @default "sm"
      */
-    stackAt?: F0CardRowProps["stackAt"];
+    stackAt?: F0CardHorizontalProps["stackAt"];
     /**
      * Accessible label and tooltip for the confirm (✓) button.
      */
@@ -3680,6 +3796,10 @@ declare type F0TagRawProps = {
      * Info text to display an i icon and a tooltip next to the tag
      */
     info?: string;
+    /**
+     * Extra classes merged onto the tag (e.g. to give it a background).
+     */
+    className?: string;
 } & ({
     icon: IconType;
     onlyIcon: true;

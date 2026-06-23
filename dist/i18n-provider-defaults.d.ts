@@ -135,6 +135,10 @@ export declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -147,6 +151,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -415,6 +422,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -559,6 +567,54 @@ export declare const defaultTranslations: {
             };
         };
     };
+    readonly chat: {
+        readonly placeholder: "Write something here..";
+        readonly send: "Send message";
+        readonly close: "Close";
+        readonly muted: "Muted";
+        readonly expand: "Expand";
+        readonly collapse: "Collapse";
+        readonly attachFile: "Attach file";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly transcribing: "Transcribing…";
+        readonly dropFilesHere: "Drop your files here";
+        readonly removeFile: "Remove";
+        readonly today: "Today";
+        readonly yesterday: "Yesterday";
+        readonly sent: "Sent";
+        readonly read: "Read";
+        readonly readBy: "Read by {{count}}";
+        readonly writing: "Writing…";
+        readonly isTyping: "{{name}} is writing…";
+        readonly twoTyping: "{{first}} and {{second}} are writing…";
+        readonly severalTyping: "Several people are writing…";
+        readonly copy: "Copy";
+        readonly copied: "Copied";
+        readonly delete: "Delete";
+        readonly deletedMessage: "Message deleted";
+        readonly moreActions: "Message actions";
+        readonly info: "Info";
+        readonly messageInfo: "Message info";
+        readonly sentAt: "Sent";
+        readonly readByLabel: "Read by {{count}}";
+        readonly noReadsYet: "No one has read this yet";
+        readonly loadMore: "Load more";
+        readonly viewProfile: "View profile";
+        readonly reply: "Reply";
+        readonly react: "Add reaction";
+        readonly download: "Download";
+        readonly removeQuote: "Remove quote";
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly newMessages: "New messages";
+        readonly unreadCount: "{{count}} unread";
+        readonly emptyConversation: "No messages yet";
+        readonly connecting: "Connecting…";
+        readonly error: "Couldn't load this conversation";
+        readonly loadingOlder: "Loading earlier messages…";
+    };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
         readonly barChartVertical: "Bar (vertical)";
@@ -660,6 +716,9 @@ export declare const defaultTranslations: {
             readonly questionType: "Question type";
             readonly questionOptions: "Question options";
             readonly actions: "Actions";
+            readonly locked: "Locked";
+            readonly lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.";
+            readonly lockedQuestionNotice: "This question is predefined and can't be edited or removed.";
             readonly sectionTitlePlaceholder: "Section title";
             readonly lastQuestionDialogTitle: "Remove last question from section";
             readonly lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?";

@@ -134,6 +134,10 @@ const e = {
     password: {
       show: "Show password",
       hide: "Hide password"
+    },
+    private: {
+      show: "Show {{label}}",
+      hide: "Hide {{label}}"
     }
   },
   link: {
@@ -146,7 +150,10 @@ const e = {
     seek: "Seek",
     options: "Recording options",
     playbackSpeed: "Playback speed",
-    position: "{{current}} of {{total}}"
+    position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details"
   },
   actions: {
     add: "Add",
@@ -415,6 +422,7 @@ const e = {
     inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
@@ -559,6 +567,54 @@ const e = {
       }
     }
   },
+  chat: {
+    placeholder: "Write something here..",
+    send: "Send message",
+    close: "Close",
+    muted: "Muted",
+    expand: "Expand",
+    collapse: "Collapse",
+    attachFile: "Attach file",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    transcribing: "Transcribing…",
+    dropFilesHere: "Drop your files here",
+    removeFile: "Remove",
+    today: "Today",
+    yesterday: "Yesterday",
+    sent: "Sent",
+    read: "Read",
+    readBy: "Read by {{count}}",
+    writing: "Writing…",
+    isTyping: "{{name}} is writing…",
+    twoTyping: "{{first}} and {{second}} are writing…",
+    severalTyping: "Several people are writing…",
+    copy: "Copy",
+    copied: "Copied",
+    delete: "Delete",
+    deletedMessage: "Message deleted",
+    moreActions: "Message actions",
+    info: "Info",
+    messageInfo: "Message info",
+    sentAt: "Sent",
+    readByLabel: "Read by {{count}}",
+    noReadsYet: "No one has read this yet",
+    loadMore: "Load more",
+    viewProfile: "View profile",
+    reply: "Reply",
+    react: "Add reaction",
+    download: "Download",
+    removeQuote: "Remove quote",
+    scrollToBottom: "Scroll to bottom",
+    newMessages: "New messages",
+    unreadCount: "{{count}} unread",
+    emptyConversation: "No messages yet",
+    connecting: "Connecting…",
+    error: "Couldn't load this conversation",
+    loadingOlder: "Loading earlier messages…"
+  },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
     barChartVertical: "Bar (vertical)",
@@ -660,6 +716,9 @@ const e = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
+      locked: "Locked",
+      lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.",
+      lockedQuestionNotice: "This question is predefined and can't be edited or removed.",
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?"
