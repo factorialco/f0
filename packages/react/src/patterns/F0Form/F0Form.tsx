@@ -220,9 +220,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   }
 
   return (
-    <div
-      className={noPadding ? "flex justify-center" : "flex justify-center p-4"}
-    >
+    <div className={cn("flex justify-center", !noPadding && "p-4")}>
       {content}
     </div>
   )
@@ -1175,11 +1173,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
           </div>
         ) : (
-          <div
-            className={
-              noPadding ? "flex justify-center" : "flex justify-center p-4"
-            }
-          >
+          <div className={cn("flex justify-center", !noPadding && "p-4")}>
             {formContent}
           </div>
         )}
