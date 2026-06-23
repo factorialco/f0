@@ -24,7 +24,8 @@ export {
  * the same context the dialog-alike components populate).
  * @deprecated Import `F0DialogContext` from `@/components/dialog-alike/F0Dialog`.
  */
-export const F0DialogContext: Context<F0DialogContextType> = DialogWrapperContext
+export const F0DialogContext: Context<F0DialogContextType> =
+  DialogWrapperContext
 /**
  * @deprecated Use the types from `@/components/dialog-alike/F0Dialog`
  * (`F0DialogSize`, `F0DialogAction`, `F0DialogActionsProps`) or
