@@ -152,6 +152,9 @@ const meta = {
     ),
   ],
   tags: ["autodocs", "experimental", "no-sidebar"],
+  // These are exported data fixtures reused by other stories, not stories
+  // themselves — keep Storybook from rendering them as standalone stories.
+  excludeStories: ["exampleActions", "exampleGroups"],
 } satisfies Meta<typeof SidebarChatList>
 
 export default meta

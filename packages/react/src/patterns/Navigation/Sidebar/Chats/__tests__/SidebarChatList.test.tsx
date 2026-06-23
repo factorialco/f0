@@ -113,7 +113,7 @@ describe("SidebarChatList", () => {
     expect(onNewChat).toHaveBeenCalled()
   })
 
-  it("orders unread conversations first within a group", () => {
+  it("renders chats in the order provided (no reordering by the list)", () => {
     render(
       <SidebarChatProvider
         initialGroups={[
@@ -141,10 +141,10 @@ describe("SidebarChatList", () => {
     )
     const readBtn = screen.getByRole("button", { name: /Read One/ })
     const unreadBtn = screen.getByRole("button", { name: /Unread One/ })
-    // The unread chat is rendered before the read one.
+    // Order is owned by the consumer: the list preserves it (read stays first).
     expect(
       readBtn.compareDocumentPosition(unreadBtn) &
-        Node.DOCUMENT_POSITION_PRECEDING
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
   })
 
