@@ -257,7 +257,11 @@ describe("InFilter", () => {
       })
 
       render(
-        <InFilter schema={staticSchema(options)} value={[]} onChange={onChange} />
+        <InFilter
+          schema={staticSchema(options)}
+          value={[]}
+          onChange={onChange}
+        />
       )
 
       await user.click(screen.getByRole("checkbox", { name: "Design" }))
