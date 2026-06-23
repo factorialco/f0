@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.6.0](https://github.com/factorialco/f0/compare/f0-react-v4.5.1...f0-react-v4.6.0) (2026-06-23)
+
+
+### Features
+
+* **OneTable:** support structured rich header info ([#4488](https://github.com/factorialco/f0/issues/4488)) ([9948e77](https://github.com/factorialco/f0/commit/9948e77f310600db807fe96da5d98d7e8f920bf6))
+
 ## [4.5.1](https://github.com/factorialco/f0/compare/f0-react-v4.5.0...f0-react-v4.5.1) (2026-06-23)
 
 
