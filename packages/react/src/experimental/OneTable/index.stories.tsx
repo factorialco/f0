@@ -269,7 +269,7 @@ export const RichInfoHeader: Story = {
                       close()
                       alert("Open data catalog on this field")
                     }}
-                    className="mt-1 w-fit font-medium underline underline-offset-2"
+                    className="mt-1 w-fit rounded-xs font-medium text-f1-foreground-inverse underline underline-offset-2 transition-colors hover:text-f1-foreground-inverse-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
                   >
                     Learn more
                   </button>
