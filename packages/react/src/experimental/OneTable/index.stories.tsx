@@ -246,8 +246,6 @@ export const InfoHeader: Story = {
   ),
 }
 
-// `info` only provides the (dark) hover surface — the consumer composes the
-// body here, using inverse text tokens and `close` to dismiss the card.
 export const RichInfoHeader: Story = {
   render: () => (
     <OneTable>
@@ -257,35 +255,20 @@ export const RichInfoHeader: Story = {
           <TableHead
             info={{
               label: "About base salary",
-              render: ({ close }) => (
-                <div className="flex flex-col gap-1 whitespace-normal text-left">
-                  <p>Annual base salary, in euros. Not FTE-adjusted.</p>
-                  <p className="text-f1-foreground-inverse-secondary">
-                    Per employee · Per year · In Euro
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      close()
-                      alert("Open data catalog on this field")
-                    }}
-                    className="mt-1 w-fit rounded-xs font-medium text-f1-foreground-inverse underline underline-offset-2 transition-colors hover:text-f1-foreground-inverse-secondary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring"
-                  >
-                    Learn more
-                  </button>
-                </div>
-              ),
+              title: "Annual base salary",
+              description: "Per employee · Per year · In Euro",
+              link: {
+                label: "Learn more",
+                onClick: () => alert("Open data catalog on this field"),
+              },
             }}
           >
             Base salary
           </TableHead>
           <TableHead
             info={{
-              render: () => (
-                <div className="flex flex-col gap-1 whitespace-normal text-left">
-                  <p>Access level assigned to the employee account.</p>
-                </div>
-              ),
+              title: "Access level",
+              description: "Access level assigned to the employee account.",
             }}
           >
             Role

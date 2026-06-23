@@ -33,7 +33,7 @@ const renderHeader = (
 
 describe("TableHead rich header info", () => {
   it("uses the column label as the info trigger's accessible name by default", () => {
-    renderHeader({ render: () => <p>Body</p> })
+    renderHeader({ title: "Active employees", description: "Body" })
 
     expect(
       screen.getByRole("button", { name: "Active headcount" })
@@ -41,22 +41,30 @@ describe("TableHead rich header info", () => {
   })
 
   it("uses info.label as the accessible name when provided", () => {
-    renderHeader({ label: "About active headcount", render: () => <p>Body</p> })
+    renderHeader({
+      label: "About active headcount",
+      title: "Active employees",
+      description: "Body",
+    })
 
     expect(
       screen.getByRole("button", { name: "About active headcount" })
     ).toBeInTheDocument()
   })
 
-  it("renders the consumer-supplied content on hover", async () => {
+  it("renders the structured title and description on hover", async () => {
     renderHeader({
-      render: () => <p>Distinct active employees in the selected snapshot.</p>,
+      title: "Active employees",
+      description: "Distinct active employees in the selected snapshot.",
     })
 
     await userEvent.hover(
       screen.getByRole("button", { name: "Active headcount" })
     )
 
+    expect(
+      await screen.findByText("Active employees", {}, { timeout: 2000 })
+    ).toBeInTheDocument()
     expect(
       await screen.findByText(
         "Distinct active employees in the selected snapshot.",
@@ -66,20 +74,12 @@ describe("TableHead rich header info", () => {
     ).toBeInTheDocument()
   })
 
-  it("passes a close handle that dismisses the card, alongside the consumer action", async () => {
+  it("dismisses the card when the link action is clicked", async () => {
     const onAction = vi.fn()
     renderHeader({
-      render: ({ close }) => (
-        <button
-          type="button"
-          onClick={() => {
-            close()
-            onAction()
-          }}
-        >
-          Learn more
-        </button>
-      ),
+      title: "Active employees",
+      description: "Distinct active employees in the selected snapshot.",
+      link: { label: "Learn more", onClick: onAction },
     })
 
     await userEvent.hover(
