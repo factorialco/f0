@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.7.0](https://github.com/factorialco/f0/compare/f0-react-v4.6.0...f0-react-v4.7.0) (2026-06-23)
+
+
+### Features
+
+* **Sidebar:** add text label (tag) to MenuItem ([#4527](https://github.com/factorialco/f0/issues/4527)) ([710b95a](https://github.com/factorialco/f0/commit/710b95a3c39c37731708709832c527dc0381617a))
+
 ## [4.6.0](https://github.com/factorialco/f0/compare/f0-react-v4.5.1...f0-react-v4.6.0) (2026-06-23)
 
 
