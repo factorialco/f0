@@ -10,15 +10,18 @@ export type TriageOutcome = {
 export const triageOutcomes: TriageOutcome[] = [
   {
     id: "accepted",
-    label: "Accepted",
-    meaning: "Fits F0 scope. Foundations adopts it.",
+    label: "Accepted (Core)",
+    meaning:
+      "Generic and useful across ≥2 domains. Foundations adopts it into Core — as a component, a pattern (composition), or a kit.",
     nextStep: "Move to Phase 2 (Design). Owner team starts.",
   },
   {
     id: "accepted-as-domain",
     label: "Accepted as domain",
-    meaning: "Valid component but not Foundations-owned.",
-    nextStep: "Lives under sds/<area>/. Domain team owns it.",
+    meaning:
+      "Valid, but specific to a single domain — not generic enough for Core.",
+    nextStep:
+      "Lives in the domain's folder, owned and maintained by the domain team (not Foundations).",
   },
   {
     id: "needs-info",

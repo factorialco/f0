@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { WhatIsF0 } from "./components/WhatIsF0"
 import { WhereF0Lives } from "./components/WhereF0Lives"
+import { CategoriesSection } from "./components/CategoriesSection"
 import { MaturitySection } from "./components/MaturitySection"
 import { FlowDiagram } from "./components/FlowDiagram"
 import { PhaseSection } from "./components/PhaseSection"
@@ -41,6 +42,12 @@ const PARTS: Part[] = [
         title: "Where F0 lives",
         blurb: "The tools F0 lives in — Storybook, Claude, the repo — and when to use each.",
         render: () => <WhereF0Lives />,
+      },
+      {
+        id: "categories",
+        title: "How F0 is organized",
+        blurb: "The three places a component lives — Core, Kits and Domain specific — plus patterns as an altitude within Core.",
+        render: () => <CategoriesSection />,
       },
       {
         id: "maturity",

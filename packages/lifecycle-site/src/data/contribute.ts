@@ -25,7 +25,7 @@ export const redundancyChecks: RedundancyCheck[] = [
     label: "It already exists",
     verdict: "use it",
     description:
-      "A stable or experimental component — or a kit / satellite system — may already cover this. Ask the F0 agent or browse Storybook before proposing anything.",
+      "A stable or experimental component — or a kit / domain-specific component — may already cover this. Ask the F0 agent or browse Storybook before proposing anything.",
   },
   {
     id: "extend",
@@ -45,7 +45,7 @@ export const redundancyChecks: RedundancyCheck[] = [
 
 // Prompts to ask the F0 agent before proposing anything new.
 export const checkPrompts: string[] = [
-  "Is there an existing F0 component, kit or satellite system that already does this?",
+  "Is there an existing F0 component, kit or domain-specific component that already does this?",
   "Can I cover this by adding a prop to an existing component instead of creating a new one?",
   "Could a pattern or a composition of existing components solve it?",
 ]
@@ -97,7 +97,7 @@ export const contributionScenarios: ContributionScenario[] = [
 // ── Where it goes — canonical placement (source: docs/where-it-goes.mdx) ─────
 
 export type PlacementKind = {
-  id: "core" | "kit" | "sds" | "monolith"
+  id: "core" | "kit" | "domain" | "monolith"
   label: string
   what: string
   examples?: string
@@ -113,14 +113,14 @@ export const placementKinds: PlacementKind[] = [
   {
     id: "kit",
     label: "Kit",
-    what: "A grouping of components for a general functional area, built on core F0 tokens (no own visual identity), reusable by ≥2 products. A kit can't add new atomic components — it only composes existing ones.",
+    what: "A grouping of components for a general functional area, built on core F0 tokens (no own visual identity), reusable by ≥2 products. A kit can't add new atomic components — it only composes existing ones. It can import from core, but never from another kit.",
     examples: "Charts, Social",
   },
   {
-    id: "sds",
-    label: "Satellite Design System (SDS)",
-    what: "A system with its OWN visual identity — own tokens, colors or typography — owned by a team and used across Factorial. “Only my product uses it” does not qualify.",
-    examples: "sds/one (AI brand), sds/upselling (Growth brand)",
+    id: "domain",
+    label: "Domain specific",
+    what: "Specific to one domain (Time tracking, Surveys, Upsell…), owned and maintained by that domain's team — visible to everyone, but not Foundations-owned. Kept out of core so the catalogue doesn't fill with domain noise. (Renamed from “Satellite / SDS”.)",
+    examples: "Time tracking (ClockIn…), Surveys (…Question), Upsell (Upselling…)",
   },
   {
     id: "monolith",
@@ -131,21 +131,21 @@ export const placementKinds: PlacementKind[] = [
 
 // The quick decision (source: where-it-goes.mdx "SDS vs Kit").
 export const placementDecision = {
-  headline: "SDS, Kit, or neither?",
+  headline: "Domain specific, Kit, or Core?",
   steps: [
     {
-      question: "Own tokens / colors / typography, different from core F0?",
-      yes: "It's an SDS.",
-      no: "Not an SDS — keep going.",
+      question: "Specific to one domain, owned by that team?",
+      yes: "It's Domain specific — lives in that domain's folder.",
+      no: "Not domain-specific — keep going.",
     },
     {
-      question: "Groups components for a general functional area (charts, social…)?",
-      yes: "It's a Kit candidate.",
+      question: "Groups components for a general functional area (charts, AI, social…)?",
+      yes: "It's a Kit candidate (imports core, never another kit).",
       no: "Not a kit.",
     },
     {
-      question: "Used by ≥2 products?",
-      yes: "It can live in F0.",
+      question: "Generic and used by ≥2 domains?",
+      yes: "It's Core.",
       no: "It belongs in your product monolith, not F0.",
     },
   ],
@@ -155,7 +155,7 @@ export const placementDecision = {
 export const gatekeeping = {
   headline: "What keeps it honest",
   rules: [
-    "Foundations is the only approver for new entries under sds/ or kits/ — an experimental can't promote itself in.",
+    "Foundations is the only approver for new entries under domain folders or kits/ — an experimental can't promote itself in.",
     "The PR template asks: “Why can't this live in your product monolith?” — you have to justify it.",
     "Inventories (sds/INVENTORY.md, kits/INVENTORY.md) record every entry; anything miscategorised is flagged for cleanup.",
   ],
