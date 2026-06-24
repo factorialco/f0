@@ -10,9 +10,14 @@ const user = (
 ): F0ChatUser => ({ id, name, avatar })
 
 describe("senderNameColorClass", () => {
-  it("returns a palette text-colour class", () => {
+  it("returns a palette text-colour class with a lighter dark-mode variant", () => {
     const cls = senderNameColorClass(user("u1", "Marcus Bennett"))
-    expect(cls).toMatch(/^text-\[hsl\(theme\(colors\.[a-z]+\.70\)\)\]$/)
+    // Light: the darker .70 shade.
+    expect(cls).toMatch(/text-\[hsl\(theme\(colors\.[a-z]+\.70\)\)\]/)
+    // Dark: the same hue lightened so it reads on the dark bubble.
+    expect(cls).toMatch(
+      /dark:text-\[color-mix\(in_srgb,hsl\(theme\(colors\.[a-z]+\.50\)\),white_35%\)\]/
+    )
   })
 
   it("is deterministic for the same person", () => {

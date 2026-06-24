@@ -239,14 +239,14 @@ export const ChatComposer = (): ReactNode => {
             rows={1}
             placeholder={isRecording ? i18n.chat.listening : placeholder}
             className={cn(
-              "w-full resize-none bg-transparent p-3 pb-2 text-md text-f1-foreground",
+              "w-full resize-none bg-transparent p-3 pb-3 text-md text-f1-foreground",
               "placeholder:text-f1-foreground-secondary focus:outline-none"
             )}
           />
 
           {isRecording ? (
             // Recording: amplitude timeline + cancel / confirm, matching the AI chat.
-            <div className="flex items-center gap-3 p-2">
+            <div className="flex items-center gap-3 p-3">
               <RecordingWaveform
                 stream={recorder.stream}
                 className="min-w-0 flex-1"

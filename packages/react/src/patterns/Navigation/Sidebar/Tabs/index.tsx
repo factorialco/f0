@@ -113,7 +113,7 @@ export const SidebarTabs = ({
   const searchLabel = search.placeholder ?? i18n.navigation.sidebar.search
 
   return (
-    <div className="mb-3 flex items-center justify-between gap-1 px-3">
+    <div className="mb-4 flex items-center justify-between gap-1 px-3">
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.tabs.label}
