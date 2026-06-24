@@ -1,3 +1,12 @@
+/**
+ * Natural-language date/time for the transcript. Fully localizable by design:
+ * weekday/month/clock come from `Intl.DateTimeFormat`, and "Today"/"Yesterday"
+ * come from the i18n `labels`. The `locale` is optional and defaults to the
+ * runtime/browser locale (we intentionally don't thread an explicit one), so a
+ * host that translates the labels and runs in the user's locale gets fully
+ * natural output in any language.
+ */
+
 /** Labels the host's i18n provides — keeps these helpers pure/testable. */
 export type NaturalTimeLabels = {
   today: string

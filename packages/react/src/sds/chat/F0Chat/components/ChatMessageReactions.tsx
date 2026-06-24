@@ -27,7 +27,7 @@ export const ChatMessageReactions = ({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-1 py-1",
+        "flex flex-wrap items-center gap-2 py-2",
         isMine && "justify-end"
       )}
     >

@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { type F0ChatMessage, type F0ChatUser } from "../types"
+import { senderNameColorClass } from "../utils/sender-color"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
 /** A single message bubble (body, or a deleted tombstone). The reply quote is
@@ -25,9 +26,10 @@ export const ChatBubble = ({
     return (
       <div
         className={cn(
-          "w-fit max-w-full rounded-xl px-3.5 py-2.5",
+          "w-fit max-w-full rounded-2xl px-3.5 py-2.5",
+          "text-sm italic text-f1-foreground",
           "border border-solid border-f1-border-secondary",
-          "text-sm italic text-f1-foreground-secondary"
+          isMine ? "bg-f1-background-secondary" : "bg-f1-background"
         )}
       >
         {i18n.chat.deletedMessage}
@@ -38,18 +40,23 @@ export const ChatBubble = ({
   return (
     <div
       className={cn(
-        "w-fit max-w-full rounded-xl px-3.5 py-2.5 text-f1-foreground font-normal",
+        "w-fit max-w-full rounded-2xl px-3.5 py-2.5 text-f1-foreground font-normal",
         "whitespace-pre-wrap break-words",
+        "border border-solid border-f1-border-secondary",
         // Mine: grey. Others: white with a subtle border (matches the design).
-        isMine
-          ? "bg-f1-background-secondary"
-          : "border border-solid border-f1-border-secondary bg-f1-background",
+        isMine ? "bg-f1-background-secondary" : "bg-f1-background",
         message.status === "failed" && "opacity-60"
       )}
     >
       {author && (
         <ChatUserHoverCard user={author}>
-          <span className="mb-0.5 block w-fit cursor-default text-sm font-medium text-f1-foreground-secondary">
+          {/* WhatsApp-style: tint the sender name to match their avatar colour. */}
+          <span
+            className={cn(
+              "mb-0.5 block w-fit cursor-default text-sm font-medium",
+              senderNameColorClass(author)
+            )}
+          >
             {author.name}
           </span>
         </ChatUserHoverCard>

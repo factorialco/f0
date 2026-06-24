@@ -14,7 +14,7 @@ export const DateTimeSeparator = ({ at }: { at: string }): ReactNode => {
 
   return (
     <div className="flex justify-center py-0">
-      <span className="text-xs font-medium text-f1-foreground-secondary">
+      <span className="text-sm font-normal text-f1-foreground-tertiary">
         {label}
       </span>
     </div>

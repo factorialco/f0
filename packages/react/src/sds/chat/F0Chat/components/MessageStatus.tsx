@@ -1,5 +1,8 @@
 import { type ReactNode } from "react"
 
+import { motion } from "motion/react"
+
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -19,6 +22,7 @@ export const MessageStatus = ({
   isGroup?: boolean
 }): ReactNode => {
   const i18n = useI18n()
+  const reducedMotion = useReducedMotion()
 
   const time = formatStatusTime(new Date(message.createdAt), new Date(), {
     today: i18n.chat.today,
@@ -31,7 +35,12 @@ export const MessageStatus = ({
     else if (message.status === "read")
       label =
         isGroup && message.readByCount
-          ? i18n.chat.readBy.replace("{{count}}", String(message.readByCount))
+          ? i18n.t(
+              message.readByCount === 1
+                ? "chat.readBy.one"
+                : "chat.readBy.other",
+              { count: message.readByCount }
+            )
           : `${i18n.chat.read} ${time}`
     else if (message.status === "sent") label = `${i18n.chat.sent} ${time}`
   }
@@ -39,11 +48,22 @@ export const MessageStatus = ({
   return (
     <div
       className={cn(
-        "px-1 pt-1 text-xs text-f1-foreground-secondary",
+        "px-1 pt-1 text-sm text-f1-foreground-secondary",
         message.isMine ? "text-right" : "text-left"
       )}
     >
-      {label}
+      {/* Fade the new label in as the status advances (sending → sent → read).
+          Keying on the label remounts on change; no exit/`mode="wait"` so there's
+          no sequential gap that makes the update feel laggy. */}
+      <motion.span
+        key={label}
+        className="inline-block"
+        initial={reducedMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: reducedMotion ? 0 : 0.15 }}
+      >
+        {label}
+      </motion.span>
     </div>
   )
 }

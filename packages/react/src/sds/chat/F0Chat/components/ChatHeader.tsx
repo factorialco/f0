@@ -5,15 +5,22 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { Cross, Maximize, MicrophoneNegative, Minimize } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { cn } from "@/lib/utils"
 
 import { type F0ChatChannel } from "../types"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
-const PresenceDot = (): ReactNode => (
-  <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
-    <span className="h-2 w-2 rounded-full bg-f1-background-positive-bold" />
-  </span>
-)
+const PresenceDot = ({ online }: { online: boolean }): ReactNode => {
+  if (!online) return null
+
+  return (
+    <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
+      <span
+        className={cn("h-2 w-2 rounded-full", "bg-f1-background-positive-bold")}
+      />
+    </span>
+  )
+}
 
 export type ChatHeaderProps = {
   channel: F0ChatChannel
@@ -30,17 +37,19 @@ export const ChatHeader = ({
   onClose,
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
-  const showPresence = channel.type === "dm" && channel.presence === "online"
+  // DMs show a presence dot (green online / grey offline).
+  const showPresence = channel.type === "dm" && channel.presence !== undefined
 
   const identity = (
     <div className="flex min-w-0 items-center gap-2">
       <div className="relative shrink-0">
         <F0Avatar size="sm" avatar={channel.avatar} />
-        {showPresence && <PresenceDot />}
+        {showPresence && <PresenceDot online={channel.presence === "online"} />}
       </div>
       <span className="truncate text-base font-medium text-f1-foreground">
         {channel.title}
       </span>
+      {/* All states surface in the header the same way the mute icon does. */}
       {channel.muted && (
         <F0Icon
           icon={MicrophoneNegative}
@@ -49,6 +58,15 @@ export const ChatHeader = ({
           aria-label={i18n.chat.muted}
         />
       )}
+      {channel.statuses?.map((status) => (
+        <F0Icon
+          key={status.label}
+          icon={status.icon}
+          size="sm"
+          color="secondary"
+          aria-label={status.label}
+        />
+      ))}
     </div>
   )
 

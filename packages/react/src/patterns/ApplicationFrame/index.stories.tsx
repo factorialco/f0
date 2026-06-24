@@ -750,7 +750,9 @@ export const Default: Story = {
     // conversation — the AI chat space now hosts arbitrary content, one at
     // a time.
     await userEvent.click(canvas.getByRole("button", { name: "Messages" }))
-    await userEvent.click(canvas.getByRole("button", { name: /María José/i }))
+    await userEvent.click(
+      canvas.getByRole("button", { name: /Marcus Bennett/i })
+    )
     // The mocked conversation mounts in the panel: its composer is present.
     await expect(
       await canvas.findByPlaceholderText(/write something here/i)

@@ -1,4 +1,5 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
+import { type IconType } from "@/components/F0Icon"
 import { type TranscribeFn } from "@/sds/ai/F0AiChat/types"
 
 /** A participant in a conversation. */
@@ -14,6 +15,13 @@ export type F0ChatUser = {
 
 export type F0ChatChannelType = "dm" | "group"
 
+/** A status badge shown in the header next to the title (e.g. on vacation, away).
+ * The host decides the icon + label; the UI just renders it like the mute icon. */
+export type F0ChatChannelStatus = {
+  icon: IconType
+  label: string
+}
+
 /** The conversation currently shown in the panel (header + behaviour differs by type). */
 export type F0ChatChannel = {
   id: string
@@ -23,6 +31,12 @@ export type F0ChatChannel = {
   /** DM only — the other person's presence. */
   presence?: "online" | "offline"
   muted?: boolean
+  /**
+   * Extra status badges shown in the header (e.g. on vacation). Host-provided
+   * metadata — not necessarily transport-backed: Stream has no such concept, so
+   * factorial sources these from its own data (e.g. HR vacation status).
+   */
+  statuses?: F0ChatChannelStatus[]
   /** Group only. */
   memberCount?: number
   /** DM only — the counterpart, used for the header identity hover card. */
@@ -58,22 +72,6 @@ export type F0ChatReaction = {
   users?: F0ChatUser[]
 }
 
-/** A person who has read a message, for the message-info reader list. */
-export type F0ChatReader = {
-  user: F0ChatUser
-  /** When they read it (ISO). */
-  readAt?: string
-}
-
-/** A page of readers — cursor-based so a message read by hundreds paginates. */
-export type F0ChatReadersPage = {
-  readers: F0ChatReader[]
-  /** Opaque cursor for the next page, or null when exhausted. */
-  nextCursor: string | null
-  /** Total number of readers (drives the "Read by N" count). */
-  total: number
-}
-
 /** iMessage-style delivery state — only meaningful for messages I sent. */
 export type F0ChatMessageStatus = "sending" | "sent" | "read" | "failed"
 
@@ -93,12 +91,20 @@ export type F0ChatMessage = {
   createdAt: string
   isMine: boolean
   status?: F0ChatMessageStatus
-  /** When the message was read (DM read receipt), ISO. */
+  /**
+   * When the message was read (DM read receipt), ISO. Approximated from the
+   * counterpart's per-channel last-read pointer — Stream has no per-message
+   * read time — so it's "read at or before this", not an exact per-message stamp.
+   */
   readAt?: string
   reactions?: F0ChatReaction[]
   attachments?: F0ChatAttachment[]
   replyTo?: F0ChatMessageReply
-  /** Group read receipts. */
+  /**
+   * Group read receipts — how many other members have read this message.
+   * Approximated by counting members whose last-read pointer is at/after this
+   * message (Stream exposes no per-message reader list).
+   */
   readByCount?: number
   /**
    * Soft-deleted tombstone — render an italic "[Message deleted]" placeholder
@@ -143,16 +149,11 @@ export type F0ChatRuntime = {
   /** Called as the user types so the runtime can emit typing.start/stop. */
   onInputActivity: () => void
   uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>
-  /** Voice dictation — same signature as the AI chat (streams partials). */
+  /**
+   * Optional voice dictation — same signature as the AI chat (streams partials).
+   * Not part of the Stream transport; a host wires it to its own speech service
+   * (the Stream adapter omits it, so the mic button stays hidden there).
+   */
   transcribe?: TranscribeFn
   markRead?: () => void
-  /**
-   * Fetch the next page of people who have read a message, for the info panel.
-   * Cursor-based + infinite scroll. The page size is owned by the runtime/host
-   * (not the UI), so it isn't passed in.
-   */
-  getMessageReaders?: (
-    messageId: string,
-    opts: { cursor?: string | null }
-  ) => Promise<F0ChatReadersPage>
 }

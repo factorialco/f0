@@ -6,11 +6,18 @@ import {
   useState,
 } from "react"
 
+import { type Virtualizer } from "@tanstack/react-virtual"
+
+import { type ChatRow } from "../utils/grouping"
+
 type ScrollMessage = { id: string; isMine?: boolean }
 
 type UseChatScrollOptions = {
   viewportRef: RefObject<HTMLDivElement | null>
-  endRef: RefObject<HTMLDivElement | null>
+  virtualizer: Virtualizer<HTMLDivElement, Element>
+  rows: ChatRow[]
+  /** message id → row index, for restoring the scroll anchor after a prepend. */
+  indexById: Map<string, number>
   /** Ordered messages — used to detect append (stick) vs prepend (retain). */
   messages: ScrollMessage[]
   hasMoreOlder: boolean
@@ -23,7 +30,7 @@ type UseChatScrollReturn = {
   scrolledUp: boolean
   /** True when the latest messages are visible (used to gate mark-as-read). */
   atBottom: boolean
-  scrollToBottom: (behavior?: ScrollBehavior) => void
+  scrollToBottom: (behavior?: "auto" | "smooth") => void
   handleScroll: () => void
 }
 
@@ -31,14 +38,20 @@ const NEAR_BOTTOM_PX = 80
 const TOP_TRIGGER_PX = 120
 
 /**
- * Scroll behaviour for the message list: jump-to-bottom detection, auto-stick on
- * new messages (always when I send, otherwise only if already near the bottom),
- * infinite-scroll-up (load older) with scroll-position retention, and an
- * `atBottom` flag the container combines with hover to mark messages as read.
+ * Scroll behaviour for the virtualized message list. The scroll element keeps
+ * the full virtual height (the spacer), so the near-bottom / scrolled-up math is
+ * unchanged; only the *targeting* goes through the virtualizer:
+ *  - initial + auto-stick on append → `scrollToIndex(last, {align:"end"})`
+ *  - infinite-scroll-up (load older) with anchor-based position retention: before
+ *    triggering, remember the first visible message and its on-screen offset; once
+ *    the older page is prepended, restore that message to the same spot.
+ *  - `atBottom` flag the container combines with hover to mark messages as read.
  */
 export function useChatScroll({
   viewportRef,
-  endRef,
+  virtualizer,
+  rows,
+  indexById,
   messages,
   hasMoreOlder,
   loadingOlder,
@@ -50,14 +63,31 @@ export function useChatScroll({
   const prevFirstIdRef = useRef<string | null>(messages[0]?.id ?? null)
   const prevLastIdRef = useRef<string | null>(messages.at(-1)?.id ?? null)
   const prevLenRef = useRef(messages.length)
-  const prevScrollHeightRef = useRef(0)
   const didInitialScrollRef = useRef(false)
+  // Saved before loading older messages, so we can keep the viewport steady once
+  // the prepended page changes every index below the anchor.
+  const anchorRef = useRef<{ id: string; delta: number } | null>(null)
 
   const scrollToBottom = useCallback(
-    (behavior: ScrollBehavior = "smooth") => {
-      endRef.current?.scrollIntoView({ behavior })
+    (behavior: "auto" | "smooth" = "smooth") => {
+      if (rows.length > 0) {
+        virtualizer.scrollToIndex(rows.length - 1, { align: "end", behavior })
+      }
     },
-    [endRef]
+    [virtualizer, rows.length]
+  )
+
+  // First message currently at the top of the viewport (skips separators/divider).
+  const firstVisibleMessageIndex = useCallback(
+    (scrollTop: number): number | null => {
+      const item = virtualizer.getVirtualItemForOffset(scrollTop)
+      if (!item) return null
+      for (let i = item.index; i < rows.length; i++) {
+        if (rows[i].type === "message") return i
+      }
+      return null
+    },
+    [virtualizer, rows]
   )
 
   const handleScroll = useCallback(() => {
@@ -69,18 +99,33 @@ export function useChatScroll({
     nearBottomRef.current = isAtBottom
     setAtBottom(isAtBottom)
     setScrolledUp(distanceFromBottom > clientHeight * 0.5)
+
     if (scrollTop < TOP_TRIGGER_PX && hasMoreOlder && !loadingOlder) {
-      prevScrollHeightRef.current = scrollHeight
+      // Anchor on the first visible message so the prepended page doesn't jump.
+      const index = firstVisibleMessageIndex(scrollTop)
+      const row = index != null ? rows[index] : null
+      if (row && row.type === "message") {
+        const start = virtualizer.getOffsetForIndex(index!, "start")?.[0] ?? 0
+        anchorRef.current = { id: row.message.id, delta: start - scrollTop }
+      }
       onReachTop()
     }
-  }, [viewportRef, hasMoreOlder, loadingOlder, onReachTop])
+  }, [
+    viewportRef,
+    hasMoreOlder,
+    loadingOlder,
+    onReachTop,
+    firstVisibleMessageIndex,
+    rows,
+    virtualizer,
+  ])
 
   useLayoutEffect(() => {
     const el = viewportRef.current
     if (!el) return
 
-    if (!didInitialScrollRef.current && messages.length > 0) {
-      endRef.current?.scrollIntoView({ behavior: "auto" })
+    if (!didInitialScrollRef.current && rows.length > 0) {
+      virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
       setAtBottom(true)
       didInitialScrollRef.current = true
       prevFirstIdRef.current = messages[0]?.id ?? null
@@ -95,20 +140,24 @@ export function useChatScroll({
     const prepended = grew && firstId !== prevFirstIdRef.current
     const appended = grew && lastMessage?.id !== prevLastIdRef.current
 
-    if (prepended && prevScrollHeightRef.current) {
-      el.scrollTop += el.scrollHeight - prevScrollHeightRef.current
-      prevScrollHeightRef.current = 0
+    if (prepended && anchorRef.current) {
+      const newIndex = indexById.get(anchorRef.current.id)
+      if (newIndex != null) {
+        const start = virtualizer.getOffsetForIndex(newIndex, "start")?.[0] ?? 0
+        el.scrollTop = start - anchorRef.current.delta
+      }
+      anchorRef.current = null
     } else if (appended && (lastMessage?.isMine || nearBottomRef.current)) {
-      // Always follow my own messages; follow incoming ones only if already near
-      // the bottom (otherwise they accumulate as unread).
-      endRef.current?.scrollIntoView({ behavior: "smooth" })
+      // Always follow my own messages; follow incoming ones only if near the
+      // bottom (otherwise they accumulate as unread).
+      virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
       setAtBottom(true)
     }
 
     prevFirstIdRef.current = firstId
     prevLastIdRef.current = lastMessage?.id ?? null
     prevLenRef.current = messages.length
-  }, [messages, viewportRef, endRef])
+  }, [messages, rows.length, viewportRef, virtualizer, indexById])
 
   return { scrolledUp, atBottom, scrollToBottom, handleScroll }
 }

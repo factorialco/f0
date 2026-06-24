@@ -1,7 +1,8 @@
 import { type ReactNode } from "react"
 
-import { Spinner } from "@/ui/Spinner"
 import { useI18n } from "@/lib/providers/i18n"
+
+import { ChatMessageSkeleton } from "./ChatMessageSkeleton"
 
 const Centered = ({ children }: { children: ReactNode }): ReactNode => (
   <div className="flex h-full flex-1 items-center justify-center px-6 text-center text-sm text-f1-foreground-secondary">
@@ -9,17 +10,13 @@ const Centered = ({ children }: { children: ReactNode }): ReactNode => (
   </div>
 )
 
-export const ChatConnecting = (): ReactNode => {
-  const i18n = useI18n()
-  return (
-    <Centered>
-      <div className="flex flex-col items-center gap-3">
-        <Spinner size="medium" />
-        <span>{i18n.chat.connecting}</span>
-      </div>
-    </Centered>
-  )
-}
+/** First load: a bubble skeleton (not a spinner). On re-entry the data is
+ * cached, so the runtime reports "ready" immediately and this never shows. */
+export const ChatConnecting = (): ReactNode => (
+  <div className="min-h-0 flex-1 overflow-hidden">
+    <ChatMessageSkeleton />
+  </div>
+)
 
 export const ChatError = (): ReactNode => {
   const i18n = useI18n()

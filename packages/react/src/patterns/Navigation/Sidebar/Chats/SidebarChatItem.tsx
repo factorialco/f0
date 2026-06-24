@@ -1,11 +1,25 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
+
+const Dots = () => (
+  <span
+    className="flex items-center gap-0.5 w-5 h-5 justify-center"
+    aria-hidden="true"
+  >
+    {[0, 1, 2].map((i) => (
+      <span
+        key={i}
+        className="size-1 animate-bounce rounded-full bg-f1-foreground-secondary"
+        style={{ animationDelay: `${i * 120}ms` }}
+      />
+    ))}
+  </span>
+)
 
 const PresenceDot = ({
   presence,
@@ -41,8 +55,6 @@ export const SidebarChatItem = ({
   isActive: boolean
   onClick: () => void
 }) => {
-  const i18n = useI18n()
-
   // Cascade loading: the conversation is known but its name/avatar aren't
   // resolved yet — show a skeleton row in place (not interactive).
   if (chat.loading) {
@@ -74,23 +86,26 @@ export const SidebarChatItem = ({
           : "hover:bg-f1-background-secondary"
       )}
     >
-      <div className="relative flex flex-shrink-0 items-center">
-        <F0Avatar size="xs" avatar={chat.avatar} />
-        {presence && <PresenceDot presence={presence} isActive={isActive} />}
-      </div>
+      {chat.typing ? (
+        <Dots />
+      ) : (
+        <div className="relative flex flex-shrink-0 items-center">
+          <F0Avatar size="xs" avatar={chat.avatar} />
+          {presence && <PresenceDot presence={presence} isActive={isActive} />}
+        </div>
+      )}
+
       <OneEllipsis
         tag="span"
         className={cn(
           "line-clamp-1 flex-1 py-0.5",
-          chat.typing
-            ? "text-f1-foreground-secondary font-medium italic"
-            : isUnread
-              ? "text-f1-foreground font-semibold "
-              : "text-f1-foreground-secondary font-medium"
+          isUnread
+            ? "text-f1-foreground font-semibold"
+            : "text-f1-foreground-secondary font-medium"
         )}
         lines={1}
       >
-        {chat.typing ? i18n.chat.writing : chat.label}
+        {chat.label}
       </OneEllipsis>
       {(status || chat.unreadCount) && (
         <div className="gap-1 flex items-center justify-center">

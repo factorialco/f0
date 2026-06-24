@@ -6,6 +6,37 @@ import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatRuntime } from "../types"
 
+// The transcript is virtualized with @tanstack/react-virtual, which windows the
+// DOM based on the scroll viewport's measured size. jsdom has no layout (every
+// rect is 0), so the real virtualizer renders nothing. Mock it to a pass-through
+// that renders all rows — the windowing itself is exercised in Storybook.
+vi.mock("@tanstack/react-virtual", () => ({
+  useVirtualizer: ({ count }: { count: number }) => {
+    const ROW = 40
+    const items = Array.from({ length: count }, (_, index) => ({
+      index,
+      key: index,
+      start: index * ROW,
+      size: ROW,
+      end: index * ROW + ROW,
+    }))
+    return {
+      getVirtualItems: () => items,
+      getTotalSize: () => count * ROW,
+      measureElement: () => {},
+      scrollToIndex: () => {},
+      scrollToOffset: () => {},
+      getOffsetForIndex: (index: number) => [index * ROW, "start"],
+      getVirtualItemForOffset: (offset: number) =>
+        items[
+          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
+        ],
+      scrollOffset: 0,
+      measure: () => {},
+    }
+  },
+}))
+
 beforeAll(() => {
   // jsdom doesn't implement scrollIntoView (used by the scroll hook).
   Element.prototype.scrollIntoView = vi.fn()
@@ -89,12 +120,17 @@ describe("F0Chat", () => {
     expect(deleteMessage).toHaveBeenCalledWith("m2")
   })
 
-  it("exposes an Info action in the actions menu", async () => {
+  it("swaps the menu for the info panel when Info is clicked, with a back button", async () => {
     renderChat(makeRuntime())
     const menus = screen.getAllByRole("button", { name: /message actions/i })
     await userEvent.click(menus[1])
-    // The hover-submenu opening is a visual behaviour verified in Storybook.
-    expect(screen.getByRole("button", { name: /^Info$/i })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("button", { name: /info/i }))
+    // Menu is replaced in place by the info panel (Delivered row + Back button).
+    expect(screen.getByText(/delivered/i)).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /back/i })).toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", { name: /^Reply$/i })
+    ).not.toBeInTheDocument()
   })
 
   it("replies to a message, showing the quote in the composer", async () => {
@@ -159,11 +195,12 @@ describe("F0Chat", () => {
     expect(sendMessage).not.toHaveBeenCalled()
   })
 
-  it("shows a 'Writing…' chip above the composer when the other side types", () => {
+  it("shows a typing dots bubble in the transcript when the other side types", () => {
     renderChat(
       makeRuntime({ typingUsers: [{ id: "other", name: "María José" }] })
     )
-    expect(screen.getByText(/writing/i)).toBeInTheDocument()
+    // Rendered as an incoming dots bubble (role=status), labelled for a11y.
+    expect(screen.getByRole("status", { name: /writing/i })).toBeInTheDocument()
   })
 
   it("renders image attachments inline and files for download", () => {
@@ -196,5 +233,51 @@ describe("F0Chat", () => {
   it("renders the empty state when there are no messages", () => {
     renderChat(makeRuntime({ messages: [] }))
     expect(screen.getByText(/no messages yet/i)).toBeInTheDocument()
+  })
+
+  it("shows the interpolated 'Read by N' count for my read message in a group", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+        },
+        messages: [
+          {
+            id: "g-m1",
+            author: { id: "me", name: "Me" },
+            body: "Shipping today",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            readByCount: 3,
+          },
+        ],
+      })
+    )
+    // i18n.t("chat.readBy.other", { count: 3 }) → "Read by 3".
+    expect(screen.getByText(/read by 3/i)).toBeInTheDocument()
+  })
+
+  it("names the typing users in a group (interpolated label)", () => {
+    renderChat(
+      makeRuntime({
+        channel: {
+          id: "g1",
+          type: "group",
+          title: "Product Team",
+          avatar: { type: "team", name: "Product Team" },
+        },
+        typingUsers: [
+          { id: "u1", name: "Marcus" },
+          { id: "u2", name: "Grace" },
+        ],
+      })
+    )
+    expect(
+      screen.getByRole("status", { name: /marcus and grace are writing/i })
+    ).toBeInTheDocument()
   })
 })

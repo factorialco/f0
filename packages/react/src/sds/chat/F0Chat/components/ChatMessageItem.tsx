@@ -3,6 +3,7 @@ import { type ReactNode, useState } from "react"
 import { F0Icon } from "@/components/F0Icon"
 import { Reply } from "@/icons/app"
 import { cn } from "@/lib/utils"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 
 import { useChatUI } from "../providers/ChatUIProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
@@ -15,9 +16,12 @@ import { ChatMessageReactions } from "./ChatMessageReactions"
 const ReplyQuote = ({
   reply,
   isMine,
+  indented,
 }: {
   reply: NonNullable<F0ChatMessage["replyTo"]>
   isMine: boolean
+  /** Incoming group message: shift right to clear the avatar gutter. */
+  indented?: boolean
 }): ReactNode => {
   const { jumpToMessage } = useChatUI()
   const image = reply.attachments?.find((a) => a.kind === "image")
@@ -27,8 +31,12 @@ const ReplyQuote = ({
       type="button"
       onClick={() => jumpToMessage(reply.id)}
       className={cn(
-        "flex max-w-[80%] items-center gap-2 rounded-md pb-3 text-left text-f1-foreground-tertiary transition-colors hover:text-f1-foreground-secondary",
-        isMine ? "self-end pr-2" : "self-start pl-2"
+        "flex max-w-[80%] items-center gap-2 rounded-md pb-3 text-left text-f1-foreground-secondary transition-colors hover:text-f1-foreground-secondary",
+        isMine
+          ? "self-end pr-2"
+          : indented
+            ? "self-start pl-7"
+            : "self-start pl-2"
       )}
     >
       <div className="flex h-5 items-center">
@@ -41,7 +49,9 @@ const ReplyQuote = ({
           className="h-9 w-9 shrink-0 rounded-sm object-cover"
         />
       )}
-      <div className="min-w-0 truncate text-base leading-5">{text}</div>
+      <OneEllipsis className="min-w-0 text-base leading-5" lines={2}>
+        {text}
+      </OneEllipsis>
     </button>
   )
 }
@@ -83,7 +93,11 @@ export const ChatMessageItem = ({
       )}
     >
       {message.replyTo && !message.deleted && (
-        <ReplyQuote reply={message.replyTo} isMine={isMine} />
+        <ReplyQuote
+          reply={message.replyTo}
+          isMine={isMine}
+          indented={Boolean(bubbleGutter)}
+        />
       )}
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
@@ -92,13 +106,13 @@ export const ChatMessageItem = ({
         <div
           className={cn(
             "flex w-full gap-2",
-            isMine ? "flex-row-reverse items-end" : "items-end"
+            isMine ? "flex-row-reverse items-center" : "items-end"
           )}
         >
           {bubbleGutter}
           <div
             className={cn(
-              "flex min-w-0 items-end gap-1",
+              "flex min-w-0 items-center gap-1",
               isMine ? "flex-row-reverse" : "flex-row"
             )}
           >
@@ -106,11 +120,13 @@ export const ChatMessageItem = ({
                 bubble), so it reads even on image-only / multi-part messages. */}
             <div
               className={cn(
-                "flex max-w-full flex-col gap-1 rounded-xl",
+                // `transition-shadow` is always on so the jump-to highlight ring
+                // fades in/out instead of snapping when `highlighted` toggles.
+                "flex max-w-full flex-col gap-1 rounded-2xl transition-shadow duration-200",
                 isMine ? "items-end" : "items-start",
-                highlighted &&
-                  "ring-1 ring-f1-special-ring ring-offset-2 transition-shadow",
-                "group-hover:bg-f1-background-hover focus-within:bg-f1-background-hover",
+                highlighted && "ring-1 ring-f1-special-ring ring-offset-2",
+                !message.deleted &&
+                  "group-hover:bg-f1-background-hover focus-within:bg-f1-background-hover",
                 actionsOpen && "bg-f1-background-hover"
               )}
             >
