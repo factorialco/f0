@@ -1,18 +1,27 @@
 import { type ReactNode, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { Reply } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 
+import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatUI } from "../providers/ChatUIProvider"
+import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
+import { senderNameColorClass } from "../utils/sender-color"
 import { ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
 
-/** Reply quote above the bubble — clicking it jumps to the quoted message. */
+/**
+ * Reply quote above the bubble — a compact card led by a reply glyph that jumps
+ * to the quoted message on click. In groups it leads with the quoted sender's
+ * avatar + colored name; the body line shows the caption, and whenever there are
+ * attachments it carries a media icon ("Photo", "3 photos", a filename, "2
+ * files", "4 attachments") with the image thumbnail flush to the right.
+ */
 const ReplyQuote = ({
   reply,
   isMine,
@@ -24,34 +33,49 @@ const ReplyQuote = ({
   indented?: boolean
 }): ReactNode => {
   const { jumpToMessage } = useChatUI()
-  const image = reply.attachments?.find((a) => a.kind === "image")
-  const text = reply.body || reply.attachments?.[0]?.name || ""
+  const { currentUserId } = useF0Chat()
+  const i18n = useI18n()
+  const { icon, label, thumbnailUrl } = useReplyPreview(reply)
+  // WhatsApp-style: a quote of your own message reads "You" rather than your name.
+  const isOwnReply = reply.author.id === currentUserId
+  const senderName = isOwnReply ? i18n.chat.you : reply.author.name
   return (
     <button
       type="button"
       onClick={() => jumpToMessage(reply.id)}
       className={cn(
-        "flex max-w-[80%] items-center gap-2 rounded-md pb-3 text-left text-f1-foreground-secondary transition-colors hover:text-f1-foreground-secondary",
-        isMine
-          ? "self-end pr-2"
-          : indented
-            ? "self-start pl-7"
-            : "self-start pl-2"
+        "mb-1 flex max-w-[85%] items-center overflow-hidden rounded bg-f1-background-tertiary text-left transition-colors hover:bg-f1-background-hover",
+        isMine ? "self-end" : indented ? "ml-7 self-start" : "self-start"
       )}
     >
-      <div className="flex h-5 items-center">
-        <F0Icon icon={Reply} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1 py-2 pl-2.5 pr-2.5">
+        {/* {isGroup && ( */}
+        <span className="flex items-center gap-1.5">
+          {/* <F0Avatar size="xs" avatar={userAvatar(reply.author)} /> */}
+          <OneEllipsis
+            className={cn(
+              "text-sm font-medium",
+              senderNameColorClass(reply.author)
+            )}
+          >
+            {senderName}
+          </OneEllipsis>
+        </span>
+        {/* )} */}
+        <span className="flex min-w-0 items-center gap-1 text-f1-foreground-secondary">
+          {icon && <F0Icon icon={icon} size="sm" color="default" />}
+          <OneEllipsis className="min-w-0 text-sm" lines={1}>
+            {label}
+          </OneEllipsis>
+        </span>
       </div>
-      {image && (
+      {thumbnailUrl && (
         <img
-          src={image.url}
+          src={thumbnailUrl}
           alt=""
-          className="h-9 w-9 shrink-0 rounded-sm object-cover"
+          className="h-14 w-14 shrink-0 self-stretch object-cover"
         />
       )}
-      <OneEllipsis className="min-w-0 text-base leading-5" lines={2}>
-        {text}
-      </OneEllipsis>
     </button>
   )
 }

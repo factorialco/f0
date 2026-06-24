@@ -1,5 +1,7 @@
 import { type ReactNode } from "react"
 
+import { motion } from "motion/react"
+
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { useReducedMotion } from "@/lib/a11y"
@@ -63,10 +65,17 @@ export const ChatTypingBubble = ({
   }
 
   return (
-    <div
+    // Eases in (fade + slight rise, scaling up from the bottom-left like an
+    // incoming bubble) so the dots don't pop. It's always the last row, so the
+    // scale-driven height change can't disturb the messages above.
+    <motion.div
       role="status"
       aria-label={label}
       className="flex w-full items-end gap-2"
+      style={{ transformOrigin: "bottom left" }}
+      initial={reducedMotion ? false : { opacity: 0, y: 6, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 500, damping: 34, mass: 0.8 }}
     >
       {isGroup &&
         (users.length > 1 ? (
@@ -97,6 +106,6 @@ export const ChatTypingBubble = ({
       <div className="w-fit rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4 items-center justify-center flex">
         <Dots animate={!reducedMotion} />
       </div>
-    </div>
+    </motion.div>
   )
 }

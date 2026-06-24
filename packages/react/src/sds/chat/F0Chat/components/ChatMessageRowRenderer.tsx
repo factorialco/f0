@@ -46,6 +46,7 @@ const ChatMessageRowRendererComponent = ({
   isLastRow,
   enterAnimation,
   animatedIds,
+  dividerLeaving = false,
 }: {
   row: ChatRow
   isGroup: boolean
@@ -55,6 +56,8 @@ const ChatMessageRowRendererComponent = ({
   enterAnimation: boolean
   /** Ids already shown — seeded with the initial set so only true arrivals animate. */
   animatedIds: Set<string>
+  /** Divider row only: fade it out in place before the row is removed. */
+  dividerLeaving?: boolean
 }): ReactNode => {
   const spacing = cn(topSpacing(row, isFirstRow), isLastRow && "pb-6")
 
@@ -84,7 +87,7 @@ const ChatMessageRowRendererComponent = ({
   if (row.type === "divider") {
     return (
       <div className={spacing}>
-        <UnreadDivider />
+        <UnreadDivider leaving={dividerLeaving} />
       </div>
     )
   }
@@ -142,11 +145,17 @@ const ChatMessageRowRendererComponent = ({
   )
 
   return animate ? (
+    // WhatsApp-style arrival: the bubble springs up into place from its own
+    // corner (mine → bottom-right, theirs → bottom-left) with a soft fade and a
+    // barely-there scale. A spring (not a fixed tween) gives the gentle, natural
+    // settle. Only the last row animates, so the brief scale-driven height change
+    // can't disturb rows above it.
     <motion.div
       className={cn("flex flex-col gap-1", spacing)}
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.18, ease: "easeOut" }}
+      style={{ transformOrigin: isMine ? "bottom right" : "bottom left" }}
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.9 }}
     >
       {content}
     </motion.div>

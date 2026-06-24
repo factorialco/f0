@@ -26,8 +26,8 @@ import { useChatScroll } from "../hooks/useChatScroll"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { DateTimeSeparator } from "./DateTimeSeparator"
 
-/** How long the "new messages" divider lingers after everything is seen. */
-const DIVIDER_LINGER_MS = 5000
+/** How long the "new messages" divider fades before its row is removed. */
+const DIVIDER_EXIT_MS = 280
 
 const estimateRowSize = (row: ChatRow): number =>
   row.type === "message" ? 76 : row.type === "typing" ? 60 : 36
@@ -71,10 +71,21 @@ export const ChatMessagesContainer = (): ReactNode => {
   // the chat. Only then do we mark as read.
   const [hovering, setHovering] = useState(false)
 
-  // The divider lingers: it stays where the unread run began until everything has
-  // been seen, then for DIVIDER_LINGER_MS more, then disappears.
+  // The "new messages" divider is captured once on entering a conversation and
+  // then frozen (WhatsApp-style): it stays where the unread run began as you read
+  // through it and only goes away when you leave and come back (re-snapshotted
+  // from the new conversation's `firstUnreadId`) or when you send a message
+  // (cleared below). Reading the messages — which zeroes `firstUnreadId` via
+  // `markRead` — must NOT move or hide it.
   const [dividerId, setDividerId] = useState<string | null>(firstUnreadId)
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // While true the divider fades out in place before its row is removed, so it
+  // dissolves rather than blinking out when you send a message.
+  const [dividerLeaving, setDividerLeaving] = useState(false)
+  const dividerChannelRef = useRef(channel.id)
+  const dividerExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastMessageIdRef = useRef<string | null>(
+    messages[messages.length - 1]?.id ?? null
+  )
 
   const { rows, indexById } = useMemo(
     () => flattenChatRows(messages, { dividerId }),
@@ -181,27 +192,50 @@ export const ChatMessagesContainer = (): ReactNode => {
     if (seeingAll && unreadCount > 0) markRead?.()
   }, [seeingAll, unreadCount, markRead])
 
-  useEffect(() => {
-    if (firstUnreadId && !seeingAll) {
-      setDividerId(firstUnreadId)
-      if (hideTimer.current) {
-        clearTimeout(hideTimer.current)
-        hideTimer.current = null
-      }
-    } else if (dividerId && !hideTimer.current) {
-      hideTimer.current = setTimeout(() => {
-        setDividerId(null)
-        hideTimer.current = null
-      }, DIVIDER_LINGER_MS)
-    }
-  }, [firstUnreadId, seeingAll, dividerId])
+  // Latest "at bottom" reading, read inside the deferred divider-exit callback so
+  // it can re-pin to the bottom without re-subscribing the timer to scroll state.
+  const atBottomRef = useRef(atBottom)
+  atBottomRef.current = atBottom
 
-  useEffect(
-    () => () => {
-      if (hideTimer.current) clearTimeout(hideTimer.current)
-    },
-    []
-  )
+  const clearDividerExit = useCallback(() => {
+    if (dividerExitTimer.current) {
+      clearTimeout(dividerExitTimer.current)
+      dividerExitTimer.current = null
+    }
+  }, [])
+
+  // Re-snapshot the unread anchor only when the conversation changes (leaving and
+  // coming back). Within the same conversation the divider is frozen, so later
+  // `firstUnreadId` changes (e.g. `markRead` clearing it) leave it untouched.
+  useEffect(() => {
+    if (dividerChannelRef.current !== channel.id) {
+      dividerChannelRef.current = channel.id
+      clearDividerExit()
+      setDividerLeaving(false)
+      setDividerId(firstUnreadId)
+    }
+  }, [channel.id, firstUnreadId, clearDividerExit])
+
+  // Sending a message dismisses the divider as your bubble lands (WhatsApp): it
+  // fades out in place over `DIVIDER_EXIT_MS`, then its row is dropped and — if
+  // we were pinned to the bottom — we re-pin so removing the row doesn't nudge
+  // the transcript. Only a newly appended message that's mine triggers it; an
+  // incoming message leaves the divider where it is.
+  useEffect(() => {
+    const last = messages[messages.length - 1]
+    if (!last || last.id === lastMessageIdRef.current) return
+    lastMessageIdRef.current = last.id
+    if (!last.isMine || !dividerId || dividerLeaving) return
+    setDividerLeaving(true)
+    dividerExitTimer.current = setTimeout(() => {
+      dividerExitTimer.current = null
+      setDividerId(null)
+      setDividerLeaving(false)
+      if (atBottomRef.current) scrollToBottom("auto")
+    }, DIVIDER_EXIT_MS)
+  }, [messages, dividerId, dividerLeaving, scrollToBottom])
+
+  useEffect(() => clearDividerExit, [clearDividerExit])
 
   // Seed the "already shown" set on first render with messages — only genuinely
   // new arrivals (not in the set) animate in. Mutated by the row renderer at mount.
@@ -255,6 +289,11 @@ export const ChatMessagesContainer = (): ReactNode => {
                   isLastRow={vi.index === displayRows.length - 1}
                   enterAnimation={!reducedMotion}
                   animatedIds={animatedIds}
+                  dividerLeaving={
+                    displayRows[vi.index].type === "divider"
+                      ? dividerLeaving
+                      : false
+                  }
                 />
               </div>
             ))}
@@ -284,7 +323,7 @@ export const ChatMessagesContainer = (): ReactNode => {
               aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
             >
               {loadingOlder && <Spinner size="small" className="h-3.5 w-3.5" />}
-              <DateTimeSeparator at={stickyDate} />
+              <DateTimeSeparator at={stickyDate} withTime />
             </div>
           </motion.div>
         )}

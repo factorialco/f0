@@ -17,36 +17,36 @@ export type ChatTimeGroup = {
   runs: ChatSenderRun[]
 }
 
-/** A new separator is inserted when the gap from the previous message exceeds this. */
-export const TIME_SEPARATOR_GAP_MS = 20 * 60 * 1000
-
+/**
+ * A new separator is inserted only when the message falls on a later calendar
+ * day (WhatsApp-style: one date divider per day). The per-message clock lives on
+ * the sticky header instead, so a busy day doesn't get peppered with separators.
+ */
 const needsSeparator = (
   current: F0ChatMessage,
-  previous: F0ChatMessage | undefined,
-  gapMs: number
+  previous: F0ChatMessage | undefined
 ): boolean => {
   if (!previous) return true
-  const prev = new Date(previous.createdAt)
-  const curr = new Date(current.createdAt)
-  if (calendarDaysApart(prev, curr) !== 0) return true
-  return curr.getTime() - prev.getTime() > gapMs
+  return (
+    calendarDaysApart(
+      new Date(previous.createdAt),
+      new Date(current.createdAt)
+    ) !== 0
+  )
 }
 
 /**
- * Splits an ordered (oldest→newest) message list into time-separated groups,
- * each further split into consecutive same-author runs. Pure — drives both the
+ * Splits an ordered (oldest→newest) message list into per-day groups, each
+ * further split into consecutive same-author runs. Pure — drives both the
  * separators and the bubble merging / avatar placement.
  */
-export function groupChatMessages(
-  messages: F0ChatMessage[],
-  gapMs: number = TIME_SEPARATOR_GAP_MS
-): ChatTimeGroup[] {
+export function groupChatMessages(messages: F0ChatMessage[]): ChatTimeGroup[] {
   const groups: ChatTimeGroup[] = []
 
   messages.forEach((message, index) => {
     const previous = messages[index - 1]
 
-    if (needsSeparator(message, previous, gapMs)) {
+    if (needsSeparator(message, previous)) {
       groups.push({
         key: `sep-${message.id}`,
         separatorAt: message.createdAt,
@@ -103,22 +103,22 @@ export type FlattenedChat = {
 
 /**
  * Flattens an ordered (oldest→newest) message list into a single row array for
- * virtualization: date/time separators, the optional "new messages" divider, and
+ * virtualization: per-day separators, the optional "new messages" divider, and
  * one row per message carrying the run/last flags that {@link groupChatMessages}
  * + {@link ChatMessageRun} computed implicitly. Pure.
  */
 export function flattenChatRows(
   messages: F0ChatMessage[],
-  opts: { dividerId?: string | null; gapMs?: number } = {}
+  opts: { dividerId?: string | null } = {}
 ): FlattenedChat {
-  const { dividerId = null, gapMs = TIME_SEPARATOR_GAP_MS } = opts
+  const { dividerId = null } = opts
   const rows: ChatRow[] = []
   const indexById = new Map<string, number>()
   let lastMessageRowIndex = -1
 
   messages.forEach((message, index) => {
     const previous = messages[index - 1]
-    const separated = needsSeparator(message, previous, gapMs)
+    const separated = needsSeparator(message, previous)
 
     if (separated) {
       rows.push({

@@ -44,12 +44,12 @@ describe("groupChatMessages", () => {
     expect(groups).toHaveLength(2)
   })
 
-  it("starts a new time group when the gap is large", () => {
+  it("keeps same-day messages in one group regardless of the gap", () => {
     const groups = groupChatMessages([
       msg("a", "u1", "2026-06-21T10:00:00"),
-      msg("b", "u1", "2026-06-21T11:00:00"),
+      msg("b", "u1", "2026-06-21T23:00:00"),
     ])
-    expect(groups).toHaveLength(2)
+    expect(groups).toHaveLength(1)
   })
 })
 
