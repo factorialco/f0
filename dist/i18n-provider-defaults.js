@@ -100,7 +100,7 @@ const e = {
   jo: "Jordan",
   jp: "Japan",
   ke: "Kenya"
-}, a = {
+}, t = {
   countries: e,
   approvals: {
     history: "Approval history",
@@ -605,6 +605,23 @@ const e = {
     react: "Add reaction",
     download: "Download",
     removeQuote: "Remove quote",
+    // Shown as the quoted sender's name when the replied-to message is your own.
+    you: "You",
+    // Attachment previews in reply quotes + the composer chip (a lone file shows
+    // its real name instead of a count).
+    photo: "Photo",
+    photoCount: {
+      one: "{{count}} photo",
+      other: "{{count}} photos"
+    },
+    fileCount: {
+      one: "{{count}} file",
+      other: "{{count}} files"
+    },
+    attachmentCount: {
+      one: "{{count}} attachment",
+      other: "{{count}} attachments"
+    },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
     unreadCount: {
@@ -864,5 +881,5 @@ const e = {
   }
 };
 export {
-  a as defaultTranslations
+  t as defaultTranslations
 };

@@ -4864,6 +4864,20 @@ export declare const defaultTranslations: {
         readonly react: "Add reaction";
         readonly download: "Download";
         readonly removeQuote: "Remove quote";
+        readonly you: "You";
+        readonly photo: "Photo";
+        readonly photoCount: {
+            readonly one: "{{count}} photo";
+            readonly other: "{{count}} photos";
+        };
+        readonly fileCount: {
+            readonly one: "{{count}} file";
+            readonly other: "{{count}} files";
+        };
+        readonly attachmentCount: {
+            readonly one: "{{count}} attachment";
+            readonly other: "{{count}} attachments";
+        };
         readonly scrollToBottom: "Scroll to bottom";
         readonly newMessages: "New messages";
         readonly unreadCount: {
