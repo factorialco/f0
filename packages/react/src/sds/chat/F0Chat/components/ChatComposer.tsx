@@ -158,10 +158,10 @@ export const ChatComposer = (): ReactNode => {
   const placeholder = i18n.chat.placeholder
 
   return (
-    <div className="shrink-0 p-3 pt-1">
+    <div className="shrink-0 p-4 pt-1">
       {/* Centered, width-capped to match the message column in fullscreen. */}
       <div className="mx-auto w-full max-w-content">
-        <div className="rounded-2xl border border-solid border-f1-border-secondary bg-f1-background">
+        <div className="rounded-lg border border-solid border-f1-border bg-f1-background">
           {replyTo && (
             <ChatReplyChip
               message={replyTo}

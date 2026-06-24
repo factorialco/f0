@@ -3,11 +3,19 @@ import { type ReactNode } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
-import { Cross, Maximize, MicrophoneNegative, Minimize } from "@/icons/app"
+import {
+  Cross,
+  Maximize,
+  MicrophoneNegative,
+  Minimize,
+  Search,
+} from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
+import { useChatUI } from "../providers/ChatUIProvider"
 import { type F0ChatChannel } from "../types"
+import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 
 const PresenceDot = ({ online }: { online: boolean }): ReactNode => {
@@ -37,6 +45,7 @@ export const ChatHeader = ({
   onClose,
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
+  const { searchOpen, openSearch } = useChatUI()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
 
@@ -72,33 +81,49 @@ export const ChatHeader = ({
 
   return (
     <header className="flex shrink-0 items-center justify-between gap-2 px-4 py-3">
-      {/* DMs surface the counterpart's identity card (with View profile) on
-          hover — the plain header block is the trigger (no button chrome). */}
-      {channel.user ? (
-        <ChatUserHoverCard user={channel.user}>{identity}</ChatUserHoverCard>
+      {searchOpen ? (
+        // Search mode: the whole header becomes the search bar.
+        <ChatHeaderSearch />
       ) : (
-        identity
+        <>
+          {/* DMs surface the counterpart's identity card (with View profile) on
+              hover — the plain header block is the trigger (no button chrome). */}
+          {channel.user ? (
+            <ChatUserHoverCard user={channel.user}>
+              {identity}
+            </ChatUserHoverCard>
+          ) : (
+            identity
+          )}
+          <div className="flex shrink-0 items-center gap-0.5">
+            <ButtonInternal
+              variant="ghost"
+              hideLabel
+              label={i18n.chat.search}
+              icon={Search}
+              onClick={openSearch}
+            />
+            {onToggleFullscreen && (
+              <ButtonInternal
+                variant="ghost"
+                hideLabel
+                label={isFullscreen ? i18n.chat.collapse : i18n.chat.expand}
+                icon={isFullscreen ? Minimize : Maximize}
+                onClick={onToggleFullscreen}
+              />
+            )}
+            {onClose && (
+              <ButtonInternal
+                variant="ghost"
+                hideLabel
+                label={i18n.chat.close}
+                icon={Cross}
+                onClick={onClose}
+              />
+            )}
+          </div>
+        </>
       )}
-      <div className="flex shrink-0 items-center gap-0.5">
-        {onToggleFullscreen && (
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label={isFullscreen ? i18n.chat.collapse : i18n.chat.expand}
-            icon={isFullscreen ? Minimize : Maximize}
-            onClick={onToggleFullscreen}
-          />
-        )}
-        {onClose && (
-          <ButtonInternal
-            variant="ghost"
-            hideLabel
-            label={i18n.chat.close}
-            icon={Cross}
-            onClick={onClose}
-          />
-        )}
-      </div>
     </header>
   )
 }

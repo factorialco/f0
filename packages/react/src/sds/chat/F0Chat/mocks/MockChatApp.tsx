@@ -9,6 +9,7 @@ import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types
 import {
   type F0ChatAttachment,
   type F0ChatRuntime,
+  type F0ChatSearchResult,
   type F0ChatSendInput,
 } from "../types"
 import {
@@ -85,6 +86,19 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     []
   )
 
+  // All seed messages are loaded in the mock, so this is a client-side scan —
+  // the same shape the Stream adapter implements with `channel.search`.
+  const searchMessages = useCallback(
+    (query: string): Promise<F0ChatSearchResult[]> => {
+      const needle = query.trim().toLowerCase()
+      const hits = (app.states[convId]?.messages ?? [])
+        .filter((m) => !m.deleted && m.body.toLowerCase().includes(needle))
+        .map((m): F0ChatSearchResult => ({ id: m.id }))
+      return Promise.resolve(hits)
+    },
+    [app.states, convId]
+  )
+
   const messages = state?.messages ?? []
   const typingUsers =
     seed && state ? state.typingIds.map((id) => resolveUser(seed, id)) : []
@@ -132,6 +146,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     uploadFiles,
     transcribe: mockTranscribe,
     markRead,
+    searchMessages,
   }
 }
 

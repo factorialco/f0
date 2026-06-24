@@ -280,4 +280,87 @@ describe("F0Chat", () => {
       screen.getByRole("status", { name: /marcus and grace are writing/i })
     ).toBeInTheDocument()
   })
+
+  // --- In-conversation search ---------------------------------------------
+
+  const searchableMessages: F0ChatMessage[] = [
+    {
+      id: "s1",
+      author: { id: "other", name: "Alex" },
+      body: "deploy started",
+      createdAt: now,
+      isMine: false,
+    },
+    {
+      id: "s2",
+      author: { id: "me", name: "Me" },
+      body: "ok thanks",
+      createdAt: now,
+      isMine: true,
+    },
+    {
+      id: "s3",
+      author: { id: "other", name: "Alex" },
+      body: "deploy finished",
+      createdAt: now,
+      isMine: false,
+    },
+  ]
+
+  it("opens the header search bar and hides the identity actions", async () => {
+    renderChat(makeRuntime())
+    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    expect(screen.getByRole("searchbox")).toBeInTheDocument()
+    // The header Search button is replaced by the search bar.
+    expect(
+      screen.queryByRole("button", { name: /^search$/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("counts matches and navigates between them (newest first, wrapping)", async () => {
+    renderChat(makeRuntime({ messages: searchableMessages }))
+    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await userEvent.type(screen.getByRole("searchbox"), "deploy")
+    // Two matches; lands on the newest (2/2). Generous timeout: the query is
+    // debounced (200ms) and the search resolves async.
+    expect(
+      await screen.findByText("2/2", undefined, { timeout: 3000 })
+    ).toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole("button", { name: /previous match/i })
+    )
+    expect(
+      await screen.findByText("1/2", undefined, { timeout: 3000 })
+    ).toBeInTheDocument()
+    // Previous again wraps back to the newest.
+    await userEvent.click(
+      screen.getByRole("button", { name: /previous match/i })
+    )
+    expect(
+      await screen.findByText("2/2", undefined, { timeout: 3000 })
+    ).toBeInTheDocument()
+  })
+
+  it("shows no-results and disables navigation for an unmatched query", async () => {
+    renderChat(makeRuntime({ messages: searchableMessages }))
+    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await userEvent.type(screen.getByRole("searchbox"), "zzzznope")
+    expect(
+      await screen.findByText(/no results/i, undefined, { timeout: 3000 })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: /next match/i })).toBeDisabled()
+    expect(
+      screen.getByRole("button", { name: /previous match/i })
+    ).toBeDisabled()
+  })
+
+  it("closes search with Escape and restores the header", async () => {
+    renderChat(makeRuntime())
+    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await userEvent.type(screen.getByRole("searchbox"), "{Escape}")
+    expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /^search$/i })
+    ).toBeInTheDocument()
+  })
 })

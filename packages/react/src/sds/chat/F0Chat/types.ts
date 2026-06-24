@@ -122,6 +122,14 @@ export type F0ChatSendInput = {
 
 export type F0ChatStatus = "connecting" | "ready" | "error"
 
+/** A message that matched an in-conversation search (room to grow: preview, author…). */
+export type F0ChatSearchResult = {
+  id: string
+}
+
+/** Sentinel for {@link F0ChatRuntime.loadMessageContext} meaning "the live tail". */
+export const LATEST = "latest" as const
+
 /**
  * The data + actions a host provides to drive the chat UI. F0 is headless: it
  * never touches the transport (GetStream, websockets, …). A mock runtime powers
@@ -137,6 +145,16 @@ export type F0ChatRuntime = {
   typingUsers: F0ChatUser[]
   hasMoreOlder: boolean
   loadingOlder: boolean
+  /**
+   * Whether there are newer messages than the loaded window — true after jumping
+   * to an old message (e.g. a search hit), so the transcript isn't anchored to
+   * the live tail. Omit (→ false) when the newest messages are always loaded.
+   * factorial → `channel.state.messagePagination.hasNext`.
+   */
+  hasMoreNewer?: boolean
+  loadingNewer?: boolean
+  /** Load the next page of newer messages (mirror of `loadOlder`). */
+  loadNewer?: () => void
   /** Count of incoming messages below the user's last-read position. */
   unreadCount: number
   /** Id of the first unread message — where the "new messages" divider goes. */
@@ -156,4 +174,18 @@ export type F0ChatRuntime = {
    */
   transcribe?: TranscribeFn
   markRead?: () => void
+  /**
+   * Full-text search within this conversation, returning matches oldest→newest.
+   * Omit to fall back to a client-side substring search over the loaded
+   * `messages`. factorial → `channel.search`.
+   */
+  searchMessages?: (query: string) => Promise<F0ChatSearchResult[]>
+  /**
+   * Ensure a message is in `messages` so the UI can jump to it: pass a message
+   * id (e.g. a search hit outside the loaded window) to load it + its context,
+   * or {@link LATEST} to return to the live tail. After it resolves, `messages`
+   * (and `hasMoreNewer`) reflect the new window. factorial →
+   * `channel.state.loadMessageIntoState(id | "latest")`.
+   */
+  loadMessageContext?: (idOrLatest: string) => Promise<void>
 }

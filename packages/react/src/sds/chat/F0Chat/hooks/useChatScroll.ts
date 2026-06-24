@@ -23,6 +23,10 @@ type UseChatScrollOptions = {
   hasMoreOlder: boolean
   loadingOlder: boolean
   onReachTop: () => void
+  /** Newer-direction pagination — set after jumping to an old message. */
+  hasMoreNewer?: boolean
+  loadingNewer?: boolean
+  onReachBottom?: () => void
 }
 
 type UseChatScrollReturn = {
@@ -56,6 +60,9 @@ export function useChatScroll({
   hasMoreOlder,
   loadingOlder,
   onReachTop,
+  hasMoreNewer = false,
+  loadingNewer = false,
+  onReachBottom,
 }: UseChatScrollOptions): UseChatScrollReturn {
   const [scrolledUp, setScrolledUp] = useState(false)
   const [atBottom, setAtBottom] = useState(true)
@@ -110,11 +117,20 @@ export function useChatScroll({
       }
       onReachTop()
     }
+
+    // After jumping to an old message the tail isn't loaded; nearing the bottom
+    // pages forward. Appending below doesn't shift the viewport, so no anchor.
+    if (distanceFromBottom < TOP_TRIGGER_PX && hasMoreNewer && !loadingNewer) {
+      onReachBottom?.()
+    }
   }, [
     viewportRef,
     hasMoreOlder,
     loadingOlder,
     onReachTop,
+    hasMoreNewer,
+    loadingNewer,
+    onReachBottom,
     firstVisibleMessageIndex,
     rows,
     virtualizer,
@@ -124,9 +140,13 @@ export function useChatScroll({
     const el = viewportRef.current
     if (!el) return
 
+    // Initial auto-scroll to the bottom — but not if we opened straight into an
+    // older window (a deep-linked / searched message), where the tail isn't loaded.
     if (!didInitialScrollRef.current && rows.length > 0) {
-      virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
-      setAtBottom(true)
+      if (!hasMoreNewer) {
+        virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
+        setAtBottom(true)
+      }
       didInitialScrollRef.current = true
       prevFirstIdRef.current = messages[0]?.id ?? null
       prevLastIdRef.current = messages.at(-1)?.id ?? null
@@ -147,9 +167,14 @@ export function useChatScroll({
         el.scrollTop = start - anchorRef.current.delta
       }
       anchorRef.current = null
-    } else if (appended && (lastMessage?.isMine || nearBottomRef.current)) {
+    } else if (
+      appended &&
+      !hasMoreNewer &&
+      (lastMessage?.isMine || nearBottomRef.current)
+    ) {
       // Always follow my own messages; follow incoming ones only if near the
-      // bottom (otherwise they accumulate as unread).
+      // bottom (otherwise they accumulate as unread). Never auto-follow while
+      // viewing an older window — the "last" row isn't the live tail.
       virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
       setAtBottom(true)
     }
@@ -157,7 +182,7 @@ export function useChatScroll({
     prevFirstIdRef.current = firstId
     prevLastIdRef.current = lastMessage?.id ?? null
     prevLenRef.current = messages.length
-  }, [messages, rows.length, viewportRef, virtualizer, indexById])
+  }, [messages, rows.length, viewportRef, virtualizer, indexById, hasMoreNewer])
 
   return { scrolledUp, atBottom, scrollToBottom, handleScroll }
 }

@@ -1,4 +1,11 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { useVirtualizer } from "@tanstack/react-virtual"
 import { AnimatePresence, motion } from "motion/react"
@@ -11,6 +18,7 @@ import { Spinner } from "@/ui/Spinner"
 
 import { useChatUI } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
+import { LATEST } from "../types"
 import { type ChatRow, flattenChatRows } from "../utils/grouping"
 import { useChatScroll } from "../hooks/useChatScroll"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
@@ -43,6 +51,10 @@ export const ChatMessagesContainer = (): ReactNode => {
     hasMoreOlder,
     loadingOlder,
     loadOlder,
+    hasMoreNewer,
+    loadingNewer,
+    loadNewer,
+    loadMessageContext,
     unreadCount,
     firstUnreadId,
     markRead,
@@ -97,6 +109,9 @@ export const ChatMessagesContainer = (): ReactNode => {
     hasMoreOlder,
     loadingOlder,
     onReachTop: loadOlder,
+    hasMoreNewer,
+    loadingNewer,
+    onReachBottom: loadNewer,
   })
 
   // When someone starts typing while we're at the bottom, keep the dots in view.
@@ -109,18 +124,53 @@ export const ChatMessagesContainer = (): ReactNode => {
     prevTypingRef.current = typingActive
   }, [typingActive, atBottom, scrollToBottom])
 
-  // Reply quotes jump to the original message by index (works off-screen).
+  // Jump targeting (reply quotes, search hits, back-to-latest). A jump may land
+  // on a message that isn't loaded yet (a far-back search hit pulled in by
+  // `loadMessageContext`): we record it as pending and resolve once it appears
+  // in `indexById` — avoids the race where the scroll fires before the loaded
+  // window has updated.
+  const pendingScrollRef = useRef<
+    { kind: "id"; id: string } | { kind: "bottom" } | null
+  >(null)
+
+  const resolvePendingScroll = useCallback(() => {
+    const pending = pendingScrollRef.current
+    if (!pending) return
+    if (pending.kind === "bottom") {
+      if (displayRows.length > 0) {
+        virtualizer.scrollToIndex(displayRows.length - 1, { align: "end" })
+        pendingScrollRef.current = null
+      }
+      return
+    }
+    const index = indexById.get(pending.id)
+    if (index != null) {
+      virtualizer.scrollToIndex(index, { align: "center", behavior: "smooth" })
+      pendingScrollRef.current = null
+    }
+  }, [indexById, virtualizer, displayRows.length])
+
+  // Retry any pending jump after the loaded window changes (e.g. once
+  // `loadMessageContext` brought the target in).
+  useEffect(resolvePendingScroll, [resolvePendingScroll])
+
   useEffect(() => {
     registerScrollToMessage((id) => {
-      const index = indexById.get(id)
-      if (index != null) {
-        virtualizer.scrollToIndex(index, {
-          align: "center",
-          behavior: "smooth",
-        })
-      }
+      pendingScrollRef.current = { kind: "id", id }
+      resolvePendingScroll()
     })
-  }, [registerScrollToMessage, indexById, virtualizer])
+  }, [registerScrollToMessage, resolvePendingScroll])
+
+  // Jump-to-bottom: when newer messages aren't loaded (we're in an old window),
+  // reload the live tail first, then stick to the bottom once it lands.
+  const jumpToBottom = useCallback(() => {
+    if (hasMoreNewer && loadMessageContext) {
+      pendingScrollRef.current = { kind: "bottom" }
+      void loadMessageContext(LATEST)
+    } else {
+      scrollToBottom()
+    }
+  }, [hasMoreNewer, loadMessageContext, scrollToBottom])
 
   const seeingAll = atBottom && hovering
 
@@ -164,7 +214,9 @@ export const ChatMessagesContainer = (): ReactNode => {
   const topItem = virtualItems[0]
   const stickyDate = topItem ? dateForRow(displayRows, topItem.index) : null
 
-  const showButton = scrolledUp
+  // Show the affordance when scrolled up, or whenever the live tail isn't loaded
+  // (after a far-back jump) so there's always a way back to the latest messages.
+  const showButton = scrolledUp || hasMoreNewer
 
   return (
     <div
@@ -242,7 +294,7 @@ export const ChatMessagesContainer = (): ReactNode => {
           >
             <div className="pointer-events-auto rounded-md bg-f1-background">
               <ButtonInternal
-                onClick={() => scrollToBottom()}
+                onClick={jumpToBottom}
                 variant={"neutral"}
                 icon={ArrowDown}
                 label={
@@ -253,9 +305,11 @@ export const ChatMessagesContainer = (): ReactNode => {
                           : "chat.unreadCount.other",
                         { count: unreadCount }
                       )
-                    : i18n.chat.scrollToBottom
+                    : hasMoreNewer
+                      ? i18n.chat.backToLatest
+                      : i18n.chat.scrollToBottom
                 }
-                hideLabel={unreadCount === 0}
+                hideLabel={unreadCount === 0 && !hasMoreNewer}
               />
             </div>
           </motion.div>

@@ -14,8 +14,10 @@ export type {
   F0ChatMessageReply,
   F0ChatSendInput,
   F0ChatStatus,
+  F0ChatSearchResult,
   F0ChatRuntime,
 } from "./types"
+export { LATEST } from "./types"
 // Re-exported because `F0ChatRuntime.transcribe` is typed as `TranscribeFn`;
 // a host implementing the runtime needs to name it.
 export type { TranscribeFn } from "@/sds/ai/F0AiChat/types"
