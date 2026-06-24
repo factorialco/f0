@@ -574,6 +574,7 @@ const e = {
     backToLatest: "Jump to latest",
     muted: "Muted",
     attachFile: "Attach file",
+    addEmoji: "Add emoji",
     recordAudio: "Record audio",
     listening: "Listening…",
     stopRecording: "Stop and transcribe",

@@ -574,6 +574,7 @@ export declare const defaultTranslations: {
         readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
         readonly attachFile: "Attach file";
+        readonly addEmoji: "Add emoji";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
         readonly stopRecording: "Stop and transcribe";
