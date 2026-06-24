@@ -134,6 +134,10 @@ const meta = {
     ),
   ],
   tags: ["autodocs", "experimental"],
+  // These are exported data fixtures reused by other stories, not stories
+  // themselves — keep Storybook from rendering them as standalone stories
+  // (they'd mount without a SidebarChatProvider and throw).
+  excludeStories: ["exampleActions", "exampleGroups"],
 } satisfies Meta<typeof SidebarChatList>
 
 export default meta

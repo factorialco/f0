@@ -1,5 +1,6 @@
 import { type ReactNode } from "react"
 
+import { OneEmptyState } from "@/components/OneEmptyState"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { ChatMessageSkeleton } from "./ChatMessageSkeleton"
@@ -25,5 +26,13 @@ export const ChatError = (): ReactNode => {
 
 export const ChatEmptyState = (): ReactNode => {
   const i18n = useI18n()
-  return <Centered>{i18n.chat.emptyConversation}</Centered>
+  return (
+    <div className="flex h-full flex-1 items-center justify-center p-6">
+      <OneEmptyState
+        emoji="💬"
+        title={i18n.chat.emptyConversation}
+        description={i18n.chat.emptyConversationDescription}
+      />
+    </div>
+  )
 }

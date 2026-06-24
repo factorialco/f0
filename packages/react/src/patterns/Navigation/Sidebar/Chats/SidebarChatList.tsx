@@ -21,7 +21,7 @@ export type SidebarChatEmptyState = {
 const DEFAULT_EMPTY_STATE: Required<SidebarChatEmptyState> = {
   emoji: "💬",
   title: "No chats yet",
-  description: "Start a conversation — the synergy won't build itself.",
+  description: "Start a new conversation to see it here.",
 }
 
 /** Left-aligned, full-width ghost button for a top-of-list action. */
