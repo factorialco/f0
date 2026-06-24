@@ -4830,18 +4830,10 @@ export declare const defaultTranslations: {
     };
     readonly chat: {
         readonly placeholder: "Write something here..";
-        readonly send: "Send message";
-        readonly close: "Close";
-        readonly search: "Search";
         readonly searchPlaceholder: "Search messages";
-        readonly noResults: "No results";
-        readonly previousMatch: "Previous match";
-        readonly nextMatch: "Next match";
         readonly closeSearch: "Close search";
         readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
-        readonly expand: "Expand";
-        readonly collapse: "Collapse";
         readonly attachFile: "Attach file";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
@@ -4850,8 +4842,6 @@ export declare const defaultTranslations: {
         readonly transcribing: "Transcribing…";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
-        readonly today: "Today";
-        readonly yesterday: "Yesterday";
         readonly sent: "Sent";
         readonly read: "Read";
         readonly readBy: {
@@ -4864,9 +4854,7 @@ export declare const defaultTranslations: {
         readonly isTyping: "{{name}} is writing…";
         readonly twoTyping: "{{first}} and {{second}} are writing…";
         readonly severalTyping: "Several people are writing…";
-        readonly copy: "Copy";
         readonly copied: "Copied";
-        readonly delete: "Delete";
         readonly deletedMessage: "Message deleted";
         readonly moreActions: "Message actions";
         readonly info: "Info";
@@ -17371,8 +17359,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -17380,11 +17371,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

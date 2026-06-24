@@ -3627,18 +3627,10 @@ declare const defaultTranslations: {
     };
     readonly chat: {
         readonly placeholder: "Write something here..";
-        readonly send: "Send message";
-        readonly close: "Close";
-        readonly search: "Search";
         readonly searchPlaceholder: "Search messages";
-        readonly noResults: "No results";
-        readonly previousMatch: "Previous match";
-        readonly nextMatch: "Next match";
         readonly closeSearch: "Close search";
         readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
-        readonly expand: "Expand";
-        readonly collapse: "Collapse";
         readonly attachFile: "Attach file";
         readonly recordAudio: "Record audio";
         readonly listening: "Listening…";
@@ -3647,8 +3639,6 @@ declare const defaultTranslations: {
         readonly transcribing: "Transcribing…";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
-        readonly today: "Today";
-        readonly yesterday: "Yesterday";
         readonly sent: "Sent";
         readonly read: "Read";
         readonly readBy: {
@@ -3661,9 +3651,7 @@ declare const defaultTranslations: {
         readonly isTyping: "{{name}} is writing…";
         readonly twoTyping: "{{first}} and {{second}} are writing…";
         readonly severalTyping: "Several people are writing…";
-        readonly copy: "Copy";
         readonly copied: "Copied";
-        readonly delete: "Delete";
         readonly deletedMessage: "Message deleted";
         readonly moreActions: "Message actions";
         readonly info: "Info";
@@ -8646,7 +8634,7 @@ export declare type SidebarChatStore = {
  * Collapsible titled section used across the Sidebar (navigation categories,
  * chat groups). Title + rotating chevron + animated height.
  */
-export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
+export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, collapsedBadge, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
 
 export declare interface SidebarCollapsibleSectionProps {
     title: string;
@@ -8661,6 +8649,11 @@ export declare interface SidebarCollapsibleSectionProps {
      * Slack-style hint that hidden items need attention (e.g. unread chats).
      */
     highlightWhenCollapsed?: boolean;
+    /**
+     * Content shown at the end of the header only while collapsed (e.g. a total
+     * unread badge) — surfaces what's hidden inside without expanding.
+     */
+    collapsedBadge?: ReactNode;
     /** Drag-aware guards used by the sortable Menu; safe to omit elsewhere. */
     isDragging?: boolean;
     wasDragging?: RefObject<boolean>;
@@ -10290,8 +10283,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -10299,11 +10295,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
