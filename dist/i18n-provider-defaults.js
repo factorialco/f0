@@ -612,6 +612,7 @@ const e = {
       other: "{{count}} unread"
     },
     emptyConversation: "No messages yet",
+    emptyConversationDescription: "Send a message to start the conversation.",
     connecting: "Connecting…",
     error: "Couldn't load this conversation",
     loadingOlder: "Loading earlier messages…"

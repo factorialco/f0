@@ -4871,6 +4871,7 @@ export declare const defaultTranslations: {
             readonly other: "{{count}} unread";
         };
         readonly emptyConversation: "No messages yet";
+        readonly emptyConversationDescription: "Send a message to start the conversation.";
         readonly connecting: "Connecting…";
         readonly error: "Couldn't load this conversation";
         readonly loadingOlder: "Loading earlier messages…";
