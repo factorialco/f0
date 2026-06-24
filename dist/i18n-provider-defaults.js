@@ -571,6 +571,13 @@ const e = {
     placeholder: "Write something here..",
     send: "Send message",
     close: "Close",
+    search: "Search",
+    searchPlaceholder: "Search messages",
+    noResults: "No results",
+    previousMatch: "Previous match",
+    nextMatch: "Next match",
+    closeSearch: "Close search",
+    backToLatest: "Jump to latest",
     muted: "Muted",
     expand: "Expand",
     collapse: "Collapse",
@@ -586,7 +593,14 @@ const e = {
     yesterday: "Yesterday",
     sent: "Sent",
     read: "Read",
-    readBy: "Read by {{count}}",
+    // Plural shape (one/other) so other languages can diverge — selected by the
+    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
+    readBy: {
+      one: "Read by {{count}}",
+      other: "Read by {{count}}"
+    },
+    delivered: "Delivered",
+    back: "Back",
     writing: "Writing…",
     isTyping: "{{name}} is writing…",
     twoTyping: "{{first}} and {{second}} are writing…",
@@ -597,11 +611,6 @@ const e = {
     deletedMessage: "Message deleted",
     moreActions: "Message actions",
     info: "Info",
-    messageInfo: "Message info",
-    sentAt: "Sent",
-    readByLabel: "Read by {{count}}",
-    noReadsYet: "No one has read this yet",
-    loadMore: "Load more",
     viewProfile: "View profile",
     reply: "Reply",
     react: "Add reaction",
@@ -609,7 +618,10 @@ const e = {
     removeQuote: "Remove quote",
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
-    unreadCount: "{{count}} unread",
+    unreadCount: {
+      one: "{{count}} unread",
+      other: "{{count}} unread"
+    },
     emptyConversation: "No messages yet",
     connecting: "Connecting…",
     error: "Couldn't load this conversation",

@@ -4832,6 +4832,13 @@ export declare const defaultTranslations: {
         readonly placeholder: "Write something here..";
         readonly send: "Send message";
         readonly close: "Close";
+        readonly search: "Search";
+        readonly searchPlaceholder: "Search messages";
+        readonly noResults: "No results";
+        readonly previousMatch: "Previous match";
+        readonly nextMatch: "Next match";
+        readonly closeSearch: "Close search";
+        readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
         readonly expand: "Expand";
         readonly collapse: "Collapse";
@@ -4847,7 +4854,12 @@ export declare const defaultTranslations: {
         readonly yesterday: "Yesterday";
         readonly sent: "Sent";
         readonly read: "Read";
-        readonly readBy: "Read by {{count}}";
+        readonly readBy: {
+            readonly one: "Read by {{count}}";
+            readonly other: "Read by {{count}}";
+        };
+        readonly delivered: "Delivered";
+        readonly back: "Back";
         readonly writing: "Writing…";
         readonly isTyping: "{{name}} is writing…";
         readonly twoTyping: "{{first}} and {{second}} are writing…";
@@ -4858,11 +4870,6 @@ export declare const defaultTranslations: {
         readonly deletedMessage: "Message deleted";
         readonly moreActions: "Message actions";
         readonly info: "Info";
-        readonly messageInfo: "Message info";
-        readonly sentAt: "Sent";
-        readonly readByLabel: "Read by {{count}}";
-        readonly noReadsYet: "No one has read this yet";
-        readonly loadMore: "Load more";
         readonly viewProfile: "View profile";
         readonly reply: "Reply";
         readonly react: "Add reaction";
@@ -4870,7 +4877,10 @@ export declare const defaultTranslations: {
         readonly removeQuote: "Remove quote";
         readonly scrollToBottom: "Scroll to bottom";
         readonly newMessages: "New messages";
-        readonly unreadCount: "{{count}} unread";
+        readonly unreadCount: {
+            readonly one: "{{count}} unread";
+            readonly other: "{{count}} unread";
+        };
         readonly emptyConversation: "No messages yet";
         readonly connecting: "Connecting…";
         readonly error: "Couldn't load this conversation";
@@ -17361,11 +17371,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -17373,8 +17380,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

@@ -3629,6 +3629,13 @@ declare const defaultTranslations: {
         readonly placeholder: "Write something here..";
         readonly send: "Send message";
         readonly close: "Close";
+        readonly search: "Search";
+        readonly searchPlaceholder: "Search messages";
+        readonly noResults: "No results";
+        readonly previousMatch: "Previous match";
+        readonly nextMatch: "Next match";
+        readonly closeSearch: "Close search";
+        readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
         readonly expand: "Expand";
         readonly collapse: "Collapse";
@@ -3644,7 +3651,12 @@ declare const defaultTranslations: {
         readonly yesterday: "Yesterday";
         readonly sent: "Sent";
         readonly read: "Read";
-        readonly readBy: "Read by {{count}}";
+        readonly readBy: {
+            readonly one: "Read by {{count}}";
+            readonly other: "Read by {{count}}";
+        };
+        readonly delivered: "Delivered";
+        readonly back: "Back";
         readonly writing: "Writing…";
         readonly isTyping: "{{name}} is writing…";
         readonly twoTyping: "{{first}} and {{second}} are writing…";
@@ -3655,11 +3667,6 @@ declare const defaultTranslations: {
         readonly deletedMessage: "Message deleted";
         readonly moreActions: "Message actions";
         readonly info: "Info";
-        readonly messageInfo: "Message info";
-        readonly sentAt: "Sent";
-        readonly readByLabel: "Read by {{count}}";
-        readonly noReadsYet: "No one has read this yet";
-        readonly loadMore: "Load more";
         readonly viewProfile: "View profile";
         readonly reply: "Reply";
         readonly react: "Add reaction";
@@ -3667,7 +3674,10 @@ declare const defaultTranslations: {
         readonly removeQuote: "Remove quote";
         readonly scrollToBottom: "Scroll to bottom";
         readonly newMessages: "New messages";
-        readonly unreadCount: "{{count}} unread";
+        readonly unreadCount: {
+            readonly one: "{{count}} unread";
+            readonly other: "{{count}} unread";
+        };
         readonly emptyConversation: "No messages yet";
         readonly connecting: "Connecting…";
         readonly error: "Couldn't load this conversation";
@@ -4856,10 +4866,23 @@ export declare type F0ChatChannel = {
     /** DM only — the other person's presence. */
     presence?: "online" | "offline";
     muted?: boolean;
+    /**
+     * Extra status badges shown in the header (e.g. on vacation). Host-provided
+     * metadata — not necessarily transport-backed: Stream has no such concept, so
+     * factorial sources these from its own data (e.g. HR vacation status).
+     */
+    statuses?: F0ChatChannelStatus[];
     /** Group only. */
     memberCount?: number;
     /** DM only — the counterpart, used for the header identity hover card. */
     user?: F0ChatUser;
+};
+
+/** A status badge shown in the header next to the title (e.g. on vacation, away).
+ * The host decides the icon + label; the UI just renders it like the mute icon. */
+export declare type F0ChatChannelStatus = {
+    icon: IconType;
+    label: string;
 };
 
 export declare type F0ChatChannelType = "dm" | "group";
@@ -4892,12 +4915,20 @@ export declare type F0ChatMessage = {
     createdAt: string;
     isMine: boolean;
     status?: F0ChatMessageStatus;
-    /** When the message was read (DM read receipt), ISO. */
+    /**
+     * When the message was read (DM read receipt), ISO. Approximated from the
+     * counterpart's per-channel last-read pointer — Stream has no per-message
+     * read time — so it's "read at or before this", not an exact per-message stamp.
+     */
     readAt?: string;
     reactions?: F0ChatReaction[];
     attachments?: F0ChatAttachment[];
     replyTo?: F0ChatMessageReply;
-    /** Group read receipts. */
+    /**
+     * Group read receipts — how many other members have read this message.
+     * Approximated by counting members whose last-read pointer is at/after this
+     * message (Stream exposes no per-message reader list).
+     */
     readByCount?: number;
     /**
      * Soft-deleted tombstone — render an italic "[Message deleted]" placeholder
@@ -4943,22 +4974,6 @@ export declare type F0ChatReaction = {
     users?: F0ChatUser[];
 };
 
-/** A person who has read a message, for the message-info reader list. */
-export declare type F0ChatReader = {
-    user: F0ChatUser;
-    /** When they read it (ISO). */
-    readAt?: string;
-};
-
-/** A page of readers — cursor-based so a message read by hundreds paginates. */
-export declare type F0ChatReadersPage = {
-    readers: F0ChatReader[];
-    /** Opaque cursor for the next page, or null when exhausted. */
-    nextCursor: string | null;
-    /** Total number of readers (drives the "Read by N" count). */
-    total: number;
-};
-
 /**
  * The data + actions a host provides to drive the chat UI. F0 is headless: it
  * never touches the transport (GetStream, websockets, …). A mock runtime powers
@@ -4974,6 +4989,16 @@ export declare type F0ChatRuntime = {
     typingUsers: F0ChatUser[];
     hasMoreOlder: boolean;
     loadingOlder: boolean;
+    /**
+     * Whether there are newer messages than the loaded window — true after jumping
+     * to an old message (e.g. a search hit), so the transcript isn't anchored to
+     * the live tail. Omit (→ false) when the newest messages are always loaded.
+     * factorial → `channel.state.messagePagination.hasNext`.
+     */
+    hasMoreNewer?: boolean;
+    loadingNewer?: boolean;
+    /** Load the next page of newer messages (mirror of `loadOlder`). */
+    loadNewer?: () => void;
     /** Count of incoming messages below the user's last-read position. */
     unreadCount: number;
     /** Id of the first unread message — where the "new messages" divider goes. */
@@ -4986,17 +5011,32 @@ export declare type F0ChatRuntime = {
     /** Called as the user types so the runtime can emit typing.start/stop. */
     onInputActivity: () => void;
     uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
-    /** Voice dictation — same signature as the AI chat (streams partials). */
+    /**
+     * Optional voice dictation — same signature as the AI chat (streams partials).
+     * Not part of the Stream transport; a host wires it to its own speech service
+     * (the Stream adapter omits it, so the mic button stays hidden there).
+     */
     transcribe?: TranscribeFn;
     markRead?: () => void;
     /**
-     * Fetch the next page of people who have read a message, for the info panel.
-     * Cursor-based + infinite scroll. The page size is owned by the runtime/host
-     * (not the UI), so it isn't passed in.
+     * Full-text search within this conversation, returning matches oldest→newest.
+     * Omit to fall back to a client-side substring search over the loaded
+     * `messages`. factorial → `channel.search`.
      */
-    getMessageReaders?: (messageId: string, opts: {
-        cursor?: string | null;
-    }) => Promise<F0ChatReadersPage>;
+    searchMessages?: (query: string) => Promise<F0ChatSearchResult[]>;
+    /**
+     * Ensure a message is in `messages` so the UI can jump to it: pass a message
+     * id (e.g. a search hit outside the loaded window) to load it + its context,
+     * or {@link LATEST} to return to the live tail. After it resolves, `messages`
+     * (and `hasMoreNewer`) reflect the new window. factorial →
+     * `channel.state.loadMessageIntoState(id | "latest")`.
+     */
+    loadMessageContext?: (idOrLatest: string) => Promise<void>;
+};
+
+/** A message that matched an in-conversation search (room to grow: preview, author…). */
+export declare type F0ChatSearchResult = {
+    id: string;
 };
 
 export declare type F0ChatSendInput = {
@@ -6535,6 +6575,9 @@ export declare type lastIntentType = {
     selectedIntent?: string;
     customIntent?: string;
 } | null;
+
+/** Sentinel for {@link F0ChatRuntime.loadMessageContext} meaning "the live tail". */
+export declare const LATEST: "latest";
 
 declare type Level = (typeof levels)[number];
 
@@ -10247,11 +10290,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -10259,8 +10299,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
