@@ -1,7 +1,7 @@
 import { Ref, forwardRef } from "react"
 import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
-const SvgTouchId = (props: SvgProps, ref: Ref<Svg>) => (
+const SvgTouchID = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
     viewBox="0 0 24 24"
@@ -15,5 +15,5 @@ const SvgTouchId = (props: SvgProps, ref: Ref<Svg>) => (
     />
   </Svg>
 )
-const ForwardRef = forwardRef(SvgTouchId)
+const ForwardRef = forwardRef(SvgTouchID)
 export default ForwardRef
