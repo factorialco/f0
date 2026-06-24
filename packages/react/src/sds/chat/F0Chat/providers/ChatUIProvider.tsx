@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from "react"
 
-import { type F0ChatMessage } from "../types"
+import { type F0ChatImageAttachment, type F0ChatMessage } from "../types"
 import { useF0Chat } from "./F0ChatProvider"
 
 /** Debounce before running a search as the user types. */
@@ -33,6 +33,15 @@ type ChatUIContextValue = {
   registerFileDropHandler: (fn: (files: File[]) => void) => void
   /** Route files dropped anywhere on the panel to the composer. */
   dropFiles: (files: File[]) => void
+
+  // In-chat image lightbox.
+  /** The clicked message's images + the active index, or null when closed. */
+  imagePreview: { images: F0ChatImageAttachment[]; index: number } | null
+  /** Open the lightbox on a message's images, starting at `index`. */
+  openImagePreview: (images: F0ChatImageAttachment[], index: number) => void
+  closeImagePreview: () => void
+  /** Move the lightbox to another image of the same message (wraps around). */
+  setImagePreviewIndex: (index: number) => void
 
   // In-conversation search (header search bar).
   /** Whether the header is in search mode. */
@@ -67,6 +76,11 @@ export const ChatUIProvider = ({
   const scrollFnRef = useRef<((id: string) => void) | null>(null)
   const dropFnRef = useRef<((files: File[]) => void) | null>(null)
   const highlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const [imagePreview, setImagePreview] = useState<{
+    images: F0ChatImageAttachment[]
+    index: number
+  } | null>(null)
 
   const [searchOpen, setSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
@@ -107,6 +121,18 @@ export const ChatUIProvider = ({
   const dropFiles = useCallback((files: File[]) => {
     dropFnRef.current?.(files)
   }, [])
+
+  const openImagePreview = useCallback(
+    (images: F0ChatImageAttachment[], index: number) =>
+      setImagePreview({ images, index }),
+    []
+  )
+  const closeImagePreview = useCallback(() => setImagePreview(null), [])
+  const setImagePreviewIndex = useCallback(
+    (index: number) =>
+      setImagePreview((prev) => (prev ? { ...prev, index } : prev)),
+    []
+  )
 
   /** Scroll to a message and highlight it; `persist` keeps the ring (search). */
   const scrollAndHighlight = useCallback((id: string, persist: boolean) => {
@@ -218,6 +244,10 @@ export const ChatUIProvider = ({
       registerScrollToMessage,
       registerFileDropHandler,
       dropFiles,
+      imagePreview,
+      openImagePreview,
+      closeImagePreview,
+      setImagePreviewIndex,
       searchOpen,
       openSearch,
       closeSearch,
@@ -236,6 +266,10 @@ export const ChatUIProvider = ({
       registerScrollToMessage,
       registerFileDropHandler,
       dropFiles,
+      imagePreview,
+      openImagePreview,
+      closeImagePreview,
+      setImagePreviewIndex,
       searchOpen,
       openSearch,
       closeSearch,

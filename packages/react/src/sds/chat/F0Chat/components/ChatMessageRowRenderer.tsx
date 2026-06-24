@@ -27,8 +27,8 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
  * the old flex `gap-6`/`gap-1` can't apply — `measureElement` reads padding). */
 const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
   if (isFirstRow) return "pt-2"
-  if (row.type === "message") return row.isFirstOfRun ? "pt-6" : "pt-2"
-  return "pt-6"
+  if (row.type === "message") return row.isFirstOfRun ? "pt-4" : "pt-1"
+  return "pt-4"
 }
 
 /**

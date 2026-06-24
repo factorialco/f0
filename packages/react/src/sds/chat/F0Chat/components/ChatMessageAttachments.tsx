@@ -5,20 +5,18 @@ import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { type F0ChatMessage } from "../types"
-
-const triggerDownload = (url: string, name: string) => {
-  const a = document.createElement("a")
-  a.href = url
-  a.download = name
-  a.rel = "noreferrer"
-  a.click()
-}
+import { useChatUI } from "../providers/ChatUIProvider"
+import {
+  type F0ChatFileAttachment,
+  type F0ChatImageAttachment,
+  type F0ChatMessage,
+} from "../types"
+import { triggerDownload } from "../utils/download"
 
 /**
  * Attachments shown above a message bubble — images render inline (clickable to
- * open full size); other files use {@link F0FileItem} with a download action,
- * mirroring the AI chat's file rendering.
+ * open the in-chat lightbox); other files use {@link F0FileItem} with a download
+ * action, mirroring the AI chat's file rendering.
  */
 export const ChatMessageAttachments = ({
   message,
@@ -28,11 +26,16 @@ export const ChatMessageAttachments = ({
   isMine: boolean
 }): ReactNode => {
   const i18n = useI18n()
+  const { openImagePreview } = useChatUI()
   const attachments = message.attachments
   if (!attachments || attachments.length === 0) return null
 
-  const images = attachments.filter((a) => a.kind === "image")
-  const files = attachments.filter((a) => a.kind === "file")
+  const images = attachments.filter(
+    (a): a is F0ChatImageAttachment => a.kind === "image"
+  )
+  const files = attachments.filter(
+    (a): a is F0ChatFileAttachment => a.kind === "file"
+  )
   // A lone image gets full size; several flow side by side (wrap) as thumbnails
   // so the message doesn't grow tall.
   const singleImage = images.length === 1
@@ -47,12 +50,12 @@ export const ChatMessageAttachments = ({
       {images.length > 0 && (
         <div className={cn("flex flex-wrap gap-1", isMine && "justify-end")}>
           {images.map((image, i) => (
-            <a
+            <button
               key={`${image.url}-${i}`}
-              href={image.url}
-              target="_blank"
-              rel="noreferrer"
-              className="block"
+              type="button"
+              onClick={() => openImagePreview(images, i)}
+              className="block overflow-hidden rounded-xl transition-opacity hover:opacity-90"
+              aria-label={i18n.chat.openImage}
             >
               <img
                 src={image.thumbnailUrl ?? image.url}
@@ -62,7 +65,7 @@ export const ChatMessageAttachments = ({
                   singleImage ? "max-h-60 max-w-full" : "h-28 w-28"
                 )}
               />
-            </a>
+            </button>
           ))}
         </div>
       )}
