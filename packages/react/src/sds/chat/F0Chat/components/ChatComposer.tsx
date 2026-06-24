@@ -284,7 +284,7 @@ export const ChatComposer = (): ReactNode => {
                   variant="default"
                   size="md"
                   hideLabel
-                  label={i18n.chat.send}
+                  label={i18n.actions.send}
                   icon={ArrowUp}
                   onClick={handleSend}
                   disabled={!canSend}

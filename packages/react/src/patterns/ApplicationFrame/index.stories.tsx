@@ -14,6 +14,7 @@ import {
   Pencil,
   Search,
 } from "@/icons/app"
+import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
@@ -34,8 +35,7 @@ import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
 import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
-import { Menu } from "@/patterns/Navigation/Sidebar/Menu"
-import * as SidebarMenuStories from "@/patterns/Navigation/Sidebar/Menu/index.stories"
+import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
 import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
@@ -947,6 +947,151 @@ const MockChatPanel = ({ convId }: { convId: string }) => {
 }
 
 /**
+ * Realistic "Main" menu mirroring the production Factorial sidebar (root nav +
+ * Personal / Company / Operations / Talent / IT Management / Finance / More).
+ */
+const homeMenuTree: MenuCategory[] = [
+  {
+    id: "main",
+    title: "Main",
+    isRoot: true,
+    isSortable: false,
+    items: [
+      { label: "Home", icon: Icons.Home, href: "/", exactMatch: true },
+      {
+        label: "Communications",
+        icon: Icons.Megaphone,
+        href: "/communications",
+      },
+      // `data-test` is asserted by the Default story play test.
+      {
+        label: "Inbox",
+        icon: Icons.Inbox,
+        href: "/inbox",
+        badge: 6,
+        "data-test": "foo",
+      },
+      { label: "Calendar", icon: Icons.Calendar, href: "/calendar" },
+      {
+        label: "Discover Factorial",
+        icon: Icons.Sparkles,
+        href: "/discover",
+        tag: "New",
+      },
+    ],
+  },
+  {
+    id: "personal",
+    title: "Personal",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Profile", icon: Icons.Person, href: "/profile" },
+      {
+        label: "My time tracking",
+        icon: Icons.Clock,
+        href: "/my-time-tracking",
+      },
+      { label: "Time off", icon: Icons.PalmTree, href: "/time-off" },
+      { label: "My benefits", icon: Icons.Present, href: "/my-benefits" },
+      { label: "My documents", icon: Icons.Files, href: "/my-documents" },
+      { label: "My projects", icon: Icons.Kanban, href: "/my-projects" },
+      { label: "My spending", icon: Icons.CreditCard, href: "/my-spending" },
+      { label: "My training", icon: Icons.AcademicCap, href: "/my-training" },
+      { label: "Tasks", icon: Icons.Completed, href: "/tasks" },
+    ],
+  },
+  {
+    id: "company",
+    title: "Company",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      {
+        label: "Organization",
+        icon: Icons.Organization,
+        href: "/organization",
+      },
+      { label: "Documents", icon: Icons.Folder, href: "/documents" },
+      { label: "Policies", icon: Icons.Shield, href: "/policies" },
+      { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
+      { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
+    ],
+  },
+  {
+    id: "operations",
+    title: "Operations",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Time tracking", icon: Icons.Timer, href: "/time-tracking" },
+      { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
+      { label: "Projects", icon: Icons.Kanban, href: "/projects" },
+      { label: "Benefits", icon: Icons.HoldHeart, href: "/benefits" },
+      { label: "Compensation", icon: Icons.MoneyBag, href: "/compensation" },
+    ],
+  },
+  {
+    id: "talent",
+    title: "Talent",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      {
+        label: "Talent analytics",
+        icon: Icons.ChartLine,
+        href: "/talent-analytics",
+      },
+      { label: "Performance", icon: Icons.Target, href: "/performance" },
+      { label: "Recruitment", icon: Icons.SearchPerson, href: "/recruitment" },
+      { label: "Engagement", icon: Icons.Heart, href: "/engagement" },
+      { label: "Training", icon: Icons.BookOpen, href: "/training" },
+    ],
+  },
+  {
+    id: "it",
+    title: "IT Management",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Device catalog", icon: Icons.Laptop, href: "/device-catalog" },
+      { label: "IT inventory", icon: Icons.HardDrive, href: "/it-inventory" },
+    ],
+  },
+  {
+    id: "finance",
+    title: "Finance",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Workspace", icon: Icons.Briefcase, href: "/finance" },
+      { label: "Sales", icon: Icons.ChartVerticalBars, href: "/sales" },
+      { label: "Spending", icon: Icons.CreditCard, href: "/spending" },
+      { label: "Treasury", icon: Icons.Bank, href: "/treasury" },
+      { label: "Accounting", icon: Icons.Calculator, href: "/accounting" },
+    ],
+  },
+  {
+    id: "more",
+    title: "More",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "AI reports", icon: Icons.Ai, href: "/ai-reports" },
+      { label: "Analytics", icon: Icons.ChartPie, href: "/analytics" },
+      { label: "Billing", icon: Icons.Receipt, href: "/billing" },
+      { label: "Workflows", icon: Icons.Split, href: "/workflows" },
+      {
+        label: "Trust channel",
+        icon: Icons.UserProtected,
+        href: "/trust-channel",
+      },
+      { label: "Settings", icon: Icons.Settings, href: "/settings" },
+    ],
+  },
+]
+
+/**
  * Tabbed sidebar (mirrors `TabbedSidebar`) whose "Messages" conversations swap
  * the side-panel content. It lives inside the `F0AiChatProvider` that
  * `ApplicationFrame` mounts, so it can call `useAiChat()` directly. "Ask AI"
@@ -1026,7 +1171,7 @@ const ConversationsSidebarInner = () => {
             ]}
           />
         ) : (
-          <Menu {...SidebarMenuStories.Default.args} />
+          <Menu tree={homeMenuTree} />
         )
       }
       footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}

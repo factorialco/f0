@@ -25,8 +25,8 @@ export const MessageStatus = ({
   const reducedMotion = useReducedMotion()
 
   const time = formatStatusTime(new Date(message.createdAt), new Date(), {
-    today: i18n.chat.today,
-    yesterday: i18n.chat.yesterday,
+    today: i18n.date.groups.today,
+    yesterday: i18n.date.groups.yesterday,
   })
 
   let label = time

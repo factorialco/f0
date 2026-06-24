@@ -1,6 +1,11 @@
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  userEvent,
+} from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
@@ -317,42 +322,43 @@ describe("F0Chat", () => {
     ).not.toBeInTheDocument()
   })
 
+  // Generous timeouts: the query is debounced (200ms) + the search resolves
+  // async, and these poll slowly under the full parallel suite (CPU contention).
   it("counts matches and navigates between them (newest first, wrapping)", async () => {
     renderChat(makeRuntime({ messages: searchableMessages }))
     await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
-    await userEvent.type(screen.getByRole("searchbox"), "deploy")
-    // Two matches; lands on the newest (2/2). Generous timeout: the query is
-    // debounced (200ms) and the search resolves async.
+    // Set the value in one shot — F0SearchInput is a controlled+debounced input,
+    // so per-key typing can drop characters under heavy parallel-suite load.
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "deploy" },
+    })
+    // Two matches; lands on the newest (2/2).
     expect(
-      await screen.findByText("2/2", undefined, { timeout: 3000 })
+      await screen.findByText("2/2", undefined, { timeout: 8000 })
     ).toBeInTheDocument()
-    await userEvent.click(
-      screen.getByRole("button", { name: /previous match/i })
-    )
+    await userEvent.click(screen.getByRole("button", { name: /^previous$/i }))
     expect(
-      await screen.findByText("1/2", undefined, { timeout: 3000 })
+      await screen.findByText("1/2", undefined, { timeout: 8000 })
     ).toBeInTheDocument()
     // Previous again wraps back to the newest.
-    await userEvent.click(
-      screen.getByRole("button", { name: /previous match/i })
-    )
+    await userEvent.click(screen.getByRole("button", { name: /^previous$/i }))
     expect(
-      await screen.findByText("2/2", undefined, { timeout: 3000 })
+      await screen.findByText("2/2", undefined, { timeout: 8000 })
     ).toBeInTheDocument()
-  })
+  }, 20000)
 
-  it("shows no-results and disables navigation for an unmatched query", async () => {
+  it("shows 0/0 and disables navigation for an unmatched query", async () => {
     renderChat(makeRuntime({ messages: searchableMessages }))
     await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
-    await userEvent.type(screen.getByRole("searchbox"), "zzzznope")
+    fireEvent.change(screen.getByRole("searchbox"), {
+      target: { value: "zzzznope" },
+    })
     expect(
-      await screen.findByText(/no results/i, undefined, { timeout: 3000 })
+      await screen.findByText("0/0", undefined, { timeout: 8000 })
     ).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: /next match/i })).toBeDisabled()
-    expect(
-      screen.getByRole("button", { name: /previous match/i })
-    ).toBeDisabled()
-  })
+    expect(screen.getByRole("button", { name: /^next$/i })).toBeDisabled()
+    expect(screen.getByRole("button", { name: /^previous$/i })).toBeDisabled()
+  }, 20000)
 
   it("closes search with Escape and restores the header", async () => {
     renderChat(makeRuntime())

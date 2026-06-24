@@ -237,6 +237,53 @@ describe("SidebarChatList", () => {
     expect(screen.getByText("3")).toBeInTheDocument()
   })
 
+  const unreadGroup: SidebarChatGroup[] = [
+    {
+      id: "dms",
+      title: "Direct messages",
+      chats: [
+        {
+          id: "a",
+          label: "A",
+          avatar: { type: "person", firstName: "A", lastName: "A" },
+          unreadCount: 2,
+        },
+        {
+          id: "b",
+          label: "B",
+          avatar: { type: "person", firstName: "B", lastName: "B" },
+          unreadCount: 5,
+        },
+      ],
+    },
+  ]
+
+  it("shows the group's total unread as a badge when collapsed", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={unreadGroup.map((g) => ({ ...g, isOpen: false }))}
+      >
+        <SidebarChatList />
+      </SidebarChatProvider>
+    )
+    // Collapsed: the header surfaces the combined unread (2 + 5).
+    expect(screen.getByText("7")).toBeInTheDocument()
+  })
+
+  it("does not show the group total badge when expanded", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={unreadGroup.map((g) => ({ ...g, isOpen: true }))}
+      >
+        <SidebarChatList />
+      </SidebarChatProvider>
+    )
+    // Expanded: only the per-chat badges show, never the combined total.
+    expect(screen.queryByText("7")).not.toBeInTheDocument()
+    expect(screen.getByText("2")).toBeInTheDocument()
+    expect(screen.getByText("5")).toBeInTheDocument()
+  })
+
   it("renders group titles and chats as buttons", () => {
     renderList()
     expect(screen.getByText("Direct messages")).toBeInTheDocument()

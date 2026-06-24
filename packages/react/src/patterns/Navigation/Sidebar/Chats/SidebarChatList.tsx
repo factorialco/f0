@@ -9,6 +9,7 @@ import { SidebarChatItem } from "./SidebarChatItem"
 import { useSidebarChats } from "./SidebarChatProvider"
 import { SidebarChatListSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChatAction } from "./types"
+import { UnreadBadge } from "./UnreadBadge"
 
 /** Copy shown when there are no chats at all. Override via the `emptyState` prop. */
 export type SidebarChatEmptyState = {
@@ -73,7 +74,7 @@ export const SidebarChatList = ({
   const showSkeleton = loading && !hasChats
 
   return (
-    <div className="flex w-full flex-col gap-2 bg-transparent px-3">
+    <div className="flex w-full flex-col gap-4 bg-transparent px-3">
       {actions.length > 0 && (
         <div className="flex flex-col gap-0.5">
           {actions.map((action) => (
@@ -95,14 +96,23 @@ export const SidebarChatList = ({
       )}
       {!showSkeleton &&
         groups.map((group) => {
-          const hasUnread = group.chats.some((c) => c.unreadCount)
+          const totalUnread = group.chats.reduce(
+            (sum, c) => sum + (c.unreadCount ?? 0),
+            0
+          )
           return (
             <SidebarCollapsibleSection
               key={group.id}
               title={group.title}
               isOpen={group.isOpen}
-              // Slack-style: when collapsed with unread chats, emphasise the title.
-              highlightWhenCollapsed={hasUnread}
+              // Slack-style: when collapsed with unread chats, emphasise the title
+              // and surface the group's total unread count as a badge.
+              highlightWhenCollapsed={totalUnread > 0}
+              collapsedBadge={
+                totalUnread > 0 ? (
+                  <UnreadBadge count={totalUnread} />
+                ) : undefined
+              }
             >
               <AnimatePresence initial={false}>
                 {group.chats.map((chat) => (

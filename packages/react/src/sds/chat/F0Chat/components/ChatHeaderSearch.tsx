@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { useChatUI } from "../providers/ChatUIProvider"
+import { cn } from "@/lib/utils"
 
 /**
  * Inline search bar that replaces the whole header in search mode: F0SearchInput
@@ -19,6 +20,7 @@ export const ChatHeaderSearch = (): ReactNode => {
   const {
     searchQuery,
     setSearchQuery,
+    searching,
     matchCurrent,
     matchTotal,
     goToNextMatch,
@@ -28,6 +30,8 @@ export const ChatHeaderSearch = (): ReactNode => {
 
   const hasMatches = matchTotal > 0
   const hasQuery = searchQuery.trim().length > 0
+  // Only "no results" once a search has actually finished — never mid-search.
+  const showNoResults = hasQuery && !searching && !hasMatches
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Enter") {
@@ -47,34 +51,45 @@ export const ChatHeaderSearch = (): ReactNode => {
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder={i18n.chat.searchPlaceholder}
+          loading={searching}
           autoFocus
           clearable
           size="sm"
         />
       </div>
-      {/* Counter: "3/5" while there are hits, "No results" once a query has none. */}
-      <span className="shrink-0 whitespace-nowrap text-sm tabular-nums text-f1-foreground-secondary">
-        {hasQuery && !hasMatches
-          ? i18n.chat.noResults
-          : `${matchCurrent}/${matchTotal}`}
+      {/* Counter: "3/5" while there are hits, "0/0" in red once a finished
+          search has none. Stays blank mid-search (the input shows a spinner). */}
+      <span
+        className={cn(
+          "shrink-0 whitespace-nowrap text-sm tabular-nums",
+          showNoResults
+            ? "text-f1-foreground-critical"
+            : "text-f1-foreground-secondary"
+        )}
+      >
+        {searching ? "" : `${matchCurrent}/${matchTotal}`}
       </span>
-      <div className="flex shrink-0 items-center gap-0.5">
-        <ButtonInternal
-          variant="ghost"
-          hideLabel
-          label={i18n.chat.previousMatch}
-          icon={ChevronUp}
-          onClick={goToPrevMatch}
-          disabled={!hasMatches}
-        />
-        <ButtonInternal
-          variant="ghost"
-          hideLabel
-          label={i18n.chat.nextMatch}
-          icon={ChevronDown}
-          onClick={goToNextMatch}
-          disabled={!hasMatches}
-        />
+      <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-0">
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={i18n.navigation.previous}
+            icon={ChevronUp}
+            onClick={goToPrevMatch}
+            disabled={!hasMatches || searching}
+            size="sm"
+          />
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={i18n.navigation.next}
+            icon={ChevronDown}
+            onClick={goToNextMatch}
+            disabled={!hasMatches || searching}
+            size="sm"
+          />
+        </div>
         <ButtonInternal
           variant="ghost"
           hideLabel

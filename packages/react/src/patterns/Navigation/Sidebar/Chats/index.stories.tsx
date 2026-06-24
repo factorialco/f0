@@ -91,49 +91,31 @@ export const exampleGroups: SidebarChatGroup[] = [
       {
         id: "engineering",
         label: "Engineering",
-        avatar: {
-          type: "company",
-          name: "Engineering",
-          src: "/avatars/company01.jpg",
-        },
+        // Groups can use an emoji avatar…
+        avatar: { type: "emoji", emoji: "🚀" },
         unreadCount: 132,
       },
       {
         id: "product",
         label: "Product",
-        avatar: {
-          type: "company",
-          name: "Product",
-          src: "/avatars/company02.jpg",
-        },
+        avatar: { type: "emoji", emoji: "🧭" },
       },
       {
         id: "design-systems",
         label: "Design Systems",
-        avatar: {
-          type: "company",
-          name: "Design Systems",
-          src: "/avatars/company03.jpg",
-        },
+        avatar: { type: "emoji", emoji: "🎨" },
         unreadCount: 23,
       },
       {
         id: "data-platform",
         label: "Data Platform",
-        avatar: {
-          type: "company",
-          name: "Data Platform",
-          src: "/avatars/company04.jpg",
-        },
+        avatar: { type: "emoji", emoji: "📊" },
       },
       {
         id: "devops-sre",
         label: "DevOps & SRE",
-        avatar: {
-          type: "company",
-          name: "DevOps & SRE",
-          src: "/avatars/company05.jpg",
-        },
+        // No emoji → company avatar built from the group name (its initials).
+        avatar: { type: "company", name: "DevOps & SRE" },
         unreadCount: 2,
       },
     ],

@@ -16,6 +16,8 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { Spinner } from "@/ui/Spinner"
 
+import { ScrollShadow } from "@/sds/ai/F0AiMessagesContainer/components/ScrollShadow"
+
 import { useChatUI } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { LATEST } from "../types"
@@ -100,19 +102,20 @@ export const ChatMessagesContainer = (): ReactNode => {
     overscan: 8,
   })
 
-  const { scrolledUp, atBottom, scrollToBottom, handleScroll } = useChatScroll({
-    viewportRef,
-    virtualizer,
-    rows: displayRows,
-    indexById,
-    messages,
-    hasMoreOlder,
-    loadingOlder,
-    onReachTop: loadOlder,
-    hasMoreNewer,
-    loadingNewer,
-    onReachBottom: loadNewer,
-  })
+  const { scrolledUp, atBottom, atTop, scrollToBottom, handleScroll } =
+    useChatScroll({
+      viewportRef,
+      virtualizer,
+      rows: displayRows,
+      indexById,
+      messages,
+      hasMoreOlder,
+      loadingOlder,
+      onReachTop: loadOlder,
+      hasMoreNewer,
+      loadingNewer,
+      onReachBottom: loadNewer,
+    })
 
   // When someone starts typing while we're at the bottom, keep the dots in view.
   const typingActive = typingUsers.length > 0
@@ -259,6 +262,12 @@ export const ChatMessagesContainer = (): ReactNode => {
         </div>
       </div>
 
+      {/* Header shadow: a soft gradient at the top of the transcript whenever
+          it's scrolled away from the top (same affordance as the sidebar). */}
+      <AnimatePresence>
+        {!atTop && <ScrollShadow position="top" key="chat-header-shadow" />}
+      </AnimatePresence>
+
       {/* Sticky date header: pinned date of the top-most visible group. While
           older messages load, a spinner sits beside the date in the same pill. */}
       <AnimatePresence>
@@ -271,7 +280,7 @@ export const ChatMessagesContainer = (): ReactNode => {
             transition={{ duration: 0.15 }}
           >
             <div
-              className="flex items-center gap-1.5 rounded-full bg-f1-background border border-solid border-f1-border-secondary px-2.5 py-0.5 backdrop-blur"
+              className="flex items-center gap-1.5 rounded-full bg-f1-background border border-solid border-f1-border-secondary px-2.5 py-0.5 backdrop-blur z-50"
               aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
             >
               {loadingOlder && <Spinner size="small" className="h-3.5 w-3.5" />}

@@ -3,6 +3,7 @@ import { type ReactNode } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
+import { EmojiImage } from "@/lib/emojis"
 import {
   Cross,
   Maximize,
@@ -52,7 +53,15 @@ export const ChatHeader = ({
   const identity = (
     <div className="flex min-w-0 items-center gap-2">
       <div className="relative shrink-0">
-        <F0Avatar size="sm" avatar={channel.avatar} />
+        {channel.avatar.type === "emoji" ? (
+          // Emoji groups show the glyph alone (no avatar chrome) so it reads at
+          // full size instead of shrunk inside the bordered avatar box.
+          <span className="flex size-6 items-center justify-center">
+            <EmojiImage emoji={channel.avatar.emoji} size="sm" />
+          </span>
+        ) : (
+          <F0Avatar size="sm" avatar={channel.avatar} />
+        )}
         {showPresence && <PresenceDot online={channel.presence === "online"} />}
       </div>
       <span className="truncate text-base font-medium text-f1-foreground">
@@ -99,7 +108,7 @@ export const ChatHeader = ({
             <ButtonInternal
               variant="ghost"
               hideLabel
-              label={i18n.chat.search}
+              label={i18n.actions.search}
               icon={Search}
               onClick={openSearch}
             />
@@ -107,7 +116,9 @@ export const ChatHeader = ({
               <ButtonInternal
                 variant="ghost"
                 hideLabel
-                label={isFullscreen ? i18n.chat.collapse : i18n.chat.expand}
+                label={
+                  isFullscreen ? i18n.actions.collapse : i18n.actions.expand
+                }
                 icon={isFullscreen ? Minimize : Maximize}
                 onClick={onToggleFullscreen}
               />
@@ -116,7 +127,7 @@ export const ChatHeader = ({
               <ButtonInternal
                 variant="ghost"
                 hideLabel
-                label={i18n.chat.close}
+                label={i18n.actions.close}
                 icon={Cross}
                 onClick={onClose}
               />

@@ -123,7 +123,11 @@ export type Seed = {
   multiTyping?: boolean
 }
 
-const team = (name: string) => ({ type: "team" as const, name })
+/** Group avatar: the emoji when one is given, otherwise the company avatar
+ * built from the group's name (its initials). A company avatar is never passed
+ * by hand — it's always this name-derived fallback. */
+const groupAvatar = (name: string, emoji?: string): AvatarVariant =>
+  emoji ? { type: "emoji", emoji } : { type: "company", name }
 
 // Time helpers for readable timestamps (minutes ago).
 const MIN = 1
@@ -293,7 +297,7 @@ export const SEEDS: Seed[] = [
     id: "grp-product",
     type: "group",
     title: "Product Team",
-    avatar: team("Product Team"),
+    avatar: groupAvatar("Product Team", "🚀"),
     participants: [MARCUS, GRACE, NOAH, SAM],
     unread: 2,
     olderPages: 3,
@@ -364,7 +368,7 @@ export const SEEDS: Seed[] = [
     id: "grp-design",
     type: "group",
     title: "Design Critique",
-    avatar: team("Design Critique"),
+    avatar: groupAvatar("Design Critique", "🎨"),
     participants: [ELEANOR, ISLA, SAM, VIKTOR],
     olderPages: 2,
     multiTyping: true,
@@ -410,7 +414,7 @@ export const SEEDS: Seed[] = [
     id: "grp-release",
     type: "group",
     title: "Release War Room",
-    avatar: team("Release War Room"),
+    avatar: groupAvatar("Release War Room", "🔥"),
     participants: [MARCUS, GRACE],
     multiTyping: true,
     lines: [
@@ -427,7 +431,8 @@ export const SEEDS: Seed[] = [
     id: "grp-leadership",
     type: "group",
     title: "Leadership",
-    avatar: team("Leadership"),
+    // No emoji → company avatar built from the group name.
+    avatar: groupAvatar("Leadership"),
     participants: [MARCUS, OWEN],
     lines: [],
   },

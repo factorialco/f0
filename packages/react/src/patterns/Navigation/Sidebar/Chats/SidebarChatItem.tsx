@@ -1,9 +1,11 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
+import { UnreadBadge } from "./UnreadBadge"
 import { F0Icon } from "@/components/F0Icon/F0Icon"
 
 const Dots = () => (
@@ -90,7 +92,15 @@ export const SidebarChatItem = ({
         <Dots />
       ) : (
         <div className="relative flex flex-shrink-0 items-center">
-          <F0Avatar size="xs" avatar={chat.avatar} />
+          {chat.avatar.type === "emoji" ? (
+            // Emoji groups show the glyph alone (no avatar chrome) so it isn't
+            // shrunk inside the bordered avatar box.
+            <span className="flex size-5 items-center justify-center">
+              <EmojiImage emoji={chat.avatar.emoji} size="sm" />
+            </span>
+          ) : (
+            <F0Avatar size="xs" avatar={chat.avatar} />
+          )}
           {presence && <PresenceDot presence={presence} isActive={isActive} />}
         </div>
       )}
@@ -119,14 +129,7 @@ export const SidebarChatItem = ({
               />
             </div>
           )}
-          {chat.unreadCount && (
-            <div
-              aria-label={`${chat.unreadCount} unread`}
-              className="flex-shrink-0 flex items-center justify-center rounded-xs bg-f1-background-info px-0.5 min-w-5 h-5 text-center text-sm font-semibold tabular-nums text-f1-foreground-info border border-solid border-f1-border-info"
-            >
-              {chat.unreadCount > 99 ? "+99" : chat.unreadCount}
-            </div>
-          )}
+          {chat.unreadCount && <UnreadBadge count={chat.unreadCount} />}
         </div>
       )}
     </button>

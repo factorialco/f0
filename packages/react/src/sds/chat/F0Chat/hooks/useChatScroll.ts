@@ -34,6 +34,8 @@ type UseChatScrollReturn = {
   scrolledUp: boolean
   /** True when the latest messages are visible (used to gate mark-as-read). */
   atBottom: boolean
+  /** True when the transcript is scrolled to the very top (drives the header shadow). */
+  atTop: boolean
   scrollToBottom: (behavior?: "auto" | "smooth") => void
   handleScroll: () => void
 }
@@ -66,6 +68,9 @@ export function useChatScroll({
 }: UseChatScrollOptions): UseChatScrollReturn {
   const [scrolledUp, setScrolledUp] = useState(false)
   const [atBottom, setAtBottom] = useState(true)
+  // Whether the viewport is pinned to the very top — the header shadow shows
+  // whenever it isn't (i.e. there's scrolled-away content beneath the header).
+  const [atTop, setAtTop] = useState(true)
   const nearBottomRef = useRef(true)
   const prevFirstIdRef = useRef<string | null>(messages[0]?.id ?? null)
   const prevLastIdRef = useRef<string | null>(messages.at(-1)?.id ?? null)
@@ -74,6 +79,8 @@ export function useChatScroll({
   // Saved before loading older messages, so we can keep the viewport steady once
   // the prepended page changes every index below the anchor.
   const anchorRef = useRef<{ id: string; delta: number } | null>(null)
+  // rAF handle for the post-prepend re-pin loop (see `restoreAnchor`).
+  const pinRafRef = useRef<number | null>(null)
 
   const scrollToBottom = useCallback(
     (behavior: "auto" | "smooth" = "smooth") => {
@@ -83,6 +90,21 @@ export function useChatScroll({
     },
     [virtualizer, rows.length]
   )
+
+  // Pin the saved anchor message back to its on-screen offset. Returns the
+  // applied scrollTop (or null when there's nothing to pin) so the caller can
+  // tell when it has stabilised.
+  const restoreAnchor = useCallback((): number | null => {
+    const el = viewportRef.current
+    const anchor = anchorRef.current
+    if (!el || !anchor) return null
+    const newIndex = indexById.get(anchor.id)
+    if (newIndex == null) return null
+    const start = virtualizer.getOffsetForIndex(newIndex, "start")?.[0] ?? 0
+    const target = start - anchor.delta
+    el.scrollTop = target
+    return target
+  }, [viewportRef, indexById, virtualizer])
 
   // First message currently at the top of the viewport (skips separators/divider).
   const firstVisibleMessageIndex = useCallback(
@@ -106,6 +128,7 @@ export function useChatScroll({
     nearBottomRef.current = isAtBottom
     setAtBottom(isAtBottom)
     setScrolledUp(distanceFromBottom > clientHeight * 0.5)
+    setAtTop(scrollTop <= 0)
 
     if (scrollTop < TOP_TRIGGER_PX && hasMoreOlder && !loadingOlder) {
       // Anchor on the first visible message so the prepended page doesn't jump.
@@ -147,6 +170,10 @@ export function useChatScroll({
         virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
         setAtBottom(true)
       }
+      // Landing at the bottom of an overflowing transcript means we're not at
+      // the top — show the header shadow right away (a programmatic scroll may
+      // not fire `onScroll`).
+      setAtTop(el.scrollHeight - el.clientHeight <= 0)
       didInitialScrollRef.current = true
       prevFirstIdRef.current = messages[0]?.id ?? null
       prevLastIdRef.current = messages.at(-1)?.id ?? null
@@ -161,12 +188,32 @@ export function useChatScroll({
     const appended = grew && lastMessage?.id !== prevLastIdRef.current
 
     if (prepended && anchorRef.current) {
-      const newIndex = indexById.get(anchorRef.current.id)
-      if (newIndex != null) {
-        const start = virtualizer.getOffsetForIndex(newIndex, "start")?.[0] ?? 0
-        el.scrollTop = start - anchorRef.current.delta
+      // Pin once now (estimate-based), then keep re-pinning each frame until the
+      // offset stops moving — the prepended rows start at their estimated height
+      // and only settle to their measured height a frame or two later, and
+      // without this re-pin that settle reads as a small jump.
+      if (pinRafRef.current != null) cancelAnimationFrame(pinRafRef.current)
+      let prev = restoreAnchor()
+      let stableFrames = 0
+      let frames = 0
+      const tick = () => {
+        const next = restoreAnchor()
+        frames += 1
+        if (next != null && prev != null && Math.abs(next - prev) < 1) {
+          stableFrames += 1
+        } else {
+          stableFrames = 0
+        }
+        prev = next
+        // Stop once stable for 2 frames (measurements settled) or after a cap.
+        if (next == null || stableFrames >= 2 || frames >= 12) {
+          anchorRef.current = null
+          pinRafRef.current = null
+          return
+        }
+        pinRafRef.current = requestAnimationFrame(tick)
       }
-      anchorRef.current = null
+      pinRafRef.current = requestAnimationFrame(tick)
     } else if (
       appended &&
       !hasMoreNewer &&
@@ -182,7 +229,23 @@ export function useChatScroll({
     prevFirstIdRef.current = firstId
     prevLastIdRef.current = lastMessage?.id ?? null
     prevLenRef.current = messages.length
-  }, [messages, rows.length, viewportRef, virtualizer, indexById, hasMoreNewer])
+  }, [
+    messages,
+    rows.length,
+    viewportRef,
+    virtualizer,
+    indexById,
+    hasMoreNewer,
+    restoreAnchor,
+  ])
 
-  return { scrolledUp, atBottom, scrollToBottom, handleScroll }
+  // Stop the re-pin loop if the list unmounts mid-restore.
+  useLayoutEffect(
+    () => () => {
+      if (pinRafRef.current != null) cancelAnimationFrame(pinRafRef.current)
+    },
+    []
+  )
+
+  return { scrolledUp, atBottom, atTop, scrollToBottom, handleScroll }
 }

@@ -8,8 +8,8 @@ import { formatSeparator } from "../utils/natural-time"
 export const DateTimeSeparator = ({ at }: { at: string }): ReactNode => {
   const i18n = useI18n()
   const label = formatSeparator(new Date(at), new Date(), {
-    today: i18n.chat.today,
-    yesterday: i18n.chat.yesterday,
+    today: i18n.date.groups.today,
+    yesterday: i18n.date.groups.yesterday,
   })
 
   return (

@@ -20,6 +20,11 @@ export interface SidebarCollapsibleSectionProps {
    * Slack-style hint that hidden items need attention (e.g. unread chats).
    */
   highlightWhenCollapsed?: boolean
+  /**
+   * Content shown at the end of the header only while collapsed (e.g. a total
+   * unread badge) — surfaces what's hidden inside without expanding.
+   */
+  collapsedBadge?: ReactNode
   /** Drag-aware guards used by the sortable Menu; safe to omit elsewhere. */
   isDragging?: boolean
   wasDragging?: RefObject<boolean>
@@ -36,6 +41,7 @@ export const SidebarCollapsibleSection = ({
   onCollapse,
   children,
   highlightWhenCollapsed,
+  collapsedBadge,
   isDragging,
   wasDragging,
 }: SidebarCollapsibleSectionProps) => {
@@ -57,7 +63,7 @@ export const SidebarCollapsibleSection = ({
         <div className="group relative flex items-center">
           <div
             className={cn(
-              "group relative flex w-full select-none items-center gap-1 rounded px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
+              "group relative flex w-full select-none items-center gap-1 rounded p-1.5 pr-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
               focusRing("focus-visible:ring-inset"),
               isRoot && "hidden"
             )}
@@ -71,7 +77,7 @@ export const SidebarCollapsibleSection = ({
           >
             <span
               className={cn(
-                "transition-colors",
+                "transition-colors py-0.5",
                 highlighted && "font-[900] text-f1-foreground"
               )}
             >
@@ -85,9 +91,13 @@ export const SidebarCollapsibleSection = ({
             >
               <F0Icon icon={ChevronDown} size="xs" />
             </motion.div>
+            {/* Surfaces hidden unreads at the far right while collapsed. */}
+            {!isOpen && collapsedBadge && (
+              <span className="ml-auto">{collapsedBadge}</span>
+            )}
           </div>
         </div>
-        <CollapsibleContent forceMount className="flex flex-col gap-1">
+        <CollapsibleContent forceMount className="flex flex-col gap-1 mt-0.5">
           <motion.div
             initial={false}
             animate={{

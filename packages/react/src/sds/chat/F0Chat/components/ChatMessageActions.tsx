@@ -156,7 +156,7 @@ export const ChatMessageActions = ({
               />
               <MenuItem
                 icon={Files}
-                label={i18n.chat.copy}
+                label={i18n.actions.copy}
                 onClick={runAndClose(() => {
                   void navigator.clipboard?.writeText(message.body)
                 })}
@@ -168,7 +168,7 @@ export const ChatMessageActions = ({
                 <div className="flex flex-col gap-0 p-1">
                   <MenuItem
                     icon={Delete}
-                    label={i18n.chat.delete}
+                    label={i18n.actions.delete}
                     onClick={runAndClose(() => deleteMessage(message.id))}
                   />
                 </div>

@@ -39,7 +39,10 @@ export const ChatMessageInfoView = ({
 }): ReactNode => {
   const i18n = useI18n()
   const { channel } = useF0Chat()
-  const labels = { today: i18n.chat.today, yesterday: i18n.chat.yesterday }
+  const labels = {
+    today: i18n.date.groups.today,
+    yesterday: i18n.date.groups.yesterday,
+  }
   const now = new Date()
 
   const isGroup = channel.type === "group"

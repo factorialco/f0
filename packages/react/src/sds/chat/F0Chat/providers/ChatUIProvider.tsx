@@ -41,6 +41,8 @@ type ChatUIContextValue = {
   closeSearch: () => void
   searchQuery: string
   setSearchQuery: (query: string) => void
+  /** True while a (debounced/async) search is in flight — show a spinner, not "no results". */
+  searching: boolean
   /** 1-based index of the active match (0 when there are none). */
   matchCurrent: number
   /** Total number of matches for the current query. */
@@ -70,6 +72,7 @@ export const ChatUIProvider = ({
   const [searchQuery, setSearchQuery] = useState("")
   const [matchIds, setMatchIds] = useState<string[]>([])
   const [activeMatchIndex, setActiveMatchIndex] = useState(-1)
+  const [searching, setSearching] = useState(false)
 
   // Latest-value refs so the search/navigation callbacks stay stable and read
   // fresh data inside async work without re-subscribing.
@@ -145,14 +148,19 @@ export const ChatUIProvider = ({
     if (q === "") {
       setMatchIds([])
       setActiveMatchIndex(-1)
+      setSearching(false)
       setHighlightedId(null)
       return
     }
+    // Mark as searching immediately (covers the debounce + async window) so the
+    // UI shows a spinner rather than flashing "no results" mid-search.
+    setSearching(true)
     const runId = ++searchRunRef.current
     const timer = setTimeout(() => {
       const apply = (ids: string[]) => {
         if (runId !== searchRunRef.current) return // a newer query superseded us
         setMatchIds(ids)
+        setSearching(false)
         if (ids.length > 0) navigateToMatch(ids.length - 1, ids)
         else {
           setActiveMatchIndex(-1)
@@ -182,6 +190,7 @@ export const ChatUIProvider = ({
     setSearchQuery("")
     setMatchIds([])
     setActiveMatchIndex(-1)
+    setSearching(false)
     setHighlightedId(null)
   }, [])
 
@@ -214,6 +223,7 @@ export const ChatUIProvider = ({
       closeSearch,
       searchQuery,
       setSearchQuery,
+      searching,
       matchCurrent,
       matchTotal,
       goToNextMatch,
@@ -230,6 +240,7 @@ export const ChatUIProvider = ({
       openSearch,
       closeSearch,
       searchQuery,
+      searching,
       matchCurrent,
       matchTotal,
       goToNextMatch,
