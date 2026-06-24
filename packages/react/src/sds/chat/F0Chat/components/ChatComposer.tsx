@@ -13,6 +13,7 @@ import { F0FileItem } from "@/components/F0FileItem"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Picker } from "@/kits/Social/Reactions/Picker"
 import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
 import { useAudioRecorder } from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
 import { Skeleton } from "@/ui/skeleton"
@@ -140,6 +141,28 @@ export const ChatComposer = (): ReactNode => {
     if (el) el.style.height = "auto"
   }, [attachments, canSend, replyTo, sendMessage, setReplyTo, value])
 
+  // Insert a picked emoji at the caret (the textarea keeps its selection while
+  // blurred), then restore focus and the caret just after it.
+  const insertEmoji = useCallback(
+    (emoji: string) => {
+      const el = textareaRef.current
+      const start = el?.selectionStart ?? el?.value.length ?? 0
+      const end = el?.selectionEnd ?? el?.value.length ?? 0
+      setValue((prev) => prev.slice(0, start) + emoji + prev.slice(end))
+      onInputActivity()
+      requestAnimationFrame(() => {
+        grow()
+        const node = textareaRef.current
+        if (node) {
+          const caret = start + emoji.length
+          node.focus()
+          node.setSelectionRange(caret, caret)
+        }
+      })
+    },
+    [grow, onInputActivity]
+  )
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -161,7 +184,7 @@ export const ChatComposer = (): ReactNode => {
     <div className="shrink-0 p-4 pt-1">
       {/* Centered, width-capped to match the message column in fullscreen. */}
       <div className="mx-auto w-full max-w-content">
-        <div className="rounded-lg border border-solid border-f1-border bg-f1-background">
+        <div className="rounded-lg border border-solid border-f1-border bg-f1-background flex flex-col">
           {replyTo && (
             <ChatReplyChip
               message={replyTo}
@@ -216,7 +239,7 @@ export const ChatComposer = (): ReactNode => {
             rows={1}
             placeholder={isRecording ? i18n.chat.listening : placeholder}
             className={cn(
-              "w-full resize-none bg-transparent px-3.5 pt-3 text-md text-f1-foreground",
+              "w-full resize-none bg-transparent p-3 pb-2 text-md text-f1-foreground",
               "placeholder:text-f1-foreground-secondary focus:outline-none"
             )}
           />
@@ -248,7 +271,7 @@ export const ChatComposer = (): ReactNode => {
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-between p-2">
+            <div className="flex items-center justify-between p-3">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -259,15 +282,24 @@ export const ChatComposer = (): ReactNode => {
                   e.target.value = ""
                 }}
               />
-              <ButtonInternal
-                variant="outline"
-                size="md"
-                hideLabel
-                label={i18n.chat.attachFile}
-                icon={Paperclip}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={!uploadFiles || isTranscribing}
-              />
+              <div className="flex items-center gap-1">
+                <ButtonInternal
+                  variant="outline"
+                  size="md"
+                  hideLabel
+                  label={i18n.chat.attachFile}
+                  icon={Paperclip}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={!uploadFiles || isTranscribing}
+                />
+                {/* Insert emoji into the message (reuses the reactions picker). */}
+                <Picker
+                  variant="outline"
+                  size="md"
+                  label={i18n.chat.addEmoji}
+                  onSelect={insertEmoji}
+                />
+              </div>
               <div className="flex items-center gap-1">
                 {canRecord && (
                   <ButtonInternal

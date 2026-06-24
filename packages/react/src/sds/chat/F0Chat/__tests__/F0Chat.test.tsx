@@ -191,6 +191,13 @@ describe("F0Chat", () => {
     )
   })
 
+  it("shows an emoji picker button in the composer", () => {
+    renderChat(makeRuntime())
+    expect(
+      screen.getByRole("button", { name: /add emoji/i })
+    ).toBeInTheDocument()
+  })
+
   it("does not send on Shift+Enter", async () => {
     const sendMessage = vi.fn()
     renderChat(makeRuntime({ sendMessage }))
