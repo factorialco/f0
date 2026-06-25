@@ -168,6 +168,12 @@ export type F0ChatRuntime = {
   onInputActivity: () => void
   uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>
   /**
+   * Max files attachable at once. When a selection/drop would exceed it, the
+   * composer rejects the whole batch and flashes a transient error in the
+   * textarea (mirrors the AI chat). Omit for no limit.
+   */
+  maxFiles?: number
+  /**
    * Optional voice dictation — same signature as the AI chat (streams partials).
    * Not part of the Stream transport; a host wires it to its own speech service
    * (the Stream adapter omits it, so the mic button stays hidden there).

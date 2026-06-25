@@ -144,6 +144,8 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     deleteMessage,
     onInputActivity: () => {},
     uploadFiles,
+    // Demoes the "too many files" transient error (mirrors the AI chat).
+    maxFiles: 5,
     transcribe: mockTranscribe,
     markRead,
     searchMessages,

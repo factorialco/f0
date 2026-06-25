@@ -326,6 +326,8 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     deleteMessage,
     onInputActivity: () => {},
     uploadFiles,
+    // Demoes the "too many files" transient error (mirrors the AI chat).
+    maxFiles: 5,
     // Same streaming dictation mock the AI chat / RichText stories use.
     transcribe: mockTranscribe,
     markRead,

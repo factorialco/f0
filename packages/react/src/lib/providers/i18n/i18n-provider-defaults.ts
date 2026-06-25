@@ -486,6 +486,13 @@ export const defaultTranslations = {
     transcribing: "Transcribing…",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
+    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileUploadError: "Upload failed",
+    micPermissionDenied:
+      "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
     sent: "Sent",
     read: "Read",
     // Plural shape (one/other) so other languages can diverge — selected by the
