@@ -16,7 +16,7 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
-import { F0Drawer } from "../index"
+import { DrawerControls, F0Drawer } from "../index"
 import { drawerSizes } from "../types"
 
 const meta: Meta<typeof F0Drawer> = {
@@ -242,5 +242,203 @@ export const WithResourceHeader: Story = {
         otherActions={undefined}
       />
     ),
+  },
+}
+
+// ─── Resource-aware header stories ────────────────────────────────────────────
+
+const CANDIDATE_RESOURCE_HEADER: ComponentProps<typeof ResourceHeader> = {
+  title: "René Galindo",
+  description: "Senior Product Designer",
+  avatar: {
+    type: "person",
+    firstName: "René",
+    lastName: "Galindo",
+    src: "/avatars/person04.jpg",
+  },
+  status: {
+    label: "Stage",
+    text: "Interview",
+    variant: "warning",
+    actions: [],
+  },
+  metadata: [
+    {
+      label: "Applied",
+      value: { type: "date", formattedDate: "2026-05-12" },
+    },
+    {
+      label: "Manager",
+      value: {
+        type: "avatar",
+        variant: {
+          type: "person",
+          firstName: "Ilya",
+          lastName: "Zayats",
+          src: "/avatars/person05.jpg",
+        },
+        text: "Ilya Zayats",
+      },
+    },
+  ],
+}
+
+/**
+ * `navigation` in the standard title row — useful when the drawer shows
+ * one item from a list and the user should be able to step through
+ * without closing and reopening.
+ */
+export const WithNavigation: Story = {
+  args: {
+    ...Default.args,
+    title: "Team Status",
+    navigation: {
+      previous: { title: "Previous item", onClick: () => {} },
+      next: { title: "Next item", onClick: () => {} },
+      counter: { current: 3, total: 10 },
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `navigation` to render prev/next arrows and an optional counter beside the close button in the standard title row.",
+      },
+    },
+  },
+}
+
+/**
+ * `resourceHeader` renders the resource identity band (avatar, title,
+ * description, status, metadata) directly in the header area instead of
+ * composing it inside the body. No controls row — the close button sits alone
+ * at the top right.
+ */
+export const WithResourceHeaderProp: Story = {
+  args: {
+    ...Default.args,
+    position: "right",
+    title: "René Galindo",
+    resourceHeader: CANDIDATE_RESOURCE_HEADER,
+    otherActions: OTHER_ACTIONS,
+    tabs: TABS,
+    children: <ExampleList itemsCount={8} />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Pass `resourceHeader` to render the identity band in the header. A visually-hidden `DialogTitle` keeps the accessible name. `otherActions` appears in the top-right beside the close button.",
+      },
+    },
+  },
+}
+
+/**
+ * Full resource-aware layout: a controls row owns the top chrome
+ * (expand link + prev/next navigation), the identity band sits below it,
+ * and tabs follow. This is the ATS-style application preview pattern.
+ */
+export const WithResourceControls: Story = {
+  render: (args) => {
+    const CANDIDATES = [
+      "René Galindo",
+      "Ilya Zayats",
+      "Anna Pérez",
+      "Marc Torres",
+      "Sofía López",
+    ]
+
+    const Wrapper = () => {
+      const [open, setOpen] = useState(args.isOpen)
+      const [index, setIndex] = useState(0)
+
+      const controls: DrawerControls = {
+        kind: "resource",
+        expand: { label: "Open detail", onClick: () => {} },
+        navigation: {
+          previous:
+            index > 0
+              ? {
+                  title: CANDIDATES[index - 1],
+                  onClick: () => setIndex((i) => i - 1),
+                }
+              : undefined,
+          next:
+            index < CANDIDATES.length - 1
+              ? {
+                  title: CANDIDATES[index + 1],
+                  onClick: () => setIndex((i) => i + 1),
+                }
+              : undefined,
+          counter: { current: index + 1, total: CANDIDATES.length },
+        },
+      }
+
+      return (
+        <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+          <F0Button label="Open drawer" onClick={() => setOpen(true)} />
+          <F0Drawer
+            {...args}
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            title={CANDIDATES[index]}
+            resourceHeader={{
+              ...CANDIDATE_RESOURCE_HEADER,
+              title: CANDIDATES[index],
+            }}
+            controls={controls}
+            tabs={TABS}
+          >
+            <ExampleList itemsCount={6} />
+          </F0Drawer>
+        </div>
+      )
+    }
+
+    return <Wrapper />
+  },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    otherActions: OTHER_ACTIONS,
+    disableContentPadding: false,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`controls={{ kind: 'resource' }}` renders the top chrome row with an expand affordance and prev/next navigation. The identity band sits below. Click the arrows to step through items.",
+      },
+    },
+  },
+}
+
+/**
+ * `controls={{ kind: "back" }}` represents a drilled-in sub-page inside
+ * the same drawer — the left slot shows a back button instead of the
+ * resource navigation.
+ */
+export const WithBackControls: Story = {
+  args: {
+    ...Default.args,
+    position: "right",
+    title: "René Galindo",
+    resourceHeader: CANDIDATE_RESOURCE_HEADER,
+    controls: {
+      kind: "back",
+      label: "Back to candidates",
+      onClick: () => {},
+    },
+    otherActions: OTHER_ACTIONS,
+    children: <ExampleList itemsCount={6} />,
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`controls={{ kind: 'back' }}` is used when the drawer has drilled into a sub-page. The left slot shows a single back affordance; the identity band and close button remain.",
+      },
+    },
   },
 }
