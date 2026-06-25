@@ -1,9 +1,10 @@
 import { type ReactNode } from "react"
+import { parse } from "twemoji-parser"
 
 import { F0Icon } from "@/components/F0Icon"
+import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 
 import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatUI } from "../providers/ChatUIProvider"
@@ -11,6 +12,41 @@ import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { senderNameColorClass } from "../utils/sender-color"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
+
+/**
+ * Render a message body with its emojis swapped for twemoji SVGs (our house
+ * style, matching the chat header) instead of the OS glyphs, keeping the text
+ * intact. Emojis are sized in `em` so they follow the surrounding font size,
+ * and are not animated — the transcript is virtualized, so an entry animation
+ * would re-fire every time an emoji scrolls back into view.
+ */
+const renderBodyWithEmojis = (body: string): ReactNode => {
+  const entities = parse(body, {
+    buildUrl: (codePoints) =>
+      `https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/svg/${codePoints}.svg`,
+  })
+  if (entities.length === 0) return body
+
+  const nodes: ReactNode[] = []
+  let cursor = 0
+  entities.forEach((entity, i) => {
+    const [start, end] = entity.indices
+    if (start > cursor) nodes.push(body.slice(cursor, start))
+    nodes.push(
+      <img
+        key={`${start}-${i}`}
+        src={entity.url}
+        alt={entity.text}
+        draggable={false}
+        className="inline-block h-4 w-4 px-px align-[-0.15em]"
+      />
+    )
+    cursor = end
+  })
+  if (cursor < body.length) nodes.push(body.slice(cursor))
+
+  return nodes
+}
 
 /**
  * Reply quote nested at the top of the bubble (WhatsApp-style): a compact card
@@ -44,7 +80,7 @@ const ReplyQuote = ({
           <img
             src={thumbnailUrl}
             alt=""
-            className="h-9 w-9 shrink-0 self-center rounded-sm object-cover ml-2.5"
+            className="ml-2.5 h-9 w-9 shrink-0 self-center rounded-sm object-cover"
           />
         )}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
@@ -105,7 +141,7 @@ export const ChatBubble = ({
   }
 
   return (
-    <div className="min-w-0 max-w-full bg-f1-background rounded-2xl">
+    <div className="min-w-0 max-w-full rounded-2xl bg-f1-background">
       <div
         className={cn(
           "flex w-fit max-w-full flex-col rounded-2xl text-f1-foreground font-normal",
@@ -131,7 +167,7 @@ export const ChatBubble = ({
               </span>
             </ChatUserHoverCard>
           )}
-          {message.body}
+          {renderBodyWithEmojis(message.body)}
         </div>
       </div>
     </div>
