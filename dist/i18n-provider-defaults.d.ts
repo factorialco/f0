@@ -604,6 +604,11 @@ export declare const defaultTranslations: {
         readonly download: "Download";
         readonly removeQuote: "Remove quote";
         readonly you: "You";
+        readonly openImage: "Open image";
+        readonly imagePreview: "Image preview";
+        readonly closePreview: "Close";
+        readonly previousImage: "Previous image";
+        readonly nextImage: "Next image";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";

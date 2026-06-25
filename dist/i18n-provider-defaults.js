@@ -607,6 +607,12 @@ const e = {
     removeQuote: "Remove quote",
     // Shown as the quoted sender's name when the replied-to message is your own.
     you: "You",
+    // In-chat image lightbox.
+    openImage: "Open image",
+    imagePreview: "Image preview",
+    closePreview: "Close",
+    previousImage: "Previous image",
+    nextImage: "Next image",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
