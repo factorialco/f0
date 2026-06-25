@@ -214,6 +214,10 @@ export const DialogWrapper = ({
             ref={setContentRef}
             container={container}
             defaultContainerId={defaultContainerId}
+            // Side drawers dock within `#content` (clear of the sidebar) by
+            // anchoring the fixed wrapper to the container box; center modals
+            // stay viewport-centered.
+            anchorToContainer={isSidePosition}
             wrapperClassName={dialogWrapperClassName({ position })}
             className={cn(
               dialogContentClassName({ size: localSize }),
