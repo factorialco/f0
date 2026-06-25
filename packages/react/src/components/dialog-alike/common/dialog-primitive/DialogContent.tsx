@@ -105,22 +105,25 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer, defaultContainerId])
 
-    // Track the container's box so the fixed wrapper overlays it exactly. Only
-    // when anchoring is requested and the container is a real shell element —
-    // a body/null container keeps the viewport (`inset-0`) fallback.
+    // Anchor to the content region's frame — the parent of the scrollable
+    // `#content`, not `#content` itself, which is `overflow-auto` and padded.
+    // The frame is a stable, non-scrolling box that spans the area beside the
+    // sidebar. Only when anchoring is requested and the container is a real
+    // shell element — a body/null container keeps the viewport (`inset-0`)
+    // fallback.
+    const anchorEl =
+      anchorToContainer && container && container !== document.body
+        ? (container.parentElement ?? container)
+        : null
+
     useIsomorphicLayoutEffect(() => {
-      if (
-        typeof document === "undefined" ||
-        !anchorToContainer ||
-        !container ||
-        container === document.body
-      ) {
+      if (typeof document === "undefined" || !anchorEl) {
         setAnchorStyle({})
         return
       }
 
       const update = () => {
-        const rect = container.getBoundingClientRect()
+        const rect = anchorEl.getBoundingClientRect()
         setAnchorStyle({
           left: rect.left,
           top: rect.top,
@@ -133,7 +136,7 @@ export const DialogContent = forwardRef<
 
       update()
       const observer = new ResizeObserver(update)
-      observer.observe(container)
+      observer.observe(anchorEl)
       window.addEventListener("resize", update)
       window.addEventListener("scroll", update, true)
       return () => {
@@ -141,7 +144,7 @@ export const DialogContent = forwardRef<
         window.removeEventListener("resize", update)
         window.removeEventListener("scroll", update, true)
       }
-    }, [anchorToContainer, container])
+    }, [anchorEl])
 
     const context = useDialogPrimitiveContext()
 
