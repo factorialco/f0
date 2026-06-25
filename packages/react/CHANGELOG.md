@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.12.0](https://github.com/factorialco/f0/compare/f0-react-v4.11.0...f0-react-v4.12.0) (2026-06-25)
+
+
+### Features
+
+* **F0Drawer:** resource-aware header — port PR [#4313](https://github.com/factorialco/f0/issues/4313) into dialog-alike ([#4568](https://github.com/factorialco/f0/issues/4568)) ([39cd11b](https://github.com/factorialco/f0/commit/39cd11bd631f1917ee8de60b0fbcf1e3cb298f32))
+
 ## [4.11.0](https://github.com/factorialco/f0/compare/f0-react-v4.10.0...f0-react-v4.11.0) (2026-06-23)
 
 
