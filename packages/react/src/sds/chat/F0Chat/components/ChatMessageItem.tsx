@@ -1,86 +1,16 @@
 import { type ReactNode, useState } from "react"
 
-import { F0Icon } from "@/components/F0Icon"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 
-import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatUI } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
-import { senderNameColorClass } from "../utils/sender-color"
 import { ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
 
-/**
- * Reply quote above the bubble — a compact card led by a reply glyph that jumps
- * to the quoted message on click. In groups it leads with the quoted sender's
- * avatar + colored name; the body line shows the caption, and whenever there are
- * attachments it carries a media icon ("Photo", "3 photos", a filename, "2
- * files", "4 attachments") with the image thumbnail flush to the right.
- */
-const ReplyQuote = ({
-  reply,
-  isMine,
-  indented,
-}: {
-  reply: NonNullable<F0ChatMessage["replyTo"]>
-  isMine: boolean
-  /** Incoming group message: shift right to clear the avatar gutter. */
-  indented?: boolean
-}): ReactNode => {
-  const { jumpToMessage } = useChatUI()
-  const { currentUserId } = useF0Chat()
-  const i18n = useI18n()
-  const { icon, label, thumbnailUrl } = useReplyPreview(reply)
-  // WhatsApp-style: a quote of your own message reads "You" rather than your name.
-  const isOwnReply = reply.author.id === currentUserId
-  const senderName = isOwnReply ? i18n.chat.you : reply.author.name
-  return (
-    <button
-      type="button"
-      onClick={() => jumpToMessage(reply.id)}
-      className={cn(
-        "mb-1 flex max-w-[85%] items-center overflow-hidden rounded bg-f1-background-tertiary text-left transition-colors hover:bg-f1-background-hover",
-        isMine ? "self-end" : indented ? "ml-7 self-start" : "self-start"
-      )}
-    >
-      <div className="flex min-w-0 flex-1 flex-col gap-1 py-2 pl-2.5 pr-2.5">
-        {/* {isGroup && ( */}
-        <span className="flex items-center gap-1.5">
-          {/* <F0Avatar size="xs" avatar={userAvatar(reply.author)} /> */}
-          <OneEllipsis
-            className={cn(
-              "text-sm font-medium",
-              senderNameColorClass(reply.author)
-            )}
-          >
-            {senderName}
-          </OneEllipsis>
-        </span>
-        {/* )} */}
-        <span className="flex min-w-0 items-center gap-1 text-f1-foreground-secondary">
-          {icon && <F0Icon icon={icon} size="sm" color="default" />}
-          <OneEllipsis className="min-w-0 text-sm" lines={1}>
-            {label}
-          </OneEllipsis>
-        </span>
-      </div>
-      {thumbnailUrl && (
-        <img
-          src={thumbnailUrl}
-          alt=""
-          className="h-14 w-14 shrink-0 self-stretch object-cover"
-        />
-      )}
-    </button>
-  )
-}
-
-/** One message: optional reply quote, bubble + reactions, with a hover ellipsis menu. */
+/** One message: bubble (with any reply quote nested inside) + reactions, with a
+ * hover ellipsis menu. */
 export const ChatMessageItem = ({
   message,
   isMine,
@@ -105,7 +35,11 @@ export const ChatMessageItem = ({
   const hasAttachments =
     !message.deleted && (message.attachments?.length ?? 0) > 0
   // Attachment-only messages (no caption) skip the empty bubble but still show.
-  const hasBubble = message.deleted || message.body.trim().length > 0
+  // A reply quote lives inside the bubble, so a quoted message always needs one.
+  const hasBubble =
+    message.deleted ||
+    message.body.trim().length > 0 ||
+    Boolean(message.replyTo)
   const hasContent = hasBubble || hasAttachments
 
   return (
@@ -116,13 +50,6 @@ export const ChatMessageItem = ({
         isMine ? "items-end" : "items-start"
       )}
     >
-      {message.replyTo && !message.deleted && (
-        <ReplyQuote
-          reply={message.replyTo}
-          isMine={isMine}
-          indented={Boolean(bubbleGutter)}
-        />
-      )}
       {/* Attachments + bubble are one message column on the message's side, so
           a text-less (files-only) message still aligns + gets hover actions.
           items-end keeps the avatar gutter level with the bottom of it. */}
