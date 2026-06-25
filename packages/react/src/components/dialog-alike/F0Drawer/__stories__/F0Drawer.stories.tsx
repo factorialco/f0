@@ -13,6 +13,7 @@ import { Placeholder } from "@/icons/app"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
@@ -88,6 +89,7 @@ const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
 )
 
 export const Default: Story = {
+  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -104,6 +106,7 @@ export const Default: Story = {
 }
 
 export const LeftPosition: Story = {
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     position: "left",
@@ -130,6 +133,7 @@ export const Modal: Story = {
   },
 }
 export const WithDescription: Story = {
+  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -197,17 +201,18 @@ export const WithMultiplePrimaryActions: Story = {
     },
     children: <ExampleList itemsCount={3} />,
   },
-  parameters: {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
           "When `primaryAction` receives an array of actions, it renders a `F0ButtonDropdown` allowing the user to select between multiple primary actions.",
       },
     },
-  },
+  }),
 }
 
 export const WithModuleAndTabs: Story = {
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     title: "Team Status",
@@ -223,6 +228,7 @@ export const WithModuleAndTabs: Story = {
 }
 
 export const WithResourceHeader: Story = {
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     position: "right",
@@ -298,14 +304,14 @@ export const WithNavigation: Story = {
       counter: { current: 3, total: 10 },
     },
   },
-  parameters: {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
           "Pass `navigation` to render prev/next arrows and an optional counter beside the close button in the standard title row.",
       },
     },
-  },
+  }),
 }
 
 /**
@@ -329,14 +335,14 @@ export const WithResourceHeaderProp: Story = {
     tabs: TABS,
     children: <ExampleList itemsCount={30} />,
   },
-  parameters: {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
           "Pass `resourceHeader` to render the identity band as pinned header chrome (vs. composing `<ResourceHeader>` in the body, which scrolls away). A visually-hidden `DialogTitle` keeps the accessible name, and `otherActions` appears in the top-right beside the close button. Scroll the body to see the band and tabs stay fixed.",
       },
     },
-  },
+  }),
 }
 
 /**
@@ -409,14 +415,14 @@ export const WithResourceControls: Story = {
     otherActions: OTHER_ACTIONS,
     disableContentPadding: false,
   },
-  parameters: {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
           "`controls={{ kind: 'resource' }}` renders the top chrome row with an expand affordance and prev/next navigation. The identity band sits below. Click the arrows to step through items.",
       },
     },
-  },
+  }),
 }
 
 /**
@@ -438,12 +444,12 @@ export const WithBackControls: Story = {
     otherActions: OTHER_ACTIONS,
     children: <ExampleList itemsCount={6} />,
   },
-  parameters: {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
           "`controls={{ kind: 'back' }}` is used when the drawer has drilled into a sub-page. The left slot shows a single back affordance; the identity band and close button remain.",
       },
     },
-  },
+  }),
 }
