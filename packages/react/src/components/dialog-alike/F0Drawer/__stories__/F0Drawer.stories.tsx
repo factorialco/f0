@@ -313,6 +313,11 @@ export const WithNavigation: Story = {
  * description, status, metadata) directly in the header area instead of
  * composing it inside the body. No controls row — the close button sits alone
  * at the top right.
+ *
+ * Unlike composing a `<ResourceHeader>` inside `children` (see
+ * `WithResourceHeader`), the band is owned by the dialog as **pinned header
+ * chrome**: it stays fixed above the tabs while the body scrolls underneath.
+ * The long list below makes that pinning visible.
  */
 export const WithResourceHeaderProp: Story = {
   args: {
@@ -322,13 +327,13 @@ export const WithResourceHeaderProp: Story = {
     resourceHeader: CANDIDATE_RESOURCE_HEADER,
     otherActions: OTHER_ACTIONS,
     tabs: TABS,
-    children: <ExampleList itemsCount={8} />,
+    children: <ExampleList itemsCount={30} />,
   },
   parameters: {
     docs: {
       description: {
         story:
-          "Pass `resourceHeader` to render the identity band in the header. A visually-hidden `DialogTitle` keeps the accessible name. `otherActions` appears in the top-right beside the close button.",
+          "Pass `resourceHeader` to render the identity band as pinned header chrome (vs. composing `<ResourceHeader>` in the body, which scrolls away). A visually-hidden `DialogTitle` keeps the accessible name, and `otherActions` appears in the top-right beside the close button. Scroll the body to see the band and tabs stay fixed.",
       },
     },
   },
