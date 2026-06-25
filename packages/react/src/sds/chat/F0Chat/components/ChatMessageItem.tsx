@@ -75,7 +75,11 @@ export const ChatMessageItem = ({
                 // fades in/out instead of snapping when `highlighted` toggles.
                 "flex max-w-full flex-col gap-1 rounded-2xl transition-shadow duration-200",
                 isMine ? "items-end" : "items-start",
-                highlighted && "ring-1 ring-f1-special-ring ring-offset-2",
+                // `ring-offset-f1-background` colours the offset gap with the
+                // transcript surface — without it the gap defaults to white and
+                // reads as an aura in dark mode.
+                highlighted &&
+                  "ring-1 ring-f1-special-ring ring-offset-2 ring-offset-f1-background",
                 !message.deleted &&
                   "group-hover:bg-f1-background-hover focus-within:bg-f1-background-hover",
                 actionsOpen && "bg-f1-background-hover"
