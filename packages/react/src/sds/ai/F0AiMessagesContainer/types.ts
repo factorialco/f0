@@ -86,6 +86,13 @@ export type RenderableTurn = {
     /** Reference message attached to feedback submissions. */
     targetMessage: Message
   }
+  /**
+   * Whether this turn can be rolled back via the undo button. Defaults to
+   * shown when an `onUndo` handler is provided; set to `false` to hide undo
+   * for a specific turn (e.g. turns with no checkpoint behind them, or while a
+   * clarifying flow is mid-flight). Only consulted when `onUndo` is set.
+   */
+  canUndo?: boolean
 }
 
 /** Props for the Thinking collapsible section. */

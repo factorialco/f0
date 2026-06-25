@@ -1,7 +1,9 @@
 import { useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import {
+  Reset,
   ThumbsDown,
   ThumbsDownFilled,
   ThumbsUp,
@@ -22,12 +24,15 @@ interface TurnFeedbackProps {
   targetMessage: AIMessage
   /** Optional copy callback (called after the user clicks copy). */
   onCopy?: (content: string) => void
+  /** When provided, renders an undo button that rolls back this turn. */
+  onUndo?: () => void
 }
 
 export const TurnFeedback = ({
   content,
   targetMessage,
   onCopy,
+  onUndo,
 }: TurnFeedbackProps) => {
   const translations = useI18n()
   const { open: openFeedbackModal } = useFeedbackModal()
@@ -89,6 +94,24 @@ export const TurnFeedback = ({
           />
         </div>
       </Action>
+      {onUndo && (
+        <TooltipInternal description={translations.actions.rewind} instant>
+          <Action
+            onClick={(e) => {
+              onUndo()
+              e.currentTarget.blur()
+            }}
+            compact={true}
+            mode="only"
+            variant="ghost"
+            aria-label={translations.actions.rewind}
+          >
+            <div className="flex min-w-0 flex-1 items-center justify-center gap-1">
+              <F0Icon size="md" icon={Reset} color="default" />
+            </div>
+          </Action>
+        </TooltipInternal>
+      )}
     </div>
   )
 }

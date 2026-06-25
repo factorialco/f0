@@ -45,6 +45,8 @@ export type F0AiChatTextAreaSubmitPayload = {
 
 export type F0AiChatTextAreaProps = {
   ref: RefObject<HTMLDivElement>
+  /** Pre-fills the textarea on first render. Use with a changing `key` to restore text after undo. */
+  initialText?: string
   /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
   onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>
   /** Called when the user clicks the stop button while a response is streaming. */

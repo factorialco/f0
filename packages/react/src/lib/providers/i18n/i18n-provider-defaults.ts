@@ -83,6 +83,7 @@ export const defaultTranslations = {
     moveDown: "Move down",
     thumbsUp: "Like",
     thumbsDown: "Dislike",
+    rewind: "Rewind to this point",
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",

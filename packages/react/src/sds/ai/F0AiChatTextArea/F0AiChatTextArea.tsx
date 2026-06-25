@@ -81,11 +81,12 @@ export const F0AiChatTextArea = ({
   fullscreen = false,
   welcomeScreenSuggestions,
   onSuggestionClick,
+  initialText,
   ref,
 }: F0AiChatTextAreaProps) => {
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
-  const [inputValue, setInputValue] = useState("")
+  const [inputValue, setInputValue] = useState(initialText ?? "")
   const [cursorPosition, setCursorPosition] = useState(0)
   const [isPreSending, setIsPreSending] = useState(false)
   // Set when the user hits send while an attachment is still uploading: the
