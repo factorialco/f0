@@ -3640,6 +3640,11 @@ declare const defaultTranslations: {
         readonly transcribing: "Transcribing…";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileUploadError: "Upload failed";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
         readonly sent: "Sent";
         readonly read: "Read";
         readonly readBy: {
@@ -5020,6 +5025,12 @@ export declare type F0ChatRuntime = {
     /** Called as the user types so the runtime can emit typing.start/stop. */
     onInputActivity: () => void;
     uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
+    /**
+     * Max files attachable at once. When a selection/drop would exceed it, the
+     * composer rejects the whole batch and flashes a transient error in the
+     * textarea (mirrors the AI chat). Omit for no limit.
+     */
+    maxFiles?: number;
     /**
      * Optional voice dictation — same signature as the AI chat (streams partials).
      * Not part of the Stream transport; a host wires it to its own speech service
@@ -10304,11 +10315,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -10316,8 +10324,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

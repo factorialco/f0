@@ -2306,6 +2306,11 @@ export declare const defaultTranslations: {
         readonly transcribing: "Transcribing…";
         readonly dropFilesHere: "Drop your files here";
         readonly removeFile: "Remove";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileUploadError: "Upload failed";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
         readonly sent: "Sent";
         readonly read: "Read";
         readonly readBy: {
@@ -4897,11 +4902,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -4909,8 +4911,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
