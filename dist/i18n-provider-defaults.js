@@ -118,6 +118,10 @@ const e = {
   navigation: {
     sidebar: {
       label: "Main navigation",
+      search: "Search",
+      tabs: {
+        label: "Sidebar sections"
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company"
@@ -130,6 +134,10 @@ const e = {
     password: {
       show: "Show password",
       hide: "Hide password"
+    },
+    private: {
+      show: "Show {{label}}",
+      hide: "Hide {{label}}"
     }
   },
   link: {
@@ -142,7 +150,10 @@ const e = {
     seek: "Seek",
     options: "Recording options",
     playbackSpeed: "Playback speed",
-    position: "{{current}} of {{total}}"
+    position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details"
   },
   actions: {
     add: "Add",
@@ -411,6 +422,7 @@ const e = {
     inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
