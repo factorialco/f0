@@ -32,6 +32,12 @@ export type F0ChatChannel = {
   presence?: "online" | "offline"
   muted?: boolean
   /**
+   * Whether the conversation is pinned (favourited) by the current user. Drives
+   * the header pin toggle and lets the host surface a "Pinned" group in the
+   * sidebar. factorial → Stream's per-member pin (`member.pinned_at`).
+   */
+  pinned?: boolean
+  /**
    * Extra status badges shown in the header (e.g. on vacation). Host-provided
    * metadata — not necessarily transport-backed: Stream has no such concept, so
    * factorial sources these from its own data (e.g. HR vacation status).
@@ -180,6 +186,12 @@ export type F0ChatRuntime = {
    */
   transcribe?: TranscribeFn
   markRead?: () => void
+  /**
+   * Toggle the conversation's pinned (favourite) state for the current user.
+   * Drives the header "Pin / Unpin" action; omit to hide it. factorial →
+   * `channel.pin()` / `channel.unpin()`.
+   */
+  togglePin?: () => void
   /**
    * Full-text search within this conversation, returning matches oldest→newest.
    * Omit to fall back to a client-side substring search over the loaded

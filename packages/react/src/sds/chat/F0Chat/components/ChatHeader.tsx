@@ -3,18 +3,23 @@ import { type ReactNode } from "react"
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
+import { Dropdown, type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { EmojiImage } from "@/lib/emojis"
 import {
   Cross,
+  Ellipsis,
   Maximize,
   MicrophoneNegative,
   Minimize,
+  PushPin,
+  PushPinSolid,
   Search,
 } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatUI } from "../providers/ChatUIProvider"
+import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatChannel } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
@@ -47,12 +52,28 @@ export const ChatHeader = ({
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatUI()
+  const { togglePin } = useF0Chat()
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
 
+  // Overflow menu: search, plus pin/unpin when the host supports it. Built as
+  // data so adding actions later (mute, leave…) is a one-line change.
+  const menuItems: DropdownItem[] = [
+    { label: i18n.actions.search, icon: Search, onClick: openSearch },
+    ...(togglePin
+      ? [
+          {
+            label: channel.pinned ? i18n.chat.unpin : i18n.chat.pin,
+            icon: channel.pinned ? PushPinSolid : PushPin,
+            onClick: togglePin,
+          },
+        ]
+      : []),
+  ]
+
   const identity = (
     <div className="flex min-w-0 items-center gap-2">
-      <div className="relative shrink-0">
+      <div className="relative shrink-0 flex">
         {channel.avatar.type === "emoji" ? (
           // Emoji groups show the glyph alone (no avatar chrome) so it reads at
           // full size instead of shrunk inside the bordered avatar box.
@@ -105,13 +126,15 @@ export const ChatHeader = ({
             identity
           )}
           <div className="flex shrink-0 items-center gap-0.5">
-            <ButtonInternal
-              variant="ghost"
-              hideLabel
-              label={i18n.actions.search}
-              icon={Search}
-              onClick={openSearch}
-            />
+            {/* Search + pin live behind the ellipsis overflow menu. */}
+            <Dropdown items={menuItems} align="end" label={i18n.chat.options}>
+              <ButtonInternal
+                variant="ghost"
+                hideLabel
+                label={i18n.chat.options}
+                icon={Ellipsis}
+              />
+            </Dropdown>
             {onToggleFullscreen && (
               <ButtonInternal
                 variant="ghost"

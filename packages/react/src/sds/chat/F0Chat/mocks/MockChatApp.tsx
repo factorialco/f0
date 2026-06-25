@@ -50,6 +50,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     [app, convId]
   )
   const markRead = useCallback(() => app.markRead(convId), [app, convId])
+  const togglePin = useCallback(() => app.togglePin(convId), [app, convId])
   const toggleReaction = useCallback(
     (messageId: string, emoji: string) =>
       app.toggleReaction(convId, messageId, emoji),
@@ -120,6 +121,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
       },
       presence: seed?.presence,
       muted: seed?.muted,
+      pinned: app.pinned[convId] ?? false,
       // Surface the same states the sidebar shows (e.g. on vacation) in the header.
       statuses:
         seed?.type === "dm" && seed.participants[0]?.vacation
@@ -149,6 +151,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     transcribe: mockTranscribe,
     markRead,
     searchMessages,
+    togglePin,
   }
 }
 
@@ -160,7 +163,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
 export const useMockChatGroups = (
   onSelect: (convId: string) => void
 ): SidebarChatGroup[] => {
-  const { states } = useMockChatApp()
+  const { states, pinned, togglePin } = useMockChatApp()
   return useMemo(() => {
     const toChat = (seed: Seed) => {
       const state = states[seed.id]
@@ -171,6 +174,8 @@ export const useMockChatGroups = (
         label: seed.title,
         avatar: seed.avatar,
         onClick: () => onSelect(seed.id),
+        pinned: !!pinned[seed.id],
+        onTogglePin: () => togglePin(seed.id),
         unreadCount: unreadCount || undefined,
         // Live "Writing…" while the other side is typing in this conversation.
         typing: (state?.typingIds.length ?? 0) > 0,
@@ -183,11 +188,24 @@ export const useMockChatGroups = (
             : undefined,
       }
     }
-    const dms = SEEDS.filter((s) => s.type === "dm").map(toChat)
-    const groups = SEEDS.filter((s) => s.type === "group").map(toChat)
+    // Pinned (favourite) chats — both people and groups — surface in their own
+    // group at the top and are removed from Direct messages / Groups below.
+    const isPinned = (s: Seed) => !!pinned[s.id]
+    const pinnedChats = SEEDS.filter(isPinned).map(toChat)
+    const dms = SEEDS.filter((s) => s.type === "dm" && !isPinned(s)).map(toChat)
+    const groups = SEEDS.filter((s) => s.type === "group" && !isPinned(s)).map(
+      toChat
+    )
     return [
-      { id: "direct-messages", title: "Direct messages", chats: dms },
-      { id: "groups", title: "Groups", chats: groups },
+      ...(pinnedChats.length > 0
+        ? [{ id: "pinned", title: "Pinned", chats: pinnedChats }]
+        : []),
+      ...(dms.length > 0
+        ? [{ id: "direct-messages", title: "Direct messages", chats: dms }]
+        : []),
+      ...(groups.length > 0
+        ? [{ id: "groups", title: "Groups", chats: groups }]
+        : []),
     ]
-  }, [states, onSelect])
+  }, [states, pinned, togglePin, onSelect])
 }

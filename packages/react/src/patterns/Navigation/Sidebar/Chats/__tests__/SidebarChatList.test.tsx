@@ -344,4 +344,59 @@ describe("SidebarChatList", () => {
       "true"
     )
   })
+
+  describe("pin affordance", () => {
+    const pinGroups = (
+      onTogglePin: () => void,
+      pinned?: boolean
+    ): SidebarChatGroup[] => [
+      {
+        id: "dms",
+        title: "Direct messages",
+        chats: [
+          {
+            id: "raul",
+            label: "Raúl",
+            avatar: { type: "person", firstName: "Raúl", lastName: "S" },
+            unreadCount: 3,
+            pinned,
+            onTogglePin,
+          },
+        ],
+      },
+    ]
+
+    it("toggles pin without selecting the chat", async () => {
+      const onTogglePin = vi.fn()
+      render(
+        <SidebarChatProvider initialGroups={pinGroups(onTogglePin)}>
+          <SidebarChatList />
+        </SidebarChatProvider>
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "Pin" }))
+      expect(onTogglePin).toHaveBeenCalledTimes(1)
+      // Clicking the pin must not select the row (stopPropagation).
+      expect(screen.getByRole("button", { name: /Raúl/ })).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      )
+    })
+
+    it("labels the button 'Unpin' when the chat is pinned", () => {
+      render(
+        <SidebarChatProvider initialGroups={pinGroups(vi.fn(), true)}>
+          <SidebarChatList />
+        </SidebarChatProvider>
+      )
+      expect(screen.getByRole("button", { name: "Unpin" })).toBeInTheDocument()
+    })
+
+    it("shows no pin button when onTogglePin is omitted", () => {
+      renderList()
+      expect(
+        screen.queryByRole("button", { name: "Pin" })
+      ).not.toBeInTheDocument()
+    })
+  })
 })

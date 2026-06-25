@@ -510,6 +510,10 @@ export const defaultTranslations = {
     copied: "Copied",
     deletedMessage: "Message deleted",
     moreActions: "Message actions",
+    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
+    options: "Options",
+    pin: "Pin",
+    unpin: "Unpin",
     info: "Info",
     viewProfile: "View profile",
     reply: "Reply",

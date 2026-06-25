@@ -1,6 +1,8 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { PushPin, PushPinSolid } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
@@ -57,6 +59,8 @@ export const SidebarChatItem = ({
   isActive: boolean
   onClick: () => void
 }) => {
+  const i18n = useI18n()
+
   // Cascade loading: the conversation is known but its name/avatar aren't
   // resolved yet — show a skeleton row in place (not interactive).
   if (chat.loading) {
@@ -76,62 +80,94 @@ export const SidebarChatItem = ({
   const status = chat.avatar.type === "person" ? chat.status : undefined
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={isActive}
-      className={cn(
-        "group flex w-full cursor-pointer items-center gap-2 rounded py-1.5 pl-1.5 pr-2 text-left transition-colors",
-        focusRing("focus-visible:ring-inset"),
-        isActive
-          ? "bg-f1-background-secondary"
-          : "hover:bg-f1-background-secondary"
-      )}
-    >
-      {chat.typing ? (
-        <Dots />
-      ) : (
-        <div className="relative flex flex-shrink-0 items-center">
-          {chat.avatar.type === "emoji" ? (
-            // Emoji groups show the glyph alone (no avatar chrome) so it isn't
-            // shrunk inside the bordered avatar box.
-            <span className="flex size-5 items-center justify-center">
-              <EmojiImage emoji={chat.avatar.emoji} size="sm" />
-            </span>
-          ) : (
-            <F0Avatar size="xs" avatar={chat.avatar} />
-          )}
-          {presence && <PresenceDot presence={presence} isActive={isActive} />}
-        </div>
-      )}
-
-      <OneEllipsis
-        tag="span"
+    <div className="group/row relative">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-pressed={isActive}
         className={cn(
-          "line-clamp-1 flex-1 py-0.5",
-          isUnread
-            ? "text-f1-foreground font-semibold"
-            : "text-f1-foreground-secondary font-medium"
+          "group flex w-full cursor-pointer items-center gap-2 rounded py-1.5 pl-1.5 pr-2 text-left transition-colors",
+          focusRing("focus-visible:ring-inset"),
+          isActive
+            ? "bg-f1-background-secondary"
+            : "hover:bg-f1-background-secondary"
         )}
-        lines={1}
       >
-        {chat.label}
-      </OneEllipsis>
-      {(status || chat.unreadCount) && (
-        <div className="gap-1 flex items-center justify-center">
-          {status && (
-            <div className="w-5 h-5 flex items-center justify-center">
-              <F0Icon
-                icon={status.icon}
-                size="sm"
-                aria-label={status.label}
-                color="default"
-              />
-            </div>
+        {chat.typing ? (
+          <Dots />
+        ) : (
+          <div className="relative flex flex-shrink-0 items-center">
+            {chat.avatar.type === "emoji" ? (
+              // Emoji groups show the glyph alone (no avatar chrome) so it isn't
+              // shrunk inside the bordered avatar box.
+              <span className="flex size-5 items-center justify-center">
+                <EmojiImage emoji={chat.avatar.emoji} size="sm" />
+              </span>
+            ) : (
+              <F0Avatar size="xs" avatar={chat.avatar} />
+            )}
+            {presence && (
+              <PresenceDot presence={presence} isActive={isActive} />
+            )}
+          </div>
+        )}
+
+        <OneEllipsis
+          tag="span"
+          className={cn(
+            "line-clamp-1 flex-1 py-0.5",
+            isUnread
+              ? "text-f1-foreground font-semibold"
+              : "text-f1-foreground-secondary font-medium"
           )}
-          {chat.unreadCount && <UnreadBadge count={chat.unreadCount} />}
-        </div>
+          lines={1}
+        >
+          {chat.label}
+        </OneEllipsis>
+        {(status || chat.unreadCount) && (
+          <div
+            className={cn(
+              "gap-1 flex items-center justify-center transition-opacity",
+              // On hover the pin button takes this spot, so fade the badge/status out.
+              chat.onTogglePin && "group-hover/row:opacity-0"
+            )}
+          >
+            {status && (
+              <div className="w-5 h-5 flex items-center justify-center">
+                <F0Icon
+                  icon={status.icon}
+                  size="sm"
+                  aria-label={status.label}
+                  color="default"
+                />
+              </div>
+            )}
+            {chat.unreadCount && <UnreadBadge count={chat.unreadCount} />}
+          </div>
+        )}
+      </button>
+      {/* Hover (or focus) reveals a pin/unpin button, sitting where the unread
+          badge / status is — a sibling of the row button so it isn't a nested
+          <button>. */}
+      {chat.onTogglePin && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            chat.onTogglePin?.()
+          }}
+          aria-label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
+          aria-pressed={chat.pinned}
+          className={cn(
+            "absolute right-2 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded",
+            "text-f1-foreground-secondary hover:text-f1-foreground",
+            "opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100",
+            focusRing()
+          )}
+        >
+          <F0Icon icon={chat.pinned ? PushPinSolid : PushPin} size="sm" />
+        </button>
       )}
-    </button>
+    </div>
   )
 }

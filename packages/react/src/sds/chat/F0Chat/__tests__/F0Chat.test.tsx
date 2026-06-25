@@ -319,13 +319,24 @@ describe("F0Chat", () => {
     },
   ]
 
+  // Search now lives behind the header overflow (ellipsis) menu: open it, then
+  // click the Search item. The dropdown defers the action ~200ms (a radix close
+  // workaround), so wait for the search bar to appear.
+  const openHeaderSearch = async () => {
+    await userEvent.click(screen.getByRole("button", { name: /^options$/i }))
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: /^search$/i })
+    )
+    await screen.findByRole("searchbox")
+  }
+
   it("opens the header search bar and hides the identity actions", async () => {
     renderChat(makeRuntime())
-    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await openHeaderSearch()
     expect(screen.getByRole("searchbox")).toBeInTheDocument()
-    // The header Search button is replaced by the search bar.
+    // The header (with its overflow menu) is replaced by the search bar.
     expect(
-      screen.queryByRole("button", { name: /^search$/i })
+      screen.queryByRole("button", { name: /^options$/i })
     ).not.toBeInTheDocument()
   })
 
@@ -333,7 +344,7 @@ describe("F0Chat", () => {
   // async, and these poll slowly under the full parallel suite (CPU contention).
   it("counts matches and navigates between them (newest first, wrapping)", async () => {
     renderChat(makeRuntime({ messages: searchableMessages }))
-    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await openHeaderSearch()
     // Set the value in one shot — F0SearchInput is a controlled+debounced input,
     // so per-key typing can drop characters under heavy parallel-suite load.
     fireEvent.change(screen.getByRole("searchbox"), {
@@ -356,7 +367,7 @@ describe("F0Chat", () => {
 
   it("shows 0/0 and disables navigation for an unmatched query", async () => {
     renderChat(makeRuntime({ messages: searchableMessages }))
-    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await openHeaderSearch()
     fireEvent.change(screen.getByRole("searchbox"), {
       target: { value: "zzzznope" },
     })
@@ -369,11 +380,12 @@ describe("F0Chat", () => {
 
   it("closes search with Escape and restores the header", async () => {
     renderChat(makeRuntime())
-    await userEvent.click(screen.getByRole("button", { name: /^search$/i }))
+    await openHeaderSearch()
     await userEvent.type(screen.getByRole("searchbox"), "{Escape}")
     expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+    // The header (overflow menu) is restored.
     expect(
-      screen.getByRole("button", { name: /^search$/i })
+      screen.getByRole("button", { name: /^options$/i })
     ).toBeInTheDocument()
   })
 })

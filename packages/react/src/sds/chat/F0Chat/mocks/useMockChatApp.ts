@@ -32,6 +32,9 @@ export type MockChatAppValue = {
   loadOlder: (convId: string) => void
   loadingOlder: Record<string, boolean>
   hasMoreOlder: (convId: string) => boolean
+  /** Pinned (favourite) state per conversation, toggled from the header. */
+  pinned: Record<string, boolean>
+  togglePin: (convId: string) => void
 }
 
 const MockChatAppContext = createContext<MockChatAppValue | null>(null)
@@ -52,6 +55,13 @@ export const useMockChatStore = (): MockChatAppValue => {
     Object.fromEntries(SEEDS.map((s) => [s.id, initialConvState(s)]))
   )
   const [loadingOlder, setLoadingOlder] = useState<Record<string, boolean>>({})
+  // Seed a couple as pinned so the "Pinned" sidebar group is populated on load.
+  const [pinned, setPinned] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(SEEDS.filter((s) => s.pinned).map((s) => [s.id, true]))
+  )
+  const togglePin = useCallback((convId: string) => {
+    setPinned((prev) => ({ ...prev, [convId]: !prev[convId] }))
+  }, [])
   const olderLeft = useRef<Record<string, number>>(
     Object.fromEntries(SEEDS.map((s) => [s.id, s.olderPages ?? 0]))
   )
@@ -259,6 +269,8 @@ export const useMockChatStore = (): MockChatAppValue => {
       loadOlder,
       loadingOlder,
       hasMoreOlder,
+      pinned,
+      togglePin,
     }),
     [
       states,
@@ -269,6 +281,8 @@ export const useMockChatStore = (): MockChatAppValue => {
       loadOlder,
       loadingOlder,
       hasMoreOlder,
+      pinned,
+      togglePin,
     ]
   )
 }

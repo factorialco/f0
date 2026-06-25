@@ -112,6 +112,8 @@ export type Seed = {
   avatar: AvatarVariant
   presence?: "online" | "offline"
   muted?: boolean
+  /** Demo: starts in the "Pinned" sidebar group (favourited). */
+  pinned?: boolean
   participants: MockPerson[]
   lines: Line[]
   /** Trailing incoming messages that start unread. */
@@ -203,6 +205,7 @@ export const SEEDS: Seed[] = [
     title: MARCUS.name,
     avatar: MARCUS.avatar,
     presence: "online",
+    pinned: true,
     participants: [MARCUS],
     olderPages: 2,
     lines: [
@@ -328,6 +331,7 @@ export const SEEDS: Seed[] = [
     type: "group",
     title: "Product Team",
     avatar: groupAvatar("Product Team", "🚀"),
+    pinned: true,
     participants: [MARCUS, GRACE, NOAH, SAM],
     unread: 2,
     olderPages: 3,

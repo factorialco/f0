@@ -301,6 +301,10 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     []
   )
 
+  // Pinned (favourite) state — toggled from the header overflow menu.
+  const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
+  const togglePin = useCallback(() => setPinned((value) => !value), [])
+
   // Unread is derived from the read pointer (matches how a real backend would
   // compute it from the last-read message).
   const { unreadCount, firstUnreadId } = useMemo(() => {
@@ -311,7 +315,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
 
   return {
     currentUserId: seed.me.id,
-    channel: seed.channel,
+    channel: { ...seed.channel, pinned },
     status: "ready",
     messages,
     typingUsers,
@@ -331,5 +335,6 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     // Same streaming dictation mock the AI chat / RichText stories use.
     transcribe: mockTranscribe,
     markRead,
+    togglePin,
   }
 }

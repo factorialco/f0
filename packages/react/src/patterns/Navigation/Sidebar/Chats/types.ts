@@ -45,6 +45,13 @@ export type SidebarChat = {
   status?: SidebarChatStatus
   /** Epoch ms of the last activity; used for ordering. */
   lastActivityAt?: number
+  /** Whether the chat is pinned (favourited) — selects the solid pin icon. */
+  pinned?: boolean
+  /**
+   * Toggle the pinned state. When set, a pin/unpin button appears on row hover
+   * in place of the unread badge / status icon. Omit to hide the affordance.
+   */
+  onTogglePin?: () => void
 }
 
 export type SidebarChatGroup = {
