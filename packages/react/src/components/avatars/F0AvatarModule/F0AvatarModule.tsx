@@ -10,6 +10,7 @@ const moduleAvatarVariants = cva({
     size: {
       "3xs": "h-2.5 w-2.5",
       "2xs": "h-3 w-3",
+      xsm: "h-4 w-4",
       xs: "h-5 w-5",
       sm: "h-6 w-6",
       md: "h-8 w-8",
@@ -27,6 +28,7 @@ const iconSizeVariants = cva({
     size: {
       "3xs": "h-2 w-2",
       "2xs": "h-2 w-2",
+      xsm: "h-3 w-3",
       xs: "h-[14px] w-[14px]",
       sm: "h-[18px] w-[18px]",
       md: "h-6 w-6",

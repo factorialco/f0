@@ -82,3 +82,37 @@ export const AsBadge: Story = {
     />
   ),
 }
+
+/**
+ * The module badge across entity-avatar sizes. The `md` and `lg` avatars share
+ * the same badge size (16px container, 12px icon).
+ */
+export const AsBadgeSizes: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div style={{ display: "flex", alignItems: "flex-end", gap: 16 }}>
+      {(["sm", "md", "lg", "xl", "2xl"] as const).map((size) => (
+        <div
+          key={size}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          <F0Avatar
+            size={size}
+            avatar={{
+              type: "person",
+              firstName: "Jane",
+              lastName: "Doe",
+              badge: { type: "module", module: "home" },
+            }}
+          />
+          <span className="text-sm">{size}</span>
+        </div>
+      ))}
+    </div>
+  ),
+}
