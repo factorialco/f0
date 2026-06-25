@@ -19,7 +19,7 @@ export const UnreadDivider = ({
   const reducedMotion = useReducedMotion()
   return (
     <motion.div
-      className="flex items-center gap-2 py-2"
+      className="flex items-center gap-2 py-4"
       initial={false}
       animate={{ opacity: leaving ? 0 : 1 }}
       transition={{ duration: reducedMotion ? 0 : 0.26, ease: "easeOut" }}

@@ -40,6 +40,13 @@ const ReplyQuote = ({
           "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary"
         )}
       >
+        {thumbnailUrl && (
+          <img
+            src={thumbnailUrl}
+            alt=""
+            className="h-9 w-9 shrink-0 self-center rounded-sm object-cover ml-2.5"
+          />
+        )}
         <div className="flex min-w-0 flex-1 flex-col gap-0.5 p-2.5">
           <OneEllipsis
             className={cn(
@@ -56,13 +63,13 @@ const ReplyQuote = ({
             </OneEllipsis>
           </span>
         </div>
-        {thumbnailUrl && (
+        {/* {thumbnailUrl && (
           <img
             src={thumbnailUrl}
             alt=""
             className="h-12 w-12 shrink-0 self-stretch object-cover"
           />
-        )}
+        )} */}
       </button>
     </div>
   )

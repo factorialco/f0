@@ -1,3 +1,4 @@
+import { type Virtualizer } from "@tanstack/react-virtual"
 import {
   type RefObject,
   useCallback,
@@ -5,8 +6,6 @@ import {
   useRef,
   useState,
 } from "react"
-
-import { type Virtualizer } from "@tanstack/react-virtual"
 
 import { type ChatRow } from "../utils/grouping"
 
@@ -33,6 +32,13 @@ type UseChatScrollOptions = {
    * reads down through the unread run; otherwise it opens at the latest message.
    */
   unreadDividerId?: string | null
+  /**
+   * Identity of the open conversation (the channel id). The message list isn't
+   * remounted when you switch conversations, so this is how the hook knows to
+   * re-run the initial scroll (land at the latest / pin the unread divider)
+   * instead of treating the new conversation's messages as an append/prepend.
+   */
+  conversationKey?: string | null
 }
 
 type UseChatScrollReturn = {
@@ -43,11 +49,25 @@ type UseChatScrollReturn = {
   /** True when the transcript is scrolled to the very top (drives the header shadow). */
   atTop: boolean
   scrollToBottom: (behavior?: "auto" | "smooth") => void
+  /**
+   * Scroll a row into view and keep re-targeting it across frames until the
+   * estimate→measured row-height settle stops moving the offset (so a jump to a
+   * just-loaded message lands precisely instead of mid-list). Used for reply /
+   * search jumps and the jump-to-bottom button.
+   */
+  scrollToIndexSettled: (
+    index: number,
+    align: "start" | "center" | "end",
+    startOffset?: number
+  ) => void
   handleScroll: () => void
 }
 
 const NEAR_BOTTOM_PX = 80
 const TOP_TRIGGER_PX = 120
+// Gap left above the unread divider on entry so it clears the sticky date pill
+// (which floats near the top) with breathing room instead of colliding with it.
+const UNREAD_DIVIDER_TOP_GAP = 88
 
 /**
  * Scroll behaviour for the virtualized message list. The scroll element keeps
@@ -72,6 +92,7 @@ export function useChatScroll({
   loadingNewer = false,
   onReachBottom,
   unreadDividerId = null,
+  conversationKey = null,
 }: UseChatScrollOptions): UseChatScrollReturn {
   const [scrolledUp, setScrolledUp] = useState(false)
   const [atBottom, setAtBottom] = useState(true)
@@ -83,12 +104,15 @@ export function useChatScroll({
   const prevLastIdRef = useRef<string | null>(messages.at(-1)?.id ?? null)
   const prevLenRef = useRef(messages.length)
   const didInitialScrollRef = useRef(false)
+  // Tracks the open conversation so we re-run the initial scroll when it
+  // changes (the list isn't remounted between conversations).
+  const conversationKeyRef = useRef(conversationKey)
   // Saved before loading older messages, so we can keep the viewport steady once
   // the prepended page changes every index below the anchor.
   const anchorRef = useRef<{ id: string; delta: number } | null>(null)
   // rAF handle for the post-prepend re-pin loop (see `restoreAnchor`).
   const pinRafRef = useRef<number | null>(null)
-  // rAF handle for the initial-scroll settle loop (see `settleInitialScroll`).
+  // rAF handle for the settle loop (see `scrollToIndexSettled`).
   const initialRafRef = useRef<number | null>(null)
 
   const scrollToBottom = useCallback(
@@ -180,12 +204,14 @@ export function useChatScroll({
     virtualizer,
   ])
 
-  // Initial-scroll settle: re-issue `scrollToIndex` each frame until the
+  // Settle a targeted scroll: re-issue `scrollToIndex` each frame until the
   // resulting scrollTop holds steady (2 frames) or a cap — absorbing the
   // estimate→measured row-height settle that otherwise lands a one-shot scroll
   // mid-list. Same shape as the prepend re-pin loop. Syncs the flags when done.
-  const settleInitialScroll = useCallback(
-    (index: number, align: "start" | "end") => {
+  // For an "end" target it also hard-pins to the true bottom once settled, so
+  // late-measuring rows (images, tall replies) can't leave it short of the end.
+  const scrollToIndexSettled = useCallback(
+    (index: number, align: "start" | "center" | "end", startOffset = 0) => {
       const el = viewportRef.current
       if (!el || index < 0) return
       if (initialRafRef.current != null) {
@@ -196,6 +222,11 @@ export function useChatScroll({
       let frames = 0
       const tick = () => {
         virtualizer.scrollToIndex(index, { align })
+        // Leave a gap above a "start"-aligned row so it isn't tucked under the
+        // sticky date pill / header. Scrolling up a touch drops the row down.
+        if (align === "start" && startOffset > 0) {
+          el.scrollTop = Math.max(0, el.scrollTop - startOffset)
+        }
         const next = el.scrollTop
         frames += 1
         if (prev != null && Math.abs(next - prev) < 1) stableFrames += 1
@@ -203,6 +234,13 @@ export function useChatScroll({
         prev = next
         if (stableFrames >= 2 || frames >= 12) {
           initialRafRef.current = null
+          if (align === "end") {
+            // scrollHeight is the full virtual height; assigning past the max
+            // clamps to the true bottom (no-op when already there).
+            const distanceFromBottom =
+              el.scrollHeight - el.scrollTop - el.clientHeight
+            if (distanceFromBottom > 1) el.scrollTop = el.scrollHeight
+          }
           syncScrollFlags()
           return
         }
@@ -217,6 +255,25 @@ export function useChatScroll({
     const el = viewportRef.current
     if (!el) return
 
+    // Conversation switched (the list isn't remounted): re-arm the initial
+    // scroll and drop stale state so the new conversation lands at its latest
+    // message / unread divider instead of being treated as an append/prepend.
+    if (conversationKeyRef.current !== conversationKey) {
+      conversationKeyRef.current = conversationKey
+      didInitialScrollRef.current = false
+      anchorRef.current = null
+      if (pinRafRef.current != null) {
+        cancelAnimationFrame(pinRafRef.current)
+        pinRafRef.current = null
+      }
+      if (initialRafRef.current != null) {
+        cancelAnimationFrame(initialRafRef.current)
+        initialRafRef.current = null
+      }
+      // Don't let a message arriving mid-load wrongly stick until we've landed.
+      nearBottomRef.current = false
+    }
+
     // Initial scroll. Land at the latest message, unless there's an unread
     // divider — then pin it to the top so the user reads down through the unread
     // run. Skip when opening straight into an older window (a deep-linked /
@@ -229,8 +286,9 @@ export function useChatScroll({
           unreadDividerId != null
             ? rows.findIndex((row) => row.type === "divider")
             : -1
-        if (dividerIndex >= 0) settleInitialScroll(dividerIndex, "start")
-        else settleInitialScroll(rows.length - 1, "end")
+        if (dividerIndex >= 0)
+          scrollToIndexSettled(dividerIndex, "start", UNREAD_DIVIDER_TOP_GAP)
+        else scrollToIndexSettled(rows.length - 1, "end")
       } else {
         // Header shadow right away (a programmatic scroll may not fire onScroll).
         setAtTop(el.scrollHeight - el.clientHeight <= 0)
@@ -298,7 +356,8 @@ export function useChatScroll({
     indexById,
     hasMoreNewer,
     unreadDividerId,
-    settleInitialScroll,
+    conversationKey,
+    scrollToIndexSettled,
     restoreAnchor,
   ])
 
@@ -312,5 +371,12 @@ export function useChatScroll({
     []
   )
 
-  return { scrolledUp, atBottom, atTop, scrollToBottom, handleScroll }
+  return {
+    scrolledUp,
+    atBottom,
+    atTop,
+    scrollToBottom,
+    scrollToIndexSettled,
+    handleScroll,
+  }
 }

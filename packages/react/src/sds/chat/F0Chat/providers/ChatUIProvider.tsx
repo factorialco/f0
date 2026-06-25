@@ -148,7 +148,17 @@ export const ChatUIProvider = ({
   }, [])
 
   const jumpToMessage = useCallback(
-    (id: string) => scrollAndHighlight(id, false),
+    (id: string) => {
+      // A reply quote can point far up, beyond the loaded window. Pull the
+      // message in first (same as search), then scroll + highlight — so the
+      // jump lands precisely and the highlight timer starts once it can show.
+      // Already-loaded messages scroll immediately, with no reload flicker.
+      const loaded = messagesRef.current.some((message) => message.id === id)
+      const load = loadCtxRef.current
+      if (!loaded && load)
+        void load(id).then(() => scrollAndHighlight(id, false))
+      else scrollAndHighlight(id, false)
+    },
     [scrollAndHighlight]
   )
 

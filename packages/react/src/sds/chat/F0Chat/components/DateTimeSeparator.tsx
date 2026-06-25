@@ -29,7 +29,7 @@ export const DateTimeSeparator = ({
 
   return (
     <div className="flex justify-center py-0">
-      <span className="text-sm font-normal text-f1-foreground-tertiary">
+      <span className="text-sm font-normal text-f1-foreground-secondary">
         {label}
       </span>
     </div>

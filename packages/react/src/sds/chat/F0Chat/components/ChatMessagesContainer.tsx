@@ -2,6 +2,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -87,6 +88,19 @@ export const ChatMessagesContainer = (): ReactNode => {
     messages[messages.length - 1]?.id ?? null
   )
 
+  // Re-snapshot the unread anchor synchronously when the conversation changes
+  // (leaving and coming back). Done during render — not in an effect — so the
+  // new divider is in place before the scroll hook's layout effect reads it
+  // (an effect would run a frame later and the initial scroll would miss it).
+  // Within the same conversation the divider is frozen, so later `firstUnreadId`
+  // changes (e.g. `markRead` clearing it) leave it untouched. The stale-timer
+  // cleanup stays in an effect below.
+  if (dividerChannelRef.current !== channel.id) {
+    dividerChannelRef.current = channel.id
+    setDividerId(firstUnreadId)
+    setDividerLeaving(false)
+  }
+
   const { rows, indexById } = useMemo(
     () => flattenChatRows(messages, { dividerId }),
     [messages, dividerId]
@@ -113,21 +127,28 @@ export const ChatMessagesContainer = (): ReactNode => {
     overscan: 8,
   })
 
-  const { scrolledUp, atBottom, atTop, scrollToBottom, handleScroll } =
-    useChatScroll({
-      viewportRef,
-      virtualizer,
-      rows: displayRows,
-      indexById,
-      messages,
-      hasMoreOlder,
-      loadingOlder,
-      onReachTop: loadOlder,
-      hasMoreNewer,
-      loadingNewer,
-      onReachBottom: loadNewer,
-      unreadDividerId: dividerId,
-    })
+  const {
+    scrolledUp,
+    atBottom,
+    atTop,
+    scrollToBottom,
+    scrollToIndexSettled,
+    handleScroll,
+  } = useChatScroll({
+    viewportRef,
+    virtualizer,
+    rows: displayRows,
+    indexById,
+    messages,
+    hasMoreOlder,
+    loadingOlder,
+    onReachTop: loadOlder,
+    hasMoreNewer,
+    loadingNewer,
+    onReachBottom: loadNewer,
+    unreadDividerId: dividerId,
+    conversationKey: channel.id,
+  })
 
   // When someone starts typing while we're at the bottom, keep the dots in view.
   const typingActive = typingUsers.length > 0
@@ -153,17 +174,19 @@ export const ChatMessagesContainer = (): ReactNode => {
     if (!pending) return
     if (pending.kind === "bottom") {
       if (displayRows.length > 0) {
-        virtualizer.scrollToIndex(displayRows.length - 1, { align: "end" })
+        scrollToIndexSettled(displayRows.length - 1, "end")
         pendingScrollRef.current = null
       }
       return
     }
     const index = indexById.get(pending.id)
     if (index != null) {
-      virtualizer.scrollToIndex(index, { align: "center", behavior: "smooth" })
+      // Settle the jump so the estimate→measured height of the just-loaded rows
+      // doesn't leave it mid-list.
+      scrollToIndexSettled(index, "center")
       pendingScrollRef.current = null
     }
-  }, [indexById, virtualizer, displayRows.length])
+  }, [indexById, scrollToIndexSettled, displayRows.length])
 
   // Retry any pending jump after the loaded window changes (e.g. once
   // `loadMessageContext` brought the target in).
@@ -198,6 +221,19 @@ export const ChatMessagesContainer = (): ReactNode => {
   const atBottomRef = useRef(atBottom)
   atBottomRef.current = atBottom
 
+  // Keep the bottom pinned while we're at the bottom as late-measuring rows
+  // (images, tall replies) grow the content — otherwise opening a conversation
+  // or loading media leaves the view just short of the end. No-op once the user
+  // scrolls up (atBottom is false). scrollHeight is the full virtual height, so
+  // assigning it clamps to the true bottom.
+  const totalSize = virtualizer.getTotalSize()
+  useLayoutEffect(() => {
+    const el = viewportRef.current
+    if (el && atBottomRef.current && displayRows.length > 0) {
+      el.scrollTop = el.scrollHeight
+    }
+  }, [totalSize, displayRows.length])
+
   const clearDividerExit = useCallback(() => {
     if (dividerExitTimer.current) {
       clearTimeout(dividerExitTimer.current)
@@ -205,17 +241,12 @@ export const ChatMessagesContainer = (): ReactNode => {
     }
   }, [])
 
-  // Re-snapshot the unread anchor only when the conversation changes (leaving and
-  // coming back). Within the same conversation the divider is frozen, so later
-  // `firstUnreadId` changes (e.g. `markRead` clearing it) leave it untouched.
+  // The unread divider is re-snapshotted during render (above) on conversation
+  // change; here we only cancel any in-flight fade timer from the conversation
+  // we left, so it can't fire against the new one.
   useEffect(() => {
-    if (dividerChannelRef.current !== channel.id) {
-      dividerChannelRef.current = channel.id
-      clearDividerExit()
-      setDividerLeaving(false)
-      setDividerId(firstUnreadId)
-    }
-  }, [channel.id, firstUnreadId, clearDividerExit])
+    clearDividerExit()
+  }, [channel.id, clearDividerExit])
 
   // Sending a message dismisses the divider as your bubble lands (WhatsApp): it
   // fades out in place over `DIVIDER_EXIT_MS`, then its row is dropped and — if

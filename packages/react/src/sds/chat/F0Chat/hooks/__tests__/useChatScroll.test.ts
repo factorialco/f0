@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react"
+import { act, renderHook } from "@testing-library/react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { type ChatRow } from "../../utils/grouping"
@@ -80,5 +80,80 @@ describe("useChatScroll — initial scroll target", () => {
       unreadDividerId: "m2",
     })
     expect(calls[0]).toEqual({ index: 1, align: "start" })
+  })
+})
+
+describe("useChatScroll — conversation switch", () => {
+  // The list isn't remounted between conversations, so the initial scroll must
+  // re-run when `conversationKey` changes (otherwise later conversations land
+  // wherever the diff logic leaves them — often mid-list).
+  it("re-runs the initial scroll when the conversation changes", () => {
+    const calls: Recorded[] = []
+    const virtualizer = {
+      scrollToIndex: (index: number, o?: { align?: string }) =>
+        calls.push({ index, align: o?.align }),
+      getOffsetForIndex: (i: number) => [i * 40, "start"],
+      getVirtualItemForOffset: () => ({ index: 0 }),
+    }
+    const el = { scrollTop: 0, scrollHeight: 1000, clientHeight: 500 }
+    const propsFor = (key: string, ids: string[]) => ({
+      // eslint-disable-next-line no-type-assertion/no-type-assertion
+      viewportRef: { current: el } as never,
+      // eslint-disable-next-line no-type-assertion/no-type-assertion
+      virtualizer: virtualizer as never,
+      rows: ids.map(messageRow),
+      indexById: new Map(ids.map((id, i) => [id, i])),
+      messages: ids.map((id) => ({ id })),
+      hasMoreOlder: false,
+      loadingOlder: false,
+      onReachTop: () => {},
+      unreadDividerId: null,
+      conversationKey: key,
+    })
+
+    const { rerender } = renderHook((props) => useChatScroll(props), {
+      initialProps: propsFor("chan-a", ["a1", "a2"]),
+    })
+    expect(calls.length).toBeGreaterThan(0) // initial scroll ran for chan-a
+
+    calls.length = 0
+    rerender(propsFor("chan-b", ["b1", "b2", "b3"]))
+    // chan-b re-runs the initial scroll and lands at its own last message.
+    expect(calls.some((c) => c.index === 2 && c.align === "end")).toBe(true)
+  })
+})
+
+describe("useChatScroll — settled jump", () => {
+  it("centers a settled jump to a loaded message", () => {
+    const calls: Recorded[] = []
+    const virtualizer = {
+      scrollToIndex: (index: number, o?: { align?: string }) =>
+        calls.push({ index, align: o?.align }),
+      getOffsetForIndex: (i: number) => [i * 40, "start"],
+      getVirtualItemForOffset: () => ({ index: 0 }),
+    }
+    const el = { scrollTop: 0, scrollHeight: 1000, clientHeight: 500 }
+    const ids = ["m1", "m2", "m3"]
+    const { result } = renderHook(() =>
+      useChatScroll({
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        viewportRef: { current: el } as never,
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        virtualizer: virtualizer as never,
+        rows: ids.map(messageRow),
+        indexById: new Map(ids.map((id, i) => [id, i])),
+        messages: ids.map((id) => ({ id })),
+        hasMoreOlder: false,
+        loadingOlder: false,
+        onReachTop: () => {},
+        unreadDividerId: null,
+        conversationKey: "chan-a",
+      })
+    )
+
+    calls.length = 0 // ignore the initial scroll
+    act(() => result.current.scrollToIndexSettled(1, "center"))
+    expect(calls.every((c) => c.index === 1 && c.align === "center")).toBe(true)
+    expect(calls.length).toBeGreaterThan(0)
   })
 })
