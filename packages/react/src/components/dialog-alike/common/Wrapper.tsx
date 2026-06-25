@@ -13,8 +13,8 @@ const dialogWrapperClassName = cva({
   variants: {
     position: {
       right:
-        "fixed flex flex-col rounded-md w-full left-auto right-0 items-end p-3",
-      left: "fixed flex flex-col rounded-md w-full left-0 items-start p-3",
+        "fixed flex flex-col rounded-md w-full left-auto right-0 items-end p-3 pl-2.5",
+      left: "fixed flex flex-col rounded-md w-full left-0 items-start p-3 pl-2.5",
       center: "p-6",
     },
   },
