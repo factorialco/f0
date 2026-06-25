@@ -475,18 +475,16 @@ export const WithBackControls: Story = {
 /**
  * The drawer rendered inside a real `ApplicationFrame`, to show how it sits
  * relative to the sidebar. Side drawers portal into `#content` (not the
- * top-level overlay root), so a right-positioned drawer docks at the right of
- * the content area: the sidebar and page header stay visible and the drawer
- * reads as a detail panel within the app rather than a full-viewport takeover.
- * Use the `position` control to switch sides (`left` docks at the opposite
- * edge, over the sidebar).
+ * top-level overlay root), so the drawer docks within the content area beside
+ * the sidebar rather than covering the whole viewport. Use the `position`
+ * control to switch sides.
  */
 export const InApplicationFrame: Story = {
   parameters: { standaloneFrame: true, layout: "fullscreen" },
   args: {
     isOpen: true,
     onClose: () => {},
-    position: "right",
+    position: "left",
     title: "Team Status",
     otherActions: OTHER_ACTIONS,
     primaryAction: {
@@ -504,8 +502,11 @@ export const InApplicationFrame: Story = {
         <ApplicationFrame
           sidebar={<Sidebar {...SidebarStories.default.args} />}
         >
-          <Page {...PageStories.Default.args} />
-          <F0Button label="Open drawer" onClick={() => setOpen(true)} />
+          <Page {...PageStories.Default.args}>
+            <div className="p-4">
+              <F0Button label="Open drawer" onClick={() => setOpen(true)} />
+            </div>
+          </Page>
           <F0Drawer {...args} isOpen={open} onClose={() => setOpen(false)}>
             <ExampleList itemsCount={20} />
           </F0Drawer>
