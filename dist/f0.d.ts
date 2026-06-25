@@ -1194,6 +1194,15 @@ export declare interface AudioPlayerControls extends AudioPlayerState {
     setPlaybackRate: (rate: number) => void;
 }
 
+export declare interface AudioPlayerDetailTab {
+    /** Stable value used to identify the tab. */
+    value: string;
+    /** Visible (already translated) tab label, e.g. "Summary". */
+    label: string;
+    /** Tab panel content, rendered inside a scrollable area. */
+    content: ReactNode;
+}
+
 export declare interface AudioPlayerMenuAction {
     label: string;
     icon?: IconType;
@@ -1512,7 +1521,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, closeAction, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1540,6 +1549,10 @@ declare interface BaseHeaderProps_2 {
     metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
+    closeAction?: {
+        onClick: () => void;
+        tooltip?: string;
+    };
 }
 
 /**
@@ -4135,6 +4148,8 @@ declare interface DatePickerPopupProps {
     asChild?: boolean;
     onCompareToChange?: (compareTo: DateRangeComplete | DateRangeComplete[] | undefined) => void;
     weekStartsOn?: WeekStartsOn;
+    /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
+    selectOnCellOnly?: boolean;
 }
 
 export declare const datepickerSizes: readonly ["sm", "md"];
@@ -4356,6 +4371,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -4381,6 +4400,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -4410,6 +4432,7 @@ export declare const defaultTranslations: {
         readonly moveDown: "Move down";
         readonly thumbsUp: "Like";
         readonly thumbsDown: "Dislike";
+        readonly rewind: "Rewind to this point";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
@@ -5117,26 +5140,6 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "file";
 });
 
-/**
- * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
- * `DialogsAlikeLayoutProvider`) to be present in the tree.
- *
- * @example
- * const result = await dialog.open({ title, content, actions: { primary: { label: "OK", value: true } } })
- */
-export declare const dialog: {
-    /** Open a dialog. Resolves with the value of the action the user picked. */
-    open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
-    /** Open a notification-style dialog (info/warning/critical/positive). */
-    notification: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
-    /** Notification dialog with a single confirm action (defaults to "Ok"). */
-    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
-    /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
-    confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
-    /** Programmatically close a dialog by id (resolves its promise with undefined). */
-    close: (id: DialogId) => void;
-};
-
 export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
     value: DialogActionValue;
     keepOpen?: boolean;
@@ -5237,6 +5240,28 @@ export declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
 
+/**
+ * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
+ * `DialogsAlikeLayoutProvider`) to be present in the tree.
+ *
+ * @example
+ * import { dialogs } from "@factorialco/f0-react"
+ *
+ * const result = await dialogs.open({ title, content, actions: { primary: { label: "OK", value: true } } })
+ */
+export declare const dialogs: {
+    /** Open a dialog. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
+    /** Open a notification-style dialog (info/warning/critical/positive). */
+    notification: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with a single confirm action (defaults to "Ok"). */
+    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
+    confirmation: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
+    /** Programmatically close a dialog by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
+
 declare type DialogSimpleAction = {
     label?: string;
     value?: DialogActionValue;
@@ -5260,6 +5285,10 @@ declare type DialogWrapperContextType = {
      */
     portalContainer: HTMLDivElement | null;
 };
+
+declare const DialogWrapperProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+export { DialogWrapperProvider as F0DialogAlikeProvider }
+export { DialogWrapperProvider as F0DialogProvider }
 
 /**
  * The props for the F0DialogProvider component.
@@ -5323,19 +5352,6 @@ export declare type DragPayload<T = unknown> = {
     data?: T;
 };
 
-/**
- * Imperative API for side drawers. Requires `<F0Provider>` to be present.
- *
- * @example
- * const result = await drawer.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
- */
-export declare const drawer: {
-    /** Open a drawer. Resolves with the value of the action the user picked. */
-    open: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
-    /** Programmatically close a drawer by id (resolves its promise with undefined). */
-    close: (id: DialogId) => void;
-};
-
 export declare type DrawerDefinition = {
     /** The size of the drawer. */
     size?: DrawerSize;
@@ -5366,6 +5382,21 @@ export declare type DrawerDefinition = {
 };
 
 declare const drawerPositions: readonly ["left", "right"];
+
+/**
+ * Imperative API for side drawers. Requires `<F0Provider>` to be present.
+ *
+ * @example
+ * import { drawers } from "@factorialco/f0-react"
+ *
+ * const result = await drawers.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ */
+export declare const drawers: {
+    /** Open a drawer. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
+    /** Programmatically close a drawer by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
 
 declare type DrawerSize = (typeof drawerSizes)[number];
 
@@ -6029,10 +6060,12 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, initialText, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
+    /** Pre-fills the textarea on first render. Use with a changing `key` to restore text after undo. */
+    initialText?: string;
     /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
     onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>;
     /** Called when the user clicks the stop button while a response is streaming. */
@@ -6361,6 +6394,8 @@ export declare type F0AiMessagesContainerProps = {
     onRegenerate?: (messageId: string) => void;
     /** Called when the user copies an assistant message's content. */
     onCopy?: (content: string) => void;
+    /** Called when the user clicks the undo button on a turn. Receives the turn index. */
+    onUndo?: (turnIndex: number) => void;
     /** Pre-processed turns to render (assembled by the connected wrapper). */
     turns: RenderableTurn[];
     /** Show a skeleton in place of the turns while a thread is being fetched. */
@@ -6709,6 +6744,31 @@ export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
      * is always rendered by the card.
      */
     actions?: AudioPlayerMenuAction[];
+    /**
+     * Tabbed detail content revealed by a "View detail" toggle in the header
+     * (e.g. a Summary and a Transcript tab). When omitted or empty, no toggle and
+     * no panel are rendered and the card behaves like a plain recording player.
+     */
+    details?: AudioPlayerDetailTab[];
+    /**
+     * Controlled expanded state of the detail panel. Pair with
+     * `onExpandedChange`.
+     */
+    expanded?: boolean;
+    /**
+     * Initial expanded state of the detail panel when uncontrolled.
+     * @default false
+     */
+    defaultExpanded?: boolean;
+    /**
+     * Fired when the detail panel expands or collapses.
+     */
+    onExpandedChange?: (expanded: boolean) => void;
+    /**
+     * Max height (in pixels) of the scrollable detail area before it scrolls.
+     * @default 200
+     */
+    detailsMaxHeight?: number;
 }
 
 export declare interface F0AudioPlayerProps extends WithDataTestIdProps, DataAttributes_2 {
@@ -7335,6 +7395,14 @@ export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typ
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export declare function F0CanvasCard({ avatar, title, description, isActive, action, children, }: F0CanvasCardProps): JSX_2.Element;
 
@@ -7342,6 +7410,10 @@ export declare namespace F0CanvasCard {
     var displayName: string;
 }
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export declare type F0CanvasCardProps = {
     /** Avatar to display: a module icon or a file-type badge */
     avatar?: CanvasCardAvatar;
@@ -8135,9 +8207,9 @@ declare type F0DateOrDateTimeFieldConfig = F0DateFieldConfig | F0TimeFieldConfig
 
 export declare const F0DatePicker: WithDataTestIdReturnType_3<typeof F0DatePicker_2>;
 
-declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, ...inputProps }: F0DatePickerProps): JSX_2.Element;
+declare function F0DatePicker_2({ onChange, value, presets, granularities, minDate, maxDate, open, showIcon, displayFormat, selectOnCellOnly, ...inputProps }: F0DatePickerProps): JSX_2.Element;
 
-export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange"> & {
+export declare type F0DatePickerProps = Pick<DatePickerPopupProps, "granularities" | "minDate" | "maxDate" | "presets" | "open" | "onOpenChange" | "selectOnCellOnly"> & {
     showIcon?: boolean;
     /** Controls how the selected date is displayed in the input. Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy. */
     displayFormat?: DateStringFormat;
@@ -8257,7 +8329,10 @@ export declare interface F0DemoCardProps {
 }
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Use `F0Dialog` from `@/components/dialog-alike/F0Dialog` for
+ * center/fullscreen dialogs, or `F0Drawer` from
+ * `@/components/dialog-alike/F0Drawer` for side panels. This is a
+ * backward-compatible shim that maps the legacy props onto those components.
  */
 export declare const F0Dialog: WithDataTestIdReturnType_3<FC<F0DialogInternalProps>>;
 
@@ -8277,8 +8352,12 @@ export declare type F0DialogActionsProps = {
 
 export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
 
-export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
-
+/**
+ * The dialog-alike context, retyped under the original name so the public
+ * `Context<F0DialogContextType>` signature is preserved (the runtime value is
+ * the same context the dialog-alike components populate).
+ * @deprecated Import `F0DialogContext` from `@/components/dialog-alike/F0Dialog`.
+ */
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -8304,17 +8383,6 @@ export declare type F0DialogPrimaryAction = {
 };
 
 export declare type F0DialogPrimaryActionItem = F0DialogActionItem;
-
-export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
-
-declare type F0DialogProviderProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    shownBottomSheet?: boolean;
-    position: DialogPosition;
-    children: ReactNode;
-    portalContainer: HTMLDivElement | null;
-};
 
 export declare type F0DialogSecondaryAction = {
     label: string;
@@ -8449,7 +8517,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0RichTextField | F0FileField | F0CardSelectField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0RichTextField | F0FileField | F0CardSelectField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -8484,12 +8552,12 @@ export declare type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
  * @typeParam T - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0StringCardSelectConfig;
+export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0PeriodFieldConfig | F0StringCardSelectConfig;
 
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -8837,6 +8905,12 @@ export declare function f0FormField<T extends z.ZodArray<ZodTypeAny>, V extends 
 export declare function f0FormField<T extends z.ZodObject<z.ZodRawShape>, TConfig = undefined>(schema: T, config: F0ObjectConfig<z.infer<T>, TConfig>): T & F0ZodType<T>;
 
 /**
+ * Period field - date navigator that preserves the full DatePickerValue.
+ * Use with `z.custom<DatePickerValue>()` (or its optional/nullable wrappers).
+ */
+export declare function f0FormField<T extends ZodTypeAny>(schema: T, config: F0PeriodFieldConfig): T & F0ZodType<T>;
+
+/**
  * Optional wrapper - inherits inner type's config
  * @typeParam V - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
@@ -9006,6 +9080,14 @@ export declare namespace f0FormField {
     export function dateRange(config: DateRangeConfig & {
         optional?: false | undefined;
     }): DateRangeObjectSchema & F0ZodType<DateRangeObjectSchema>;
+    /* Excluded from this release type: PeriodValueSchema */
+    /* Excluded from this release type: DatePeriodConfig */
+    export function datePeriod(config: DatePeriodConfig & {
+        optional: true;
+    }): z.ZodOptional<z.ZodNullable<PeriodValueSchema>> & F0ZodType<z.ZodOptional<z.ZodNullable<PeriodValueSchema>>>;
+    export function datePeriod(config: DatePeriodConfig & {
+        optional?: false | undefined;
+    }): PeriodValueSchema & F0ZodType<PeriodValueSchema>;
     /* Excluded from this release type: RichTextObjectSchema */
     /* Excluded from this release type: RichTextConfig */
     export function richText(config: RichTextConfig & {
@@ -9559,6 +9641,14 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
@@ -9567,6 +9657,9 @@ export declare const F0HILActionConfirmation: ({ text, description, avatar, conf
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -9856,6 +9949,70 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     };
     /** When true, the tooltip is opened automatically for 3 seconds*/
     autoOpen?: boolean;
+};
+
+/**
+ * F0 config options specific to period fields.
+ *
+ * A period field reuses `F0DatePicker` exactly like the `date` field, but keeps
+ * the full `DatePickerValue` (`{ value: { from, to }, granularity }`) as the
+ * form value instead of collapsing it to a single `Date`. This lets a form
+ * declare a real "period" selector (Year / Half year / Quarter / Month / Range).
+ *
+ * Note: `clearable` is derived from the Zod schema (optional/nullable).
+ */
+export declare interface F0PeriodConfig {
+    /** Available granularities for the period picker */
+    granularities?: DateGranularity[];
+    /** Preset period options to display */
+    presets?: DatePreset[];
+    /**
+     * Controls how the selected period is displayed in the input.
+     * Defaults to "long" (e.g. "01 Aug 2025"). Use "default" for dd/MM/yyyy.
+     */
+    displayFormat?: DateStringFormat;
+    /**
+     * Minimum selectable date.
+     * Can be a static Date or a function that receives form values for dynamic constraints.
+     * @example
+     * // Static constraint
+     * minDate: new Date("2024-01-01")
+     *
+     * // Dynamic constraint based on another field
+     * minDate: ({ values }) => values.startDate
+     */
+    minDate?: F0DateConstraintProp;
+    /**
+     * Maximum selectable date.
+     * Can be a static Date or a function that receives form values for dynamic constraints.
+     * @example
+     * // Static constraint
+     * maxDate: new Date("2025-12-31")
+     *
+     * // Dynamic constraint based on another field
+     * maxDate: ({ values }) => values.endDate
+     */
+    maxDate?: F0DateConstraintProp;
+}
+
+/**
+ * Period field with all properties for rendering.
+ * Includes properties derived from the Zod schema.
+ */
+export declare type F0PeriodField = F0BaseField & F0PeriodConfig & {
+    type: "period";
+    /** Whether the period can be cleared (derived from optional/nullable) */
+    clearable?: boolean;
+    /** Conditional rendering based on another field's value */
+    renderIf?: PeriodFieldRenderIf;
+};
+
+/**
+ * Config for period fields (date navigator that preserves the full
+ * DatePickerValue: `{ value: { from, to }, granularity }`).
+ */
+export declare type F0PeriodFieldConfig = F0BaseConfig & F0PeriodConfig & {
+    fieldType: "period";
 };
 
 /**
@@ -10835,6 +10992,39 @@ export declare interface F0TimelineRowTaskProps extends F0TimelineRowBaseProps {
     otherActions?: F0TimelineRowOtherAction[];
 }
 
+declare type F0ToastProps = {
+    /**
+     * The title of the toast
+     */
+    title?: string;
+    /**
+     * The description of the toast
+     */
+    description?: string;
+    /**
+     * The variant of the toast
+     */
+    variant?: F0ToastVariant;
+    /**
+     * The duration of the toast in milliseconds (if not provided, the toast will stay open until the user closes it)
+     */
+    duration?: number;
+    /**
+     * Whether the toast is paused. If true, the duraction timer will not tick in anycase
+     */
+    forcePauseTimer?: boolean;
+    /**
+     * The callback to be called when the toast is closed
+     */
+    onClose?: () => void;
+    /**
+     * The actions to display in the toast ()
+     */
+    actions?: ToastActionButton | [ToastActionButton] | ToastActionLink | [ToastActionLink] | [ToastActionButton, ToastActionLink];
+};
+
+declare type F0ToastVariant = (typeof toastVariants)[number];
+
 /**
  * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
  * shape so adapters (factorial, mock runtime) can map back and forth
@@ -10860,7 +11050,7 @@ declare interface F0WizardFormBaseProps {
     onClose?: () => void;
     title?: string;
     /** @deprecated Use `size` instead. */
-    width?: DialogWidth;
+    width?: Exclude<F0DialogSize, "fullscreen">;
     /** The size of the wizard dialog. Preferred over the deprecated `width`. */
     size?: F0DialogSize;
     defaultStepIndex?: number;
@@ -10996,7 +11186,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "richtext" | "file" | "cardSelect" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -11360,6 +11550,23 @@ export declare interface FormFieldProps {
     /** Ref callback for the underlying input element */
     ref?: React.RefCallback<HTMLElement>;
 }
+
+/**
+ * Imperative API for opening forms. Pick the presentation with `mode` —
+ * `"dialog"` for a single-screen form, `"wizard"` for a multi-step form.
+ * Requires `<F0Provider>` to be mounted.
+ *
+ * @example
+ * const result = await forms.open({ formDefinition, mode: "dialog", title: "Add member" })
+ * if (result.submitted) save(result.data)
+ *
+ * @example
+ * const result = await forms.open({ formDefinition, mode: "wizard", title: "Onboarding" })
+ * if (result.completed) save(result.data)
+ */
+export declare const forms: {
+    open: typeof openForm;
+};
 
 /** Fraction tokens for proportional widths */
 export declare type FractionToken = "1/2" | "1/3" | "2/3" | "1/4" | "2/4" | "3/4" | "1/5" | "2/5" | "3/5" | "4/5" | "1/6" | "5/6";
@@ -11868,6 +12075,8 @@ export declare interface HourDistributionDataPoint {
     justifiedAbsenceValue?: number;
     /** Renders a full-height neutral bar for justified non-working days without a minute baseline. */
     justifiedAbsenceFullDay?: boolean;
+    /** Per-point label for the neutral segment tooltip. Overrides the chart-level justifiedAbsenceLabel when set. */
+    neutralLabel?: string;
 }
 
 declare type I18nContextType = TranslationsType & {
@@ -13290,7 +13499,7 @@ export declare const OneCalendar: WithDataTestIdReturnType_3<    {
 displayName: string;
 }>;
 
-export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, }: OneCalendarInternalProps) => JSX_2.Element;
+export declare const OneCalendarInternal: ({ mode, view, onSelect, defaultMonth, defaultSelected, showNavigation, showInput, minDate, maxDate, compact, weekStartsOn, selectOnCellOnly, }: OneCalendarInternalProps) => JSX_2.Element;
 
 export declare interface OneCalendarInternalProps {
     mode: CalendarMode;
@@ -13304,6 +13513,8 @@ export declare interface OneCalendarInternalProps {
     maxDate?: Date;
     compact?: boolean;
     weekStartsOn?: WeekStartsOn;
+    /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
+    selectOnCellOnly?: boolean;
 }
 
 export declare type OneCalendarProps = Omit<OneCalendarInternalProps, (typeof privateProps_6)[number]>;
@@ -13449,6 +13660,78 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>;
 }, clearSelectedItems: () => void, handleSelectAll?: (checked: boolean) => void) => void;
 
+/** Open a form in a dialog. */
+declare function openForm<TSchema extends F0FormSchema_2>(options: {
+    mode: "dialog";
+} & OpenFormDialogOptions<TSchema>): Promise<OpenFormDialogResult<TSchema>>;
+
+/** Open a form in a multi-step wizard. */
+declare function openForm<T extends F0FormSchema_2 | F0PerSectionSchema_2>(options: {
+    mode: "wizard";
+} & OpenFormWizardOptions<T>): Promise<OpenFormWizardResult<T>>;
+
+export declare type OpenFormDialogOptions<TSchema extends F0FormSchema_2> = {
+    /** The form definition created with `useF0FormDefinition`. */
+    formDefinition: F0FormDefinitionSingleSchema<TSchema>;
+    /** The dialog title. */
+    title: string;
+    /** Optional supporting description below the title. */
+    description?: string;
+    /** The dialog size. @default "md" */
+    size?: F0DialogSize;
+    /** Module shown in the dialog header. */
+    module?: DialogModule;
+    /**
+     * When true, the dialog can only be closed via its actions (no overlay click
+     * or Escape) — so in-progress input isn't lost by an accidental dismissal.
+     * @default true
+     */
+    modal?: boolean;
+    /** Overlay id. Auto-generated if not provided. */
+    id?: DialogId;
+    /** Override the footer button labels (default to i18n save/cancel). */
+    labels?: {
+        submit?: string;
+        cancel?: string;
+    };
+};
+
+export declare type OpenFormDialogResult<TSchema extends F0FormSchema_2> = {
+    submitted: true;
+    data: z.infer<TSchema>;
+} | {
+    submitted: false;
+};
+
+export declare type OpenFormWizardOptions<T extends F0FormSchema_2 | F0PerSectionSchema_2> = {
+    /** The form definition created with `useF0FormDefinition`. */
+    formDefinition: F0FormDefinition<T>;
+    /** The wizard dialog title. */
+    title?: string;
+    /** The wizard dialog size. */
+    size?: F0DialogSize;
+    /** Overlay id. Auto-generated if not provided. */
+    id?: DialogId;
+    /** Custom step definitions (otherwise derived from sections). */
+    steps?: F0WizardFormStep[];
+    /** Step to open on. */
+    defaultStepIndex?: number;
+    nextLabel?: string;
+    previousLabel?: string;
+    /** Allow clicking ahead to non-incomplete steps. @default false */
+    allowStepSkipping?: boolean;
+    /** Skip to the first incomplete step on open. @default false */
+    autoSkipCompletedSteps?: boolean;
+    onStepChanged?: (stepIndex: number) => void;
+};
+
+export declare type OpenFormWizardResult<T extends F0FormSchema_2 | F0PerSectionSchema_2> = {
+    completed: true;
+    data: WizardData<T>;
+} | {
+    completed: false;
+};
+
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 /** Overflow values */
@@ -13589,6 +13872,21 @@ declare type PendingContext = {
 declare type PendingQuote = {
     /** Plain-text selection (markdown stripped by the browser's toString()). */
     text: string;
+};
+
+declare type PeriodFieldRenderIf = PeriodRenderIfCondition | CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+declare interface PeriodRenderIfBase {
+    fieldId: string;
+}
+
+/**
+ * RenderIf conditions specific to period fields.
+ * The value is a `DatePickerValue` object, so only `isEmpty` is meaningful
+ * (same approach as date range fields).
+ */
+export declare type PeriodRenderIfCondition = PeriodRenderIfBase & {
+    isEmpty: boolean;
 };
 
 /**
@@ -13944,10 +14242,11 @@ declare type PromoteAction = {
 declare type PropertyDefinition_2<T> = {
     label: string;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card. Only
+     * rendered by the table visualization's column headers.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Function that extracts and formats the value from an item.
      * Should return an object matching the expected args for the specified renderer type.
@@ -14000,7 +14299,7 @@ declare type Props_3 = {
     list?: TagCounterItem[];
 };
 
-declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
+declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder" | "closeAction">;
 
 export declare type QuestionActionParams = {
     questionId: string;
@@ -14186,6 +14485,13 @@ export declare type RenderableTurn = {
         /** Reference message attached to feedback submissions. */
         targetMessage: Message_2;
     };
+    /**
+     * Whether this turn can be rolled back via the undo button. Defaults to
+     * shown when an `onUndo` handler is provided; set to `false` to hide undo
+     * for a specific turn (e.g. turns with no checkpoint behind them, or while a
+     * clarifying flow is mid-flight). Only consulted when `onUndo` is set.
+     */
+    canUndo?: boolean;
 };
 
 /**
@@ -14254,7 +14560,7 @@ declare interface RenderIfBase {
 /**
  * Union of all possible RenderIf conditions (used internally for evaluation)
  */
-export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition;
+export declare type RenderIfCondition = CommonRenderIfCondition | TextRenderIfCondition | NumberRenderIfCondition | BooleanRenderIfCondition | SelectRenderIfCondition | DateRenderIfCondition | DateRangeRenderIfCondition | PeriodRenderIfCondition;
 
 export declare interface ReplaceBlockNotesTextEditorPageDocumentPatch {
     type: "replace_block";
@@ -14854,7 +15160,7 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
     inline?: false;
     mode: SurveyAnsweringFormMode;
     module: SurveyAnsweringFormModule;
-    position?: DialogPosition;
+    position?: SurveyDialogPosition;
     isOpen: boolean;
     onClose: () => void;
     allowToChangeFullscreen?: boolean;
@@ -14965,6 +15271,9 @@ export declare type SurveyDataset = {
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
 
+/** Where the answering dialog is anchored. */
+declare type SurveyDialogPosition = "center" | "left" | "right" | "fullscreen";
+
 export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
@@ -15073,6 +15382,20 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
+declare type TableHeaderInfo = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the info-icon trigger. Defaults to the column label
+     * when the header's children are a string.
+     */
+    label?: string;
+};
+
 declare interface TableHeadProps {
     children: React.ReactNode;
     /**
@@ -15109,10 +15432,11 @@ declare interface TableHeadProps {
      */
     onSortClick?: () => void;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. When provided, displays an info icon next to the
+     * header content. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Icon to display when info is provided.
      * @default InfoCircleLine
@@ -15526,6 +15850,111 @@ export declare interface ThreadGroup {
 export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
+
+declare type ToastActionButton = {
+    type: "button";
+    label: string;
+    onClick: () => void;
+    icon?: IconType;
+    /**
+     * If true, the toast will not be closed automatically when the action is clicked.
+     */
+    keepOpen?: boolean;
+};
+
+declare type ToastActionLink = {
+    type: "link";
+    label: string;
+    href: string;
+    /**
+     * If true, the toast will not be closed automatically when the action is clicked.
+     */
+    keepOpen?: boolean;
+};
+
+export declare type ToastId = string;
+
+export declare type ToastOptions = {
+    /**
+     * The title of the toast
+     */
+    title?: string;
+    /**
+     * The description of the toast
+     */
+    description?: string;
+    /**
+     * The variant of the toast
+     */
+    variant?: F0ToastVariant;
+    /**
+     * The actions to display in the toast
+     */
+    actions?: F0ToastProps["actions"];
+    /**
+     * Optional id for the toast. If not provided, a random id will be generated.
+     */
+    id?: ToastId;
+} & ({
+    /**
+     * The duration of the toast in milliseconds (if not provided, the toast will stay open until the user closes it)
+     * @default 5000
+     */
+    duration?: number;
+    /**
+     * Whether the toast should persist until the user closes it
+     */
+    persistent?: undefined;
+} | {
+    duration?: undefined;
+    persistent: true;
+});
+
+export declare const ToastProvider: ({ children, portalTargets, }: ToastProviderProps) => JSX_2.Element;
+
+/**
+ * A toast as held by the store: the public options resolved into the props the
+ * `F0Toast` component renders, plus a stable `id` and an `onClose` callback.
+ */
+export declare type ToastProviderItem = F0ToastProps & {
+    id: ToastId;
+    onClose: () => void;
+};
+
+declare type ToastProviderProps = {
+    children: React.ReactNode;
+    portalTargets?: Record<"mobile" | "desktop", string>;
+};
+
+/**
+ * Imperative API for toast notifications. Can be called from anywhere — no hook
+ * required — as long as `<F0Provider>` (which mounts `ToastProvider`) is in the
+ * tree.
+ *
+ * @example
+ * import { toasts } from "@factorialco/f0-react"
+ *
+ * const id = toasts.open({ title: "Saved", variant: "success" })
+ * toasts.close(id)
+ * toasts.closeAll()
+ */
+export declare const toasts: {
+    /**
+     * Show a toast.
+     * @param options The options for the toast
+     * @returns The id of the created toast (pass it to `toasts.close` to dismiss it)
+     */
+    open: (options: ToastOptions) => ToastId;
+    /**
+     * Dismiss a toast by id.
+     * @param id The id returned by `toasts.open`
+     */
+    close: (id: ToastId) => void;
+    /** Dismiss every open toast. */
+    closeAll: () => void;
+};
+
+declare const toastVariants: readonly ["error", "warning", "success", "default"];
 
 /** A button rendered in the footer at the bottom of the table of contents */
 declare type TOCAction = {
@@ -16086,6 +16515,10 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     previousItemUrl: string | null;
 }
 
+declare const useDialogWrapperContext: () => DialogWrapperContextType;
+export { useDialogWrapperContext as useF0Dialog }
+export { useDialogWrapperContext as useF0DialogAlikeContext }
+
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -16113,10 +16546,6 @@ export declare const useEmojiConfetti: () => {
  * Returns null if not inside a F0AiFormRegistryProvider.
  */
 export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | null;
-
-export declare const useF0Dialog: () => F0DialogContextType;
-
-export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
 
 /**
  * Hook to control F0Form programmatically.
@@ -16337,6 +16766,16 @@ export declare const useGroups: <R extends RecordType>(groups: GroupRecord<R>[],
 };
 
 /**
+ * Returns true when the viewport width is >= 640px (Tailwind's `sm` breakpoint).
+ */
+export declare const useIsDesktop: () => boolean;
+
+/**
+ * Returns true when the viewport width is < 640px (below Tailwind's `sm` breakpoint).
+ */
+export declare const useIsMobile: () => boolean;
+
+/**
  * Resolves the previous/next neighbours of an item through the adapter's
  * optional id-relative `fetchItemNeighbors` capability.
  *
@@ -16459,7 +16898,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -16509,6 +16948,11 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * @default false
      */
     preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * Selectable rows currently rendered (incl. nested children), so "select all"
+     * reaches rows absent from `data.records`. Falls back to `data.records`.
+     */
+    getRenderedSelectableEntries?: () => Array<[SelectionId, R]>;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -16787,6 +17231,8 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
+
+declare type WizardData<T extends F0FormSchema_2 | F0PerSectionSchema_2> = T extends F0FormSchema_2 ? z.infer<T> : T extends F0PerSectionSchema_2 ? InferPerSectionValues_2<T> : never;
 
 /**
  * Synchronously persists a OneDataCollection's state to localStorage, mirroring

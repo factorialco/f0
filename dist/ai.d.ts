@@ -1830,6 +1830,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -1855,6 +1859,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -1884,6 +1891,7 @@ export declare const defaultTranslations: {
         readonly moveDown: "Move down";
         readonly thumbsUp: "Like";
         readonly thumbsDown: "Dislike";
+        readonly rewind: "Rewind to this point";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
@@ -2799,10 +2807,12 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, initialText, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
+    /** Pre-fills the textarea on first render. Use with a changing `key` to restore text after undo. */
+    initialText?: string;
     /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
     onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>;
     /** Called when the user clicks the stop button while a response is streaming. */
@@ -2999,6 +3009,8 @@ export declare type F0AiMessagesContainerProps = {
     onRegenerate?: (messageId: string) => void;
     /** Called when the user copies an assistant message's content. */
     onCopy?: (content: string) => void;
+    /** Called when the user clicks the undo button on a turn. Receives the turn index. */
+    onUndo?: (turnIndex: number) => void;
     /** Pre-processed turns to render (assembled by the connected wrapper). */
     turns: RenderableTurn[];
     /** Show a skeleton in place of the turns while a thread is being fetched. */
@@ -3362,6 +3374,14 @@ declare type F0AvatarTeamProps = {
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export declare function F0CanvasCard({ avatar, title, description, isActive, action, children, }: F0CanvasCardProps): JSX_2.Element;
 
@@ -3369,6 +3389,10 @@ export declare namespace F0CanvasCard {
     var displayName: string;
 }
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export declare type F0CanvasCardProps = {
     /** Avatar to display: a module icon or a file-type badge */
     avatar?: CanvasCardAvatar;
@@ -3543,6 +3567,14 @@ declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 declare const f0FileItemSizes: readonly ["md", "lg"];
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
@@ -3551,6 +3583,9 @@ export declare const F0HILActionConfirmation: ({ text, description, avatar, conf
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -4412,6 +4447,13 @@ export declare type RenderableTurn = {
         /** Reference message attached to feedback submissions. */
         targetMessage: Message;
     };
+    /**
+     * Whether this turn can be rolled back via the undo button. Defaults to
+     * shown when an `onUndo` handler is provided; set to `false` to hide undo
+     * for a specific turn (e.g. turns with no checkpoint behind them, or while a
+     * clarifying flow is mid-flight). Only consulted when `onUndo` is set.
+     */
+    canUndo?: boolean;
 };
 
 export declare type RequisitionProfile = {

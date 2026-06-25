@@ -118,6 +118,10 @@ const e = {
   navigation: {
     sidebar: {
       label: "Main navigation",
+      search: "Search",
+      tabs: {
+        label: "Sidebar sections"
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company"
@@ -142,7 +146,10 @@ const e = {
     seek: "Seek",
     options: "Recording options",
     playbackSpeed: "Playback speed",
-    position: "{{current}} of {{total}}"
+    position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details"
   },
   actions: {
     add: "Add",
@@ -172,6 +179,7 @@ const e = {
     moveDown: "Move down",
     thumbsUp: "Like",
     thumbsDown: "Dislike",
+    rewind: "Rewind to this point",
     other: "Other actions",
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
