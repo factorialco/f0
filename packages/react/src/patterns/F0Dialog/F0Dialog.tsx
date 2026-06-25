@@ -11,10 +11,9 @@ import { F0DialogInternalProps } from "./internal-types"
  * `@/components/dialog-alike/F0Drawer` for side panels (`position: "left" | "right"`).
  *
  * This component is a backward-compatible shim that maps the legacy patterns
- * props onto those components. The following props no longer have an
- * equivalent in the dialog-alike API and are accepted but ignored:
- * `asBottomSheetInMobile` (mobile behaviour is handled internally),
- * `navigation`, `resourceHeader` and `controls`.
+ * props onto those components. `navigation`, `resourceHeader`, and `controls`
+ * are forwarded to `F0Drawer` when `position` is `"left"` or `"right"`.
+ * `asBottomSheetInMobile` is accepted but ignored (handled internally).
  */
 export const F0Dialog: FC<F0DialogInternalProps> = ({
   isOpen,
@@ -33,12 +32,11 @@ export const F0Dialog: FC<F0DialogInternalProps> = ({
   tabs,
   activeTabId,
   setActiveTabId,
-  // Deprecated props with no dialog-alike equivalent. Destructured so they are
-  // not forwarded; kept in the signature for backward compatibility.
+  // Accepted but ignored — mobile behaviour is handled internally.
   asBottomSheetInMobile: _asBottomSheetInMobile,
-  navigation: _navigation,
-  resourceHeader: _resourceHeader,
-  controls: _controls,
+  navigation,
+  resourceHeader,
+  controls,
 }) => {
   const commonProps = {
     isOpen,
@@ -56,7 +54,13 @@ export const F0Dialog: FC<F0DialogInternalProps> = ({
 
   if (position === "left" || position === "right") {
     return (
-      <F0Drawer position={position} {...commonProps}>
+      <F0Drawer
+        position={position}
+        navigation={navigation}
+        resourceHeader={resourceHeader}
+        controls={controls}
+        {...commonProps}
+      >
         {children}
       </F0Drawer>
     )

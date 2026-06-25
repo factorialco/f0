@@ -4,7 +4,14 @@ import {
   DropdownInternalProps,
   DropdownItemObject,
 } from "@/experimental/Navigation/Dropdown/internal"
+import { BaseHeader } from "@/experimental/Information/Headers/BaseHeader"
 import { BreadcrumbItem } from "@/experimental/Navigation/Header/Breadcrumbs/internal/BreadcrumbItem"
+import {
+  NavigationProps,
+  PageNavigation,
+} from "@/experimental/Navigation/Header/PageNavigation"
+import { ResourceHeaderProps } from "@/patterns/ResourceHeader"
+import { ChevronLeft, Maximize } from "@/icons/app"
 import CrossIcon from "@/icons/app/Cross"
 import { DialogModule } from "@/lib/providers/dialogs-alike/module-types"
 import { useI18n } from "@/lib/providers/i18n"
@@ -16,6 +23,18 @@ import { DrawerDescription } from "@/ui/drawer"
 
 import { useDialogWrapperContext } from "./DialogWrapperProvider"
 
+export type DrawerControls =
+  | {
+      kind: "resource"
+      expand?: { label: string; url?: string; onClick?: () => void }
+      navigation?: NavigationProps
+    }
+  | {
+      kind: "back"
+      label: string
+      onClick: () => void
+    }
+
 export type HeaderProps = {
   /**
    * Disables the close button of the dialog.
@@ -26,6 +45,12 @@ export type HeaderProps = {
   description?: string
   module?: DialogModule
   otherActions?: DropdownInternalProps["items"]
+  /** Side-panel navigation rendered in the title row, next to the close button. */
+  navigation?: NavigationProps
+  /** Resource identity band rendered below the controls row (drawers only). */
+  resourceHeader?: ResourceHeaderProps
+  /** Controls the left slot of the controls row — back or resource (expand + prev/next). */
+  controls?: DrawerControls
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
 
 export const Header = ({
@@ -33,6 +58,9 @@ export const Header = ({
   description,
   module,
   otherActions,
+  navigation,
+  resourceHeader,
+  controls,
   tabs,
   activeTabId,
   setActiveTabId,
@@ -95,6 +123,89 @@ export const Header = ({
     )
   }
 
+  const CloseButton = () => (
+    <ButtonInternal
+      variant="outline"
+      icon={CrossIcon}
+      disabled={disableClose}
+      onClick={onClose}
+      label={translations.actions.close}
+      hideLabel
+    />
+  )
+
+  const TabsStrip = () =>
+    tabs && tabs.length > 0 ? (
+      <div className="-mx-2">
+        <Tabs
+          tabs={tabs}
+          activeTabId={activeTabId}
+          setActiveTabId={setActiveTabId}
+        />
+      </div>
+    ) : null
+
+  const Controls = () => {
+    if (!controls) return null
+
+    if (controls.kind === "back") {
+      return (
+        <ButtonInternal
+          variant="outline"
+          icon={ChevronLeft}
+          onClick={controls.onClick}
+          label={controls.label}
+        />
+      )
+    }
+
+    const expandElementProps = controls.expand?.onClick
+      ? { onClick: controls.expand.onClick, type: "button" as const }
+      : { href: controls.expand?.url ?? "" }
+
+    return (
+      <>
+        {controls.expand && (
+          <ButtonInternal
+            variant="outline"
+            icon={Maximize}
+            {...expandElementProps}
+            label={controls.expand.label}
+          />
+        )}
+        {controls.expand && controls.navigation && <Divider />}
+        {controls.navigation && <PageNavigation {...controls.navigation} />}
+      </>
+    )
+  }
+
+  if (resourceHeader || controls) {
+    return (
+      <>
+        <div className="flex flex-row items-center justify-between gap-3 px-4 py-3">
+          <div className="flex flex-row items-center gap-2">
+            <Controls />
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <Actions />
+            <CloseButton />
+          </div>
+        </div>
+        {resourceHeader ? (
+          <>
+            <DialogTitle className="sr-only">
+              {resourceHeader.title ?? title}
+            </DialogTitle>
+            <BaseHeader {...resourceHeader} />
+          </>
+        ) : (
+          title && <DialogTitle className="sr-only">{title}</DialogTitle>
+        )}
+        <TabsStrip />
+      </>
+    )
+  }
+
   return (
     <>
       <div
@@ -121,27 +232,13 @@ export const Header = ({
           )}
         </div>
         <div className="flex flex-row gap-2">
+          {navigation && <PageNavigation {...navigation} />}
           <Actions />
-          {otherActions && <Divider />}
-          <ButtonInternal
-            variant="outline"
-            icon={CrossIcon}
-            disabled={disableClose}
-            onClick={onClose}
-            label={translations.actions.close}
-            hideLabel
-          />
+          {(navigation || otherActions) && <Divider />}
+          <CloseButton />
         </div>
       </div>
-      {tabs && tabs.length > 0 && (
-        <div className="-mx-2">
-          <Tabs
-            tabs={tabs}
-            activeTabId={activeTabId}
-            setActiveTabId={setActiveTabId}
-          />
-        </div>
-      )}
+      <TabsStrip />
     </>
   )
 }
