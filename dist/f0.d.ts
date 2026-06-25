@@ -106,6 +106,7 @@ import { LineChartConfig as LineChartConfig_2 } from './f0';
 import { LineChartPropsBase } from './utils/types';
 import { LocalAudioTrack } from 'livekit-client';
 import { LongTextCellValue } from './types/longText';
+import { NamedExoticComponent } from 'react';
 import { NumberCellValue } from './f0';
 import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
@@ -893,6 +894,7 @@ export declare const aiTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -1172,6 +1174,15 @@ export declare interface AudioPlayerControls extends AudioPlayerState {
     toggle: () => void;
     seek: (seconds: number) => void;
     setPlaybackRate: (rate: number) => void;
+}
+
+export declare interface AudioPlayerDetailTab {
+    /** Stable value used to identify the tab. */
+    value: string;
+    /** Visible (already translated) tab label, e.g. "Summary". */
+    label: string;
+    /** Tab panel content, rendered inside a scrollable area. */
+    content: ReactNode;
 }
 
 export declare interface AudioPlayerMenuAction {
@@ -4338,6 +4349,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -4351,6 +4366,10 @@ export declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -4363,6 +4382,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -4631,6 +4653,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -5098,26 +5121,6 @@ declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
     type: "file";
 });
 
-/**
- * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
- * `DialogsAlikeLayoutProvider`) to be present in the tree.
- *
- * @example
- * const result = await dialog.open({ title, content, actions: { primary: { label: "OK", value: true } } })
- */
-export declare const dialog: {
-    /** Open a dialog. Resolves with the value of the action the user picked. */
-    open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
-    /** Open a notification-style dialog (info/warning/critical/positive). */
-    notification: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
-    /** Notification dialog with a single confirm action (defaults to "Ok"). */
-    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
-    /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
-    confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
-    /** Programmatically close a dialog by id (resolves its promise with undefined). */
-    close: (id: DialogId) => void;
-};
-
 export declare type DialogAction = Optional<Pick<F0ButtonProps, "label" | "icon" | "disabled">, "icon" | "disabled"> & {
     value: DialogActionValue;
     keepOpen?: boolean;
@@ -5218,6 +5221,28 @@ export declare type DialogPosition = (typeof dialogPositions)[number];
 
 declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"];
 
+/**
+ * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
+ * `DialogsAlikeLayoutProvider`) to be present in the tree.
+ *
+ * @example
+ * import { dialogs } from "@factorialco/f0-react"
+ *
+ * const result = await dialogs.open({ title, content, actions: { primary: { label: "OK", value: true } } })
+ */
+export declare const dialogs: {
+    /** Open a dialog. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
+    /** Open a notification-style dialog (info/warning/critical/positive). */
+    notification: (options: NotificationDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with a single confirm action (defaults to "Ok"). */
+    alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
+    /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
+    confirmation: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
+    /** Programmatically close a dialog by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
+
 declare type DialogSimpleAction = {
     label?: string;
     value?: DialogActionValue;
@@ -5241,6 +5266,10 @@ declare type DialogWrapperContextType = {
      */
     portalContainer: HTMLDivElement | null;
 };
+
+declare const DialogWrapperProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+export { DialogWrapperProvider as F0DialogAlikeProvider }
+export { DialogWrapperProvider as F0DialogProvider }
 
 /**
  * The props for the F0DialogProvider component.
@@ -5304,17 +5333,18 @@ export declare type DragPayload<T = unknown> = {
     data?: T;
 };
 
-/**
- * Imperative API for side drawers. Requires `<F0Provider>` to be present.
- *
- * @example
- * const result = await drawer.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
- */
-export declare const drawer: {
-    /** Open a drawer. Resolves with the value of the action the user picked. */
-    open: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
-    /** Programmatically close a drawer by id (resolves its promise with undefined). */
-    close: (id: DialogId) => void;
+export declare type DrawerControls = {
+    kind: "resource";
+    expand?: {
+        label: string;
+        url?: string;
+        onClick?: () => void;
+    };
+    navigation?: NavigationProps;
+} | {
+    kind: "back";
+    label: string;
+    onClick: () => void;
 };
 
 export declare type DrawerDefinition = {
@@ -5347,6 +5377,21 @@ export declare type DrawerDefinition = {
 };
 
 declare const drawerPositions: readonly ["left", "right"];
+
+/**
+ * Imperative API for side drawers. Requires `<F0Provider>` to be present.
+ *
+ * @example
+ * import { drawers } from "@factorialco/f0-react"
+ *
+ * const result = await drawers.open({ title, content, actions: { primary: { label: "Save", value: "save" } } })
+ */
+export declare const drawers: {
+    /** Open a drawer. Resolves with the value of the action the user picked. */
+    open: (definition: Optional<DrawerDefinition, "id">) => Promise<DialogActionValue>;
+    /** Programmatically close a drawer by id (resolves its promise with undefined). */
+    close: (id: DialogId) => void;
+};
 
 declare type DrawerSize = (typeof drawerSizes)[number];
 
@@ -6379,6 +6424,34 @@ declare interface F0AiPongProps {
     onClose: () => void;
 }
 
+/**
+ * Wraps a panel/canvas that F0AiChat is regenerating. While `active`, the
+ * content blurs and stops receiving pointer events, and a centered pill — the
+ * One icon plus an "Applying changes" label — floats over it, so the user gets
+ * clear feedback that the surface is being updated and shouldn't be edited.
+ *
+ * Mirrors the survey form-builder "applying changes" affordance, lifted into
+ * the F0AiChat family so any surface paired with the chat can reuse it.
+ */
+export declare const F0AiProcessingOverlay: NamedExoticComponent<F0AiProcessingOverlayProps>;
+
+export declare interface F0AiProcessingOverlayProps {
+    /**
+     * When `true`, the wrapped content is blurred and locked
+     * (`pointer-events-none`) and the floating status pill is shown over it.
+     */
+    active: boolean;
+    /**
+     * Pill label. Defaults to the translated "Applying changes"
+     * (`ai.applyingChanges`).
+     */
+    label?: string;
+    /** Extra classes for the wrapper element. */
+    className?: string;
+    /** The panel/canvas content the assistant is editing. */
+    children: ReactNode;
+}
+
 export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
 
 export declare namespace F0AiProposalCard {
@@ -6621,6 +6694,31 @@ export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
      * is always rendered by the card.
      */
     actions?: AudioPlayerMenuAction[];
+    /**
+     * Tabbed detail content revealed by a "View detail" toggle in the header
+     * (e.g. a Summary and a Transcript tab). When omitted or empty, no toggle and
+     * no panel are rendered and the card behaves like a plain recording player.
+     */
+    details?: AudioPlayerDetailTab[];
+    /**
+     * Controlled expanded state of the detail panel. Pair with
+     * `onExpandedChange`.
+     */
+    expanded?: boolean;
+    /**
+     * Initial expanded state of the detail panel when uncontrolled.
+     * @default false
+     */
+    defaultExpanded?: boolean;
+    /**
+     * Fired when the detail panel expands or collapses.
+     */
+    onExpandedChange?: (expanded: boolean) => void;
+    /**
+     * Max height (in pixels) of the scrollable detail area before it scrolls.
+     * @default 200
+     */
+    detailsMaxHeight?: number;
 }
 
 export declare interface F0AudioPlayerProps extends WithDataTestIdProps, DataAttributes_2 {
@@ -7247,6 +7345,14 @@ export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typ
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export declare function F0CanvasCard({ avatar, title, description, isActive, action, children, }: F0CanvasCardProps): JSX_2.Element;
 
@@ -7254,6 +7360,10 @@ export declare namespace F0CanvasCard {
     var displayName: string;
 }
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export declare type F0CanvasCardProps = {
     /** Avatar to display: a module icon or a file-type badge */
     avatar?: CanvasCardAvatar;
@@ -8169,7 +8279,10 @@ export declare interface F0DemoCardProps {
 }
 
 /**
- * @experimental This is an experimental component use it at your own risk
+ * @deprecated Use `F0Dialog` from `@/components/dialog-alike/F0Dialog` for
+ * center/fullscreen dialogs, or `F0Drawer` from
+ * `@/components/dialog-alike/F0Drawer` for side panels. This is a
+ * backward-compatible shim that maps the legacy props onto those components.
  */
 export declare const F0Dialog: WithDataTestIdReturnType_3<FC<F0DialogInternalProps>>;
 
@@ -8189,8 +8302,12 @@ export declare type F0DialogActionsProps = {
 
 export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
 
-export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
-
+/**
+ * The dialog-alike context, retyped under the original name so the public
+ * `Context<F0DialogContextType>` signature is preserved (the runtime value is
+ * the same context the dialog-alike components populate).
+ * @deprecated Import `F0DialogContext` from `@/components/dialog-alike/F0Dialog`.
+ */
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -8216,17 +8333,6 @@ export declare type F0DialogPrimaryAction = {
 };
 
 export declare type F0DialogPrimaryActionItem = F0DialogActionItem;
-
-export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
-
-declare type F0DialogProviderProps = {
-    isOpen: boolean;
-    onClose: () => void;
-    shownBottomSheet?: boolean;
-    position: DialogPosition;
-    children: ReactNode;
-    portalContainer: HTMLDivElement | null;
-};
 
 export declare type F0DialogSecondaryAction = {
     label: string;
@@ -9338,6 +9444,11 @@ export declare interface F0FormStylingConfig {
      * @default false
      */
     showSectionsSidepanel?: boolean;
+    /**
+     * Removes the default padding around the form content.
+     * @default false
+     */
+    noPadding?: boolean;
 }
 
 /**
@@ -9480,6 +9591,14 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
     as?: HeadingTags;
 };
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
@@ -9488,6 +9607,9 @@ export declare const F0HILActionConfirmation: ({ text, description, avatar, conf
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export declare type F0HILActionConfirmationProps = {
     /**
@@ -10615,8 +10737,12 @@ export declare type F0TextAreaInputProps = Pick<ComponentProps<typeof Textarea_2
  * F0 config options specific to text fields
  */
 export declare interface F0TextConfig {
-    /** HTML input type (text, email, password, etc.) */
-    inputType?: "text" | "email" | "password" | "tel" | "url";
+    /**
+     * Input type. `"private"` is a non-HTML F0 subtype for sensitive,
+     * non-credential data — masked like a password but with no lock icon, an
+     * eye toggle, and password managers disabled.
+     */
+    inputType?: "text" | "email" | "password" | "tel" | "url" | "private";
 }
 
 /**
@@ -10878,7 +11004,7 @@ declare interface F0WizardFormBaseProps {
     onClose?: () => void;
     title?: string;
     /** @deprecated Use `size` instead. */
-    width?: DialogWidth;
+    width?: Exclude<F0DialogSize, "fullscreen">;
     /** The size of the wizard dialog. Preferred over the deprecated `width`. */
     size?: F0DialogSize;
     defaultStepIndex?: number;
@@ -11378,6 +11504,23 @@ export declare interface FormFieldProps {
     /** Ref callback for the underlying input element */
     ref?: React.RefCallback<HTMLElement>;
 }
+
+/**
+ * Imperative API for opening forms. Pick the presentation with `mode` —
+ * `"dialog"` for a single-screen form, `"wizard"` for a multi-step form.
+ * Requires `<F0Provider>` to be mounted.
+ *
+ * @example
+ * const result = await forms.open({ formDefinition, mode: "dialog", title: "Add member" })
+ * if (result.submitted) save(result.data)
+ *
+ * @example
+ * const result = await forms.open({ formDefinition, mode: "wizard", title: "Onboarding" })
+ * if (result.completed) save(result.data)
+ */
+export declare const forms: {
+    open: typeof openForm;
+};
 
 /** Fraction tokens for proportional widths */
 export declare type FractionToken = "1/2" | "1/3" | "2/3" | "1/4" | "2/4" | "3/4" | "1/5" | "2/5" | "3/5" | "4/5" | "1/6" | "5/6";
@@ -12196,7 +12339,12 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
 declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
-    type?: Exclude<HTMLInputTypeAttribute, "number">;
+    /**
+     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
+     * masked like a password but with no lock icon and with password managers
+     * disabled. It never reaches the DOM (mapped to text/password internally).
+     */
+    type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
 };
 
@@ -13471,6 +13619,78 @@ export declare type OnSelectItemsCallback<R extends RecordType, Filters extends 
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>;
 }, clearSelectedItems: () => void, handleSelectAll?: (checked: boolean) => void) => void;
 
+/** Open a form in a dialog. */
+declare function openForm<TSchema extends F0FormSchema_2>(options: {
+    mode: "dialog";
+} & OpenFormDialogOptions<TSchema>): Promise<OpenFormDialogResult<TSchema>>;
+
+/** Open a form in a multi-step wizard. */
+declare function openForm<T extends F0FormSchema_2 | F0PerSectionSchema_2>(options: {
+    mode: "wizard";
+} & OpenFormWizardOptions<T>): Promise<OpenFormWizardResult<T>>;
+
+export declare type OpenFormDialogOptions<TSchema extends F0FormSchema_2> = {
+    /** The form definition created with `useF0FormDefinition`. */
+    formDefinition: F0FormDefinitionSingleSchema<TSchema>;
+    /** The dialog title. */
+    title: string;
+    /** Optional supporting description below the title. */
+    description?: string;
+    /** The dialog size. @default "md" */
+    size?: F0DialogSize;
+    /** Module shown in the dialog header. */
+    module?: DialogModule;
+    /**
+     * When true, the dialog can only be closed via its actions (no overlay click
+     * or Escape) — so in-progress input isn't lost by an accidental dismissal.
+     * @default true
+     */
+    modal?: boolean;
+    /** Overlay id. Auto-generated if not provided. */
+    id?: DialogId;
+    /** Override the footer button labels (default to i18n save/cancel). */
+    labels?: {
+        submit?: string;
+        cancel?: string;
+    };
+};
+
+export declare type OpenFormDialogResult<TSchema extends F0FormSchema_2> = {
+    submitted: true;
+    data: z.infer<TSchema>;
+} | {
+    submitted: false;
+};
+
+export declare type OpenFormWizardOptions<T extends F0FormSchema_2 | F0PerSectionSchema_2> = {
+    /** The form definition created with `useF0FormDefinition`. */
+    formDefinition: F0FormDefinition<T>;
+    /** The wizard dialog title. */
+    title?: string;
+    /** The wizard dialog size. */
+    size?: F0DialogSize;
+    /** Overlay id. Auto-generated if not provided. */
+    id?: DialogId;
+    /** Custom step definitions (otherwise derived from sections). */
+    steps?: F0WizardFormStep[];
+    /** Step to open on. */
+    defaultStepIndex?: number;
+    nextLabel?: string;
+    previousLabel?: string;
+    /** Allow clicking ahead to non-incomplete steps. @default false */
+    allowStepSkipping?: boolean;
+    /** Skip to the first incomplete step on open. @default false */
+    autoSkipCompletedSteps?: boolean;
+    onStepChanged?: (stepIndex: number) => void;
+};
+
+export declare type OpenFormWizardResult<T extends F0FormSchema_2 | F0PerSectionSchema_2> = {
+    completed: true;
+    data: WizardData<T>;
+} | {
+    completed: false;
+};
+
 declare type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
 /** Overflow values */
@@ -13981,10 +14201,11 @@ declare type PromoteAction = {
 declare type PropertyDefinition_2<T> = {
     label: string;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card. Only
+     * rendered by the table visualization's column headers.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Function that extracts and formats the value from an item.
      * Should return an object matching the expected args for the specified renderer type.
@@ -14891,7 +15112,7 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
     inline?: false;
     mode: SurveyAnsweringFormMode;
     module: SurveyAnsweringFormModule;
-    position?: DialogPosition;
+    position?: SurveyDialogPosition;
     isOpen: boolean;
     onClose: () => void;
     allowToChangeFullscreen?: boolean;
@@ -15002,6 +15223,9 @@ export declare type SurveyDataset = {
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
 
+/** Where the answering dialog is anchored. */
+declare type SurveyDialogPosition = "center" | "left" | "right" | "fullscreen";
+
 export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
@@ -15110,6 +15334,20 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
+declare type TableHeaderInfo = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the info-icon trigger. Defaults to the column label
+     * when the header's children are a string.
+     */
+    label?: string;
+};
+
 declare interface TableHeadProps {
     children: React.ReactNode;
     /**
@@ -15146,10 +15384,11 @@ declare interface TableHeadProps {
      */
     onSortClick?: () => void;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. When provided, displays an info icon next to the
+     * header content. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Icon to display when info is provided.
      * @default InfoCircleLine
@@ -16228,6 +16467,10 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     previousItemUrl: string | null;
 }
 
+declare const useDialogWrapperContext: () => DialogWrapperContextType;
+export { useDialogWrapperContext as useF0Dialog }
+export { useDialogWrapperContext as useF0DialogAlikeContext }
+
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -16255,10 +16498,6 @@ export declare const useEmojiConfetti: () => {
  * Returns null if not inside a F0AiFormRegistryProvider.
  */
 export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | null;
-
-export declare const useF0Dialog: () => F0DialogContextType;
-
-export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
 
 /**
  * Hook to control F0Form programmatically.
@@ -16611,7 +16850,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -16661,6 +16900,11 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * @default false
      */
     preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * Selectable rows currently rendered (incl. nested children), so "select all"
+     * reaches rows absent from `data.records`. Falls back to `data.records`.
+     */
+    getRenderedSelectableEntries?: () => Array<[SelectionId, R]>;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {
@@ -16938,6 +17182,8 @@ declare interface WithTooltipDescription {
      */
     description?: string;
 }
+
+declare type WizardData<T extends F0FormSchema_2 | F0PerSectionSchema_2> = T extends F0FormSchema_2 ? z.infer<T> : T extends F0PerSectionSchema_2 ? InferPerSectionValues_2<T> : never;
 
 /**
  * Synchronously persists a OneDataCollection's state to localStorage, mirroring

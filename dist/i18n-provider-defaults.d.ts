@@ -118,6 +118,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -131,6 +135,10 @@ export declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -143,6 +151,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -411,6 +422,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";

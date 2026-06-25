@@ -3170,6 +3170,10 @@ declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -3183,6 +3187,10 @@ declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -3195,6 +3203,9 @@ declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -3463,6 +3474,7 @@ declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -4969,6 +4981,18 @@ export declare type F0SearchInputProps = {
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
+export declare const F0SegmentedBar: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0SegmentedBarProps & RefAttributes<HTMLDivElement>>>;
+
+export declare interface F0SegmentedBarProps extends WithDataTestIdProps {
+    value: number;
+    max: number;
+    color?: SegmentColorToken;
+    label: string;
+}
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
 export declare const F0SegmentedControl: {
     ({ items, value, onChange, disabled, fullWidth, hideLabels, ariaLabel, ariaLabelledBy, }: F0SegmentedControlProps_2): JSX_2.Element;
     displayName: string;
@@ -6136,7 +6160,12 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
 declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
-    type?: Exclude<HTMLInputTypeAttribute, "number">;
+    /**
+     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
+     * masked like a password but with no lock icon and with password managers
+     * disabled. It never reaches the DOM (mapped to text/password internally).
+     */
+    type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
 };
 
@@ -6334,6 +6363,7 @@ export declare interface MenuCategory {
 export declare interface MenuItem extends NavigationItem {
     icon: IconType;
     badge?: number;
+    tag?: string;
 }
 
 export declare interface MenuProps {
@@ -7687,10 +7717,11 @@ declare interface PromiseState<T> {
 declare type PropertyDefinition_2<T> = {
     label: string;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card. Only
+     * rendered by the table visualization's column headers.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Function that extracts and formats the value from an item.
      * Should return an object matching the expected args for the specified renderer type.
@@ -8086,6 +8117,8 @@ export declare interface SeedTarget<R extends RecordType, Filters extends Filter
     } | undefined) => void;
 }
 
+export declare type SegmentColorToken = `categorical-${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8}` | "feedback-positive" | "feedback-neutral" | "feedback-negative";
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */
@@ -8180,6 +8213,135 @@ export declare const Sidebar: WithDataTestIdReturnType_5<typeof _Sidebar>;
 
 declare function _Sidebar({ header, body, footer, onFooterDropdownClick, }: SidebarProps): JSX_2.Element;
 
+export declare type SidebarChat = {
+    id: string;
+    label: string;
+    /** Person / team / company avatar (F0Avatar variant). */
+    avatar: AvatarVariant;
+    onClick?: () => void;
+    /** When > 0, the chat is rendered as unread (darker, bolder name). */
+    unreadCount?: number;
+    presence?: SidebarChatPresence;
+    /** Status icon shown to the right of the name. People only. */
+    status?: SidebarChatStatus;
+    /** Epoch ms of the last activity; used for ordering. */
+    lastActivityAt?: number;
+};
+
+/**
+ * A top-of-list action in the Messages tab (e.g. "New chat", "New group").
+ * The list renders one ghost button per action, so any number can be added.
+ */
+export declare type SidebarChatAction = {
+    label: string;
+    icon?: IconType;
+    onClick?: () => void;
+};
+
+export declare type SidebarChatActions = Omit<SidebarChatStore, "groups" | "activeChatId" | "unreadChatsCount">;
+
+export declare type SidebarChatGroup = {
+    id: string;
+    title: string;
+    /** Initial open state of the collapsible group. @default true */
+    isOpen?: boolean;
+    chats: SidebarChat[];
+};
+
+export declare const SidebarChatItem: ({ chat, isActive, onClick, }: {
+    chat: SidebarChat;
+    isActive: boolean;
+    onClick: () => void;
+}) => JSX_2.Element;
+
+/**
+ * Body of the "Messages" tab: chat groups read from `SidebarChatProvider`.
+ * Chats fade in/out as they are added/removed; live reordering from the store
+ * is applied instantly (Slack-style), without layout projection — that avoids
+ * the resize-like "bounce" when the tab mounts.
+ */
+export declare const SidebarChatList: ({ actions, }: {
+    /** Ghost actions rendered at the very top (e.g. New chat, New group). */
+    actions?: SidebarChatAction[];
+}) => JSX_2.Element;
+
+export declare type SidebarChatPresence = "online" | "offline";
+
+export declare const SidebarChatProvider: ({ children, initialGroups, initialActiveChatId, }: SidebarChatProviderProps) => JSX_2.Element;
+
+export declare type SidebarChatProviderProps = {
+    children: ReactNode;
+    /** Initial chat groups. Live updates are applied through the store actions. */
+    initialGroups?: SidebarChatGroup[];
+    /** Initially active chat id. Chats are not navigation links (see store). */
+    initialActiveChatId?: string;
+};
+
+/**
+ * Status shown as a small icon avatar to the right of a person's name (people
+ * only). The consumer fully controls it — pass any icon with an accessible
+ * label. F0 does not hardcode any set of statuses.
+ */
+export declare type SidebarChatStatus = {
+    icon: IconType;
+    label: string;
+};
+
+/**
+ * Imperative store API exposed by `useSidebarChats`. Every mutation is stable
+ * (identity preserved across renders) so it can be called from anywhere with
+ * access to the context — e.g. a websocket handler pushing live updates.
+ */
+export declare type SidebarChatStore = {
+    groups: SidebarChatGroup[];
+    /**
+     * Id of the currently active chat. Chats are not navigation links — you can
+     * be on any page (e.g. the dashboard) with a chat active — so the active
+     * state is driven from here, not from the router.
+     */
+    activeChatId?: string;
+    /** Number of conversations with unread messages (across all groups). */
+    unreadChatsCount: number;
+    /** Replace the whole tree. */
+    setGroups: (groups: SidebarChatGroup[]) => void;
+    /** Set (or clear, with `null`) the active chat. */
+    setActiveChat: (id: string | null) => void;
+    /** Insert a chat into a group, or update it in place if it already exists. */
+    upsertChat: (groupId: string, chat: SidebarChat) => void;
+    /** Patch an existing chat by id, regardless of its group. */
+    updateChat: (id: string, patch: Partial<SidebarChat>) => void;
+    /** Remove a chat by id. */
+    removeChat: (id: string) => void;
+    /** Convenience setter for the unread counter of a chat. */
+    setUnread: (id: string, count: number) => void;
+    /** Reorder the chats of a group given the new ordered list of ids. */
+    reorder: (groupId: string, orderedIds: string[]) => void;
+};
+
+/**
+ * Collapsible titled section used across the Sidebar (navigation categories,
+ * chat groups). Title + rotating chevron + animated height.
+ */
+export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
+
+export declare interface SidebarCollapsibleSectionProps {
+    title: string;
+    /** Initial open state. @default true */
+    isOpen?: boolean;
+    /** Root sections render their content without the collapsible header. */
+    isRoot?: boolean;
+    onCollapse?: (isOpen: boolean) => void;
+    children?: ReactNode;
+    /**
+     * Emphasises the title (darker, bolder) while the section is collapsed —
+     * Slack-style hint that hidden items need attention (e.g. unread chats).
+     */
+    highlightWhenCollapsed?: boolean;
+    /** Drag-aware guards used by the sortable Menu; safe to omit elsewhere. */
+    isDragging?: boolean;
+    wasDragging?: RefObject<boolean>;
+}
+
 export declare function SidebarFooter({ user, options, showActivityButton, activityButtonShortcut, onActivityButtonClick, onDropdownClick, hasActivityUpdates, }: SidebarFooterProps): JSX_2.Element;
 
 declare interface SidebarFooterProps {
@@ -8213,6 +8375,35 @@ declare interface SidebarProps {
 }
 
 declare type SidebarState = "locked" | "unlocked" | "hidden";
+
+export declare type SidebarTab = {
+    id: string;
+    label: string;
+    icon: IconType;
+    /** Unread counter shown next to the tab. */
+    badge?: number;
+};
+
+/**
+ * Tab switcher that replaces the `SearchBar` row when the Sidebar gains tabs.
+ * The active tab shows icon + label (animated in); inactive tabs are
+ * icon-only. Search becomes an icon button on the right.
+ *
+ * When no tabs are needed, keep composing the Sidebar header with `SearchBar`
+ * instead — that path is unchanged.
+ */
+export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, search, }: SidebarTabsProps) => JSX_2.Element;
+
+export declare type SidebarTabsProps = {
+    tabs: SidebarTab[];
+    activeTab: string;
+    onTabChange: (id: string) => void;
+    search: {
+        /** Accessible label / tooltip for the search icon button. */
+        placeholder?: string;
+        onClick?: () => void;
+    };
+};
 
 /**
  * Response structure for non-paginated data
@@ -8474,6 +8665,20 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
 
 declare function TableHead({ children, width, minWidth, sortState, onSortClick, info, infoIcon, sticky, hidden, align, className, colSpan, }: TableHeadProps): JSX_2.Element;
 
+declare type TableHeaderInfo = {
+    title: string;
+    description: string;
+    link?: {
+        label: string;
+        onClick: () => void;
+    };
+    /**
+     * Accessible name for the info-icon trigger. Defaults to the column label
+     * when the header's children are a string.
+     */
+    label?: string;
+};
+
 declare interface TableHeadProps {
     children: React.ReactNode;
     /**
@@ -8510,10 +8715,11 @@ declare interface TableHeadProps {
      */
     onSortClick?: () => void;
     /**
-     * Optional tooltip text. When provided, displays an info icon next to the header content
-     * that shows this text in a tooltip when hovered.
+     * Optional header info. When provided, displays an info icon next to the
+     * header content. Pass a string for a short text tooltip, or a
+     * {@link TableHeaderInfo} object for a structured hoverable card.
      */
-    info?: string;
+    info?: string | TableHeaderInfo;
     /**
      * Icon to display when info is provided.
      * @default InfoCircleLine
@@ -9222,6 +9428,16 @@ declare interface User_2 {
 }
 
 export declare function useSidebar(): FrameContextType;
+
+/**
+ * Access only the mutation actions, without subscribing to state changes.
+ * Use this from code that pushes updates (e.g. websocket handlers) so it
+ * doesn't re-render on every chat change.
+ */
+export declare const useSidebarChatActions: () => SidebarChatActions;
+
+/** Read the chat state (groups, active chat) and the imperative store API. */
+export declare const useSidebarChats: () => SidebarChatStore;
 
 /**
  * Profile data for a vacancy entity (ATS vacancy/position), resolved asynchronously

@@ -20,6 +20,7 @@ import { HTMLAttributes } from 'react';
 import { ItemProps } from './types';
 import { JSX as JSX_2 } from 'react';
 import { LocalAudioTrack } from 'livekit-client';
+import { NamedExoticComponent } from 'react';
 import { Props as Props_3 } from './types';
 import * as React_2 from 'react';
 import { ReactElement } from 'react';
@@ -607,6 +608,7 @@ export declare const aiTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -1810,6 +1812,10 @@ export declare const defaultTranslations: {
     readonly navigation: {
         readonly sidebar: {
             readonly label: "Main navigation";
+            readonly search: "Search";
+            readonly tabs: {
+                readonly label: "Sidebar sections";
+            };
             readonly companySelector: {
                 readonly label: "Select a company";
                 readonly placeholder: "Select a company";
@@ -1823,6 +1829,10 @@ export declare const defaultTranslations: {
             readonly show: "Show password";
             readonly hide: "Hide password";
         };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
+        };
     };
     readonly link: {
         readonly opensInNewTab: "opens in new tab";
@@ -1835,6 +1845,9 @@ export declare const defaultTranslations: {
         readonly options: "Recording options";
         readonly playbackSpeed: "Playback speed";
         readonly position: "{{current}} of {{total}}";
+        readonly viewDetail: "View detail";
+        readonly hideDetail: "Hide detail";
+        readonly details: "Recording details";
     };
     readonly actions: {
         readonly add: "Add";
@@ -2103,6 +2116,7 @@ export declare const defaultTranslations: {
         readonly inputPlaceholder: "Ask about time, people, or company info and a lot of other things...";
         readonly stopAnswerGeneration: "Stop generating";
         readonly responseStopped: "You stopped this response";
+        readonly applyingChanges: "Applying changes";
         readonly sendMessage: "Send message";
         readonly thoughtsGroupTitle: "Reasoning";
         readonly resourcesGroupTitle: "Resources";
@@ -3015,6 +3029,34 @@ declare interface F0AiPongProps {
     onClose: () => void;
 }
 
+/**
+ * Wraps a panel/canvas that F0AiChat is regenerating. While `active`, the
+ * content blurs and stops receiving pointer events, and a centered pill — the
+ * One icon plus an "Applying changes" label — floats over it, so the user gets
+ * clear feedback that the surface is being updated and shouldn't be edited.
+ *
+ * Mirrors the survey form-builder "applying changes" affordance, lifted into
+ * the F0AiChat family so any surface paired with the chat can reuse it.
+ */
+export declare const F0AiProcessingOverlay: NamedExoticComponent<F0AiProcessingOverlayProps>;
+
+export declare interface F0AiProcessingOverlayProps {
+    /**
+     * When `true`, the wrapped content is blurred and locked
+     * (`pointer-events-none`) and the floating status pill is shown over it.
+     */
+    active: boolean;
+    /**
+     * Pill label. Defaults to the translated "Applying changes"
+     * (`ai.applyingChanges`).
+     */
+    label?: string;
+    /** Extra classes for the wrapper element. */
+    className?: string;
+    /** The panel/canvas content the assistant is editing. */
+    children: ReactNode;
+}
+
 export declare function F0AiProposalCard(props: F0AiProposalCardProps): JSX_2.Element;
 
 export declare namespace F0AiProposalCard {
@@ -3272,6 +3314,14 @@ declare type F0AvatarTeamProps = {
 /**
  * Shared inline card rendered in the AI chat for any canvas entity.
  * Shows an avatar, title, optional description, and a configurable action button.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
+ * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
+ * wrapper). Don't add new usages; migrate the remaining one
+ * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
+ * `F0CardHorizontal`-friendly home.
+ * @removeIn 5.0.0
  */
 export declare function F0CanvasCard({ avatar, title, description, isActive, action, children, }: F0CanvasCardProps): JSX_2.Element;
 
@@ -3279,6 +3329,10 @@ export declare namespace F0CanvasCard {
     var displayName: string;
 }
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0CanvasCard}.
+ * @removeIn 5.0.0
+ */
 export declare type F0CanvasCardProps = {
     /** Avatar to display: a module icon or a file-type badge */
     avatar?: CanvasCardAvatar;
@@ -3453,6 +3507,14 @@ declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 declare const f0FileItemSizes: readonly ["md", "lg"];
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export declare const F0HILActionConfirmation: ({ text, description, avatar, confirmationText, onConfirm, cancelText, onCancel, stackAt, }: F0HILActionConfirmationProps) => JSX_2.Element;
 
 /**
@@ -3461,6 +3523,9 @@ export declare const F0HILActionConfirmation: ({ text, description, avatar, conf
  * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export declare type F0HILActionConfirmationProps = {
     /**
