@@ -91,49 +91,31 @@ export const exampleGroups: SidebarChatGroup[] = [
       {
         id: "engineering",
         label: "Engineering",
-        avatar: {
-          type: "company",
-          name: "Engineering",
-          src: "/avatars/company01.jpg",
-        },
+        // Groups can use an emoji avatar…
+        avatar: { type: "emoji", emoji: "🚀" },
         unreadCount: 132,
       },
       {
         id: "product",
         label: "Product",
-        avatar: {
-          type: "company",
-          name: "Product",
-          src: "/avatars/company02.jpg",
-        },
+        avatar: { type: "emoji", emoji: "🧭" },
       },
       {
         id: "design-systems",
         label: "Design Systems",
-        avatar: {
-          type: "company",
-          name: "Design Systems",
-          src: "/avatars/company03.jpg",
-        },
+        avatar: { type: "emoji", emoji: "🎨" },
         unreadCount: 23,
       },
       {
         id: "data-platform",
         label: "Data Platform",
-        avatar: {
-          type: "company",
-          name: "Data Platform",
-          src: "/avatars/company04.jpg",
-        },
+        avatar: { type: "emoji", emoji: "📊" },
       },
       {
         id: "devops-sre",
         label: "DevOps & SRE",
-        avatar: {
-          type: "company",
-          name: "DevOps & SRE",
-          src: "/avatars/company05.jpg",
-        },
+        // No emoji → company avatar built from the group name (its initials).
+        avatar: { type: "company", name: "DevOps & SRE" },
         unreadCount: 2,
       },
     ],
@@ -141,7 +123,7 @@ export const exampleGroups: SidebarChatGroup[] = [
 ]
 
 const meta = {
-  title: "Sidebar/ChatList",
+  title: "Navigation/Sidebar/ChatList",
   component: SidebarChatList,
   parameters: { layout: "centered" },
   decorators: [
@@ -151,9 +133,10 @@ const meta = {
       </div>
     ),
   ],
-  tags: ["autodocs", "experimental", "no-sidebar"],
+  tags: ["autodocs", "experimental"],
   // These are exported data fixtures reused by other stories, not stories
-  // themselves — keep Storybook from rendering them as standalone stories.
+  // themselves — keep Storybook from rendering them as standalone stories
+  // (they'd mount without a SidebarChatProvider and throw).
   excludeStories: ["exampleActions", "exampleGroups"],
 } satisfies Meta<typeof SidebarChatList>
 
@@ -165,6 +148,48 @@ export const Default: Story = {
     <SidebarChatProvider
       initialGroups={exampleGroups}
       initialActiveChatId="priyanka"
+    >
+      <SidebarChatList actions={exampleActions} />
+    </SidebarChatProvider>
+  ),
+}
+
+/** Blank state shown when the user hasn't started any conversation yet. */
+export const Empty: Story = {
+  render: () => (
+    <SidebarChatProvider initialGroups={[]}>
+      <SidebarChatList actions={exampleActions} />
+    </SidebarChatProvider>
+  ),
+}
+
+/**
+ * Whole-list skeleton shown while loading and nothing is known yet. The blank
+ * state is intentionally NOT shown here (that would read as "no conversations").
+ */
+export const Loading: Story = {
+  render: () => (
+    <SidebarChatProvider initialGroups={[]}>
+      <SidebarChatList actions={exampleActions} loading />
+    </SidebarChatProvider>
+  ),
+}
+
+/**
+ * Cascade: the conversations and groups are known, but some names/avatars are
+ * still resolving — those rows show a skeleton in place while the rest render
+ * normally. As each one resolves, flip its `loading` to false.
+ */
+export const CascadeLoading: Story = {
+  render: () => (
+    <SidebarChatProvider
+      initialGroups={exampleGroups.map((group, groupIndex) => ({
+        ...group,
+        chats: group.chats.map((chat, chatIndex) => ({
+          ...chat,
+          loading: (groupIndex + chatIndex) % 3 === 0,
+        })),
+      }))}
     >
       <SidebarChatList actions={exampleActions} />
     </SidebarChatProvider>

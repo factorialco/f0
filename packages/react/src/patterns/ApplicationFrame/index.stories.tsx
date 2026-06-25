@@ -1,11 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps } from "react"
-import { expect, within } from "storybook/test"
+import { ComponentProps, useCallback, useEffect, useState } from "react"
+import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { ChartVerticalBars, Lightbulb, Pencil, Search } from "@/icons/app"
+import {
+  ChartVerticalBars,
+  Comment,
+  Home,
+  Lightbulb,
+  New,
+  Pencil,
+  Search,
+} from "@/icons/app"
+import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
@@ -13,9 +22,29 @@ import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
+import { SidebarChatList } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatList"
+import {
+  SidebarChatProvider,
+  useSidebarChatActions,
+  useSidebarChats,
+} from "@/patterns/Navigation/Sidebar/Chats/SidebarChatProvider"
+import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
+import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
+import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
+import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
+import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
+import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
+import {
+  MockChatAppProvider,
+  useConversationRuntime,
+  useMockChatGroups,
+} from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
@@ -697,12 +726,37 @@ const DefaultStoryComponent = (
 }
 
 export const Default: Story = {
-  render: (args) => <DefaultStoryComponent {...args} />,
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{ ...withMockChatSlots(args.ai), side: "left" }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar />}
+        >
+          <Page {...PageStories.Default.args} />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
+    // Home tab: the Menu renders links carrying test attributes.
     const link = canvas.getByRole("link", { name: /inbox/i })
     await expect(link.dataset.test).toBe("foo")
+
+    // Messages tab: picking a conversation swaps the side panel to that
+    // conversation — the AI chat space now hosts arbitrary content, one at
+    // a time.
+    await userEvent.click(canvas.getByRole("button", { name: "Messages" }))
+    await userEvent.click(
+      canvas.getByRole("button", { name: /Marcus Bennett/i })
+    )
+    // The mocked conversation mounts in the panel: its composer is present.
+    await expect(
+      await canvas.findByPlaceholderText(/write something here/i)
+    ).toBeInTheDocument()
   },
 }
 
@@ -859,4 +913,281 @@ export const WithEmployeeCredits: Story = {
       },
     },
   },
+}
+
+/**
+ * A fully-mocked conversation hosted in the side panel, driven by the shared
+ * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
+ * fullscreen/close to the panel via `useAiChat()`.
+ */
+const MockChatPanel = ({ convId }: { convId: string }) => {
+  const runtime = useConversationRuntime(convId)
+  const {
+    visualizationMode,
+    setVisualizationMode,
+    setOpen,
+    clearPanelContent,
+  } = useAiChat()
+  const isFullscreen = visualizationMode === "fullscreen"
+
+  return (
+    <F0ChatProvider runtime={runtime}>
+      <F0Chat
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={() =>
+          setVisualizationMode(isFullscreen ? "sidepanel" : "fullscreen")
+        }
+        onClose={() => {
+          clearPanelContent()
+          setOpen(false)
+        }}
+      />
+    </F0ChatProvider>
+  )
+}
+
+/**
+ * Realistic "Main" menu mirroring the production Factorial sidebar (root nav +
+ * Personal / Company / Operations / Talent / IT Management / Finance / More).
+ */
+const homeMenuTree: MenuCategory[] = [
+  {
+    id: "main",
+    title: "Main",
+    isRoot: true,
+    isSortable: false,
+    items: [
+      { label: "Home", icon: Icons.Home, href: "/", exactMatch: true },
+      {
+        label: "Communications",
+        icon: Icons.Megaphone,
+        href: "/communications",
+      },
+      // `data-test` is asserted by the Default story play test.
+      {
+        label: "Inbox",
+        icon: Icons.Inbox,
+        href: "/inbox",
+        badge: 6,
+        "data-test": "foo",
+      },
+      { label: "Calendar", icon: Icons.Calendar, href: "/calendar" },
+      {
+        label: "Discover Factorial",
+        icon: Icons.Sparkles,
+        href: "/discover",
+        tag: "New",
+      },
+    ],
+  },
+  {
+    id: "personal",
+    title: "Personal",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Profile", icon: Icons.Person, href: "/profile" },
+      {
+        label: "My time tracking",
+        icon: Icons.Clock,
+        href: "/my-time-tracking",
+      },
+      { label: "Time off", icon: Icons.PalmTree, href: "/time-off" },
+      { label: "My benefits", icon: Icons.Present, href: "/my-benefits" },
+      { label: "My documents", icon: Icons.Files, href: "/my-documents" },
+      { label: "My projects", icon: Icons.Kanban, href: "/my-projects" },
+      { label: "My spending", icon: Icons.CreditCard, href: "/my-spending" },
+      { label: "My training", icon: Icons.AcademicCap, href: "/my-training" },
+      { label: "Tasks", icon: Icons.Completed, href: "/tasks" },
+    ],
+  },
+  {
+    id: "company",
+    title: "Company",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      {
+        label: "Organization",
+        icon: Icons.Organization,
+        href: "/organization",
+      },
+      { label: "Documents", icon: Icons.Folder, href: "/documents" },
+      { label: "Policies", icon: Icons.Shield, href: "/policies" },
+      { label: "Tickets", icon: Icons.Tag, href: "/tickets" },
+      { label: "Spaces", icon: Icons.LayersFront, href: "/spaces" },
+    ],
+  },
+  {
+    id: "operations",
+    title: "Operations",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Time tracking", icon: Icons.Timer, href: "/time-tracking" },
+      { label: "Shifts", icon: Icons.Schedule, href: "/shifts" },
+      { label: "Projects", icon: Icons.Kanban, href: "/projects" },
+      { label: "Benefits", icon: Icons.HoldHeart, href: "/benefits" },
+      { label: "Compensation", icon: Icons.MoneyBag, href: "/compensation" },
+    ],
+  },
+  {
+    id: "talent",
+    title: "Talent",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      {
+        label: "Talent analytics",
+        icon: Icons.ChartLine,
+        href: "/talent-analytics",
+      },
+      { label: "Performance", icon: Icons.Target, href: "/performance" },
+      { label: "Recruitment", icon: Icons.SearchPerson, href: "/recruitment" },
+      { label: "Engagement", icon: Icons.Heart, href: "/engagement" },
+      { label: "Training", icon: Icons.BookOpen, href: "/training" },
+    ],
+  },
+  {
+    id: "it",
+    title: "IT Management",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Device catalog", icon: Icons.Laptop, href: "/device-catalog" },
+      { label: "IT inventory", icon: Icons.HardDrive, href: "/it-inventory" },
+    ],
+  },
+  {
+    id: "finance",
+    title: "Finance",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "Workspace", icon: Icons.Briefcase, href: "/finance" },
+      { label: "Sales", icon: Icons.ChartVerticalBars, href: "/sales" },
+      { label: "Spending", icon: Icons.CreditCard, href: "/spending" },
+      { label: "Treasury", icon: Icons.Bank, href: "/treasury" },
+      { label: "Accounting", icon: Icons.Calculator, href: "/accounting" },
+    ],
+  },
+  {
+    id: "more",
+    title: "More",
+    isOpen: true,
+    isSortable: true,
+    items: [
+      { label: "AI reports", icon: Icons.Ai, href: "/ai-reports" },
+      { label: "Analytics", icon: Icons.ChartPie, href: "/analytics" },
+      { label: "Billing", icon: Icons.Receipt, href: "/billing" },
+      { label: "Workflows", icon: Icons.Split, href: "/workflows" },
+      {
+        label: "Trust channel",
+        icon: Icons.UserProtected,
+        href: "/trust-channel",
+      },
+      { label: "Settings", icon: Icons.Settings, href: "/settings" },
+    ],
+  },
+]
+
+/**
+ * Tabbed sidebar (mirrors `TabbedSidebar`) whose "Messages" conversations swap
+ * the side-panel content. It lives inside the `F0AiChatProvider` that
+ * `ApplicationFrame` mounts, so it can call `useAiChat()` directly. "Ask AI"
+ * clears the custom content and falls back to the real chat.
+ */
+const ConversationsSidebarInner = () => {
+  const [company, setCompany] = useState("1")
+  const [tab, setTab] = useState("home")
+  const { unreadChatsCount } = useSidebarChats()
+  const { setGroups, setActiveChat } = useSidebarChatActions()
+  const { setPanelContent, clearPanelContent, setOpen, open, panelContent } =
+    useAiChat()
+
+  // Clicking a conversation mounts it in the side panel (one at a time).
+  const onSelect = useCallback(
+    (convId: string) => {
+      setPanelContent({
+        id: convId,
+        content: <MockChatPanel convId={convId} />,
+      })
+    },
+    [setPanelContent]
+  )
+
+  // Groups come from the shared mock store, so unread badges / presence / mute
+  // are live and clear as conversations are read.
+  const groups = useMockChatGroups(onSelect)
+  useEffect(() => {
+    setGroups(groups)
+  }, [groups, setGroups])
+
+  // A conversation is "selected" only while it's the one on view in the side
+  // panel. Opening the AI chat (panelContent cleared) or closing the panel
+  // deselects it — the sidebar selection follows the panel, not the last click.
+  useEffect(() => {
+    setActiveChat(open && panelContent ? panelContent.id : null)
+  }, [open, panelContent, setActiveChat])
+
+  return (
+    <Sidebar
+      header={
+        <>
+          <SidebarHeader
+            {...SidebarHeaderStories.Default.args}
+            selected={company}
+            onChange={setCompany}
+          />
+          <SidebarTabs
+            tabs={[
+              { id: "home", label: "Home", icon: Home },
+              {
+                id: "messages",
+                label: "Messages",
+                icon: Comment,
+                badge: unreadChatsCount || undefined,
+              },
+            ]}
+            activeTab={tab}
+            onTabChange={setTab}
+            search={{ placeholder: "Search..." }}
+          />
+        </>
+      }
+      body={
+        tab === "messages" ? (
+          <SidebarChatList
+            actions={[
+              {
+                label: "Ask AI",
+                icon: New,
+                onClick: () => {
+                  clearPanelContent()
+                  setOpen(true)
+                },
+              },
+              ...exampleActions,
+            ]}
+          />
+        ) : (
+          <Menu tree={homeMenuTree} />
+        )
+      }
+      footer={<SidebarFooter {...SidebarFooterStories.Default.args} />}
+    />
+  )
+}
+
+/**
+ * Wraps the tabbed sidebar in a chat store whose conversations, when clicked,
+ * mount in the same resizable + fullscreen panel the AI chat uses — one
+ * content at a time. Used by the `Default` story.
+ */
+const ConversationsSidebar = () => {
+  return (
+    <SidebarChatProvider>
+      <ConversationsSidebarInner />
+    </SidebarChatProvider>
+  )
 }

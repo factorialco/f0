@@ -23,9 +23,9 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
-import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
+import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
@@ -188,11 +188,15 @@ function ApplicationFrameContent({
     closeCanvas,
     chatWidth,
     resizable,
+    panelSide,
   } = useAiChat()
   const isAiChatFullscreen = visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
   const { open: isAiPromotionChatOpen } = useAiPromotionChat()
   const reservedChatWidth = resizable ? chatWidth : DEFAULT_CHAT_WIDTH
+  // Hosts can dock the whole panel left for a chat-first experience (e.g.
+  // communications); the default is right, so the standard layout is unchanged.
+  const isPanelLeft = panelSide === "left"
 
   // Track fullscreen transitions for smooth exit animation
   const prevFullscreenRef = useRef(isAiChatFullscreen)
@@ -232,15 +236,19 @@ function ApplicationFrameContent({
     initializeWithValue: true,
   })
 
+  // A left-docked panel sits beside the navigation (not over it), so the chat
+  // list stays usable — don't float / auto-close the sidebar in that case.
+  const floatsOverSidebar = isAiChatOpen && !isPanelLeft
+
   useEffect(() => {
-    setForceFloat(isAiChatOpen)
-  }, [isAiChatOpen, setForceFloat])
+    setForceFloat(floatsOverSidebar)
+  }, [floatsOverSidebar, setForceFloat])
 
   useEffect(() => {
     setForceFloat(isAiPromotionChatOpen)
   }, [isAiPromotionChatOpen, setForceFloat])
 
-  useAutoCloseSidebar(isAiChatOpen, shouldAutoCloseSidebar)
+  useAutoCloseSidebar(floatsOverSidebar, shouldAutoCloseSidebar)
 
   return (
     <MotionConfig
@@ -295,9 +303,18 @@ function ApplicationFrameContent({
               className="relative min-w-0 flex-1"
               animate={{
                 paddingRight:
-                  isAiChatOpen && !isSmallViewport ? reservedChatWidth : 0,
+                  isAiChatOpen && !isSmallViewport && !isPanelLeft
+                    ? reservedChatWidth
+                    : 0,
+                paddingLeft:
+                  isAiChatOpen && !isSmallViewport && isPanelLeft
+                    ? reservedChatWidth
+                    : 0,
               }}
-              transition={{ paddingRight: CONTENT_TRANSITION }}
+              transition={{
+                paddingRight: CONTENT_TRANSITION,
+                paddingLeft: CONTENT_TRANSITION,
+              }}
             >
               {/* Main content */}
               <motion.main
@@ -309,7 +326,8 @@ function ApplicationFrameContent({
                     ? "overflow-hidden"
                     : "overflow-auto",
                   !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
-                  sidebarState === "locked" ? "pl-0" : "xs:pl-1"
+                  sidebarState === "locked" ? "pl-0" : "xs:pl-1",
+                  isAiChatOpen && isPanelLeft && "pr-1"
                 )}
                 layoutDependency={sidebarState}
               >
@@ -332,21 +350,32 @@ function ApplicationFrameContent({
                 <div
                   className={cn(
                     // z-[21] sits above the chat wrapper (z-20 in canvas
-                    // mode) so the canvas card's right-side shadow paints
+                    // mode) so the canvas card's seam-side shadow paints
                     // over the chat surface instead of being clipped by it.
-                    "pointer-events-none flex justify-end",
+                    "pointer-events-none flex",
+                    // Canvas sits opposite the panel, hugging the seam between
+                    // them: panel-right -> canvas on the left, and vice versa.
+                    isPanelLeft ? "justify-start" : "justify-end",
                     isSmallViewport
                       ? "fixed inset-0 z-[50]"
-                      : "absolute bottom-0 left-0 top-0 z-[21]"
+                      : cn(
+                          "absolute bottom-0 top-0 z-[21]",
+                          isPanelLeft ? "right-0" : "left-0"
+                        )
                   )}
                   style={
-                    isSmallViewport ? undefined : { right: reservedChatWidth }
+                    isSmallViewport
+                      ? undefined
+                      : isPanelLeft
+                        ? { left: reservedChatWidth }
+                        : { right: reservedChatWidth }
                   }
                 >
                   <F0CanvasPanel
                     content={canvasContent}
                     onClose={closeCanvas}
                     entities={canvasEntities}
+                    side={isPanelLeft ? "left" : "right"}
                   />
                 </div>
               )}
@@ -359,7 +388,8 @@ function ApplicationFrameContent({
                     isSmallViewport
                       ? "fixed inset-0 z-[30]"
                       : cn(
-                          "absolute right-0 top-0 bottom-0",
+                          "absolute top-0 bottom-0",
+                          isPanelLeft ? "left-0" : "right-0",
                           // In canvas mode the chat wrapper must sit above
                           // the CanvasPanel (z-[15]) so the ResizeHandle's
                           // hit-area (which extends a few pixels over the
