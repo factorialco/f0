@@ -135,6 +135,36 @@ const HOUR = 60
 const DAY = 24 * HOUR
 const MONTH = 30 * DAY
 
+// Pool of short, varied lines for a busy group transcript (the big-unread demo).
+const BUSY_LINES = [
+  "Morning all — opening checklist done ✅",
+  "Tienda Centro is fully staffed today",
+  "Heads up: delivery window moved to 11:00",
+  "Can someone cover the 2pm break rotation?",
+  "Stock count for aisle 4 is off by 3 units",
+  "Fixed it — was a mislabelled return",
+  "Customer footfall is way up vs last week 📈",
+  "POS terminal 2 needed a restart, all good now",
+  "Reminder: new returns policy starts Monday",
+  "Who has the key for the back storeroom?",
+  "I do — leaving it with the duty manager",
+  "Promo signage is up in the front window",
+  "Two no-shows for the afternoon shift 😕",
+  "Pulling someone from Tienda Norte to cover",
+  "Thanks team, crisis averted 🙌",
+  "End-of-day cash reconciliation matches",
+]
+
+/** Builds a long group transcript (oldest→newest), authors rotating through the
+ * participants, for the large-unread scroll demo. */
+const manyGroupLines = (people: MockPerson[], count: number): Line[] =>
+  Array.from({ length: count }, (_, i) => ({
+    from: people[i % people.length],
+    body: BUSY_LINES[i % BUSY_LINES.length],
+    // Newest last (smallest `min`); ~12 min apart so it spans a few hours.
+    min: Math.max(1 * MIN, (count - i) * 12 * MIN),
+  }))
+
 export const SEEDS: Seed[] = [
   // DM — always typing (online): sidebar "Writing…" + a dots bubble, non-stop.
   {
@@ -425,6 +455,19 @@ export const SEEDS: Seed[] = [
       },
       { from: GRACE, body: "Monitoring dashboards are up", min: 80 * MIN },
     ],
+  },
+  // GROUP — long transcript with a big unread run: opens with the "new messages"
+  // divider pinned to the top so you scroll down through ~26 unread.
+  {
+    id: "grp-ops",
+    type: "group",
+    title: "Store Ops — Daily",
+    avatar: groupAvatar("Store Ops — Daily", "🛒"),
+    participants: [MARCUS, GRACE, SAM, NOAH, ISLA],
+    unread: 26,
+    olderPages: 2,
+    multiTyping: true,
+    lines: manyGroupLines([MARCUS, GRACE, SAM, NOAH, ISLA], 32),
   },
   // GROUP — empty (exercises the empty state).
   {

@@ -27,6 +27,12 @@ type UseChatScrollOptions = {
   hasMoreNewer?: boolean
   loadingNewer?: boolean
   onReachBottom?: () => void
+  /**
+   * Frozen "new messages" divider id (the first unread message). When set on
+   * entry, the transcript opens with the divider pinned to the top so the user
+   * reads down through the unread run; otherwise it opens at the latest message.
+   */
+  unreadDividerId?: string | null
 }
 
 type UseChatScrollReturn = {
@@ -65,6 +71,7 @@ export function useChatScroll({
   hasMoreNewer = false,
   loadingNewer = false,
   onReachBottom,
+  unreadDividerId = null,
 }: UseChatScrollOptions): UseChatScrollReturn {
   const [scrolledUp, setScrolledUp] = useState(false)
   const [atBottom, setAtBottom] = useState(true)
@@ -81,6 +88,8 @@ export function useChatScroll({
   const anchorRef = useRef<{ id: string; delta: number } | null>(null)
   // rAF handle for the post-prepend re-pin loop (see `restoreAnchor`).
   const pinRafRef = useRef<number | null>(null)
+  // rAF handle for the initial-scroll settle loop (see `settleInitialScroll`).
+  const initialRafRef = useRef<number | null>(null)
 
   const scrollToBottom = useCallback(
     (behavior: "auto" | "smooth" = "smooth") => {
@@ -119,9 +128,13 @@ export function useChatScroll({
     [virtualizer, rows]
   )
 
-  const handleScroll = useCallback(() => {
+  // Recompute the scroll-state flags from the DOM (no pagination side effects).
+  // Shared by `handleScroll` and the initial settle so opening a conversation
+  // reflects the real position (e.g. divider-at-top → scrolledUp shows the
+  // "N unread" affordance) without spuriously paging on open.
+  const syncScrollFlags = useCallback(() => {
     const el = viewportRef.current
-    if (!el) return
+    if (!el) return { scrollTop: 0, distanceFromBottom: 0 }
     const { scrollTop, scrollHeight, clientHeight } = el
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight
     const isAtBottom = distanceFromBottom < NEAR_BOTTOM_PX
@@ -129,6 +142,13 @@ export function useChatScroll({
     setAtBottom(isAtBottom)
     setScrolledUp(distanceFromBottom > clientHeight * 0.5)
     setAtTop(scrollTop <= 0)
+    return { scrollTop, distanceFromBottom }
+  }, [viewportRef])
+
+  const handleScroll = useCallback(() => {
+    const el = viewportRef.current
+    if (!el) return
+    const { scrollTop, distanceFromBottom } = syncScrollFlags()
 
     if (scrollTop < TOP_TRIGGER_PX && hasMoreOlder && !loadingOlder) {
       // Anchor on the first visible message so the prepended page doesn't jump.
@@ -148,6 +168,7 @@ export function useChatScroll({
     }
   }, [
     viewportRef,
+    syncScrollFlags,
     hasMoreOlder,
     loadingOlder,
     onReachTop,
@@ -159,21 +180,61 @@ export function useChatScroll({
     virtualizer,
   ])
 
+  // Initial-scroll settle: re-issue `scrollToIndex` each frame until the
+  // resulting scrollTop holds steady (2 frames) or a cap — absorbing the
+  // estimate→measured row-height settle that otherwise lands a one-shot scroll
+  // mid-list. Same shape as the prepend re-pin loop. Syncs the flags when done.
+  const settleInitialScroll = useCallback(
+    (index: number, align: "start" | "end") => {
+      const el = viewportRef.current
+      if (!el || index < 0) return
+      if (initialRafRef.current != null) {
+        cancelAnimationFrame(initialRafRef.current)
+      }
+      let prev: number | null = null
+      let stableFrames = 0
+      let frames = 0
+      const tick = () => {
+        virtualizer.scrollToIndex(index, { align })
+        const next = el.scrollTop
+        frames += 1
+        if (prev != null && Math.abs(next - prev) < 1) stableFrames += 1
+        else stableFrames = 0
+        prev = next
+        if (stableFrames >= 2 || frames >= 12) {
+          initialRafRef.current = null
+          syncScrollFlags()
+          return
+        }
+        initialRafRef.current = requestAnimationFrame(tick)
+      }
+      tick()
+    },
+    [viewportRef, virtualizer, syncScrollFlags]
+  )
+
   useLayoutEffect(() => {
     const el = viewportRef.current
     if (!el) return
 
-    // Initial auto-scroll to the bottom — but not if we opened straight into an
-    // older window (a deep-linked / searched message), where the tail isn't loaded.
+    // Initial scroll. Land at the latest message, unless there's an unread
+    // divider — then pin it to the top so the user reads down through the unread
+    // run. Skip when opening straight into an older window (a deep-linked /
+    // searched message), where the tail isn't loaded. The settle loop re-targets
+    // across frames so the estimate→measured height settle doesn't land it
+    // mid-list; it syncs the scroll flags when done.
     if (!didInitialScrollRef.current && rows.length > 0) {
       if (!hasMoreNewer) {
-        virtualizer.scrollToIndex(rows.length - 1, { align: "end" })
-        setAtBottom(true)
+        const dividerIndex =
+          unreadDividerId != null
+            ? rows.findIndex((row) => row.type === "divider")
+            : -1
+        if (dividerIndex >= 0) settleInitialScroll(dividerIndex, "start")
+        else settleInitialScroll(rows.length - 1, "end")
+      } else {
+        // Header shadow right away (a programmatic scroll may not fire onScroll).
+        setAtTop(el.scrollHeight - el.clientHeight <= 0)
       }
-      // Landing at the bottom of an overflowing transcript means we're not at
-      // the top — show the header shadow right away (a programmatic scroll may
-      // not fire `onScroll`).
-      setAtTop(el.scrollHeight - el.clientHeight <= 0)
       didInitialScrollRef.current = true
       prevFirstIdRef.current = messages[0]?.id ?? null
       prevLastIdRef.current = messages.at(-1)?.id ?? null
@@ -231,18 +292,22 @@ export function useChatScroll({
     prevLenRef.current = messages.length
   }, [
     messages,
-    rows.length,
+    rows,
     viewportRef,
     virtualizer,
     indexById,
     hasMoreNewer,
+    unreadDividerId,
+    settleInitialScroll,
     restoreAnchor,
   ])
 
-  // Stop the re-pin loop if the list unmounts mid-restore.
+  // Stop the re-pin / initial-settle loops if the list unmounts mid-flight.
   useLayoutEffect(
     () => () => {
       if (pinRafRef.current != null) cancelAnimationFrame(pinRafRef.current)
+      if (initialRafRef.current != null)
+        cancelAnimationFrame(initialRafRef.current)
     },
     []
   )

@@ -126,6 +126,7 @@ export const ChatMessagesContainer = (): ReactNode => {
       hasMoreNewer,
       loadingNewer,
       onReachBottom: loadNewer,
+      unreadDividerId: dividerId,
     })
 
   // When someone starts typing while we're at the bottom, keep the dots in view.
