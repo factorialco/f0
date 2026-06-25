@@ -1,15 +1,16 @@
+import type { ReactNode } from "react"
+
 import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
-import type { ReactNode } from "react"
 import { useCallback, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
 
-import { useAiChat } from "../../providers/AiChatStateProvider"
-import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
 import { DropOverlay } from "../../../F0AiChatTextArea"
 import { F0AiPong } from "../../../F0AiPong"
+import { useAiChat } from "../../providers/AiChatStateProvider"
+import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
 import { ResizeHandle } from "./ResizeHandle"
 
 export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
@@ -108,7 +109,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
           key="chat-wrapper"
           className={cn(
             "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background md:py-1",
-            isLeft ? "mr-auto md:pl-1" : "ml-auto md:pr-1"
+            isLeft ? "mr-auto" : "ml-auto md:pr-1"
           )}
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false

@@ -23,9 +23,9 @@ import {
   F0AiChatProvider,
   AiChatProviderProps,
 } from "@/sds/ai/F0AiChat"
-import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
 import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
+import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 
@@ -326,7 +326,8 @@ function ApplicationFrameContent({
                     ? "overflow-hidden"
                     : "overflow-auto",
                   !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
-                  sidebarState === "locked" ? "pl-0" : "xs:pl-1"
+                  sidebarState === "locked" ? "pl-0" : "xs:pl-1",
+                  isAiChatOpen && isPanelLeft && "pr-1"
                 )}
                 layoutDependency={sidebarState}
               >
