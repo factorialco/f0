@@ -7384,7 +7384,7 @@ const oc = {
       ),
       children: a.chat.deletedMessage
     }
-  ) : /* @__PURE__ */ t("div", { className: "bg-f1-background rounded-2xl", children: /* @__PURE__ */ o(
+  ) : /* @__PURE__ */ t("div", { className: "min-w-0 max-w-full bg-f1-background rounded-2xl", children: /* @__PURE__ */ o(
     "div",
     {
       className: g(
@@ -7735,7 +7735,10 @@ const oc = {
                         className: g(
                           // `transition-shadow` is always on so the jump-to highlight ring
                           // fades in/out instead of snapping when `highlighted` toggles.
-                          "flex max-w-full flex-col gap-1 rounded-2xl transition-shadow duration-200",
+                          // `min-w-0` lets this flex item shrink below its content's
+                          // intrinsic width so the reply quote's single line truncates
+                          // instead of forcing the bubble wider than the column.
+                          "flex min-w-0 max-w-full flex-col gap-1 rounded-2xl transition-shadow duration-200",
                           n ? "items-end" : "items-start",
                           // `ring-offset-f1-background` colours the offset gap with the
                           // transcript surface — without it the gap defaults to white and
