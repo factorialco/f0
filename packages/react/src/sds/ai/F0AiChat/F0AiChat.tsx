@@ -185,12 +185,15 @@ const F0AiChatComponent = ({
 
   return (
     <SidebarWindow>
-      {/* `mode="wait"` so the current view fades fully out before the next
-          fades in (the fadeout→fadein the fullscreen reveal does). */}
-      <AnimatePresence mode="wait" initial={false}>
+      {/* Simultaneous crossfade: the outgoing view fades out while the next
+          fades in (both briefly mounted, stacked via `absolute inset-0` over the
+          SidebarWindow's relative content box). Switching conversations starts
+          the next view immediately instead of waiting for a sequential fade-out,
+          which is what made switching feel slow. */}
+      <AnimatePresence initial={false}>
         <motion.div
           key={viewKey}
-          className="flex h-full w-full flex-col overflow-hidden"
+          className="absolute inset-0 flex flex-col overflow-hidden"
           initial={reducedMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={reducedMotion ? undefined : { opacity: 0 }}
