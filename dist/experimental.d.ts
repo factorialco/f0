@@ -3660,6 +3660,9 @@ declare const defaultTranslations: {
         readonly copied: "Copied";
         readonly deletedMessage: "Message deleted";
         readonly moreActions: "Message actions";
+        readonly options: "Options";
+        readonly pin: "Pin";
+        readonly unpin: "Unpin";
         readonly info: "Info";
         readonly viewProfile: "View profile";
         readonly reply: "Reply";
@@ -4881,6 +4884,12 @@ export declare type F0ChatChannel = {
     presence?: "online" | "offline";
     muted?: boolean;
     /**
+     * Whether the conversation is pinned (favourited) by the current user. Drives
+     * the header pin toggle and lets the host surface a "Pinned" group in the
+     * sidebar. factorial → Stream's per-member pin (`member.pinned_at`).
+     */
+    pinned?: boolean;
+    /**
      * Extra status badges shown in the header (e.g. on vacation). Host-provided
      * metadata — not necessarily transport-backed: Stream has no such concept, so
      * factorial sources these from its own data (e.g. HR vacation status).
@@ -5038,6 +5047,12 @@ export declare type F0ChatRuntime = {
      */
     transcribe?: TranscribeFn;
     markRead?: () => void;
+    /**
+     * Toggle the conversation's pinned (favourite) state for the current user.
+     * Drives the header "Pin / Unpin" action; omit to hide it. factorial →
+     * `channel.pin()` / `channel.unpin()`.
+     */
+    togglePin?: () => void;
     /**
      * Full-text search within this conversation, returning matches oldest→newest.
      * Omit to fall back to a client-side substring search over the loaded
@@ -8532,6 +8547,13 @@ export declare type SidebarChat = {
     status?: SidebarChatStatus;
     /** Epoch ms of the last activity; used for ordering. */
     lastActivityAt?: number;
+    /** Whether the chat is pinned (favourited) — selects the solid pin icon. */
+    pinned?: boolean;
+    /**
+     * Toggle the pinned state. When set, a pin/unpin button appears on row hover
+     * in place of the unread badge / status icon. Omit to hide the affordance.
+     */
+    onTogglePin?: () => void;
 };
 
 /**
@@ -10336,10 +10358,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -10347,8 +10367,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

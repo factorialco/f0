@@ -602,6 +602,9 @@ export declare const defaultTranslations: {
         readonly copied: "Copied";
         readonly deletedMessage: "Message deleted";
         readonly moreActions: "Message actions";
+        readonly options: "Options";
+        readonly pin: "Pin";
+        readonly unpin: "Unpin";
         readonly info: "Info";
         readonly viewProfile: "View profile";
         readonly reply: "Reply";
@@ -978,10 +981,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -989,8 +990,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
