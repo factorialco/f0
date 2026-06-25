@@ -14,6 +14,11 @@ import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import { Page } from "@/patterns/Navigation/Page"
+import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
@@ -52,7 +57,11 @@ const meta: Meta<typeof F0Drawer> = {
     ...dataTestIdArgs,
   },
   decorators: [
-    (Story, { args: { isOpen, ...rest } }) => {
+    (Story, context) => {
+      const {
+        args: { isOpen, ...rest },
+        parameters,
+      } = context
       const [open, setOpen] = useState(isOpen)
 
       const handleClose = () => {
@@ -60,6 +69,13 @@ const meta: Meta<typeof F0Drawer> = {
       }
       const handleOpen = () => {
         setOpen(true)
+      }
+
+      // Stories that build their own ApplicationFrame (e.g. the sidebar
+      // showcase) opt out of the default open-button + centering wrapper and
+      // drive the drawer themselves.
+      if (parameters.standaloneFrame) {
+        return <Story />
       }
 
       return (
@@ -452,4 +468,51 @@ export const WithBackControls: Story = {
       },
     },
   }),
+}
+
+// ─── Drawer inside the app shell ──────────────────────────────────────────────
+
+/**
+ * The drawer rendered inside a real `ApplicationFrame`, to show how it sits
+ * relative to the sidebar. Side drawers portal into `#content` (not the
+ * top-level overlay root), so a right-positioned drawer docks at the right of
+ * the content area: the sidebar and page header stay visible and the drawer
+ * reads as a detail panel within the app rather than a full-viewport takeover.
+ * Use the `position` control to switch sides (`left` docks at the opposite
+ * edge, over the sidebar).
+ */
+export const InApplicationFrame: Story = {
+  parameters: { standaloneFrame: true, layout: "fullscreen" },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    position: "right",
+    title: "Team Status",
+    otherActions: OTHER_ACTIONS,
+    primaryAction: {
+      label: "submit",
+      icon: Placeholder,
+      onClick: () => {},
+      closeOnClick: true,
+    },
+  },
+  render: (args) => {
+    const Wrapper = () => {
+      const [open, setOpen] = useState(true)
+
+      return (
+        <ApplicationFrame
+          sidebar={<Sidebar {...SidebarStories.default.args} />}
+        >
+          <Page {...PageStories.Default.args} />
+          <F0Button label="Open drawer" onClick={() => setOpen(true)} />
+          <F0Drawer {...args} isOpen={open} onClose={() => setOpen(false)}>
+            <ExampleList itemsCount={20} />
+          </F0Drawer>
+        </ApplicationFrame>
+      )
+    }
+
+    return <Wrapper />
+  },
 }
