@@ -98,7 +98,7 @@ export const ChatBubble = ({
   }
 
   return (
-    <div className="bg-f1-background rounded-2xl">
+    <div className="min-w-0 max-w-full bg-f1-background rounded-2xl">
       <div
         className={cn(
           "flex w-fit max-w-full flex-col rounded-2xl text-f1-foreground font-normal",
