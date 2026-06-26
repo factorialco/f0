@@ -586,6 +586,14 @@ declare type AiChatProviderProps = {
      */
     canvasEntities?: Record<string, CanvasEntityDefinition>;
     /**
+     * When false, the chat content does NOT re-fade when the canvas opens/closes
+     * with the chat docked as a side panel (the `sidepanel`↔`canvas` mode-change
+     * reveal is suppressed), so toggling the canvas is seamless. The canvas
+     * panel's own open/close animation is unaffected, and fullscreen transitions
+     * still reveal. Defaults to true.
+     */
+    revealChatOnCanvasToggle?: boolean;
+    /**
      * Credits configuration. When provided, a credits button is shown in the chat header.
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
@@ -9998,11 +10006,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -10010,8 +10015,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }

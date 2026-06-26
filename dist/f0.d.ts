@@ -614,6 +614,14 @@ export declare type AiChatProviderProps = {
      */
     canvasEntities?: Record<string, CanvasEntityDefinition>;
     /**
+     * When false, the chat content does NOT re-fade when the canvas opens/closes
+     * with the chat docked as a side panel (the `sidepanel`↔`canvas` mode-change
+     * reveal is suppressed), so toggling the canvas is seamless. The canvas
+     * panel's own open/close animation is unaffected, and fullscreen transitions
+     * still reveal. Defaults to true.
+     */
+    revealChatOnCanvasToggle?: boolean;
+    /**
      * Credits configuration. When provided, a credits button is shown in the chat header.
      * Groups fetchUsage, upgradePlanUrl, and company/plan display info.
      */
@@ -5942,7 +5950,7 @@ export declare interface F0AiAvailableFormDefinition<TParams extends Record<stri
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
+export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, revealChatOnCanvasToggle, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
  * Headless chat header. Renders a top bar with title (or thread selector),
@@ -6044,6 +6052,13 @@ export declare interface F0AiChatProps {
     messages?: ReactNode;
     /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
     input?: ReactNode;
+    /**
+     * When false, the chat content does NOT re-fade when the canvas opens/closes
+     * with the chat docked on the side: `sidepanel` and `canvas` are treated as
+     * one state for the mode-change reveal, so toggling the canvas is seamless.
+     * Fullscreen transitions still reveal. Defaults to true.
+     */
+    revealChatOnCanvasToggle?: boolean;
 }
 
 /**
@@ -17329,11 +17344,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -17341,8 +17353,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
