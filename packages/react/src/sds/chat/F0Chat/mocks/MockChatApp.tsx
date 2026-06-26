@@ -102,12 +102,11 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     [app.states, convId]
   )
 
-  // Mentions are a group concept — filter the members by query. The current
-  // user is included (you can @-mention yourself). Omitted for DMs so the
-  // composer keeps the popover suppressed there.
+  // Member search for the mention popover — both DMs (the two people) and
+  // groups. The current user is included (you can @-mention yourself).
   const searchMembers = useCallback(
     (query: string): Promise<F0ChatUser[]> => {
-      if (seed?.type !== "group") return Promise.resolve([])
+      if (!seed) return Promise.resolve([])
       const q = query.trim().toLowerCase()
       const matches = [...seed.participants, ME]
         .filter((p) =>
@@ -181,7 +180,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     markRead,
     searchMessages,
     togglePin,
-    searchMembers: seed?.type === "group" ? searchMembers : undefined,
+    searchMembers: seed ? searchMembers : undefined,
   }
 }
 

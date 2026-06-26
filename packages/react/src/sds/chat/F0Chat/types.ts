@@ -222,9 +222,10 @@ export type F0ChatRuntime = {
   markRead?: () => void
   /**
    * Search the conversation's members for the `@`-mention popover, returning
-   * matches for `query` (empty string → the full member list). Provide it only
-   * for **group** conversations — in a DM the composer suppresses mentions
-   * entirely, so omitting it (or returning the lone counterpart) is fine.
+   * matches for `query` (empty string → the full member list). Provide it
+   * wherever mentions should work — DMs (both people) and groups alike; omit it
+   * to disable mentions for the conversation. The `@here` everyone option is a
+   * group-only concept and is gated separately by the composer.
    * factorial → `channel.state.members`.
    */
   searchMembers?: (query: string) => Promise<F0ChatUser[]>

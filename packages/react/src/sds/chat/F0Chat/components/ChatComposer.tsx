@@ -68,9 +68,10 @@ export const ChatComposer = (): ReactNode => {
   const highlightRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Mentions: groups only, and only when the host provides a member search.
-  // In DMs the popover never opens (the single recipient is already notified).
-  const mentionsEnabled = channel.type === "group" && !!searchMembers
+  // Mentions are available wherever the host provides a member search — both
+  // DMs (mention either person) and groups. The `@here` (everyone) option only
+  // makes sense in a group, so it's offered there only.
+  const mentionsEnabled = !!searchMembers
   const mentions = useMentions({
     inputValue: value,
     setInputValue: setValue,
@@ -78,7 +79,8 @@ export const ChatComposer = (): ReactNode => {
     textareaRef,
     enabled: mentionsEnabled,
     searchMembers,
-    everyoneLabel: i18n.chat.mentionEveryone,
+    everyoneLabel:
+      channel.type === "group" ? i18n.chat.mentionEveryone : undefined,
   })
   const highlightSegments = useMemo(
     () =>

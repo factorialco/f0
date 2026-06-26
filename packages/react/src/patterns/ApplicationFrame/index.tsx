@@ -326,7 +326,9 @@ function ApplicationFrameContent({
                     ? "overflow-hidden"
                     : "overflow-auto",
                   !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
-                  sidebarState === "locked" ? "pl-0" : "xs:pl-1",
+                  sidebarState === "locked"
+                    ? "pl-0"
+                    : !isPanelLeft && "xs:pl-1",
                   isAiChatOpen && isPanelLeft && "pr-1"
                 )}
                 layoutDependency={sidebarState}
@@ -401,7 +403,8 @@ function ApplicationFrameContent({
                             : "z-0",
                           sidebarState === "hidden" && isInFullscreenTransition
                             ? "pl-1"
-                            : "pl-0"
+                            : "pl-0",
+                          sidebarState === "hidden" && isPanelLeft && "pl-1"
                         )
                   )}
                   animate={{

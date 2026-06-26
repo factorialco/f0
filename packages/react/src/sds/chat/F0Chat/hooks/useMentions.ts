@@ -41,8 +41,8 @@ export type UseMentionsOptions = {
   /** Ref to the textarea element for reading selection + caret position. */
   textareaRef: React.RefObject<HTMLTextAreaElement | null>
   /**
-   * Whether mentions are active. False in DMs (and whenever `searchMembers` is
-   * absent) → the hook is inert and the popover never opens.
+   * Whether mentions are active. When false (e.g. no `searchMembers`), the hook
+   * is inert and the popover never opens.
    */
   enabled: boolean
   /** Search the conversation's members for the popover. */
@@ -202,8 +202,9 @@ const candidateLabel = (c: MentionCandidate): string =>
 /**
  * `@`-mention support for the communications composer — same UX as the AI chat
  * (debounced inline search, ghost-text completion, keyboard nav, caret-anchored
- * popover), but driven by the conversation's members and with an "everyone"
- * (`@here`) option pinned on top. Inert unless `enabled` (groups only).
+ * popover), but driven by the conversation's members. An "everyone" (`@here`)
+ * option is pinned on top when `everyoneLabel` is given (groups only). Inert
+ * unless `enabled`.
  */
 export function useMentions({
   inputValue,
