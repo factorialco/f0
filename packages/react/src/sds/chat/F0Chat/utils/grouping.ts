@@ -1,22 +1,6 @@
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { calendarDaysApart } from "./natural-time"
 
-/** A run of consecutive messages from the same author (merged bubble). */
-export type ChatSenderRun = {
-  key: string
-  author: F0ChatUser
-  isMine: boolean
-  messages: F0ChatMessage[]
-}
-
-/** Messages under one date/time separator. */
-export type ChatTimeGroup = {
-  key: string
-  /** ISO of the first message — used to render the separator label. */
-  separatorAt: string
-  runs: ChatSenderRun[]
-}
-
 /**
  * A new separator is inserted only when the message falls on a later calendar
  * day (WhatsApp-style: one date divider per day). The per-message clock lives on
@@ -33,43 +17,6 @@ const needsSeparator = (
       new Date(current.createdAt)
     ) !== 0
   )
-}
-
-/**
- * Splits an ordered (oldest→newest) message list into per-day groups, each
- * further split into consecutive same-author runs. Pure — drives both the
- * separators and the bubble merging / avatar placement.
- */
-export function groupChatMessages(messages: F0ChatMessage[]): ChatTimeGroup[] {
-  const groups: ChatTimeGroup[] = []
-
-  messages.forEach((message, index) => {
-    const previous = messages[index - 1]
-
-    if (needsSeparator(message, previous)) {
-      groups.push({
-        key: `sep-${message.id}`,
-        separatorAt: message.createdAt,
-        runs: [],
-      })
-    }
-
-    const group = groups[groups.length - 1]
-    const lastRun = group.runs[group.runs.length - 1]
-
-    if (lastRun && lastRun.author.id === message.author.id) {
-      lastRun.messages.push(message)
-    } else {
-      group.runs.push({
-        key: `run-${message.id}`,
-        author: message.author,
-        isMine: message.isMine,
-        messages: [message],
-      })
-    }
-  })
-
-  return groups
 }
 
 /**
@@ -104,8 +51,7 @@ export type FlattenedChat = {
 /**
  * Flattens an ordered (oldest→newest) message list into a single row array for
  * virtualization: per-day separators, the optional "new messages" divider, and
- * one row per message carrying the run/last flags that {@link groupChatMessages}
- * + {@link ChatMessageRun} computed implicitly. Pure.
+ * one row per message carrying the run/last flags (computed inline). Pure.
  */
 export function flattenChatRows(
   messages: F0ChatMessage[],
@@ -154,12 +100,4 @@ export function flattenChatRows(
   })
 
   return { rows, indexById }
-}
-
-/** Id of the last message I sent — only that one shows a delivery status. */
-export function lastOwnMessageId(messages: F0ChatMessage[]): string | null {
-  for (let i = messages.length - 1; i >= 0; i--) {
-    if (messages[i].isMine) return messages[i].id
-  }
-  return null
 }

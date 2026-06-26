@@ -484,7 +484,6 @@ export const defaultTranslations = {
     listening: "Listening…",
     stopRecording: "Stop and transcribe",
     cancelRecording: "Cancel recording",
-    transcribing: "Transcribing…",
     dropFilesHere: "Drop your files here",
     removeFile: "Remove",
     // Transient composer errors (flashed in the textarea, mirroring the AI chat).
@@ -508,7 +507,6 @@ export const defaultTranslations = {
     isTyping: "{{name}} is writing…",
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
-    copied: "Copied",
     deletedMessage: "Message deleted",
     moreActions: "Message actions",
     // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
@@ -556,7 +554,6 @@ export const defaultTranslations = {
     },
     emptyConversation: "No messages yet",
     emptyConversationDescription: "Send a message to start the conversation.",
-    connecting: "Connecting…",
     error: "Couldn't load this conversation",
     loadingOlder: "Loading earlier messages…",
   },
