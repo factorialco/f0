@@ -517,6 +517,10 @@ export const defaultTranslations = {
     unpin: "Unpin",
     info: "Info",
     viewProfile: "View profile",
+    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
+    // for a group-wide ping (localize the word, e.g. es "aquí").
+    mentionEveryone: "here",
+    mentionEveryoneDescription: "Notify everyone in this group",
     reply: "Reply",
     react: "Add reaction",
     download: "Download",

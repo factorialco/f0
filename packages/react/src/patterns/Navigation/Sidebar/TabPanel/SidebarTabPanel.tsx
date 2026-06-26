@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, LayoutGroup, motion } from "motion/react"
 import { Fragment, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
@@ -83,7 +83,7 @@ export const SidebarTabPanel = ({
   skeleton,
   emptyState,
   noResultsLabel,
-  animateItems = false,
+  animateItems = true,
   className,
 }: SidebarTabPanelProps) => {
   const shouldReduceMotion = useReducedMotion()
@@ -137,37 +137,98 @@ export const SidebarTabPanel = ({
         </p>
       )}
       {!showSkeleton &&
-        filteredGroups.map((group) => (
-          <SidebarCollapsibleSection
-            // Remount only when search toggles on/off (not per keystroke) so a
-            // collapsed group opens to reveal its matches while searching.
-            key={`${group.id}-${isSearching}`}
-            title={group.title ?? ""}
-            isRoot={group.title === undefined}
-            isOpen={isSearching ? true : group.isOpen}
-            highlightWhenCollapsed={group.highlightWhenCollapsed}
-            collapsedBadge={group.collapsedBadge}
-          >
-            {animateItems ? (
-              <AnimatePresence initial={false}>
-                {group.items.map((item) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+        (animateItems ? (
+          // Layout-animated lists. A `LayoutGroup` lets the collapsible groups
+          // remeasure together, so a row leaving one group and joining another
+          // (pin/unpin) stays in sync as positions shift.
+          <LayoutGroup>
+            <AnimatePresence mode="popLayout" initial={false}>
+              {filteredGroups.map((group) => (
+                <motion.div
+                  // Remount only when search toggles on/off (not per keystroke)
+                  // so a collapsed group opens to reveal its matches.
+                  key={`${group.id}-${isSearching}`}
+                  layout="position"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={
+                    shouldReduceMotion
+                      ? { duration: 0 }
+                      : {
+                          layout: {
+                            type: "spring",
+                            stiffness: 520,
+                            damping: 40,
+                          },
+                          opacity: { duration: 0.16, ease: [0.16, 1, 0.3, 1] },
+                        }
+                  }
+                >
+                  <SidebarCollapsibleSection
+                    title={group.title ?? ""}
+                    isRoot={group.title === undefined}
+                    isOpen={isSearching ? true : group.isOpen}
+                    highlightWhenCollapsed={group.highlightWhenCollapsed}
+                    collapsedBadge={group.collapsedBadge}
                   >
-                    {item.content}
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            ) : (
-              group.items.map((item) => (
+                    {/* `popLayout` pulls an exiting row out of flow at once, so
+                        the rows that stay slide up immediately instead of
+                        waiting for the fade to finish (the old "lag"). The
+                        shared `layoutId` makes a pin/unpin a single row that
+                        glides between groups rather than a fade-out + fade-in. */}
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      {group.items.map((item) => (
+                        <motion.div
+                          key={item.id}
+                          layout="position"
+                          layoutId={`sidebar-row-${item.id}`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={
+                            shouldReduceMotion
+                              ? { duration: 0 }
+                              : {
+                                  layout: {
+                                    type: "spring",
+                                    stiffness: 560,
+                                    damping: 42,
+                                    mass: 0.9,
+                                  },
+                                  opacity: {
+                                    duration: 0.14,
+                                    ease: [0.16, 1, 0.3, 1],
+                                  },
+                                }
+                          }
+                        >
+                          {item.content}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </SidebarCollapsibleSection>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </LayoutGroup>
+        ) : (
+          filteredGroups.map((group) => (
+            <SidebarCollapsibleSection
+              // Remount only when search toggles on/off (not per keystroke) so a
+              // collapsed group opens to reveal its matches while searching.
+              key={`${group.id}-${isSearching}`}
+              title={group.title ?? ""}
+              isRoot={group.title === undefined}
+              isOpen={isSearching ? true : group.isOpen}
+              highlightWhenCollapsed={group.highlightWhenCollapsed}
+              collapsedBadge={group.collapsedBadge}
+            >
+              {group.items.map((item) => (
                 <Fragment key={item.id}>{item.content}</Fragment>
-              ))
-            )}
-          </SidebarCollapsibleSection>
+              ))}
+            </SidebarCollapsibleSection>
+          ))
         ))}
     </div>
   )

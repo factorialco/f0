@@ -6,6 +6,7 @@ import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
@@ -134,7 +135,9 @@ export const SidebarChatItem = ({
             className={cn(
               "gap-1 flex items-center justify-center transition-opacity",
               // On hover the pin button takes this spot, so fade the badge/status out.
-              chat.onTogglePin && "group-hover/row:opacity-0"
+              chat.onTogglePin && "group-hover/row:opacity-0",
+              // While saving, the spinner takes this spot off-hover too.
+              chat.pinPending && "opacity-0"
             )}
           >
             {status && (
@@ -147,33 +150,48 @@ export const SidebarChatItem = ({
                 />
               </div>
             )}
-            {chat.unreadCount && <UnreadBadge count={chat.unreadCount} />}
+            {/* A mention in the unread run just prefixes the count with `@`. */}
+            {chat.unreadCount ? (
+              <UnreadBadge
+                count={chat.unreadCount}
+                hasMention={!!chat.mentionCount}
+              />
+            ) : null}
           </div>
         )}
       </button>
       {/* Hover (or focus) reveals a pin/unpin button, sitting where the unread
           badge / status is — a sibling of the row button so it isn't a nested
-          <button>. */}
-      {chat.onTogglePin && (
-        <div
-          className={cn(
-            "absolute right-1.5 top-1/2 -translate-y-1/2",
-            "opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100"
-          )}
-        >
-          <ButtonInternal
-            variant="neutral"
-            size="sm"
-            hideLabel
-            label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
-            icon={chat.pinned ? PushPinSolid : PushPin}
-            onClick={(event) => {
-              event.stopPropagation()
-              chat.onTogglePin?.()
-            }}
-          />
-        </div>
-      )}
+          <button>. While a pin/unpin is saving, a spinner takes its place and
+          stays visible off-hover. */}
+      {chat.onTogglePin &&
+        (chat.pinPending ? (
+          <div
+            className="absolute right-1.5 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center"
+            aria-label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
+          >
+            <Spinner size="small" />
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "absolute right-1.5 top-1/2 -translate-y-1/2",
+              "opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100"
+            )}
+          >
+            <ButtonInternal
+              variant="neutral"
+              size="sm"
+              hideLabel
+              label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
+              icon={chat.pinned ? PushPinSolid : PushPin}
+              onClick={(event) => {
+                event.stopPropagation()
+                chat.onTogglePin?.()
+              }}
+            />
+          </div>
+        ))}
     </div>
   )
 }

@@ -1,9 +1,9 @@
 import {
-  type ChangeEvent,
   type KeyboardEvent,
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react"
@@ -25,12 +25,15 @@ import {
 } from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
 import { Skeleton } from "@/ui/skeleton"
 
+import { buildHighlightSegments } from "../hooks/highlight-utils"
+import { useMentions } from "../hooks/useMentions"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { useChatUI } from "../providers/ChatUIProvider"
 import { type F0ChatAttachment } from "../types"
+import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
+import { ChatTextareaField } from "./ChatTextareaField"
 
-const MAX_TEXTAREA_HEIGHT = 140
 // How long a transient composer error (too many files, upload/voice failure)
 // stays before it fades out — matches the AI chat.
 const TRANSIENT_ERROR_MS = 4000
@@ -45,15 +48,55 @@ type PendingAttachment =
  * Drag & drop is owned by the whole panel (F0Chat) and bridged here. */
 export const ChatComposer = (): ReactNode => {
   const i18n = useI18n()
-  const { sendMessage, onInputActivity, uploadFiles, transcribe, maxFiles } =
-    useF0Chat()
+  const {
+    sendMessage,
+    onInputActivity,
+    uploadFiles,
+    transcribe,
+    maxFiles,
+    channel,
+    searchMembers,
+    currentUserId,
+  } = useF0Chat()
   const { replyTo, setReplyTo, registerFileDropHandler } = useChatUI()
   const shouldReduceMotion = useReducedMotion()
 
   const [value, setValue] = useState("")
+  const [cursorPosition, setCursorPosition] = useState(0)
   const [attachments, setAttachments] = useState<PendingAttachment[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const highlightRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Mentions: groups only, and only when the host provides a member search.
+  // In DMs the popover never opens (the single recipient is already notified).
+  const mentionsEnabled = channel.type === "group" && !!searchMembers
+  const mentions = useMentions({
+    inputValue: value,
+    setInputValue: setValue,
+    cursorPosition,
+    textareaRef,
+    enabled: mentionsEnabled,
+    searchMembers,
+    everyoneLabel: i18n.chat.mentionEveryone,
+  })
+  const highlightSegments = useMemo(
+    () =>
+      buildHighlightSegments(value, mentions.mentions, {
+        cursorPosition,
+        inlineCompletion: mentions.inlineCompletion,
+        currentUserId,
+      }),
+    [
+      value,
+      mentions.mentions,
+      cursorPosition,
+      mentions.inlineCompletion,
+      currentUserId,
+    ]
+  )
+  const hasOverlay =
+    mentions.mentions.length > 0 || mentions.inlineCompletion !== null
   // Monotonic id for pending attachments (avoids Date.now/random in render).
   const attachmentSeq = useRef(0)
 
@@ -91,24 +134,16 @@ export const ChatComposer = (): ReactNode => {
     attachedCountRef.current = attachments.length
   }, [attachments])
 
-  const grow = useCallback(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = "auto"
-    el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`
-  }, [])
-
   // Voice dictation — same recorder + waveform the AI chat (and RichText) use.
   // Partials stream into the textarea, appended to whatever was already typed.
+  // The grid sizer in ChatTextareaField auto-grows the box, so no manual height.
   const baseValueRef = useRef("")
-  const fillFromTranscript = useCallback(
-    (text: string) => {
-      const base = baseValueRef.current
-      setValue(base ? `${base} ${text}` : text)
-      requestAnimationFrame(grow)
-    },
-    [grow]
-  )
+  const fillFromTranscript = useCallback((text: string) => {
+    const base = baseValueRef.current
+    const next = base ? `${base} ${text}` : text
+    setValue(next)
+    setCursorPosition(next.length)
+  }, [])
   const recorderErrorMessage: Record<RecorderError, string> = {
     "permission-denied": i18n.chat.micPermissionDenied,
     "device-error": i18n.chat.micError,
@@ -130,13 +165,23 @@ export const ChatComposer = (): ReactNode => {
     !isUploading
 
   const handleChange = useCallback(
-    (e: ChangeEvent<HTMLTextAreaElement>) => {
-      setValue(e.target.value)
+    (next: string, cursorPos: number) => {
+      setValue(next)
+      setCursorPosition(cursorPos)
       onInputActivity()
-      grow()
     },
-    [grow, onInputActivity]
+    [onInputActivity]
   )
+
+  const updateCursorPosition = useCallback(() => {
+    setCursorPosition(textareaRef.current?.selectionStart ?? 0)
+  }, [])
+
+  const syncHighlightScroll = useCallback(() => {
+    if (highlightRef.current && textareaRef.current) {
+      highlightRef.current.scrollTop = textareaRef.current.scrollTop
+    }
+  }, [])
 
   const handleUpload = useCallback(
     async (files: File[]) => {
@@ -196,17 +241,20 @@ export const ChatComposer = (): ReactNode => {
     const ready = attachments.flatMap((a) =>
       a.status === "ready" ? [a.attachment] : []
     )
+    const { mentions: mentioned, mentionedEveryone } = mentions.getMentions()
     sendMessage({
       body: value.trim(),
       attachments: ready.length > 0 ? ready : undefined,
       replyToId: replyTo?.id,
+      mentions: mentioned.length > 0 ? mentioned : undefined,
+      mentionedEveryone: mentionedEveryone || undefined,
     })
+    mentions.close()
     setValue("")
+    setCursorPosition(0)
     setAttachments([])
     setReplyTo(null)
-    const el = textareaRef.current
-    if (el) el.style.height = "auto"
-  }, [attachments, canSend, replyTo, sendMessage, setReplyTo, value])
+  }, [attachments, canSend, mentions, replyTo, sendMessage, setReplyTo, value])
 
   // Insert a picked emoji at the caret (the textarea keeps its selection while
   // blurred), then restore focus and the caret just after it.
@@ -215,29 +263,31 @@ export const ChatComposer = (): ReactNode => {
       const el = textareaRef.current
       const start = el?.selectionStart ?? el?.value.length ?? 0
       const end = el?.selectionEnd ?? el?.value.length ?? 0
+      const caret = start + emoji.length
       setValue((prev) => prev.slice(0, start) + emoji + prev.slice(end))
+      setCursorPosition(caret)
       onInputActivity()
       requestAnimationFrame(() => {
-        grow()
         const node = textareaRef.current
         if (node) {
-          const caret = start + emoji.length
           node.focus()
           node.setSelectionRange(caret, caret)
         }
       })
     },
-    [grow, onInputActivity]
+    [onInputActivity]
   )
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
+      // The mention popover consumes navigation keys first (↑↓/Enter/Tab/Esc).
+      if (mentions.handleKeyDown(e)) return
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault()
         handleSend()
       }
     },
-    [handleSend]
+    [handleSend, mentions]
   )
 
   const startRecording = useCallback(() => {
@@ -251,7 +301,16 @@ export const ChatComposer = (): ReactNode => {
     <div className="shrink-0 p-4 pt-1">
       {/* Centered, width-capped to match the message column in fullscreen. */}
       <div className="mx-auto w-full max-w-content">
-        <div className="rounded-lg border border-solid border-f1-border bg-f1-background flex flex-col">
+        <div className="relative rounded-lg border border-solid border-f1-border bg-f1-background flex flex-col">
+          <ChatMentionPopover
+            isOpen={mentions.isOpen}
+            results={mentions.results}
+            isLoading={mentions.isLoading}
+            selectedIndex={mentions.selectedIndex}
+            position={mentions.popoverPosition}
+            onSelect={mentions.selectCandidate}
+            everyoneDescription={i18n.chat.mentionEveryoneDescription}
+          />
           {replyTo && (
             <ChatReplyChip
               message={replyTo}
@@ -332,17 +391,17 @@ export const ChatComposer = (): ReactNode => {
 
           {/* The textarea stays during recording: it shows "Listening…" and
               fills with the live transcript — only the action row swaps. */}
-          <textarea
-            ref={textareaRef}
+          <ChatTextareaField
+            textareaRef={textareaRef}
+            highlightRef={highlightRef}
             value={value}
+            placeholder={isRecording ? i18n.chat.listening : placeholder}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            rows={1}
-            placeholder={isRecording ? i18n.chat.listening : placeholder}
-            className={cn(
-              "w-full resize-none bg-transparent p-3 pb-3 text-md text-f1-foreground",
-              "placeholder:text-f1-foreground-secondary focus:outline-none"
-            )}
+            onCursorUpdate={updateCursorPosition}
+            onScroll={syncHighlightScroll}
+            highlightSegments={highlightSegments}
+            hasOverlay={hasOverlay}
           />
 
           {isRecording ? (

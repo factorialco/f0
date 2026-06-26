@@ -88,7 +88,6 @@ export const SidebarChatList = ({
       loading={loading}
       skeleton={<SidebarChatListSkeleton />}
       noResultsLabel={i18n.chat.noResults}
-      animateItems
       emptyState={
         <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
           <span className="text-3xl" role="img" aria-hidden="true">

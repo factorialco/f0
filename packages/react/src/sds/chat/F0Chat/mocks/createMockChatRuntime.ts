@@ -23,6 +23,8 @@ export type MockChatSeed = {
   olderPages?: number
   /** Ambient incoming-message cadence (ms). 0 disables it. */
   ambientEveryMs?: number
+  /** Extra messages appended after the seeded ones (e.g. to demo mentions). */
+  extraMessages?: F0ChatMessage[]
 }
 
 const SAMPLE_TEXTS = [
@@ -76,14 +78,15 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
   const olderPagesTotal = seed.olderPages ?? 2
   const ambientEveryMs = seed.ambientEveryMs ?? 16000
 
-  const [messages, setMessages] = useState<F0ChatMessage[]>(() =>
-    buildMessages(
+  const [messages, setMessages] = useState<F0ChatMessage[]>(() => [
+    ...buildMessages(
       seed,
       initialCount,
       Date.now() - 18 * 60 * 60 * 1000,
       7 * 60 * 1000
-    )
-  )
+    ),
+    ...(seed.extraMessages ?? []),
+  ])
   const messagesRef = useRef(messages)
   messagesRef.current = messages
 
@@ -165,6 +168,8 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
             isMine: true,
             status: "sending",
             attachments: input.attachments,
+            mentions: input.mentions,
+            mentionedEveryone: input.mentionedEveryone,
             replyTo: replyTo
               ? { id: replyTo.id, author: replyTo.author, body: replyTo.body }
               : undefined,
@@ -305,6 +310,19 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
 
+  // Mention autocomplete source: filter the members by query. The current user
+  // is included (you can @-mention yourself).
+  const searchMembers = useCallback(
+    (query: string): Promise<F0ChatUser[]> => {
+      const q = query.trim().toLowerCase()
+      const matches = [...seed.others, seed.me].filter((u) =>
+        q.length === 0 ? true : u.name.toLowerCase().includes(q)
+      )
+      return Promise.resolve(matches)
+    },
+    [seed.others, seed.me]
+  )
+
   // Unread is derived from the read pointer (matches how a real backend would
   // compute it from the last-read message).
   const { unreadCount, firstUnreadId } = useMemo(() => {
@@ -336,5 +354,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     transcribe: mockTranscribe,
     markRead,
     togglePin,
+    // Only meaningful for groups; the composer suppresses mentions in DMs.
+    searchMembers,
   }
 }

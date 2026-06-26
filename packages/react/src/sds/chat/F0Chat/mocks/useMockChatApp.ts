@@ -114,6 +114,8 @@ export const useMockChatStore = (): MockChatAppValue => {
           isMine: true,
           status: "sending",
           attachments: input.attachments,
+          mentions: input.mentions,
+          mentionedEveryone: input.mentionedEveryone,
           replyTo: replyTo
             ? {
                 id: replyTo.id,

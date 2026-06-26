@@ -15,6 +15,23 @@ export type F0ChatUser = {
 
 export type F0ChatChannelType = "dm" | "group"
 
+/**
+ * A person mentioned in a message. `id` matches an {@link F0ChatUser.id}; `name`
+ * is the display name as it appears in the body (e.g. "Ana García"), used to
+ * locate and highlight the `@name` token. "Everyone" (`@here`) is tracked
+ * separately via `mentionedEveryone`, not as an entry here.
+ */
+export type F0ChatMention = {
+  id: string
+  name: string
+  /** Optional display data so the `@name` chip can show the same profile hover
+   * card as the avatar (avatar, role line, "View profile" link). Omit for a
+   * name-only card. */
+  avatar?: AvatarVariant
+  subtitle?: string
+  profileHref?: string
+}
+
 /** A status badge shown in the header next to the title (e.g. on vacation, away).
  * The host decides the icon + label; the UI just renders it like the mute icon. */
 export type F0ChatChannelStatus = {
@@ -107,6 +124,17 @@ export type F0ChatMessage = {
   attachments?: F0ChatAttachment[]
   replyTo?: F0ChatMessageReply
   /**
+   * People mentioned in this message (groups only). Drives the `@name` chip
+   * highlighting in the bubble; a chip whose id is the current user gets the
+   * self-mention emphasis.
+   */
+  mentions?: F0ChatMention[]
+  /**
+   * Whether this message mentions the whole group (`@here`). Renders the
+   * `@here` token with the self-mention emphasis for every member.
+   */
+  mentionedEveryone?: boolean
+  /**
    * Group read receipts — how many other members have read this message.
    * Approximated by counting members whose last-read pointer is at/after this
    * message (Stream exposes no per-message reader list).
@@ -124,6 +152,12 @@ export type F0ChatSendInput = {
   body: string
   attachments?: F0ChatAttachment[]
   replyToId?: string
+  /** People mentioned in the body (groups only). The host maps these to the
+   * transport's mention field (factorial → Stream `mentioned_users`). */
+  mentions?: F0ChatMention[]
+  /** Whether the message mentions the whole group (`@here`). The host fans this
+   * out to every member so they all get notified. */
+  mentionedEveryone?: boolean
 }
 
 export type F0ChatStatus = "connecting" | "ready" | "error"
@@ -186,6 +220,14 @@ export type F0ChatRuntime = {
    */
   transcribe?: TranscribeFn
   markRead?: () => void
+  /**
+   * Search the conversation's members for the `@`-mention popover, returning
+   * matches for `query` (empty string → the full member list). Provide it only
+   * for **group** conversations — in a DM the composer suppresses mentions
+   * entirely, so omitting it (or returning the lone counterpart) is fine.
+   * factorial → `channel.state.members`.
+   */
+  searchMembers?: (query: string) => Promise<F0ChatUser[]>
   /**
    * Toggle the conversation's pinned (favourite) state for the current user.
    * Drives the header "Pin / Unpin" action; omit to hide it. factorial →

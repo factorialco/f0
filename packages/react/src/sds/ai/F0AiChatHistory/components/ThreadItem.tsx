@@ -12,6 +12,7 @@ import PushPinSolid from "@/icons/app/PushPinSolid"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
 import type { ThreadActionHandlers } from "../types"
 import type { ChatThread } from "../useChatHistory"
@@ -23,6 +24,13 @@ interface ThreadItemProps extends ThreadActionHandlers {
   isPinned: boolean
   /** Keeps the row highlighted while its thread is the one open in the panel. */
   isActive?: boolean
+  /**
+   * A pin/unpin/delete request for this thread is in flight. Replaces the
+   * actions button with a spinner (kept visible off-hover) so the row reads as
+   * "saving" while the backend confirms. Wire it from `useChatHistory`'s
+   * `pendingIds`.
+   */
+  isPending?: boolean
   /** Override the row classes (e.g. to match the sidebar's chat-row paddings). */
   className?: string
 }
@@ -31,6 +39,7 @@ export function ThreadItem({
   thread,
   isPinned,
   isActive = false,
+  isPending = false,
   onSelect,
   onPin,
   onUnpin,
@@ -95,26 +104,37 @@ export function ThreadItem({
           {formattedDate}
         </span>
       </div>
-      <div
-        className={cn(
-          // Hidden (not just transparent) off-hover so it takes no space and
-          // the title can use the full row width. Shown on hover / focus /
-          // while its dropdown is open.
-          "hidden items-center",
-          "group-hover:flex group-focus-within:flex",
-          "has-[[aria-expanded=true]]:flex"
-        )}
-      >
-        <Dropdown items={dropdownItems}>
-          <ButtonInternal
-            icon={Ellipsis}
-            variant="ghost"
-            size="sm"
-            label={translations.ai.threadOptions}
-            hideLabel
-          />
-        </Dropdown>
-      </div>
+      {isPending ? (
+        // While saving, the spinner sits where the actions button is and stays
+        // visible off-hover so the row reads as "working".
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center"
+          aria-label={translations.ai.threadOptions}
+        >
+          <Spinner size="small" />
+        </div>
+      ) : (
+        <div
+          className={cn(
+            // Hidden (not just transparent) off-hover so it takes no space and
+            // the title can use the full row width. Shown on hover / focus /
+            // while its dropdown is open.
+            "hidden items-center",
+            "group-hover:flex group-focus-within:flex",
+            "has-[[aria-expanded=true]]:flex"
+          )}
+        >
+          <Dropdown items={dropdownItems}>
+            <ButtonInternal
+              icon={Ellipsis}
+              variant="ghost"
+              size="sm"
+              label={translations.ai.threadOptions}
+              hideLabel
+            />
+          </Dropdown>
+        </div>
+      )}
     </div>
   )
 }

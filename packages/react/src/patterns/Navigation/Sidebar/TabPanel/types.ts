@@ -61,7 +61,11 @@ export type SidebarTabPanelProps = {
   emptyState?: ReactNode
   /** Shown when a search yields no matches. */
   noResultsLabel?: ReactNode
-  /** Fade items in/out as they appear/disappear (reduced-motion aware). */
+  /**
+   * Animate rows as they appear/disappear/move between groups — a pin/unpin
+   * glides a row across, search reflows smoothly (reduced-motion aware).
+   * On by default; pass `false` to render rows statically.
+   */
   animateItems?: boolean
   /** Override the outer container className. */
   className?: string

@@ -41,6 +41,12 @@ export type SidebarChat = {
   onClick?: () => void
   /** When > 0, the chat is rendered as unread (darker, bolder name). */
   unreadCount?: number
+  /**
+   * When > 0, the unread badge is prefixed with an `@` (groups only) — the
+   * unread run includes a message that mentions you, Slack-style. Just a marker
+   * on the existing badge, not a separate count; cleared on read.
+   */
+  mentionCount?: number
   /** When true, the name is replaced by a live "Writing…" label. */
   typing?: boolean
   presence?: SidebarChatPresence
@@ -55,6 +61,13 @@ export type SidebarChat = {
    * in place of the unread badge / status icon. Omit to hide the affordance.
    */
   onTogglePin?: () => void
+  /**
+   * A pin/unpin request for this chat is in flight (e.g. waiting on the
+   * backend). Replaces the pin button with a spinner, kept visible off-hover,
+   * so the row reads as "saving". The move between groups can still be applied
+   * optimistically — this only reflects that persistence is pending.
+   */
+  pinPending?: boolean
 }
 
 export type SidebarChatGroup = {

@@ -3,6 +3,7 @@ import { type ReactNode, useState } from "react"
 import { cn } from "@/lib/utils"
 
 import { useChatUI } from "../providers/ChatUIProvider"
+import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
@@ -30,6 +31,7 @@ export const ChatMessageItem = ({
 }): ReactNode => {
   const [actionsOpen, setActionsOpen] = useState(false)
   const { highlightedId } = useChatUI()
+  const { currentUserId } = useF0Chat()
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0
   const hasAttachments =
@@ -92,7 +94,12 @@ export const ChatMessageItem = ({
                 <ChatMessageAttachments message={message} isMine={isMine} />
               )}
               {hasBubble && (
-                <ChatBubble message={message} isMine={isMine} author={author} />
+                <ChatBubble
+                  message={message}
+                  isMine={isMine}
+                  author={author}
+                  currentUserId={currentUserId}
+                />
               )}
             </div>
             {/* Deleted tombstones have nothing to act on. The menu stays visible

@@ -11,6 +11,7 @@ import {
   type F0ChatRuntime,
   type F0ChatSearchResult,
   type F0ChatSendInput,
+  type F0ChatUser,
 } from "../types"
 import {
   type Seed,
@@ -19,6 +20,7 @@ import {
   SEEDS,
   resolveUser,
   unreadCountOf,
+  unreadMentionCountOf,
 } from "./mockSeeds"
 import {
   MockChatAppContext,
@@ -100,6 +102,33 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     [app.states, convId]
   )
 
+  // Mentions are a group concept — filter the members by query. The current
+  // user is included (you can @-mention yourself). Omitted for DMs so the
+  // composer keeps the popover suppressed there.
+  const searchMembers = useCallback(
+    (query: string): Promise<F0ChatUser[]> => {
+      if (seed?.type !== "group") return Promise.resolve([])
+      const q = query.trim().toLowerCase()
+      const matches = [...seed.participants, ME]
+        .filter((p) =>
+          q.length === 0 ? true : p.name.toLowerCase().includes(q)
+        )
+        .map(
+          (p): F0ChatUser => ({
+            id: p.id,
+            name: p.name,
+            avatar: p.avatar,
+            // Carry the full profile so a sent mention's hover card is complete
+            // (role line + "View profile"), like the sender avatar's card.
+            subtitle: p.subtitle,
+            profileHref: p.profileHref,
+          })
+        )
+      return Promise.resolve(matches)
+    },
+    [seed]
+  )
+
   const messages = state?.messages ?? []
   const typingUsers =
     seed && state ? state.typingIds.map((id) => resolveUser(seed, id)) : []
@@ -152,6 +181,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     markRead,
     searchMessages,
     togglePin,
+    searchMembers: seed?.type === "group" ? searchMembers : undefined,
   }
 }
 
@@ -168,6 +198,10 @@ export const useMockChatGroups = (
     const toChat = (seed: Seed) => {
       const state = states[seed.id]
       const unreadCount = state ? unreadCountOf(state) : 0
+      // Groups can ping you (`@you` / `@here`) — surface an `@N` badge alongside
+      // the unread count, cleared on read.
+      const mentionCount =
+        seed.type === "group" && state ? unreadMentionCountOf(state) : 0
       const dmPerson = seed.type === "dm" ? seed.participants[0] : undefined
       return {
         id: seed.id,
@@ -177,6 +211,7 @@ export const useMockChatGroups = (
         pinned: !!pinned[seed.id],
         onTogglePin: () => togglePin(seed.id),
         unreadCount: unreadCount || undefined,
+        mentionCount: mentionCount || undefined,
         // Live "Writing…" while the other side is typing in this conversation.
         typing: (state?.typingIds.length ?? 0) > 0,
         presence: seed.type === "dm" ? seed.presence : undefined,

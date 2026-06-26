@@ -1,7 +1,11 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { mockImage } from "@/testing/mocks/images"
 
-import { type F0ChatMessage, type F0ChatUser } from "../types"
+import {
+  type F0ChatMention,
+  type F0ChatMessage,
+  type F0ChatUser,
+} from "../types"
 
 // ---------------------------------------------------------------------------
 // People
@@ -103,6 +107,10 @@ type Line = {
   min: number
   /** Index of an earlier line in the same seed this message replies to. */
   replyToIndex?: number
+  /** People mentioned in the body (groups). */
+  mentions?: F0ChatMention[]
+  /** Whether the line mentions the whole group (`@here`). */
+  mentionedEveryone?: boolean
 }
 
 export type Seed = {
@@ -395,6 +403,44 @@ export const SEEDS: Seed[] = [
         min: 90 * MIN,
       },
       { from: MARCUS, body: "Perfect, thanks all 🙌", min: 20 * MIN },
+      // A mention of someone else (read) — hovering the @chip opens Grace's
+      // profile card, the same affordance as hovering her avatar.
+      {
+        from: ME,
+        body: `Thanks @${GRACE.name}, ping me when the dashboard is live`,
+        min: 18 * MIN,
+        mentions: [
+          {
+            id: GRACE.id,
+            name: GRACE.name,
+            avatar: GRACE.avatar,
+            subtitle: GRACE.subtitle,
+            profileHref: GRACE.profileHref,
+          },
+        ],
+      },
+      // The two trailing (unread) messages mention you and the whole group, so
+      // the sidebar shows an `@2` badge and the bubbles get the self-emphasis.
+      {
+        from: GRACE,
+        body: `@${ME.name} can you sign off on the Q1 scope today?`,
+        min: 15 * MIN,
+        mentions: [
+          {
+            id: ME.id,
+            name: ME.name,
+            avatar: ME.avatar,
+            subtitle: ME.subtitle,
+            profileHref: ME.profileHref,
+          },
+        ],
+      },
+      {
+        from: MARCUS,
+        body: "@here deploy freeze starts in 30 minutes ❄️",
+        min: 8 * MIN,
+        mentionedEveryone: true,
+      },
     ],
   },
   // GROUP — extensive, weeks/days of history.
@@ -521,6 +567,8 @@ const buildSeedMessages = (seed: Seed): F0ChatMessage[] => {
       status: isMine ? "read" : undefined,
       // The other side read my messages shortly after they were sent (DM info).
       readAt: isMine ? new Date(sentMs + 60_000).toISOString() : undefined,
+      mentions: line.mentions,
+      mentionedEveryone: line.mentionedEveryone,
     }
   })
   // Second pass: resolve reply references now that every message has an id.
@@ -568,6 +616,22 @@ export const unreadCountOf = (state: ConvState): number => {
     ? state.messages.findIndex((m) => m.id === state.lastReadId)
     : -1
   return state.messages.slice(idx + 1).filter((m) => !m.isMine).length
+}
+
+/** Unread messages that mention me (directly or via `@here`) — drives the
+ * sidebar `@N` badge. Clears as the conversation is read, like the unread count. */
+export const unreadMentionCountOf = (state: ConvState): number => {
+  const idx = state.lastReadId
+    ? state.messages.findIndex((m) => m.id === state.lastReadId)
+    : -1
+  return state.messages
+    .slice(idx + 1)
+    .filter(
+      (m) =>
+        !m.isMine &&
+        (m.mentionedEveryone ||
+          (m.mentions ?? []).some((mention) => mention.id === ME.id))
+    ).length
 }
 
 export const resolveUser = (seed: Seed, id: string): F0ChatUser =>

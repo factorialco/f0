@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ComponentProps, useCallback, useEffect, useState } from "react"
+import { ComponentProps, useCallback, useEffect, useRef, useState } from "react"
 import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
@@ -1236,9 +1236,16 @@ const OneHistoryTab = () => {
  * mounts, so it can call `useAiChat()` directly. "Ask AI" clears the custom
  * content and falls back to the real chat.
  */
-const ConversationsSidebarInner = () => {
+const ConversationsSidebarInner = ({
+  initialTab = "home",
+  autoOpenConvId,
+}: {
+  initialTab?: string
+  /** Mount this conversation in the side panel on first render (demo only). */
+  autoOpenConvId?: string
+} = {}) => {
   const [company, setCompany] = useState("1")
-  const [tab, setTab] = useState("home")
+  const [tab, setTab] = useState(initialTab)
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
   const { setPanelContent, open, panelContent } = useAiChat()
@@ -1253,6 +1260,16 @@ const ConversationsSidebarInner = () => {
     },
     [setPanelContent]
   )
+
+  // Demo convenience: open a conversation straight away (e.g. the mentions story
+  // lands inside the group so the chat + composer are visible without a click).
+  const autoOpened = useRef(false)
+  useEffect(() => {
+    if (autoOpenConvId && !autoOpened.current) {
+      autoOpened.current = true
+      onSelect(autoOpenConvId)
+    }
+  }, [autoOpenConvId, onSelect])
 
   // Groups come from the shared mock store, so unread badges / presence / mute
   // are live and clear as conversations are read.
@@ -1318,10 +1335,19 @@ const ConversationsSidebarInner = () => {
  * content at a time. Used by the `Default` and `CommunicationsWithOneTab`
  * stories.
  */
-const ConversationsSidebar = () => {
+const ConversationsSidebar = ({
+  initialTab,
+  autoOpenConvId,
+}: {
+  initialTab?: string
+  autoOpenConvId?: string
+} = {}) => {
   return (
     <SidebarChatProvider>
-      <ConversationsSidebarInner />
+      <ConversationsSidebarInner
+        initialTab={initialTab}
+        autoOpenConvId={autoOpenConvId}
+      />
     </SidebarChatProvider>
   )
 }
@@ -1377,6 +1403,74 @@ export const CommunicationsWithOneTab: Story = {
     )
     await expect(
       await canvas.findByText(/within your permissions/i)
+    ).toBeInTheDocument()
+  },
+}
+
+/**
+ * Communications **mentions**, end to end in the frame. Lands inside the
+ * "Product Team" group with the chat docked left: the transcript shows a
+ * mention of you and an `@here` (both with the self-mention emphasis), the
+ * sidebar's Chat tab shows the matching `@2` badge, and typing `@` in the
+ * composer opens the member popover with `@here` pinned on top — exactly the AI
+ * chat's mention UX, but driven by the conversation's members. (DMs show no
+ * popover.)
+ */
+export const CommunicationsWithMentions: Story = {
+  name: "Communications — mentions",
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              initialTab="messages"
+              autoOpenConvId="grp-product"
+            />
+          }
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // The group auto-opens: the seeded mention messages are on view.
+    await expect(
+      await canvas.findByText(/sign off on the Q1 scope/i)
+    ).toBeInTheDocument()
+    // Both the @you and the @here chips render (self-mention emphasis).
+    await expect(canvas.getByText("@here")).toBeInTheDocument()
+
+    // The sidebar's unread badge for the group is prefixed with `@` (mentions).
+    await expect(
+      await canvas.findByLabelText(/mentions you/i)
+    ).toBeInTheDocument()
+
+    // Typing `@` opens the member popover with `@here` pinned on top.
+    const composer = await canvas.findByPlaceholderText(/write something/i)
+    await userEvent.click(composer)
+    await userEvent.type(composer, "@")
+    await expect(
+      await canvas.findByText("Notify everyone in this group")
+    ).toBeInTheDocument()
+    // A group member is listed in the popover (scoped so it doesn't collide with
+    // the sender names in the transcript).
+    const popover = canvas.getByRole("listbox")
+    await expect(
+      await within(popover).findByText(/Grace|Marcus|Sam|Noah/)
     ).toBeInTheDocument()
   },
 }

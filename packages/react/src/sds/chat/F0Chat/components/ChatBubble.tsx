@@ -1,4 +1,4 @@
-import { type ReactNode } from "react"
+import { Fragment, type ReactNode } from "react"
 import { parse } from "twemoji-parser"
 
 import { F0Icon } from "@/components/F0Icon"
@@ -45,6 +45,101 @@ const renderBodyWithEmojis = (body: string): ReactNode => {
   })
   if (cursor < body.length) nodes.push(body.slice(cursor))
 
+  return nodes
+}
+
+/** A `@name` token to highlight in a message body. Slack-style colours: a
+ * mention of someone else reads in info colours; a mention of you (`isSelf`) or
+ * the whole group (`isEveryone`, `@here`) reads in warning/amber. `user`, when
+ * present (any person mention), opens the same profile hover card as the avatar. */
+type MentionToken = {
+  name: string
+  isSelf: boolean
+  isEveryone: boolean
+  user?: F0ChatUser
+}
+
+/**
+ * Render a body with its `@name` mentions as chips and everything else through
+ * {@link renderBodyWithEmojis}. Slack-style: a mention of someone else is an
+ * info pill (and opens their profile hover card, like the sender avatar); a
+ * mention of you or `@here` is an amber/warning pill that stands out. Falls back
+ * to plain emoji rendering when there are no mentions.
+ */
+const renderBodyWithMentions = (
+  body: string,
+  tokens: MentionToken[]
+): ReactNode => {
+  if (tokens.length === 0) return renderBodyWithEmojis(body)
+
+  // Collect every `@name` occurrence (longest names first so "@Ana María" wins
+  // over "@Ana"), then drop overlaps left-to-right.
+  const ranges: { start: number; end: number; token: MentionToken }[] = []
+  const byLength = [...tokens].sort((a, b) => b.name.length - a.name.length)
+  for (const token of byLength) {
+    const pattern = `@${token.name}`
+    let from = 0
+    while (true) {
+      const idx = body.indexOf(pattern, from)
+      if (idx === -1) break
+      ranges.push({ start: idx, end: idx + pattern.length, token })
+      from = idx + pattern.length
+    }
+  }
+  ranges.sort((a, b) => a.start - b.start)
+
+  const clean: typeof ranges = []
+  let lastEnd = 0
+  for (const range of ranges) {
+    if (range.start < lastEnd) continue
+    clean.push(range)
+    lastEnd = range.end
+  }
+  if (clean.length === 0) return renderBodyWithEmojis(body)
+
+  const nodes: ReactNode[] = []
+  let cursor = 0
+  clean.forEach((range, i) => {
+    if (range.start > cursor) {
+      nodes.push(
+        <Fragment key={`t-${i}`}>
+          {renderBodyWithEmojis(body.slice(cursor, range.start))}
+        </Fragment>
+      )
+    }
+    const { token } = range
+    const chip = (
+      <span
+        className={cn(
+          "rounded-sm px-0.5 font-semibold",
+          token.isSelf || token.isEveryone
+            ? "bg-f1-background-warning text-f1-foreground-warning"
+            : "cursor-default bg-f1-background-info text-f1-foreground-info"
+        )}
+      >
+        {body.slice(range.start, range.end)}
+      </span>
+    )
+    // A person mention opens their profile card on hover, mirroring the
+    // sender-avatar affordance. `@here` is a broadcast — no single person.
+    nodes.push(
+      token.user ? (
+        <ChatUserHoverCard key={`m-${i}`} user={token.user}>
+          {chip}
+        </ChatUserHoverCard>
+      ) : (
+        <Fragment key={`m-${i}`}>{chip}</Fragment>
+      )
+    )
+    cursor = range.end
+  })
+  if (cursor < body.length) {
+    nodes.push(
+      <Fragment key="t-last">
+        {renderBodyWithEmojis(body.slice(cursor))}
+      </Fragment>
+    )
+  }
   return nodes
 }
 
@@ -117,13 +212,38 @@ export const ChatBubble = ({
   message,
   isMine,
   author,
+  currentUserId,
 }: {
   message: F0ChatMessage
   isMine: boolean
   /** When set (group incoming, first of a run), render the name as line one. */
   author?: F0ChatUser
+  /** The viewer's id — a mention of it reads in warning/amber (Slack-style). */
+  currentUserId?: string
 }): ReactNode => {
   const i18n = useI18n()
+
+  const mentionTokens: MentionToken[] = [
+    // Every person mention carries a user for the profile hover card; a mention
+    // of you is flagged so it stands out in amber.
+    ...(message.mentions ?? []).map(
+      (m): MentionToken => ({
+        name: m.name,
+        isSelf: currentUserId != null && m.id === currentUserId,
+        isEveryone: false,
+        user: {
+          id: m.id,
+          name: m.name,
+          avatar: m.avatar,
+          subtitle: m.subtitle,
+          profileHref: m.profileHref,
+        },
+      })
+    ),
+    ...(message.mentionedEveryone
+      ? [{ name: i18n.chat.mentionEveryone, isSelf: false, isEveryone: true }]
+      : []),
+  ]
 
   if (message.deleted) {
     return (
@@ -167,7 +287,7 @@ export const ChatBubble = ({
               </span>
             </ChatUserHoverCard>
           )}
-          {renderBodyWithEmojis(message.body)}
+          {renderBodyWithMentions(message.body, mentionTokens)}
         </div>
       </div>
     </div>
