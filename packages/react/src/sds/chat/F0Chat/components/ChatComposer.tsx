@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react"
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -8,17 +9,15 @@ import {
   useState,
 } from "react"
 
-import { AnimatePresence, motion } from "motion/react"
-
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
+import { Picker } from "@/kits/Social/Reactions/Picker"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
-import { Picker } from "@/kits/Social/Reactions/Picker"
 import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
 import {
   type RecorderError,
@@ -29,8 +28,8 @@ import { Skeleton } from "@/ui/skeleton"
 import { buildHighlightSegments } from "../hooks/highlight-utils"
 import { useMentions } from "../hooks/useMentions"
 import { useTransientError } from "../hooks/useTransientError"
-import { useF0Chat } from "../providers/F0ChatProvider"
 import { useChatDrop, useChatReply } from "../providers/ChatUIProvider"
+import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment } from "../types"
 import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
@@ -284,10 +283,10 @@ export const ChatComposer = (): ReactNode => {
   const placeholder = i18n.chat.placeholder
 
   return (
-    <div className="shrink-0 p-4 pt-1">
+    <div className="shrink-0 p-4 pt-0">
       {/* Centered, width-capped to match the message column in fullscreen. */}
       <div className="mx-auto w-full max-w-content">
-        <div className="relative rounded-lg border border-solid border-f1-border bg-f1-background flex flex-col">
+        <div className="relative flex flex-col rounded-lg border border-solid border-f1-border bg-f1-background">
           <ChatMentionPopover
             isOpen={mentions.isOpen}
             results={mentions.results}
