@@ -109,7 +109,11 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
           key="chat-wrapper"
           className={cn(
             "bg-f1-transparent pointer-events-auto relative flex h-full dark:bg-f1-background md:py-1",
-            isLeft ? "mr-auto" : "ml-auto md:pr-1"
+            // Right seam (against the viewport edge — no sidebar there) is owned
+            // here: always wanted right-docked or filling the screen. The LEFT
+            // seam depends on whether the app sidebar is present (it provides the
+            // gap), which only the host frame knows, so ApplicationFrame owns it.
+            fullscreen ? "md:pr-1" : isLeft ? "mr-auto" : "ml-auto md:pr-1"
           )}
           initial={
             shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false

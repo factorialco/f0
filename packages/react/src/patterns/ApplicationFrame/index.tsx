@@ -326,10 +326,18 @@ function ApplicationFrameContent({
                     ? "overflow-hidden"
                     : "overflow-auto",
                   !isAiChatOpen && !isAiPromotionChatOpen && "xs:pr-1",
+                  // Left seam so the content never sticks to the viewport edge:
+                  // none when the sidebar is active (it provides the gap) or when
+                  // a left-docked panel is OPEN (it reserves the space); otherwise
+                  // a small seam. Gated on the panel being open — not just
+                  // configured left — so a closed left panel still gets the seam.
                   sidebarState === "locked"
                     ? "pl-0"
-                    : !isPanelLeft && "xs:pl-1",
-                  isAiChatOpen && isPanelLeft && "pr-1"
+                    : isPanelLeft && isAiChatOpen
+                      ? "pl-0"
+                      : "xs:pl-1",
+                  // Consistent breakpoint with the other seams (was a bare `pr-1`).
+                  isAiChatOpen && isPanelLeft && "xs:pr-1"
                 )}
                 layoutDependency={sidebarState}
               >
@@ -377,7 +385,7 @@ function ApplicationFrameContent({
                     content={canvasContent}
                     onClose={closeCanvas}
                     entities={canvasEntities}
-                    side={isPanelLeft ? "left" : "right"}
+                    side={panelSide}
                   />
                 </div>
               )}
@@ -401,10 +409,15 @@ function ApplicationFrameContent({
                           isInFullscreenTransition || isCanvasMode
                             ? "z-20"
                             : "z-0",
-                          sidebarState === "hidden" && isInFullscreenTransition
-                            ? "pl-1"
-                            : "pl-0",
-                          sidebarState === "hidden" && isPanelLeft && "pl-1"
+                          // Left seam for the panel — owned by the frame because
+                          // it depends on the sidebar. The panel's left edge needs
+                          // a gap only when it's left-docked or filling the screen;
+                          // and never when the sidebar is active (locked), since
+                          // the sidebar already provides the gap (same rule as the
+                          // main content). md:-gated so mobile fullscreen is full-bleed.
+                          sidebarState !== "locked" &&
+                            (isPanelLeft || isInFullscreenTransition) &&
+                            "md:pl-1"
                         )
                   )}
                   animate={{

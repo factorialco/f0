@@ -111,7 +111,7 @@ const renderBodyWithMentions = (
     const chip = (
       <span
         className={cn(
-          "rounded-sm px-0.5 font-semibold",
+          "rounded-xs px-0.5 font-medium",
           token.isSelf || token.isEveryone
             ? "bg-f1-background-warning text-f1-foreground-warning"
             : "cursor-default bg-f1-background-info text-f1-foreground-info"

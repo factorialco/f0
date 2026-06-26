@@ -76,7 +76,7 @@ export const ChatTextareaField = ({
               <span
                 key={i}
                 className={cn(
-                  "rounded-sm",
+                  "rounded-xs px-0.5 font-medium",
                   seg.tone === "self" || seg.tone === "everyone"
                     ? "bg-f1-background-warning text-f1-foreground-warning"
                     : "bg-f1-background-info text-f1-foreground-info"

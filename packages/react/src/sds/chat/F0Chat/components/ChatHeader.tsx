@@ -1,4 +1,6 @@
+import { breakpoints } from "@factorialco/f0-core"
 import { type ReactNode } from "react"
+import { useMediaQuery } from "usehooks-ts"
 
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -53,6 +55,11 @@ export const ChatHeader = ({
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatUI()
   const { togglePin } = useF0Chat()
+  // On mobile the chat already fills the screen, so the fullscreen toggle is a
+  // no-op — hide it (matches F0AiChatHeader).
+  const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
+    initializeWithValue: true,
+  })
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
 
@@ -135,7 +142,7 @@ export const ChatHeader = ({
                 icon={Ellipsis}
               />
             </Dropdown>
-            {onToggleFullscreen && (
+            {onToggleFullscreen && !isSmallScreen && (
               <ButtonInternal
                 variant="ghost"
                 hideLabel
