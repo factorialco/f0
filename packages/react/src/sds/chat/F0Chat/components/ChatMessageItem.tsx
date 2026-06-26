@@ -2,7 +2,7 @@ import { type ReactNode, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatHighlightedId } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { ChatBubble } from "./ChatBubble"
@@ -30,7 +30,7 @@ export const ChatMessageItem = ({
   belowGutter?: ReactNode
 }): ReactNode => {
   const [actionsOpen, setActionsOpen] = useState(false)
-  const { highlightedId } = useChatUI()
+  const { highlightedId } = useChatHighlightedId()
   const { currentUserId } = useF0Chat()
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0

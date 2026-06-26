@@ -5,7 +5,7 @@ import { F0SearchInput } from "@/components/F0SearchInput"
 import { ChevronDown, ChevronUp, Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatSearch } from "../providers/ChatUIProvider"
 import { cn } from "@/lib/utils"
 
 /**
@@ -26,7 +26,7 @@ export const ChatHeaderSearch = (): ReactNode => {
     goToNextMatch,
     goToPrevMatch,
     closeSearch,
-  } = useChatUI()
+  } = useChatSearch()
 
   const hasMatches = matchTotal > 0
   const hasQuery = searchQuery.trim().length > 0

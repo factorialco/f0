@@ -5,7 +5,7 @@ import { Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatImagePreview } from "../providers/ChatUIProvider"
 import {
   type F0ChatFileAttachment,
   type F0ChatImageAttachment,
@@ -26,7 +26,7 @@ export const ChatMessageAttachments = ({
   isMine: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const { openImagePreview } = useChatUI()
+  const { openImagePreview } = useChatImagePreview()
   const attachments = message.attachments
   if (!attachments || attachments.length === 0) return null
 

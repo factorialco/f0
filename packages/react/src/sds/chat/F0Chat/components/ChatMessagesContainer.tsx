@@ -19,7 +19,7 @@ import { Spinner } from "@/ui/Spinner"
 
 import { ScrollShadow } from "@/sds/ai/F0AiMessagesContainer/components/ScrollShadow"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { LATEST } from "../types"
 import { type ChatRow, flattenChatRows } from "../utils/grouping"
@@ -66,7 +66,7 @@ export const ChatMessagesContainer = (): ReactNode => {
   const isGroup = channel.type === "group"
 
   const viewportRef = useRef<HTMLDivElement>(null)
-  const { registerScrollToMessage } = useChatUI()
+  const { registerScrollToMessage } = useChatJump()
 
   // "Seen everything" = the latest messages are visible AND the pointer is over
   // the chat. Only then do we mark as read.
@@ -116,11 +116,21 @@ export const ChatMessagesContainer = (): ReactNode => {
     [rows, typingUsers]
   )
 
+  const getScrollElement = useCallback(() => viewportRef.current, [])
+  const estimateSize = useCallback(
+    (i: number) => estimateRowSize(displayRows[i]),
+    [displayRows]
+  )
+  const getItemKey = useCallback(
+    (i: number) => displayRows[i].key,
+    [displayRows]
+  )
+
   const virtualizer = useVirtualizer({
     count: displayRows.length,
-    getScrollElement: () => viewportRef.current,
-    estimateSize: (i) => estimateRowSize(displayRows[i]),
-    getItemKey: (i) => displayRows[i].key,
+    getScrollElement,
+    estimateSize,
+    getItemKey,
     // Round to whole pixels — sub-pixel measurements accumulate into translateY
     // drift that shows as jitter while scrolling up.
     measureElement: (el) => Math.round(el.getBoundingClientRect().height),

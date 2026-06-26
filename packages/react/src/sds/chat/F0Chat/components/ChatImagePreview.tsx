@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, Cross, Download } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Dialog, DialogContent, DialogTitle } from "@/ui/Dialog"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatImagePreview } from "../providers/ChatUIProvider"
 import { triggerDownload } from "../utils/download"
 
 /** A control pill — a neutral icon button on an opaque chip so it reads over the
@@ -47,7 +47,8 @@ const PreviewControl = ({
  */
 export const ChatImagePreview = (): ReactNode => {
   const i18n = useI18n()
-  const { imagePreview, closeImagePreview, setImagePreviewIndex } = useChatUI()
+  const { imagePreview, closeImagePreview, setImagePreviewIndex } =
+    useChatImagePreview()
 
   // Portal above the whole app: the chat panel owns the top stacking context, so
   // the dialog's default `#content` target renders the lightbox behind it. `body`

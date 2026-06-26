@@ -3,6 +3,7 @@ import { type RefObject } from "react"
 import { cn } from "@/lib/utils"
 
 import { type HighlightSegment } from "../hooks/highlight-utils"
+import { renderTextWithEmojis } from "../utils/render-body"
 
 type ChatTextareaFieldProps = {
   textareaRef: RefObject<HTMLTextAreaElement>
@@ -82,14 +83,14 @@ export const ChatTextareaField = ({
                     : "bg-f1-background-info text-f1-foreground-info"
                 )}
               >
-                {seg.text}
+                {renderTextWithEmojis(seg.text)}
               </span>
             ) : seg.type === "ghost" ? (
               <span key={i} className="text-f1-foreground-secondary opacity-50">
-                {seg.text}
+                {renderTextWithEmojis(seg.text)}
               </span>
             ) : (
-              <span key={i}>{seg.text}</span>
+              <span key={i}>{renderTextWithEmojis(seg.text)}</span>
             )
           )}
         </div>

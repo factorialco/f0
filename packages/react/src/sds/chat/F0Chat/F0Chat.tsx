@@ -10,7 +10,7 @@ import {
   ChatEmptyState,
   ChatError,
 } from "./components/ChatStates"
-import { ChatUIProvider, useChatUI } from "./providers/ChatUIProvider"
+import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
 
 export type F0ChatProps = {
@@ -30,7 +30,7 @@ const ChatShell = ({
   onClose,
 }: F0ChatProps): ReactNode => {
   const { channel, status, messages } = useF0Chat()
-  const { dropFiles } = useChatUI()
+  const { dropFiles } = useChatDrop()
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
   // entire surface and a drop anywhere attaches to the composer. Stop file-drag

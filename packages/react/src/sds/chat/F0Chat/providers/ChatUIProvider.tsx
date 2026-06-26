@@ -19,22 +19,39 @@ const SEARCH_DEBOUNCE_MS = 200
 /** How long a reply jump keeps a message highlighted (search highlights persist). */
 const JUMP_HIGHLIGHT_MS = 1600
 
-type ChatUIContextValue = {
-  /** Message being replied to (quoted in the composer), or null. */
-  replyTo: F0ChatMessage | null
-  setReplyTo: (message: F0ChatMessage | null) => void
-  /** Message currently highlighted after a jump (reply quote or active search hit). */
-  highlightedId: string | null
+/**
+ * Ephemeral chat UI state is split into focused contexts so a change in one
+ * concern doesn't re-render consumers of another. In particular, message rows
+ * subscribe to `useChatHighlight` only — typing in search, changing the reply
+ * target, or opening the image lightbox no longer re-renders the transcript.
+ */
+
+type ChatJumpContextValue = {
   /** Scroll to a message and briefly highlight it. */
   jumpToMessage: (id: string) => void
   /** The message list registers how to scroll to a given message id. */
   registerScrollToMessage: (fn: (id: string) => void) => void
+}
+
+type ChatHighlightedIdContextValue = {
+  /** Message currently highlighted after a jump (reply quote or active search hit). */
+  highlightedId: string | null
+}
+
+type ChatReplyContextValue = {
+  /** Message being replied to (quoted in the composer), or null. */
+  replyTo: F0ChatMessage | null
+  setReplyTo: (message: F0ChatMessage | null) => void
+}
+
+type ChatDropContextValue = {
   /** The composer registers how to attach dropped files (window-wide drop). */
   registerFileDropHandler: (fn: (files: File[]) => void) => void
   /** Route files dropped anywhere on the panel to the composer. */
   dropFiles: (files: File[]) => void
+}
 
-  // In-chat image lightbox.
+type ChatImagePreviewContextValue = {
   /** The clicked message's images + the active index, or null when closed. */
   imagePreview: { images: F0ChatImageAttachment[]; index: number } | null
   /** Open the lightbox on a message's images, starting at `index`. */
@@ -42,8 +59,9 @@ type ChatUIContextValue = {
   closeImagePreview: () => void
   /** Move the lightbox to another image of the same message (wraps around). */
   setImagePreviewIndex: (index: number) => void
+}
 
-  // In-conversation search (header search bar).
+type ChatSearchContextValue = {
   /** Whether the header is in search mode. */
   searchOpen: boolean
   openSearch: () => void
@@ -61,7 +79,14 @@ type ChatUIContextValue = {
   goToPrevMatch: () => void
 }
 
-const ChatUIContext = createContext<ChatUIContextValue | null>(null)
+const ChatJumpContext = createContext<ChatJumpContextValue | null>(null)
+const ChatHighlightedIdContext =
+  createContext<ChatHighlightedIdContextValue | null>(null)
+const ChatReplyContext = createContext<ChatReplyContextValue | null>(null)
+const ChatDropContext = createContext<ChatDropContextValue | null>(null)
+const ChatImagePreviewContext =
+  createContext<ChatImagePreviewContextValue | null>(null)
+const ChatSearchContext = createContext<ChatSearchContextValue | null>(null)
 
 /** Ephemeral, presentation-only chat UI state (reply target, jump-to-message, search). */
 export const ChatUIProvider = ({
@@ -102,6 +127,9 @@ export const ChatUIProvider = ({
   activeIndexRef.current = activeMatchIndex
   // Guards against an out-of-order async search result overwriting a newer one.
   const searchRunRef = useRef(0)
+  // Cache of lowercased bodies for the client-side search fallback, so a scan
+  // doesn't allocate a lowercased copy of every message on each keystroke.
+  const lowerBodyCache = useRef(new WeakMap<F0ChatMessage, string>())
 
   useEffect(
     () => () => {
@@ -208,9 +236,18 @@ export const ChatUIProvider = ({
         void fn(q).then((res) => apply(res.map((r) => r.id)))
       } else {
         const needle = q.toLowerCase()
+        const cache = lowerBodyCache.current
         apply(
           messagesRef.current
-            .filter((m) => !m.deleted && m.body.toLowerCase().includes(needle))
+            .filter((m) => {
+              if (m.deleted) return false
+              let lower = cache.get(m)
+              if (lower === undefined) {
+                lower = m.body.toLowerCase()
+                cache.set(m, lower)
+              }
+              return lower.includes(needle)
+            })
             .map((m) => m.id)
         )
       }
@@ -245,19 +282,36 @@ export const ChatUIProvider = ({
   const matchTotal = matchIds.length
   const matchCurrent = activeMatchIndex >= 0 ? activeMatchIndex + 1 : 0
 
-  const value = useMemo<ChatUIContextValue>(
+  // Jump API is stable (never changes after mount) so reply quotes / the
+  // transcript that only need it don't re-render when the highlight moves.
+  const jumpValue = useMemo<ChatJumpContextValue>(
+    () => ({ jumpToMessage, registerScrollToMessage }),
+    [jumpToMessage, registerScrollToMessage]
+  )
+  // Isolated so only the highlighted row (ChatMessageItem) re-renders on a jump.
+  const highlightedIdValue = useMemo<ChatHighlightedIdContextValue>(
+    () => ({ highlightedId }),
+    [highlightedId]
+  )
+  const replyValue = useMemo<ChatReplyContextValue>(
+    () => ({ replyTo, setReplyTo }),
+    [replyTo]
+  )
+  const dropValue = useMemo<ChatDropContextValue>(
+    () => ({ registerFileDropHandler, dropFiles }),
+    [registerFileDropHandler, dropFiles]
+  )
+  const imagePreviewValue = useMemo<ChatImagePreviewContextValue>(
     () => ({
-      replyTo,
-      setReplyTo,
-      highlightedId,
-      jumpToMessage,
-      registerScrollToMessage,
-      registerFileDropHandler,
-      dropFiles,
       imagePreview,
       openImagePreview,
       closeImagePreview,
       setImagePreviewIndex,
+    }),
+    [imagePreview, openImagePreview, closeImagePreview, setImagePreviewIndex]
+  )
+  const searchValue = useMemo<ChatSearchContextValue>(
+    () => ({
       searchOpen,
       openSearch,
       closeSearch,
@@ -270,16 +324,6 @@ export const ChatUIProvider = ({
       goToPrevMatch,
     }),
     [
-      replyTo,
-      highlightedId,
-      jumpToMessage,
-      registerScrollToMessage,
-      registerFileDropHandler,
-      dropFiles,
-      imagePreview,
-      openImagePreview,
-      closeImagePreview,
-      setImagePreviewIndex,
       searchOpen,
       openSearch,
       closeSearch,
@@ -291,15 +335,54 @@ export const ChatUIProvider = ({
       goToPrevMatch,
     ]
   )
+
   return (
-    <ChatUIContext.Provider value={value}>{children}</ChatUIContext.Provider>
+    <ChatJumpContext.Provider value={jumpValue}>
+      <ChatHighlightedIdContext.Provider value={highlightedIdValue}>
+        <ChatReplyContext.Provider value={replyValue}>
+          <ChatDropContext.Provider value={dropValue}>
+            <ChatImagePreviewContext.Provider value={imagePreviewValue}>
+              <ChatSearchContext.Provider value={searchValue}>
+                {children}
+              </ChatSearchContext.Provider>
+            </ChatImagePreviewContext.Provider>
+          </ChatDropContext.Provider>
+        </ChatReplyContext.Provider>
+      </ChatHighlightedIdContext.Provider>
+    </ChatJumpContext.Provider>
   )
 }
 
-export function useChatUI(): ChatUIContextValue {
-  const ctx = useContext(ChatUIContext)
-  if (!ctx) {
-    throw new Error("useChatUI must be used within a ChatUIProvider")
+function useCtx<T>(ctx: React.Context<T | null>, name: string): T {
+  const value = useContext(ctx)
+  if (!value) {
+    throw new Error(`${name} must be used within a ChatUIProvider`)
   }
-  return ctx
+  return value
 }
+
+/** Stable jump API (scroll-to + register). Consumed by the transcript, reply
+ * quotes and the reply chip — none re-render when the highlight moves. */
+export const useChatJump = (): ChatJumpContextValue =>
+  useCtx(ChatJumpContext, "useChatJump")
+
+/** The currently highlighted message id. Consumed only by the message row so a
+ * jump re-renders just that row. */
+export const useChatHighlightedId = (): ChatHighlightedIdContextValue =>
+  useCtx(ChatHighlightedIdContext, "useChatHighlightedId")
+
+/** Reply-target state. Consumed by the composer and message actions. */
+export const useChatReply = (): ChatReplyContextValue =>
+  useCtx(ChatReplyContext, "useChatReply")
+
+/** Window-wide file-drop routing. Consumed by the shell and composer. */
+export const useChatDrop = (): ChatDropContextValue =>
+  useCtx(ChatDropContext, "useChatDrop")
+
+/** Image lightbox state. Consumed by attachments and the preview overlay. */
+export const useChatImagePreview = (): ChatImagePreviewContextValue =>
+  useCtx(ChatImagePreviewContext, "useChatImagePreview")
+
+/** In-conversation search state. Consumed by the header and its search bar. */
+export const useChatSearch = (): ChatSearchContextValue =>
+  useCtx(ChatSearchContext, "useChatSearch")

@@ -16,6 +16,7 @@ import { F0FileItem } from "@/components/F0FileItem"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
+import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
 import { Picker } from "@/kits/Social/Reactions/Picker"
 import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
@@ -27,16 +28,13 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
 import { useMentions } from "../hooks/useMentions"
+import { useTransientError } from "../hooks/useTransientError"
 import { useF0Chat } from "../providers/F0ChatProvider"
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatDrop, useChatReply } from "../providers/ChatUIProvider"
 import { type F0ChatAttachment } from "../types"
 import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
-
-// How long a transient composer error (too many files, upload/voice failure)
-// stays before it fades out — matches the AI chat.
-const TRANSIENT_ERROR_MS = 4000
 
 /** A pending composer attachment: a skeleton while it uploads, an F0FileItem
  * chip once the runtime resolves it (same pattern as the AI chat composer). */
@@ -58,7 +56,8 @@ export const ChatComposer = (): ReactNode => {
     searchMembers,
     currentUserId,
   } = useF0Chat()
-  const { replyTo, setReplyTo, registerFileDropHandler } = useChatUI()
+  const { replyTo, setReplyTo } = useChatReply()
+  const { registerFileDropHandler } = useChatDrop()
   const shouldReduceMotion = useReducedMotion()
 
   const [value, setValue] = useState("")
@@ -97,8 +96,13 @@ export const ChatComposer = (): ReactNode => {
       currentUserId,
     ]
   )
+  // The overlay also turns on when the text has emoji, so the composer can
+  // paint twemoji (matching the bubble). Plain text keeps the native textarea
+  // visible, so IME composition stays visible for non-emoji typing.
   const hasOverlay =
-    mentions.mentions.length > 0 || mentions.inlineCompletion !== null
+    mentions.mentions.length > 0 ||
+    mentions.inlineCompletion !== null ||
+    containsEmojis(value)
   // Monotonic id for pending attachments (avoids Date.now/random in render).
   const attachmentSeq = useRef(0)
 
@@ -106,28 +110,8 @@ export const ChatComposer = (): ReactNode => {
 
   // Transient error flashed in the textarea (too many files, upload/voice
   // failure), auto-cleared after a few seconds — same pattern as the AI chat.
-  const [transientError, setTransientError] = useState<string | null>(null)
-  const transientErrorTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
-    null
-  )
-  const showTransientError = useCallback((message: string) => {
-    if (transientErrorTimeoutRef.current) {
-      clearTimeout(transientErrorTimeoutRef.current)
-    }
-    setTransientError(message)
-    transientErrorTimeoutRef.current = setTimeout(() => {
-      setTransientError(null)
-      transientErrorTimeoutRef.current = null
-    }, TRANSIENT_ERROR_MS)
-  }, [])
-  useEffect(
-    () => () => {
-      if (transientErrorTimeoutRef.current) {
-        clearTimeout(transientErrorTimeoutRef.current)
-      }
-    },
-    []
-  )
+  const { error: transientError, show: showTransientError } =
+    useTransientError()
 
   // Mirror the attachment count in a ref so the upload handler can read the
   // current total without depending on it (keeps its identity stable).

@@ -16,7 +16,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatReply } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
@@ -74,7 +74,7 @@ export const ChatMessageActions = ({
 }): ReactNode => {
   const i18n = useI18n()
   const { toggleReaction, deleteMessage } = useF0Chat()
-  const { setReplyTo } = useChatUI()
+  const { setReplyTo } = useChatReply()
   const [view, setView] = useState<"menu" | "info">("menu")
 
   const handleOpenChange = (next: boolean) => {

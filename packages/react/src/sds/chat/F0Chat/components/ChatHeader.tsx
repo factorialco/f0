@@ -20,7 +20,7 @@ import {
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { useChatUI } from "../providers/ChatUIProvider"
+import { useChatSearch } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatChannel } from "../types"
 import { ChatHeaderSearch } from "./ChatHeaderSearch"
@@ -53,7 +53,7 @@ export const ChatHeader = ({
   onClose,
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
-  const { searchOpen, openSearch } = useChatUI()
+  const { searchOpen, openSearch } = useChatSearch()
   const { togglePin } = useF0Chat()
   // On mobile the chat already fills the screen, so the fullscreen toggle is a
   // no-op — hide it (matches F0AiChatHeader).
