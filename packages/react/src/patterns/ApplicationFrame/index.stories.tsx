@@ -5,7 +5,6 @@ import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
-import { F0SearchInput } from "@/components/F0SearchInput"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
 import {
@@ -23,9 +22,7 @@ import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
 import Communities from "@/icons/modules/Communities"
 import { F0Box } from "@/lib/F0Box"
-import { fuzzyMatch } from "@/lib/fuzzyMatch"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-import { cn, focusRing } from "@/lib/utils"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -35,7 +32,6 @@ import {
   useSidebarChatActions,
   useSidebarChats,
 } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatProvider"
-import { SidebarCollapsibleSection } from "@/patterns/Navigation/Sidebar/CollapsibleSection"
 import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
 import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
 import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
@@ -45,6 +41,7 @@ import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
 import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
 import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
+import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
@@ -1123,13 +1120,6 @@ const homeMenuTree: MenuCategory[] = [
  * PageHeader `hideOneSwitch`).                                                *
  * -------------------------------------------------------------------------- */
 
-// Ghost button styled like `SidebarChatList`'s top actions, so the One tab's
-// New chat / Settings sit in one consistent stack.
-const oneActionClass = cn(
-  "flex w-full cursor-pointer items-center gap-1.5 rounded py-1.5 pl-1.5 pr-2 text-left font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary",
-  focusRing("focus-visible:ring-inset")
-)
-
 const OneHistoryTab = () => {
   const { fetchThreads, deleteThread, loadThread, clear, currentThreadId } =
     useMockAiChatRuntime()
@@ -1168,93 +1158,74 @@ const OneHistoryTab = () => {
     onDelete: removeThread,
   }
 
-  const [search, setSearch] = useState("")
-  const isSearching = search.trim().length > 0
-
-  // Fuzzy-filter by chat title, then split into the two groups. A group with no
-  // matches drops out entirely (its title disappears too).
-  const filtered = threads.filter((t) => fuzzyMatch(search, t.title))
-  const pinned = filtered.filter((t) => pinnedIds.has(t.id))
-  const conversations = filtered.filter((t) => !pinnedIds.has(t.id))
-  const noResults = isSearching && filtered.length === 0
-
   // A thread stays highlighted while it's the conversation shown in the (AI)
   // panel — i.e. the panel is open with no custom comms content over it.
   const activeThreadId = open && !panelContent ? currentThreadId : null
 
-  // Render the threads with the sidebar's chat-row paddings (same as the Chat
-  // tab) instead of the dialog's, so the One tab matches the rest of the sidebar.
-  const renderThreads = (items: typeof threads, pinnedGroup: boolean) =>
-    items.map((thread) => (
+  // Render a thread with the sidebar's chat-row paddings (same as the Chat tab)
+  // instead of the dialog's, so the One tab matches the rest of the sidebar.
+  const toItem = (thread: (typeof threads)[number], pinnedGroup: boolean) => ({
+    id: thread.id,
+    searchText: thread.title,
+    content: (
       <ThreadItem
-        key={thread.id}
         thread={thread}
         isPinned={pinnedGroup}
         isActive={thread.id === activeThreadId}
         className="gap-2 rounded pl-1.5 pr-2 hover:bg-f1-background-secondary"
         {...handlers}
       />
-    ))
+    ),
+  })
+
+  // Two groups: pinned, then everything else. Empty groups are dropped by the
+  // panel, so both can be passed unconditionally.
+  const pinned = threads.filter((t) => pinnedIds.has(t.id))
+  const conversations = threads.filter((t) => !pinnedIds.has(t.id))
 
   return (
-    <div className="flex w-full flex-col gap-4 px-3">
-      {/* Search sits between the actions and the chat history, filtering by
-          title. It stays put even while the history is still loading. */}
-      <F0SearchInput
-        value={search}
-        onChange={setSearch}
-        clearable
-        placeholder="Search chats"
-      />
-      {/* New chat + Settings as one action stack. Settings opens the AI
-          credits/settings popover (its trigger styled to match). */}
-      <div className="flex flex-col gap-0.5">
-        <button
-          type="button"
-          className={oneActionClass}
-          onClick={() => {
+    <SidebarTabPanel
+      searchPlaceholder="Search chats"
+      loading={isLoading}
+      skeleton={<ThreadListSkeleton />}
+      noResultsLabel="No chats found"
+      groups={[
+        {
+          id: "pinned",
+          title: "Pinned",
+          items: pinned.map((t) => toItem(t, true)),
+        },
+        {
+          id: "conversations",
+          title: "Conversations",
+          items: conversations.map((t) => toItem(t, false)),
+        },
+      ]}
+      // New chat + Settings as one action stack. Both use the panel's standard
+      // ghost button; Settings just wraps it as the credits popover trigger.
+      actions={[
+        {
+          label: "New AI chat",
+          icon: New,
+          onClick: () => {
             clearPanelContent()
             clear()
             setOpen(true)
-          }}
-        >
-          <F0Icon icon={New} size="md" className="text-f1-icon" />
-          <span className="line-clamp-1">New AI chat</span>
-        </button>
-        <F0AiChatCreditsButton
-          credits={credits}
-          employeeCredits={employeeCredits}
-          trigger={
-            <button type="button" className={oneActionClass}>
-              <F0Icon icon={Sliders} size="md" className="text-f1-icon" />
-              <span className="line-clamp-1">Settings</span>
-            </button>
-          }
-        />
-      </div>
-
-      {isLoading && threads.length === 0 ? (
-        <ThreadListSkeleton />
-      ) : (
-        <>
-          {noResults && (
-            <p className="px-1.5 py-2 text-sm text-f1-foreground-secondary">
-              No chats found
-            </p>
-          )}
-          {pinned.length > 0 && (
-            <SidebarCollapsibleSection title="Pinned">
-              {renderThreads(pinned, true)}
-            </SidebarCollapsibleSection>
-          )}
-          {conversations.length > 0 && (
-            <SidebarCollapsibleSection title="Conversations">
-              {renderThreads(conversations, false)}
-            </SidebarCollapsibleSection>
-          )}
-        </>
-      )}
-    </div>
+          },
+        },
+        {
+          label: "Settings",
+          icon: Sliders,
+          render: (trigger) => (
+            <F0AiChatCreditsButton
+              credits={credits}
+              employeeCredits={employeeCredits}
+              trigger={trigger}
+            />
+          ),
+        },
+      ]}
+    />
   )
 }
 

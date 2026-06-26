@@ -126,7 +126,7 @@ export const SidebarTabs = ({
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.tabs.label}
-        className="flex w-full flex-row justify-between gap-1 rounded-lg bg-f1-background-tertiary p-1"
+        className="flex w-full flex-row justify-between gap-1 rounded-lg bg-f1-background-secondary p-1"
       >
         <LayoutGroup>
           {tabs.map((tab) => (

@@ -401,13 +401,14 @@ describe("SidebarChatList", () => {
   })
 
   describe("search", () => {
-    it("shows the search box only when there are chats", () => {
-      render(
+    it("always shows the search box at the top, even with no chats", () => {
+      const { unmount } = render(
         <SidebarChatProvider initialGroups={[]}>
           <SidebarChatList />
         </SidebarChatProvider>
       )
-      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+      unmount()
 
       renderList()
       expect(screen.getByRole("searchbox")).toBeInTheDocument()
