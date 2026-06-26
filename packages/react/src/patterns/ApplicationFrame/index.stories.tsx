@@ -974,7 +974,7 @@ const homeMenuTree: MenuCategory[] = [
     isRoot: true,
     isSortable: false,
     items: [
-      { label: "Home", icon: Icons.Home, href: "/", exactMatch: true },
+      { label: "Dashboard", icon: Icons.Hub, href: "/", exactMatch: true },
       {
         label: "Communications",
         icon: Icons.Megaphone,
@@ -1303,7 +1303,7 @@ const ConversationsSidebarInner = ({
                 icon: Comment,
                 badge: unreadChatsCount || undefined,
               },
-              { id: "one", label: "One", icon: One },
+              { id: "one", label: "One", icon: One, variant: "ai" },
             ]}
             activeTab={tab}
             onTabChange={setTab}

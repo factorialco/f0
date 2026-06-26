@@ -1,11 +1,11 @@
 import { LayoutGroup, motion } from "motion/react"
+import { useEffect, useState } from "react"
 
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
-
 const UnreadDot = () => {
   return (
     <div className="absolute -right-2 -top-1 flex h-3 w-3 items-center justify-center rounded-full">
@@ -20,6 +20,12 @@ export type SidebarTab = {
   icon: IconType
   /** Unread counter shown next to the tab. */
   badge?: number
+  /**
+   * Visual variant. "ai" renders the tab as an AI-variant button — the animated
+   * gradient shimmer on hover — e.g. the "One" tab. Defaults to the plain ghost
+   * tab (transparent background; the icon darkens on hover).
+   */
+  variant?: "default" | "ai"
 }
 
 export type SidebarTabsProps = {
@@ -51,6 +57,23 @@ const TabButton = ({
     ? { duration: 0 }
     : { type: "spring" as const, duration: 0.35, bounce: 0 }
 
+  // An "ai" tab (e.g. One) shows the signature gradient aura behind its pill
+  // when active — otherwise it behaves like any other ghost tab.
+  const isAi = tab.variant === "ai"
+
+  // Show the aura instantly (no fade) once active, but only after the sliding
+  // pill has settled, so it never flashes mid-transition. Hidden immediately
+  // when the tab deactivates.
+  const [showAura, setShowAura] = useState(false)
+  useEffect(() => {
+    if (!(isAi && isActive)) {
+      setShowAura(false)
+      return
+    }
+    const timer = setTimeout(() => setShowAura(true), reduceMotion ? 0 : 350)
+    return () => clearTimeout(timer)
+  }, [isAi, isActive, reduceMotion])
+
   return (
     <button
       type="button"
@@ -68,6 +91,23 @@ const TabButton = ({
         !isActive && "hover:bg-transparent hover:shadow-none"
       )}
     >
+      {/* AI aura for an "ai" tab (e.g. One): a blurred, slowly-rotating conic
+          gradient with an inner background mask so it reads as a glowing ring.
+          Toggled (no fade) so it appears/disappears directly — shown only once
+          the pill has settled (see `showAura`) so it never flashes mid-transition.
+          The slower spin comes from the inline animation-duration (keyframe is 2s). */}
+      {showAura && (
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded"
+        >
+          <span
+            style={{ animationDuration: "8s" }}
+            className="absolute inset-0 animate-rotate-gradient rounded bg-[conic-gradient(from_var(--gradient-angle),hsla(229,57%,76%,0.7),hsla(348,80%,50%,0.7),hsla(348,80%,50%,0.7),hsla(18,80%,50%,0.7),hsla(229,57%,76%,0.7),hsla(229,57%,76%,0.7))] opacity-80 blur-sm [--gradient-angle:0deg]"
+          />
+          <span className="absolute inset-0 rounded bg-f1-background" />
+        </span>
+      )}
       {/* The sliding active background — one element shared across tabs. */}
       {isActive && (
         <motion.span
@@ -89,7 +129,7 @@ const TabButton = ({
           <F0Icon icon={tab.icon} size="md" color="currentColor" />
           {/* The unread dot shows on an inactive tab (hover only darkens the
               icon now, so the dot no longer needs to hide). */}
-          {tab.badge && !isActive ? <UnreadDot /> : null}
+          {tab.badge && !isActive && <UnreadDot />}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
