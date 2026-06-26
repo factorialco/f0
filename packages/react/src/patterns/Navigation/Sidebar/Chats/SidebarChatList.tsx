@@ -1,7 +1,11 @@
 import { AnimatePresence, motion } from "motion/react"
+import { useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { useReducedMotion } from "@/lib/a11y"
+import { fuzzyMatch } from "@/lib/fuzzyMatch"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { SidebarCollapsibleSection } from "../CollapsibleSection"
@@ -66,6 +70,8 @@ export const SidebarChatList = ({
 }) => {
   const { groups, activeChatId, setActiveChat } = useSidebarChats()
   const shouldReduceMotion = useReducedMotion()
+  const i18n = useI18n()
+  const [search, setSearch] = useState("")
 
   const hasChats = groups.some((group) => group.chats.length > 0)
   const empty = { ...DEFAULT_EMPTY_STATE, ...emptyState }
@@ -73,8 +79,29 @@ export const SidebarChatList = ({
   // state (which means "you have no conversations").
   const showSkeleton = loading && !hasChats
 
+  // Fuzzy-filter each group by chat name, then drop groups left with no
+  // matches so their title disappears too. An empty query keeps everything.
+  const filteredGroups = groups
+    .map((group) => ({
+      ...group,
+      chats: group.chats.filter((chat) => fuzzyMatch(search, chat.label)),
+    }))
+    .filter((group) => group.chats.length > 0)
+
+  const isSearching = search.trim().length > 0
+  const noResults = isSearching && filteredGroups.length === 0
+
   return (
     <div className="flex w-full flex-col gap-4 bg-transparent px-3">
+      {/* Search sits between the actions and the chat groups, filtering by name. */}
+      {!showSkeleton && hasChats && (
+        <F0SearchInput
+          value={search}
+          onChange={setSearch}
+          clearable
+          placeholder={i18n.chat.searchPlaceholder}
+        />
+      )}
       {actions.length > 0 && (
         <div className="flex flex-col gap-0.5">
           {actions.map((action) => (
@@ -82,6 +109,7 @@ export const SidebarChatList = ({
           ))}
         </div>
       )}
+
       {showSkeleton && <SidebarChatListSkeleton />}
       {!showSkeleton && !hasChats && (
         <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
@@ -94,17 +122,24 @@ export const SidebarChatList = ({
           </p>
         </div>
       )}
+      {noResults && (
+        <p className="px-1.5 py-2 text-base text-f1-foreground-secondary">
+          {i18n.chat.noResults}
+        </p>
+      )}
       {!showSkeleton &&
-        groups.map((group) => {
+        filteredGroups.map((group) => {
           const totalUnread = group.chats.reduce(
             (sum, c) => sum + (c.unreadCount ?? 0),
             0
           )
           return (
             <SidebarCollapsibleSection
-              key={group.id}
+              // Remount only when search toggles on/off (not per keystroke) so
+              // a collapsed group opens to reveal its matches while searching.
+              key={`${group.id}-${isSearching}`}
               title={group.title}
-              isOpen={group.isOpen}
+              isOpen={isSearching ? true : group.isOpen}
               // Slack-style: when collapsed with unread chats, emphasise the title
               // and surface the group's total unread count as a badge.
               highlightWhenCollapsed={totalUnread > 0}

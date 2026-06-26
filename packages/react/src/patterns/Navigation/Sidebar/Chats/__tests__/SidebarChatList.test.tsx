@@ -399,4 +399,60 @@ describe("SidebarChatList", () => {
       ).not.toBeInTheDocument()
     })
   })
+
+  describe("search", () => {
+    it("shows the search box only when there are chats", () => {
+      render(
+        <SidebarChatProvider initialGroups={[]}>
+          <SidebarChatList />
+        </SidebarChatProvider>
+      )
+      expect(screen.queryByRole("searchbox")).not.toBeInTheDocument()
+
+      renderList()
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+    })
+
+    it("fuzzy-filters chats by name and hides groups left with no matches", async () => {
+      renderList()
+      await userEvent.type(screen.getByRole("searchbox"), "roger")
+
+      // Only the matching chat survives.
+      expect(
+        await screen.findByRole("button", { name: "Roger Campos" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /Raúl Sigüenza Sánchez/ })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "General" })
+      ).not.toBeInTheDocument()
+
+      // The "Groups" group has no matches, so its title disappears too; the
+      // group that still has a match keeps its title.
+      expect(screen.queryByText("Groups")).not.toBeInTheDocument()
+      expect(screen.getByText("Direct messages")).toBeInTheDocument()
+    })
+
+    it("matches non-contiguously and ignores accents", async () => {
+      renderList()
+      // "raul" (no accent) matches "Raúl Sigüenza Sánchez".
+      await userEvent.type(screen.getByRole("searchbox"), "raul")
+      expect(
+        await screen.findByRole("button", { name: /Raúl Sigüenza Sánchez/ })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Roger Campos" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("shows a no-results message when nothing matches", async () => {
+      renderList()
+      await userEvent.type(screen.getByRole("searchbox"), "zzz")
+
+      expect(await screen.findByText("No chats found")).toBeInTheDocument()
+      expect(screen.queryByText("Direct messages")).not.toBeInTheDocument()
+      expect(screen.queryByText("Groups")).not.toBeInTheDocument()
+    })
+  })
 })

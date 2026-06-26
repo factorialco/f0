@@ -5,9 +5,9 @@ import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import One from "@/icons/ai/One"
-import Communities from "@/icons/modules/Communities"
 import {
   ChartVerticalBars,
   Home,
@@ -21,9 +21,11 @@ import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
+import Communities from "@/icons/modules/Communities"
 import { F0Box } from "@/lib/F0Box"
-import { cn, focusRing } from "@/lib/utils"
+import { fuzzyMatch } from "@/lib/fuzzyMatch"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { cn, focusRing } from "@/lib/utils"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -33,13 +35,13 @@ import {
   useSidebarChatActions,
   useSidebarChats,
 } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatProvider"
+import { SidebarCollapsibleSection } from "@/patterns/Navigation/Sidebar/CollapsibleSection"
 import { SidebarFooter } from "@/patterns/Navigation/Sidebar/Footer"
 import * as SidebarFooterStories from "@/patterns/Navigation/Sidebar/Footer/index.stories"
 import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
 import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
-import { SidebarCollapsibleSection } from "@/patterns/Navigation/Sidebar/CollapsibleSection"
 import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
 import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
@@ -1166,9 +1168,15 @@ const OneHistoryTab = () => {
     onDelete: removeThread,
   }
 
-  // Two groups only: pinned, then everything else.
-  const pinned = threads.filter((t) => pinnedIds.has(t.id))
-  const conversations = threads.filter((t) => !pinnedIds.has(t.id))
+  const [search, setSearch] = useState("")
+  const isSearching = search.trim().length > 0
+
+  // Fuzzy-filter by chat title, then split into the two groups. A group with no
+  // matches drops out entirely (its title disappears too).
+  const filtered = threads.filter((t) => fuzzyMatch(search, t.title))
+  const pinned = filtered.filter((t) => pinnedIds.has(t.id))
+  const conversations = filtered.filter((t) => !pinnedIds.has(t.id))
+  const noResults = isSearching && filtered.length === 0
 
   // A thread stays highlighted while it's the conversation shown in the (AI)
   // panel — i.e. the panel is open with no custom comms content over it.
@@ -1190,6 +1198,14 @@ const OneHistoryTab = () => {
 
   return (
     <div className="flex w-full flex-col gap-4 px-3">
+      {/* Search sits between the actions and the chat history, filtering by
+          title. It stays put even while the history is still loading. */}
+      <F0SearchInput
+        value={search}
+        onChange={setSearch}
+        clearable
+        placeholder="Search chats"
+      />
       {/* New chat + Settings as one action stack. Settings opens the AI
           credits/settings popover (its trigger styled to match). */}
       <div className="flex flex-col gap-0.5">
@@ -1216,18 +1232,26 @@ const OneHistoryTab = () => {
           }
         />
       </div>
+
       {isLoading && threads.length === 0 ? (
         <ThreadListSkeleton />
       ) : (
         <>
+          {noResults && (
+            <p className="px-1.5 py-2 text-sm text-f1-foreground-secondary">
+              No chats found
+            </p>
+          )}
           {pinned.length > 0 && (
             <SidebarCollapsibleSection title="Pinned">
               {renderThreads(pinned, true)}
             </SidebarCollapsibleSection>
           )}
-          <SidebarCollapsibleSection title="Conversations">
-            {renderThreads(conversations, false)}
-          </SidebarCollapsibleSection>
+          {conversations.length > 0 && (
+            <SidebarCollapsibleSection title="Conversations">
+              {renderThreads(conversations, false)}
+            </SidebarCollapsibleSection>
+          )}
         </>
       )}
     </div>

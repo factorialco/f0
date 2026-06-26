@@ -475,6 +475,7 @@ export const defaultTranslations = {
     placeholder: "Write something here..",
     searchPlaceholder: "Search messages",
     closeSearch: "Close search",
+    noResults: "No chats found",
     backToLatest: "Jump to latest",
     muted: "Muted",
     attachFile: "Attach file",

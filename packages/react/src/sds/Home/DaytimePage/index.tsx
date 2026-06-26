@@ -43,6 +43,11 @@ export interface DaytimePageProps extends VariantProps<
     onPulseClick?: ComponentProps<typeof F0AvatarPulse>["onPulseClick"]
   }
   embedded?: boolean
+  /**
+   * Hides the One AI toggle in the header. Use when One is reached elsewhere
+   * (e.g. a sidebar tab) so the home header doesn't show a redundant switch.
+   */
+  hideOneSwitch?: boolean
 }
 
 function _DaytimePage({
@@ -50,6 +55,7 @@ function _DaytimePage({
   header,
   period,
   embedded = false,
+  hideOneSwitch = false,
 }: DaytimePageProps) {
   const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
 
@@ -124,7 +130,7 @@ function _DaytimePage({
             </div>
           </div>
           <div>
-            <F0OneSwitch />
+            {!hideOneSwitch && <F0OneSwitch />}
             <OnePromotionSwitch />
           </div>
         </div>

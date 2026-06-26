@@ -15,9 +15,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
+import type { F0AiChatHeaderProps } from "./types"
+
 import { CreditsPopover } from "./components/CreditsPopover"
 import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
-import type { F0AiChatHeaderProps } from "./types"
 
 /**
  * Picks the right credits popover to render based on which prop the host
@@ -110,7 +111,7 @@ export const F0AiChatHeader = ({
   if (compact) {
     return (
       <header
-        className={cn("flex items-center justify-between gap-3 px-4 py-3")}
+        className={cn("flex items-center justify-between gap-3 pr-4 pl-5 py-3")}
       >
         <OneEllipsis
           lines={1}
