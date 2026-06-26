@@ -15,12 +15,12 @@ import {
   Pencil,
   Search,
   Sliders,
+  Comment,
 } from "@/icons/app"
 import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
-import Communities from "@/icons/modules/Communities"
 import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
@@ -1300,7 +1300,7 @@ const ConversationsSidebarInner = ({
               {
                 id: "messages",
                 label: "Chat",
-                icon: Communities,
+                icon: Comment,
                 badge: unreadChatsCount || undefined,
               },
               { id: "one", label: "One", icon: One },

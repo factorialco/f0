@@ -8,7 +8,7 @@ import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 
 const UnreadDot = () => {
   return (
-    <div className="absolute -right-2.5 -top-1.5 flex h-3 w-3 items-center justify-center rounded-full">
+    <div className="absolute -right-2 -top-1 flex h-3 w-3 items-center justify-center rounded-full">
       <span className="h-2 w-2 rounded-full bg-f1-background-critical-bold" />
     </div>
   )
@@ -63,7 +63,9 @@ const TabButton = ({
         isActive ? "shrink-0" : "flex-1",
         actionVariants({ variant: "ghost" }),
         buttonSizeVariants({ size: "md" }),
-        focusRing()
+        focusRing(),
+        // Inactive tabs: no hover background — only the icon darkens (below).
+        !isActive && "hover:bg-transparent hover:shadow-none"
       )}
     >
       {/* The sliding active background — one element shared across tabs. */}
@@ -76,15 +78,18 @@ const TabButton = ({
         />
       )}
       <div className="main flex h-8 min-w-0 items-center justify-center">
-        <span className="relative flex items-center">
-          <F0Icon icon={tab.icon} size="md" color="default" />
-          {/* The unread dot shows only on an inactive, non-hovered tab; it
-              hugs the icon and hides on hover (and when active). */}
-          {tab.badge && !isActive ? (
-            <span className="group-hover:hidden">
-              <UnreadDot />
-            </span>
-          ) : null}
+        {/* Icon inherits the span's colour (F0Icon ignores a passed className),
+            so an inactive tab only darkens its icon on hover — no background. */}
+        <span
+          className={cn(
+            "relative flex items-center text-f1-icon transition-colors",
+            !isActive && "group-hover:text-f1-icon-bold"
+          )}
+        >
+          <F0Icon icon={tab.icon} size="md" color="currentColor" />
+          {/* The unread dot shows on an inactive tab (hover only darkens the
+              icon now, so the dot no longer needs to hide). */}
+          {tab.badge && !isActive ? <UnreadDot /> : null}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
@@ -122,11 +127,11 @@ export const SidebarTabs = ({
   const i18n = useI18n()
 
   return (
-    <div className="mb-4 flex items-stretch justify-between px-2">
+    <div className="mb-4 flex items-stretch justify-between px-3">
       <div
         role="group"
         aria-label={i18n.navigation.sidebar.tabs.label}
-        className="flex w-full flex-row justify-between gap-1 rounded-lg bg-f1-background-secondary p-1"
+        className="flex w-full flex-row justify-between gap-0 rounded bg-f1-background-secondary p-0"
       >
         <LayoutGroup>
           {tabs.map((tab) => (
