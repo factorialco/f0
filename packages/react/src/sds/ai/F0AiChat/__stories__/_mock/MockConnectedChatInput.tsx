@@ -17,7 +17,13 @@ import { filterNonRenderableMessages } from "./turn-utils"
  * to `mock.sendMessage()`. Mirrors factorial's production wrapper.
  */
 export const MockConnectedChatInput = () => {
-  const { messages, inProgress, sendMessage } = useMockAiChatRuntime()
+  const {
+    messages,
+    inProgress,
+    sendMessage,
+    isLoadingThread,
+    currentThreadTitle,
+  } = useMockAiChatRuntime()
   const {
     placeholders,
     entityRefs,
@@ -51,7 +57,12 @@ export const MockConnectedChatInput = () => {
     () => filterNonRenderableMessages(messages),
     [messages]
   )
-  const isWelcomeScreen = filteredMessages.length === 0
+  // The welcome screen (suggestions + footer, centred textarea) is only for a
+  // brand-new chat. When a thread is loading or already loaded from history,
+  // render the started-conversation layout (textarea at the bottom, no
+  // suggestions/footer) — including in fullscreen.
+  const isWelcomeScreen =
+    filteredMessages.length === 0 && !isLoadingThread && !currentThreadTitle
   const fullscreen = visualizationMode === "fullscreen"
 
   const handleSubmit = useCallback(

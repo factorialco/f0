@@ -5,20 +5,24 @@ import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
+import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
+import One from "@/icons/ai/One"
+import Communities from "@/icons/modules/Communities"
 import {
   ChartVerticalBars,
-  Comment,
   Home,
   Lightbulb,
   New,
   Pencil,
   Search,
+  Sliders,
 } from "@/icons/app"
 import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
 import { F0Box } from "@/lib/F0Box"
+import { cn, focusRing } from "@/lib/utils"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
@@ -35,15 +39,11 @@ import { SidebarHeader } from "@/patterns/Navigation/Sidebar/Header"
 import * as SidebarHeaderStories from "@/patterns/Navigation/Sidebar/Header/index.stories"
 import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
 import { TabbedSidebar } from "@/patterns/Navigation/Sidebar/index.stories"
+import { SidebarCollapsibleSection } from "@/patterns/Navigation/Sidebar/CollapsibleSection"
 import { Menu, type MenuCategory } from "@/patterns/Navigation/Sidebar/Menu"
+import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
-import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
-import {
-  MockChatAppProvider,
-  useConversationRuntime,
-  useMockChatGroups,
-} from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
@@ -61,6 +61,18 @@ import {
   type UploadedFile,
   type VacancyProfile,
 } from "@/sds/ai/F0AiChat/types"
+import { F0AiChatCreditsButton } from "@/sds/ai/F0AiChatHeader"
+import {
+  ThreadItem,
+  ThreadListSkeleton,
+  useChatHistory,
+} from "@/sds/ai/F0AiChatHistory"
+import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
+import {
+  MockChatAppProvider,
+  useConversationRuntime,
+  useMockChatGroups,
+} from "@/sds/chat/F0Chat/mocks/MockChatApp"
 import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
@@ -709,6 +721,19 @@ const withMockChatSlots = (
 ): ComponentProps<typeof ApplicationFrame>["ai"] =>
   ai ? { ...ai, ...mockChatSlots } : ai
 
+// Communications mode hides the per-page One switch (One is reached from the
+// sidebar tab), so the page header opts out via `hideOneSwitch`.
+const communicationsPageHeader = (
+  <PageHeader
+    module={{
+      id: "time-tracking",
+      name: "Time Tracking",
+      href: "/time-tracking",
+    }}
+    hideOneSwitch
+  />
+)
+
 const DefaultStoryComponent = (
   args: ComponentProps<typeof ApplicationFrame>
 ) => {
@@ -730,34 +755,27 @@ export const Default: Story = {
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <ApplicationFrame
-          ai={{ ...withMockChatSlots(args.ai), side: "left" }}
+          // Communications mode: the sidebar owns chat navigation (history, new
+          // chat) and the credits/settings popover, so the in-chat history is
+          // off and the header stays compact (expand + close only). The page
+          // header's One switch is hidden too — One is reached from the sidebar.
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
           aiPromotion={args.aiPromotion}
           sidebar={<ConversationsSidebar />}
         >
-          <Page {...PageStories.Default.args} />
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // Home tab: the Menu renders links carrying test attributes.
-    const link = canvas.getByRole("link", { name: /inbox/i })
-    await expect(link.dataset.test).toBe("foo")
-
-    // Messages tab: picking a conversation swaps the side panel to that
-    // conversation — the AI chat space now hosts arbitrary content, one at
-    // a time.
-    await userEvent.click(canvas.getByRole("button", { name: "Messages" }))
-    await userEvent.click(
-      canvas.getByRole("button", { name: /Marcus Bennett/i })
-    )
-    // The mocked conversation mounts in the panel: its composer is present.
-    await expect(
-      await canvas.findByPlaceholderText(/write something here/i)
-    ).toBeInTheDocument()
-  },
 }
 
 export const WithAiPromotion: Story = {
@@ -1091,19 +1109,144 @@ const homeMenuTree: MenuCategory[] = [
   },
 ]
 
+/* -------------------------------------------------------------------------- *
+ * "One" sidebar tab — AI chat history                                         *
+ *                                                                            *
+ * Reference UX for the factorial integration: communications users get a     *
+ * third "One" tab with a New Chat + Settings action stack and the AI chat     *
+ * history. The history reuses the F0AiChatHistory rows (title + date + a      *
+ * three-dots menu to pin / delete), grouped into just two sections — Pinned   *
+ * and Conversations. Selecting a thread clears any open communications panel  *
+ * and loads that conversation. The per-page One toggle is gone (see           *
+ * PageHeader `hideOneSwitch`).                                                *
+ * -------------------------------------------------------------------------- */
+
+// Ghost button styled like `SidebarChatList`'s top actions, so the One tab's
+// New chat / Settings sit in one consistent stack.
+const oneActionClass = cn(
+  "flex w-full cursor-pointer items-center gap-1.5 rounded py-1.5 pl-1.5 pr-2 text-left font-medium text-f1-foreground transition-colors hover:bg-f1-background-secondary",
+  focusRing("focus-visible:ring-inset")
+)
+
+const OneHistoryTab = () => {
+  const { fetchThreads, deleteThread, loadThread, clear, currentThreadId } =
+    useMockAiChatRuntime()
+  const {
+    clearPanelContent,
+    setOpen,
+    open,
+    panelContent,
+    credits,
+    employeeCredits,
+  } = useAiChat()
+  const {
+    threads,
+    isLoading,
+    pinnedIds,
+    pinThread,
+    unpinThread,
+    deleteThread: removeThread,
+  } = useChatHistory({ enabled: true, fetchThreads, deleteThread })
+
+  // Opening a thread loads that conversation into the (shared) side panel —
+  // exactly like the in-chat history — but here we stay in the One tab.
+  const openThread = useCallback(
+    (id: string, title: string) => {
+      clearPanelContent()
+      loadThread(id, title)
+      setOpen(true)
+    },
+    [clearPanelContent, loadThread, setOpen]
+  )
+
+  const handlers = {
+    onSelect: openThread,
+    onPin: pinThread,
+    onUnpin: unpinThread,
+    onDelete: removeThread,
+  }
+
+  // Two groups only: pinned, then everything else.
+  const pinned = threads.filter((t) => pinnedIds.has(t.id))
+  const conversations = threads.filter((t) => !pinnedIds.has(t.id))
+
+  // A thread stays highlighted while it's the conversation shown in the (AI)
+  // panel — i.e. the panel is open with no custom comms content over it.
+  const activeThreadId = open && !panelContent ? currentThreadId : null
+
+  // Render the threads with the sidebar's chat-row paddings (same as the Chat
+  // tab) instead of the dialog's, so the One tab matches the rest of the sidebar.
+  const renderThreads = (items: typeof threads, pinnedGroup: boolean) =>
+    items.map((thread) => (
+      <ThreadItem
+        key={thread.id}
+        thread={thread}
+        isPinned={pinnedGroup}
+        isActive={thread.id === activeThreadId}
+        className="gap-2 rounded pl-1.5 pr-2 hover:bg-f1-background-secondary"
+        {...handlers}
+      />
+    ))
+
+  return (
+    <div className="flex w-full flex-col gap-4 px-3">
+      {/* New chat + Settings as one action stack. Settings opens the AI
+          credits/settings popover (its trigger styled to match). */}
+      <div className="flex flex-col gap-0.5">
+        <button
+          type="button"
+          className={oneActionClass}
+          onClick={() => {
+            clearPanelContent()
+            clear()
+            setOpen(true)
+          }}
+        >
+          <F0Icon icon={New} size="md" className="text-f1-icon" />
+          <span className="line-clamp-1">New AI chat</span>
+        </button>
+        <F0AiChatCreditsButton
+          credits={credits}
+          employeeCredits={employeeCredits}
+          trigger={
+            <button type="button" className={oneActionClass}>
+              <F0Icon icon={Sliders} size="md" className="text-f1-icon" />
+              <span className="line-clamp-1">Settings</span>
+            </button>
+          }
+        />
+      </div>
+      {isLoading && threads.length === 0 ? (
+        <ThreadListSkeleton />
+      ) : (
+        <>
+          {pinned.length > 0 && (
+            <SidebarCollapsibleSection title="Pinned">
+              {renderThreads(pinned, true)}
+            </SidebarCollapsibleSection>
+          )}
+          <SidebarCollapsibleSection title="Conversations">
+            {renderThreads(conversations, false)}
+          </SidebarCollapsibleSection>
+        </>
+      )}
+    </div>
+  )
+}
+
 /**
  * Tabbed sidebar (mirrors `TabbedSidebar`) whose "Messages" conversations swap
- * the side-panel content. It lives inside the `F0AiChatProvider` that
- * `ApplicationFrame` mounts, so it can call `useAiChat()` directly. "Ask AI"
- * clears the custom content and falls back to the real chat.
+ * the side-panel content, plus a "One" tab hosting the AI chat history grouped
+ * by day. It lives inside the `F0AiChatProvider` that `ApplicationFrame`
+ * mounts, so it can call `useAiChat()` directly. "Ask AI" clears the custom
+ * content and falls back to the real chat.
  */
 const ConversationsSidebarInner = () => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState("home")
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
-  const { setPanelContent, clearPanelContent, setOpen, open, panelContent } =
-    useAiChat()
+  const { setPanelContent, open, panelContent } = useAiChat()
 
   // Clicking a conversation mounts it in the side panel (one at a time).
   const onSelect = useCallback(
@@ -1144,32 +1287,27 @@ const ConversationsSidebarInner = () => {
               { id: "home", label: "Home", icon: Home },
               {
                 id: "messages",
-                label: "Messages",
-                icon: Comment,
+                label: "Chat",
+                icon: Communities,
                 badge: unreadChatsCount || undefined,
               },
+              { id: "one", label: "One", icon: One },
             ]}
             activeTab={tab}
             onTabChange={setTab}
-            search={{ placeholder: "Search..." }}
           />
+          {/* Search lives with the tabs in the (fixed) header so it stays put
+              while the body scrolls. Only the Home tab uses it. */}
+          {tab === "home" && (
+            <SearchBar placeholder="Search..." onClick={() => {}} />
+          )}
         </>
       }
       body={
         tab === "messages" ? (
-          <SidebarChatList
-            actions={[
-              {
-                label: "Ask AI",
-                icon: New,
-                onClick: () => {
-                  clearPanelContent()
-                  setOpen(true)
-                },
-              },
-              ...exampleActions,
-            ]}
-          />
+          <SidebarChatList actions={exampleActions} />
+        ) : tab === "one" ? (
+          <OneHistoryTab />
         ) : (
           <Menu tree={homeMenuTree} />
         )
@@ -1182,7 +1320,8 @@ const ConversationsSidebarInner = () => {
 /**
  * Wraps the tabbed sidebar in a chat store whose conversations, when clicked,
  * mount in the same resizable + fullscreen panel the AI chat uses — one
- * content at a time. Used by the `Default` story.
+ * content at a time. Used by the `Default` and `CommunicationsWithOneTab`
+ * stories.
  */
 const ConversationsSidebar = () => {
   return (
@@ -1190,4 +1329,59 @@ const ConversationsSidebar = () => {
       <ConversationsSidebarInner />
     </SidebarChatProvider>
   )
+}
+
+/**
+ * The full target experience for communications users: the tabbed sidebar
+ * (`ConversationsSidebar`) now includes a third **One** tab that hosts the AI
+ * chat history grouped by day + a New Chat action, with the AI panel docked
+ * left. There is no per-page One toggle — One is reached from this tab
+ * (`PageHeader hideOneSwitch`). Messages still swap the shared side panel to the
+ * selected conversation.
+ */
+export const CommunicationsWithOneTab: Story = {
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
+          // Communications mode: the sidebar owns chat navigation (history, new
+          // chat) and the credits/settings popover, so the in-chat history is
+          // off and the header stays compact (expand + close only). The page
+          // header's One switch is hidden too — One is reached from the sidebar.
+          ai={{
+            ...withMockChatSlots(args.ai),
+            side: "left",
+            historyEnabled: false,
+            chatHeader: <MockConnectedChatHeader compact />,
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar />}
+        >
+          <Page
+            {...PageStories.Default.args}
+            header={communicationsPageHeader}
+          />
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    // Open the One tab → New Chat action + the history grouped into just
+    // Pinned / Conversations (threads load async).
+    await userEvent.click(canvas.getByRole("button", { name: "One" }))
+    await expect(
+      canvas.getByRole("button", { name: /New AI chat/i })
+    ).toBeInTheDocument()
+    await expect(await canvas.findByText("Conversations")).toBeInTheDocument()
+
+    // Selecting a thread loads that conversation in the side panel.
+    await userEvent.click(
+      await canvas.findByText(/Pending time-off requests summary/i)
+    )
+    await expect(
+      await canvas.findByText(/within your permissions/i)
+    ).toBeInTheDocument()
+  },
 }

@@ -1,6 +1,5 @@
-import { type ReactNode } from "react"
-
 import { motion } from "motion/react"
+import { type ReactNode } from "react"
 
 import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
@@ -103,7 +102,7 @@ export const ChatTypingBubble = ({
             />
           </span>
         ))}
-      <div className="w-fit rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4 items-center justify-center flex">
+      <div className="flex w-fit items-center justify-center rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4">
         <Dots animate={!reducedMotion} />
       </div>
     </motion.div>

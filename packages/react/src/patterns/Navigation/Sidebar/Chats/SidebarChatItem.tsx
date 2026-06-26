@@ -1,4 +1,6 @@
 import { F0Avatar } from "@/components/avatars/F0Avatar"
+import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Icon } from "@/components/F0Icon/F0Icon"
 import { PushPin, PushPinSolid } from "@/icons/app"
 import { EmojiImage } from "@/lib/emojis"
 import { OneEllipsis } from "@/lib/OneEllipsis"
@@ -8,11 +10,10 @@ import { cn, focusRing } from "@/lib/utils"
 import { SidebarChatItemSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChat, SidebarChatPresence } from "./types"
 import { UnreadBadge } from "./UnreadBadge"
-import { F0Icon } from "@/components/F0Icon/F0Icon"
 
 const Dots = () => (
   <span
-    className="flex items-center gap-0.5 w-5 h-5 justify-center"
+    className="flex h-5 w-5 items-center justify-center gap-0.5"
     aria-hidden="true"
   >
     {[0, 1, 2].map((i) => (
@@ -34,7 +35,7 @@ const PresenceDot = ({
 }) => {
   if (presence === "offline") return null
   return (
-    <div className="bg-f1-background absolute -bottom-1 -right-1 w-3 h-3 flex items-center justify-center rounded-full">
+    <div className="absolute -bottom-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-f1-background">
       <span
         aria-hidden="true"
         className={cn(
@@ -72,12 +73,12 @@ export const SidebarChatItem = ({
   const isUnread = Boolean(chat.unreadCount)
 
   // People always show a presence state (defaulting to offline); companies and
-  // groups only show one if explicitly set.
+  // groups only show one if explicitly set. Avatar-less rows have no presence.
   const presence =
-    chat.presence ?? (chat.avatar.type === "person" ? "offline" : undefined)
+    chat.presence ?? (chat.avatar?.type === "person" ? "offline" : undefined)
 
   // Status — people only; the consumer provides the emoji/icon + label.
-  const status = chat.avatar.type === "person" ? chat.status : undefined
+  const status = chat.avatar?.type === "person" ? chat.status : undefined
 
   return (
     <div className="group/row relative">
@@ -95,7 +96,7 @@ export const SidebarChatItem = ({
       >
         {chat.typing ? (
           <Dots />
-        ) : (
+        ) : chat.avatar ? (
           <div className="relative flex flex-shrink-0 items-center">
             {chat.avatar.type === "emoji" ? (
               // Emoji groups show the glyph alone (no avatar chrome) so it isn't
@@ -110,7 +111,7 @@ export const SidebarChatItem = ({
               <PresenceDot presence={presence} isActive={isActive} />
             )}
           </div>
-        )}
+        ) : null}
 
         <OneEllipsis
           tag="span"
@@ -118,7 +119,11 @@ export const SidebarChatItem = ({
             "line-clamp-1 flex-1 py-0.5",
             isUnread
               ? "text-f1-foreground font-semibold"
-              : "text-f1-foreground-secondary font-medium"
+              : // Avatar-less rows (e.g. AI chat history) read as primary text;
+                // real conversations stay muted until they have unread messages.
+                chat.avatar
+                ? "text-f1-foreground-secondary font-medium"
+                : "text-f1-foreground font-medium"
           )}
           lines={1}
         >
@@ -133,7 +138,7 @@ export const SidebarChatItem = ({
             )}
           >
             {status && (
-              <div className="w-5 h-5 flex items-center justify-center">
+              <div className="flex h-5 w-5 items-center justify-center">
                 <F0Icon
                   icon={status.icon}
                   size="sm"
@@ -150,23 +155,24 @@ export const SidebarChatItem = ({
           badge / status is — a sibling of the row button so it isn't a nested
           <button>. */}
       {chat.onTogglePin && (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation()
-            chat.onTogglePin?.()
-          }}
-          aria-label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
-          aria-pressed={chat.pinned}
+        <div
           className={cn(
-            "absolute right-2 top-1/2 flex size-5 -translate-y-1/2 items-center justify-center rounded",
-            "text-f1-foreground-secondary hover:text-f1-foreground",
-            "opacity-0 group-hover/row:opacity-100 focus-visible:opacity-100",
-            focusRing()
+            "absolute right-1.5 top-1/2 -translate-y-1/2",
+            "opacity-0 transition-opacity group-hover/row:opacity-100 focus-within:opacity-100"
           )}
         >
-          <F0Icon icon={chat.pinned ? PushPinSolid : PushPin} size="sm" />
-        </button>
+          <ButtonInternal
+            variant="neutral"
+            size="sm"
+            hideLabel
+            label={chat.pinned ? i18n.chat.unpin : i18n.chat.pin}
+            icon={chat.pinned ? PushPinSolid : PushPin}
+            onClick={(event) => {
+              event.stopPropagation()
+              chat.onTogglePin?.()
+            }}
+          />
+        </div>
       )}
     </div>
   )

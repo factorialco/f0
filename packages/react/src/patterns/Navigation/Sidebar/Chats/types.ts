@@ -26,8 +26,11 @@ export type SidebarChatAction = {
 export type SidebarChat = {
   id: string
   label: string
-  /** Person / team / company avatar (F0Avatar variant). */
-  avatar: AvatarVariant
+  /**
+   * Person / team / company avatar (F0Avatar variant). Optional: omit it for
+   * avatar-less rows (e.g. an AI chat history that shows titles only).
+   */
+  avatar?: AvatarVariant
   /**
    * When true, the row renders as a skeleton (avatar + name placeholders) but
    * keeps its position. Use it for the "cascade" case: the conversation is
