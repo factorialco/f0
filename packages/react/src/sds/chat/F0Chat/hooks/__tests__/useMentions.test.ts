@@ -119,4 +119,24 @@ describe("useMentions", () => {
     expect(payload.mentionedEveryone).toBe(true)
     expect(payload.mentions).toEqual([{ id: "ana-g", name: "Ana García" }])
   })
+
+  it("seedMentions rehydrates tracked mentions when editing a message", async () => {
+    const { result } = renderHook((p: Props) => useMentions(p), {
+      initialProps: makeProps({
+        inputValue: "Hey @Ana García ",
+        cursorPosition: 16,
+      }),
+    })
+    act(() =>
+      result.current.seedMentions([{ id: "ana-g", name: "Ana García" }])
+    )
+    // The seeded mention survives (its `@name ` token is present in the body)
+    // and resolves through getMentions, ready to re-send on save.
+    await waitFor(() =>
+      expect(result.current.getMentions()).toEqual({
+        mentions: [{ id: "ana-g", name: "Ana García" }],
+        mentionedEveryone: false,
+      })
+    )
+  })
 })

@@ -148,6 +148,117 @@ describe("F0Chat", () => {
     ).toBeInTheDocument()
   })
 
+  it("edits my message from its actions menu, prefilling the composer", async () => {
+    const editMessage = vi.fn()
+    renderChat(makeRuntime({ editMessage, editWindowMs: 60_000 }))
+    // m2 (the second message) is mine.
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    // The composer is prefilled with the message body and shows the editing chip.
+    const input = screen.getByPlaceholderText(/write something here/i)
+    expect(input).toHaveValue("Hi back")
+    expect(screen.getByText(/editing/i)).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /cancel edit/i })
+    ).toBeInTheDocument()
+    // Amend and save → editMessage fires with the message id and new body.
+    await userEvent.type(input, " again")
+    await userEvent.click(screen.getByRole("button", { name: /^Save$/i }))
+    expect(editMessage).toHaveBeenCalledWith(
+      "m2",
+      expect.objectContaining({ body: "Hi back again" })
+    )
+  })
+
+  it("cancels an edit, clearing the composer", async () => {
+    renderChat(makeRuntime({ editMessage: vi.fn(), editWindowMs: 60_000 }))
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    await userEvent.click(screen.getByRole("button", { name: /^Edit$/i }))
+    const input = screen.getByPlaceholderText(/write something here/i)
+    expect(input).toHaveValue("Hi back")
+    await userEvent.click(screen.getByRole("button", { name: /cancel edit/i }))
+    expect(input).toHaveValue("")
+    expect(screen.queryByText(/editing/i)).not.toBeInTheDocument()
+  })
+
+  it("offers no Edit action when the host doesn't provide editMessage", async () => {
+    renderChat(makeRuntime())
+    const menus = screen.getAllByRole("button", { name: /message actions/i })
+    await userEvent.click(menus[1])
+    expect(
+      screen.queryByRole("button", { name: /^Edit$/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("hides Edit once a message is older than the edit window", async () => {
+    const old = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    renderChat(
+      makeRuntime({
+        editMessage: vi.fn(),
+        editWindowMs: 5 * 60 * 1000,
+        messages: [
+          {
+            id: "m-old",
+            author: { id: "me", name: "Me" },
+            body: "old one",
+            createdAt: old,
+            isMine: true,
+            status: "read",
+          },
+        ],
+      })
+    )
+    await userEvent.click(
+      screen.getByRole("button", { name: /message actions/i })
+    )
+    expect(
+      screen.queryByRole("button", { name: /^Edit$/i })
+    ).not.toBeInTheDocument()
+  })
+
+  it("renders the muted 'edited' marker on an edited message", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "e1",
+            author: { id: "me", name: "Me" },
+            body: "fixed a typo",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            editedAt: now,
+          },
+        ],
+      })
+    )
+    expect(screen.getByText("edited")).toBeInTheDocument()
+  })
+
+  it("shows 'edited' on an edited attachment-only message (no text bubble)", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          {
+            id: "a-edit",
+            author: { id: "me", name: "Me" },
+            body: "",
+            createdAt: now,
+            isMine: true,
+            status: "read",
+            editedAt: now,
+            attachments: [
+              { kind: "image", url: "blob:img", name: "photo.png" },
+            ],
+          },
+        ],
+      })
+    )
+    expect(screen.getByText("edited")).toBeInTheDocument()
+  })
+
   it("renders a tombstone for deleted messages (no actions)", () => {
     renderChat(
       makeRuntime({

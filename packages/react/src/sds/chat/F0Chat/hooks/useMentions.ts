@@ -74,6 +74,9 @@ export type UseMentionsReturn = {
   selectCandidate: (candidate: MentionCandidate) => void
   /** Resolve the mentions/everyone payload to attach when sending. */
   getMentions: () => MentionPayload
+  /** Replace the tracked mentions wholesale — used to rehydrate an existing
+   * message's mentions when it's reloaded into the composer for editing. */
+  seedMentions: (entries: MentionEntry[]) => void
   /** Close the popover. */
   close: () => void
 }
@@ -421,6 +424,10 @@ export function useMentions({
     return { mentions: users, mentionedEveryone }
   }, [mentions])
 
+  const seedMentions = useCallback((entries: MentionEntry[]) => {
+    setMentions(entries)
+  }, [])
+
   // Drop mentions the user has edited away (deleted, or backspaced into,
   // removing the trailing separator) so the trigger can fire again.
   useEffect(() => {
@@ -474,6 +481,7 @@ export function useMentions({
     handleKeyDown,
     selectCandidate,
     getMentions,
+    seedMentions,
     close,
   }
 }

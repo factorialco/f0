@@ -146,6 +146,13 @@ export type F0ChatMessage = {
    * unsend window). Hard-deleted messages are removed from `messages` entirely.
    */
   deleted?: boolean
+  /**
+   * When the message text was last edited (ISO). Presence drives the muted
+   * "edited" label after the body (WhatsApp-style). factorial → Stream's
+   * `message_text_updated_at`, which is set only on a text edit (not on
+   * reactions/read updates), so it never false-positives the label.
+   */
+  editedAt?: string
 }
 
 export type F0ChatSendInput = {
@@ -157,6 +164,20 @@ export type F0ChatSendInput = {
   mentions?: F0ChatMention[]
   /** Whether the message mentions the whole group (`@here`). The host fans this
    * out to every member so they all get notified. */
+  mentionedEveryone?: boolean
+}
+
+/**
+ * Edits applied to an existing message. Text, mentions and attachments are all
+ * editable; the host maps this to the transport's partial-update (factorial →
+ * Stream `partialUpdateMessage`).
+ */
+export type F0ChatEditInput = {
+  body: string
+  attachments?: F0ChatAttachment[]
+  /** People mentioned in the edited body (groups only). */
+  mentions?: F0ChatMention[]
+  /** Whether the edited message mentions the whole group (`@here`). */
   mentionedEveryone?: boolean
 }
 
@@ -204,6 +225,18 @@ export type F0ChatRuntime = {
   loadOlder: () => void
   toggleReaction: (messageId: string, emoji: string) => void
   deleteMessage: (id: string) => void
+  /**
+   * Edit an existing message (text, mentions, attachments). Omit to disable
+   * editing — the "Edit" action then never shows. factorial →
+   * `client.partialUpdateMessage`.
+   */
+  editMessage?: (id: string, input: F0ChatEditInput) => void
+  /**
+   * How long after sending a message stays editable (ms). The "Edit" action is
+   * hidden once a message is older than this. Omit for no limit (editable
+   * anytime). factorial sets a fixed window (e.g. 15 min).
+   */
+  editWindowMs?: number
   /** Called as the user types so the runtime can emit typing.start/stop. */
   onInputActivity: () => void
   uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>

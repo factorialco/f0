@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from "react"
 
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
@@ -29,6 +30,7 @@ export const ChatMessageItem = ({
   /** Matching invisible spacer so reactions line up under the bubble. */
   belowGutter?: ReactNode
 }): ReactNode => {
+  const i18n = useI18n()
   const [actionsOpen, setActionsOpen] = useState(false)
   const { highlightedId } = useChatHighlightedId()
   const { currentUserId } = useF0Chat()
@@ -100,6 +102,14 @@ export const ChatMessageItem = ({
                   author={author}
                   currentUserId={currentUserId}
                 />
+              )}
+              {/* The bubble anchors the "edited" mark to the body text. An
+                  attachment-only message has no bubble, so surface it here
+                  instead — otherwise an edited media message shows no mark. */}
+              {!hasBubble && message.editedAt && !message.deleted && (
+                <span className="px-1 text-sm text-f1-foreground-tertiary">
+                  {i18n.chat.edited}
+                </span>
               )}
             </div>
             {/* Deleted tombstones have nothing to act on. The menu stays visible

@@ -26,11 +26,20 @@ import {
 import { Skeleton } from "@/ui/skeleton"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
-import { useMentions } from "../hooks/useMentions"
+import {
+  MENTION_EVERYONE_ID,
+  type MentionEntry,
+  useMentions,
+} from "../hooks/useMentions"
 import { useTransientError } from "../hooks/useTransientError"
-import { useChatDrop, useChatReply } from "../providers/ChatUIProvider"
+import {
+  useChatDrop,
+  useChatEdit,
+  useChatReply,
+} from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment } from "../types"
+import { ChatEditChip } from "./ChatEditChip"
 import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
@@ -47,6 +56,7 @@ export const ChatComposer = (): ReactNode => {
   const i18n = useI18n()
   const {
     sendMessage,
+    editMessage,
     onInputActivity,
     uploadFiles,
     transcribe,
@@ -56,6 +66,7 @@ export const ChatComposer = (): ReactNode => {
     currentUserId,
   } = useF0Chat()
   const { replyTo, setReplyTo } = useChatReply()
+  const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
   const shouldReduceMotion = useReducedMotion()
 
@@ -221,12 +232,79 @@ export const ChatComposer = (): ReactNode => {
     registerFileDropHandler((files) => void handleUpload(files))
   }, [registerFileDropHandler, handleUpload])
 
+  const isEditing = editingMessage !== null
+
+  // Cancel an in-progress edit: drop the edit target and reset the composer.
+  const cancelEdit = useCallback(() => {
+    setEditingMessage(null)
+    mentions.close()
+    mentions.seedMentions([])
+    setValue("")
+    setCursorPosition(0)
+    setAttachments([])
+  }, [setEditingMessage, mentions.close, mentions.seedMentions])
+
+  // Entering edit mode reloads the message into the composer — text, existing
+  // attachments (as ready chips) and its mentions — then focuses at the end.
+  useEffect(() => {
+    if (!editingMessage) return
+    setValue(editingMessage.body)
+    setCursorPosition(editingMessage.body.length)
+    setAttachments(
+      (editingMessage.attachments ?? []).map((attachment) => ({
+        id: `att-${attachmentSeq.current++}`,
+        status: "ready" as const,
+        attachment,
+      }))
+    )
+    const entries: MentionEntry[] = [
+      ...(editingMessage.mentions ?? []).map((m) => ({
+        id: m.id,
+        name: m.name,
+        avatar: m.avatar,
+        subtitle: m.subtitle,
+        profileHref: m.profileHref,
+      })),
+      ...(editingMessage.mentionedEveryone && channel.type === "group"
+        ? [{ id: MENTION_EVERYONE_ID, name: i18n.chat.mentionEveryone }]
+        : []),
+    ]
+    mentions.seedMentions(entries)
+    requestAnimationFrame(() => {
+      const node = textareaRef.current
+      if (node) {
+        node.focus()
+        const end = editingMessage.body.length
+        node.setSelectionRange(end, end)
+      }
+    })
+  }, [
+    editingMessage,
+    channel.type,
+    i18n.chat.mentionEveryone,
+    mentions.seedMentions,
+  ])
+
   const handleSend = useCallback(() => {
     if (!canSend) return
     const ready = attachments.flatMap((a) =>
       a.status === "ready" ? [a.attachment] : []
     )
     const { mentions: mentioned, mentionedEveryone } = mentions.getMentions()
+
+    // In edit mode, persist the changes to the existing message instead of
+    // sending a new one, then reset the composer.
+    if (editingMessage && editMessage) {
+      editMessage(editingMessage.id, {
+        body: value.trim(),
+        attachments: ready.length > 0 ? ready : undefined,
+        mentions: mentioned.length > 0 ? mentioned : undefined,
+        mentionedEveryone: mentionedEveryone || undefined,
+      })
+      cancelEdit()
+      return
+    }
+
     sendMessage({
       body: value.trim(),
       attachments: ready.length > 0 ? ready : undefined,
@@ -239,7 +317,18 @@ export const ChatComposer = (): ReactNode => {
     setCursorPosition(0)
     setAttachments([])
     setReplyTo(null)
-  }, [attachments, canSend, mentions, replyTo, sendMessage, setReplyTo, value])
+  }, [
+    attachments,
+    canSend,
+    mentions,
+    replyTo,
+    sendMessage,
+    setReplyTo,
+    value,
+    editingMessage,
+    editMessage,
+    cancelEdit,
+  ])
 
   // Insert a picked emoji at the caret (the textarea keeps its selection while
   // blurred), then restore focus and the caret just after it.
@@ -267,12 +356,18 @@ export const ChatComposer = (): ReactNode => {
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       // The mention popover consumes navigation keys first (↑↓/Enter/Tab/Esc).
       if (mentions.handleKeyDown(e)) return
+      // Escape backs out of an edit (when the popover didn't claim it).
+      if (e.key === "Escape" && isEditing) {
+        e.preventDefault()
+        cancelEdit()
+        return
+      }
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault()
         handleSend()
       }
     },
-    [handleSend, mentions]
+    [handleSend, mentions, isEditing, cancelEdit]
   )
 
   const startRecording = useCallback(() => {
@@ -296,11 +391,17 @@ export const ChatComposer = (): ReactNode => {
             onSelect={mentions.selectCandidate}
             everyoneDescription={i18n.chat.mentionEveryoneDescription}
           />
-          {replyTo && (
-            <ChatReplyChip
-              message={replyTo}
-              onRemove={() => setReplyTo(null)}
-            />
+          {/* Editing and replying are mutually exclusive — the edit chip takes
+              the reply chip's slot while you're editing a message. */}
+          {isEditing && editingMessage ? (
+            <ChatEditChip message={editingMessage} onRemove={cancelEdit} />
+          ) : (
+            replyTo && (
+              <ChatReplyChip
+                message={replyTo}
+                onRemove={() => setReplyTo(null)}
+              />
+            )
           )}
 
           {/* Transient error (too many files, upload/voice failure) — flashed
@@ -461,8 +562,8 @@ export const ChatComposer = (): ReactNode => {
                   variant="default"
                   size="md"
                   hideLabel
-                  label={i18n.actions.send}
-                  icon={ArrowUp}
+                  label={isEditing ? i18n.chat.saveEdit : i18n.actions.send}
+                  icon={isEditing ? Check : ArrowUp}
                   onClick={handleSend}
                   disabled={!canSend}
                 />

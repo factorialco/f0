@@ -14,6 +14,7 @@ export type {
   F0ChatMessageReply,
   F0ChatMention,
   F0ChatSendInput,
+  F0ChatEditInput,
   F0ChatStatus,
   F0ChatSearchResult,
   F0ChatRuntime,

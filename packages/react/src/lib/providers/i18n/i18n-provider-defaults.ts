@@ -523,6 +523,13 @@ export const defaultTranslations = {
     react: "Add reaction",
     download: "Download",
     removeQuote: "Remove quote",
+    // Editing your own message (within the edit window). `editing` heads the
+    // composer chip; `edited` is the muted marker after an edited message body.
+    edit: "Edit",
+    editing: "Editing",
+    edited: "edited",
+    cancelEdit: "Cancel edit",
+    saveEdit: "Save",
     // Shown as the quoted sender's name when the replied-to message is your own.
     you: "You",
     // In-chat image lightbox.

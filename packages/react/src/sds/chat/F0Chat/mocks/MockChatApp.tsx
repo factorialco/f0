@@ -8,6 +8,7 @@ import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types
 
 import {
   type F0ChatAttachment,
+  type F0ChatEditInput,
   type F0ChatRuntime,
   type F0ChatSearchResult,
   type F0ChatSendInput,
@@ -60,6 +61,11 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   )
   const deleteMessage = useCallback(
     (messageId: string) => app.deleteMessage(convId, messageId),
+    [app, convId]
+  )
+  const editMessage = useCallback(
+    (messageId: string, input: F0ChatEditInput) =>
+      app.editMessage(convId, messageId, input),
     [app, convId]
   )
   const loadOlder = useCallback(() => app.loadOlder(convId), [app, convId])
@@ -172,6 +178,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     loadOlder,
     toggleReaction,
     deleteMessage,
+    editMessage,
+    // Generous window so the seeded "mine" messages stay editable in the demo.
+    editWindowMs: 24 * 60 * 60 * 1000,
     onInputActivity: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).

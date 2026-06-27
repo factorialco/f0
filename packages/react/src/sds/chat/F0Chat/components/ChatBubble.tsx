@@ -110,6 +110,13 @@ const ChatBubbleImpl = ({
             </ChatUserHoverCard>
           )}
           {renderedBody}
+          {message.editedAt && (
+            // WhatsApp-style "edited" marker; sits at the end of the body (the
+            // bubble shows no timestamp, so there's no time to pair it with).
+            <span className="ml-1 align-baseline text-sm text-f1-foreground-tertiary">
+              {i18n.chat.edited}
+            </span>
+          )}
         </div>
       </div>
     </div>

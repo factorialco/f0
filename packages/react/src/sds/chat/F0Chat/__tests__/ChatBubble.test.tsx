@@ -42,3 +42,34 @@ describe("ChatBubble emoji rendering", () => {
     expect(imgs.map((i) => i.getAttribute("alt"))).toEqual(["🎉", "🚀", "🔥"])
   })
 })
+
+describe("ChatBubble edited marker", () => {
+  it("shows the muted 'edited' label when the message has been edited", () => {
+    render(
+      <ChatBubble
+        message={{ ...makeMessage("updated text"), editedAt: now }}
+        isMine
+      />
+    )
+    expect(screen.getByText("edited")).toBeInTheDocument()
+  })
+
+  it("does not show 'edited' on an unedited message", () => {
+    render(<ChatBubble message={makeMessage("hello")} isMine={false} />)
+    expect(screen.queryByText("edited")).not.toBeInTheDocument()
+  })
+
+  it("does not show 'edited' on a deleted tombstone", () => {
+    render(
+      <ChatBubble
+        message={{
+          ...makeMessage(""),
+          deleted: true,
+          editedAt: now,
+        }}
+        isMine
+      />
+    )
+    expect(screen.queryByText("edited")).not.toBeInTheDocument()
+  })
+})

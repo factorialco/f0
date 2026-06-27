@@ -8,6 +8,7 @@ import {
   Ellipsis,
   Files,
   AlertCircleLine,
+  Pencil,
   Reply,
   Plus,
 } from "@/icons/app"
@@ -16,7 +17,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import { useChatReply } from "../providers/ChatUIProvider"
+import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
@@ -73,9 +74,20 @@ export const ChatMessageActions = ({
   onOpenChange: (open: boolean) => void
 }): ReactNode => {
   const i18n = useI18n()
-  const { toggleReaction, deleteMessage } = useF0Chat()
+  const { toggleReaction, deleteMessage, editMessage, editWindowMs } =
+    useF0Chat()
   const { setReplyTo } = useChatReply()
+  const { setEditingMessage } = useChatEdit()
   const [view, setView] = useState<"menu" | "info">("menu")
+
+  // Editing is offered on your own, non-deleted messages while the host allows
+  // it (provides `editMessage`) and the message is still within the edit window.
+  // `Date.now()` here is fine: the popover content only mounts when open.
+  const withinEditWindow =
+    editWindowMs == null ||
+    Date.now() - new Date(message.createdAt).getTime() <= editWindowMs
+  const canEdit =
+    isMine && !message.deleted && !!editMessage && withinEditWindow
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next)
@@ -152,7 +164,10 @@ export const ChatMessageActions = ({
               <MenuItem
                 icon={Reply}
                 label={i18n.chat.reply}
-                onClick={runAndClose(() => setReplyTo(message))}
+                onClick={runAndClose(() => {
+                  setEditingMessage(null)
+                  setReplyTo(message)
+                })}
               />
               <MenuItem
                 icon={Files}
@@ -162,15 +177,27 @@ export const ChatMessageActions = ({
                 })}
               />
             </div>
-            {isMine && (
+            {(canEdit || isMine) && (
               <>
                 <div className="h-px bg-f1-border-secondary" />
                 <div className="flex flex-col gap-0 p-1">
-                  <MenuItem
-                    icon={Delete}
-                    label={i18n.actions.delete}
-                    onClick={runAndClose(() => deleteMessage(message.id))}
-                  />
+                  {canEdit && (
+                    <MenuItem
+                      icon={Pencil}
+                      label={i18n.chat.edit}
+                      onClick={runAndClose(() => {
+                        setReplyTo(null)
+                        setEditingMessage(message)
+                      })}
+                    />
+                  )}
+                  {isMine && (
+                    <MenuItem
+                      icon={Delete}
+                      label={i18n.actions.delete}
+                      onClick={runAndClose(() => deleteMessage(message.id))}
+                    />
+                  )}
                 </div>
               </>
             )}

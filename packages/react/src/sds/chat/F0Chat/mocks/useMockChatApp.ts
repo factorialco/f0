@@ -10,7 +10,11 @@ import {
   useState,
 } from "react"
 
-import { type F0ChatMessage, type F0ChatSendInput } from "../types"
+import {
+  type F0ChatEditInput,
+  type F0ChatMessage,
+  type F0ChatSendInput,
+} from "../types"
 import {
   type ConvState,
   ME,
@@ -29,6 +33,11 @@ export type MockChatAppValue = {
   markRead: (convId: string) => void
   toggleReaction: (convId: string, messageId: string, emoji: string) => void
   deleteMessage: (convId: string, messageId: string) => void
+  editMessage: (
+    convId: string,
+    messageId: string,
+    input: F0ChatEditInput
+  ) => void
   loadOlder: (convId: string) => void
   loadingOlder: Record<string, boolean>
   hasMoreOlder: (convId: string) => boolean
@@ -224,6 +233,27 @@ export const useMockChatStore = (): MockChatAppValue => {
     [patch]
   )
 
+  const editMessage = useCallback(
+    (convId: string, messageId: string, input: F0ChatEditInput) => {
+      patch(convId, (s) => ({
+        ...s,
+        messages: s.messages.map((m) =>
+          m.id === messageId
+            ? {
+                ...m,
+                body: input.body,
+                attachments: input.attachments,
+                mentions: input.mentions,
+                mentionedEveryone: input.mentionedEveryone,
+                editedAt: new Date().toISOString(),
+              }
+            : m
+        ),
+      }))
+    },
+    [patch]
+  )
+
   const loadOlder = useCallback(
     (convId: string) => {
       if (loadingOlder[convId] || (olderLeft.current[convId] ?? 0) <= 0) return
@@ -268,6 +298,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       markRead,
       toggleReaction,
       deleteMessage,
+      editMessage,
       loadOlder,
       loadingOlder,
       hasMoreOlder,
@@ -280,6 +311,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       markRead,
       toggleReaction,
       deleteMessage,
+      editMessage,
       loadOlder,
       loadingOlder,
       hasMoreOlder,

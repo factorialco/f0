@@ -44,6 +44,12 @@ type ChatReplyContextValue = {
   setReplyTo: (message: F0ChatMessage | null) => void
 }
 
+type ChatEditContextValue = {
+  /** Message being edited (reloaded into the composer), or null. */
+  editingMessage: F0ChatMessage | null
+  setEditingMessage: (message: F0ChatMessage | null) => void
+}
+
 type ChatDropContextValue = {
   /** The composer registers how to attach dropped files (window-wide drop). */
   registerFileDropHandler: (fn: (files: File[]) => void) => void
@@ -83,6 +89,7 @@ const ChatJumpContext = createContext<ChatJumpContextValue | null>(null)
 const ChatHighlightedIdContext =
   createContext<ChatHighlightedIdContextValue | null>(null)
 const ChatReplyContext = createContext<ChatReplyContextValue | null>(null)
+const ChatEditContext = createContext<ChatEditContextValue | null>(null)
 const ChatDropContext = createContext<ChatDropContextValue | null>(null)
 const ChatImagePreviewContext =
   createContext<ChatImagePreviewContextValue | null>(null)
@@ -97,6 +104,9 @@ export const ChatUIProvider = ({
   const { messages, searchMessages, loadMessageContext } = useF0Chat()
 
   const [replyTo, setReplyTo] = useState<F0ChatMessage | null>(null)
+  const [editingMessage, setEditingMessage] = useState<F0ChatMessage | null>(
+    null
+  )
   const [highlightedId, setHighlightedId] = useState<string | null>(null)
   const scrollFnRef = useRef<((id: string) => void) | null>(null)
   const dropFnRef = useRef<((files: File[]) => void) | null>(null)
@@ -297,6 +307,10 @@ export const ChatUIProvider = ({
     () => ({ replyTo, setReplyTo }),
     [replyTo]
   )
+  const editValue = useMemo<ChatEditContextValue>(
+    () => ({ editingMessage, setEditingMessage }),
+    [editingMessage]
+  )
   const dropValue = useMemo<ChatDropContextValue>(
     () => ({ registerFileDropHandler, dropFiles }),
     [registerFileDropHandler, dropFiles]
@@ -340,13 +354,15 @@ export const ChatUIProvider = ({
     <ChatJumpContext.Provider value={jumpValue}>
       <ChatHighlightedIdContext.Provider value={highlightedIdValue}>
         <ChatReplyContext.Provider value={replyValue}>
-          <ChatDropContext.Provider value={dropValue}>
-            <ChatImagePreviewContext.Provider value={imagePreviewValue}>
-              <ChatSearchContext.Provider value={searchValue}>
-                {children}
-              </ChatSearchContext.Provider>
-            </ChatImagePreviewContext.Provider>
-          </ChatDropContext.Provider>
+          <ChatEditContext.Provider value={editValue}>
+            <ChatDropContext.Provider value={dropValue}>
+              <ChatImagePreviewContext.Provider value={imagePreviewValue}>
+                <ChatSearchContext.Provider value={searchValue}>
+                  {children}
+                </ChatSearchContext.Provider>
+              </ChatImagePreviewContext.Provider>
+            </ChatDropContext.Provider>
+          </ChatEditContext.Provider>
         </ChatReplyContext.Provider>
       </ChatHighlightedIdContext.Provider>
     </ChatJumpContext.Provider>
@@ -374,6 +390,12 @@ export const useChatHighlightedId = (): ChatHighlightedIdContextValue =>
 /** Reply-target state. Consumed by the composer and message actions. */
 export const useChatReply = (): ChatReplyContextValue =>
   useCtx(ChatReplyContext, "useChatReply")
+
+/** Edit-target state. Consumed by the composer and message actions. Editing and
+ * replying are mutually exclusive — the action handlers clear one when setting
+ * the other. */
+export const useChatEdit = (): ChatEditContextValue =>
+  useCtx(ChatEditContext, "useChatEdit")
 
 /** Window-wide file-drop routing. Consumed by the shell and composer. */
 export const useChatDrop = (): ChatDropContextValue =>

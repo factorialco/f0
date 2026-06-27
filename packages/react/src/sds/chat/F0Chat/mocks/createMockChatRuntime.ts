@@ -5,6 +5,7 @@ import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import {
   type F0ChatAttachment,
   type F0ChatChannel,
+  type F0ChatEditInput,
   type F0ChatMessage,
   type F0ChatRuntime,
   type F0ChatSendInput,
@@ -287,6 +288,26 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     })
   }, [])
 
+  // Edit a message in place: replace text/attachments/mentions and stamp
+  // `editedAt` so the bubble shows the "edited" marker (mirrors how Stream's
+  // `message_text_updated_at` drives it in factorial).
+  const editMessage = useCallback((id: string, input: F0ChatEditInput) => {
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === id
+          ? {
+              ...m,
+              body: input.body,
+              attachments: input.attachments,
+              mentions: input.mentions,
+              mentionedEveryone: input.mentionedEveryone,
+              editedAt: new Date().toISOString(),
+            }
+          : m
+      )
+    )
+  }, [])
+
   const uploadFiles = useCallback(
     (files: File[]): Promise<F0ChatAttachment[]> =>
       Promise.resolve(
@@ -346,6 +367,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     loadOlder,
     toggleReaction,
     deleteMessage,
+    editMessage,
+    // Generous window so seeded "mine" messages stay editable in the demo.
+    editWindowMs: 24 * 60 * 60 * 1000,
     onInputActivity: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
