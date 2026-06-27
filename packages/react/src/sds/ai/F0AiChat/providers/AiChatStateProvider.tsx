@@ -141,10 +141,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         if (prev === "canvas" && resolved !== "canvas") {
           setCanvasContent(null)
         }
+        // Fullscreen implies the panel is open. Open here, on the mode change
+        // itself, rather than via an effect on `open`: a reactive effect would
+        // also fire when the panel is *closing* (open → false while the mode is
+        // still "fullscreen"), reopening it as the bare AI chat. Closing must
+        // always close the panel fully, regardless of its content.
+        if (resolved === "fullscreen") {
+          setOpen(true)
+        }
         return resolved
       })
     },
-    [setVisualizationModeRaw]
+    [setVisualizationModeRaw, setOpen]
   )
 
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
@@ -205,12 +213,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
       setShouldPlayEntranceAnimation(!prefersReducedMotion)
     }
   }, [open])
-
-  useEffect(() => {
-    if (visualizationMode === "fullscreen" && !open) {
-      setOpen(true)
-    }
-  }, [visualizationMode, open])
 
   const openCanvas = useCallback(
     (content: CanvasContent) => {

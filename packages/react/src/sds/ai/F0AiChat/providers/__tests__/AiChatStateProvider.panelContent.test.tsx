@@ -51,6 +51,44 @@ describe("AiChatStateProvider panel content", () => {
     expect(result.current.open).toBe(true)
   })
 
+  it("entering fullscreen opens the panel", () => {
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+    expect(result.current.open).toBe(false)
+
+    act(() => {
+      result.current.setVisualizationMode("fullscreen")
+    })
+
+    expect(result.current.open).toBe(true)
+    expect(result.current.visualizationMode).toBe("fullscreen")
+  })
+
+  it("closing a fullscreen panel closes it fully (never reopens as the AI chat)", () => {
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    // Open the AI chat in fullscreen, then mount a conversation over it — the
+    // hosted content inherits fullscreen.
+    act(() => {
+      result.current.setVisualizationMode("fullscreen")
+    })
+    act(() => {
+      result.current.setPanelContent({ id: "conv", content: <div>Conv</div> })
+    })
+    expect(result.current.open).toBe(true)
+    expect(result.current.visualizationMode).toBe("fullscreen")
+
+    // Closing drops the content and shuts the panel. It must stay closed — not
+    // bounce back open as the bare AI chat.
+    act(() => {
+      result.current.clearPanelContent()
+      result.current.setOpen(false)
+    })
+
+    expect(result.current.open).toBe(false)
+    expect(result.current.panelContent).toBeNull()
+    expect(result.current.visualizationMode).toBe("sidepanel")
+  })
+
   it("defaults the panel side to right and lets the host flip it to left", () => {
     const { result } = renderHook(() => useAiChat(), { wrapper })
     expect(result.current.panelSide).toBe("right")

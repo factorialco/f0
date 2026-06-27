@@ -1397,12 +1397,25 @@ export const CommunicationsWithOneTab: Story = {
     ).toBeInTheDocument()
     await expect(await canvas.findByText("Conversations")).toBeInTheDocument()
 
-    // Selecting a thread loads that conversation in the side panel.
-    await userEvent.click(
-      await canvas.findByText(/Pending time-off requests summary/i)
-    )
+    // Selecting a thread loads that conversation in the side panel. Activate the
+    // row via the keyboard — it's a `role="button"`, and a synthetic click on its
+    // truncated, tooltip-wrapped (`OneEllipsis`) title doesn't reliably reach the
+    // row's handler.
+    const row = canvas.getByRole("button", {
+      name: /Pending time-off requests summary/i,
+    })
+    row.focus()
+    await userEvent.keyboard("{Enter}")
+
+    // Assert on the thread's opening user message (loaded after the mock delay,
+    // hence the longer timeout) rather than the chat disclaimer, whose
+    // `OneEllipsis` wrapper makes it brittle to match.
     await expect(
-      await canvas.findByText(/within your permissions/i)
+      await canvas.findByText(
+        /Give me a summary of my pending time-off requests/i,
+        undefined,
+        { timeout: 5000 }
+      )
     ).toBeInTheDocument()
   },
 }
@@ -1466,11 +1479,11 @@ export const CommunicationsWithMentions: Story = {
     await expect(
       await canvas.findByText("Notify everyone in this group")
     ).toBeInTheDocument()
-    // A group member is listed in the popover (scoped so it doesn't collide with
-    // the sender names in the transcript).
+    // The popover lists the group members (scoped to the listbox so it doesn't
+    // collide with the sender names in the transcript). Several match, so assert
+    // at least one rather than a single element.
     const popover = canvas.getByRole("listbox")
-    await expect(
-      await within(popover).findByText(/Grace|Marcus|Sam|Noah/)
-    ).toBeInTheDocument()
+    const members = await within(popover).findAllByText(/Grace|Marcus|Sam|Noah/)
+    await expect(members.length).toBeGreaterThan(0)
   },
 }
