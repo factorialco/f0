@@ -6,7 +6,11 @@ import { expect, within } from "storybook/test"
 import { Comment, Home } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { exampleActions, exampleGroups } from "./Chats/index.stories"
+import {
+  exampleActions,
+  exampleEmptyState,
+  exampleGroups,
+} from "./Chats/index.stories"
 import { SidebarChatList } from "./Chats/SidebarChatList"
 import {
   SidebarChatProvider,
@@ -182,7 +186,10 @@ const TabbedSidebarInner = () => {
       }
       body={
         tab === "messages" ? (
-          <SidebarChatList actions={exampleActions} />
+          <SidebarChatList
+            actions={exampleActions}
+            emptyState={exampleEmptyState}
+          />
         ) : (
           <Menu {...SidebarMenuStories.Default.args} />
         )

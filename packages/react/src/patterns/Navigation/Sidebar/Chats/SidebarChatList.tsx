@@ -1,23 +1,26 @@
 import { useI18n } from "@/lib/providers/i18n"
 
 import { SidebarTabPanel, SidebarTabPanelGroup } from "../TabPanel"
+import {
+  SidebarChatBlankState,
+  type SidebarChatBlankStateAction,
+} from "./SidebarChatBlankState"
 import { SidebarChatItem } from "./SidebarChatItem"
 import { useSidebarChats } from "./SidebarChatProvider"
 import { SidebarChatListSkeleton } from "./SidebarChatSkeleton"
 import { SidebarChatAction } from "./types"
 import { UnreadBadge } from "./UnreadBadge"
 
-/** Copy shown when there are no chats at all. Override via the `emptyState` prop. */
+/**
+ * Copy shown when there are no chats at all. Override via the `emptyState` prop.
+ * Rendered through the shared `OneEmptyState`, so the AI history list and this
+ * one read identically — the host (factorial) just supplies the copy + actions.
+ */
 export type SidebarChatEmptyState = {
-  emoji?: string
-  title?: string
+  title: string
   description?: string
-}
-
-const DEFAULT_EMPTY_STATE: Required<SidebarChatEmptyState> = {
-  emoji: "💬",
-  title: "No chats yet",
-  description: "Start a new conversation to see it here.",
+  /** Optional CTA(s) shown under the copy — e.g. "Start a conversation". */
+  actions?: SidebarChatBlankStateAction[]
 }
 
 /**
@@ -34,7 +37,7 @@ export const SidebarChatList = ({
   /** Ghost actions rendered at the very top (e.g. New chat, New group). */
   actions?: SidebarChatAction[]
   /** Copy for the blank state shown when there are no chats. */
-  emptyState?: SidebarChatEmptyState
+  emptyState: SidebarChatEmptyState
   /**
    * Whole-list loading: the conversations aren't known yet. Renders a generic
    * skeleton instead of the blank state. Once any chats are known, pass them
@@ -77,8 +80,6 @@ export const SidebarChatList = ({
     }
   })
 
-  const empty = { ...DEFAULT_EMPTY_STATE, ...emptyState }
-
   return (
     <SidebarTabPanel
       className="bg-transparent"
@@ -89,15 +90,11 @@ export const SidebarChatList = ({
       skeleton={<SidebarChatListSkeleton />}
       noResultsLabel={i18n.chat.noResults}
       emptyState={
-        <div className="flex flex-col items-center gap-1 px-4 py-10 text-center">
-          <span className="text-3xl" role="img" aria-hidden="true">
-            {empty.emoji}
-          </span>
-          <p className="font-medium text-f1-foreground">{empty.title}</p>
-          <p className="text-sm text-f1-foreground-secondary">
-            {empty.description}
-          </p>
-        </div>
+        <SidebarChatBlankState
+          title={emptyState.title}
+          description={emptyState.description}
+          actions={emptyState.actions}
+        />
       }
     />
   )

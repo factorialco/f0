@@ -43,13 +43,16 @@ const groups: SidebarChatGroup[] = [
   },
 ]
 
+/** Minimal blank-state copy for tests that don't exercise the empty state. */
+const defaultEmptyState = { title: "No chats yet" }
+
 const renderList = (initialActiveChatId?: string) =>
   render(
     <SidebarChatProvider
       initialGroups={groups}
       initialActiveChatId={initialActiveChatId}
     >
-      <SidebarChatList />
+      <SidebarChatList emptyState={defaultEmptyState} />
     </SidebarChatProvider>
   )
 
@@ -57,7 +60,7 @@ describe("SidebarChatList", () => {
   it("shows a blank state when there are no chats", () => {
     render(
       <SidebarChatProvider initialGroups={[]}>
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     expect(screen.getByText("No chats yet")).toBeInTheDocument()
@@ -66,7 +69,7 @@ describe("SidebarChatList", () => {
   it("shows a skeleton (not the blank state) while loading with no chats", () => {
     render(
       <SidebarChatProvider initialGroups={[]}>
-        <SidebarChatList loading />
+        <SidebarChatList emptyState={defaultEmptyState} loading />
       </SidebarChatProvider>
     )
     expect(screen.getByTestId("sidebar-chat-list-skeleton")).toBeInTheDocument()
@@ -76,7 +79,7 @@ describe("SidebarChatList", () => {
   it("ignores the loading flag once chats are known (cascade takes over)", () => {
     render(
       <SidebarChatProvider initialGroups={groups}>
-        <SidebarChatList loading />
+        <SidebarChatList emptyState={defaultEmptyState} loading />
       </SidebarChatProvider>
     )
     expect(
@@ -110,7 +113,7 @@ describe("SidebarChatList", () => {
           },
         ]}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     // The loading chat is a skeleton — no interactive button with its name.
@@ -121,6 +124,25 @@ describe("SidebarChatList", () => {
     expect(
       screen.getByRole("button", { name: "Ready One" })
     ).toBeInTheDocument()
+  })
+
+  it("renders the blank-state CTA and fires its onClick", async () => {
+    const onStart = vi.fn()
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList
+          emptyState={{
+            title: "No conversations yet",
+            actions: [{ label: "Start a conversation", onClick: onStart }],
+          }}
+        />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByText("No conversations yet")).toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole("button", { name: /Start a conversation/i })
+    )
+    expect(onStart).toHaveBeenCalledTimes(1)
   })
 
   it("hides the blank state and lets the consumer override its copy", () => {
@@ -167,7 +189,7 @@ describe("SidebarChatList", () => {
           },
         ]}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     expect(
@@ -182,6 +204,7 @@ describe("SidebarChatList", () => {
     render(
       <SidebarChatProvider initialGroups={groups}>
         <SidebarChatList
+          emptyState={defaultEmptyState}
           actions={[
             { label: "New chat", onClick: onNewChat },
             { label: "New group", onClick: vi.fn() },
@@ -219,7 +242,7 @@ describe("SidebarChatList", () => {
           },
         ]}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     const readBtn = screen.getByRole("button", { name: /Read One/ })
@@ -263,7 +286,7 @@ describe("SidebarChatList", () => {
       <SidebarChatProvider
         initialGroups={unreadGroup.map((g) => ({ ...g, isOpen: false }))}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     // Collapsed: the header surfaces the combined unread (2 + 5).
@@ -275,7 +298,7 @@ describe("SidebarChatList", () => {
       <SidebarChatProvider
         initialGroups={unreadGroup.map((g) => ({ ...g, isOpen: true }))}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     // Expanded: only the per-chat badges show, never the combined total.
@@ -330,7 +353,7 @@ describe("SidebarChatList", () => {
     render(
       <SidebarChatProvider initialGroups={groups}>
         <Pusher />
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
 
@@ -370,7 +393,7 @@ describe("SidebarChatList", () => {
       const onTogglePin = vi.fn()
       render(
         <SidebarChatProvider initialGroups={pinGroups(onTogglePin)}>
-          <SidebarChatList />
+          <SidebarChatList emptyState={defaultEmptyState} />
         </SidebarChatProvider>
       )
 
@@ -386,7 +409,7 @@ describe("SidebarChatList", () => {
     it("labels the button 'Unpin' when the chat is pinned", () => {
       render(
         <SidebarChatProvider initialGroups={pinGroups(vi.fn(), true)}>
-          <SidebarChatList />
+          <SidebarChatList emptyState={defaultEmptyState} />
         </SidebarChatProvider>
       )
       expect(screen.getByRole("button", { name: "Unpin" })).toBeInTheDocument()
@@ -404,7 +427,7 @@ describe("SidebarChatList", () => {
     it("always shows the search box at the top, even with no chats", () => {
       const { unmount } = render(
         <SidebarChatProvider initialGroups={[]}>
-          <SidebarChatList />
+          <SidebarChatList emptyState={defaultEmptyState} />
         </SidebarChatProvider>
       )
       expect(screen.getByRole("searchbox")).toBeInTheDocument()

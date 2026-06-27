@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useCallback, useEffect, useRef, useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -26,6 +25,7 @@ import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
+import { SidebarChatBlankState } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatBlankState"
 import { SidebarChatList } from "@/patterns/Navigation/Sidebar/Chats/SidebarChatList"
 import {
   SidebarChatProvider,
@@ -733,22 +733,6 @@ const communicationsPageHeader = (
   />
 )
 
-const DefaultStoryComponent = (
-  args: ComponentProps<typeof ApplicationFrame>
-) => {
-  return (
-    <MockAiChatRuntimeProvider>
-      <ApplicationFrame
-        ai={withMockChatSlots(args.ai)}
-        aiPromotion={args.aiPromotion}
-        sidebar={<TabbedSidebar />}
-      >
-        <Page {...PageStories.Default.args} />
-      </ApplicationFrame>
-    </MockAiChatRuntimeProvider>
-  )
-}
-
 export const Default: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
@@ -777,51 +761,12 @@ export const Default: Story = {
   ),
 }
 
-export const WithAiPromotion: Story = {
-  render: (args) => <DefaultStoryComponent {...args} />,
-  args: {
-    ai: undefined,
-    aiPromotion: {
-      enabled: true,
-      greeting: "Hey Hellen,",
-      title: "Meet One, your AI agent",
-      description:
-        "One simplifies your daily tasks so you can focus on what really matters. Join the waitlist (open until November 30, 2025) to:",
-      benefits: [
-        {
-          noBoldText: "Get access at",
-          boldText: "no additional cost",
-        },
-        {
-          noBoldText: "Explore key features",
-          boldText: "early",
-        },
-        {
-          noBoldText: "Share feedback and",
-          boldText: "help shape One",
-        },
-      ],
-      actions: [
-        {
-          label: "Join the waitlist",
-          onClick: () => {},
-          buttonType: "gradient",
-          isLoading: false,
-        },
-        {
-          label: "Learn more",
-          onClick: () => {},
-          buttonType: "internal",
-          buttonVariant: "ghost",
-          isLoading: false,
-          icon: ExternalLink,
-        },
-      ],
-    },
-  },
-}
-
-export const FullscreenWithActions: Story = {
+/**
+ * The standalone AI assistant: no communications sidebar, the chat docked on the
+ * right as a resizable side panel, with the full feature set (credits, file
+ * attachments, dictation, entity refs, disclaimer + quick actions footer).
+ */
+export const WithAiAssistant: Story = {
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <ApplicationFrame
@@ -850,8 +795,6 @@ export const FullscreenWithActions: Story = {
         "Ask anything about your people, policies, or payroll",
         "Turn months of data into a one-line answer",
       ],
-      defaultVisualizationMode: "fullscreen",
-      lockVisualizationMode: true,
       footer: <QuickActions />,
       entityRefs: {
         resolvers: {
@@ -898,35 +841,6 @@ export const FullscreenWithActions: Story = {
         text: "One works within your permissions.",
         link: "/permissions",
         linkText: "See more",
-      },
-    },
-  },
-}
-
-/**
- * Demonstrates the employee-only credits popover. Hosts opt in by passing
- * `employeeCredits` to the AI provider; when both `credits` and
- * `employeeCredits` are set, the employee variant wins. Here we only set
- * `employeeCredits` so the focus stays on that variant.
- */
-export const WithEmployeeCredits: Story = {
-  render: (args) => <DefaultStoryComponent {...args} />,
-  args: {
-    ai: {
-      enabled: true,
-      resizable: true,
-      initialMessage: [
-        "Operational work, automated by One",
-        "Ask anything about your company",
-        "Skip the boring part of your job",
-        "Ask anything about your people, policies, or payroll",
-        "Turn months of data into a one-line answer",
-      ],
-      employeeCredits: {
-        fetchUsage: mockFetchEmployeeCreditsUsage,
-        companyName: "Factorial",
-        companyLogoUrl: "/avatars/factorial.png",
-        planName: "Free plan",
       },
     },
   },
@@ -1120,7 +1034,9 @@ const homeMenuTree: MenuCategory[] = [
  * PageHeader `hideOneSwitch`).                                                *
  * -------------------------------------------------------------------------- */
 
-const OneHistoryTab = () => {
+const OneHistoryTab = ({
+  forceEmpty = false,
+}: { forceEmpty?: boolean } = {}) => {
   const { fetchThreads, deleteThread, loadThread, clear, currentThreadId } =
     useMockAiChatRuntime()
   const {
@@ -1131,6 +1047,8 @@ const OneHistoryTab = () => {
     credits,
     employeeCredits,
   } = useAiChat()
+  // Demo-only: an empty history to showcase the blank state.
+  const fetchEmpty = useCallback(async () => [], [])
   const {
     threads,
     isLoading,
@@ -1138,7 +1056,17 @@ const OneHistoryTab = () => {
     pinThread,
     unpinThread,
     deleteThread: removeThread,
-  } = useChatHistory({ enabled: true, fetchThreads, deleteThread })
+  } = useChatHistory({
+    enabled: true,
+    fetchThreads: forceEmpty ? fetchEmpty : fetchThreads,
+    deleteThread,
+  })
+
+  const startNewChat = useCallback(() => {
+    clearPanelContent()
+    clear()
+    setOpen(true)
+  }, [clearPanelContent, clear, setOpen])
 
   // Opening a thread loads that conversation into the (shared) side panel —
   // exactly like the in-chat history — but here we stay in the One tab.
@@ -1189,6 +1117,22 @@ const OneHistoryTab = () => {
       loading={isLoading}
       skeleton={<ThreadListSkeleton />}
       noResultsLabel="No chats found"
+      // Shared blank state (same component as the Messages tab) — shown when
+      // there are no AI conversations yet, with a CTA to start one.
+      emptyState={
+        <SidebarChatBlankState
+          title="No AI conversations yet"
+          description="Ask One anything to start your first conversation."
+          actions={[
+            {
+              label: "Start a conversation",
+              icon: New,
+              variant: "ai",
+              onClick: startNewChat,
+            },
+          ]}
+        />
+      }
       groups={[
         {
           id: "pinned",
@@ -1207,11 +1151,7 @@ const OneHistoryTab = () => {
         {
           label: "New AI chat",
           icon: New,
-          onClick: () => {
-            clearPanelContent()
-            clear()
-            setOpen(true)
-          },
+          onClick: startNewChat,
         },
         {
           label: "Settings",
@@ -1239,10 +1179,13 @@ const OneHistoryTab = () => {
 const ConversationsSidebarInner = ({
   initialTab = "home",
   autoOpenConvId,
+  forceEmpty = false,
 }: {
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
   autoOpenConvId?: string
+  /** Demo-only: render both lists (Messages + One) empty to show the blank states. */
+  forceEmpty?: boolean
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
@@ -1275,8 +1218,8 @@ const ConversationsSidebarInner = ({
   // are live and clear as conversations are read.
   const groups = useMockChatGroups(onSelect)
   useEffect(() => {
-    setGroups(groups)
-  }, [groups, setGroups])
+    setGroups(forceEmpty ? [] : groups)
+  }, [groups, setGroups, forceEmpty])
 
   // A conversation is "selected" only while it's the one on view in the side
   // panel. Opening the AI chat (panelContent cleared) or closing the panel
@@ -1317,9 +1260,16 @@ const ConversationsSidebarInner = ({
       }
       body={
         tab === "messages" ? (
-          <SidebarChatList actions={exampleActions} />
+          <SidebarChatList
+            actions={exampleActions}
+            // Shared blank state with a CTA — shown when there are no chats yet.
+            emptyState={{
+              title: "No conversations yet",
+              description: "Start a chat with a teammate to see it here.",
+            }}
+          />
         ) : tab === "one" ? (
-          <OneHistoryTab />
+          <OneHistoryTab forceEmpty={forceEmpty} />
         ) : (
           <Menu tree={homeMenuTree} />
         )
@@ -1338,99 +1288,33 @@ const ConversationsSidebarInner = ({
 const ConversationsSidebar = ({
   initialTab,
   autoOpenConvId,
+  forceEmpty,
 }: {
   initialTab?: string
   autoOpenConvId?: string
+  forceEmpty?: boolean
 } = {}) => {
   return (
     <SidebarChatProvider>
       <ConversationsSidebarInner
         initialTab={initialTab}
         autoOpenConvId={autoOpenConvId}
+        forceEmpty={forceEmpty}
       />
     </SidebarChatProvider>
   )
 }
 
 /**
- * The full target experience for communications users: the tabbed sidebar
- * (`ConversationsSidebar`) now includes a third **One** tab that hosts the AI
- * chat history grouped by day + a New Chat action, with the AI panel docked
- * left. There is no per-page One toggle — One is reached from this tab
- * (`PageHeader hideOneSwitch`). Messages still swap the shared side panel to the
- * selected conversation.
+ * Both conversation lists **empty**, side by side in the frame. The Messages tab
+ * and the One tab share the same compact blank state (`SidebarChatBlankState`):
+ * title + description + a CTA button, no emoji. The host (factorial) supplies the
+ * copy and the action per surface; F0 owns the layout so the two read
+ * identically. Lands on Messages; the play function also opens One to reveal the
+ * AI blank state.
  */
-export const CommunicationsWithOneTab: Story = {
-  render: (args) => (
-    <MockAiChatRuntimeProvider>
-      <MockChatAppProvider>
-        <ApplicationFrame
-          // Communications mode: the sidebar owns chat navigation (history, new
-          // chat) and the credits/settings popover, so the in-chat history is
-          // off and the header stays compact (expand + close only). The page
-          // header's One switch is hidden too — One is reached from the sidebar.
-          ai={{
-            ...withMockChatSlots(args.ai),
-            side: "left",
-            historyEnabled: false,
-            chatHeader: <MockConnectedChatHeader compact />,
-          }}
-          aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar />}
-        >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
-        </ApplicationFrame>
-      </MockChatAppProvider>
-    </MockAiChatRuntimeProvider>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // Open the One tab → New Chat action + the history grouped into just
-    // Pinned / Conversations (threads load async).
-    await userEvent.click(canvas.getByRole("button", { name: "One" }))
-    await expect(
-      canvas.getByRole("button", { name: /New AI chat/i })
-    ).toBeInTheDocument()
-    await expect(await canvas.findByText("Conversations")).toBeInTheDocument()
-
-    // Selecting a thread loads that conversation in the side panel. Activate the
-    // row via the keyboard — it's a `role="button"`, and a synthetic click on its
-    // truncated, tooltip-wrapped (`OneEllipsis`) title doesn't reliably reach the
-    // row's handler.
-    const row = canvas.getByRole("button", {
-      name: /Pending time-off requests summary/i,
-    })
-    row.focus()
-    await userEvent.keyboard("{Enter}")
-
-    // Assert on the thread's opening user message (loaded after the mock delay,
-    // hence the longer timeout) rather than the chat disclaimer, whose
-    // `OneEllipsis` wrapper makes it brittle to match.
-    await expect(
-      await canvas.findByText(
-        /Give me a summary of my pending time-off requests/i,
-        undefined,
-        { timeout: 5000 }
-      )
-    ).toBeInTheDocument()
-  },
-}
-
-/**
- * Communications **mentions**, end to end in the frame. Lands inside the
- * "Product Team" group with the chat docked left: the transcript shows a
- * mention of you and an `@here` (both with the self-mention emphasis), the
- * sidebar's Chat tab shows the matching `@2` badge, and typing `@` in the
- * composer opens the member popover with `@here` pinned on top — exactly the AI
- * chat's mention UX, but driven by the conversation's members. (DMs show no
- * popover.)
- */
-export const CommunicationsWithMentions: Story = {
-  name: "Communications — mentions",
+export const CommunicationsBlankStates: Story = {
+  name: "Communications — blank states",
   render: (args) => (
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
@@ -1442,12 +1326,7 @@ export const CommunicationsWithMentions: Story = {
             chatHeader: <MockConnectedChatHeader compact />,
           }}
           aiPromotion={args.aiPromotion}
-          sidebar={
-            <ConversationsSidebar
-              initialTab="messages"
-              autoOpenConvId="grp-product"
-            />
-          }
+          sidebar={<ConversationsSidebar initialTab="messages" forceEmpty />}
         >
           <Page
             {...PageStories.Default.args}
@@ -1457,33 +1336,4 @@ export const CommunicationsWithMentions: Story = {
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-
-    // The group auto-opens: the seeded mention messages are on view.
-    await expect(
-      await canvas.findByText(/sign off on the Q1 scope/i)
-    ).toBeInTheDocument()
-    // Both the @you and the @here chips render (self-mention emphasis).
-    await expect(canvas.getByText("@here")).toBeInTheDocument()
-
-    // The sidebar's unread badge for the group is prefixed with `@` (mentions).
-    await expect(
-      await canvas.findByLabelText(/mentions you/i)
-    ).toBeInTheDocument()
-
-    // Typing `@` opens the member popover with `@here` pinned on top.
-    const composer = await canvas.findByPlaceholderText(/write something/i)
-    await userEvent.click(composer)
-    await userEvent.type(composer, "@")
-    await expect(
-      await canvas.findByText("Notify everyone in this group")
-    ).toBeInTheDocument()
-    // The popover lists the group members (scoped to the listbox so it doesn't
-    // collide with the sender names in the transcript). Several match, so assert
-    // at least one rather than a single element.
-    const popover = canvas.getByRole("listbox")
-    const members = await within(popover).findAllByText(/Grace|Marcus|Sam|Noah/)
-    await expect(members.length).toBeGreaterThan(0)
-  },
 }

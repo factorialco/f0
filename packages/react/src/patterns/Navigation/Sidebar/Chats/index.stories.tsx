@@ -6,7 +6,7 @@ import { action } from "storybook/actions"
 import { F0Button } from "@/components/F0Button"
 import { Clock, MicrophoneNegative, New, PalmTree, People } from "@/icons/app"
 
-import { SidebarChatList } from "./SidebarChatList"
+import { SidebarChatList, type SidebarChatEmptyState } from "./SidebarChatList"
 import {
   SidebarChatProvider,
   useSidebarChatActions,
@@ -17,6 +17,19 @@ export const exampleActions: SidebarChatAction[] = [
   { label: "New chat", icon: New, onClick: action("new chat") },
   { label: "New group", icon: People, onClick: action("new group") },
 ]
+
+export const exampleEmptyState: SidebarChatEmptyState = {
+  title: "No conversations yet",
+  description: "Start a chat with a teammate to see it here.",
+  actions: [
+    {
+      label: "Start a conversation",
+      icon: New,
+      variant: "outline",
+      onClick: action("start conversation"),
+    },
+  ],
+}
 
 const person = (firstName: string, lastName: string, src: string) =>
   ({ type: "person", firstName, lastName, src }) as const
@@ -129,6 +142,7 @@ export const exampleGroups: SidebarChatGroup[] = [
 const meta = {
   title: "Navigation/Sidebar/ChatList",
   component: SidebarChatList,
+  args: { emptyState: exampleEmptyState },
   parameters: { layout: "centered" },
   decorators: [
     (Story) => (
@@ -141,7 +155,7 @@ const meta = {
   // These are exported data fixtures reused by other stories, not stories
   // themselves — keep Storybook from rendering them as standalone stories
   // (they'd mount without a SidebarChatProvider and throw).
-  excludeStories: ["exampleActions", "exampleGroups"],
+  excludeStories: ["exampleActions", "exampleGroups", "exampleEmptyState"],
 } satisfies Meta<typeof SidebarChatList>
 
 export default meta
@@ -153,7 +167,10 @@ export const Default: Story = {
       initialGroups={exampleGroups}
       initialActiveChatId="priyanka"
     >
-      <SidebarChatList actions={exampleActions} />
+      <SidebarChatList
+        actions={exampleActions}
+        emptyState={exampleEmptyState}
+      />
     </SidebarChatProvider>
   ),
 }
@@ -162,7 +179,10 @@ export const Default: Story = {
 export const Empty: Story = {
   render: () => (
     <SidebarChatProvider initialGroups={[]}>
-      <SidebarChatList actions={exampleActions} />
+      <SidebarChatList
+        actions={exampleActions}
+        emptyState={exampleEmptyState}
+      />
     </SidebarChatProvider>
   ),
 }
@@ -174,7 +194,11 @@ export const Empty: Story = {
 export const Loading: Story = {
   render: () => (
     <SidebarChatProvider initialGroups={[]}>
-      <SidebarChatList actions={exampleActions} loading />
+      <SidebarChatList
+        actions={exampleActions}
+        emptyState={exampleEmptyState}
+        loading
+      />
     </SidebarChatProvider>
   ),
 }
@@ -195,7 +219,10 @@ export const CascadeLoading: Story = {
         })),
       }))}
     >
-      <SidebarChatList actions={exampleActions} />
+      <SidebarChatList
+        actions={exampleActions}
+        emptyState={exampleEmptyState}
+      />
     </SidebarChatProvider>
   ),
 }
@@ -242,7 +269,10 @@ export const LiveUpdates: Story = {
   render: () => (
     <SidebarChatProvider initialGroups={exampleGroups}>
       <LiveControls />
-      <SidebarChatList actions={exampleActions} />
+      <SidebarChatList
+        actions={exampleActions}
+        emptyState={exampleEmptyState}
+      />
     </SidebarChatProvider>
   ),
 }
@@ -322,7 +352,10 @@ export const PinnedReordering: Story = {
   render: () => (
     <SidebarChatProvider initialGroups={[]}>
       <PinController />
-      <SidebarChatList actions={exampleActions} />
+      <SidebarChatList
+        actions={exampleActions}
+        emptyState={exampleEmptyState}
+      />
     </SidebarChatProvider>
   ),
 }
