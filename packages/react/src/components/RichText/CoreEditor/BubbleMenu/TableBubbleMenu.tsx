@@ -51,6 +51,10 @@ export const TableBubbleMenu = ({
   const translations = useI18n()
   const t = translations.richTextEditor.tableMenu
 
+  // If the table extension isn't loaded there is nothing to control (and the
+  // table commands won't exist on `editor.can()`), so render nothing.
+  if (typeof editor.can().deleteTable !== "function") return null
+
   // Direct quick-access icon buttons, grouped so dividers separate them.
   // Inserts use directional arrows (where the new column/row will go).
   const groups: TableAction[][] = [
