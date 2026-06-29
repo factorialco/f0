@@ -4443,11 +4443,11 @@ const sessionFormSchema = z.object({
     fieldConfig: { options: sessionModalityOptions, columns: "3", title: "Modality" },
   }),
   videoCall: f0FormField(z.string(), {
-    label: "Video call",
+    label: "Where it's hosted",
     section: "format",
     fieldType: "custom",
     customFieldName: "segmented",
-    fieldConfig: { options: videoCallOptions, columns: "2", title: "Video call" },
+    fieldConfig: { options: videoCallOptions, columns: "2", title: "Where it's hosted" },
     renderIf: ({ values }: { values: Record<string, unknown> }) => values.modality === "virtual" || values.modality === "hybrid",
   }),
   meetingLink: f0FormField.text({
@@ -4476,7 +4476,17 @@ const sessionFormSchema = z.object({
     section: "format",
     min: 1,
     max: 100,
-    helpText: "Minimum time a participant must attend to be counted as attended.",
+    helpText: "Percentage of the session a participant must attend to count as attended.",
+    renderIf: ({ values }: { values: Record<string, unknown> }) =>
+      (values.modality === "virtual" || values.modality === "hybrid") && values.videoCall === "factorial",
+  }),
+  attendanceUpsell: f0FormField(z.string().optional(), {
+    label: "Attendance",
+    section: "format",
+    fieldType: "custom",
+    customFieldName: "attendanceUpsell",
+    renderIf: ({ values }: { values: Record<string, unknown> }) =>
+      !((values.modality === "virtual" || values.modality === "hybrid") && values.videoCall === "factorial"),
   }),
   notifications: f0FormField.boolean({
     label: "Send reminders and calendar invites",
@@ -4511,6 +4521,7 @@ const sessionFormDefaultValues = {
   location: "",
   instructors: [],
   minimumAttendance: 75,
+  attendanceUpsell: "",
   notifications: false,
   reminderConfig: "",
   calendarConfig: "",
@@ -4550,6 +4561,14 @@ function SessionFormBody({ onClose, onSave }: { onClose: () => void; onSave: () 
       }
       if (props.customFieldName === "reminderCard") return <SessionReminderCard />
       if (props.customFieldName === "calendarCard") return <SessionCalendarCard />
+      if (props.customFieldName === "attendanceUpsell")
+        return (
+          <F0Alert
+            variant="info"
+            title="Attendance won't be tracked automatically"
+            description="Automatic attendance only works for sessions hosted in Factorial. For this format you'll need to mark attendance manually."
+          />
+        )
       return null
     },
     []
