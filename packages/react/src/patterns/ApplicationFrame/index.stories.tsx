@@ -26,12 +26,14 @@ import {
 import {
   type CandidateProfile,
   type ExpenseProfile,
+  type F0AiChatWelcomeCard,
   type JobPostingProfile,
   type RequisitionProfile,
   type PersonProfile,
   type UploadedFile,
   type VacancyProfile,
 } from "@/sds/ai/F0AiChat/types"
+import { WelcomeScreenCardsRow } from "@/sds/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
@@ -418,6 +420,44 @@ const QuickActions = () => {
   )
 }
 
+const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
+  {
+    icon: Pencil,
+    title: "Empty survey",
+    description: "Start from scratch",
+    message: "Create an empty survey.",
+  },
+  {
+    icon: Marketplace,
+    title: "All templates",
+    description: "Browse pre-made surveys",
+    message: "Show me all the survey templates.",
+  },
+  {
+    icon: ChartVerticalBars,
+    title: "Q4 Employee Satisfaction",
+    description: "Reuse last quarter's survey",
+    message: "Create a Q4 employee satisfaction survey.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Team Effectiveness",
+    description: "Measure how teams work together",
+    message: "Create a team effectiveness survey.",
+  },
+]
+
+const WelcomeCards = () => {
+  const { sendMessage } = useMockAiChatRuntime()
+
+  return (
+    <WelcomeScreenCardsRow
+      cards={WELCOME_CARDS}
+      onCardSelect={(message) => sendMessage(message)}
+    />
+  )
+}
+
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
@@ -430,7 +470,7 @@ const meta: Meta<typeof ApplicationFrame> = {
       historyEnabled: true,
       enabled: true,
       resizable: true,
-      footer: <QuickActions />,
+      footer: <WelcomeCards />,
       onThumbsUp: (message, { threadId, feedback }) => {
         console.log("thumbs up", { message, threadId, feedback })
       },
