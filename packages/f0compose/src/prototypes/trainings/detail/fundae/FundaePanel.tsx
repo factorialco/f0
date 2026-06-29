@@ -141,7 +141,7 @@ export function defaultFin(trainingClass: TrainingClass): FinGrupoData {
 
 // ── Validation ───────────────────────────────────────────────────────────
 
-function isInicioValid(d: InicioGrupoData): boolean {
+export function isInicioValid(d: InicioGrupoData): boolean {
   // Group header
   if (!validateCodigo(d.idAccion)) return false
   if (!validateCodigo(d.idGrupo)) return false
@@ -189,7 +189,7 @@ function isInicioValid(d: InicioGrupoData): boolean {
   return true
 }
 
-function isFinValid(d: FinGrupoData): boolean {
+export function isFinValid(d: FinGrupoData): boolean {
   return Boolean(
     d.fechaFinReal &&
       d.costesDirectos &&

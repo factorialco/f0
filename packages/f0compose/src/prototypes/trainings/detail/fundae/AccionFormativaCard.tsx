@@ -15,6 +15,7 @@ import {
   validateCodigo,
   type Modalidad,
   type PerfilFundae,
+  type PlataformaData,
 } from "./fundaeTypes"
 
 export type AccionFormativaState = {
@@ -27,6 +28,8 @@ export type AccionFormativaState = {
   perfil: PerfilFundae
   objetivos: string
   contenidos: string
+  // Plataforma de teleformación / aula virtual (solo aplica a modalidades online).
+  plataforma: PlataformaData
 }
 
 type Props = {
@@ -68,6 +71,15 @@ export function buildInitialAccionFormativa(
     perfil: "bonificada", // default: only XSD currently supported for fin
     objetivos: training.objectives,
     contenidos: training.description,
+    // Pre-rellenado para que, al cambiar a una modalidad online, el caso se vea
+    // montado (no campos vacíos).
+    plataforma: {
+      cif: "B12345678",
+      razonSocial: "Aula Virtual Formación S.L.",
+      url: "https://campus.formacion.es",
+      usuario: "casa.tarradellas",
+      password: "Ct-2026-aula",
+    },
   }
 }
 

@@ -417,6 +417,15 @@ const F0SelectComponent = forwardRef(function Select<
   // Track whether the user has interacted with the selection
   const hasUserInteracted = useRef(false)
   const isFirstRender = useRef(true)
+  // Dedup de emisión (port del fix de F0Select en origin/main): evita re-emitir
+  // onChange cuando la selección no ha cambiado realmente. Sin esto, al abrir el
+  // select la reconstrucción de `selectedState` en cada render re-dispara el
+  // efecto de emisión y produce un bucle de actualización ("Maximum update depth
+  // exceeded") que tumba la página.
+  const lastEmittedSingleRef = useRef<{ value: string | undefined } | null>(
+    null
+  )
+  const lastEmittedMultiRef = useRef<string | null>(null)
 
   const onItemCheckChange = useCallback(
     (value: string, checked: boolean) => {
@@ -542,6 +551,12 @@ const F0SelectComponent = forwardRef(function Select<
       // Use Set to ensure unique values and prevent duplicates
       setLocalValue(Array.from(new Set(values.map(String))))
 
+      // Guard: solo emite si el conjunto de valores cambió (orden-independiente).
+      const valuesKey = values.map(String).sort().join(" ")
+      if (lastEmittedMultiRef.current === valuesKey) {
+        return
+      }
+      lastEmittedMultiRef.current = valuesKey
       onChange?.(values, originalItems, options)
     } else {
       const selectedItem = checkedItems[0]
@@ -561,6 +576,16 @@ const F0SelectComponent = forwardRef(function Select<
       // Sync localValue with actual selection state (as string for internal comparison)
       setLocalValue(value !== undefined ? [String(value)] : [])
 
+      // Guard: solo emite si el valor seleccionado cambió. Rompe el bucle de
+      // re-emisión que tumbaba la página al abrir el select.
+      const valueKey = value === undefined ? undefined : String(value)
+      if (
+        lastEmittedSingleRef.current !== null &&
+        lastEmittedSingleRef.current.value === valueKey
+      ) {
+        return
+      }
+      lastEmittedSingleRef.current = { value: valueKey }
       onChange?.(value as T, originalItem, option)
     }
   }, [selectedState])

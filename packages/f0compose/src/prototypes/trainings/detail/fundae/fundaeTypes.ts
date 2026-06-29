@@ -2,7 +2,28 @@
 // In production these would come from a backend seed or constant module.
 
 // Group modality per FUNDAE XSD: jornadaPresencial / distanciaTeleformacion / mixta
-export type Modalidad = "presencial" | "teleformacion" | "mixta"
+// + "presencial con aula virtual" (post-COVID).
+export type Modalidad =
+  | "presencial"
+  | "teleformacion"
+  | "mixta"
+  | "presencial_aula_virtual"
+
+// Datos de la plataforma de teleformación / aula virtual (XSD AAFF: cifPlataforma,
+// razonSocialPlataforma, uri, usuario, password). Aplica a modalidades con online.
+export type PlataformaData = {
+  cif: string
+  razonSocial: string
+  url: string
+  usuario: string
+  password: string
+}
+
+// Helpers de modalidad → qué bloques de campos aplican.
+export const modalidadTienePresencial = (m: Modalidad) =>
+  m === "presencial" || m === "mixta" || m === "presencial_aula_virtual"
+export const modalidadTieneOnline = (m: Modalidad) =>
+  m === "teleformacion" || m === "mixta" || m === "presencial_aula_virtual"
 
 // Tipo de documento del centro proveedor (perfil bonificada): NIF/Pasaporte/NIE
 // XSD values: 10 (NIF), 20 (Pasaporte), 60 (NIE).
@@ -174,6 +195,7 @@ export const MODALIDAD_OPTIONS: Option[] = [
   { value: "presencial", label: "Presencial" },
   { value: "teleformacion", label: "Teleformación" },
   { value: "mixta", label: "Mixta" },
+  { value: "presencial_aula_virtual", label: "Presencial con aula virtual" },
 ]
 
 // Tipo de documento del centro proveedor (perfil bonificada)

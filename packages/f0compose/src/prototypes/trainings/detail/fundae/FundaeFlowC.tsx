@@ -2,15 +2,13 @@ import {
   F0Alert,
   F0Box,
   F0Button,
-  F0Checkbox,
-  F0Dialog,
   F0Heading,
-  F0Select,
   F0TagStatus,
   F0Text,
 } from "@factorialco/f0-react"
-import { Input, NumberInput, Textarea } from "@factorialco/f0-react/dist/experimental"
-import { useMemo, useState } from "react"
+import { Download, InfoCircleLine } from "@factorialco/f0-react/icons/app"
+import { Input, NumberInput, Textarea, Tooltip } from "@factorialco/f0-react/dist/experimental"
+import { createContext, Fragment, useContext, useMemo, useState } from "react"
 
 import { participantsForTraining, type Training, type TrainingClass } from "@/fixtures"
 
@@ -26,12 +24,15 @@ import { defaultFin, defaultInicio } from "./FundaePanel"
 import { FundaeParticipantsTable } from "./ParticipantsTable"
 import {
   MODALIDAD_OPTIONS,
+  modalidadTieneOnline,
+  modalidadTienePresencial,
   PERFIL_OPTIONS,
-  perfilLabel,
+  TIPO_DOCUMENTO_CENTRO_OPTIONS,
   type FinGrupoData,
   type InicioGrupoData,
   type Modalidad,
   type PerfilFundae,
+  type TipoDocumentoCentro,
 } from "./fundaeTypes"
 
 type Phase = "alta" | "inicio" | "fin"
@@ -126,26 +127,176 @@ function aptosFor(trainingId: string, cls: TrainingClass): { aptos: number; tota
   return { aptos, total: all.length }
 }
 
-// ── Piezas de presentación (solo componentes f0) ───────────────────────
+// ── Piezas de FORM (siempre editables, patrón f0: label + hint + input) ─────
 
-function Field({ label, value, required }: { label: string; value: string; required?: boolean }) {
-  const missing = required && !value
+// Mensaje de validación f0 para un obligatorio sin rellenar (error, rojo).
+const REQUIRED_ERROR = "Obligatorio para FUNDAE"
+
+// El error rojo de "obligatorio" solo se muestra cuando se ha intentado exportar
+// el paso (validación al enviar, patrón f0), no de entrada.
+const ValidateCtx = createContext(false)
+
+// Etiqueta de campo común (estilo Invoice): label + ⓘ con tooltip f0 para la
+// ayuda, en vez de una línea gris fija debajo del campo.
+function Labeled({
+  label,
+  hint,
+  required,
+  children,
+}: {
+  label: string
+  hint?: string
+  required?: boolean
+  children: React.ReactNode
+}) {
   return (
     <F0Box display="flex" flexDirection="column" gap="xs">
-      <F0Text variant="label" content={label} />
-      {missing ? (
-        <F0Box display="flex"><F0TagStatus text="Falta" variant="warning" /></F0Box>
-      ) : (
-        <F0Text variant="body" content={value || "—"} />
-      )}
+      <F0Box display="flex" alignItems="center" gap="xs">
+        <F0Text variant="label" content={required ? `${label} *` : label} />
+        {hint && (
+          <Tooltip label={hint}>
+            <span className="inline-flex cursor-help text-f1-foreground-secondary">
+              <InfoCircleLine className="h-3.5 w-3.5" />
+            </span>
+          </Tooltip>
+        )}
+      </F0Box>
+      {children}
     </F0Box>
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function EditField({
+  label,
+  hint,
+  value,
+  onChange,
+  required,
+  placeholder,
+}: {
+  label: string
+  hint?: string
+  value: string
+  onChange: (v: string) => void
+  required?: boolean
+  placeholder?: string
+}) {
+  const validate = useContext(ValidateCtx)
   return (
-    <F0Box display="flex" flexDirection="column" gap="md">
-      <F0Heading as="h2" variant="heading" content={title} />
+    <Labeled label={label} hint={hint} required={required}>
+      <Input
+        label={label}
+        hideLabel
+        placeholder={placeholder}
+        value={value}
+        required={required}
+        error={validate && required && !value ? REQUIRED_ERROR : undefined}
+        onChange={(v) => onChange(v ?? "")}
+      />
+    </Labeled>
+  )
+}
+
+function NumField({
+  label,
+  hint,
+  value,
+  onChange,
+  required,
+  units,
+}: {
+  label: string
+  hint?: string
+  value: number | null
+  onChange: (v: number | null) => void
+  required?: boolean
+  units?: string
+}) {
+  const validate = useContext(ValidateCtx)
+  return (
+    <Labeled label={label} hint={hint} required={required}>
+      <NumberInput
+        label={label}
+        hideLabel
+        locale="es-ES"
+        value={value}
+        required={required}
+        units={units}
+        error={validate && required && !value ? REQUIRED_ERROR : undefined}
+        onChange={onChange}
+      />
+    </Labeled>
+  )
+}
+
+// Select NATIVO estilado para imitar al input f0 (label + hint arriba, caja con
+// chevron). F0Select NO se puede usar: al abrirlo entra en bucle ("Maximum
+// update depth exceeded") y tira toda la página. Verificado en este build.
+function SelectField({
+  label,
+  hint,
+  value,
+  options,
+  onChange,
+  required,
+}: {
+  label: string
+  hint?: string
+  value: string
+  options: ReadonlyArray<{ value: string; label: string }>
+  onChange: (v: string) => void
+  required?: boolean
+}) {
+  const validate = useContext(ValidateCtx)
+  const missing = validate && required && !value
+  return (
+    <Labeled label={label} hint={hint} required={required}>
+      <div
+        className={
+          "relative inline-flex h-9 w-full items-center rounded border border-solid bg-f1-background transition-colors " +
+          (missing
+            ? "border-f1-border-critical"
+            : "border-f1-border hover:border-f1-border-hover")
+        }
+      >
+        <select
+          aria-label={label}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-full w-full cursor-pointer appearance-none bg-transparent pl-3 pr-8 text-sm text-f1-foreground focus:outline-none"
+        >
+          {!value && <option value="">Selecciona…</option>}
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="pointer-events-none absolute right-2 h-4 w-4 text-f1-foreground-secondary"
+        >
+          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
+      {missing && (
+        <span className="text-xs text-f1-foreground-critical">{REQUIRED_ERROR}</span>
+      )}
+    </Labeled>
+  )
+}
+
+function Section({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <F0Box display="flex" flexDirection="column" gap="lg">
+      <F0Box display="flex" alignItems="center" justifyContent="between" gap="md">
+        <F0Heading as="h2" variant="heading" content={title} />
+        {action}
+      </F0Box>
       {children}
     </F0Box>
   )
@@ -153,95 +304,10 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 type Step = { key: Phase; n: number; label: string; desc: string; done: boolean; tone: Tone; status: string }
 
-// ── Diálogos de edición ─────────────────────────────────────────────────
-
-function EditFooter({ onCancel, onSave }: { onCancel: () => void; onSave: () => void }) {
-  return (
-    <F0Box display="flex" justifyContent="end" gap="sm" borderTop="default" borderColor="secondary" paddingTop="lg">
-      <F0Button label="Cancelar" variant="outline" onClick={onCancel} />
-      <F0Button label="Guardar" variant="default" onClick={onSave} />
-    </F0Box>
-  )
-}
-
-function FinForm({ data, onCancel, onSave }: { data: FinGrupoData; onCancel: () => void; onSave: (d: FinGrupoData) => void }) {
-  const [draft, setDraft] = useState(data)
-  const num = (k: keyof FinGrupoData) => (draft[k] ? Number(draft[k]) : null)
-  const set = (k: keyof FinGrupoData, v: string) => setDraft({ ...draft, [k]: v })
-  return (
-    <F0Box display="flex" flexDirection="column" gap="xl" maxWidth="96">
-      <Input label="Fecha de fin real" placeholder="DD/MM/AAAA" value={draft.fechaFinReal} onChange={(v) => set("fechaFinReal", v ?? "")} />
-      <F0Box display="grid" columns="3" gap="lg">
-        <NumberInput label="Costes directos (€)" locale="es-ES" value={num("costesDirectos")} onChange={(v) => set("costesDirectos", v == null ? "" : String(v))} />
-        <NumberInput label="Costes indirectos (€)" locale="es-ES" value={num("costesIndirectos")} onChange={(v) => set("costesIndirectos", v == null ? "" : String(v))} />
-        <NumberInput label="Costes salariales (€)" locale="es-ES" value={num("costesSalariales")} onChange={(v) => set("costesSalariales", v == null ? "" : String(v))} />
-      </F0Box>
-      <EditFooter onCancel={onCancel} onSave={() => onSave(draft)} />
-    </F0Box>
-  )
-}
-
-function InicioForm({ data, onCancel, onSave }: { data: InicioGrupoData; onCancel: () => void; onSave: (d: InicioGrupoData) => void }) {
-  const [draft, setDraft] = useState(data)
-  const set = <K extends keyof InicioGrupoData>(k: K, v: InicioGrupoData[K]) => setDraft({ ...draft, [k]: v })
-  return (
-    <F0Box display="flex" flexDirection="column" gap="xl" maxWidth="2xl">
-      <F0Box display="grid" columns="2" gap="lg">
-        <Input label="Código de grupo" value={draft.idGrupo} onChange={(v) => set("idGrupo", v ?? "")} />
-        <Input label="Descripción" value={draft.descripcion} onChange={(v) => set("descripcion", v ?? "")} />
-      </F0Box>
-      <F0Box display="grid" columns="3" gap="lg">
-        <Input label="Fecha de inicio" placeholder="DD/MM/AAAA" value={draft.fechaInicio} onChange={(v) => set("fechaInicio", v ?? "")} />
-        <Input label="Fecha fin prevista" placeholder="DD/MM/AAAA" value={draft.fechaFin} onChange={(v) => set("fechaFin", v ?? "")} />
-        <NumberInput label="Nº participantes" locale="es-ES" value={draft.numeroParticipantes} onChange={(v) => set("numeroParticipantes", v)} />
-      </F0Box>
-      <F0Box display="grid" columns="3" gap="lg">
-        <Input label="Responsable" value={draft.responsable} onChange={(v) => set("responsable", v ?? "")} />
-        <Input label="Teléfono" value={draft.telefonoContacto} onChange={(v) => set("telefonoContacto", v ?? "")} />
-        <F0Select label="Modalidad" value={draft.modalidad} options={MODALIDAD_OPTIONS} onChange={(v: string) => set("modalidad", v as Modalidad)} />
-      </F0Box>
-      <F0Box maxWidth="64">
-        <NumberInput label="Horas totales" locale="es-ES" value={draft.horario.horaTotales} onChange={(v) => set("horario", { ...draft.horario, horaTotales: v })} />
-      </F0Box>
-      <EditFooter onCancel={onCancel} onSave={() => onSave(draft)} />
-    </F0Box>
-  )
-}
-
-function AltaForm({ data, onCancel, onSave }: { data: AccionFormativaState; onCancel: () => void; onSave: (d: AccionFormativaState) => void }) {
-  const [draft, setDraft] = useState(data)
-  const set = <K extends keyof AccionFormativaState>(k: K, v: AccionFormativaState[K]) => setDraft({ ...draft, [k]: v })
-  return (
-    <F0Box display="flex" flexDirection="column" gap="xl" maxWidth="2xl">
-      <Input label="Nombre" value={draft.nombre} onChange={(v) => set("nombre", v ?? "")} />
-      <F0Box display="grid" columns="3" gap="lg">
-        <Input label="Código FUNDAE" value={draft.codigoFundae ?? ""} onChange={(v) => set("codigoFundae", v ?? "")} />
-        <NumberInput label="Horas" locale="es-ES" value={draft.horas} onChange={(v) => set("horas", v)} />
-        <F0Select label="Modalidad" value={draft.modalidad} options={MODALIDAD_OPTIONS} onChange={(v: string) => set("modalidad", v as Modalidad)} />
-      </F0Box>
-      <F0Box maxWidth="64">
-        <F0Select label="Perfil FUNDAE" value={draft.perfil} options={PERFIL_OPTIONS} onChange={(v: string) => set("perfil", v as PerfilFundae)} />
-      </F0Box>
-      <Textarea label="Objetivos" rows={3} value={draft.objetivos} onChange={(v) => set("objetivos", v ?? "")} />
-      <Textarea label="Contenidos" rows={3} value={draft.contenidos} onChange={(v) => set("contenidos", v ?? "")} />
-      <EditFooter onCancel={onCancel} onSave={() => onSave(draft)} />
-    </F0Box>
-  )
-}
-
-
 // ═══════════════════════════════════════════════════════════════════════
-
-// Stepper HORIZONTAL a ancho completo como UNA barra (patrón "consultant
-// profile"): un solo bloque dividido en segmentos iguales que llenan el ancho.
-// Cada segmento mantiene su info (círculo de estado + nombre + descripción +
-// estado), el activo resaltado, separados por divisores. Clicable con hover.
-// (TopSteps eliminado en versión C: los pasos van como header-tabs compactos)
 
 function Flow({ training, af, setAf }: { training: Training; af: AccionFormativaState; setAf: (s: AccionFormativaState) => void }) {
   const classes = training.classes
-  // Opciones del selector MEMOIZADAS: si se recrea el array en cada render,
-  // F0Select entra en bucle ("Maximum update depth exceeded").
   const groupOptions = useMemo(() => classes.map((c) => ({ value: c.id, label: c.name })), [classes])
   const [classId, setClassId] = useState(classes[0]?.id ?? "")
   const cls = useMemo(() => classes.find((c) => c.id === classId), [classes, classId])
@@ -261,7 +327,7 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
           // Cada grupo arranca en una fase distinta, para que cambiar de grupo
           // cambie de verdad la vista (su progreso es independiente).
           const mod = i % 3
-          if (mod === 1) return [c.id, {}] // aún por comunicar el inicio
+          if (mod === 1) return [c.id, {}] // aún por exportar el inicio
           if (mod === 2) return [c.id, { inicioAt, finAt: inicioAt }] // ciclo completo
           return [c.id, inicioAt ? { inicioAt } : {}] // en fase Fin (inicio hecho)
         })
@@ -271,10 +337,10 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   const enFundae = af.enFundae
   const initCom = comBy[classId] ?? {}
   const [active, setActive] = useState<Phase>(!enFundae ? "alta" : !initCom.inicioAt ? "inicio" : "fin")
-  const [confirm, setConfirm] = useState<"inicio" | "fin" | null>(null)
-  const [editing, setEditing] = useState<Phase | null>(null)
-  const [ack, setAck] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  // Pasos (por grupo) en los que ya se ha intentado exportar → se muestran los
+  // errores de obligatorios. Antes de intentar, solo el asterisco.
+  const [validatedSteps, setValidatedSteps] = useState<Record<string, boolean>>({})
 
   if (!cls) return null
 
@@ -290,18 +356,19 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
 
   const setInicio = (d: InicioGrupoData) => setInicioBy((p) => ({ ...p, [cls.id]: d }))
   const setFin = (d: FinGrupoData) => setFinBy((p) => ({ ...p, [cls.id]: d }))
+  const patchInicio = <K extends keyof InicioGrupoData>(k: K, v: InicioGrupoData[K]) => setInicio({ ...inicio, [k]: v })
+  const patchTutor = (id: string, patch: Partial<InicioGrupoData["tutores"][number]>) =>
+    patchInicio("tutores", inicio.tutores.map((x) => (x.id === id ? { ...x, ...patch } : x)))
+  const patchFin = (k: keyof FinGrupoData, v: string) => setFin({ ...fin, [k]: v })
+  const patchAf = <K extends keyof AccionFormativaState>(k: K, v: AccionFormativaState[K]) => setAf({ ...af, [k]: v })
 
   const stamp = () => new Date().toLocaleDateString("es-ES")
-  const goPhase = (p: Phase) => { setToast(null); setEditing(null); setActive(p) }
-  const giveAlta = () => setAf({ ...af, enFundae: true, codigoFundae: af.codigoFundae ?? "00142", fechaAlta: stamp() })
-  const comunicarInicio = () => { setComBy((p) => ({ ...p, [cls.id]: { ...p[cls.id], inicioAt: stamp() } })); setConfirm(null); setToast("Inicio comunicado a FUNDAE."); setActive("fin") }
-  const comunicarFin = () => { setComBy((p) => ({ ...p, [cls.id]: { ...p[cls.id], finAt: stamp() } })); setConfirm(null); setToast("Fin comunicado a FUNDAE.") }
-  const openConfirm = (w: "inicio" | "fin") => { setAck(false); setToast(null); setActive(w); setConfirm(w) }
-  const selectClass = (id: string) => { setClassId(id); setToast(null); setEditing(null); const c = comBy[id] ?? {}; setActive(!enFundae ? "alta" : !c.inicioAt ? "inicio" : "fin") }
+  const goPhase = (p: Phase) => { setToast(null); setActive(p) }
+  const selectClass = (id: string) => { setClassId(id); setToast(null); const c = comBy[id] ?? {}; setActive(!enFundae ? "alta" : !c.inicioAt ? "inicio" : "fin") }
 
   const totalCostes = Number(fin.costesDirectos || 0) + Number(fin.costesIndirectos || 0) + Number(fin.costesSalariales || 0)
   const horas = inicio.horario.horaTotales
-  const rate = moduloHora(inicio.modalidad)
+  const rate = moduloHora(af.modalidad)
   const maxBonif = horas ? rate * horas * aptos : 0
   const exceso = totalCostes > maxBonif ? totalCostes - maxBonif : 0
   const recuperable = Math.min(totalCostes, maxBonif)
@@ -311,133 +378,141 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
   const inicioChecks: Check[] = []
   {
     const datosOk = !!(inicio.idGrupo && inicio.fechaInicio && inicio.fechaFin && inicio.responsable)
-    inicioChecks.push(datosOk ? { ok: true, text: "Datos del grupo completos." } : { ok: false, text: "Faltan datos obligatorios del grupo.", advice: "Edita los datos antes de comunicar." })
-    if (inicioDl) inicioChecks.push(inicioDl.level === "expired" ? { ok: false, warn: true, text: `El plazo venció el ${inicioDl.formattedDeadline}.`, advice: "Puedes comunicar igualmente, pero FUNDAE puede no bonificar." } : { ok: true, text: `En plazo hasta el ${inicioDl.formattedDeadline}.` })
+    inicioChecks.push(datosOk ? { ok: true, text: "Datos del grupo completos." } : { ok: false, text: "Faltan datos obligatorios del grupo." })
+    if (inicioDl) inicioChecks.push(inicioDl.level === "expired" ? { ok: false, warn: true, text: `El plazo venció el ${inicioDl.formattedDeadline}.`, advice: "Puedes exportar igualmente, pero FUNDAE puede no bonificar." } : { ok: true, text: `En plazo hasta el ${inicioDl.formattedDeadline}.` })
   }
   const finChecks: Check[] = []
   {
     const datosOk = !!(fin.fechaFinReal && fin.costesDirectos && fin.costesIndirectos && fin.costesSalariales)
-    finChecks.push(datosOk ? { ok: true, text: "Fecha de fin y costes informados." } : { ok: false, text: "Faltan fecha de fin o algún coste.", advice: "Edita los datos antes de comunicar." })
+    finChecks.push(datosOk ? { ok: true, text: "Fecha de fin y costes informados." } : { ok: false, text: "Faltan fecha de fin o algún coste." })
     if (noAptos > 0) finChecks.push({ ok: false, warn: true, text: `${noAptos} ${noAptos === 1 ? "participante no llega" : "participantes no llegan"} al 75% de asistencia`, advice: `Se bonifican ${aptos} de ${totalParts}.` })
     if (exceso > 0) finChecks.push({ ok: false, warn: true, text: `${eur(exceso)} por encima del módulo bonificable`, advice: `FUNDAE solo bonifica hasta ${eur(maxBonif)}.` })
     else finChecks.push({ ok: true, text: `Costes dentro del módulo bonificable (${eur(maxBonif)}).` })
-    if (finDl) finChecks.push(finDl.level === "expired" ? { ok: false, warn: true, text: `El plazo venció el ${finDl.formattedDeadline}.`, advice: "Puedes comunicar igualmente, pero FUNDAE puede no bonificar." } : { ok: true, text: `En plazo hasta el ${finDl.formattedDeadline}.` })
+    if (finDl) finChecks.push(finDl.level === "expired" ? { ok: false, warn: true, text: `El plazo venció el ${finDl.formattedDeadline}.`, advice: "Puedes exportar igualmente, pero FUNDAE puede no bonificar." } : { ok: true, text: `En plazo hasta el ${finDl.formattedDeadline}.` })
   }
   const inicioRisk = inicioChecks.some((c) => c.warn)
   const finRisk = finChecks.some((c) => c.warn)
 
   const steps: Step[] = [
     { key: "alta", n: 1, label: "Acción formativa", desc: "Da de alta el curso en FUNDAE", done: enFundae, tone: enFundae ? "positive" : "neutral", status: enFundae ? "Dada de alta" : "Pendiente" },
-    { key: "inicio", n: 2, label: "Inicio del grupo", desc: "Comunica el inicio antes del plazo", done: inicioCom, tone: inicioCom ? (inicioRisk ? "warning" : "positive") : deadlineTone(inicioDl) === "neutral" ? "info" : deadlineTone(inicioDl), status: inicioCom ? (inicioRisk ? "Comunicado · en riesgo" : "Comunicado") : "Por comunicar" },
-    { key: "fin", n: 3, label: "Fin del grupo", desc: "Costes y resultado de participantes", done: finCom, tone: finCom ? (finRisk ? "warning" : "positive") : !inicioCom ? "neutral" : "info", status: finCom ? (finRisk ? "Comunicado · en riesgo" : "Comunicado") : !inicioCom ? "Pendiente" : "Por comunicar" },
+    { key: "inicio", n: 2, label: "Inicio del grupo", desc: "Genera el XML de inicio del grupo", done: inicioCom, tone: inicioCom ? (inicioRisk ? "warning" : "positive") : deadlineTone(inicioDl) === "neutral" ? "info" : deadlineTone(inicioDl), status: inicioCom ? (inicioRisk ? "Exportado · en riesgo" : "Exportado") : "Por exportar" },
+    { key: "fin", n: 3, label: "Fin del grupo", desc: "Costes y resultado de participantes", done: finCom, tone: finCom ? (finRisk ? "warning" : "positive") : !inicioCom ? "neutral" : "info", status: finCom ? (finRisk ? "Exportado · en riesgo" : "Exportado") : !inicioCom ? "Pendiente" : "Por exportar" },
   ]
 
-  // ── Contenido + acciones del paso activo ──
-  let stepNote: string | undefined
-  // Fecha de confirmación del paso (alta/comunicado) como campo apilado
-  // label/valor, MISMO tratamiento que "Plazos" en el paso fin.
+  // ── Cuerpo del paso activo: SIEMPRE editable (no hay modo edición) ──
+  const leftTitle = active === "alta" ? "Acción formativa" : active === "inicio" ? "Datos del grupo" : "Cierre del grupo"
+  const leftDesc =
+    active === "alta"
+      ? "Información de la acción formativa que se da de alta en FUNDAE."
+      : active === "inicio"
+        ? "Datos del grupo que se envían al exportar el XML de inicio."
+        : "Costes y resultado que se envían al exportar el XML de finalización."
   let doneDate: { label: string; value: string } | undefined
-  let onEdit: (() => void) | null = null // editar vive a la IZQUIERDA, con los datos
   let mainBody: React.ReactNode = null
 
   if (active === "alta") {
-    if (enFundae && af.fechaAlta) doneDate = { label: "Dada de alta el", value: padDateStr(af.fechaAlta) }
-    onEdit = () => setEditing("alta")
-    const modalidad = MODALIDAD_OPTIONS.find((o) => o.value === af.modalidad)?.label ?? af.modalidad
+    if (enFundae && af.fechaAlta) doneDate = { label: "Exportado el", value: padDateStr(af.fechaAlta) }
     mainBody = (
       <F0Box display="flex" flexDirection="column" gap="3xl">
-        <Section title="Datos de la acción formativa">
-          <F0Box display="grid" columns="3" gap="2xl">
-            <Field label="Denominación" value={af.nombre} />
-            <Field label="Código FUNDAE" value={af.codigoFundae ?? "—"} />
-            <Field label="Duración" value={af.horas ? `${af.horas} h` : "—"} />
-            <Field label="Modalidad" value={modalidad} />
-            <Field label="Perfil FUNDAE" value={perfilLabel(af.perfil)} />
+        <F0Box display="flex" flexDirection="column" gap="lg">
+          <EditField label="Denominación" value={af.nombre} onChange={(v) => patchAf("nombre", v)} />
+          <F0Box display="grid" columns="3" gap="lg" alignItems="start">
+            <EditField label="Código FUNDAE" hint="Código de la acción en FUNDAE" value={af.codigoFundae ?? ""} required onChange={(v) => patchAf("codigoFundae", v)} />
+            <NumField label="Duración" units="h" required value={af.horas ?? null} onChange={(v) => patchAf("horas", v ?? 0)} />
+            <SelectField label="Modalidad" required value={af.modalidad} options={MODALIDAD_OPTIONS} onChange={(v) => patchAf("modalidad", v as Modalidad)} />
           </F0Box>
-        </Section>
+          <F0Box maxWidth="96">
+            <SelectField label="Perfil FUNDAE" hint="Perfil del destinatario de la formación" required value={af.perfil} options={PERFIL_OPTIONS} onChange={(v) => patchAf("perfil", v as PerfilFundae)} />
+          </F0Box>
+        </F0Box>
+        {modalidadTieneOnline(af.modalidad) && (
+          <Section title="Plataforma de teleformación">
+            <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+              <EditField label="CIF de la plataforma" required value={af.plataforma.cif} onChange={(v) => patchAf("plataforma", { ...af.plataforma, cif: v })} />
+              <EditField label="Razón social" required value={af.plataforma.razonSocial} onChange={(v) => patchAf("plataforma", { ...af.plataforma, razonSocial: v })} />
+            </F0Box>
+            <EditField label="URL de acceso" hint="Dirección de la plataforma/aula virtual" required value={af.plataforma.url} onChange={(v) => patchAf("plataforma", { ...af.plataforma, url: v })} />
+            <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+              <EditField label="Usuario" required value={af.plataforma.usuario} onChange={(v) => patchAf("plataforma", { ...af.plataforma, usuario: v })} />
+              <EditField label="Contraseña" required value={af.plataforma.password} onChange={(v) => patchAf("plataforma", { ...af.plataforma, password: v })} />
+            </F0Box>
+          </Section>
+        )}
         <Section title="Objetivos">
-          <F0Text variant="body" content={af.objetivos || "—"} />
+          <Textarea label="Objetivos" hideLabel rows={3} value={af.objetivos} onChange={(v) => patchAf("objetivos", v ?? "")} />
         </Section>
         <Section title="Contenidos">
-          <F0Text variant="body" content={af.contenidos || "—"} />
+          <Textarea label="Contenidos" hideLabel rows={3} value={af.contenidos} onChange={(v) => patchAf("contenidos", v ?? "")} />
         </Section>
       </F0Box>
     )
   } else if (active === "inicio") {
-    if (inicioCom) doneDate = { label: "Comunicado el", value: padDateStr(com.inicioAt ?? "") }
-    onEdit = () => setEditing("inicio")
-    const modalidad = MODALIDAD_OPTIONS.find((o) => o.value === inicio.modalidad)?.label ?? inicio.modalidad
+    if (inicioCom) doneDate = { label: "Exportado el", value: padDateStr(com.inicioAt ?? "") }
     mainBody = (
       <F0Box display="flex" flexDirection="column" gap="3xl">
-        <Section title="Datos del grupo">
-          <F0Box display="grid" columns="3" gap="2xl">
-            <Field label="Código acción formativa" value={inicio.idAccion} />
-            <Field label="Código de grupo" value={inicio.idGrupo} required />
-            <Field label="Descripción" value={inicio.descripcion} required />
-            <Field label="Fecha de inicio" value={inicio.fechaInicio} required />
-            <Field label="Fecha fin prevista" value={inicio.fechaFin} required />
-            <Field label="Nº participantes" value={inicio.numeroParticipantes != null ? String(inicio.numeroParticipantes) : "—"} />
-            <Field label="Responsable" value={inicio.responsable} required />
-            <Field label="Teléfono" value={inicio.telefonoContacto} required />
-            <Field label="Modalidad" value={modalidad} />
+        <F0Box display="flex" flexDirection="column" gap="lg">
+          <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+            <EditField label="Código acción formativa" hint="Código interno del curso" value={inicio.idAccion} onChange={(v) => patchInicio("idAccion", v)} />
+            <EditField label="Código de grupo" hint="Código interno del grupo formativo" value={inicio.idGrupo} required onChange={(v) => patchInicio("idGrupo", v)} />
           </F0Box>
-        </Section>
-        <Section title="Centro proveedor">
-          <F0Box display="grid" columns="3" gap="2xl">
-            <Field label="Nombre del centro" value={inicio.centro.nombreCentro} />
-            <Field label="Documento" value={inicio.centro.documentoCentro} />
-            <Field label="Dirección" value={inicio.centro.direccionDetallada} />
-            <Field label="Localidad" value={inicio.centro.localidad} required />
-            <Field label="Código postal" value={inicio.centro.codPostal} required />
+          <EditField label="Descripción" value={inicio.descripcion} required onChange={(v) => patchInicio("descripcion", v)} />
+          <F0Box display="grid" columns="3" gap="lg" alignItems="start">
+            <EditField label="Fecha de inicio" placeholder="DD/MM/AAAA" value={inicio.fechaInicio} required onChange={(v) => patchInicio("fechaInicio", v)} />
+            <EditField label="Fecha fin prevista" placeholder="DD/MM/AAAA" value={inicio.fechaFin} required onChange={(v) => patchInicio("fechaFin", v)} />
+            <NumField label="Nº participantes" value={inicio.numeroParticipantes ?? null} onChange={(v) => patchInicio("numeroParticipantes", v)} />
           </F0Box>
-        </Section>
+          <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+            <EditField label="Responsable" value={inicio.responsable} required onChange={(v) => patchInicio("responsable", v)} />
+            <EditField label="Teléfono" value={inicio.telefonoContacto} required onChange={(v) => patchInicio("telefonoContacto", v)} />
+          </F0Box>
+        </F0Box>
+        {modalidadTienePresencial(af.modalidad) && (
+          <Section title="Centro proveedor">
+            <EditField label="Nombre del centro" value={inicio.centro.nombreCentro} onChange={(v) => patchInicio("centro", { ...inicio.centro, nombreCentro: v })} />
+            <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+              <SelectField label="Tipo de documento" value={inicio.centro.tipoDocumentoCentro} options={TIPO_DOCUMENTO_CENTRO_OPTIONS} onChange={(v) => patchInicio("centro", { ...inicio.centro, tipoDocumentoCentro: v as TipoDocumentoCentro })} />
+              <EditField label="Documento" value={inicio.centro.documentoCentro} onChange={(v) => patchInicio("centro", { ...inicio.centro, documentoCentro: v })} />
+            </F0Box>
+            <EditField label="Dirección" value={inicio.centro.direccionDetallada} onChange={(v) => patchInicio("centro", { ...inicio.centro, direccionDetallada: v })} />
+            <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+              <EditField label="Localidad" value={inicio.centro.localidad} required onChange={(v) => patchInicio("centro", { ...inicio.centro, localidad: v })} />
+              <EditField label="Código postal" value={inicio.centro.codPostal} required onChange={(v) => patchInicio("centro", { ...inicio.centro, codPostal: v })} />
+            </F0Box>
+          </Section>
+        )}
         <Section title="Horario">
-          <F0Box display="grid" columns="3" gap="2xl">
-            <Field label="Horas totales" value={inicio.horario.horaTotales ? `${inicio.horario.horaTotales} h` : "—"} />
-            <Field label="Tramos" value={[inicio.horario.horaInicioTramo1 && `${inicio.horario.horaInicioTramo1}–${inicio.horario.horaFinTramo1}`].filter(Boolean).join(" · ") || "—"} />
+          <F0Box maxWidth="64">
+            <NumField label="Horas totales" units="h" value={inicio.horario.horaTotales || null} onChange={(v) => patchInicio("horario", { ...inicio.horario, horaTotales: v ?? 0 })} />
           </F0Box>
         </Section>
         <Section title={`Tutores (${inicio.tutores.length})`}>
-          <F0Box display="grid" columns="2" gap="2xl">
-            {inicio.tutores.map((t, i) => (
-              <Field key={t.id} label={`Tutor ${i + 1}`} value={`${t.nombre} ${t.apellido1} · ${t.documento} · ${t.numeroHoras ?? "—"} h`} />
-            ))}
-          </F0Box>
+          {inicio.tutores.map((t, i) => (
+            <F0Box key={t.id} display="flex" flexDirection="column" gap="sm">
+              <F0Text variant="label" content={`Tutor ${i + 1} · ${t.nombre} ${t.apellido1}`} />
+              <F0Box display="grid" columns="2" gap="lg" alignItems="start">
+                <SelectField label="Tipo de documento" value={t.tipoDocumento} options={TIPO_DOCUMENTO_CENTRO_OPTIONS} onChange={(v) => patchTutor(t.id, { tipoDocumento: v as TipoDocumentoCentro })} />
+                <EditField label="NIF" required value={t.documento ?? ""} onChange={(v) => patchTutor(t.id, { documento: v })} />
+                <EditField label="Correo" required value={t.correoElectronico ?? ""} onChange={(v) => patchTutor(t.id, { correoElectronico: v })} />
+                <NumField label="Nº de horas" units="h" required value={t.numeroHoras} onChange={(v) => patchTutor(t.id, { numeroHoras: v })} />
+              </F0Box>
+            </F0Box>
+          ))}
         </Section>
       </F0Box>
     )
   } else {
-    if (finCom) doneDate = { label: "Comunicado el", value: padDateStr(com.finAt ?? "") }
-    onEdit = () => setEditing("fin")
-    // Izquierda = el trabajo (lo que verificas y editas): costes (arriba) +
-    // participantes. Costes a todo el ancho, con jerarquía (no celdas planas).
+    if (finCom) doneDate = { label: "Exportado el", value: padDateStr(com.finAt ?? "") }
+    const numFin = (k: keyof FinGrupoData) => (fin[k] ? Number(fin[k]) : null)
     mainBody = (
       <F0Box display="flex" flexDirection="column" gap="3xl">
+        <F0Box maxWidth="64">
+          <EditField label="Fecha de fin real" placeholder="DD/MM/AAAA" value={fin.fechaFinReal} required onChange={(v) => patchFin("fechaFinReal", v)} />
+        </F0Box>
         <Section title="Costes">
-          {/* Desglose itemizado en una columna acotada: componentes → total
-              destacado (divisor encima) → tope del módulo como referencia.
-              Filas etiqueta/valor, mismo patrón que el panel de la derecha. */}
-          <F0Box display="flex" flexDirection="column" gap="sm" width="full">
-            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
-              <F0Text variant="small" content="Directos" />
-              <F0Text variant="body" content={eur(Number(fin.costesDirectos || 0))} />
-            </F0Box>
-            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
-              <F0Text variant="small" content="Indirectos" />
-              <F0Text variant="body" content={eur(Number(fin.costesIndirectos || 0))} />
-            </F0Box>
-            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
-              <F0Text variant="small" content="Salariales" />
-              <F0Text variant="body" content={eur(Number(fin.costesSalariales || 0))} />
-            </F0Box>
-            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md" borderTop="default" borderColor="secondary" paddingTop="sm">
-              <F0Text variant="label" content="Total invertido" />
-              <F0Heading as="h3" variant="heading" content={eur(totalCostes)} />
-            </F0Box>
-            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
-              <F0Text variant="small" content="Máximo bonificable (módulo)" />
-              <F0Text variant="body" content={eur(maxBonif)} />
-            </F0Box>
+          <F0Box display="grid" columns="3" gap="lg" alignItems="start">
+            <NumField label="Directos" units="EUR" required value={numFin("costesDirectos")} onChange={(v) => patchFin("costesDirectos", v == null ? "" : String(v))} />
+            <NumField label="Indirectos" units="EUR" required value={numFin("costesIndirectos")} onChange={(v) => patchFin("costesIndirectos", v == null ? "" : String(v))} />
+            <NumField label="Salariales" units="EUR" required value={numFin("costesSalariales")} onChange={(v) => patchFin("costesSalariales", v == null ? "" : String(v))} />
           </F0Box>
         </Section>
 
@@ -447,414 +522,291 @@ function Flow({ training, af, setAf }: { training: Training; af: AccionFormativa
           trainingId={training.id}
           trainingClass={cls}
           numParticipantesPrevistos={inicio.numeroParticipantes}
-          readOnly
         />
       </F0Box>
     )
   }
 
-  // Edición EN LÍNEA (no modal): sustituye el contenido del paso por su
-  // formulario, con Guardar/Cancelar propios. Acciones de cabecera ocultas.
-  if (editing === active) {
-    stepNote = "Editando…"
-    if (active === "alta") mainBody = <AltaForm data={af} onCancel={() => setEditing(null)} onSave={(d) => { setAf(d); setEditing(null) }} />
-    else if (active === "inicio") mainBody = <InicioForm data={inicio} onCancel={() => setEditing(null)} onSave={(d) => { setInicio(d); setEditing(null) }} />
-    else mainBody = <FinForm data={fin} onCancel={() => setEditing(null)} onSave={(d) => { setFin(d); setEditing(null) }} />
-  }
-
-  const isEditing = editing === active
-
-  // Plazo del paso activo (cuando aún está por comunicar): se muestra como
-  // indicador con color por urgencia, no como texto gris.
-  const activeDeadline: DeadlineInfo | null = isEditing
-    ? null
-    : active === "inicio" && !inicioCom
+  // Plazo del paso activo (cuando aún está por exportar).
+  const activeDeadline: DeadlineInfo | null =
+    active === "inicio" && !inicioCom
       ? inicioDl
       : active === "fin" && !finCom
         ? finDl
         : null
-
-  // Fechas de "Plazos" en formato numérico consistente (DD/MM/AAAA), apiladas.
   const numDate = (d: Date) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`
   const finRealNum = fin.fechaFinReal ? padDateStr(fin.fechaFinReal) : ""
   const deadlineNum = activeDeadline ? numDate(activeDeadline.deadlineDate) : ""
 
-  // Acción primaria del paso (barra inferior, patrón Atrás/Siguiente de las
-  // referencias): avanzar el ciclo o pasar al siguiente paso ya hecho.
-  // El CTA es SOLO para completar el paso (comunicar / dar de alta), y solo si
-  // está por hacer. Navegar entre pasos es libre por el stepper — no es un botón.
-  let action: { label: string; onClick: () => void; disabled?: boolean } | null = null
-  if (active === "alta") {
-    if (!enFundae) action = { label: "Comunicar alta", onClick: giveAlta }
-  } else if (active === "inicio") {
-    if (!inicioCom) action = { label: "Comunicar inicio", onClick: () => openConfirm("inicio"), disabled: !enFundae }
-  } else if (!finCom) {
-    action = { label: "Comunicar fin", onClick: () => openConfirm("fin"), disabled: !inicioCom }
-  }
-
-  // ── Veredicto sintetizado del paso activo ──────────────────────────────
-  // El sistema YA tiene los checks (lee los datos). Aquí los convertimos en
-  // un veredicto en claro + solo las incidencias, en vez de exponer el dato
-  // crudo para que el usuario lo ensamble.
+  // ── Validación + estado del paso ──
   const activeChecks: Check[] = active === "inicio" ? inicioChecks : active === "fin" ? finChecks : []
   const activeCom = active === "inicio" ? inicioCom : active === "fin" ? finCom : enFundae
   const datosOk = activeChecks.length === 0 ? true : activeChecks[0]!.ok
-  const issues = activeChecks.filter((c) => !c.ok) // incidencias = lo que NO está en orden
+  const issues = activeChecks.filter((c) => !c.ok)
 
-  // Campos obligatorios FUNDAE que faltan en el paso activo (validación antes de
-  // generar el fichero). Si hay alguno, se avisa y se bloquea la exportación.
+  // Campos obligatorios FUNDAE que faltan: si hay alguno, no se puede exportar.
   const missing = requiredMissing(active, af, inicio, fin)
-  // Solo se BLOQUEA (avisar + deshabilitar generar) un paso PENDIENTE al que le
-  // faltan obligatorios. Un paso ya comunicado nunca sale bloqueado.
-  const blocked = !activeCom && missing.length > 0
+  const blocked = missing.length > 0
+  const validateKey = `${active}-${cls.id}`
+  const showErrors = !!validatedSteps[validateKey]
 
-  // ── Estructura del panel (elementos + jerarquía, sin ocultar info) ──
-  // El resultado económico se presenta como DESGLOSE alineado: el 208 € es el
-  // total de un cálculo (invertido − no bonificable), y los avisos son sus
-  // razones (líneas del cálculo), no frases sueltas al lado del número.
+  // Prerrequisito de orden: no se exporta inicio sin alta, ni fin sin inicio.
+  let prereq: string | null = null
+  if (active === "inicio" && !enFundae) prereq = "Primero da de alta la acción formativa."
+  if (active === "fin" && !inicioCom) prereq = "Primero exporta el inicio del grupo."
+  // Solo el prerrequisito de orden deshabilita. Si faltan datos, el botón se
+  // pulsa igual y entonces se marcan los obligatorios (validación al enviar).
+  const exportDisabled = !!prereq
+
   const showBreakdown = active === "fin" && datosOk
 
-  // Estado = un ESTADO real (Comunicable / Comunicado / Faltan datos / Bloqueado),
-  // NO "Atención". Los avisos no son el estado: van en su propio banner.
+  // Estado real del paso.
   let stateText: string
   let stateTone: Tone
-  if (active === "alta") {
-    stateText = enFundae ? "Dada de alta" : "Pendiente de alta"
-    stateTone = enFundae ? "positive" : "info"
-  } else if (activeCom) {
-    stateText = "Comunicado"
+  if (activeCom) {
+    stateText = "Exportado"
     stateTone = "positive"
-  } else if (!datosOk) {
-    stateText = "Faltan datos"
-    stateTone = "critical"
-  } else if ((active === "inicio" && !enFundae) || (active === "fin" && !inicioCom)) {
+  } else if (prereq) {
     stateText = "Bloqueado"
     stateTone = "neutral"
+  } else if (blocked && showErrors) {
+    stateText = `Faltan ${missing.length} ${missing.length === 1 ? "dato" : "datos"}`
+    stateTone = "critical"
+  } else if (blocked) {
+    stateText = "Por completar"
+    stateTone = "neutral"
   } else {
-    stateText = "Comunicable"
+    stateText = "Listo para exportar"
     stateTone = "info"
   }
 
-  // Avisos para el BANNER: todos menos el del módulo (ese vive en "Bonificación"
-  // como "No bonificable", para no duplicar la cifra).
-  // Un paso YA comunicado no muestra avisos de "puedes comunicar igualmente"
-  // ni incidencias de acción: su decisión es solo confirmación (estado + fecha).
-  // Banners = SOLO avisos reales (asistencia/75%). "Faltan datos" lo cubre la
-  // validación de obligatorios, y el plazo lo cubre la sección Plazos — no se
-  // duplican aquí. Un paso comunicado no muestra banners.
+  // Banner = SOLO avisos reales de asistencia/75% (lo demás vive en su sección).
   const bannerIssues = activeCom ? [] : issues.filter((c) => /asistencia|75%/i.test(c.text))
 
-  // Divisores del panel derecho: el lead "Estado" ya lleva su borderBottom, así
-  // que la PRIMERA sección del cuerpo NO lleva borderTop (si no, dos rayas
-  // juntas). El resto sí, como separador entre secciones — igual que la izquierda.
-  const rightSections = [
-    showBreakdown && "bonif",
-    bannerIssues.length > 0 && "banner",
-    showBreakdown && "recup",
-    (activeDeadline || (active === "fin" && fin.fechaFinReal)) && "plazos",
-    doneDate && "done",
-    "action",
-  ].filter(Boolean) as string[]
-  const firstRight = rightSections[0]
-
-  // ── Confirmación ──
-  const checks = confirm === "inicio" ? inicioChecks : confirm === "fin" ? finChecks : []
-  const canSend = checks.length > 0 && checks[0]!.ok
-  const risk = checks.some((c) => c.warn)
-  const gated = canSend && risk && !ack
-  const confExceso = confirm === "fin" ? exceso : 0
+  // Acción de exportar: marca el paso como hecho al exportar con éxito.
+  const doExport = (fmt: string) => {
+    // Validación al enviar: si faltan obligatorios, se marcan (en rojo) y no exporta.
+    if (blocked) {
+      setValidatedSteps((v) => ({ ...v, [validateKey]: true }))
+      setToast("Faltan datos obligatorios para exportar — revísalos abajo.")
+      return
+    }
+    if (active === "alta") setAf({ ...af, enFundae: true, codigoFundae: af.codigoFundae ?? "00142", fechaAlta: stamp() })
+    else if (active === "inicio") setComBy((p) => ({ ...p, [cls.id]: { ...p[cls.id], inicioAt: stamp() } }))
+    else setComBy((p) => ({ ...p, [cls.id]: { ...p[cls.id], finAt: stamp() } }))
+    setToast(
+      fmt === "XML"
+        ? "XML exportado. Paso marcado como hecho — súbelo a la web de FUNDAE."
+        : `Exportado a ${fmt}.`
+    )
+  }
 
   return (
     <F0Box display="flex" flexDirection="column" gap="2xl">
       {toast && <F0Alert variant="positive" title={toast} description="" />}
 
-      {/* HEADER-TABS compacto (estilo QUOTE): grupo + pasos numerados en una
-          línea. Los círculos numerados/check los diferencian de las tabs de
-          página; el activo en negrita + subrayado. */}
-      {/* UN conjunto full-width: una sola pista gris que contiene el selector de
-          grupo + los pasos. Los pasos rellenan el ancho (flex-1). Activo =
-          pastilla blanca elevada; hechos = check verde. */}
-      <div className="flex w-full items-center gap-1 rounded-lg bg-f1-background-secondary p-1">
+      {/* Selector de grupo + STEPPER compacto: círculos numerados unidos por
+          una línea (= flujo de pasos), no pestañas. Sin pista de pills. */}
+      <div className="flex w-full items-center gap-3">
         {classes.length > 1 && (
-          // Select NATIVO estilado para IMITAR a F0Select (que entra en bucle al
-          // abrirse en este build): misma caja h-8, rounded (10px), borde f1 +
-          // hover, fondo blanco, texto 14px y chevron a la derecha.
-          <div className="relative inline-flex h-8 shrink-0 items-center rounded border border-solid border-f1-border bg-f1-background transition-colors hover:border-f1-border-hover">
-            <select
-              aria-label="Grupo formativo"
-              value={classId}
-              onChange={(e) => selectClass(e.target.value)}
-              className="h-full cursor-pointer appearance-none bg-transparent pl-3 pr-8 text-sm text-f1-foreground focus:outline-none"
-            >
-              {groupOptions.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="pointer-events-none absolute right-2 h-4 w-4 text-f1-foreground-secondary"
-            >
-              <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-        )}
-        {steps.map((s) => {
-          const sel = s.key === active
-          return (
-            <button
-              key={s.key}
-              type="button"
-              onClick={() => goPhase(s.key)}
-              className={
-                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-sm transition-colors " +
-                (sel
-                  ? "bg-f1-background font-semibold text-f1-foreground shadow-sm"
-                  : "font-medium text-f1-foreground hover:bg-f1-background-hover")
-              }
-            >
-              <span
-                className={
-                  "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-xs font-medium " +
-                  (s.done
-                    ? "border-transparent bg-f1-background-positive text-f1-foreground-positive"
-                    : "border-f1-border " + (STEP_TONE_TEXT[s.tone] ?? "text-f1-foreground-secondary"))
-                }
+          <>
+            <div className="relative inline-flex h-8 shrink-0 items-center rounded border border-solid border-f1-border bg-f1-background transition-colors hover:border-f1-border-hover">
+              <select
+                aria-label="Grupo formativo"
+                value={classId}
+                onChange={(e) => selectClass(e.target.value)}
+                className="h-full cursor-pointer appearance-none bg-transparent pl-3 pr-8 text-sm text-f1-foreground focus:outline-none"
               >
-                {s.done ? "✓" : s.n}
-              </span>
-              <span>{s.label}</span>
-            </button>
-          )
-        })}
+                {groupOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                className="pointer-events-none absolute right-2 h-4 w-4 text-f1-foreground-secondary"
+              >
+                <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div className="h-6 w-px shrink-0 bg-f1-border" />
+          </>
+        )}
+        <div className="flex flex-1 items-center">
+          {steps.map((s, i) => {
+            const sel = s.key === active
+            const prevDone = i > 0 && !!steps[i - 1]?.done
+            return (
+              <Fragment key={s.key}>
+                {i > 0 && (
+                  <div
+                    className={
+                      "mx-2 h-px flex-1 " +
+                      (prevDone ? "bg-f1-background-positive-bold" : "bg-f1-border")
+                    }
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => goPhase(s.key)}
+                  className="flex shrink-0 items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-f1-background-hover"
+                >
+                  <span
+                    className={
+                      "flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-medium " +
+                      (s.done
+                        ? "bg-f1-background-positive text-f1-foreground-positive"
+                        : sel
+                          ? "bg-f1-background-info text-f1-foreground-info"
+                          : "border border-solid border-f1-border " +
+                            (STEP_TONE_TEXT[s.tone] ?? "text-f1-foreground-secondary"))
+                    }
+                  >
+                    {s.done ? "✓" : s.n}
+                  </span>
+                  <span
+                    className={
+                      "whitespace-nowrap text-sm " +
+                      (sel
+                        ? "font-semibold text-f1-foreground"
+                        : "font-medium text-f1-foreground-secondary")
+                    }
+                  >
+                    {s.label}
+                  </span>
+                </button>
+              </Fragment>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Body: DATOS (izquierda, área de trabajo) + DECISIÓN (derecha, panel
-          contenido). Sin cabecera redundante (la barra de pasos ya dice el paso). */}
+      {/* Body: DATOS (izquierda, editable) + DECISIÓN (derecha, panel). Mismo
+          layout en los 3 pasos (coherencia). */}
       <F0Box display="flex" width="full" gap="2xl" alignItems="start">
-          {/* IZQUIERDA — el trabajo (o el formulario, si editas). Editar vive
-              aquí, con los datos que toca. */}
-          <F0Box
-            grow
-            minWidth="0"
-            display="flex"
-            flexDirection="column"
-            gap="lg"
-            border="default"
-            borderColor="secondary"
-            borderRadius="lg"
-            paddingX="lg"
-            paddingY="lg"
-          >
-            {/* Cabecera de la tarjeta: rótulo de contexto + acción Editar (que
-                edita TODOS los datos del paso). Da lead y saca Editar del aire. */}
-            <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" minHeight="12" borderBottom="default" borderColor="secondary" paddingBottom="md">
-              <F0Heading as="h3" variant="heading" content="Datos del grupo" />
-              {!isEditing && onEdit && (
-                <F0Button label="Editar datos" variant="outline" onClick={onEdit} />
-              )}
-            </F0Box>
-            {mainBody}
+        <F0Box
+          grow
+          minWidth="0"
+          display="flex"
+          flexDirection="column"
+          gap="lg"
+          border="default"
+          borderColor="secondary"
+          borderRadius="lg"
+          paddingX="lg"
+          paddingY="lg"
+        >
+          <F0Box display="flex" flexDirection="column" gap="xs" borderBottom="default" borderColor="secondary" paddingBottom="md">
+            <F0Heading as="h3" variant="heading" content={leftTitle} />
+            <F0Text variant="description" content={leftDesc} />
           </F0Box>
+          <ValidateCtx.Provider value={showErrors}>{mainBody}</ValidateCtx.Provider>
+        </F0Box>
 
-          {/* DERECHA — la DECISIÓN como panel contenido (tarjeta con borde):
-              estado · avisos · bonificación · recuperable · plazos · acción. */}
-          <F0Box
-            shrink={false}
-            width="80"
-            display="flex"
-            flexDirection="column"
-            gap="xl"
-            border="default"
-            borderColor="secondary"
-            borderRadius="lg"
-            paddingX="lg"
-            paddingY="xl"
-          >
-            {isEditing ? (
-              <F0Box display="flex" flexDirection="column" gap="xs">
-                <F0Text variant="label" content="Editando datos" />
-                <F0Text variant="small" content="Guarda o cancela en el formulario de la izquierda." />
-              </F0Box>
-            ) : (
-              <>
-            {/* TODAS las secciones siguen EL MISMO patrón: (divisor encima salvo
-                la primera) + título `heading` + filas etiqueta/valor. Sin
-                excepciones, sin tratamientos únicos. */}
-
-            {/* SECCIÓN Estado — un ESTADO real (tag). Los avisos NO son el estado:
-                van en su banner debajo. */}
-            <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" minHeight="12" borderBottom="default" borderColor="secondary" paddingBottom="md">
+        {/* DERECHA — decisión: estado · avisos · bonificación · recuperable ·
+            plazos · exportar. */}
+        <F0Box
+          shrink={false}
+          width="80"
+          display="flex"
+          flexDirection="column"
+          gap="xl"
+          border="default"
+          borderColor="secondary"
+          borderRadius="lg"
+          paddingX="lg"
+          paddingY="xl"
+        >
+          {/* Estado del paso + su acción primaria, juntos, arriba del panel. */}
+          <F0Box display="flex" flexDirection="column" gap="lg">
+            <F0Box display="flex" alignItems="center" justifyContent="between" gap="md">
               <F0Heading as="h3" variant="heading" content="Estado" />
               <F0TagStatus text={stateText} variant={stateTone} />
             </F0Box>
+            <F0Button
+              label={activeCom ? "Volver a exportar" : "Exportar .XML"}
+              icon={Download}
+              variant={activeCom ? "outline" : "default"}
+              disabled={exportDisabled}
+              onClick={() => doExport("XML")}
+            />
+            {prereq && !blocked && <F0Text variant="small" content={prereq} />}
+          </F0Box>
 
-            {/* SECCIÓN Bonificación — desglose de costes (Invertido / No bonificable). */}
-            {showBreakdown && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "bonif" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "bonif" ? undefined : "xl"}>
-                <F0Heading as="h3" variant="heading" content="Bonificación" />
+          {showBreakdown && (
+            <F0Box display="flex" flexDirection="column" gap="sm" borderTop="default" borderColor="secondary" paddingTop="xl">
+              <F0Heading as="h3" variant="heading" content="Bonificación" />
+              <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+                <F0Text variant="small" content="Invertido" />
+                <F0Text variant="body" content={eur(totalCostes)} />
+              </F0Box>
+              {exceso > 0 && (
                 <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
-                  <F0Text variant="small" content="Invertido" />
-                  <F0Text variant="body" content={eur(totalCostes)} />
-                </F0Box>
-                {exceso > 0 && (
-                  <F0Box display="flex" flexDirection="column" gap="xs">
-                    <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
-                      <F0Text variant="small" content="No bonificable" />
-                      <F0Text variant="body" content={`−${eur(exceso)}`} />
-                    </F0Box>
-                    <F0Text variant="small" content="supera el tope del módulo bonificable" />
-                  </F0Box>
-                )}
-              </F0Box>
-            )}
-
-            {/* BANNER de avisos — bajo el desglose de Bonificación, que es lo que
-                explican (p. ej. "se bonifican 2 de 3"). En pasos sin desglose
-                cae justo tras Estado. */}
-            {bannerIssues.length > 0 && (
-              <F0Box display="flex" flexDirection="column" gap="sm">
-                {bannerIssues.map((c, i) => (
-                  <F0Alert
-                    key={i}
-                    variant={c.warn ? "warning" : "critical"}
-                    title={c.text}
-                    description={c.advice ?? ""}
-                  />
-                ))}
-              </F0Box>
-            )}
-
-            {/* SECCIÓN Recuperable — su propio título + cifra, como las demás. */}
-            {showBreakdown && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "recup" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "recup" ? undefined : "xl"}>
-                <F0Heading as="h3" variant="heading" content="Recuperable" />
-                <F0Heading as="h3" variant="heading-large" content={eur(recuperable)} />
-              </F0Box>
-            )}
-
-            {/* SECCIÓN Plazos — mismo patrón */}
-            {(activeDeadline || (active === "fin" && fin.fechaFinReal)) && (
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={firstRight === "plazos" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "plazos" ? undefined : "xl"}>
-                <F0Heading as="h3" variant="heading" content="Plazos" />
-                {active === "fin" && fin.fechaFinReal && (
-                  <F0Box display="flex" flexDirection="column" gap="xs">
-                    <F0Text variant="small" content="Finalizó el" />
-                    <F0Text variant="body" content={finRealNum} />
-                  </F0Box>
-                )}
-                {activeDeadline && (
-                  <F0Box display="flex" flexDirection="column" gap="xs">
-                    <F0Text variant="small" content="Plazo para comunicar" />
-                    <F0Text variant="body" content={deadlineNum} />
-                    <span
-                      className={
-                        "text-sm font-medium " +
-                        STEP_TONE_TEXT[
-                          activeDeadline.level === "info" ? "info" : activeDeadline.level === "warning" ? "warning" : "critical"
-                        ]
-                      }
-                    >
-                      {activeDeadline.daysRemaining < 0
-                        ? "Vencido — comunicar puede no bonificar"
-                        : `Te quedan ${activeDeadline.daysRemaining} ${activeDeadline.daysRemaining === 1 ? "día" : "días"}`}
-                    </span>
-                  </F0Box>
-                )}
-              </F0Box>
-            )}
-
-            {/* FECHA de confirmación (alta/comunicado) — campo apilado label/valor,
-                MISMO tratamiento que "Plazos" en fin. */}
-            {doneDate && (
-              <F0Box display="flex" flexDirection="column" gap="xs" borderTop={firstRight === "done" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "done" ? undefined : "xl"}>
-                <F0Text variant="small" content={doneDate.label} />
-                <F0Text variant="body" content={doneDate.value} />
-              </F0Box>
-            )}
-
-            {/* Validación de obligatorios + comunicar + EXPORTAR el fichero del
-                paso (XML/Excel/CSV). Si faltan campos required FUNDAE, se avisa
-                y se bloquean comunicar y exportar. */}
-            <F0Box display="flex" flexDirection="column" gap="lg" borderTop={firstRight === "action" ? undefined : "default"} borderColor="secondary" paddingTop={firstRight === "action" ? undefined : "xl"}>
-              {/* Comunicar (acción primaria del paso) */}
-              {(action || stepNote) && (
-                <F0Box display="flex" flexDirection="column" gap="sm">
-                  {blocked && action && (
-                    <F0Alert
-                      variant="warning"
-                      title={missing.length === 1 ? "Falta 1 dato obligatorio" : `Faltan ${missing.length} datos obligatorios`}
-                      description=""
-                    />
-                  )}
-                  {action && (
-                    <F0Button label={action.label} variant="default" disabled={action.disabled || blocked} onClick={action.onClick} />
-                  )}
-                  {stepNote && <F0Text variant="small" content={stepNote} />}
+                  <F0Text variant="small" content="No recuperable" />
+                  <F0Text variant="body" content={`−${eur(exceso)}`} />
                 </F0Box>
               )}
-              {/* Generar fichero — divisor solo si hay un botón de comunicar
-                  encima (si es lo primero, basta el borde de la sección). */}
-              <F0Box display="flex" flexDirection="column" gap="sm" borderTop={action || stepNote ? "default" : undefined} borderColor="secondary" paddingTop={action || stepNote ? "lg" : undefined}>
-                <F0Heading as="h3" variant="heading" content="Generar fichero" />
-                <F0Box display="flex" flexDirection="row" gap="sm">
-                  {(["XML", "Excel", "CSV"] as const).map((fmt) => (
-                    <F0Button
-                      key={fmt}
-                      variant="outline"
-                      label={fmt}
-                      disabled={blocked}
-                      onClick={() => setToast(`Fichero ${fmt} generado (demo).`)}
-                    />
-                  ))}
-                </F0Box>
+              <F0Box display="flex" justifyContent="between" alignItems="center" gap="md" borderTop="default" borderColor="secondary" paddingTop="sm">
+                <F0Text variant="label" content="Recuperable" />
+                <F0Text variant="label" content={eur(recuperable)} />
               </F0Box>
             </F0Box>
-              </>
-            )}
-          </F0Box>
-        </F0Box>
+          )}
 
-      {confirm && (
-        <F0Dialog
-          isOpen={!!confirm}
-          onClose={() => setConfirm(null)}
-          width="md"
-          title={confirm === "inicio" ? "Comunicar inicio a FUNDAE" : "Comunicar fin a FUNDAE"}
-          description={confirm === "inicio" ? `Grupo ${cls.name} · inicio ${inicio.fechaInicio}` : `Grupo ${cls.name} · recuperas ${eur(maxBonif)} de ${eur(totalCostes)}`}
-          primaryAction={{
-            label: !canSend ? "Faltan datos" : gated ? "Marca la casilla" : confExceso > 0 ? `Comunicar y asumir ${eur(confExceso)}` : risk ? "Comunicar igualmente" : "Comunicar",
-            disabled: !canSend || gated,
-            onClick: () => { if (canSend && !gated) (confirm === "inicio" ? comunicarInicio() : comunicarFin()) },
-          }}
-          secondaryAction={{ label: "Cancelar", onClick: () => setConfirm(null) }}
-        >
-          <F0Box display="flex" flexDirection="column" gap="md">
-            {checks.map((c, i) =>
-              c.ok ? (
-                <F0Box key={i} display="flex" alignItems="center" gap="sm">
-                  <F0TagStatus text="OK" variant="positive" />
-                  <F0Text variant="body" content={c.text} />
-                </F0Box>
-              ) : (
+          {bannerIssues.length > 0 && (
+            <F0Box display="flex" flexDirection="column" gap="sm">
+              {bannerIssues.map((c, i) => (
                 <F0Alert key={i} variant={c.warn ? "warning" : "critical"} title={c.text} description={c.advice ?? ""} />
-              )
-            )}
-            {canSend && risk && (
-              <F0Checkbox
-                title={confExceso > 0 ? `Asumo ${eur(confExceso)} de sobrecoste que FUNDAE no bonifica y quiero comunicar igualmente.` : "Entiendo que este grupo puede no bonificarse y quiero comunicarlo igualmente."}
-                checked={ack}
-                onCheckedChange={setAck}
-              />
-            )}
-          </F0Box>
-        </F0Dialog>
-      )}
+              ))}
+            </F0Box>
+          )}
+
+          {(activeDeadline || (active === "fin" && fin.fechaFinReal)) && (
+            <F0Box display="flex" flexDirection="column" gap="sm" borderTop="default" borderColor="secondary" paddingTop="xl">
+              <F0Heading as="h3" variant="heading" content="Plazos" />
+              {active === "fin" && fin.fechaFinReal && (
+                <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+                  <F0Text variant="small" content="Finalizó el" />
+                  <F0Text variant="body" content={finRealNum} />
+                </F0Box>
+              )}
+              {activeDeadline && (
+                <>
+                  <F0Box display="flex" justifyContent="between" alignItems="center" gap="md">
+                    <F0Text variant="small" content="Plazo para exportar" />
+                    <F0Text variant="body" content={deadlineNum} />
+                  </F0Box>
+                  <span
+                    className={
+                      "text-sm font-medium " +
+                      STEP_TONE_TEXT[
+                        activeDeadline.level === "info" ? "info" : activeDeadline.level === "warning" ? "warning" : "critical"
+                      ]
+                    }
+                  >
+                    {activeDeadline.daysRemaining < 0
+                      ? "Vencido — exportar puede no bonificar"
+                      : `Te quedan ${activeDeadline.daysRemaining} ${activeDeadline.daysRemaining === 1 ? "día" : "días"}`}
+                  </span>
+                </>
+              )}
+            </F0Box>
+          )}
+
+          {doneDate && (
+            <F0Box display="flex" justifyContent="between" alignItems="center" gap="md" borderTop="default" borderColor="secondary" paddingTop="xl">
+              <F0Text variant="small" content={doneDate.label} />
+              <F0Text variant="body" content={doneDate.value} />
+            </F0Box>
+          )}
+
+        </F0Box>
+      </F0Box>
     </F0Box>
   )
 }
