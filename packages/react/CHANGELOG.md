@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.1](https://github.com/factorialco/f0/compare/f0-react-v4.14.0...f0-react-v4.14.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* **RichText:** re-wire PasteSanitizer into editor extension lists ([#4574](https://github.com/factorialco/f0/issues/4574)) ([8f90c03](https://github.com/factorialco/f0/commit/8f90c03b26f1701accce84ed1a7dc70abb2977fc))
+
 ## [4.14.0](https://github.com/factorialco/f0/compare/f0-react-v4.13.0...f0-react-v4.14.0) (2026-06-29)
 
 
