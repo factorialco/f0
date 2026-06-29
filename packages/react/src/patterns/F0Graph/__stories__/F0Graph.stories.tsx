@@ -4,6 +4,7 @@ import { useState } from "react"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import type { DeferredNodesPayload, GraphNode } from "../types"
 
@@ -144,9 +145,9 @@ const BASIC_NODES: GraphNode<Employee>[] = [
     id: "1",
     parentId: null,
     data: {
-      name: "Sofia Reyes",
+      name: fakePeople.eva.fullName,
       title: "Chief Executive Officer",
-      ...profileDefaults("1", "Sofia Reyes"),
+      ...profileDefaults("1", fakePeople.eva.fullName),
     },
     childrenCount: 2,
   },
@@ -154,9 +155,9 @@ const BASIC_NODES: GraphNode<Employee>[] = [
     id: "2",
     parentId: "1",
     data: {
-      name: "Marcus Chen",
+      name: fakePeople.omar.fullName,
       title: "Chief Technology Officer",
-      ...profileDefaults("2", "Marcus Chen"),
+      ...profileDefaults("2", fakePeople.omar.fullName),
     },
     childrenCount: 2,
   },
@@ -164,9 +165,9 @@ const BASIC_NODES: GraphNode<Employee>[] = [
     id: "3",
     parentId: "1",
     data: {
-      name: "Elena Dupont",
+      name: fakePeople.mira.fullName,
       title: "Chief Financial Officer",
-      ...profileDefaults("3", "Elena Dupont"),
+      ...profileDefaults("3", fakePeople.mira.fullName),
     },
     childrenCount: 0,
   },
@@ -174,9 +175,9 @@ const BASIC_NODES: GraphNode<Employee>[] = [
     id: "4",
     parentId: "2",
     data: {
-      name: "Tomás Herrera",
+      name: fakePeople.bruno.fullName,
       title: "Engineering Manager",
-      ...profileDefaults("4", "Tomas Herrera"),
+      ...profileDefaults("4", fakePeople.bruno.fullName),
     },
     childrenCount: 0,
   },
@@ -184,9 +185,9 @@ const BASIC_NODES: GraphNode<Employee>[] = [
     id: "5",
     parentId: "2",
     data: {
-      name: "Aisha Patel",
+      name: fakePeople.priya.fullName,
       title: "QA Lead",
-      ...profileDefaults("5", "Aisha Patel"),
+      ...profileDefaults("5", fakePeople.priya.fullName),
     },
     childrenCount: 0,
   },
@@ -225,51 +226,51 @@ const MULTI_ROOT_NODES: GraphNode<Employee>[] = [
   {
     id: "eng-root",
     parentId: null,
-    data: { name: "Marcus Chen", title: "VP Engineering" },
+    data: { name: fakePeople.aria.fullName, title: "VP Engineering" },
     childrenCount: 2,
   },
   {
     id: "eng-fe",
     parentId: "eng-root",
-    data: { name: "Nina Volkov", title: "Frontend Lead" },
+    data: { name: fakePeople.felix.fullName, title: "Frontend Lead" },
     childrenCount: 0,
   },
   {
     id: "eng-be",
     parentId: "eng-root",
-    data: { name: "Diego Martín", title: "Backend Lead" },
+    data: { name: fakePeople.lena.fullName, title: "Backend Lead" },
     childrenCount: 0,
   },
   // Tree 2 — Product
   {
     id: "prod-root",
     parentId: null,
-    data: { name: "Laura Kim", title: "VP Product" },
+    data: { name: fakePeople.tobias.fullName, title: "VP Product" },
     childrenCount: 2,
   },
   {
     id: "prod-pm",
     parentId: "prod-root",
-    data: { name: "Yuki Tanaka", title: "Product Manager" },
+    data: { name: fakePeople.noor.fullName, title: "Product Manager" },
     childrenCount: 0,
   },
   {
     id: "prod-design",
     parentId: "prod-root",
-    data: { name: "Priya Sharma", title: "Product Designer" },
+    data: { name: fakePeople.diego.fullName, title: "Product Designer" },
     childrenCount: 0,
   },
   // Tree 3 — People
   {
     id: "people-root",
     parentId: null,
-    data: { name: "James Okafor", title: "VP People" },
+    data: { name: fakePeople.hana.fullName, title: "VP People" },
     childrenCount: 1,
   },
   {
     id: "people-ops",
     parentId: "people-root",
-    data: { name: "Fatima Benali", title: "People Operations" },
+    data: { name: fakePeople.caleb.fullName, title: "People Operations" },
     childrenCount: 0,
   },
 ]
@@ -316,28 +317,31 @@ export const Lazy: Story = {
       {
         id: "ceo",
         parentId: null,
-        data: { name: "Sofia Reyes", title: "Chief Executive Officer" },
+        data: {
+          name: fakePeople.yuki.fullName,
+          title: "Chief Executive Officer",
+        },
         childrenCount: 3,
         childrenLoaded: true,
       },
       {
         id: "vp-eng",
         parentId: "ceo",
-        data: { name: "Marcus Chen", title: "VP Engineering" },
+        data: { name: fakePeople.sofia.fullName, title: "VP Engineering" },
         childrenCount: 4,
         childrenLoaded: false,
       },
       {
         id: "vp-product",
         parentId: "ceo",
-        data: { name: "Laura Kim", title: "VP Product" },
+        data: { name: fakePeople.ravi.fullName, title: "VP Product" },
         childrenCount: 3,
         childrenLoaded: false,
       },
       {
         id: "vp-people",
         parentId: "ceo",
-        data: { name: "James Okafor", title: "VP People" },
+        data: { name: fakePeople.greta.fullName, title: "VP People" },
         childrenCount: 2,
         childrenLoaded: false,
       },
@@ -355,116 +359,137 @@ export const Lazy: Story = {
         "vp-eng": [
           {
             id: "eng-mgr-1",
-            data: { name: "Nina Volkov", title: "Engineering Manager" },
+            data: {
+              name: fakePeople.mateo.fullName,
+              title: "Engineering Manager",
+            },
             childrenCount: 3,
           },
           {
             id: "eng-mgr-2",
-            data: { name: "Diego Martín", title: "Engineering Manager" },
+            data: {
+              name: fakePeople.iris.fullName,
+              title: "Engineering Manager",
+            },
             childrenCount: 2,
           },
           {
             id: "eng-staff-1",
-            data: { name: "Yuki Tanaka", title: "Staff Engineer" },
+            data: { name: fakePeople.aaron.fullName, title: "Staff Engineer" },
             childrenCount: 0,
           },
           {
             id: "eng-staff-2",
-            data: { name: "Priya Sharma", title: "Staff Engineer" },
+            data: { name: fakePeople.nadia.fullName, title: "Staff Engineer" },
             childrenCount: 0,
           },
         ],
         "vp-product": [
           {
             id: "pm-lead",
-            data: { name: "Aiko Saito", title: "Product Lead" },
+            data: { name: fakePeople.linus.fullName, title: "Product Lead" },
             childrenCount: 2,
           },
           {
             id: "design-lead",
-            data: { name: "Tomás Vega", title: "Design Lead" },
+            data: { name: fakePeople.camila.fullName, title: "Design Lead" },
             childrenCount: 2,
           },
           {
             id: "research-lead",
-            data: { name: "Sara Ahmed", title: "Research Lead" },
+            data: { name: fakePeople.theo.fullName, title: "Research Lead" },
             childrenCount: 0,
           },
         ],
         "vp-people": [
           {
             id: "talent-lead",
-            data: { name: "Ethan O'Brien", title: "Talent Lead" },
+            data: { name: fakePeople.eva.fullName, title: "Talent Lead" },
             childrenCount: 2,
           },
           {
             id: "people-ops",
-            data: { name: "Mia Lefebvre", title: "People Ops" },
+            data: { name: fakePeople.omar.fullName, title: "People Ops" },
             childrenCount: 0,
           },
         ],
         "eng-mgr-1": [
           {
             id: "eng-mgr-1-ic-1",
-            data: { name: "Hiro Watanabe", title: "Senior Engineer" },
+            data: { name: fakePeople.mira.fullName, title: "Senior Engineer" },
             childrenCount: 0,
           },
           {
             id: "eng-mgr-1-ic-2",
-            data: { name: "Carla Rivas", title: "Software Engineer" },
+            data: {
+              name: fakePeople.bruno.fullName,
+              title: "Software Engineer",
+            },
             childrenCount: 0,
           },
           {
             id: "eng-mgr-1-ic-3",
-            data: { name: "Ben Thompson", title: "Software Engineer" },
+            data: {
+              name: fakePeople.priya.fullName,
+              title: "Software Engineer",
+            },
             childrenCount: 0,
           },
         ],
         "eng-mgr-2": [
           {
             id: "eng-mgr-2-ic-1",
-            data: { name: "Lina Petrov", title: "Senior Engineer" },
+            data: { name: fakePeople.aria.fullName, title: "Senior Engineer" },
             childrenCount: 0,
           },
           {
             id: "eng-mgr-2-ic-2",
-            data: { name: "Omar Haddad", title: "Software Engineer" },
+            data: {
+              name: fakePeople.felix.fullName,
+              title: "Software Engineer",
+            },
             childrenCount: 0,
           },
         ],
         "pm-lead": [
           {
             id: "pm-1",
-            data: { name: "Riya Kapoor", title: "Product Manager" },
+            data: { name: fakePeople.lena.fullName, title: "Product Manager" },
             childrenCount: 0,
           },
           {
             id: "pm-2",
-            data: { name: "Léa Dubois", title: "Product Manager" },
+            data: {
+              name: fakePeople.tobias.fullName,
+              title: "Product Manager",
+            },
             childrenCount: 0,
           },
         ],
         "design-lead": [
           {
             id: "des-1",
-            data: { name: "Kenji Mori", title: "Senior Designer" },
+            data: { name: fakePeople.noor.fullName, title: "Senior Designer" },
             childrenCount: 0,
           },
           {
             id: "des-2",
-            data: { name: "Eva Lindgren", title: "Product Designer" },
+            data: {
+              name: fakePeople.diego.fullName,
+              title: "Product Designer",
+            },
             childrenCount: 0,
           },
         ],
         "talent-lead": [
           {
             id: "rec-1",
-            data: { name: "Pablo Núñez", title: "Senior Recruiter" },
+            data: { name: fakePeople.hana.fullName, title: "Senior Recruiter" },
             childrenCount: 0,
           },
           {
             id: "rec-2",
-            data: { name: "Anya Sokolova", title: "Recruiter" },
+            data: { name: fakePeople.caleb.fullName, title: "Recruiter" },
             childrenCount: 0,
           },
         ],
@@ -488,7 +513,7 @@ export const Lazy: Story = {
 // Generate a large tree for performance testing
 const DEPARTMENTS = [
   {
-    head: { name: "Marcus Chen", title: "VP Engineering" },
+    head: { name: fakePeople.yuki.fullName, title: "VP Engineering" },
     roles: [
       "Staff Engineer",
       "Senior Engineer",
@@ -503,7 +528,7 @@ const DEPARTMENTS = [
     ],
   },
   {
-    head: { name: "Laura Kim", title: "VP Product" },
+    head: { name: fakePeople.sofia.fullName, title: "VP Product" },
     roles: [
       "Senior Product Manager",
       "Product Manager",
@@ -514,7 +539,7 @@ const DEPARTMENTS = [
     ],
   },
   {
-    head: { name: "James Okafor", title: "VP People" },
+    head: { name: fakePeople.ravi.fullName, title: "VP People" },
     roles: [
       "People Partner",
       "Talent Acquisition Lead",
@@ -525,7 +550,7 @@ const DEPARTMENTS = [
     ],
   },
   {
-    head: { name: "Elena Dupont", title: "VP Finance" },
+    head: { name: fakePeople.greta.fullName, title: "VP Finance" },
     roles: [
       "Financial Controller",
       "Senior Accountant",
@@ -535,7 +560,7 @@ const DEPARTMENTS = [
     ],
   },
   {
-    head: { name: "Amir Hassan", title: "VP Sales" },
+    head: { name: fakePeople.mateo.fullName, title: "VP Sales" },
     roles: [
       "Sales Director",
       "Account Executive",
@@ -548,128 +573,26 @@ const DEPARTMENTS = [
   },
 ]
 
-const FIRST_NAMES = [
-  "Nina",
-  "Diego",
-  "Yuki",
-  "Priya",
-  "Liam",
-  "Fatima",
-  "Noah",
-  "Marta",
-  "Oliver",
-  "Sara",
-  "Hugo",
-  "Chloe",
-  "André",
-  "Mei",
-  "Oscar",
-  "Ines",
-  "Leo",
-  "Dana",
-  "Erik",
-  "Zara",
-  "Mateo",
-  "Nadia",
-  "Ravi",
-  "Clara",
-  "Joel",
-  "Amara",
-  "Kai",
-  "Elsa",
-  "Marco",
-  "Lena",
-  "Adam",
-  "Vera",
-  "Ivan",
-  "Rosa",
-  "Sam",
-  "Leila",
-  "Jan",
-  "Petra",
-  "Alex",
-  "Nora",
-  "Tomás",
-  "Aisha",
-  "Finn",
-  "Julia",
-  "Bruno",
-  "Hana",
-  "Lukas",
-  "Dina",
-  "Felix",
-  "Sana",
-]
-
-const LAST_NAMES = [
-  "Volkov",
-  "Martín",
-  "Tanaka",
-  "Sharma",
-  "Andersen",
-  "Benali",
-  "Williams",
-  "Ferreira",
-  "Park",
-  "Novak",
-  "Laurent",
-  "Zhang",
-  "Santos",
-  "Lindqvist",
-  "Moreau",
-  "Kowalski",
-  "Nakamura",
-  "Al-Rashid",
-  "Weber",
-  "Johansson",
-  "Rossi",
-  "Müller",
-  "Petrov",
-  "García",
-  "Silva",
-  "Dubois",
-  "Hayashi",
-  "Berg",
-  "Costa",
-  "Larsson",
-  "Ali",
-  "Richter",
-  "Popov",
-  "Ortega",
-  "Flores",
-  "Yamazaki",
-  "Khoury",
-  "Bauer",
-  "Eriksen",
-  "Torres",
-  "Herrera",
-  "Patel",
-  "Reyes",
-  "Kim",
-  "Oliveira",
-  "Schmid",
-  "Ito",
-  "Bakker",
-  "Hansen",
-  "Meyer",
-]
+const ROSTER = Object.values(fakePeople)
 
 function makeLargeTree(count: number): GraphNode<Employee>[] {
   const nodes: GraphNode<Employee>[] = [
     {
       id: "root",
       parentId: null,
-      data: { name: "Sofia Reyes", title: "Chief Executive Officer" },
+      data: {
+        name: fakePeople.iris.fullName,
+        title: "Chief Executive Officer",
+      },
       childrenCount: DEPARTMENTS.length,
     },
   ]
 
   let nameIndex = 0
   const getName = () => {
-    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
-    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    const name = ROSTER[nameIndex % ROSTER.length].fullName
     nameIndex++
-    return `${first} ${last}`
+    return name
   }
 
   const perDept = Math.floor(
@@ -830,10 +753,9 @@ function makeDeferredPayload(count: number): DeferredNodesPayload<Employee> {
   const nodes: GraphNode<Employee>[] = []
   let nameIndex = 100
   const getName = () => {
-    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
-    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    const name = ROSTER[nameIndex % ROSTER.length].fullName
     nameIndex++
-    return `${first} ${last}`
+    return name
   }
 
   // Add more members to existing departments

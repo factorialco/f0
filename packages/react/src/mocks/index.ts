@@ -12,6 +12,11 @@ import {
   Table,
 } from "@/icons/app"
 
+import { FAKE_MANAGERS, FAKE_PEOPLE, getFakePerson } from "./people"
+
+// Re-export the canonical roster so existing imports can reach it from @/mocks.
+export * from "./people"
+
 export const MOCK_ICONS = [
   Pencil,
   Plus,
@@ -45,53 +50,10 @@ export const MOCK_EMOJIS = [
   "🐤",
 ]
 
-export const FIRST_NAMES_MOCK = [
-  "Dani",
-  "Desirée",
-  "Eliseo",
-  "Arnau",
-  "Carlos",
-  "Lilian",
-  "Andrea",
-  "Mario",
-  "Nik",
-  "René",
-  "Sergio",
-  "Saúl",
-]
+// Derived from the canonical roster so names stay consistent everywhere.
+export const FIRST_NAMES_MOCK = FAKE_PEOPLE.map((person) => person.firstName)
 
-export const SURNAMES_MOCK = [
-  "Smith",
-  "Johnson",
-  "Williams",
-  "Brown",
-  "Jones",
-  "Garcia",
-  "Miller",
-  "Davis",
-  "Rodriguez",
-  "Martinez",
-  "Hernandez",
-  "Lopez",
-  "Gonzalez",
-  "Wilson",
-  "Anderson",
-  "Thomas",
-  "Taylor",
-  "Moore",
-  "Jackson",
-  "Martin",
-  "Lee",
-  "Perez",
-  "Thompson",
-  "White",
-  "Harris",
-  "Sanchez",
-  "Clark",
-  "Ramirez",
-  "Lewis",
-  "Robinson",
-]
+export const SURNAMES_MOCK = FAKE_PEOPLE.map((person) => person.lastName)
 
 export const ROLES_MOCK = [
   "Senior Engineer",
@@ -226,20 +188,22 @@ export type MockUser = {
 
 export const generateMockUsers = (count: number): MockUser[] => {
   return Array.from({ length: count }).map((_, index) => {
-    const department = getMockValue(DEPARTMENTS_MOCK, index)
-    const name = `${getMockValue(FIRST_NAMES_MOCK, index)} ${getMockValue(SURNAMES_MOCK, index)}`
-    const email = `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`
+    // Each index maps to a stable roster person: same name/email/avatar/manager.
+    const person = getFakePerson(index)
+    const manager = person.managerId
+      ? FAKE_PEOPLE.find((candidate) => candidate.id === person.managerId)
+      : undefined
     return {
       index,
       id: `user-${index + 1}`,
-      name,
-      email,
-      role: getMockValue(ROLES_MOCK, index),
-      department,
+      name: person.fullName,
+      email: person.email,
+      role: person.jobTitle,
+      department: person.department,
       status: getMockValue(STATUS_MOCK, index),
       isStarred: index % 3 === 0,
-      manager: getMockValue(MANAGERS_MOCK, index),
-      image: getMockValue(IMAGE_MOCK, index),
+      manager: (manager ?? FAKE_MANAGERS[0]).fullName,
+      image: person.image,
       href: `/users/user-${index + 1}`,
       salary: getMockValue(SALARY_MOCK, index),
       joinedAt: getMockValue(START_DATE_MOCK, index),
@@ -252,21 +216,8 @@ export const generateMockUsers = (count: number): MockUser[] => {
     }
   })
 }
-export const IMAGE_MOCK = [
-  "/avatars/person01.jpg",
-  "/avatars/person02.jpg",
-  "/avatars/person03.jpg",
-  "/avatars/person04.jpg",
-  "/avatars/person05.jpg",
-  "/avatars/person06.jpg",
-  "/avatars/person07.jpg",
-  "/avatars/person08.jpg",
-]
 
-export const MANAGERS_MOCK = [
-  "John Doe",
-  "Jane Smith",
-  "Michael Brown",
-  "Emily Johnson",
-  "David Lee",
-]
+// Avatar paths and manager names, derived from the canonical roster.
+export const IMAGE_MOCK = FAKE_PEOPLE.slice(0, 8).map((person) => person.image)
+
+export const MANAGERS_MOCK = FAKE_MANAGERS.map((person) => person.fullName)

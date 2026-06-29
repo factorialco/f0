@@ -16,6 +16,7 @@ import Plane from "@/icons/app/Plane"
 import Question from "@/icons/app/Question"
 import ThumbsUp from "@/icons/app/ThumbsUp"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -93,14 +94,14 @@ export const Completed: Story = {
             {
               type: "person",
               badge: { type: "positive", icon: Check },
-              firstName: "Alex",
-              lastName: "Rashfold",
+              firstName: fakePeople.noor.firstName,
+              lastName: fakePeople.noor.lastName,
             },
             {
               type: "person",
               badge: { type: "positive", icon: Check },
-              firstName: "James",
-              lastName: "Hopper",
+              firstName: fakePeople.hana.firstName,
+              lastName: fakePeople.hana.lastName,
             },
           ],
         },
@@ -141,26 +142,26 @@ export const WithAssignees: Story = {
           avatars: [
             {
               type: "person",
-              firstName: "Alex",
-              lastName: "Rashfold",
+              firstName: fakePeople.noor.firstName,
+              lastName: fakePeople.noor.lastName,
               badge: { type: "positive", icon: Check },
             },
             {
               type: "person",
-              firstName: "James",
-              lastName: "Hopper",
+              firstName: fakePeople.hana.firstName,
+              lastName: fakePeople.hana.lastName,
               badge: { type: "positive", icon: Check },
             },
             {
               type: "person",
-              firstName: "Sarah",
-              lastName: "Connor",
+              firstName: fakePeople.caleb.firstName,
+              lastName: fakePeople.caleb.lastName,
               badge: { type: "positive", icon: Check },
             },
             {
               type: "person",
-              firstName: "John",
-              lastName: "Doe",
+              firstName: fakePeople.yuki.firstName,
+              lastName: fakePeople.yuki.lastName,
               badge: { type: "positive", icon: Check },
             },
           ],
@@ -228,8 +229,8 @@ export const Timeline: Story = {
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "Alex",
-                  lastName: "Rashfold",
+                  firstName: fakePeople.noor.firstName,
+                  lastName: fakePeople.noor.lastName,
                 },
               ],
             },
@@ -252,13 +253,13 @@ export const Timeline: Story = {
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "James",
-                  lastName: "Hopper",
+                  firstName: fakePeople.hana.firstName,
+                  lastName: fakePeople.hana.lastName,
                 },
                 {
                   type: "person",
-                  firstName: "Sarah",
-                  lastName: "Connor",
+                  firstName: fakePeople.caleb.firstName,
+                  lastName: fakePeople.caleb.lastName,
                   badge: { type: "positive", icon: Check },
                 },
               ],
@@ -282,20 +283,20 @@ export const Timeline: Story = {
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "Alex",
-                  lastName: "Rashfold",
+                  firstName: fakePeople.noor.firstName,
+                  lastName: fakePeople.noor.lastName,
                 },
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "James",
-                  lastName: "Hopper",
+                  firstName: fakePeople.hana.firstName,
+                  lastName: fakePeople.hana.lastName,
                 },
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "Sarah",
-                  lastName: "Connor",
+                  firstName: fakePeople.caleb.firstName,
+                  lastName: fakePeople.caleb.lastName,
                 },
               ],
             },
@@ -335,20 +336,20 @@ export const WithActions: Story = {
           avatars: [
             {
               type: "person",
-              firstName: "Quigley",
-              lastName: "Smitty",
+              firstName: fakePeople.sofia.firstName,
+              lastName: fakePeople.sofia.lastName,
               badge: { type: "positive", icon: Check },
             },
             {
               type: "person",
-              firstName: "James",
-              lastName: "Hopper",
+              firstName: fakePeople.hana.firstName,
+              lastName: fakePeople.hana.lastName,
               badge: { type: "positive", icon: Check },
             },
             {
               type: "person",
-              firstName: "Sarah",
-              lastName: "Connor",
+              firstName: fakePeople.caleb.firstName,
+              lastName: fakePeople.caleb.lastName,
               badge: { type: "positive", icon: Check },
             },
           ],
@@ -407,18 +408,18 @@ const MultitaskTimelineDemo = () => {
               avatars: [
                 {
                   type: "person",
-                  firstName: "Quigley",
-                  lastName: "Smitty",
+                  firstName: fakePeople.sofia.firstName,
+                  lastName: fakePeople.sofia.lastName,
                 },
                 {
                   type: "person",
-                  firstName: "James",
-                  lastName: "Hopper",
+                  firstName: fakePeople.hana.firstName,
+                  lastName: fakePeople.hana.lastName,
                 },
                 {
                   type: "person",
-                  firstName: "Sarah",
-                  lastName: "Connor",
+                  firstName: fakePeople.caleb.firstName,
+                  lastName: fakePeople.caleb.lastName,
                 },
               ],
             },
@@ -456,14 +457,14 @@ const MultitaskTimelineDemo = () => {
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "James",
-                  lastName: "Hopper",
+                  firstName: fakePeople.hana.firstName,
+                  lastName: fakePeople.hana.lastName,
                 },
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "Sarah",
-                  lastName: "Connor",
+                  firstName: fakePeople.caleb.firstName,
+                  lastName: fakePeople.caleb.lastName,
                 },
               ],
             },
@@ -499,18 +500,18 @@ const MultitaskTimelineDemo = () => {
                   avatars: [
                     {
                       type: "person",
-                      firstName: "Quigley",
-                      lastName: "Smitty",
+                      firstName: fakePeople.sofia.firstName,
+                      lastName: fakePeople.sofia.lastName,
                     },
                     {
                       type: "person",
-                      firstName: "James",
-                      lastName: "Hopper",
+                      firstName: fakePeople.hana.firstName,
+                      lastName: fakePeople.hana.lastName,
                     },
                     {
                       type: "person",
-                      firstName: "Sarah",
-                      lastName: "Connor",
+                      firstName: fakePeople.caleb.firstName,
+                      lastName: fakePeople.caleb.lastName,
                     },
                   ],
                 },
@@ -620,62 +621,62 @@ const MultitaskDemo = () => {
                   avatars: [
                     {
                       type: "person",
-                      firstName: "Quigley",
-                      lastName: "Smitty",
+                      firstName: fakePeople.sofia.firstName,
+                      lastName: fakePeople.sofia.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "James",
-                      lastName: "Hopper",
+                      firstName: fakePeople.hana.firstName,
+                      lastName: fakePeople.hana.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "Sarah",
-                      lastName: "Connor",
+                      firstName: fakePeople.caleb.firstName,
+                      lastName: fakePeople.caleb.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "John",
-                      lastName: "Doe",
+                      firstName: fakePeople.yuki.firstName,
+                      lastName: fakePeople.yuki.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "Jane",
-                      lastName: "Smith",
+                      firstName: fakePeople.ravi.firstName,
+                      lastName: fakePeople.ravi.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "Alex",
-                      lastName: "Rashfold",
+                      firstName: fakePeople.noor.firstName,
+                      lastName: fakePeople.noor.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "Emily",
-                      lastName: "Chen",
+                      firstName: fakePeople.greta.firstName,
+                      lastName: fakePeople.greta.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "Mike",
-                      lastName: "Ross",
+                      firstName: fakePeople.iris.firstName,
+                      lastName: fakePeople.iris.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                     {
                       type: "person",
-                      firstName: "Rachel",
+                      firstName: fakePeople.aaron.firstName,
                       badge: { type: "positive", icon: Check },
-                      lastName: "Green",
+                      lastName: fakePeople.aaron.lastName,
                     },
                     {
                       type: "person",
-                      firstName: "Monica",
-                      lastName: "Geller",
+                      firstName: fakePeople.nadia.firstName,
+                      lastName: fakePeople.nadia.lastName,
                       badge: { type: "positive", icon: Check },
                     },
                   ],
@@ -704,8 +705,8 @@ const MultitaskDemo = () => {
                     {
                       type: "person",
                       badge: { type: "positive", icon: Check },
-                      firstName: "Alex",
-                      lastName: "Rashfold",
+                      firstName: fakePeople.noor.firstName,
+                      lastName: fakePeople.noor.lastName,
                     },
                   ],
                 },
@@ -745,8 +746,8 @@ const MultitaskDemo = () => {
                     {
                       type: "person",
                       badge: { type: "positive", icon: Check },
-                      firstName: "James",
-                      lastName: "Hopper",
+                      firstName: fakePeople.hana.firstName,
+                      lastName: fakePeople.hana.lastName,
                     },
                   ],
                 },
@@ -775,14 +776,14 @@ const MultitaskDemo = () => {
                     {
                       type: "person",
                       badge: { type: "positive", icon: Check },
-                      firstName: "Sarah",
-                      lastName: "Connor",
+                      firstName: fakePeople.caleb.firstName,
+                      lastName: fakePeople.caleb.lastName,
                     },
                     {
                       type: "person",
                       badge: { type: "positive", icon: Check },
-                      firstName: "John",
-                      lastName: "Doe",
+                      firstName: fakePeople.yuki.firstName,
+                      lastName: fakePeople.yuki.lastName,
                     },
                   ],
                 },
@@ -832,14 +833,14 @@ export const Snapshot: Story = {
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "Alex",
-                  lastName: "Rashfold",
+                  firstName: fakePeople.noor.firstName,
+                  lastName: fakePeople.noor.lastName,
                 },
                 {
                   type: "person",
                   badge: { type: "positive", icon: Check },
-                  firstName: "James",
-                  lastName: "Hopper",
+                  firstName: fakePeople.hana.firstName,
+                  lastName: fakePeople.hana.lastName,
                 },
               ],
             },
@@ -940,8 +941,8 @@ const NestedtaskTimelineDemo = () => {
               avatars: [
                 {
                   type: "person",
-                  firstName: "Hellen",
-                  lastName: "the HR",
+                  firstName: fakePeople.linus.firstName,
+                  lastName: fakePeople.linus.lastName,
                 },
               ],
             },
@@ -998,8 +999,8 @@ const NestedtaskTimelineDemo = () => {
               avatars: [
                 {
                   type: "person",
-                  firstName: "Hellen",
-                  lastName: "the HR",
+                  firstName: fakePeople.linus.firstName,
+                  lastName: fakePeople.linus.lastName,
                 },
               ],
             },
@@ -1035,8 +1036,8 @@ export const NestedtaskNotStarted: Story = {
           avatars: [
             {
               type: "person",
-              firstName: "Hellen",
-              lastName: "the HR",
+              firstName: fakePeople.linus.firstName,
+              lastName: fakePeople.linus.lastName,
             },
           ],
         },
@@ -1123,9 +1124,12 @@ type SignatureRow = {
   statusVariant: "positive" | "warning" | "critical"
 }
 
-const james = { name: "James Hopper", email: "james.hopper@example.com" }
-const hellen = { name: "Hellen Wagner", email: "hellen.wagner@example.com" }
-const danilo = { name: "Danilo Pereira", email: "danilo.pereira@example.com" }
+const james = { name: fakePeople.hana.fullName, email: fakePeople.hana.email }
+const hellen = {
+  name: fakePeople.camila.fullName,
+  email: fakePeople.camila.email,
+}
+const danilo = { name: fakePeople.theo.fullName, email: fakePeople.theo.email }
 
 const SIGNATURE_ROWS: SignatureRow[] = [
   {

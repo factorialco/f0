@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Check } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { mockImage } from "@/testing/mocks/images"
 
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
@@ -28,8 +29,8 @@ type Story = StoryObj<typeof F0AvatarPerson>
 
 export const Default: Story = {
   args: {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: fakePeople.aria.firstName,
+    lastName: fakePeople.aria.lastName,
     size: "md",
   },
 }
@@ -37,7 +38,7 @@ export const Default: Story = {
 export const WithImage: Story = {
   args: {
     ...Default.args,
-    src: "/avatars/person04.jpg",
+    src: fakePeople.aria.image,
   },
 }
 
@@ -82,8 +83,8 @@ export const Snapshot: Story = {
             <F0AvatarPerson
               key={size}
               size={size}
-              firstName="Juanito"
-              lastName="Perez"
+              firstName={fakePeople.noor.firstName}
+              lastName={fakePeople.noor.lastName}
             />
           ))}
         </div>
@@ -95,8 +96,8 @@ export const Snapshot: Story = {
             <F0AvatarPerson
               key={size}
               size={size}
-              firstName="Juanito"
-              lastName="Perez"
+              firstName={fakePeople.noor.firstName}
+              lastName={fakePeople.noor.lastName}
               src={mockImage("person", index)}
             />
           ))}
@@ -109,8 +110,8 @@ export const Snapshot: Story = {
             <F0AvatarPerson
               key={size}
               size={size}
-              firstName="Juanito"
-              lastName="Perez"
+              firstName={fakePeople.noor.firstName}
+              lastName={fakePeople.noor.lastName}
               src={mockImage("person", index)}
               badge={{ type: "module", module: "inbox" }}
             />
@@ -125,8 +126,8 @@ export const Snapshot: Story = {
               key={size}
               size={size}
               deactivated
-              firstName="Juanito"
-              lastName="Perez"
+              firstName={fakePeople.noor.firstName}
+              lastName={fakePeople.noor.lastName}
             />
           ))}
         </div>

@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import image from "@storybook-static/avatars/person04.jpg"
 import { fn } from "storybook/test"
 
 import { F0Card } from "@/components/F0Card"
 import { Briefcase, Check, Cross, Delete, Envelope } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import { F0CardHorizontal } from "../F0CardHorizontal"
 
@@ -175,11 +175,11 @@ export const ConfirmReject: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description: "Requested 3 days off",
     stackAt: "md",
     rejectAction: { label: "Reject", onClick: clickAlert("Reject") },
@@ -197,11 +197,11 @@ export const Accepted: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description: "Requested 3 days off",
     status: { icon: Check, variant: "positive", label: "Accepted" },
   },
@@ -211,11 +211,11 @@ export const Rejected: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description: "Requested 3 days off",
     status: { icon: Cross, variant: "critical", label: "Rejected" },
     inactive: true,
@@ -232,11 +232,11 @@ export const Stacking: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description: "Drops to its own line below @md",
     stackAt: "md",
     secondaryActions: [{ label: "Edit", onClick: clickAlert("Edit") }],
@@ -289,11 +289,11 @@ export const ResponsiveStacking: Story = {
             <F0CardHorizontal
               avatar={{
                 type: "person",
-                firstName: "Jane",
-                lastName: "Cooper",
-                src: image,
+                firstName: fakePeople.noor.firstName,
+                lastName: fakePeople.noor.lastName,
+                src: fakePeople.noor.image,
               }}
-              title="Jane Cooper"
+              title={fakePeople.noor.fullName}
               description="Requested 3 days off"
               stackAt="md"
               secondaryActions={[
@@ -329,11 +329,11 @@ export const WithAvatar: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description: "Product designer",
     primaryAction: {
       label: "Open",
@@ -372,11 +372,11 @@ export const LongContent: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description:
       "Product designer leading the design system team across web and mobile, with a bio long enough to wrap onto several lines — ref https://example.com/people/jane-cooper-design-systems-lead-2026",
     primaryAction: { label: "Open", onClick: clickAlert("Open") },
@@ -391,11 +391,11 @@ export const WithAlert: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description: "Contract ends in 3 days",
     alert: {
       variant: "warning",
@@ -432,11 +432,11 @@ export const AvatarTypes: Story = {
       <F0CardHorizontal
         avatar={{
           type: "person",
-          firstName: "Jane",
-          lastName: "Cooper",
-          src: image,
+          firstName: fakePeople.noor.firstName,
+          lastName: fakePeople.noor.lastName,
+          src: fakePeople.noor.image,
         }}
-        title="Jane Cooper"
+        title={fakePeople.noor.fullName}
         description="Person avatar"
         primaryAction={{ label: "Open", onClick: clickAlert("Open") }}
       />
@@ -509,9 +509,21 @@ export const AvatarTypes: Story = {
 }
 
 const people = [
-  { firstName: "Jane", lastName: "Cooper", role: "Product designer" },
-  { firstName: "Cody", lastName: "Fisher", role: "Engineering manager" },
-  { firstName: "Esther", lastName: "Howard", role: "Sales lead" },
+  {
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
+    role: "Product designer",
+  },
+  {
+    firstName: fakePeople.hana.firstName,
+    lastName: fakePeople.hana.lastName,
+    role: "Engineering manager",
+  },
+  {
+    firstName: fakePeople.caleb.firstName,
+    lastName: fakePeople.caleb.lastName,
+    role: "Sales lead",
+  },
 ]
 
 /**

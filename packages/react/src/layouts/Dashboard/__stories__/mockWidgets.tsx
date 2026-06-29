@@ -1,6 +1,7 @@
 import type { EChartsOption } from "echarts"
 
 import { F0Chart } from "@/kits/Charts/F0Chart"
+import { FAKE_PEOPLE } from "@/mocks/people"
 import {
   getMockVisualizations,
   ExampleComponent as OneDataCollectionExampleComponent,
@@ -55,18 +56,7 @@ const departments = [
 
 const locations = ["New York", "London", "Barcelona", "Berlin", "Remote"]
 
-const names = [
-  "Thomas Anderson",
-  "Isabella Garcia",
-  "Alexander Lee",
-  "Sophie Davis",
-  "David Brown",
-  "Olivia Martinez",
-  "James Wilson",
-  "Emma Thompson",
-  "Michael Chen",
-  "Sarah Johnson",
-]
+const names = FAKE_PEOPLE.slice(0, 10).map((person) => person.fullName)
 
 // Chart helper functions
 const getRandomBarChartOptions = (): ChartOptions => {

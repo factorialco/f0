@@ -1,4 +1,5 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
+import { FAKE_PEOPLE } from "@/mocks/people"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
@@ -45,56 +46,49 @@ const person = (
     vacation: opts.vacation,
   })
 
+// Chat participants are drawn from the canonical fake roster, so the same person
+// carries the same name/role here as everywhere else. The scenario knobs
+// (online / vacation / photo) stay per the chat demo design.
+const fromRoster = (
+  chatId: string,
+  rosterId: string,
+  opts: { online?: boolean; vacation?: boolean; image?: number } = {},
+  subtitleOverride?: string
+): MockPerson => {
+  const p = FAKE_PEOPLE.find((candidate) => candidate.id === rosterId)!
+  return person(
+    chatId,
+    p.firstName,
+    p.lastName,
+    subtitleOverride ?? p.jobTitle,
+    opts
+  )
+}
+
 // A deliberate mix: some people have a photo (`image`), others fall back to the
 // initials + colour avatar (and their name is tinted to match — WhatsApp-style).
-export const ME = person("me", "Jordan", "Avery", "Product Manager", {
-  online: true,
-  image: 4,
-})
+export const ME = fromRoster("me", "person-10", { online: true, image: 4 })
 // Online people reply when you message them; offline people never do.
-const ELEANOR = person(
-  "u_eleanor",
-  "Eleanor",
-  "Whitfield",
-  "Senior Product Designer",
-  { online: true, image: 0 }
+const ELEANOR = fromRoster("u_eleanor", "person-12", { online: true, image: 0 })
+const MARCUS = fromRoster("u_marcus", "person-1", { online: true, image: 1 })
+const PRIYA = fromRoster("u_priya", "person-5", { online: true, image: 2 })
+// No photo — initials + colour avatar.
+const THEO = fromRoster(
+  "u_theo",
+  "person-24",
+  { vacation: true },
+  "On vacation until Monday"
 )
-const MARCUS = person("u_marcus", "Marcus", "Bennett", "Engineering Manager", {
-  online: true,
-  image: 1,
-})
-const PRIYA = person("u_priya", "Priya", "Raman", "Account Executive", {
-  online: true,
-  image: 2,
-})
+const NADIA = fromRoster("u_nadia", "person-21")
+const OWEN = fromRoster("u_owen", "person-18", { online: true, image: 3 })
+const HARPER = fromRoster("u_harper", "person-20", { online: true, image: 7 })
 // No photo — initials + colour avatar.
-const THEO = person("u_theo", "Theo", "Lindqvist", "On vacation until Monday", {
-  vacation: true,
-})
-const NADIA = person("u_nadia", "Nadia", "Costa", "Recruiter")
-const OWEN = person("u_owen", "Owen", "Carter", "Finance Analyst", {
-  online: true,
-  image: 3,
-})
-const HARPER = person("u_harper", "Harper", "Quinn", "Customer Success", {
-  online: true,
-  image: 7,
-})
+const GRACE = fromRoster("u_grace", "person-17", { online: true })
+const SAM = fromRoster("u_sam", "person-7", { online: true, image: 5 })
+const NOAH = fromRoster("u_noah", "person-16")
+const ISLA = fromRoster("u_isla", "person-14", { online: true, image: 6 })
 // No photo — initials + colour avatar.
-const GRACE = person("u_grace", "Grace", "Liang", "Data Analyst", {
-  online: true,
-})
-const SAM = person("u_sam", "Sam", "Okafor", "Frontend Engineer", {
-  online: true,
-  image: 5,
-})
-const NOAH = person("u_noah", "Noah", "Bergström", "QA Engineer")
-const ISLA = person("u_isla", "Isla", "Romano", "Content Strategist", {
-  online: true,
-  image: 6,
-})
-// No photo — initials + colour avatar.
-const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
+const VIKTOR = fromRoster("u_viktor", "person-6")
 
 // ---------------------------------------------------------------------------
 // Seeds — every conversation is deliberately different (empty, short, long,
@@ -187,7 +181,7 @@ export const SEEDS: Seed[] = [
     unread: 1,
     alwaysTyping: true,
     lines: [
-      { from: ME, body: "Hey Eleanor! Got 10 minutes today?", min: 2 * HOUR },
+      { from: ME, body: "Hey Hana! Got 10 minutes today?", min: 2 * HOUR },
       {
         from: ELEANOR,
         body: "Sure — right after standup works",
@@ -222,7 +216,7 @@ export const SEEDS: Seed[] = [
         body: "Welcome to the team! Excited to work together 🎉",
         min: 21 * DAY,
       },
-      { from: ME, body: "Thanks Marcus! Happy to be here.", min: 21 * DAY - 5 },
+      { from: ME, body: "Thanks Eva! Happy to be here.", min: 21 * DAY - 5 },
       { from: MARCUS, body: "Did the deploy go out?", min: 3 * DAY },
       {
         from: ME,
@@ -320,7 +314,7 @@ export const SEEDS: Seed[] = [
     participants: [OWEN],
     lines: [
       { from: OWEN, body: "Expense report approved ✅", min: 3 * DAY },
-      { from: ME, body: "Thanks Owen!", min: 3 * DAY - 2 },
+      { from: ME, body: "Thanks Mateo!", min: 3 * DAY - 2 },
     ],
   },
   // DM — empty (exercises the empty state).
@@ -421,7 +415,7 @@ export const SEEDS: Seed[] = [
         min: 90 * MIN,
       },
       { from: MARCUS, body: "Perfect, thanks all 🙌", min: 20 * MIN },
-      // A mention of someone else (read) — hovering the @chip opens Grace's
+      // A mention of someone else (read) — hovering the @chip opens Greta's
       // profile card, the same affordance as hovering her avatar.
       {
         from: ME,

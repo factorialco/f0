@@ -8,6 +8,7 @@ import { F0Checkbox } from "@/components/F0Checkbox"
 import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { F0TagStatus, type StatusVariant } from "@/components/tags/F0TagStatus"
 import { Dropdown } from "@/experimental/Navigation/Dropdown"
+import { fakePeople } from "@/mocks/people"
 import { OnePagination } from "@/ui/OnePagination"
 import { Delete, Ellipsis, Pencil } from "@/icons/app"
 
@@ -32,11 +33,11 @@ type Story = StoryObj<typeof OneTable>
 const sampleData = [
   {
     id: 1,
-    name: "Nik Lopin",
-    email: "nik@example.com",
+    name: fakePeople.aria.fullName,
+    email: fakePeople.aria.email,
     role: "Admin",
     joined: "2024-01-01",
-    manager: "Eliseo Juan Quintanilla",
+    manager: fakePeople.eva.fullName,
     status: {
       label: "Active",
       variant: "positive" as StatusVariant,
@@ -45,11 +46,11 @@ const sampleData = [
   },
   {
     id: 2,
-    name: "Josep Jaume Rey",
-    email: "jj@example.com",
+    name: fakePeople.felix.fullName,
+    email: fakePeople.felix.email,
     role: "User",
     joined: "2024-01-01",
-    manager: "Eliseo Juan Quintanilla",
+    manager: fakePeople.eva.fullName,
     status: {
       label: "Active",
       variant: "positive" as StatusVariant,
@@ -58,11 +59,11 @@ const sampleData = [
   },
   {
     id: 3,
-    name: "Saúl Domínguez",
-    email: "saul@example.com",
+    name: fakePeople.lena.fullName,
+    email: fakePeople.lena.email,
     role: "Editor",
     joined: "2024-01-01",
-    manager: "Eliseo Juan Quintanilla",
+    manager: fakePeople.eva.fullName,
     status: {
       label: "Promoted",
       variant: "warning" as StatusVariant,
@@ -71,11 +72,11 @@ const sampleData = [
   },
   {
     id: 4,
-    name: "Desirée Navarro",
-    email: "desi@example.com",
+    name: fakePeople.tobias.fullName,
+    email: fakePeople.tobias.email,
     role: "Editor",
     joined: "2024-01-01",
-    manager: "René Galindo",
+    manager: fakePeople.priya.fullName,
     status: {
       label: "Active",
       variant: "positive" as StatusVariant,

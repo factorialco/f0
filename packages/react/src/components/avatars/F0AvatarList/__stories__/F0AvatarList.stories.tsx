@@ -11,6 +11,7 @@ import {
   TeamAvatarVariant,
 } from "@/components/avatars/F0Avatar"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarList } from "../F0AvatarList"
@@ -18,28 +19,28 @@ import { avatarListSizes } from "../types"
 
 const dummyPeople = [
   {
-    firstName: "Nik",
-    lastName: "Lopin",
-    src: "/avatars/person01.jpg",
+    firstName: fakePeople.felix.firstName,
+    lastName: fakePeople.felix.lastName,
+    src: fakePeople.felix.image,
   },
   {
-    firstName: "Josep Jaume",
-    lastName: "Rey",
-    src: "/avatars/person02.jpg",
+    firstName: fakePeople.tobias.firstName,
+    lastName: fakePeople.tobias.lastName,
+    src: fakePeople.tobias.image,
   },
   {
-    firstName: "Saúl",
-    lastName: "Domínguez",
+    firstName: fakePeople.lena.firstName,
+    lastName: fakePeople.lena.lastName,
   },
   {
-    firstName: "Dani",
-    lastName: "Moreno",
-    src: "/avatars/person03.jpg",
+    firstName: fakePeople.aria.firstName,
+    lastName: fakePeople.aria.lastName,
+    src: fakePeople.aria.image,
   },
   {
-    firstName: "Hellen",
-    lastName: "Fernández",
-    src: "/avatars/person04.jpg",
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
+    src: fakePeople.noor.image,
     deactivated: true,
   },
 ]
@@ -232,11 +233,11 @@ export const WithRemainingCount: Story = {
 }
 
 const personEmails = [
-  "lionel.messi@example.com",
-  "ada.lovelace@example.com",
-  "marie.curie@example.com",
-  "alan.turing@example.com",
-  "grace.hopper@example.com",
+  fakePeople.hana.email,
+  fakePeople.caleb.email,
+  fakePeople.yuki.email,
+  fakePeople.sofia.email,
+  fakePeople.ravi.email,
 ]
 
 function getDummyPeopleWithDescriptions(count: number) {

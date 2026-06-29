@@ -5,6 +5,8 @@ import { z } from "zod"
 
 import type { F0AiAvailableFormDefinition } from "@/patterns/F0Form"
 
+import { fakePeople } from "@/mocks/people"
+
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
@@ -52,19 +54,19 @@ const employeeSchema = z.object({
   // -- Text fields --
   firstName: f0FormField(z.string().min(1), {
     label: "First Name",
-    placeholder: "e.g. Jane",
+    placeholder: `e.g. ${fakePeople.noor.firstName}`,
     section: "personal",
     helpText: "Legal first name as it appears on official documents",
   }),
   lastName: f0FormField(z.string().min(1), {
     label: "Last Name",
-    placeholder: "e.g. Doe",
+    placeholder: `e.g. ${fakePeople.noor.lastName}`,
     section: "personal",
     helpText: "Legal last name as it appears on official documents",
   }),
   email: f0FormField(z.string().email(), {
     label: "Email",
-    placeholder: "jane@factorial.co",
+    placeholder: fakePeople.noor.email,
     section: "personal",
     helpText: "Work email address — will be used for login",
   }),
@@ -246,7 +248,8 @@ function FormWithAiDemo() {
       </h1>
       <p className="mb-6 text-sm text-f1-foreground-secondary">
         Try asking One to fill this form. Say something like: &quot;Fill the new
-        employee form with Jane Doe, engineer, starting next Monday&quot;
+        employee form with {fakePeople.noor.fullName}, engineer, starting next
+        Monday&quot;
       </p>
       <F0Form formRef={formRef} formDefinition={formDefinition} />
     </div>
@@ -265,7 +268,7 @@ function FormWithAiDemo() {
  * Try prompts like:
  * - "What forms are available?"
  * - "Describe the new employee form"
- * - "Fill the form with: Jane Doe, engineer, salary 75000, starting 2026-04-01"
+ * - "Fill the form with: Noor Rahimi, engineer, salary 75000, starting 2026-04-01"
  * - "What's the current form state?"
  * - "Submit the form"
  */
@@ -315,25 +318,25 @@ const presentableFormSchema = z.object({
   firstName: f0FormField(z.string().min(1), {
     label: "First Name",
     section: "personal",
-    placeholder: "e.g. Jane",
+    placeholder: `e.g. ${fakePeople.noor.firstName}`,
     helpText: "Legal first name as it appears on official documents",
   }),
   lastName: f0FormField(z.string().min(1), {
     label: "Last Name",
     section: "personal",
-    placeholder: "e.g. Doe",
+    placeholder: `e.g. ${fakePeople.noor.lastName}`,
     helpText: "Legal last name as it appears on official documents",
   }),
   email: f0FormField(z.string().email(), {
     label: "Work Email",
     section: "personal",
-    placeholder: "jane@factorial.co",
+    placeholder: fakePeople.noor.email,
     helpText: "This will be used as the login email",
   }),
   personalEmail: f0FormField(z.string().email().optional(), {
     label: "Personal Email",
     section: "personal",
-    placeholder: "jane.doe@gmail.com",
+    placeholder: fakePeople.noor.email,
     helpText: "Optional — used for pre-boarding communications",
   }),
   phone: f0FormField(z.string().optional(), {
@@ -427,7 +430,7 @@ const presentableFormSchema = z.object({
   manager: f0FormField(z.string().optional(), {
     label: "Direct Manager",
     section: "work",
-    placeholder: "e.g. John Smith",
+    placeholder: `e.g. ${fakePeople.hana.fullName}`,
     helpText: "Name of the reporting manager",
   }),
   skills: f0FormField(
@@ -572,7 +575,7 @@ const presentableFormSchema = z.object({
   emergencyContactName: f0FormField(z.string().optional(), {
     label: "Emergency Contact Name",
     section: "additional",
-    placeholder: "e.g. Maria Doe",
+    placeholder: `e.g. ${fakePeople.caleb.fullName}`,
   }),
   emergencyContactPhone: f0FormField(z.string().optional(), {
     label: "Emergency Contact Phone",
@@ -613,7 +616,7 @@ const presentableFormSchema = z.object({
 const timeOffRequestSchema = z.object({
   employeeName: f0FormField(z.string().min(1), {
     label: "Employee Name",
-    placeholder: "e.g. Jane Doe",
+    placeholder: `e.g. ${fakePeople.noor.fullName}`,
   }),
   leaveType: f0FormField(z.enum(["vacation", "sick", "personal", "parental"]), {
     label: "Leave Type",
@@ -848,8 +851,8 @@ const presentableFormDefinitions: F0AiAvailableFormDefinition[] = [
  *
  * Try prompts like:
  * - "What forms are available?"
- * - "Fill the time-off request for Jane Doe, vacation from April 1 to April 10"
- * - "Fill the new employee form with Jane Doe, engineer, salary 75000"
+ * - "Fill the time-off request for Noor Rahimi, vacation from April 1 to April 10"
+ * - "Fill the new employee form with Noor Rahimi, engineer, salary 75000"
  * - "Open the quick contact form"
  */
 export const AvailableForms: Story = {

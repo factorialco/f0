@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { Celebration } from "./index"
 
 const meta: Meta<typeof Celebration> = {
@@ -31,9 +33,9 @@ export const Default: Story = {
       <div className="w-48">
         <Celebration
           link="/"
-          firstName="Josep Jaume"
-          lastName="Rey"
-          src="/avatars/person02.jpg"
+          firstName={fakePeople.tobias.firstName}
+          lastName={fakePeople.tobias.lastName}
+          src={fakePeople.tobias.image}
           type="birthday"
           typeLabel="Birthday"
           date={exampleDate}
@@ -42,9 +44,9 @@ export const Default: Story = {
       <div className="w-48">
         <Celebration
           link="/"
-          firstName="Nik"
-          lastName="Lopin"
-          src="/avatars/person07.jpg"
+          firstName={fakePeople.felix.firstName}
+          lastName={fakePeople.felix.lastName}
+          src={fakePeople.felix.image}
           type="anniversary"
           typeLabel="Anniversary"
           date={exampleDate}
@@ -59,9 +61,9 @@ export const WithReaction: Story = {
     <div className="w-48">
       <Celebration
         link="/"
-        firstName="Saul"
-        lastName="Dominguez"
-        src="/avatars/person05.jpg"
+        firstName={fakePeople.lena.firstName}
+        lastName={fakePeople.lena.lastName}
+        src={fakePeople.lena.image}
         type="birthday"
         typeLabel="Birthday"
         date={exampleDate}
@@ -81,8 +83,8 @@ export const NoImage: Story = {
   ],
   args: {
     link: "/",
-    firstName: "Saúl",
-    lastName: "Domínguez",
+    firstName: fakePeople.lena.firstName,
+    lastName: fakePeople.lena.lastName,
     canReact: false,
     type: "first-day",
     typeLabel: "First day very long name",

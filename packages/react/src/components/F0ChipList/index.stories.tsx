@@ -1,11 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import avatar01 from "@storybook-static/avatars/person01.jpg"
-import avatar02 from "@storybook-static/avatars/person02.jpg"
-import avatar03 from "@storybook-static/avatars/person03.jpg"
 import { expect, within } from "storybook/test"
 
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { fakePeople } from "@/mocks/people"
 
 import { F0ChipList } from "./index"
 
@@ -30,30 +28,30 @@ export const Default: Story = {
     max: 2,
     chips: [
       {
-        label: "John Doe",
+        label: fakePeople.noor.fullName,
         avatar: {
           type: "person",
-          firstName: "John",
-          lastName: "Doe",
-          src: avatar01,
+          firstName: fakePeople.noor.firstName,
+          lastName: fakePeople.noor.lastName,
+          src: fakePeople.noor.image,
         },
       },
       {
-        label: "Jane Smith",
+        label: fakePeople.hana.fullName,
         avatar: {
           type: "person",
-          firstName: "John",
-          lastName: "Doe",
-          src: avatar02,
+          firstName: fakePeople.hana.firstName,
+          lastName: fakePeople.hana.lastName,
+          src: fakePeople.hana.image,
         },
       },
       {
-        label: "Bob Johnson",
+        label: fakePeople.caleb.fullName,
         avatar: {
           type: "person",
-          firstName: "John",
-          lastName: "Doe",
-          src: avatar03,
+          firstName: fakePeople.caleb.firstName,
+          lastName: fakePeople.caleb.lastName,
+          src: fakePeople.caleb.image,
         },
       },
     ],
@@ -69,9 +67,9 @@ export const WithDataTestId: Story = {
         label: "Chip with Test ID",
         avatar: {
           type: "person",
-          firstName: "John",
-          lastName: "Doe",
-          src: avatar01,
+          firstName: fakePeople.noor.firstName,
+          lastName: fakePeople.noor.lastName,
+          src: fakePeople.noor.image,
         },
       },
     ],

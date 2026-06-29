@@ -4,6 +4,7 @@ import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import { SummariesDefinition } from "@/patterns/OneDataCollection/summary.ts"
 import { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import { Ai, Delete, Download, Pencil, Person, Upload } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import {
   DataCollectionSource,
@@ -31,8 +32,8 @@ type Story = StoryObj<typeof meta>
 const mockUsers = [
   {
     id: "user-1",
-    name: "John Doe",
-    email: "john@example.com",
+    name: fakePeople.noor.fullName,
+    email: fakePeople.noor.email,
     role: "Senior Engineer",
     department: "Engineering",
     status: "active",
@@ -45,8 +46,8 @@ const mockUsers = [
   },
   {
     id: "user-2",
-    name: "Jane Smith",
-    email: "jane@example.com",
+    name: fakePeople.hana.fullName,
+    email: fakePeople.hana.email,
     role: "Product Manager",
     department: "Product",
     status: "active",
@@ -59,8 +60,8 @@ const mockUsers = [
   },
   {
     id: "user-3",
-    name: "Bob Johnson",
-    email: "bob@example.com",
+    name: fakePeople.caleb.fullName,
+    email: fakePeople.caleb.email,
     role: "Designer",
     department: "Design",
     status: "inactive",
@@ -73,8 +74,8 @@ const mockUsers = [
   },
   {
     id: "user-4",
-    name: "Alice Williams",
-    email: "alice@example.com",
+    name: fakePeople.yuki.fullName,
+    email: fakePeople.yuki.email,
     role: "Marketing Lead",
     department: "Marketing",
     status: "active",

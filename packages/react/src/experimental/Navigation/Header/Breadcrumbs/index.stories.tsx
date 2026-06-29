@@ -17,6 +17,7 @@ import {
   MOCK_ICONS,
   SURNAMES_MOCK,
 } from "@/mocks"
+import { fakePeople } from "@/mocks/people"
 
 import { Breadcrumbs, BreadcrumbsProps } from "./index"
 
@@ -44,7 +45,7 @@ export const Default: Story = {
         label: "Candidates",
         href: "/recruitment/candidates",
       },
-      { id: "dani-moreno", label: "Dani Moreno" },
+      { id: "dani-moreno", label: fakePeople.aria.fullName },
     ],
   },
 }
@@ -353,7 +354,7 @@ export const LongBreadcrumbs: Story = {
       },
       {
         id: "dani-moreno",
-        label: "Dani Moreno",
+        label: fakePeople.aria.fullName,
         href: "/dani-moreno",
       },
       {
@@ -386,7 +387,7 @@ export const Interactive: Story = {
       },
       {
         id: "dani-moreno",
-        label: "Dani Moreno",
+        label: fakePeople.aria.fullName,
         href: "/recruitment/candidates/dani-moreno",
       },
       {

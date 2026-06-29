@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { withSkipA11y } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import type { RecordType } from "@/hooks/datasource"
 
@@ -24,9 +25,9 @@ const datasets: SurveyDatasets = {
             hasMore: false,
             total: 3,
             records: [
-              { id: "1", name: "Ada Lovelace" },
-              { id: "2", name: "Alan Turing" },
-              { id: "3", name: "Grace Hopper" },
+              { id: "1", name: fakePeople.noor.fullName },
+              { id: "2", name: fakePeople.hana.fullName },
+              { id: "3", name: fakePeople.caleb.fullName },
             ],
           }),
       },

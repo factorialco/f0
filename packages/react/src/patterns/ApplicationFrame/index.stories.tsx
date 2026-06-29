@@ -24,6 +24,7 @@ import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
 import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { fakePeople } from "@/mocks/people"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -86,42 +87,62 @@ import { ApplicationFrame } from "./index"
 const mockPeople: PersonProfile[] = [
   {
     id: "5",
-    firstName: "Hellen",
-    lastName: "the HR",
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
     jobTitle: "People Director, CPO",
   },
-  { id: "6", firstName: "Phebe", lastName: "Jacobson", jobTitle: "CEO, I" },
-  { id: "7", firstName: "Arnulfo", lastName: "Maggio", jobTitle: "CTO, I" },
-  { id: "8", firstName: "Bernarda", lastName: "Wilkinson", jobTitle: "CFO, I" },
-  { id: "10", firstName: "Anitra", lastName: "Schaden", jobTitle: "CMO, I" },
+  {
+    id: "6",
+    firstName: fakePeople.hana.firstName,
+    lastName: fakePeople.hana.lastName,
+    jobTitle: "CEO, I",
+  },
+  {
+    id: "7",
+    firstName: fakePeople.caleb.firstName,
+    lastName: fakePeople.caleb.lastName,
+    jobTitle: "CTO, I",
+  },
+  {
+    id: "8",
+    firstName: fakePeople.yuki.firstName,
+    lastName: fakePeople.yuki.lastName,
+    jobTitle: "CFO, I",
+  },
+  {
+    id: "10",
+    firstName: fakePeople.sofia.firstName,
+    lastName: fakePeople.sofia.lastName,
+    jobTitle: "CMO, I",
+  },
   {
     id: "11",
-    firstName: "Fidel",
-    lastName: "Johnson",
+    firstName: fakePeople.ravi.firstName,
+    lastName: fakePeople.ravi.lastName,
     jobTitle: "People Director, CPO",
   },
   {
     id: "12",
-    firstName: "Jeanetta",
-    lastName: "McCullough",
+    firstName: fakePeople.greta.firstName,
+    lastName: fakePeople.greta.lastName,
     jobTitle: "Store Manager, I",
   },
   {
     id: "13",
-    firstName: "Florencio",
-    lastName: "Little",
+    firstName: fakePeople.iris.firstName,
+    lastName: fakePeople.iris.lastName,
     jobTitle: "Sales Manager, I",
   },
   {
     id: "14",
-    firstName: "Fae",
-    lastName: "Fritsch",
+    firstName: fakePeople.aaron.firstName,
+    lastName: fakePeople.aaron.lastName,
     jobTitle: "Design Director, I",
   },
   {
     id: "15",
-    firstName: "Jordan",
-    lastName: "Kunze",
+    firstName: fakePeople.nadia.firstName,
+    lastName: fakePeople.nadia.lastName,
     jobTitle: "Sales Manager, I",
   },
 ]
@@ -164,20 +185,20 @@ const mockSearchPersons = (query: string): Promise<PersonProfile[]> =>
 const mockCandidates: CandidateProfile[] = [
   {
     id: "101",
-    firstName: "Alice",
-    lastName: "Martinez",
+    firstName: fakePeople.linus.firstName,
+    lastName: fakePeople.linus.lastName,
     source: "LinkedIn",
   },
   {
     id: "102",
-    firstName: "Bob",
-    lastName: "Chen",
+    firstName: fakePeople.camila.firstName,
+    lastName: fakePeople.camila.lastName,
     source: "Referral",
   },
   {
     id: "103",
-    firstName: "Clara",
-    lastName: "Nguyen",
+    firstName: fakePeople.theo.firstName,
+    lastName: fakePeople.theo.lastName,
     source: "Job Board",
   },
 ]
@@ -525,15 +546,18 @@ const meta: Meta<typeof ApplicationFrame> = {
                 description:
                   "Latest expenses summary pulled from the database, reflecting any edits made from the Analytics list after this chat was opened.",
                 creator: {
-                  firstName: "Hellen",
-                  lastName: "Schmidt",
-                  src: "/avatars/person01.jpg",
+                  firstName: fakePeople.eva.firstName,
+                  lastName: fakePeople.eva.lastName,
+                  src: fakePeople.eva.image,
                 },
                 lastEdited: new Date("2026-04-18T10:32:00Z"),
               }
             }
             return {
-              creator: { firstName: "John", lastName: "Doe" },
+              creator: {
+                firstName: fakePeople.omar.firstName,
+                lastName: fakePeople.omar.lastName,
+              },
               lastEdited: new Date(),
             }
           },
@@ -668,7 +692,7 @@ const meta: Meta<typeof ApplicationFrame> = {
     },
     aiPromotion: {
       enabled: false,
-      greeting: "Hey Hellen,",
+      greeting: `Hey ${fakePeople.mira.firstName},`,
       title: "Meet One, your AI agent",
       description:
         "One simplifies your daily tasks so you can focus on what really matters. Join the waitlist (open until November 30, 2025) to:",
@@ -760,10 +784,10 @@ export const Default: Story = {
             period="morning"
             hideOneSwitch
             header={{
-              employeeFirstName: "Jordan",
-              employeeLastName: "Avery",
-              title: "Good morning, Jordan!",
-              employeeAvatar: "/avatars/person05.jpg",
+              employeeFirstName: fakePeople.priya.firstName,
+              employeeLastName: fakePeople.priya.lastName,
+              title: `Good morning, ${fakePeople.priya.firstName}!`,
+              employeeAvatar: fakePeople.priya.image,
             }}
           >
             <HomeLayout {...HomeLayoutStories.Default.args} />

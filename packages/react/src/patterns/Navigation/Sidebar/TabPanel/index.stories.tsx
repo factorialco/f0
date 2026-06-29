@@ -4,6 +4,7 @@ import { ReactNode } from "react"
 import { action } from "storybook/actions"
 
 import { New, People } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import { SidebarTabPanel } from "./SidebarTabPanel"
 import { SidebarTabPanelGroup } from "./types"
@@ -29,9 +30,9 @@ const exampleGroups: SidebarTabPanelGroup[] = [
     id: "dms",
     title: "Direct messages",
     items: [
-      item("Roger Campos"),
-      item("Raúl Sigüenza"),
-      item("María José Fernández"),
+      item(fakePeople.noor.fullName),
+      item(fakePeople.mateo.fullName),
+      item(fakePeople.hana.fullName),
     ],
   },
   {

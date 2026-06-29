@@ -10,6 +10,7 @@ import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { forms } from "@/patterns/forms"
+import { fakePeople } from "@/mocks/people"
 
 import { F0WizardForm, useF0FormDefinition } from "../index"
 
@@ -36,7 +37,7 @@ const singleSchema = z.object({
   email: f0FormField(z.string().email(), {
     label: "Email",
     section: "general",
-    placeholder: "alicia.keys@factorial.co",
+    placeholder: fakePeople.noor.email,
   }),
   firstName: f0FormField(z.string().min(1), {
     label: "First name",
@@ -73,7 +74,7 @@ function SingleSchemaStory() {
   const definition = useF0FormDefinition({
     name: "add-employee-single",
     schema: singleSchema,
-    defaultValues: { email: "alicia.keys@factorial.co" },
+    defaultValues: { email: fakePeople.noor.email },
     sections: {
       general: { title: "General information" },
       personal: { title: "Personal details" },
@@ -188,7 +189,7 @@ function OpenFormWizardStory() {
   const definition = useF0FormDefinition({
     name: "open-wizard-single",
     schema: singleSchema,
-    defaultValues: { email: "alicia.keys@factorial.co" },
+    defaultValues: { email: fakePeople.noor.email },
     sections: {
       general: { title: "General information" },
       personal: { title: "Personal details" },
@@ -247,7 +248,7 @@ const perSectionSchema = {
   general: z.object({
     email: f0FormField(z.string().email(), {
       label: "Email",
-      placeholder: "alicia.keys@factorial.co",
+      placeholder: fakePeople.noor.email,
     }),
     firstName: f0FormField(z.string().min(1), {
       label: "First name",
@@ -427,8 +428,8 @@ function DisabledStepAutoCompletedStory() {
     name: "edit-employee-disabled",
     schema: disabledSchema,
     defaultValues: {
-      email: "alicia.keys@factorial.co",
-      firstName: "Alicia",
+      email: fakePeople.noor.email,
+      firstName: fakePeople.noor.firstName,
     },
     sections: {
       general: {
@@ -615,12 +616,12 @@ const manyFieldsSchema = z.object({
   fullName: f0FormField(z.string().min(1), {
     label: "Full name",
     section: "personal",
-    placeholder: "e.g. Alicia Keys",
+    placeholder: `e.g. ${fakePeople.noor.fullName}`,
   }),
   email: f0FormField(z.string().email(), {
     label: "Email address",
     section: "personal",
-    placeholder: "alicia.keys@factorial.co",
+    placeholder: fakePeople.noor.email,
   }),
   phone: f0FormField(z.string().optional(), {
     label: "Phone number",
@@ -736,9 +737,9 @@ const manyFieldsSchema = z.object({
     section: "employment",
     fieldType: "select",
     options: [
-      { value: "saul", label: "Saul Dominguez" },
-      { value: "dani", label: "Dani Moreno" },
-      { value: "jj", label: "Josep Jaume Rey" },
+      { value: "saul", label: fakePeople.lena.fullName },
+      { value: "dani", label: fakePeople.aria.fullName },
+      { value: "jj", label: fakePeople.tobias.fullName },
     ],
   }),
   salary: f0FormField(z.number().min(0), {
@@ -912,8 +913,8 @@ function ManyFieldsStory() {
     name: "onboard-employee-full",
     schema: manyFieldsSchema,
     defaultValues: {
-      email: "alicia.keys@factorial.co",
-      fullName: "Alicia Keys",
+      email: fakePeople.noor.email,
+      fullName: fakePeople.noor.fullName,
       healthInsurance: true,
       mealAllowance: true,
       accessCard: true,

@@ -6,6 +6,7 @@ import {
   SURNAMES_MOCK,
   getMockValue,
 } from "@/mocks"
+import { fakePeople } from "@/mocks/people"
 
 import {
   F0SelectItemObject,
@@ -159,7 +160,7 @@ export const AsyncDataWithLargeDataset: StoryObj<
   args: {
     defaultItem: {
       value: "option-3",
-      label: "Arnau Pérez",
+      label: fakePeople.noor.fullName,
       icon: Search,
     },
     source: {

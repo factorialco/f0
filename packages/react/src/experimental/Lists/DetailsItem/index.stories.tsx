@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
+import { fakePeople } from "@/mocks/people"
+
 import { DetailsItem } from "./index"
 
 const meta: Meta = {
@@ -12,7 +14,7 @@ const meta: Meta = {
     title: "Email",
     content: {
       type: "item",
-      text: "alicia.keys@factorial.co",
+      text: fakePeople.eva.email,
       action: {
         type: "copy",
       },

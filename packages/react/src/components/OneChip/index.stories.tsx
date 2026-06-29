@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
+import { fakePeople } from "@/mocks/people"
+
 import * as Icons from "../../icons/app"
 import { Chip } from "./index"
 
@@ -80,13 +82,13 @@ export const WithClose: Story = {
 
 export const WithAvatar: Story = {
   args: {
-    label: "Dani Moreno",
+    label: fakePeople.aria.fullName,
     variant: "default",
     avatar: {
       type: "person",
-      firstName: "Dani",
-      lastName: "Moreno",
-      src: "/avatars/person01.jpg",
+      firstName: fakePeople.aria.firstName,
+      lastName: fakePeople.aria.lastName,
+      src: fakePeople.aria.image,
     },
   },
   render: ({ icon: _icon, ...args }) => (

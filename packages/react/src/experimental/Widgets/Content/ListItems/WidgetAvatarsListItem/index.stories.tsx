@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { WidgetAvatarsListItem, WidgetAvatarsListItemProps } from "./index"
 
 const meta: Meta<WidgetAvatarsListItemProps> = {
@@ -29,23 +31,23 @@ export const Default: Story = {
     subtitle: "4 people",
     avatars: [
       {
-        firstName: "Miguel",
-        lastName: "Pousa",
-        src: "/avatars/person01.jpg",
+        firstName: fakePeople.noor.firstName,
+        lastName: fakePeople.noor.lastName,
+        src: fakePeople.noor.image,
       },
       {
-        firstName: "Nik",
-        lastName: "Lopin",
-        src: "/avatars/person02.jpg",
+        firstName: fakePeople.felix.firstName,
+        lastName: fakePeople.felix.lastName,
+        src: fakePeople.felix.image,
       },
       {
-        firstName: "Josep Jaume",
-        lastName: "Rey",
-        src: "/avatars/person03.jpg",
+        firstName: fakePeople.tobias.firstName,
+        lastName: fakePeople.tobias.lastName,
+        src: fakePeople.tobias.image,
       },
       {
-        firstName: "Saúl",
-        lastName: "Domínguez",
+        firstName: fakePeople.lena.firstName,
+        lastName: fakePeople.lena.lastName,
       },
     ],
     onClick: () => {},
@@ -60,23 +62,23 @@ export const WithLongTitle: Story = {
     subtitle: "4 people",
     avatars: [
       {
-        firstName: "Miguel",
-        lastName: "Pousa",
-        src: "/avatars/person01.jpg",
+        firstName: fakePeople.noor.firstName,
+        lastName: fakePeople.noor.lastName,
+        src: fakePeople.noor.image,
       },
       {
-        firstName: "Nik",
-        lastName: "Lopin",
-        src: "/avatars/person02.jpg",
+        firstName: fakePeople.felix.firstName,
+        lastName: fakePeople.felix.lastName,
+        src: fakePeople.felix.image,
       },
       {
-        firstName: "Josep Jaume",
-        lastName: "Rey",
-        src: "/avatars/person03.jpg",
+        firstName: fakePeople.tobias.firstName,
+        lastName: fakePeople.tobias.lastName,
+        src: fakePeople.tobias.image,
       },
       {
-        firstName: "Saúl",
-        lastName: "Domínguez",
+        firstName: fakePeople.lena.firstName,
+        lastName: fakePeople.lena.lastName,
       },
     ],
   },

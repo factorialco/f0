@@ -1,156 +1,163 @@
+import { fakePeople } from "@/mocks/people"
+
 import avatar from "../../../storybook-assets/avatar.jpeg"
 import { EntitySelectEntity, EntitySelectSubEntity } from "./types"
 
 export const famousEmployees: EntitySelectEntity[] = [
   {
     id: 1000,
-    name: "Albert Einstein",
-    searchKeys: ["Albert", "Albert Einstein", "Al", "Einstein", "genius"],
+    name: fakePeople.noor.fullName,
+    searchKeys: [
+      fakePeople.noor.firstName,
+      fakePeople.noor.fullName,
+      fakePeople.noor.lastName,
+      "genius",
+    ],
     avatar: avatar,
   },
   {
     id: 1002,
-    name: "Marie Curie",
+    name: fakePeople.hana.fullName,
     avatar: avatar,
   },
   {
     id: 1003,
-    name: "Isaac Newton",
+    name: fakePeople.caleb.fullName,
     avatar: avatar,
   },
   {
     id: 1004,
-    name: "Galileo Galilei",
+    name: fakePeople.yuki.fullName,
     avatar: avatar,
   },
   {
     id: 1005,
-    name: "Leonardo da Vinci",
+    name: fakePeople.sofia.fullName,
     avatar: avatar,
   },
   {
     id: 1006,
-    name: "Winston Churchill",
+    name: fakePeople.ravi.fullName,
     avatar: avatar,
   },
   {
     id: 1007,
-    name: "Abraham Lincoln",
+    name: fakePeople.greta.fullName,
     avatar: avatar,
   },
   {
     id: 1008,
-    name: "George Washington",
+    name: fakePeople.iris.fullName,
     avatar: avatar,
   },
   {
     id: 1009,
-    name: "Thomas Edison",
+    name: fakePeople.aaron.fullName,
     avatar: avatar,
   },
   {
     id: 1010,
-    name: "Nikola Tesla",
+    name: fakePeople.nadia.fullName,
     avatar: avatar,
   },
   {
     id: 1011,
-    name: "Alexander Graham Bell",
+    name: fakePeople.linus.fullName,
     avatar: avatar,
   },
   {
     id: 1012,
-    name: "Martin Luther King",
+    name: fakePeople.camila.fullName,
     avatar: avatar,
   },
   {
     id: 1013,
-    name: "Mohandas Gandhi",
+    name: fakePeople.theo.fullName,
     avatar: avatar,
   },
   {
     id: 1014,
-    name: "Nelson Mandela",
+    name: fakePeople.eva.fullName,
     avatar: avatar,
   },
   {
     id: 1015,
-    name: "Pablo Picasso",
+    name: fakePeople.omar.fullName,
     avatar: avatar,
   },
   {
     id: 1016,
-    name: "Vincent van Gogh",
+    name: fakePeople.mira.fullName,
     avatar: avatar,
   },
   {
     id: 1017,
-    name: "Ludwig van Beethoven",
+    name: fakePeople.priya.fullName,
     avatar: avatar,
   },
   {
     id: 1018,
-    name: "Wolfgang Amadeus Mozart",
+    name: fakePeople.aria.fullName,
     avatar: avatar,
   },
   {
     id: 1019,
-    name: "William Shakespeare",
+    name: fakePeople.felix.fullName,
     avatar: avatar,
   },
   {
     id: 1020,
-    name: "Charles Dickens",
+    name: fakePeople.lena.fullName,
     avatar: avatar,
   },
   {
     id: 1021,
-    name: "Mark Twain",
+    name: fakePeople.tobias.fullName,
     avatar: avatar,
   },
   {
     id: 1022,
-    name: "Jane Austen",
+    name: fakePeople.diego.fullName,
     avatar: avatar,
   },
   {
     id: 1023,
-    name: "Agatha Christie",
+    name: fakePeople.bruno.fullName,
     avatar: avatar,
   },
   {
     id: 1024,
-    name: "Virginia Woolf",
+    name: fakePeople.mateo.fullName,
     avatar: avatar,
   },
   {
     id: 1025,
-    name: "Oprah Winfrey",
+    name: fakePeople.noor.fullName,
     avatar: avatar,
   },
   {
     id: 1026,
-    name: "Elon Musk",
+    name: fakePeople.hana.fullName,
     avatar: avatar,
   },
   {
     id: 1027,
-    name: "Steve Jobs",
+    name: fakePeople.caleb.fullName,
     avatar: avatar,
   },
   {
     id: 1028,
-    name: "Ada Lovelace",
+    name: fakePeople.yuki.fullName,
     avatar: avatar,
   },
   {
     id: 1029,
-    name: "Grace Hopper",
+    name: fakePeople.sofia.fullName,
     avatar: avatar,
   },
   {
     id: 1030,
-    name: "Coco Chanel",
+    name: fakePeople.ravi.fullName,
   },
 ]
 

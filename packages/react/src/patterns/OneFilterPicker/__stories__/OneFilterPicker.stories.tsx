@@ -31,6 +31,7 @@ import {
   samplePresets,
   sourceBasedDefinition,
 } from "./mockData"
+import { fakePeople } from "@/mocks/people"
 
 const meta = {
   title: "FilterPicker",
@@ -66,7 +67,7 @@ export const Interactive: StoryObj = {
   args: {
     filters: filterDefinition,
     value: {
-      name: "John",
+      name: fakePeople.hana.firstName,
       department: ["engineering"],
     },
   },
@@ -77,7 +78,7 @@ export const WithInitialFilters: StoryObj = {
     filters: filterDefinition,
     value: {
       department: ["engineering", "marketing"],
-      name: "John",
+      name: fakePeople.hana.firstName,
       manager: ["alice"],
     },
   },
@@ -120,7 +121,7 @@ const PresetsOverflowCounterConsistencyComponent = ({
       itemsCount: () => 18,
     },
     {
-      label: "Alice's Team",
+      label: `${fakePeople.eva.firstName}'s Team`,
       filter: { manager: ["alice"] },
       itemsCount: () => 9,
     },
@@ -408,11 +409,11 @@ export const WithAsyncOptions: Story = {
             return new Promise((resolve) => {
               setTimeout(() => {
                 resolve([
-                  { value: "user1", label: "John Doe" },
-                  { value: "user2", label: "Jane Smith" },
-                  { value: "user3", label: "Bob Johnson" },
-                  { value: "user4", label: "Alice Williams" },
-                  { value: "user5", label: "Michael Brown" },
+                  { value: "user1", label: fakePeople.caleb.fullName },
+                  { value: "user2", label: fakePeople.yuki.fullName },
+                  { value: "user3", label: fakePeople.sofia.fullName },
+                  { value: "user4", label: fakePeople.ravi.fullName },
+                  { value: "user5", label: fakePeople.greta.fullName },
                 ])
               }, 1500)
             })

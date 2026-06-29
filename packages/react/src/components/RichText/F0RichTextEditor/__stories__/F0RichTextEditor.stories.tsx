@@ -4,6 +4,7 @@ import { fn } from "storybook/test"
 import { Summary } from "@/icons/ai"
 import { Alert, Globe } from "@/icons/app"
 import { mockEnhanceText, mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { fakePeople } from "@/mocks/people"
 
 import { EnhancementOption, FILE_TYPES, F0RichTextEditor } from ".."
 
@@ -162,18 +163,18 @@ const enhancementOptions: EnhancementOption[] = [
 const users = [
   {
     id: 1,
-    label: "Raúl Sigüenza Sánchez",
-    href: "/avatars/person01.jpg",
+    label: fakePeople.mateo.fullName,
+    href: fakePeople.mateo.image,
   },
   {
     id: 2,
-    label: "Jacob Bamio Cordero",
-    href: "/avatars/person02.jpg",
+    label: fakePeople.noor.fullName,
+    href: fakePeople.noor.image,
   },
   {
     id: 3,
-    label: "Xavier Val Parejo",
-    href: "/avatars/person03.jpg",
+    label: fakePeople.hana.fullName,
+    href: fakePeople.hana.image,
   },
 ]
 

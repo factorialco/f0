@@ -1,5 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { Check } from "../../../icons/app"
 import { DataList } from "./index"
 
@@ -12,7 +14,7 @@ const meta: Meta<typeof DataList> = {
       <>
         <DataList.Item text="test" />
         <DataList.Item icon={Check} text="Make coffee" />
-        <DataList.Item text="hellen@factorial.co" action={{ type: "copy" }} />
+        <DataList.Item text={fakePeople.eva.email} action={{ type: "copy" }} />
         <DataList.Item
           action={{ type: "navigate", href: "https://factorialhr.com/" }}
           text="Factorial"
@@ -22,23 +24,23 @@ const meta: Meta<typeof DataList> = {
           text="Banco Bilbao Vizcaya Argentaria"
         />
         <DataList.PersonItem
-          firstName="Saul"
-          lastName="Dominguez"
-          avatarUrl="/avatars/person05.jpg"
+          firstName={fakePeople.priya.firstName}
+          lastName={fakePeople.priya.lastName}
+          avatarUrl={fakePeople.priya.image}
         />
         <DataList.PersonItem
-          firstName="Dani"
-          lastName="Moreno"
-          avatarUrl="/avatars/person06.jpg"
-          action={{ type: "copy", text: "Dani" }}
+          firstName={fakePeople.aria.firstName}
+          lastName={fakePeople.aria.lastName}
+          avatarUrl={fakePeople.aria.image}
+          action={{ type: "copy", text: fakePeople.aria.firstName }}
         />
         <DataList.PersonItem
-          firstName="Josep Jaume"
-          lastName=" Rey Peroy"
-          avatarUrl="/avatars/person07.jpg"
+          firstName={fakePeople.felix.firstName}
+          lastName={fakePeople.felix.lastName}
+          avatarUrl={fakePeople.felix.image}
           action={{
             type: "navigate",
-            href: "/avatars/person07.jpg",
+            href: fakePeople.felix.image,
           }}
         />
         <DataList.CompanyItem

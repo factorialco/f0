@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0AiTableCard } from "../F0AiTableCard"
 
 const meta = {
@@ -26,10 +28,26 @@ export const Default: Story = {
     dataset: {
       columns: ["name", "department", "country"],
       rows: [
-        { name: "Ada Lovelace", department: "Engineering", country: "UK" },
-        { name: "Grace Hopper", department: "Engineering", country: "US" },
-        { name: "Alan Turing", department: "Research", country: "UK" },
-        { name: "Linus Torvalds", department: "Engineering", country: "FI" },
+        {
+          name: fakePeople.noor.fullName,
+          department: "Engineering",
+          country: "UK",
+        },
+        {
+          name: fakePeople.hana.fullName,
+          department: "Engineering",
+          country: "US",
+        },
+        {
+          name: fakePeople.caleb.fullName,
+          department: "Research",
+          country: "UK",
+        },
+        {
+          name: fakePeople.yuki.fullName,
+          department: "Engineering",
+          country: "FI",
+        },
       ],
     },
   },
@@ -41,12 +59,12 @@ export const WithColumnLabels: Story = {
       columns: ["employee_name", "department_name", "country_code"],
       rows: [
         {
-          employee_name: "Ada Lovelace",
+          employee_name: fakePeople.noor.fullName,
           department_name: "Engineering",
           country_code: "UK",
         },
         {
-          employee_name: "Grace Hopper",
+          employee_name: fakePeople.hana.fullName,
           department_name: "Engineering",
           country_code: "US",
         },
@@ -74,8 +92,16 @@ export const NullValues: Story = {
     dataset: {
       columns: ["name", "manager", "department"],
       rows: [
-        { name: "Ada Lovelace", manager: null, department: "Engineering" },
-        { name: "Grace Hopper", manager: "Ada Lovelace", department: null },
+        {
+          name: fakePeople.noor.fullName,
+          manager: null,
+          department: "Engineering",
+        },
+        {
+          name: fakePeople.hana.fullName,
+          manager: fakePeople.noor.fullName,
+          department: null,
+        },
       ],
     },
   },

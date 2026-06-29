@@ -5,6 +5,7 @@ import { action } from "storybook/actions"
 
 import { F0Button } from "@/components/F0Button"
 import { Clock, MicrophoneNegative, New, PalmTree, People } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import { SidebarChatList, type SidebarChatEmptyState } from "./SidebarChatList"
 import {
@@ -41,10 +42,10 @@ export const exampleGroups: SidebarChatGroup[] = [
     chats: [
       {
         id: "maria-jose",
-        label: "María José Fernández-Velasco",
+        label: fakePeople.noor.fullName,
         avatar: person(
-          "María José",
-          "Fernández-Velasco",
+          fakePeople.noor.firstName,
+          fakePeople.noor.lastName,
           "/avatars/person01.jpg"
         ),
         presence: "online",
@@ -52,46 +53,74 @@ export const exampleGroups: SidebarChatGroup[] = [
       },
       {
         id: "alexander",
-        label: "Alexander Whitmore-Brown",
-        avatar: person("Alexander", "Whitmore-Brown", "/avatars/person02.jpg"),
+        label: fakePeople.hana.fullName,
+        avatar: person(
+          fakePeople.hana.firstName,
+          fakePeople.hana.lastName,
+          "/avatars/person02.jpg"
+        ),
         presence: "online",
         status: { icon: MicrophoneNegative, label: "Muted" },
       },
       {
         id: "jean-baptiste",
-        label: "Jean-Baptiste Lefèvre",
-        avatar: person("Jean-Baptiste", "Lefèvre", "/avatars/person03.jpg"),
+        label: fakePeople.caleb.fullName,
+        avatar: person(
+          fakePeople.caleb.firstName,
+          fakePeople.caleb.lastName,
+          "/avatars/person03.jpg"
+        ),
         status: { icon: PalmTree, label: "On holidays" },
       },
       {
         id: "priyanka",
-        label: "Priyanka Ramaswamy Iyer",
-        avatar: person("Priyanka", "Ramaswamy Iyer", "/avatars/person04.jpg"),
+        label: fakePeople.yuki.fullName,
+        avatar: person(
+          fakePeople.yuki.firstName,
+          fakePeople.yuki.lastName,
+          "/avatars/person04.jpg"
+        ),
         presence: "online",
         unreadCount: 2,
       },
       {
         id: "mohammed",
-        label: "Mohammed Al-Rashid",
-        avatar: person("Mohammed", "Al-Rashid", "/avatars/person05.jpg"),
+        label: fakePeople.sofia.fullName,
+        avatar: person(
+          fakePeople.sofia.firstName,
+          fakePeople.sofia.lastName,
+          "/avatars/person05.jpg"
+        ),
         status: { icon: Clock, label: "Away" },
       },
       {
         id: "anastasia",
-        label: "Anastasia Volkonskaya",
-        avatar: person("Anastasia", "Volkonskaya", "/avatars/person06.jpg"),
+        label: fakePeople.ravi.fullName,
+        avatar: person(
+          fakePeople.ravi.firstName,
+          fakePeople.ravi.lastName,
+          "/avatars/person06.jpg"
+        ),
         presence: "online",
       },
       {
         id: "thomas",
-        label: "Thomas O'Sullivan",
-        avatar: person("Thomas", "O'Sullivan", "/avatars/person07.jpg"),
+        label: fakePeople.greta.fullName,
+        avatar: person(
+          fakePeople.greta.firstName,
+          fakePeople.greta.lastName,
+          "/avatars/person07.jpg"
+        ),
         unreadCount: 12,
       },
       {
         id: "sofia",
-        label: "Sofía Gutiérrez del Río",
-        avatar: person("Sofía", "Gutiérrez del Río", "/avatars/person08.jpg"),
+        label: fakePeople.iris.fullName,
+        avatar: person(
+          fakePeople.iris.firstName,
+          fakePeople.iris.lastName,
+          "/avatars/person08.jpg"
+        ),
         presence: "online",
         unreadCount: 1,
         status: { icon: MicrophoneNegative, label: "Muted" },
@@ -235,13 +264,13 @@ const LiveControls = () => {
       <F0Button
         size="sm"
         variant="outline"
-        label="New message from Thomas"
+        label={`New message from ${fakePeople.greta.firstName}`}
         onClick={() => setUnread("thomas", 5)}
       />
       <F0Button
         size="sm"
         variant="outline"
-        label="Bump Mohammed to top"
+        label={`Bump ${fakePeople.sofia.firstName} to top`}
         onClick={() =>
           reorder("dms", [
             "mohammed",

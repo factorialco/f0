@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { F0Text } from "@/components/F0Text"
 import { Add } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { useF0Form } from "@/patterns/F0Form"
 import { F0Wizard } from "@/ui/F0Wizard"
@@ -243,7 +244,7 @@ function KanbanLaneCreateScenario() {
                   {
                     id: `resource-${Date.now()}`,
                     name: `New ${kanbanLaneStatus[laneId] ?? "Draft"} resource`,
-                    owner: "Alicia Keys",
+                    owner: fakePeople.noor.fullName,
                     status: kanbanLaneStatus[laneId] ?? "Draft",
                     summary:
                       "Created from the lane where the resource belongs.",
@@ -294,7 +295,7 @@ function EditableTableAddRowScenario() {
                     {
                       id: `resource-${Date.now()}`,
                       name: "New row resource",
-                      owner: "Alicia Keys",
+                      owner: fakePeople.noor.fullName,
                       status: "Draft",
                       summary:
                         "Created inline because the resource is lightweight.",

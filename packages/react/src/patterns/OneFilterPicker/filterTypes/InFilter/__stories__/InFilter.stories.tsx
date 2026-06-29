@@ -8,6 +8,7 @@ import {
   MockUser,
 } from "@/patterns/OneDataCollection/__stories__/mockData"
 import { createDataSourceDefinition } from "@/hooks/datasource"
+import { fakePeople } from "@/mocks/people"
 
 import type { InFilterOptionItem, InFilterOptions } from "../types"
 
@@ -121,10 +122,10 @@ const AsyncOptionsExample = () => {
             return new Promise<InFilterOptionItem<string>[]>((resolve) => {
               setTimeout(() => {
                 resolve([
-                  { value: "user1", label: "John Doe" },
-                  { value: "user2", label: "Jane Smith" },
-                  { value: "user3", label: "Bob Johnson" },
-                  { value: "user4", label: "Alice Williams" },
+                  { value: "user1", label: fakePeople.noor.fullName },
+                  { value: "user2", label: fakePeople.hana.fullName },
+                  { value: "user3", label: fakePeople.caleb.fullName },
+                  { value: "user4", label: fakePeople.yuki.fullName },
                 ])
               }, 5000)
             })

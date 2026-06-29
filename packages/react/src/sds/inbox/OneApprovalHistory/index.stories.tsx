@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import type { Status } from "./ApprovalStep"
 
 import { OneApprovalHistory } from "."
@@ -25,86 +27,86 @@ type Story = StoryObj<typeof meta>
 
 const mockApprovers = [
   {
-    firstName: "John",
-    lastName: "Doe",
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
     avatar: "https://i.pravatar.cc/450?img=1",
     status: "approved" as Status,
   },
   {
-    firstName: "Jane",
-    lastName: "Smith",
+    firstName: fakePeople.hana.firstName,
+    lastName: fakePeople.hana.lastName,
     avatar: "https://i.pravatar.cc/450?img=2",
     status: "approved" as Status,
   },
   {
-    firstName: "Mike",
-    lastName: "Johnson",
+    firstName: fakePeople.caleb.firstName,
+    lastName: fakePeople.caleb.lastName,
     avatar: "https://i.pravatar.cc/450?img=3",
     status: "rejected" as Status,
   },
   {
-    firstName: "Sarah",
-    lastName: "Williams",
+    firstName: fakePeople.yuki.firstName,
+    lastName: fakePeople.yuki.lastName,
     avatar: "https://i.pravatar.cc/450?img=4",
     status: "waiting" as Status,
   },
   {
-    firstName: "David",
-    lastName: "Brown",
+    firstName: fakePeople.sofia.firstName,
+    lastName: fakePeople.sofia.lastName,
     avatar: "https://i.pravatar.cc/450?img=5",
     status: "waiting" as Status,
   },
   {
-    firstName: "Emma",
-    lastName: "Davis",
+    firstName: fakePeople.ravi.firstName,
+    lastName: fakePeople.ravi.lastName,
     avatar: "https://i.pravatar.cc/450?img=6",
     status: "waiting" as Status,
   },
   {
-    firstName: "James",
-    lastName: "Miller",
+    firstName: fakePeople.greta.firstName,
+    lastName: fakePeople.greta.lastName,
     avatar: "https://i.pravatar.cc/450?img=7",
     status: "waiting" as Status,
   },
   {
-    firstName: "Olivia",
-    lastName: "Wilson",
+    firstName: fakePeople.iris.firstName,
+    lastName: fakePeople.iris.lastName,
     avatar: "https://i.pravatar.cc/450?img=8",
     status: "waiting" as Status,
   },
   {
-    firstName: "William",
-    lastName: "Moore",
+    firstName: fakePeople.aaron.firstName,
+    lastName: fakePeople.aaron.lastName,
     avatar: "https://i.pravatar.cc/450?img=9",
     status: "waiting" as Status,
   },
   {
-    firstName: "Sophia",
-    lastName: "Taylor",
+    firstName: fakePeople.nadia.firstName,
+    lastName: fakePeople.nadia.lastName,
     avatar: "https://i.pravatar.cc/450?img=10",
     status: "waiting" as Status,
   },
   {
-    firstName: "Lucas",
-    lastName: "Anderson",
+    firstName: fakePeople.linus.firstName,
+    lastName: fakePeople.linus.lastName,
     avatar: "https://i.pravatar.cc/450?img=11",
     status: "waiting" as Status,
   },
   {
-    firstName: "Ava",
-    lastName: "Thomas",
+    firstName: fakePeople.camila.firstName,
+    lastName: fakePeople.camila.lastName,
     avatar: "https://i.pravatar.cc/450?img=12",
     status: "waiting" as Status,
   },
   {
-    firstName: "Henry",
-    lastName: "Jackson",
+    firstName: fakePeople.theo.firstName,
+    lastName: fakePeople.theo.lastName,
     avatar: "https://i.pravatar.cc/450?img=13",
     status: "waiting" as Status,
   },
   {
-    firstName: "Isabella",
-    lastName: "White",
+    firstName: fakePeople.eva.firstName,
+    lastName: fakePeople.eva.lastName,
     avatar: "https://i.pravatar.cc/450?img=14",
     status: "waiting" as Status,
   },

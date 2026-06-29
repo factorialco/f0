@@ -1,5 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { Cell, mockItem } from "../../../__stories__/shared"
 
 const meta = {
@@ -25,7 +27,7 @@ type Story = StoryObj<typeof meta>
 const avatarListWithDescriptions = mockItem.avatarList.map((avatar, index) => ({
   ...avatar,
   tooltipDescription:
-    index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
+    index === 0 ? fakePeople.noor.email : fakePeople.tobias.email,
 }))
 
 export const AvatarListType: Story = {
@@ -60,7 +62,7 @@ export const WithTooltipDescriptions: Story = {
           avatarList: item.avatarList.map((avatar, index) => ({
             ...avatar,
             tooltipDescription:
-              index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
+              index === 0 ? fakePeople.noor.email : fakePeople.tobias.email,
           })),
           max: 1,
         },
@@ -84,7 +86,7 @@ export const OverflowPopoverNoScroll: Story = {
           avatarList: item.avatarList.map((avatar, index) => ({
             ...avatar,
             tooltipDescription:
-              index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
+              index === 0 ? fakePeople.noor.email : fakePeople.tobias.email,
           })),
           max: 1,
           tooltipScroll: "none",
@@ -110,7 +112,7 @@ export const OverflowPopoverManyDescriptions: Story = {
           avatarList: item.avatarList.map((avatar, index) => ({
             ...avatar,
             tooltipDescription:
-              index === 0 ? "john.doe@factorial.co" : "josep.rey@factorial.co",
+              index === 0 ? fakePeople.noor.email : fakePeople.tobias.email,
           })),
           max: 1,
         },

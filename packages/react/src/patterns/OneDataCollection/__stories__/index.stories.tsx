@@ -38,6 +38,7 @@ import {
   TEAMS_MOCK,
   YEARS_OF_EXPERIENCIE_MOCK,
 } from "@/mocks"
+import { fakePeople } from "@/mocks/people"
 import { mockImage } from "@/testing/mocks/images"
 
 import type { CustomVisualizationProps } from "../visualizations/collection"
@@ -700,15 +701,15 @@ export const RendererTypes: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
-                          src: "/avatars/person04.jpg",
+                          firstName: fakePeople.aria.firstName,
+                          lastName: fakePeople.aria.lastName,
+                          src: fakePeople.aria.image,
                         },
                         {
                           type: "person",
-                          firstName: "Sergio",
-                          lastName: "Carracedo",
-                          src: "/avatars/person05.jpg",
+                          firstName: fakePeople.priya.firstName,
+                          lastName: fakePeople.priya.lastName,
+                          src: fakePeople.priya.image,
                         },
                       ],
                     },
@@ -768,15 +769,15 @@ export const CustomCardProperties: Story = {
                         },
                         {
                           type: "person",
-                          firstName: "Dani",
-                          lastName: "Moreno",
-                          src: "/avatars/person04.jpg",
+                          firstName: fakePeople.aria.firstName,
+                          lastName: fakePeople.aria.lastName,
+                          src: fakePeople.aria.image,
                         },
                         {
                           type: "person",
-                          firstName: "Sergio",
-                          lastName: "Carracedo",
-                          src: "/avatars/person05.jpg",
+                          firstName: fakePeople.priya.firstName,
+                          lastName: fakePeople.priya.lastName,
+                          src: fakePeople.priya.image,
                         },
                       ],
                     },

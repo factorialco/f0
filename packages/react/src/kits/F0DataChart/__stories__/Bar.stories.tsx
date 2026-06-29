@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import type { F0DataChartProps } from "../types"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0DataChart } from "../index"
 import { ChartDecorator, ResponsiveSnapshot } from "./decorators"
 
@@ -153,12 +155,12 @@ export const Horizontal: Story = {
     type: "bar",
     orientation: "horizontal",
     categories: [
-      "Sarah Johnson",
-      "Michael Chen",
-      "Emma Thompson",
-      "James Wilson",
-      "Olivia Martinez",
-      "David Brown",
+      fakePeople.noor.fullName,
+      fakePeople.hana.fullName,
+      fakePeople.caleb.fullName,
+      fakePeople.yuki.fullName,
+      fakePeople.sofia.fullName,
+      fakePeople.ravi.fullName,
     ],
     series: [{ name: "Successful hires", data: [28, 25, 23, 21, 19, 18] }],
     showLegend: false,

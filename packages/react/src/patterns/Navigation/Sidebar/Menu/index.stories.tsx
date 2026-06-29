@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { expect, within } from "storybook/test"
 
+import { fakePeople } from "@/mocks/people"
+
 import * as Icons from "../../../../icons/app"
 import { Menu } from "./index"
 
@@ -91,11 +93,11 @@ export const Default: Story = {
       },
       {
         type: "avatar",
-        label: "Dani Moreno",
+        label: fakePeople.aria.fullName,
         avatar: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: fakePeople.aria.firstName,
+          lastName: fakePeople.aria.lastName,
           src: "/avatars/person04.jpg",
         },
         href: "/people/dani-moreno",
@@ -103,11 +105,11 @@ export const Default: Story = {
       },
       {
         type: "avatar",
-        label: "Dani Moreno",
+        label: fakePeople.aria.fullName,
         avatar: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
+          firstName: fakePeople.aria.firstName,
+          lastName: fakePeople.aria.lastName,
           src: "/avatars/person05.jpg",
         },
         href: "/people/dani-moreno",
@@ -115,11 +117,11 @@ export const Default: Story = {
       },
       {
         type: "avatar",
-        label: "Nik Lopin",
+        label: fakePeople.felix.fullName,
         avatar: {
           type: "person",
-          firstName: "Nik",
-          lastName: "Lopin",
+          firstName: fakePeople.felix.firstName,
+          lastName: fakePeople.felix.lastName,
           src: "/avatars/person01.jpg",
         },
         href: "/people/nik-lopin",
@@ -127,11 +129,11 @@ export const Default: Story = {
       },
       {
         type: "avatar",
-        label: "Saúl Domínguez",
+        label: fakePeople.lena.fullName,
         avatar: {
           type: "person",
-          firstName: "Saúl",
-          lastName: "Domínguez",
+          firstName: fakePeople.lena.firstName,
+          lastName: fakePeople.lena.lastName,
         },
         href: "/people/saul-dominguez",
       },

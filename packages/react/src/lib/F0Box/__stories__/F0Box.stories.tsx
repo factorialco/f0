@@ -10,6 +10,7 @@ import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { F0TagDot } from "@/components/tags/F0TagDot"
 import { Badge } from "@/ui/badge"
+import { fakePeople } from "@/mocks/people"
 import {
   ChartLine,
   Clock,
@@ -2199,40 +2200,40 @@ export const ResponsiveDashboardExample: Story = {
           <F0Box display="flex" flexDirection="column" divider="y">
             {[
               {
-                first: "Sarah",
-                last: "Connor",
+                first: fakePeople.noor.firstName,
+                last: fakePeople.noor.lastName,
                 product: "Pro Plan",
                 amount: "$299",
                 status: "positive" as const,
                 statusText: "Completed",
               },
               {
-                first: "James",
-                last: "Wilson",
+                first: fakePeople.hana.firstName,
+                last: fakePeople.hana.lastName,
                 product: "Enterprise",
                 amount: "$1,200",
                 status: "warning" as const,
                 statusText: "Pending",
               },
               {
-                first: "Emily",
-                last: "Zhang",
+                first: fakePeople.caleb.firstName,
+                last: fakePeople.caleb.lastName,
                 product: "Starter",
                 amount: "$49",
                 status: "positive" as const,
                 statusText: "Completed",
               },
               {
-                first: "Marcus",
-                last: "Brown",
+                first: fakePeople.yuki.firstName,
+                last: fakePeople.yuki.lastName,
                 product: "Pro Plan",
                 amount: "$299",
                 status: "critical" as const,
                 statusText: "Cancelled",
               },
               {
-                first: "Ana",
-                last: "García",
+                first: fakePeople.sofia.firstName,
+                last: fakePeople.sofia.lastName,
                 product: "Enterprise",
                 amount: "$1,200",
                 status: "info" as const,
@@ -2310,26 +2311,26 @@ export const ResponsiveDashboardExample: Story = {
             <F0Box display="flex" flexDirection="column" divider="y">
               {[
                 {
-                  first: "Laura",
-                  last: "Martínez",
+                  first: fakePeople.ravi.firstName,
+                  last: fakePeople.ravi.lastName,
                   role: "Product Manager",
                   status: "positive" as const,
                 },
                 {
-                  first: "David",
-                  last: "Kim",
+                  first: fakePeople.greta.firstName,
+                  last: fakePeople.greta.lastName,
                   role: "Lead Engineer",
                   status: "positive" as const,
                 },
                 {
-                  first: "Sophie",
-                  last: "Bernard",
+                  first: fakePeople.iris.firstName,
+                  last: fakePeople.iris.lastName,
                   role: "UX Designer",
                   status: "warning" as const,
                 },
                 {
-                  first: "Alex",
-                  last: "Nowak",
+                  first: fakePeople.aaron.firstName,
+                  last: fakePeople.aaron.lastName,
                   role: "Data Analyst",
                   status: "neutral" as const,
                 },
@@ -2443,7 +2444,12 @@ export const ListWithDividers: Story = {
       background="primary"
       overflow="hidden"
     >
-      {["John Doe", "Jane Smith", "Bob Johnson", "Alice Brown"].map((name) => (
+      {[
+        fakePeople.nadia.fullName,
+        fakePeople.linus.fullName,
+        fakePeople.camila.fullName,
+        fakePeople.theo.fullName,
+      ].map((name) => (
         <F0Box
           key={name}
           display="flex"

@@ -71,8 +71,8 @@ export const renderBodyWithMentions = (
 ): ReactNode => {
   if (tokens.length === 0) return renderBodyWithEmojis(body)
 
-  // Collect every `@name` occurrence (longest names first so "@Ana María" wins
-  // over "@Ana"), then drop overlaps left-to-right.
+  // Collect every `@name` occurrence (longest names first so "@Noor Rahimi" wins
+  // over "@Noor"), then drop overlaps left-to-right.
   const ranges: { start: number; end: number; token: MentionToken }[] = []
   const byLength = [...tokens].sort((a, b) => b.name.length - a.name.length)
   for (const token of byLength) {

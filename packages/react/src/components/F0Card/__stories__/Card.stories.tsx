@@ -23,6 +23,7 @@ import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
 import { DndProvider } from "@/lib/dnd/context"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { mockImage } from "@/testing/mocks/images"
 import { Switch } from "@/ui/switch"
 import { Text } from "@/ui/Text"
@@ -160,11 +161,11 @@ export const Default: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Daniel",
-      lastName: "Moreno",
+      firstName: fakePeople.aria.firstName,
+      lastName: fakePeople.aria.lastName,
     },
     compact: false,
-    title: "Daniel Moreno",
+    title: fakePeople.aria.fullName,
     description: "This is a cool description",
     metadata: [
       {

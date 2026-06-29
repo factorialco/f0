@@ -1,6 +1,7 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 
 import { Ai, Download, Pencil, Upload } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import { OneDataCollection } from "../.."
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
@@ -32,8 +33,8 @@ type Story = StoryObj<typeof meta>
 const mockUsers = [
   {
     id: "user-1",
-    name: "John Doe",
-    email: "john@example.com",
+    name: fakePeople.noor.fullName,
+    email: fakePeople.noor.email,
     role: "Senior Engineer",
     department: "Engineering",
     status: "active",
@@ -46,8 +47,8 @@ const mockUsers = [
   },
   {
     id: "user-2",
-    name: "Jane Smith",
-    email: "jane@example.com",
+    name: fakePeople.hana.fullName,
+    email: fakePeople.hana.email,
     role: "Product Manager",
     department: "Product",
     status: "active",
@@ -60,8 +61,8 @@ const mockUsers = [
   },
   {
     id: "user-3",
-    name: "Bob Johnson",
-    email: "bob@example.com",
+    name: fakePeople.caleb.fullName,
+    email: fakePeople.caleb.email,
     role: "Designer",
     department: "Design",
     status: "inactive",
@@ -74,8 +75,8 @@ const mockUsers = [
   },
   {
     id: "user-4",
-    name: "Alice Williams",
-    email: "alice@example.com",
+    name: fakePeople.yuki.fullName,
+    email: fakePeople.yuki.email,
     role: "Marketing Lead",
     department: "Marketing",
     status: "active",

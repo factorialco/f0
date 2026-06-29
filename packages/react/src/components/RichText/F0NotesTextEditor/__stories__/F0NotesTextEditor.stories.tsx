@@ -4,6 +4,7 @@ import { fn } from "storybook/test"
 import { NewColor } from "@/components/tags/F0TagDot"
 import { Summary } from "@/icons/ai"
 import { mockEnhanceText } from "@/lib/storybook-utils/ai-mocks"
+import { fakePeople } from "@/mocks/people"
 import { AcademicCap, Alert, Globe, List, Placeholder } from "@/icons/app"
 
 import {
@@ -289,11 +290,11 @@ export const Default: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Raúl",
-            lastName: "Sigüenza",
-            src: "/avatars/person01.jpg",
+            firstName: fakePeople.mateo.firstName,
+            lastName: fakePeople.mateo.lastName,
+            src: fakePeople.mateo.image,
           },
-          text: "Raúl Sigüenza",
+          text: fakePeople.mateo.fullName,
         },
       },
     ],

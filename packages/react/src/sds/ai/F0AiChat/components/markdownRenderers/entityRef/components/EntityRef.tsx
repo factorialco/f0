@@ -24,7 +24,7 @@ export function extractText(node: ReactNode): string {
  * Falls back to rendering children as plain text for unknown types.
  *
  * Usage in markdown (via rehype-raw):
- *   <entity-ref type="person" id="123">Ana García</entity-ref>
+ *   <entity-ref type="person" id="123">Noor Rahimi</entity-ref>
  */
 export function EntityRef({
   type,

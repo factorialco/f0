@@ -14,6 +14,7 @@ import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
@@ -270,13 +271,13 @@ export const WithResourceHeader: Story = {
 // ─── Resource-aware header stories ────────────────────────────────────────────
 
 const CANDIDATE_RESOURCE_HEADER: ComponentProps<typeof ResourceHeader> = {
-  title: "René Galindo",
+  title: fakePeople.bruno.fullName,
   description: "Senior Product Designer",
   avatar: {
     type: "person",
-    firstName: "René",
-    lastName: "Galindo",
-    src: "/avatars/person04.jpg",
+    firstName: fakePeople.bruno.firstName,
+    lastName: fakePeople.bruno.lastName,
+    src: fakePeople.bruno.image,
   },
   status: {
     label: "Stage",
@@ -295,11 +296,11 @@ const CANDIDATE_RESOURCE_HEADER: ComponentProps<typeof ResourceHeader> = {
         type: "avatar",
         variant: {
           type: "person",
-          firstName: "Ilya",
-          lastName: "Zayats",
-          src: "/avatars/person05.jpg",
+          firstName: fakePeople.noor.firstName,
+          lastName: fakePeople.noor.lastName,
+          src: fakePeople.noor.image,
         },
-        text: "Ilya Zayats",
+        text: fakePeople.noor.fullName,
       },
     },
   ],
@@ -345,7 +346,7 @@ export const WithResourceHeaderProp: Story = {
   args: {
     ...Default.args,
     position: "right",
-    title: "René Galindo",
+    title: fakePeople.bruno.fullName,
     resourceHeader: CANDIDATE_RESOURCE_HEADER,
     otherActions: OTHER_ACTIONS,
     tabs: TABS,
@@ -369,11 +370,11 @@ export const WithResourceHeaderProp: Story = {
 export const WithResourceControls: Story = {
   render: (args) => {
     const CANDIDATES = [
-      "René Galindo",
-      "Ilya Zayats",
-      "Anna Pérez",
-      "Marc Torres",
-      "Sofía López",
+      fakePeople.bruno.fullName,
+      fakePeople.noor.fullName,
+      fakePeople.hana.fullName,
+      fakePeople.caleb.fullName,
+      fakePeople.yuki.fullName,
     ]
 
     const Wrapper = () => {
@@ -450,7 +451,7 @@ export const WithBackControls: Story = {
   args: {
     ...Default.args,
     position: "right",
-    title: "René Galindo",
+    title: fakePeople.bruno.fullName,
     resourceHeader: CANDIDATE_RESOURCE_HEADER,
     controls: {
       kind: "back",

@@ -1,4 +1,5 @@
 import type { RecordType } from "@/hooks/datasource"
+import { FAKE_PEOPLE } from "@/mocks/people"
 import type { PageBasedPaginatedResponse } from "@/hooks/datasource/types"
 import type {
   F0DataChartFunnelSeries,
@@ -511,79 +512,17 @@ interface Employee extends RecordType {
   startDate: string
 }
 
-const ROLES: Record<(typeof DEPARTMENTS)[number], string[]> = {
-  Engineering: [
-    "Frontend Engineer",
-    "Backend Engineer",
-    "Staff Engineer",
-    "SRE",
-  ],
-  Product: [
-    "Product Manager",
-    "Product Designer",
-    "Product Analyst",
-    "Head of Product",
-  ],
-  Design: ["UI Designer", "UX Researcher", "Design Lead", "Brand Designer"],
-  Marketing: [
-    "Content Strategist",
-    "Growth Manager",
-    "Marketing Analyst",
-    "SEO Specialist",
-  ],
-}
-
-const FIRST_NAMES = [
-  "Alice",
-  "Bob",
-  "Carol",
-  "David",
-  "Eve",
-  "Frank",
-  "Grace",
-  "Henry",
-  "Iris",
-  "Jack",
-  "Karen",
-  "Leo",
-  "Mia",
-  "Noah",
-  "Olivia",
-  "Paul",
-]
-
-const LAST_NAMES = [
-  "Johnson",
-  "Smith",
-  "Williams",
-  "Brown",
-  "Davis",
-  "Miller",
-  "Wilson",
-  "Taylor",
-  "Anderson",
-  "Thomas",
-  "Martinez",
-  "Garcia",
-  "Lee",
-  "Clark",
-  "Hall",
-  "Young",
-]
-
-const MOCK_EMPLOYEES: Employee[] = FIRST_NAMES.map((firstName, i) => {
-  const lastName = LAST_NAMES[i]
-  const dept = DEPARTMENTS[i % DEPARTMENTS.length]
-  const roles = ROLES[dept]
-  const role = roles[i % roles.length]
+// Drawn from the canonical fake roster: same name, email, role and department
+// as the person carries everywhere else.
+const MOCK_EMPLOYEES: Employee[] = FAKE_PEOPLE.slice(0, 16).map((person, i) => {
   const isActive = i % 5 !== 0
 
   return {
     id: String(i + 1),
-    name: `${firstName} ${lastName}`,
-    email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.com`,
-    role,
-    department: dept,
+    name: person.fullName,
+    email: person.email,
+    role: person.jobTitle,
+    department: person.department,
     salary: 80_000 + Math.round((i * 3_721) % 70_000),
     status: isActive ? ("Active" as const) : ("Inactive" as const),
     startDate: `${2020 + (i % 5)}-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`,
