@@ -4416,14 +4416,13 @@ const SESSION_INSTRUCTOR_OPTIONS = [
 ]
 
 const sessionFormSections = {
-  details: { title: "Details" },
   schedule: { title: "Schedule" },
   format: { title: "Format" },
   notifications: { title: "Notifications" },
 }
 
 const sessionFormSchema = z.object({
-  name: f0FormField.text({ label: "Name", section: "details", placeholder: "Session name" }),
+  name: f0FormField.text({ label: "Name", section: "schedule", placeholder: "Session name" }),
   date: f0FormField.text({ label: "Date", section: "schedule", row: "schedule-row", placeholder: "dd/mm/yyyy" }),
   startsAt: f0FormField.text({ label: "Starts at", section: "schedule", row: "schedule-row", placeholder: "09:00" }),
   endsAt: f0FormField.text({ label: "Ends at", section: "schedule", row: "schedule-row", placeholder: "11:00" }),
