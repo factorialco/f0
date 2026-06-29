@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.56.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.55.0...f0-react-native-v0.56.0) (2026-06-29)
+
+
+### Features
+
+* **react-native:** refresh icon set with new designs ([#4561](https://github.com/factorialco/f0/issues/4561)) ([dadefe3](https://github.com/factorialco/f0/commit/dadefe349a8076a5df4289fec2cc9f7ba72f68f3))
+
 ## [0.55.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.54.0...f0-react-native-v0.55.0) (2026-05-20)
 
 
