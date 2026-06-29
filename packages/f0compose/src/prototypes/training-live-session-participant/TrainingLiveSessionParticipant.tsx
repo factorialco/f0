@@ -67,6 +67,7 @@ import {
   InProgressTask,
   Laptop,
   Link,
+  LogoAvatar,
   Microphone,
   MicrophoneNegative,
   Settings,
@@ -578,16 +579,16 @@ const sessionModalityOptions: Array<{
 // External = the instructor pastes their own link (and we then lose the
 // in-Factorial call features).
 const videoCallOptions: Array<{ value: "factorial" | "external"; label: string; description: string; icon: IconType }> = [
-  { value: "factorial", label: "In Factorial", description: "Runs in Factorial", icon: VideoRecorder },
+  { value: "factorial", label: "In Factorial", description: "Runs in Factorial", icon: LogoAvatar },
   { value: "external", label: "External link", description: "Use your own link", icon: ExternalLink },
 ]
 
 function SessionToggleField({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <F0Box display="flex" flexDirection="column" gap="xs">
+    <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 11 }}>
       <label className="text-base font-medium leading-normal text-f1-foreground-secondary">{label}</label>
       {children}
-    </F0Box>
+    </F0BoxWithClassName>
   )
 }
 
@@ -609,7 +610,7 @@ function SessionOptionGroup<TValue extends string>({
       onValueChange={(nextValue) => {
         if (nextValue) onChange(nextValue as TValue)
       }}
-      className={columns === "2" ? "grid w-full grid-cols-2 gap-2" : "grid w-full grid-cols-3 gap-2"}
+      className={columns === "2" ? "grid w-full grid-cols-2 gap-3" : "grid w-full grid-cols-3 gap-3"}
     >
       {options.map((option) => {
         const selected = option.value === value
@@ -619,10 +620,10 @@ function SessionOptionGroup<TValue extends string>({
             key={option.value}
             value={option.value}
             className={selected
-              ? "h-auto justify-between gap-2 rounded-md border border-solid border-f1-border-selected bg-f1-background-selected-secondary px-3 py-2 text-f1-foreground-selected shadow-none data-[state=on]:bg-f1-background-selected-secondary data-[state=on]:text-f1-foreground-selected focus-visible:outline-none"
-              : "h-auto justify-between gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-f1-foreground hover:border-f1-border-hover hover:bg-f1-background-hover focus-visible:outline-none"}
+              ? "h-auto justify-between gap-2 rounded-md border border-solid border-f1-border-selected bg-f1-background-selected-secondary px-3 py-3 text-f1-foreground-selected shadow-none data-[state=on]:bg-f1-background-selected-secondary data-[state=on]:text-f1-foreground-selected focus-visible:outline-none"
+              : "h-auto justify-between gap-2 rounded-md border border-solid border-f1-border-secondary bg-f1-background px-3 py-3 text-f1-foreground hover:border-f1-border-hover hover:bg-f1-background-hover focus-visible:outline-none"}
           >
-            <F0Box display="flex" alignItems="center" gap="sm">
+            <F0Box display="flex" alignItems="center" gap="md">
               <F0Icon icon={option.icon} size="sm" color="currentColor" />
               <F0Box display="flex" flexDirection="column" gap="none">
                 <F0Text content={option.label} variant="body" />
@@ -4472,7 +4473,7 @@ const sessionFormSchema = z.object({
     options: SESSION_INSTRUCTOR_OPTIONS,
   }),
   minimumAttendance: f0FormField.percentage({
-    label: "Minimum to be marked as attended",
+    label: "Minimum percentage to be marked as attended",
     section: "format",
     min: 1,
     max: 100,
