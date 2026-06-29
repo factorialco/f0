@@ -40,11 +40,6 @@ describe("NonEditableCell", () => {
     expect(container.firstChild).toHaveClass("cursor-default")
   })
 
-  it("applies the read-only background", () => {
-    const { container } = render(<NonEditableCell {...defaultProps} />)
-    expect(container.firstChild).toHaveClass("bg-f1-background-secondary")
-  })
-
   it("renders the hint icon after the cell content", () => {
     render(
       <NonEditableCell

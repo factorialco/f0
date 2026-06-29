@@ -383,12 +383,12 @@ export const EditableTableWithDisabledCells: Story = {
   },
 }
 
-export const EditableTableWithNonEditableHint: Story = {
+export const EditableTableWithCellHint: Story = {
   parameters: {
     docs: {
       description: {
         story:
-          "Non-editable cells (`editType: () => 'display-only'`) render with the read-only background, and their `cellHint` icon sits to the right of the content (FCT-56432). Here the Role column is read-only with a hint; Email stays editable for contrast.",
+          "A `cellHint` (ⓘ tooltip) renders its icon to the right of the cell content for read-only cell types (FCT-56432). Here the Role column is `disabled` (gray background) with a hint; Email stays editable for contrast.",
       },
     },
   },
@@ -414,7 +414,7 @@ export const EditableTableWithNonEditableHint: Story = {
                 if (col.editType !== undefined && col.id === "role") {
                   return {
                     ...col,
-                    editType: () => "display-only" as const,
+                    editType: () => "disabled" as const,
                     cellHint: () => ({
                       icon: InfoCircleLine,
                       iconColor: "secondary" as const,
@@ -430,7 +430,7 @@ export const EditableTableWithNonEditableHint: Story = {
           },
         ]}
         dataAdapter={dataAdapter}
-        id="editable-table-non-editable-hint/v1"
+        id="editable-table-cell-hint/v1"
       />
     )
   },
