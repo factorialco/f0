@@ -10,4 +10,8 @@ export {
   type UserReaction,
 } from "./components/feedback/FeedbackProvider"
 
-export { type RenderableTurn, type ThinkingProps } from "./types"
+export {
+  type RenderableTurn,
+  type ThinkingProps,
+  type ThinkingStep,
+} from "./types"
