@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.14.0](https://github.com/factorialco/f0/compare/f0-react-v4.13.0...f0-react-v4.14.0) (2026-06-29)
+
+
+### Features
+
+* **ClockInControls:** add locationSelectorElement slot for location drill-in ([#4516](https://github.com/factorialco/f0/issues/4516)) ([67ffa13](https://github.com/factorialco/f0/commit/67ffa13298f51a227fc99a4b1d42e789692a3ff5))
+
 ## [4.13.0](https://github.com/factorialco/f0/compare/f0-react-v4.12.0...f0-react-v4.13.0) (2026-06-29)
 
 
