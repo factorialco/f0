@@ -6,11 +6,13 @@ import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { Ellipsis } from "@/icons/app"
+import UpsellIcon from "@/icons/app/Upsell"
 
 import {
   PrimaryActionItemDefinition,
   SecondaryActionGroup,
   SecondaryActionItem,
+  UpsellActionDefinition,
 } from "../../actions"
 
 type CollectionActionProps = {
@@ -18,6 +20,7 @@ type CollectionActionProps = {
   primaryActionsLabel?: string
   secondaryActions?: SecondaryActionItem[]
   otherActions?: SecondaryActionGroup[]
+  upsellAction?: UpsellActionDefinition
 }
 
 export const CollectionActions = ({
@@ -25,6 +28,7 @@ export const CollectionActions = ({
   primaryActionsLabel,
   secondaryActions,
   otherActions,
+  upsellAction,
 }: CollectionActionProps) => {
   const primaryActionsButtons = (
     Array.isArray(primaryActions) ? primaryActions : [primaryActions]
@@ -56,7 +60,8 @@ export const CollectionActions = ({
   if (
     primaryActionsButtons.length === 0 &&
     secondaryActionsButtons.length === 0 &&
-    dropdownItems.length === 0
+    dropdownItems.length === 0 &&
+    !upsellAction
   )
     return null
 
@@ -130,6 +135,17 @@ export const CollectionActions = ({
           <React.Fragment key={action.label}>{button}</React.Fragment>
         )
       })}
+
+      {upsellAction && (
+        <F0Button
+          size="md"
+          variant={upsellAction.variant ?? "outlinePromote"}
+          label={upsellAction.label}
+          icon={upsellAction.showIcon === false ? undefined : UpsellIcon}
+          onClick={upsellAction.onClick}
+          disabled={upsellAction.disabled}
+        />
+      )}
 
       {dropdownItems.length > 0 && (
         <Dropdown
