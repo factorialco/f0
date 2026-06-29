@@ -301,14 +301,25 @@ export type AiChatProviderProps = {
    */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   /**
-   * Action/prompt cards rendered below the composer on the fullscreen welcome
-   * screen. The chat owns layout and, for prompt cards, the send.
+   * Cards rendered below the composer on the fullscreen welcome screen. Pure
+   * data — clicking a card calls `onCardSelect` with its `id` and optional
+   * `message`. The chat owns the layout; the host owns the interaction.
    *
    * Optional and independent of `welcomeScreenSuggestions` — provide either,
    * both, or neither, in any counts. At most 4 cards are rendered (the row is a
    * 2×2 grid); extras are dropped.
    */
   welcomeScreenCards?: F0AiChatWelcomeCard[]
+  /**
+   * Handler invoked when a welcome card is clicked, with the card's `id` and
+   * optional `message`. Branch on `id` to drive per-card behavior (send the
+   * `message` as a prompt, open a dialog, …).
+   *
+   * Hosts that must build the handler inside the chat provider (e.g. needing
+   * `openCanvas`) can register it dynamically via `setOnCardSelect` from
+   * `useAiChat()` instead.
+   */
+  onCardSelect?: (id: string, message?: string) => void
   disclaimer?: AiChatDisclaimer
   /**
    * Enable resizable chat window

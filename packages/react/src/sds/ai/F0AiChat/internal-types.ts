@@ -35,6 +35,7 @@ export interface AiChatState {
   chatInput?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenCards?: F0AiChatWelcomeCard[]
+  onCardSelect?: (id: string, message?: string) => void
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
   defaultVisualizationMode?: VisualizationMode
@@ -90,6 +91,20 @@ export type AiChatProviderReturnValue = {
   setWelcomeScreenCards: React.Dispatch<
     React.SetStateAction<F0AiChatWelcomeCard[]>
   >
+  /**
+   * Stable handler invoked when a welcome card is clicked, with the card's
+   * `id` and optional `message`. Always defined; no-ops until a handler is
+   * registered (via the `onCardSelect` prop or `setOnCardSelect`).
+   */
+  onCardSelect: (id: string, message?: string) => void
+  /**
+   * Register the welcome-card click handler. Lets a component inside the
+   * provider wire behavior that needs in-provider context (e.g. `openCanvas`).
+   * Pass `undefined` to clear.
+   */
+  setOnCardSelect: (
+    handler: ((id: string, message?: string) => void) | undefined
+  ) => void
   onThumbsUp?: (
     message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
