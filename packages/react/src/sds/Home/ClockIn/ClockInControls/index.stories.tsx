@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import {
   Home as HomeIcon,
   Office as OfficeIcon,
@@ -237,5 +238,17 @@ export const WithHiddenLocationAndProject: Story = {
   args: {
     ...ClockedOut.args,
     canShowLocation: false,
+  },
+}
+
+export const WithCustomLocationSelector: Story = {
+  args: {
+    ...ClockedOut.args,
+    // When `locationSelectorElement` is provided it replaces the built-in flat
+    // location select, letting the consumer render its own control — e.g. a
+    // drill-in selector (location → workplace → work area).
+    locationSelectorElement: (
+      <F0TagRaw text="Office · Barcelona · Llucuna A-3" icon={OfficeIcon} />
+    ),
   },
 }
