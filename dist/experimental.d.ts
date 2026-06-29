@@ -3258,7 +3258,6 @@ declare const defaultTranslations: {
         readonly moveDown: "Move down";
         readonly thumbsUp: "Like";
         readonly thumbsDown: "Dislike";
-        readonly rewind: "Rewind to this point";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";

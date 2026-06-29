@@ -1899,7 +1899,6 @@ export declare const defaultTranslations: {
         readonly moveDown: "Move down";
         readonly thumbsUp: "Like";
         readonly thumbsDown: "Dislike";
-        readonly rewind: "Rewind to this point";
         readonly other: "Other actions";
         readonly toggle: "Toggle";
         readonly toggleDropdownMenu: "Toggle dropdown menu";
@@ -2822,12 +2821,10 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, initialText, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
-    /** Pre-fills the textarea on first render. Use with a changing `key` to restore text after undo. */
-    initialText?: string;
     /** Emitted when the user submits. Awaited so the textarea can stay disabled. */
     onSubmit: (payload: F0AiChatTextAreaSubmitPayload) => void | Promise<void>;
     /** Called when the user clicks the stop button while a response is streaming. */
@@ -3024,8 +3021,6 @@ export declare type F0AiMessagesContainerProps = {
     onRegenerate?: (messageId: string) => void;
     /** Called when the user copies an assistant message's content. */
     onCopy?: (content: string) => void;
-    /** Called when the user clicks the undo button on a turn. Receives the turn index. */
-    onUndo?: (turnIndex: number) => void;
     /** Pre-processed turns to render (assembled by the connected wrapper). */
     turns: RenderableTurn[];
     /** Show a skeleton in place of the turns while a thread is being fetched. */
@@ -4462,13 +4457,6 @@ export declare type RenderableTurn = {
         /** Reference message attached to feedback submissions. */
         targetMessage: Message;
     };
-    /**
-     * Whether this turn can be rolled back via the undo button. Defaults to
-     * shown when an `onUndo` handler is provided; set to `false` to hide undo
-     * for a specific turn (e.g. turns with no checkpoint behind them, or while a
-     * clarifying flow is mid-flight). Only consulted when `onUndo` is set.
-     */
-    canUndo?: boolean;
 };
 
 export declare type RequisitionProfile = {
