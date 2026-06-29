@@ -27,7 +27,7 @@ export const ChatMessageReactions = ({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-2 py-2",
+        "flex flex-wrap items-center gap-2 py-1",
         isMine && "justify-end"
       )}
     >
@@ -41,6 +41,7 @@ export const ChatMessageReactions = ({
           hasReacted={reaction.reactedByMe}
           users={reaction.users}
           onInteraction={(emoji) => toggleReaction(message.id, emoji)}
+          size="sm"
         />
       ))}
       <Picker

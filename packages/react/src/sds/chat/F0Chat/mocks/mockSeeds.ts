@@ -397,6 +397,24 @@ export const SEEDS: Seed[] = [
         min: 2 * DAY - 15,
         replyToIndex: 8,
       },
+      // A run of consecutive messages from the same author (Noah) — the bubbles
+      // chain (tucked-in corners) and, in a group, only the last one shows the
+      // avatar.
+      {
+        from: NOAH,
+        body: "Quick update on the QA pass 👇",
+        min: 1 * DAY,
+      },
+      {
+        from: NOAH,
+        body: "All the critical flows are green ✅",
+        min: 1 * DAY - 1,
+      },
+      {
+        from: NOAH,
+        body: "Just a few minor visual nits left — filing them now",
+        min: 1 * DAY - 2,
+      },
       {
         from: GRACE,
         body: "Analytics dashboard will be ready for Monday's demo",

@@ -43,6 +43,75 @@ describe("ChatBubble emoji rendering", () => {
   })
 })
 
+describe("ChatBubble chained corners", () => {
+  it("keeps all corners rounded for a lone message (others, left)", () => {
+    const { container } = render(
+      <ChatBubble message={makeMessage("hi")} isMine={false} />
+    )
+    expect(container.querySelector(".rounded-tl-sm")).not.toBeInTheDocument()
+    expect(container.querySelector(".rounded-bl-sm")).not.toBeInTheDocument()
+  })
+
+  it("tucks only the bottom for the first of a run (others, left)", () => {
+    const { container } = render(
+      <ChatBubble
+        message={makeMessage("hi")}
+        isMine={false}
+        isFirstOfRun
+        isLastOfRun={false}
+      />
+    )
+    expect(container.querySelector(".rounded-bl-sm")).toBeInTheDocument()
+    expect(container.querySelector(".rounded-tl-sm")).not.toBeInTheDocument()
+  })
+
+  it("tucks both corners for a middle message (others, left)", () => {
+    const { container } = render(
+      <ChatBubble
+        message={makeMessage("hi")}
+        isMine={false}
+        isFirstOfRun={false}
+        isLastOfRun={false}
+      />
+    )
+    expect(container.querySelector(".rounded-tl-sm")).toBeInTheDocument()
+    expect(container.querySelector(".rounded-bl-sm")).toBeInTheDocument()
+  })
+
+  it("tucks only the top for the last of a run (others, left)", () => {
+    const { container } = render(
+      <ChatBubble
+        message={makeMessage("hi")}
+        isMine={false}
+        isFirstOfRun={false}
+        isLastOfRun
+      />
+    )
+    expect(container.querySelector(".rounded-tl-sm")).toBeInTheDocument()
+    expect(container.querySelector(".rounded-bl-sm")).not.toBeInTheDocument()
+  })
+
+  it("mirrors the chaining to the right for my own messages", () => {
+    // First of a run: bottom-right tucked, top-right still rounded.
+    const first = render(
+      <ChatBubble message={makeMessage("hi")} isMine isLastOfRun={false} />
+    )
+    expect(first.container.querySelector(".rounded-br-sm")).toBeInTheDocument()
+    expect(
+      first.container.querySelector(".rounded-tr-sm")
+    ).not.toBeInTheDocument()
+
+    // Last of a run: top-right tucked, bottom-right rounded again.
+    const last = render(
+      <ChatBubble message={makeMessage("hi")} isMine isFirstOfRun={false} />
+    )
+    expect(last.container.querySelector(".rounded-tr-sm")).toBeInTheDocument()
+    expect(
+      last.container.querySelector(".rounded-br-sm")
+    ).not.toBeInTheDocument()
+  })
+})
+
 describe("ChatBubble edited marker", () => {
   it("shows the muted 'edited' label when the message has been edited", () => {
     render(

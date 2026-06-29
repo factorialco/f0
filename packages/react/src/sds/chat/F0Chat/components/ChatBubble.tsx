@@ -20,6 +20,8 @@ const ChatBubbleImpl = ({
   isMine,
   author,
   currentUserId,
+  isFirstOfRun = true,
+  isLastOfRun = true,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -27,6 +29,12 @@ const ChatBubbleImpl = ({
   author?: F0ChatUser
   /** The viewer's id — a mention of it reads in warning/amber (Slack-style). */
   currentUserId?: string
+  /** First message of a same-author run. When false, the bubble tucks in its
+   * tail-side top corner so the run reads as one chained, stacked group. */
+  isFirstOfRun?: boolean
+  /** Last message of a same-author run. When false, the bubble tucks in its
+   * tail-side bottom corner so the run reads as one chained, stacked group. */
+  isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
 
@@ -67,11 +75,24 @@ const ChatBubbleImpl = ({
     [message.body, mentionTokens]
   )
 
+  // Chained corners: on the tail side, a corner tucks in only when it abuts
+  // another bubble from the same author — the top corner when this message
+  // continues a run, the bottom corner when another follows. So a run reads as
+  // one stacked group with a rounded top (first) and rounded bottom (last); a
+  // lone message keeps all four corners fully rounded. The opposite side is
+  // always fully rounded.
+  const corners = cn(
+    "rounded-2xl",
+    !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
+    !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
+  )
+
   if (message.deleted) {
     return (
       <div
         className={cn(
-          "w-fit max-w-full rounded-2xl px-3.5 py-2.5",
+          corners,
+          "w-fit max-w-full px-3.5 py-2.5",
           "text-sm italic text-f1-foreground",
           "border border-solid border-f1-border-secondary",
           isMine ? "bg-f1-background-tertiary" : "bg-f1-background"
@@ -83,10 +104,11 @@ const ChatBubbleImpl = ({
   }
 
   return (
-    <div className="min-w-0 max-w-full rounded-2xl bg-f1-background">
+    <div className={cn("min-w-0 max-w-full bg-f1-background", corners)}>
       <div
         className={cn(
-          "flex w-fit max-w-full flex-col rounded-2xl text-f1-foreground font-normal",
+          corners,
+          "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
           "border border-solid border-f1-border-secondary",
           // Mine: grey. Others: white with a subtle border (matches the design).

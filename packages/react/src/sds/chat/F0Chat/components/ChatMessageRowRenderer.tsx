@@ -132,6 +132,8 @@ const ChatMessageRowRendererComponent = ({
         author={showIdentity && isFirstOfRun ? message.author : undefined}
         bubbleGutter={bubbleGutter}
         belowGutter={spacer}
+        isFirstOfRun={isFirstOfRun}
+        isLastOfRun={isLastOfRun}
       />
       {isLastMessage && (
         <div className="flex w-full gap-2">

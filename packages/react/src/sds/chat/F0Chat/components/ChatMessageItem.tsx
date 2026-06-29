@@ -19,6 +19,8 @@ export const ChatMessageItem = ({
   author,
   bubbleGutter,
   belowGutter,
+  isFirstOfRun = true,
+  isLastOfRun = true,
 }: {
   message: F0ChatMessage
   isMine: boolean
@@ -29,6 +31,10 @@ export const ChatMessageItem = ({
   bubbleGutter?: ReactNode
   /** Matching invisible spacer so reactions line up under the bubble. */
   belowGutter?: ReactNode
+  /** First message of a same-author run — drives the bubble's chained corners. */
+  isFirstOfRun?: boolean
+  /** Last message of a same-author run — drives the bubble's chained corners. */
+  isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
   const [actionsOpen, setActionsOpen] = useState(false)
@@ -101,6 +107,8 @@ export const ChatMessageItem = ({
                   isMine={isMine}
                   author={author}
                   currentUserId={currentUserId}
+                  isFirstOfRun={isFirstOfRun}
+                  isLastOfRun={isLastOfRun}
                 />
               )}
               {/* The bubble anchors the "edited" mark to the body text. An
