@@ -287,6 +287,9 @@ type GroupSessionRow = {
   liveDurationSeconds?: number
   type: "self-paced" | "scheduled"
   modality: "Virtual" | "On-site" | "Hybrid"
+  // Where an online session runs. "external" (own link) and on-site sessions
+  // can't be auto-tracked, so attendance is manual. Defaults to "factorial".
+  host?: "factorial" | "external"
   liveState: "completed" | "live" | "waiting"
 }
 type SessionAttendanceRow = {
@@ -933,6 +936,37 @@ const groupSessions: GroupSessionRow[] = [
     type: "scheduled",
     modality: "Virtual",
     liveState: "waiting",
+  },
+  {
+    id: "session-4",
+    name: "Repaso con consultor externo",
+    date: "16 Jun 2026, 10:00 - 11:00",
+    statusLabel: "Starts soon",
+    scheduleLabel: "16 Jun 2026, 10:00 - 11:00",
+    type: "scheduled",
+    modality: "Virtual",
+    host: "external",
+    liveState: "waiting",
+  },
+  {
+    id: "session-5",
+    name: "Práctica en planta",
+    date: "17 Jun 2026, 09:00 - 11:00",
+    statusLabel: "Starts soon",
+    scheduleLabel: "17 Jun 2026, 09:00 - 11:00",
+    type: "scheduled",
+    modality: "On-site",
+    liveState: "waiting",
+  },
+  {
+    id: "session-6",
+    name: "Taller presencial inicial",
+    date: "9 Jun 2026, 09:00 - 11:00",
+    statusLabel: "Ended",
+    scheduleLabel: "9 Jun 2026, 09:00 - 11:00",
+    type: "scheduled",
+    modality: "On-site",
+    liveState: "completed",
   },
 ]
 
@@ -4329,6 +4363,11 @@ function SessionSidepanel({
 }) {
   if (!session) return null
 
+  // Notes and transcript are Factorial-room features. External-link and on-site
+  // sessions keep the tabs (so the capability stays discoverable) but show an
+  // info panel explaining they're only available when hosted in Factorial.
+  const inFactorial = (session.modality === "Virtual" || session.modality === "Hybrid") && session.host !== "external"
+
   const tabs: { id: SessionSidepanelTabId; label: string; disabled?: boolean; onClick: () => void }[] = [
     { id: "details", label: "Details", onClick: () => onTabChange("details") },
     // Notes are the instructor's private prep/review space; participants don't see them.
@@ -4336,11 +4375,11 @@ function SessionSidepanel({
       ? [{ id: "notes" as const, label: "Notes", onClick: () => onTabChange("notes") }]
       : []),
     { id: "attendance", label: "Attendance", onClick: () => onTabChange("attendance") },
-    { id: "transcript", label: "Transcript", disabled: !isEnded, onClick: () => isEnded ? onTabChange("transcript") : undefined },
+    { id: "transcript", label: "Transcript", disabled: inFactorial && !isEnded, onClick: () => (inFactorial && !isEnded ? undefined : onTabChange("transcript")) },
   ]
 
   const visibleTab =
-    (activeTab === "transcript" && !isEnded) || (activeTab === "notes" && role !== "instructor")
+    (activeTab === "transcript" && inFactorial && !isEnded) || (activeTab === "notes" && role !== "instructor")
       ? "details"
       : activeTab
 
@@ -4398,9 +4437,9 @@ function SessionSidepanel({
             />
             <F0BoxWithClassName style={{ paddingTop: 32 }}>
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
-              {visibleTab === "notes" ? <SessionNotesTab session={session} /> : null}
+              {visibleTab === "notes" ? (inFactorial ? <SessionNotesTab session={session} /> : <SessionFactorialOnlyNote feature="notes" />) : null}
               {visibleTab === "attendance" ? <SessionAttendanceTable isEnded={isEnded} /> : null}
-              {visibleTab === "transcript" ? <SessionTranscriptTab session={session} /> : null}
+              {visibleTab === "transcript" ? (inFactorial ? <SessionTranscriptTab session={session} /> : <SessionFactorialOnlyNote feature="transcript" />) : null}
             </F0BoxWithClassName>
           </F0BoxWithClassName>
         </F0Box>
@@ -4751,6 +4790,9 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
   // class clock and attendance only start at the scheduled time. So entry is no
   // longer blocked while "waiting" — only an ended session can't be started.
   const isWaitingInstructor = role === "instructor" && session.liveState === "waiting"
+  // Only sessions that run online in Factorial have a live room (early entry,
+  // camera/mic, auto-attendance). External-link and on-site sessions don't.
+  const inFactorial = (session.modality === "Virtual" || session.modality === "Hybrid") && session.host !== "external"
 
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
@@ -4765,15 +4807,19 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <SessionField label="Location" value={session.modality === "On-site" || session.modality === "Hybrid" ? "Aula 2 · Sede Barcelona" : "-"} />
-          <SessionField label="Minimum attendance" value={COMPLETION_THRESHOLD_PCT <= 1 ? "1% (just joining)" : `${COMPLETION_THRESHOLD_PCT}% (${thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)} min)`} />
+          {inFactorial ? (
+            <SessionField label="Minimum attendance" value={COMPLETION_THRESHOLD_PCT <= 1 ? "1% (just joining)" : `${COMPLETION_THRESHOLD_PCT}% (${thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)} min)`} />
+          ) : (
+            <SessionField label="Attendance" value="Marked manually" />
+          )}
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionJoinField role={role} disabled={isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
+          <SessionJoinField session={session} role={role} disabled={isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
         </F0Box>
         {isEnded ? (
-          <F0Alert variant="positive" title="Session ended" description="Attendance and transcript are now available for review." />
+          <F0Alert variant="positive" title="Session ended" description={inFactorial ? "Attendance and transcript are now available for review." : "Mark attendance for this session in the Attendance tab."} />
         ) : null}
-        {!isEnded && isWaitingInstructor ? (
+        {!isEnded && isWaitingInstructor && inFactorial ? (
           <F0Alert variant="info" title="You can enter to set up 5 minutes before" description="Open the room early to check your camera, mic and notes. The class clock and attendance only start at the scheduled time." />
         ) : null}
       </F0BoxWithClassName>
@@ -4785,8 +4831,37 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
   )
 }
 
-function SessionJoinField({ role, disabled, isEnded, onJoinSession }: { role: LiveSessionRole; disabled: boolean; isEnded: boolean; onJoinSession: () => void }) {
+function SessionJoinField({ session, role, disabled, isEnded, onJoinSession }: { session: GroupSessionRow; role: LiveSessionRole; disabled: boolean; isEnded: boolean; onJoinSession: () => void }) {
   const isInstructor = role === "instructor"
+  const isOnline = session.modality === "Virtual" || session.modality === "Hybrid"
+  const isExternal = isOnline && session.host === "external"
+  const inFactorial = isOnline && session.host !== "external"
+
+  // On-site: physical session, nothing to open or join.
+  if (!inFactorial && !isExternal) return null
+
+  // External link: it's the instructor's own link, so we just expose it as a
+  // plain hyperlink — there's no Factorial room to start or join.
+  if (isExternal) {
+    return (
+      <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 14 }}>
+        <F0Text content="Link" variant="body" />
+        <F0BoxWithClassName
+          role="link"
+          aria-label="Open link"
+          tabIndex={0}
+          display="flex"
+          alignItems="center"
+          gap="xs"
+          className="text-f1-foreground-info"
+          style={{ cursor: "pointer", width: "fit-content" }}
+        >
+          <span className="text-f1-foreground-info underline">Open link</span>
+          <F0Icon icon={ExternalLink} size="sm" color="info" />
+        </F0BoxWithClassName>
+      </F0BoxWithClassName>
+    )
+  }
 
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 14 }}>
@@ -5015,6 +5090,17 @@ function SessionNotesEditor({ session }: { session: GroupSessionRow }) {
       metadata={[{ label: "Notes", value: { type: "status", label: "Only visible to you", variant: "neutral" } }]}
       onTitleChange={(title) => setSessionNotesTitle(session.id, title)}
       onChange={({ json }) => setSessionNotesContent(session.id, json ?? "")}
+    />
+  )
+}
+
+function SessionFactorialOnlyNote({ feature }: { feature: "notes" | "transcript" }) {
+  const title = feature === "notes" ? "Notes are only available in Factorial" : "Transcript is only available in Factorial"
+  return (
+    <F0Alert
+      variant="info"
+      title={title}
+      description="This session runs outside Factorial, so there's no live room to capture it. Host the session in Factorial to use this."
     />
   )
 }
