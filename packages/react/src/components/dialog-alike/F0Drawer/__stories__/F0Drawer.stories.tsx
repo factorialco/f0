@@ -13,10 +13,16 @@ import { Placeholder } from "@/icons/app"
 import SaveIcon from "@/icons/app/Save"
 import ShareIcon from "@/icons/app/Share"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { ApplicationFrame } from "@/patterns/ApplicationFrame"
+import { Page } from "@/patterns/Navigation/Page"
+import * as PageStories from "@/patterns/Navigation/Page/index.stories"
+import * as SidebarStories from "@/patterns/Navigation/Sidebar/index.stories"
+import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks"
-import { F0Drawer } from "../index"
+import { DrawerControls, F0Drawer } from "../index"
 import { drawerSizes } from "../types"
 
 const meta: Meta<typeof F0Drawer> = {
@@ -51,7 +57,11 @@ const meta: Meta<typeof F0Drawer> = {
     ...dataTestIdArgs,
   },
   decorators: [
-    (Story, { args: { isOpen, ...rest } }) => {
+    (Story, context) => {
+      const {
+        args: { isOpen, ...rest },
+        parameters,
+      } = context
       const [open, setOpen] = useState(isOpen)
 
       const handleClose = () => {
@@ -59,6 +69,13 @@ const meta: Meta<typeof F0Drawer> = {
       }
       const handleOpen = () => {
         setOpen(true)
+      }
+
+      // Stories that build their own ApplicationFrame (e.g. the sidebar
+      // showcase) opt out of the default open-button + centering wrapper and
+      // drive the drawer themselves.
+      if (parameters.standaloneFrame) {
+        return <Story />
       }
 
       return (
@@ -88,6 +105,7 @@ const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
 )
 
 export const Default: Story = {
+  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -104,6 +122,7 @@ export const Default: Story = {
 }
 
 export const LeftPosition: Story = {
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     position: "left",
@@ -130,6 +149,7 @@ export const Modal: Story = {
   },
 }
 export const WithDescription: Story = {
+  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -197,17 +217,18 @@ export const WithMultiplePrimaryActions: Story = {
     },
     children: <ExampleList itemsCount={3} />,
   },
-  parameters: {
+  parameters: withSnapshot({
     docs: {
       description: {
         story:
           "When `primaryAction` receives an array of actions, it renders a `F0ButtonDropdown` allowing the user to select between multiple primary actions.",
       },
     },
-  },
+  }),
 }
 
 export const WithModuleAndTabs: Story = {
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     title: "Team Status",
@@ -223,6 +244,7 @@ export const WithModuleAndTabs: Story = {
 }
 
 export const WithResourceHeader: Story = {
+  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     position: "right",
@@ -242,5 +264,256 @@ export const WithResourceHeader: Story = {
         otherActions={undefined}
       />
     ),
+  },
+}
+
+// ─── Resource-aware header stories ────────────────────────────────────────────
+
+const CANDIDATE_RESOURCE_HEADER: ComponentProps<typeof ResourceHeader> = {
+  title: "René Galindo",
+  description: "Senior Product Designer",
+  avatar: {
+    type: "person",
+    firstName: "René",
+    lastName: "Galindo",
+    src: "/avatars/person04.jpg",
+  },
+  status: {
+    label: "Stage",
+    text: "Interview",
+    variant: "warning",
+    actions: [],
+  },
+  metadata: [
+    {
+      label: "Applied",
+      value: { type: "date", formattedDate: "2026-05-12" },
+    },
+    {
+      label: "Manager",
+      value: {
+        type: "avatar",
+        variant: {
+          type: "person",
+          firstName: "Ilya",
+          lastName: "Zayats",
+          src: "/avatars/person05.jpg",
+        },
+        text: "Ilya Zayats",
+      },
+    },
+  ],
+}
+
+/**
+ * `navigation` in the standard title row — useful when the drawer shows
+ * one item from a list and the user should be able to step through
+ * without closing and reopening.
+ */
+export const WithNavigation: Story = {
+  args: {
+    ...Default.args,
+    title: "Team Status",
+    navigation: {
+      previous: { title: "Previous item", onClick: () => {} },
+      next: { title: "Next item", onClick: () => {} },
+      counter: { current: 3, total: 10 },
+    },
+  },
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "Pass `navigation` to render prev/next arrows and an optional counter beside the close button in the standard title row.",
+      },
+    },
+  }),
+}
+
+/**
+ * `resourceHeader` renders the resource identity band (avatar, title,
+ * description, status, metadata) directly in the header area instead of
+ * composing it inside the body. No controls row — the close button sits alone
+ * at the top right.
+ *
+ * Unlike composing a `<ResourceHeader>` inside `children` (see
+ * `WithResourceHeader`), the band is owned by the dialog as **pinned header
+ * chrome**: it stays fixed above the tabs while the body scrolls underneath.
+ * The long list below makes that pinning visible.
+ */
+export const WithResourceHeaderProp: Story = {
+  args: {
+    ...Default.args,
+    position: "right",
+    title: "René Galindo",
+    resourceHeader: CANDIDATE_RESOURCE_HEADER,
+    otherActions: OTHER_ACTIONS,
+    tabs: TABS,
+    children: <ExampleList itemsCount={30} />,
+  },
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "Pass `resourceHeader` to render the identity band as pinned header chrome (vs. composing `<ResourceHeader>` in the body, which scrolls away). A visually-hidden `DialogTitle` keeps the accessible name, and `otherActions` appears in the top-right beside the close button. Scroll the body to see the band and tabs stay fixed.",
+      },
+    },
+  }),
+}
+
+/**
+ * Full resource-aware layout: a controls row owns the top chrome
+ * (expand link + prev/next navigation), the identity band sits below it,
+ * and tabs follow. This is the ATS-style application preview pattern.
+ */
+export const WithResourceControls: Story = {
+  render: (args) => {
+    const CANDIDATES = [
+      "René Galindo",
+      "Ilya Zayats",
+      "Anna Pérez",
+      "Marc Torres",
+      "Sofía López",
+    ]
+
+    const Wrapper = () => {
+      const [open, setOpen] = useState(args.isOpen)
+      const [index, setIndex] = useState(0)
+
+      const controls: DrawerControls = {
+        kind: "resource",
+        expand: { label: "Open detail", onClick: () => {} },
+        navigation: {
+          previous:
+            index > 0
+              ? {
+                  title: CANDIDATES[index - 1],
+                  onClick: () => setIndex((i) => i - 1),
+                }
+              : undefined,
+          next:
+            index < CANDIDATES.length - 1
+              ? {
+                  title: CANDIDATES[index + 1],
+                  onClick: () => setIndex((i) => i + 1),
+                }
+              : undefined,
+          counter: { current: index + 1, total: CANDIDATES.length },
+        },
+      }
+
+      return (
+        <div className="flex flex-1 items-center justify-center rounded-md border border-solid border-f1-border-secondary bg-f1-background">
+          <F0Button label="Open drawer" onClick={() => setOpen(true)} />
+          <F0Drawer
+            {...args}
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            title={CANDIDATES[index]}
+            resourceHeader={{
+              ...CANDIDATE_RESOURCE_HEADER,
+              title: CANDIDATES[index],
+            }}
+            controls={controls}
+            tabs={TABS}
+          >
+            <ExampleList itemsCount={6} />
+          </F0Drawer>
+        </div>
+      )
+    }
+
+    return <Wrapper />
+  },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    otherActions: OTHER_ACTIONS,
+    disableContentPadding: false,
+  },
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "`controls={{ kind: 'resource' }}` renders the top chrome row with an expand affordance and prev/next navigation. The identity band sits below. Click the arrows to step through items.",
+      },
+    },
+  }),
+}
+
+/**
+ * `controls={{ kind: "back" }}` represents a drilled-in sub-page inside
+ * the same drawer — the left slot shows a back button instead of the
+ * resource navigation.
+ */
+export const WithBackControls: Story = {
+  args: {
+    ...Default.args,
+    position: "right",
+    title: "René Galindo",
+    resourceHeader: CANDIDATE_RESOURCE_HEADER,
+    controls: {
+      kind: "back",
+      label: "Back to candidates",
+      onClick: () => {},
+    },
+    otherActions: OTHER_ACTIONS,
+    children: <ExampleList itemsCount={6} />,
+  },
+  parameters: withSnapshot({
+    docs: {
+      description: {
+        story:
+          "`controls={{ kind: 'back' }}` is used when the drawer has drilled into a sub-page. The left slot shows a single back affordance; the identity band and close button remain.",
+      },
+    },
+  }),
+}
+
+// ─── Drawer inside the app shell ──────────────────────────────────────────────
+
+/**
+ * The drawer rendered inside a real `ApplicationFrame`, to show how it sits
+ * relative to the sidebar. Side drawers portal into `#content` (not the
+ * top-level overlay root), so the drawer docks within the content area beside
+ * the sidebar rather than covering the whole viewport. Use the `position`
+ * control to switch sides.
+ */
+export const InApplicationFrame: Story = {
+  parameters: { standaloneFrame: true, layout: "fullscreen" },
+  args: {
+    isOpen: true,
+    onClose: () => {},
+    position: "left",
+    title: "Team Status",
+    otherActions: OTHER_ACTIONS,
+    primaryAction: {
+      label: "submit",
+      icon: Placeholder,
+      onClick: () => {},
+      closeOnClick: true,
+    },
+  },
+  render: (args) => {
+    const Wrapper = () => {
+      const [open, setOpen] = useState(true)
+
+      return (
+        <ApplicationFrame
+          sidebar={<Sidebar {...SidebarStories.default.args} />}
+        >
+          <Page {...PageStories.Default.args}>
+            <div className="p-4">
+              <F0Button label="Open drawer" onClick={() => setOpen(true)} />
+            </div>
+          </Page>
+          <F0Drawer {...args} isOpen={open} onClose={() => setOpen(false)}>
+            <ExampleList itemsCount={20} />
+          </F0Drawer>
+        </ApplicationFrame>
+      )
+    }
+
+    return <Wrapper />
   },
 }

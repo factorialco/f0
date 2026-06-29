@@ -14,6 +14,7 @@ import {
   ImageExtension,
   LinkExtension,
   MoodTrackerExtension,
+  PasteSanitizer,
   PersistSelection,
   StarterKitExtension,
   TableExtension,
@@ -46,6 +47,7 @@ export const createNotesTextEditorExtensions = ({
 }: CreateNotesTextEditorExtensionsProps) => {
   return [
     StarterKitExtension,
+    PasteSanitizer,
     UnderlineExtension,
     TextStyleExtension,
     TypographyExtension,

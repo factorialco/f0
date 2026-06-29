@@ -10,10 +10,8 @@ const SvgInputField = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 6h6M9 18h6M12 6v12M8 9H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2M16 15h2a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-2"
+      fill="currentColor"
+      d="M15 5.1a.9.9 0 1 1 0 1.8h-2.1v10.2H15a.9.9 0 1 1 0 1.8H9a.9.9 0 0 1 0-1.8h2.1V6.9H9a.9.9 0 0 1 0-1.8zm-7 3a.9.9 0 0 1 0 1.8H6A1.1 1.1 0 0 0 4.9 11v2c0 .607.493 1.1 1.1 1.1h2a.9.9 0 0 1 0 1.8H6A2.9 2.9 0 0 1 3.1 13v-2A2.9 2.9 0 0 1 6 8.1zm10 0a2.9 2.9 0 0 1 2.9 2.9v2c0 1.601-1.3 2.9-2.9 2.9h-2a.9.9 0 0 1 0-1.8h2c.607 0 1.1-.493 1.1-1.1v-2A1.1 1.1 0 0 0 18 9.9h-2a.9.9 0 0 1 0-1.8z"
     />
   </Svg>
 )

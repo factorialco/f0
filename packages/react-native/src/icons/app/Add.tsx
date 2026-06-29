@@ -10,10 +10,8 @@ const SvgAdd = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 5v14M12 12H5h14"
+      fill="currentColor"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
     />
   </Svg>
 )

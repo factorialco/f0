@@ -1,5 +1,33 @@
 # Changelog
 
+## [4.14.1](https://github.com/factorialco/f0/compare/f0-react-v4.14.0...f0-react-v4.14.1) (2026-06-29)
+
+
+### Bug Fixes
+
+* **RichText:** re-wire PasteSanitizer into editor extension lists ([#4574](https://github.com/factorialco/f0/issues/4574)) ([8f90c03](https://github.com/factorialco/f0/commit/8f90c03b26f1701accce84ed1a7dc70abb2977fc))
+
+## [4.14.0](https://github.com/factorialco/f0/compare/f0-react-v4.13.0...f0-react-v4.14.0) (2026-06-29)
+
+
+### Features
+
+* **ClockInControls:** add locationSelectorElement slot for location drill-in ([#4516](https://github.com/factorialco/f0/issues/4516)) ([67ffa13](https://github.com/factorialco/f0/commit/67ffa13298f51a227fc99a4b1d42e789692a3ff5))
+
+## [4.13.0](https://github.com/factorialco/f0/compare/f0-react-v4.12.0...f0-react-v4.13.0) (2026-06-29)
+
+
+### Features
+
+* **icons:** add ReceiptAi to the AI icon set ([#4570](https://github.com/factorialco/f0/issues/4570)) ([6df4849](https://github.com/factorialco/f0/commit/6df4849e86eaf9ee8e9dfb2645819b293688cdc9))
+
+## [4.12.0](https://github.com/factorialco/f0/compare/f0-react-v4.11.0...f0-react-v4.12.0) (2026-06-25)
+
+
+### Features
+
+* **F0Drawer:** resource-aware header — port PR [#4313](https://github.com/factorialco/f0/issues/4313) into dialog-alike ([#4568](https://github.com/factorialco/f0/issues/4568)) ([39cd11b](https://github.com/factorialco/f0/commit/39cd11bd631f1917ee8de60b0fbcf1e3cb298f32))
+
 ## [4.11.0](https://github.com/factorialco/f0/compare/f0-react-v4.10.0...f0-react-v4.11.0) (2026-06-23)
 
 

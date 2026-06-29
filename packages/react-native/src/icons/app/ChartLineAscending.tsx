@@ -1,0 +1,19 @@
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
+const SvgChartLineAscending = (props: SvgProps, ref: Ref<Svg>) => (
+  <Svg
+    fill="none"
+    viewBox="0 0 24 24"
+    className={props.className}
+    ref={ref}
+    {...props}
+  >
+    <Path
+      fill="currentColor"
+      d="M3.541 4.6a.9.9 0 0 1 .9.9v5c0 1.415 0 2.422.065 3.21.064.778.185 1.265.382 1.652a4.1 4.1 0 0 0 1.792 1.792c.386.197.872.318 1.65.381.788.065 1.796.065 3.21.065h8.96a.9.9 0 0 1 0 1.8h-8.96c-1.384 0-2.478.002-3.357-.07-.889-.073-1.638-.225-2.32-.572a5.9 5.9 0 0 1-2.58-2.58c-.347-.682-.499-1.431-.571-2.32-.072-.879-.07-1.972-.07-3.357v-5a.9.9 0 0 1 .9-.9m15.96 3a.9.9 0 0 1 .9.9v3a.9.9 0 0 1-1.8 0v-.827l-3.465 3.464a.9.9 0 0 1-1.273 0L11 11.273l-2.863 2.864a.9.9 0 0 1-1.272-1.273l3.5-3.5.068-.062a.9.9 0 0 1 1.205.062l2.863 2.863L17.327 9.4H16.5a.9.9 0 0 1 0-1.8z"
+    />
+  </Svg>
+)
+const ForwardRef = forwardRef(SvgChartLineAscending)
+export default ForwardRef

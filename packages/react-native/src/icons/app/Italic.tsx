@@ -10,10 +10,8 @@ const SvgItalic = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M17 6h-4M9 6h4m0 0-2 12H7h8"
+      fill="currentColor"
+      d="M17 5.1a.9.9 0 1 1 0 1.8h-3.237l-1.7 10.2H15a.9.9 0 0 1 0 1.8H7a.9.9 0 1 1 0-1.8h3.237l1.7-10.2H9a.9.9 0 0 1 0-1.8z"
     />
   </Svg>
 )
