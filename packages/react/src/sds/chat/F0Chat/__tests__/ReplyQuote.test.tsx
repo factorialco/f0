@@ -54,19 +54,19 @@ const card = (container: HTMLElement): Element | null =>
 describe("ReplyQuote chained corner", () => {
   it("rounds the tail-side top corner to hug the bubble (others, run start)", () => {
     const { container } = renderQuote({ isMine: false, isFirstOfRun: true })
-    expect(card(container)).toHaveClass("rounded-tl-2xl")
+    expect(card(container)).toHaveClass("rounded-tl-xl")
   })
 
   it("tucks the tail-side top corner when continuing a run (others)", () => {
     const { container } = renderQuote({ isMine: false, isFirstOfRun: false })
-    expect(card(container)).toHaveClass("rounded-tl-sm")
+    expect(card(container)).toHaveClass("rounded-tl-xs")
   })
 
   it("mirrors to the right for my own messages", () => {
     const start = renderQuote({ isMine: true, isFirstOfRun: true })
-    expect(card(start.container)).toHaveClass("rounded-tr-2xl")
+    expect(card(start.container)).toHaveClass("rounded-tr-xl")
 
     const continued = renderQuote({ isMine: true, isFirstOfRun: false })
-    expect(card(continued.container)).toHaveClass("rounded-tr-sm")
+    expect(card(continued.container)).toHaveClass("rounded-tr-xs")
   })
 })

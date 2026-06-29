@@ -9,6 +9,24 @@ import { senderNameColorClass } from "../utils/sender-color"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
 
+/**
+ * Border-radius classes for a chat bubble given its position in a same-author
+ * run: on the tail side, a corner tucks in only when it abuts another bubble
+ * from the same author (top when continuing a run, bottom when another follows).
+ * Exported so the highlight ring / hover surface in `ChatMessageItem` can follow
+ * the exact same shape as the bubble it wraps.
+ */
+export const bubbleCornerClass = (
+  isMine: boolean,
+  isFirstOfRun: boolean,
+  isLastOfRun: boolean
+): string =>
+  cn(
+    "rounded-2xl",
+    !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
+    !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
+  )
+
 /** A single message bubble. In groups the sender's name is the first line
  * (hover-carded); a reply quote, when present, is nested above the body.
  *
@@ -75,17 +93,7 @@ const ChatBubbleImpl = ({
     [message.body, mentionTokens]
   )
 
-  // Chained corners: on the tail side, a corner tucks in only when it abuts
-  // another bubble from the same author — the top corner when this message
-  // continues a run, the bottom corner when another follows. So a run reads as
-  // one stacked group with a rounded top (first) and rounded bottom (last); a
-  // lone message keeps all four corners fully rounded. The opposite side is
-  // always fully rounded.
-  const corners = cn(
-    "rounded-2xl",
-    !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
-    !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
-  )
+  const corners = bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun)
 
   if (message.deleted) {
     return (

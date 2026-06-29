@@ -49,11 +49,11 @@ export const ReplyQuote = ({
           // bubble at a run's start, tucked in when the message continues a run.
           isFirstOfRun
             ? isMine
-              ? "rounded-tr-2xl"
-              : "rounded-tl-2xl"
+              ? "rounded-tr-xl"
+              : "rounded-tl-xl"
             : isMine
-              ? "rounded-tr-sm"
-              : "rounded-tl-sm"
+              ? "rounded-tr-xs"
+              : "rounded-tl-xs"
         )}
       >
         {thumbnailUrl && (

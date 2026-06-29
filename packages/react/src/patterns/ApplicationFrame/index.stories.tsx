@@ -20,6 +20,8 @@ import * as Icons from "@/icons/app"
 import ArrowRight from "@/icons/app/ArrowRight"
 import ExternalLink from "@/icons/app/ExternalLink"
 import Marketplace from "@/icons/app/Marketplace"
+import { HomeLayout } from "@/layouts/HomeLayout"
+import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
 import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 import { Page } from "@/patterns/Navigation/Page"
@@ -43,6 +45,7 @@ import { SearchBar } from "@/patterns/Navigation/Sidebar/Searchbar"
 import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
+import { DaytimePage } from "@/sds/Home/DaytimePage"
 import { useAiChat } from "@/sds/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
@@ -751,10 +754,20 @@ export const Default: Story = {
           aiPromotion={args.aiPromotion}
           sidebar={<ConversationsSidebar />}
         >
-          <Page
-            {...PageStories.Default.args}
-            header={communicationsPageHeader}
-          />
+          {/* Real-world main content: the home "daytime" page. `hideOneSwitch`
+              because One is reached from the sidebar tab in communications mode. */}
+          <DaytimePage
+            period="morning"
+            hideOneSwitch
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
         </ApplicationFrame>
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>

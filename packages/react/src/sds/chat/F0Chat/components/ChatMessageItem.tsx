@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
-import { ChatBubble } from "./ChatBubble"
+import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
@@ -86,7 +86,10 @@ export const ChatMessageItem = ({
                 // `min-w-0` lets this flex item shrink below its content's
                 // intrinsic width so the reply quote's single line truncates
                 // instead of forcing the bubble wider than the column.
-                "flex min-w-0 max-w-full flex-col gap-1 rounded-2xl transition-shadow duration-200",
+                "flex min-w-0 max-w-full flex-col gap-1 transition-shadow duration-200",
+                // Match the bubble's chained corners so the highlight ring and
+                // hover surface follow its exact shape (not a fixed 2xl box).
+                bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun),
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and
