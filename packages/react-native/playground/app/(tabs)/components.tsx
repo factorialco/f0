@@ -22,25 +22,29 @@ import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
-import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0MetadataShowcase } from "../../components/F0MetadataShowcase"
+import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
 import { F0StepShowcase } from "../../components/F0StepShowcase"
 import { F0TabsShowcase } from "../../components/F0TabsShowcase"
 import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { F0WizardShowcase } from "../../components/F0WizardShowcase"
+import { NativeControlsShowcase } from "../../components/NativeControlsShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
 import { OnePresetShowcase } from "../../components/OnePresetShowcase"
 import { PageHeaderShowcase } from "../../components/PageHeaderShowcase"
 import { PressableFeedbackShowcase } from "../../components/PressableFeedbackShowcase"
 import { Select } from "../../components/Select"
+import { SymbolViewShowcase } from "../../components/SymbolViewShowcase"
 import { TagShowcase } from "../../components/TagShowcase"
 import { ThemeSwitcher } from "../../components/ThemeSwitcher"
 
 const SafeAreaView = withUniwind(RNSafeAreaView)
 
 type ComponentType =
+  | "nativecontrols"
+  | "symbols"
   | "activity"
   | "animatedf0text"
   | "avatar"
@@ -75,6 +79,11 @@ type ComponentType =
   | "tag"
 
 const componentOptions = [
+  {
+    value: "nativecontrols" as ComponentType,
+    label: "Native Controls (Expo UI)",
+  },
+  { value: "symbols" as ComponentType, label: "Symbols (SF / Material)" },
   { value: "activity" as ComponentType, label: "Activity" },
   { value: "animatedf0text" as ComponentType, label: "AnimatedF0Text" },
   { value: "avatar" as ComponentType, label: "Avatar (deprecated)" },
@@ -126,6 +135,10 @@ export default function ComponentsShowcase() {
 
   const renderComponent = () => {
     switch (selectedComponent) {
+      case "nativecontrols":
+        return <NativeControlsShowcase />
+      case "symbols":
+        return <SymbolViewShowcase />
       case "activity":
         return <ActivityShowcase />
       case "animatedf0text":
@@ -196,7 +209,7 @@ export default function ComponentsShowcase() {
   }
 
   return (
-    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-f0-background" edges={["top", "bottom"]}>
       <View
         className="flex-1"
         style={{ backgroundColor: asString(f0Background) }}
