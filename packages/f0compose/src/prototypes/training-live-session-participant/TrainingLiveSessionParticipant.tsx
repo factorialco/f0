@@ -72,7 +72,6 @@ import {
   MicrophoneNegative,
   Settings,
   Sliders,
-  SolidStop,
   Sparkles,
   Desktop,
   People,
@@ -5057,40 +5056,47 @@ function LiveSessionChatDrawer() {
   )
 }
 
-// Instructor's private notes per session. Kept in a module-level store so the
-// same notes are shared across the three moments: prepared before (Notes tab in
-// the session detail), edited during (notes panel in the live room), and
-// reviewed after (Notes tab again). Prototype-only: no backend, lives in memory.
+// Instructor's private notes. Kept per (session, target) where target is the
+// whole session or an individual participant, so the same notes are shared
+// across the three moments: prepared before (Notes tab in the session detail),
+// edited during (notes panel in the live room), and reviewed after (Notes tab
+// again). Prototype-only: no backend, lives in memory.
 type NotesEditorContent = NonNullable<ComponentProps<typeof NotesTextEditor>["initialEditorState"]>["content"]
-type SessionNotesState = { title: string; content: NotesEditorContent }
-const sessionNotesStore: Record<string, SessionNotesState> = {}
+const sessionNotesStore: Record<string, NotesEditorContent> = {}
+const WHOLE_SESSION = "__session__"
 
-function getSessionNotes(session: GroupSessionRow): SessionNotesState {
-  if (!sessionNotesStore[session.id]) {
-    sessionNotesStore[session.id] = { title: session.name, content: "" }
-  }
-  return sessionNotesStore[session.id]
+function getSessionNote(key: string): NotesEditorContent {
+  return sessionNotesStore[key] ?? ""
 }
-function setSessionNotesContent(sessionId: string, content: NotesEditorContent) {
-  const current = sessionNotesStore[sessionId] ?? { title: "", content: "" }
-  sessionNotesStore[sessionId] = { ...current, content }
-}
-function setSessionNotesTitle(sessionId: string, title: string) {
-  const current = sessionNotesStore[sessionId] ?? { title: "", content: "" }
-  sessionNotesStore[sessionId] = { ...current, title }
+function setSessionNote(key: string, content: NotesEditorContent) {
+  sessionNotesStore[key] = content
 }
 
-function SessionNotesEditor({ session }: { session: GroupSessionRow }) {
-  const notes = getSessionNotes(session)
+function ParticipantNotesPanel({ session }: { session: GroupSessionRow }) {
+  const targets = [
+    { value: WHOLE_SESSION, label: "Whole session", title: session.name },
+    ...groupParticipants.map((participant) => ({ value: participant.id, label: participant.name, title: participant.name })),
+  ]
+  const [target, setTarget] = useState(WHOLE_SESSION)
+  const current = targets.find((item) => item.value === target) ?? targets[0]
+  const key = `${session.id}:${target}`
   return (
-    <NotesTextEditor
-      titlePlaceholder="Training session notes"
-      placeholder="Take notes with rich formatting, including bold text, lists, and links."
-      initialEditorState={{ title: notes.title, content: notes.content }}
-      metadata={[{ label: "Notes", value: { type: "status", label: "Only visible to you", variant: "neutral" } }]}
-      onTitleChange={(title) => setSessionNotesTitle(session.id, title)}
-      onChange={({ json }) => setSessionNotesContent(session.id, json ?? "")}
-    />
+    <F0Box display="flex" flexDirection="column" gap="lg" height="full" style={{ minHeight: 0 }}>
+      <F0Select<string>
+        label="Notes for"
+        value={target}
+        onChange={(value: string) => setTarget(value)}
+        options={targets.map((item) => ({ value: item.value, label: item.label }))}
+      />
+      <NotesTextEditor
+        key={key}
+        titlePlaceholder={target === WHOLE_SESSION ? "Training session notes" : `Notes about ${current.title}`}
+        placeholder="Private notes, only visible to you."
+        initialEditorState={{ title: current.title, content: getSessionNote(key) }}
+        metadata={[{ label: "Notes", value: { type: "status", label: "Only visible to you", variant: "neutral" } }]}
+        onChange={({ json }) => setSessionNote(key, json ?? "")}
+      />
+    </F0Box>
   )
 }
 
@@ -5108,7 +5114,7 @@ function SessionFactorialOnlyNote({ feature }: { feature: "notes" | "transcript"
 function SessionNotesTab({ session }: { session: GroupSessionRow }) {
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" padding="md" style={{ cursor: "text", minHeight: 420 }}>
-      <SessionNotesEditor session={session} />
+      <ParticipantNotesPanel session={session} />
     </F0BoxWithClassName>
   )
 }
@@ -5116,7 +5122,7 @@ function SessionNotesTab({ session }: { session: GroupSessionRow }) {
 function LiveSessionNotesDrawer({ session }: { session: GroupSessionRow }) {
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" height="full" padding="lg" style={{ cursor: "text", minHeight: 0 }}>
-      <SessionNotesEditor session={session} />
+      <ParticipantNotesPanel session={session} />
     </F0BoxWithClassName>
   )
 }
@@ -5383,13 +5389,11 @@ function SessionRoomScreen({
             <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
           ) : null}
           <F0Button label="Settings" hideLabel icon={Settings} variant="outline" onClick={() => setSettingsOpen(true)} />
-          {isInstructor ? (
-            <>
-              <F0Button label="Exit" variant="outline" onClick={onExit} />
-              {canEndSession ? (
-                <F0Button label="End session" icon={SolidStop} variant="critical" onClick={onEndSession} />
-              ) : null}
-            </>
+          {/* One CTA only: "Exit". For the instructor once the class is live it
+              doubles as ending the session (opens the attendance review); before
+              that, and for participants, it just leaves the room. */}
+          {isInstructor && canEndSession ? (
+            <F0Button label="Exit" variant="critical" onClick={onEndSession} />
           ) : (
             <F0Button label="Exit" variant="critical" onClick={onExit} />
           )}
