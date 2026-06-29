@@ -10,10 +10,8 @@ const SvgCalendarArrowRight = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 3v2m0 2V5m0 0H9m6 0h1a3 3 0 0 1 3 3v4M9 5V3m0 2v2m0-2H8a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h2M5 10h14M13 17.5h7m0 0-3-3m3 3-3 3"
+      fill="currentColor"
+      d="M16.364 13.863a.9.9 0 0 1 1.272 0l3 3a.9.9 0 0 1 0 1.273l-3 3a.9.9 0 0 1-1.272-1.273l1.463-1.463H13a.9.9 0 1 1 0-1.8h4.827l-1.463-1.464a.9.9 0 0 1 0-1.273M15 2.1a.9.9 0 0 1 .9.9v1.1h.1A3.9 3.9 0 0 1 19.9 8v4a.9.9 0 0 1-1.8 0v-1.1H5.9V16c0 1.16.94 2.1 2.1 2.1h2a.9.9 0 0 1 0 1.8H8A3.9 3.9 0 0 1 4.1 16V8A3.9 3.9 0 0 1 8 4.1h.1V3a.9.9 0 0 1 1.8 0v1.1h4.2V3a.9.9 0 0 1 .9-.9M8 5.9A2.1 2.1 0 0 0 5.9 8v1.1h12.2V8A2.1 2.1 0 0 0 16 5.9h-.1V7a.9.9 0 1 1-1.8 0V5.9H9.9V7a.9.9 0 0 1-1.8 0V5.9z"
     />
   </Svg>
 )
