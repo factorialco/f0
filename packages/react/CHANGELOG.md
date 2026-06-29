@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.15.0](https://github.com/factorialco/f0/compare/f0-react-v4.14.1...f0-react-v4.15.0) (2026-06-29)
+
+
+### Features
+
+* **ai:** move One chat navigation into the sidebar ([#4576](https://github.com/factorialco/f0/issues/4576)) ([76aa0da](https://github.com/factorialco/f0/commit/76aa0da8f5328c73533247f7b1ee5f966788cfc3))
+
 ## [4.14.1](https://github.com/factorialco/f0/compare/f0-react-v4.14.0...f0-react-v4.14.1) (2026-06-29)
 
 
