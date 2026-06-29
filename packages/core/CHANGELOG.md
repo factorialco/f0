@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.54.0](https://github.com/factorialco/f0/compare/f0-core-v1.53.0...f0-core-v1.54.0) (2026-06-29)
+
+
+### Features
+
+* **icons:** add ReceiptAi to the AI icon set ([#4570](https://github.com/factorialco/f0/issues/4570)) ([6df4849](https://github.com/factorialco/f0/commit/6df4849e86eaf9ee8e9dfb2645819b293688cdc9))
+
 ## [1.53.0](https://github.com/factorialco/f0/compare/f0-core-v1.52.0...f0-core-v1.53.0) (2026-06-16)
 
 
