@@ -139,6 +139,28 @@ const notification = (
     actions: options.actions,
   })
 
+// Notification dialog with confirm + cancel actions (defaults to Ok/Cancel).
+// Module-level so it can be exposed both as `confirmation` and the back-compat
+// `confirm` alias below.
+const confirmation = (
+  options: ConfirmDialogOptions
+): Promise<DialogActionValue> => {
+  const labels = dialogsAlikeStore.getDefaultActionLabels()
+  return notification({
+    ...options,
+    actions: {
+      primary: {
+        value: options.confirm?.value ?? true,
+        label: options.confirm?.label || labels.ok,
+      },
+      secondary: {
+        value: options.cancel?.value ?? false,
+        label: options.cancel?.label || labels.cancel,
+      },
+    },
+  })
+}
+
 /**
  * Imperative API for centered dialogs. Requires `<F0Provider>` (which mounts
  * `DialogsAlikeLayoutProvider`) to be present in the tree.
@@ -171,22 +193,15 @@ export const dialogs = {
   },
 
   /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
-  confirmation: (options: ConfirmDialogOptions): Promise<DialogActionValue> => {
-    const labels = dialogsAlikeStore.getDefaultActionLabels()
-    return notification({
-      ...options,
-      actions: {
-        primary: {
-          value: options.confirm?.value ?? true,
-          label: options.confirm?.label || labels.ok,
-        },
-        secondary: {
-          value: options.cancel?.value ?? false,
-          label: options.cancel?.label || labels.cancel,
-        },
-      },
-    })
-  },
+  confirmation,
+
+  /**
+   * Back-compat alias for {@link confirmation} — the v3 `dialog.confirm(...)`.
+   * Same options shape (`type`, `title`, `msg`, `confirm`, `cancel`), so legacy
+   * call sites keep working through the `dialogs as dialog` re-export.
+   * @deprecated Use `confirmation` instead.
+   */
+  confirm: confirmation,
 
   /** Programmatically close a dialog by id (resolves its promise with undefined). */
   close,

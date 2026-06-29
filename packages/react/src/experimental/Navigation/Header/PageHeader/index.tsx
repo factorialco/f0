@@ -80,6 +80,11 @@ type HeaderProps = {
     whenEnabled?: string
   }
   oneSwitchAutoOpen?: boolean
+  /**
+   * Hide the per-page One switch. Use when One is reachable from elsewhere
+   * (e.g. a sidebar tab) so the page header doesn't duplicate the entry point.
+   */
+  hideOneSwitch?: boolean
 }
 
 export function PageHeader({
@@ -93,6 +98,7 @@ export function PageHeader({
   favorites,
   oneSwitchTooltip,
   oneSwitchAutoOpen,
+  hideOneSwitch = false,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
   const contextNavigation = useContext(PageHeaderNavigationContext)
@@ -235,10 +241,12 @@ export function PageHeader({
           </div>
         )}
         <div className="flex items-center gap-3">
-          <F0OneSwitch
-            tooltip={oneSwitchTooltip}
-            autoOpen={oneSwitchAutoOpen}
-          />
+          {!hideOneSwitch && (
+            <F0OneSwitch
+              tooltip={oneSwitchTooltip}
+              autoOpen={oneSwitchAutoOpen}
+            />
+          )}
           <OnePromotionSwitch />
         </div>
       </div>

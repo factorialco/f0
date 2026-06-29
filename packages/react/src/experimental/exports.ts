@@ -66,6 +66,7 @@ export * from "./Overlays/exports"
  */
 export * from "../components/RichText/exports"
 export * from "../components/F0FileItem"
+export * from "../sds/chat/F0Chat"
 export * from "./Utilities/exports"
 export * from "./Widgets/exports"
 /**
