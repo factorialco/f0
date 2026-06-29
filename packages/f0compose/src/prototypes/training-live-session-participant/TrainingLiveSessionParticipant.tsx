@@ -28,6 +28,7 @@ import {
 } from "@factorialco/f0-react"
 import {
   CalendarEvent,
+  DetailsItem,
   OneDataCollection,
   Page,
   PageHeader,
@@ -51,7 +52,6 @@ import {
   CheckCircle,
   CheckDouble,
   Comment,
-  Computer,
   Cross,
   Delete,
   Download,
@@ -1594,7 +1594,13 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
 }
 
 function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }: { session: GroupSessionRow | null; course: ExactCourse; groupName: string; onClose: () => void; onJoinSession: (session: GroupSessionRow) => void }) {
+  const [tab, setTab] = useState<"details" | "notes">("details")
   if (!session) return null
+
+  const tabs = [
+    { id: "details", label: "Details", onClick: () => setTab("details") },
+    { id: "notes", label: "Notes", onClick: () => setTab("notes") },
+  ]
 
   return (
     <F0BoxWithClassName role="presentation" className="fixed inset-0 z-50 pointer-events-none">
@@ -1617,26 +1623,31 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
             </F0BoxWithClassName>
           </F0BoxWithClassName>
           <F0BoxWithClassName paddingTop="lg" paddingLeft="md" paddingRight="md" overflowY="auto" grow>
-            <F0Box display="flex" flexDirection="column" gap="3xl">
-              <F0Box display="flex" flexDirection="column" gap="xs">
-                <F0Text content="Status" variant="label" />
-                <F0Box display="flex" justifyContent="start">
-                  <F0TagStatus text={getSessionStatus(session).label} variant={getSessionStatus(session).status} />
+            <Tabs key={tab} tabs={tabs} activeTabId={tab} />
+            <F0BoxWithClassName style={{ paddingTop: 24 }}>
+              {tab === "details" ? (
+                <F0Box display="flex" flexDirection="column" gap="3xl">
+                  <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionStatus(session).label, variant: getSessionStatus(session).status }} />
+                  <F0Box display="grid" columns="2" gap="xl">
+                    <DetailsItem title="Course name" content={{ type: "item", text: course.name }} />
+                    <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
+                    <DetailsItem title="Date" content={{ type: "item", text: session.scheduleLabel }} />
+                    <DetailsItem title="Hour" content={{ type: "item", text: session.scheduleLabel }} />
+                    <DetailsItem title="Location" content={{ type: "item", text: "—" }} />
+                    <DetailsItem title="Modality" content={{ type: "item", text: session.modality }} />
+                    <DetailsItem title="Instructors" content={{ type: "avatar-list", avatarList: { avatars: [{ type: "person", firstName: "Adam", lastName: "Joseph" }], size: "sm", type: "person", max: 3 } }} />
+                  </F0Box>
+                  <F0Box display="flex" flexDirection="column" gap="sm">
+                    <F0Text content="Link" variant="label" />
+                    <F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} onClick={() => onJoinSession(session)} /></F0Box>
+                  </F0Box>
+                  {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="Click ‘Join session’ and wait for the instructor to start the session." /> : null}
+                  <DetailsItem title="Description" content={{ type: "item", text: course.description }} />
                 </F0Box>
-              </F0Box>
-              <F0Box display="grid" columns="2" gap="xl">
-                <ParticipantDetailField label="Course name"><F0Text content={course.name} variant="body" /></ParticipantDetailField>
-                <ParticipantDetailField label="Type"><F0TagRaw text={session.type === "self-paced" ? "Self-paced" : "Scheduled"} /></ParticipantDetailField>
-                <ParticipantDetailField label="Date"><F0Text content={session.scheduleLabel} variant="body" /></ParticipantDetailField>
-                <ParticipantDetailField label="Hour"><F0Text content={session.scheduleLabel} variant="body" /></ParticipantDetailField>
-                <ParticipantDetailField label="Location"><F0Text content="-" variant="body" /></ParticipantDetailField>
-                <ParticipantDetailField label="Link"><F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} onClick={() => onJoinSession(session)} /></F0Box></ParticipantDetailField>
-                <ParticipantDetailField label="Modality"><F0Box display="flex" alignItems="center" gap="sm"><F0Icon icon={Laptop} size="md" /><F0Text content={session.modality} variant="body" /></F0Box></ParticipantDetailField>
-                <ParticipantDetailField label="Instructors"><F0AvatarList avatars={[{ type: "person", firstName: "Adam", lastName: "Joseph" }]} size="sm" type="person" max={3} /></ParticipantDetailField>
-              </F0Box>
-              {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="Click ‘Join session’ and wait for the instructor to start the session." /> : null}
-              <ParticipantDetailField label="Description"><F0Text content={course.description} variant="body" /></ParticipantDetailField>
-            </F0Box>
+              ) : (
+                <SessionNotesTab session={session} scope="participant" />
+              )}
+            </F0BoxWithClassName>
           </F0BoxWithClassName>
         </F0Box>
       </F0BoxWithClassName>
@@ -1644,9 +1655,6 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
   )
 }
 
-function ParticipantDetailField({ label, children }: { label: string; children: ReactNode }) {
-  return <F0Box display="flex" flexDirection="column" gap="sm"><F0Text content={label} variant="label" />{children}</F0Box>
-}
 
 export function TrainingLiveSessionsInstructorExperience() {
   return <TrainingLiveSessionsExperience role="instructor" />
@@ -4436,7 +4444,7 @@ function SessionSidepanel({
             />
             <F0BoxWithClassName style={{ paddingTop: 32 }}>
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
-              {visibleTab === "notes" ? (inFactorial ? <SessionNotesTab session={session} /> : <SessionFactorialOnlyNote feature="notes" />) : null}
+              {visibleTab === "notes" ? (inFactorial ? <SessionNotesTab session={session} scope={role} /> : <SessionFactorialOnlyNote feature="notes" />) : null}
               {visibleTab === "attendance" ? <SessionAttendanceTable isEnded={isEnded} /> : null}
               {visibleTab === "transcript" ? (inFactorial ? <SessionTranscriptTab session={session} /> : <SessionFactorialOnlyNote feature="transcript" />) : null}
             </F0BoxWithClassName>
@@ -4797,19 +4805,19 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 30 }}>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionField label="Type" value={session.type === "self-paced" ? "Self-paced" : "Scheduled"} dot />
-          <SessionField label="Modality" value={session.modality} icon={Computer} />
+          <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
+          <DetailsItem title="Modality" content={{ type: "item", text: session.modality }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionField label="Date" value={session.date.split(", ")[0] ?? session.date} />
-          <SessionField label="Hour" value={session.date.split(", ")[1] ?? session.scheduleLabel} />
+          <DetailsItem title="Date" content={{ type: "item", text: session.date.split(", ")[0] ?? session.date }} />
+          <DetailsItem title="Hour" content={{ type: "item", text: session.date.split(", ")[1] ?? session.scheduleLabel }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <SessionField label="Location" value={session.modality === "On-site" || session.modality === "Hybrid" ? "Aula 2 · Sede Barcelona" : "-"} />
+          <DetailsItem title="Location" content={{ type: "item", text: session.modality === "On-site" || session.modality === "Hybrid" ? "Aula 2 · Sede Barcelona" : "—" }} />
           {inFactorial ? (
-            <SessionField label="Minimum attendance" value={COMPLETION_THRESHOLD_PCT <= 1 ? "1% (just joining)" : `${COMPLETION_THRESHOLD_PCT}% (${thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)} min)`} />
+            <DetailsItem title="Minimum attendance" content={{ type: "item", text: COMPLETION_THRESHOLD_PCT <= 1 ? "1% (just joining)" : `${COMPLETION_THRESHOLD_PCT}% (${thresholdMinutes(COMPLETION_THRESHOLD_PCT, SESSION_DURATION_MIN)} min)` }} />
           ) : (
-            <SessionField label="Attendance" value="Marked manually" />
+            <DetailsItem title="Attendance" content={{ type: "item", text: "Marked manually" }} />
           )}
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
@@ -4868,28 +4876,6 @@ function SessionJoinField({ session, role, disabled, isEnded, onJoinSession }: {
       <F0Box display="flex" justifyContent="start">
         <F0Button label={isEnded ? "Session ended" : isInstructor ? "Start session" : "Join session"} icon={VideoRecorder} size="md" disabled={disabled} onClick={onJoinSession} />
       </F0Box>
-    </F0BoxWithClassName>
-  )
-}
-
-function SessionField({ label, value, icon, dot = false, link = false }: { label: string; value: string; icon?: typeof Link; dot?: boolean; link?: boolean }) {
-  return (
-    <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 14 }}>
-      <F0Text content={label} variant="body" />
-      {dot || icon ? (
-        <F0Box display="flex" alignItems="center" gap="sm">
-          {dot ? <F0BoxWithClassName background="info" borderRadius="full" style={{ width: 8, height: 8 }} /> : null}
-          {icon ? <F0Icon icon={icon} size="sm" /> : null}
-          <F0Text content={value} variant="body" />
-        </F0Box>
-      ) : link ? (
-        <F0Box display="flex" alignItems="center" gap="xs">
-          <F0Text content={value} variant="body" />
-          <F0Icon icon={ExternalLink} size="sm" color="info" />
-        </F0Box>
-      ) : (
-        <F0Text content={value} variant="body" />
-      )}
     </F0BoxWithClassName>
   )
 }
@@ -5056,47 +5042,42 @@ function LiveSessionChatDrawer() {
   )
 }
 
-// Instructor's private notes. Kept per (session, target) where target is the
-// whole session or an individual participant, so the same notes are shared
-// across the three moments: prepared before (Notes tab in the session detail),
-// edited during (notes panel in the live room), and reviewed after (Notes tab
-// again). Prototype-only: no backend, lives in memory.
+// Per-session notes, PRIVATE to each user: the instructor and each participant
+// keep their own notes for the same session, so the store is keyed by
+// `${scope}:${session.id}` (scope = the viewer's role). Shared across the three
+// moments: prepared before (Notes tab), edited during (notes panel in the live
+// room), reviewed after. Prototype-only: no backend, lives in memory.
 type NotesEditorContent = NonNullable<ComponentProps<typeof NotesTextEditor>["initialEditorState"]>["content"]
-const sessionNotesStore: Record<string, NotesEditorContent> = {}
-const WHOLE_SESSION = "__session__"
+type SessionNotesState = { title: string; content: NotesEditorContent }
+const sessionNotesStore: Record<string, SessionNotesState> = {}
 
-function getSessionNote(key: string): NotesEditorContent {
-  return sessionNotesStore[key] ?? ""
+function getSessionNotes(key: string, fallbackTitle: string): SessionNotesState {
+  if (!sessionNotesStore[key]) {
+    sessionNotesStore[key] = { title: fallbackTitle, content: "" }
+  }
+  return sessionNotesStore[key]
 }
-function setSessionNote(key: string, content: NotesEditorContent) {
-  sessionNotesStore[key] = content
+function setSessionNotesContent(key: string, content: NotesEditorContent) {
+  const current = sessionNotesStore[key] ?? { title: "", content: "" }
+  sessionNotesStore[key] = { ...current, content }
+}
+function setSessionNotesTitle(key: string, title: string) {
+  const current = sessionNotesStore[key] ?? { title: "", content: "" }
+  sessionNotesStore[key] = { ...current, title }
 }
 
-function ParticipantNotesPanel({ session }: { session: GroupSessionRow }) {
-  const targets = [
-    { value: WHOLE_SESSION, label: "Whole session", title: session.name },
-    ...groupParticipants.map((participant) => ({ value: participant.id, label: participant.name, title: participant.name })),
-  ]
-  const [target, setTarget] = useState(WHOLE_SESSION)
-  const current = targets.find((item) => item.value === target) ?? targets[0]
-  const key = `${session.id}:${target}`
+function SessionNotesEditor({ session, scope = "instructor" }: { session: GroupSessionRow; scope?: string }) {
+  const key = `${scope}:${session.id}`
+  const notes = getSessionNotes(key, session.name)
   return (
-    <F0Box display="flex" flexDirection="column" gap="lg" height="full" style={{ minHeight: 0 }}>
-      <F0Select<string>
-        label="Notes for"
-        value={target}
-        onChange={(value: string) => setTarget(value)}
-        options={targets.map((item) => ({ value: item.value, label: item.label }))}
-      />
-      <NotesTextEditor
-        key={key}
-        titlePlaceholder={target === WHOLE_SESSION ? "Training session notes" : `Notes about ${current.title}`}
-        placeholder="Private notes, only visible to you."
-        initialEditorState={{ title: current.title, content: getSessionNote(key) }}
-        metadata={[{ label: "Notes", value: { type: "status", label: "Only visible to you", variant: "neutral" } }]}
-        onChange={({ json }) => setSessionNote(key, json ?? "")}
-      />
-    </F0Box>
+    <NotesTextEditor
+      titlePlaceholder="Training session notes"
+      placeholder="Take notes with rich formatting, including bold text, lists, and links."
+      initialEditorState={{ title: notes.title, content: notes.content }}
+      metadata={[{ label: "Notes", value: { type: "status", label: "Only visible to you", variant: "neutral" } }]}
+      onTitleChange={(title) => setSessionNotesTitle(key, title)}
+      onChange={({ json }) => setSessionNotesContent(key, json ?? "")}
+    />
   )
 }
 
@@ -5111,18 +5092,18 @@ function SessionFactorialOnlyNote({ feature }: { feature: "notes" | "transcript"
   )
 }
 
-function SessionNotesTab({ session }: { session: GroupSessionRow }) {
+function SessionNotesTab({ session, scope }: { session: GroupSessionRow; scope?: string }) {
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" padding="md" style={{ cursor: "text", minHeight: 420 }}>
-      <ParticipantNotesPanel session={session} />
+      <SessionNotesEditor session={session} scope={scope} />
     </F0BoxWithClassName>
   )
 }
 
-function LiveSessionNotesDrawer({ session }: { session: GroupSessionRow }) {
+function LiveSessionNotesDrawer({ session, scope }: { session: GroupSessionRow; scope?: string }) {
   return (
     <F0BoxWithClassName display="flex" flexDirection="column" height="full" padding="lg" style={{ cursor: "text", minHeight: 0 }}>
-      <ParticipantNotesPanel session={session} />
+      <SessionNotesEditor session={session} scope={scope} />
     </F0BoxWithClassName>
   )
 }
@@ -5375,7 +5356,7 @@ function SessionRoomScreen({
             </F0BoxWithClassName>
           ) : (
             <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={activePanelStyle}>
-              <LiveSessionNotesDrawer session={session} />
+              <LiveSessionNotesDrawer session={session} scope={role} />
             </F0BoxWithClassName>
           )
         ) : null}
@@ -5384,10 +5365,11 @@ function SessionRoomScreen({
           <F0ButtonToggle label={["Turn camera on", "Turn camera off"]} icon={[VideoRecorderNegative, VideoRecorder]} selected={cameraEnabled} onSelectedChange={setCameraEnabled} />
           <F0Box height="4" width="0.5" background="secondary" />
           <F0ButtonToggle label={["Open chat", "Close chat"]} icon={[Comment, Comment]} selected={activePanel === "chat"} onSelectedChange={() => togglePanel("chat")} />
-          <F0ButtonToggle label={["Share screen", "Stop sharing"]} icon={[Desktop, Desktop]} selected={screenShareEnabled} onSelectedChange={setScreenShareEnabled} />
           {isInstructor ? (
-            <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
+            <F0ButtonToggle label={["Share screen", "Stop sharing"]} icon={[Desktop, Desktop]} selected={screenShareEnabled} onSelectedChange={setScreenShareEnabled} />
           ) : null}
+          {/* Both instructor and participants can take their own private notes. */}
+          <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
           <F0Button label="Settings" hideLabel icon={Settings} variant="outline" onClick={() => setSettingsOpen(true)} />
           {/* One CTA only: "Exit". For the instructor once the class is live it
               doubles as ending the session (opens the attendance review); before
