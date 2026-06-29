@@ -9,10 +9,14 @@ import {
   F0Button,
   F0ButtonToggle,
   F0Dialog,
+  F0Form,
   F0FormField,
   F0Heading,
   F0Icon,
   NotesTextEditor,
+  useF0Form,
+  useF0FormDefinition,
+  f0FormField,
   F0Select,
   F0TagRaw,
   F0TagStatus,
@@ -80,10 +84,12 @@ import {
   type ComponentType,
   type CSSProperties,
   type ReactNode,
+  useCallback,
   useEffect,
   useState,
 } from "react"
 import { useSearchParams } from "react-router-dom"
+import { z } from "zod"
 
 import { type Training, trainings } from "@/fixtures"
 import { applySort } from "@/lib/applySort"
@@ -556,60 +562,6 @@ const costFields = {
   },
 } satisfies Record<string, RenderableField>
 
-const createSessionModalFields = {
-  type: {
-    id: "sessionType",
-    type: "select",
-    label: "Type",
-    options: [
-      { value: "scheduled", label: "Scheduled" },
-      { value: "self-paced", label: "Self-paced" },
-    ],
-  },
-  name: { id: "sessionName", type: "text", label: "Name" },
-  date: { id: "sessionDate", type: "date", label: "Date" },
-  startDate: { id: "sessionDate", type: "date", label: "Start date" },
-  endDate: { id: "endDate", type: "date", label: "End date" },
-  startsAt: { id: "startsAt", type: "text", label: "Starts at", placeholder: "09:00" },
-  endsAt: { id: "endsAt", type: "text", label: "Ends at", placeholder: "11:00" },
-  duration: { id: "duration", type: "duration", label: "Duration", units: ["hours", "minutes"] },
-  minimumAttendance: { id: "minimumAttendance", type: "number", label: "Minimum to be marked as attended", min: 1, max: 100, maxDecimals: 0, units: "%", placeholder: "e.g. 75" },
-  modality: {
-    id: "modality",
-    type: "select",
-    label: "Modality",
-    options: [
-      { value: "hybrid", label: "Hybrid" },
-      { value: "virtual", label: "Virtual" },
-      { value: "onsite", label: "On-site" },
-    ],
-  },
-  instructors: {
-    id: "instructors",
-    type: "select",
-    label: "Instructor(s)",
-    multiple: true,
-    helpText: "Select who will deliver the course.",
-    options: [
-      { value: "hellen", label: "Hellen Howard" },
-      { value: "scott", label: "Scott Santos" },
-      { value: "emilia", label: "Emilia Estrada" },
-    ],
-  },
-  frequency: {
-    id: "frequency",
-    type: "select",
-    label: "Frequency",
-    options: [{ value: "none", label: "Does not repeat" }],
-  },
-  meetingLink: {
-    id: "meetingLink",
-    type: "text",
-    label: "Meeting link",
-    helpText: "By default, the session runs in Factorial. Add your own link if you prefer.",
-  },
-  location: { id: "location", type: "text", label: "Location" },
-} satisfies Record<string, RenderableField>
 
 const sessionModalityOptions: Array<{
   value: SessionModalityValue
@@ -622,10 +574,18 @@ const sessionModalityOptions: Array<{
   { value: "onsite", label: "On-site", description: "Physical location", icon: People },
 ]
 
+// Online sessions: where the video call lives. Factorial = built-in call;
+// External = the instructor pastes their own link (and we then lose the
+// in-Factorial call features).
+const videoCallOptions: Array<{ value: "factorial" | "external"; label: string; description: string; icon: IconType }> = [
+  { value: "factorial", label: "In Factorial", description: "Runs in Factorial", icon: VideoRecorder },
+  { value: "external", label: "External link", description: "Use your own link", icon: ExternalLink },
+]
+
 function SessionToggleField({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <F0Box display="flex" flexDirection="column" gap="sm">
-      <F0Text content={label} variant="label" />
+    <F0Box display="flex" flexDirection="column" gap="xs">
+      <label className="text-base font-medium leading-normal text-f1-foreground-secondary">{label}</label>
       {children}
     </F0Box>
   )
@@ -4448,6 +4408,166 @@ function SessionSidepanel({
   )
 }
 
+const SESSION_INSTRUCTOR_OPTIONS = [
+  { value: "adam-joseph", label: "Adam Joseph" },
+  { value: "hellen-howard", label: "Hellen Howard" },
+  { value: "calvino-collins", label: "Calvino Collins" },
+]
+
+const sessionFormSections = {
+  details: { title: "Details" },
+  schedule: { title: "Schedule" },
+  format: { title: "Format" },
+  notifications: { title: "Notifications" },
+}
+
+const sessionFormSchema = z.object({
+  name: f0FormField.text({ label: "Name", section: "details", placeholder: "Session name" }),
+  date: f0FormField.text({ label: "Date", section: "schedule", row: "schedule-row", placeholder: "dd/mm/yyyy" }),
+  startsAt: f0FormField.text({ label: "Starts at", section: "schedule", row: "schedule-row", placeholder: "09:00" }),
+  endsAt: f0FormField.text({ label: "Ends at", section: "schedule", row: "schedule-row", placeholder: "11:00" }),
+  frequency: f0FormField.select({
+    label: "Frequency",
+    section: "schedule",
+    options: [
+      { value: "none", label: "Does not repeat" },
+      { value: "weekly", label: "Weekly" },
+      { value: "monthly", label: "Monthly" },
+    ],
+  }),
+  modality: f0FormField(z.string(), {
+    label: "Modality",
+    section: "format",
+    fieldType: "custom",
+    customFieldName: "segmented",
+    fieldConfig: { options: sessionModalityOptions, columns: "3", title: "Modality" },
+  }),
+  videoCall: f0FormField(z.string(), {
+    label: "Video call",
+    section: "format",
+    fieldType: "custom",
+    customFieldName: "segmented",
+    fieldConfig: { options: videoCallOptions, columns: "2", title: "Video call" },
+    renderIf: ({ values }: { values: Record<string, unknown> }) => values.modality === "virtual" || values.modality === "hybrid",
+  }),
+  meetingLink: f0FormField.text({
+    label: "Meeting link",
+    section: "format",
+    optional: true,
+    helpText: "Paste the link participants will use to join.",
+    renderIf: ({ values }: { values: Record<string, unknown> }) =>
+      (values.modality === "virtual" || values.modality === "hybrid") && values.videoCall === "external",
+  }),
+  location: f0FormField.text({
+    label: "Location",
+    section: "format",
+    optional: true,
+    renderIf: ({ values }: { values: Record<string, unknown> }) => values.modality === "hybrid" || values.modality === "onsite",
+  }),
+  instructors: f0FormField.multiSelect({
+    label: "Instructor(s)",
+    section: "format",
+    optional: true,
+    placeholder: "Select who will deliver the course",
+    options: SESSION_INSTRUCTOR_OPTIONS,
+  }),
+  minimumAttendance: f0FormField.percentage({
+    label: "Minimum to be marked as attended",
+    section: "format",
+    min: 1,
+    max: 100,
+    helpText: "Minimum time a participant must attend to be counted as attended.",
+  }),
+  notifications: f0FormField.boolean({
+    label: "Send reminders and calendar invites",
+    section: "notifications",
+    optional: true,
+  }),
+  reminderConfig: f0FormField(z.string().optional(), {
+    label: "Reminder",
+    section: "notifications",
+    fieldType: "custom",
+    customFieldName: "reminderCard",
+    renderIf: { fieldId: "notifications", equalsTo: true },
+  }),
+  calendarConfig: f0FormField(z.string().optional(), {
+    label: "Calendar",
+    section: "notifications",
+    fieldType: "custom",
+    customFieldName: "calendarCard",
+    renderIf: { fieldId: "notifications", equalsTo: true },
+  }),
+})
+
+const sessionFormDefaultValues = {
+  name: "Fundamentos ISO 9001",
+  date: "",
+  startsAt: "09:00",
+  endsAt: "11:00",
+  frequency: "none",
+  modality: "virtual",
+  videoCall: "factorial",
+  meetingLink: "",
+  location: "",
+  instructors: [],
+  minimumAttendance: 75,
+  notifications: false,
+  reminderConfig: "",
+  calendarConfig: "",
+}
+
+function SessionFormBody({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
+  const formDefinition = useF0FormDefinition({
+    name: "create-session",
+    schema: sessionFormSchema,
+    sections: sessionFormSections,
+    defaultValues: sessionFormDefaultValues,
+    onSubmit: async () => {
+      onSave()
+      return { success: true }
+    },
+    submitConfig: { hideSubmitButton: true },
+  })
+  const { formRef, submit } = useF0Form()
+  const renderCustomField = useCallback(
+    (props: { customFieldName?: string; value: unknown; onChange: (value: string) => void; config?: unknown }) => {
+      if (props.customFieldName === "segmented") {
+        const cfg = props.config as {
+          options: Array<{ value: string; label: string; description: string; icon: IconType }>
+          columns: "2" | "3"
+          title: string
+        }
+        return (
+          <SessionToggleField label={cfg.title}>
+            <SessionOptionGroup
+              options={cfg.options}
+              value={(props.value as string) ?? ""}
+              onChange={(value) => props.onChange(value)}
+              columns={cfg.columns}
+            />
+          </SessionToggleField>
+        )
+      }
+      if (props.customFieldName === "reminderCard") return <SessionReminderCard />
+      if (props.customFieldName === "calendarCard") return <SessionCalendarCard />
+      return null
+    },
+    []
+  )
+  return (
+    <F0Box display="flex" flexDirection="column" gap="2xl">
+      <div className="session-form-compact">
+        <style>{".session-form-compact section > .py-5 { padding-top: 10px; padding-bottom: 10px; }"}</style>
+        <F0Form formDefinition={formDefinition} formRef={formRef} renderCustomField={renderCustomField} />
+      </div>
+      <F0Box display="flex" justifyContent="end" gap="md">
+        <F0Button label="Cancel" variant="outline" onClick={onClose} />
+        <F0Button label="Save" onClick={() => submit()} />
+      </F0Box>
+    </F0Box>
+  )
+}
+
 function SessionFormDialog({
   mode,
   onClose,
@@ -4457,31 +4577,7 @@ function SessionFormDialog({
   onClose: () => void
   onSave: () => void
 }) {
-  const [values, setValues] = useState<Record<string, unknown>>({
-    sessionType: "scheduled",
-    sessionName: "Fundamentos ISO 9001",
-    modality: "hybrid",
-    frequency: "none",
-    instructors: [],
-    durationSeconds: 3600,
-    minimumAttendance: 75,
-    meetingLink: "",
-    location: "",
-    calendarInvites: false,
-    reminders: false,
-  })
-
   if (!mode) return null
-
-  const hasOnlineSession = values.modality === "virtual" || values.modality === "hybrid"
-  const hasPhysicalLocation = values.modality === "hybrid" || values.modality === "onsite"
-  const sessionDurationMin = Math.round((Number(values.durationSeconds) || 0) / 60)
-  const minAttendancePct = Number(values.minimumAttendance) || 0
-  const minAttendanceMin = Math.round((minAttendancePct / 100) * sessionDurationMin)
-  const minAttendanceHint =
-    sessionDurationMin > 0
-      ? `Minimum time a participant must attend to be counted as attended. About ${minAttendanceMin} min of this ${sessionDurationMin}-min session.`
-      : "Minimum time a participant must attend to be counted as attended."
 
   return (
     <F0BoxWithClassName
@@ -4497,58 +4593,22 @@ function SessionFormDialog({
         className="relative rounded-lg bg-f1-background shadow-2xl"
         style={{ width: 664, backgroundColor: "var(--f1-background, #fff)" }}
       >
-        <F0BoxWithClassName className="absolute z-10" style={{ right: 16, top: 16 }}>
-          <F0BoxWithClassName
-            role="button"
-            aria-label="Close"
-            tabIndex={0}
-            onClick={onClose}
-            className="flex cursor-pointer items-center justify-center text-f1-foreground-secondary"
-            style={{ width: 24, height: 24 }}
-          >
-            <F0Icon icon={Cross} size="md" />
-          </F0BoxWithClassName>
-        </F0BoxWithClassName>
-        <F0BoxWithClassName style={{ margin: "56px 32px", width: 600 }}>
+        <F0BoxWithClassName style={{ margin: 32, width: 600 }}>
         <F0Box display="flex" flexDirection="column" gap="2xl">
-          <F0Heading content={mode === "new" ? "Create scheduled session" : "Edit scheduled session"} variant="heading-large" as="h2" />
-          <F0BoxWithClassName style={{ padding: 16 }}>
-          <F0Box display="flex" flexDirection="column" gap="2xl">
-            <F0FormField field={createSessionModalFields.name} value={values.sessionName} onChange={(value) => setValues((current) => ({ ...current, sessionName: value }))} />
-            <F0Box display="grid" columns="3" gap="md">
-              <F0FormField field={createSessionModalFields.date} value={values.sessionDate} onChange={(value) => setValues((current) => ({ ...current, sessionDate: value }))} />
-              <F0FormField field={createSessionModalFields.startsAt} value={values.startsAt} onChange={(value) => setValues((current) => ({ ...current, startsAt: value }))} />
-              <F0FormField field={createSessionModalFields.endsAt} value={values.endsAt} onChange={(value) => setValues((current) => ({ ...current, endsAt: value }))} />
-            </F0Box>
-            <F0FormField field={createSessionModalFields.duration} value={values.durationSeconds} onChange={(value) => setValues((current) => ({ ...current, durationSeconds: value }))} />
-            <F0Box display="flex" flexDirection="column" gap="xs">
-              <F0BoxWithClassName className="w-72">
-                <F0FormField field={createSessionModalFields.minimumAttendance} value={values.minimumAttendance} onChange={(value) => setValues((current) => ({ ...current, minimumAttendance: value }))} />
-              </F0BoxWithClassName>
-              <F0Text variant="description" content={minAttendanceHint} />
-            </F0Box>
-            <SessionToggleField label="Modality">
-              <SessionOptionGroup
-                options={sessionModalityOptions}
-                value={values.modality as SessionModalityValue}
-                onChange={(value) => setValues((current) => ({ ...current, modality: value }))}
-                columns="3"
-              />
-            </SessionToggleField>
-            {hasPhysicalLocation ? <F0FormField field={createSessionModalFields.location} value={values.location} onChange={(value) => setValues((current) => ({ ...current, location: value }))} /> : null}
-            {hasOnlineSession ? (
-              <F0FormField field={createSessionModalFields.meetingLink} value={values.meetingLink} onChange={(value) => setValues((current) => ({ ...current, meetingLink: value }))} />
-            ) : null}
-            <F0FormField field={createSessionModalFields.instructors} value={values.instructors} onChange={(value) => setValues((current) => ({ ...current, instructors: value }))} />
-            <F0FormField field={createSessionModalFields.frequency} value={values.frequency} onChange={(value) => setValues((current) => ({ ...current, frequency: value }))} />
-            <SessionReminderBlock />
-            <SessionCalendarBlock />
+          <F0Box display="flex" alignItems="center" justifyContent="between" gap="md">
+            <F0Heading content={mode === "new" ? "Create scheduled session" : "Edit scheduled session"} variant="heading-large" as="h2" />
+            <F0BoxWithClassName
+              role="button"
+              aria-label="Close"
+              tabIndex={0}
+              onClick={onClose}
+              className="flex cursor-pointer items-center justify-center text-f1-foreground-secondary"
+              style={{ width: 24, height: 24, flexShrink: 0 }}
+            >
+              <F0Icon icon={Cross} size="md" />
+            </F0BoxWithClassName>
           </F0Box>
-          </F0BoxWithClassName>
-          <F0Box display="flex" justifyContent="end" gap="md">
-            <F0Button label="Cancel" variant="outline" onClick={onClose} />
-            <F0Button label="Save" onClick={onSave} />
-          </F0Box>
+          <SessionFormBody onClose={onClose} onSave={onSave} />
         </F0Box>
         </F0BoxWithClassName>
       </F0BoxWithClassName>
@@ -5290,54 +5350,42 @@ function participantInitials(name: string) {
     .join("")
 }
 
-function SessionReminderBlock() {
+function SessionReminderCard() {
   return (
-    <F0Box display="flex" flexDirection="column" gap="md">
-      <F0Text content="Reminders" variant="label" />
-      <F0Box
-        display="flex"
-        flexDirection="column"
-        gap="md"
-        padding="lg"
-        border="default"
-        borderColor="secondary"
-        borderRadius="lg"
-        background="primary"
-      >
-        <F0Box display="flex" justifyContent="between" alignItems="center">
-          <F0Text content="Add reminder" variant="body" />
-          <F0Button label="Add reminder" hideLabel icon={Add} variant="outline" onClick={() => undefined} />
-        </F0Box>
-        <F0Text
-          content="Schedule a reminder to be sent to all assigned employees before the session."
-          variant="body"
-        />
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="md"
+      padding="lg"
+      border="default"
+      borderColor="secondary"
+      borderRadius="lg"
+      background="primary"
+    >
+      <F0Box display="flex" justifyContent="between" alignItems="center">
+        <F0Text content="Add reminder" variant="body" />
+        <F0Button label="Add reminder" hideLabel icon={Add} variant="outline" onClick={() => undefined} />
       </F0Box>
+      <F0Text content="Schedule a reminder to be sent to all assigned employees before the session." variant="body" />
     </F0Box>
   )
 }
 
-function SessionCalendarBlock() {
+function SessionCalendarCard() {
   return (
-    <F0Box display="flex" flexDirection="column" gap="sm">
-      <F0Box
-        display="flex"
-        justifyContent="between"
-        alignItems="center"
-        padding="lg"
-        border="default"
-        borderColor="secondary"
-        borderRadius="lg"
-        background="primary"
-      >
-        <F0Box display="flex" flexDirection="column" gap="xs">
-          <F0Text content="Send calendar invites" variant="body" />
-          <F0Text
-            content="Authorize Factorial to access your calendar and schedule trainings."
-            variant="description"
-          />
-        </F0Box>
-        <F0TagRaw text="Off" />
+    <F0Box
+      display="flex"
+      flexDirection="column"
+      gap="md"
+      padding="lg"
+      border="default"
+      borderColor="secondary"
+      borderRadius="lg"
+      background="primary"
+    >
+      <F0Box display="flex" flexDirection="column" gap="xs">
+        <F0Text content="Send calendar invites" variant="body" />
+        <F0Text content="Authorize Factorial to access your calendar and schedule trainings." variant="description" />
       </F0Box>
       <F0Box
         display="flex"
