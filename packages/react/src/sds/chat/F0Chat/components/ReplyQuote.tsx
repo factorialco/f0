@@ -19,8 +19,16 @@ import { senderNameColorClass } from "../utils/sender-color"
  */
 export const ReplyQuote = ({
   reply,
+  isMine = false,
+  isFirstOfRun = true,
 }: {
   reply: NonNullable<F0ChatMessage["replyTo"]>
+  /** The host bubble's side — picks which top corner hugs the bubble. */
+  isMine?: boolean
+  /** First message of a same-author run — mirrors the bubble's tail-side top
+   * corner so the quote nests cleanly (rounded at a run's start, tucked when
+   * it continues one). */
+  isFirstOfRun?: boolean
 }): ReactNode => {
   const { jumpToMessage } = useChatJump()
   const { currentUserId } = useF0Chat()
@@ -36,7 +44,16 @@ export const ReplyQuote = ({
         onClick={() => jumpToMessage(reply.id)}
         className={cn(
           "flex w-full items-center overflow-hidden rounded-xl text-left",
-          "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary"
+          "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",
+          // Tail-side top corner mirrors the host bubble: rounded to hug the
+          // bubble at a run's start, tucked in when the message continues a run.
+          isFirstOfRun
+            ? isMine
+              ? "rounded-tr-2xl"
+              : "rounded-tl-2xl"
+            : isMine
+              ? "rounded-tr-sm"
+              : "rounded-tl-sm"
         )}
       >
         {thumbnailUrl && (

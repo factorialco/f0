@@ -116,7 +116,13 @@ const ChatBubbleImpl = ({
           message.status === "failed" && "opacity-60"
         )}
       >
-        {message.replyTo && <ReplyQuote reply={message.replyTo} />}
+        {message.replyTo && (
+          <ReplyQuote
+            reply={message.replyTo}
+            isMine={isMine}
+            isFirstOfRun={isFirstOfRun}
+          />
+        )}
         <div className="px-3.5 py-2.5">
           {author && (
             <ChatUserHoverCard user={author}>
