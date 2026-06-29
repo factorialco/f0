@@ -42,8 +42,6 @@ export type F0AiMessagesContainerProps = {
   onRegenerate?: (messageId: string) => void
   /** Called when the user copies an assistant message's content. */
   onCopy?: (content: string) => void
-  /** Called when the user clicks the undo button on a turn. Receives the turn index. */
-  onUndo?: (turnIndex: number) => void
 
   /** Pre-processed turns to render (assembled by the connected wrapper). */
   turns: RenderableTurn[]
@@ -124,7 +122,6 @@ const Messages = ({
   UserMessage: UserMessageProp,
   onRegenerate,
   onCopy,
-  onUndo,
 }: F0AiMessagesContainerProps) => {
   const { modal, handleSubmit, handleClose } = useFeedbackSubmit(
     feedback ?? noopFeedback
@@ -255,18 +252,15 @@ const Messages = ({
         )}
         {turn.endIndicator === "activity" && <F0ActionItem status="writing" />}
         {(() => {
-          // Undo shows only when a handler is wired, the turn isn't still
-          // streaming, and the turn hasn't opted out (`canUndo === false`, e.g.
-          // no checkpoint behind it or a clarifying flow is mid-flight).
-          const showUndo =
-            !!onUndo && !turn.isInProgress && turn.canUndo !== false
-          if (!turn.feedback && !showUndo) return null
+          // The rewind button shows only when the turn supplies an `onUndo`
+          // handler; the consumer decides per turn whether a rewind target exists.
+          if (!turn.feedback && !turn.onUndo) return null
           return (
             <TurnFeedback
               content={turn.feedback?.content ?? ""}
               targetMessage={turn.feedback?.targetMessage ?? {}}
               onCopy={turn.feedback ? onCopy : undefined}
-              onUndo={showUndo ? () => onUndo!(turnIndex) : undefined}
+              onUndo={turn.onUndo}
             />
           )
         })()}

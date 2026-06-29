@@ -87,12 +87,11 @@ export type RenderableTurn = {
     targetMessage: Message
   }
   /**
-   * Whether this turn can be rolled back via the undo button. Defaults to
-   * shown when an `onUndo` handler is provided; set to `false` to hide undo
-   * for a specific turn (e.g. turns with no checkpoint behind them, or while a
-   * clarifying flow is mid-flight). Only consulted when `onUndo` is set.
+   * When provided, the turn renders a rewind button that calls this on click.
+   * Omit it to hide rewind for the turn (e.g. the last turn, turns with no
+   * checkpoint behind them, or while a clarifying flow is mid-flight).
    */
-  canUndo?: boolean
+  onUndo?: () => void
 }
 
 /** Props for the Thinking collapsible section. */
