@@ -87,8 +87,13 @@ const TabButton = ({
         actionVariants({ variant: "ghost" }),
         buttonSizeVariants({ size: "md" }),
         focusRing(),
-        // Inactive tabs: no hover background — only the icon darkens (below).
-        !isActive && "hover:bg-transparent hover:shadow-none"
+        // The sliding pill is the only selection affordance, so suppress the
+        // ghost variant's grey backgrounds entirely — on hover, press, and
+        // pressed. Otherwise the just-activated tab flashes its hover grey
+        // while the pill is still sliding over to it.
+        "hover:bg-transparent hover:shadow-none",
+        "active:bg-transparent active:shadow-none",
+        "data-[pressed=true]:bg-transparent data-[pressed=true]:shadow-none"
       )}
     >
       {/* AI aura for an "ai" tab (e.g. One): a blurred, slowly-rotating conic
