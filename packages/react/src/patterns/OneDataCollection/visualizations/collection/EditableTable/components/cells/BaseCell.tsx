@@ -26,6 +26,7 @@ export function BaseCell({
   borderOnHover = true,
   error,
   hint,
+  hintPosition = "left",
   children,
 }: {
   readonly?: boolean
@@ -34,9 +35,37 @@ export function BaseCell({
   isActive?: boolean
   error?: string
   hint?: { icon: IconType; message: string; iconColor?: F0IconProps["color"] }
+  hintPosition?: "left" | "right"
   borderOnHover?: boolean
   children: ReactNode
 }) {
+  const hintIcon = hint && !error && (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            aria-label={hint.message}
+            className={cn(
+              "pointer-events-auto flex shrink-0 cursor-pointer items-center rounded px-1",
+              focusRing()
+            )}
+          >
+            <F0Icon icon={hint.icon} size="md" color={hint.iconColor} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="border-black/10 max-w-64 cursor-default text-f1-foreground shadow-md"
+        >
+          <span className="text-sm font-medium text-f1-foreground">
+            {hint.message}
+          </span>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+
   return (
     <div
       className={cn(
@@ -55,33 +84,9 @@ export function BaseCell({
       )}
     >
       <ErrorTooltip message={error}>
-        {hint && !error && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  aria-label={hint.message}
-                  className={cn(
-                    "pointer-events-auto flex shrink-0 cursor-pointer items-center rounded px-1",
-                    focusRing()
-                  )}
-                >
-                  <F0Icon icon={hint.icon} size="md" color={hint.iconColor} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="top"
-                className="border-black/10 max-w-64 cursor-default text-f1-foreground shadow-md"
-              >
-                <span className="text-sm font-medium text-f1-foreground">
-                  {hint.message}
-                </span>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
+        {hintPosition === "left" && hintIcon}
         <div className="min-w-0 flex-1">{children}</div>
+        {hintPosition === "right" && hintIcon}
       </ErrorTooltip>
     </div>
   )
