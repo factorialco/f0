@@ -4418,7 +4418,7 @@ const SESSION_INSTRUCTOR_OPTIONS = [
 const sessionFormSections = {
   schedule: { title: "Schedule" },
   format: { title: "Format" },
-  notifications: { title: "Notifications" },
+  notifications: { title: "Reminders" },
 }
 
 const sessionFormSchema = z.object({
