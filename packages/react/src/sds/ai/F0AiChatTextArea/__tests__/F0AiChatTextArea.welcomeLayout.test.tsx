@@ -64,7 +64,12 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
 
   it("renders welcome cards below the textarea on the fullscreen welcome screen", () => {
     const cards: F0AiChatWelcomeCard[] = [
-      { icon: File, title: "Empty survey", message: "Create an empty survey." },
+      {
+        id: "empty-survey",
+        icon: File,
+        title: "Empty survey",
+        message: "Create an empty survey.",
+      },
     ]
     render(
       <F0AiChatTextArea
@@ -92,9 +97,24 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
       { icon: ChartVerticalBars, label: "Summarize", items: [{ title: "B" }] },
     ]
     const threeCards: F0AiChatWelcomeCard[] = [
-      { icon: File, title: "Empty survey", message: "Create an empty survey." },
-      { icon: File, title: "From template", message: "Use a template." },
-      { icon: File, title: "Import", message: "Import an existing survey." },
+      {
+        id: "empty-survey",
+        icon: File,
+        title: "Empty survey",
+        message: "Create an empty survey.",
+      },
+      {
+        id: "from-template",
+        icon: File,
+        title: "From template",
+        message: "Use a template.",
+      },
+      {
+        id: "import",
+        icon: File,
+        title: "Import",
+        message: "Import an existing survey.",
+      },
     ]
     render(
       <F0AiChatTextArea
@@ -119,7 +139,12 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
 
   it("does not render welcome cards on the sidepanel welcome screen", () => {
     const cards: F0AiChatWelcomeCard[] = [
-      { icon: File, title: "Empty survey", message: "Create an empty survey." },
+      {
+        id: "empty-survey",
+        icon: File,
+        title: "Empty survey",
+        message: "Create an empty survey.",
+      },
     ]
     render(
       <F0AiChatTextArea

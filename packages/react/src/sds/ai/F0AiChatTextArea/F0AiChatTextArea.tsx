@@ -348,8 +348,8 @@ export const F0AiChatTextArea = ({
   ) : null
 
   // Welcome cards sit below the composer on the fullscreen welcome screen
-  // (same gate the footer slot uses). Prompt cards send their message through
-  // `onCardSelect`; action cards run their own `onClick`.
+  // (same gate the footer slot uses). Clicking a card calls `onCardSelect`
+  // with the card's `id` and optional `message`; the host owns the behavior.
   const showWelcomeCards =
     isWelcomeScreen &&
     fullscreen &&

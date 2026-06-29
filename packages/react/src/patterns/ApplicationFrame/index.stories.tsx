@@ -422,24 +422,29 @@ const QuickActions = () => {
 
 const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
   {
+    id: "empty-survey",
     icon: Pencil,
     title: "Empty survey",
     description: "Start from scratch",
     message: "Create an empty survey.",
   },
   {
+    id: "all-templates",
     icon: Marketplace,
     title: "All templates",
     description: "Browse pre-made surveys",
-    message: "Show me all the survey templates.",
+    // No message: browsing templates isn't a prompt — the host opens the
+    // template gallery instead (see onCardSelect below).
   },
   {
+    id: "q4-employee-satisfaction",
     icon: ChartVerticalBars,
     title: "Q4 Employee Satisfaction",
     description: "Reuse last quarter's survey",
     message: "Create a Q4 employee satisfaction survey.",
   },
   {
+    id: "team-effectiveness",
     icon: Lightbulb,
     title: "Team Effectiveness",
     description: "Measure how teams work together",
@@ -453,7 +458,15 @@ const WelcomeCards = () => {
   return (
     <WelcomeScreenCardsRow
       cards={WELCOME_CARDS}
-      onCardSelect={(message) => sendMessage(message)}
+      onCardSelect={(id, message) => {
+        // Cards branch on their id: "All templates" opens the gallery, the
+        // rest send their prompt.
+        if (id === "all-templates") {
+          console.log("open template gallery")
+        } else if (message) {
+          sendMessage(message)
+        }
+      }}
     />
   )
 }

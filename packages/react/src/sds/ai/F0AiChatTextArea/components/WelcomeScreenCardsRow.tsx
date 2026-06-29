@@ -17,17 +17,17 @@ export type WelcomeScreenCardsRowProps = {
    */
   cards: F0AiChatWelcomeCard[]
   /**
-   * Fired with a prompt card's `message` when it's clicked. Action cards (with
-   * their own `onClick`) bypass this — `onClick` takes precedence.
+   * Fired when a card is clicked, with the card's `id` and its optional
+   * `message`. The host branches on `id` to decide what to do — send the
+   * `message` as a prompt, open a dialog, etc.
    */
-  onCardSelect?: (message: string) => void
+  onCardSelect?: (id: string, message?: string) => void
 }
 
 /**
- * Grid of action/prompt cards shown below the composer on the fullscreen
- * welcome screen, rendered with `F0CardHorizontal`. Prompt cards (with a
- * `message`) call `onCardSelect`; action cards run their own `onClick`, which
- * takes precedence when both are present.
+ * Grid of cards shown below the composer on the fullscreen welcome screen,
+ * rendered with `F0CardHorizontal`. Clicking a card calls `onCardSelect` with
+ * its `id` and optional `message`; the host owns the resulting behavior.
  *
  * Renders at most {@link MAX_WELCOME_CARDS} cards; extras are dropped.
  */
@@ -41,17 +41,11 @@ export const WelcomeScreenCardsRow = ({
     <div className="grid w-full grid-cols-2 gap-3">
       {cards.slice(0, MAX_WELCOME_CARDS).map((card) => (
         <F0CardHorizontal
-          key={card.title}
+          key={card.id}
           avatar={{ type: "icon", icon: card.icon }}
           title={card.title}
           description={card.description}
-          onClick={() => {
-            if (card.onClick) {
-              card.onClick()
-            } else if (card.message) {
-              onCardSelect?.(card.message)
-            }
-          }}
+          onClick={() => onCardSelect?.(card.id, card.message)}
         />
       ))}
     </div>

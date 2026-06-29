@@ -20,12 +20,14 @@ describe("WelcomeScreenCardsRow", () => {
   it("renders every card's title and description", () => {
     const cards: F0AiChatWelcomeCard[] = [
       {
+        id: "empty-survey",
         icon: File,
         title: "Empty survey",
         description: "Start from scratch",
         message: "Create an empty survey.",
       },
       {
+        id: "templates",
         icon: Marketplace,
         title: "Templates",
         description: "Browse pre-made surveys",
@@ -41,36 +43,38 @@ describe("WelcomeScreenCardsRow", () => {
     expect(screen.getByText("Browse pre-made surveys")).toBeInTheDocument()
   })
 
-  it("calls onCardSelect with the message when a prompt card is clicked", async () => {
+  it("calls onCardSelect with the id and message when a card is clicked", async () => {
     const onCardSelect = vi.fn()
     const cards: F0AiChatWelcomeCard[] = [
-      { icon: File, title: "Empty survey", message: "Create an empty survey." },
+      {
+        id: "empty-survey",
+        icon: File,
+        title: "Empty survey",
+        message: "Create an empty survey.",
+      },
     ]
 
     render(<WelcomeScreenCardsRow cards={cards} onCardSelect={onCardSelect} />)
     await clickCard("Empty survey")
 
     expect(onCardSelect).toHaveBeenCalledTimes(1)
-    expect(onCardSelect).toHaveBeenCalledWith("Create an empty survey.")
+    expect(onCardSelect).toHaveBeenCalledWith(
+      "empty-survey",
+      "Create an empty survey."
+    )
   })
 
-  it("calls onClick (not onCardSelect) when an action card is clicked", async () => {
+  it("calls onCardSelect with the id and undefined message for a message-less card", async () => {
     const onCardSelect = vi.fn()
-    const onClick = vi.fn()
     const cards: F0AiChatWelcomeCard[] = [
-      {
-        icon: Marketplace,
-        title: "Templates",
-        message: "ignored when onClick is present",
-        onClick,
-      },
+      { id: "templates", icon: Marketplace, title: "Templates" },
     ]
 
     render(<WelcomeScreenCardsRow cards={cards} onCardSelect={onCardSelect} />)
     await clickCard("Templates")
 
-    expect(onClick).toHaveBeenCalledTimes(1)
-    expect(onCardSelect).not.toHaveBeenCalled()
+    expect(onCardSelect).toHaveBeenCalledTimes(1)
+    expect(onCardSelect).toHaveBeenCalledWith("templates", undefined)
   })
 
   it("renders nothing when given no cards", () => {
@@ -85,6 +89,7 @@ describe("WelcomeScreenCardsRow", () => {
     const cards: F0AiChatWelcomeCard[] = Array.from(
       { length: MAX_WELCOME_CARDS + 2 },
       (_, i) => ({
+        id: `card-${i + 1}`,
         icon: File,
         title: `Card ${i + 1}`,
         message: `Message ${i + 1}`,

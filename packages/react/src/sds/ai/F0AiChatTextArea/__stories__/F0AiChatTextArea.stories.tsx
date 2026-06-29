@@ -95,16 +95,19 @@ const CREDIT_WARNING: AiChatCreditWarning = {
 
 const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
   {
+    id: "empty-survey",
     icon: File,
     title: "Empty survey",
     description: "Start from scratch",
     message: "Create an empty survey.",
   },
   {
+    id: "templates",
     icon: Marketplace,
     title: "Templates",
     description: "Browse pre-made surveys",
-    onClick: () => console.log("open templates"),
+    // No message: a templates card triggers a non-prompt behavior, handled by
+    // the host via its id.
   },
 ]
 
@@ -214,12 +217,18 @@ const Wrapper = ({
         disclaimer={disclaimer}
         footer={footer}
         welcomeScreenCards={welcomeScreenCards}
-        onCardSelect={(message) =>
-          setSubmissions((prev) => [
-            ...prev,
-            { text: message, files: [], context: null, quote: null },
-          ])
-        }
+        onCardSelect={(id, message) => {
+          // Branch on id; message-less cards (e.g. "Templates") do something
+          // other than send a prompt.
+          if (message) {
+            setSubmissions((prev) => [
+              ...prev,
+              { text: message, files: [], context: null, quote: null },
+            ])
+          } else {
+            console.log(`card clicked: ${id}`)
+          }
+        }}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
       />
