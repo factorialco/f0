@@ -739,17 +739,6 @@ const confirmLeaveCreation = () =>
     cancel: { label: "Cancel" },
   })
 
-// "Open in Surveys" confirmation — opened by the resource header's dropdown
-// action. Mirrors `confirmLeaveCreation`: opening the survey in its Surveys
-// resource view navigates away from the current creation flow.
-const confirmOpenInSurveys = () =>
-  dialogs.confirmation({
-    title: "Leave creation?",
-    msg: "Opening this survey in Engagement / Surveys navigates away from the current creation flow. Are you sure you want to leave?",
-    confirm: { label: "Open in Surveys" },
-    cancel: { label: "Cancel" },
-  })
-
 // "Unsaved changes" confirmation shown when "Publish" is pressed — offers to save
 // before publishing. Resolves `true` when the user confirms.
 const confirmPublish = () =>
@@ -1271,12 +1260,6 @@ function SurveyEditorCanvasHeader({
         ]}
         otherActions={[
           {
-            label: "Open in Surveys",
-            icon: ExternalLink,
-            onClick: () => void confirmOpenInSurveys(),
-          },
-          { type: "separator" },
-          {
             label: "Duplicate",
             icon: LayersFront,
             onClick: () => toast({ title: "Survey duplicated" }),
@@ -1482,7 +1465,7 @@ function SurveyWelcomeCardsRegistrar() {
     setPlaceholders(
       hasDraftedSurvey
         ? ["Improve the Survey by..."]
-        : ["Create a Survey for..."]
+        : ["Describe the type of survey you want to create"]
     )
   }, [hasDraftedSurvey, setPlaceholders])
 
@@ -1870,12 +1853,6 @@ function FlowContent({
                 ]}
                 otherActions={[
                   {
-                    label: "Open in Surveys",
-                    icon: ExternalLink,
-                    onClick: () => void confirmOpenInSurveys(),
-                  },
-                  { type: "separator" },
-                  {
                     label: "Duplicate",
                     icon: LayersFront,
                     onClick: () => toast({ title: "Survey duplicated" }),
@@ -2015,7 +1992,7 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
     welcomeScreenSuggestions: [
       {
         icon: Pencil,
-        label: "Create",
+        label: "Create a survey for...",
         items: [
           {
             title: "Employee satisfaction survey",
