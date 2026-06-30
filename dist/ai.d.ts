@@ -478,6 +478,11 @@ declare type AiChatProviderReturnValue = {
     lockVisualizationMode: boolean;
     historyEnabled: boolean;
     /**
+     * When false, suppress the chat content's mode-change re-fade when the canvas
+     * opens/closes with the chat docked as a side panel. Defaults to true.
+     */
+    revealChatOnCanvasToggle: boolean;
+    /**
      * Optional footer content rendered below the textarea
      */
     footer?: React.ReactNode;
@@ -560,6 +565,11 @@ declare interface AiChatState {
     resizable?: boolean;
     defaultVisualizationMode?: VisualizationMode;
     lockVisualizationMode?: boolean;
+    /**
+     * When false, suppress the chat content's mode-change re-fade when the canvas
+     * opens/closes with the chat docked as a side panel. Defaults to true.
+     */
+    revealChatOnCanvasToggle?: boolean;
     historyEnabled?: boolean;
     footer?: React.ReactNode;
     VoiceMode?: React.ComponentType;
@@ -2720,7 +2730,7 @@ export declare interface F0ActionItemProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, revealChatOnCanvasToggle, }: F0AiChatProps) => JSX_2.Element | null;
+export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
  * Headless chat header. Renders a top bar with title (or thread selector),
@@ -2822,19 +2832,12 @@ export declare interface F0AiChatProps {
     messages?: ReactNode;
     /** Input slot rendered at the bottom (textarea + suggestions + disclaimer). */
     input?: ReactNode;
-    /**
-     * When false, the chat content does NOT re-fade when the canvas opens/closes
-     * with the chat docked on the side: `sidepanel` and `canvas` are treated as
-     * one state for the mode-change reveal, so toggling the canvas is seamless.
-     * Fullscreen transitions still reveal. Defaults to true.
-     */
-    revealChatOnCanvasToggle?: boolean;
 }
 
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, onCardSelect, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, onCardSelect, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, revealChatOnCanvasToggle, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -4903,8 +4906,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -4912,10 +4917,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
