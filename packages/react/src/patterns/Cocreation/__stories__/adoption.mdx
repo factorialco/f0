@@ -1,0 +1,139 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="Co-creation/Adoption" />
+
+# Adoption
+
+How to apply co-creation to a **new** resource. Co-creation is not a component you import —
+it is an orchestration of existing AI blocks around a small state machine. Surveys is the
+first instance; a job description, a policy draft, or a goal plan follows the same recipe.
+This page is the recipe: the state to own, the blocks to wire, the contracts to honor, and
+the few things that are actually specific to your resource.
+
+## 1. Own a single `phase`
+
+A co-creation flow runs on one chat-enabled
+[`ApplicationFrame`](?path=/docs/patterns-applicationframe--documentation) and is driven by a
+single `phase` value — `"collection" | "chat" | "split"`. Everything else (whether the chat
+is open, and whether it shows full width or as a side panel) is **derived** from `phase`,
+never set independently, so the header trigger and the in-flow buttons can't disagree. See
+[Phases](?path=/docs/patterns-co-creation-phases--documentation) for what each phase is and
+how the transitions fire.
+
+<DoDonts
+  do={{
+    description:
+      "Derive the chat's open and visualization state from one `phase` source of truth.",
+  }}
+  dont={{
+    description:
+      "Don't track \"is the chat open\" and \"which phase are we in\" as separate, free-floating state — they will drift.",
+  }}
+/>
+
+## 2. Wire the blocks (don't rebuild them)
+
+Reach for the existing AI blocks for every conversational part of the flow. You are
+assembling, not authoring — when a block improves, your flow inherits it. Each is documented
+on its own page; the catalog and responsibilities live in
+[Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation).
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Responsibility</th>
+        <th className="text-left">Block</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Open the AI from any phase</td>
+        <td><code>F0OneSwitch</code> in the frame header</td>
+      </tr>
+      <tr>
+        <td>The conversation surface, composer, and welcome screen</td>
+        <td><code>F0AiChat</code> (plus its <code>welcomeScreenCards</code> / <code>welcomeScreenSuggestions</code>)</td>
+      </tr>
+      <tr>
+        <td>Narrow a vague intent before drafting</td>
+        <td><code>F0ClarifyingPanel</code></td>
+      </tr>
+      <tr>
+        <td>The in-chat resource card and the accept/reject proposal card</td>
+        <td><code>F0CardHorizontal</code></td>
+      </tr>
+      <tr>
+        <td>"Applying changes" over the canvas</td>
+        <td><code>F0AiProcessingOverlay</code></td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## 3. Honor the contracts
+
+These are the invariants that make every co-creation flow feel like the same pattern. They
+are defined in full on the
+[Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) page:
+
+- **Canvas in chat** — the resource is built and edited in a canvas that opens inside the
+  chat, never on a separate page you route the user to.
+- **Approve every change** — no AI proposal reaches the resource without an explicit accept;
+  surface each one as a confirm/reject card.
+- **Leaving warns** — navigation that would abandon an in-progress creation confirms first;
+  merely collapsing the chat does not.
+- **Card lifecycle** — keep only the latest card for a resource interactive (active / live),
+  and leave superseded cards in the chat as history.
+
+Co-creation is also held to the pattern's
+[Accessibility](?path=/docs/patterns-co-creation-accessibility--documentation) contract —
+keyboard, focus, announcements, and reduced motion.
+
+## 4. Bring only your resource surfaces
+
+The conversational machinery is shared; what's specific to your resource is small:
+
+- **The canvas surfaces** — a read-only **preview** and an editable **builder/editor** for
+  your resource (Surveys supplies `SurveyAnsweringForm` and `SurveyFormBuilder`).
+- **Draft + apply logic** — how an intent becomes a first draft, and how an accepted proposal
+  is written into the resource.
+- **Save model** — when the resource is persisted. A resource with a **Draft** state is created
+  on first creation (it exists in its domain from then on; later changes are saved explicitly);
+  a resource **without** a draft state creates nothing until the user explicitly saves. This
+  drives the "leaving warns" contract — a draft survives navigation, unsaved non-draft work is
+  lost.
+- **Clarifying questions** — the handful that materially improve *your* first draft (Surveys
+  asks type → audience → length).
+- **Welcome cards** — the starting points worth offering on the welcome screen (blank, browse
+  templates, seed a known template).
+
+<DoDonts
+  do={{
+    description:
+      "Keep the resource-specific code to the canvas surfaces and the draft/apply logic.",
+  }}
+  dont={{
+    description:
+      "Don't re-implement chat, clarifying questions, or the confirmation card per resource — compose the blocks.",
+  }}
+/>
+
+## Checklist
+
+When standing up a new co-creation flow:
+
+1. Mount it on one chat-enabled `ApplicationFrame` with `F0OneSwitch` in the header.
+2. Model a single `phase`; derive the chat's open / visualization state from it.
+3. Define the welcome cards and the clarifying questions for your resource.
+4. Build the canvas preview and editor surfaces; open them **inside** the chat.
+5. Post each AI change as a confirm/reject `F0CardHorizontal`; apply only on accept, behind
+   `F0AiProcessingOverlay`.
+6. Manage the resource/proposal card lifecycle (active, live, superseded, resolved).
+7. Warn before navigation that abandons an in-progress creation.
+8. Verify the [Accessibility](?path=/docs/patterns-co-creation-accessibility--documentation)
+   contract — keyboard, focus, announcements, reduced motion.
+
+For the first end-to-end instance to read alongside this checklist, see
+[Creation with AI](?path=/docs/patterns-co-creation-creation-with-ai--documentation).

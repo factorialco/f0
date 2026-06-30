@@ -1,0 +1,167 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import chatFullscreen from "./assets/chat-fullscreen.png"
+import splitEmpty from "./assets/split-empty.png"
+
+<Meta title="Co-creation/Creation with AI" />
+
+# Creation with AI
+
+**Creation with AI** is the first concrete instance of the
+[Co-creation](?path=/docs/patterns-co-creation--documentation) pattern — the abstract flow
+grounded in one real resource. The resource here is a survey, but the structure is the
+pattern's, not the survey's: the user starts on a collection (Collection), describes what they
+want in a chat (Chat), then refines the resulting draft on a canvas while the conversation
+continues (Split). The walkthrough below maps each phase to what the survey example shows; the
+mock itself runs full screen, so open it in its own canvas:
+
+<Unstyled>
+  <a
+    target="_parent"
+    href="/?path=/story/patterns-co-creation-creation-with-ai--surveys"
+    className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
+  >
+    Open the interactive flow ↗
+  </a>
+</Unstyled>
+
+## Flow
+
+### Collection
+
+The flow starts on the collection the user is already working in — a Surveys data collection in
+this example. The user opens the AI from the header One switch (side panel) or the **Create**
+primary button (full width).
+
+### Chat
+
+<Unstyled>
+  <figure className="mx-auto mb-8 mt-0 max-w-2xl">
+    <img
+      src={chatFullscreen}
+      alt="The full-width chat welcome screen, with an action-driven header, a composer, and four starting-point cards below it."
+      className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+    />
+    <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+      The chat opens full width, with an action-driven header. The user types what they want
+      (or dictates it with the mic), or picks a starting-point card.
+    </figcaption>
+  </figure>
+</Unstyled>
+
+The chat opens with welcome cards offering a few starting points. The cards are
+data-driven (`welcomeScreenCards`) and rendered below the composer on the full-width welcome
+screen; they're optional, and you can show up to four. Which starting points to offer is up to
+each flow — the survey example fills all four:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Starting point</th>
+        <th className="text-left">What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Empty survey</strong>
+        </td>
+        <td>Creates a blank survey and walks the user through it with clarifying questions.</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Templates</strong>
+        </td>
+        <td>Opens the templates canvas to browse and preview pre-made surveys.</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Employee NPS</strong>
+        </td>
+        <td>
+          Seeds a ready-made eNPS survey; the eNPS question is locked so scores stay
+          comparable, the rest is editable.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Employee Engagement</strong>
+        </td>
+        <td>Seeds a ready-made employee-engagement survey to edit.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Clarifying questions narrow the intent before anything is drafted — here, the survey's type,
+audience, and length. The draft is then surfaced as an in-chat resource card; opening it moves
+the flow into Split.
+
+### Split
+
+<Unstyled>
+  <figure className="mx-auto mb-8 mt-0 max-w-2xl">
+    <img
+      src={splitEmpty}
+      alt="The split view: a survey builder fills the center while the chat docks on the right, showing the resource card and a clarifying question."
+      className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
+    />
+    <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
+      After choosing Empty survey: the resource canvas fills the center, the chat
+      docks on the right with the resource card and clarifying questions.
+    </figcaption>
+  </figure>
+</Unstyled>
+
+The resource canvas fills the center while the chat docks on the right. Every co-created
+resource needs a way to read the draft and a way to edit it; here the survey canvas offers those
+as two modes:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Mode</th>
+        <th className="text-left">What the user sees</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Preview</strong>
+        </td>
+        <td>
+          The survey rendered as it will be answered (the answering form), for reviewing a
+          template or draft.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Edit</strong>
+        </td>
+        <td>
+          The survey builder, with a Questions tab for the survey content and a Settings tab
+          for metadata (title, description, participants, schedule, visibility, editors).
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+The canvas header carries the resource actions — here **Save to Surveys** and a primary
+**Publish** — so the user can keep the draft or ship it without leaving the flow.
+
+As the conversation continues, the AI proposes changes (for example, adding an open-ended
+comment question). Each proposal appears as a human-in-the-loop confirmation card; the user
+accepts or rejects it, and an overlay covers the canvas while an accepted change is applied.
+
+## Composed building blocks
+
+This flow assembles the blocks documented in
+[Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation):
+`F0OneSwitch`, `F0AiChat` (including its data-driven welcome cards and voice dictation),
+`F0ClarifyingPanel`, `F0CardHorizontal` (the in-chat resource and proposal cards), and
+`F0AiProcessingOverlay`. Only the surfaces specific to this example — the survey's answering
+form and builder — come from the
+[Surveys](?path=/docs/sds-surveys-surveyformbuilder--documentation) SDS.
