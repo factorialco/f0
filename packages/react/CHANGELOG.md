@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.17.0](https://github.com/factorialco/f0/compare/f0-react-v4.16.0...f0-react-v4.17.0) (2026-06-30)
+
+
+### Features
+
+* **ai:** add welcomeScreenCards to F0AiChat ([#4550](https://github.com/factorialco/f0/issues/4550)) ([f0405f7](https://github.com/factorialco/f0/commit/f0405f763786b465b0f5be89846989a9b605030c))
+
 ## [4.16.0](https://github.com/factorialco/f0/compare/f0-react-v4.15.0...f0-react-v4.16.0) (2026-06-30)
 
 
