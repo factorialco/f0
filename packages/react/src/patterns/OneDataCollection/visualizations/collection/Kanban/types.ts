@@ -1,6 +1,7 @@
 import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
 import { CardMetadataProperty } from "@/components/F0Card/types"
 import { IconType } from "@/components/F0Icon"
+import { NewColor } from "@/components/tags/F0TagDot"
 import { Variant } from "@/components/tags/F0TagStatus"
 import {
   FiltersDefinition,
@@ -18,6 +19,7 @@ export type KanbanLaneDefinition = {
   id: string
   title: string
   variant?: Variant
+  color?: NewColor
 }
 
 export type KanbanVisualizationOptions<

@@ -331,6 +331,7 @@ export function Kanban<TRecord extends RecordType>(
                     emptyState={lane.emptyState}
                     loading={loading}
                     variant={lane.variant}
+                    color={lane.color}
                     total={total}
                     hasMore={hasMore}
                     loadingMore={loadingMore}
