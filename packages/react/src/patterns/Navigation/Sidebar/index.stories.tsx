@@ -3,16 +3,19 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, useState } from "react"
 import { expect, within } from "storybook/test"
 
+import { Comment, Home } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import { Comment, Home } from "@/icons/app"
-
+import {
+  exampleActions,
+  exampleEmptyState,
+  exampleGroups,
+} from "./Chats/index.stories"
 import { SidebarChatList } from "./Chats/SidebarChatList"
 import {
   SidebarChatProvider,
   useSidebarChats,
 } from "./Chats/SidebarChatProvider"
-import { exampleActions, exampleGroups } from "./Chats/index.stories"
 import { SidebarFooter } from "./Footer"
 import * as SidebarFooterStories from "./Footer/index.stories"
 import { SidebarHeader } from "./Header"
@@ -85,7 +88,7 @@ export const Default: Story = {
   decorators: [
     (Story) => {
       return (
-        <div className="h-[500px] w-[240px] bg-f1-background-tertiary border border-solid border-f1-border-secondary rounded relative">
+        <div className="relative h-[500px] w-[240px] rounded border border-solid border-f1-border-secondary bg-f1-background-tertiary">
           <Story />
         </div>
       )
@@ -123,7 +126,7 @@ export const Snapshot: Story = {
         {snapshotVariants.map((variant, index) => (
           <div
             key={index}
-            className="isolate h-[500px] w-[240px] bg-f1-background-tertiary relative"
+            className="relative isolate h-[500px] w-[240px] bg-f1-background-tertiary"
           >
             <Sidebar {...variant} />
           </div>
@@ -178,13 +181,15 @@ const TabbedSidebarInner = () => {
             ]}
             activeTab={tab}
             onTabChange={setTab}
-            search={{ placeholder: "Search..." }}
           />
         </>
       }
       body={
         tab === "messages" ? (
-          <SidebarChatList actions={exampleActions} />
+          <SidebarChatList
+            actions={exampleActions}
+            emptyState={exampleEmptyState}
+          />
         ) : (
           <Menu {...SidebarMenuStories.Default.args} />
         )
@@ -204,7 +209,7 @@ export const WithTabs: Story = {
   render: () => <TabbedSidebar />,
   decorators: [
     (Story) => (
-      <div className="h-[560px] w-[240px] bg-f1-background-tertiary border border-solid border-f1-border-secondary rounded relative">
+      <div className="relative h-[560px] w-[240px] rounded border border-solid border-f1-border-secondary bg-f1-background-tertiary">
         <Story />
       </div>
     ),

@@ -1,5 +1,19 @@
 # Changelog
 
+## [4.16.0](https://github.com/factorialco/f0/compare/f0-react-v4.15.0...f0-react-v4.16.0) (2026-06-30)
+
+
+### Features
+
+* **F0CardHorizontal:** add disabled and descriptionAsSingleLine props ([#4590](https://github.com/factorialco/f0/issues/4590)) ([afe0c14](https://github.com/factorialco/f0/commit/afe0c145d456322c5375104d609a1185c3ebae1d))
+
+## [4.15.0](https://github.com/factorialco/f0/compare/f0-react-v4.14.1...f0-react-v4.15.0) (2026-06-29)
+
+
+### Features
+
+* **ai:** move One chat navigation into the sidebar ([#4576](https://github.com/factorialco/f0/issues/4576)) ([76aa0da](https://github.com/factorialco/f0/commit/76aa0da8f5328c73533247f7b1ee5f966788cfc3))
+
 ## [4.14.1](https://github.com/factorialco/f0/compare/f0-react-v4.14.0...f0-react-v4.14.1) (2026-06-29)
 
 

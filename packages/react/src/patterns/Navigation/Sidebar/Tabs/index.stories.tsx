@@ -31,14 +31,7 @@ type Story = StoryObj<typeof meta>
 
 const Interactive = ({ initial = "main" }: { initial?: string }) => {
   const [active, setActive] = useState(initial)
-  return (
-    <SidebarTabs
-      tabs={tabs}
-      activeTab={active}
-      onTabChange={setActive}
-      search={{ placeholder: "Search...", onClick: action("search clicked") }}
-    />
-  )
+  return <SidebarTabs tabs={tabs} activeTab={active} onTabChange={setActive} />
 }
 
 export const Default: Story = {
@@ -46,7 +39,6 @@ export const Default: Story = {
     tabs,
     activeTab: "main",
     onTabChange: action("tab changed"),
-    search: { placeholder: "Search...", onClick: action("search clicked") },
   },
   render: () => <Interactive initial="main" />,
 }
@@ -68,7 +60,6 @@ export const WithBadges: Story = {
         tabs={badged}
         activeTab="main"
         onTabChange={action("tab changed")}
-        search={{ onClick: action("search clicked") }}
       />
     )
   },
