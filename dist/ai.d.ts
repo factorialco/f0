@@ -268,14 +268,25 @@ export declare type AiChatProviderProps = {
      */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     /**
-     * Action/prompt cards rendered below the composer on the fullscreen welcome
-     * screen. The chat owns layout and, for prompt cards, the send.
+     * Cards rendered below the composer on the fullscreen welcome screen. Pure
+     * data — clicking a card calls `onCardSelect` with its `id` and optional
+     * `message`. The chat owns the layout; the host owns the interaction.
      *
      * Optional and independent of `welcomeScreenSuggestions` — provide either,
      * both, or neither, in any counts. At most 4 cards are rendered (the row is a
      * 2×2 grid); extras are dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
+     * Handler invoked when a welcome card is clicked, with the card's `id` and
+     * optional `message`. Branch on `id` to drive per-card behavior (send the
+     * `message` as a prompt, open a dialog, …).
+     *
+     * Hosts that must build the handler inside the chat provider (e.g. needing
+     * `openCanvas`) can register it dynamically via `setOnCardSelect` from
+     * `useAiChat()` instead.
+     */
+    onCardSelect?: (id: string, message?: string) => void;
     disclaimer?: AiChatDisclaimer;
     /**
      * Enable resizable chat window
@@ -415,6 +426,18 @@ declare type AiChatProviderReturnValue = {
     setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
     welcomeScreenCards: F0AiChatWelcomeCard[];
     setWelcomeScreenCards: React.Dispatch<React.SetStateAction<F0AiChatWelcomeCard[]>>;
+    /**
+     * Stable handler invoked when a welcome card is clicked, with the card's
+     * `id` and optional `message`. Always defined; no-ops until a handler is
+     * registered (via the `onCardSelect` prop or `setOnCardSelect`).
+     */
+    onCardSelect: (id: string, message?: string) => void;
+    /**
+     * Register the welcome-card click handler. Lets a component inside the
+     * provider wire behavior that needs in-provider context (e.g. `openCanvas`).
+     * Pass `undefined` to clear.
+     */
+    setOnCardSelect: (handler: ((id: string, message?: string) => void) | undefined) => void;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -532,6 +555,7 @@ declare interface AiChatState {
     chatInput?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     welcomeScreenCards?: F0AiChatWelcomeCard[];
+    onCardSelect?: (id: string, message?: string) => void;
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
     defaultVisualizationMode?: VisualizationMode;
@@ -2810,7 +2834,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, onCardSelect, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -2902,9 +2926,9 @@ export declare type F0AiChatTextAreaProps = {
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
-     * Action/prompt cards rendered as a grid below the composer on the
-     * fullscreen welcome screen. Prompt cards (with a `message`) call
-     * `onCardSelect`; action cards (with an `onClick`) run their own handler.
+     * Cards rendered as a grid below the composer on the fullscreen welcome
+     * screen. Clicking a card calls `onCardSelect` with its `id` and optional
+     * `message`; the host decides the behavior.
      *
      * Optional and independent of `welcomeScreenSuggestions` — the two can have
      * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
@@ -2912,10 +2936,10 @@ export declare type F0AiChatTextAreaProps = {
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
     /**
-     * Called with a prompt card's `message` when it's clicked. Wire this to the
-     * chat's send. Action cards bypass it via their own `onClick`.
+     * Called when a welcome card is clicked, with the card's `id` and its
+     * optional `message`. Branch on `id` to send the prompt, open a dialog, etc.
      */
-    onCardSelect?: (message: string) => void;
+    onCardSelect?: (id: string, message?: string) => void;
     /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
@@ -2942,25 +2966,29 @@ export declare type F0AiChatTextAreaSubmitPayload = {
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
- * as an `F0CardHorizontal`. Two kinds:
- * - **Prompt cards** carry a `message` the chat sends when the card is clicked.
- * - **Action cards** carry an `onClick` (e.g. open a dialog) which takes
- *   precedence over `message`.
+ * as an `F0CardHorizontal`. Pure data — clicking a card calls the host's
+ * `onCardSelect(id, message)`, and the host decides what to do from the `id`
+ * (send the `message` as a prompt, open a dialog, navigate, …). Different
+ * cards can therefore trigger different behaviors.
  *
- * Data-driven and runtime-agnostic — the chat owns the layout and, for prompt
- * cards, the send. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
+ * Data-driven and runtime-agnostic — the chat owns the layout; the host owns
+ * the interaction. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
  */
 export declare type F0AiChatWelcomeCard = {
+    /**
+     * Stable identifier passed to `onCardSelect` so the host can branch behavior
+     * per card. Also used as the React key.
+     */
+    id: string;
     icon: IconType;
     title: string;
     description?: string;
-    /** Prompt cards: the message the chat sends when the card is clicked. */
-    message?: string;
     /**
-     * Action cards: custom click handler (e.g. open a dialog). Takes precedence
-     * over `message` when both are present.
+     * Optional prompt associated with the card, passed to `onCardSelect`
+     * alongside `id`. The host decides whether to send it — cards without a
+     * `message` (e.g. a "Browse templates" card) just carry their `id`.
      */
-    onClick?: () => void;
+    message?: string;
 };
 
 export declare const F0AiInsightCard: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
