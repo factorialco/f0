@@ -3878,10 +3878,6 @@ declare type F0TagRawProps = {
 declare interface F0TagStatusProps {
     text: string;
     variant: Variant;
-    /**
-     * Optional leading icon, rendered inside the tag in place of the status dot.
-     * It inherits the variant's semantic color.
-     */
     icon?: IconType;
     /**
      * Sometimes you need to clarify the status for screen reader users
@@ -4994,11 +4990,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -5006,8 +4999,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
