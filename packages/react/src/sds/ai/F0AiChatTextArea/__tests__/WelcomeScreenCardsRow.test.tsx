@@ -25,6 +25,7 @@ describe("WelcomeScreenCardsRow", () => {
         title: "Empty survey",
         description: "Start from scratch",
         message: "Create an empty survey.",
+        onClick: vi.fn(),
       },
       {
         id: "templates",
@@ -32,10 +33,11 @@ describe("WelcomeScreenCardsRow", () => {
         title: "Templates",
         description: "Browse pre-made surveys",
         message: "Show me the survey templates.",
+        onClick: vi.fn(),
       },
     ]
 
-    render(<WelcomeScreenCardsRow cards={cards} onCardSelect={vi.fn()} />)
+    render(<WelcomeScreenCardsRow cards={cards} />)
 
     expect(screen.getByText("Empty survey")).toBeInTheDocument()
     expect(screen.getByText("Start from scratch")).toBeInTheDocument()
@@ -43,44 +45,45 @@ describe("WelcomeScreenCardsRow", () => {
     expect(screen.getByText("Browse pre-made surveys")).toBeInTheDocument()
   })
 
-  it("calls onCardSelect with the id and message when a card is clicked", async () => {
-    const onCardSelect = vi.fn()
+  it("calls the clicked card's onClick and leaves the others untouched", async () => {
+    const onEmptySurvey = vi.fn()
+    const onTemplates = vi.fn()
     const cards: F0AiChatWelcomeCard[] = [
       {
         id: "empty-survey",
         icon: File,
         title: "Empty survey",
-        message: "Create an empty survey.",
+        onClick: onEmptySurvey,
+      },
+      {
+        id: "templates",
+        icon: Marketplace,
+        title: "Templates",
+        onClick: onTemplates,
       },
     ]
 
-    render(<WelcomeScreenCardsRow cards={cards} onCardSelect={onCardSelect} />)
+    render(<WelcomeScreenCardsRow cards={cards} />)
     await clickCard("Empty survey")
 
-    expect(onCardSelect).toHaveBeenCalledTimes(1)
-    expect(onCardSelect).toHaveBeenCalledWith(
-      "empty-survey",
-      "Create an empty survey."
-    )
+    expect(onEmptySurvey).toHaveBeenCalledTimes(1)
+    expect(onTemplates).not.toHaveBeenCalled()
   })
 
-  it("calls onCardSelect with the id and undefined message for a message-less card", async () => {
-    const onCardSelect = vi.fn()
+  it("renders a card without an onClick as non-interactive", async () => {
     const cards: F0AiChatWelcomeCard[] = [
       { id: "templates", icon: Marketplace, title: "Templates" },
     ]
 
-    render(<WelcomeScreenCardsRow cards={cards} onCardSelect={onCardSelect} />)
+    render(<WelcomeScreenCardsRow cards={cards} />)
+    // Clicking a card that carries no handler must not throw.
     await clickCard("Templates")
 
-    expect(onCardSelect).toHaveBeenCalledTimes(1)
-    expect(onCardSelect).toHaveBeenCalledWith("templates", undefined)
+    expect(screen.getByText("Templates")).toBeInTheDocument()
   })
 
   it("renders nothing when given no cards", () => {
-    const { container } = render(
-      <WelcomeScreenCardsRow cards={[]} onCardSelect={vi.fn()} />
-    )
+    const { container } = render(<WelcomeScreenCardsRow cards={[]} />)
 
     expect(container).toBeEmptyDOMElement()
   })
@@ -93,10 +96,11 @@ describe("WelcomeScreenCardsRow", () => {
         icon: File,
         title: `Card ${i + 1}`,
         message: `Message ${i + 1}`,
+        onClick: vi.fn(),
       })
     )
 
-    render(<WelcomeScreenCardsRow cards={cards} onCardSelect={vi.fn()} />)
+    render(<WelcomeScreenCardsRow cards={cards} />)
 
     // First MAX_WELCOME_CARDS render…
     for (let i = 1; i <= MAX_WELCOME_CARDS; i++) {

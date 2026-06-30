@@ -59,7 +59,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   chatInput,
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
   welcomeScreenCards: initialWelcomeScreenCards = [],
-  onCardSelect: initialOnCardSelect,
   disclaimer,
   resizable = false,
   defaultVisualizationMode = "sidepanel",
@@ -120,23 +119,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [welcomeScreenCards, setWelcomeScreenCards] = useState<
     F0AiChatWelcomeCard[]
   >(initialWelcomeScreenCards)
-  // Welcome-card click handler. Kept in a ref and exposed as a stable
-  // dispatcher so the connected input always calls the latest registered
-  // handler without re-rendering, and consumers can `setOnCardSelect(fn)`
-  // directly (no functional-setState wrapper). Symmetric with the card data
-  // above (`welcomeScreenCards` / `setWelcomeScreenCards`).
-  const onCardSelectRef = useRef<
-    ((id: string, message?: string) => void) | undefined
-  >(initialOnCardSelect)
-  const setOnCardSelect = useCallback(
-    (handler: ((id: string, message?: string) => void) | undefined) => {
-      onCardSelectRef.current = handler
-    },
-    []
-  )
-  const onCardSelect = useCallback((id: string, message?: string) => {
-    onCardSelectRef.current?.(id, message)
-  }, [])
   const i18n = useI18n()
   const [placeholders, setPlaceholders] = useState<string[]>([
     i18n.t("ai.inputPlaceholder"),
@@ -287,8 +269,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setWelcomeScreenSuggestions,
         welcomeScreenCards,
         setWelcomeScreenCards,
-        onCardSelect,
-        setOnCardSelect,
         onThumbsUp,
         onThumbsDown,
         placeholders,

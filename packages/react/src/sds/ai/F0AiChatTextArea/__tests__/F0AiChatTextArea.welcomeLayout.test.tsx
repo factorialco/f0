@@ -77,7 +77,6 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
         fullscreen
         isWelcomeScreen
         welcomeScreenCards={cards}
-        onCardSelect={() => {}}
       />
     )
 
@@ -124,7 +123,6 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
         welcomeScreenSuggestions={twoSuggestions}
         onSuggestionClick={() => {}}
         welcomeScreenCards={threeCards}
-        onCardSelect={() => {}}
       />
     )
 
@@ -151,7 +149,6 @@ describe("F0AiChatTextArea welcome suggestions placement", () => {
         onSubmit={() => {}}
         isWelcomeScreen
         welcomeScreenCards={cards}
-        onCardSelect={() => {}}
       />
     )
 

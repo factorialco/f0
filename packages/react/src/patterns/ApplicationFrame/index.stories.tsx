@@ -434,7 +434,7 @@ const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
     title: "All templates",
     description: "Browse pre-made surveys",
     // No message: browsing templates isn't a prompt — the host opens the
-    // template gallery instead (see onCardSelect below).
+    // template gallery instead (see the card's onClick below).
   },
   {
     id: "q4-employee-satisfaction",
@@ -455,20 +455,20 @@ const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
 const WelcomeCards = () => {
   const { sendMessage } = useMockAiChatRuntime()
 
-  return (
-    <WelcomeScreenCardsRow
-      cards={WELCOME_CARDS}
-      onCardSelect={(id, message) => {
-        // Cards branch on their id: "All templates" opens the gallery, the
-        // rest send their prompt.
-        if (id === "all-templates") {
-          console.log("open template gallery")
-        } else if (message) {
-          sendMessage(message)
-        }
-      }}
-    />
-  )
+  // The host owns each card's behavior via `onClick`: "All templates" opens the
+  // gallery, the rest send their prompt.
+  const cards: F0AiChatWelcomeCard[] = WELCOME_CARDS.map((card) => ({
+    ...card,
+    onClick: () => {
+      if (card.id === "all-templates") {
+        console.log("open template gallery")
+      } else if (card.message) {
+        sendMessage(card.message)
+      }
+    },
+  }))
+
+  return <WelcomeScreenCardsRow cards={cards} />
 }
 
 const meta: Meta<typeof ApplicationFrame> = {

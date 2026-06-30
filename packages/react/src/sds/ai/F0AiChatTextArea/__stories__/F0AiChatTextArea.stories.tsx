@@ -193,6 +193,22 @@ const Wrapper = ({
 
   const composerRef = useRef<HTMLDivElement>(null)
 
+  // The host wires each card's `onClick`. Cards carrying a `message` send it as
+  // a prompt; message-less cards (e.g. "Templates") do something else.
+  const cardsWithHandlers = welcomeScreenCards?.map((card) => ({
+    ...card,
+    onClick: () => {
+      if (card.message) {
+        setSubmissions((prev) => [
+          ...prev,
+          { text: card.message!, files: [], context: null, quote: null },
+        ])
+      } else {
+        console.log(`card clicked: ${card.id}`)
+      }
+    },
+  }))
+
   return (
     <div className="flex flex-col gap-4 w-[640px]">
       <F0AiChatTextArea
@@ -216,19 +232,7 @@ const Wrapper = ({
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
-        welcomeScreenCards={welcomeScreenCards}
-        onCardSelect={(id, message) => {
-          // Branch on id; message-less cards (e.g. "Templates") do something
-          // other than send a prompt.
-          if (message) {
-            setSubmissions((prev) => [
-              ...prev,
-              { text: message, files: [], context: null, quote: null },
-            ])
-          } else {
-            console.log(`card clicked: ${id}`)
-          }
-        }}
+        welcomeScreenCards={cardsWithHandlers}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
       />

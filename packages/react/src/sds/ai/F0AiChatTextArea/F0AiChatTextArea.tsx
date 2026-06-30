@@ -83,7 +83,6 @@ export const F0AiChatTextArea = ({
   welcomeScreenSuggestions,
   onSuggestionClick,
   welcomeScreenCards,
-  onCardSelect,
   ref,
 }: F0AiChatTextAreaProps) => {
   const translation = useI18n()
@@ -348,8 +347,8 @@ export const F0AiChatTextArea = ({
   ) : null
 
   // Welcome cards sit below the composer on the fullscreen welcome screen
-  // (same gate the footer slot uses). Clicking a card calls `onCardSelect`
-  // with the card's `id` and optional `message`; the host owns the behavior.
+  // (same gate the footer slot uses). Each card carries its own `onClick`;
+  // the host owns the behavior.
   const showWelcomeCards =
     isWelcomeScreen &&
     fullscreen &&
@@ -564,10 +563,7 @@ export const F0AiChatTextArea = ({
 
       {showWelcomeCards && (
         <div className="w-full max-w-content pt-2">
-          <WelcomeScreenCardsRow
-            cards={welcomeScreenCards}
-            onCardSelect={onCardSelect}
-          />
+          <WelcomeScreenCardsRow cards={welcomeScreenCards} />
         </div>
       )}
 

@@ -301,25 +301,19 @@ export type AiChatProviderProps = {
    */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   /**
-   * Cards rendered below the composer on the fullscreen welcome screen. Pure
-   * data — clicking a card calls `onCardSelect` with its `id` and optional
-   * `message`. The chat owns the layout; the host owns the interaction.
+   * Cards rendered below the composer on the fullscreen welcome screen. Each
+   * card carries its own `onClick` — the chat owns the layout; the host owns
+   * the interaction.
+   *
+   * Hosts that must build a card's `onClick` inside the chat provider (e.g.
+   * needing `openCanvas`) can register the cards dynamically via
+   * `setWelcomeScreenCards` from `useAiChat()` instead of passing them here.
    *
    * Optional and independent of `welcomeScreenSuggestions` — provide either,
    * both, or neither, in any counts. At most 4 cards are rendered (the row is a
    * 2×2 grid); extras are dropped.
    */
   welcomeScreenCards?: F0AiChatWelcomeCard[]
-  /**
-   * Handler invoked when a welcome card is clicked, with the card's `id` and
-   * optional `message`. Branch on `id` to drive per-card behavior (send the
-   * `message` as a prompt, open a dialog, …).
-   *
-   * Hosts that must build the handler inside the chat provider (e.g. needing
-   * `openCanvas`) can register it dynamically via `setOnCardSelect` from
-   * `useAiChat()` instead.
-   */
-  onCardSelect?: (id: string, message?: string) => void
   disclaimer?: AiChatDisclaimer
   /**
    * Enable resizable chat window
@@ -454,29 +448,31 @@ export type WelcomeScreenSuggestion = {
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
- * as an `F0CardHorizontal`. Pure data — clicking a card calls the host's
- * `onCardSelect(id, message)`, and the host decides what to do from the `id`
- * (send the `message` as a prompt, open a dialog, navigate, …). Different
- * cards can therefore trigger different behaviors.
+ * as an `F0CardHorizontal`. Each card owns its behavior via `onClick`, so
+ * different cards can trigger different things (send a prompt, open a dialog,
+ * navigate, …).
  *
- * Data-driven and runtime-agnostic — the chat owns the layout; the host owns
- * the interaction. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
+ * The chat owns the layout; the host owns the interaction. Up to 4 cards are
+ * rendered (a 2×2 grid); extras are dropped.
  */
 export type F0AiChatWelcomeCard = {
-  /**
-   * Stable identifier passed to `onCardSelect` so the host can branch behavior
-   * per card. Also used as the React key.
-   */
+  /** Stable identifier, also used as the React key. */
   id: string
   icon: IconType
   title: string
   description?: string
   /**
-   * Optional prompt associated with the card, passed to `onCardSelect`
-   * alongside `id`. The host decides whether to send it — cards without a
-   * `message` (e.g. a "Browse templates" card) just carry their `id`.
+   * Optional prompt the card represents. The card's own `onClick` decides
+   * whether to send it — cards without a `message` (e.g. a "Browse templates"
+   * card) simply do something else.
    */
   message?: string
+  /**
+   * Invoked when the card is clicked. The host wires the behavior per card —
+   * send `message` as a prompt, open a dialog, navigate, … A card without an
+   * `onClick` renders as non-interactive.
+   */
+  onClick?: () => void
 }
 
 /**

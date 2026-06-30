@@ -16,24 +16,18 @@ export type WelcomeScreenCardsRowProps = {
    * rendered; the rest are ignored.
    */
   cards: F0AiChatWelcomeCard[]
-  /**
-   * Fired when a card is clicked, with the card's `id` and its optional
-   * `message`. The host branches on `id` to decide what to do — send the
-   * `message` as a prompt, open a dialog, etc.
-   */
-  onCardSelect?: (id: string, message?: string) => void
 }
 
 /**
  * Grid of cards shown below the composer on the fullscreen welcome screen,
- * rendered with `F0CardHorizontal`. Clicking a card calls `onCardSelect` with
- * its `id` and optional `message`; the host owns the resulting behavior.
+ * rendered with `F0CardHorizontal`. Each card carries its own `onClick`; the
+ * host owns the resulting behavior. A card without an `onClick` renders as
+ * non-interactive.
  *
  * Renders at most {@link MAX_WELCOME_CARDS} cards; extras are dropped.
  */
 export const WelcomeScreenCardsRow = ({
   cards,
-  onCardSelect,
 }: WelcomeScreenCardsRowProps) => {
   if (cards.length === 0) return null
 
@@ -45,7 +39,7 @@ export const WelcomeScreenCardsRow = ({
           avatar={{ type: "icon", icon: card.icon }}
           title={card.title}
           description={card.description}
-          onClick={() => onCardSelect?.(card.id, card.message)}
+          onClick={card.onClick}
         />
       ))}
     </div>

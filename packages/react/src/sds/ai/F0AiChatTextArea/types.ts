@@ -141,19 +141,13 @@ export type F0AiChatTextAreaProps = {
 
   /**
    * Cards rendered as a grid below the composer on the fullscreen welcome
-   * screen. Clicking a card calls `onCardSelect` with its `id` and optional
-   * `message`; the host decides the behavior.
+   * screen. Each card carries its own `onClick`; the host decides the behavior.
    *
    * Optional and independent of `welcomeScreenSuggestions` — the two can have
    * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
    * dropped.
    */
   welcomeScreenCards?: F0AiChatWelcomeCard[]
-  /**
-   * Called when a welcome card is clicked, with the card's `id` and its
-   * optional `message`. Branch on `id` to send the prompt, open a dialog, etc.
-   */
-  onCardSelect?: (id: string, message?: string) => void
 
   /**
    * When true on the welcome screen, the composer adopts the fullscreen
