@@ -268,25 +268,19 @@ export declare type AiChatProviderProps = {
      */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     /**
-     * Cards rendered below the composer on the fullscreen welcome screen. Pure
-     * data — clicking a card calls `onCardSelect` with its `id` and optional
-     * `message`. The chat owns the layout; the host owns the interaction.
+     * Cards rendered below the composer on the fullscreen welcome screen. Each
+     * card carries its own `onClick` — the chat owns the layout; the host owns
+     * the interaction.
+     *
+     * Hosts that must build a card's `onClick` inside the chat provider (e.g.
+     * needing `openCanvas`) can register the cards dynamically via
+     * `setWelcomeScreenCards` from `useAiChat()` instead of passing them here.
      *
      * Optional and independent of `welcomeScreenSuggestions` — provide either,
      * both, or neither, in any counts. At most 4 cards are rendered (the row is a
      * 2×2 grid); extras are dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
-    /**
-     * Handler invoked when a welcome card is clicked, with the card's `id` and
-     * optional `message`. Branch on `id` to drive per-card behavior (send the
-     * `message` as a prompt, open a dialog, …).
-     *
-     * Hosts that must build the handler inside the chat provider (e.g. needing
-     * `openCanvas`) can register it dynamically via `setOnCardSelect` from
-     * `useAiChat()` instead.
-     */
-    onCardSelect?: (id: string, message?: string) => void;
     disclaimer?: AiChatDisclaimer;
     /**
      * Enable resizable chat window
@@ -426,18 +420,6 @@ declare type AiChatProviderReturnValue = {
     setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
     welcomeScreenCards: F0AiChatWelcomeCard[];
     setWelcomeScreenCards: React.Dispatch<React.SetStateAction<F0AiChatWelcomeCard[]>>;
-    /**
-     * Stable handler invoked when a welcome card is clicked, with the card's
-     * `id` and optional `message`. Always defined; no-ops until a handler is
-     * registered (via the `onCardSelect` prop or `setOnCardSelect`).
-     */
-    onCardSelect: (id: string, message?: string) => void;
-    /**
-     * Register the welcome-card click handler. Lets a component inside the
-     * provider wire behavior that needs in-provider context (e.g. `openCanvas`).
-     * Pass `undefined` to clear.
-     */
-    setOnCardSelect: (handler: ((id: string, message?: string) => void) | undefined) => void;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -560,7 +542,6 @@ declare interface AiChatState {
     chatInput?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     welcomeScreenCards?: F0AiChatWelcomeCard[];
-    onCardSelect?: (id: string, message?: string) => void;
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
     defaultVisualizationMode?: VisualizationMode;
@@ -2837,7 +2818,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, onCardSelect, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, revealChatOnCanvasToggle, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, revealChatOnCanvasToggle, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -2848,7 +2829,7 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, onCardSelect, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -2930,19 +2911,13 @@ export declare type F0AiChatTextAreaProps = {
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
      * Cards rendered as a grid below the composer on the fullscreen welcome
-     * screen. Clicking a card calls `onCardSelect` with its `id` and optional
-     * `message`; the host decides the behavior.
+     * screen. Each card carries its own `onClick`; the host decides the behavior.
      *
      * Optional and independent of `welcomeScreenSuggestions` — the two can have
      * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
      * dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
-    /**
-     * Called when a welcome card is clicked, with the card's `id` and its
-     * optional `message`. Branch on `id` to send the prompt, open a dialog, etc.
-     */
-    onCardSelect?: (id: string, message?: string) => void;
     /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
@@ -2969,29 +2944,31 @@ export declare type F0AiChatTextAreaSubmitPayload = {
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
- * as an `F0CardHorizontal`. Pure data — clicking a card calls the host's
- * `onCardSelect(id, message)`, and the host decides what to do from the `id`
- * (send the `message` as a prompt, open a dialog, navigate, …). Different
- * cards can therefore trigger different behaviors.
+ * as an `F0CardHorizontal`. Each card owns its behavior via `onClick`, so
+ * different cards can trigger different things (send a prompt, open a dialog,
+ * navigate, …).
  *
- * Data-driven and runtime-agnostic — the chat owns the layout; the host owns
- * the interaction. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
+ * The chat owns the layout; the host owns the interaction. Up to 4 cards are
+ * rendered (a 2×2 grid); extras are dropped.
  */
 export declare type F0AiChatWelcomeCard = {
-    /**
-     * Stable identifier passed to `onCardSelect` so the host can branch behavior
-     * per card. Also used as the React key.
-     */
+    /** Stable identifier, also used as the React key. */
     id: string;
     icon: IconType;
     title: string;
     description?: string;
     /**
-     * Optional prompt associated with the card, passed to `onCardSelect`
-     * alongside `id`. The host decides whether to send it — cards without a
-     * `message` (e.g. a "Browse templates" card) just carry their `id`.
+     * Optional prompt the card represents. The card's own `onClick` decides
+     * whether to send it — cards without a `message` (e.g. a "Browse templates"
+     * card) simply do something else.
      */
     message?: string;
+    /**
+     * Invoked when the card is clicked. The host wires the behavior per card —
+     * send `message` as a prompt, open a dialog, navigate, … A card without an
+     * `onClick` renders as non-interactive.
+     */
+    onClick?: () => void;
 };
 
 export declare const F0AiInsightCard: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0AiInsightCardPublicProps & RefAttributes<HTMLDivElement>> & {
@@ -4875,9 +4852,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -4885,11 +4864,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -4906,10 +4883,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -4917,8 +4892,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

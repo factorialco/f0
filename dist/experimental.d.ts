@@ -526,25 +526,19 @@ declare type AiChatProviderProps = {
      */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     /**
-     * Cards rendered below the composer on the fullscreen welcome screen. Pure
-     * data — clicking a card calls `onCardSelect` with its `id` and optional
-     * `message`. The chat owns the layout; the host owns the interaction.
+     * Cards rendered below the composer on the fullscreen welcome screen. Each
+     * card carries its own `onClick` — the chat owns the layout; the host owns
+     * the interaction.
+     *
+     * Hosts that must build a card's `onClick` inside the chat provider (e.g.
+     * needing `openCanvas`) can register the cards dynamically via
+     * `setWelcomeScreenCards` from `useAiChat()` instead of passing them here.
      *
      * Optional and independent of `welcomeScreenSuggestions` — provide either,
      * both, or neither, in any counts. At most 4 cards are rendered (the row is a
      * 2×2 grid); extras are dropped.
      */
     welcomeScreenCards?: F0AiChatWelcomeCard[];
-    /**
-     * Handler invoked when a welcome card is clicked, with the card's `id` and
-     * optional `message`. Branch on `id` to drive per-card behavior (send the
-     * `message` as a prompt, open a dialog, …).
-     *
-     * Hosts that must build the handler inside the chat provider (e.g. needing
-     * `openCanvas`) can register it dynamically via `setOnCardSelect` from
-     * `useAiChat()` instead.
-     */
-    onCardSelect?: (id: string, message?: string) => void;
     disclaimer?: AiChatDisclaimer;
     /**
      * Enable resizable chat window
@@ -1079,7 +1073,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, closeAction, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, onClose, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1107,10 +1101,8 @@ declare interface BaseHeaderProps_2 {
     metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
-    closeAction?: {
-        onClick: () => void;
-        tooltip?: string;
-    };
+    /** When set, renders a close button in the header actions that calls this on click. */
+    onClose?: () => void;
 }
 
 /**
@@ -4463,29 +4455,31 @@ export declare type F0AiBannerProps = AiBannerInternalProps;
 
 /**
  * A card shown below the composer on the fullscreen welcome screen, rendered
- * as an `F0CardHorizontal`. Pure data — clicking a card calls the host's
- * `onCardSelect(id, message)`, and the host decides what to do from the `id`
- * (send the `message` as a prompt, open a dialog, navigate, …). Different
- * cards can therefore trigger different behaviors.
+ * as an `F0CardHorizontal`. Each card owns its behavior via `onClick`, so
+ * different cards can trigger different things (send a prompt, open a dialog,
+ * navigate, …).
  *
- * Data-driven and runtime-agnostic — the chat owns the layout; the host owns
- * the interaction. Up to 4 cards are rendered (a 2×2 grid); extras are dropped.
+ * The chat owns the layout; the host owns the interaction. Up to 4 cards are
+ * rendered (a 2×2 grid); extras are dropped.
  */
 declare type F0AiChatWelcomeCard = {
-    /**
-     * Stable identifier passed to `onCardSelect` so the host can branch behavior
-     * per card. Also used as the React key.
-     */
+    /** Stable identifier, also used as the React key. */
     id: string;
     icon: IconType;
     title: string;
     description?: string;
     /**
-     * Optional prompt associated with the card, passed to `onCardSelect`
-     * alongside `id`. The host decides whether to send it — cards without a
-     * `message` (e.g. a "Browse templates" card) just carry their `id`.
+     * Optional prompt the card represents. The card's own `onClick` decides
+     * whether to send it — cards without a `message` (e.g. a "Browse templates"
+     * card) simply do something else.
      */
     message?: string;
+    /**
+     * Invoked when the card is clicked. The host wires the behavior per card —
+     * send `message` as a prompt, open a dialog, navigate, … A card without an
+     * `onClick` renders as non-interactive.
+     */
+    onClick?: () => void;
 };
 
 /** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
@@ -7802,7 +7796,7 @@ declare type PropertyDefinition_2<T> = {
     hide?: (item: T) => boolean;
 };
 
-declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder" | "closeAction">;
+declare type Props = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder" | "onClose">;
 
 declare type Props_10<Id extends string | number = string | number> = {
     items: Omit<WidgetSimpleListItemProps<Id>, "onClick">[];
@@ -7997,7 +7991,7 @@ export declare type ResolvedRecordType<R> = R extends RecordType ? R : RecordTyp
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, closeAction, }: Props) => JSX_2.Element;
+export declare const ResourceHeader: ({ avatar, title, description, primaryAction, secondaryActions, otherActions, status, metadata, deactivated, metadataRowGap, showBottomBorder, onClose, }: Props) => JSX_2.Element;
 
 export declare type ResourceHeaderProps = Props;
 
@@ -10010,9 +10004,11 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -10020,11 +10016,9 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -10041,10 +10035,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -10052,8 +10044,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
