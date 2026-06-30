@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.18.0](https://github.com/factorialco/f0/compare/f0-react-v4.17.1...f0-react-v4.18.0) (2026-06-30)
+
+
+### Features
+
+* **kanban:** allow palette color on lane headers ([#4598](https://github.com/factorialco/f0/issues/4598)) ([29382a7](https://github.com/factorialco/f0/commit/29382a71cf3171820c3b1c25fec219d6fa73ba4b))
+
 ## [4.17.1](https://github.com/factorialco/f0/compare/f0-react-v4.17.0...f0-react-v4.17.1) (2026-06-30)
 
 
