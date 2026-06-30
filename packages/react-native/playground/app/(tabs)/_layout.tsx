@@ -14,13 +14,13 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 export default function TabLayout() {
   return (
     <NativeTabs>
-      <NativeTabs.Trigger name="tokens">
-        <NativeTabs.Trigger.Icon sf="paintpalette.fill" md="palette" />
-        <NativeTabs.Trigger.Label>Design Tokens</NativeTabs.Trigger.Label>
-      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="components">
         <NativeTabs.Trigger.Icon sf="square.grid.2x2.fill" md="widgets" />
         <NativeTabs.Trigger.Label>Components</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="tokens">
+        <NativeTabs.Trigger.Icon sf="paintpalette.fill" md="palette" />
+        <NativeTabs.Trigger.Label>Design Tokens</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
     </NativeTabs>
   );
