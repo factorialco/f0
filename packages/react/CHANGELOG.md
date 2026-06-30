@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.17.1](https://github.com/factorialco/f0/compare/f0-react-v4.17.0...f0-react-v4.17.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **emoji-picker:** mount em-emoji-picker via createElement to avoid Illegal constructor ([#4594](https://github.com/factorialco/f0/issues/4594)) ([89304b5](https://github.com/factorialco/f0/commit/89304b5a3a49b1b7c25b2aeb6278f93763edb230))
+
 ## [4.17.0](https://github.com/factorialco/f0/compare/f0-react-v4.16.0...f0-react-v4.17.0) (2026-06-30)
 
 
