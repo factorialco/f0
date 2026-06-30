@@ -1,0 +1,118 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta title="Co-creation/Phases" />
+
+# Phases
+
+Every co-creation flow moves through three phases — **Collection → Chat → Split**. They run
+on one chat-enabled [`ApplicationFrame`](?path=/docs/patterns-applicationframe--documentation),
+so the AI trigger in the header is available throughout. The whole flow is coordinated by a
+single `phase` value: the chat's open state and visualization follow from it, staying in sync
+as the user toggles the header trigger.
+
+## The three phases
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Phase</th>
+        <th className="text-left">What happens</th>
+        <th className="text-left">Entry / exit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Collection</strong>
+        </td>
+        <td>
+          The starting surface — a data collection, page, or list. The user works as
+          usual; co-creation is one trigger away.
+        </td>
+        <td>
+          Enters from the surface itself. Exits to Chat when the user opens the AI via the
+          header <strong>One switch</strong> (side panel) or the <strong>Create</strong>{" "}
+          primary button (full width).
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Chat</strong>
+        </td>
+        <td>
+          The chat animates in so the user can describe what they want. Clarifying
+          questions narrow the intent before anything is drafted.
+        </td>
+        <td>
+          Enters from Collection. Opens full width via the Create button, or as a side
+          panel via the One switch. Exits to Split once there is a resource to show.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Split</strong>
+        </td>
+        <td>
+          The chat docks as the right side panel and the resource canvas fills the center.
+          The user reviews, edits, and refines the draft while the conversation continues
+          alongside it.
+        </td>
+        <td>
+          Enters from Chat when a resource is created or opened. The conversation and the
+          canvas stay visible together until the resource is done.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+The interactive mock begins in **Collection**; opening the AI from the header moves it through
+Chat and Split. It runs full screen, so open it in its own canvas:
+
+<Unstyled>
+  <a
+    target="_parent"
+    href="/?path=/story/patterns-co-creation-creation-with-ai--surveys"
+    className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
+  >
+    Open the interactive flow ↗
+  </a>
+</Unstyled>
+
+## Behavior
+
+- `phase` (`"collection" | "chat" | "split"`) is the single source of truth. The chat's
+  open state and visualization (side panel vs. full width) are derived from it — never set
+  independently — so the header trigger and the in-flow buttons can never disagree.
+- The chat trigger lives in the `ApplicationFrame` header and is present in every phase, so
+  the user can open, collapse, or return to the conversation at any point.
+- In Split, the resource lives in a canvas **inside the chat** — the flow never navigates to a
+  separate resource page. See the
+  [Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) for this and
+  the other rules that hold across the phases.
+
+## Guidelines
+
+<DoDonts
+  do={{
+    description:
+      "Keep the originating surface (collection or page) reachable so the user never loses context while co-creating.",
+  }}
+  dont={{
+    description:
+      "Don't drop the user into a full-width chat with no way back to where they started.",
+  }}
+/>
+
+<DoDonts
+  do={{
+    description:
+      "Use Split so the conversation and the resource are visible together while the user refines it.",
+  }}
+  dont={{
+    description:
+      "Don't hide the resource behind the chat once there is a draft to review — the user needs to see what they are shaping.",
+  }}
+/>

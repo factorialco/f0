@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef } from "react"
 
 import { F0AiChatTextArea } from "../../../F0AiChatTextArea"
 import { type F0AiChatTextAreaSubmitPayload } from "../../../F0AiChatTextArea/types"
+import { F0ClarifyingPanel } from "../../../F0ClarifyingPanel"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import type {
   WelcomeScreenSuggestion,
@@ -23,6 +24,7 @@ export const MockConnectedChatInput = () => {
     sendMessage,
     isLoadingThread,
     currentThreadTitle,
+    clarifyingQuestion,
   } = useMockAiChatRuntime()
   const {
     placeholders,
@@ -39,6 +41,7 @@ export const MockConnectedChatInput = () => {
     visualizationMode,
     creditWarning,
     welcomeScreenSuggestions,
+    welcomeScreenCards,
     tracking,
     openGame,
   } = useAiChat()
@@ -102,6 +105,15 @@ export const MockConnectedChatInput = () => {
       fullscreen={fullscreen}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       onSuggestionClick={handleSuggestionClick}
+      welcomeScreenCards={welcomeScreenCards}
+      clarifyingUI={
+        clarifyingQuestion ? (
+          <F0ClarifyingPanel
+            clarifyingQuestion={clarifyingQuestion}
+            isSubmitDisabled={inProgress}
+          />
+        ) : undefined
+      }
     />
   )
 }
