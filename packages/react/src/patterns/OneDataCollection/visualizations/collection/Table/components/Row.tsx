@@ -201,11 +201,22 @@ const RowComponentInner = <
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
+  // Register on mount and refresh the stored item when the row's data changes.
+  // `register` only re-syncs the registry when the id is new, so refreshing an
+  // existing row's item is cheap and does not re-render the table.
   useEffect(() => {
     if (id === undefined || !willRenderOwnRow || !registerSelectable) return
     registerSelectable(id, item)
-    return () => unregisterSelectable?.(id)
-  }, [id, item, willRenderOwnRow, registerSelectable, unregisterSelectable])
+  }, [id, item, willRenderOwnRow, registerSelectable])
+
+  // Unregister only when the row truly leaves (unmount, or it stops owning the
+  // rendered row) — NOT on every `item` identity change. Keeping `item` out of
+  // these deps avoids the unregister+register churn that fired a full-table
+  // re-render on every data refresh.
+  useEffect(() => {
+    if (id === undefined || !willRenderOwnRow || !unregisterSelectable) return
+    return () => unregisterSelectable(id)
+  }, [id, willRenderOwnRow, unregisterSelectable])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
