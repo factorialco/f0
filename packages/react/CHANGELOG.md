@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.16.0](https://github.com/factorialco/f0/compare/f0-react-v4.15.0...f0-react-v4.16.0) (2026-06-30)
+
+
+### Features
+
+* **F0CardHorizontal:** add disabled and descriptionAsSingleLine props ([#4590](https://github.com/factorialco/f0/issues/4590)) ([afe0c14](https://github.com/factorialco/f0/commit/afe0c145d456322c5375104d609a1185c3ebae1d))
+
 ## [4.15.0](https://github.com/factorialco/f0/compare/f0-react-v4.14.1...f0-react-v4.15.0) (2026-06-29)
 
 

@@ -61,6 +61,16 @@ const meta: Meta<typeof F0CardHorizontal> = {
       description:
         "Disables the full-card overlay link (used with `link`) so a parent can manage drag-and-drop while still allowing click navigation via `onClick`.",
     },
+    disabled: {
+      control: "boolean",
+      description:
+        "Dims the whole card and disables interaction (its actions and any row-level link/click).",
+    },
+    descriptionAsSingleLine: {
+      control: "boolean",
+      description:
+        "Renders the description on a single line, truncating overflow with an ellipsis (and a tooltip) instead of wrapping.",
+    },
     // Function-bearing props: disable the control so it doesn't dump the
     // serialized mock fn() source. They still appear in the args table.
     primaryAction: {
@@ -164,6 +174,30 @@ export const ClickableCard: Story = {
     title: "Company goals",
     description: "Click anywhere on the card to open",
     onClick: clickAlert("Card"),
+  },
+}
+
+/**
+ * Disabled state: pass `disabled` to dim the whole card and switch off all
+ * interaction — its action buttons and any row-level link/click. Purely a
+ * visual + interaction affordance.
+ */
+export const Disabled: Story = {
+  args: {
+    avatar: { type: "module", module: "goals" },
+    title: "Company goals",
+    description: "This card is disabled",
+    disabled: true,
+    primaryAction: {
+      label: "Open",
+      onClick: clickAlert("Open"),
+    },
+    secondaryActions: [
+      {
+        label: "Edit",
+        onClick: clickAlert("Edit"),
+      },
+    ],
   },
 }
 
@@ -384,6 +418,29 @@ export const LongContent: Story = {
   },
   parameters: {
     docs: { story: { inline: false, height: "220px" } },
+  },
+}
+
+/**
+ * Pass `descriptionAsSingleLine` to keep the description on one line — overflow
+ * is truncated with an ellipsis (and a tooltip with the full text) instead of
+ * wrapping. Mirrors the single-line description behaviour of the deprecated
+ * `F0CanvasCard`; use it for dense lists where a fixed row height matters.
+ */
+export const SingleLineDescription: Story = {
+  args: {
+    avatar: {
+      type: "person",
+      firstName: "Jane",
+      lastName: "Cooper",
+      src: image,
+    },
+    title: "Jane Cooper",
+    description:
+      "Product designer leading the design system team across web and mobile, with a bio long enough to wrap onto several lines — ref https://example.com/people/jane-cooper-design-systems-lead-2026",
+    descriptionAsSingleLine: true,
+    primaryAction: { label: "Open", onClick: clickAlert("Open") },
+    secondaryActions: [{ label: "Edit", onClick: clickAlert("Edit") }],
   },
 }
 
