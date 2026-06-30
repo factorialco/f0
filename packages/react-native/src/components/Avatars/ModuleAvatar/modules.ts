@@ -2,6 +2,7 @@ import { ModuleIcons } from "../../../icons"
 
 export const modules = {
   "ai-reports": ModuleIcons.Reports,
+  ai_ticketing: ModuleIcons.Tasks,
   analytics: ModuleIcons.Reports,
   ats: ModuleIcons.Recruitment,
   benefits: ModuleIcons.Benefits,
