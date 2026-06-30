@@ -23,6 +23,7 @@ import {
   type PendingQuote,
   type SidePanelContent,
   type VisualizationMode,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
@@ -59,6 +60,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   chatMessages,
   chatInput,
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
+  welcomeScreenCards: initialWelcomeScreenCards = [],
   disclaimer,
   resizable = false,
   defaultVisualizationMode = "sidepanel",
@@ -116,6 +118,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
   >(initialWelcomeScreenSuggestions)
+  const [welcomeScreenCards, setWelcomeScreenCards] = useState<
+    F0AiChatWelcomeCard[]
+  >(initialWelcomeScreenCards)
   const i18n = useI18n()
   const [placeholders, setPlaceholders] = useState<string[]>([
     i18n.t("ai.inputPlaceholder"),
@@ -288,6 +293,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatInput,
         welcomeScreenSuggestions,
         setWelcomeScreenSuggestions,
+        welcomeScreenCards,
+        setWelcomeScreenCards,
         onThumbsUp,
         onThumbsDown,
         placeholders,
@@ -391,6 +398,7 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   shouldPlayEntranceAnimation: true,
   placeholders: [],
   welcomeScreenSuggestions: [],
+  welcomeScreenCards: [],
 }
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {

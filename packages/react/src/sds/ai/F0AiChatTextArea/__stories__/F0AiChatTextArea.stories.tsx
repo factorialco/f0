@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import { File, Marketplace } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
@@ -12,6 +13,7 @@ import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
+  F0AiChatWelcomeCard,
   PendingContext,
   PendingQuote,
   PersonProfile,
@@ -91,6 +93,24 @@ const CREDIT_WARNING: AiChatCreditWarning = {
   onDismiss: () => console.log("dismiss clicked"),
 }
 
+const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
+  {
+    id: "empty-survey",
+    icon: File,
+    title: "Empty survey",
+    description: "Start from scratch",
+    message: "Create an empty survey.",
+  },
+  {
+    id: "templates",
+    icon: Marketplace,
+    title: "Templates",
+    description: "Browse pre-made surveys",
+    // No message: a templates card triggers a non-prompt behavior, handled by
+    // the host via its id.
+  },
+]
+
 const noop = () => {}
 
 const buildClarifyingState = (
@@ -135,6 +155,7 @@ type WrapperProps = {
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
   inProgress?: boolean
@@ -151,6 +172,7 @@ const Wrapper = ({
   creditWarning,
   disclaimer,
   footer,
+  welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
   inProgress,
@@ -170,6 +192,22 @@ const Wrapper = ({
   }
 
   const composerRef = useRef<HTMLDivElement>(null)
+
+  // The host wires each card's `onClick`. Cards carrying a `message` send it as
+  // a prompt; message-less cards (e.g. "Templates") do something else.
+  const cardsWithHandlers = welcomeScreenCards?.map((card) => ({
+    ...card,
+    onClick: () => {
+      if (card.message) {
+        setSubmissions((prev) => [
+          ...prev,
+          { text: card.message!, files: [], context: null, quote: null },
+        ])
+      } else {
+        console.log(`card clicked: ${card.id}`)
+      }
+    },
+  }))
 
   return (
     <div className="flex flex-col gap-4 w-[640px]">
@@ -194,6 +232,7 @@ const Wrapper = ({
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
+        welcomeScreenCards={cardsWithHandlers}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
       />
@@ -308,6 +347,15 @@ export const FullscreenWelcome: Story = {
         Powered by Factorial AI · v0.1.0
       </p>
     ),
+  },
+}
+
+export const WithWelcomeCards: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenCards: WELCOME_CARDS,
+    disclaimer: DISCLAIMER,
   },
 }
 

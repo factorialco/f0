@@ -57,12 +57,14 @@ import {
 import {
   type CandidateProfile,
   type ExpenseProfile,
+  type F0AiChatWelcomeCard,
   type JobPostingProfile,
   type RequisitionProfile,
   type PersonProfile,
   type UploadedFile,
   type VacancyProfile,
 } from "@/sds/ai/F0AiChat/types"
+import { WelcomeScreenCardsRow } from "@/sds/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
 import { F0AiChatCreditsButton } from "@/sds/ai/F0AiChatHeader"
 import {
   ThreadItem,
@@ -461,6 +463,57 @@ const QuickActions = () => {
   )
 }
 
+const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
+  {
+    id: "empty-survey",
+    icon: Pencil,
+    title: "Empty survey",
+    description: "Start from scratch",
+    message: "Create an empty survey.",
+  },
+  {
+    id: "all-templates",
+    icon: Marketplace,
+    title: "All templates",
+    description: "Browse pre-made surveys",
+    // No message: browsing templates isn't a prompt — the host opens the
+    // template gallery instead (see the card's onClick below).
+  },
+  {
+    id: "q4-employee-satisfaction",
+    icon: ChartVerticalBars,
+    title: "Q4 Employee Satisfaction",
+    description: "Reuse last quarter's survey",
+    message: "Create a Q4 employee satisfaction survey.",
+  },
+  {
+    id: "team-effectiveness",
+    icon: Lightbulb,
+    title: "Team Effectiveness",
+    description: "Measure how teams work together",
+    message: "Create a team effectiveness survey.",
+  },
+]
+
+const WelcomeCards = () => {
+  const { sendMessage } = useMockAiChatRuntime()
+
+  // The host owns each card's behavior via `onClick`: "All templates" opens the
+  // gallery, the rest send their prompt.
+  const cards: F0AiChatWelcomeCard[] = WELCOME_CARDS.map((card) => ({
+    ...card,
+    onClick: () => {
+      if (card.id === "all-templates") {
+        console.log("open template gallery")
+      } else if (card.message) {
+        sendMessage(card.message)
+      }
+    },
+  }))
+
+  return <WelcomeScreenCardsRow cards={cards} />
+}
+
 const meta: Meta<typeof ApplicationFrame> = {
   title: "ApplicationFrame",
   component: ApplicationFrame,
@@ -473,7 +526,7 @@ const meta: Meta<typeof ApplicationFrame> = {
       historyEnabled: true,
       enabled: true,
       resizable: true,
-      footer: <QuickActions />,
+      footer: <WelcomeCards />,
       onThumbsUp: (message, { threadId, feedback }) => {
         console.log("thumbs up", { message, threadId, feedback })
       },
