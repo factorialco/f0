@@ -213,6 +213,7 @@ export const KanbanCollection = <
           title: l.title,
           items: l.items,
           variant: l.variant,
+          color: l.color,
           total: totalItems,
           hasMore,
           loading: laneData ? laneData.isInitialLoading : true,
