@@ -1,10 +1,10 @@
 import data from "@emoji-mart/data/sets/15/twitter.json"
-import EmojiPicker from "@emoji-mart/react"
 import { useState } from "react"
 
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Reaction } from "@/icons/app"
+import { EmojiPicker } from "@/lib/EmojiPicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import "./index.css"
