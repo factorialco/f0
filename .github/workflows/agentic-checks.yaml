@@ -1,0 +1,179 @@
+name: 🤖 Agentic Checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/react/components/**"
+      - "packages/react/patterns/**"
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+jobs:
+  agentic-check:
+    name: ${{ matrix.emoji }} ${{ matrix.name }}
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: write
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.draft == false
+    runs-on: build-s
+    timeout-minutes: 60
+    concurrency:
+      group: 🤖-agentic-checks-agentic-check-agentic-check-${{ matrix.id }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        id:
+          - code-review
+          - a11y
+          - storybook
+          - test-coverage
+        include:
+          - id: code-review
+            name: Code Review
+            emoji: 🧐
+            prompt: .github/agent-prompts/code-review.md
+          - id: a11y
+            name: Accessibility
+            emoji: ♿
+            prompt: .github/agent-prompts/a11y.md
+          - id: storybook
+            name: Storybook
+            emoji: 📚
+            prompt: .github/agent-prompts/storybook.md
+          - id: test-coverage
+            name: Test Coverage
+            emoji: 🧪
+            prompt: .github/agent-prompts/test-coverage.md
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PROMPT_FILE: ${{ matrix.prompt }}
+      CHECK_NAME: ${{ matrix.name }}
+      CHECK_EMOJI: ${{ matrix.emoji }}
+      MODEL: azure-cognitive-services/gpt-5.3-codex
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Runner uptime
+        run: uptime
+      - name: Repository last commit
+        run: which git && (git log -n 1 --pretty=format:"%h %s %an %ar" || true)
+      - name: Runner disk space
+        run: df -h
+      - name: Host machine IP
+        run: |-
+          echo "🐳 Pod: ${{ runner.name }}"
+          echo "🖥️ Self hosted machine ip: $(curl -s --max-time 5 https://api.ipify.org || echo '<unavailable>')"
+      - timeout-minutes: 5
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Install OpenCode CLI
+        run: npm install -g opencode-ai@1.15.5
+      - id: run-agentic-check
+        name: Run Agentic Check
+        continue-on-error: true
+        env:
+          AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
+          AZURE_RESOURCE_NAME: platform-dx-ai
+          OPENCODE_CONFIG_CONTENT: >-
+            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
+            5.3 Codex"}}}}}
+        run: |-
+          SCRIPT_LOG=$(mktemp)
+
+          set +e
+          bash .github/scripts/agentic-check.sh 2>&1 | tee "$SCRIPT_LOG"
+          SCRIPT_EXIT=${PIPESTATUS[0]}
+          set -e
+
+          # Check if the script already wrote a verdict to GITHUB_OUTPUT
+          SCRIPT_VERDICT=$(grep "^verdict=" "$GITHUB_OUTPUT" 2>/dev/null | tail -1 | cut -d= -f2- || true)
+
+          if [[ -n "$SCRIPT_VERDICT" ]]; then
+            VERDICT="$SCRIPT_VERDICT"
+            echo "Verdict (from script GITHUB_OUTPUT): ${VERDICT}"
+          elif [[ $SCRIPT_EXIT -eq 0 ]]; then
+            VERDICT="ok"
+            echo "Verdict (exit code 0): ok"
+          elif grep -q "Agent check failed" "$SCRIPT_LOG"; then
+            VERDICT="ko"
+            echo "Verdict (exit code ${SCRIPT_EXIT}, detected agent failure): ko"
+          else
+            VERDICT="error"
+            echo "::error::Script exited ${SCRIPT_EXIT} without verdict. Verdict: error"
+          fi
+
+          rm -f "$SCRIPT_LOG"
+
+          # Always write from wrapper to guarantee the step output is set
+          echo "verdict=${VERDICT}" >> "$GITHUB_OUTPUT"
+          # Write fallback verdict_text if the script did not provide one
+          if ! grep -q "^verdict_text" "$GITHUB_OUTPUT" 2>/dev/null; then
+            echo "verdict_text=Check the Run Agentic Check step logs for details." >> "$GITHUB_OUTPUT"
+          fi
+          echo "Final verdict written to GITHUB_OUTPUT: ${VERDICT}"
+      - name: OpenCode Stats
+        if: always() && !cancelled() && steps.run-agentic-check.conclusion != 'skipped' && steps.run-agentic-check.outcome != 'cancelled'
+        continue-on-error: true
+        env:
+          AZURE_API_KEY: ${{ secrets.DX_AI_WORKFLOWS_API_KEY }}
+          AZURE_RESOURCE_NAME: platform-dx-ai
+          OPENCODE_CONFIG_CONTENT: >-
+            {"snapshot":false,"small_model":"azure-cognitive-services/gpt-5.3-codex","permission":{"external_directory":{"/tmp/*":"allow"}},"provider":{"azure-cognitive-services":{"models":{"gpt-5.3-codex":{"name":"GPT
+            5.3 Codex"}}}}}
+        run: |-
+          echo "::group::OpenCode usage statistics"
+          opencode stats || echo "opencode stats failed (non-fatal)"
+          echo "::endgroup::"
+      # Datadog reporting is disabled until we want aggregated telemetry on verdicts.
+      # Re-enable by uncommenting this step and making sure secret `DATADOG_CODEMONITOR_API_TOKEN`
+      # is available in `factorialco/f0`.
+      # - name: Report to Datadog
+      #   if: always() && !cancelled() && steps.run-agentic-check.conclusion != 'skipped' && steps.run-agentic-check.outcome != 'cancelled'
+      #   env:
+      #     DATADOG_API_KEY: ${{ secrets.DATADOG_CODEMONITOR_API_TOKEN }}
+      #     AGENTIC_VERDICT: ${{ steps.run-agentic-check.outputs.verdict }}
+      #   run: |-
+      #     VERDICT="${AGENTIC_VERDICT}"
+      #     # Default to "error" if the step was killed before writing an output (e.g. OOM)
+      #     if [[ -z "$VERDICT" ]]; then VERDICT="error"; fi
+      #
+      #     case "$VERDICT" in
+      #       ok)      ALERT_TYPE="success" ;;
+      #       ko)      ALERT_TYPE="warning" ;;
+      #       error)   ALERT_TYPE="error"   ;;
+      #       *)       ALERT_TYPE="error"   ;;
+      #     esac
+      #
+      #     WORKFLOW_RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+      #     PR_URL="${{ github.server_url }}/${{ github.repository }}/pull/${{ github.event.pull_request.number }}"
+      #
+      #     DD_MARKER="%%%"
+      #     TEXT="${DD_MARKER}
+      #     **Check**: ${{ matrix.name }}
+      #     **Verdict**: ${VERDICT}
+      #     **PR**: [#${{ github.event.pull_request.number }}](${PR_URL})
+      #     **Repo**: ${{ github.repository }}
+      #     **Workflow run**: [View run](${WORKFLOW_RUN_URL})
+      #     ${DD_MARKER}"
+      #
+      #     PAYLOAD=$(jq -n \
+      #       --arg title "Agentic Check: ${{ matrix.name }} - ${VERDICT}" \
+      #       --arg text "$TEXT" \
+      #       --arg alert_type "$ALERT_TYPE" \
+      #       --arg aggregation_key "agentic-check-${{ github.event.pull_request.number }}-${{ matrix.id }}" \
+      #       --argjson tags '["service:agentic-checks","source:github-actions"]' \
+      #       --arg check "${{ matrix.id }}" \
+      #       --arg verdict "$VERDICT" \
+      #       --arg pr "${{ github.event.pull_request.number }}" \
+      #       --arg repo "${{ github.repository }}" \
+      #       '{ title: $title, text: $text, alert_type: $alert_type, aggregation_key: $aggregation_key, source_type_name: "Github", tags: ($tags + ["check:" + $check, "verdict:" + $verdict, "pr:" + $pr, "repo:" + $repo]) }')
+      #
+      #     curl -sS -X POST "https://api.datadoghq.eu/api/v1/events" \
+      #       -H "Content-Type: application/json" \
+      #       -H "DD-API-KEY: ${DATADOG_API_KEY}" \
+      #       -d "$PAYLOAD"

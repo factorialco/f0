@@ -10,10 +10,8 @@ const SvgArrowUp = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m6 11 6-6 6 6M12 19V5.5"
+      fill="currentColor"
+      d="M5.065 11.667a.9.9 0 0 1 0-1.272l6.299-6.3a.9.9 0 0 1 1.272 0l6.3 6.3a.9.9 0 0 1-1.272 1.272L12.9 6.904v12.365a.9.9 0 0 1-1.8 0V6.905l-4.763 4.762a.9.9 0 0 1-1.272 0"
     />
   </Svg>
 )

@@ -1,7 +1,15 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import {
+  CSSProperties,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react"
+import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
 type PointerDownOutsideEvent = CustomEvent<{
   originalEvent: PointerEvent
@@ -40,6 +48,14 @@ export const DialogContent = forwardRef<
      */
     defaultContainerId?: string
     animation?: DialogAnimation
+    /**
+     * Anchor the (fixed) wrapper to the resolved portal container's box rather
+     * than the viewport. Used by side drawers so they dock within the
+     * `#content` region — clear of the sidebar — instead of painting over it.
+     * Falls back to the viewport when the container is absent or the document
+     * body (e.g. outside ApplicationFrame: Storybook docs, tests).
+     */
+    anchorToContainer?: boolean
   }
 >(
   (
@@ -50,12 +66,17 @@ export const DialogContent = forwardRef<
       children,
       container: propContainer,
       defaultContainerId = "content",
+      anchorToContainer = false,
       ...props
     },
     ref
   ) => {
     const [container, setContainer] = useState<HTMLElement | null>()
     const contentRef = useRef<HTMLDivElement>(null)
+    // When anchoring, the fixed wrapper is positioned to overlay the container's
+    // box (kept in sync on resize/scroll). Empty → fall back to the class-based
+    // `inset-0` viewport positioning.
+    const [anchorStyle, setAnchorStyle] = useState<CSSProperties>({})
 
     // Shake the content when the dialog is opened and clicked outside in modal mode
     const shake = useCallback(() => {
@@ -84,6 +105,47 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer, defaultContainerId])
 
+    // Anchor to the content region's frame — the parent of the scrollable
+    // `#content`, not `#content` itself, which is `overflow-auto` and padded.
+    // The frame is a stable, non-scrolling box that spans the area beside the
+    // sidebar. Only when anchoring is requested and the container is a real
+    // shell element — a body/null container keeps the viewport (`inset-0`)
+    // fallback.
+    const anchorEl =
+      anchorToContainer && container && container !== document.body
+        ? (container.parentElement ?? container)
+        : null
+
+    useIsomorphicLayoutEffect(() => {
+      if (typeof document === "undefined" || !anchorEl) {
+        setAnchorStyle({})
+        return
+      }
+
+      const update = () => {
+        const rect = anchorEl.getBoundingClientRect()
+        setAnchorStyle({
+          left: rect.left,
+          top: rect.top,
+          width: rect.width,
+          height: rect.height,
+          right: "auto",
+          bottom: "auto",
+        })
+      }
+
+      update()
+      const observer = new ResizeObserver(update)
+      observer.observe(anchorEl)
+      window.addEventListener("resize", update)
+      window.addEventListener("scroll", update, true)
+      return () => {
+        observer.disconnect()
+        window.removeEventListener("resize", update)
+        window.removeEventListener("scroll", update, true)
+      }
+    }, [anchorEl])
+
     const context = useDialogPrimitiveContext()
 
     if (container === undefined) return null
@@ -103,6 +165,7 @@ export const DialogContent = forwardRef<
           )}
           style={{
             transition: "all 2s 100ms !important",
+            ...anchorStyle,
           }}
           {...props}
           onClick={(e) => {

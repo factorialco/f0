@@ -1,16 +1,18 @@
 import { useMemo } from "react"
 
-import { F0Button } from "@/components/F0Button"
+import { ButtonInternal } from "@/components/F0Button/internal"
 import {
   Dropdown,
   type DropdownItem as DropdownItemType,
 } from "@/experimental/Navigation/Dropdown"
-import { EllipsisHorizontal } from "@/icons/app"
+import { Ellipsis } from "@/icons/app"
 import Delete from "@/icons/app/Delete"
 import PushPin from "@/icons/app/PushPin"
+import PushPinSolid from "@/icons/app/PushPinSolid"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
 import type { ThreadActionHandlers } from "../types"
 import type { ChatThread } from "../useChatHistory"
@@ -20,22 +22,36 @@ import { formatThreadDate } from "../utils"
 interface ThreadItemProps extends ThreadActionHandlers {
   thread: ChatThread
   isPinned: boolean
+  /** Keeps the row highlighted while its thread is the one open in the panel. */
+  isActive?: boolean
+  /**
+   * A pin/unpin/delete request for this thread is in flight. Replaces the
+   * actions button with a spinner (kept visible off-hover) so the row reads as
+   * "saving" while the backend confirms. Wire it from `useChatHistory`'s
+   * `pendingIds`.
+   */
+  isPending?: boolean
+  /** Override the row classes (e.g. to match the sidebar's chat-row paddings). */
+  className?: string
 }
 
 export function ThreadItem({
   thread,
   isPinned,
+  isActive = false,
+  isPending = false,
   onSelect,
   onPin,
   onUnpin,
   onDelete,
+  className,
 }: ThreadItemProps) {
   const translations = useI18n()
   const dropdownItems: DropdownItemType[] = useMemo(
     () => [
       {
         label: isPinned ? translations.ai.unpinChat : translations.ai.pinChat,
-        icon: PushPin,
+        icon: isPinned ? PushPinSolid : PushPin,
         onClick: () => (isPinned ? onUnpin(thread.id) : onPin(thread.id)),
       },
       {
@@ -60,11 +76,15 @@ export function ThreadItem({
   return (
     <div
       className={cn(
-        "group flex cursor-pointer items-center justify-between rounded-md py-1.5 pl-3 pr-1.5 hover:bg-f1-background-hover",
-        focusRing("rounded")
+        "group flex gap-1 cursor-pointer items-center justify-between rounded-md py-1.5 pl-3 pr-1.5 hover:bg-f1-background-hover",
+        focusRing("rounded"),
+        className,
+        // Persistent highlight while this thread is the one open in the panel.
+        isActive && "bg-f1-background-secondary"
       )}
       role="button"
       tabIndex={0}
+      aria-current={isActive ? "true" : undefined}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault()
@@ -76,30 +96,45 @@ export function ThreadItem({
         className="flex w-full min-w-0 items-center gap-1"
         onClick={() => onSelect(thread.id, thread.title)}
       >
-        <OneEllipsis lines={1} className="text-left font-medium">
+        <OneEllipsis lines={1} className="py-0.5 text-left font-medium">
           {thread.title}
         </OneEllipsis>
-        <span className="shrink-0 font-medium text-f1-foreground-tertiary">
-          {`- ${formattedDate}`}
+        {/* The date only shows on row hover/focus, like the actions menu. */}
+        <span className="hidden shrink-0 text-sm font-medium text-f1-foreground-tertiary group-focus-within:inline group-hover:inline">
+          {formattedDate}
         </span>
       </div>
-      <div
-        className={cn(
-          "flex items-center opacity-0 transition-opacity duration-150",
-          "group-hover:opacity-100 focus-within:opacity-100",
-          "has-[[aria-expanded=true]]:opacity-100"
-        )}
-      >
-        <Dropdown items={dropdownItems}>
-          <F0Button
-            icon={EllipsisHorizontal}
-            variant="ghost"
-            size="md"
-            label={translations.ai.threadOptions}
-            hideLabel
-          />
-        </Dropdown>
-      </div>
+      {isPending ? (
+        // While saving, the spinner sits where the actions button is and stays
+        // visible off-hover so the row reads as "working".
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center"
+          aria-label={translations.ai.threadOptions}
+        >
+          <Spinner size="small" />
+        </div>
+      ) : (
+        <div
+          className={cn(
+            // Hidden (not just transparent) off-hover so it takes no space and
+            // the title can use the full row width. Shown on hover / focus /
+            // while its dropdown is open.
+            "hidden items-center",
+            "group-hover:flex group-focus-within:flex",
+            "has-[[aria-expanded=true]]:flex"
+          )}
+        >
+          <Dropdown items={dropdownItems}>
+            <ButtonInternal
+              icon={Ellipsis}
+              variant="ghost"
+              size="sm"
+              label={translations.ai.threadOptions}
+              hideLabel
+            />
+          </Dropdown>
+        </div>
+      )}
     </div>
   )
 }

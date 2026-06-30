@@ -35,6 +35,10 @@ export const defaultTranslations = {
       show: "Show password",
       hide: "Hide password",
     },
+    private: {
+      show: "Show {{label}}",
+      hide: "Hide {{label}}",
+    },
   },
   link: {
     opensInNewTab: "opens in new tab",
@@ -466,6 +470,99 @@ export const defaultTranslations = {
         title: "Questions before getting started",
       },
     },
+  },
+  chat: {
+    placeholder: "Write something here..",
+    searchPlaceholder: "Search messages",
+    closeSearch: "Close search",
+    noResults: "No chats found",
+    backToLatest: "Jump to latest",
+    muted: "Muted",
+    attachFile: "Attach file",
+    addEmoji: "Add emoji",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    dropFilesHere: "Drop your files here",
+    removeFile: "Remove",
+    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileUploadError: "Upload failed",
+    micPermissionDenied:
+      "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
+    sent: "Sent",
+    read: "Read",
+    // Plural shape (one/other) so other languages can diverge — selected by the
+    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
+    readBy: {
+      one: "Read by {{count}}",
+      other: "Read by {{count}}",
+    },
+    delivered: "Delivered",
+    back: "Back",
+    writing: "Writing…",
+    isTyping: "{{name}} is writing…",
+    twoTyping: "{{first}} and {{second}} are writing…",
+    severalTyping: "Several people are writing…",
+    deletedMessage: "Message deleted",
+    moreActions: "Message actions",
+    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
+    options: "Options",
+    pin: "Pin",
+    unpin: "Unpin",
+    info: "Info",
+    viewProfile: "View profile",
+    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
+    // for a group-wide ping (localize the word, e.g. es "aquí").
+    mentionEveryone: "here",
+    mentionEveryoneDescription: "Notify everyone in this group",
+    reply: "Reply",
+    react: "Add reaction",
+    download: "Download",
+    removeQuote: "Remove quote",
+    // Editing your own message (within the edit window). `editing` heads the
+    // composer chip; `edited` is the muted marker after an edited message body.
+    edit: "Edit",
+    editing: "Editing",
+    edited: "edited",
+    cancelEdit: "Cancel edit",
+    saveEdit: "Save",
+    // Shown as the quoted sender's name when the replied-to message is your own.
+    you: "You",
+    // In-chat image lightbox.
+    openImage: "Open image",
+    imagePreview: "Image preview",
+    closePreview: "Close",
+    previousImage: "Previous image",
+    nextImage: "Next image",
+    // Attachment previews in reply quotes + the composer chip (a lone file shows
+    // its real name instead of a count).
+    photo: "Photo",
+    photoCount: {
+      one: "{{count}} photo",
+      other: "{{count}} photos",
+    },
+    fileCount: {
+      one: "{{count}} file",
+      other: "{{count}} files",
+    },
+    attachmentCount: {
+      one: "{{count}} attachment",
+      other: "{{count}} attachments",
+    },
+    scrollToBottom: "Scroll to bottom",
+    newMessages: "New messages",
+    unreadCount: {
+      one: "{{count}} unread",
+      other: "{{count}} unread",
+    },
+    emptyConversation: "No messages yet",
+    emptyConversationDescription: "Send a message to start the conversation.",
+    error: "Couldn't load this conversation",
+    loadingOlder: "Loading earlier messages…",
   },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",

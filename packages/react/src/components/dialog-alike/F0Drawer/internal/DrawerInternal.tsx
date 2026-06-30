@@ -19,6 +19,9 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
   description,
   module,
   otherActions,
+  navigation,
+  resourceHeader,
+  controls,
   tabs,
   modal = false,
   activeTabId,
@@ -39,6 +42,9 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
           description={description}
           module={module}
           otherActions={otherActions}
+          navigation={navigation}
+          resourceHeader={resourceHeader}
+          controls={controls}
           tabs={tabs}
           activeTabId={activeTabId}
           setActiveTabId={setActiveTabId}
@@ -59,6 +65,9 @@ export const DrawerInternal: FC<DrawerInternalProps> = ({
     description,
     module,
     otherActions,
+    navigation,
+    resourceHeader,
+    controls,
     tabs,
     activeTabId,
     setActiveTabId,

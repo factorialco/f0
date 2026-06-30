@@ -1,6 +1,7 @@
 export {
   MockAiChatRuntimeProvider,
   useMockAiChatRuntime,
+  DEFAULT_MOCK_THREADS,
   type MockAiChatRuntime,
   type MockAiChatRuntimeProviderProps,
 } from "./MockAiChatRuntime"

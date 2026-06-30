@@ -34,6 +34,7 @@ export type {
   JobPostingProfile,
   RequisitionProfile,
   PersonProfile,
+  SidePanelContent,
   UploadedFile,
   VacancyProfile,
   VisualizationMode,

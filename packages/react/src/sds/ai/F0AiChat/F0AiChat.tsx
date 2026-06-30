@@ -1,8 +1,9 @@
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { type ReactNode } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import Cross from "@/icons/app/Cross"
+import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -35,6 +36,7 @@ export interface F0AiChatProps {
 
 const F0AiChatProviderComponent = ({
   enabled = false,
+  side,
   initialMessage,
   chatHeader,
   chatMessages,
@@ -65,6 +67,7 @@ const F0AiChatProviderComponent = ({
   return (
     <AiChatStateProvider
       enabled={enabled}
+      side={side}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
@@ -111,6 +114,7 @@ const F0AiChatComponent = ({
     chatHeader,
     chatMessages,
     chatInput,
+    panelContent,
   } = useAiChat()
   const translations = useI18n()
 
@@ -124,6 +128,7 @@ const F0AiChatComponent = ({
     (prev: VisualizationMode, next: VisualizationMode) =>
       next === "fullscreen" ? 220 : prev === "fullscreen" ? 460 : 260
   )
+  const reducedMotion = useReducedMotion()
 
   // Props take precedence over provider-supplied slots. The provider slots
   // are how `ApplicationFrame` (which mounts `<F0AiChat />` itself) gets
@@ -136,30 +141,38 @@ const F0AiChatComponent = ({
     return null
   }
 
-  if (mode === "voice" && VoiceMode) {
-    return (
-      <SidebarWindow>
-        <div className="flex h-full w-full flex-col">
-          <div className="absolute right-3 top-3 z-20">
-            <ButtonInternal
-              variant="ghost"
-              hideLabel
-              label={translations.ai.closeChat}
-              icon={Cross}
-              onClick={() => {
-                setOpen(false)
-                tracking?.onClose?.()
-              }}
-            />
-          </div>
-          <VoiceMode />
+  // Every view lives in the same SidebarWindow (the container never remounts).
+  // Custom side-panel content takes precedence over the chat, then voice mode,
+  // then the chat itself. The `viewKey` drives a crossfade so switching between
+  // conversations — or between a conversation and the AI chat — fades the
+  // content out and the next one in, while the window stays put.
+  let viewKey: string
+  let viewContent: ReactNode
+  if (panelContent) {
+    viewKey = `panel:${panelContent.id}`
+    viewContent = panelContent.content
+  } else if (mode === "voice" && VoiceMode) {
+    viewKey = "voice"
+    viewContent = (
+      <div className="flex h-full w-full flex-col">
+        <div className="absolute right-3 top-3 z-20">
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={translations.ai.closeChat}
+            icon={Cross}
+            onClick={() => {
+              setOpen(false)
+              tracking?.onClose?.()
+            }}
+          />
         </div>
-      </SidebarWindow>
+        <VoiceMode />
+      </div>
     )
-  }
-
-  return (
-    <SidebarWindow>
+  } else {
+    viewKey = "chat"
+    viewContent = (
       <div className="flex h-full w-full flex-col">
         {header}
         <motion.div className="flex min-h-0 flex-1 flex-col" {...contentReveal}>
@@ -169,6 +182,28 @@ const F0AiChatComponent = ({
           {input}
         </motion.div>
       </div>
+    )
+  }
+
+  return (
+    <SidebarWindow>
+      {/* Simultaneous crossfade: the outgoing view fades out while the next
+          fades in (both briefly mounted, stacked via `absolute inset-0` over the
+          SidebarWindow's relative content box). Switching conversations starts
+          the next view immediately instead of waiting for a sequential fade-out,
+          which is what made switching feel slow. */}
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={viewKey}
+          className="absolute inset-0 flex flex-col overflow-hidden"
+          initial={reducedMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={reducedMotion ? undefined : { opacity: 0 }}
+          transition={{ duration: reducedMotion ? 0 : 0.15, ease: "easeOut" }}
+        >
+          {viewContent}
+        </motion.div>
+      </AnimatePresence>
     </SidebarWindow>
   )
 }

@@ -43,17 +43,122 @@ const groups: SidebarChatGroup[] = [
   },
 ]
 
+/** Minimal blank-state copy for tests that don't exercise the empty state. */
+const defaultEmptyState = { title: "No chats yet" }
+
 const renderList = (initialActiveChatId?: string) =>
   render(
     <SidebarChatProvider
       initialGroups={groups}
       initialActiveChatId={initialActiveChatId}
     >
-      <SidebarChatList />
+      <SidebarChatList emptyState={defaultEmptyState} />
     </SidebarChatProvider>
   )
 
 describe("SidebarChatList", () => {
+  it("shows a blank state when there are no chats", () => {
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByText("No chats yet")).toBeInTheDocument()
+  })
+
+  it("shows a skeleton (not the blank state) while loading with no chats", () => {
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList emptyState={defaultEmptyState} loading />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByTestId("sidebar-chat-list-skeleton")).toBeInTheDocument()
+    expect(screen.queryByText("No chats yet")).not.toBeInTheDocument()
+  })
+
+  it("ignores the loading flag once chats are known (cascade takes over)", () => {
+    render(
+      <SidebarChatProvider initialGroups={groups}>
+        <SidebarChatList emptyState={defaultEmptyState} loading />
+      </SidebarChatProvider>
+    )
+    expect(
+      screen.queryByTestId("sidebar-chat-list-skeleton")
+    ).not.toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: /Raúl Sigüenza Sánchez/ })
+    ).toBeInTheDocument()
+  })
+
+  it("renders a loading chat as a skeleton row, keeping the others interactive", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={[
+          {
+            id: "dms",
+            title: "Direct messages",
+            chats: [
+              {
+                id: "loading",
+                label: "Loading One",
+                avatar: { type: "person", firstName: "L", lastName: "O" },
+                loading: true,
+              },
+              {
+                id: "ready",
+                label: "Ready One",
+                avatar: { type: "person", firstName: "R", lastName: "O" },
+              },
+            ],
+          },
+        ]}
+      >
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+    // The loading chat is a skeleton — no interactive button with its name.
+    expect(
+      screen.queryByRole("button", { name: /Loading One/ })
+    ).not.toBeInTheDocument()
+    // The resolved chat renders normally.
+    expect(
+      screen.getByRole("button", { name: "Ready One" })
+    ).toBeInTheDocument()
+  })
+
+  it("renders the blank-state CTA and fires its onClick", async () => {
+    const onStart = vi.fn()
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList
+          emptyState={{
+            title: "No conversations yet",
+            actions: [{ label: "Start a conversation", onClick: onStart }],
+          }}
+        />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByText("No conversations yet")).toBeInTheDocument()
+    await userEvent.click(
+      screen.getByRole("button", { name: /Start a conversation/i })
+    )
+    expect(onStart).toHaveBeenCalledTimes(1)
+  })
+
+  it("hides the blank state and lets the consumer override its copy", () => {
+    // With chats present, the blank state is not rendered.
+    renderList()
+    expect(screen.queryByText("No chats yet")).not.toBeInTheDocument()
+
+    // Custom copy is used when provided and there are no chats.
+    render(
+      <SidebarChatProvider initialGroups={[]}>
+        <SidebarChatList emptyState={{ title: "All quiet" }} />
+      </SidebarChatProvider>
+    )
+    expect(screen.getByText("All quiet")).toBeInTheDocument()
+  })
+
   it("shows a status icon for people but not for groups", () => {
     const { container } = render(
       <SidebarChatProvider
@@ -84,7 +189,7 @@ describe("SidebarChatList", () => {
           },
         ]}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     expect(
@@ -99,6 +204,7 @@ describe("SidebarChatList", () => {
     render(
       <SidebarChatProvider initialGroups={groups}>
         <SidebarChatList
+          emptyState={defaultEmptyState}
           actions={[
             { label: "New chat", onClick: onNewChat },
             { label: "New group", onClick: vi.fn() },
@@ -136,7 +242,7 @@ describe("SidebarChatList", () => {
           },
         ]}
       >
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
     const readBtn = screen.getByRole("button", { name: /Read One/ })
@@ -152,6 +258,53 @@ describe("SidebarChatList", () => {
     renderList()
     // raul has unreadCount: 3
     expect(screen.getByText("3")).toBeInTheDocument()
+  })
+
+  const unreadGroup: SidebarChatGroup[] = [
+    {
+      id: "dms",
+      title: "Direct messages",
+      chats: [
+        {
+          id: "a",
+          label: "A",
+          avatar: { type: "person", firstName: "A", lastName: "A" },
+          unreadCount: 2,
+        },
+        {
+          id: "b",
+          label: "B",
+          avatar: { type: "person", firstName: "B", lastName: "B" },
+          unreadCount: 5,
+        },
+      ],
+    },
+  ]
+
+  it("shows the group's total unread as a badge when collapsed", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={unreadGroup.map((g) => ({ ...g, isOpen: false }))}
+      >
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+    // Collapsed: the header surfaces the combined unread (2 + 5).
+    expect(screen.getByText("7")).toBeInTheDocument()
+  })
+
+  it("does not show the group total badge when expanded", () => {
+    render(
+      <SidebarChatProvider
+        initialGroups={unreadGroup.map((g) => ({ ...g, isOpen: true }))}
+      >
+        <SidebarChatList emptyState={defaultEmptyState} />
+      </SidebarChatProvider>
+    )
+    // Expanded: only the per-chat badges show, never the combined total.
+    expect(screen.queryByText("7")).not.toBeInTheDocument()
+    expect(screen.getByText("2")).toBeInTheDocument()
+    expect(screen.getByText("5")).toBeInTheDocument()
   })
 
   it("renders group titles and chats as buttons", () => {
@@ -200,7 +353,7 @@ describe("SidebarChatList", () => {
     render(
       <SidebarChatProvider initialGroups={groups}>
         <Pusher />
-        <SidebarChatList />
+        <SidebarChatList emptyState={defaultEmptyState} />
       </SidebarChatProvider>
     )
 
@@ -213,5 +366,117 @@ describe("SidebarChatList", () => {
       "aria-pressed",
       "true"
     )
+  })
+
+  describe("pin affordance", () => {
+    const pinGroups = (
+      onTogglePin: () => void,
+      pinned?: boolean
+    ): SidebarChatGroup[] => [
+      {
+        id: "dms",
+        title: "Direct messages",
+        chats: [
+          {
+            id: "raul",
+            label: "Raúl",
+            avatar: { type: "person", firstName: "Raúl", lastName: "S" },
+            unreadCount: 3,
+            pinned,
+            onTogglePin,
+          },
+        ],
+      },
+    ]
+
+    it("toggles pin without selecting the chat", async () => {
+      const onTogglePin = vi.fn()
+      render(
+        <SidebarChatProvider initialGroups={pinGroups(onTogglePin)}>
+          <SidebarChatList emptyState={defaultEmptyState} />
+        </SidebarChatProvider>
+      )
+
+      await userEvent.click(screen.getByRole("button", { name: "Pin" }))
+      expect(onTogglePin).toHaveBeenCalledTimes(1)
+      // Clicking the pin must not select the row (stopPropagation).
+      expect(screen.getByRole("button", { name: /Raúl/ })).toHaveAttribute(
+        "aria-pressed",
+        "false"
+      )
+    })
+
+    it("labels the button 'Unpin' when the chat is pinned", () => {
+      render(
+        <SidebarChatProvider initialGroups={pinGroups(vi.fn(), true)}>
+          <SidebarChatList emptyState={defaultEmptyState} />
+        </SidebarChatProvider>
+      )
+      expect(screen.getByRole("button", { name: "Unpin" })).toBeInTheDocument()
+    })
+
+    it("shows no pin button when onTogglePin is omitted", () => {
+      renderList()
+      expect(
+        screen.queryByRole("button", { name: "Pin" })
+      ).not.toBeInTheDocument()
+    })
+  })
+
+  describe("search", () => {
+    it("always shows the search box at the top, even with no chats", () => {
+      const { unmount } = render(
+        <SidebarChatProvider initialGroups={[]}>
+          <SidebarChatList emptyState={defaultEmptyState} />
+        </SidebarChatProvider>
+      )
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+      unmount()
+
+      renderList()
+      expect(screen.getByRole("searchbox")).toBeInTheDocument()
+    })
+
+    it("fuzzy-filters chats by name and hides groups left with no matches", async () => {
+      renderList()
+      await userEvent.type(screen.getByRole("searchbox"), "roger")
+
+      // Only the matching chat survives.
+      expect(
+        await screen.findByRole("button", { name: "Roger Campos" })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: /Raúl Sigüenza Sánchez/ })
+      ).not.toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "General" })
+      ).not.toBeInTheDocument()
+
+      // The "Groups" group has no matches, so its title disappears too; the
+      // group that still has a match keeps its title.
+      expect(screen.queryByText("Groups")).not.toBeInTheDocument()
+      expect(screen.getByText("Direct messages")).toBeInTheDocument()
+    })
+
+    it("matches non-contiguously and ignores accents", async () => {
+      renderList()
+      // "raul" (no accent) matches "Raúl Sigüenza Sánchez".
+      await userEvent.type(screen.getByRole("searchbox"), "raul")
+      expect(
+        await screen.findByRole("button", { name: /Raúl Sigüenza Sánchez/ })
+      ).toBeInTheDocument()
+      expect(
+        screen.queryByRole("button", { name: "Roger Campos" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("shows a no-results message when nothing matches", async () => {
+      renderList()
+      await userEvent.type(screen.getByRole("searchbox"), "zzz")
+
+      expect(await screen.findByText("No chats found")).toBeInTheDocument()
+      expect(screen.queryByText("Direct messages")).not.toBeInTheDocument()
+      expect(screen.queryByText("Groups")).not.toBeInTheDocument()
+    })
   })
 })

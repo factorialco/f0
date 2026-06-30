@@ -41,6 +41,8 @@ export type MockAiChatRuntime = {
 
   // ── Chat history ────────────────────────────────────────────────
   currentThreadTitle: string | null
+  /** Id of the thread currently loaded (null on a fresh / new chat). */
+  currentThreadId: string | null
   isLoadingThread: boolean
   /** Returns the in-memory list of threads (excluding any deleted). */
   fetchThreads: () => Promise<ChatThread[]>
@@ -250,6 +252,7 @@ export const MockAiChatRuntimeProvider = ({
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
     null
   )
+  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null)
   const [isLoadingThread, setIsLoadingThread] = useState(false)
   const snapshotsRef = useRef<Record<string, F0Message[]>>(
     buildDefaultSnapshots()
@@ -403,6 +406,7 @@ export const MockAiChatRuntimeProvider = ({
     setMessages([])
     setInProgress(false)
     setCurrentThreadTitle(null)
+    setCurrentThreadId(null)
     setIsLoadingThread(false)
   }, [clearTimers])
 
@@ -426,15 +430,16 @@ export const MockAiChatRuntimeProvider = ({
         const t = setTimeout(() => {
           setThreads((prev) => prev.filter((thread) => thread.id !== id))
           // If the deleted thread is the one currently loaded, clear it.
-          setCurrentThreadTitle((title) => {
-            const deleted = threads.find((thread) => thread.id === id)
-            return deleted && deleted.title === title ? null : title
+          setCurrentThreadId((current) => {
+            if (current !== id) return current
+            setCurrentThreadTitle(null)
+            return null
           })
           resolve()
         }, 200)
         timersRef.current.push(t)
       }),
-    [threads]
+    []
   )
 
   const loadThread = useCallback<MockAiChatRuntime["loadThread"]>(
@@ -442,6 +447,7 @@ export const MockAiChatRuntimeProvider = ({
       clearTimers()
       setIsLoadingThread(true)
       setCurrentThreadTitle(title)
+      setCurrentThreadId(id)
       setMessages([])
       const t = setTimeout(() => {
         const snapshot = snapshotsRef.current[id]
@@ -479,6 +485,7 @@ export const MockAiChatRuntimeProvider = ({
         appendMessages,
         clear,
         currentThreadTitle,
+        currentThreadId,
         isLoadingThread,
         fetchThreads,
         deleteThread,

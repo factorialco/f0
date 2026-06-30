@@ -5,6 +5,7 @@ import { useState } from "react"
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { Reaction } from "@/icons/app"
+import { type IconType } from "@/components/F0Icon"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import "./index.css"
@@ -22,6 +23,7 @@ interface PickerProps {
   lastEmojiReaction?: string
   /** Accessible label / tooltip for the trigger button. */
   label?: string
+  icon?: IconType
 }
 
 export function Picker({
@@ -31,6 +33,7 @@ export function Picker({
   variant = "outline",
   lastEmojiReaction,
   label = "Add reaction",
+  icon,
 }: PickerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -42,7 +45,7 @@ export function Picker({
           compact
           label={label}
           size={size}
-          icon={lastEmojiReaction ? undefined : Reaction}
+          icon={lastEmojiReaction ? undefined : (icon ?? Reaction)}
           emoji={lastEmojiReaction}
           pressed={isOpen}
           onClick={(event) => {

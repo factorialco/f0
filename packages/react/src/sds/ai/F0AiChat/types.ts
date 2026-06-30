@@ -218,6 +218,17 @@ export type AiChatMode = "chat" | "voice"
 export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
+ * A single piece of content hosted in the side panel — the same resizable +
+ * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
+ * the `id` keys the content so switching conversations unmounts the previous
+ * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ */
+export type SidePanelContent = {
+  id: string
+  content: React.ReactNode
+}
+
+/**
  * Tracking options for the AI chat
  */
 export type UploadedFile = {
@@ -287,6 +298,12 @@ export type AiChatTrackingOptions = {
  */
 export type AiChatProviderProps = {
   enabled?: boolean
+  /**
+   * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+   * Hosts set "left" for a chat-first experience (e.g. communications).
+   * @default "right"
+   */
+  side?: "left" | "right"
   /**
    * Greeting phrase(s) shown by the welcome screen when the chat is empty.
    * A single string renders once; an array rotates through phrases. Purely

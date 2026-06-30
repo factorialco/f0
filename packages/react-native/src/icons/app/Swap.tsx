@@ -10,10 +10,8 @@ const SvgSwap = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 16H6m0 0 3-3m-3 3 3 3M9 8h9m0 0-3-3m3 3-3 3"
+      fill="currentColor"
+      d="M15.9 16a.9.9 0 0 1-.9.9H8.174l1.464 1.464a.9.9 0 0 1-1.273 1.273l-3-3a.9.9 0 0 1 0-1.273l3-3a.9.9 0 0 1 1.273 1.273L8.173 15.1h6.828a.9.9 0 0 1 .9.9m2.737-8.636a.9.9 0 0 1 0 1.272l-3 3a.9.9 0 1 1-1.273-1.272L15.828 8.9H9.001a.9.9 0 0 1 0-1.8h6.827l-1.464-1.464a.9.9 0 0 1 1.273-1.272z"
     />
   </Svg>
 )
