@@ -431,11 +431,11 @@ export const SingleLineDescription: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
-      src: image,
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: fakePeople.noor.image,
     },
-    title: "Jane Cooper",
+    title: fakePeople.noor.fullName,
     description:
       "Product designer leading the design system team across web and mobile, with a bio long enough to wrap onto several lines — ref https://example.com/people/jane-cooper-design-systems-lead-2026",
     descriptionAsSingleLine: true,
