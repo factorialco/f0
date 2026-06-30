@@ -166,7 +166,7 @@ export const Default = {
     // Test search functionality
     const input = popover?.querySelector("input")
     expect(input).toBeInTheDocument()
-    await userEvent.type(input!, famousEmployees[0].name)
+    await userEvent.type(input!, "Albert Einstein")
     await new Promise((resolve) => setTimeout(resolve, 600))
 
     // Get the popover content and use within to scope our queries
@@ -174,17 +174,17 @@ export const Default = {
 
     // Find and click the item in the main list
     const listItem = popoverContent.getByRole("checkbox", {
-      name: new RegExp(famousEmployees[0].name, "i"),
+      name: /Albert Einstein/i,
     })
     expect(listItem).toBeInTheDocument()
     await userEvent.click(listItem.closest("label")!)
 
     // Test that selection is reflected in trigger
-    const triggerText = canvas.getByText(new RegExp(famousEmployees[1].name))
+    const triggerText = canvas.getByText(/Marie Curie/)
     expect(triggerText).toBeInTheDocument()
 
     await userEvent.clear(input!)
-    await userEvent.type(input!, famousEmployees[2].name.slice(0, 2))
+    await userEvent.type(input!, "Al")
     await new Promise((resolve) => setTimeout(resolve, 600))
 
     const selectAllButton = popoverContent.getByRole("button", {
@@ -194,12 +194,12 @@ export const Default = {
     await userEvent.click(selectAllButton)
 
     await userEvent.clear(input!)
-    await userEvent.type(input!, famousEmployees[6].name.slice(0, 2))
+    await userEvent.type(input!, "Ab")
     await new Promise((resolve) => setTimeout(resolve, 600))
     await userEvent.click(selectAllButton)
 
     const listItem2 = popoverContent.getByRole("checkbox", {
-      name: new RegExp(famousEmployees[6].name, "i"),
+      name: /Abraham Lincoln/i,
     })
     expect(listItem2).toBeInTheDocument()
     await userEvent.click(listItem2.closest("label")!)
