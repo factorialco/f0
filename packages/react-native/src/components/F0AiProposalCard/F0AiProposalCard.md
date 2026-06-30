@@ -29,19 +29,19 @@ import { F0AiProposalCard } from "@factorialco/f0-react-native"
 
 ## Props
 
-| Prop                            | Type         | Default   | Description                                                   |
-| ------------------------------- | ------------ | --------- | ------------------------------------------------------------- |
-| `module`                        | `ModuleId`   | optional  | Module avatar shown in the header                             |
-| `heading`                       | `string`     | required  | Header label describing the proposal type                    |
-| `title`                         | `string`     | required  | Main proposal title                                           |
-| `subtitle`                      | `string`     | optional  | Secondary metadata line                                       |
-| `description`                   | `string`     | required  | Proposal details (truncated until expanded)                   |
-| `seeMoreLabel`                  | `string`     | required  | Label for the inline expansion control                        |
-| `maxCollapsedDescriptionLength` | `number`     | `180`     | Characters shown before expansion                             |
-| `primaryActionLabel`            | `string`     | required* | Primary action button label                                   |
-| `primaryActionIcon`             | `IconType`   | optional  | Icon shown before the action label                            |
-| `onPrimaryAction`               | `() => void` | required* | Called when the action is pressed                             |
-| `showActions`                   | `boolean`    | `true`    | Set `false` to hide the action footer and omit the action props |
+| Prop                            | Type         | Default    | Description                                                     |
+| ------------------------------- | ------------ | ---------- | --------------------------------------------------------------- |
+| `module`                        | `ModuleId`   | optional   | Module avatar shown in the header                               |
+| `heading`                       | `string`     | required   | Header label describing the proposal type                       |
+| `title`                         | `string`     | required   | Main proposal title                                             |
+| `subtitle`                      | `string`     | optional   | Secondary metadata line                                         |
+| `description`                   | `string`     | required   | Proposal details (truncated until expanded)                     |
+| `seeMoreLabel`                  | `string`     | required   | Label for the inline expansion control                          |
+| `maxCollapsedDescriptionLength` | `number`     | `180`      | Characters shown before expansion                               |
+| `primaryActionLabel`            | `string`     | required\* | Primary action button label                                     |
+| `primaryActionIcon`             | `IconType`   | optional   | Icon shown before the action label                              |
+| `onPrimaryAction`               | `() => void` | required\* | Called when the action is pressed                               |
+| `showActions`                   | `boolean`    | `true`     | Set `false` to hide the action footer and omit the action props |
 
 \*Required unless `showActions` is `false`.
 
@@ -51,7 +51,7 @@ The action is a standard `F0Button`. The "see more" control expands the descript
 
 ## Testing
 
-Pending (draft). Add `src/components/F0AiProposalCard/__tests__/F0AiProposalCard.spec.tsx` with snapshots for the with-actions, hidden-actions, and truncated/expanded description states.
+`__tests__/F0AiProposalCard.spec.tsx` covers snapshots for the with-actions and hidden-actions states, the heading/title/subtitle rendering, the truncate-then-expand behaviour of the "see more" control, the primary-action callback, and rendering without a module avatar.
 
 ## File Structure
 
@@ -61,5 +61,7 @@ src/components/F0AiProposalCard/
 ├── F0AiProposalCard.types.ts
 ├── F0AiProposalCard.styles.ts
 ├── F0AiProposalCard.md
+├── __tests__/
+│   └── F0AiProposalCard.spec.tsx
 └── index.ts
 ```
