@@ -13,7 +13,7 @@ const meta: Meta = {
     docs: {
       description: {
         component:
-          "This is a component that is used to display a dot tag. They should be used to display categories, but not for statuses. Use the `TagStatus` component instead.",
+          "This is a component that is used to display a dot tag. The full base color palette is available through the `color` prop. They should be used to display categories, but not for statuses — even though status-like hues (`red`, `orange`, `grass`) are available, use the `TagStatus` component when you mean an actual status.",
       },
     },
   },
