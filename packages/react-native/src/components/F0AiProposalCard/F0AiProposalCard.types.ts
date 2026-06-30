@@ -1,4 +1,4 @@
-import type { ModuleId } from "../Avatars/ModuleAvatar/modules"
+import type { ModuleId } from "../F0Avatar"
 import type { IconType } from "../primitives/F0Icon"
 
 export interface F0AiProposalCardBaseProps {
