@@ -513,6 +513,12 @@ declare type AiChatFileAttachmentConfig = {
 declare type AiChatProviderProps = {
     enabled?: boolean;
     /**
+     * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+     * Hosts set "left" for a chat-first experience (e.g. communications).
+     * @default "right"
+     */
+    side?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -2246,7 +2252,7 @@ export declare const chipVariants: (props?: ({
     className?: ClassValue;
 })) | undefined) => string;
 
-export declare function ClockInControls({ trackedMinutes, remainingMinutes, data, labels, locationId, locations, canShowLocation, locationSelectorDisabled, onClockIn, onClockOut, onBreak, breakTypes, onChangeBreakTypeId, canShowBreakButton, canSeeGraph, canSeeRemainingTime, onChangeLocationId, canShowProject, projectSelectorElement, breakTypeName, }: ClockInControlsProps): JSX_2.Element;
+export declare function ClockInControls({ trackedMinutes, remainingMinutes, data, labels, locationId, locations, canShowLocation, locationSelectorDisabled, onClockIn, onClockOut, onBreak, breakTypes, onChangeBreakTypeId, canShowBreakButton, canSeeGraph, canSeeRemainingTime, onChangeLocationId, canShowProject, projectSelectorElement, locationSelectorElement, breakTypeName, }: ClockInControlsProps): JSX_2.Element;
 
 export declare interface ClockInControlsProps {
     /** Optional remaining time in minutes */
@@ -2293,6 +2299,14 @@ export declare interface ClockInControlsProps {
     onBreak?: (breakTypeId?: string) => void;
     canShowProject?: boolean;
     projectSelectorElement?: React.ReactNode;
+    /**
+     * Optional custom location control. When provided, it replaces the built-in
+     * flat location `F0Select` (in both the editable clocked-out state and the
+     * read-only clocked-in state), letting the consumer supply its own control —
+     * e.g. a drill-in selector (location → workplace → work area). The consumer
+     * owns its data and editable/disabled state, mirroring `projectSelectorElement`.
+     */
+    locationSelectorElement?: React.ReactNode;
     breakTypeName?: string;
 }
 
@@ -3050,7 +3064,7 @@ declare type DateValue = {
  */
 export declare const DaytimePage: WithDataTestIdReturnType_5<typeof _DaytimePage>;
 
-declare function _DaytimePage({ children, header, period, embedded, }: DaytimePageProps): JSX_2.Element;
+declare function _DaytimePage({ children, header, period, embedded, hideOneSwitch, }: DaytimePageProps): JSX_2.Element;
 
 declare namespace _DaytimePage {
     var displayName: string;
@@ -3068,6 +3082,11 @@ export declare interface DaytimePageProps extends VariantProps<typeof daytimePag
         onPulseClick?: ComponentProps<typeof F0AvatarPulse>["onPulseClick"];
     };
     embedded?: boolean;
+    /**
+     * Hides the One AI toggle in the header. Use when One is reached elsewhere
+     * (e.g. a sidebar tab) so the home header doesn't show a redundant switch.
+     */
+    hideOneSwitch?: boolean;
 }
 
 declare const daytimePageVariants: (props?: ({
@@ -3216,6 +3235,10 @@ declare const defaultTranslations: {
         readonly password: {
             readonly show: "Show password";
             readonly hide: "Hide password";
+        };
+        readonly private: {
+            readonly show: "Show {{label}}";
+            readonly hide: "Hide {{label}}";
         };
     };
     readonly link: {
@@ -3644,6 +3667,86 @@ declare const defaultTranslations: {
                 readonly title: "Questions before getting started";
             };
         };
+    };
+    readonly chat: {
+        readonly placeholder: "Write something here..";
+        readonly searchPlaceholder: "Search messages";
+        readonly closeSearch: "Close search";
+        readonly noResults: "No chats found";
+        readonly backToLatest: "Jump to latest";
+        readonly muted: "Muted";
+        readonly attachFile: "Attach file";
+        readonly addEmoji: "Add emoji";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly dropFilesHere: "Drop your files here";
+        readonly removeFile: "Remove";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileUploadError: "Upload failed";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
+        readonly sent: "Sent";
+        readonly read: "Read";
+        readonly readBy: {
+            readonly one: "Read by {{count}}";
+            readonly other: "Read by {{count}}";
+        };
+        readonly delivered: "Delivered";
+        readonly back: "Back";
+        readonly writing: "Writing…";
+        readonly isTyping: "{{name}} is writing…";
+        readonly twoTyping: "{{first}} and {{second}} are writing…";
+        readonly severalTyping: "Several people are writing…";
+        readonly deletedMessage: "Message deleted";
+        readonly moreActions: "Message actions";
+        readonly options: "Options";
+        readonly pin: "Pin";
+        readonly unpin: "Unpin";
+        readonly info: "Info";
+        readonly viewProfile: "View profile";
+        readonly mentionEveryone: "here";
+        readonly mentionEveryoneDescription: "Notify everyone in this group";
+        readonly reply: "Reply";
+        readonly react: "Add reaction";
+        readonly download: "Download";
+        readonly removeQuote: "Remove quote";
+        readonly edit: "Edit";
+        readonly editing: "Editing";
+        readonly edited: "edited";
+        readonly cancelEdit: "Cancel edit";
+        readonly saveEdit: "Save";
+        readonly you: "You";
+        readonly openImage: "Open image";
+        readonly imagePreview: "Image preview";
+        readonly closePreview: "Close";
+        readonly previousImage: "Previous image";
+        readonly nextImage: "Next image";
+        readonly photo: "Photo";
+        readonly photoCount: {
+            readonly one: "{{count}} photo";
+            readonly other: "{{count}} photos";
+        };
+        readonly fileCount: {
+            readonly one: "{{count}} file";
+            readonly other: "{{count}} files";
+        };
+        readonly attachmentCount: {
+            readonly one: "{{count}} attachment";
+            readonly other: "{{count}} attachments";
+        };
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly newMessages: "New messages";
+        readonly unreadCount: {
+            readonly one: "{{count}} unread";
+            readonly other: "{{count}} unread";
+        };
+        readonly emptyConversation: "No messages yet";
+        readonly emptyConversationDescription: "Send a message to start the conversation.";
+        readonly error: "Couldn't load this conversation";
+        readonly loadingOlder: "Loading earlier messages…";
     };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
@@ -4747,9 +4850,11 @@ export declare type F0CalloutProps = CalloutInternalProps;
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
-export declare const F0CardHorizontal: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
+declare const F0CardHorizontal: WithDataTestIdReturnType_2<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
 Skeleton: () => JSX_2.Element;
 }>;
+export { F0CardHorizontal }
+export { F0CardHorizontal as F0CardRow }
 
 export declare interface F0CardHorizontalProps {
     /**
@@ -4837,7 +4942,322 @@ export declare interface F0CardHorizontalProps {
      * drag-and-drop while still allowing click navigation via `onClick`.
      */
     disableOverlayLink?: boolean;
+    /**
+     * Dims the whole card and disables interaction (including its actions and any
+     * row-level link/click). Purely a visual + interaction affordance.
+     */
+    disabled?: boolean;
+    /**
+     * Renders the description on a single line, truncating overflow with an
+     * ellipsis (and a tooltip with the full text) instead of wrapping. Has no
+     * effect when there's no `description`.
+     */
+    descriptionAsSingleLine?: boolean;
 }
+
+/**
+ * Headless chat surface — header, transcript and composer — driven entirely by
+ * the {@link F0ChatRuntime} from a surrounding `F0ChatProvider`. Panel controls
+ * (fullscreen / close) are wired by the host so F0Chat stays transport-agnostic.
+ */
+export declare const F0Chat: (props: F0ChatProps) => ReactNode;
+
+export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment;
+
+/** The conversation currently shown in the panel (header + behaviour differs by type). */
+export declare type F0ChatChannel = {
+    id: string;
+    type: F0ChatChannelType;
+    title: string;
+    avatar: AvatarVariant;
+    /** DM only — the other person's presence. */
+    presence?: "online" | "offline";
+    muted?: boolean;
+    /**
+     * Whether the conversation is pinned (favourited) by the current user. Drives
+     * the header pin toggle and lets the host surface a "Pinned" group in the
+     * sidebar. factorial → Stream's per-member pin (`member.pinned_at`).
+     */
+    pinned?: boolean;
+    /**
+     * Extra status badges shown in the header (e.g. on vacation). Host-provided
+     * metadata — not necessarily transport-backed: Stream has no such concept, so
+     * factorial sources these from its own data (e.g. HR vacation status).
+     */
+    statuses?: F0ChatChannelStatus[];
+    /** Group only. */
+    memberCount?: number;
+    /** DM only — the counterpart, used for the header identity hover card. */
+    user?: F0ChatUser;
+};
+
+/** A status badge shown in the header next to the title (e.g. on vacation, away).
+ * The host decides the icon + label; the UI just renders it like the mute icon. */
+export declare type F0ChatChannelStatus = {
+    icon: IconType;
+    label: string;
+};
+
+export declare type F0ChatChannelType = "dm" | "group";
+
+/**
+ * Edits applied to an existing message. Text, mentions and attachments are all
+ * editable; the host maps this to the transport's partial-update (factorial →
+ * Stream `partialUpdateMessage`).
+ */
+export declare type F0ChatEditInput = {
+    body: string;
+    attachments?: F0ChatAttachment[];
+    /** People mentioned in the edited body (groups only). */
+    mentions?: F0ChatMention[];
+    /** Whether the edited message mentions the whole group (`@here`). */
+    mentionedEveryone?: boolean;
+};
+
+export declare type F0ChatFileAttachment = {
+    kind: "file";
+    url: string;
+    name: string;
+    size?: number;
+    mimeType?: string;
+    /** 0–100 while uploading; undefined once done. */
+    progress?: number;
+};
+
+export declare type F0ChatImageAttachment = {
+    kind: "image";
+    url: string;
+    thumbnailUrl?: string;
+    name: string;
+    mimeType?: string;
+    width?: number;
+    height?: number;
+};
+
+/**
+ * A person mentioned in a message. `id` matches an {@link F0ChatUser.id}; `name`
+ * is the display name as it appears in the body (e.g. "Ana García"), used to
+ * locate and highlight the `@name` token. "Everyone" (`@here`) is tracked
+ * separately via `mentionedEveryone`, not as an entry here.
+ */
+export declare type F0ChatMention = {
+    id: string;
+    name: string;
+    /** Optional display data so the `@name` chip can show the same profile hover
+     * card as the avatar (avatar, role line, "View profile" link). Omit for a
+     * name-only card. */
+    avatar?: AvatarVariant;
+    subtitle?: string;
+    profileHref?: string;
+};
+
+export declare type F0ChatMessage = {
+    id: string;
+    author: F0ChatUser;
+    body: string;
+    /** ISO timestamp. */
+    createdAt: string;
+    isMine: boolean;
+    status?: F0ChatMessageStatus;
+    /**
+     * When the message was read (DM read receipt), ISO. Approximated from the
+     * counterpart's per-channel last-read pointer — Stream has no per-message
+     * read time — so it's "read at or before this", not an exact per-message stamp.
+     */
+    readAt?: string;
+    reactions?: F0ChatReaction[];
+    attachments?: F0ChatAttachment[];
+    replyTo?: F0ChatMessageReply;
+    /**
+     * People mentioned in this message (groups only). Drives the `@name` chip
+     * highlighting in the bubble; a chip whose id is the current user gets the
+     * self-mention emphasis.
+     */
+    mentions?: F0ChatMention[];
+    /**
+     * Whether this message mentions the whole group (`@here`). Renders the
+     * `@here` token with the self-mention emphasis for every member.
+     */
+    mentionedEveryone?: boolean;
+    /**
+     * Group read receipts — how many other members have read this message.
+     * Approximated by counting members whose last-read pointer is at/after this
+     * message (Stream exposes no per-message reader list).
+     */
+    readByCount?: number;
+    /**
+     * Soft-deleted tombstone — render an italic "[Message deleted]" placeholder
+     * instead of the body (Stream keeps these when a message is deleted after the
+     * unsend window). Hard-deleted messages are removed from `messages` entirely.
+     */
+    deleted?: boolean;
+    /**
+     * When the message text was last edited (ISO). Presence drives the muted
+     * "edited" label after the body (WhatsApp-style). factorial → Stream's
+     * `message_text_updated_at`, which is set only on a text edit (not on
+     * reactions/read updates), so it never false-positives the label.
+     */
+    editedAt?: string;
+};
+
+export declare type F0ChatMessageReply = {
+    id: string;
+    author: F0ChatUser;
+    body: string;
+    /** Attachments of the quoted message (preview thumbnail / file name). */
+    attachments?: F0ChatAttachment[];
+};
+
+/** iMessage-style delivery state — only meaningful for messages I sent. */
+export declare type F0ChatMessageStatus = "sending" | "sent" | "read" | "failed";
+
+export declare type F0ChatProps = {
+    /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
+    isFullscreen?: boolean;
+    /** Toggle the hosting panel's fullscreen. Hidden when omitted. */
+    onToggleFullscreen?: () => void;
+    /** Close the hosting panel. Hidden when omitted. */
+    onClose?: () => void;
+};
+
+/**
+ * Makes a chat {@link F0ChatRuntime} available to the F0Chat UI. The host owns
+ * the runtime (mock in stories, GetStream adapter in factorial); F0 only reads it.
+ */
+export declare const F0ChatProvider: ({ runtime, children, }: {
+    runtime: F0ChatRuntime;
+    children: ReactNode;
+}) => ReactNode;
+
+export declare type F0ChatReaction = {
+    emoji: string;
+    count: number;
+    reactedByMe: boolean;
+    users?: F0ChatUser[];
+};
+
+/**
+ * The data + actions a host provides to drive the chat UI. F0 is headless: it
+ * never touches the transport (GetStream, websockets, …). A mock runtime powers
+ * Storybook; factorial implements this against GetStream after the bump.
+ */
+export declare type F0ChatRuntime = {
+    currentUserId: string;
+    channel: F0ChatChannel;
+    status: F0ChatStatus;
+    /** Oldest → newest. */
+    messages: F0ChatMessage[];
+    /** Users currently typing (excluding me). */
+    typingUsers: F0ChatUser[];
+    hasMoreOlder: boolean;
+    loadingOlder: boolean;
+    /**
+     * Whether there are newer messages than the loaded window — true after jumping
+     * to an old message (e.g. a search hit), so the transcript isn't anchored to
+     * the live tail. Omit (→ false) when the newest messages are always loaded.
+     * factorial → `channel.state.messagePagination.hasNext`.
+     */
+    hasMoreNewer?: boolean;
+    loadingNewer?: boolean;
+    /** Load the next page of newer messages (mirror of `loadOlder`). */
+    loadNewer?: () => void;
+    /** Count of incoming messages below the user's last-read position. */
+    unreadCount: number;
+    /** Id of the first unread message — where the "new messages" divider goes. */
+    firstUnreadId: string | null;
+    sendMessage: (input: F0ChatSendInput) => void;
+    retryMessage: (id: string) => void;
+    loadOlder: () => void;
+    toggleReaction: (messageId: string, emoji: string) => void;
+    deleteMessage: (id: string) => void;
+    /**
+     * Edit an existing message (text, mentions, attachments). Omit to disable
+     * editing — the "Edit" action then never shows. factorial →
+     * `client.partialUpdateMessage`.
+     */
+    editMessage?: (id: string, input: F0ChatEditInput) => void;
+    /**
+     * How long after sending a message stays editable (ms). The "Edit" action is
+     * hidden once a message is older than this. Omit for no limit (editable
+     * anytime). factorial sets a fixed window (e.g. 15 min).
+     */
+    editWindowMs?: number;
+    /** Called as the user types so the runtime can emit typing.start/stop. */
+    onInputActivity: () => void;
+    uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
+    /**
+     * Max files attachable at once. When a selection/drop would exceed it, the
+     * composer rejects the whole batch and flashes a transient error in the
+     * textarea (mirrors the AI chat). Omit for no limit.
+     */
+    maxFiles?: number;
+    /**
+     * Optional voice dictation — same signature as the AI chat (streams partials).
+     * Not part of the Stream transport; a host wires it to its own speech service
+     * (the Stream adapter omits it, so the mic button stays hidden there).
+     */
+    transcribe?: TranscribeFn;
+    markRead?: () => void;
+    /**
+     * Search the conversation's members for the `@`-mention popover, returning
+     * matches for `query` (empty string → the full member list). Provide it
+     * wherever mentions should work — DMs (both people) and groups alike; omit it
+     * to disable mentions for the conversation. The `@here` everyone option is a
+     * group-only concept and is gated separately by the composer.
+     * factorial → `channel.state.members`.
+     */
+    searchMembers?: (query: string) => Promise<F0ChatUser[]>;
+    /**
+     * Toggle the conversation's pinned (favourite) state for the current user.
+     * Drives the header "Pin / Unpin" action; omit to hide it. factorial →
+     * `channel.pin()` / `channel.unpin()`.
+     */
+    togglePin?: () => void;
+    /**
+     * Full-text search within this conversation, returning matches oldest→newest.
+     * Omit to fall back to a client-side substring search over the loaded
+     * `messages`. factorial → `channel.search`.
+     */
+    searchMessages?: (query: string) => Promise<F0ChatSearchResult[]>;
+    /**
+     * Ensure a message is in `messages` so the UI can jump to it: pass a message
+     * id (e.g. a search hit outside the loaded window) to load it + its context,
+     * or {@link LATEST} to return to the live tail. After it resolves, `messages`
+     * (and `hasMoreNewer`) reflect the new window. factorial →
+     * `channel.state.loadMessageIntoState(id | "latest")`.
+     */
+    loadMessageContext?: (idOrLatest: string) => Promise<void>;
+};
+
+/** A message that matched an in-conversation search (room to grow: preview, author…). */
+export declare type F0ChatSearchResult = {
+    id: string;
+};
+
+export declare type F0ChatSendInput = {
+    body: string;
+    attachments?: F0ChatAttachment[];
+    replyToId?: string;
+    /** People mentioned in the body (groups only). The host maps these to the
+     * transport's mention field (factorial → Stream `mentioned_users`). */
+    mentions?: F0ChatMention[];
+    /** Whether the message mentions the whole group (`@here`). The host fans this
+     * out to every member so they all get notified. */
+    mentionedEveryone?: boolean;
+};
+
+export declare type F0ChatStatus = "connecting" | "ready" | "error";
+
+/** A participant in a conversation. */
+export declare type F0ChatUser = {
+    id: string;
+    name: string;
+    avatar?: AvatarVariant;
+    /** Secondary line for the hover card (e.g. job title). */
+    subtitle?: string;
+    /** Link to the person's profile, shown as "View profile" in the hover card. */
+    profileHref?: string;
+};
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -5909,6 +6329,11 @@ declare type HeaderProps_2 = {
         whenEnabled?: string;
     };
     oneSwitchAutoOpen?: boolean;
+    /**
+     * Hide the per-page One switch. Use when One is reachable from elsewhere
+     * (e.g. a sidebar tab) so the page header doesn't duplicate the entry point.
+     */
+    hideOneSwitch?: boolean;
 };
 
 export declare type HeaderSecondaryAction = HeaderSecondaryButtonAction | HeaderSecondaryDropdownAction;
@@ -6215,7 +6640,12 @@ declare const inputFieldStatus: readonly ["default", "warning", "info", "error"]
 declare type InputFieldStatusType = (typeof inputFieldStatus)[number];
 
 declare type InputInternalProps = Pick<ComponentProps<typeof Input_2>, "ref" | "id" | "aria-describedby" | "aria-invalid"> & Pick<InputFieldProps<string>, "autoFocus" | "required" | "disabled" | "size" | "onChange" | "value" | "placeholder" | "clearable" | "maxLength" | "label" | "labelIcon" | "icon" | "hideLabel" | "name" | "error" | "status" | "hint" | "autocomplete" | "buttonToggle" | "hideMaxLength" | "loading" | "transparent" | "onBlur" | "readonly"> & {
-    type?: Exclude<HTMLInputTypeAttribute, "number">;
+    /**
+     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
+     * masked like a password but with no lock icon and with password managers
+     * disabled. It never reaches the DOM (mapped to text/password internally).
+     */
+    type?: Exclude<HTMLInputTypeAttribute, "number"> | "private";
     onPressEnter?: () => void;
 };
 
@@ -6351,6 +6781,9 @@ export declare type lastIntentType = {
     selectedIntent?: string;
     customIntent?: string;
 } | null;
+
+/** Sentinel for {@link F0ChatRuntime.loadMessageContext} meaning "the live tail". */
+export declare const LATEST: "latest";
 
 declare type Level = (typeof levels)[number];
 
@@ -7423,7 +7856,7 @@ export declare type PageBasedPaginatedResponse<TRecord> = BasePaginatedResponse<
     pagesCount: number;
 };
 
-export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, }: HeaderProps_2): JSX_2.Element;
+export declare function PageHeader({ module, statusTag, breadcrumbs, actions, embedded, navigation, productUpdates, favorites, oneSwitchTooltip, oneSwitchAutoOpen, hideOneSwitch, }: HeaderProps_2): JSX_2.Element;
 
 export declare type PageHeaderItemNavigationInput<R extends RecordType> = Pick<UseDataSourceItemNavigationReturn<R>, "previousItem" | "nextItem" | "previousItemUrl" | "nextItemUrl" | "absoluteIndex" | "totalItems" | "activeIndex" | "hasPrevious" | "hasNext" | "goToPrevious" | "goToNext">;
 
@@ -7907,6 +8340,7 @@ declare interface ReactionProps {
     hasReacted?: boolean;
     users?: User_2[];
     onInteraction?: (emoji: string) => void;
+    size?: "sm" | "md" | "lg";
 }
 
 /**
@@ -8266,16 +8700,48 @@ declare function _Sidebar({ header, body, footer, onFooterDropdownClick, }: Side
 export declare type SidebarChat = {
     id: string;
     label: string;
-    /** Person / team / company avatar (F0Avatar variant). */
-    avatar: AvatarVariant;
+    /**
+     * Person / team / company avatar (F0Avatar variant). Optional: omit it for
+     * avatar-less rows (e.g. an AI chat history that shows titles only).
+     */
+    avatar?: AvatarVariant;
+    /**
+     * When true, the row renders as a skeleton (avatar + name placeholders) but
+     * keeps its position. Use it for the "cascade" case: the conversation is
+     * known (id, group, order) but its name/avatar haven't resolved yet. As each
+     * chat resolves, flip this to false and pass the real `label`/`avatar`.
+     */
+    loading?: boolean;
     onClick?: () => void;
     /** When > 0, the chat is rendered as unread (darker, bolder name). */
     unreadCount?: number;
+    /**
+     * When > 0, the unread badge is prefixed with an `@` (groups only) — the
+     * unread run includes a message that mentions you, Slack-style. Just a marker
+     * on the existing badge, not a separate count; cleared on read.
+     */
+    mentionCount?: number;
+    /** When true, the name is replaced by a live "Writing…" label. */
+    typing?: boolean;
     presence?: SidebarChatPresence;
     /** Status icon shown to the right of the name. People only. */
     status?: SidebarChatStatus;
     /** Epoch ms of the last activity; used for ordering. */
     lastActivityAt?: number;
+    /** Whether the chat is pinned (favourited) — selects the solid pin icon. */
+    pinned?: boolean;
+    /**
+     * Toggle the pinned state. When set, a pin/unpin button appears on row hover
+     * in place of the unread badge / status icon. Omit to hide the affordance.
+     */
+    onTogglePin?: () => void;
+    /**
+     * A pin/unpin request for this chat is in flight (e.g. waiting on the
+     * backend). Replaces the pin button with a spinner, kept visible off-hover,
+     * so the row reads as "saving". The move between groups can still be applied
+     * optimistically — this only reflects that persistence is pending.
+     */
+    pinPending?: boolean;
 };
 
 /**
@@ -8289,6 +8755,45 @@ export declare type SidebarChatAction = {
 };
 
 export declare type SidebarChatActions = Omit<SidebarChatStore, "groups" | "activeChatId" | "unreadChatsCount">;
+
+export declare const SidebarChatBlankState: WithDataTestIdReturnType_3<typeof _SidebarChatBlankState>;
+
+/**
+ * Compact blank state for a sidebar conversation list. Shared by the people
+ * chat (`SidebarChatList`) and the AI history list so the two read identically.
+ * Deliberately lighter than `OneEmptyState` — no emoji/avatar and tight
+ * paddings — because it lives in a narrow sidebar column. The host (factorial)
+ * supplies the copy + actions.
+ */
+declare function _SidebarChatBlankState({ title, description, actions, ...rest }: SidebarChatBlankStateProps): ReactNode;
+
+/** A CTA shown under the blank-state copy — e.g. "Start a conversation". */
+export declare type SidebarChatBlankStateAction = {
+    label: string;
+    onClick?: () => void;
+    icon?: IconType;
+    /** Button variant — supports the gradient "ai" variant. @default "outline" */
+    variant?: ActionButtonVariant;
+};
+
+export declare type SidebarChatBlankStateProps = {
+    title: string;
+    description?: string;
+    /** Optional CTA(s) shown under the copy — e.g. "Start a conversation". */
+    actions?: SidebarChatBlankStateAction[];
+};
+
+/**
+ * Copy shown when there are no chats at all. Override via the `emptyState` prop.
+ * Rendered through the shared `OneEmptyState`, so the AI history list and this
+ * one read identically — the host (factorial) just supplies the copy + actions.
+ */
+export declare type SidebarChatEmptyState = {
+    title: string;
+    description?: string;
+    /** Optional CTA(s) shown under the copy — e.g. "Start a conversation". */
+    actions?: SidebarChatBlankStateAction[];
+};
 
 export declare type SidebarChatGroup = {
     id: string;
@@ -8305,14 +8810,45 @@ export declare const SidebarChatItem: ({ chat, isActive, onClick, }: {
 }) => JSX_2.Element;
 
 /**
- * Body of the "Messages" tab: chat groups read from `SidebarChatProvider`.
- * Chats fade in/out as they are added/removed; live reordering from the store
- * is applied instantly (Slack-style), without layout projection — that avoids
- * the resize-like "bounce" when the tab mounts.
+ * A single chat row rendered as a skeleton. Matches `SidebarChatItem`'s layout
+ * and height (36px: a 24px avatar + the row's vertical padding) so the row
+ * doesn't shift when the real data resolves. Used for the "cascade" case — a
+ * known conversation whose name/avatar is still loading (`SidebarChat.loading`).
  */
-export declare const SidebarChatList: ({ actions, }: {
+export declare const SidebarChatItemSkeleton: ({ className, }: {
+    className?: string;
+}) => JSX_2.Element;
+
+/**
+ * Body of the "Messages" tab: chat groups read from `SidebarChatProvider`,
+ * rendered through the shared `SidebarTabPanel` (search + actions + collapsible
+ * groups). This stays a thin adapter — it maps the chat store onto the panel
+ * and owns only chat-specific bits (unread badges, the blank state copy).
+ */
+export declare const SidebarChatList: ({ actions, emptyState, loading, }: {
     /** Ghost actions rendered at the very top (e.g. New chat, New group). */
     actions?: SidebarChatAction[];
+    /** Copy for the blank state shown when there are no chats. */
+    emptyState: SidebarChatEmptyState;
+    /**
+     * Whole-list loading: the conversations aren't known yet. Renders a generic
+     * skeleton instead of the blank state. Once any chats are known, pass them
+     * (with `loading` on the individual chats whose name is still resolving) and
+     * set this back to false — the per-chat skeletons take over (cascade).
+     */
+    loading?: boolean;
+}) => JSX_2.Element;
+
+/**
+ * Full-list skeleton shown while the conversations are still loading and the
+ * groups aren't known yet. A few placeholder groups, each with a 32px title row
+ * and some 36px chat rows.
+ */
+export declare const SidebarChatListSkeleton: ({ groups, rowsPerGroup, }: {
+    /** Number of placeholder groups. @default 2 */
+    groups?: number;
+    /** Placeholder rows per group. @default 4 */
+    rowsPerGroup?: number;
 }) => JSX_2.Element;
 
 export declare type SidebarChatPresence = "online" | "offline";
@@ -8372,7 +8908,7 @@ export declare type SidebarChatStore = {
  * Collapsible titled section used across the Sidebar (navigation categories,
  * chat groups). Title + rotating chevron + animated height.
  */
-export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
+export declare const SidebarCollapsibleSection: ({ title, isOpen: initialIsOpen, isRoot, onCollapse, children, highlightWhenCollapsed, collapsedBadge, isDragging, wasDragging, }: SidebarCollapsibleSectionProps) => JSX_2.Element;
 
 export declare interface SidebarCollapsibleSectionProps {
     title: string;
@@ -8387,6 +8923,11 @@ export declare interface SidebarCollapsibleSectionProps {
      * Slack-style hint that hidden items need attention (e.g. unread chats).
      */
     highlightWhenCollapsed?: boolean;
+    /**
+     * Content shown at the end of the header only while collapsed (e.g. a total
+     * unread badge) — surfaces what's hidden inside without expanding.
+     */
+    collapsedBadge?: ReactNode;
     /** Drag-aware guards used by the sortable Menu; safe to omit elsewhere. */
     isDragging?: boolean;
     wasDragging?: RefObject<boolean>;
@@ -8432,6 +8973,91 @@ export declare type SidebarTab = {
     icon: IconType;
     /** Unread counter shown next to the tab. */
     badge?: number;
+    /**
+     * Visual variant. "ai" renders the tab as an AI-variant button — the animated
+     * gradient shimmer on hover — e.g. the "One" tab. Defaults to the plain ghost
+     * tab (transparent background; the icon darkens on hover).
+     */
+    variant?: "default" | "ai";
+};
+
+/**
+ * Shared skeleton for a sidebar tab body: an optional search box pinned at the
+ * top, optional actions, and collapsible groups of arbitrary item rows.
+ *
+ * The panel is agnostic about what a row is — it renders `item.content` — so it
+ * backs the Messages (chats) and One (AI history) tabs from one place, keeping
+ * paddings, search behaviour and the empty / no-results states consistent.
+ */
+export declare const SidebarTabPanel: ({ groups, actions, searchPlaceholder, loading, skeleton, emptyState, noResultsLabel, animateItems, className, }: SidebarTabPanelProps) => JSX_2.Element;
+
+/**
+ * A top-of-panel action (e.g. "New chat", "New group"). The panel renders one
+ * ghost button per action, so they all share the same design. For an action
+ * that needs custom chrome (e.g. a popover trigger), pass `render` to wrap the
+ * default button while keeping its look.
+ */
+export declare type SidebarTabPanelAction = {
+    label: string;
+    icon?: IconType;
+    onClick?: () => void;
+    /**
+     * Wrap the default ghost button (received as `button`) in custom chrome —
+     * e.g. a popover/credits trigger. Return the wrapped node. The button keeps
+     * the standard action design; only its surroundings change.
+     */
+    render?: (button: ReactNode) => ReactNode;
+};
+
+export declare type SidebarTabPanelGroup = {
+    id: string;
+    /** Omit to render the items without a collapsible header (root group). */
+    title?: string;
+    /** Initial open state of the collapsible group. @default true */
+    isOpen?: boolean;
+    /** Emphasise the title (darker, bolder) while collapsed. */
+    highlightWhenCollapsed?: boolean;
+    /** Content shown at the end of the header only while collapsed. */
+    collapsedBadge?: ReactNode;
+    items: SidebarTabPanelItem[];
+};
+
+/**
+ * A single row in a group. The panel is agnostic about what a row looks like:
+ * it renders `content` opaquely. `searchText` is what the search box matches
+ * against (omit it to keep the item out of search results while filtering).
+ */
+export declare type SidebarTabPanelItem = {
+    id: string;
+    searchText?: string;
+    content: ReactNode;
+};
+
+export declare type SidebarTabPanelProps = {
+    groups: SidebarTabPanelGroup[];
+    /** Top-of-panel actions, rendered as a stack of ghost buttons. */
+    actions?: SidebarTabPanelAction[];
+    /**
+     * When set, renders a search box pinned at the very top of the panel that
+     * fuzzy-filters items by their `searchText`. Omit for no search.
+     */
+    searchPlaceholder?: string;
+    /** Whole-panel loading: renders `skeleton` instead of the groups. */
+    loading?: boolean;
+    /** Shown while `loading` and there are no items yet. */
+    skeleton?: ReactNode;
+    /** Shown when there are no items at all (not while searching). */
+    emptyState?: ReactNode;
+    /** Shown when a search yields no matches. */
+    noResultsLabel?: ReactNode;
+    /**
+     * Animate rows as they appear/disappear/move between groups — a pin/unpin
+     * glides a row across, search reflows smoothly (reduced-motion aware).
+     * On by default; pass `false` to render rows statically.
+     */
+    animateItems?: boolean;
+    /** Override the outer container className. */
+    className?: string;
 };
 
 /**
@@ -8442,17 +9068,12 @@ export declare type SidebarTab = {
  * When no tabs are needed, keep composing the Sidebar header with `SearchBar`
  * instead — that path is unchanged.
  */
-export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, search, }: SidebarTabsProps) => JSX_2.Element;
+export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, }: SidebarTabsProps) => JSX_2.Element;
 
 export declare type SidebarTabsProps = {
     tabs: SidebarTab[];
     activeTab: string;
     onTabChange: (id: string) => void;
-    search: {
-        /** Accessible label / tooltip for the search icon button. */
-        placeholder?: string;
-        onClick?: () => void;
-    };
 };
 
 /**
@@ -9120,7 +9741,7 @@ export declare interface TopLevelPrependNotesTextEditorPageDocumentPatch {
  * intermediate results for live textarea fill. When omitted from the chat
  * config, the microphone button is not rendered.
  */
-declare type TranscribeFn = (audio: Blob, options: TranscribeOptions) => Promise<string>;
+export declare type TranscribeFn = (audio: Blob, options: TranscribeOptions) => Promise<string>;
 
 declare type TranscribeOptions = {
     /**
@@ -9421,6 +10042,9 @@ declare interface UseExportActionProps<R extends RecordType, Filters extends Fil
      *  state, callbacks, and i18n are still initialized. Defaults to `true`. */
     enabled?: boolean;
 }
+
+/** Read the chat runtime. Throws when used outside an {@link F0ChatProvider}. */
+export declare function useF0Chat(): F0ChatRuntime;
 
 export declare const useInfiniteScrollPagination: (paginationInfo: PaginationInfo | null, isLoading: boolean, isLoadingMore: boolean, loadMore: () => void) => {
     loadingIndicatorRef: RefObject<HTMLTableCellElement>;
@@ -10004,18 +10628,6 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
-        };
-    }
-}
-
-
-declare module "@tiptap/core" {
-    interface Commands<ReturnType> {
         aiBlock: {
             insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
             executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
@@ -10028,6 +10640,18 @@ declare module "@tiptap/core" {
     interface Commands<ReturnType> {
         moodTracker: {
             insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        };
+    }
+}
+
+
+declare module "@tiptap/core" {
+    interface Commands<ReturnType> {
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
