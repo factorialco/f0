@@ -81,7 +81,7 @@ import {
 import type { Template } from "./mockData"
 // WIP: temporary toast mock — replace with "@/hooks/toast" once
 // https://github.com/factorialco/f0/pull/3493 merges, then remove this import.
-import { MockToastProvider, useMockToast } from "./mockToast"
+import { toasts } from "@/hooks/toast"
 import {
   makeInitialSurveyElements,
   mockSurveyTranscribe,
@@ -1252,7 +1252,6 @@ function SurveyEditorCanvasHeader({
   onClose: () => void
 }) {
   const { tabId, setTabId, elements, name } = useSurveyEditorCanvas()
-  const { toast } = useMockToast()
   return (
     <>
       <ResourceHeader
@@ -1265,7 +1264,10 @@ function SurveyEditorCanvasHeader({
           onClick: () =>
             void confirmPublish().then((ok) => {
               if (ok)
-                toast({ title: SURVEY_PUBLISHED_TOAST, variant: "success" })
+                toasts.open({
+                  title: SURVEY_PUBLISHED_TOAST,
+                  variant: "success",
+                })
             }),
         }}
         onClose={() =>
@@ -1273,7 +1275,7 @@ function SurveyEditorCanvasHeader({
             // Cancel or dismissed → stay on the canvas.
             if (action === "cancel" || action === undefined) return
             if (action === "save")
-              toast({
+              toasts.open({
                 title: SURVEY_SAVED_TOAST,
                 variant: "success",
               })
@@ -1284,7 +1286,7 @@ function SurveyEditorCanvasHeader({
           {
             label: "Save to Surveys",
             onClick: () =>
-              toast({
+              toasts.open({
                 title: SURVEY_SAVED_TOAST,
                 variant: "success",
               }),
@@ -1294,7 +1296,7 @@ function SurveyEditorCanvasHeader({
           {
             label: "Duplicate",
             icon: LayersFront,
-            onClick: () => toast({ title: SURVEY_DUPLICATED_TOAST }),
+            onClick: () => toasts.open({ title: SURVEY_DUPLICATED_TOAST }),
           },
           { type: "separator" },
           {
@@ -1302,7 +1304,7 @@ function SurveyEditorCanvasHeader({
             icon: Delete,
             critical: true,
             onClick: () =>
-              toast({ title: SURVEY_DELETED_TOAST, variant: "error" }),
+              toasts.open({ title: SURVEY_DELETED_TOAST, variant: "error" }),
           },
         ]}
         metadata={[
@@ -1341,7 +1343,6 @@ function SurveyEditorCanvasHeader({
 function SurveyEditorCanvasBody() {
   const { tabId, elements, setElements, processing, surveyId } =
     useSurveyEditorCanvas()
-  const { toast } = useMockToast()
   // This flow's resource carries a Draft status, so creating it persists a draft
   // to its domain the moment its canvas first opens — the resource's first
   // creation (not autosave), fired once per survey across every creation path
@@ -1353,13 +1354,13 @@ function SurveyEditorCanvasBody() {
     if (!surveyId || createdSurveyIds.has(surveyId)) return
     const t = setTimeout(() => {
       createdSurveyIds.add(surveyId)
-      toast({
+      toasts.open({
         title: SURVEY_SAVED_TOAST,
         variant: "success",
       })
     }, 600)
     return () => clearTimeout(t)
-  }, [surveyId, toast])
+  }, [surveyId])
   return (
     // While the AI is "drafting" questions, blur + lock the builder behind the
     // "applying changes" overlay.
@@ -1723,7 +1724,6 @@ function FlowContent({
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
   const { armProposal } = useProposalFlow()
-  const { toast } = useMockToast()
 
   // Typed "Create" flow: the same three clarifying questions as the Empty survey
   // card, walked as a single consecutive panel — but the canvas stays closed
@@ -1869,7 +1869,7 @@ function FlowContent({
                   onClick: () =>
                     void confirmPublish().then((ok) => {
                       if (ok)
-                        toast({
+                        toasts.open({
                           title: SURVEY_PUBLISHED_TOAST,
                           variant: "success",
                         })
@@ -1880,7 +1880,7 @@ function FlowContent({
                   {
                     label: "Save to Surveys",
                     onClick: () =>
-                      toast({
+                      toasts.open({
                         title: SURVEY_SAVED_TOAST,
                         variant: "success",
                       }),
@@ -1890,7 +1890,8 @@ function FlowContent({
                   {
                     label: "Duplicate",
                     icon: LayersFront,
-                    onClick: () => toast({ title: SURVEY_DUPLICATED_TOAST }),
+                    onClick: () =>
+                      toasts.open({ title: SURVEY_DUPLICATED_TOAST }),
                   },
                   { type: "separator" },
                   {
@@ -1898,7 +1899,10 @@ function FlowContent({
                     icon: Delete,
                     critical: true,
                     onClick: () =>
-                      toast({ title: SURVEY_DELETED_TOAST, variant: "error" }),
+                      toasts.open({
+                        title: SURVEY_DELETED_TOAST,
+                        variant: "error",
+                      }),
                   },
                 ]}
                 metadata={[
@@ -2068,21 +2072,19 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
 
   return (
     <MockAiChatRuntimeProvider>
-      <MockToastProvider>
-        <TabConfigProvider initialTabId={initialTabId}>
-          <SurveyStoreProvider>
-            <ApplicationFrame
-              ai={ai}
-              sidebar={<Sidebar {...SidebarStories.default.args} />}
-            >
-              {/* Feeds the survey welcome cards into the chat via
-                  `welcomeScreenCards`; renders nothing itself. */}
-              <SurveyWelcomeCardsRegistrar />
-              <FlowContent phase={phase} setPhase={setPhase} />
-            </ApplicationFrame>
-          </SurveyStoreProvider>
-        </TabConfigProvider>
-      </MockToastProvider>
+      <TabConfigProvider initialTabId={initialTabId}>
+        <SurveyStoreProvider>
+          <ApplicationFrame
+            ai={ai}
+            sidebar={<Sidebar {...SidebarStories.default.args} />}
+          >
+            {/* Feeds the survey welcome cards into the chat via
+                `welcomeScreenCards`; renders nothing itself. */}
+            <SurveyWelcomeCardsRegistrar />
+            <FlowContent phase={phase} setPhase={setPhase} />
+          </ApplicationFrame>
+        </SurveyStoreProvider>
+      </TabConfigProvider>
     </MockAiChatRuntimeProvider>
   )
 }
