@@ -1,0 +1,125 @@
+name: "Deploy f0compose previews"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    paths:
+      - "packages/f0compose/**"
+      - "packages/react/**"
+      - "packages/core/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "package.json"
+      - ".github/workflows/deploy-f0compose-previews.yaml"
+  workflow_dispatch:
+    inputs:
+      aliases:
+        description: "Comma-separated Vercel aliases to update. Defaults to aliases found in the PR body."
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: f0compose-preview-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy f0compose public preview aliases
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    env:
+      VERCEL_ORG_ID: team_8ftOz3rwfowRI8Ca3K0YZIzN
+      VERCEL_PROJECT_ID: prj_eL9NXyAj6ZKF5clS3m8rqgl8SGs0
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node-pnpm
+
+      - name: Resolve public aliases
+        id: aliases
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const manualAliases = `${{ github.event.inputs.aliases || '' }}`
+              .split(',')
+              .map((alias) => alias.trim())
+              .filter(Boolean)
+            const body = context.payload.pull_request?.body ?? ''
+            const bodyAliases = [...body.matchAll(/https?:\/\/([a-z0-9-]+\.vercel\.app)\b/gi)]
+              .map((match) => match[1])
+            const aliases = [...new Set([...manualAliases, ...bodyAliases])]
+              .filter((alias) => !alias.includes('-jonsaenz-6331s-projects.vercel.app'))
+
+            core.setOutput('json', JSON.stringify(aliases))
+            core.setOutput('count', String(aliases.length))
+
+      - name: Stop when there are no public aliases
+        if: steps.aliases.outputs.count == '0'
+        run: echo "No public Vercel aliases found in this PR. Skipping deploy."
+
+      - name: Write Vercel config
+        if: steps.aliases.outputs.count != '0'
+        run: |
+          cat > vercel.f0compose.json <<'JSON'
+          {
+            "framework": "vite",
+            "installCommand": "pnpm install --frozen-lockfile",
+            "buildCommand": "pnpm --filter @factorialco/f0-core build && pnpm --filter @factorialco/f0compose build",
+            "outputDirectory": "packages/f0compose/dist",
+            "rewrites": [
+              {
+                "source": "/(.*)",
+                "destination": "/index.html"
+              }
+            ]
+          }
+          JSON
+
+      - name: Build Vercel output
+        if: steps.aliases.outputs.count != '0'
+        run: pnpm dlx vercel@54.2.0 build --yes --local-config vercel.f0compose.json --token "$VERCEL_TOKEN"
+
+      - name: Deploy Vercel output
+        if: steps.aliases.outputs.count != '0'
+        id: deploy
+        run: |
+          deployment_url=$(pnpm dlx vercel@54.2.0 deploy --prebuilt --local-config vercel.f0compose.json --token "$VERCEL_TOKEN" | grep -Eo 'https://[^ ]+\.vercel\.app' | tail -n 1)
+          if [ -z "$deployment_url" ]; then
+            echo "Could not resolve Vercel deployment URL" >&2
+            exit 1
+          fi
+          echo "url=$deployment_url" >> "$GITHUB_OUTPUT"
+
+      - name: Update public aliases
+        if: steps.aliases.outputs.count != '0'
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
+          ALIASES_JSON: ${{ steps.aliases.outputs.json }}
+        with:
+          script: |
+            const { execFileSync } = require('node:child_process')
+            const aliases = JSON.parse(process.env.ALIASES_JSON)
+            const deploymentUrl = process.env.DEPLOYMENT_URL
+
+            for (const alias of aliases) {
+              core.info(`Pointing ${alias} to ${deploymentUrl}`)
+              execFileSync('pnpm', [
+                'dlx',
+                'vercel@54.2.0',
+                'alias',
+                'set',
+                deploymentUrl,
+                alias,
+                '--token',
+                process.env.VERCEL_TOKEN,
+              ], { stdio: 'inherit' })
+            }
