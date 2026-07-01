@@ -388,6 +388,29 @@ type SurveyCanvasContent = CanvasContentBase & {
   empty?: boolean
 }
 
+// Bridge the story-local canvas types to the SDS API. `CanvasContent` /
+// `CanvasEntityDefinition` are a *closed* SDS union that doesn't include the
+// custom "survey"/"templates" entities this story demos, so we widen at the
+// provider boundary (the registry/panel match on the `type` string at runtime).
+// Centralized here so the unavoidable cast — and the reason for it — live in one
+// place instead of being repeated at every call site.
+type StoryCanvasContent = SurveyCanvasContent | TemplatesCanvasContent
+
+const toCanvasContent = (content: StoryCanvasContent): CanvasContent =>
+  content as unknown as CanvasContent
+
+const toCanvasEntity = (
+  entity:
+    | CanvasEntityDefinition<SurveyCanvasContent>
+    | CanvasEntityDefinition<TemplatesCanvasContent>
+): CanvasEntityDefinition => entity as unknown as CanvasEntityDefinition
+
+// Inverse of `toCanvasContent`: read the story content back out of the SDS union.
+const asSurveyCanvasContent = (
+  content: CanvasContent | null
+): SurveyCanvasContent | null =>
+  content as unknown as SurveyCanvasContent | null
+
 // Default name for a blank "start from scratch" survey, shown until the guided
 // flow resolves a real name.
 const UNTITLED_SURVEY_NAME = "Untitled survey"
@@ -438,19 +461,21 @@ function SurveyCard({
   const live = isLiveCard(surveyId, cardId)
   // `canvasContent` is the closed SDS union (dashboard | form | dataDownload);
   // the story-local "survey" type is matched at runtime, so widen to read it.
-  const surveyContent = canvasContent as unknown as SurveyCanvasContent | null
+  const surveyContent = asSurveyCanvasContent(canvasContent)
   const isActive =
     surveyContent?.type === "survey" && surveyContent.surveyId === surveyId
 
   const handleOpen = () =>
-    openCanvas({
-      type: "survey",
-      title,
-      mode: "edit",
-      templateName: title,
-      surveyId,
-      description,
-    } as unknown as CanvasContent)
+    openCanvas(
+      toCanvasContent({
+        type: "survey",
+        title,
+        mode: "edit",
+        templateName: title,
+        surveyId,
+        description,
+      })
+    )
 
   // Closing from the card collapses the canvas but keeps the chat docked as a
   // side panel (split). The mode before the canvas opened is always either
@@ -814,14 +839,16 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
     // A template copy is created already populated, so seed the sample questions
     // (empty: false). No AI drafting follows, so this single card stays live.
     const surveyId = createSurvey(content.templateName, { empty: false })
-    openCanvas({
-      type: "survey",
-      title: content.templateName,
-      mode: "edit",
-      templateName: content.templateName,
-      surveyId,
-      description: content.description,
-    } as unknown as CanvasContent)
+    openCanvas(
+      toCanvasContent({
+        type: "survey",
+        title: content.templateName,
+        mode: "edit",
+        templateName: content.templateName,
+        surveyId,
+        description: content.description,
+      })
+    )
     // Acknowledge the survey created from this template — an openable canvas card
     // (template name + subtitle) followed by a guided follow-up question.
     const cardId = nextCardId()
@@ -854,9 +881,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         hideLabel
         label="Back to templates"
         icon={ArrowLeft}
-        onClick={() =>
-          openCanvas(TEMPLATES_CANVAS_CONTENT as unknown as CanvasContent)
-        }
+        onClick={() => openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))}
       />
       <div className="min-w-0 flex-shrink truncate">
         <F0Heading content={`Template · ${content.templateName}`} as="h2" />
@@ -1393,13 +1418,15 @@ const surveyCanvasEntity: CanvasEntityDefinition<SurveyCanvasContent> = {
 function TemplatesCanvasBody() {
   const { openCanvas } = useAiChat()
   const openPreview = (item: Template) =>
-    openCanvas({
-      type: "survey",
-      title: item.name,
-      mode: "preview",
-      templateName: item.name,
-      description: item.description,
-    } as unknown as CanvasContent)
+    openCanvas(
+      toCanvasContent({
+        type: "survey",
+        title: item.name,
+        mode: "preview",
+        templateName: item.name,
+        description: item.description,
+      })
+    )
   return <TemplatesCollection onSelect={openPreview} />
 }
 
@@ -1552,7 +1579,7 @@ function SurveyWelcomeCardsRegistrar() {
         // (live/openable), and the first clarifying question (the chain walks
         // the rest).
         const surveyId = createSurvey(UNTITLED_SURVEY_NAME, { empty: true })
-        openCanvas(makeEmptySurveyContent(surveyId) as unknown as CanvasContent)
+        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
         appendMessages([
           { role: "assistant", content: "Let's start with a blank survey." },
         ])
@@ -1570,7 +1597,7 @@ function SurveyWelcomeCardsRegistrar() {
         break
       }
       case "templates": {
-        openCanvas(TEMPLATES_CANVAS_CONTENT as unknown as CanvasContent)
+        openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
         appendMessages([
           {
             role: "assistant",
@@ -1588,14 +1615,16 @@ function SurveyWelcomeCardsRegistrar() {
         const surveyId = createSurvey(EMPLOYEE_NPS_SURVEY_NAME, {
           elements: NPS_SURVEY_ELEMENTS,
         })
-        openCanvas({
-          type: "survey",
-          title: EMPLOYEE_NPS_SURVEY_NAME,
-          mode: "edit",
-          templateName: EMPLOYEE_NPS_SURVEY_NAME,
-          surveyId,
-          description: SURVEY_CREATED_DESCRIPTION,
-        } as unknown as CanvasContent)
+        openCanvas(
+          toCanvasContent({
+            type: "survey",
+            title: EMPLOYEE_NPS_SURVEY_NAME,
+            mode: "edit",
+            templateName: EMPLOYEE_NPS_SURVEY_NAME,
+            surveyId,
+            description: SURVEY_CREATED_DESCRIPTION,
+          })
+        )
         const cardId = nextCardId()
         registerLiveCard(surveyId, cardId)
         appendCard(() => (
@@ -1702,9 +1731,7 @@ function FlowContent({
       onConfirm: (answersByStep) => {
         appendMessages(surveyAnswerMessages(answersByStep))
         const name = surveyNameForType(answersByStep[0]?.[0] ?? "Untitled")
-        openCanvas(
-          makeEmptySurveyContent(surveyId, name) as unknown as CanvasContent
-        )
+        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId, name)))
         appendMessages([
           {
             role: "assistant",
@@ -2018,8 +2045,8 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
     // closed SDS `CanvasContent` union, so the entity definitions are widened to
     // the registry's base type here.
     canvasEntities: {
-      templates: templatesCanvasEntity as unknown as CanvasEntityDefinition,
-      survey: surveyCanvasEntity as unknown as CanvasEntityDefinition,
+      templates: toCanvasEntity(templatesCanvasEntity),
+      survey: toCanvasEntity(surveyCanvasEntity),
     },
     // Keep the chat steady when the canvas opens/closes with the chat docked as
     // a side panel: suppress the chat content's mode-change re-fade. The canvas
