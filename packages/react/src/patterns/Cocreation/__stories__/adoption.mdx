@@ -28,7 +28,7 @@ how the transitions fire.
   }}
   dont={{
     description:
-      "Don't track \"is the chat open\" and \"which phase are we in\" as separate, free-floating state — they will drift.",
+      'Don\'t track "is the chat open" and "which phase are we in" as separate, free-floating state — they will drift.',
   }}
 />
 
@@ -50,23 +50,34 @@ on its own page; the catalog and responsibilities live in
     <tbody>
       <tr>
         <td>Open the AI from any phase</td>
-        <td><code>F0OneSwitch</code> in the frame header</td>
+        <td>
+          <code>F0OneSwitch</code> in the frame header
+        </td>
       </tr>
       <tr>
         <td>The conversation surface, composer, and welcome screen</td>
-        <td><code>F0AiChat</code> (plus its <code>welcomeScreenCards</code> / <code>welcomeScreenSuggestions</code>)</td>
+        <td>
+          <code>F0AiChat</code> (plus its <code>welcomeScreenCards</code> /{" "}
+          <code>welcomeScreenSuggestions</code>)
+        </td>
       </tr>
       <tr>
         <td>Narrow a vague intent before drafting</td>
-        <td><code>F0ClarifyingPanel</code></td>
+        <td>
+          <code>F0ClarifyingPanel</code>
+        </td>
       </tr>
       <tr>
         <td>The in-chat resource card and the accept/reject proposal card</td>
-        <td><code>F0CardHorizontal</code></td>
+        <td>
+          <code>F0CardHorizontal</code>
+        </td>
       </tr>
       <tr>
         <td>"Applying changes" over the canvas</td>
-        <td><code>F0AiProcessingOverlay</code></td>
+        <td>
+          <code>F0AiProcessingOverlay</code>
+        </td>
       </tr>
     </tbody>
   </table>
@@ -104,7 +115,7 @@ The conversational machinery is shared; what's specific to your resource is smal
   a resource **without** a draft state creates nothing until the user explicitly saves. This
   drives the "leaving warns" contract — a draft survives navigation, unsaved non-draft work is
   lost.
-- **Clarifying questions** — the handful that materially improve *your* first draft (Surveys
+- **Clarifying questions** — the handful that materially improve _your_ first draft (Surveys
   asks type → audience → length).
 - **Welcome cards** — the starting points worth offering on the welcome screen (blank, browse
   templates, seed a known template).
