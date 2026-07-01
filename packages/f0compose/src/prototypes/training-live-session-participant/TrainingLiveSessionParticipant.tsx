@@ -4511,7 +4511,7 @@ const sessionFormSchema = z.object({
     label: "Meeting link",
     section: "format",
     optional: true,
-    helpText: "Paste the link participants will use to join.",
+    helpText: "The link participants use to join. Overrides the auto-generated one when a calendar is connected.",
     renderIf: ({ values }: { values: Record<string, unknown> }) =>
       (values.modality === "virtual" || values.modality === "hybrid") && values.videoCall === "external",
   }),
