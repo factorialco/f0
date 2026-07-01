@@ -514,6 +514,12 @@ const SURVEY_CREATED_DESCRIPTION = "Created in Engagement / Surveys"
 // Subtitle shown on the "updated" card posted once the AI drafts the questions.
 const SURVEY_UPDATED_DESCRIPTION = "Survey updated with your choices."
 
+// Toast titles reused across the survey resource-header actions and autosave.
+const SURVEY_SAVED_TOAST = "Survey saved in Engagement / Surveys"
+const SURVEY_PUBLISHED_TOAST = "Survey published"
+const SURVEY_DUPLICATED_TOAST = "Survey duplicated"
+const SURVEY_DELETED_TOAST = "Survey deleted"
+
 // The single open-ended question the AI "proposes" adding once a template has
 // been applied and the user describes a change. Appended to the survey (kept
 // alongside the template's questions) when the user accepts the proposal.
@@ -1258,7 +1264,8 @@ function SurveyEditorCanvasHeader({
           icon: SolidPlay,
           onClick: () =>
             void confirmPublish().then((ok) => {
-              if (ok) toast({ title: "Survey published", variant: "success" })
+              if (ok)
+                toast({ title: SURVEY_PUBLISHED_TOAST, variant: "success" })
             }),
         }}
         onClose={() =>
@@ -1267,7 +1274,7 @@ function SurveyEditorCanvasHeader({
             if (action === "cancel" || action === undefined) return
             if (action === "save")
               toast({
-                title: "Survey saved in Engagement / Surveys",
+                title: SURVEY_SAVED_TOAST,
                 variant: "success",
               })
             onClose()
@@ -1278,7 +1285,7 @@ function SurveyEditorCanvasHeader({
             label: "Save to Surveys",
             onClick: () =>
               toast({
-                title: "Survey saved in Engagement / Surveys",
+                title: SURVEY_SAVED_TOAST,
                 variant: "success",
               }),
           },
@@ -1287,14 +1294,15 @@ function SurveyEditorCanvasHeader({
           {
             label: "Duplicate",
             icon: LayersFront,
-            onClick: () => toast({ title: "Survey duplicated" }),
+            onClick: () => toast({ title: SURVEY_DUPLICATED_TOAST }),
           },
           { type: "separator" },
           {
             label: "Delete",
             icon: Delete,
             critical: true,
-            onClick: () => toast({ title: "Survey deleted", variant: "error" }),
+            onClick: () =>
+              toast({ title: SURVEY_DELETED_TOAST, variant: "error" }),
           },
         ]}
         metadata={[
@@ -1346,7 +1354,7 @@ function SurveyEditorCanvasBody() {
     const t = setTimeout(() => {
       createdSurveyIds.add(surveyId)
       toast({
-        title: "Survey saved in Engagement / Surveys",
+        title: SURVEY_SAVED_TOAST,
         variant: "success",
       })
     }, 600)
@@ -1862,7 +1870,7 @@ function FlowContent({
                     void confirmPublish().then((ok) => {
                       if (ok)
                         toast({
-                          title: "Survey published",
+                          title: SURVEY_PUBLISHED_TOAST,
                           variant: "success",
                         })
                     }),
@@ -1873,7 +1881,7 @@ function FlowContent({
                     label: "Save to Surveys",
                     onClick: () =>
                       toast({
-                        title: "Survey saved in Engagement / Surveys",
+                        title: SURVEY_SAVED_TOAST,
                         variant: "success",
                       }),
                   },
@@ -1882,7 +1890,7 @@ function FlowContent({
                   {
                     label: "Duplicate",
                     icon: LayersFront,
-                    onClick: () => toast({ title: "Survey duplicated" }),
+                    onClick: () => toast({ title: SURVEY_DUPLICATED_TOAST }),
                   },
                   { type: "separator" },
                   {
@@ -1890,7 +1898,7 @@ function FlowContent({
                     icon: Delete,
                     critical: true,
                     onClick: () =>
-                      toast({ title: "Survey deleted", variant: "error" }),
+                      toast({ title: SURVEY_DELETED_TOAST, variant: "error" }),
                   },
                 ]}
                 metadata={[
