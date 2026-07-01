@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { Phone } from "@/icons/app"
+import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0TagStatus } from "../"
@@ -28,6 +30,18 @@ const meta: Meta = {
       table: {
         type: {
           summary: "StatusVariant",
+        },
+      },
+    },
+    icon: {
+      control: "select",
+      description:
+        "Optional leading icon, rendered inside the tag in place of the status dot. Inherits the variant's semantic color.",
+      options: Object.keys(Icons),
+      mapping: Icons,
+      table: {
+        type: {
+          summary: "IconType",
         },
       },
     },
@@ -67,6 +81,14 @@ export const CriticalStatusTag: Story = {
   },
 }
 
+export const WithIcon: Story = {
+  args: {
+    variant: "info",
+    text: "Live call",
+    icon: Phone,
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -74,6 +96,16 @@ export const Snapshot: Story = {
       <h3 className="text-lg font-semibold">All Status Tags</h3>
       {statuses.map((status) => (
         <F0TagStatus key={status} text={status} variant={status} />
+      ))}
+
+      <h3 className="text-lg font-semibold">With Icon</h3>
+      {statuses.map((status) => (
+        <F0TagStatus
+          key={`${status}-icon`}
+          text={status}
+          variant={status}
+          icon={Phone}
+        />
       ))}
 
       <F0TagStatus
