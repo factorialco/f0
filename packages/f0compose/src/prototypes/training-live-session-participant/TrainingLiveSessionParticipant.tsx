@@ -35,6 +35,7 @@ import {
   NumberInput,
   ResourceHeader,
   SectionHeader,
+  Switch,
   Tabs,
   ToggleGroup,
   ToggleGroupItem,
@@ -582,7 +583,7 @@ const sessionModalityOptions: Array<{
 // in-Factorial call features).
 const videoCallOptions: Array<{ value: "factorial" | "external"; label: string; description: string; icon: IconType }> = [
   { value: "factorial", label: "In Factorial", description: "Runs in Factorial", icon: LogoAvatar },
-  { value: "external", label: "External link", description: "Use your own link", icon: ExternalLink },
+  { value: "external", label: "Externally hosted", description: "Runs outside Factorial", icon: ExternalLink },
 ]
 
 function SessionToggleField({ label, children }: { label: string; children: ReactNode }) {
@@ -1616,15 +1617,17 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
         style={{ right: 12, top: 12, bottom: 12, width: 640, backgroundColor: "var(--f1-background, #fff)" }}
       >
         <F0Box height="full" display="flex" flexDirection="column">
-          <F0BoxWithClassName display="flex" alignItems="center" justifyContent="between" paddingLeft="md" paddingRight="lg" borderBottom="default" borderColor="secondary" style={{ height: 57 }}>
+          <F0BoxWithClassName display="flex" alignItems="center" justifyContent="between" paddingLeft="xl" paddingRight="lg" borderBottom="default" borderColor="secondary" style={{ height: 57 }}>
             <F0Heading content={session.name} variant="heading" as="h2" />
             <F0BoxWithClassName role="button" aria-label="Close" tabIndex={0} onClick={onClose} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 32, height: 32, cursor: "pointer" }}>
               <F0Icon icon={Cross} size="md" />
             </F0BoxWithClassName>
           </F0BoxWithClassName>
-          <F0BoxWithClassName paddingTop="lg" paddingLeft="md" paddingRight="md" overflowY="auto" grow>
-            <Tabs key={tab} tabs={tabs} activeTabId={tab} />
-            <F0BoxWithClassName style={{ paddingTop: 24 }}>
+          <F0BoxWithClassName overflowY="auto" grow>
+            <F0BoxWithClassName paddingTop="lg">
+              <Tabs key={tab} tabs={tabs} activeTabId={tab} />
+            </F0BoxWithClassName>
+            <F0BoxWithClassName paddingLeft="xl" paddingRight="xl" style={{ paddingTop: 24 }}>
               {tab === "details" ? (
                 <F0Box display="flex" flexDirection="column" gap="3xl">
                   <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionStatus(session).label, variant: getSessionStatus(session).status }} />
@@ -4411,7 +4414,7 @@ function SessionSidepanel({
             display="flex"
             alignItems="center"
             justifyContent="between"
-            paddingLeft="md"
+            paddingLeft="xl"
             paddingRight="lg"
             borderBottom="default"
             borderColor="secondary"
@@ -4434,15 +4437,17 @@ function SessionSidepanel({
                 <F0Icon icon={Cross} size="md" />
               </F0BoxWithClassName>
             </F0BoxWithClassName>
-          <F0BoxWithClassName paddingTop="lg" paddingLeft="md" paddingRight="md" overflowY="auto" grow>
-            <Tabs
-              key={visibleTab}
-              tabs={tabs
-                .filter((tab) => tab.disabled !== true)
-                .map((tab) => ({ id: tab.id, label: tab.label, onClick: tab.onClick }))}
-              activeTabId={visibleTab}
-            />
-            <F0BoxWithClassName style={{ paddingTop: 32 }}>
+          <F0BoxWithClassName overflowY="auto" grow>
+            <F0BoxWithClassName paddingTop="lg">
+              <Tabs
+                key={visibleTab}
+                tabs={tabs
+                  .filter((tab) => tab.disabled !== true)
+                  .map((tab) => ({ id: tab.id, label: tab.label, onClick: tab.onClick }))}
+                activeTabId={visibleTab}
+              />
+            </F0BoxWithClassName>
+            <F0BoxWithClassName paddingLeft="xl" paddingRight="xl" style={{ paddingTop: 32 }}>
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
               {visibleTab === "notes" ? (inFactorial ? <SessionNotesTab session={session} scope={role} /> : <SessionFactorialOnlyNote feature="notes" />) : null}
               {visibleTab === "attendance" ? <SessionAttendanceTable isEnded={isEnded} /> : null}
@@ -4496,6 +4501,12 @@ const sessionFormSchema = z.object({
     fieldConfig: { options: videoCallOptions, columns: "2", title: "Where it's hosted" },
     renderIf: ({ values }: { values: Record<string, unknown> }) => values.modality === "virtual" || values.modality === "hybrid",
   }),
+  calendar: f0FormField(z.string().optional(), {
+    label: "Calendar",
+    section: "format",
+    fieldType: "custom",
+    customFieldName: "calendarField",
+  }),
   meetingLink: f0FormField.text({
     label: "Meeting link",
     section: "format",
@@ -4535,7 +4546,7 @@ const sessionFormSchema = z.object({
       !((values.modality === "virtual" || values.modality === "hybrid") && values.videoCall === "factorial"),
   }),
   notifications: f0FormField.boolean({
-    label: "Send reminders and calendar invites",
+    label: "Send reminders",
     section: "notifications",
     optional: true,
   }),
@@ -4544,13 +4555,6 @@ const sessionFormSchema = z.object({
     section: "notifications",
     fieldType: "custom",
     customFieldName: "reminderCard",
-    renderIf: { fieldId: "notifications", equalsTo: true },
-  }),
-  calendarConfig: f0FormField(z.string().optional(), {
-    label: "Calendar",
-    section: "notifications",
-    fieldType: "custom",
-    customFieldName: "calendarCard",
     renderIf: { fieldId: "notifications", equalsTo: true },
   }),
 })
@@ -4568,9 +4572,9 @@ const sessionFormDefaultValues = {
   instructors: [],
   minimumAttendance: 75,
   attendanceUpsell: "",
+  calendar: "",
   notifications: false,
   reminderConfig: "",
-  calendarConfig: "",
 }
 
 function SessionFormBody({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
@@ -4606,7 +4610,7 @@ function SessionFormBody({ onClose, onSave }: { onClose: () => void; onSave: () 
         )
       }
       if (props.customFieldName === "reminderCard") return <SessionReminderCard />
-      if (props.customFieldName === "calendarCard") return <SessionCalendarCard />
+      if (props.customFieldName === "calendarField") return <SessionCalendarField />
       if (props.customFieldName === "attendanceUpsell")
         return (
           <F0Alert
@@ -5462,7 +5466,13 @@ function SessionReminderCard() {
   )
 }
 
-function SessionCalendarCard() {
+// Two-step calendar feature. Step 1: connect the calendar (can't be enabled
+// until it is). Step 2 (once connected): a toggle to activate it for this
+// session — blocks the slot in agendas and emails participants.
+function SessionCalendarField() {
+  const [connected, setConnected] = useState(false)
+  const [active, setActive] = useState(true)
+
   return (
     <F0Box
       display="flex"
@@ -5475,27 +5485,37 @@ function SessionCalendarCard() {
       background="primary"
     >
       <F0Box display="flex" flexDirection="column" gap="xs">
-        <F0Text content="Send calendar invites" variant="body" />
-        <F0Text content="Authorize Factorial to access your calendar and schedule trainings." variant="description" />
+        <F0Text content="Connect calendar" variant="body" />
+        <F0Text content="Connect it to block the slot in everyone's agenda and email participants about the session." variant="description" />
       </F0Box>
-      <F0Box
-        display="flex"
-        alignItems="center"
-        justifyContent="between"
-        gap="md"
-        padding="sm"
-        borderRadius="lg"
-        background="warning"
-      >
-        <F0Box display="flex" alignItems="center" gap="sm">
-          <F0Icon icon={InProgressTask} size="md" color="warning" />
-          <F0Box display="flex" flexDirection="column">
-            <F0Text content="Calendar not connected" variant="body" />
-            <F0Text content={'Click "Connect" to start the process.'} variant="description" />
+      {!connected ? (
+        <F0Box
+          display="flex"
+          alignItems="center"
+          justifyContent="between"
+          gap="md"
+          padding="sm"
+          borderRadius="lg"
+          background="warning"
+        >
+          <F0Box display="flex" alignItems="center" gap="sm">
+            <F0Icon icon={InProgressTask} size="md" color="warning" />
+            <F0Box display="flex" flexDirection="column">
+              <F0Text content="Calendar not connected" variant="body" />
+              <F0Text content={'Click "Connect" to start the process.'} variant="description" />
+            </F0Box>
           </F0Box>
+          <F0Button label="Connect" variant="outline" onClick={() => setConnected(true)} />
         </F0Box>
-        <F0Button label="Connect" variant="outline" onClick={() => undefined} />
-      </F0Box>
+      ) : (
+        <F0Box display="flex" alignItems="center" justifyContent="between" gap="md">
+          <F0Box display="flex" alignItems="center" gap="sm">
+            <F0Icon icon={CheckCircle} size="md" color="positive" />
+            <F0Text content="Calendar connected" variant="body" />
+          </F0Box>
+          <Switch title="Add this session to calendars" hideLabel checked={active} onCheckedChange={setActive} />
+        </F0Box>
+      )}
     </F0Box>
   )
 }
