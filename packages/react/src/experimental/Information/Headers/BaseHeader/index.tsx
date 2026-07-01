@@ -246,6 +246,17 @@ export function BaseHeader({
               <MobileDropdown items={visibleOtherActions} />
             </div>
           )}
+          {onClose && (
+            <div className="w-full md:hidden [&>*]:w-full">
+              <F0Button
+                label={i18n.actions.close}
+                icon={Cross}
+                variant="outline"
+                size="lg"
+                onClick={onClose}
+              />
+            </div>
+          )}
         </div>
 
         <div className="-m-1 hidden w-fit shrink-0 flex-wrap items-center gap-x-2 gap-y-2 p-1 md:flex md:overflow-x-auto">
