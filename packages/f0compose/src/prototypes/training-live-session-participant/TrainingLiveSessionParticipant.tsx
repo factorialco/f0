@@ -5466,56 +5466,34 @@ function SessionReminderCard() {
   )
 }
 
-// Two-step calendar feature. Step 1: connect the calendar (can't be enabled
-// until it is). Step 2 (once connected): a toggle to activate it for this
-// session — blocks the slot in agendas and emails participants.
+// Calendar feature. Connecting is really an account-level, one-time action, so
+// the two states are distinct UIs: not connected → a connect prompt; connected
+// → a plain on/off toggle (same shape as "Send reminders") to add this session.
 function SessionCalendarField() {
   const [connected, setConnected] = useState(false)
   const [active, setActive] = useState(true)
 
   return (
-    <F0Box
-      display="flex"
-      flexDirection="column"
-      gap="md"
-      padding="lg"
-      border="default"
-      borderColor="secondary"
-      borderRadius="lg"
-      background="primary"
-    >
-      <F0Box display="flex" flexDirection="column" gap="xs">
-        <F0Text content="Connect calendar" variant="body" />
-        <F0Text content="Connect it to block the slot in everyone's agenda and email participants about the session." variant="description" />
+    <F0Box display="flex" flexDirection="column" gap="md" padding="lg" border="default" borderColor="secondary" borderRadius="lg" background="primary">
+      <F0Box display="flex" alignItems="start" justifyContent="between" gap="md">
+        <F0Box display="flex" flexDirection="column" gap="xs">
+          <F0Text content="Add this session to calendars" variant="label" />
+          <F0Text content="Blocks the session time in everyone's agenda and emails them an invite." variant="description" />
+        </F0Box>
+        {connected ? <Switch title="Add this session to calendars" hideLabel checked={active} onCheckedChange={setActive} /> : null}
       </F0Box>
       {!connected ? (
-        <F0Box
-          display="flex"
-          alignItems="center"
-          justifyContent="between"
-          gap="md"
-          padding="sm"
-          borderRadius="lg"
-          background="warning"
-        >
+        <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" padding="sm" borderRadius="lg" background="warning">
           <F0Box display="flex" alignItems="center" gap="sm">
             <F0Icon icon={InProgressTask} size="md" color="warning" />
             <F0Box display="flex" flexDirection="column">
               <F0Text content="Calendar not connected" variant="body" />
-              <F0Text content={'Click "Connect" to start the process.'} variant="description" />
+              <F0Text content="Connect it to enable this for the session." variant="description" />
             </F0Box>
           </F0Box>
           <F0Button label="Connect" variant="outline" onClick={() => setConnected(true)} />
         </F0Box>
-      ) : (
-        <F0Box display="flex" alignItems="center" justifyContent="between" gap="md">
-          <F0Box display="flex" alignItems="center" gap="sm">
-            <F0Icon icon={CheckCircle} size="md" color="positive" />
-            <F0Text content="Calendar connected" variant="body" />
-          </F0Box>
-          <Switch title="Add this session to calendars" hideLabel checked={active} onCheckedChange={setActive} />
-        </F0Box>
-      )}
+      ) : null}
     </F0Box>
   )
 }
