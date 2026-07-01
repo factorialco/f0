@@ -82,6 +82,7 @@ import type { Template } from "./mockData"
 // WIP: temporary toast mock — replace with "@/hooks/toast" once
 // https://github.com/factorialco/f0/pull/3493 merges, then remove this import.
 import { toasts } from "@/hooks/toast"
+import { useI18n } from "@/lib/providers/i18n"
 import {
   makeInitialSurveyElements,
   mockSurveyTranscribe,
@@ -1252,6 +1253,7 @@ function SurveyEditorCanvasHeader({
   onClose: () => void
 }) {
   const { tabId, setTabId, elements, name } = useSurveyEditorCanvas()
+  const i18n = useI18n()
   return (
     <>
       <ResourceHeader
@@ -1284,7 +1286,7 @@ function SurveyEditorCanvasHeader({
         }
         secondaryActions={[
           {
-            label: "Save to Surveys",
+            label: i18n.actions.save,
             onClick: () =>
               toasts.open({
                 title: SURVEY_SAVED_TOAST,
@@ -1348,7 +1350,7 @@ function SurveyEditorCanvasBody() {
   // creation (not autosave), fired once per survey across every creation path
   // (empty survey, "Use this template" copy, predefined template). Keyed in a
   // module-scoped set so closing and reopening the canvas doesn't re-fire it.
-  // From here saves are explicit (the header's "Save to Surveys"); resources
+  // From here saves are explicit (the header's "Save"); resources
   // without a draft state create nothing until the user explicitly saves.
   useEffect(() => {
     if (!surveyId || createdSurveyIds.has(surveyId)) return
@@ -1704,6 +1706,7 @@ function FlowContent({
   setPhase: (phase: Phase) => void
 }) {
   const { activeTabId, setActiveTabId, tabConfig } = useTabConfig()
+  const i18n = useI18n()
   // Primary (module-level) navigation. In production this would be a single
   // "Survey" item; "Tasks" is a second item added purely so the nav renders as
   // a real tab strip (a single-tab `Tabs` collapses to a plain heading).
@@ -1878,7 +1881,7 @@ function FlowContent({
                 onClose={() => setPhase("chat")}
                 secondaryActions={[
                   {
-                    label: "Save to Surveys",
+                    label: i18n.actions.save,
                     onClick: () =>
                       toasts.open({
                         title: SURVEY_SAVED_TOAST,
