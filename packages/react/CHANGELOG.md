@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.20.0](https://github.com/factorialco/f0/compare/f0-react-v4.19.0...f0-react-v4.20.0) (2026-07-01)
+
+
+### Features
+
+* **OneDataCollection:** add toolbar upsell button option ([#4578](https://github.com/factorialco/f0/issues/4578)) ([5d26f6b](https://github.com/factorialco/f0/commit/5d26f6b909c3d25c04bc13c98eba784d9bedd3c4))
+
 ## [4.19.0](https://github.com/factorialco/f0/compare/f0-react-v4.18.0...f0-react-v4.19.0) (2026-07-01)
 
 
