@@ -31,9 +31,9 @@ order, with a visible focus ring.
           <strong>Clarifying questions</strong> (<code>F0ClarifyingPanel</code>)
         </td>
         <td>
-          Arrow keys move between options, <kbd>Enter</kbd> selects and advances, and{" "}
-          <kbd>Esc</kbd> cancels the whole flow. The panel surfaces these hints inline
-          ("navigate · Enter select · Esc cancel").
+          Arrow keys move between options, <kbd>Enter</kbd> selects and
+          advances, and <kbd>Esc</kbd> cancels the whole flow. The panel
+          surfaces these hints inline ("navigate · Enter select · Esc cancel").
         </td>
       </tr>
       <tr>
@@ -41,8 +41,9 @@ order, with a visible focus ring.
           <strong>Proposal cards</strong> (accept / reject)
         </td>
         <td>
-          The accept (✓) and reject (✗) actions are real buttons with text labels, focusable
-          in reading order. Resolving a proposal must not strand focus (see below).
+          The accept (✓) and reject (✗) actions are real buttons with text
+          labels, focusable in reading order. Resolving a proposal must not
+          strand focus (see below).
         </td>
       </tr>
       <tr>
@@ -50,8 +51,9 @@ order, with a visible focus ring.
           <strong>Resource cards</strong> (Open / Close)
         </td>
         <td>
-          Opening and closing the canvas is a focusable control on the card — never a
-          pointer-only target. Superseded cards drop their action and leave the tab order.
+          Opening and closing the canvas is a focusable control on the card —
+          never a pointer-only target. Superseded cards drop their action and
+          leave the tab order.
         </td>
       </tr>
       <tr>
@@ -59,8 +61,8 @@ order, with a visible focus ring.
           <strong>Header trigger</strong> (<code>F0OneSwitch</code>)
         </td>
         <td>
-          The One switch is reachable in every phase, so the keyboard user can always open,
-          collapse, or return to the conversation.
+          The One switch is reachable in every phase, so the keyboard user can
+          always open, collapse, or return to the conversation.
         </td>
       </tr>
     </tbody>
@@ -69,16 +71,17 @@ order, with a visible focus ring.
 
 <DoDonts
   do={{
-    description: "Give accept / reject buttons real text labels for assistive tech.",
+    description:
+      "Give accept / reject buttons real text labels for assistive tech.",
     guidelines: [
-      "Label the actions (\"Apply\" / \"Discard\"), don't rely on the ✓ / ✗ glyph alone",
+      'Label the actions ("Apply" / "Discard"), don\'t rely on the ✓ / ✗ glyph alone',
       "Keep the whole proposal card decision reachable by keyboard, in reading order",
     ],
   }}
   dont={{
     description: "Don't make a decision pointer-only or icon-only.",
     guidelines: [
-      "Don't ship a ✓ / ✗ that a screen reader announces as just \"button\"",
+      'Don\'t ship a ✓ / ✗ that a screen reader announces as just "button"',
       "Don't trap focus inside the canvas with no keyboard way back to the chat",
     ],
   }}
@@ -124,7 +127,7 @@ overlay applies a change to the canvas. A screen-reader user needs those moments
 <DoDonts
   do={{
     description:
-      "Announce \"the AI is working\", \"a change was applied\", and \"a decision is waiting\" politely.",
+      'Announce "the AI is working", "a change was applied", and "a decision is waiting" politely.',
   }}
   dont={{
     description:

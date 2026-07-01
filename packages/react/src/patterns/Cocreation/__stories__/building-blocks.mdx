@@ -27,12 +27,15 @@ and its dedicated documentation.
           <code>F0OneSwitch</code>
         </td>
         <td>
-          The One switch in the application header. Entry point that opens the AI from
-          any phase.
+          The One switch in the application header. Entry point that opens the
+          AI from any phase.
         </td>
         <td>Collection → Chat</td>
         <td>
-          <a target="_parent" href="/?path=/docs/sds-ai-f0oneswitch--documentation">
+          <a
+            target="_parent"
+            href="/?path=/docs/sds-ai-f0oneswitch--documentation"
+          >
             AI / F0OneSwitch
           </a>
         </td>
@@ -42,12 +45,15 @@ and its dedicated documentation.
           <code>F0AiChat</code>
         </td>
         <td>
-          The conversation surface and runtime. Hosts the messages, input, welcome cards
-          and suggestions, and in-chat cards.
+          The conversation surface and runtime. Hosts the messages, input,
+          welcome cards and suggestions, and in-chat cards.
         </td>
         <td>Chat, Split</td>
         <td>
-          <a target="_parent" href="/?path=/docs/sds-ai-f0aichat--documentation">
+          <a
+            target="_parent"
+            href="/?path=/docs/sds-ai-f0aichat--documentation"
+          >
             AI / F0AiChat
           </a>
         </td>
@@ -57,12 +63,15 @@ and its dedicated documentation.
           <code>F0ClarifyingPanel</code>
         </td>
         <td>
-          Structured clarifying questions that narrow the intent before drafting (e.g.
-          resource type, audience, length).
+          Structured clarifying questions that narrow the intent before drafting
+          (e.g. resource type, audience, length).
         </td>
         <td>Chat</td>
         <td>
-          <a target="_parent" href="/?path=/docs/sds-ai-f0clarifyingpanel--documentation">
+          <a
+            target="_parent"
+            href="/?path=/docs/sds-ai-f0clarifyingpanel--documentation"
+          >
             AI / F0ClarifyingPanel
           </a>
         </td>
@@ -76,7 +85,8 @@ and its dedicated documentation.
           (opening it moves the flow into Split and shows the resource in the
           canvas) and the human-in-the-loop proposal card (a proposed change
           surfaced as an explicit accept / reject before it is applied). Its
-          active, inactive, and confirm/reject variants drive the card lifecycle.
+          active, inactive, and confirm/reject variants drive the card
+          lifecycle.
         </td>
         <td>Chat, Split</td>
         <td>
@@ -93,8 +103,8 @@ and its dedicated documentation.
           <code>F0AiProcessingOverlay</code>
         </td>
         <td>
-          The "applying changes" overlay shown over the resource while a proposed change is
-          being written.
+          The "applying changes" overlay shown over the resource while a
+          proposed change is being written.
         </td>
         <td>Split</td>
         <td>
@@ -130,6 +140,7 @@ and its dedicated documentation.
     ([With Welcome Suggestions](?path=/story/sds-ai-f0aichattextarea--with-welcome-suggestions))
 
   Provide either, both, or neither — their counts are unrelated.
+
 - Human-in-the-loop confirmation — the `F0CardHorizontal` confirm/reject card — is the contract
   that keeps the user in control: no AI-proposed change reaches the resource without an explicit
   accept.

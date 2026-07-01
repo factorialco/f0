@@ -66,11 +66,11 @@ Each resource the AI creates posts an **in-chat card** — built on
 open and close that resource in the canvas. As the AI iterates, the cards change state so the
 chat stays an accurate, navigable history.
 
-- **Active vs. inactive** — a card is *active* when its resource is the one currently shown in
+- **Active vs. inactive** — a card is _active_ when its resource is the one currently shown in
   the canvas (it offers Close and reads as selected). Only one card is active at a time; opening
   another resource deactivates the previous one.
 - **Live vs. superseded** — when the AI applies an accepted change, it posts a **fresh card** for
-  the same resource. The new card is *live* (interactive); the previous one is *superseded* — it
+  the same resource. The new card is _live_ (interactive); the previous one is _superseded_ — it
   drops its Open/Close action and dims, but stays in the chat so the timeline is preserved.
 - **Proposals** — a proposed change appears as a pending
   [`F0CardHorizontal`](?path=/docs/experimental-cardhorizontal--documentation) confirm/reject card
@@ -117,7 +117,9 @@ last card is still active, awaiting the user's accept (✓) or reject (✗):
         <td>
           <strong>Live</strong> (not open)
         </td>
-        <td>Latest card for the resource, not currently shown — offers Open.</td>
+        <td>
+          Latest card for the resource, not currently shown — offers Open.
+        </td>
         <td>Yes</td>
       </tr>
       <tr>
@@ -126,7 +128,8 @@ last card is still active, awaiting the user's accept (✓) or reject (✗):
           <strong>Superseded</strong>
         </td>
         <td>
-          Replaced by a newer card — Open/Close removed, dimmed, kept in history.
+          Replaced by a newer card — Open/Close removed, dimmed, kept in
+          history.
         </td>
         <td>No</td>
       </tr>
