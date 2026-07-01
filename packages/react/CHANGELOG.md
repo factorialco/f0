@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.19.0](https://github.com/factorialco/f0/compare/f0-react-v4.18.0...f0-react-v4.19.0) (2026-07-01)
+
+
+### Features
+
+* **EditableTable:** render cellHint icon on the right for read-only cells (FCT-56432) ([#4580](https://github.com/factorialco/f0/issues/4580)) ([202e8de](https://github.com/factorialco/f0/commit/202e8de0356c0aef0ac591c6863e8ad52ad1ebbf))
+
 ## [4.18.0](https://github.com/factorialco/f0/compare/f0-react-v4.17.1...f0-react-v4.18.0) (2026-06-30)
 
 
