@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
-import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -130,20 +129,6 @@ export const Default: Story = {
       closeOnClick: true,
     },
     children: <ExampleList itemsCount={20} />,
-  },
-}
-
-export const WithDataTestId: Story = {
-  args: {
-    isOpen: true,
-    onClose: () => {},
-    title: "Dialog with Test ID",
-    dataTestId: "my-test-dialog",
-    children: <ExampleList itemsCount={2} />,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-dialog")).toBeInTheDocument()
   },
 }
 

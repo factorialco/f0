@@ -16,22 +16,6 @@ import {
   F0DialogSecondaryActionItem,
 } from "./types"
 
-// Mirrors the shape of the dialog-alike `DialogWrapperContextType` (the actual
-// runtime context). Kept under this name so the public `F0DialogContext` export
-// keeps its original `Context<F0DialogContextType>` type signature.
-export type F0DialogContextType = {
-  open: boolean
-  onClose: () => void
-  shownBottomSheet: boolean
-  position: DialogPosition
-  /**
-   * The dialog's content container element.
-   * Use this as the `portalContainer` prop for components like F0Select
-   * to ensure dropdowns render inside the dialog.
-   */
-  portalContainer: HTMLDivElement | null
-}
-
 export type F0DialogHeaderProps = {
   title?: string
   description?: string
@@ -45,6 +29,28 @@ export type F0DialogHeaderProps = {
   resourceHeader?: ResourceHeaderProps
   controls?: DialogControls
 } & Partial<Pick<TabsProps, "tabs" | "activeTabId" | "setActiveTabId">>
+
+export type F0DialogContextType = {
+  open: boolean
+  onClose: () => void
+  shownBottomSheet: boolean
+  position: DialogPosition
+  /**
+   * The dialog's content container element.
+   * Use this as the `portalContainer` prop for components like F0Select
+   * to ensure dropdowns render inside the dialog.
+   */
+  portalContainer: HTMLDivElement | null
+}
+
+export type F0DialogProviderProps = {
+  isOpen: boolean
+  onClose: () => void
+  shownBottomSheet?: boolean
+  position: DialogPosition
+  children: ReactNode
+  portalContainer: HTMLDivElement | null
+}
 
 export type F0DialogInternalProps = {
   // Whether the dialog is open
