@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.20.1](https://github.com/factorialco/f0/compare/f0-react-v4.20.0...f0-react-v4.20.1) (2026-07-02)
+
+
+### Bug Fixes
+
+* **dialog-alike:** stop side-drawer anchor re-rendering on every scroll (renderer OOM) ([#4604](https://github.com/factorialco/f0/issues/4604)) ([a6cb803](https://github.com/factorialco/f0/commit/a6cb803a47a8af2d6e6615d305e5bdb0177cfda4))
+
 ## [4.20.0](https://github.com/factorialco/f0/compare/f0-react-v4.19.0...f0-react-v4.20.0) (2026-07-01)
 
 
