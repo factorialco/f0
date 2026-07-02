@@ -8,6 +8,7 @@ export const F0AvatarCompany = ({
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledby,
   badge,
+  bgColor = "viridian",
 }: F0AvatarCompanyProps) => {
   return (
     <BaseAvatar
@@ -15,7 +16,7 @@ export const F0AvatarCompany = ({
       name={name}
       src={src}
       size={size}
-      color="viridian"
+      color={bgColor}
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledby}
       badge={badge}

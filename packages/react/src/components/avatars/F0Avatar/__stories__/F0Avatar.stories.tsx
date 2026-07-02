@@ -3,6 +3,7 @@ import type { ComponentProps } from "react"
 
 import { expect, within } from "storybook/test"
 
+import { tagDotColors } from "@/components/tags/F0TagDot"
 import { Check, Warning } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -191,6 +192,73 @@ export const CompanyAvatar: Story = {
           />
         </div>
       ))}
+    </div>
+  ),
+}
+
+export const CustomBackgroundColor: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          'The background color can be customized with any color from the F0 palette using the `bgColor` prop on the avatar configuration. It applies to person, team, and company avatars when no image is provided. Use `"random"` to derive the color from the name.',
+      },
+    },
+  },
+  render: () => (
+    <div className="flex w-fit flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Person</span>
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          {tagDotColors.map((color) => (
+            <F0Avatar
+              key={color}
+              size="lg"
+              avatar={{
+                type: "person",
+                firstName: "John",
+                lastName: "Doe",
+                bgColor: color,
+                "aria-label": `John Doe (${color})`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Team</span>
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          {tagDotColors.map((color) => (
+            <F0Avatar
+              key={color}
+              size="lg"
+              avatar={{
+                type: "team",
+                name: "Engineering Team",
+                bgColor: color,
+                "aria-label": `Engineering Team (${color})`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Company</span>
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          {tagDotColors.map((color) => (
+            <F0Avatar
+              key={color}
+              size="lg"
+              avatar={{
+                type: "company",
+                name: "Factorial HR",
+                bgColor: color,
+                "aria-label": `Factorial HR (${color})`,
+              }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   ),
 }
