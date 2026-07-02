@@ -68,7 +68,7 @@ const config: StorybookConfig = {
     },
     {
       directory: "../src/patterns",
-      titlePrefix: "Patterns",
+      titlePrefix: "Patterns & Layout/Patterns",
     },
     {
       directory: "../src/experimental",
@@ -80,7 +80,7 @@ const config: StorybookConfig = {
     },
     {
       directory: "../src/layouts",
-      titlePrefix: "Layouts",
+      titlePrefix: "Patterns & Layout/Layouts",
     },
     {
       directory: "../src/lib",
