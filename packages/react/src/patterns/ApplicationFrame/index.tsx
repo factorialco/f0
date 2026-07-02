@@ -433,7 +433,11 @@ function ApplicationFrameContent({
                     }
                   }}
                 >
-                  <F0AiChat />
+                  <F0AiChat
+                    revealChatOnCanvasToggle={
+                      ai?.revealChatOnCanvasToggle ?? true
+                    }
+                  />
                 </motion.div>
               )}
             </motion.div>
