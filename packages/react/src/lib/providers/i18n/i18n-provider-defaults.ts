@@ -590,6 +590,10 @@ export const defaultTranslations = {
     greaterThan: "It should be greater than {{min}}",
     lessThan: "It should be less than {{max}}",
   },
+  rating: {
+    ariaLabel: "Rating: {{value}} of {{max}}",
+    ariaLabelEmpty: "Rating: not rated, out of {{max}}",
+  },
   imageUpload: {
     uploading: "Uploading...",
     uploadError: "Upload failed",
