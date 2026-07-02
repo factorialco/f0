@@ -1,15 +1,54 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/react-vite"
 
+import { readFile } from "node:fs/promises"
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
 import { fileURLToPath } from "node:url"
 import remarkGfm from "remark-gfm"
-import { Preset } from "storybook/internal/types"
+import { loadCsf } from "storybook/internal/csf-tools"
+import { Indexer, Preset } from "storybook/internal/types"
+
+import {
+  buildRemapTest,
+  remapTitle,
+  resolveRemapSection,
+} from "../src/lib/storybook-utils/sidebar-remap"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
+
+// -----------------------------------------------------------------------------
+// Sidebar remap indexer — the reusable mechanism for relocating a component to
+// another sidebar section WITHOUT moving its files or breaking imports.
+//
+// Storybook glues a `stories` entry's `titlePrefix` onto each story's title to
+// decide its section, so a component in `src/components` can only ever live
+// under "Components" — unless we intervene at index time. This indexer runs
+// before the default CSF indexer, parses the story exactly as usual, then
+// rewrites the leading section segment of the title. Because it sets an
+// explicit title, Storybook uses it verbatim (no titlePrefix is re-applied).
+//
+// It is INERT by default: `SIDEBAR_REMAP` (in sidebar-remap.ts) ships empty, so
+// `buildRemapTest()` returns a never-match pattern and the default indexer
+// handles everything. Add a rule there to move a component across sections.
+// -----------------------------------------------------------------------------
+const sidebarRemapIndexer: Indexer = {
+  test: buildRemapTest(),
+  createIndex: async (fileName, options) => {
+    const section = resolveRemapSection(fileName)
+    const code = (await readFile(fileName, "utf-8")).toString()
+    const inputs = loadCsf(code, { ...options, fileName }).parse().indexInputs
+    if (!section) return inputs
+    // Drop `__id`/`metaId` so ids recompute from the new title, keeping the
+    // sidebar tree, story ids and docs ids internally consistent.
+    return inputs.map(({ __id: _id, metaId: _metaId, title, ...input }) => ({
+      ...input,
+      title: remapTitle(title ?? "", section),
+    }))
+  },
+}
 
 // We should add the STORYBOOK_ prefix to make sure that the environment variables are in browser mode (for example manager.ts file)
 if (process.env.PUBLIC_BUILD) {
@@ -104,6 +143,10 @@ const config: StorybookConfig = {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
+  experimental_indexers: (existingIndexers) => [
+    sidebarRemapIndexer,
+    ...(existingIndexers ?? []),
+  ],
   docs: {
     defaultName: "Documentation",
     docsMode:
