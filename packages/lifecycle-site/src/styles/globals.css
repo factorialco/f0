@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-paper text-ink font-sans antialiased;
+}
+
+::selection {
+  background: #ff6364;
+  color: #0b0b0b;
+}
+
+.section-anchor {
+  scroll-margin-top: 5rem;
+}
+
+/* Brand dot-matrix backdrop (used on dark hero bands) */
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
