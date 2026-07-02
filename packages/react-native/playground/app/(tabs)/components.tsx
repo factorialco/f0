@@ -14,6 +14,7 @@ import { DetailsItemShowcase } from "../../components/DetailsItemShowcase"
 import { DetailsItemsListShowcase } from "../../components/DetailsItemsListShowcase"
 import { F0AvatarShowcase } from "../../components/F0AvatarShowcase"
 import { F0BadgeShowcase } from "../../components/F0BadgeShowcase"
+import { F0BannerShowcase } from "../../components/F0BannerShowcase"
 import { F0BlurViewShowcase } from "../../components/F0BlurViewShowcase"
 import { F0ButtonShowcase } from "../../components/F0ButtonShowcase"
 import { F0CheckboxShowcase } from "../../components/F0CheckboxShowcase"
@@ -22,8 +23,8 @@ import { F0CounterShowcase } from "../../components/F0CounterShowcase"
 import { F0IconShowcase } from "../../components/F0IconShowcase"
 import { F0ImageShowcase } from "../../components/F0ImageShowcase"
 import { F0LinkShowcase } from "../../components/F0LinkShowcase"
-import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0MetadataShowcase } from "../../components/F0MetadataShowcase"
+import { F0PresetShowcase } from "../../components/F0PresetShowcase"
 import { F0ProgressShowcase } from "../../components/F0ProgressShowcase"
 import { F0StepShowcase } from "../../components/F0StepShowcase"
 import { F0TabsShowcase } from "../../components/F0TabsShowcase"
@@ -57,6 +58,7 @@ type ComponentType =
   | "f0checkbox"
   | "f0chip"
   | "f0counter"
+  | "f0banner"
   | "f0icon"
   | "f0link"
   | "f0progress"
@@ -91,6 +93,7 @@ const componentOptions = [
   { value: "f0checkbox" as ComponentType, label: "F0Checkbox" },
   { value: "f0chip" as ComponentType, label: "F0Chip" },
   { value: "f0counter" as ComponentType, label: "F0Counter" },
+  { value: "f0banner" as ComponentType, label: "F0Banner" },
   { value: "f0icon" as ComponentType, label: "F0Icon" },
   { value: "f0link" as ComponentType, label: "F0Link" },
   { value: "f0progress" as ComponentType, label: "F0Progress" },
@@ -158,6 +161,8 @@ export default function ComponentsShowcase() {
         return <F0ChipShowcase />
       case "f0counter":
         return <F0CounterShowcase />
+      case "f0banner":
+        return <F0BannerShowcase />
       case "f0icon":
         return <F0IconShowcase />
       case "f0link":
@@ -196,7 +201,7 @@ export default function ComponentsShowcase() {
   }
 
   return (
-    <SafeAreaView className="bg-f0-background flex-1" edges={["top", "bottom"]}>
+    <SafeAreaView className="flex-1 bg-f0-background" edges={["top", "bottom"]}>
       <View
         className="flex-1"
         style={{ backgroundColor: asString(f0Background) }}
