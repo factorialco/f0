@@ -1,18 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { Check } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { mockImage } from "@/testing/mocks/images"
-import { mockModuleId } from "@/testing/mocks/modules"
 
 import { avatarSizes } from "../../internal/BaseAvatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
-import { F0AvatarTeam } from "../F0AvatarTeam"
+import { F0AvatarCompany } from "../F0AvatarCompany"
 
-const meta: Meta<typeof F0AvatarTeam> = {
-  component: F0AvatarTeam,
-  title: "Avatars/AvatarTeam",
-  tags: ["autodocs"],
+const meta = {
+  component: F0AvatarCompany,
+  title: "Avatars/AvatarCompany",
+  tags: ["stable", "!autodocs"],
   argTypes: {
     ...getBaseAvatarArgTypes([
       "size",
@@ -20,30 +18,51 @@ const meta: Meta<typeof F0AvatarTeam> = {
       "aria-labelledby",
       "badge",
     ]),
+    name: {
+      control: "text",
+      description:
+        "The company name to display (used for initials if no image provided)",
+    },
+    src: {
+      control: "text",
+      description:
+        "URL of the company logo/image. If no logo is provided, it will display the company name initials with a fixed background color.",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        component: ["A company avatar component."]
+          .map((line) => `<p>${line}</p>`)
+          .join(""),
+      },
+    },
   },
   args: {
-    name: "Design",
-    size: "md",
+    name: "Factorial",
+    size: "lg",
+    "aria-label": "Factorial avatar",
   },
-}
+} satisfies Meta<typeof F0AvatarCompany>
 
 export default meta
 
-type Story = StoryObj<typeof F0AvatarTeam>
+type Story = StoryObj<typeof F0AvatarCompany>
 
 export const Default: Story = {}
 
 export const WithImage: Story = {
   args: {
-    src: "/avatars/team01.jpg",
+    src: "/avatars/factorial.png",
   },
 }
 
-export const WithBadge: Story = {
+export const WithModuleBadge: Story = {
   args: {
+    src: "/avatars/factorial.png",
     badge: {
-      type: "positive",
-      icon: Check,
+      type: "module",
+      module: "inbox",
     },
   },
 }
@@ -58,7 +77,7 @@ export const Snapshot: Story = {
         <h4 className="text-lg font-semibold">Without Image</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size) => (
-            <F0AvatarTeam key={size} size={size} name="Engineering" />
+            <F0AvatarCompany key={size} size={size} name="Factorial" />
           ))}
         </div>
       </section>
@@ -66,11 +85,11 @@ export const Snapshot: Story = {
         <h4 className="text-lg font-semibold">With Image</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size, index) => (
-            <F0AvatarTeam
+            <F0AvatarCompany
               key={size}
               size={size}
-              name="Engineering"
-              src={mockImage("team", index)}
+              name="Factorial"
+              src={mockImage("company", index)}
             />
           ))}
         </div>
@@ -79,12 +98,12 @@ export const Snapshot: Story = {
         <h4 className="text-lg font-semibold">With Module Badge</h4>
         <div className="flex flex-row gap-2">
           {avatarSizes.map((size, index) => (
-            <F0AvatarTeam
+            <F0AvatarCompany
               key={size}
               size={size}
-              name="Engineering"
-              src={mockImage("team", index)}
-              badge={{ type: "module", module: mockModuleId(index) }}
+              name="Factorial"
+              src={mockImage("company", index)}
+              badge={{ type: "module", module: "inbox" }}
             />
           ))}
         </div>

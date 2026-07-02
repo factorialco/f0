@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.21.0](https://github.com/factorialco/f0/compare/f0-react-v4.20.1...f0-react-v4.21.0) (2026-07-02)
+
+
+### Features
+
+* **avatars:** promote F0Avatar + entity types to stable ([#4326](https://github.com/factorialco/f0/issues/4326)) ([6b8e4f7](https://github.com/factorialco/f0/commit/6b8e4f7b8ecbe7e0ef95c607937a0f59c8df3c9c))
+
 ## [4.20.1](https://github.com/factorialco/f0/compare/f0-react-v4.20.0...f0-react-v4.20.1) (2026-07-02)
 
 

@@ -4,7 +4,7 @@ import type { ComponentProps } from "react"
 import { expect, within } from "storybook/test"
 
 import { tagDotColors } from "@/components/tags/F0TagDot"
-import { Check, Warning } from "@/icons/app"
+import { Calendar, Check, Warning } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { internalAvatarSizes } from "@/ui/Avatar"
@@ -13,22 +13,10 @@ import { avatarSizes } from "../../internal/BaseAvatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0Avatar } from "../F0Avatar"
 
-const meta: Meta<typeof F0Avatar> = {
+const meta = {
   component: F0Avatar,
   title: "Avatars/Avatar",
-  tags: ["autodocs"],
-  parameters: {
-    docs: {
-      description: {
-        component: [
-          "A polymorphic avatar component that can display person, team, or company avatars.",
-          "The component automatically renders the appropriate avatar type based on the avatar prop configuration.",
-        ]
-          .map((line) => `<p>${line}</p>`)
-          .join(""),
-      },
-    },
-  },
+  tags: ["stable", "!autodocs"],
   argTypes: {
     ...getBaseAvatarArgTypes(["size"]),
     size: {
@@ -52,7 +40,7 @@ const meta: Meta<typeof F0Avatar> = {
     },
     ...dataTestIdArgs,
   },
-}
+} satisfies Meta<typeof F0Avatar>
 
 export default meta
 type Story = StoryObj<typeof F0Avatar>
@@ -61,7 +49,7 @@ const SIZES = avatarSizes
 
 export const WithDataTestId: Story = {
   args: {
-    size: "md",
+    size: "lg",
     avatar: {
       type: "person",
       firstName: "John",
@@ -99,7 +87,7 @@ export const PersonAvatar: Story = {
               type: "person",
               firstName: "Jane",
               lastName: "Smith",
-              src: "/storybook-assets/avatar.jpeg",
+              src: "/avatars/person02.jpg",
             }}
           />
           <F0Avatar
@@ -138,7 +126,7 @@ export const TeamAvatar: Story = {
             avatar={{
               type: "team",
               name: "Design Team",
-              src: "/storybook-assets/avatar.jpeg",
+              src: "/avatars/team02.jpg",
             }}
           />
           <F0Avatar
@@ -176,7 +164,7 @@ export const CompanyAvatar: Story = {
             avatar={{
               type: "company",
               name: "Acme Corp",
-              src: "/storybook-assets/avatar.jpeg",
+              src: "/avatars/company01.jpg",
             }}
           />
           <F0Avatar
@@ -194,6 +182,19 @@ export const CompanyAvatar: Story = {
       ))}
     </div>
   ),
+}
+
+export const Default: Story = {
+  args: {
+    size: "lg",
+    avatar: {
+      type: "person",
+      firstName: "John",
+      lastName: "Doe",
+      "aria-label": "John Doe",
+    },
+  } as ComponentProps<typeof F0Avatar>,
+  render: (args) => <F0Avatar {...args} />,
 }
 
 export const CustomBackgroundColor: Story = {
@@ -264,48 +265,62 @@ export const CustomBackgroundColor: Story = {
 }
 
 export const AllTypes: Story = {
-  render: () => (
-    <div className="flex w-fit flex-col gap-4">
-      <h3 className="text-lg font-semibold">All Avatar Types</h3>
-      <div className="flex flex-row gap-4">
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-sm font-medium">Person</span>
-          <F0Avatar
-            size="lg"
-            avatar={{
-              type: "person",
-              firstName: "John",
-              lastName: "Doe",
-              src: "/storybook-assets/avatar.jpeg",
-            }}
-          />
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-sm font-medium">Team</span>
-          <F0Avatar
-            size="lg"
-            avatar={{
-              type: "team",
-              name: "Engineering Team",
-            }}
-          />
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-sm font-medium">Company</span>
-          <F0Avatar
-            size="lg"
-            avatar={{
-              type: "company",
-              name: "Factorial HR",
-            }}
-          />
+  render: () => {
+    const types = [
+      {
+        label: "Person",
+        avatar: {
+          type: "person",
+          firstName: "John",
+          lastName: "Doe",
+          src: "/avatars/person04.jpg",
+        },
+      },
+      {
+        label: "Team",
+        avatar: {
+          type: "team",
+          name: "Engineering Team",
+          src: "/avatars/team01.jpg",
+        },
+      },
+      {
+        label: "Company",
+        avatar: {
+          type: "company",
+          name: "Factorial HR",
+          src: "/avatars/company02.jpg",
+        },
+      },
+      {
+        label: "File",
+        avatar: {
+          type: "file",
+          file: { name: "report.pdf", type: "application/pdf" },
+        },
+      },
+      { label: "Flag", avatar: { type: "flag", flag: "es" } },
+      { label: "Emoji", avatar: { type: "emoji", emoji: "🎉" } },
+      { label: "Icon", avatar: { type: "icon", icon: Calendar } },
+    ] as const
+
+    return (
+      <div className="flex w-fit flex-col gap-4">
+        <h3 className="text-lg font-semibold">All Avatar Types</h3>
+        <div className="flex flex-row flex-wrap gap-4">
+          {types.map(({ label, avatar }) => (
+            <div key={label} className="flex flex-col items-center gap-2">
+              <span className="text-sm font-medium">{label}</span>
+              <F0Avatar size="lg" avatar={avatar} />
+            </div>
+          ))}
         </div>
       </div>
-    </div>
-  ),
+    )
+  },
 }
 
-export const WithBadges: Story = {
+export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
     <div className="flex w-fit flex-col gap-4">

@@ -1,0 +1,62 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import * as PersonStories from "./F0AvatarPerson.stories"
+
+<Meta of={PersonStories} />
+
+# AvatarPerson
+
+The avatar for an individual — an employee, user or contact.
+
+---
+
+## Overview
+
+### Purpose
+
+- Represent a specific person consistently across the interface
+- Help distinguish people at a glance in lists, headers and assignments
+- Convey a person's state, such as deactivated
+
+### Anatomy
+
+Person avatars are always circular — the only avatar type that is, setting
+people apart from the square shape used by every other type.
+
+<Canvas of={PersonStories.Default} />
+
+<Controls of={PersonStories.Default} />
+
+### Variants
+
+#### States
+
+A person can be shown as deactivated, which replaces the content with a muted
+person icon to signal that the account is no longer active.
+
+<Canvas of={PersonStories.Deactivated} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- The entity is always a person and known at build time
+- Profile headers, employee rows, comment authors, assignees
+
+#### When NOT to use
+
+- The entity type is dynamic (could be a team or company): use `F0Avatar`
+- The entity is not a person: use the matching `F0Avatar*` component
+
+---
+
+## Behavior
+
+### Image fallback
+
+With no `src` — or if the image fails to load — the avatar shows the initials
+from the name over a color derived deterministically from it, so the same person
+always keeps the same color.

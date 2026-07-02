@@ -6,10 +6,10 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { avatarIconSizes, F0AvatarIcon } from "../F0AvatarIcon"
 
-const meta: Meta<typeof F0AvatarIcon> = {
+const meta = {
   component: F0AvatarIcon,
   title: "Avatars/AvatarIcon",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   argTypes: {
     size: {
       control: "select",
@@ -26,7 +26,7 @@ const meta: Meta<typeof F0AvatarIcon> = {
   },
   args: {
     icon: Icons.Placeholder,
-    size: "md",
+    size: "lg",
   },
   parameters: {
     docs: {
@@ -47,7 +47,7 @@ const meta: Meta<typeof F0AvatarIcon> = {
       },
     },
   },
-}
+} satisfies Meta<typeof F0AvatarIcon>
 
 export default meta
 

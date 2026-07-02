@@ -9,9 +9,8 @@ import { avatarFileSizes } from "../types"
 const meta = {
   component: F0AvatarFile,
   title: "Avatars/AvatarFile",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   parameters: {
-    layout: "centered",
     docs: {
       description: {
         component: ["An avatar component that displays a file type icon."]
@@ -40,14 +39,14 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     file: { name: "document.pdf", type: "application/pdf" },
-    size: "md",
+    size: "lg",
   },
 }
 
 export const WithBadge: Story = {
   args: {
     file: { name: "document.pdf", type: "application/pdf" },
-    size: "md",
+    size: "lg",
     badge: {
       type: "module",
       module: "inbox",
@@ -83,7 +82,7 @@ const fileTypes = [
 export const AllFileTypes: Story = {
   args: {
     file: { name: "document.pdf", type: "application/pdf" },
-    size: "md",
+    size: "lg",
   },
   render: (args: F0AvatarFileProps) => {
     return (
@@ -103,7 +102,7 @@ export const AllFileTypes: Story = {
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: {
-    size: "md",
+    size: "lg",
     file: { name: "document.pdf", type: "application/pdf" },
   },
   render: () => (
