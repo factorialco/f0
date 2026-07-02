@@ -8,10 +8,10 @@ import { avatarSizes } from "../../internal/BaseAvatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { F0AvatarFlag } from "../F0AvatarFlag.tsx"
 
-const meta: Meta<typeof F0AvatarFlag> = {
+const meta = {
   component: F0AvatarFlag,
   title: "Avatars/AvatarFlag",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   argTypes: {
     ...getBaseAvatarArgTypes([
       "size",
@@ -34,10 +34,10 @@ const meta: Meta<typeof F0AvatarFlag> = {
     },
   },
   args: {
-    size: "md",
+    size: "lg",
     "aria-label": "Factorial avatar",
   },
-}
+} satisfies Meta<typeof F0AvatarFlag>
 
 export default meta
 

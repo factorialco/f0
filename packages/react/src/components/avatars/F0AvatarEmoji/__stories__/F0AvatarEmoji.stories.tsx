@@ -5,10 +5,10 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
 import { avatarEmojiSizes, F0AvatarEmoji } from "../F0AvatarEmoji"
 
-const meta: Meta<typeof F0AvatarEmoji> = {
+const meta = {
   component: F0AvatarEmoji,
   title: "Avatars/AvatarEmoji",
-  tags: ["autodocs"],
+  tags: ["stable", "!autodocs"],
   argTypes: {
     ...getBaseAvatarArgTypes(["size", "aria-label", "aria-labelledby"]),
     size: {
@@ -19,7 +19,7 @@ const meta: Meta<typeof F0AvatarEmoji> = {
   },
   args: {
     emoji: "🍑",
-    size: "sm",
+    size: "lg",
   },
   parameters: {
     docs: {
@@ -40,7 +40,7 @@ const meta: Meta<typeof F0AvatarEmoji> = {
       },
     },
   },
-}
+} satisfies Meta<typeof F0AvatarEmoji>
 
 export default meta
 
