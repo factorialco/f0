@@ -2,6 +2,7 @@ import { Fragment } from "react"
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Button } from "@/components/F0Button"
+import { Cross } from "@/icons/app"
 import { F0ButtonDropdown } from "@/components/F0ButtonDropdown"
 import { StatusVariant } from "@/components/tags/F0TagStatus"
 import { Description } from "@/experimental/Information/Headers/BaseHeader/Description"
@@ -21,6 +22,7 @@ import {
   DropdownItem,
   MobileDropdown,
 } from "@/experimental/Navigation/Dropdown"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 export type HeaderSecondaryButtonAction = SecondaryAction & {
@@ -60,6 +62,8 @@ interface BaseHeaderProps {
   metadataRowGap?: MetadataProps["rowGap"]
   /** Renders a 1px bottom border at the very bottom of the header. */
   showBottomBorder?: boolean
+  /** When set, renders a close button in the header actions that calls this on click. */
+  onClose?: () => void
 }
 
 const isVisible = (action: { isVisible?: boolean }) =>
@@ -77,7 +81,9 @@ export function BaseHeader({
   metadata = [],
   metadataRowGap = "none",
   showBottomBorder = false,
+  onClose,
 }: BaseHeaderProps) {
+  const i18n = useI18n()
   const allMetadata: BaseHeaderProps["metadata"] = [
     status && {
       label: status.label,
@@ -240,6 +246,17 @@ export function BaseHeader({
               <MobileDropdown items={visibleOtherActions} />
             </div>
           )}
+          {onClose && (
+            <div className="w-full md:hidden [&>*]:w-full">
+              <F0Button
+                label={i18n.actions.close}
+                icon={Cross}
+                variant="outline"
+                size="lg"
+                onClick={onClose}
+              />
+            </div>
+          )}
         </div>
 
         <div className="-m-1 hidden w-fit shrink-0 flex-wrap items-center gap-x-2 gap-y-2 p-1 md:flex md:overflow-x-auto">
@@ -307,6 +324,20 @@ export function BaseHeader({
                 loading={primaryAction.loading}
               />
             </div>
+          )}
+          {onClose && (
+            <>
+              <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+              <div className="hidden md:block">
+                <F0Button
+                  label={i18n.actions.close}
+                  hideLabel
+                  icon={Cross}
+                  variant="outline"
+                  onClick={onClose}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

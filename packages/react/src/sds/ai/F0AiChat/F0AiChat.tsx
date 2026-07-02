@@ -53,6 +53,7 @@ const F0AiChatProviderComponent = ({
   entityRefs,
   canvasActions,
   canvasEntities,
+  revealChatOnCanvasToggle,
   credits,
   employeeCredits,
   creditWarning,
@@ -88,6 +89,7 @@ const F0AiChatProviderComponent = ({
       entityRefs={entityRefs}
       canvasActions={canvasActions}
       canvasEntities={canvasEntities}
+      revealChatOnCanvasToggle={revealChatOnCanvasToggle}
       credits={credits}
       employeeCredits={employeeCredits}
       creditWarning={creditWarning}
@@ -109,6 +111,7 @@ const F0AiChatComponent = ({
     setOpen,
     mode,
     visualizationMode,
+    revealChatOnCanvasToggle,
     VoiceMode,
     tracking,
     chatHeader,
@@ -123,9 +126,18 @@ const F0AiChatComponent = ({
   // place (busy), hide the content the instant the mode flips and reveal it
   // already settled with a soft fade. Hold ≈ the chat window's resize
   // animation (see ApplicationFrame: ~0.15s entering, ~0.4s exiting).
+  // When the host opts out (`revealChatOnCanvasToggle={false}`), collapse
+  // sidepanel + canvas into a single "docked" reveal state so opening/closing
+  // the canvas with the chat on the side isn't seen as a mode change and the
+  // chat content doesn't re-fade. Fullscreen transitions stay distinct and still
+  // reveal (their layout change is substantial).
+  const revealValue: VisualizationMode | "docked" =
+    !revealChatOnCanvasToggle && visualizationMode !== "fullscreen"
+      ? "docked"
+      : visualizationMode
   const { motionProps: contentReveal } = useRevealOnChange(
-    visualizationMode,
-    (prev: VisualizationMode, next: VisualizationMode) =>
+    revealValue,
+    (prev, next) =>
       next === "fullscreen" ? 220 : prev === "fullscreen" ? 460 : 260
   )
   const reducedMotion = useReducedMotion()
