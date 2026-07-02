@@ -117,6 +117,23 @@ describe("Select", () => {
     })
   })
 
+  it("keeps the open dropdown clickable under pointer-events-none ancestors (select-in-dialog)", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(screen.getByRole("listbox").className).toContain(
+      "pointer-events-auto"
+    )
+  })
+
   it("shows options when clicked", async () => {
     const user = userEvent.setup()
     render(
