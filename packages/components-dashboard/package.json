@@ -1,0 +1,28 @@
+{
+  "name": "@factorialco/f0-components-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Internal triage dashboard for the F0 component lifecycle. Scans packages/react/src and visualizes each component against the Definition of Done.",
+  "scripts": {
+    "scan": "node scripts/scan.mjs",
+    "plan:ola1": "node scripts/plan-ola1.mjs",
+    "dev": "npm run scan && npm run plan:ola1 && vite",
+    "build": "npm run scan && npm run plan:ola1 && tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7"
+  }
+}
