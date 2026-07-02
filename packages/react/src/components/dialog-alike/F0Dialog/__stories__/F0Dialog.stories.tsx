@@ -41,7 +41,7 @@ const meta: Meta<typeof F0Dialog> = {
       },
     },
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   argTypes: {
     ...getDialogAlikeArgTypes({
       componentName: "dialog",
