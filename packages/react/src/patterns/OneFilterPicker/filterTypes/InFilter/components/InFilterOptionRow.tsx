@@ -75,7 +75,7 @@ export function InFilterOptionRow<T extends string>({
       className={cn(
         "w-full",
         depth === 0 && !isCompactMode && "px-2",
-        hasChildren &&
+        depth === 0 &&
           "border-0 border-b border-solid border-f1-border-secondary last:border-b-0"
       )}
     >
