@@ -24,6 +24,71 @@ describe("F0NumberInput", () => {
     expect(input).toHaveValue("123,46")
   })
 
+  describe("thousand separators", () => {
+    test("groups the value when not focused (en-US)", () => {
+      render(
+        <F0NumberInput
+          locale="en-US"
+          value={5000}
+          maxDecimals={0}
+          label="Number Input"
+        />
+      )
+      expect(screen.getByRole("textbox")).toHaveValue("5,000")
+    })
+
+    test("groups the value when not focused (es-ES)", () => {
+      render(
+        <F0NumberInput
+          locale="es-ES"
+          value={5000.54}
+          maxDecimals={2}
+          label="Number Input"
+        />
+      )
+      expect(screen.getByRole("textbox")).toHaveValue("5.000,54")
+    })
+
+    test("shows the raw value on focus and re-groups on blur", async () => {
+      render(
+        <F0NumberInput
+          locale="en-US"
+          value={5000}
+          maxDecimals={0}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      expect(input).toHaveValue("5,000")
+
+      await userEvent.click(input)
+      expect(input).toHaveValue("5000")
+
+      await userEvent.tab()
+      expect(input).toHaveValue("5,000")
+    })
+
+    test("calls onBlur when the input loses focus", async () => {
+      const onBlur = vi.fn()
+      render(
+        <F0NumberInput
+          locale="en-US"
+          value={5000}
+          maxDecimals={0}
+          onBlur={onBlur}
+          label="Number Input"
+        />
+      )
+
+      const input = screen.getByRole("textbox")
+      await userEvent.click(input)
+      await userEvent.tab()
+
+      expect(onBlur).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe("when the value is null", () => {
     test("renders an empty input", () => {
       render(<F0NumberInput locale="en-US" value={null} label="Number Input" />)
