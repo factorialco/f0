@@ -1,5 +1,6 @@
 export * from "./F0Avatar"
 export * from "./F0AvatarAlert"
+export * from "./F0AvatarColor"
 export * from "./F0AvatarCompany"
 export * from "./F0AvatarDate"
 export * from "./F0AvatarEmoji"

@@ -1,7 +1,8 @@
 import { ModuleId } from "@/components/avatars/F0AvatarModule"
-import { BadgeProps } from "@/ui/IconBadge"
 import { DistributiveOmit } from "@/lib/typescript-utils/distributive-omit"
+import { BadgeProps } from "@/ui/IconBadge"
 
+import { F0AvatarColorProps } from "../F0AvatarColor"
 import { F0AvatarCompanyProps } from "../F0AvatarCompany"
 import { F0AvatarEmojiProps } from "../F0AvatarEmoji"
 import { F0AvatarFileProps } from "../F0AvatarFile"
@@ -40,7 +41,8 @@ export type AvatarVariant = DistributiveOmit<
   | ({ type: "company" } & F0AvatarCompanyProps)
   | ({ type: "file" } & F0AvatarFileProps)
   | ({ type: "flag" } & F0AvatarFlagProps)
-  | ({ type: "icon" } & F0AvatarIconProps),
+  | ({ type: "icon" } & F0AvatarIconProps)
+  | ({ type: "color" } & F0AvatarColorProps),
   "size"
 >
 
@@ -51,3 +53,4 @@ export type CompanyAvatarVariant = Extract<AvatarVariant, { type: "company" }>
 export type FileAvatarVariant = Extract<AvatarVariant, { type: "file" }>
 export type FlagAvatarVariant = Extract<AvatarVariant, { type: "flag" }>
 export type IconAvatarVariant = Extract<AvatarVariant, { type: "icon" }>
+export type ColorAvatarVariant = Extract<AvatarVariant, { type: "color" }>
