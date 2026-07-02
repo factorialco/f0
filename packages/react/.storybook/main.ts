@@ -92,7 +92,7 @@ const config: StorybookConfig = {
     },
     {
       directory: "../src/sds",
-      titlePrefix: "SDS",
+      titlePrefix: "Domain Specific",
     },
     {
       directory: "../src/examples",
