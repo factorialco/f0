@@ -36,6 +36,8 @@ f0/
     one/                     — Factorial AI (One) components
     react/                   — Web component library (see packages/react/AGENTS.md)
     react-native/            — Mobile component library
+    f0compose/               — AI-driven prototyping app for designers/PMs
+                               (see packages/f0compose/AGENTS.md)
     playground/              — (deprecated)
     react-native-playground/ — (deprecated)
   icons/                     — Shared SVG icon assets
@@ -43,6 +45,9 @@ f0/
 
 For `packages/react/` conventions, see `packages/react/AGENTS.md`.
 For `packages/react-native/` conventions, see `packages/react-native/AGENTS.md`.
+For prototyping with AI, see `packages/f0compose/README.md` and
+`packages/f0compose/AGENTS.md`. Skills bundled under
+`packages/f0compose/.opencode/skills/` and `.claude/skills/`.
 
 ## Storybook MCP Server
 
