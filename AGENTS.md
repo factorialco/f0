@@ -73,8 +73,10 @@ The repo includes a `.mcp.json` at the root that configures the local Storybook 
 
 **Local development** (all toolsets — docs, dev, test):
 
-1. Start Storybook: `pnpm storybook dev` from `packages/react/`
+1. Start Storybook: `pnpm run dev` from `packages/react/`
 2. The MCP endpoint is available at `http://localhost:6006/mcp`
+
+`pnpm run dev` runs `storybook:install-browsers` first, which installs the local Playwright Chromium binary required by MCP `run-story-tests`. If `run-story-tests` fails with a Playwright browser executable error, run `pnpm run storybook:install-browsers` from `packages/react/` and retry the MCP test.
 
 **Remote / published** (docs toolset only):
 

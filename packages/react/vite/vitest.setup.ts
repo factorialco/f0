@@ -32,7 +32,17 @@ declare global {
   }) => JSX.Element
 }
 
-vi.stubGlobal("CSS", { supports: () => true })
+const escapeCssIdentifier = (value: string) =>
+  value.replace(/[^a-zA-Z0-9_-]/g, (character) => `\\${character}`)
+
+vi.stubGlobal("CSS", {
+  ...(typeof CSS !== "undefined" ? CSS : {}),
+  supports: () => true,
+  escape:
+    typeof CSS !== "undefined" && CSS.escape
+      ? CSS.escape.bind(CSS)
+      : escapeCssIdentifier,
+})
 
 vi.stubGlobal("matchMedia", (query: string) => ({
   matches: false,
