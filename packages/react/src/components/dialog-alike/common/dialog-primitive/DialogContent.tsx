@@ -1,15 +1,7 @@
 "use client"
 
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import {
-  CSSProperties,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react"
-import { useIsomorphicLayoutEffect } from "usehooks-ts"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 
 type PointerDownOutsideEvent = CustomEvent<{
   originalEvent: PointerEvent
@@ -23,6 +15,7 @@ import { DialogPortal } from "@/ui/Dialog/components/DialogPortal"
 import { useDialogPrimitiveContext } from "./context"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogAnimation } from "./types"
+import { useContainerAnchor } from "./useContainerAnchor"
 
 const animationClassName = (animation: DialogAnimation) => {
   return cn(
@@ -73,10 +66,6 @@ export const DialogContent = forwardRef<
   ) => {
     const [container, setContainer] = useState<HTMLElement | null>()
     const contentRef = useRef<HTMLDivElement>(null)
-    // When anchoring, the fixed wrapper is positioned to overlay the container's
-    // box (kept in sync on resize/scroll). Empty → fall back to the class-based
-    // `inset-0` viewport positioning.
-    const [anchorStyle, setAnchorStyle] = useState<CSSProperties>({})
 
     // Shake the content when the dialog is opened and clicked outside in modal mode
     const shake = useCallback(() => {
@@ -116,35 +105,7 @@ export const DialogContent = forwardRef<
         ? (container.parentElement ?? container)
         : null
 
-    useIsomorphicLayoutEffect(() => {
-      if (typeof document === "undefined" || !anchorEl) {
-        setAnchorStyle({})
-        return
-      }
-
-      const update = () => {
-        const rect = anchorEl.getBoundingClientRect()
-        setAnchorStyle({
-          left: rect.left,
-          top: rect.top,
-          width: rect.width,
-          height: rect.height,
-          right: "auto",
-          bottom: "auto",
-        })
-      }
-
-      update()
-      const observer = new ResizeObserver(update)
-      observer.observe(anchorEl)
-      window.addEventListener("resize", update)
-      window.addEventListener("scroll", update, true)
-      return () => {
-        observer.disconnect()
-        window.removeEventListener("resize", update)
-        window.removeEventListener("scroll", update, true)
-      }
-    }, [anchorEl])
+    const anchorStyle = useContainerAnchor(anchorEl)
 
     const context = useDialogPrimitiveContext()
 
