@@ -541,12 +541,38 @@ export declare type AiChatMode = "chat" | "voice";
 export declare type AiChatProviderProps = {
     enabled?: boolean;
     /**
+     * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+     * Hosts set "left" for a chat-first experience (e.g. communications).
+     * @default "right"
+     */
+    side?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
      */
     initialMessage?: string | string[];
+    /**
+     * Grouped suggestions rendered as outline buttons above the composer on the
+     * welcome screen. Optional and independent of `welcomeScreenCards` — provide
+     * either, both, or neither, in any counts. No hard limit on the number of
+     * groups yet.
+     */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    /**
+     * Cards rendered below the composer on the fullscreen welcome screen. Each
+     * card carries its own `onClick` — the chat owns the layout; the host owns
+     * the interaction.
+     *
+     * Hosts that must build a card's `onClick` inside the chat provider (e.g.
+     * needing `openCanvas`) can register the cards dynamically via
+     * `setWelcomeScreenCards` from `useAiChat()` instead of passing them here.
+     *
+     * Optional and independent of `welcomeScreenSuggestions` — provide either,
+     * both, or neither, in any counts. At most 4 cards are rendered (the row is a
+     * 2×2 grid); extras are dropped.
+     */
+    welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     /**
      * Enable resizable chat window
@@ -676,6 +702,8 @@ declare type AiChatProviderReturnValue = {
     setInitialMessage: React.Dispatch<React.SetStateAction<string | string[] | undefined>>;
     welcomeScreenSuggestions: WelcomeScreenSuggestion[];
     setWelcomeScreenSuggestions: React.Dispatch<React.SetStateAction<WelcomeScreenSuggestion[]>>;
+    welcomeScreenCards: F0AiChatWelcomeCard[];
+    setWelcomeScreenCards: React.Dispatch<React.SetStateAction<F0AiChatWelcomeCard[]>>;
     onThumbsUp?: (message: F0AIMessage, { threadId, feedback }: {
         threadId: string;
         feedback: string;
@@ -764,6 +792,28 @@ declare type AiChatProviderReturnValue = {
     pendingQuote: PendingQuote | null;
     /** Set the pending quote (pass null to clear). */
     setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>;
+    /**
+     * Content currently hosted in the side panel, or `null` to show the F0.ai
+     * chat. Only one is mounted at a time — see {@link SidePanelContent}.
+     */
+    panelContent: SidePanelContent | null;
+    /**
+     * Mount `content` in the side panel (replacing whatever was there) and open
+     * the panel. Pass `null` to fall back to the AI chat. The previous content
+     * is unmounted thanks to the `id` key.
+     */
+    setPanelContent: (content: SidePanelContent | null) => void;
+    /** Clear the custom panel content and fall back to the F0.ai chat. */
+    clearPanelContent: () => void;
+    /**
+     * Edge the whole side panel docks to — the AI chat, hosted content and the
+     * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
+     * chat-first experience (e.g. communications), where left is comfier to
+     * navigate between conversations.
+     */
+    panelSide: "left" | "right";
+    /** Set which edge the side panel docks to. */
+    setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
 } & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -786,12 +836,15 @@ declare type AiChatProviderReturnValue = {
  */
 declare interface AiChatState {
     enabled: boolean;
+    /** Initial edge the panel docks to. @default "right" */
+    side?: "left" | "right";
     agent?: string;
     initialMessage?: string | string[];
     chatHeader?: React.ReactNode;
     chatMessages?: React.ReactNode;
     chatInput?: React.ReactNode;
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
+    welcomeScreenCards?: F0AiChatWelcomeCard[];
     disclaimer?: AiChatDisclaimer;
     resizable?: boolean;
     defaultVisualizationMode?: VisualizationMode;
@@ -3052,6 +3105,14 @@ export declare interface ClarifyingStepState extends ClarifyingStepData {
 
 declare type ColId = string;
 
+export declare function CollapsibleGroup({ label, threads, pinnedIds, onSelect, onPin, onUnpin, onDelete, }: CollapsibleGroupProps): JSX_2.Element;
+
+declare interface CollapsibleGroupProps extends ThreadActionHandlers {
+    label: string;
+    threads: ChatThread[];
+    pinnedIds: Set<string>;
+}
+
 export declare interface CollectionComputation {
     datasetId: string;
     sortBy?: string;
@@ -3769,6 +3830,9 @@ declare type DataCollectionSourceDefinition<R extends RecordType = RecordType, F
     primaryActionsLabel?: string;
     /** Available secondary actions that can be performed on the collection */
     secondaryActions?: SecondaryActionsDefinition;
+    /** Optional upsell button rendered in the collection toolbar. Opt-in per
+     * collection: return a definition to show it, or undefined to hide it. */
+    upsellAction?: UpsellActionDefinitionFn;
     /** Available summaries fields. If not provided, summaries is not allowed. */
     summaries?: Summaries & {
         label?: string;
@@ -4798,6 +4862,86 @@ export declare const defaultTranslations: {
             };
         };
     };
+    readonly chat: {
+        readonly placeholder: "Write something here..";
+        readonly searchPlaceholder: "Search messages";
+        readonly closeSearch: "Close search";
+        readonly noResults: "No chats found";
+        readonly backToLatest: "Jump to latest";
+        readonly muted: "Muted";
+        readonly attachFile: "Attach file";
+        readonly addEmoji: "Add emoji";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly dropFilesHere: "Drop your files here";
+        readonly removeFile: "Remove";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileUploadError: "Upload failed";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
+        readonly sent: "Sent";
+        readonly read: "Read";
+        readonly readBy: {
+            readonly one: "Read by {{count}}";
+            readonly other: "Read by {{count}}";
+        };
+        readonly delivered: "Delivered";
+        readonly back: "Back";
+        readonly writing: "Writing…";
+        readonly isTyping: "{{name}} is writing…";
+        readonly twoTyping: "{{first}} and {{second}} are writing…";
+        readonly severalTyping: "Several people are writing…";
+        readonly deletedMessage: "Message deleted";
+        readonly moreActions: "Message actions";
+        readonly options: "Options";
+        readonly pin: "Pin";
+        readonly unpin: "Unpin";
+        readonly info: "Info";
+        readonly viewProfile: "View profile";
+        readonly mentionEveryone: "here";
+        readonly mentionEveryoneDescription: "Notify everyone in this group";
+        readonly reply: "Reply";
+        readonly react: "Add reaction";
+        readonly download: "Download";
+        readonly removeQuote: "Remove quote";
+        readonly edit: "Edit";
+        readonly editing: "Editing";
+        readonly edited: "edited";
+        readonly cancelEdit: "Cancel edit";
+        readonly saveEdit: "Save";
+        readonly you: "You";
+        readonly openImage: "Open image";
+        readonly imagePreview: "Image preview";
+        readonly closePreview: "Close";
+        readonly previousImage: "Previous image";
+        readonly nextImage: "Next image";
+        readonly photo: "Photo";
+        readonly photoCount: {
+            readonly one: "{{count}} photo";
+            readonly other: "{{count}} photos";
+        };
+        readonly fileCount: {
+            readonly one: "{{count}} file";
+            readonly other: "{{count}} files";
+        };
+        readonly attachmentCount: {
+            readonly one: "{{count}} attachment";
+            readonly other: "{{count}} attachments";
+        };
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly newMessages: "New messages";
+        readonly unreadCount: {
+            readonly one: "{{count}} unread";
+            readonly other: "{{count}} unread";
+        };
+        readonly emptyConversation: "No messages yet";
+        readonly emptyConversationDescription: "Send a message to start the conversation.";
+        readonly error: "Couldn't load this conversation";
+        readonly loadingOlder: "Loading earlier messages…";
+    };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
         readonly barChartVertical: "Bar (vertical)";
@@ -5230,7 +5374,7 @@ declare const dialogPositions: readonly ["center", "left", "right", "fullscreen"
  *
  * const result = await dialogs.open({ title, content, actions: { primary: { label: "OK", value: true } } })
  */
-export declare const dialogs: {
+declare const dialogs: {
     /** Open a dialog. Resolves with the value of the action the user picked. */
     open: (definition: Optional<DialogDefinition, "id">) => Promise<DialogActionValue>;
     /** Open a notification-style dialog (info/warning/critical/positive). */
@@ -5239,9 +5383,18 @@ export declare const dialogs: {
     alert: (options: AlertDialogOptions) => Promise<DialogActionValue>;
     /** Notification dialog with confirm + cancel actions (defaults to Ok/Cancel). */
     confirmation: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
+    /**
+     * Back-compat alias for {@link confirmation} — the v3 `dialog.confirm(...)`.
+     * Same options shape (`type`, `title`, `msg`, `confirm`, `cancel`), so legacy
+     * call sites keep working through the `dialogs as dialog` re-export.
+     * @deprecated Use `confirmation` instead.
+     */
+    confirm: (options: ConfirmDialogOptions) => Promise<DialogActionValue>;
     /** Programmatically close a dialog by id (resolves its promise with undefined). */
     close: (id: DialogId) => void;
 };
+export { dialogs as dialog }
+export { dialogs }
 
 declare type DialogSimpleAction = {
     label?: string;
@@ -5940,6 +6093,16 @@ export declare interface F0AiAvailableFormDefinition<TParams extends Record<stri
 export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, input: inputProp, }: F0AiChatProps) => JSX_2.Element | null;
 
 /**
+ * The AI chat credits / settings popover button, on its own. Use it to surface
+ * the popover outside the chat header — e.g. from a sidebar that already owns
+ * the chat navigation (history, new chat), leaving the header minimal.
+ */
+export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger, }: Pick<F0AiChatHeaderProps, "credits" | "employeeCredits"> & {
+    /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
+    trigger?: ReactNode;
+}) => JSX_2.Element | null;
+
+/**
  * Headless chat header. Renders a top bar with title (or thread selector),
  * credits popover, fullscreen toggle and close button. Has two visual
  * variants:
@@ -5949,7 +6112,7 @@ export declare const F0AiChat: ({ header: headerProp, messages: messagesProp, in
  *
  * Decoupled from CopilotKit and `useAiChat()` — everything via props.
  */
-export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, }: F0AiChatHeaderProps) => JSX_2.Element;
+export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, }: F0AiChatHeaderProps) => JSX_2.Element;
 
 export declare type F0AiChatHeaderProps = {
     /**
@@ -5983,6 +6146,12 @@ export declare type F0AiChatHeaderProps = {
     onOpenHistory?: () => void;
     /** Legacy variant gate: only renders the "new chat" button when true. */
     hasMessages?: boolean;
+    /**
+     * Minimal header: render only the expand + close controls (no title, new
+     * chat or credits popover). Use when a sidebar owns the chat navigation and
+     * the credits/settings popover (see `F0AiChatCreditsButton`).
+     */
+    compact?: boolean;
     /** Credits configuration. When present, renders the credits popover button. */
     credits?: AiChatCredits;
     /**
@@ -6044,7 +6213,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -6055,7 +6224,7 @@ export declare const F0AiChatProvider: ({ enabled, initialMessage, chatHeader, c
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -6127,16 +6296,28 @@ export declare type F0AiChatTextAreaProps = {
      * the welcome screen. Clicking a group opens a single popover (above the
      * row, left-aligned, spanning the composer width) with that group's items.
      * Hovering an item previews its prompt in the textarea placeholder.
+     *
+     * Optional and independent of `welcomeScreenCards` — the two can have
+     * different counts. No hard limit on the number of groups yet.
      */
     welcomeScreenSuggestions?: WelcomeScreenSuggestion[];
     /** Called when the user clicks a sub-suggestion. Receives the picked
      *  `item` and its parent `group` (the outline-button entry). */
     onSuggestionClick?: (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => void;
     /**
+     * Cards rendered as a grid below the composer on the fullscreen welcome
+     * screen. Each card carries its own `onClick`; the host decides the behavior.
+     *
+     * Optional and independent of `welcomeScreenSuggestions` — the two can have
+     * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
+     * dropped.
+     */
+    welcomeScreenCards?: F0AiChatWelcomeCard[];
+    /**
      * When true on the welcome screen, the composer adopts the fullscreen
      * layout: the input slot grows to claim the bottom half (so the textarea
-     * rises toward the vertical center), and the welcome suggestions render
-     * below the textarea with their popover opening downward (instead of above).
+     * rises toward the vertical center) and the welcome cards render below it.
+     * The welcome suggestions row sits above the composer in both layouts.
      */
     fullscreen?: boolean;
 };
@@ -6154,6 +6335,35 @@ export declare type F0AiChatTextAreaSubmitPayload = {
     files: UploadedFile[];
     context: PendingContext | null;
     quote: PendingQuote | null;
+};
+
+/**
+ * A card shown below the composer on the fullscreen welcome screen, rendered
+ * as an `F0CardHorizontal`. Each card owns its behavior via `onClick`, so
+ * different cards can trigger different things (send a prompt, open a dialog,
+ * navigate, …).
+ *
+ * The chat owns the layout; the host owns the interaction. Up to 4 cards are
+ * rendered (a 2×2 grid); extras are dropped.
+ */
+export declare type F0AiChatWelcomeCard = {
+    /** Stable identifier, also used as the React key. */
+    id: string;
+    icon: IconType;
+    title: string;
+    description?: string;
+    /**
+     * Optional prompt the card represents. The card's own `onClick` decides
+     * whether to send it — cards without a `message` (e.g. a "Browse templates"
+     * card) simply do something else.
+     */
+    message?: string;
+    /**
+     * Invoked when the card is clicked. The host wires the behavior per card —
+     * send `message` as a prompt, open a dialog, navigate, … A card without an
+     * `onClick` renders as non-interactive.
+     */
+    onClick?: () => void;
 };
 
 /**
@@ -7390,7 +7600,7 @@ export declare type F0CanvasCardProps = {
  * Headless: no CopilotKit or `useAiChat()` dependency — the host wires
  * `content`, `onClose` and `entities` directly.
  */
-export declare function F0CanvasPanel({ content, onClose, entities, }: F0CanvasPanelProps): ReactNode;
+export declare function F0CanvasPanel({ content, onClose, entities, side, }: F0CanvasPanelProps): ReactNode;
 
 export declare namespace F0CanvasPanel {
     var displayName: string;
@@ -7403,6 +7613,12 @@ export declare type F0CanvasPanelProps = {
     onClose: () => void;
     /** Canvas entity registry keyed by `CanvasContent["type"]`. */
     entities?: Record<string, CanvasEntityDefinition<any>>;
+    /**
+     * Edge the adjacent chat panel docks to. The canvas hugs the seam on the
+     * opposite side, so the rounded corner / open border face the chat.
+     * Defaults to "right" (chat on the right -> canvas seam on its right).
+     */
+    side?: "left" | "right";
 };
 
 export declare const F0Card: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardProps & RefAttributes<HTMLDivElement>> & {
@@ -7497,9 +7713,27 @@ declare interface F0CardHorizontalProps {
      * drag-and-drop while still allowing click navigation via `onClick`.
      */
     disableOverlayLink?: boolean;
+    /**
+     * Dims the whole card and disables interaction (including its actions and any
+     * row-level link/click). Purely a visual + interaction affordance.
+     */
+    disabled?: boolean;
+    /**
+     * Renders the description on a single line, truncating overflow with an
+     * ellipsis (and a tooltip with the full text) instead of wrapping. Has no
+     * effect when there's no `description`.
+     */
+    descriptionAsSingleLine?: boolean;
 }
 
 export declare type F0CardProps = Omit<CardInternalProps, (typeof privateProps_3)[number]>;
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0CardRow: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0CardHorizontalProps & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
 
 declare interface F0CardSelectConfig {
     options: CardSelectOption[];
@@ -12459,6 +12693,7 @@ declare type KanbanLaneDefinition = {
     id: string;
     title: string;
     variant?: Variant;
+    color?: NewColor;
 };
 
 declare type KanbanOnCreate = (laneId: string) => void | Promise<void>;
@@ -14993,6 +15228,17 @@ export declare const setDataCollectionUrlParams: <CurrentFiltersState extends Fi
 declare type SetFormCardValueFormatter = <T = unknown>(entry: FormCardValueFormatterEntry<T>) => void;
 
 /**
+ * A single piece of content hosted in the side panel — the same resizable +
+ * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
+ * the `id` keys the content so switching conversations unmounts the previous
+ * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ */
+export declare type SidePanelContent = {
+    id: string;
+    content: React.ReactNode;
+};
+
+/**
  * Response structure for non-paginated data
  */
 declare type SimpleResult<T> = T[];
@@ -15799,6 +16045,32 @@ export declare interface ThreadGroup {
     threads: ChatThread[];
 }
 
+export declare function ThreadItem({ thread, isPinned, isActive, isPending, onSelect, onPin, onUnpin, onDelete, className, }: ThreadItemProps): JSX_2.Element;
+
+declare interface ThreadItemProps extends ThreadActionHandlers {
+    thread: ChatThread;
+    isPinned: boolean;
+    /** Keeps the row highlighted while its thread is the one open in the panel. */
+    isActive?: boolean;
+    /**
+     * A pin/unpin/delete request for this thread is in flight. Replaces the
+     * actions button with a spinner (kept visible off-hover) so the row reads as
+     * "saving" while the backend confirms. Wire it from `useChatHistory`'s
+     * `pendingIds`.
+     */
+    isPending?: boolean;
+    /** Override the row classes (e.g. to match the sidebar's chat-row paddings). */
+    className?: string;
+}
+
+/**
+ * Loading placeholder for the chat-history thread list. Mirrors the real
+ * layout: a couple of collapsible groups, each with a short title and a few
+ * title-only rows of varying width (no avatar or trailing actions — those only
+ * appear on hover).
+ */
+export declare function ThreadListSkeleton(): JSX_2.Element;
+
 export declare type TimelineRowStatus = (typeof timelineRowStatuses)[number];
 
 export declare const timelineRowStatuses: readonly ["completed", "in-progress", "not-started"];
@@ -16066,6 +16338,20 @@ declare type UpsellAction = BaseAction & {
     showConfirmation: boolean;
 };
 
+/** Upsell button rendered in the collection toolbar. */
+declare type UpsellActionDefinition = {
+    label: string;
+    onClick: () => void | Promise<void>;
+    /** Show the upsell icon. Defaults to true. */
+    showIcon?: boolean;
+    /** Button variant. Defaults to "outlinePromote". */
+    variant?: "promote" | "outlinePromote";
+    disabled?: boolean;
+};
+
+/** Returns the upsell action, or undefined to hide it. */
+declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined;
+
 export declare const UpsellingAlert: WithDataTestIdReturnType_4<typeof _UpsellingAlert>;
 
 declare function _UpsellingAlert({ icon, title, description, action, }: UpsellingAlertProps): JSX_2.Element;
@@ -16217,7 +16503,7 @@ export declare function useCanvasEntity(type: string | undefined): CanvasEntityD
  * URLs, auth headers or fetch wiring. Manages pinned threads in
  * localStorage and the threads list (loading/error/data).
  */
-export declare function useChatHistory({ enabled, fetchThreads: fetchThreadsCb, deleteThread: deleteThreadCb, }: UseChatHistoryOptions): UseChatHistoryReturn;
+export declare function useChatHistory({ enabled, fetchThreads: fetchThreadsCb, deleteThread: deleteThreadCb, pinThread: pinThreadCb, unpinThread: unpinThreadCb, }: UseChatHistoryOptions): UseChatHistoryReturn;
 
 declare type UseChatHistoryOptions = {
     /** When true, fetches threads on mount. Default: `false`. */
@@ -16232,6 +16518,16 @@ declare type UseChatHistoryOptions = {
      * failure; the hook will then re-fetch to restore consistency.
      */
     deleteThread: (id: string) => Promise<void>;
+    /**
+     * Optional async persisters for the pin state (e.g. a Stream-backed mutation
+     * in the host app). When provided, pin/unpin become host-backed: the change
+     * is applied optimistically (the row moves between groups at once), the id is
+     * marked in `pendingIds` while the request is in flight, and the change is
+     * rolled back if the callback rejects. When omitted, the pin state is kept
+     * locally in localStorage as before — synchronous and never pending.
+     */
+    pinThread?: (id: string) => Promise<void>;
+    unpinThread?: (id: string) => Promise<void>;
 };
 
 declare type UseChatHistoryReturn = {
@@ -16240,6 +16536,14 @@ declare type UseChatHistoryReturn = {
     error: string | null;
     refetch: () => void;
     pinnedIds: Set<string>;
+    /**
+     * Ids of threads with an in-flight pin/unpin/delete request. Use it to show a
+     * per-row loading affordance (e.g. a spinner where the actions sit) while the
+     * backend confirms. Only populated for host-backed actions: a synchronous,
+     * localStorage-only pin (no `pinThread`/`unpinThread` callback) is never
+     * pending.
+     */
+    pendingIds: Set<string>;
     pinThread: (id: string) => void;
     unpinThread: (id: string) => void;
     deleteThread: (id: string) => Promise<void>;
@@ -17092,7 +17396,8 @@ export declare type WeekStartsOn = (typeof WeekStartDay)[keyof typeof WeekStartD
 
 /**
  * A welcome-screen group rendered as an outline button in the welcome row.
- * Clicking the group opens a popover listing its `items`.
+ * Clicking the group opens a popover listing its `items`. The number of groups
+ * is not capped yet (unlike welcome cards, which top out at 4).
  */
 export declare type WelcomeScreenSuggestion = {
     icon: IconType;
