@@ -174,7 +174,9 @@ export const Header = ({
           />
         )}
         {controls.expand && controls.navigation && <Divider />}
-        {controls.navigation && <PageNavigation {...controls.navigation} />}
+        {controls.navigation && (
+          <PageNavigation {...controls.navigation} counterPosition="end" />
+        )}
       </>
     )
   }
@@ -232,7 +234,9 @@ export const Header = ({
           )}
         </div>
         <div className="flex flex-row gap-2">
-          {navigation && <PageNavigation {...navigation} />}
+          {navigation && (
+            <PageNavigation {...navigation} counterPosition="end" />
+          )}
           <Actions />
           {(navigation || otherActions) && <Divider />}
           <CloseButton />
