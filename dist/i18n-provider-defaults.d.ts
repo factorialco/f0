@@ -567,6 +567,86 @@ export declare const defaultTranslations: {
             };
         };
     };
+    readonly chat: {
+        readonly placeholder: "Write something here..";
+        readonly searchPlaceholder: "Search messages";
+        readonly closeSearch: "Close search";
+        readonly noResults: "No chats found";
+        readonly backToLatest: "Jump to latest";
+        readonly muted: "Muted";
+        readonly attachFile: "Attach file";
+        readonly addEmoji: "Add emoji";
+        readonly recordAudio: "Record audio";
+        readonly listening: "Listening…";
+        readonly stopRecording: "Stop and transcribe";
+        readonly cancelRecording: "Cancel recording";
+        readonly dropFilesHere: "Drop your files here";
+        readonly removeFile: "Remove";
+        readonly tooManyFilesError: "You can attach up to {{maxFiles}} files at once";
+        readonly fileUploadError: "Upload failed";
+        readonly micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.";
+        readonly micError: "Couldn't access the microphone.";
+        readonly transcriptionError: "Couldn't transcribe the audio. Try again.";
+        readonly sent: "Sent";
+        readonly read: "Read";
+        readonly readBy: {
+            readonly one: "Read by {{count}}";
+            readonly other: "Read by {{count}}";
+        };
+        readonly delivered: "Delivered";
+        readonly back: "Back";
+        readonly writing: "Writing…";
+        readonly isTyping: "{{name}} is writing…";
+        readonly twoTyping: "{{first}} and {{second}} are writing…";
+        readonly severalTyping: "Several people are writing…";
+        readonly deletedMessage: "Message deleted";
+        readonly moreActions: "Message actions";
+        readonly options: "Options";
+        readonly pin: "Pin";
+        readonly unpin: "Unpin";
+        readonly info: "Info";
+        readonly viewProfile: "View profile";
+        readonly mentionEveryone: "here";
+        readonly mentionEveryoneDescription: "Notify everyone in this group";
+        readonly reply: "Reply";
+        readonly react: "Add reaction";
+        readonly download: "Download";
+        readonly removeQuote: "Remove quote";
+        readonly edit: "Edit";
+        readonly editing: "Editing";
+        readonly edited: "edited";
+        readonly cancelEdit: "Cancel edit";
+        readonly saveEdit: "Save";
+        readonly you: "You";
+        readonly openImage: "Open image";
+        readonly imagePreview: "Image preview";
+        readonly closePreview: "Close";
+        readonly previousImage: "Previous image";
+        readonly nextImage: "Next image";
+        readonly photo: "Photo";
+        readonly photoCount: {
+            readonly one: "{{count}} photo";
+            readonly other: "{{count}} photos";
+        };
+        readonly fileCount: {
+            readonly one: "{{count}} file";
+            readonly other: "{{count}} files";
+        };
+        readonly attachmentCount: {
+            readonly one: "{{count}} attachment";
+            readonly other: "{{count}} attachments";
+        };
+        readonly scrollToBottom: "Scroll to bottom";
+        readonly newMessages: "New messages";
+        readonly unreadCount: {
+            readonly one: "{{count}} unread";
+            readonly other: "{{count}} unread";
+        };
+        readonly emptyConversation: "No messages yet";
+        readonly emptyConversationDescription: "Send a message to start the conversation.";
+        readonly error: "Couldn't load this conversation";
+        readonly loadingOlder: "Loading earlier messages…";
+    };
     readonly dataChart: {
         readonly heatmapNotSupported: "Heatmap not supported at this size";
         readonly barChartVertical: "Bar (vertical)";
@@ -906,10 +986,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -917,8 +995,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
