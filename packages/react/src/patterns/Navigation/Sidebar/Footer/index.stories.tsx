@@ -4,6 +4,8 @@ import { action } from "storybook/actions"
 
 import * as Icons from "@/icons/app"
 
+import { fakePeople } from "@/mocks/people"
+
 import { SidebarFooter } from "./index"
 
 const meta = {
@@ -18,9 +20,9 @@ type Story = StoryObj<typeof meta>
 export const Default: Story = {
   args: {
     user: {
-      firstName: "Dani",
-      lastName: "Moreno Frontend kind of long name",
-      avatarUrl: "/avatars/person04.jpg",
+      firstName: fakePeople.aria.firstName,
+      lastName: `${fakePeople.aria.lastName} Frontend kind of long name`,
+      avatarUrl: fakePeople.aria.image,
     },
     showActivityButton: true,
     hasActivityUpdates: true,

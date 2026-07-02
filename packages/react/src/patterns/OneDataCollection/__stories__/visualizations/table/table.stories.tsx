@@ -3,6 +3,7 @@ import { expect, within } from "storybook/test"
 import { useState, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
+import { fakePeople } from "@/mocks/people"
 import {
   CompoundCellValue,
   CompoundTone,
@@ -693,13 +694,28 @@ export const StrikedRowsVisualization: Story = {
     const records = [
       {
         id: 1,
-        name: "Alice Johnson",
-        email: "alice@example.com",
+        name: fakePeople.noor.fullName,
+        email: fakePeople.noor.email,
         active: true,
       },
-      { id: 2, name: "Bob Smith", email: "bob@example.com", active: false },
-      { id: 3, name: "Carol Lee", email: "carol@example.com", active: true },
-      { id: 4, name: "Dan Park", email: "dan@example.com", active: false },
+      {
+        id: 2,
+        name: fakePeople.hana.fullName,
+        email: fakePeople.hana.email,
+        active: false,
+      },
+      {
+        id: 3,
+        name: fakePeople.caleb.fullName,
+        email: fakePeople.caleb.email,
+        active: true,
+      },
+      {
+        id: 4,
+        name: fakePeople.yuki.fullName,
+        email: fakePeople.yuki.email,
+        active: false,
+      },
     ]
 
     const source = useDataCollectionSource({
@@ -735,12 +751,22 @@ export const BorderedTable: Story = {
     const records = [
       {
         id: 1,
-        name: "Alice Johnson",
-        email: "alice@example.com",
+        name: fakePeople.noor.fullName,
+        email: fakePeople.noor.email,
         role: "Admin",
       },
-      { id: 2, name: "Bob Smith", email: "bob@example.com", role: "Editor" },
-      { id: 3, name: "Carol Lee", email: "carol@example.com", role: "Viewer" },
+      {
+        id: 2,
+        name: fakePeople.hana.fullName,
+        email: fakePeople.hana.email,
+        role: "Editor",
+      },
+      {
+        id: 3,
+        name: fakePeople.caleb.fullName,
+        email: fakePeople.caleb.email,
+        role: "Viewer",
+      },
     ]
 
     const source = useDataCollectionSource({

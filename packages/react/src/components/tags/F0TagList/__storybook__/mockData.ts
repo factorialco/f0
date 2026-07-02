@@ -1,5 +1,6 @@
 import { Settings } from "lucide-react"
 
+import { fakePeople } from "@/mocks/people"
 import { mockImage } from "@/testing/mocks/images"
 
 // Sample dot tags
@@ -29,15 +30,15 @@ const dotTags = [
 // Sample person tags
 const personTags = [
   {
-    name: "John Doe",
+    name: fakePeople.noor.fullName,
     src: mockImage("person", 0),
   },
   {
-    name: "Jane Smith",
+    name: fakePeople.hana.fullName,
     src: mockImage("person", 1),
   },
   {
-    name: "Bob Johnson",
+    name: fakePeople.caleb.fullName,
   },
 ]
 

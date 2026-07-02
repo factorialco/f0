@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0VersionHistory } from "../index"
 import { Version } from "../types"
 
@@ -9,17 +11,17 @@ const mockVersions: Version[] = [
   {
     id: "4",
     author: {
-      firstName: "Raul",
-      lastName: "Sigüenza",
-      src: "/avatars/person04.jpg",
+      firstName: fakePeople.mateo.firstName,
+      lastName: fakePeople.mateo.lastName,
+      src: fakePeople.mateo.image,
     },
     timestamp: new Date("2023-11-06T12:00:00"),
   },
   {
     id: "3",
     author: {
-      firstName: "Alan",
-      lastName: "Kay",
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
       src: "/storybook-assets/avatar.jpeg",
     },
     timestamp: new Date("2024-10-04T08:30:00"),
@@ -27,18 +29,18 @@ const mockVersions: Version[] = [
   {
     id: "2",
     author: {
-      firstName: "Eleanor",
-      lastName: "Roosevelt",
-      src: "/avatars/person05.jpg",
+      firstName: fakePeople.hana.firstName,
+      lastName: fakePeople.hana.lastName,
+      src: fakePeople.hana.image,
     },
     timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
   },
   {
     id: "1",
     author: {
-      firstName: "Raul",
-      lastName: "Sigüenza",
-      src: "/avatars/person04.jpg",
+      firstName: fakePeople.mateo.firstName,
+      lastName: fakePeople.mateo.lastName,
+      src: fakePeople.mateo.image,
     },
     timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), // Yesterday
   },

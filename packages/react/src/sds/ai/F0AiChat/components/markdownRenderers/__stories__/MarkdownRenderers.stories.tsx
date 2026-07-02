@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
+import { fakePeople } from "@/mocks/people"
 
 import { Blockquote, Hr, Pre } from "../components/Block"
 import { A } from "../components/Link"
@@ -98,17 +99,17 @@ export const TableExample: Story = {
       </thead>
       <tbody>
         <tr>
-          <Td>John Doe</Td>
+          <Td>{fakePeople.noor.fullName}</Td>
           <Td>Engineer</Td>
           <Td>Engineering</Td>
         </tr>
         <tr>
-          <Td>Jane Smith</Td>
+          <Td>{fakePeople.hana.fullName}</Td>
           <Td>Designer</Td>
           <Td>Design</Td>
         </tr>
         <tr>
-          <Td>Bob Johnson</Td>
+          <Td>{fakePeople.caleb.fullName}</Td>
           <Td>Manager</Td>
           <Td>Operations</Td>
         </tr>

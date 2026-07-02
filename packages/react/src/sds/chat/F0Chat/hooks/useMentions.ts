@@ -11,7 +11,7 @@ export const MENTION_EVERYONE_ID = "@everyone"
 export type MentionEntry = {
   /** A user id, or {@link MENTION_EVERYONE_ID} for `@here`. */
   id: string
-  /** Display name as inserted in the text (e.g. "Ana García" or "here"). */
+  /** Display name as inserted in the text (e.g. "Noor Rahimi" or "here"). */
   name: string
   /** Display data carried through to the sent message so the chip can show the
    * member's profile hover card (set when picking a member; absent for @here). */

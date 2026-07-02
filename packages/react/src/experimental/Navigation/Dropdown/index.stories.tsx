@@ -5,6 +5,7 @@ import { expect, userEvent, within } from "storybook/test"
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import * as Icons from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import { Dropdown, MobileDropdown as MobileDropdownComponent } from "./index"
 
@@ -130,9 +131,9 @@ export const WithCustomTrigger: Story = {
     <Dropdown {...args}>
       <button aria-label="Open user menu">
         <F0AvatarPerson
-          src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          src={fakePeople.aria.image}
+          firstName={fakePeople.aria.firstName}
+          lastName={fakePeople.aria.lastName}
           size="lg"
         />
       </button>
@@ -176,33 +177,33 @@ export const WithAvatars: Story = {
   args: {
     items: [
       {
-        label: "Josep Jaume Rey",
+        label: fakePeople.tobias.fullName,
         avatar: {
           type: "person",
-          firstName: "Josep Jaume",
-          lastName: "Rey",
-          src: "/avatars/person02.jpg",
-          "aria-label": "Josep Jaume Rey avatar",
+          firstName: fakePeople.tobias.firstName,
+          lastName: fakePeople.tobias.lastName,
+          src: fakePeople.tobias.image,
+          "aria-label": `${fakePeople.tobias.fullName} avatar`,
         },
       },
       {
-        label: "Nik Lopin",
+        label: fakePeople.felix.fullName,
         avatar: {
           type: "person",
-          firstName: "Nik",
-          lastName: "Lopin",
-          src: "/avatars/person07.jpg",
-          "aria-label": "Nik Lopin avatar",
+          firstName: fakePeople.felix.firstName,
+          lastName: fakePeople.felix.lastName,
+          src: fakePeople.felix.image,
+          "aria-label": `${fakePeople.felix.fullName} avatar`,
         },
       },
       {
-        label: "Saúl Domínguez",
+        label: fakePeople.lena.fullName,
         avatar: {
           type: "person",
-          firstName: "Saúl",
-          lastName: "Domínguez",
-          src: "/avatars/person05.jpg",
-          "aria-label": "Saúl Domínguez avatar",
+          firstName: fakePeople.lena.firstName,
+          lastName: fakePeople.lena.lastName,
+          src: fakePeople.lena.image,
+          "aria-label": `${fakePeople.lena.fullName} avatar`,
         },
       },
     ],
@@ -285,9 +286,9 @@ export const DisabledWithCustomTrigger: Story = {
     <Dropdown {...args}>
       <button aria-label="Open user menu">
         <F0AvatarPerson
-          src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          src={fakePeople.aria.image}
+          firstName={fakePeople.aria.firstName}
+          lastName={fakePeople.aria.lastName}
           size="lg"
         />
       </button>
@@ -353,9 +354,9 @@ export const WithDataTestId: Story = {
     <Dropdown {...args}>
       <button aria-label="Open user menu">
         <F0AvatarPerson
-          src="/avatars/person04.jpg"
-          firstName="Dani"
-          lastName="Moreno"
+          src={fakePeople.aria.image}
+          firstName={fakePeople.aria.firstName}
+          lastName={fakePeople.aria.lastName}
           size="lg"
         />
       </button>
@@ -382,9 +383,9 @@ export const Snapshot: Story = {
       <Dropdown {...args} disabled>
         <button aria-label="Open user menu">
           <F0AvatarPerson
-            src="/avatars/person04.jpg"
-            firstName="Dani"
-            lastName="Moreno"
+            src={fakePeople.aria.image}
+            firstName={fakePeople.aria.firstName}
+            lastName={fakePeople.aria.lastName}
             size="lg"
           />
         </button>

@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import image from "@storybook-static/avatars/person04.jpg"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0HILActionConfirmation } from ".."
 
 const meta = {
@@ -84,7 +86,7 @@ export const Default: Story = {
 export const WithDescription: Story = {
   args: {
     text: "Approve 3 days off",
-    description: "Requested by Jane Cooper · Jun 10–12",
+    description: `Requested by ${fakePeople.noor.fullName} · Jun 10–12`,
     confirmationText: "Approve",
     cancelText: "Reject",
   },
@@ -94,11 +96,11 @@ export const WithAvatar: Story = {
   args: {
     avatar: {
       type: "person",
-      firstName: "Jane",
-      lastName: "Cooper",
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
       src: image,
     },
-    text: "Jane Cooper",
+    text: fakePeople.noor.fullName,
     description: "Requested 3 days off",
     confirmationText: "Approve",
     cancelText: "Reject",

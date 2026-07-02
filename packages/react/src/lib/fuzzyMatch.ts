@@ -3,11 +3,11 @@
  *
  * Matching is a case- and accent-insensitive *subsequence* test: every
  * character of the query must appear in `text`, in order, but not necessarily
- * contiguously (so "rcm" matches "Roger Campos"). An empty/whitespace query
+ * contiguously (so "nrh" matches "Noor Rahimi"). An empty/whitespace query
  * matches everything.
  */
 
-// Lowercase + strip diacritics so "Raúl" matches "raul".
+// Lowercase + strip diacritics so "Sofía" matches "sofia".
 const normalize = (value: string): string =>
   value
     .toLowerCase()

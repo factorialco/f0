@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import avatar from "@storybook-static/avatars/person03.jpg"
 import { expect, fn, within } from "storybook/test"
 
+import { fakePeople } from "@/mocks/people"
+
 import { Check, Placeholder } from "../../../icons/app"
 import { OnePersonListItem } from "./index"
 
@@ -18,15 +20,15 @@ type Story = StoryObj<typeof OnePersonListItem>
 export const Default: Story = {
   args: {
     person: {
-      firstName: "John",
-      lastName: "Smith",
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
       avatarUrl: avatar,
       avatarBadge: {
         icon: Check,
         type: "positive",
       },
     },
-    info: "Manager: Agustín García",
+    info: `Manager: ${fakePeople.yuki.fullName}`,
     description: "Software Engineer",
     withPointerCursor: true,
     rightTag: {
@@ -39,8 +41,8 @@ export const Default: Story = {
 export const WithActions: Story = {
   args: {
     person: {
-      firstName: "Sarah",
-      lastName: "Johnson",
+      firstName: fakePeople.hana.firstName,
+      lastName: fakePeople.hana.lastName,
       avatarUrl: avatar,
     },
     description: "Product Designer",
@@ -61,8 +63,8 @@ export const WithActions: Story = {
 export const WithTags: Story = {
   args: {
     person: {
-      firstName: "Emma",
-      lastName: "Wilson",
+      firstName: fakePeople.caleb.firstName,
+      lastName: fakePeople.caleb.lastName,
       avatarUrl: avatar,
     },
     bottomTags: [
@@ -77,8 +79,8 @@ export const WithTags: Story = {
 export const Minimal: Story = {
   args: {
     person: {
-      firstName: "Emma",
-      lastName: "Wilson",
+      firstName: fakePeople.caleb.firstName,
+      lastName: fakePeople.caleb.lastName,
       avatarUrl: avatar,
     },
     description: "Software Engineer",

@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { mockImage } from "@/testing/mocks/images"
 
 import { getBaseAvatarArgTypes } from "@/components/avatars/internal/BaseAvatar/__stories__/utils"
@@ -34,8 +35,8 @@ const meta: Meta<typeof F0AvatarPulse> = {
     ...getBaseAvatarArgTypes(["aria-label", "aria-labelledby"]),
   },
   args: {
-    firstName: "Dani",
-    lastName: "Moreno",
+    firstName: fakePeople.aria.firstName,
+    lastName: fakePeople.aria.lastName,
     onPulseClick: () => {
       console.log("Pulse clicked")
     },
@@ -73,8 +74,8 @@ export const Snapshot: Story = {
           {[...pulses, undefined].map((pulse, index) => (
             <F0AvatarPulse
               key={`${pulse ?? "none"}-${index}`}
-              firstName="Dani"
-              lastName="Moreno"
+              firstName={fakePeople.aria.firstName}
+              lastName={fakePeople.aria.lastName}
               pulse={pulse}
               onPulseClick={() => {}}
             />
@@ -88,8 +89,8 @@ export const Snapshot: Story = {
           {[...pulses, undefined].map((pulse, index) => (
             <F0AvatarPulse
               key={`${pulse ?? "none"}-${index}`}
-              firstName="Dani"
-              lastName="Moreno"
+              firstName={fakePeople.aria.firstName}
+              lastName={fakePeople.aria.lastName}
               src={mockImage("person", index)}
               pulse={pulse}
               onPulseClick={() => {}}

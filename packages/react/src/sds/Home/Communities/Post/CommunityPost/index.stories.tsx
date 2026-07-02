@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import PushPin from "@/icons/app/PushPin"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import { CommunityPost } from "./index"
 
@@ -29,9 +30,9 @@ export const Default: Story = {
   args: {
     id: "123",
     author: {
-      firstName: "Saúl",
-      lastName: "Domínguez",
-      avatarUrl: "/avatars/person08.jpg",
+      firstName: fakePeople.lena.firstName,
+      lastName: fakePeople.lena.lastName,
+      avatarUrl: fakePeople.lena.image,
     },
     group: {
       title: "All company",

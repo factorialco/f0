@@ -8,6 +8,7 @@ import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
 import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
+import { fakePeople } from "@/mocks/people"
 
 import { OneDataCollection } from "../../.."
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
@@ -915,7 +916,7 @@ export const EditableTableWithAddRow: Story = {
           department: "Engineering",
           status: "Active",
           isStarred: false,
-          manager: "John Doe",
+          manager: fakePeople.noor.fullName,
           image: "",
           salary: 50000,
           joinedAt: new Date(),
@@ -1028,7 +1029,7 @@ export const EditableTableWithSummaryRowAndAddRow: Story = {
           department: "Engineering",
           status: "Active",
           isStarred: false,
-          manager: "John Doe",
+          manager: fakePeople.noor.fullName,
           image: "",
           salary: 50000,
           joinedAt: new Date(),

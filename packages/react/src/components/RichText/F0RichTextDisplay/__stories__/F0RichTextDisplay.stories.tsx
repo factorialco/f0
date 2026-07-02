@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0RichTextDisplay } from ".."
 
 const meta = {
@@ -39,11 +41,11 @@ type Story = StoryObj<typeof meta>
 
 const htmlContent = `<p>
   <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="3" rel="noopener noreferrer" target="_blank">
-    @Xavier Val Parejo
+    @${fakePeople.hana.fullName}
   </a>
   and
   <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="2" rel="noopener noreferrer" target="_blank">
-    @Jacob Bamio Cordero
+    @${fakePeople.noor.fullName}
   </a>
   are trying to get fit so...
 </p>
@@ -83,7 +85,7 @@ const htmlContent = `<p>
     <p>
       <mark>
         <a href="https://cdn.memegenerator.es/imagenes/memes/full/32/48/32486607.jpg" class="mention" data-id="1" rel="noopener noreferrer" target="_blank">
-          @Raúl Sigüenza Sánchez
+          @${fakePeople.mateo.fullName}
         </a>
       </mark>
     </p>

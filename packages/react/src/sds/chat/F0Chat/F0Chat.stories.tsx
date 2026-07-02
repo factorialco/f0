@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { type ReactNode } from "react"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0Chat } from "./F0Chat"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
@@ -10,7 +12,7 @@ import { type F0ChatRuntime, type F0ChatUser } from "./types"
 const me: F0ChatUser = { id: "me", name: "Me" }
 const ana: F0ChatUser = {
   id: "ana",
-  name: "Ana Torres",
+  name: fakePeople.noor.fullName,
   subtitle: "Product Designer",
 }
 
@@ -22,8 +24,12 @@ const Frame = ({ children }: { children: ReactNode }): ReactNode => (
 const dmChannel = {
   id: "dm-ana",
   type: "dm" as const,
-  title: "Ana Torres",
-  avatar: { type: "person" as const, firstName: "Ana", lastName: "Torres" },
+  title: fakePeople.noor.fullName,
+  avatar: {
+    type: "person" as const,
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
+  },
   presence: "online" as const,
   user: ana,
 }
@@ -32,23 +38,35 @@ const dmChannel = {
 // card a full profile card (avatar + role + "View profile").
 const anaG: F0ChatUser = {
   id: "ana-g",
-  name: "Ana García",
+  name: fakePeople.hana.fullName,
   subtitle: "Product Designer",
-  avatar: { type: "person", firstName: "Ana", lastName: "García" },
+  avatar: {
+    type: "person",
+    firstName: fakePeople.hana.firstName,
+    lastName: fakePeople.hana.lastName,
+  },
   profileHref: "/people/ana-g",
 }
 const bruno: F0ChatUser = {
   id: "bruno",
-  name: "Bruno Martínez",
+  name: fakePeople.caleb.fullName,
   subtitle: "Engineering Manager",
-  avatar: { type: "person", firstName: "Bruno", lastName: "Martínez" },
+  avatar: {
+    type: "person",
+    firstName: fakePeople.caleb.firstName,
+    lastName: fakePeople.caleb.lastName,
+  },
   profileHref: "/people/bruno",
 }
 const carmen: F0ChatUser = {
   id: "carmen",
-  name: "Carmen Rodríguez",
+  name: fakePeople.yuki.fullName,
   subtitle: "Data Analyst",
-  avatar: { type: "person", firstName: "Carmen", lastName: "Rodríguez" },
+  avatar: {
+    type: "person",
+    firstName: fakePeople.yuki.firstName,
+    lastName: fakePeople.yuki.lastName,
+  },
   profileHref: "/people/carmen",
 }
 
@@ -95,7 +113,7 @@ const GroupConversation = (): ReactNode => {
         // Mention of someone else — hover the @chip to open their profile card.
         id: "mention-other",
         author: anaG,
-        body: "@Bruno Martínez can you take the deploy?",
+        body: `@${fakePeople.caleb.fullName} can you take the deploy?`,
         createdAt: new Date().toISOString(),
         isMine: false,
         mentions: [

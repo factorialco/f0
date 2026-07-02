@@ -16,6 +16,7 @@ import type {
 import type { RenderCustomFieldSelectConfig } from "../types"
 
 import { forms } from "@/patterns/forms"
+import { fakePeople } from "@/mocks/people"
 
 import {
   f0FormField,
@@ -1645,9 +1646,9 @@ export const CustomField: Story = {
     }
 
     const employees = [
-      { id: "1", name: "John Doe" },
-      { id: "2", name: "Jane Smith" },
-      { id: "3", name: "Bob Johnson" },
+      { id: "1", name: fakePeople.noor.fullName },
+      { id: "2", name: fakePeople.hana.fullName },
+      { id: "3", name: fakePeople.caleb.fullName },
     ]
 
     const formSchema = z.object({
@@ -2055,9 +2056,9 @@ export const WithActionBar: Story = {
         label: "Save Changes",
       },
       defaultValues: {
-        firstName: "John",
-        lastName: "Doe",
-        email: "john@example.com",
+        firstName: fakePeople.sofia.firstName,
+        lastName: fakePeople.sofia.lastName,
+        email: fakePeople.sofia.email,
         notifications: true,
       },
       onSubmit: async ({ data }) => {
@@ -2892,7 +2893,7 @@ export const PerSectionShowSubmitWhenDirty: Story = {
         },
       },
       defaultValues: {
-        profile: { displayName: "Jane Doe", bio: "" },
+        profile: { displayName: fakePeople.yuki.fullName, bio: "" },
         notifications: {
           emailNotifications: true,
           pushNotifications: false,
@@ -2953,9 +2954,9 @@ export const AsyncDefaultValues: Story = {
         // Simulate fetching user profile from an API
         await sleep(2000)
         return {
-          firstName: "Jane",
-          lastName: "Smith",
-          email: "jane.smith@example.com",
+          firstName: fakePeople.ravi.firstName,
+          lastName: fakePeople.ravi.lastName,
+          email: fakePeople.ravi.email,
           bio: "Software engineer passionate about design systems.",
           notifications: true,
         }
@@ -3021,8 +3022,11 @@ export const AsyncDefaultValuesPerSection: Story = {
         // Simulate API call
         await sleep(2000)
         return {
-          personal: { firstName: "Jane", lastName: "Smith" },
-          contact: { email: "jane@example.com", phone: "+1 555 123 4567" },
+          personal: {
+            firstName: fakePeople.ravi.firstName,
+            lastName: fakePeople.ravi.lastName,
+          },
+          contact: { email: fakePeople.ravi.email, phone: "+1 555 123 4567" },
         }
       },
       onSubmit: async ({ sectionId, data }) => {
@@ -3086,15 +3090,15 @@ export const WithDefaultValuesParamsSchema: Story = {
       }
     > = {
       "emp-1": {
-        firstName: "Jane",
-        lastName: "Doe",
-        email: "jane.doe@factorial.co",
+        firstName: fakePeople.greta.firstName,
+        lastName: fakePeople.greta.lastName,
+        email: fakePeople.greta.email,
         role: "Staff Engineer",
       },
       "emp-2": {
-        firstName: "John",
-        lastName: "Smith",
-        email: "john.smith@factorial.co",
+        firstName: fakePeople.iris.firstName,
+        lastName: fakePeople.iris.lastName,
+        email: fakePeople.iris.email,
         role: "Product Manager",
       },
     }
@@ -3164,14 +3168,14 @@ export const WithDefaultValuesParamsSchemaPerSection: Story = {
       { firstName: string; lastName: string; email: string }
     > = {
       "emp-1": {
-        firstName: "Jane",
-        lastName: "Doe",
-        email: "jane.doe@factorial.co",
+        firstName: fakePeople.greta.firstName,
+        lastName: fakePeople.greta.lastName,
+        email: fakePeople.greta.email,
       },
       "emp-2": {
-        firstName: "John",
-        lastName: "Smith",
-        email: "john.smith@factorial.co",
+        firstName: fakePeople.iris.firstName,
+        lastName: fakePeople.iris.lastName,
+        email: fakePeople.iris.email,
       },
     }
 
@@ -3316,7 +3320,10 @@ export const ActionBarWiggle: Story = {
     const formDefinition = useF0FormDefinition({
       name: "wiggle-demo",
       schema: formSchema,
-      defaultValues: { name: "Jane", email: "jane@example.com" },
+      defaultValues: {
+        name: fakePeople.aaron.fullName,
+        email: fakePeople.aaron.email,
+      },
       onSubmit: async ({ data }) => {
         await sleep(1000)
         console.info(`Submitted: ${JSON.stringify(data, null, 2)}`)

@@ -17,6 +17,7 @@ import { LinkProps, LinkProvider } from "@/lib/linkHandler"
 import { writeDataCollectionStorage } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { FIRST_NAMES_MOCK, getMockValue, SURNAMES_MOCK } from "@/mocks"
+import { fakePeople } from "@/mocks/people"
 
 import { ChartLine } from "../../../../icons/ai"
 import { EllipsisHorizontal, Settings } from "../../../../icons/app"
@@ -74,11 +75,11 @@ const defaultActions = [
 const defaultNavigation = {
   previous: {
     url: "/previous",
-    title: "Previous Employee: John Smith",
+    title: `Previous Employee: ${fakePeople.hana.fullName}`,
   },
   next: {
     url: "/next",
-    title: "Next Employee: Sarah Johnson",
+    title: `Next Employee: ${fakePeople.caleb.fullName}`,
   },
   counter: {
     current: 1,
@@ -179,7 +180,7 @@ export const WithNavigationDisabled: Story = {
     navigation: {
       next: {
         url: "/next",
-        title: "Next Employee: Sarah Johnson",
+        title: `Next Employee: ${fakePeople.caleb.fullName}`,
       },
       counter: {
         current: 1,
@@ -195,7 +196,11 @@ export const WithBreadcrumbs: Story = {
     breadcrumbs: [
       { id: "employees_collection", label: "Company", href: "/employees" },
       { id: "employees", label: "Employees", href: "/employees" },
-      { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
+      {
+        id: "employee",
+        label: fakePeople.noor.fullName,
+        href: "/employees/123",
+      },
     ],
   },
 }
@@ -208,7 +213,7 @@ export const WithSelectBreadcrumb: Story = {
       {
         type: "select",
         id: "employee",
-        label: "Ainhoa Aznar Lago",
+        label: fakePeople.noor.fullName,
         searchbox: true,
         options: Array.from({ length: 10 }, (_, idx) => ({
           value: idx.toString(),
@@ -452,7 +457,11 @@ export const WithEverything: Story = {
     module: defaultModule,
     breadcrumbs: [
       { id: "employees", label: "Employees", href: "/employees" },
-      { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
+      {
+        id: "employee",
+        label: fakePeople.noor.fullName,
+        href: "/employees/123",
+      },
     ],
     navigation: defaultNavigation,
     statusTag: {
@@ -469,7 +478,11 @@ export const WithProductUpdate: Story = {
     module: defaultModule,
     breadcrumbs: [
       { id: "employees", label: "Employees", href: "/employees" },
-      { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
+      {
+        id: "employee",
+        label: fakePeople.noor.fullName,
+        href: "/employees/123",
+      },
     ],
     navigation: defaultNavigation,
     statusTag: {
@@ -619,7 +632,11 @@ export const WithFavorites: Story = {
     module: defaultModule,
     breadcrumbs: [
       { id: "employees", label: "Employees", href: "/employees" },
-      { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
+      {
+        id: "employee",
+        label: fakePeople.noor.fullName,
+        href: "/employees/123",
+      },
     ],
     statusTag: {
       text: "Draft",
@@ -650,7 +667,11 @@ export const Embedded: Story = {
     embedded: true,
     breadcrumbs: [
       { id: "employees", label: "Employees", href: "/employees" },
-      { id: "employee", label: "Ainhoa Aznar Lago", href: "/employees/123" },
+      {
+        id: "employee",
+        label: fakePeople.noor.fullName,
+        href: "/employees/123",
+      },
     ],
   },
 }

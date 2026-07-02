@@ -11,6 +11,8 @@ import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import * as HeaderStories from "@/experimental/Navigation/Header/PageHeader/index.stories"
 import { Tabs } from "@/patterns/Navigation/Tabs"
 import * as TabsStories from "@/patterns/Navigation/Tabs/index.stories"
+import { fakePeople } from "@/mocks/people"
+
 import { Page } from "./index"
 
 type TabsProps = ComponentProps<typeof Tabs>
@@ -74,7 +76,7 @@ export const WithBreadcrumbs: Story = {
             { id: "employees", label: "Employees", href: "/employees" },
             {
               id: "employee",
-              label: "Ainhoa Aznar Lago",
+              label: fakePeople.noor.fullName,
               href: "/employees/123",
             },
           ]}
@@ -105,7 +107,7 @@ export const WithBreadcrumbsAndStatus: Story = {
             { id: "employees", label: "Employees", href: "/employees" },
             {
               id: "employee",
-              label: "Ainhoa Aznar Lago",
+              label: fakePeople.noor.fullName,
               href: "/employees/123",
             },
           ]}
@@ -140,11 +142,11 @@ export const WithNavigation: Story = {
           navigation={{
             previous: {
               url: "/previous",
-              title: "Previous Employee: John Smith",
+              title: `Previous Employee: ${fakePeople.hana.fullName}`,
             },
             next: {
               url: "/next",
-              title: "Next Employee: Sarah Johnson",
+              title: `Next Employee: ${fakePeople.caleb.fullName}`,
             },
             counter: {
               current: 1,
@@ -177,11 +179,11 @@ export const WithNavigationAndStatus: Story = {
           navigation={{
             previous: {
               url: "/previous",
-              title: "Previous Employee: John Smith",
+              title: `Previous Employee: ${fakePeople.hana.fullName}`,
             },
             next: {
               url: "/next",
-              title: "Next Employee: Sarah Johnson",
+              title: `Next Employee: ${fakePeople.caleb.fullName}`,
             },
             counter: {
               current: 1,
@@ -222,7 +224,7 @@ export const Embedded: Story = {
             { id: "employees", label: "Employees", href: "/employees" },
             {
               id: "employee",
-              label: "Ainhoa Aznar Lago",
+              label: fakePeople.noor.fullName,
               href: "/employees/123",
             },
           ]}

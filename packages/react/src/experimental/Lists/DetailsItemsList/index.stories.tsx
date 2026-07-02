@@ -4,6 +4,7 @@ import { expect, within } from "storybook/test"
 
 import type { TagListProps } from "@/components/tags/F0TagList"
 import type { TagDotProps } from "@/components/tags/F0TagDot"
+import { fakePeople } from "@/mocks/people"
 
 import { DetailsItemsList } from "./index"
 
@@ -28,9 +29,9 @@ const meta: Meta = {
         title: "Manager",
         content: {
           type: "person",
-          firstName: "Saul",
-          lastName: "Dominguez",
-          avatarUrl: "/avatars/person01.jpg",
+          firstName: fakePeople.lena.firstName,
+          lastName: fakePeople.lena.lastName,
+          avatarUrl: fakePeople.lena.image,
           action: {
             type: "navigate",
             href: "",
@@ -172,27 +173,27 @@ export const TableViewWithPersonList: Story = {
         title: "Manager",
         content: {
           type: "person",
-          firstName: "Saul",
-          lastName: "Dominguez",
-          avatarUrl: "/avatars/person01.jpg",
+          firstName: fakePeople.lena.firstName,
+          lastName: fakePeople.lena.lastName,
+          avatarUrl: fakePeople.lena.image,
         },
       },
       {
         title: "Tech Lead",
         content: {
           type: "person",
-          firstName: "Dani",
-          lastName: "Moreno",
-          avatarUrl: "/avatars/person05.jpg",
+          firstName: fakePeople.aria.firstName,
+          lastName: fakePeople.aria.lastName,
+          avatarUrl: fakePeople.aria.image,
         },
       },
       {
         title: "Designer",
         content: {
           type: "person",
-          firstName: "Josep Jaume",
-          lastName: "Rey Peroy",
-          avatarUrl: "/avatars/person07.jpg",
+          firstName: fakePeople.tobias.firstName,
+          lastName: fakePeople.tobias.lastName,
+          avatarUrl: fakePeople.tobias.image,
         },
       },
       {
@@ -200,15 +201,15 @@ export const TableViewWithPersonList: Story = {
         content: [
           {
             type: "person",
-            firstName: "Alex",
-            lastName: "Garcia",
-            avatarUrl: "/avatars/person06.jpg",
+            firstName: fakePeople.noor.firstName,
+            lastName: fakePeople.noor.lastName,
+            avatarUrl: fakePeople.noor.image,
           },
           {
             type: "person",
-            firstName: "Maria",
-            lastName: "Lopez",
-            avatarUrl: "/avatars/person02.jpg",
+            firstName: fakePeople.hana.firstName,
+            lastName: fakePeople.hana.lastName,
+            avatarUrl: fakePeople.hana.image,
           },
         ],
       },
@@ -230,19 +231,19 @@ export const WithAvatarList: Story = {
             remainingCount: 9,
             avatars: [
               {
-                firstName: "Saul",
-                lastName: "Dominguez",
-                src: "/avatars/person01.jpg",
+                firstName: fakePeople.lena.firstName,
+                lastName: fakePeople.lena.lastName,
+                src: fakePeople.lena.image,
               },
               {
-                firstName: "Dani",
-                lastName: "Moreno",
-                src: "/avatars/person05.jpg",
+                firstName: fakePeople.aria.firstName,
+                lastName: fakePeople.aria.lastName,
+                src: fakePeople.aria.image,
               },
               {
-                firstName: "Josep Jaume",
-                lastName: "Rey Peroy",
-                src: "/avatars/person07.jpg",
+                firstName: fakePeople.tobias.firstName,
+                lastName: fakePeople.tobias.lastName,
+                src: fakePeople.tobias.image,
               },
             ],
           },
@@ -280,19 +281,19 @@ export const TableViewWithAvatarList: Story = {
             remainingCount: 9,
             avatars: [
               {
-                firstName: "Saul",
-                lastName: "Dominguez",
-                src: "/avatars/person01.jpg",
+                firstName: fakePeople.lena.firstName,
+                lastName: fakePeople.lena.lastName,
+                src: fakePeople.lena.image,
               },
               {
-                firstName: "Dani",
-                lastName: "Moreno",
-                src: "/avatars/person05.jpg",
+                firstName: fakePeople.aria.firstName,
+                lastName: fakePeople.aria.lastName,
+                src: fakePeople.aria.image,
               },
               {
-                firstName: "Josep Jaume",
-                lastName: "Rey Peroy",
-                src: "/avatars/person07.jpg",
+                firstName: fakePeople.tobias.firstName,
+                lastName: fakePeople.tobias.lastName,
+                src: fakePeople.tobias.image,
               },
             ],
           },

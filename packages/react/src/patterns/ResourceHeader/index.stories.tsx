@@ -4,6 +4,7 @@ import { ComponentProps } from "react"
 import { fn } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import * as Icon from "@/icons/app"
 import { Archive, Comment, Download, ExternalLink, Pencil } from "@/icons/app"
@@ -178,11 +179,11 @@ export const Metadata: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Josep Jaume",
-            lastName: "Rey",
-            src: "/avatars/person02.jpg",
+            firstName: fakePeople.tobias.firstName,
+            lastName: fakePeople.tobias.lastName,
+            src: fakePeople.tobias.image,
           },
-          text: "Josep Jaume Rey",
+          text: fakePeople.tobias.fullName,
         },
         actions: [
           {
@@ -273,11 +274,11 @@ export const WithDropdownAction: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Ana",
-            lastName: "Martínez",
-            src: "/avatars/person03.jpg",
+            firstName: fakePeople.noor.firstName,
+            lastName: fakePeople.noor.lastName,
+            src: fakePeople.noor.image,
           },
-          text: "Ana Martínez",
+          text: fakePeople.noor.fullName,
         },
       },
     ],
@@ -357,13 +358,13 @@ export const CompanyHeader: Story = {
 export const PersonHeader: Story = {
   tags: ["!dev"],
   args: {
-    title: "René Galindo",
+    title: fakePeople.bruno.fullName,
     description: "Product Design Lead",
     avatar: {
       type: "person",
-      firstName: "René",
-      lastName: "Galindo",
-      src: "/avatars/person04.jpg",
+      firstName: fakePeople.bruno.firstName,
+      lastName: fakePeople.bruno.lastName,
+      src: fakePeople.bruno.image,
     },
     metadata: [
       {
@@ -372,11 +373,11 @@ export const PersonHeader: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Ilya",
-            lastName: "Zayats",
-            src: "/avatars/person05.jpg",
+            firstName: fakePeople.hana.firstName,
+            lastName: fakePeople.hana.lastName,
+            src: fakePeople.hana.image,
           },
-          text: "ilya Zayats",
+          text: fakePeople.hana.fullName,
         },
       },
       {
@@ -445,10 +446,10 @@ export const EmojiHeader: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Ana",
-            lastName: "García",
+            firstName: fakePeople.caleb.firstName,
+            lastName: fakePeople.caleb.lastName,
           },
-          text: "Ana García",
+          text: fakePeople.caleb.fullName,
         },
       },
     ],
@@ -502,11 +503,11 @@ export const TeamHeader: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Josep Jaume",
-            lastName: "Rey",
-            src: "/avatars/person01.jpg",
+            firstName: fakePeople.tobias.firstName,
+            lastName: fakePeople.tobias.lastName,
+            src: fakePeople.tobias.image,
           },
-          text: "Josep Jaume Rey",
+          text: fakePeople.tobias.fullName,
         },
         actions: [
           {
@@ -595,11 +596,11 @@ export const NoDescription: Story = {
           type: "avatar",
           variant: {
             type: "person",
-            firstName: "Josep Jaume",
-            lastName: "Rey",
-            src: "/avatars/person08.jpg",
+            firstName: fakePeople.tobias.firstName,
+            lastName: fakePeople.tobias.lastName,
+            src: fakePeople.tobias.image,
           },
-          text: "Josep Jaume Rey",
+          text: fakePeople.tobias.fullName,
         },
         actions: [
           {
@@ -626,13 +627,13 @@ export const DeactivatedEmployee: Story = {
   tags: ["!dev"],
   args: {
     ...PersonHeader.args,
-    title: "John Doe",
+    title: fakePeople.yuki.fullName,
     deactivated: true,
     description: "Software Engineer",
     avatar: {
       type: "person",
-      firstName: "John",
-      lastName: "Doe",
+      firstName: fakePeople.yuki.firstName,
+      lastName: fakePeople.yuki.lastName,
       deactivated: true,
     },
   },

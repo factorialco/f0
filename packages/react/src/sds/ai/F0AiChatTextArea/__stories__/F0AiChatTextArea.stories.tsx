@@ -6,6 +6,7 @@ import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
 import { File, Marketplace } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { fakePeople } from "@/mocks/people"
 
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
@@ -47,20 +48,20 @@ const PENDING_QUOTE: PendingQuote = {
 const SAMPLE_PEOPLE: PersonProfile[] = [
   {
     id: "1",
-    firstName: "Ana",
-    lastName: "García",
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
     avatarUrl: undefined,
   } as PersonProfile,
   {
     id: "2",
-    firstName: "Bruno",
-    lastName: "Martínez",
+    firstName: fakePeople.hana.firstName,
+    lastName: fakePeople.hana.lastName,
     avatarUrl: undefined,
   } as PersonProfile,
   {
     id: "3",
-    firstName: "Carmen",
-    lastName: "Rodríguez",
+    firstName: fakePeople.caleb.firstName,
+    lastName: fakePeople.caleb.lastName,
     avatarUrl: undefined,
   } as PersonProfile,
 ]

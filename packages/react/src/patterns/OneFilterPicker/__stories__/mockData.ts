@@ -2,6 +2,7 @@ import {
   createDataSourceDefinition,
   type PaginatedFetchOptions,
 } from "@/hooks/datasource"
+import { fakePeople } from "@/mocks/people"
 
 import { InFilterOptions } from "../filterTypes/InFilter/types"
 import { FiltersDefinition, PresetsDefinition } from "../types"
@@ -98,10 +99,10 @@ export const filterDefinition: FiltersDefinition = {
     label: "Manager",
     options: {
       options: [
-        { value: "alice", label: "Alice Johnson" },
-        { value: "bob", label: "Bob Smith" },
-        { value: "carol", label: "Carol Williams" },
-        { value: "dave", label: "Dave Brown" },
+        { value: "alice", label: fakePeople.eva.fullName },
+        { value: "bob", label: fakePeople.omar.fullName },
+        { value: "carol", label: fakePeople.mira.fullName },
+        { value: "dave", label: fakePeople.bruno.fullName },
       ],
     },
   },

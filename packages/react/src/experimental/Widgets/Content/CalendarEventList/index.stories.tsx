@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { CalendarEventList } from "./index"
 
 const meta: Meta = {
@@ -12,7 +14,7 @@ const meta: Meta = {
   args: {
     events: [
       {
-        title: "Birthday of Kyriakos Papadopoulos",
+        title: `Birthday of ${fakePeople.noor.fullName}`,
         subtitle: "(2 days)",
         description: "02/07 - 04/07",
         color: "orange",

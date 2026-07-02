@@ -4,6 +4,7 @@ import { expect, within } from "storybook/test"
 
 import { HomeLayout } from "@/layouts/HomeLayout"
 import { Default as DefaultHomeLayoutStory } from "@/layouts/HomeLayout/index.stories"
+import { fakePeople } from "@/mocks/people"
 
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { DaytimePage, DaytimePageProps } from "./index"
@@ -47,10 +48,10 @@ export const DaytimeHomeLayout: Story = {
     <DaytimePage
       period={period}
       header={{
-        employeeFirstName: "Saul",
-        employeeLastName: "Goodman",
-        title: "Good morning, Saul!",
-        employeeAvatar: "/avatars/person05.jpg",
+        employeeFirstName: fakePeople.noor.firstName,
+        employeeLastName: fakePeople.noor.lastName,
+        title: `Good morning, ${fakePeople.noor.firstName}!`,
+        employeeAvatar: fakePeople.noor.image,
       }}
     >
       <HomeLayout {...DefaultHomeLayoutStory.args} />
@@ -72,11 +73,11 @@ export const DaytimeHomeLayoutWithDescription: Story = {
     <DaytimePage
       period={period}
       header={{
-        employeeFirstName: "Saul",
-        employeeLastName: "Goodman",
-        title: "Good morning, Saul!",
+        employeeFirstName: fakePeople.noor.firstName,
+        employeeLastName: fakePeople.noor.lastName,
+        title: `Good morning, ${fakePeople.noor.firstName}!`,
         description: "How are you feeling today?",
-        employeeAvatar: "/avatars/person04.jpg",
+        employeeAvatar: fakePeople.noor.image,
       }}
     >
       <HomeLayout {...DefaultHomeLayoutStory.args} />
@@ -98,13 +99,13 @@ export const DaytimeHomeLayoutWithMood: Story = {
     <DaytimePage
       period={period}
       header={{
-        employeeFirstName: "Saul",
-        employeeLastName: "Goodman",
-        title: "Good morning, Saul!",
+        employeeFirstName: fakePeople.noor.firstName,
+        employeeLastName: fakePeople.noor.lastName,
+        title: `Good morning, ${fakePeople.noor.firstName}!`,
         description: "How are you feeling today?",
         pulse: "positive",
         onPulseClick: () => {},
-        employeeAvatar: "/avatars/person03.jpg",
+        employeeAvatar: fakePeople.noor.image,
       }}
     >
       <HomeLayout {...DefaultHomeLayoutStory.args} />
@@ -126,12 +127,12 @@ export const DaytimeHomeLayoutWithMoodNotSet: Story = {
     <DaytimePage
       period={period}
       header={{
-        employeeFirstName: "Saul",
-        employeeLastName: "Goodman",
-        title: "Good morning, Saul!",
+        employeeFirstName: fakePeople.noor.firstName,
+        employeeLastName: fakePeople.noor.lastName,
+        title: `Good morning, ${fakePeople.noor.firstName}!`,
         pulse: undefined,
         onPulseClick: () => {},
-        employeeAvatar: "/avatars/person05.jpg",
+        employeeAvatar: fakePeople.noor.image,
       }}
     >
       <HomeLayout {...DefaultHomeLayoutStory.args} />
@@ -147,10 +148,10 @@ export const WithDataTestId: Story = {
     <DaytimePage
       period={period}
       header={{
-        employeeFirstName: "Saul",
-        employeeLastName: "Goodman",
-        title: "Good morning, Saul!",
-        employeeAvatar: "/avatars/person05.jpg",
+        employeeFirstName: fakePeople.noor.firstName,
+        employeeLastName: fakePeople.noor.lastName,
+        title: `Good morning, ${fakePeople.noor.firstName}!`,
+        employeeAvatar: fakePeople.noor.image,
       }}
       dataTestId="daytime-page-test-id"
     >

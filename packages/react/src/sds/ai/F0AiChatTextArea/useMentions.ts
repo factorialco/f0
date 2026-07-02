@@ -9,7 +9,7 @@ import { escapeXml } from "./highlight-utils"
 export type MentionEntry = {
   /** Employee ID */
   id: string
-  /** Display name as inserted in the text (e.g. "Ana Garcia") */
+  /** Display name as inserted in the text (e.g. "Noor Rahimi") */
   name: string
 }
 

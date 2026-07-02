@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { fn } from "storybook/test"
 
+import { fakePeople } from "@/mocks/people"
+
 import * as Icon from "../../../../icons/app"
 import { Metadata } from "./index"
 
@@ -52,33 +54,33 @@ export const Default: Story = {
           avatars: [
             {
               type: "person",
-              firstName: "Josep Jaume",
-              lastName: "Rey",
+              firstName: fakePeople.tobias.firstName,
+              lastName: fakePeople.tobias.lastName,
             },
             {
               type: "person",
-              firstName: "Nik",
-              lastName: "Lopin",
+              firstName: fakePeople.felix.firstName,
+              lastName: fakePeople.felix.lastName,
             },
             {
               type: "person",
-              firstName: "Josep Jaume",
-              lastName: "Rey",
+              firstName: fakePeople.tobias.firstName,
+              lastName: fakePeople.tobias.lastName,
             },
             {
               type: "person",
-              firstName: "Nik",
-              lastName: "Lopin",
+              firstName: fakePeople.felix.firstName,
+              lastName: fakePeople.felix.lastName,
             },
             {
               type: "person",
-              firstName: "Josep Jaume",
-              lastName: "Rey",
+              firstName: fakePeople.tobias.firstName,
+              lastName: fakePeople.tobias.lastName,
             },
             {
               type: "person",
-              firstName: "Nik",
-              lastName: "Lopin",
+              firstName: fakePeople.felix.firstName,
+              lastName: fakePeople.felix.lastName,
             },
           ],
         },

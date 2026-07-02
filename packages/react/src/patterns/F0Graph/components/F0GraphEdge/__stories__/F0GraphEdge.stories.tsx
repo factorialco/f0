@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import type { GraphEdge, GraphNode } from "../../../types"
 
@@ -17,13 +18,13 @@ const NODES: GraphNode<Person>[] = [
   {
     id: "a",
     parentId: null,
-    data: { name: "Alice Moreno", title: "Manager" },
+    data: { name: fakePeople.noor.fullName, title: "Manager" },
     childrenCount: 1,
   },
   {
     id: "b",
     parentId: "a",
-    data: { name: "Bob Smith", title: "Engineer" },
+    data: { name: fakePeople.hana.fullName, title: "Engineer" },
   },
 ]
 

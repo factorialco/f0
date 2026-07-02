@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { RadarChart } from "./index"
 
 const meta: Meta = {
@@ -19,9 +21,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const skillsDataConfig = {
-  alice: { label: "Alice" },
-  bob: { label: "Bob" },
-  carol: { label: "Carol" },
+  alice: { label: fakePeople.noor.fullName },
+  bob: { label: fakePeople.hana.fullName },
+  carol: { label: fakePeople.caleb.fullName },
 }
 
 const skillsData = [

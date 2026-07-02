@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import { F0Avatar } from "../../F0Avatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
@@ -75,8 +76,8 @@ export const AsBadge: Story = {
       size="xl"
       avatar={{
         type: "person",
-        firstName: "Jane",
-        lastName: "Doe",
+        firstName: fakePeople.noor.firstName,
+        lastName: fakePeople.noor.lastName,
         badge: { type: "module", module: "home" },
       }}
     />

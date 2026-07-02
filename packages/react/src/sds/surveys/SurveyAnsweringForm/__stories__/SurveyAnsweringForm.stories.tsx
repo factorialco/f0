@@ -10,6 +10,7 @@ import type {
 } from "@/patterns/F0Form/fields/file/types"
 
 import { F0Button } from "@/components/F0Button"
+import { fakePeople } from "@/mocks/people"
 
 import type { SurveyAnsweringFormProps } from "../types"
 
@@ -397,7 +398,7 @@ export const WithDefaultValues: Story = {
   args: {
     mode: "all-questions",
     defaultValues: {
-      "q-name": { type: "text", value: "Jane Doe" },
+      "q-name": { type: "text", value: fakePeople.noor.fullName },
       "q-perf-rating": { type: "rating", value: 4 },
       "q-department": { type: "dropdown-single", value: "engineering" },
     },
@@ -446,7 +447,7 @@ export const PreviewWithDefaultValues: Story = {
     mode: "all-questions",
     preview: true,
     defaultValues: {
-      "q-name": { type: "text", value: "Jane Doe" },
+      "q-name": { type: "text", value: fakePeople.noor.fullName },
       "q-perf-rating": { type: "rating", value: 4 },
       "q-department": { type: "dropdown-single", value: "engineering" },
     },
@@ -497,7 +498,7 @@ export const Inline: Story = {
         datasets={mockDatasets}
         useUpload={useMockUpload}
         defaultValues={{
-          "q-name": { type: "text", value: "Jane Doe" },
+          "q-name": { type: "text", value: fakePeople.noor.fullName },
           "q-perf-rating": { type: "rating", value: 4 },
           "q-department": { type: "dropdown-single", value: "engineering" },
         }}

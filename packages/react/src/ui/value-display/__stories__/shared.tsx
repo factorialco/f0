@@ -1,4 +1,5 @@
 import { NewColor } from "@/components/tags/F0TagDot"
+import { fakePeople } from "@/mocks/people"
 import {
   PropertyDefinition,
   renderProperty,
@@ -7,26 +8,26 @@ import { useI18n } from "@/lib/providers/i18n"
 
 export const mockItem = {
   id: "1",
-  lastName: "Doe",
-  firstName: "John",
+  lastName: fakePeople.eva.lastName,
+  firstName: fakePeople.eva.firstName,
   salary: 100000,
   date: new Date(2025, 1, 1),
   role: "Engineer",
   amount: 100000,
   status: "Active",
-  avatar: "/avatars/person01.jpg",
+  avatar: fakePeople.eva.image,
   avatarList: [
     {
       type: "person" as const,
-      firstName: "John",
-      lastName: "Doe",
-      src: "/avatars/person01.jpg",
+      firstName: fakePeople.eva.firstName,
+      lastName: fakePeople.eva.lastName,
+      src: fakePeople.eva.image,
     },
     {
       type: "person" as const,
-      firstName: "Josep",
-      lastName: "Rey",
-      src: "/avatars/person02.jpg",
+      firstName: fakePeople.omar.firstName,
+      lastName: fakePeople.omar.lastName,
+      src: fakePeople.omar.image,
     },
   ],
   positiveDelta: {

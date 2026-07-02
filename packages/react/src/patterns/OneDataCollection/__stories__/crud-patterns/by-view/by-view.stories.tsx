@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { Add, Delete, Pencil, Save } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 import { F0Dialog } from "@/patterns/F0Dialog"
 import { useF0Form } from "@/patterns/F0Form"
 
@@ -156,7 +157,7 @@ function CrudByViewScenario({
                 createResource(
                   {
                     name: `New ${laneStatus[laneId] ?? "Draft"} resource`,
-                    owner: "Alicia Keys",
+                    owner: fakePeople.noor.fullName,
                     status: laneStatus[laneId] ?? "Draft",
                   },
                   "Created from the lane where the resource belongs."
@@ -192,7 +193,7 @@ function CrudByViewScenario({
                     {
                       id: `resource-${Date.now()}`,
                       name: "New row resource",
-                      owner: "Alicia Keys",
+                      owner: fakePeople.noor.fullName,
                       status: "Draft",
                       summary:
                         "Created inline because the resource is lightweight.",

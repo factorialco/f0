@@ -3,6 +3,7 @@ import type { MutableRefObject, ReactNode } from "react"
 import { ComponentProps } from "react"
 import { z } from "zod"
 
+import { fakePeople } from "@/mocks/people"
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
 import { Add, Download, EllipsisHorizontal } from "@/icons/app"
@@ -49,10 +50,13 @@ export const resourceFilters = {
     label: "Owner",
     options: {
       options: [
-        { value: "Alicia Keys", label: "Alicia Keys" },
-        { value: "Dani Moreno", label: "Dani Moreno" },
-        { value: "Marta Soler", label: "Marta Soler" },
-        { value: "Nora Park", label: "Nora Park" },
+        { value: fakePeople.noor.fullName, label: fakePeople.noor.fullName },
+        { value: fakePeople.aria.fullName, label: fakePeople.aria.fullName },
+        { value: fakePeople.hana.fullName, label: fakePeople.hana.fullName },
+        {
+          value: fakePeople.caleb.fullName,
+          label: fakePeople.caleb.fullName,
+        },
       ],
     },
   },
@@ -62,28 +66,28 @@ export const initialResources: Resource[] = [
   {
     id: "resource-1",
     name: "Payroll integration",
-    owner: "Alicia Keys",
+    owner: fakePeople.noor.fullName,
     status: "Needs details",
     summary: "Configure payroll provider, mapping, and export settings.",
   },
   {
     id: "resource-2",
     name: "Engineering onboarding",
-    owner: "Dani Moreno",
+    owner: fakePeople.aria.fullName,
     status: "Draft",
     summary: "Checklist for laptop, accounts, and first-week sessions.",
   },
   {
     id: "resource-3",
     name: "Performance review cycle",
-    owner: "Marta Soler",
+    owner: fakePeople.hana.fullName,
     status: "Complete",
     summary: "Review window, calibration, and employee communications.",
   },
   {
     id: "resource-4",
     name: "Security access review",
-    owner: "Nora Park",
+    owner: fakePeople.caleb.fullName,
     status: "Draft",
     summary: "Quarterly review for sensitive systems and permissions.",
   },
@@ -395,7 +399,7 @@ export function WizardStepAssignments() {
     }),
     responsible: f0FormField.text({
       label: "Responsible",
-      placeholder: "e.g. Marta Soler",
+      placeholder: `e.g. ${fakePeople.hana.fullName}`,
       optional: true,
     }),
   })

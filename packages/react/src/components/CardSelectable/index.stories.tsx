@@ -4,6 +4,7 @@ import { useState } from "react"
 import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { Add, Briefcase, People } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import type { CardSelectableItem, CardSelectableSingleProps } from "./types"
 
@@ -278,21 +279,33 @@ export const WithIconAvatar: Story = {
 const personItems: CardSelectableItem<string>[] = [
   {
     value: "john",
-    title: "John Doe",
+    title: fakePeople.noor.fullName,
     description: "Product Designer",
-    avatar: { type: "person", firstName: "John", lastName: "Doe" },
+    avatar: {
+      type: "person",
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+    },
   },
   {
     value: "jane",
-    title: "Jane Smith",
+    title: fakePeople.hana.fullName,
     description: "Software Engineer",
-    avatar: { type: "person", firstName: "Jane", lastName: "Smith" },
+    avatar: {
+      type: "person",
+      firstName: fakePeople.hana.firstName,
+      lastName: fakePeople.hana.lastName,
+    },
   },
   {
     value: "bob",
-    title: "Bob Wilson",
+    title: fakePeople.caleb.fullName,
     description: "Project Manager",
-    avatar: { type: "person", firstName: "Bob", lastName: "Wilson" },
+    avatar: {
+      type: "person",
+      firstName: fakePeople.caleb.firstName,
+      lastName: fakePeople.caleb.lastName,
+    },
   },
 ]
 

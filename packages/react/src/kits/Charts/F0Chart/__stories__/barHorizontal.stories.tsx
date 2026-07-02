@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fakePeople } from "@/mocks/people"
+
 import { F0Chart } from "../index"
 import { ChartDecorator } from "./decorators"
 const meta = {
@@ -28,16 +30,16 @@ export const Default: Story = {
       yAxis: {
         type: "category",
         data: [
-          "Thomas Anderson",
-          "Isabella Garcia",
-          "Alexander Lee",
-          "Sophie Davis",
-          "David Brown",
-          "Olivia Martinez",
-          "James Wilson",
-          "Emma Thompson",
-          "Michael Chen",
-          "Sarah Johnson",
+          fakePeople.noor.fullName,
+          fakePeople.hana.fullName,
+          fakePeople.caleb.fullName,
+          fakePeople.yuki.fullName,
+          fakePeople.sofia.fullName,
+          fakePeople.ravi.fullName,
+          fakePeople.greta.fullName,
+          fakePeople.iris.fullName,
+          fakePeople.aaron.fullName,
+          fakePeople.nadia.fullName,
         ],
       },
       series: [
@@ -73,16 +75,16 @@ export const MultipleBars: Story = {
       yAxis: {
         type: "category",
         data: [
-          "Thomas Anderson",
-          "Isabella Garcia",
-          "Alexander Lee",
-          "Sophie Davis",
-          "David Brown",
-          "Olivia Martinez",
-          "James Wilson",
-          "Emma Thompson",
-          "Michael Chen",
-          "Sarah Johnson",
+          fakePeople.noor.fullName,
+          fakePeople.hana.fullName,
+          fakePeople.caleb.fullName,
+          fakePeople.yuki.fullName,
+          fakePeople.sofia.fullName,
+          fakePeople.ravi.fullName,
+          fakePeople.greta.fullName,
+          fakePeople.iris.fullName,
+          fakePeople.aaron.fullName,
+          fakePeople.nadia.fullName,
         ],
       },
       series: [

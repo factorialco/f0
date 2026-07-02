@@ -7,6 +7,7 @@ import { Check, Warning } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { internalAvatarSizes } from "@/ui/Avatar"
+import { fakePeople } from "@/mocks/people"
 
 import { avatarSizes } from "../../internal/BaseAvatar"
 import { getBaseAvatarArgTypes } from "../../internal/BaseAvatar/__stories__/utils"
@@ -63,9 +64,9 @@ export const WithDataTestId: Story = {
     size: "md",
     avatar: {
       type: "person",
-      firstName: "John",
-      lastName: "Doe",
-      "aria-label": "John Doe",
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      "aria-label": fakePeople.noor.fullName,
     },
     dataTestId: "my-test-avatar",
   } as ComponentProps<typeof F0Avatar>,
@@ -86,18 +87,18 @@ export const PersonAvatar: Story = {
             size={size}
             avatar={{
               type: "person",
-              firstName: "John",
-              lastName: "Doe",
-              "aria-label": "John Doe",
-              "aria-labelledby": "John Doe",
+              firstName: fakePeople.noor.firstName,
+              lastName: fakePeople.noor.lastName,
+              "aria-label": fakePeople.noor.fullName,
+              "aria-labelledby": fakePeople.noor.fullName,
             }}
           />
           <F0Avatar
             size={size}
             avatar={{
               type: "person",
-              firstName: "Jane",
-              lastName: "Smith",
+              firstName: fakePeople.hana.firstName,
+              lastName: fakePeople.hana.lastName,
               src: "/storybook-assets/avatar.jpeg",
             }}
           />
@@ -105,8 +106,8 @@ export const PersonAvatar: Story = {
             size={size}
             avatar={{
               type: "person",
-              firstName: "Alex",
-              lastName: "Johnson",
+              firstName: fakePeople.caleb.firstName,
+              lastName: fakePeople.caleb.lastName,
               badge: {
                 type: "module",
                 module: "time-tracking",
@@ -206,8 +207,8 @@ export const AllTypes: Story = {
             size="lg"
             avatar={{
               type: "person",
-              firstName: "John",
-              lastName: "Doe",
+              firstName: fakePeople.noor.firstName,
+              lastName: fakePeople.noor.lastName,
               src: "/storybook-assets/avatar.jpeg",
             }}
           />
@@ -249,8 +250,8 @@ export const WithBadges: Story = {
             size="lg"
             avatar={{
               type: "person",
-              firstName: "John",
-              lastName: "Doe",
+              firstName: fakePeople.noor.firstName,
+              lastName: fakePeople.noor.lastName,
               badge: {
                 type: "module",
                 module: "time-tracking",

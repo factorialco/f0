@@ -13,6 +13,7 @@ import { SelectedItemsDetailedStatus } from "@/hooks/datasource/types/selection.
 import { Appearance, Circle, Desktop, Placeholder, Plus } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
 import { withSkipA11y, withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 import { inputFieldStatus } from "@/components/F0InputField"
 
 import { F0Select, selectSizes } from "../index"
@@ -428,19 +429,19 @@ export const WithPersonTags: Story = {
     options: [
       {
         value: "isabella",
-        label: "Isabella Tangari",
+        label: fakePeople.noor.fullName,
         description: "Product Designer",
         tag: {
           type: "person",
-          name: "Marta Serrano",
+          name: fakePeople.hana.fullName,
         },
       },
       {
         value: "saul",
-        label: "Saul Dominguez",
+        label: fakePeople.lena.fullName,
         tag: {
           type: "person",
-          name: "Eliseo Quintanilla",
+          name: fakePeople.diego.fullName,
         },
       },
       {
@@ -532,30 +533,30 @@ export const WithPersonAvatar: Story = {
     options: [
       {
         value: "isabella",
-        label: "Isabella Tangari",
+        label: fakePeople.noor.fullName,
         description: "Product Designer",
         avatar: {
           type: "person",
-          firstName: "Isabella",
-          lastName: "Tangari",
+          firstName: fakePeople.noor.firstName,
+          lastName: fakePeople.noor.lastName,
         },
       },
       {
         value: "saul",
-        label: "Saul Dominguez",
+        label: fakePeople.lena.fullName,
         avatar: {
           type: "person",
-          firstName: "Saul",
-          lastName: "Dominguez",
+          firstName: fakePeople.lena.firstName,
+          lastName: fakePeople.lena.lastName,
         },
       },
       {
         value: "marta",
-        label: "Marta Serrano",
+        label: fakePeople.hana.fullName,
         avatar: {
           type: "person",
-          firstName: "Marta",
-          lastName: "Serrano",
+          firstName: fakePeople.hana.firstName,
+          lastName: fakePeople.hana.lastName,
         },
       },
     ],

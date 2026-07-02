@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { PalmTree as PalmTreeIcon } from "@/icons/app"
+import { fakePeople } from "@/mocks/people"
 
 import { ActivityItem } from "./index"
 
@@ -28,8 +29,7 @@ export const Default: Story = {
   args: {
     title:
       "Your time off request for Summer Vacation (August 15-30, 2025) has been approved by the HR department",
-    description:
-      "René Galindo from Human Resources has reviewed and approved your time off request for 15 days of paid vacation. Your manager has been notified and your calendar has been updated accordingly. Please remember to set up your out-of-office message before leaving.",
+    description: `${fakePeople.bruno.fullName} from Human Resources has reviewed and approved your time off request for 15 days of paid vacation. Your manager has been notified and your calendar has been updated accordingly. Please remember to set up your out-of-office message before leaving.`,
     category: "Time off",
     icon: PalmTreeIcon,
     isUnread: true,

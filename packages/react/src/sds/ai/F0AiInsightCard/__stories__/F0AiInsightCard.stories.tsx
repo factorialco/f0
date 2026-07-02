@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn } from "storybook/test"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import type { F0AiInsightCardProps, SparklineDataPoint } from "../types"
 
@@ -103,11 +104,11 @@ export const TextOnly: Story = {
 const personArgs: F0AiInsightCardProps = {
   content: "person",
   description: "Top performer",
-  heading: "Jane Cooper",
+  heading: fakePeople.noor.fullName,
   label: "Engineering",
   avatar: {
-    firstName: "Jane",
-    lastName: "Cooper",
+    firstName: fakePeople.noor.firstName,
+    lastName: fakePeople.noor.lastName,
     src: "",
   },
   onClick: fn(),
@@ -124,9 +125,21 @@ const peopleArgs: F0AiInsightCardProps = {
   heading: "Engineering leads with outstanding reviews",
   label: "3 people",
   avatars: [
-    { firstName: "Jane", lastName: "Cooper", src: "" },
-    { firstName: "John", lastName: "Doe", src: "" },
-    { firstName: "Alice", lastName: "Smith", src: "" },
+    {
+      firstName: fakePeople.noor.firstName,
+      lastName: fakePeople.noor.lastName,
+      src: "",
+    },
+    {
+      firstName: fakePeople.hana.firstName,
+      lastName: fakePeople.hana.lastName,
+      src: "",
+    },
+    {
+      firstName: fakePeople.caleb.firstName,
+      lastName: fakePeople.caleb.lastName,
+      src: "",
+    },
   ],
   onClick: fn(),
   onAskOne: fn(),

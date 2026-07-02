@@ -10,6 +10,7 @@ import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { Building, Delete, Files, Pencil } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import { fakePeople } from "@/mocks/people"
 
 import { F0GraphNode } from ".."
 import { graphNodeStates, graphNodeVariants } from "../types"
@@ -48,13 +49,13 @@ type Story = StoryObj<typeof meta>
 
 const personAvatar = {
   type: "person",
-  firstName: "Alice",
-  lastName: "Moreno",
+  firstName: fakePeople.noor.firstName,
+  lastName: fakePeople.noor.lastName,
 } as const
 
 const baseProps = {
   avatar: personAvatar,
-  title: "Alice Moreno",
+  title: fakePeople.noor.fullName,
   subtitle: "Staff Designer",
 } as const
 
@@ -87,7 +88,7 @@ export const ZoomLevels: Story = {
         <div key={variant} className="flex flex-col items-center gap-2">
           <F0GraphNode
             avatar={personAvatar}
-            title="Alice Moreno"
+            title={fakePeople.noor.fullName}
             subtitle="Staff Designer"
             variant={variant}
           />
@@ -110,8 +111,12 @@ export const Avatars: Story = {
       {
         key: "person",
         label: "person",
-        avatar: { type: "person", firstName: "Alice", lastName: "Moreno" },
-        title: "Alice Moreno",
+        avatar: {
+          type: "person",
+          firstName: fakePeople.noor.firstName,
+          lastName: fakePeople.noor.lastName,
+        },
+        title: fakePeople.noor.fullName,
         subtitle: "Staff Designer",
       },
       {
@@ -199,7 +204,7 @@ export const WithTags: Story = {
       { type: "team", name: "Platform" },
       { type: "team", name: "Research" },
       { type: "status", text: "Manager", variant: "info" },
-      { type: "person", name: "Bob Smith" },
+      { type: "person", name: fakePeople.hana.fullName },
     ],
   },
   parameters: {

@@ -17,7 +17,7 @@ export type F0ChatChannelType = "dm" | "group"
 
 /**
  * A person mentioned in a message. `id` matches an {@link F0ChatUser.id}; `name`
- * is the display name as it appears in the body (e.g. "Ana García"), used to
+ * is the display name as it appears in the body (e.g. "Noor Rahimi"), used to
  * locate and highlight the `@name` token. "Everyone" (`@here`) is tracked
  * separately via `mentionedEveryone`, not as an entry here.
  */
