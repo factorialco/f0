@@ -106,4 +106,15 @@ describe("Dropdown (experimental) — enabled regression", () => {
     await userEvent.click(trigger)
     expect(await screen.findByText("Create")).toBeInTheDocument()
   })
+
+  // Inside a non-modal dialog-alike the dialog content wrapper is
+  // `pointer-events-none` (so the backdrop stays click-through); portaled
+  // menu content must opt back in or its items are unclickable when the
+  // dropdown is used within a dialog/drawer.
+  it("keeps the open menu clickable under pointer-events-none ancestors", async () => {
+    render(<Dropdown items={items} />)
+    await userEvent.click(screen.getByRole("button"))
+    const menu = await screen.findByRole("menu")
+    expect(menu.className).toContain("pointer-events-auto")
+  })
 })

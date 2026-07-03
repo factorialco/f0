@@ -91,4 +91,29 @@ describe("useContainerAnchor", () => {
     expect(result.current).not.toBe(first)
     expect(result.current).toMatchObject({ width: 200, height: 200 })
   })
+
+  // The anchor's box can read 0×0 before the shell (#content) is laid out.
+  // Pinning the dialog to that box collapses it to an invisible 0×0 element
+  // (the dialog / side panel never appears). Keep the viewport-fill fallback
+  // until a real box is measurable, then anchor once it is.
+  it("does NOT collapse to a 0×0 box; keeps the fallback until the anchor is laid out", () => {
+    let rect: Partial<DOMRect> = { left: 0, top: 0, width: 0, height: 0 }
+    const el = document.createElement("div")
+    el.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, width: 0, height: 0, ...rect }) as DOMRect
+
+    const { result } = renderHook(() => useContainerAnchor(el))
+    flushRaf()
+
+    // 0×0 anchor => stay on the viewport-fill fallback, not a collapsed box.
+    expect(result.current).toEqual({})
+
+    // Once the shell has a real box, anchor to it.
+    rect = { left: 0, top: 0, width: 800, height: 600 }
+    act(() => {
+      window.dispatchEvent(new Event("resize"))
+    })
+    flushRaf()
+    expect(result.current).toMatchObject({ width: 800, height: 600 })
+  })
 })

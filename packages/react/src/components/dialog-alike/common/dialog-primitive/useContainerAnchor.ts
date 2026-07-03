@@ -21,6 +21,11 @@ export const useContainerAnchor = (
     const measure = () => {
       raf = 0
       const rect = anchorEl.getBoundingClientRect()
+      // If the anchor isn't laid out yet (0×0 box), keep the viewport-fill
+      // fallback (the `fixed inset-0` class) instead of pinning the dialog to a
+      // 0×0 box that renders nothing. The ResizeObserver re-measures and applies
+      // the real box once the anchor has one.
+      if (rect.width === 0 && rect.height === 0) return
       if (
         rect.left === prev.left &&
         rect.top === prev.top &&
