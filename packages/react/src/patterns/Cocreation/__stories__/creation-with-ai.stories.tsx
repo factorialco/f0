@@ -1608,14 +1608,11 @@ function SurveyWelcomeCardsRegistrar() {
         break
       }
       case "templates": {
+        // Browse-only: open the templates list in the canvas WITHOUT posting a
+        // chat message, so the chat stays on the welcome screen. Closing the
+        // list without choosing a template (see `TemplatesCanvasHeader`) then
+        // returns to the fullscreen welcome screen with the welcome cards intact.
         openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
-        appendMessages([
-          {
-            role: "assistant",
-            content:
-              "Here are the templates. Choose the one that fits your needs.",
-          },
-        ])
         break
       }
       case "employee-nps": {
