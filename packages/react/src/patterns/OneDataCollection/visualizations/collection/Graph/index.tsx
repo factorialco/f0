@@ -63,6 +63,7 @@ export const GraphCollection = <
   revealNodeId,
   loadNodePath,
   getParentId,
+  loadNodeData,
   zoomPreset,
   minZoom,
   maxZoom,
@@ -90,6 +91,7 @@ export const GraphCollection = <
     highlightedNodes,
     revealNode,
     clearFocus,
+    loadVisibleNodeData: hydrateVisibleNodeData,
     isInitialLoading,
   } = useDataCollectionTreeData<
     Record,
@@ -111,6 +113,7 @@ export const GraphCollection = <
       defaultExpandDepth,
       loadNodePath,
       getParentId,
+      loadNodeData,
       zoomPreset,
       showControls,
     },
@@ -200,7 +203,9 @@ export const GraphCollection = <
           maxZoom={maxZoom}
           enableNodeWindowing={enableNodeWindowing}
           nodeWindowPadding={nodeWindowPadding}
-          loadVisibleNodeData={loadVisibleNodeData}
+          // The hook's own hydration loader (two-phase mode) wins; otherwise
+          // fall back to a loader supplied directly in the visualization options.
+          loadVisibleNodeData={hydrateVisibleNodeData ?? loadVisibleNodeData}
           visibleDataDebounceMs={visibleDataDebounceMs}
           reserveTagRow={tags !== undefined}
           nodeTagTypes={nodeTagTypes}
@@ -217,6 +222,9 @@ export const GraphCollection = <
             return (
               <F0GraphNode
                 {...ctx}
+                // Show the node skeleton while its rich data is being fetched
+                // (two-phase hydration); `ctx.dataLoading` is undefined otherwise.
+                loading={ctx.dataLoading}
                 avatar={avatar?.(node.data)}
                 title={title(node.data)}
                 subtitle={subtitle?.(node.data)}

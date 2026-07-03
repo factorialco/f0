@@ -78,6 +78,19 @@ export type GraphVisualizationOptions<
   /** Optional parent accessor used when linking the revealed ancestor path. */
   getParentId?: (record: R) => string | null
   /**
+   * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+   * built from whatever lightweight records `childrenFilters`/`fetchData`
+   * return, and the full record is fetched — batched, once per node — only for
+   * the nodes that enter the viewport, via this loader. The returned records
+   * replace each node's `data` (matched by node id) and clear its loading
+   * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+   * eager behavior (structure and data fetched together per expansion).
+   *
+   * The "lightness" of the initial records is entirely the source's choice and
+   * transparent to the hook — no special adapter mode is required.
+   */
+  loadNodeData?: (ids: string[]) => Promise<R[]>
+  /**
    * Id of the node representing the current user. When set, a "Find me" button
    * is shown in the controls that centers the viewport on that node.
    */
