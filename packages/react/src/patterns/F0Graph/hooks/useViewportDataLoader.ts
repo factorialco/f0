@@ -45,11 +45,15 @@ export function useViewportDataLoader({
         hasNew = true
       }
     }
-    if (!hasNew) return
+    if (pendingRef.current.size === 0) return
 
-    // Debounce: reschedule the flush while new ids keep arriving. No cleanup
-    // here on purpose — an unrelated re-render must not cancel a pending flush;
-    // unmount is handled by the effect below.
+    // Trailing debounce: reset the timer while new ids keep arriving; otherwise
+    // only (re)arm it when none is scheduled. That second case also recovers the
+    // batch after StrictMode's mount→unmount→mount cancels the first timer (the
+    // ids are already pending, so `hasNew` is false, but the timer is gone).
+    // No cleanup here on purpose — an unrelated re-render must not cancel a
+    // pending flush; unmount is handled by the effect below.
+    if (!hasNew && timerRef.current !== null) return
     if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(() => {
       timerRef.current = null
@@ -63,6 +67,7 @@ export function useViewportDataLoader({
   useEffect(
     () => () => {
       if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = null
     },
     []
   )

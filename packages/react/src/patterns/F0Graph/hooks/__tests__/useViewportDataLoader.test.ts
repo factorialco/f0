@@ -1,8 +1,11 @@
 import { renderHook } from "@testing-library/react"
-import { act } from "react"
+import { StrictMode, act, createElement, type ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { useViewportDataLoader } from "../useViewportDataLoader"
+
+const strictWrapper = ({ children }: { children: ReactNode }) =>
+  createElement(StrictMode, null, children)
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -76,6 +79,23 @@ describe("useViewportDataLoader", () => {
     act(() => vi.advanceTimersByTime(200))
     expect(load).toHaveBeenCalledTimes(1)
     expect(load).toHaveBeenCalledWith(["a", "b", "c"])
+  })
+
+  it("still flushes the initial batch under StrictMode (mount→unmount→mount)", () => {
+    const load = vi.fn()
+    renderHook(
+      () =>
+        useViewportDataLoader({
+          nodeIds: ["a", "b"],
+          loadVisibleNodeData: load,
+          debounceMs: 200,
+        }),
+      { wrapper: strictWrapper }
+    )
+    // StrictMode cancels the first timer; the re-mounted effect must re-arm it.
+    act(() => vi.advanceTimersByTime(200))
+    expect(load).toHaveBeenCalledTimes(1)
+    expect(load).toHaveBeenCalledWith(["a", "b"])
   })
 
   it("cancels the pending flush on unmount", () => {

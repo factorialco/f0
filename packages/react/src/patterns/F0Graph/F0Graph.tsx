@@ -221,6 +221,10 @@ export interface F0GraphProps<T = unknown> {
    * `enableNodeWindowing` (then it fires per on-screen node rather than per
    * expand-visible node). Mark not-yet-loaded nodes with `dataLoaded: false` to
    * surface `dataLoading` on the render context.
+   *
+   * Each id is requested at most once for the lifetime of the mounted graph.
+   * If you reuse the same mounted graph across different datasets that share
+   * node ids, remount it (e.g. via `key`) so the request cache resets.
    */
   loadVisibleNodeData?: (ids: string[]) => void
   /** Debounce (ms) before flushing a batch of newly-visible ids. Defaults to `200`. */
