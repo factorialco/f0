@@ -23,7 +23,12 @@ export const MemberList = ({
   const i18n = useI18n()
 
   return (
-    <div className="ml-4 flex flex-col gap-1 border-0 border-l border-solid border-f1-border-secondary pb-2 pl-6">
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy={status === "loading"}
+      className="ml-4 flex flex-col gap-1 border-0 border-l border-solid border-f1-border-secondary pb-2 pl-6"
+    >
       {status === "loading" && (
         <>
           <Skeleton className="h-5 w-40" />

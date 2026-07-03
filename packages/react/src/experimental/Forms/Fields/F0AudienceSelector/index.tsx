@@ -4,6 +4,12 @@ import { F0AudienceSelector as F0AudienceSelectorComponent } from "./F0AudienceS
 
 export * from "./types"
 
+// Shared audience primitives, consumed by sibling audience components (e.g.
+// F0AudienceListItem) through this public barrel rather than by reaching into
+// the selector's private component/hook folders.
+export { AudienceAvatar } from "./components/AudienceAvatar"
+export { useAudienceEntitySubtitle } from "./hooks/useAudienceEntitySubtitle"
+
 /**
  * @experimental This is an experimental component use it at your own risk
  */

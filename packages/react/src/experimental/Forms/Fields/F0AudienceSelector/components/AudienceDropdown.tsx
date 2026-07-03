@@ -79,7 +79,12 @@ export const AudienceDropdown = ({
           </div>
         )}
       </div>
-      <div id={listboxId} role="listbox" aria-label={label}>
+      <div
+        id={listboxId}
+        role="listbox"
+        aria-label={label}
+        aria-multiselectable="true"
+      >
         {items.map((item) => (
           <AudienceOptionRow
             key={item.key}

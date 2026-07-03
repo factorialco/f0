@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
-import { AudienceAvatar } from "@/experimental/Forms/Fields/F0AudienceSelector/components/AudienceAvatar"
-import { useAudienceEntitySubtitle } from "@/experimental/Forms/Fields/F0AudienceSelector/hooks/useAudienceEntitySubtitle"
+import {
+  AudienceAvatar,
+  useAudienceEntitySubtitle,
+} from "@/experimental/Forms/Fields/F0AudienceSelector"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { ChevronDown, ChevronUp, Warning } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
