@@ -15,7 +15,6 @@ import { DialogPortal } from "@/ui/Dialog/components/DialogPortal"
 import { useDialogPrimitiveContext } from "./context"
 import { DialogOverlay } from "./DialogOverlay"
 import { DialogAnimation } from "./types"
-import { useContainerAnchor } from "./useContainerAnchor"
 
 const animationClassName = (animation: DialogAnimation) => {
   return cn(
@@ -41,14 +40,6 @@ export const DialogContent = forwardRef<
      */
     defaultContainerId?: string
     animation?: DialogAnimation
-    /**
-     * Anchor the (fixed) wrapper to the resolved portal container's box rather
-     * than the viewport. Used by side drawers so they dock within the
-     * `#content` region — clear of the sidebar — instead of painting over it.
-     * Falls back to the viewport when the container is absent or the document
-     * body (e.g. outside ApplicationFrame: Storybook docs, tests).
-     */
-    anchorToContainer?: boolean
   }
 >(
   (
@@ -59,7 +50,6 @@ export const DialogContent = forwardRef<
       children,
       container: propContainer,
       defaultContainerId = "content",
-      anchorToContainer = false,
       ...props
     },
     ref
@@ -94,19 +84,6 @@ export const DialogContent = forwardRef<
       }
     }, [propContainer, defaultContainerId])
 
-    // Anchor to the content region's frame — the parent of the scrollable
-    // `#content`, not `#content` itself, which is `overflow-auto` and padded.
-    // The frame is a stable, non-scrolling box that spans the area beside the
-    // sidebar. Only when anchoring is requested and the container is a real
-    // shell element — a body/null container keeps the viewport (`inset-0`)
-    // fallback.
-    const anchorEl =
-      anchorToContainer && container && container !== document.body
-        ? (container.parentElement ?? container)
-        : null
-
-    const anchorStyle = useContainerAnchor(anchorEl)
-
     const context = useDialogPrimitiveContext()
 
     if (container === undefined) return null
@@ -126,7 +103,6 @@ export const DialogContent = forwardRef<
           )}
           style={{
             transition: "all 2s 100ms !important",
-            ...anchorStyle,
           }}
           {...props}
           onClick={(e) => {
