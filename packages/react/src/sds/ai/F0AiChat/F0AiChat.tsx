@@ -10,11 +10,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
-import {
-  AiChatProviderProps,
-  type VisualizationMode,
-  type WelcomeScreenSuggestion,
-} from "./types"
+import { AiChatProviderProps, type WelcomeScreenSuggestion } from "./types"
 
 /**
  * Slot composition for the F0 AI chat shell. F0 ships the shell + UI
@@ -53,7 +49,6 @@ const F0AiChatProviderComponent = ({
   entityRefs,
   canvasActions,
   canvasEntities,
-  revealChatOnCanvasToggle,
   credits,
   employeeCredits,
   creditWarning,
@@ -89,7 +84,6 @@ const F0AiChatProviderComponent = ({
       entityRefs={entityRefs}
       canvasActions={canvasActions}
       canvasEntities={canvasEntities}
-      revealChatOnCanvasToggle={revealChatOnCanvasToggle}
       credits={credits}
       employeeCredits={employeeCredits}
       creditWarning={creditWarning}
@@ -111,7 +105,6 @@ const F0AiChatComponent = ({
     setOpen,
     mode,
     visualizationMode,
-    revealChatOnCanvasToggle,
     VoiceMode,
     tracking,
     chatHeader,
@@ -121,24 +114,16 @@ const F0AiChatComponent = ({
   } = useAiChat()
   const translations = useI18n()
 
-  // Mode-change reveal: switching between sidepanel / fullscreen / canvas
-  // changes the whole content layout. Rather than animating each element into
-  // place (busy), hide the content the instant the mode flips and reveal it
-  // already settled with a soft fade. Hold ≈ the chat window's resize
-  // animation (see ApplicationFrame: ~0.15s entering, ~0.4s exiting).
-  // When the host opts out (`revealChatOnCanvasToggle={false}`), collapse
-  // sidepanel + canvas into a single "docked" reveal state so opening/closing
-  // the canvas with the chat on the side isn't seen as a mode change and the
-  // chat content doesn't re-fade. Fullscreen transitions stay distinct and still
-  // reveal (their layout change is substantial).
-  const revealValue: VisualizationMode | "docked" =
-    !revealChatOnCanvasToggle && visualizationMode !== "fullscreen"
-      ? "docked"
-      : visualizationMode
+  // Mode-change reveal: only fullscreen transitions change the layout enough to
+  // warrant a re-fade. Sidepanel + canvas are treated as one "docked" state, so
+  // opening/closing the canvas beside the docked chat doesn't re-fade it;
+  // fullscreen still reveals. Hold ≈ the chat window's resize animation (see
+  // ApplicationFrame: ~0.15s entering, ~0.4s exiting).
+  const revealValue: "docked" | "fullscreen" =
+    visualizationMode === "fullscreen" ? "fullscreen" : "docked"
   const { motionProps: contentReveal } = useRevealOnChange(
     revealValue,
-    (prev, next) =>
-      next === "fullscreen" ? 220 : prev === "fullscreen" ? 460 : 260
+    (_prev, next) => (next === "fullscreen" ? 220 : 460)
   )
   const reducedMotion = useReducedMotion()
 

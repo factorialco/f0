@@ -2063,10 +2063,6 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
       templates: toCanvasEntity(templatesCanvasEntity),
       survey: toCanvasEntity(surveyCanvasEntity),
     },
-    // Keep the chat steady when the canvas opens/closes with the chat docked as
-    // a side panel: suppress the chat content's mode-change re-fade. The canvas
-    // panel's own open/close animation is unaffected.
-    revealChatOnCanvasToggle: false,
     resizable: true,
     // Start closed in sidepanel mode so the chat plays its entrance animation
     // when opened from the collection view.

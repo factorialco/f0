@@ -65,7 +65,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   resizable = false,
   defaultVisualizationMode = "sidepanel",
   lockVisualizationMode = false,
-  revealChatOnCanvasToggle = true,
   historyEnabled = false,
   footer: initialFooter,
   VoiceMode,
@@ -279,7 +278,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         visualizationMode,
         setVisualizationMode,
         lockVisualizationMode,
-        revealChatOnCanvasToggle,
         historyEnabled,
         footer,
         VoiceMode,
@@ -401,7 +399,6 @@ const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   placeholders: [],
   welcomeScreenSuggestions: [],
   welcomeScreenCards: [],
-  revealChatOnCanvasToggle: true,
 }
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {

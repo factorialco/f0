@@ -42,11 +42,6 @@ export interface AiChatState {
   resizable?: boolean
   defaultVisualizationMode?: VisualizationMode
   lockVisualizationMode?: boolean
-  /**
-   * When false, suppress the chat content's mode-change re-fade when the canvas
-   * opens/closes with the chat docked as a side panel. Defaults to true.
-   */
-  revealChatOnCanvasToggle?: boolean
   historyEnabled?: boolean
   footer?: React.ReactNode
   VoiceMode?: React.ComponentType
@@ -137,11 +132,6 @@ export type AiChatProviderReturnValue = {
    */
   lockVisualizationMode: boolean
   historyEnabled: boolean
-  /**
-   * When false, suppress the chat content's mode-change re-fade when the canvas
-   * opens/closes with the chat docked as a side panel. Defaults to true.
-   */
-  revealChatOnCanvasToggle: boolean
   /**
    * Optional footer content rendered below the textarea
    */
