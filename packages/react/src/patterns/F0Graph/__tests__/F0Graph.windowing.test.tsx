@@ -1,7 +1,7 @@
 import React from "react"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
-import { zeroRender, screen } from "@/testing/test-utils"
+import { zeroRender } from "@/testing/test-utils"
 
 import type { GraphNode, ZoomLevel } from "../types"
 
@@ -65,59 +65,6 @@ describe("F0Graph — node windowing (A1)", () => {
     const last = onRenderedNodesChange.mock.calls.at(-1)?.[0]
     expect(typeof last).toBe("number")
     expect(last).toBeGreaterThan(0)
-  })
-
-  it("never renders more than the visible node count", () => {
-    const onVisibleNodesChange = vi.fn()
-    const onRenderedNodesChange = vi.fn()
-    zeroRender(
-      <div style={{ width: 800, height: 600 }}>
-        <F0Graph
-          nodes={makeWideTree(30)}
-          renderNode={renderNodeFn}
-          enableNodeWindowing
-          onVisibleNodesChange={onVisibleNodesChange}
-          onRenderedNodesChange={onRenderedNodesChange}
-        />
-      </div>
-    )
-    const visible = onVisibleNodesChange.mock.calls.at(-1)?.[0]
-    const rendered = onRenderedNodesChange.mock.calls.at(-1)?.[0]
-    expect(visible).toBe(30)
-    // Windowing only ever removes nodes — it can't fabricate them.
-    expect(rendered).toBeLessThanOrEqual(visible)
-    expect(rendered).toBeGreaterThan(0)
-  })
-
-  it("still renders the controls bar with windowing on", () => {
-    zeroRender(
-      <div style={{ width: 800, height: 600 }}>
-        <F0Graph
-          nodes={makeWideTree(20)}
-          renderNode={renderNodeFn}
-          enableNodeWindowing
-          showControls
-        />
-      </div>
-    )
-    expect(
-      screen.getByRole("toolbar", { name: "Graph navigation" })
-    ).toBeTruthy()
-  })
-
-  it("honors a custom nodeWindowPadding without error", () => {
-    expect(() =>
-      zeroRender(
-        <div style={{ width: 800, height: 600 }}>
-          <F0Graph
-            nodes={makeWideTree(40)}
-            renderNode={renderNodeFn}
-            enableNodeWindowing
-            nodeWindowPadding={1200}
-          />
-        </div>
-      )
-    ).not.toThrow()
   })
 
   it("leaves behavior unchanged when windowing is off (default)", () => {

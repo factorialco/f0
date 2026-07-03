@@ -1,4 +1,4 @@
-import { type ReactFlowState, useStore } from "@xyflow/react"
+import { useStore } from "@xyflow/react"
 import { useMemo } from "react"
 
 import {
@@ -8,45 +8,10 @@ import {
 import type { ViewportRect } from "../utils"
 
 interface UseViewportGeometryOptions {
-  /** When false the hook does no work and never subscribes to viewport changes. */
+  /** When false the hook reads nothing and never re-renders on viewport changes. */
   enabled: boolean
   /** Flow-space px added around the viewport rect. Defaults to {@link DEFAULT_NODE_WINDOW_PADDING}. */
   padding?: number
-}
-
-// A compact snapshot of the pieces of the React Flow transform we need. We read
-// primitives (not an object) so the equality check below is a cheap element
-// comparison and the selector never allocates a fresh object that would defeat
-// memoization.
-type ViewportSnapshot = readonly [
-  tx: number,
-  ty: number,
-  zoom: number,
-  width: number,
-  height: number,
-]
-
-const selectViewport =
-  (enabled: boolean) =>
-  (state: ReactFlowState): ViewportSnapshot | null => {
-    if (!enabled) return null
-    const [tx, ty, zoom] = state.transform
-    return [tx, ty, zoom, state.width, state.height] as const
-  }
-
-function snapshotsEqual(
-  a: ViewportSnapshot | null,
-  b: ViewportSnapshot | null
-): boolean {
-  if (a === b) return true
-  if (!a || !b) return false
-  return (
-    a[0] === b[0] &&
-    a[1] === b[1] &&
-    a[2] === b[2] &&
-    a[3] === b[3] &&
-    a[4] === b[4]
-  )
 }
 
 /**
@@ -60,34 +25,30 @@ function snapshotsEqual(
  * returned object identity is stable while the camera stays within a grid cell.
  * That throttles the O(N) intersection downstream to fire only when the camera
  * crosses a cell boundary rather than on every pan frame.
+ *
+ * Each viewport field is read as a separate primitive selector so the default
+ * `Object.is` equality already prevents re-renders on unrelated store changes;
+ * when disabled the selectors return a constant `0`, so no subscription churn.
  */
 export function useViewportGeometry({
   enabled,
   padding = DEFAULT_NODE_WINDOW_PADDING,
 }: UseViewportGeometryOptions): ViewportRect | null {
-  const selector = useMemo(() => selectViewport(enabled), [enabled])
-  const snapshot = useStore(selector, snapshotsEqual)
+  const tx = useStore((s) => (enabled ? s.transform[0] : 0))
+  const ty = useStore((s) => (enabled ? s.transform[1] : 0))
+  const zoom = useStore((s) => (enabled ? s.transform[2] : 0))
+  const width = useStore((s) => (enabled ? s.width : 0))
+  const height = useStore((s) => (enabled ? s.height : 0))
 
-  const tx = snapshot?.[0] ?? 0
-  const ty = snapshot?.[1] ?? 0
-  const zoom = snapshot?.[2] ?? 0
-  const width = snapshot?.[3] ?? 0
-  const height = snapshot?.[4] ?? 0
-
-  const hasViewport = snapshot !== null && width > 0 && height > 0 && zoom > 0
+  const hasViewport = enabled && width > 0 && height > 0 && zoom > 0
 
   // Flow-space rect of what the camera currently shows, grown by `padding`.
   // Screen point p maps to flow coordinate (p - t) / zoom.
-  const rawMinX = -tx / zoom - padding
-  const rawMinY = -ty / zoom - padding
-  const rawMaxX = (-tx + width) / zoom + padding
-  const rawMaxY = (-ty + height) / zoom + padding
-
   const step = NODE_WINDOW_QUANTIZE_STEP
-  const minX = Math.floor(rawMinX / step) * step
-  const minY = Math.floor(rawMinY / step) * step
-  const maxX = Math.ceil(rawMaxX / step) * step
-  const maxY = Math.ceil(rawMaxY / step) * step
+  const minX = Math.floor((-tx / zoom - padding) / step) * step
+  const minY = Math.floor((-ty / zoom - padding) / step) * step
+  const maxX = Math.ceil(((-tx + width) / zoom + padding) / step) * step
+  const maxY = Math.ceil(((-ty + height) / zoom + padding) / step) * step
 
   // Depend on the quantized scalars so the rect object identity only changes
   // when the camera crosses a grid cell — this is the throttle.
