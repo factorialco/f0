@@ -13,6 +13,7 @@ export * from "./hooks/useDataCollectionItemNavigation"
 export * from "./hooks/useDataCollectionSource"
 export * from "./hooks/useInfiniteScrollPagination"
 export { useExportAction } from "./hooks/useExportAction"
+export * from "./visualizations/collection/Table/nested"
 export { downloadAsCSV, generateCSVContent } from "./utils/csvExport"
 export type { CSVExportOptions } from "./utils/csvExport"
 export type {

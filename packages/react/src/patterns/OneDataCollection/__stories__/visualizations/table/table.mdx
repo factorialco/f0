@@ -774,3 +774,124 @@ shown at the end of the expanded children. When clicked:
 ```
 
 <Canvas of={TableStories.TableWithMixedNestedRecords} meta={TableStories} />
+
+### Programmatic Expansion Control
+
+Expansion of nested rows can be controlled programmatically through the
+`nested` option of the table visualization. It supports declarative
+auto-expansion on mount, an imperative controller for runtime operations,
+control over how children pages are loaded, and expand animations.
+
+```tsx
+{
+  type: "table",
+  options: {
+    columns: [...],
+    nested: {
+      defaultExpanded: 1,                // boolean | depth number | predicate
+      defaultExpandedChildren: "all",    // "paginated" (default) | "all"
+      control: nestedTable,              // from useNestedTable()
+      expandAnimation: "stagger",        // "none" (default) | "fade" | "stagger" | "slide" | "pop"
+      onExpandedChange: ({ item, depth, expanded }) => { ... },
+    },
+  },
+}
+```
+
+`onExpandedChange` fires when a row's expansion changes explicitly — via user
+interaction or a targeted controller operation (`expand`, `collapse`,
+`toggle`) — and is not called for policy-based auto-expansion
+(`defaultExpanded`, `expandAll`, `collapseAll`).
+
+#### Declarative auto-expansion: `defaultExpanded`
+
+Evaluated when the table mounts, and re-evaluated for rows revealed later by
+lazy loading — so a policy cascades naturally through a tree that loads on
+demand:
+
+- `true` — expand every row at every depth
+- `number` — expand rows whose depth is lower than the value: `1` expands
+  root rows (2 visible levels), `2` also expands their children, etc.
+- `(context: { item, depth }) => boolean` — any practical criteria, e.g.
+  expand a specific branch or rows matching a business rule
+
+```tsx
+// Expand the first two levels
+nested: { defaultExpanded: 2 }
+
+// Expand only the Engineering branch
+nested: {
+  defaultExpanded: (ctx) => ctx.depth === 0 || ctx.item.id.startsWith("engineering"),
+}
+```
+
+#### Children load mode: "show more" vs eager loading
+
+By default expanded rows keep their children paginated behind a "show more"
+row. Set `defaultExpandedChildren: "all"` (or `children: "all"` on controller
+operations) to fetch every page eagerly so the subtree is fully visible. Eager
+loading is guarded by the reported `total` and a page cap, so a misbehaving
+adapter cannot cause an infinite fetch loop.
+
+#### Imperative controller: `useNestedTable`
+
+Create a controller with `useNestedTable()` and pass it via
+`options.nested.control`. Operations invoked before the table mounts are
+queued and applied once it is ready.
+
+```tsx
+const nestedTable = useNestedTable<OrgNode>()
+
+nestedTable.expandAll() // whole tree
+nestedTable.expandAll({ depth: 2 }) // first two levels
+nestedTable.expandAll({
+  where: (ctx) => ctx.item.type === "folder", // criteria-based
+  children: "all", // and load all their pages
+})
+nestedTable.expand("node-42", { children: "all" }) // by item id
+nestedTable.collapse((ctx) => ctx.depth > 1) // by predicate
+nestedTable.toggle("node-42")
+nestedTable.expandTo(["dept-2", "team-21"]) // reveal a deep node by its id path
+nestedTable.collapseAll()
+nestedTable.isExpanded("node-42")
+nestedTable.getExpandedItems()
+```
+
+`expand`, `collapse` and `toggle` target rows by item `id` or with a
+predicate, and apply to the rows currently rendered. `expandAll` installs a
+policy that also applies to rows revealed later, and an explicit `collapse`
+always wins over an active policy.
+
+`expandTo` expands a specific path of item ids (ancestor → descendant)
+without touching the rest of the tree. Ids not rendered yet stay pending and
+are expanded as soon as lazy loading reveals them, so a single call is enough
+to reach a node buried under collapsed, not-yet-loaded ancestors.
+
+<Canvas of={TableStories.TableNestedProgrammaticControl} meta={TableStories} />
+
+#### Auto-expand examples
+
+Expand the first level on mount, keeping children paginated:
+
+<Canvas of={TableStories.TableNestedAutoExpandFirstLevel} meta={TableStories} />
+
+Expand a branch matching a criteria, loading all its pages eagerly:
+
+<Canvas of={TableStories.TableNestedAutoExpandCriteria} meta={TableStories} />
+
+#### Expand animations
+
+`expandAnimation` animates the mount of the rows revealed on expansion:
+
+- `"fade"` — all revealed rows fade in at once
+- `"stagger"` — rows fade in and settle downwards one after another
+- `"slide"` — rows slide in from the left with a soft spring, sequentially
+- `"pop"` — rows scale up into place with a springy pop, sequentially
+
+Sequenced animations stagger by sibling index and depth, so even when a
+cached subtree mounts in a single pass (re-expanding already-loaded data)
+the reveal still cascades level by level. All animations are GPU-composited
+(`opacity`/`transform` only), collapse stays instant, and every mode
+respects `prefers-reduced-motion`.
+
+<Canvas of={TableStories.TableNestedExpandAnimation} meta={TableStories} />

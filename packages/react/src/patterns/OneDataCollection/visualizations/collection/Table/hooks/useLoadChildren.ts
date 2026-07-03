@@ -41,7 +41,6 @@ interface UseLoadChildrenProps<
     NavigationFilters,
     Grouping
   >
-  onClearFetchedData: () => void
 }
 
 const isDetailed = <R extends RecordType>(
@@ -80,7 +79,6 @@ export const useLoadChildren = <
   rowId,
   item,
   source,
-  onClearFetchedData,
 }: UseLoadChildrenProps<
   R,
   Filters,
@@ -102,6 +100,7 @@ export const useLoadChildren = <
     ChildrenPaginationInfo | undefined
   >(nestedFetchedData?.[rowId]?.paginationInfo)
   const [isLoading, setIsLoading] = useState(false)
+  const [hasError, setHasError] = useState(false)
   const [childrenType, setChildrenType] = useState<NestedVariant>(
     getChildrenType(nestedFetchedData?.[rowId])
   )
@@ -121,8 +120,10 @@ export const useLoadChildren = <
       setChildren([])
       setPaginationInfo(undefined)
       setChildrenType("basic")
+      setHasError(false)
+      // The provider also resets the expansion overrides here (keeping any
+      // active auto-expansion policy), so no per-row collapse is needed.
       clearFetchedData()
-      onClearFetchedData()
 
       previousFiltersRef.current = source.currentFilters
       previousSortingsRef.current = source.currentSortings
@@ -133,7 +134,6 @@ export const useLoadChildren = <
     source.currentSortings,
     source.currentNavigationFilters,
     clearFetchedData,
-    onClearFetchedData,
   ])
 
   const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()
@@ -166,6 +166,7 @@ export const useLoadChildren = <
     subscriptionRef.current?.unsubscribe()
 
     setIsLoading(true)
+    setHasError(false)
 
     const result = source.fetchChildren?.({
       item,
@@ -197,6 +198,7 @@ export const useLoadChildren = <
           setIsLoading(true)
         } else if (state.error) {
           setIsLoading(false)
+          setHasError(true)
         } else if (state.data) {
           processChildrenData(state.data)
           setIsLoading(false)
@@ -204,6 +206,7 @@ export const useLoadChildren = <
       },
       error: (error) => {
         setIsLoading(false)
+        setHasError(true)
         console.error("Error loading children:", error)
       },
       complete: () => {
@@ -225,7 +228,11 @@ export const useLoadChildren = <
     children,
     loadChildren,
     isLoading,
+    /** Whether the last fetch failed. Cleared on the next fetch or on a filters/sortings reset. */
+    hasError,
     childrenType,
     paginationInfo,
+    /** Whether at least one page of children has been fetched (even if empty). */
+    hasFetched: nestedFetchedData?.[rowId] !== undefined,
   }
 }

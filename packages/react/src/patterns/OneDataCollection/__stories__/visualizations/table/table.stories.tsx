@@ -8,9 +8,19 @@ import {
   CompoundTone,
 } from "@/ui/value-display/types/compound"
 
+import { ChildrenPaginationInfo } from "@/hooks/datasource/types/nested.typings"
+
 import { ExampleComponent, getMockVisualizations } from "../../mockData"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
+import {
+  NestedChildrenDisplayMode,
+  nestedChildrenDisplayModes,
+  NestedExpandAnimation,
+  nestedExpandAnimations,
+  NestedTableOptions,
+  useNestedTable,
+} from "../../../visualizations/collection/Table/nested"
 
 const meta = {
   title: "Data Collection/Visualizations/Table",
@@ -784,6 +794,475 @@ export const BorderedTable: Story = {
               },
             },
           ]}
+        />
+      </div>
+    )
+  },
+}
+
+/**
+ * Nested tables — programmatic expansion control
+ * ------------------------------------------------------------------
+ * The stories below share an org-chart dataset (departments → teams →
+ * squads → members) with unique ids and real children pagination, so the
+ * "show more" vs "load all" behaviors can be exercised.
+ */
+
+type OrgNode = {
+  id: string
+  name: string
+  role: string
+  children?: OrgNode[]
+}
+
+const ORG_MEMBER_NAMES = [
+  "Ana García",
+  "Liam Chen",
+  "Maya Patel",
+  "Noah Kim",
+  "Sara López",
+  "Tom Becker",
+  "Zoe Martin",
+  "Iris Novak",
+]
+
+const buildOrgMembers = (
+  parentId: string,
+  count: number,
+  role: string
+): OrgNode[] =>
+  Array.from({ length: count }, (_, index) => ({
+    id: `${parentId}.member-${index + 1}`,
+    name: ORG_MEMBER_NAMES[index % ORG_MEMBER_NAMES.length],
+    role,
+  }))
+
+const orgTree: OrgNode[] = [
+  {
+    id: "engineering",
+    name: "Engineering",
+    role: "Department",
+    children: [
+      {
+        id: "engineering.platform",
+        name: "Platform",
+        role: "Team",
+        children: [
+          {
+            id: "engineering.platform.core",
+            name: "Core Squad",
+            role: "Squad",
+            children: buildOrgMembers(
+              "engineering.platform.core",
+              7,
+              "Backend Engineer"
+            ),
+          },
+          {
+            id: "engineering.platform.infra",
+            name: "Infra Squad",
+            role: "Squad",
+            children: buildOrgMembers(
+              "engineering.platform.infra",
+              5,
+              "Site Reliability Engineer"
+            ),
+          },
+        ],
+      },
+      {
+        id: "engineering.frontend",
+        name: "Frontend",
+        role: "Team",
+        children: [
+          {
+            id: "engineering.frontend.web",
+            name: "Web Squad",
+            role: "Squad",
+            children: buildOrgMembers(
+              "engineering.frontend.web",
+              6,
+              "Frontend Engineer"
+            ),
+          },
+          {
+            id: "engineering.frontend.ds",
+            name: "Design Systems Squad",
+            role: "Squad",
+            children: buildOrgMembers(
+              "engineering.frontend.ds",
+              4,
+              "UI Engineer"
+            ),
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: "product",
+    name: "Product",
+    role: "Department",
+    children: [
+      {
+        id: "product.discovery",
+        name: "Discovery",
+        role: "Team",
+        children: buildOrgMembers("product.discovery", 5, "Product Manager"),
+      },
+      {
+        id: "product.growth",
+        name: "Growth",
+        role: "Team",
+        children: buildOrgMembers("product.growth", 8, "Growth Manager"),
+      },
+    ],
+  },
+  {
+    id: "design",
+    name: "Design",
+    role: "Department",
+    children: buildOrgMembers("design", 6, "Product Designer"),
+  },
+]
+
+const countOrgDescendants = (node: OrgNode): number =>
+  node.children?.reduce(
+    (total, child) => total + 1 + countOrgDescendants(child),
+    0
+  ) ?? 0
+
+const ORG_CHILDREN_PER_PAGE = 3
+
+const useOrgTreeSource = () =>
+  useDataCollectionSource({
+    dataAdapter: {
+      fetchData: async () => ({ records: orgTree }),
+    },
+    itemsWithChildren: (item: OrgNode) => !!item.children?.length,
+    childrenCount: ({ item }: { item: OrgNode }) => item.children?.length,
+    fetchChildren: async ({
+      item,
+      pagination,
+    }: {
+      item: OrgNode
+      pagination?: ChildrenPaginationInfo
+    }) => {
+      await new Promise((resolve) => setTimeout(resolve, 400))
+      const all = item.children ?? []
+      const currentPage = (pagination?.currentPage ?? 0) + 1
+      const start = (currentPage - 1) * ORG_CHILDREN_PER_PAGE
+      return {
+        records: all.slice(start, start + ORG_CHILDREN_PER_PAGE),
+        paginationInfo: {
+          total: all.length,
+          perPage: ORG_CHILDREN_PER_PAGE,
+          currentPage,
+          pagesCount: Math.ceil(all.length / ORG_CHILDREN_PER_PAGE),
+          hasMore: currentPage * ORG_CHILDREN_PER_PAGE < all.length,
+        },
+      }
+    },
+  })
+
+const orgColumns = [
+  {
+    id: "name",
+    label: "Name",
+    width: 320,
+    render: (item: OrgNode) => item.name,
+  },
+  { id: "role", label: "Role", render: (item: OrgNode) => item.role },
+  {
+    id: "people",
+    label: "People",
+    render: (item: OrgNode) => {
+      const descendants = countOrgDescendants(item)
+      return descendants > 0 ? String(descendants) : "—"
+    },
+  },
+]
+
+const OrgNestedTable = ({
+  nested,
+}: {
+  nested?: NestedTableOptions<OrgNode>
+}) => {
+  const source = useOrgTreeSource()
+
+  return (
+    <OneDataCollection
+      source={source}
+      visualizations={[
+        {
+          type: "table",
+          options: { columns: orgColumns, nested },
+        },
+      ]}
+    />
+  )
+}
+
+const NestedDemoSection = ({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) => (
+  <div className="flex flex-col gap-1" role="group" aria-label={title}>
+    <span className="text-sm font-medium text-f1-foreground">{title}</span>
+    <div className="flex flex-wrap items-center gap-2">{children}</div>
+  </div>
+)
+
+/**
+ * Full playground for the programmatic API: create a controller with
+ * `useNestedTable()`, pass it via `options.nested.control` and drive the
+ * tree from anywhere. The toolbar also switches the children load mode
+ * ("show more" vs eager) and the expand animation at runtime, and can reset
+ * the table (and its children cache) back to its initial state.
+ */
+export const TableNestedProgrammaticControl: Story = {
+  render: function Render() {
+    const nestedTable = useNestedTable<OrgNode>()
+    const [childrenMode, setChildrenMode] =
+      useState<NestedChildrenDisplayMode>("paginated")
+    const [expandAnimation, setExpandAnimation] =
+      useState<NestedExpandAnimation>("stagger")
+    const [lastEvent, setLastEvent] = useState("—")
+    const [resetKey, setResetKey] = useState(0)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <NestedDemoSection title="Bulk expansion (expandAll / collapseAll)">
+          <F0Button
+            size="sm"
+            label="Expand all"
+            onClick={() => nestedTable.expandAll({ children: childrenMode })}
+          />
+          <F0Button
+            size="sm"
+            label="Expand 1 level"
+            onClick={() =>
+              nestedTable.expandAll({ depth: 1, children: childrenMode })
+            }
+          />
+          <F0Button
+            size="sm"
+            label="Expand 2 levels"
+            onClick={() =>
+              nestedTable.expandAll({ depth: 2, children: childrenMode })
+            }
+          />
+          <F0Button
+            size="sm"
+            variant="critical"
+            label="Collapse all"
+            onClick={() => nestedTable.collapseAll()}
+          />
+        </NestedDemoSection>
+        <NestedDemoSection title="Targeted operations (expand / toggle / expandTo)">
+          <F0Button
+            size="sm"
+            variant="outline"
+            label="Expand Engineering branch (all pages)"
+            onClick={() =>
+              nestedTable.expandAll({
+                where: (ctx) => ctx.item.id.startsWith("engineering"),
+                children: "all",
+              })
+            }
+          />
+          <F0Button
+            size="sm"
+            variant="outline"
+            label="Toggle Platform team"
+            onClick={() => nestedTable.toggle("engineering.platform")}
+          />
+          <F0Button
+            size="sm"
+            variant="outline"
+            label="Reveal Core Squad (expandTo)"
+            onClick={() =>
+              nestedTable.expandTo(
+                [
+                  "engineering",
+                  "engineering.platform",
+                  "engineering.platform.core",
+                ],
+                { children: childrenMode }
+              )
+            }
+          />
+        </NestedDemoSection>
+        <div className="flex flex-wrap items-start gap-4">
+          <NestedDemoSection title="Children load mode">
+            {nestedChildrenDisplayModes.map((mode) => (
+              <F0Button
+                key={mode}
+                size="sm"
+                variant={childrenMode === mode ? "default" : "outline"}
+                label={mode === "paginated" ? "Show more" : "Load all"}
+                onClick={() => setChildrenMode(mode)}
+              />
+            ))}
+          </NestedDemoSection>
+          <NestedDemoSection title="Expand animation">
+            {nestedExpandAnimations.map((animation) => (
+              <F0Button
+                key={animation}
+                size="sm"
+                variant={expandAnimation === animation ? "default" : "outline"}
+                label={animation}
+                onClick={() => setExpandAnimation(animation)}
+              />
+            ))}
+          </NestedDemoSection>
+          <NestedDemoSection title="Table state">
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Reset to initial state"
+              onClick={() => {
+                setResetKey((key) => key + 1)
+                setLastEvent("—")
+              }}
+            />
+            <span
+              role="status"
+              className="text-sm text-f1-foreground-secondary"
+            >
+              Last change: {lastEvent}
+            </span>
+          </NestedDemoSection>
+        </div>
+        <OrgNestedTable
+          key={resetKey}
+          nested={{
+            control: nestedTable,
+            expandAnimation,
+            onExpandedChange: ({ item, depth, expanded }) =>
+              setLastEvent(
+                `${item.name} (depth ${depth}) → ${expanded ? "expanded" : "collapsed"}`
+              ),
+          }}
+        />
+      </div>
+    )
+  },
+}
+
+/**
+ * Declarative auto-expansion: `defaultExpanded: 1` opens every root row on
+ * mount (2 visible levels). Children keep their "show more" pagination.
+ */
+export const TableNestedAutoExpandFirstLevel: Story = {
+  render: () => <OrgNestedTable nested={{ defaultExpanded: 1 }} />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The defaultExpanded: 1 policy expands root rows, revealing depth-1 rows
+    await canvas.findByText("Platform")
+    await canvas.findByText("Discovery")
+    // …but depth-1 rows stay collapsed, so their children are not rendered
+    expect(canvas.queryByText("Core Squad")).toBeNull()
+  },
+}
+
+/**
+ * Criteria-based auto-expansion: a predicate receives `{ item, depth }`, so
+ * any practical rule works — here every root department is expanded and the
+ * whole Engineering branch is expanded with its children pages loaded
+ * eagerly (no "show more" rows), while deeper levels outside Engineering
+ * stay collapsed.
+ */
+export const TableNestedAutoExpandCriteria: Story = {
+  render: function Render() {
+    const [resetKey, setResetKey] = useState(0)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <F0Button
+            size="sm"
+            variant="outline"
+            label="Reset to initial state"
+            onClick={() => setResetKey((key) => key + 1)}
+          />
+        </div>
+        <OrgNestedTable
+          key={resetKey}
+          nested={{
+            defaultExpanded: (ctx) =>
+              ctx.depth === 0 || ctx.item.id.startsWith("engineering"),
+            defaultExpandedChildren: "all",
+          }}
+        />
+      </div>
+    )
+  },
+}
+
+/**
+ * Expand animations: `"fade"` reveals all rows at once, while `"stagger"`,
+ * `"slide"` and `"pop"` sequence them by sibling index and depth — so a
+ * cached subtree still cascades level by level. Collapse stays instant and
+ * `prefers-reduced-motion` disables every mode. Use the toolbar to switch
+ * modes, replay the animation on cached data (Collapse all → Expand all),
+ * or reset the table (clearing the children cache).
+ */
+export const TableNestedExpandAnimation: Story = {
+  render: function Render() {
+    const nestedTable = useNestedTable<OrgNode>()
+    const [expandAnimation, setExpandAnimation] =
+      useState<NestedExpandAnimation>("stagger")
+    const [resetKey, setResetKey] = useState(0)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div
+            className="flex items-center gap-2"
+            role="group"
+            aria-label="Expand animation"
+          >
+            {nestedExpandAnimations.map((animation) => (
+              <F0Button
+                key={animation}
+                size="sm"
+                variant={expandAnimation === animation ? "default" : "outline"}
+                label={animation}
+                onClick={() => setExpandAnimation(animation)}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <F0Button
+              size="sm"
+              label="Expand all"
+              onClick={() => nestedTable.expandAll()}
+            />
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Collapse all"
+              onClick={() => nestedTable.collapseAll()}
+            />
+            <F0Button
+              size="sm"
+              variant="outline"
+              label="Reset to initial state"
+              onClick={() => setResetKey((key) => key + 1)}
+            />
+          </div>
+        </div>
+        <OrgNestedTable
+          key={resetKey}
+          nested={{
+            control: nestedTable,
+            defaultExpanded: 1,
+            expandAnimation,
+          }}
         />
       </div>
     )
