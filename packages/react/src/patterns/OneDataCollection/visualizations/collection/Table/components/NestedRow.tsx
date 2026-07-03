@@ -16,7 +16,8 @@
  *
  */
 
-import { forwardRef, useCallback, useRef } from "react"
+import { motion } from "motion/react"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -26,6 +27,7 @@ import {
   SelectionId,
   SortingsDefinition,
 } from "@/hooks/datasource"
+import { useReducedMotion } from "@/lib/a11y"
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import { ItemActionsDefinition } from "@/patterns/OneDataCollection/item-actions"
 import { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
@@ -40,6 +42,7 @@ import type {
 
 import { PrimaryActionItemDefinition } from "../../../../actions"
 import { useAddRow } from "../../EditableTable/context/AddRowContext"
+import { getExpandAnimationVariants } from "../nested/animations"
 import { useCalculateConectorHeight } from "../hooks/useCalculateConectorHeight"
 import { HeaderGroupEntry } from "../hooks/useHeaderGroups"
 import { useLoadChildren } from "../hooks/useLoadChildren"
@@ -61,6 +64,20 @@ const normalizeAddRowActions = (
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
 }
+
+/**
+ * Safety cap for eager children loading (`children: "all"`): stops fetching
+ * further pages even if the adapter keeps reporting `hasMore`.
+ */
+const MAX_EAGER_CHILDREN_PAGES = 100
+
+/**
+ * Stagger index for row mount animations. Depth contributes to the delay so
+ * that when a whole cached subtree mounts in a single commit (re-expansion
+ * without network waterfalls), the reveal still cascades level by level
+ * instead of appearing all at once.
+ */
+const mountStaggerIndex = (index: number, depth: number) => index + depth * 2
 
 export type RowProps<
   R extends RecordType,
@@ -132,8 +149,31 @@ const NestedRowContent = <
 
   const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
-  const { expandedRowIds, setRowExpanded } = useNestedDataContext()
-  const open = expandedRowIds[rowId] ?? false
+  const {
+    setRowExpanded,
+    resolveRowExpansion,
+    registerNestedRow,
+    expandAnimation,
+  } = useNestedDataContext()
+
+  const depth = props.nestedRowProps?.depth ?? 0
+
+  /**
+   * Expansion is resolved declaratively: an explicit override (user click or
+   * controller call) wins, otherwise the active auto-expansion policy is
+   * evaluated. This lets policies cascade to rows revealed by lazy loading.
+   */
+  const { expanded: open, eager } = resolveRowExpansion(
+    rowId,
+    props.item,
+    depth
+  )
+
+  // Register so imperative controller operations can target this row.
+  useEffect(
+    () => registerNestedRow(rowId, props.item, depth),
+    [registerNestedRow, rowId, props.item, depth]
+  )
 
   /**
    * useLoadChildren hook manages:
@@ -142,17 +182,80 @@ const NestedRowContent = <
    * - Pagination information
    * - Determining if children are "nested" (have their own children) or "flat"
    */
-  const { children, loadChildren, isLoading, childrenType, paginationInfo } =
-    useLoadChildren({
-      rowId: rowId,
-      item: props.item,
-      source: props.source,
-      onClearFetchedData: () => setRowExpanded(rowId, false),
-    })
+  const {
+    children,
+    loadChildren,
+    isLoading,
+    hasError,
+    childrenType,
+    paginationInfo,
+    hasFetched,
+  } = useLoadChildren({
+    rowId: rowId,
+    item: props.item,
+    source: props.source,
+  })
+
+  /**
+   * Lazy loading is driven by the resolved `open` state (not by the click
+   * handler) so rows opened programmatically or by a policy also fetch their
+   * children. The ref makes each open-session request the first page once,
+   * avoiding retry loops when a fetch errors.
+   */
+  const autoLoadRequestedRef = useRef(false)
+  const [eagerPagesRequested, setEagerPagesRequested] = useState(0)
+
+  // Re-arm the request guards when the children cache is invalidated (e.g. a
+  // filters change) so rows kept open by a policy reload their children.
+  const previousHasFetchedRef = useRef(hasFetched)
+  useEffect(() => {
+    if (previousHasFetchedRef.current && !hasFetched) {
+      autoLoadRequestedRef.current = false
+      setEagerPagesRequested(0)
+    }
+    previousHasFetchedRef.current = hasFetched
+  }, [hasFetched])
+
+  useEffect(() => {
+    if (!open) {
+      autoLoadRequestedRef.current = false
+      return
+    }
+    if (autoLoadRequestedRef.current || isLoading || hasFetched) return
+    autoLoadRequestedRef.current = true
+    loadChildren()
+  }, [open, isLoading, hasFetched, loadChildren])
+
+  /**
+   * Eager pagination (`children: "all"`): keeps fetching pages until the
+   * adapter reports no more. Guarded by `total`, a page cap and the error
+   * flag, so a misbehaving or failing adapter cannot cause a fetch loop —
+   * remaining pages fall back to the "show more" row.
+   */
+  const eagerLoadPending =
+    open &&
+    eager &&
+    hasFetched &&
+    !hasError &&
+    !!paginationInfo?.hasMore &&
+    (paginationInfo.total === undefined ||
+      children.length < paginationInfo.total) &&
+    eagerPagesRequested < MAX_EAGER_CHILDREN_PAGES
+
+  useEffect(() => {
+    if (!open || !eager) {
+      setEagerPagesRequested(0)
+      return
+    }
+    if (!eagerLoadPending || isLoading) return
+    setEagerPagesRequested((count) => count + 1)
+    loadChildren()
+  }, [open, eager, eagerLoadPending, isLoading, loadChildren])
 
   const shouldShowLoading = open && isLoading
   const shouldShowChildren = open
-  const shouldShowLoadMore = open && paginationInfo?.hasMore
+  const shouldShowLoadMore =
+    open && paginationInfo?.hasMore && !eagerLoadPending
 
   const addRowActions =
     open && !isLoading
@@ -201,22 +304,47 @@ const NestedRowContent = <
     [externalRef]
   )
 
+  // Children fetching reacts to the resolved `open` state (see effects above),
+  // so toggling only needs to record the explicit override.
   const handleExpand = () => {
-    const isExpanding = !open
-    setRowExpanded(rowId, isExpanding)
-
-    if (isExpanding && !children.length) {
-      loadChildren()
-    }
+    setRowExpanded(rowId, !open)
   }
 
   const sharedNestedRowProps = {
-    depth: props.nestedRowProps?.depth ?? 0,
+    depth,
     expanded: open,
     onExpand: handleExpand,
     nestedVariant: childrenType,
     connectorHeight: calculatedHeight,
   }
+
+  /**
+   * Optional mount animation for rows revealed on expansion (see
+   * `nested/animations.ts` for the variants); collapsing stays instant.
+   */
+  const shouldReduceMotion = useReducedMotion()
+  const animated = expandAnimation !== "none" && !shouldReduceMotion
+  const [MotionRow] = useState(() =>
+    motion.create(
+      Row<
+        R,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    )
+  )
+  const mountAnimationProps =
+    expandAnimation !== "none"
+      ? {
+          variants: getExpandAnimationVariants(expandAnimation),
+          initial: "hidden" as const,
+          animate: "visible" as const,
+        }
+      : {}
 
   const isTableVisualization = props.fromVisualization === "table"
 
@@ -230,27 +358,37 @@ const NestedRowContent = <
   const isLastChild = (props.nestedRowProps?.isLastChild || firstRow) ?? false
   const shouldHideBorder = (open || !isLastChild) && isTableVisualization
 
+  const selfRowProps = {
+    ...props,
+    disableHover: !props.source.itemOnClick,
+    noBorder: shouldHideBorder,
+    nestedRowProps: {
+      ...sharedNestedRowProps,
+      // If nestedRowProps.parentHasChildren is not provided, we need to set it to true if the parent has children
+      // This nestedRowProps.parentHasChildren is provided on children iteration
+      parentHasChildren:
+        (props.nestedRowProps?.parentHasChildren ?? children.length > 0) ||
+        hasAddRowActions,
+      hasLoadedChildren: false,
+      isLastChild,
+      stickyRow: isSticky,
+    },
+    tableWithChildren: props.tableWithChildren,
+    fromVisualization: props.fromVisualization,
+  }
+
   return (
     <>
-      <Row
-        {...props}
-        disableHover={!props.source.itemOnClick}
-        noBorder={shouldHideBorder}
-        ref={combinedRowRef}
-        nestedRowProps={{
-          ...sharedNestedRowProps,
-          // If nestedRowProps.parentHasChildren is not provided, we need to set it to true if the parent has children
-          // This nestedRowProps.parentHasChildren is provided on children iteration
-          parentHasChildren:
-            (props.nestedRowProps?.parentHasChildren ?? children.length > 0) ||
-            hasAddRowActions,
-          hasLoadedChildren: false,
-          isLastChild,
-          stickyRow: isSticky,
-        }}
-        tableWithChildren={props.tableWithChildren}
-        fromVisualization={props.fromVisualization}
-      />
+      {animated && props.nestedRowProps?.animateMount ? (
+        <MotionRow
+          {...selfRowProps}
+          {...mountAnimationProps}
+          custom={mountStaggerIndex(props.index, depth)}
+          ref={combinedRowRef}
+        />
+      ) : (
+        <Row {...selfRowProps} ref={combinedRowRef} />
+      )}
 
       {shouldShowChildren &&
         children.map((child, childIndex) => {
@@ -259,7 +397,7 @@ const NestedRowContent = <
           const isFirstChild = childIndex === 0
           const isLastChildInLevel = childIndex === children.length - 1
 
-          const depth = (props.nestedRowProps?.depth ?? 0) + 1
+          const childDepth = depth + 1
 
           /**
            * Get the appropriate ref for connector height calculations
@@ -319,8 +457,9 @@ const NestedRowContent = <
                 nestedRowProps={{
                   ...props.nestedRowProps,
                   parentHasChildren: true,
-                  depth: depth,
+                  depth: childDepth,
                   isLastChild: childIsLastInTree,
+                  animateMount: animated,
                 }}
                 fromVisualization={props.fromVisualization}
               />
@@ -345,27 +484,39 @@ const NestedRowContent = <
             const leafShouldHideBorder =
               !childIsLastInTree && isTableVisualization
 
-            const leafChild = (
-              <Row
-                {...props}
+            const leafRowProps = {
+              ...props,
+              index: childIndex,
+              item: childItem,
+              onCheckedChange: (checked: boolean) => {
+                props.onItemCheckedChange?.(childItem, checked)
+              },
+              noBorder: leafShouldHideBorder,
+              nestedRowProps: {
+                ...props.nestedRowProps,
+                depth: childDepth,
+                parentHasChildren: true,
+                nestedVariant: childrenType,
+                onExpand: handleExpand,
+                isLastChild: childIsLastInTree,
+              },
+              fromVisualization: props.fromVisualization,
+              tableWithChildren: props.tableWithChildren,
+            }
+
+            const leafChild = animated ? (
+              <MotionRow
+                {...leafRowProps}
+                {...mountAnimationProps}
+                custom={mountStaggerIndex(childIndex, childDepth)}
                 key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
-                index={childIndex}
-                item={childItem}
-                onCheckedChange={(checked) => {
-                  props.onItemCheckedChange?.(childItem, checked)
-                }}
-                noBorder={leafShouldHideBorder}
                 ref={getChildRef()}
-                nestedRowProps={{
-                  ...props.nestedRowProps,
-                  depth: (props.nestedRowProps?.depth ?? 0) + 1,
-                  parentHasChildren: true,
-                  nestedVariant: childrenType,
-                  onExpand: handleExpand,
-                  isLastChild: childIsLastInTree,
-                }}
-                fromVisualization={props.fromVisualization}
-                tableWithChildren={props.tableWithChildren}
+              />
+            ) : (
+              <Row
+                {...leafRowProps}
+                key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
+                ref={getChildRef()}
               />
             )
 
@@ -476,9 +627,9 @@ const NestedRowComponentInner = <
     | React.RefObject<HTMLTableRowElement>
     | null
 ) => {
-  // Provider is mounted at Table level when tableWithChildren is true, so we
-  // never wrap here. This keeps expansion state and fetched data in a single
-  // context that survives parent re-renders (e.g. GraphQL refetch).
+  // Provider is mounted unconditionally at Table level, so we never wrap
+  // here. This keeps expansion state and fetched data in a single context
+  // that survives parent re-renders (e.g. GraphQL refetch).
   return <NestedRowContentWithRef {...props} ref={ref} />
 }
 

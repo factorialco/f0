@@ -108,6 +108,8 @@ export type NestedRowProps = {
   onLoadMoreChildren?: () => void
   onAddRow?: OnAddRowConfig
   stickyRow?: boolean
+  /** Whether this row should animate its mount (set while revealing children with an expand animation). */
+  animateMount?: boolean
 }
 
 const referenceTypeClasses: Record<ReferenceType, string> = {
