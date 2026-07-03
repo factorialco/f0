@@ -178,6 +178,9 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     nodeRef: nodeRefCallback,
     visibleTagTypes: renderCfg?.visibleTagTypes,
     deferredLoading: renderCfg?.deferredLoading,
+    dataLoading: renderCfg?.dataLoadingEnabled
+      ? graphNode.dataLoaded === false
+      : undefined,
   }
 
   return (

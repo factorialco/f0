@@ -44,6 +44,7 @@ import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useLazyTree } from "../../hooks/useLazyTree"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
+import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
 import { ClickSpark } from "../../internal/ClickSpark"
 import {
   F0GraphCollapserWrapper,
@@ -163,6 +164,8 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onRenderedNodesChange,
     enableNodeWindowing,
     nodeWindowPadding,
+    loadVisibleNodeData,
+    visibleDataDebounceMs,
     layoutEngine: layoutEngineProp,
     controlLabels,
     currentUserNodeId,
@@ -349,6 +352,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     reservedTagHeight,
     tagsAffectLayout,
     renderedNodeCount,
+    renderedNodeIds,
     contentBounds,
     getNodePosition,
   } = useGraphRenderModel<T>({
@@ -411,6 +415,13 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onRenderedNodesChange?.(renderedNodeCount)
   }, [renderedNodeCount, onRenderedNodesChange])
 
+  // Viewport-driven data loading: request rich data for on-screen nodes.
+  useViewportDataLoader({
+    nodeIds: renderedNodeIds,
+    loadVisibleNodeData,
+    debounceMs: visibleDataDebounceMs,
+  })
+
   // ── Fly to the consumer-controlled focused node ──
   useEffect(() => {
     if (focusedNode) {
@@ -459,6 +470,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       // Only publish a Set when the consumer opted in via `nodeTagTypes`.
       visibleTagTypes: nodeTagTypes ? visibleTagTypesSet : undefined,
       deferredLoading: isDeferredLoading || undefined,
+      dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
       largeGraph: visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD,
     }),
@@ -467,6 +479,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       nodeTagTypes,
       visibleTagTypesSet,
       isDeferredLoading,
+      loadVisibleNodeData,
       visibleTreeNodes.length,
       tagsAffectLayout,
       reservedTagHeight,

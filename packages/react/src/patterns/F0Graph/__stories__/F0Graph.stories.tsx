@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -66,6 +66,8 @@ const meta = {
     onViewportChange: { table: { disable: true } },
     onVisibleNodesChange: { table: { disable: true } },
     onRenderedNodesChange: { table: { disable: true } },
+    loadVisibleNodeData: { table: { disable: true } },
+    visibleDataDebounceMs: { table: { disable: true } },
     enableNodeWindowing: { control: "boolean" },
     nodeWindowPadding: {
       control: { type: "number", min: 0, max: 2000, step: 100 },
@@ -808,6 +810,113 @@ export const ViewportWindowing: Story = {
     },
   },
   render: () => <ViewportWindowingDemo />,
+}
+
+// ─── Viewport-driven data loading (A2) ─────────────────────────
+
+// Structure-only skeleton: ids + parent links, no rich data yet.
+function makeSkeletonForest(rootCount: number): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  for (let r = 0; r < rootCount; r++) {
+    const rootId = `r-${r}`
+    nodes.push({
+      id: rootId,
+      parentId: null,
+      data: { name: "", title: "" },
+      dataLoaded: false,
+      childrenCount: 3,
+    })
+    for (let c = 0; c < 3; c++) {
+      nodes.push({
+        id: `${rootId}-${c}`,
+        parentId: rootId,
+        data: { name: "", title: "" },
+        dataLoaded: false,
+      })
+    }
+  }
+  return nodes
+}
+
+/**
+ * Viewport-driven data loading: the tree is built from a lightweight skeleton
+ * (ids + structure only). `loadVisibleNodeData` fires for the nodes on screen,
+ * and the story simulates an async fetch that hydrates just those. Nodes render
+ * a shimmer while `ctx.dataLoading` is true.
+ */
+function ViewportDataLoadingDemo() {
+  const [nodes, setNodes] = useState(() => makeSkeletonForest(400))
+  const [fetches, setFetches] = useState(0)
+
+  const loadVisibleNodeData = useCallback((ids: string[]) => {
+    setFetches((n) => n + 1)
+    // Simulate a batched network round-trip for the on-screen nodes.
+    setTimeout(() => {
+      const wanted = new Set(ids)
+      setNodes((prev) =>
+        prev.map((node, i) =>
+          wanted.has(node.id)
+            ? {
+                ...node,
+                dataLoaded: true,
+                data: {
+                  name: `${FIRST_NAMES[i % FIRST_NAMES.length]} ${LAST_NAMES[i % LAST_NAMES.length]}`,
+                  title: node.parentId ? "Team member" : "Manager",
+                },
+              }
+            : node
+        )
+      )
+    }, 600)
+  }, [])
+
+  const renderNode = useCallback(
+    (node: GraphNode<Employee>, ctx: F0GraphNodeRenderContext) => {
+      if (ctx.dataLoading) {
+        return (
+          <div className="h-14 w-64 animate-pulse rounded-md bg-f1-background-secondary" />
+        )
+      }
+      const [firstName = "", lastName = ""] = node.data.name.split(" ")
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={node.data.name}
+          subtitle={node.data.title}
+        />
+      )
+    },
+    []
+  )
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 rounded-md bg-f1-background p-3 text-sm shadow-md tabular-nums">
+        Batched fetches: <strong>{fetches}</strong>
+      </div>
+      <F0Graph<Employee>
+        nodes={nodes}
+        renderNode={renderNode}
+        showControls
+        defaultExpandDepth={2}
+        enableNodeWindowing
+        loadVisibleNodeData={loadVisibleNodeData}
+      />
+    </div>
+  )
+}
+
+export const ViewportDataLoading: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A2 for FCT-57915: the tree is built from a lightweight skeleton and `loadVisibleNodeData` hydrates only the nodes on screen (debounced + batched). Pan/zoom around and watch the batched-fetch count grow only as new nodes enter the viewport; nodes shimmer until their data arrives.",
+      },
+    },
+  },
+  render: () => <ViewportDataLoadingDemo />,
 }
 
 // ─── Intent-searchable stories ─────────────────────────────────

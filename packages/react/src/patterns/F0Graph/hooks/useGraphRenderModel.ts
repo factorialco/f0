@@ -92,6 +92,8 @@ export interface UseGraphRenderModelResult<T> {
    * when `enableNodeWindowing` is on.
    */
   renderedNodeCount: number
+  /** Ids of those `graphNode`s — for viewport-driven data loading. */
+  renderedNodeIds: string[]
   /** Bounding box of the full layout (`null` when empty), for fit-view. */
   contentBounds: { x: number; y: number; width: number; height: number } | null
   /** Layout position of a node id, regardless of whether it is windowed out. */
@@ -400,6 +402,7 @@ export function useGraphRenderModel<T>({
         data: treeNode.data,
         childrenCount: treeNode.childrenCount,
         childrenLoaded: treeNode.childrenLoaded,
+        dataLoaded: treeNode.dataLoaded,
       }
       const aria = ariaTreeInfo.get(treeNode.id)
 
@@ -594,8 +597,10 @@ export function useGraphRenderModel<T>({
     return result
   }, [allRfNodes, windowedIds])
 
-  const renderedNodeCount = useMemo(
-    () => rfNodes.filter((n) => n.type === "graphNode").length,
+  // Ids of the graphNodes actually handed to React Flow (post-windowing) — feeds
+  // the rendered-count callback and viewport-driven data loading.
+  const renderedNodeIds = useMemo(
+    () => rfNodes.filter((n) => n.type === "graphNode").map((n) => n.id),
     [rfNodes]
   )
 
@@ -650,7 +655,8 @@ export function useGraphRenderModel<T>({
     rfEdges,
     reservedTagHeight,
     tagsAffectLayout,
-    renderedNodeCount,
+    renderedNodeCount: renderedNodeIds.length,
+    renderedNodeIds,
     contentBounds,
     getNodePosition,
   }

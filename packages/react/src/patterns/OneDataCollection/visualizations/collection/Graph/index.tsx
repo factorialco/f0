@@ -69,6 +69,8 @@ export const GraphCollection = <
   showControls,
   enableNodeWindowing,
   nodeWindowPadding,
+  loadVisibleNodeData,
+  visibleDataDebounceMs,
   onLoadData,
   onLoadError,
 }: GraphCollectionProps<
@@ -198,6 +200,8 @@ export const GraphCollection = <
           maxZoom={maxZoom}
           enableNodeWindowing={enableNodeWindowing}
           nodeWindowPadding={nodeWindowPadding}
+          loadVisibleNodeData={loadVisibleNodeData}
+          visibleDataDebounceMs={visibleDataDebounceMs}
           reserveTagRow={tags !== undefined}
           nodeTagTypes={nodeTagTypes}
           visibleTagTypes={visibleTagTypes}

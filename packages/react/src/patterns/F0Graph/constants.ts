@@ -37,6 +37,11 @@ export const NODE_CLICK_DISTANCE_SQ = 4 * 4
 // materialized so panning reveals already-present nodes instead of blanks.
 export const DEFAULT_NODE_WINDOW_PADDING = 600
 
+// Debounce (ms) before flushing a batch of newly-visible node ids to
+// `loadVisibleNodeData`. Collapses a burst of pan/zoom frames into one call so
+// the consumer fetches once the camera settles instead of on every frame.
+export const DEFAULT_VISIBLE_DATA_DEBOUNCE_MS = 200
+
 // The viewport rect is snapped to this grid (flow-space px) before it drives the
 // windowed-id computation. Without quantization the O(N) intersection would run
 // on every pointer-move frame during a pan; snapping recomputes the window only

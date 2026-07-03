@@ -212,6 +212,19 @@ export interface F0GraphProps<T = unknown> {
    * Defaults to `600`.
    */
   nodeWindowPadding?: number
+  /**
+   * Viewport-driven data loading. Called (debounced + batched) with the ids of
+   * nodes that have entered the viewport and not been requested before, so the
+   * consumer can hydrate rich `data` on demand — the tree can be built from a
+   * lightweight structure and heavy per-node data fetched only for what's on
+   * screen. Each id is requested at most once. Most effective together with
+   * `enableNodeWindowing` (then it fires per on-screen node rather than per
+   * expand-visible node). Mark not-yet-loaded nodes with `dataLoaded: false` to
+   * surface `dataLoading` on the render context.
+   */
+  loadVisibleNodeData?: (ids: string[]) => void
+  /** Debounce (ms) before flushing a batch of newly-visible ids. Defaults to `200`. */
+  visibleDataDebounceMs?: number
 
   // ---- Callbacks ----
   onZoomLevelChange?: (level: ZoomLevel) => void
@@ -260,6 +273,12 @@ export interface F0GraphNodeRenderContext {
    * may receive additional children once resolved.
    */
   deferredLoading?: boolean
+  /**
+   * `true` when viewport-driven data loading is active (`loadVisibleNodeData`
+   * provided) and this node's rich data hasn't been fetched yet
+   * (`dataLoaded === false`). Render a skeleton/placeholder while true.
+   */
+  dataLoading?: boolean
 }
 
 // ─── Public component (wraps the view in a ReactFlowProvider) ──────────────

@@ -102,4 +102,12 @@ export type GraphVisualizationOptions<
   enableNodeWindowing?: boolean
   /** Flow-space px kept materialized around the viewport (pass-through). */
   nodeWindowPadding?: number
+  /**
+   * Viewport-driven data loading (pass-through). Called (debounced + batched)
+   * with the ids of nodes that entered the viewport, so the consumer can
+   * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+   */
+  loadVisibleNodeData?: (ids: string[]) => void
+  /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+  visibleDataDebounceMs?: number
 }
