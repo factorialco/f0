@@ -571,19 +571,22 @@ export function useGraphRenderModel<T>({
       if (!windowedIds.has(node.id)) continue
       // Trim aria-owns to children still in the window: an aria-owns entry
       // pointing at a node windowed out of the DOM is a dangling reference.
-      const data = node.data as GraphNodeData
-      const childIds = data.visibleChildIds
-      if (node.type === "graphNode" && childIds && childIds.length > 0) {
-        const kept = childIds.filter((id) => windowedIds.has(id))
-        if (kept.length !== childIds.length) {
-          result.push({
-            ...node,
-            data: {
-              ...data,
-              visibleChildIds: kept.length > 0 ? kept : undefined,
-            },
-          })
-          continue
+      // Only graphNode carries visibleChildIds (expander/collapser don't).
+      if (node.type === "graphNode") {
+        const data = node.data as GraphNodeData
+        const childIds = data.visibleChildIds
+        if (childIds && childIds.length > 0) {
+          const kept = childIds.filter((id) => windowedIds.has(id))
+          if (kept.length !== childIds.length) {
+            result.push({
+              ...node,
+              data: {
+                ...data,
+                visibleChildIds: kept.length > 0 ? kept : undefined,
+              },
+            })
+            continue
+          }
         }
       }
       result.push(node)

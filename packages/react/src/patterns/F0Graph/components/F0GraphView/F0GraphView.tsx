@@ -50,7 +50,12 @@ import {
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
 } from "../../internal/ReactFlowAdapters"
-import type { GraphEdge, GraphNode, LayoutDirection } from "../../types"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+} from "../../types"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
@@ -281,9 +286,9 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     width: number
     height: number
   } | null>(null)
-  const getNodePositionRef = useRef<
-    (id: string) => ReturnType<typeof getNodePosition>
-  >(() => undefined)
+  const getNodePositionRef = useRef<(id: string) => PositionedNode | undefined>(
+    () => undefined
+  )
   const getContentBounds = useMemo(() => () => contentBoundsRef.current, [])
   const getNodePositionStable = useMemo(
     () => (id: string) => getNodePositionRef.current(id),
