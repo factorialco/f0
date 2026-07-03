@@ -828,16 +828,17 @@ function TemplatePreviewAlert() {
 }
 
 /**
- * Header for the template-PREVIEW survey canvas (mode "preview"). Closing
- * returns to the template list (the survey is only ever reached from there)
- * rather than dismissing the canvas, so `onClose` is intentionally ignored in
- * favour of re-opening the templates canvas. "Use this template" swaps in the
- * editable resource view (mode "edit"), carrying the template's name and
- * description so its `ResourceHeader` is populated. Defined as a component so it
- * can read `openCanvas` from context.
+ * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits:
+ * "Back to templates" (left) re-opens the templates list, and "Close" (right)
+ * returns to the starting point of the flow — the fullscreen welcome screen —
+ * the same behaviour as the templates-list canvas' close. The framework
+ * `onClose` is intentionally ignored in favour of these. "Use this template"
+ * swaps in the editable resource view (mode "edit"), carrying the template's
+ * name and description so its `ResourceHeader` is populated. Defined as a
+ * component so it can read `openCanvas` / `setVisualizationMode` from context.
  */
 function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
-  const { openCanvas } = useAiChat()
+  const { openCanvas, setVisualizationMode } = useAiChat()
   const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
   const { armProposal } = useProposalFlow()
@@ -912,6 +913,15 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
             onClick: () => void confirmLeaveCreation(),
           },
         ]}
+      />
+      {/* Close returns to the starting point of the flow (fullscreen welcome),
+          mirroring the templates-list canvas' close. */}
+      <ButtonInternal
+        variant="outline"
+        hideLabel
+        label="Close"
+        icon={Cross}
+        onClick={() => setVisualizationMode("fullscreen")}
       />
     </div>
   )
