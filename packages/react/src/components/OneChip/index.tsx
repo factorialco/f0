@@ -36,6 +36,13 @@ interface BaseChipProps extends VariantProps<typeof chipVariants> {
    * */
   onClose?: () => void
 
+  /**
+   * Accessible label for the close button, so chips remain distinguishable
+   * to screen readers (e.g. "Remove Ada Lovelace")
+   * @default "Close"
+   */
+  closeLabel?: string
+
   deactivated?: boolean
 }
 
@@ -70,6 +77,7 @@ const _Chip = ({
   variant,
   onClick,
   onClose,
+  closeLabel,
   avatar,
   icon,
 }: ChipProps) => {
@@ -113,7 +121,7 @@ const _Chip = ({
             focusRing()
           )}
           tabIndex={0}
-          aria-label="Close"
+          aria-label={closeLabel ?? "Close"}
         >
           <F0Icon icon={CrossedCircle} size="sm" />
         </button>
