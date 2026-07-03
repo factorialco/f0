@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.21.1](https://github.com/factorialco/f0/compare/f0-react-v4.21.0...f0-react-v4.21.1) (2026-07-03)
+
+
+### Bug Fixes
+
+* **F0Select:** re-enable pointer events on dropdowns portaled into non-modal dialogs ([#4609](https://github.com/factorialco/f0/issues/4609)) ([ab07ab2](https://github.com/factorialco/f0/commit/ab07ab2c1814e7789e5bfaf84df3d8b65e37647b))
+
 ## [4.21.0](https://github.com/factorialco/f0/compare/f0-react-v4.20.1...f0-react-v4.21.0) (2026-07-02)
 
 
