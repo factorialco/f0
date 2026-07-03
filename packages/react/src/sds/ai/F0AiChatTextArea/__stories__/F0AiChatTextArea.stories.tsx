@@ -4,7 +4,13 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
-import { File, Marketplace } from "@/icons/app"
+import {
+  ChartVerticalBars,
+  File,
+  Marketplace,
+  Pencil,
+  Search,
+} from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
@@ -19,6 +25,7 @@ import type {
   PersonProfile,
   TranscribeFn,
   UploadedFile,
+  WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
 
 const ROTATING_PLACEHOLDERS = [
@@ -107,7 +114,66 @@ const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
     title: "Templates",
     description: "Browse pre-made surveys",
     // No message: a templates card triggers a non-prompt behavior, handled by
-    // the host via its id.
+    // the host in its `onClick`.
+  },
+]
+
+// Welcome suggestions: grouped outline buttons shown ABOVE the composer. Each
+// group opens a popover of starter prompts; clicking one sends its `prompt`
+// straight to the AI (contrast with welcome cards, which fire a host action).
+const WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title: "April leave and overtime summary",
+        prompt:
+          "Give me a breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+      },
+      {
+        title: "Current gross salary by employee",
+        prompt:
+          "List the current gross salary of every active employee, sorted from highest to lowest.",
+      },
+      {
+        title: "Headcount evolution by department",
+        prompt:
+          "Plot headcount evolution by department over the last twelve months.",
+      },
+    ],
+  },
+  {
+    icon: Search,
+    label: "Find",
+    items: [
+      {
+        title: "Who's out of office this week?",
+        prompt:
+          "List every employee on time-off or sick leave between today and the end of the week.",
+      },
+      {
+        title: "Engineers based in Barcelona",
+        prompt:
+          "Find all employees in Engineering whose office location is Barcelona.",
+      },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title: "Draft a Senior Backend job description",
+        prompt:
+          "Draft a job description for a Senior Backend Engineer focused on distributed systems.",
+      },
+      {
+        title: "Compose an offboarding email template",
+        prompt:
+          "Compose an offboarding email template covering return-of-equipment steps and the HR exit form.",
+      },
+    ],
   },
 ]
 
@@ -155,6 +221,7 @@ type WrapperProps = {
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
@@ -172,6 +239,7 @@ const Wrapper = ({
   creditWarning,
   disclaimer,
   footer,
+  welcomeScreenSuggestions,
   welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
@@ -193,21 +261,25 @@ const Wrapper = ({
 
   const composerRef = useRef<HTMLDivElement>(null)
 
-  // The host wires each card's `onClick`. Cards carrying a `message` send it as
-  // a prompt; message-less cards (e.g. "Templates") do something else.
-  const cardsWithHandlers = welcomeScreenCards?.map((card) => ({
-    ...card,
-    onClick: () => {
-      if (card.message) {
-        setSubmissions((prev) => [
-          ...prev,
-          { text: card.message!, files: [], context: null, quote: null },
-        ])
-      } else {
-        console.log(`card clicked: ${card.id}`)
-      }
-    },
-  }))
+  // Welcome cards now carry their own `onClick`. Branch on each card's data:
+  // message-bearing cards (e.g. "Empty survey") send their prompt; message-less
+  // cards (e.g. "Templates") do something other than send a prompt.
+  const cardsWithBehavior = welcomeScreenCards?.map((card) => {
+    const { id, message } = card
+    return {
+      ...card,
+      onClick: () => {
+        if (message) {
+          setSubmissions((prev) => [
+            ...prev,
+            { text: message, files: [], context: null, quote: null },
+          ])
+        } else {
+          console.log(`card clicked: ${id}`)
+        }
+      },
+    }
+  })
 
   return (
     <div className="flex flex-col gap-4 w-[640px]">
@@ -232,7 +304,17 @@ const Wrapper = ({
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
-        welcomeScreenCards={cardsWithHandlers}
+        welcomeScreenSuggestions={welcomeScreenSuggestions}
+        onSuggestionClick={(item) => {
+          // Suggestions always send a prompt (item.prompt, falling back to its
+          // title) — unlike cards, the host doesn't branch on behavior.
+          const text = item.prompt ?? item.title
+          setSubmissions((prev) => [
+            ...prev,
+            { text, files: [], context: null, quote: null },
+          ])
+        }}
+        welcomeScreenCards={cardsWithBehavior}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
       />
@@ -355,6 +437,15 @@ export const WithWelcomeCards: Story = {
     isWelcomeScreen: true,
     fullscreen: true,
     welcomeScreenCards: WELCOME_CARDS,
+    disclaimer: DISCLAIMER,
+  },
+}
+
+export const WithWelcomeSuggestions: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
     disclaimer: DISCLAIMER,
   },
 }

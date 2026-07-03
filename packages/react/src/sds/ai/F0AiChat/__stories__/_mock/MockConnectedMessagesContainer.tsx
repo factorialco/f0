@@ -68,9 +68,10 @@ export const MockConnectedMessagesContainer = ({
     [messages]
   )
 
-  const turns = useMemo<RenderableTurn[]>(() => {
+  const turns = useMemo(() => {
     const rawTurns = convertMessagesToTurns(filteredMessages)
-    return rawTurns.map((turnMessages, turnIndex) => {
+
+    const built: RenderableTurn[] = rawTurns.map((turnMessages, turnIndex) => {
       const { turnIsComplete, showActivityIndicator } = analyzeTurn(
         turnMessages,
         turnIndex,
@@ -135,6 +136,8 @@ export const MockConnectedMessagesContainer = ({
         feedback: feedbackEntry,
       }
     })
+
+    return built
   }, [filteredMessages, inProgress])
 
   const onReplyQuote = useCallback(

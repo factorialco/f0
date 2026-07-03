@@ -13,25 +13,32 @@ const MOCK_TRANSCRIPTS = [
 ] as const
 
 /**
- * Simulates a streaming STT endpoint: picks a random long transcript and emits
- * it word by word so the surface fills live (Wispr Flow feel) without any
- * backend.
+ * Builds a streaming STT mock from a pool of transcripts: picks a random one and
+ * emits it word by word so the surface fills live (Wispr Flow feel) without any
+ * backend. Use this to make voice dictation contextual to a given flow (e.g.
+ * survey-refinement phrasing in the co-creation story) instead of the generic
+ * pool below.
  */
-export const mockTranscribe: TranscribeFn = async (
-  _audio,
-  { onPartial, signal }
-) => {
-  const transcript = pickRandom(MOCK_TRANSCRIPTS)
-  const words = transcript.split(" ")
-  let acc = ""
-  for (const word of words) {
-    if (signal?.aborted) break
-    await new Promise((r) => setTimeout(r, 60 + Math.random() * 100))
-    acc = acc ? `${acc} ${word}` : word
-    onPartial(acc)
+export const makeMockTranscribe =
+  (transcripts: readonly string[]): TranscribeFn =>
+  async (_audio, { onPartial, signal }) => {
+    const transcript = pickRandom(transcripts)
+    const words = transcript.split(" ")
+    let acc = ""
+    for (const word of words) {
+      if (signal?.aborted) break
+      await new Promise((r) => setTimeout(r, 60 + Math.random() * 100))
+      acc = acc ? `${acc} ${word}` : word
+      onPartial(acc)
+    }
+    return transcript
   }
-  return transcript
-}
+
+/**
+ * Default streaming STT mock over the generic transcript pool above. Backs the
+ * `WithVoiceDictation` stories that aren't tied to a specific flow.
+ */
+export const mockTranscribe: TranscribeFn = makeMockTranscribe(MOCK_TRANSCRIPTS)
 
 const MOCK_ENHANCED_TEXTS = [
   `<p>Our quarterly review highlighted <b>three priorities</b> for the next cycle: improving the onboarding experience, reducing the time it takes to close payroll, and giving managers better visibility over team workloads.</p><p>Each priority now has a clear owner and a measurable target, so we can track progress week by week instead of waiting for the end of the quarter to find out where we stand.</p>`,
