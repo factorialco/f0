@@ -329,6 +329,24 @@ export const TableCollection = <
     source.itemsWithChildren?.(item)
   )
 
+  /**
+   * Whether the collection has an active search term or any applied filter.
+   * Exposed to nested-expansion criteria (`NestedExpansionContext`) so
+   * expansion policies can align with filtering.
+   */
+  const hasActiveFilters = useMemo(() => {
+    if (source.debouncedCurrentSearch ?? source.currentSearch) return true
+    return Object.values(source.currentFilters ?? {}).some((value) =>
+      Array.isArray(value)
+        ? value.length > 0
+        : value !== undefined && value !== null
+    )
+  }, [
+    source.debouncedCurrentSearch,
+    source.currentSearch,
+    source.currentFilters,
+  ])
+
   /*
    * Initial loading
    */
@@ -395,7 +413,7 @@ export const TableCollection = <
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <NestedDataProvider nested={nested}>
+      <NestedDataProvider nested={nested} hasActiveFilters={hasActiveFilters}>
         <div
           className={cn(
             bordered &&

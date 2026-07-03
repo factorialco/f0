@@ -18,6 +18,13 @@ export type NestedChildrenDisplayMode =
 export type NestedExpansionContext<R extends RecordType> = {
   item: R
   depth: number
+  /**
+   * Whether the collection currently has an active search term or any
+   * applied filter. Lets expansion criteria align with filtering, e.g.
+   * `defaultExpanded: (ctx) => ctx.hasActiveFilters` auto-expands the tree
+   * while the user searches/filters and collapses it back when cleared.
+   */
+  hasActiveFilters: boolean
 }
 
 /**

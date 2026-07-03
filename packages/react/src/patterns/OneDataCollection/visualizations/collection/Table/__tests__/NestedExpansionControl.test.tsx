@@ -189,26 +189,30 @@ const renderNestedTable = (
 }
 
 /**
- * Harness with mutable filters, to exercise the expansion reset that happens
- * when the source filters change.
+ * Harness with a mutable source, to exercise the expansion/cache resets that
+ * happen when the source filters or search change.
  */
-const FilterableHarness = ({
+const MutableSourceHarness = ({
   nested,
   onApi,
+  initialOverrides,
 }: {
   nested?: Omit<NestedTableOptions<Person>, "control">
   onApi: (api: {
     control: NestedTableController<Person>
-    setFilters: (filters: Record<string, unknown>) => void
+    setOverrides: (overrides: Partial<TestSource>) => void
   }) => void
+  initialOverrides?: Partial<TestSource>
 }) => {
-  const [filters, setFilters] = useState<Record<string, unknown>>({})
+  const [overrides, setOverrides] = useState<Partial<TestSource>>(
+    initialOverrides ?? {}
+  )
   const control = useNestedTable<Person>()
   const source = useMemo(
-    () => ({ ...createSource(), currentFilters: filters }),
-    [filters]
+    () => ({ ...createSource(), ...initialOverrides, ...overrides }),
+    [initialOverrides, overrides]
   )
-  onApi({ control, setFilters })
+  onApi({ control, setOverrides })
 
   return (
     <TableCollection<
@@ -246,7 +250,7 @@ const clickFirstChevron = async (user: ReturnType<typeof userEvent.setup>) => {
 }
 
 describe("matchesExpansionCriteria", () => {
-  const context = { item: { id: "x" }, depth: 1 }
+  const context = { item: { id: "x" }, depth: 1, hasActiveFilters: false }
 
   it("resolves booleans, depth numbers and predicates", () => {
     expect(matchesExpansionCriteria(undefined, context)).toBe(false)
@@ -448,6 +452,7 @@ describe("Nested table expansion control", () => {
       expect(onExpandedChange).toHaveBeenCalledWith({
         item: expect.objectContaining({ id: "p1" }),
         depth: 0,
+        hasActiveFilters: false,
         expanded: false,
       })
     })
@@ -495,13 +500,15 @@ describe("Nested table expansion control", () => {
   })
 
   describe("filters change reset", () => {
+    type MutableApi = {
+      control: NestedTableController<Person>
+      setOverrides: (overrides: Partial<TestSource>) => void
+    }
+
     it("clears explicit overrides but keeps the auto-expansion policy", async () => {
-      let api!: {
-        control: NestedTableController<Person>
-        setFilters: (filters: Record<string, unknown>) => void
-      }
+      let api!: MutableApi
       render(
-        <FilterableHarness
+        <MutableSourceHarness
           nested={{ defaultExpanded: 1 }}
           onApi={(a) => {
             api = a
@@ -519,7 +526,9 @@ describe("Nested table expansion control", () => {
       })
 
       // …until the filters change: overrides reset, the policy re-applies
-      act(() => api.setFilters({ department: ["Engineering"] }))
+      act(() =>
+        api.setOverrides({ currentFilters: { department: ["Engineering"] } })
+      )
       await waitFor(() => {
         expect(screen.getByText("Child One")).toBeInTheDocument()
       })
@@ -527,12 +536,9 @@ describe("Nested table expansion control", () => {
 
     it("reloads children of every policy-expanded row without firing onExpandedChange", async () => {
       const onExpandedChange = vi.fn()
-      let api!: {
-        control: NestedTableController<Person>
-        setFilters: (filters: Record<string, unknown>) => void
-      }
+      let api!: MutableApi
       render(
-        <FilterableHarness
+        <MutableSourceHarness
           nested={{ defaultExpanded: 1, onExpandedChange }}
           onApi={(a) => {
             api = a
@@ -544,7 +550,9 @@ describe("Nested table expansion control", () => {
         expect(screen.getByText("Child Three")).toBeInTheDocument()
       })
 
-      act(() => api.setFilters({ department: ["Engineering"] }))
+      act(() =>
+        api.setOverrides({ currentFilters: { department: ["Engineering"] } })
+      )
 
       // Every policy-expanded row stays expanded and reloads its children —
       // no row must be left with a residual explicit-collapse override.
@@ -554,6 +562,70 @@ describe("Nested table expansion control", () => {
       })
       // The reset is not an explicit expansion change, so no events fire
       expect(onExpandedChange).not.toHaveBeenCalled()
+    })
+  })
+
+  describe("search and filters alignment", () => {
+    type MutableApi = {
+      control: NestedTableController<Person>
+      setOverrides: (overrides: Partial<TestSource>) => void
+    }
+
+    it("resets children and passes the search term to fetchChildren when the search changes", async () => {
+      const fetchChildren = vi.fn(({ item }: { item: Person }) => ({
+        records: item.children ?? [],
+      }))
+      let api!: MutableApi
+      render(
+        <MutableSourceHarness
+          initialOverrides={{ fetchChildren } as unknown as Partial<TestSource>}
+          nested={{ defaultExpanded: 1 }}
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+      expect(fetchChildren).toHaveBeenCalledWith(
+        expect.objectContaining({ search: undefined })
+      )
+
+      act(() => api.setOverrides({ debouncedCurrentSearch: "Grand" }))
+
+      // The children cache resets and the refetch carries the search term
+      await waitFor(() => {
+        expect(fetchChildren).toHaveBeenCalledWith(
+          expect.objectContaining({ search: "Grand" })
+        )
+      })
+    })
+
+    it("lets defaultExpanded react to the active search via hasActiveFilters", async () => {
+      let api!: MutableApi
+      render(
+        <MutableSourceHarness
+          nested={{ defaultExpanded: (ctx) => ctx.hasActiveFilters }}
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitForRootRows()
+      expect(screen.queryByText("Child One")).not.toBeInTheDocument()
+
+      // Searching activates the policy: the tree auto-expands
+      act(() => api.setOverrides({ debouncedCurrentSearch: "One" }))
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+
+      // Clearing the search deactivates it: the tree collapses back
+      act(() => api.setOverrides({}))
+      await waitFor(() => {
+        expect(screen.queryByText("Child One")).not.toBeInTheDocument()
+      })
     })
   })
 
@@ -614,6 +686,7 @@ describe("Nested table expansion control", () => {
       expect(onExpandedChange).toHaveBeenCalledWith({
         item: expect.objectContaining({ id: "p1" }),
         depth: 0,
+        hasActiveFilters: false,
         expanded: true,
       })
 
@@ -624,6 +697,7 @@ describe("Nested table expansion control", () => {
       expect(onExpandedChange).toHaveBeenLastCalledWith({
         item: expect.objectContaining({ id: "p1" }),
         depth: 0,
+        hasActiveFilters: false,
         expanded: false,
       })
     })

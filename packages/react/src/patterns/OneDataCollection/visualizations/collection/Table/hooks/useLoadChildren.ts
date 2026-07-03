@@ -108,6 +108,7 @@ export const useLoadChildren = <
   const previousFiltersRef = useRef(source.currentFilters)
   const previousSortingsRef = useRef(source.currentSortings)
   const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
+  const previousSearchRef = useRef(source.debouncedCurrentSearch)
 
   useEffect(() => {
     const filtersChanged = previousFiltersRef.current !== source.currentFilters
@@ -115,8 +116,15 @@ export const useLoadChildren = <
       previousSortingsRef.current !== source.currentSortings
     const navigationFiltersChanged =
       previousNavigationFiltersRef.current !== source.currentNavigationFilters
+    const searchChanged =
+      previousSearchRef.current !== source.debouncedCurrentSearch
 
-    if (filtersChanged || sortingsChanged || navigationFiltersChanged) {
+    if (
+      filtersChanged ||
+      sortingsChanged ||
+      navigationFiltersChanged ||
+      searchChanged
+    ) {
       setChildren([])
       setPaginationInfo(undefined)
       setChildrenType("basic")
@@ -128,11 +136,13 @@ export const useLoadChildren = <
       previousFiltersRef.current = source.currentFilters
       previousSortingsRef.current = source.currentSortings
       previousNavigationFiltersRef.current = source.currentNavigationFilters
+      previousSearchRef.current = source.debouncedCurrentSearch
     }
   }, [
     source.currentFilters,
     source.currentSortings,
     source.currentNavigationFilters,
+    source.debouncedCurrentSearch,
     clearFetchedData,
   ])
 
@@ -173,6 +183,7 @@ export const useLoadChildren = <
       filters: source.currentFilters,
       pagination: paginationInfo,
       sortings: source.currentSortings,
+      search: source.debouncedCurrentSearch,
     })
 
     // Handle undefined result
