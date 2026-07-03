@@ -94,4 +94,12 @@ export type GraphVisualizationOptions<
   maxZoom?: number
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
+  /**
+   * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+   * the viewport are handed to React Flow — for very large trees (thousands of
+   * expand-visible nodes). Off by default; non-breaking.
+   */
+  enableNodeWindowing?: boolean
+  /** Flow-space px kept materialized around the viewport (pass-through). */
+  nodeWindowPadding?: number
 }
