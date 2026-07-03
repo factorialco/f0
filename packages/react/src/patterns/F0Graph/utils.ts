@@ -28,31 +28,6 @@ export function nodeIntersectsRect(
 }
 
 /**
- * Ids of the positioned nodes whose box intersects `rect`. When a node has no
- * explicit width/height the fallbacks are used (React Flow measures real DOM
- * sizes, but the layout box is a good enough proxy for windowing). Used to
- * materialize only the React Flow nodes near the camera.
- */
-export function collectNodesInViewport(
-  nodes: Array<
-    Pick<PositionedNode, "id" | "x" | "y"> & Partial<PositionedNode>
-  >,
-  rect: ViewportRect,
-  fallbackWidth: number,
-  fallbackHeight: number
-): Set<string> {
-  const ids = new Set<string>()
-  for (const node of nodes) {
-    const width = node.width ?? fallbackWidth
-    const height = node.height ?? fallbackHeight
-    if (nodeIntersectsRect(node.x, node.y, width, height, rect)) {
-      ids.add(node.id)
-    }
-  }
-  return ids
-}
-
-/**
  * Bounding box of every positioned node, as an `{ x, y, width, height }` rect
  * suitable for `reactFlow.fitBounds`. Returns `null` for an empty layout.
  * Lets navigation (fit-view, fly-to) target the full graph even when node-array

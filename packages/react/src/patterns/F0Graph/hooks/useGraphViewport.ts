@@ -48,6 +48,12 @@ export interface UseGraphViewportResult {
   handleZoomOut: () => void
   handleFitView: () => void
   handleFocusUser: () => void
+  /**
+   * Fly to a node using its full-layout position, so it works even when the
+   * node is windowed out of React Flow's store. Returns false if the position
+   * is unknown (caller should fall back to an id-based fit).
+   */
+  centerOnNode: (nodeId: string, duration: number) => boolean
 }
 
 /**
@@ -117,26 +123,33 @@ export function useGraphViewport({
     reactFlow.fitView({ duration: 400, padding: FIT_VIEW_PADDING_TIGHT })
   }, [reactFlow, nodeWindowingActive, getContentBounds])
 
+  // Fly to a node by its full-layout position (works even when windowing has
+  // dropped it from React Flow's store). Returns false when the position is
+  // unknown so callers can fall back to an id-based fitView.
+  const centerOnNode = useCallback(
+    (nodeId: string, duration: number): boolean => {
+      const pos = getNodePosition?.(nodeId)
+      if (!pos) return false
+      reactFlow.setCenter(pos.x + pos.width / 2, pos.y + pos.height / 2, {
+        duration,
+        zoom: reactFlow.getZoom(),
+      })
+      return true
+    },
+    [reactFlow, getNodePosition]
+  )
+
   const handleFocusUser = useCallback(() => {
     if (!currentUserNodeId) return
     // Windowing: the target may be off-screen and absent from the store, so
     // center on its layout position instead of an id-based fitView.
-    if (nodeWindowingActive) {
-      const pos = getNodePosition?.(currentUserNodeId)
-      if (pos) {
-        reactFlow.setCenter(pos.x + pos.width / 2, pos.y + pos.height / 2, {
-          duration: 400,
-          zoom: reactFlow.getZoom(),
-        })
-        return
-      }
-    }
+    if (nodeWindowingActive && centerOnNode(currentUserNodeId, 400)) return
     reactFlow.fitView({
       nodes: [{ id: currentUserNodeId }],
       duration: 400,
       padding: FIT_VIEW_PADDING_LOOSE,
     })
-  }, [currentUserNodeId, reactFlow, nodeWindowingActive, getNodePosition])
+  }, [currentUserNodeId, reactFlow, nodeWindowingActive, centerOnNode])
 
   return {
     currentZoom,
@@ -147,5 +160,6 @@ export function useGraphViewport({
     handleZoomOut,
     handleFitView,
     handleFocusUser,
+    centerOnNode,
   }
 }

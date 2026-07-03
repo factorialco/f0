@@ -4,7 +4,6 @@ import type { TreeNode } from "../types"
 import type { PositionedNode } from "../types"
 import {
   collectExpandableNodeIds,
-  collectNodesInViewport,
   collectVisibleNodes,
   computeExpandedByDepth,
   computeLayoutBounds,
@@ -102,41 +101,6 @@ describe("nodeIntersectsRect", () => {
     expect(nodeIntersectsRect(-30, 50, 10, 10, rect)).toBe(false) // left
     expect(nodeIntersectsRect(50, 200, 10, 10, rect)).toBe(false) // below
     expect(nodeIntersectsRect(50, -30, 10, 10, rect)).toBe(false) // above
-  })
-})
-
-describe("collectNodesInViewport", () => {
-  const nodes: PositionedNode[] = [
-    { id: "in", x: 10, y: 10, width: 20, height: 20 },
-    { id: "out", x: 500, y: 500, width: 20, height: 20 },
-    { id: "edge", x: 95, y: 95, width: 20, height: 20 },
-  ]
-  const rect: ViewportRect = { minX: 0, minY: 0, maxX: 100, maxY: 100 }
-
-  it("keeps only nodes whose box intersects the rect", () => {
-    const ids = collectNodesInViewport(nodes, rect, 256, 56)
-    expect(ids.has("in")).toBe(true)
-    expect(ids.has("edge")).toBe(true)
-    expect(ids.has("out")).toBe(false)
-  })
-
-  it("uses fallback dimensions when a node omits width/height", () => {
-    // A wide fallback makes an otherwise-outside node reach into the rect.
-    const wideFallback = collectNodesInViewport(
-      [{ id: "n", x: -200, y: 10 }],
-      rect,
-      /* fallbackWidth */ 300,
-      /* fallbackHeight */ 56
-    )
-    expect(wideFallback.has("n")).toBe(true)
-
-    const narrowFallback = collectNodesInViewport(
-      [{ id: "n", x: -200, y: 10 }],
-      rect,
-      50,
-      56
-    )
-    expect(narrowFallback.has("n")).toBe(false)
   })
 })
 

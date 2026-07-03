@@ -34,10 +34,10 @@ import type {
   ZoomLevel,
 } from "../types"
 import {
-  collectNodesInViewport,
   collectVisibleNodes,
   computeLayoutBounds,
   deriveEdgesFromTree,
+  nodeIntersectsRect,
 } from "../utils"
 import { useLayoutEngine } from "./useLayoutEngine"
 import { useViewportGeometry } from "./useViewportGeometry"
@@ -537,19 +537,25 @@ export function useGraphRenderModel<T>({
   // needs to fit the whole graph before the camera settles.
   const windowedIds = useMemo((): Set<string> | null => {
     if (!enableNodeWindowing || !viewportRect) return null
+    // Intersect each rf node's box against the viewport directly — no
+    // intermediate array — since this runs on every pan cell-crossing.
     const fallbackWidth = nodeWidthProp ?? 256
-    return collectNodesInViewport(
-      allRfNodes.map((n) => ({
-        id: n.id,
-        x: n.position.x,
-        y: n.position.y,
-        width: (n.width as number | undefined) ?? fallbackWidth,
-        height: effectiveNodeHeight,
-      })),
-      viewportRect,
-      fallbackWidth,
-      effectiveNodeHeight
-    )
+    const ids = new Set<string>()
+    for (const node of allRfNodes) {
+      const width = node.width ?? fallbackWidth
+      if (
+        nodeIntersectsRect(
+          node.position.x,
+          node.position.y,
+          width,
+          effectiveNodeHeight,
+          viewportRect
+        )
+      ) {
+        ids.add(node.id)
+      }
+    }
+    return ids
   }, [
     enableNodeWindowing,
     viewportRect,
@@ -558,13 +564,32 @@ export function useGraphRenderModel<T>({
     effectiveNodeHeight,
   ])
 
-  const rfNodes = useMemo(
-    (): RFNode[] =>
-      windowedIds
-        ? allRfNodes.filter((n) => windowedIds.has(n.id))
-        : allRfNodes,
-    [allRfNodes, windowedIds]
-  )
+  const rfNodes = useMemo((): RFNode[] => {
+    if (!windowedIds) return allRfNodes
+    const result: RFNode[] = []
+    for (const node of allRfNodes) {
+      if (!windowedIds.has(node.id)) continue
+      // Trim aria-owns to children still in the window: an aria-owns entry
+      // pointing at a node windowed out of the DOM is a dangling reference.
+      const data = node.data as GraphNodeData
+      const childIds = data.visibleChildIds
+      if (node.type === "graphNode" && childIds && childIds.length > 0) {
+        const kept = childIds.filter((id) => windowedIds.has(id))
+        if (kept.length !== childIds.length) {
+          result.push({
+            ...node,
+            data: {
+              ...data,
+              visibleChildIds: kept.length > 0 ? kept : undefined,
+            },
+          })
+          continue
+        }
+      }
+      result.push(node)
+    }
+    return result
+  }, [allRfNodes, windowedIds])
 
   const renderedNodeCount = useMemo(
     () => rfNodes.filter((n) => n.type === "graphNode").length,

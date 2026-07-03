@@ -300,6 +300,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     handleZoomOut,
     handleFitView,
     handleFocusUser,
+    centerOnNode,
   } = useGraphViewport({
     defaultZoom,
     zoomPreset,
@@ -413,16 +414,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
         // Windowing: the target may be off-screen and absent from React Flow's
         // store, so center on its layout position instead of an id-based
         // fitView (which silently no-ops for a missing node).
-        if (enableNodeWindowing) {
-          const pos = getNodePosition(focusedNode)
-          if (pos) {
-            reactFlow.setCenter(pos.x + pos.width / 2, pos.y + pos.height / 2, {
-              duration: 300,
-              zoom: reactFlow.getZoom(),
-            })
-            return
-          }
-        }
+        if (enableNodeWindowing && centerOnNode(focusedNode, 300)) return
         reactFlow.fitView({
           nodes: [{ id: focusedNode }],
           duration: 300,
@@ -431,7 +423,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       }, FOCUS_SETTLE_DELAY_MS)
       return () => clearTimeout(timer)
     }
-  }, [focusedNode, reactFlow, enableNodeWindowing, getNodePosition])
+  }, [focusedNode, reactFlow, enableNodeWindowing, centerOnNode])
 
   // ── Split context values (wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
