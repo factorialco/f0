@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.22.0](https://github.com/factorialco/f0/compare/f0-react-v4.21.1...f0-react-v4.22.0) (2026-07-03)
+
+
+### Features
+
+* **cocreation:** co-creation pattern definition ([#4307](https://github.com/factorialco/f0/issues/4307)) ([9ad337d](https://github.com/factorialco/f0/commit/9ad337ddc16b824de8281126510e746472838b9a))
+
 ## [4.21.1](https://github.com/factorialco/f0/compare/f0-react-v4.21.0...f0-react-v4.21.1) (2026-07-03)
 
 
