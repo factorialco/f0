@@ -4080,11 +4080,13 @@ export declare type DataSourceDefinition<R extends RecordType = RecordType, Filt
     currentGrouping?: GroupingState<R, Grouping>;
     /*******************************************************/
     /***** NESTED RECORDS ***************************************************/
-    fetchChildren?: ({ item, filters, pagination, sortings, }: {
+    fetchChildren?: ({ item, filters, pagination, sortings, search, }: {
         item: R;
         filters?: FiltersState<Filters>;
         pagination?: ChildrenPaginationInfo;
         sortings?: SortingsState<Sortings>;
+        /** Active search term (debounced), aligned with the main collection fetch */
+        search?: string;
     }) => ChildrenResponse<R> | Promise<ChildrenResponse<R>> | Observable<PromiseState<ChildrenResponse<R>>>;
     /** Function to determine if an item has children */
     itemsWithChildren?: (item: R) => boolean;
@@ -13353,6 +13355,13 @@ declare type NestedExpandOptions = {
 declare type NestedExpansionContext<R extends RecordType> = {
     item: R;
     depth: number;
+    /**
+     * Whether the collection currently has an active search term or any
+     * applied filter. Lets expansion criteria align with filtering, e.g.
+     * `defaultExpanded: (ctx) => ctx.hasActiveFilters` auto-expands the tree
+     * while the user searches/filters and collapses it back when cleared.
+     */
+    hasActiveFilters: boolean;
 };
 
 /**
