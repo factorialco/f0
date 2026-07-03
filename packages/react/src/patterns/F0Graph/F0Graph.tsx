@@ -192,10 +192,38 @@ export interface F0GraphProps<T = unknown> {
    */
   reserveTagRow?: boolean
 
+  // ---- Viewport virtualization (opt-in, non-breaking) ----
+  /**
+   * Opt into node-array windowing. When enabled, only the nodes whose layout
+   * box intersects the current viewport (grown by `nodeWindowPadding`) are
+   * handed to React Flow, instead of every expand-visible node. The tree
+   * structure and layout are still computed in full — positions, bounds and
+   * fit-view stay correct — so this is safe for very large graphs (thousands
+   * of nodes) where React Flow otherwise chokes on the full node array even
+   * with `onlyRenderVisibleElements` (which only culls the DOM).
+   *
+   * Off by default; existing consumers are unaffected.
+   */
+  enableNodeWindowing?: boolean
+  /**
+   * Flow-space px kept materialized around the viewport when
+   * `enableNodeWindowing` is on. Larger values pre-render more off-screen nodes
+   * (smoother fast pans, more work); smaller values window more aggressively.
+   * Defaults to `600`.
+   */
+  nodeWindowPadding?: number
+
   // ---- Callbacks ----
   onZoomLevelChange?: (level: ZoomLevel) => void
   onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void
   onVisibleNodesChange?: (count: number) => void
+  /**
+   * Fired with the number of nodes actually handed to React Flow. Without
+   * windowing this equals the visible-node count; with `enableNodeWindowing`
+   * it approximates the on-screen count. Useful for perf assertions and
+   * debugging.
+   */
+  onRenderedNodesChange?: (count: number) => void
 }
 
 // ─── Custom Node Type for React Flow ───────────────────────────

@@ -6,6 +6,7 @@ import {
 import {
   type MutableRefObject,
   type ReactNode,
+  useCallback,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -28,11 +29,18 @@ import type {
   GraphNode,
   LayoutDirection,
   LayoutEngine,
+  PositionedNode,
   TreeNode,
   ZoomLevel,
 } from "../types"
-import { collectVisibleNodes, deriveEdgesFromTree } from "../utils"
+import {
+  collectNodesInViewport,
+  collectVisibleNodes,
+  computeLayoutBounds,
+  deriveEdgesFromTree,
+} from "../utils"
 import { useLayoutEngine } from "./useLayoutEngine"
+import { useViewportGeometry } from "./useViewportGeometry"
 
 // Extra vertical room for the tags below the pill. Each row of small F0Tag
 // pills is ~`TAG_ROW_HEIGHT`; when several tag types are visible they wrap to
@@ -61,6 +69,15 @@ interface UseGraphRenderModelOptions<T> {
   direction: LayoutDirection
   controlLabels?: { collapseChildren?: string }
   hoveredEdgeId: string | null
+  /**
+   * Opt-in node-array windowing: when true, only the React Flow nodes whose
+   * layout box intersects the current viewport (plus `nodeWindowPadding`) are
+   * materialized. The layout itself is still computed over every visible node,
+   * so positions, bounds and fit-view stay correct.
+   */
+  enableNodeWindowing?: boolean
+  /** Flow-space px grown around the viewport when windowing. */
+  nodeWindowPadding?: number
 }
 
 export interface UseGraphRenderModelResult<T> {
@@ -69,6 +86,16 @@ export interface UseGraphRenderModelResult<T> {
   rfEdges: RFEdge[]
   reservedTagHeight: number
   tagsAffectLayout: boolean
+  /**
+   * Number of `graphNode` React Flow nodes actually handed to React Flow. Equals
+   * the visible count when windowing is off; approximates the on-screen count
+   * when `enableNodeWindowing` is on.
+   */
+  renderedNodeCount: number
+  /** Bounding box of the full layout (`null` when empty), for fit-view. */
+  contentBounds: { x: number; y: number; width: number; height: number } | null
+  /** Layout position of a node id, regardless of whether it is windowed out. */
+  getNodePosition: (id: string) => PositionedNode | undefined
 }
 
 /**
@@ -94,6 +121,8 @@ export function useGraphRenderModel<T>({
   direction,
   controlLabels,
   hoveredEdgeId,
+  enableNodeWindowing,
+  nodeWindowPadding,
 }: UseGraphRenderModelOptions<T>): UseGraphRenderModelResult<T> {
   // ── Visible nodes (respecting expand state) ──
   const visibleTreeNodes = useMemo(
@@ -255,6 +284,30 @@ export function useGraphRenderModel<T>({
     [layoutEngine, layoutNodes, layoutEdges, direction]
   )
 
+  // Positions keyed by id — shared by rfNodes, windowing and navigation.
+  const positionMap = useMemo(
+    () => new Map(layout.nodes.map((pn) => [pn.id, pn])),
+    [layout.nodes]
+  )
+
+  // Bounding box of the whole layout, so fit-view / fly-to can target the full
+  // graph even when windowing has removed off-screen nodes from React Flow.
+  const contentBounds = useMemo(
+    () => computeLayoutBounds(layout.nodes),
+    [layout.nodes]
+  )
+
+  const getNodePosition = useCallback(
+    (id: string): PositionedNode | undefined => positionMap.get(id),
+    [positionMap]
+  )
+
+  // Padded viewport rect in flow-space (null when windowing off or pre-measure).
+  const viewportRect = useViewportGeometry({
+    enabled: enableNodeWindowing ?? false,
+    padding: nodeWindowPadding,
+  })
+
   // Place expanders at the midpoint between parent bottom and where children would be.
   // Scales per zoom level (+100% each step) so the larger expander button remains
   // visually centered in its lane.
@@ -311,9 +364,8 @@ export function useGraphRenderModel<T>({
     }
   }, [layout.nodes, anchorOffset, nodeMap, expandedNodes, anchorNodeRef])
 
-  const rfNodes = useMemo((): RFNode[] => {
+  const allRfNodes = useMemo((): RFNode[] => {
     const { dx: anchorDx, dy: anchorDy } = anchorOffset
-    const positionMap = new Map(layout.nodes.map((pn) => [pn.id, pn]))
 
     // Node dimensions (constant — compensation scale is applied inside the wrapper via context)
     const BASE_W = nodeWidthProp ?? 256
@@ -463,7 +515,7 @@ export function useGraphRenderModel<T>({
 
     return [...graphRfNodes, ...expanderRfNodes, ...collapserRfNodes]
   }, [
-    layout.nodes,
+    positionMap,
     visibleTreeNodes,
     expanderNodes,
     expandedNodes,
@@ -478,6 +530,47 @@ export function useGraphRenderModel<T>({
     controlLabels?.collapseChildren,
   ])
 
+  // ── Node-array windowing ──
+  // Ids of the built rf nodes whose box intersects the padded viewport. `null`
+  // means "no windowing" (feature off, or viewport not yet measured), in which
+  // case every node is rendered — which is also what the initial `fitView`
+  // needs to fit the whole graph before the camera settles.
+  const windowedIds = useMemo((): Set<string> | null => {
+    if (!enableNodeWindowing || !viewportRect) return null
+    const fallbackWidth = nodeWidthProp ?? 256
+    return collectNodesInViewport(
+      allRfNodes.map((n) => ({
+        id: n.id,
+        x: n.position.x,
+        y: n.position.y,
+        width: (n.width as number | undefined) ?? fallbackWidth,
+        height: effectiveNodeHeight,
+      })),
+      viewportRect,
+      fallbackWidth,
+      effectiveNodeHeight
+    )
+  }, [
+    enableNodeWindowing,
+    viewportRect,
+    allRfNodes,
+    nodeWidthProp,
+    effectiveNodeHeight,
+  ])
+
+  const rfNodes = useMemo(
+    (): RFNode[] =>
+      windowedIds
+        ? allRfNodes.filter((n) => windowedIds.has(n.id))
+        : allRfNodes,
+    [allRfNodes, windowedIds]
+  )
+
+  const renderedNodeCount = useMemo(
+    () => rfNodes.filter((n) => n.type === "graphNode").length,
+    [rfNodes]
+  )
+
   // ── Build React Flow edges ──
   const rfEdges = useMemo((): RFEdge[] => {
     // Parents that have a collapser button sitting on their outgoing edges
@@ -487,7 +580,13 @@ export function useGraphRenderModel<T>({
         .map((n) => n.id)
     )
 
-    return visibleEdges.map((edge): RFEdge => {
+    // When windowing, drop edges whose endpoints aren't both materialized —
+    // React Flow can't route an edge to a node that isn't in its store.
+    const inWindow = (edge: GraphEdge): boolean =>
+      !windowedIds ||
+      (windowedIds.has(edge.source) && windowedIds.has(edge.target))
+
+    return visibleEdges.filter(inWindow).map((edge): RFEdge => {
       const isInteractive = Boolean(edge.onEdgeClick || edge.onEdgeHover)
       const isHovered = isInteractive && edge.id === hoveredEdgeId
       const baseData = edge.data as Record<string, unknown> | undefined
@@ -509,7 +608,13 @@ export function useGraphRenderModel<T>({
         },
       }
     })
-  }, [visibleEdges, visibleTreeNodes, expandedNodes, hoveredEdgeId])
+  }, [
+    visibleEdges,
+    visibleTreeNodes,
+    expandedNodes,
+    hoveredEdgeId,
+    windowedIds,
+  ])
 
   return {
     visibleTreeNodes,
@@ -517,5 +622,8 @@ export function useGraphRenderModel<T>({
     rfEdges,
     reservedTagHeight,
     tagsAffectLayout,
+    renderedNodeCount,
+    contentBounds,
+    getNodePosition,
   }
 }

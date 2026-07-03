@@ -65,6 +65,11 @@ const meta = {
     onZoomLevelChange: { table: { disable: true } },
     onViewportChange: { table: { disable: true } },
     onVisibleNodesChange: { table: { disable: true } },
+    onRenderedNodesChange: { table: { disable: true } },
+    enableNodeWindowing: { control: "boolean" },
+    nodeWindowPadding: {
+      control: { type: "number", min: 0, max: 2000, step: 100 },
+    },
   },
 } satisfies Meta<F0GraphProps<Employee>>
 
@@ -709,6 +714,100 @@ export const LargeTree: Story = {
     showControls: true,
     defaultExpandDepth: 2,
   },
+}
+
+// ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
+
+/**
+ * The "broken orgchart" shape from FCT-57915: thousands of root employees with
+ * no manager. Every root is expand-visible at once, so this is the worst case
+ * for the React Flow node array.
+ */
+function makeBrokenOrgchart(rootCount: number): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  let nameIndex = 0
+  for (let i = 0; i < rootCount; i++) {
+    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
+    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    nameIndex++
+    nodes.push({
+      id: `root-${i}`,
+      parentId: null,
+      data: { name: `${first} ${last}`, title: "Employee" },
+      childrenCount: 0,
+    })
+  }
+  return nodes
+}
+
+const BROKEN_ORGCHART_3K = makeBrokenOrgchart(3000)
+
+/**
+ * Interactive perf harness: renders 3,000 root nodes and lets you toggle
+ * `enableNodeWindowing` live while watching how many nodes are actually handed
+ * to React Flow. With windowing on, the rendered count collapses to roughly
+ * what's on screen (pan/zoom to see it track the camera); with it off, all
+ * 3,000 nodes stay in the array. This is both the A0 baseline and the A1 demo.
+ */
+function ViewportWindowingDemo() {
+  const [windowing, setWindowing] = useState(true)
+  const [padding, setPadding] = useState(600)
+  const [visible, setVisible] = useState(0)
+  const [rendered, setRendered] = useState(0)
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 flex flex-col gap-2 rounded-md bg-f1-background p-3 text-sm shadow-md">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={windowing}
+            onChange={(e) => setWindowing(e.target.checked)}
+          />
+          Node windowing
+        </label>
+        <label className="flex items-center gap-2">
+          Padding
+          <input
+            type="range"
+            min={0}
+            max={2000}
+            step={100}
+            value={padding}
+            onChange={(e) => setPadding(Number(e.target.value))}
+          />
+          <span className="tabular-nums">{padding}px</span>
+        </label>
+        <div className="tabular-nums">
+          Visible nodes: <strong>{visible}</strong>
+        </div>
+        <div className="tabular-nums">
+          Rendered nodes: <strong>{rendered}</strong>
+        </div>
+      </div>
+      <F0Graph<Employee>
+        nodes={BROKEN_ORGCHART_3K}
+        renderNode={renderEmployee}
+        showControls
+        enableNodeWindowing={windowing}
+        nodeWindowPadding={padding}
+        onVisibleNodesChange={setVisible}
+        onRenderedNodesChange={setRendered}
+      />
+    </div>
+  )
+}
+
+export const ViewportWindowing: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Perf harness for FCT-57915: 3,000 root nodes (the 'broken orgchart' case). Toggle `enableNodeWindowing` and pan/zoom to watch the rendered-node count track the viewport instead of the full 3,000.",
+      },
+    },
+  },
+  render: () => <ViewportWindowingDemo />,
 }
 
 // ─── Intent-searchable stories ─────────────────────────────────

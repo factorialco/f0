@@ -1,11 +1,19 @@
+import { ReactFlowProvider } from "@xyflow/react"
 import { renderHook } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
-import type { MutableRefObject } from "react"
+import { createElement, type MutableRefObject, type ReactNode } from "react"
 
 import type { ExpanderNodeData } from "../../internal/ReactFlowAdapters"
 import type { TreeNode } from "../../types"
 import { useGraphRenderModel } from "../useGraphRenderModel"
+
+// The render model reads React Flow's viewport store (for node windowing), so
+// the hook must run inside a provider — as it always does in F0Graph.
+const wrapper = ({ children }: { children: ReactNode }) =>
+  createElement(ReactFlowProvider, null, children)
+const renderModel = (options: Parameters<typeof useGraphRenderModel>[0]) =>
+  renderHook(() => useGraphRenderModel(options), { wrapper })
 
 const treeNode = (
   id: string,
@@ -54,9 +62,7 @@ describe("useGraphRenderModel — expander affordance", () => {
     // ceo (expanded) → cto (collapsed, 81 reports, children NOT loaded)
     const cto = treeNode("cto", "ceo", 81, [], 1)
     const ceo = treeNode("ceo", null, 1, [cto])
-    const { result } = renderHook(() =>
-      useGraphRenderModel(baseOptions([ceo], ["ceo"]))
-    )
+    const { result } = renderModel(baseOptions([ceo], ["ceo"]))
 
     const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander?.type).toBe("expanderNode")
@@ -68,9 +74,7 @@ describe("useGraphRenderModel — expander affordance", () => {
     // cto is expanded but its 81 children have not arrived yet.
     const cto = treeNode("cto", "ceo", 81, [], 1)
     const ceo = treeNode("ceo", null, 1, [cto])
-    const { result } = renderHook(() =>
-      useGraphRenderModel(baseOptions([ceo], ["ceo", "cto"]))
-    )
+    const { result } = renderModel(baseOptions([ceo], ["ceo", "cto"]))
 
     const expander = expanderFor(result.current.rfNodes, "cto")
     expect(expander).toBeDefined()
@@ -80,9 +84,7 @@ describe("useGraphRenderModel — expander affordance", () => {
   it("removes the expander once an expanded node's children are loaded", () => {
     const report = treeNode("report", "boss", 0, [], 1)
     const boss = treeNode("boss", null, 1, [report])
-    const { result } = renderHook(() =>
-      useGraphRenderModel(baseOptions([boss], ["boss"]))
-    )
+    const { result } = renderModel(baseOptions([boss], ["boss"]))
 
     expect(expanderFor(result.current.rfNodes, "boss")).toBeUndefined()
   })
@@ -90,9 +92,7 @@ describe("useGraphRenderModel — expander affordance", () => {
   it("renders no expander for a true leaf (childrenCount 0)", () => {
     const leaf = treeNode("leaf", "ceo", 0, [], 1)
     const ceo = treeNode("ceo", null, 1, [leaf])
-    const { result } = renderHook(() =>
-      useGraphRenderModel(baseOptions([ceo], ["ceo"]))
-    )
+    const { result } = renderModel(baseOptions([ceo], ["ceo"]))
 
     expect(expanderFor(result.current.rfNodes, "leaf")).toBeUndefined()
   })

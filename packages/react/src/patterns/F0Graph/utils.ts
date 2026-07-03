@@ -1,4 +1,79 @@
-import type { GraphEdge, TreeNode } from "./types"
+import type { GraphEdge, PositionedNode, TreeNode } from "./types"
+
+/** Axis-aligned rectangle in flow-space coordinates. */
+export interface ViewportRect {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
+
+/**
+ * Whether a node box (top-left `x`/`y`, size `width`/`height`) overlaps `rect`.
+ * Pure AABB intersection — the core predicate behind node-array windowing.
+ */
+export function nodeIntersectsRect(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  rect: ViewportRect
+): boolean {
+  return (
+    x <= rect.maxX &&
+    x + width >= rect.minX &&
+    y <= rect.maxY &&
+    y + height >= rect.minY
+  )
+}
+
+/**
+ * Ids of the positioned nodes whose box intersects `rect`. When a node has no
+ * explicit width/height the fallbacks are used (React Flow measures real DOM
+ * sizes, but the layout box is a good enough proxy for windowing). Used to
+ * materialize only the React Flow nodes near the camera.
+ */
+export function collectNodesInViewport(
+  nodes: Array<
+    Pick<PositionedNode, "id" | "x" | "y"> & Partial<PositionedNode>
+  >,
+  rect: ViewportRect,
+  fallbackWidth: number,
+  fallbackHeight: number
+): Set<string> {
+  const ids = new Set<string>()
+  for (const node of nodes) {
+    const width = node.width ?? fallbackWidth
+    const height = node.height ?? fallbackHeight
+    if (nodeIntersectsRect(node.x, node.y, width, height, rect)) {
+      ids.add(node.id)
+    }
+  }
+  return ids
+}
+
+/**
+ * Bounding box of every positioned node, as an `{ x, y, width, height }` rect
+ * suitable for `reactFlow.fitBounds`. Returns `null` for an empty layout.
+ * Lets navigation (fit-view, fly-to) target the full graph even when node-array
+ * windowing has removed off-screen nodes from the React Flow store.
+ */
+export function computeLayoutBounds(
+  nodes: PositionedNode[]
+): { x: number; y: number; width: number; height: number } | null {
+  if (nodes.length === 0) return null
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const node of nodes) {
+    minX = Math.min(minX, node.x)
+    minY = Math.min(minY, node.y)
+    maxX = Math.max(maxX, node.x + node.width)
+    maxY = Math.max(maxY, node.y + node.height)
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+}
 
 /** Compute the initial expanded set by expanding every node above `depth`. */
 export function computeExpandedByDepth<T>(
