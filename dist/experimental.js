@@ -3262,16 +3262,25 @@ const Fl = {
           s && r.length === 0 && /* @__PURE__ */ t("div", { className: "flex justify-center px-2 py-6 text-f1-foreground-secondary", children: h.audience.selector.loading }),
           g && /* @__PURE__ */ t("div", { className: "flex justify-center px-2 py-6 text-f1-foreground-secondary", children: c })
         ] }),
-        /* @__PURE__ */ t("div", { id: e, role: "listbox", "aria-label": n, children: r.map((x) => /* @__PURE__ */ t(
-          Al,
+        /* @__PURE__ */ t(
+          "div",
           {
-            item: x,
-            active: x.key === a,
-            onToggle: f,
-            onActivate: u
-          },
-          x.key
-        )) }),
+            id: e,
+            role: "listbox",
+            "aria-label": n,
+            "aria-multiselectable": "true",
+            children: r.map((x) => /* @__PURE__ */ t(
+              Al,
+              {
+                item: x,
+                active: x.key === a,
+                onToggle: f,
+                onActivate: u
+              },
+              x.key
+            ))
+          }
+        ),
         i && /* @__PURE__ */ t(
           "div",
           {
@@ -4490,56 +4499,65 @@ const Jl = () => /* @__PURE__ */ d("div", { className: "flex flex-col justify-ar
   onRetry: a
 }) => {
   const s = ee();
-  return /* @__PURE__ */ d("div", { className: "ml-4 flex flex-col gap-1 border-0 border-l border-solid border-f1-border-secondary pb-2 pl-6", children: [
-    e === "loading" && /* @__PURE__ */ d(me, { children: [
-      /* @__PURE__ */ t(X, { className: "h-5 w-40" }),
-      /* @__PURE__ */ t(X, { className: "h-5 w-32" })
-    ] }),
-    e === "error" && /* @__PURE__ */ d("div", { className: "flex items-center gap-2 py-1", children: [
-      /* @__PURE__ */ t("span", { className: "text-f1-foreground-secondary", children: s.audience.listItem.loadError }),
-      a && /* @__PURE__ */ t(
-        de,
-        {
-          variant: "ghost",
-          size: "sm",
-          label: s.audience.listItem.retry,
-          onClick: a
-        }
-      )
-    ] }),
-    e === "loaded" && n.length === 0 && /* @__PURE__ */ t("span", { className: "py-1 text-f1-foreground-secondary", children: s.audience.listItem.noMembers }),
-    e === "loaded" && n.map((o) => /* @__PURE__ */ d("div", { className: "flex items-center gap-2 py-1", children: [
-      /* @__PURE__ */ t(
-        Be,
-        {
-          avatar: {
-            type: "person",
-            firstName: o.firstName,
-            lastName: o.lastName,
-            src: o.src
-          },
-          size: "xs"
-        }
-      ),
-      /* @__PURE__ */ d("span", { className: "truncate text-f1-foreground", children: [
-        o.firstName,
-        " ",
-        o.lastName
-      ] }),
-      o.subtitle && /* @__PURE__ */ t("span", { className: "truncate text-sm text-f1-foreground-secondary", children: o.subtitle })
-    ] }, o.id)),
-    e === "loaded" && r && /* @__PURE__ */ d("div", { className: "flex items-center gap-2 py-1", children: [
-      /* @__PURE__ */ t("span", { className: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed border-f1-border", children: /* @__PURE__ */ t(
-        te,
-        {
-          icon: Zt,
-          size: "sm",
-          className: "text-f1-icon-secondary"
-        }
-      ) }),
-      /* @__PURE__ */ t("span", { className: "text-f1-foreground-secondary", children: r })
-    ] })
-  ] });
+  return /* @__PURE__ */ d(
+    "div",
+    {
+      role: "status",
+      "aria-live": "polite",
+      "aria-busy": e === "loading",
+      className: "ml-4 flex flex-col gap-1 border-0 border-l border-solid border-f1-border-secondary pb-2 pl-6",
+      children: [
+        e === "loading" && /* @__PURE__ */ d(me, { children: [
+          /* @__PURE__ */ t(X, { className: "h-5 w-40" }),
+          /* @__PURE__ */ t(X, { className: "h-5 w-32" })
+        ] }),
+        e === "error" && /* @__PURE__ */ d("div", { className: "flex items-center gap-2 py-1", children: [
+          /* @__PURE__ */ t("span", { className: "text-f1-foreground-secondary", children: s.audience.listItem.loadError }),
+          a && /* @__PURE__ */ t(
+            de,
+            {
+              variant: "ghost",
+              size: "sm",
+              label: s.audience.listItem.retry,
+              onClick: a
+            }
+          )
+        ] }),
+        e === "loaded" && n.length === 0 && /* @__PURE__ */ t("span", { className: "py-1 text-f1-foreground-secondary", children: s.audience.listItem.noMembers }),
+        e === "loaded" && n.map((o) => /* @__PURE__ */ d("div", { className: "flex items-center gap-2 py-1", children: [
+          /* @__PURE__ */ t(
+            Be,
+            {
+              avatar: {
+                type: "person",
+                firstName: o.firstName,
+                lastName: o.lastName,
+                src: o.src
+              },
+              size: "xs"
+            }
+          ),
+          /* @__PURE__ */ d("span", { className: "truncate text-f1-foreground", children: [
+            o.firstName,
+            " ",
+            o.lastName
+          ] }),
+          o.subtitle && /* @__PURE__ */ t("span", { className: "truncate text-sm text-f1-foreground-secondary", children: o.subtitle })
+        ] }, o.id)),
+        e === "loaded" && r && /* @__PURE__ */ d("div", { className: "flex items-center gap-2 py-1", children: [
+          /* @__PURE__ */ t("span", { className: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-dashed border-f1-border", children: /* @__PURE__ */ t(
+            te,
+            {
+              icon: Zt,
+              size: "sm",
+              className: "text-f1-icon-secondary"
+            }
+          ) }),
+          /* @__PURE__ */ t("span", { className: "text-f1-foreground-secondary", children: r })
+        ] })
+      ]
+    }
+  );
 }, sc = ({
   entity: e,
   isYou: n = !1,
@@ -11808,6 +11826,7 @@ export {
   nm as ApplicationFrame,
   Nh as AreaChart,
   Nm as AreaChartWidget,
+  rn as AudienceAvatar,
   wm as AutoGrid,
   go as Badge,
   Ch as BarChart,
@@ -11971,6 +11990,7 @@ export {
   nr as seedFromStorage,
   up as selectSizes,
   Ot as useAiPromotionChat,
+  ca as useAudienceEntitySubtitle,
   fp as useDataCollectionData,
   gm as useDataCollectionItemNavigation,
   vi as useDataCollectionSource,

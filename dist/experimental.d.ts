@@ -806,6 +806,11 @@ blurArea?: "l" | "r" | "lr";
 
 export declare const AreaChartWidget: ForwardRefExoticComponent<Omit<AreaChartWidgetProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
+export declare const AudienceAvatar: ({ entity, size, }: {
+    entity: F0AudienceEntity;
+    size?: "xs" | "sm" | "md";
+}) => JSX_2.Element;
+
 /** Composite selection key, exported for consumer-side dedupe and lookups */
 export declare const audienceEntityKey: (entity: Pick<F0AudienceEntity, "kind" | "id">) => string;
 
@@ -9994,6 +9999,16 @@ export declare type UpsellActionDefinition = {
 export declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined;
 
 export declare function useAiPromotionChat(): AiPromotionChatProviderReturnValue;
+
+/**
+ * Individuals show their consumer-provided subtitle (e.g. job title); group
+ * kinds show the localized "{{count}} people · {{kind}}" line owned by f0.
+ *
+ * Returned inline (no useCallback): `t` from the i18n provider is a fresh
+ * closure each render, so memoization would never hold, and the result is
+ * only used during render — not as an effect dependency.
+ */
+export declare const useAudienceEntitySubtitle: () => (entity: F0AudienceEntity) => string | undefined;
 
 export declare type UseDataCollectionData<R extends RecordType> = UseDataCollectionDataReturn<R> & {
     summaries?: R;
