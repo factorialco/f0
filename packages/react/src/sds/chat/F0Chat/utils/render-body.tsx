@@ -35,7 +35,7 @@ export const renderBodyWithEmojis = (body: string): ReactNode => {
         src={entity.url}
         alt={entity.text}
         draggable={false}
-        className="inline-block h-4 w-4 px-px align-[-0.15em]"
+        className="inline-block h-[17px] w-[17px] px-px align-[-0.2em]"
       />
     )
     cursor = end
