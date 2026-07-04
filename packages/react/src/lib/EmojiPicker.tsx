@@ -6,7 +6,14 @@ import "emoji-mart"
 
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
 
-type EmojiMartElement = HTMLElement & { update?: (props: object) => void }
+type EmojiMartElement = HTMLElement & {
+  // emoji-mart reads `this.props` inside connectedCallback (fired on append) to
+  // build the picker, and only wires later `update()` calls once its internal
+  // component ref exists. Seeding `props` before append is what `new Picker(props)`
+  // did implicitly via the constructor.
+  props?: object
+  update?: (props: object) => void
+}
 
 export type EmojiPickerProps = {
   data?: unknown
@@ -44,8 +51,13 @@ function EmojiPickerElement(props: EmojiPickerProps) {
       "em-emoji-picker"
     ) as EmojiMartElement
     elementRef.current = element
+    // Seed props *before* appending: connectedCallback reads `this.props`
+    // synchronously on append to build the picker. A post-append `update()`
+    // is dropped because emoji-mart's attributeChangedCallback bails while its
+    // internal component ref doesn't exist yet, leaving callbacks (onEmojiSelect)
+    // and options unset — so selecting an emoji would do nothing.
+    element.props = propsRef.current
     container.appendChild(element)
-    element.update?.(propsRef.current)
 
     return () => {
       element.remove()
