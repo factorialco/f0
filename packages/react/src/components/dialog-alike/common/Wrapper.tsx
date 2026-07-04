@@ -9,6 +9,12 @@ import { DialogWrapperProvider } from "./DialogWrapperProvider"
 import { DialogAlikeSize } from "./types"
 import { useIsSmallScreen } from "./utils"
 
+// Window after opening during which an outside-dismiss is ignored, so the
+// interaction that opened the dialog (e.g. a menu-item click that restores
+// focus) cannot immediately close it. Kept small so genuine dismissals still
+// work almost instantly.
+const OPEN_DISMISS_GRACE_MS = 300
+
 const dialogWrapperClassName = cva({
   variants: {
     position: {
@@ -124,8 +130,26 @@ export const DialogWrapper = ({
 
   const isSmallScreen = useIsSmallScreen()
 
+  // Timestamp of when the dialog last became open. Used to ignore a dismiss
+  // that belongs to the very interaction that opened it (see handleOpenChange).
+  const openedAtRef = useRef(0)
+  useEffect(() => {
+    if (isOpen) openedAtRef.current = Date.now()
+  }, [isOpen])
+
   const handleOpenChange = useCallback(
     (open: boolean) => {
+      // When a non-modal dialog is opened from a closing overlay — e.g. a
+      // dropdown/menu item click, which restores focus and finishes its
+      // pointer sequence after the dialog has already mounted — Radix's
+      // dismissable layer treats that in-flight interaction as an outside
+      // event and immediately requests a close. Ignore a close that lands
+      // within a short window of opening so the dialog is not dismissed by
+      // the same interaction that opened it. Genuine user dismissals happen
+      // well after this window.
+      if (!open && Date.now() - openedAtRef.current < OPEN_DISMISS_GRACE_MS) {
+        return
+      }
       onOpenChange?.(open)
       // Do not call onClose here: the useEffect below runs when isOpen becomes
       // false and invokes onClose once. Calling onClose here would duplicate
