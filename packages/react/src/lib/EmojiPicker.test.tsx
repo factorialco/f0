@@ -5,33 +5,61 @@ import { EmojiPicker } from "./EmojiPicker"
 
 const realCreateElement = document.createElement.bind(document)
 
-type UpdatableElement = HTMLElement & { update?: (props: object) => void }
+type PickerElement = HTMLElement & {
+  props?: { onEmojiSelect?: unknown; set?: unknown }
+  update?: (props: object) => void
+}
+
+// Stand-in for the real <em-emoji-picker>. emoji-mart's real element kicks off
+// an async, network-bound init on append that can't complete in jsdom; these
+// tests only assert how the wrapper wires props onto the element, so a plain
+// element avoids that noise.
+function stubPickerElement(): PickerElement {
+  const el = realCreateElement("div") as PickerElement
+  el.update = vi.fn()
+  return el
+}
 
 afterEach(() => {
   vi.restoreAllMocks()
 })
 
 describe("EmojiPicker", () => {
-  it("mounts the <em-emoji-picker> element via createElement, never `new`", () => {
-    const createElementSpy = vi.spyOn(document, "createElement")
+  it("mounts the element via createElement, never `new`", () => {
+    const stub = stubPickerElement()
+    const createElementSpy = vi
+      .spyOn(document, "createElement")
+      .mockImplementation((tag: string) =>
+        tag === "em-emoji-picker" ? stub : realCreateElement(tag)
+      )
 
     const { container } = render(<EmojiPicker data={{}} />)
 
     expect(createElementSpy).toHaveBeenCalledWith("em-emoji-picker")
-    expect(container.querySelector("em-emoji-picker")).not.toBeNull()
+    expect(container.contains(stub)).toBe(true)
   })
 
-  it("forwards props to the element through update()", () => {
-    const update = vi.fn()
+  it("seeds props onto the element before appending so callbacks are wired", () => {
+    // emoji-mart reads `this.props` in connectedCallback (fired on append) to
+    // build the picker; a post-append update() is dropped while its internal
+    // component ref doesn't exist yet. So props — crucially onEmojiSelect — must
+    // be present on the element *before* it is appended, otherwise selecting an
+    // emoji does nothing.
     const onEmojiSelect = vi.fn()
-    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
-      const el = realCreateElement(tag)
-      if (tag === "em-emoji-picker") {
-        const updatable = el as UpdatableElement
-        updatable.update = update
-      }
-      return el
+    const stub = stubPickerElement()
+    let propsAtAppendTime: PickerElement["props"]
+
+    const originalAppend = HTMLElement.prototype.appendChild
+    vi.spyOn(HTMLElement.prototype, "appendChild").mockImplementation(function (
+      this: HTMLElement,
+      node: Node
+    ) {
+      if (node === stub) propsAtAppendTime = stub.props
+      return originalAppend.call(this, node) as Node
     })
+    vi.spyOn(document, "createElement").mockImplementation((tag: string) =>
+      tag === "em-emoji-picker" ? stub : realCreateElement(tag)
+    )
 
     render(
       <EmojiPicker
@@ -41,9 +69,9 @@ describe("EmojiPicker", () => {
       />
     )
 
-    expect(update).toHaveBeenCalled()
-    const lastArgs = update.mock.calls.at(-1)?.[0]
-    expect(lastArgs).toMatchObject({ set: "twitter", onEmojiSelect })
+    expect(stub.props).toMatchObject({ set: "twitter", onEmojiSelect })
+    // The seed must happen before the append, not after.
+    expect(propsAtAppendTime).toMatchObject({ set: "twitter", onEmojiSelect })
   })
 
   it("degrades to nothing instead of crashing when the element fails to construct", () => {
