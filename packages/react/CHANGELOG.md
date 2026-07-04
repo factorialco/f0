@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.22.2](https://github.com/factorialco/f0/compare/f0-react-v4.22.1...f0-react-v4.22.2) (2026-07-04)
+
+
+### Bug Fixes
+
+* **emoji-picker:** seed props before append so onEmojiSelect fires ([#4619](https://github.com/factorialco/f0/issues/4619)) ([f65810f](https://github.com/factorialco/f0/commit/f65810fca1488879cf772d210a84ad14c1318931))
+
 ## [4.22.1](https://github.com/factorialco/f0/compare/f0-react-v4.22.0...f0-react-v4.22.1) (2026-07-04)
 
 
