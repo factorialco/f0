@@ -98,6 +98,45 @@ describe("useViewportDataLoader", () => {
     expect(load).toHaveBeenCalledWith(["a", "b"])
   })
 
+  it("does not flush while disabled", () => {
+    const load = vi.fn()
+    renderHook(() =>
+      useViewportDataLoader({
+        nodeIds: ["a", "b", "c"],
+        loadVisibleNodeData: load,
+        debounceMs: 200,
+        enabled: false,
+      })
+    )
+    act(() => vi.advanceTimersByTime(1000))
+    expect(load).not.toHaveBeenCalled()
+  })
+
+  it("flushes only the ids present once enabled — not the pre-enable set (windowing mount bug)", () => {
+    const load = vi.fn()
+    // Repro: on mount, windowing isn't active yet so nodeIds is the WHOLE tree
+    // and the loader is disabled; once the viewport settles, windowing kicks in
+    // and nodeIds shrinks to what's on screen.
+    const { rerender } = renderHook(
+      ({ ids, enabled }) =>
+        useViewportDataLoader({
+          nodeIds: ids,
+          loadVisibleNodeData: load,
+          debounceMs: 200,
+          enabled,
+        }),
+      { initialProps: { ids: ["a", "b", "c", "d", "e"], enabled: false } }
+    )
+    act(() => vi.advanceTimersByTime(200))
+    expect(load).not.toHaveBeenCalled()
+
+    // Viewport settles → windowing active → only ~2 on screen, loader enabled.
+    rerender({ ids: ["c", "d"], enabled: true })
+    act(() => vi.advanceTimersByTime(200))
+    expect(load).toHaveBeenCalledTimes(1)
+    expect(load).toHaveBeenCalledWith(["c", "d"])
+  })
+
   it("cancels the pending flush on unmount", () => {
     const load = vi.fn()
     const { unmount } = renderHook(() =>

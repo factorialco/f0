@@ -416,10 +416,14 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
   }, [renderedNodeCount, onRenderedNodesChange])
 
   // Viewport-driven data loading: request rich data for on-screen nodes.
+  // With windowing, hold off until the viewport has settled — before then
+  // `renderedNodeIds` is the full (un-windowed) set, and flushing it would
+  // request the whole tree on mount instead of just what's on screen.
   useViewportDataLoader({
     nodeIds: renderedNodeIds,
     loadVisibleNodeData,
     debounceMs: visibleDataDebounceMs,
+    enabled: !enableNodeWindowing || viewportReady,
   })
 
   // ── Fly to the consumer-controlled focused node ──

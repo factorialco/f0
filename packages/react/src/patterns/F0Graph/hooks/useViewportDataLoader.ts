@@ -12,6 +12,14 @@ interface UseViewportDataLoaderOptions {
   loadVisibleNodeData?: (ids: string[]) => void
   /** Debounce before flushing a batch. Defaults to {@link DEFAULT_VISIBLE_DATA_DEBOUNCE_MS}. */
   debounceMs?: number
+  /**
+   * Gate accumulation/flushing. Defaults to `true`. Pass `false` while the ids
+   * don't yet represent the on-screen set — e.g. with node windowing, the very
+   * first render (before the viewport settles) exposes *every* node, and
+   * flushing then would request the whole tree instead of just what's visible.
+   * Ids accumulate only from the render where this becomes `true`.
+   */
+  enabled?: boolean
 }
 
 /**
@@ -25,6 +33,7 @@ export function useViewportDataLoader({
   nodeIds,
   loadVisibleNodeData,
   debounceMs = DEFAULT_VISIBLE_DATA_DEBOUNCE_MS,
+  enabled = true,
 }: UseViewportDataLoaderOptions): void {
   // Ids already handed to the consumer (never re-requested).
   const requestedRef = useRef<Set<string>>(new Set())
@@ -36,7 +45,7 @@ export function useViewportDataLoader({
   callbackRef.current = loadVisibleNodeData
 
   useEffect(() => {
-    if (!loadVisibleNodeData) return
+    if (!loadVisibleNodeData || !enabled) return
 
     let hasNew = false
     for (const id of nodeIds) {
@@ -62,7 +71,7 @@ export function useViewportDataLoader({
       for (const id of batch) requestedRef.current.add(id)
       callbackRef.current?.(batch)
     }, debounceMs)
-  }, [nodeIds, loadVisibleNodeData, debounceMs])
+  }, [nodeIds, loadVisibleNodeData, debounceMs, enabled])
 
   useEffect(
     () => () => {
