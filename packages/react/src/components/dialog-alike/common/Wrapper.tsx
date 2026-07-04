@@ -13,8 +13,8 @@ const dialogWrapperClassName = cva({
   variants: {
     position: {
       right:
-        "fixed flex flex-col rounded-md w-full left-auto right-0 items-end p-3 pl-2.5",
-      left: "fixed flex flex-col rounded-md w-full left-0 items-start p-3 pl-2.5",
+        "fixed flex flex-col rounded-md w-full left-auto right-0 items-end p-3",
+      left: "fixed flex flex-col rounded-md w-full left-0 items-start p-3",
       center: "p-6",
     },
   },
@@ -214,10 +214,6 @@ export const DialogWrapper = ({
             ref={setContentRef}
             container={container}
             defaultContainerId={defaultContainerId}
-            // Side drawers dock within `#content` (clear of the sidebar) by
-            // anchoring the fixed wrapper to the container box; center modals
-            // stay viewport-centered.
-            anchorToContainer={isSidePosition}
             wrapperClassName={dialogWrapperClassName({ position })}
             className={cn(
               dialogContentClassName({ size: localSize }),
