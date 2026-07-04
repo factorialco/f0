@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.22.1](https://github.com/factorialco/f0/compare/f0-react-v4.22.0...f0-react-v4.22.1) (2026-07-04)
+
+
+### Reverts
+
+* **F0Dialog:** restore F0Dialog, F0Drawer and dialog-alike to v3.12.0 behavior ([#4616](https://github.com/factorialco/f0/issues/4616)) ([6677d77](https://github.com/factorialco/f0/commit/6677d777125851ceb763f36867a0a26c64d9184c))
+
 ## [4.22.0](https://github.com/factorialco/f0/compare/f0-react-v4.21.1...f0-react-v4.22.0) (2026-07-03)
 
 
