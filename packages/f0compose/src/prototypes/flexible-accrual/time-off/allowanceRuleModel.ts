@@ -43,8 +43,62 @@ export type AccrualProration = {
   usabilityWindow: string
 }
 
-/** User-added rule (no "Default" badge, deletable). */
-export type CustomRule = { id: string; title: string; summary: string }
+/**
+ * Level-tiered placement for a rule projected onto the accrual tree.
+ * The chain of labels down the indent IS the rule's condition; deeper = narrower
+ * scope. `tenure-filter` / `role-filter` are cross-cutting peers (info accent).
+ */
+export type RuleLevel =
+  | "common"
+  | "country"
+  | "contract"
+  | "role"
+  | "tenure-filter"
+  | "role-filter"
+
+/** Reading depth per level (drives indentation; cross-cutting peers sit shallow). */
+export const LEVEL_DEPTH: Record<RuleLevel, number> = {
+  common: 0,
+  country: 0,
+  contract: 1,
+  role: 2,
+  "tenure-filter": 0,
+  "role-filter": 0,
+}
+
+/** Human label for the scope pill. */
+export const LEVEL_LABEL: Record<RuleLevel, string> = {
+  common: "Common",
+  country: "Country",
+  contract: "Contract",
+  role: "Role",
+  "tenure-filter": "Tenure filter",
+  "role-filter": "Role filter",
+}
+
+/** Cross-cutting peers render with an info-colored rail. */
+export const IS_CROSS_CUTTING: Record<RuleLevel, boolean> = {
+  common: false,
+  country: false,
+  contract: false,
+  role: false,
+  "tenure-filter": true,
+  "role-filter": true,
+}
+
+/**
+ * User-added rule (no "Default" badge, deletable). One places it at a level and
+ * may flag it as an exception that overrides a broader rule. `placementNote` is
+ * One's plain-language statement of where it landed in evaluation order.
+ */
+export type CustomRule = {
+  id: string
+  level: RuleLevel
+  title: string
+  summary: string
+  isException?: boolean
+  placementNote?: string
+}
 
 export function baseSummary(b: BaseAllocation): string {
   return `Employees receive ${b.amount} working days of allowance per cycle, starting in ${b.startMonth} for ${b.cycleMonths} months`

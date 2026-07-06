@@ -1,6 +1,6 @@
 import { F0Button, F0Heading } from "@factorialco/f0-react"
-import { Pencil } from "@factorialco/f0-react/icons/app"
-import { useState } from "react"
+import { Ai, Pencil } from "@factorialco/f0-react/icons/app"
+import { useRef, useState } from "react"
 
 import { useAiChat, useCopilotAction, useCopilotReadable } from "@/copilot"
 
@@ -9,10 +9,13 @@ import {
   accrualSummary,
   type BaseAllocation,
   baseSummary,
+  type CustomRule,
   MONTHS,
+  type RuleLevel,
 } from "./allowanceRuleModel"
 import { RuleSelect } from "./accrualControls"
 import { type Allowance } from "./policiesData"
+import { RulesTree } from "./RulesTree"
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Exploration 4 — Allowance page + One panel pattern
@@ -76,21 +79,71 @@ const EXPIRE_OPTS = [
 
 const CONTROL_WIDTH = "w-72"
 
-// One's opening turn when the panel is summoned: restate → simulate → confirm.
-function openingMessage(base: BaseAllocation, accrual: AccrualProration): string {
-  return (
-    `Let's customise this accrual rule. Right now: ${baseSummary(base)}. ` +
-    `${accrualSummary(accrual)}.\n\n` +
-    `So an employee starting on day one of the cycle would see ${base.amount} ` +
-    `working days available ${accrual.accrualTiming}.\n\n` +
-    `Tell me what to change in plain language — e.g. "give everyone 22 days", ` +
-    `"start the cycle in April", "cap it at 25 days", or "accrue monthly" — and ` +
-    `I'll restate it and confirm before applying.`
-  )
-}
+// ── One conversation model (driven through the native f0 agent) ───────────────
+
+// Greeting shown on the welcome screen every time the panel opens (D1).
+const GREETING =
+  "Let's define the allowance and accrual rules! You can edit the existing " +
+  "default rule or create new ones right here. If you already know your rule, " +
+  "write or paste it and I'll turn it into structured rules. If you'd rather, " +
+  "I can walk you through the defaults with a few quick questions."
+
+// Two greeting chips → route to free-text transform or the guided walk-through.
+const GREETING_SUGGESTIONS = [
+  {
+    icon: Pencil,
+    message: "Write or paste my rule",
+    prompt:
+      "I'll write or paste my rule in plain language — turn it into structured rules.",
+  },
+  {
+    icon: Ai,
+    message: "Start with guided questions",
+    prompt: "Walk me through the accrual defaults with a few quick questions.",
+  },
+]
+
+// The deterministic guided script One should walk one question at a time.
+const GUIDED_SCRIPT = [
+  { step: 1, question: "How many days per cycle?", options: ["20", "22", "25 working days", "Something else"], default: "—" },
+  { step: 2, question: "When does the cycle start?", options: ["January (calendar year)", "Start date", "Custom month"], default: "January" },
+  { step: 3, question: "How long is the cycle?", options: ["12 months", "6 months", "Custom"], default: "12 months" },
+  { step: 4, question: "Prorate for mid-cycle joiners?", options: ["Yes, by time", "No, full"], default: "Prorated" },
+  { step: 5, question: "Max accrued days?", options: ["Unlimited", "Cap at base", "Custom cap"], default: "Unlimited" },
+  { step: 6, question: "When is it accrued?", options: ["All at once", "Monthly", "Per worked period"], default: "All at once, day 1" },
+  { step: 7, question: "When usable?", options: ["Same cycle", "Into next cycle"], default: "Same cycle" },
+  { step: 8, question: "Defaults are mapped out. Want to add any rules on top of the base?", options: ["Add a tenure rule", "Add another rule", "No, that's all"], default: "—" },
+] as const
+
+// The level-tiered placement logic One applies to any free-text rule.
+const LEVELING_RULES =
+  "Place every rule at the highest level where its scope is fully true: no " +
+  "scope → Common (floor rule, applies in every branch); one scope → that " +
+  "level (country / contract / role); several scopes → the deepest, nested. " +
+  "A rule that spans a dimension (e.g. a tenure bonus for all countries) is a " +
+  "cross-cutting tenure-filter / role-filter peer. Flag a narrower rule that " +
+  "overrides a broader one as an Exception. Row order = evaluation order. " +
+  "After placing, state placement back (e.g. \"added as a Tenure-filter rule, " +
+  "before rounding\"), give a one-line simulation for an example employee, " +
+  "then ask to confirm before calling addAccrualRule."
+
+const VALID_LEVELS: RuleLevel[] = [
+  "common",
+  "country",
+  "contract",
+  "role",
+  "tenure-filter",
+  "role-filter",
+]
 
 export function Exploration4View({ allowance }: { allowance: Allowance }) {
-  const { setOpen, setPlaceholders, appendMessages } = useAiChat()
+  const {
+    setOpen,
+    setPlaceholders,
+    setInitialMessage,
+    setWelcomeScreenSuggestions,
+    clear,
+  } = useAiChat()
 
   const [name, setName] = useState(allowance.name)
   const [allowanceType, setAllowanceType] = useState("fixed")
@@ -118,6 +171,12 @@ export function Exploration4View({ allowance }: { allowance: Allowance }) {
   const [carryDays, setCarryDays] = useState("0")
   const [expire, setExpire] = useState("12m")
 
+  // Rules One confirms on top of the base — the level-tiered write-back (D5).
+  const [customRules, setCustomRules] = useState<CustomRule[]>([])
+  const ruleIdRef = useRef(0)
+  const deleteRule = (id: string) =>
+    setCustomRules((rs) => rs.filter((r) => r.id !== id))
+
   // ── Co-create with One (native f0 chat) ─────────────────────────────────────
   // Expose the live rule so One reasons about exactly what the admin sees.
   useCopilotReadable({
@@ -129,6 +188,32 @@ export function Exploration4View({ allowance }: { allowance: Allowance }) {
       base,
       accrual,
     },
+  })
+
+  // Rules already placed on top of the base (so One doesn't duplicate them).
+  useCopilotReadable({
+    description:
+      "Rules the admin has already confirmed on top of the base, in evaluation order. Each has a level (scope), title, summary and whether it's an exception.",
+    value: customRules.map((r) => ({
+      level: r.level,
+      title: r.title,
+      summary: r.summary,
+      isException: r.isException ?? false,
+    })),
+  })
+
+  // The deterministic guided script One walks one question at a time.
+  useCopilotReadable({
+    description:
+      "Guided setup script. When the admin chooses the guided path, ask these questions ONE AT A TIME in order, surfacing the options as predefined answers and the default. Map each answer to applyAccrualRule. After step 8, offer to add rules on top via the free-text transform.",
+    value: GUIDED_SCRIPT,
+  })
+
+  // The level-tiered placement logic for any free-text rule.
+  useCopilotReadable({
+    description:
+      "Level-tiered placement logic for free-text rules. Apply this before calling addAccrualRule.",
+    value: LEVELING_RULES,
   })
 
   // Let One rewrite the rule. Only the provided fields change; the prose
@@ -210,15 +295,80 @@ export function Exploration4View({ allowance }: { allowance: Allowance }) {
     },
   })
 
+  // Add a rule on top of the base, placed at a level — the write-back (D5).
+  useCopilotAction({
+    name: "addAccrualRule",
+    description:
+      "Add a confirmed rule on top of the base allowance. Only call this after stating placement, simulating, and getting the admin's confirmation. The rule appears on the page as a level-tiered row in evaluation order.",
+    parameters: [
+      {
+        name: "level",
+        type: "string",
+        description: `Scope/level — one of: ${VALID_LEVELS.join(", ")}. Use the highest level where the scope is fully true; cross-cutting rules use tenure-filter or role-filter.`,
+        required: true,
+      },
+      {
+        name: "title",
+        type: "string",
+        description: "Short rule title (≤ 5 words)",
+        required: true,
+      },
+      {
+        name: "summary",
+        type: "string",
+        description: "One-sentence plain-language description of the rule",
+        required: true,
+      },
+      {
+        name: "isException",
+        type: "boolean",
+        description: "True if this narrower rule overrides a broader one",
+        required: false,
+      },
+      {
+        name: "placementNote",
+        type: "string",
+        description:
+          'Where it landed in evaluation order, e.g. "added as a Tenure-filter rule, before rounding"',
+        required: false,
+      },
+    ],
+    handler: ({ level, title, summary, isException, placementNote }) => {
+      if (!VALID_LEVELS.includes(level as RuleLevel)) return
+      setCustomRules((rs) => [
+        ...rs,
+        {
+          id: `rule-${ruleIdRef.current++}`,
+          level: level as RuleLevel,
+          title,
+          summary,
+          isException: isException ?? false,
+          placementNote,
+        },
+      ])
+    },
+  })
+
+  useCopilotAction({
+    name: "removeAccrualRule",
+    description:
+      "Remove a previously added rule by its title (case-insensitive). Does not affect the base.",
+    parameters: [
+      { name: "title", type: "string", description: "Title of the rule to remove", required: true },
+    ],
+    handler: ({ title }) => {
+      const t = title.trim().toLowerCase()
+      setCustomRules((rs) => rs.filter((r) => r.title.trim().toLowerCase() !== t))
+    },
+  })
+
+  // Open One with context: reset to the greeting (D1), surface the two routing
+  // chips, and set the free-text placeholder.
   const customiseAccrual = () => {
-    setPlaceholders([
-      'e.g. "give everyone 22 days and start the cycle in April"',
-      'e.g. "cap it at 25 days and accrue monthly"',
-    ])
-    appendMessages?.(
-      [{ role: "assistant", content: openingMessage(base, accrual) }],
-      { persist: false }
-    )
+    clear()
+    setInitialMessage(GREETING)
+    setWelcomeScreenSuggestions(GREETING_SUGGESTIONS)
+    setPlaceholders(["Write or paste your rule…"])
     setOpen(true)
   }
 
@@ -251,9 +401,17 @@ export function Exploration4View({ allowance }: { allowance: Allowance }) {
       <section className="flex flex-col gap-3">
         <SectionHeader title="Allowance & accrual rules" />
         <div className="flex flex-col">
-          <div className="border-b border-solid border-f1-border-secondary pb-4">
+          <div
+            className={`pb-4 ${customRules.length === 0 ? "border-b border-solid border-f1-border-secondary" : ""}`}
+          >
             <AccrualProse base={base} accrual={accrual} />
           </div>
+          {/* Confirmed rules on top of the base — level-tiered projection (D5) */}
+          {customRules.length > 0 ? (
+            <div className="border-b border-solid border-f1-border-secondary pb-4">
+              <RulesTree rules={customRules} onDelete={deleteRule} />
+            </div>
+          ) : null}
           <div className="pt-4">
             <F0Button
               label="Customise accrual rule"
