@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.23.0](https://github.com/factorialco/f0/compare/f0-react-v4.22.2...f0-react-v4.23.0) (2026-07-06)
+
+
+### Features
+
+* **F0TagStatus:** add optional icon prop ([#4593](https://github.com/factorialco/f0/issues/4593)) ([4c1239e](https://github.com/factorialco/f0/commit/4c1239e478c753b130dcb424bb62bb0b1f96b8f7))
+
 ## [4.22.2](https://github.com/factorialco/f0/compare/f0-react-v4.22.1...f0-react-v4.22.2) (2026-07-04)
 
 
