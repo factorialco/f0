@@ -1,11 +1,14 @@
-import type { F0CardRowProps } from "@/components/F0Card"
+import type { F0CardHorizontalProps } from "@/experimental/F0CardHorizontal"
 
 /**
  * Props for the F0HILActionConfirmation component.
  *
- * Renders an inline approve/reject row built on `F0CardRow`'s confirm/reject
+ * Renders an inline approve/reject row built on `F0CardHorizontal`'s confirm/reject
  * variant: the prompt as the row title, with icon-only ✓ (confirm) and ✗
  * (reject) buttons at the trailing edge.
+ *
+ * @deprecated Being replaced by `F0CardHorizontal`. See {@link F0HILActionConfirmation}.
+ * @removeIn 5.0.0
  */
 export type F0HILActionConfirmationProps = {
   /**
@@ -16,19 +19,19 @@ export type F0HILActionConfirmationProps = {
   /**
    * Optional secondary line shown beneath the title (single line, truncated).
    */
-  description?: F0CardRowProps["description"]
+  description?: F0CardHorizontalProps["description"]
   /**
    * Optional avatar rendered on the left of the row. Accepts any avatar type in
    * the system (person, company, team, file, icon, emoji, …).
    */
-  avatar?: F0CardRowProps["avatar"]
+  avatar?: F0CardHorizontalProps["avatar"]
   /**
    * Container width at which the ✓/✗ actions drop onto their own line instead of
    * staying inline. Prevents the buttons from overlapping the prompt in narrow
    * containers. Set to `"never"` to keep them inline at every width.
    * @default "sm"
    */
-  stackAt?: F0CardRowProps["stackAt"]
+  stackAt?: F0CardHorizontalProps["stackAt"]
   /**
    * Accessible label and tooltip for the confirm (✓) button.
    */

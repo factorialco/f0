@@ -163,7 +163,7 @@ export const SelectOption = ({
             )}
             value={label}
             onChange={handleChangeLabel}
-            className="flex-1 resize-none font-medium"
+            className="flex-1 resize-none font-medium text-f1-foreground placeholder:text-f1-foreground-tertiary"
             style={TEXT_AREA_STYLE}
           />
         ) : (

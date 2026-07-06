@@ -18,6 +18,10 @@ export const defaultTranslations = {
   navigation: {
     sidebar: {
       label: "Main navigation",
+      search: "Search",
+      tabs: {
+        label: "Sidebar sections",
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company",
@@ -31,9 +35,25 @@ export const defaultTranslations = {
       show: "Show password",
       hide: "Hide password",
     },
+    private: {
+      show: "Show {{label}}",
+      hide: "Hide {{label}}",
+    },
   },
   link: {
     opensInNewTab: "opens in new tab",
+  },
+  audioPlayer: {
+    label: "Audio player",
+    play: "Play",
+    pause: "Pause",
+    seek: "Seek",
+    options: "Recording options",
+    playbackSpeed: "Playback speed",
+    position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details",
   },
   actions: {
     add: "Add",
@@ -159,16 +179,18 @@ export const defaultTranslations = {
       cancel: "Cancel",
     },
     visualizations: {
-      table: "Table view",
-      editableTable: "Editable table view",
-      card: "Card view",
-      list: "List view",
-      kanban: "Kanban view",
+      table: "Table",
+      editableTable: "Editable table",
+      card: "Card",
+      list: "List",
+      kanban: "Kanban",
+      graph: "Graph",
       pagination: {
         of: "of",
       },
       settings: "{{visualizationName}} settings",
       reset: "Reset to default",
+      viewSelectorLabel: "Select view",
     },
     table: {
       settings: {
@@ -302,6 +324,7 @@ export const defaultTranslations = {
       "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
     thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
@@ -448,6 +471,99 @@ export const defaultTranslations = {
       },
     },
   },
+  chat: {
+    placeholder: "Write something here..",
+    searchPlaceholder: "Search messages",
+    closeSearch: "Close search",
+    noResults: "No chats found",
+    backToLatest: "Jump to latest",
+    muted: "Muted",
+    attachFile: "Attach file",
+    addEmoji: "Add emoji",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    dropFilesHere: "Drop your files here",
+    removeFile: "Remove",
+    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileUploadError: "Upload failed",
+    micPermissionDenied:
+      "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
+    sent: "Sent",
+    read: "Read",
+    // Plural shape (one/other) so other languages can diverge — selected by the
+    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
+    readBy: {
+      one: "Read by {{count}}",
+      other: "Read by {{count}}",
+    },
+    delivered: "Delivered",
+    back: "Back",
+    writing: "Writing…",
+    isTyping: "{{name}} is writing…",
+    twoTyping: "{{first}} and {{second}} are writing…",
+    severalTyping: "Several people are writing…",
+    deletedMessage: "Message deleted",
+    moreActions: "Message actions",
+    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
+    options: "Options",
+    pin: "Pin",
+    unpin: "Unpin",
+    info: "Info",
+    viewProfile: "View profile",
+    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
+    // for a group-wide ping (localize the word, e.g. es "aquí").
+    mentionEveryone: "here",
+    mentionEveryoneDescription: "Notify everyone in this group",
+    reply: "Reply",
+    react: "Add reaction",
+    download: "Download",
+    removeQuote: "Remove quote",
+    // Editing your own message (within the edit window). `editing` heads the
+    // composer chip; `edited` is the muted marker after an edited message body.
+    edit: "Edit",
+    editing: "Editing",
+    edited: "edited",
+    cancelEdit: "Cancel edit",
+    saveEdit: "Save",
+    // Shown as the quoted sender's name when the replied-to message is your own.
+    you: "You",
+    // In-chat image lightbox.
+    openImage: "Open image",
+    imagePreview: "Image preview",
+    closePreview: "Close",
+    previousImage: "Previous image",
+    nextImage: "Next image",
+    // Attachment previews in reply quotes + the composer chip (a lone file shows
+    // its real name instead of a count).
+    photo: "Photo",
+    photoCount: {
+      one: "{{count}} photo",
+      other: "{{count}} photos",
+    },
+    fileCount: {
+      one: "{{count}} file",
+      other: "{{count}} files",
+    },
+    attachmentCount: {
+      one: "{{count}} attachment",
+      other: "{{count}} attachments",
+    },
+    scrollToBottom: "Scroll to bottom",
+    newMessages: "New messages",
+    unreadCount: {
+      one: "{{count}} unread",
+      other: "{{count}} unread",
+    },
+    emptyConversation: "No messages yet",
+    emptyConversationDescription: "Send a message to start the conversation.",
+    error: "Couldn't load this conversation",
+    loadingOlder: "Loading earlier messages…",
+  },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
     barChartVertical: "Bar (vertical)",
@@ -549,6 +665,11 @@ export const defaultTranslations = {
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
+      locked: "Locked",
+      lockedSectionNotice:
+        "These questions are predefined and can't be edited, moved, or removed.",
+      lockedQuestionNotice:
+        "This question is predefined and can't be edited or removed.",
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription:
@@ -609,7 +730,7 @@ export const defaultTranslations = {
       blocks: "Blocks",
     },
     ai: {
-      enhanceButtonLabel: "Enhance",
+      enhanceButtonLabel: "Generate",
       loadingEnhanceLabel: "Loading...",
       defaultError: "An error occurred while loading",
       closeErrorButtonLabel: "Continue editing",
@@ -683,33 +804,6 @@ export const defaultTranslations = {
       zoomIn: "Zoom in",
       zoomOut: "Zoom out",
       navigation: "Graph navigation",
-      metadataSettings: "Metadata visibility",
-      tagTypeLabels: {
-        person: "People",
-        team: "Teams",
-        company: "Companies",
-        status: "Statuses",
-        alert: "Alerts",
-        balance: "Balances",
-        dot: "Tags",
-        raw: "Tags",
-      },
-    },
-    search: {
-      noResults: "No results",
-    },
-    detailPanel: {
-      details: "Details",
-      moreActions: "More actions",
-      resize: "Resize detail panel",
-    },
-    expander: {
-      collapse: "Collapse {{count}} items",
-      expand: "Expand {{count}} items",
-      expandWithParentSingular: "Expand {{parent}}, {{count}} child",
-      expandWithParentPlural: "Expand {{parent}}, {{count}} children",
-      collapseWithParent: "Collapse {{parent}}",
-      collapseDefault: "Collapse children",
     },
   },
   wizard: {
@@ -717,6 +811,20 @@ export const defaultTranslations = {
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  pdfViewer: {
+    toolbar: "Document toolbar",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    scaleSelector: "Zoom level",
+    pageWidth: "Page width",
+    pageFit: "Page fit",
+    rotate: "Rotate",
+    print: "Print",
+    download: "Download",
+    loading: "Loading document",
   },
 } as const
 

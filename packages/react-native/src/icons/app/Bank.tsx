@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Rect, Path } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgBank = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,10 +9,9 @@ const SvgBank = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Rect width={16} height={4} x={4} y={16} stroke="currentColor" rx={1} />
     <Path
-      stroke="currentColor"
-      d="M4 5.78a1 1 0 0 1 .757-.97l7-1.75a1 1 0 0 1 .486 0l7 1.75a1 1 0 0 1 .757.97V8a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM6 9v7M18 9v7M14 9v7M10 9v7"
+      fill="currentColor"
+      d="M11.538 2.188c.303-.076.62-.076.922 0l7 1.75A1.9 1.9 0 0 1 20.9 5.78v2.22A1.9 1.9 0 0 1 19 9.9h-.1V15.1h.1c1.049 0 1.899.85 1.9 1.9v2a1.9 1.9 0 0 1-1.9 1.9H5A1.9 1.9 0 0 1 3.1 19v-2A1.9 1.9 0 0 1 5 15.1h.1V9.9H5A1.9 1.9 0 0 1 3.1 8V5.782a1.9 1.9 0 0 1 1.439-1.843zM5 16.9a.1.1 0 0 0-.1.1v2a.1.1 0 0 0 .1.1h14a.1.1 0 0 0 .1-.1v-2a.1.1 0 0 0-.1-.1zm5.9-1.8h2.2V9.9h-2.2zm4 0H17.1V9.9h-2.2zm-7.999 0h2.2V9.9H6.9zM4.976 5.684a.1.1 0 0 0-.076.097v2.22a.1.1 0 0 0 .1.1h14a.1.1 0 0 0 .1-.1V5.78a.1.1 0 0 0-.076-.097l-7-1.75a.1.1 0 0 0-.049 0z"
     />
   </Svg>
 )

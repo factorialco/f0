@@ -45,7 +45,7 @@ export const QuestionItem = ({
     setDraggedItemId(null)
   }
 
-  const questionLocked = item.question.locked || containingSection?.locked
+  const questionLocked = containingSection?.locked
   const dragEnabled = !disabled && !answering && !questionLocked
 
   return (
@@ -66,25 +66,34 @@ export const QuestionItem = ({
         <div
           className={cn(
             "group/element flex flex-row items-start gap-1",
+            // Mirror the drag-and-drop gutter (handle w-6 + gap-1 ≈ 28px) on
+            // the right so every card keeps the same width.
+            !disabled && !answering && "pr-7",
             isDragging && "cursor-grabbing"
           )}
         >
-          {!disabled && !answering && (
-            <div
-              className={cn(
-                "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/element:opacity-40",
-                !isDragging && "cursor-grab",
-                !dragEnabled && "cursor-not-allowed"
-              )}
-              onPointerDown={(e) => {
-                if (dragEnabled) {
-                  dragControls.start(e)
-                }
-              }}
-            >
-              <F0Icon icon={Handle} size="sm" />
-            </div>
-          )}
+          {!disabled &&
+            !answering &&
+            (questionLocked ? (
+              // Blocked question: drop the drag affordance but keep the handle's
+              // gutter so the card stays the same width and alignment as the
+              // editable questions around it.
+              <div className="mt-2 aspect-square w-6 scale-75" aria-hidden />
+            ) : (
+              <div
+                className={cn(
+                  "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/element:opacity-40",
+                  !isDragging && "cursor-grab"
+                )}
+                onPointerDown={(e) => {
+                  if (dragEnabled) {
+                    dragControls.start(e)
+                  }
+                }}
+              >
+                <F0Icon icon={Handle} size="sm" />
+              </div>
+            ))}
           <QuestionComponent
             {...({
               ...item.question,

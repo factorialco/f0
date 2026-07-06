@@ -67,6 +67,10 @@ export type F0AiMessagesContainerProps = {
   /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
   autoScrollUserIntoView?: boolean
 
+  /** Fullscreen welcome layout: pushes the welcome phrase to the bottom of the
+   *  top half so it meets the composer near the vertical center. */
+  fullscreen?: boolean
+
   /**
    * Renders the markdown content of user/assistant messages. The connected
    * wrapper provides a CopilotKit + f0-markdown-renderers implementation;
@@ -112,6 +116,7 @@ const Messages = ({
   feedback,
   freezeLayout = false,
   noShadows = false,
+  fullscreen = false,
   children,
   AssistantMessage: AssistantMessageProp,
   UserMessage: UserMessageProp,
@@ -287,6 +292,7 @@ const Messages = ({
                 <WelcomeScreen
                   messages={welcomeMessages}
                   onClick={onWelcomeClick}
+                  fullscreen={fullscreen}
                 />
               )}
               {!isLoadingThread &&

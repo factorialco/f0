@@ -10,17 +10,9 @@ const SvgClockPlus = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M13 19.938Q12.508 20 12 20a8 8 0 1 1 7.91-6.793"
+      fill="currentColor"
+      d="M12 3.1a8.9 8.9 0 0 1 8.798 10.242.9.9 0 1 1-1.778-.27q.079-.523.08-1.072a7.1 7.1 0 1 0-6.212 7.044.9.9 0 0 1 .223 1.788A8.9 8.9 0 1 1 12 3.1m6 12a.9.9 0 0 1 .9.9v1.1H20a.9.9 0 1 1 0 1.8h-1.1V20a.9.9 0 0 1-1.8 0v-1.1H16a.9.9 0 0 1 0-1.8h1.1V16a.9.9 0 0 1 .9-.9m-6-7a.9.9 0 0 1 .9.9v2.478l3.047 1.741a.9.9 0 0 1-.893 1.562l-3.5-1.999A.9.9 0 0 1 11.1 12V9a.9.9 0 0 1 .9-.9"
     />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v3l3.5 2"
-    />
-    <Path stroke="currentColor" strokeLinecap="round" d="M16 18h4M18 16v4" />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgClockPlus)

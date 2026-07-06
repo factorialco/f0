@@ -9,6 +9,7 @@ import React, {
 
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
+import { stripNativeTitle } from "@/lib/strip-native-title"
 import {
   TooltipContent,
   Tooltip as TooltipPrimitive,
@@ -108,7 +109,7 @@ export function TooltipInternal({
             }}
             onBlur={() => close()}
           >
-            {children}
+            {stripNativeTitle(children)}
           </TooltipTrigger>
           <TooltipContent
             className={cn(

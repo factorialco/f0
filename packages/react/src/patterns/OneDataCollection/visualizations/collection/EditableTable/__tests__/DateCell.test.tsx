@@ -39,6 +39,11 @@ describe("DateCell", () => {
     item: { id: "1", startDate: "" },
   }
 
+  it("applies pointer cursor", () => {
+    const { container } = render(<DateCell {...defaultProps} />)
+    expect(container.firstChild).toHaveClass("cursor-pointer")
+  })
+
   it("forwards minDate and maxDate from dateConfig to F0DatePicker", () => {
     const minDate = new Date(2026, 0, 1)
     const maxDate = new Date(2026, 0, 31)

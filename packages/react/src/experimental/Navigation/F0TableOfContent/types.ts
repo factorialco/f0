@@ -52,6 +52,14 @@ export type TOCItemAction =
       children: TOCItemAction[]
     }
 
+/** A button rendered in the footer at the bottom of the table of contents */
+export type TOCAction = {
+  label: string
+  onClick: () => void
+  icon?: IconType
+  disabled?: boolean
+}
+
 export type IdStructure = {
   id: string
   children?: IdStructure[]
@@ -71,4 +79,6 @@ export interface TOCProps {
   hideChildrenCounter?: boolean
   /** Enable vertical scrolling when content overflows (default: true) */
   scrollable?: boolean
+  /** Action buttons pinned in a footer at the bottom of the panel */
+  actions?: TOCAction[]
 }

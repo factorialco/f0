@@ -54,6 +54,14 @@ export interface UseDataOptions<
 > {
   filters?: Partial<FiltersState<Filters>>
   /**
+   * When false, suspends all data fetching: the initial fetch effect does not
+   * run until `enabled` becomes true. Useful to delay the first fetch until
+   * async state (e.g. persisted filters) has been applied to the source.
+   * `isInitialLoading` stays true while disabled.
+   * @default true
+   */
+  enabled?: boolean
+  /**
    * A function that is called when an error occurs during data fetching.
    * It is called with the error object.
    * @param error - The error object.
@@ -234,6 +242,7 @@ export function useData<
   source: DataSource<R, Filters, Sortings, Grouping>,
   {
     filters,
+    enabled = true,
     onError,
     fetchParamsProvider = defaultFetchDataAndUpdateOptions,
     onResponse,
@@ -747,6 +756,7 @@ export function useData<
 
   useEffect(
     () => {
+      if (!enabled) return
       if (!isLoadingMoreRef.current) {
         setIsLoading(true)
         // Seed the first page-based fetch from `currentPage` (if provided), then
@@ -771,6 +781,7 @@ export function useData<
       fetchDataAndUpdate,
       mergedFilters,
       setIsLoading,
+      enabled,
       dataAdapter.paginationType,
       searchValue.current,
       // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller

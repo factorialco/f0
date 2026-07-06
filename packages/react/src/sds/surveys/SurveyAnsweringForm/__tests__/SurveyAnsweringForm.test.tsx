@@ -205,6 +205,31 @@ describe("SurveyAnsweringForm", () => {
     })
   })
 
+  describe("question notice", () => {
+    it("does not render an authoring notice in the answering form", () => {
+      render(
+        <SurveyAnsweringForm
+          {...defaultProps}
+          elements={[
+            {
+              type: "question",
+              question: {
+                id: "q1",
+                title: "Name",
+                type: "text" as const,
+                lockedNote: { description: "Author-only notice" },
+              },
+            },
+          ]}
+          onSubmit={vi.fn()}
+        />
+      )
+
+      expect(screen.getByText("Name")).toBeInTheDocument()
+      expect(screen.queryByText("Author-only notice")).not.toBeInTheDocument()
+    })
+  })
+
   describe("validation on submit", () => {
     it("does not call onSubmit when required fields are empty", async () => {
       const onSubmit = vi.fn()

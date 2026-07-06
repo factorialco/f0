@@ -1,5 +1,6 @@
 import { breakpoints } from "@factorialco/f0-core"
 import { motion } from "motion/react"
+import { type ReactNode } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -14,9 +15,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Action } from "@/ui/Action"
 
+import type { F0AiChatHeaderProps } from "./types"
+
 import { CreditsPopover } from "./components/CreditsPopover"
 import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
-import type { F0AiChatHeaderProps } from "./types"
 
 /**
  * Picks the right credits popover to render based on which prop the host
@@ -27,12 +29,28 @@ import type { F0AiChatHeaderProps } from "./types"
 const CreditsPopoverPicker = ({
   credits,
   employeeCredits,
-}: Pick<F0AiChatHeaderProps, "credits" | "employeeCredits">) => {
+  trigger,
+}: Pick<F0AiChatHeaderProps, "credits" | "employeeCredits"> & {
+  /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
+  trigger?: ReactNode
+}) => {
   if (employeeCredits)
-    return <EmployeeCreditsPopover employeeCredits={employeeCredits} />
-  if (credits) return <CreditsPopover credits={credits} />
+    return (
+      <EmployeeCreditsPopover
+        employeeCredits={employeeCredits}
+        trigger={trigger}
+      />
+    )
+  if (credits) return <CreditsPopover credits={credits} trigger={trigger} />
   return null
 }
+
+/**
+ * The AI chat credits / settings popover button, on its own. Use it to surface
+ * the popover outside the chat header — e.g. from a sidebar that already owns
+ * the chat navigation (history, new chat), leaving the header minimal.
+ */
+export const F0AiChatCreditsButton = CreditsPopoverPicker
 
 /**
  * Headless chat header. Renders a top bar with title (or thread selector),
@@ -57,6 +75,7 @@ export const F0AiChatHeader = ({
   hasMessages = false,
   credits,
   employeeCredits,
+  compact = false,
 }: F0AiChatHeaderProps) => {
   const translations = useI18n()
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
@@ -84,6 +103,34 @@ export const F0AiChatHeader = ({
       onClick={onClose}
     />
   )
+
+  // Compact: the chat is hosted next to a sidebar that owns navigation (history,
+  // new chat) and the credits/settings popover, so the header keeps only the
+  // conversation title (plain text — the thread title, or "New chat") plus the
+  // expand + close controls.
+  if (compact) {
+    return (
+      <header
+        className={cn("flex items-center justify-between gap-3 pr-4 pl-5 py-3")}
+      >
+        <OneEllipsis
+          lines={1}
+          className="min-w-0 flex-1 text-left font-semibold text-f1-foreground"
+        >
+          {currentThreadTitle ?? translations.ai.newConversation}
+        </OneEllipsis>
+        <motion.div
+          className="flex shrink-0 items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          {expandButton}
+          {closeButton}
+        </motion.div>
+      </header>
+    )
+  }
 
   if (historyEnabled) {
     return (

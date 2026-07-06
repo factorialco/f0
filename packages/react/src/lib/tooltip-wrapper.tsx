@@ -7,6 +7,8 @@ import {
   TooltipTrigger,
 } from "@/ui/tooltip"
 
+import { stripNativeTitle } from "./strip-native-title"
+
 interface TooltipWrapperProps {
   tooltip?: string
   children: ReactNode
@@ -21,7 +23,7 @@ export const TooltipWrapper: React.FC<TooltipWrapperProps> = ({
       <TooltipProvider delayDuration={100} disableHoverableContent>
         <TooltipPrimitive>
           <TooltipTrigger asChild className="pointer-events-auto">
-            {children}
+            {stripNativeTitle(children)}
           </TooltipTrigger>
           <TooltipContent className="pointer-events-none max-w-xs">
             <p className="font-semibold">{tooltip}</p>

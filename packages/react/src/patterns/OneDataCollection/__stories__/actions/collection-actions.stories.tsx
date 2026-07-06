@@ -199,6 +199,82 @@ export const BasicActionsExample: Story = {
   },
 }
 
+// Upsell button next to the full toolbar: search, settings, and a primary action.
+export const UpsellActionExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      search: { enabled: true },
+      sortings: {
+        name: { label: "Name" },
+        email: { label: "Email" },
+      },
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      primaryActions: () => ({
+        label: "Create user",
+        icon: Ai,
+        onClick: () => console.log(`Creating a user`),
+      }),
+      upsellAction: () => ({
+        label: "Upgrade to unlock",
+        onClick: () => console.log("Open upsell modal"),
+      }),
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
+// Upsell button alongside secondary actions.
+export const UpsellActionWithSecondaryExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      upsellAction: () => ({
+        label: "Upgrade to unlock",
+        onClick: () => console.log("Open upsell modal"),
+      }),
+      secondaryActions: {
+        expanded: 2,
+        actions: () => [
+          {
+            label: "Export",
+            icon: Upload,
+            onClick: () => console.log("Export"),
+          },
+          {
+            label: "Import",
+            icon: Download,
+            onClick: () => console.log("Import"),
+          },
+        ],
+      },
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
+// Upsell button as the only toolbar action.
+export const UpsellActionOnlyExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      upsellAction: () => ({
+        label: "Upgrade to unlock",
+        onClick: () => console.log("Open upsell modal"),
+      }),
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
 // Basic story showing all action types
 export const MultiplePrimaryActionsExample: Story = {
   render: () => {

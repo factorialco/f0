@@ -21,6 +21,8 @@ export interface HourDistributionDataPoint {
   justifiedAbsenceValue?: number
   /** Renders a full-height neutral bar for justified non-working days without a minute baseline. */
   justifiedAbsenceFullDay?: boolean
+  /** Per-point label for the neutral segment tooltip. Overrides the chart-level justifiedAbsenceLabel when set. */
+  neutralLabel?: string
 }
 
 export interface HourDistributionCellValue {
@@ -68,6 +70,7 @@ function toBarSeriesDataPoint(
     ...(point.justifiedAbsenceFullDay
       ? { neutralFullHeight: point.justifiedAbsenceFullDay }
       : {}),
+    ...(point.neutralLabel != null ? { neutralLabel: point.neutralLabel } : {}),
   }
 }
 
@@ -91,11 +94,12 @@ function toBarSeriesValue(args: HourDistributionCellValue): BarSeriesCellValue {
     formatValue: formatHours,
     formatTooltip: ({ point, formattedLabel, formattedValue }) => {
       const parts = [`${workedLabel} ${formattedValue}`]
+      const label = point.neutralLabel ?? absenceLabel
 
       if (point.neutralFullHeight) {
-        parts.push(absenceLabel)
+        parts.push(label)
       } else if (point.neutralValue != null && point.neutralValue > 0) {
-        parts.push(`${absenceLabel} ${formatHours(point.neutralValue)}`)
+        parts.push(`${label} ${formatHours(point.neutralValue)}`)
       }
 
       return `${formattedLabel} - ${parts.join(", ")}`

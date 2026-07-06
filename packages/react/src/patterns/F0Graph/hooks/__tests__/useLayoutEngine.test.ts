@@ -133,4 +133,58 @@ describe("useLayoutEngine", () => {
     expect(typeof layout.nodes[0].x).toBe("number")
     expect(typeof layout.nodes[0].y).toBe("number")
   })
+
+  it("snaps the cross axis to the grid (TB: x) and keeps positions integral", () => {
+    const grid = 32
+    const { result } = renderLayoutEngine({ snapGrid: grid })
+
+    const child1 = makeTree("2", [], 1)
+    const child2 = makeTree("3", [], 1)
+    const root = makeTree("1", [child1, child2])
+
+    const edges: GraphEdge[] = [
+      { id: "e1-2", source: "1", target: "2" },
+      { id: "e1-3", source: "1", target: "3" },
+    ]
+
+    const layout = result.current.computeLayout(
+      [root, child1, child2],
+      edges,
+      "TB"
+    )
+
+    // In TB the cross axis is X (default node width 256, so center = x + 128).
+    for (const node of layout.nodes) {
+      expect(Number.isInteger(node.x)).toBe(true)
+      expect(Number.isInteger(node.y)).toBe(true)
+      const centerX = node.x + node.width / 2
+      expect(centerX % grid).toBe(0)
+    }
+  })
+
+  it("rounds to whole pixels when no grid is given", () => {
+    const { result } = renderLayoutEngine({ snapGrid: 0 })
+
+    const child1 = makeTree("2", [], 1)
+    const child2 = makeTree("3", [], 1)
+    const child3 = makeTree("4", [], 1)
+    const root = makeTree("1", [child1, child2, child3])
+
+    const edges: GraphEdge[] = [
+      { id: "e1-2", source: "1", target: "2" },
+      { id: "e1-3", source: "1", target: "3" },
+      { id: "e1-4", source: "1", target: "4" },
+    ]
+
+    const layout = result.current.computeLayout(
+      [root, child1, child2, child3],
+      edges,
+      "TB"
+    )
+
+    for (const node of layout.nodes) {
+      expect(Number.isInteger(node.x)).toBe(true)
+      expect(Number.isInteger(node.y)).toBe(true)
+    }
+  })
 })

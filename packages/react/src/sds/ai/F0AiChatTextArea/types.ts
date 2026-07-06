@@ -9,6 +9,7 @@ import type {
   PersonProfile,
   TranscribeFn,
   UploadedFile,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../F0AiChat/types"
@@ -126,6 +127,9 @@ export type F0AiChatTextAreaProps = {
    * the welcome screen. Clicking a group opens a single popover (above the
    * row, left-aligned, spanning the composer width) with that group's items.
    * Hovering an item previews its prompt in the textarea placeholder.
+   *
+   * Optional and independent of `welcomeScreenCards` — the two can have
+   * different counts. No hard limit on the number of groups yet.
    */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
   /** Called when the user clicks a sub-suggestion. Receives the picked
@@ -136,9 +140,20 @@ export type F0AiChatTextAreaProps = {
   ) => void
 
   /**
-   * When true, the composer adopts the fullscreen layout: the welcome
-   * footer is pushed to the bottom and the disclaimer is hidden so the
-   * footer is the only thing under the textarea.
+   * Cards rendered as a grid below the composer on the fullscreen welcome
+   * screen. Each card carries its own `onClick`; the host decides the behavior.
+   *
+   * Optional and independent of `welcomeScreenSuggestions` — the two can have
+   * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
+   * dropped.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
+
+  /**
+   * When true on the welcome screen, the composer adopts the fullscreen
+   * layout: the input slot grows to claim the bottom half (so the textarea
+   * rises toward the vertical center) and the welcome cards render below it.
+   * The welcome suggestions row sits above the composer in both layouts.
    */
   fullscreen?: boolean
 }

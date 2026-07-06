@@ -237,7 +237,6 @@ function buildFieldForQuestion(
     description: q.description,
     type: q.type,
     required: q.required,
-    locked: q.locked,
   }
 
   switch (q.type) {
@@ -679,7 +678,7 @@ export function useSurveyFormSchema(
 
         if (mode === "all-questions") {
           sections[sectionId] = {
-            title: section.title,
+            title: section.title ?? "",
             description: section.description,
             withInset: true,
           }

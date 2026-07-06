@@ -213,9 +213,10 @@ export const KanbanCollection = <
           title: l.title,
           items: l.items,
           variant: l.variant,
+          color: l.color,
           total: totalItems,
           hasMore,
-          loading: laneData?.isLoading ?? true,
+          loading: laneData ? laneData.isInitialLoading : true,
           loadingMore: laneData?.isLoadingMore || false,
           fetchMore: hasMore ? () => laneData.loadMore() : undefined,
         }

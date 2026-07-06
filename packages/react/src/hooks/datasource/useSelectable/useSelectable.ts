@@ -41,6 +41,7 @@ export function useSelectable<
   allPagesSelection,
   resetOnPageChange = true,
   preserveSelectionOnDatasetChange = false,
+  getRenderedSelectableEntries,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -558,6 +559,20 @@ export function useSelectable<
     [isGrouped, data, getSelectable, handleSelectItemChangeInternal]
   )
 
+  // Selectable rows a "select all" can act on: rendered-row registry when
+  // present (covers nested children), else `data.records`.
+  const collectSelectableEntries = useCallback((): Array<[SelectionId, R]> => {
+    const rendered = getRenderedSelectableEntries?.() ?? []
+    if (rendered.length > 0) return rendered
+
+    return data.records
+      .map((record): [SelectionId, R] | undefined => {
+        const id = getSelectable?.(record)
+        return id === undefined ? undefined : [id, record]
+      })
+      .filter((entry): entry is [SelectionId, R] => entry !== undefined)
+  }, [getRenderedSelectableEntries, data.records, getSelectable])
+
   // Public Selection Handlers
 
   /**
@@ -601,7 +616,10 @@ export function useSelectable<
         return
       }
 
-      const currentPageCount = data.records?.length || 0
+      const selectableEntries =
+        isGrouped && data.type === "grouped" ? [] : collectSelectableEntries()
+      const currentPageCount =
+        selectableEntries.length || data.records?.length || 0
 
       if (checked) {
         setSelectAllTotal((prev) => (prev !== null ? prev : currentPageCount))
@@ -613,12 +631,16 @@ export function useSelectable<
           handleSelectGroupChange(allGroupIds, checked)
         }
       } else {
-        const allItemIds = data.records
-          .map((record) => getSelectable?.(record))
-          .filter((id): id is SelectionId => id !== undefined)
+        const allItemIds = selectableEntries.map(([id]) => id)
+        const fallbackItems = selectableEntries.map(([, item]) => item)
 
         if (allItemIds.length > 0) {
-          handleSelectItemChangeInternal(allItemIds, checked)
+          handleSelectItemChangeInternal(
+            allItemIds,
+            checked,
+            false,
+            fallbackItems
+          )
         }
       }
 
@@ -633,7 +655,7 @@ export function useSelectable<
       allSelectedCheck,
       isGrouped,
       data,
-      getSelectable,
+      collectSelectableEntries,
       handleSelectGroupChange,
       handleSelectItemChangeInternal,
     ]
@@ -661,13 +683,34 @@ export function useSelectable<
         if (allGroupIds.length > 0) {
           handleSelectGroupChange(allGroupIds, checked)
         }
+      } else if (checked) {
+        // Behave as preserve=false at the moment select-all is clicked: select
+        // ONLY the current query's items, discarding any selections preserved
+        // from earlier filters/searches. Keeping them would inflate the count
+        // (e.g. "All selected (25)" when far fewer match the active filter).
+        // Subsequent pages load via the data-sync effect while select-all stays
+        // active, so all-pages selection still works.
+        const selectableEntries = collectSelectableEntries()
+        setLocalSelectedState((current) => {
+          const newItems = new Map<SelectionId, SelectedItemState<R>>()
+          for (const [id, item] of selectableEntries) {
+            newItems.set(id, {
+              id,
+              checked: true,
+              item: item as WithGroupId<R>,
+            })
+          }
+          return {
+            ...current,
+            allSelected: true,
+            items: newItems,
+          }
+        })
       } else {
-        const allItemIds = data.records
-          .map((record) => getSelectable?.(record))
-          .filter((id): id is SelectionId => id !== undefined)
+        const allItemIds = collectSelectableEntries().map(([id]) => id)
 
         if (allItemIds.length > 0) {
-          handleSelectItemChangeInternal(allItemIds, checked)
+          handleSelectItemChangeInternal(allItemIds, false)
         }
 
         setLocalSelectedState((current) => {
@@ -675,8 +718,8 @@ export function useSelectable<
           let hasChanges = false
 
           for (const [id, itemState] of newItems.entries()) {
-            if (itemState.checked !== checked) {
-              newItems.set(id, { ...itemState, checked })
+            if (itemState.checked !== false) {
+              newItems.set(id, { ...itemState, checked: false })
               hasChanges = true
             }
           }
@@ -685,7 +728,7 @@ export function useSelectable<
 
           return {
             ...current,
-            allSelected: checked ? true : false,
+            allSelected: false,
             items: newItems,
           }
         })
@@ -696,7 +739,7 @@ export function useSelectable<
       totalKnownItemsCount,
       isGrouped,
       data,
-      getSelectable,
+      collectSelectableEntries,
       handleSelectGroupChange,
       handleSelectItemChangeInternal,
     ]
@@ -770,7 +813,14 @@ export function useSelectable<
       // When preserveSelectionOnDatasetChange is true, never clear on dataset
       // changes — used by selectors where search/filter is for finding items
       // to add to an existing selection.
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+      // `preserveSelectionOnDatasetChange` only governs MANUAL selection. A
+      // "select all" is scoped to the query it was made under, so it always
+      // clears on a dataset change (i.e. behaves as if the prop were false),
+      // regardless of the prop value.
+      if (
+        !disableSelectAll &&
+        (!preserveSelectionOnDatasetChange || allSelectedCheck)
+      ) {
         // Mark that we're clearing due to a dataset-identity change to prevent
         // the data-sync effect from restoring selections.
         justClearedByDatasetChange.current = true
@@ -787,6 +837,7 @@ export function useSelectable<
     clearSelectedItems,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
+    allSelectedCheck,
   ])
 
   // Clear selections when page changes, unless the user has triggered

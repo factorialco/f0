@@ -9,7 +9,9 @@
     "packages/examples/*"
   ],
   "scripts": {
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "postinstall": "tsx scripts/install-skills.ts",
+    "skills:sync": "tsx scripts/install-skills.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",

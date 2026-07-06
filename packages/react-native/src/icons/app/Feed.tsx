@@ -10,10 +10,8 @@ const SvgFeed = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 12h3l2.5-5.5 5 11L17 12h3"
+      fill="currentColor"
+      d="M9.5 5.6a.9.9 0 0 1 .82.528l4.18 9.198 1.68-3.697.064-.117A.9.9 0 0 1 17 11.1h3a.9.9 0 0 1 0 1.8H17.58l-2.26 4.972a.9.9 0 0 1-.819.529.9.9 0 0 1-.819-.529l-4.18-9.198-1.681 3.699A.9.9 0 0 1 7 12.9H4a.9.9 0 0 1 0-1.8h2.422L8.68 6.128l.063-.115A.9.9 0 0 1 9.5 5.6"
     />
   </Svg>
 )

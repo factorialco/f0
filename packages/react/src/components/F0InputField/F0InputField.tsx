@@ -141,6 +141,20 @@ const inputFieldStatusVariants = cva({
   ],
 })
 
+/**
+ * Design system primitive. Do NOT use in product code.
+ *
+ * `F0InputField` is the shared chrome (label, status, icon, append, clear,
+ * loading, focus/hover/disabled styles, a11y wiring) used by every writable
+ * F0 input. It is intentionally not exported from `@factorialco/f0-react`.
+ *
+ * Product code must use the dedicated `F0*Input` components instead:
+ *   - F0TextInput, F0NumberInput, F0SearchInput, F0TextAreaInput,
+ *     F0DurationInput, F0DatePicker, F0Select, ...
+ *
+ * Use `F0InputField` only when you are adding a new input type to the design
+ * system itself (e.g. F0CurrencyInput, F0PhoneInput, F0PercentageInput).
+ */
 export type InputFieldProps<T> = {
   id?: string
   autoFocus?: boolean
@@ -499,7 +513,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-disabled": noEdit,
                 name,
                 className: cn(
-                  "h-full w-full min-w-0 px-3",
+                  "h-full w-full min-w-0 px-3 text-f1-foreground",
                   "[&::-webkit-search-cancel-button]:hidden",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",

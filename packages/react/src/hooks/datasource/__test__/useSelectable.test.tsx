@@ -1073,4 +1073,292 @@ describe("useSelectable", () => {
       })
     })
   })
+
+  // `preserveSelectionOnDatasetChange` governs MANUAL selection only. A
+  // "select all" is scoped to the query it was made under, so it always clears
+  // on a filter/search/sort change — i.e. it behaves as if the prop were false,
+  // regardless of the prop value. This prevents a filter-scoped select-all from
+  // ballooning or reporting a stale count when the dataset later changes.
+  describe("select-all is not preserved across dataset changes", () => {
+    const makeData = (ids: number[]): Data<TestRecord> => {
+      const records = ids.map((id) => ({
+        id,
+        name: `Item ${id}`,
+        group: "all",
+        [GROUP_ID_SYMBOL]: undefined,
+      }))
+      return {
+        type: "flat",
+        records,
+        groups: [
+          { key: "all", label: "All", records, itemCount: records.length },
+        ],
+      }
+    }
+
+    for (const preserve of [true, false]) {
+      it(`clears a "select all" when the filter changes (preserve=${preserve})`, async () => {
+        const sourceA = {
+          ...mockSource,
+          currentFilters: { department: ["A"] },
+        } as unknown as DataSource<TestRecord, never, never, never>
+
+        const { result, rerender } = renderHook(
+          ({ source }) =>
+            useSelectable({
+              data: makeData([1, 2]),
+              paginationInfo: null,
+              source,
+              onSelectItems: vi.fn(),
+              selectionMode: "multi",
+              allPagesSelection: true,
+              preserveSelectionOnDatasetChange: preserve,
+            }),
+          { initialProps: { source: sourceA } }
+        )
+
+        act(() => {
+          result.current.handleSelectAllItems(true)
+        })
+        await waitFor(() =>
+          expect(result.current.selectionStatus.allChecked).toBe(true)
+        )
+
+        // Change the filter — the select-all is scoped to filter A and must clear.
+        rerender({
+          source: {
+            ...sourceA,
+            currentFilters: { department: ["B"] },
+          } as unknown as DataSource<TestRecord, never, never, never>,
+        })
+
+        await waitFor(() => {
+          expect(result.current.selectedItems.size).toBe(0)
+          expect(result.current.selectionStatus.selectedCount).toBe(0)
+          expect(result.current.selectionStatus.allChecked).toBe(false)
+        })
+      })
+    }
+
+    it("still preserves MANUAL selections across a filter change when preserve=true", async () => {
+      const sourceA = {
+        ...mockSource,
+        currentFilters: { department: ["A"] },
+      } as unknown as DataSource<TestRecord, never, never, never>
+
+      const { result, rerender } = renderHook(
+        ({ source }) =>
+          useSelectable({
+            data: makeData([1, 2, 3]),
+            paginationInfo: null,
+            source,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+            allPagesSelection: true,
+            preserveSelectionOnDatasetChange: true,
+          }),
+        { initialProps: { source: sourceA } }
+      )
+
+      // Manual selection (not select-all): allSelectedCheck stays false.
+      act(() => {
+        result.current.handleSelectItemChange(1, true)
+        result.current.handleSelectItemChange(2, true)
+      })
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(2))
+
+      rerender({
+        source: {
+          ...sourceA,
+          currentFilters: { department: ["B"] },
+        } as unknown as DataSource<TestRecord, never, never, never>,
+      })
+
+      // Manual selections survive (the prop governs manual selection).
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(2))
+    })
+
+    // Regression: with preserve=true, prior selections are kept across a filter
+    // change, then clicking "Select all" marked the WHOLE accumulated map as
+    // checked — so onSelectItems reported e.g. selectedIds of 25 while
+    // selectedCount (the filtered total) was 3. Select-all must select ONLY the
+    // current query's items (behaving as preserve=false at the click).
+    it("select-all selects only the current query, not the preserved accumulation", async () => {
+      const sourceA = {
+        ...mockSource,
+        currentFilters: { team: ["1"] },
+      } as unknown as DataSource<TestRecord, never, never, never>
+
+      const { result, rerender } = renderHook(
+        ({ source, data }) =>
+          useSelectable({
+            data,
+            paginationInfo: null,
+            source,
+            onSelectItems: vi.fn(),
+            selectionMode: "multi",
+            allPagesSelection: true,
+            preserveSelectionOnDatasetChange: true,
+          }),
+        { initialProps: { source: sourceA, data: makeData([1, 2, 3]) } }
+      )
+
+      // Accumulate manual selections under team 1.
+      act(() => {
+        result.current.handleSelectItemChange(1, true)
+        result.current.handleSelectItemChange(2, true)
+        result.current.handleSelectItemChange(3, true)
+      })
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(3))
+
+      // Switch to team 3 (2 matching rows); the 3 are preserved in the map.
+      rerender({
+        source: {
+          ...sourceA,
+          currentFilters: { team: ["3"] },
+        } as unknown as DataSource<TestRecord, never, never, never>,
+        data: makeData([4, 5]),
+      })
+      await waitFor(() => expect(result.current.selectedItems.size).toBe(3))
+
+      // Select all under team 3: only the 2 current rows are selected — the
+      // preserved 1/2/3 are discarded. selectedIds and selectedCount agree.
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(2)
+        expect(result.current.selectionStatus.selectedCount).toBe(2)
+        expect(result.current.selectionStatus.selectedIds.sort()).toEqual([
+          4, 5,
+        ])
+      })
+    })
+  })
+
+  describe("Nested/tree data (registry-backed select all)", () => {
+    // Top-level rows are non-selectable parents; selectable rows are nested
+    // children absent from data.records, reported via getRenderedSelectableEntries.
+    const PARENT_IDS = new Set([1000, 2000])
+    const parentRecords = [
+      { id: 1000, name: "New headcount", group: "g" },
+      { id: 2000, name: "Actual headcount", group: "g" },
+    ].map((item) => ({ ...item, [GROUP_ID_SYMBOL]: undefined }))
+
+    const childRecords = [1, 2, 3, 4, 5, 6].map((id) => ({
+      id,
+      name: `Child ${id}`,
+      group: "g",
+      [GROUP_ID_SYMBOL]: undefined,
+    }))
+
+    const nestedData: Data<TestRecord> = {
+      type: "flat",
+      records: parentRecords,
+      groups: [
+        {
+          key: "all",
+          label: "All",
+          records: parentRecords,
+          itemCount: parentRecords.length,
+        },
+      ],
+    }
+
+    const nestedSource = {
+      ...mockSource,
+      selectable: (item: TestRecord) =>
+        PARENT_IDS.has(item.id) ? undefined : item.id,
+    } as typeof mockSource
+
+    const paginationInfo: PaginationInfo = {
+      type: "pages",
+      total: childRecords.length,
+      currentPage: 1,
+      perPage: childRecords.length,
+      pagesCount: 1,
+    }
+
+    const renderedEntries = () =>
+      childRecords.map((item) => [item.id, item] as [number, TestRecord])
+
+    it("handleSelectAll selects every rendered child row (not just data.records)", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectAll(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(6)
+        expect(
+          result.current.selectionStatus.selectedIds
+            .slice()
+            .sort((a, b) => Number(a) - Number(b))
+        ).toEqual([1, 2, 3, 4, 5, 6])
+      })
+    })
+
+    it("regression: without the registry, select-all is a no-op (data.records holds only non-selectable parents)", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          // getRenderedSelectableEntries intentionally omitted
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectAll(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(0)
+      })
+    })
+
+    it("handleSelectAllItems selects all rendered children and preserves the pre-existing selection (no wipe)", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectItemChange(childRecords[0], true)
+      })
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(1)
+      })
+
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+
+      await waitFor(() => {
+        expect(result.current.selectedItems.size).toBe(6)
+        expect(result.current.selectedItems.has(1)).toBe(true)
+      })
+    })
+  })
 })

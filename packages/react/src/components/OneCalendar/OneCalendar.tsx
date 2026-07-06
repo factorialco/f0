@@ -39,6 +39,8 @@ interface OneCalendarInternalProps {
   maxDate?: Date
   compact?: boolean
   weekStartsOn?: WeekStartsOn
+  /** When true, a granularity change updates the view without emitting `onSelect`. Default false. */
+  selectOnCellOnly?: boolean
 }
 
 export type OneCalendarProps = Omit<
@@ -83,6 +85,7 @@ const OneCalendarInternal = ({
   maxDate,
   compact = false,
   weekStartsOn,
+  selectOnCellOnly = false,
 }: OneCalendarInternalProps) => {
   const i18n = useI18n()
   const l10n = useL10n()
@@ -207,7 +210,12 @@ const OneCalendarInternal = ({
           ? granularity.toRange(range)
           : granularity.toRange(range.from)
 
-      handleSelect(newRange)
+      // setSelected updates the view without emitting; handleSelect emits.
+      if (selectOnCellOnly) {
+        setSelected(newRange)
+      } else {
+        handleSelect(newRange)
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps -- we dont want to re-render when the granularity changes
     [granularity]

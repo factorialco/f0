@@ -6,6 +6,7 @@ type LabelProps = {
   label: string
   required?: boolean
   htmlFor: string
+  id?: string
   className?: string
   icon?: IconType
   disabled?: boolean
@@ -14,12 +15,14 @@ const Label = ({
   label,
   required,
   htmlFor,
+  id,
   className,
   icon,
   disabled,
 }: LabelProps) => {
   return (
     <label
+      id={id}
       className={cn(
         className,
         "text-md flex max-w-full gap-1 font-medium text-f1-foreground-secondary"

@@ -10,6 +10,7 @@ export * from "../kits/Charts/exports"
 export * from "../kits/F0DataChart"
 export * from "./F0BigNumber"
 export * from "./F0ActionBar"
+export * from "./F0AudioPlayer"
 export * from "./CardSelectable"
 export * from "./F0Accordion"
 export * from "./OneChip"
@@ -33,6 +34,7 @@ export * from "./F0Alert"
  * @deprecated F0Dialog has moved to @/patterns/F0Dialog. Import from there instead.
  */
 export * from "../patterns/F0Dialog"
+export * from "./dialog-alike/F0Drawer"
 export * from "./F0DurationInput"
 export * from "./F0NumberInput"
 export * from "./F0SearchInput"
@@ -54,10 +56,14 @@ export * from "../patterns/F0FormField"
  * @deprecated F0WizardForm has moved to @/patterns/F0WizardForm. Import from there instead.
  */
 export * from "../patterns/F0WizardForm"
+// Imperative `forms.open({ mode: "dialog" | "wizard" })` API.
+export * from "../patterns/forms"
 export * from "./F0Heading"
 export * from "./F0Icon"
 export * from "./F0Link"
+export * from "./F0PdfViewer"
 export * from "./F0Select"
+export * from "./F0Slider"
 export * from "./F0Text"
 export * from "../sds/TimeLine"
 /**
@@ -99,6 +105,9 @@ export * from "../sds/surveys/exports"
 export * from "../sds/UpsellingKit/exports"
 // AI Components
 export * from "../ai/exports"
+// RichText Components
+export * from "./F0FileItem"
+export * from "./RichText/exports"
 // Analytics
 /**
  * @deprecated F0AnalyticsDashboard has moved to @/patterns/F0AnalyticsDashboard. Import from there instead.

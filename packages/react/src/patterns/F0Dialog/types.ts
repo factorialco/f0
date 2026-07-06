@@ -1,4 +1,5 @@
 import { IconType } from "@/components/F0Icon"
+import { NavigationProps } from "@/experimental/Navigation/Header/PageNavigation"
 
 export const dialogPositions = [
   "center",
@@ -48,3 +49,22 @@ export type F0DialogActionsProps = {
   primaryAction?: F0DialogPrimaryAction | F0DialogPrimaryActionItem[]
   secondaryAction?: F0DialogSecondaryAction | F0DialogSecondaryActionItem[]
 }
+
+export type DialogControls =
+  | {
+      kind: "resource"
+      /**
+       * "Open detail" affordance. Provide `url` to render a link to the
+       * resource's full-page view (routed through the app's `LinkProvider`,
+       * so it is cmd/middle-clickable) — typically the active item's
+       * `itemUrl` from `useDataCollectionItemNavigation`. Provide `onClick`
+       * for imperative expansion. `url` wins when both are set.
+       */
+      expand?: { label: string; url?: string; onClick?: () => void }
+      navigation?: NavigationProps
+    }
+  | {
+      kind: "back"
+      label: string
+      onClick: () => void
+    }

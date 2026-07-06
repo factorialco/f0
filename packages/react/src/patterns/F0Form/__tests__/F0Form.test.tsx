@@ -49,6 +49,31 @@ describe("F0Form", () => {
     expect(screen.getByText("Submit")).toBeInTheDocument()
   })
 
+  it("renders a private inputType as a masked field with an eye toggle", () => {
+    const formSchema = z.object({
+      ssn: f0FormField(z.string(), {
+        label: "Social security number",
+        inputType: "private",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-private"
+        schema={formSchema}
+        defaultValues={{ ssn: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const input = screen.getByLabelText("Social security number")
+    expect(input).toBeInTheDocument()
+    // Masked at rest, opted out of password managers, and toggleable.
+    expect(input).toHaveAttribute("type", "password")
+    expect(input).toHaveAttribute("data-1p-ignore")
+    expect(screen.getByRole("button", { name: /show/i })).toBeInTheDocument()
+  })
+
   it("renders form with custom submit label", () => {
     const formSchema = z.object({
       email: f0FormField(z.string().email(), {
@@ -3661,6 +3686,72 @@ describe("F0Form sections sidepanel scroll", () => {
     const stickyElement = scrollContainer?.querySelector(".sticky")
     expect(stickyElement).toBeInTheDocument()
     expect(stickyElement).toHaveClass("top-0")
+  })
+
+  it("keeps the default content padding (p-4) when noPadding is not set", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="padding-default"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(container.querySelector(".justify-center.p-4")).toBeInTheDocument()
+  })
+
+  it("removes the content padding when styling.noPadding is true (single schema)", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="padding-single-no-padding"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+        styling={{ noPadding: true }}
+      />
+    )
+
+    // The centered wrapper is still there, just without the p-4 padding.
+    expect(
+      container.querySelector(".justify-center.p-4")
+    ).not.toBeInTheDocument()
+    expect(container.querySelector(".justify-center")).toBeInTheDocument()
+  })
+
+  it("removes the content padding when styling.noPadding is true (per-section schema)", () => {
+    const formSchema = {
+      personal: z.object({
+        name: f0FormField(z.string(), { label: "Name" }),
+      }),
+    }
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: { title: "Personal" },
+    }
+
+    const { container } = render(
+      <F0Form
+        name="padding-per-section-no-padding"
+        schema={formSchema}
+        defaultValues={{ personal: { name: "" } }}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ noPadding: true }}
+      />
+    )
+
+    expect(
+      container.querySelector(".justify-center.p-4")
+    ).not.toBeInTheDocument()
   })
 })
 

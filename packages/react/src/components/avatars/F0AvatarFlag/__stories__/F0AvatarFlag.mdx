@@ -1,0 +1,42 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import * as FlagStories from "./F0AvatarFlag.stories"
+
+<Meta of={FlagStories} />
+
+# AvatarFlag
+
+The avatar for a country or locale.
+
+---
+
+## Overview
+
+### Purpose
+
+- Represent a country, region or locale by its flag
+- Make locale-specific items recognizable at a glance
+
+### Anatomy
+
+A flag avatar is square and displays the flag image for the given country or
+region code.
+
+<Canvas of={FlagStories.Default} />
+
+<Controls of={FlagStories.Default} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- The entity is always a country, region or locale
+- Language and region pickers, localized content, nationality fields
+
+#### When NOT to use
+
+- The entity type is dynamic: use `F0Avatar`
+- The entity is not a country/locale: use the matching `F0Avatar*` component

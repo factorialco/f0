@@ -10,14 +10,8 @@ const SvgList = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 8h10M9 12h10M9 16h10"
-    />
-    <Path
-      stroke="currentColor"
-      d="M4.5 8a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0Zm0 4a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0Zm0 4a.5.5 0 1 1 1 0 .5.5 0 0 1-1 0Z"
+      fill="currentColor"
+      d="M5 15a1 1 0 1 1 0 2.001 1 1 0 0 1 0-2m14 .1a.9.9 0 0 1 0 1.8H9a.9.9 0 1 1 0-1.8zM5 11a1.001 1.001 0 0 1 0 2 1 1 0 0 1 0-2m14 .1a.9.9 0 0 1 0 1.8H9a.9.9 0 0 1 0-1.8zM5 7a1 1 0 1 1 0 2.001A1 1 0 0 1 5 7m14 .1a.9.9 0 0 1 0 1.8H9a.9.9 0 1 1 0-1.8z"
     />
   </Svg>
 )

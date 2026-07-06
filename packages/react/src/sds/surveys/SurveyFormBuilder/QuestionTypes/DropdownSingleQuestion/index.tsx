@@ -77,7 +77,7 @@ export const DropdownSingleQuestion = ({
 
   return (
     <BaseQuestion {...props}>
-      <div className="flex flex-col items-start px-0.5 [&>div]:w-full">
+      <div className="flex flex-col items-start [&>div]:w-full">
         <F0FormField
           field={field}
           value={isMulti ? (props.value ?? []) : (props.value ?? "")}

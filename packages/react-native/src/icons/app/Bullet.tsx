@@ -4,15 +4,12 @@ import type { SvgProps } from "react-native-svg"
 const SvgBullet = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
-    viewBox="0 0 20 20"
+    viewBox="0 0 24 24"
     className={props.className}
     ref={ref}
     {...props}
   >
-    <Path
-      fill="currentColor"
-      d="M10 7c-2.25 0-3 .75-3 3s.75 3 3 3 3-.75 3-3-.75-3-3-3"
-    />
+    <Path fill="currentColor" d="M8 12a4 4 0 0 1 8 0 4 4 0 0 1-8 0" />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgBullet)

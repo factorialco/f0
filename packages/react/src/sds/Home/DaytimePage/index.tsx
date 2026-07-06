@@ -2,7 +2,6 @@ import { cva, type VariantProps } from "cva"
 import { ComponentProps } from "react"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
-import { F0AvatarPulse } from "@/components/avatars/F0AvatarPulse"
 import { F0Button } from "@/components/F0Button"
 import { OneSwitch as OnePromotionSwitch } from "@/experimental/AiPromotionChat/OneSwitch"
 import Menu from "@/icons/app/Menu"
@@ -11,6 +10,7 @@ import { experimentalComponent } from "@/lib/experimental"
 import { cn } from "@/lib/utils"
 import { useSidebar } from "@/patterns/ApplicationFrame/FrameProvider"
 import { F0OneSwitch } from "@/sds/ai/F0OneSwitch"
+import { F0AvatarPulse } from "@/sds/Home/F0AvatarPulse"
 
 const daytimePageVariants = cva({
   base: "pointer-events-none absolute inset-0 h-screen max-h-[1000px] opacity-[0.08]",
@@ -43,6 +43,11 @@ export interface DaytimePageProps extends VariantProps<
     onPulseClick?: ComponentProps<typeof F0AvatarPulse>["onPulseClick"]
   }
   embedded?: boolean
+  /**
+   * Hides the One AI toggle in the header. Use when One is reached elsewhere
+   * (e.g. a sidebar tab) so the home header doesn't show a redundant switch.
+   */
+  hideOneSwitch?: boolean
 }
 
 function _DaytimePage({
@@ -50,19 +55,20 @@ function _DaytimePage({
   header,
   period,
   embedded = false,
+  hideOneSwitch = false,
 }: DaytimePageProps) {
   const { sidebarState, toggleSidebar, isSmallScreen } = useSidebar()
 
   return (
     <div
-      className={`relative flex w-full flex-col overflow-hidden ${
+      className={`relative flex w-full flex-col overflow-hidden border border-solid border-f1-border-secondary ${
         embedded ? "" : "xs:rounded-xl"
       } bg-f1-special-page shadow`}
     >
       <div className={daytimePageVariants({ period })} />
       {header && (
         <div className="flex flex-row items-center justify-between pr-6 @container">
-          <div className="@5xl:px-page flex flex-row items-center gap-2 px-5 py-4">
+          <div className="flex flex-row items-center gap-2 px-5 py-4 @5xl:px-page">
             {(isSmallScreen || sidebarState === "hidden") && (
               <F0Button
                 variant="ghost"
@@ -124,7 +130,7 @@ function _DaytimePage({
             </div>
           </div>
           <div>
-            <F0OneSwitch />
+            {!hideOneSwitch && <F0OneSwitch />}
             <OnePromotionSwitch />
           </div>
         </div>
