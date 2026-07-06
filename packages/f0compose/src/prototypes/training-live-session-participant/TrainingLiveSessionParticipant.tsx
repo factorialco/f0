@@ -2,6 +2,7 @@ import {
   F0Alert,
   F0AvatarEmoji,
   F0AvatarList,
+  F0AvatarPerson,
   F0Box,
   F0Card,
   F0DataChart,
@@ -117,7 +118,7 @@ type CourseDetailTabId =
   | "surveys"
 type GroupDetailTabId = "sessions" | "participants" | "materials" | "documents" | "costs"
 type SessionSidepanelTabId = "details" | "notes" | "attendance" | "transcript"
-type LiveSessionPanelId = "chat" | "notes" | null
+type LiveSessionPanelId = "chat" | "notes" | "participants" | null
 type LiveSessionRole = "participant" | "instructor"
 type ViewId =
   | "list"
@@ -5046,6 +5047,75 @@ function LiveSessionChatDrawer() {
   )
 }
 
+// Presence roster for the live room. Opens as a side panel (not a modal) when
+// the instructor clicks the avatar cluster in the header. Mirrors the tile mute
+// logic so the panel and the grid agree on who's muted / camera-off.
+function liveParticipantMuted(index: number) {
+  return index !== 0 && index % 3 !== 0
+}
+function liveParticipantCameraOff(index: number) {
+  return index % 4 === 2
+}
+
+function LiveParticipantRosterRow({ name, team, muted, cameraOff, joined }: { name: string; team: string; muted?: boolean; cameraOff?: boolean; joined: boolean }) {
+  return (
+    <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" paddingX="lg" paddingY="sm">
+      <F0Box display="flex" alignItems="center" gap="md" style={{ minWidth: 0 }}>
+        <F0AvatarPerson firstName={name.split(" ")[0] ?? name} lastName={name.split(" ")[1] ?? ""} size="sm" deactivated={!joined} />
+        <F0Box display="flex" flexDirection="column">
+          <F0Text content={name} variant="label" />
+          <F0Text content={team} variant="description" />
+        </F0Box>
+      </F0Box>
+      {joined ? (
+        <F0Box display="flex" alignItems="center" gap="sm">
+          <F0BoxWithClassName display="flex" className={muted ? "text-f1-foreground-secondary" : "text-f1-foreground"}>
+            <F0Icon icon={muted ? MicrophoneNegative : Microphone} size="sm" />
+          </F0BoxWithClassName>
+          <F0BoxWithClassName display="flex" className={cameraOff ? "text-f1-foreground-secondary" : "text-f1-foreground"}>
+            <F0Icon icon={cameraOff ? VideoRecorderNegative : VideoRecorder} size="sm" />
+          </F0BoxWithClassName>
+        </F0Box>
+      ) : (
+        <F0Text content="Not joined" variant="description" />
+      )}
+    </F0Box>
+  )
+}
+
+function LiveSessionParticipantsDrawer({ attendees, notJoined, onClose }: { attendees: GroupParticipantRow[]; notJoined: GroupParticipantRow[]; onClose: () => void }) {
+  return (
+    <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" display="flex" flexDirection="column" height="full" style={{ overflow: "hidden" }}>
+      <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" padding="lg" borderBottom="default" borderColor="secondary">
+        <F0Heading content="Participants" variant="heading" as="h3" />
+        <F0BoxWithClassName role="button" aria-label="Close" tabIndex={0} onClick={onClose} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 32, height: 32, cursor: "pointer" }}>
+          <F0Icon icon={Cross} size="md" />
+        </F0BoxWithClassName>
+      </F0Box>
+      <F0BoxWithClassName grow style={{ overflowY: "auto", minHeight: 0 }}>
+        <F0Box display="flex" flexDirection="column" gap="xs" paddingY="sm">
+          <F0Box paddingX="lg" paddingY="xs">
+            <F0Text content={`In the call · ${attendees.length}`} variant="description" />
+          </F0Box>
+          {attendees.map((participant, index) => (
+            <LiveParticipantRosterRow key={participant.id} name={index === 0 ? "Adam Joseph" : participant.name} team={participant.team} muted={liveParticipantMuted(index)} cameraOff={liveParticipantCameraOff(index)} joined />
+          ))}
+        </F0Box>
+        {notJoined.length > 0 ? (
+          <F0Box display="flex" flexDirection="column" gap="xs" paddingY="sm" borderTop="default" borderColor="secondary">
+            <F0Box paddingX="lg" paddingY="xs">
+              <F0Text content={`Not joined · ${notJoined.length}`} variant="description" />
+            </F0Box>
+            {notJoined.map((participant) => (
+              <LiveParticipantRosterRow key={participant.id} name={participant.name} team={participant.team} joined={false} />
+            ))}
+          </F0Box>
+        ) : null}
+      </F0BoxWithClassName>
+    </F0BoxWithClassName>
+  )
+}
+
 // Per-session notes, PRIVATE to each user: the instructor and each participant
 // keep their own notes for the same session, so the store is keyed by
 // `${scope}:${session.id}` (scope = the viewer's role). Shared across the three
@@ -5219,50 +5289,83 @@ function CallTopBar({
   groupName,
   session,
   clock,
+  attendees = [],
+  totalInvited = 0,
+  onOpenParticipants,
+  role,
 }: {
   course: ExactCourse
   groupName: string
   session: GroupSessionRow
   clock: GreenRoomClock
+  attendees?: GroupParticipantRow[]
+  totalInvited?: number
+  onOpenParticipants?: () => void
+  role?: LiveSessionRole
 }) {
   const isWaiting = session.liveState === "waiting"
   const showLive = session.liveState === "live" || clock.classStarted
+  const isInstructor = role === "instructor"
+
+  // A live call is not a page: the full ResourceHeader (large title + description
+  // + metadata + padding) eats the vertical space the video grid needs. This is a
+  // compact one-bar version that keeps the Factorial language — status tag, the
+  // clock, avatars — on two tight lines.
+  const statusTag = showLive
+    ? { text: "Live", variant: "critical" as const }
+    : isWaiting
+      ? { text: "Starting soon", variant: "warning" as const }
+      : { text: session.statusLabel, variant: "neutral" as const }
+
+  const timeText = showLive
+    ? formatCallDuration(clock.liveSeconds)
+    : isWaiting
+      ? `Starts in ${formatCallDuration(clock.secondsToStart)}`
+      : session.scheduleLabel
 
   return (
-    <F0Box display="flex" justifyContent="between" alignItems="center" gap="lg" background="primary" borderRadius="xl" paddingX="sm" paddingY="xs">
-      <F0Box display="flex" flexDirection="column" gap="xs">
+    <F0BoxWithClassName background="primary" borderRadius="xl" paddingX="lg" paddingY="sm" display="flex" alignItems="center" justifyContent="between" gap="lg">
+      <F0Box display="flex" flexDirection="column" gap="xs" style={{ minWidth: 0 }}>
         <F0Text content={`${course.name} · ${groupName}`} variant="description" />
-        <F0Heading content={session.name} variant="heading" as="h1" />
-      </F0Box>
-      <F0Box display="flex" flexDirection="column" alignItems="end" gap="xs">
-        {showLive ? (
-          <F0Box display="flex" alignItems="center" gap="md">
-            <F0BoxWithClassName display="flex" alignItems="center" gap="sm" background="critical" borderRadius="full" paddingX="md" paddingY="sm">
-              <F0BoxWithClassName background="critical-bold" borderRadius="full" style={{ width: 9, height: 9 }} />
-              <F0BoxWithClassName className="text-f1-foreground-critical" display="flex">
-                <F0Text content="Live" variant="body" />
+        <F0Box display="flex" alignItems="center" gap="md">
+          <F0Heading content={session.name} variant="heading" as="h1" />
+          <F0TagStatus text={statusTag.text} variant={statusTag.variant} />
+          <F0Text content={timeText} variant="body" />
+          {isInstructor && showLive && totalInvited > 0 ? (
+            <>
+              <F0BoxWithClassName height="4" width="0.5" background="tertiary" />
+              <F0BoxWithClassName
+                className="shrink-0 cursor-pointer rounded-full hover:bg-f1-background-secondary"
+                role="button"
+                aria-label="See who's in the call"
+                tabIndex={0}
+                onClick={onOpenParticipants}
+                display="flex"
+                alignItems="center"
+                paddingX="xs"
+                paddingY="xs"
+              >
+                <F0AvatarList
+                  avatars={attendees.map((p) => ({ type: "person", firstName: p.name.split(" ")[0] ?? p.name, lastName: p.name.split(" ")[1] ?? "" }))}
+                  size="sm"
+                  type="person"
+                  max={5}
+                />
               </F0BoxWithClassName>
-            </F0BoxWithClassName>
-            <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
-            <F0Text content={formatCallDuration(clock.liveSeconds)} variant="body" />
-          </F0Box>
-        ) : isWaiting ? (
-          <F0Box display="flex" alignItems="center" gap="md">
-            <F0Icon icon={CalendarArrowRight} size="md" color="warning" />
-            <F0Text content="Session starts in" variant="body" />
-            <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
-            <F0Text content={formatCallDuration(clock.secondsToStart)} variant="body" />
-          </F0Box>
-        ) : (
-          <F0Box display="flex" alignItems="center" gap="md">
-            <F0Icon icon={CalendarArrowRight} size="md" color="warning" />
-            <F0Text content={session.statusLabel} variant="body" />
-            <F0BoxWithClassName height="8" width="0.5" background="tertiary" />
-            <F0Text content={session.scheduleLabel} variant="body" />
-          </F0Box>
-        )}
+            </>
+          ) : null}
+        </F0Box>
       </F0Box>
-    </F0Box>
+      {!isInstructor && showLive ? (
+        <F0Box display="flex" alignItems="center" gap="sm">
+          <F0AvatarPerson firstName="Adam" lastName="Joseph" size="sm" />
+          <F0Box display="flex" flexDirection="column">
+            <F0Text content="Instructor" variant="description" />
+            <F0Text content="Adam Joseph" variant="label" />
+          </F0Box>
+        </F0Box>
+      ) : null}
+    </F0BoxWithClassName>
   )
 }
 
@@ -5344,7 +5447,7 @@ function SessionRoomScreen({
 
   return (
     <FullscreenCallSurface>
-      <CallTopBar course={course} groupName={groupName} session={session} clock={clock} />
+      <CallTopBar course={course} groupName={groupName} session={session} clock={clock} attendees={liveParticipants} totalInvited={groupParticipants.length} onOpenParticipants={() => setActivePanel("participants")} role={role} />
       <F0BoxWithClassName display="flex" gap="lg" grow style={{ minHeight: 0, paddingBottom: 88, position: "relative" }}>
         <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0 }}>
           <F0BoxWithClassName display="grid" gap="md" grow width="full" style={{ minHeight: 0, gridTemplateColumns: `repeat(${grid.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))` }}>
@@ -5357,6 +5460,10 @@ function SessionRoomScreen({
           activePanel === "chat" ? (
             <F0BoxWithClassName style={activePanelStyle}>
               <LiveSessionChatDrawer />
+            </F0BoxWithClassName>
+          ) : activePanel === "participants" ? (
+            <F0BoxWithClassName style={activePanelStyle}>
+              <LiveSessionParticipantsDrawer attendees={liveParticipants} notJoined={groupParticipants.slice(liveParticipants.length)} onClose={() => setActivePanel(null)} />
             </F0BoxWithClassName>
           ) : (
             <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" style={activePanelStyle}>
