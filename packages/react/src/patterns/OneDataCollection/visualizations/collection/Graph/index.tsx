@@ -13,6 +13,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { resolveGraphReveal } from "./reveal"
 import { GraphVisualizationOptions } from "./types"
 import { useDataCollectionTreeData } from "./useDataCollectionTreeData"
 
@@ -61,6 +62,7 @@ export const GraphCollection = <
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
+  focusOnEntry,
   loadNodePath,
   getParentId,
   loadNodeData,
@@ -120,26 +122,28 @@ export const GraphCollection = <
     { onLoadData, onLoadError }
   )
 
-  // Reveal a node selected from the shared Data Collection search — but NEVER on
-  // entry: opening the graph must not auto-focus anyone (a consistent default
-  // view + clean search). We adopt whatever `revealNodeId` exists when the tree
-  // first becomes ready as "already handled", then only react to LATER changes
-  // (a fresh search selection). "Find me" reveals directly via the controls and
-  // is unaffected.
+  // Reveal driver. By default the graph does NOT auto-focus on entry (a
+  // consistent default view + clean search): the initial `revealNodeId` is
+  // adopted as "already handled", and only LATER changes (a fresh search
+  // selection) reveal. Opting into `focusOnEntry` reveals that node once on
+  // entry instead. "Find me" reveals via the controls, outside this path.
+  // The decision lives in the pure `resolveGraphReveal`; this effect only
+  // applies it and carries the refs across renders.
   const lastRevealedRef = useRef<string | undefined>(undefined)
   const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
     if (isInitialLoading) return
-    if (!initialRevealConsumedRef.current) {
-      initialRevealConsumedRef.current = true
-      lastRevealedRef.current = revealNodeId
-      return
-    }
-    if (revealNodeId && revealNodeId !== lastRevealedRef.current) {
-      lastRevealedRef.current = revealNodeId
-      void revealNode(revealNodeId)
-    }
-  }, [revealNodeId, revealNode, isInitialLoading])
+    const decision = resolveGraphReveal({
+      isInitialLoading,
+      initialConsumed: initialRevealConsumedRef.current,
+      focusOnEntry,
+      revealNodeId,
+      lastRevealed: lastRevealedRef.current,
+    })
+    if (decision.consumeInitial) initialRevealConsumedRef.current = true
+    lastRevealedRef.current = decision.lastRevealed
+    if (decision.revealId) void revealNode(decision.revealId)
+  }, [revealNodeId, focusOnEntry, revealNode, isInitialLoading])
 
   // Clear the shared header search when ENTERING and LEAVING the graph view, so
   // it never points at a node here (the graph is a tree, not a filtered list).
