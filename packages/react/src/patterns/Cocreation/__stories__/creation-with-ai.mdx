@@ -39,13 +39,13 @@ primary button (full width).
   <figure className="mx-auto mb-8 mt-0 max-w-2xl">
     <img
       src={chatFullscreen}
-      alt="The full-width chat welcome screen, with an action-driven header, a composer, and four starting-point cards below it."
+      alt="The full-width chat welcome screen: a quick-start suggestion button above the composer, the composer itself, and four starting-point cards below it."
       className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
     />
     <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
-      The chat opens full width, with an action-driven header. The user types
-      what they want (or dictates it with the mic), or picks a starting-point
-      card.
+      The chat opens full width. The user types what they want (or dictates it
+      with the mic), taps a quick-start suggestion above the composer, or picks
+      a starting-point card below.
     </figcaption>
   </figure>
 </Unstyled>
@@ -99,6 +99,19 @@ each flow — the survey example fills all four:
     </tbody>
   </table>
 </Unstyled>
+
+Above the composer sits a separate, optional row of quick-start buttons — the welcome
+suggestions (`welcomeScreenSuggestions`). They are **example prompts, not flows**: each button is
+a group (here, the "Create a Survey for..." pill) that opens a short list of starter prompts, and
+picking one sends its text straight to the AI as if the user had typed it. That is the line
+between the two entry points — **a suggestion sends a prompt, a card triggers a flow** (open a
+canvas, seed a template). Use suggestions to show the user _what to say_ and to lower the
+blank-composer cost. When a flow includes them, populate them with prompts tied to the domain or
+resource being created — the survey example offers "Employee satisfaction survey," "Onboarding
+feedback survey," and "Remote work pulse check." They render on both the side-panel and
+full-width welcome screens, and are independent of the cards: provide either, both, or neither.
+See [Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation) for the
+full cards-vs-suggestions contract.
 
 Clarifying questions narrow the intent before anything is drafted — here, the survey's type,
 audience, and length. The draft is then surfaced as an in-chat resource card; opening it moves
