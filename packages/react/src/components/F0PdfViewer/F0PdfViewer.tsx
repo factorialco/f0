@@ -248,7 +248,7 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
       <div
         ref={ref}
         {...rest}
-        className="F0PdfViewer__surface relative flex h-full w-full flex-col overflow-hidden rounded-md border border-solid border-f1-border-secondary"
+        className="F0PdfViewer__surface relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary"
       >
         <div
           ref={containerRef}

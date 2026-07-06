@@ -12,7 +12,7 @@ export const F0PdfViewerSkeleton = () => {
       aria-live="polite"
       aria-label={pdfViewer.loading}
       className={cn(
-        "F0PdfViewer__surface flex h-full w-full flex-col overflow-hidden rounded-md",
+        "F0PdfViewer__surface flex h-full w-full flex-col overflow-hidden",
         "border border-solid border-f1-border-secondary"
       )}
     >
