@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.24.0](https://github.com/factorialco/f0/compare/f0-react-v4.23.0...f0-react-v4.24.0) (2026-07-06)
+
+
+### Features
+
+* **F0Chat:** preview composer images as square thumbnails ([#4631](https://github.com/factorialco/f0/issues/4631)) ([9a640d4](https://github.com/factorialco/f0/commit/9a640d45d0e9c6f9847c68cedc8fb54d94bdf84c))
+
 ## [4.23.0](https://github.com/factorialco/f0/compare/f0-react-v4.22.2...f0-react-v4.23.0) (2026-07-06)
 
 
