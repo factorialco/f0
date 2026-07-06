@@ -353,6 +353,46 @@ describe("F0Chat", () => {
     expect(screen.getByText("report.pdf")).toBeInTheDocument()
   })
 
+  it("previews uploaded images as square thumbnails and other files as chips", async () => {
+    // The pdf uploads first — images must still render grouped at the front.
+    const uploadFiles = vi.fn().mockResolvedValue([
+      {
+        kind: "file",
+        url: "blob:doc",
+        name: "report.pdf",
+        mimeType: "application/pdf",
+      },
+      { kind: "image", url: "blob:img", name: "photo.png" },
+    ])
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["doc"], "report.pdf", { type: "application/pdf" }),
+          new File(["img"], "photo.png", { type: "image/png" }),
+        ],
+      },
+    })
+    // The image resolves to an inline square preview, the pdf to a file chip.
+    const preview = await screen.findByRole("img", { name: /photo\.png/i })
+    expect(preview).toHaveAttribute("src", "blob:img")
+    const chip = screen.getByText("report.pdf")
+    // The image preview comes before the file chip despite uploading second.
+    expect(
+      preview.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+    // Each pending attachment carries its own remove action.
+    const removeButtons = screen.getAllByRole("button", { name: /^remove$/i })
+    expect(removeButtons).toHaveLength(2)
+    await userEvent.click(removeButtons[0])
+    expect(
+      screen.queryByRole("img", { name: /photo\.png/i })
+    ).not.toBeInTheDocument()
+    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+  })
+
   it("renders the empty state when there are no messages", () => {
     renderChat(makeRuntime({ messages: [] }))
     expect(screen.getByText(/no messages yet/i)).toBeInTheDocument()
