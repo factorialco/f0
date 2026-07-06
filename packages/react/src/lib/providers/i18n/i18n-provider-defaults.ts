@@ -812,6 +812,20 @@ export const defaultTranslations = {
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
   },
+  pdfViewer: {
+    toolbar: "Document toolbar",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    scaleSelector: "Zoom level",
+    pageWidth: "Page width",
+    pageFit: "Page fit",
+    rotate: "Rotate",
+    print: "Print",
+    download: "Download",
+    loading: "Loading document",
+  },
 } as const
 
 type TranslationShape<T> = {
