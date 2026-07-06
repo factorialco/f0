@@ -366,14 +366,58 @@ export function useGraphRenderModel<T>({
     }
   }, [layout.nodes, anchorOffset, nodeMap, expandedNodes, anchorNodeRef])
 
-  const allRfNodes = useMemo((): RFNode[] => {
-    const { dx: anchorDx, dy: anchorDy } = anchorOffset
+  // ── Node-array windowing ──
+  // Ids of the LAYOUT nodes (graph pills + expanders) whose box intersects the
+  // padded viewport. `null` means "no windowing" (feature off, or viewport not
+  // yet measured) → render everything, which is also what the initial `fitView`
+  // needs to frame the whole graph before the camera settles.
+  //
+  // Computed from the cheap layout positions (not the built rf nodes) so that
+  // the rf-node construction below can materialize ONLY the windowed nodes —
+  // keeping per-interaction work proportional to what's on screen, not to the
+  // whole (potentially thousands-of-nodes) tree. This is the key to smooth
+  // pan/zoom on large graphs: without it every pan cell-crossing and every
+  // zoom-level change would rebuild an object per visible node.
+  const windowedIds = useMemo((): Set<string> | null => {
+    if (!enableNodeWindowing || !viewportRect) return null
+    const fallbackWidth = nodeWidthProp ?? 256
+    const { dx, dy } = anchorOffset
+    const ids = new Set<string>()
+    for (const pn of layout.nodes) {
+      if (
+        nodeIntersectsRect(
+          pn.x + dx,
+          pn.y + dy,
+          pn.width || fallbackWidth,
+          pn.height || effectiveNodeHeight,
+          viewportRect
+        )
+      ) {
+        ids.add(pn.id)
+      }
+    }
+    return ids
+  }, [
+    enableNodeWindowing,
+    viewportRect,
+    layout.nodes,
+    anchorOffset,
+    nodeWidthProp,
+    effectiveNodeHeight,
+  ])
 
-    // Node dimensions (constant — compensation scale is applied inside the wrapper via context)
+  // ── React Flow nodes ── Only the windowed nodes are materialized (all of them
+  // when windowing is off). Building here — rather than building everything and
+  // filtering — is what makes the work O(on-screen) instead of O(visible tree).
+  const rfNodes = useMemo((): RFNode[] => {
+    const { dx: anchorDx, dy: anchorDy } = anchorOffset
     const BASE_W = nodeWidthProp ?? 256
     const BASE_H = effectiveNodeHeight
-
     const yStretch = 1
+    // Collapsers aren't in `layout.nodes`; they sit adjacent to their parent
+    // (well within the window padding), so they follow the parent's membership.
+    const inWindow = (id: string): boolean =>
+      !windowedIds || windowedIds.has(id)
 
     // Direction-aware port positions for React Flow edge routing
     const isHorizontal = direction === "LR" || direction === "RL"
@@ -394,7 +438,10 @@ export function useGraphRenderModel<T>({
             ? Position.Left
             : Position.Right
 
-    const graphRfNodes: RFNode[] = visibleTreeNodes.map((treeNode): RFNode => {
+    const nodes: RFNode[] = []
+
+    for (const treeNode of visibleTreeNodes) {
+      if (!inWindow(treeNode.id)) continue
       const pos = positionMap.get(treeNode.id)
       const graphNode: GraphNode<T> = {
         id: treeNode.id,
@@ -406,13 +453,17 @@ export function useGraphRenderModel<T>({
       }
       const aria = ariaTreeInfo.get(treeNode.id)
 
-      // aria-owns: only for expanded nodes with visible children
-      const visibleChildIds =
-        expandedNodes.has(treeNode.id) && treeNode.children.length > 0
-          ? treeNode.children.map((c) => c.id)
-          : undefined
+      // aria-owns: only for expanded nodes, and only the children still in the
+      // window (an entry pointing at a windowed-out node would be a dangling ref).
+      let visibleChildIds: string[] | undefined
+      if (expandedNodes.has(treeNode.id) && treeNode.children.length > 0) {
+        const kept = treeNode.children
+          .map((c) => c.id)
+          .filter((id) => inWindow(id))
+        visibleChildIds = kept.length > 0 ? kept : undefined
+      }
 
-      return {
+      nodes.push({
         id: treeNode.id,
         type: "graphNode",
         position: {
@@ -430,12 +481,13 @@ export function useGraphRenderModel<T>({
           ariaPosInSet: aria?.posInSet ?? 1,
           visibleChildIds,
         } as GraphNodeData,
-      }
-    })
+      })
+    }
 
     // Expanders are not part of the layout tree; they're positioned
-    // manually adjacent to their parent on the "outgoing" edge of the layout
-    const expanderRfNodes: RFNode[] = expanderNodes.map((exp): RFNode => {
+    // manually adjacent to their parent on the "outgoing" edge of the layout.
+    for (const exp of expanderNodes) {
+      if (!inWindow(exp.id)) continue
       const parentPos = positionMap.get(exp.parentId)
       const parentNode = parentPos ?? {
         x: 0,
@@ -455,13 +507,10 @@ export function useGraphRenderModel<T>({
         : direction === "TB"
           ? parentNode.y * yStretch + ph + EXPANDER_Y_OFFSET
           : parentNode.y * yStretch - ph
-      return {
+      nodes.push({
         id: exp.id,
         type: "expanderNode",
-        position: {
-          x: expX + anchorDx,
-          y: expY + anchorDy,
-        },
+        position: { x: expX + anchorDx, y: expY + anchorDy },
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
@@ -472,52 +521,47 @@ export function useGraphRenderModel<T>({
           parentWidth: BASE_W,
           loading: exp.loading,
         } as ExpanderNodeData,
-      }
-    })
-
-    // Collapser buttons for expanded parents with visible children
-    const collapserRfNodes: RFNode[] = visibleTreeNodes
-      .filter((n) => expandedNodes.has(n.id) && n.children.length > 0)
-      .map((parent): RFNode => {
-        const parentPos = positionMap.get(parent.id)
-        const px = parentPos?.x ?? 0
-        const py = parentPos?.y ?? 0
-        const pw = parentPos?.width ?? BASE_W
-        const ph = parentPos?.height ?? BASE_H
-        const colX = isHorizontal
-          ? direction === "LR"
-            ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
-            : px - pw
-          : px
-        const colY = isHorizontal
-          ? py * yStretch
-          : direction === "TB"
-            ? py * yStretch +
-              ph +
-              EXPANDER_Y_OFFSET +
-              COLLAPSER_OFFSET_ADJUSTMENT
-            : py * yStretch - ph
-
-        return {
-          id: `collapser-${parent.id}`,
-          type: "collapserNode",
-          zIndex: 10,
-          position: {
-            x: colX + anchorDx,
-            y: colY + anchorDy,
-          },
-          sourcePosition: sourcePos,
-          targetPosition: targetPos,
-          data: {
-            parentId: parent.id,
-            parentWidth: BASE_W,
-            collapseLabel: controlLabels?.collapseChildren,
-          } as CollapserNodeData,
-        }
       })
+    }
 
-    return [...graphRfNodes, ...expanderRfNodes, ...collapserRfNodes]
+    // Collapser buttons for expanded parents with visible children.
+    for (const parent of visibleTreeNodes) {
+      if (!expandedNodes.has(parent.id) || parent.children.length === 0)
+        continue
+      if (!inWindow(parent.id)) continue
+      const parentPos = positionMap.get(parent.id)
+      const px = parentPos?.x ?? 0
+      const py = parentPos?.y ?? 0
+      const pw = parentPos?.width ?? BASE_W
+      const ph = parentPos?.height ?? BASE_H
+      const colX = isHorizontal
+        ? direction === "LR"
+          ? px + pw + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          : px - pw
+        : px
+      const colY = isHorizontal
+        ? py * yStretch
+        : direction === "TB"
+          ? py * yStretch + ph + EXPANDER_Y_OFFSET + COLLAPSER_OFFSET_ADJUSTMENT
+          : py * yStretch - ph
+      nodes.push({
+        id: `collapser-${parent.id}`,
+        type: "collapserNode",
+        zIndex: 10,
+        position: { x: colX + anchorDx, y: colY + anchorDy },
+        sourcePosition: sourcePos,
+        targetPosition: targetPos,
+        data: {
+          parentId: parent.id,
+          parentWidth: BASE_W,
+          collapseLabel: controlLabels?.collapseChildren,
+        } as CollapserNodeData,
+      })
+    }
+
+    return nodes
   }, [
+    windowedIds,
     positionMap,
     visibleTreeNodes,
     expanderNodes,
@@ -532,70 +576,6 @@ export function useGraphRenderModel<T>({
     ariaTreeInfo,
     controlLabels?.collapseChildren,
   ])
-
-  // ── Node-array windowing ──
-  // Ids of the built rf nodes whose box intersects the padded viewport. `null`
-  // means "no windowing" (feature off, or viewport not yet measured), in which
-  // case every node is rendered — which is also what the initial `fitView`
-  // needs to fit the whole graph before the camera settles.
-  const windowedIds = useMemo((): Set<string> | null => {
-    if (!enableNodeWindowing || !viewportRect) return null
-    // Intersect each rf node's box against the viewport directly — no
-    // intermediate array — since this runs on every pan cell-crossing.
-    const fallbackWidth = nodeWidthProp ?? 256
-    const ids = new Set<string>()
-    for (const node of allRfNodes) {
-      const width = node.width ?? fallbackWidth
-      if (
-        nodeIntersectsRect(
-          node.position.x,
-          node.position.y,
-          width,
-          effectiveNodeHeight,
-          viewportRect
-        )
-      ) {
-        ids.add(node.id)
-      }
-    }
-    return ids
-  }, [
-    enableNodeWindowing,
-    viewportRect,
-    allRfNodes,
-    nodeWidthProp,
-    effectiveNodeHeight,
-  ])
-
-  const rfNodes = useMemo((): RFNode[] => {
-    if (!windowedIds) return allRfNodes
-    const result: RFNode[] = []
-    for (const node of allRfNodes) {
-      if (!windowedIds.has(node.id)) continue
-      // Trim aria-owns to children still in the window: an aria-owns entry
-      // pointing at a node windowed out of the DOM is a dangling reference.
-      // Only graphNode carries visibleChildIds (expander/collapser don't).
-      if (node.type === "graphNode") {
-        const data = node.data as GraphNodeData
-        const childIds = data.visibleChildIds
-        if (childIds && childIds.length > 0) {
-          const kept = childIds.filter((id) => windowedIds.has(id))
-          if (kept.length !== childIds.length) {
-            result.push({
-              ...node,
-              data: {
-                ...data,
-                visibleChildIds: kept.length > 0 ? kept : undefined,
-              },
-            })
-            continue
-          }
-        }
-      }
-      result.push(node)
-    }
-    return result
-  }, [allRfNodes, windowedIds])
 
   // Ids of the graphNodes actually handed to React Flow (post-windowing) — feeds
   // the rendered-count callback and viewport-driven data loading.
