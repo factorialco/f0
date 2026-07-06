@@ -1,4 +1,21 @@
 import React from "react"
+import type { ScrollViewProps } from "react-native"
+
+/**
+ * Props for the scroll container F0Wizard renders around each step's content.
+ *
+ * A keyboard-aware scroll component (e.g.
+ * `react-native-keyboard-controller`'s `KeyboardAwareScrollView`) can be
+ * injected via {@link F0WizardProps.ScrollComponent}. F0Wizard passes it a
+ * `bottomOffset` equal to the measured footer height so a focused input is
+ * scrolled clear of the pinned Back/Next footer. A plain `ScrollView` simply
+ * ignores the extra prop.
+ */
+export type F0WizardScrollComponentProps = ScrollViewProps & {
+  /** Height (px) of the pinned footer, so a keyboard-aware scroll component can
+   * offset the focused input above it. Ignored by a plain `ScrollView`. */
+  bottomOffset?: number
+}
 
 export interface F0WizardStep {
   /** Title displayed above the step content */
@@ -54,6 +71,22 @@ export interface F0WizardProps {
   onStepChanged?: (stepIndex: number) => void
   /** Called when the user confirms the last step. */
   onSubmit?: () => void | Promise<void>
+  /**
+   * Scroll container rendered around each step's content. Defaults to React
+   * Native's `ScrollView`.
+   *
+   * Inject a keyboard-aware scroll component (e.g.
+   * `react-native-keyboard-controller`'s `KeyboardAwareScrollView`) to scroll a
+   * focused input above the keyboard while the footer stays pinned. F0Wizard
+   * measures the footer height and passes it as `bottomOffset` so the focused
+   * field clears the Back/Next buttons — no magic numbers, adapts to button
+   * size and locale. F0Wizard adds no keyboard dependency of its own.
+   *
+   * @example
+   * import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
+   * <F0Wizard ScrollComponent={KeyboardAwareScrollView} … />
+   */
+  ScrollComponent?: React.ComponentType<F0WizardScrollComponentProps>
   accessibilityLabel?: string
   testID?: string
 }

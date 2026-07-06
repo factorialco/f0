@@ -405,6 +405,75 @@ describe("F0Wizard", () => {
     expect(screen.queryByText("Tell us about yourself")).toBeNull()
   })
 
+  it("renders step content through an injected ScrollComponent", () => {
+    const ScrollComponent = jest.fn(
+      ({ children }: { children?: React.ReactNode }) => <>{children}</>
+    )
+
+    render(
+      <F0Wizard
+        steps={makeSteps(1)}
+        testID="wizard"
+        {...LABELS}
+        ScrollComponent={ScrollComponent}
+      />
+    )
+
+    // The injected component is used and still renders the step content.
+    expect(ScrollComponent).toHaveBeenCalled()
+    expect(screen.getByTestId("content-0")).toBeTruthy()
+  })
+
+  it("forwards the measured footer height as bottomOffset to ScrollComponent", async () => {
+    const ScrollComponent = jest.fn(
+      ({ children }: { children?: React.ReactNode }) => <>{children}</>
+    )
+
+    render(
+      <F0Wizard
+        steps={makeSteps(1)}
+        testID="wizard"
+        {...LABELS}
+        ScrollComponent={ScrollComponent}
+      />
+    )
+
+    // The footer is the only node wiring an onLayout handler; fire it with a
+    // known height and assert F0Wizard forwards it as bottomOffset.
+    const footerHeight = 72
+    const footer = screen
+      .getByTestId("wizard")
+      .findAll((node) => typeof node.props?.onLayout === "function")[0]
+    fireEvent(footer, "layout", {
+      nativeEvent: { layout: { height: footerHeight, width: 300, x: 0, y: 0 } },
+    })
+
+    await waitFor(() => {
+      const lastCall =
+        ScrollComponent.mock.calls[ScrollComponent.mock.calls.length - 1]
+      expect(lastCall?.[0]?.bottomOffset).toBe(footerHeight)
+    })
+  })
+
+  it("passes keyboardShouldPersistTaps='handled' to ScrollComponent", () => {
+    const ScrollComponent = jest.fn(
+      ({ children }: { children?: React.ReactNode }) => <>{children}</>
+    )
+
+    render(
+      <F0Wizard
+        steps={makeSteps(1)}
+        testID="wizard"
+        {...LABELS}
+        ScrollComponent={ScrollComponent}
+      />
+    )
+
+    expect(ScrollComponent.mock.calls[0]?.[0]?.keyboardShouldPersistTaps).toBe(
+      "handled"
+    )
+  })
+
   it("canAdvance:false disables button and onNext is never called", async () => {
     const onNext = jest.fn().mockResolvedValue({ canAdvance: true })
     const steps: F0WizardStep[] = [
