@@ -39,8 +39,8 @@ describe("EmojiPicker", () => {
   })
 
   it("degrades to nothing instead of crashing when construction throws", () => {
-    // The FCT-55700 failure mode: constructing the element throws "Illegal
-    // constructor". The render error boundary must contain it so the
+    // Constructing the element throws "Illegal constructor" (the duplicated-class
+    // failure mode). The render error boundary must contain it so the
     // surrounding UI keeps rendering.
     class ThrowingPicker {
       constructor() {

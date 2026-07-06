@@ -1,7 +1,6 @@
 import { type RefObject, useEffect, useRef } from "react"
 
-// Side-effect import: registers the <em-emoji-picker> custom element so it is
-// available in the custom-element registry.
+// Registers the <em-emoji-picker> custom element (side-effect import).
 import "emoji-mart"
 
 import { RenderErrorBoundary } from "@/lib/RenderErrorBoundary"
@@ -36,12 +35,10 @@ function EmojiPickerElement(props: EmojiPickerProps) {
   useEffect(() => {
     if (!containerRef.current) return
 
-    // Construct the class from the custom-element registry, NOT the one
-    // @emoji-mart/react imports. Passing a `ref` makes emoji-mart render the
-    // picker into that element (light DOM), exactly like @emoji-mart/react — so
-    // clicks behave identically. `new` on the *registered* class is legal;
-    // @emoji-mart/react instead throws "Illegal constructor" when a duplicated,
-    // unregistered copy of the class lands in the bundle.
+    // Build from the *registered* class, not the copy @emoji-mart/react imports
+    // (a duplicated, unregistered copy is what throws "Illegal constructor").
+    // Passing `ref` renders the picker into the div in light-DOM mode — like
+    // @emoji-mart/react — so clicks keep working inside popovers.
     const Picker = customElements.get("em-emoji-picker") as
       | EmojiMartPickerCtor
       | undefined
