@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.25.0](https://github.com/factorialco/f0/compare/f0-react-v4.24.0...f0-react-v4.25.0) (2026-07-06)
+
+
+### Features
+
+* **F0PdfViewer:** add experimental PDF viewer component ([#4343](https://github.com/factorialco/f0/issues/4343)) ([e017974](https://github.com/factorialco/f0/commit/e0179744312a09060262dc3abae1db4bb3412b85))
+
 ## [4.24.0](https://github.com/factorialco/f0/compare/f0-react-v4.23.0...f0-react-v4.24.0) (2026-07-06)
 
 
