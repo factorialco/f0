@@ -1556,7 +1556,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, onClose, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1584,6 +1584,8 @@ declare interface BaseHeaderProps_2 {
     metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
+    /** When set, renders a close button in the header actions that calls this on click. */
+    onClose?: () => void;
 }
 
 /**
@@ -5420,10 +5422,6 @@ declare type DialogWrapperContextType = {
     portalContainer: HTMLDivElement | null;
 };
 
-declare const DialogWrapperProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
-export { DialogWrapperProvider as F0DialogAlikeProvider }
-export { DialogWrapperProvider as F0DialogProvider }
-
 /**
  * The props for the F0DialogProvider component.
  */
@@ -5484,20 +5482,6 @@ export declare type DragPayload<T = unknown> = {
     kind: string;
     id: string;
     data?: T;
-};
-
-export declare type DrawerControls = {
-    kind: "resource";
-    expand?: {
-        label: string;
-        url?: string;
-        onClick?: () => void;
-    };
-    navigation?: NavigationProps;
-} | {
-    kind: "back";
-    label: string;
-    onClick: () => void;
 };
 
 export declare type DrawerDefinition = {
@@ -8513,10 +8497,7 @@ export declare interface F0DemoCardProps {
 }
 
 /**
- * @deprecated Use `F0Dialog` from `@/components/dialog-alike/F0Dialog` for
- * center/fullscreen dialogs, or `F0Drawer` from
- * `@/components/dialog-alike/F0Drawer` for side panels. This is a
- * backward-compatible shim that maps the legacy props onto those components.
+ * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0Dialog: WithDataTestIdReturnType_3<FC<F0DialogInternalProps>>;
 
@@ -8536,12 +8517,8 @@ export declare type F0DialogActionsProps = {
 
 export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
 
-/**
- * The dialog-alike context, retyped under the original name so the public
- * `Context<F0DialogContextType>` signature is preserved (the runtime value is
- * the same context the dialog-alike components populate).
- * @deprecated Import `F0DialogContext` from `@/components/dialog-alike/F0Dialog`.
- */
+export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -8567,6 +8544,17 @@ export declare type F0DialogPrimaryAction = {
 };
 
 export declare type F0DialogPrimaryActionItem = F0DialogActionItem;
+
+export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
+
+declare type F0DialogProviderProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    shownBottomSheet?: boolean;
+    position: DialogPosition;
+    children: ReactNode;
+    portalContainer: HTMLDivElement | null;
+};
 
 export declare type F0DialogSecondaryAction = {
     label: string;
@@ -11238,7 +11226,7 @@ declare interface F0WizardFormBaseProps {
     onClose?: () => void;
     title?: string;
     /** @deprecated Use `size` instead. */
-    width?: Exclude<F0DialogSize, "fullscreen">;
+    width?: DialogWidth;
     /** The size of the wizard dialog. Preferred over the deprecated `width`. */
     size?: F0DialogSize;
     defaultStepIndex?: number;
@@ -14493,7 +14481,7 @@ declare type Props_3 = {
     list?: TagCounterItem[];
 };
 
-declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
+declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder" | "onClose">;
 
 export declare type QuestionActionParams = {
     questionId: string;
@@ -15358,7 +15346,7 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
     inline?: false;
     mode: SurveyAnsweringFormMode;
     module: SurveyAnsweringFormModule;
-    position?: SurveyDialogPosition;
+    position?: DialogPosition;
     isOpen: boolean;
     onClose: () => void;
     allowToChangeFullscreen?: boolean;
@@ -15468,9 +15456,6 @@ export declare type SurveyDataset = {
 };
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
-
-/** Where the answering dialog is anchored. */
-declare type SurveyDialogPosition = "center" | "left" | "right" | "fullscreen";
 
 export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
@@ -16771,10 +16756,6 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     previousItemUrl: string | null;
 }
 
-declare const useDialogWrapperContext: () => DialogWrapperContextType;
-export { useDialogWrapperContext as useF0Dialog }
-export { useDialogWrapperContext as useF0DialogAlikeContext }
-
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -16802,6 +16783,10 @@ export declare const useEmojiConfetti: () => {
  * Returns null if not inside a F0AiFormRegistryProvider.
  */
 export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | null;
+
+export declare const useF0Dialog: () => F0DialogContextType;
+
+export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
 
 /**
  * Hook to control F0Form programmatically.
