@@ -173,7 +173,11 @@ const F0Wizard = React.memo(function F0Wizard({
           className="flex flex-1" internally (Uniwind + Tailwind), which collapses to 32px
           inside a flex-row container without an explicit height. The View wrapper
           provides the correct stretch behavior. */}
-      <View className={wizardFooterVariants()} onLayout={handleFooterLayout}>
+      <View
+        className={wizardFooterVariants()}
+        onLayout={handleFooterLayout}
+        testID={testID ? `${testID}-footer` : undefined}
+      >
         <View className={wizardFooterButtonVariants()}>
           <F0Button
             label={backButtonLabel}

@@ -8,7 +8,10 @@ import React from "react"
 import { Text } from "react-native"
 
 import { F0Wizard } from "../F0Wizard"
-import type { F0WizardStep } from "../F0Wizard.types"
+import type {
+  F0WizardScrollComponentProps,
+  F0WizardStep,
+} from "../F0Wizard.types"
 
 const makeSteps = (count: number): F0WizardStep[] =>
   Array.from({ length: count }, (_, i) => ({
@@ -407,7 +410,7 @@ describe("F0Wizard", () => {
 
   it("renders step content through an injected ScrollComponent", () => {
     const ScrollComponent = jest.fn(
-      ({ children }: { children?: React.ReactNode }) => <>{children}</>
+      ({ children }: F0WizardScrollComponentProps) => <>{children}</>
     )
 
     render(
@@ -426,7 +429,7 @@ describe("F0Wizard", () => {
 
   it("forwards the measured footer height as bottomOffset to ScrollComponent", async () => {
     const ScrollComponent = jest.fn(
-      ({ children }: { children?: React.ReactNode }) => <>{children}</>
+      ({ children }: F0WizardScrollComponentProps) => <>{children}</>
     )
 
     render(
@@ -438,13 +441,10 @@ describe("F0Wizard", () => {
       />
     )
 
-    // The footer is the only node wiring an onLayout handler; fire it with a
-    // known height and assert F0Wizard forwards it as bottomOffset.
+    // Fire the footer's onLayout with a known height and assert F0Wizard
+    // forwards it to the scroll component as bottomOffset.
     const footerHeight = 72
-    const footer = screen
-      .getByTestId("wizard")
-      .findAll((node) => typeof node.props?.onLayout === "function")[0]
-    fireEvent(footer, "layout", {
+    fireEvent(screen.getByTestId("wizard-footer"), "layout", {
       nativeEvent: { layout: { height: footerHeight, width: 300, x: 0, y: 0 } },
     })
 
@@ -457,7 +457,7 @@ describe("F0Wizard", () => {
 
   it("passes keyboardShouldPersistTaps='handled' to ScrollComponent", () => {
     const ScrollComponent = jest.fn(
-      ({ children }: { children?: React.ReactNode }) => <>{children}</>
+      ({ children }: F0WizardScrollComponentProps) => <>{children}</>
     )
 
     render(
