@@ -54,7 +54,7 @@ export const ChatMessageAttachments = ({
               key={`${image.url}-${i}`}
               type="button"
               onClick={() => openImagePreview(images, i)}
-              className="block overflow-hidden rounded-xl transition-opacity hover:opacity-90"
+              className="flex overflow-hidden rounded-xl transition-opacity hover:opacity-90"
               aria-label={i18n.chat.openImage}
             >
               <img
