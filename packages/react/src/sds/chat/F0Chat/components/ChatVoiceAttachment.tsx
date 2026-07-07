@@ -196,7 +196,7 @@ export const ChatVoiceAttachment = ({
         ))}
       </div>
 
-      <span className="shrink-0 text-sm tabular-nums text-f1-foreground-secondary">
+      <span className="shrink-0 text-base tabular-nums text-f1-foreground-secondary">
         {formatTime(
           player.isPlaying || player.currentTime > 0
             ? player.currentTime
@@ -204,15 +204,16 @@ export const ChatVoiceAttachment = ({
         )}
       </span>
 
-      <button
-        type="button"
-        onClick={handleCycleRate}
-        aria-label={i18n.audioPlayer.playbackSpeed}
-        className="shrink-0 rounded-full bg-f1-background-secondary px-2 py-0.5 text-sm font-medium text-f1-foreground-secondary transition-colors hover:bg-f1-background-hover"
-        data-testid="chat-voice-rate"
-      >
-        {`${PLAYBACK_RATES[rateIndex]}x`}
-      </button>
+      <div className="shrink-0">
+        <ButtonInternal
+          variant="ghost"
+          size="sm"
+          label={`${PLAYBACK_RATES[rateIndex]}x`}
+          aria-label={i18n.audioPlayer.playbackSpeed}
+          onClick={handleCycleRate}
+          data-testid="chat-voice-rate"
+        />
+      </div>
     </div>
   )
 }

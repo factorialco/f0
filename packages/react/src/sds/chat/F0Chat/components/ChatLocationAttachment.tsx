@@ -52,6 +52,7 @@ export const ChatLocationAttachment = ({
       rel="noopener noreferrer"
       className={cn(
         "flex w-full flex-col overflow-hidden bg-f1-background-tertiary no-underline transition-colors hover:bg-f1-background-secondary",
+        "border border-solid border-f1-border-secondary",
         cornerClass
       )}
       data-testid="chat-location-attachment"
