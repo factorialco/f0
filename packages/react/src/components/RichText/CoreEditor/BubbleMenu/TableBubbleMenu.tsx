@@ -61,6 +61,22 @@ export const TableBubbleMenu = ({
   // Direct quick-access icon buttons, grouped so dividers separate them.
   // Inserts use directional arrows (where the new column/row will go).
   const renderMenu = () => {
+    // Whether the table has a header row (its first row is made of header
+    // cells) — independent of where the cursor sits, so the toggle's state
+    // isn't misleading when the cursor is in a body cell.
+    const hasHeaderRow = (() => {
+      const { $from } = editor.state.selection
+      for (let depth = $from.depth; depth > 0; depth--) {
+        if ($from.node(depth).type.name === "table") {
+          return (
+            $from.node(depth).firstChild?.firstChild?.type.name ===
+            "tableHeader"
+          )
+        }
+      }
+      return false
+    })()
+
     const groups: TableAction[][] = [
       [
         {
@@ -108,7 +124,7 @@ export const TableBubbleMenu = ({
         {
           icon: Table,
           label: t.toggleHeaderRow,
-          active: editor.isActive("tableHeader"),
+          active: hasHeaderRow,
           onClick: () => editor.chain().focus().toggleHeaderRow().run(),
           disabled: !editor.can().toggleHeaderRow(),
         },
@@ -176,6 +192,17 @@ export const TableBubbleMenu = ({
             ? document.body
             : document.getElementById(editorId) || document.body,
         zIndex: 9999,
+        // Anchor the menu to the whole table's bounding box (so it sits under
+        // the table) instead of the default collapsed-cursor rect, which would
+        // drop it below the current cell and overlap the rows underneath.
+        getReferenceClientRect: () => {
+          const { view, state } = editor
+          const domNode = view.domAtPos(state.selection.from).node
+          const startEl =
+            domNode instanceof HTMLElement ? domNode : domNode.parentElement
+          const tableEl = startEl?.closest("table")
+          return (tableEl ?? view.dom).getBoundingClientRect()
+        },
       }}
       shouldShow={({ editor }) => editor.isEditable && editor.isActive("table")}
     >
