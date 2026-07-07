@@ -48,14 +48,15 @@ describe("ChatLocationAttachment", () => {
     expect(link.className).not.toContain("rounded-xl ")
   })
 
-  it("shows the place name, falling back to the generic label", () => {
+  it("is a map-only card (no footer text)", () => {
     render(<ChatLocationAttachment location={LOCATION} />)
-    expect(screen.getByText("Factorial HQ")).toBeInTheDocument()
-
+    expect(screen.queryByText("Factorial HQ")).not.toBeInTheDocument()
+    // The generic label only titles the iframe when no name is given.
     render(
       <ChatLocationAttachment location={{ ...LOCATION, name: undefined }} />
     )
-    expect(screen.getByText("Location")).toBeInTheDocument()
+    expect(screen.queryByText("Location")).not.toBeInTheDocument()
+    expect(screen.getByTitle("Location")).toBeInTheDocument()
   })
 })
 

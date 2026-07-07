@@ -1,5 +1,4 @@
 import { type ReactNode } from "react"
-import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -32,9 +31,9 @@ const mapsUrl = ({ latitude, longitude }: F0ChatLocationAttachment): string =>
 
 /**
  * A shared location: an embedded OpenStreetMap preview (keyless — no maps API
- * token needed) with a footer naming the place; clicking anywhere opens the
- * point in Google Maps in a new tab. The iframe is pointer-inert so the click
- * always lands on the surrounding link.
+ * token needed); clicking anywhere opens the point in Google Maps in a new
+ * tab. The iframe is pointer-inert so the click always lands on the
+ * surrounding link. Map-only card, mirroring the mobile app.
  */
 export const ChatLocationAttachment = ({
   location,
@@ -63,11 +62,6 @@ export const ChatLocationAttachment = ({
         loading="lazy"
         className="pointer-events-none h-fit w-full border-0"
       />
-      <div className="flex min-w-0 items-center gap-1.5 p-2.5">
-        <OneEllipsis className="text-sm font-medium text-f1-foreground">
-          {location.name ?? i18n.chat.location}
-        </OneEllipsis>
-      </div>
     </a>
   )
 }
