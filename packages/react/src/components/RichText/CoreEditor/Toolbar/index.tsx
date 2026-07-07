@@ -218,6 +218,11 @@ export const Toolbar = ({
   const formattingGroup = renderButtons(formatButtons)
   const textSizeGroup = renderButtons(headingButtons)
 
+  // Inside a table cell we keep simple formatting (inline marks, lists, text
+  // alignment) but hide the block-level controls that make no sense in a cell:
+  // headings and the code/divider/quote/details dropdown.
+  const isInTableCell = editor.isActive("table")
+
   const moreOptionsGroup = (
     <div className="flex flex-row items-center gap-0.5">
       <ToolbarDropdown
@@ -262,40 +267,42 @@ export const Toolbar = ({
 
       {renderButtons(listButtons)}
 
-      <ToolbarDropdown
-        darkMode={darkMode}
-        items={[
-          {
-            icon: Code,
-            label: translations.richTextEditor.codeBlock,
-            onClick: () => editor.chain().focus().toggleCodeBlock().run(),
-            isActive: editor.isActive("codeBlock"),
-          },
-          {
-            icon: Minus,
-            label: translations.richTextEditor.divider,
-            onClick: () => editor.chain().focus().setHorizontalRule().run(),
-            isActive: editor.isActive("horizontalRule"),
-          },
-          {
-            icon: Quote,
-            label: translations.richTextEditor.quote,
-            onClick: () => editor.chain().focus().toggleBlockquote().run(),
-            isActive: editor.isActive("blockquote"),
-          },
-          {
-            icon: ChevronDown,
-            label: translations.richTextEditor.details,
-            onClick: () => editor.chain().focus().setDetails().run(),
-            isActive: editor.isActive("details"),
-          },
-        ]}
-        disabled={disableButtons}
-        activator={{
-          label: translations.richTextEditor.moreOptions,
-          icon: Ellipsis,
-        }}
-      />
+      {!isInTableCell && (
+        <ToolbarDropdown
+          darkMode={darkMode}
+          items={[
+            {
+              icon: Code,
+              label: translations.richTextEditor.codeBlock,
+              onClick: () => editor.chain().focus().toggleCodeBlock().run(),
+              isActive: editor.isActive("codeBlock"),
+            },
+            {
+              icon: Minus,
+              label: translations.richTextEditor.divider,
+              onClick: () => editor.chain().focus().setHorizontalRule().run(),
+              isActive: editor.isActive("horizontalRule"),
+            },
+            {
+              icon: Quote,
+              label: translations.richTextEditor.quote,
+              onClick: () => editor.chain().focus().toggleBlockquote().run(),
+              isActive: editor.isActive("blockquote"),
+            },
+            {
+              icon: ChevronDown,
+              label: translations.richTextEditor.details,
+              onClick: () => editor.chain().focus().setDetails().run(),
+              isActive: editor.isActive("details"),
+            },
+          ]}
+          disabled={disableButtons}
+          activator={{
+            label: translations.richTextEditor.moreOptions,
+            icon: Ellipsis,
+          }}
+        />
+      )}
     </div>
   )
 
@@ -312,16 +319,12 @@ export const Toolbar = ({
     />
   )
 
-  // Inside a table cell only simple inline formatting makes sense — hide the
-  // block-level controls (headings, lists, alignment, code, quote, divider…).
-  const isInTableCell = editor.isActive("table")
-
   const groups = compact([
     linkGroup,
     showEmojiPicker && !disableButtons && emojiGroup,
     formattingGroup,
     !isInTableCell && textSizeGroup,
-    !isInTableCell && moreOptionsGroup,
+    moreOptionsGroup,
   ])
 
   return (
