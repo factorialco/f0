@@ -144,7 +144,9 @@ export const ChatVoiceAttachment = ({
   return (
     <div
       className={cn(
-        "group/voice flex min-w-54 max-w-full items-center gap-2 border border-solid pl-2 pr-3.5 py-2.5",
+        // Fills whatever width the message column offers (responsive), but
+        // never collapses below a usable minimum.
+        "group/voice flex w-full min-w-54 max-w-full items-center gap-2 border border-solid pl-2 pr-3.5 py-2.5",
         // Bubble-matching surface: mine grey, others white with the border.
         isMine
           ? "border-f1-background bg-f1-background-tertiary"
@@ -173,7 +175,9 @@ export const ChatVoiceAttachment = ({
       <div
         ref={barsRef}
         onClick={handleSeek}
-        className="flex h-6 min-w-0 flex-1 cursor-pointer items-center gap-[2px]"
+        // justify-between spreads the fixed set of bars across whatever width
+        // the card gets, so the waveform stays proportioned at any size.
+        className="flex h-6 min-w-0 flex-1 cursor-pointer items-center justify-between gap-[2px]"
         role="slider"
         aria-label={i18n.audioPlayer.seek}
         aria-valuemin={0}

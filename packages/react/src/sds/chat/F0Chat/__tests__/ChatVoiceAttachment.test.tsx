@@ -29,6 +29,13 @@ describe("ChatVoiceAttachment", () => {
     expect(waveform.querySelectorAll("span").length).toBe(32)
   })
 
+  it("stretches to the available width while keeping a minimum size", () => {
+    render(<ChatVoiceAttachment voice={VOICE} />)
+    const card = screen.getByTestId("chat-voice-attachment")
+    expect(card.className).toContain("w-full")
+    expect(card.className).toContain("min-w-54")
+  })
+
   it("shows the total duration before playback starts", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     expect(screen.getByText("0:04")).toBeInTheDocument()
