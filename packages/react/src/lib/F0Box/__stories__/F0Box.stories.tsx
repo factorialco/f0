@@ -320,6 +320,10 @@ const meta = {
       control: "select",
       options: [undefined, "nowrap", "wrap", "wrap-reverse"],
     },
+    flex: {
+      control: "select",
+      options: [undefined, "1", "auto", "initial", "none"],
+    },
     grow: { control: "boolean" },
     shrink: { control: "boolean" },
   },

@@ -287,6 +287,9 @@ export type FlexDirectionToken =
 /** Flex wrap */
 export type FlexWrapToken = "nowrap" | "wrap" | "wrap-reverse"
 
+/** Flex shorthand (grow/shrink/basis). Mirrors Tailwind's `flex-*` utilities. */
+export type FlexToken = "1" | "auto" | "initial" | "none"
+
 /** CSS position */
 export type PositionToken =
   | "static"
