@@ -24,7 +24,6 @@ interface TableBubbleMenuProps {
 }
 
 interface TableAction {
-  key: string
   icon: IconType
   label: string
   onClick: () => void
@@ -51,116 +50,99 @@ export const TableBubbleMenu = ({
   const translations = useI18n()
   const t = translations.richTextEditor.tableMenu
 
-  // If the table extension isn't loaded there is nothing to control (and the
-  // table commands won't exist on `editor.can()`), so render nothing.
-  if (typeof editor.can().deleteTable !== "function") return null
+  // Nothing to control if the table extension isn't registered.
+  if (!editor.schema.nodes.table) return null
+
+  // The `<BubbleMenu>` wrapper stays mounted so its plugin keeps watching for
+  // the selection entering a table, but the menu content (and the eager
+  // `editor.can()` probes it needs) is only built while actually inside one.
+  const inTable = editor.isEditable && editor.isActive("table")
 
   // Direct quick-access icon buttons, grouped so dividers separate them.
   // Inserts use directional arrows (where the new column/row will go).
-  const groups: TableAction[][] = [
-    [
-      {
-        key: "addColumnBefore",
-        icon: ArrowLeft,
-        label: t.addColumnBefore,
-        onClick: () => editor.chain().focus().addColumnBefore().run(),
-        disabled: !editor.can().addColumnBefore(),
-      },
-      {
-        key: "addColumnAfter",
-        icon: ArrowRight,
-        label: t.addColumnAfter,
-        onClick: () => editor.chain().focus().addColumnAfter().run(),
-        disabled: !editor.can().addColumnAfter(),
-      },
-    ],
-    [
-      {
-        key: "addRowBefore",
-        icon: ArrowUp,
-        label: t.addRowBefore,
-        onClick: () => editor.chain().focus().addRowBefore().run(),
-        disabled: !editor.can().addRowBefore(),
-      },
-      {
-        key: "addRowAfter",
-        icon: ArrowDown,
-        label: t.addRowAfter,
-        onClick: () => editor.chain().focus().addRowAfter().run(),
-        disabled: !editor.can().addRowAfter(),
-      },
-    ],
-    [
-      {
-        key: "mergeCells",
-        icon: Group,
-        label: t.mergeCells,
-        onClick: () => editor.chain().focus().mergeCells().run(),
-        disabled: !editor.can().mergeCells(),
-      },
-      {
-        key: "splitCell",
-        icon: Split,
-        label: t.splitCell,
-        onClick: () => editor.chain().focus().splitCell().run(),
-        disabled: !editor.can().splitCell(),
-      },
-    ],
-    [
-      {
-        key: "toggleHeaderRow",
-        icon: Table,
-        label: t.toggleHeaderRow,
-        active: editor.isActive("tableHeader"),
-        onClick: () => editor.chain().focus().toggleHeaderRow().run(),
-        disabled: !editor.can().toggleHeaderRow(),
-      },
-    ],
-  ]
+  const renderMenu = () => {
+    const groups: TableAction[][] = [
+      [
+        {
+          icon: ArrowLeft,
+          label: t.addColumnBefore,
+          onClick: () => editor.chain().focus().addColumnBefore().run(),
+          disabled: !editor.can().addColumnBefore(),
+        },
+        {
+          icon: ArrowRight,
+          label: t.addColumnAfter,
+          onClick: () => editor.chain().focus().addColumnAfter().run(),
+          disabled: !editor.can().addColumnAfter(),
+        },
+      ],
+      [
+        {
+          icon: ArrowUp,
+          label: t.addRowBefore,
+          onClick: () => editor.chain().focus().addRowBefore().run(),
+          disabled: !editor.can().addRowBefore(),
+        },
+        {
+          icon: ArrowDown,
+          label: t.addRowAfter,
+          onClick: () => editor.chain().focus().addRowAfter().run(),
+          disabled: !editor.can().addRowAfter(),
+        },
+      ],
+      [
+        {
+          icon: Group,
+          label: t.mergeCells,
+          onClick: () => editor.chain().focus().mergeCells().run(),
+          disabled: !editor.can().mergeCells(),
+        },
+        {
+          icon: Split,
+          label: t.splitCell,
+          onClick: () => editor.chain().focus().splitCell().run(),
+          disabled: !editor.can().splitCell(),
+        },
+      ],
+      [
+        {
+          icon: Table,
+          label: t.toggleHeaderRow,
+          active: editor.isActive("tableHeader"),
+          onClick: () => editor.chain().focus().toggleHeaderRow().run(),
+          disabled: !editor.can().toggleHeaderRow(),
+        },
+      ],
+    ]
 
-  // The three destructive actions live behind a single trash dropdown so they
-  // are not confused with one another.
-  const deleteItems = [
-    {
-      icon: Delete,
-      label: t.deleteColumn,
-      onClick: () => editor.chain().focus().deleteColumn().run(),
-    },
-    {
-      icon: Delete,
-      label: t.deleteRow,
-      onClick: () => editor.chain().focus().deleteRow().run(),
-    },
-    {
-      icon: Delete,
-      label: t.deleteTable,
-      onClick: () => editor.chain().focus().deleteTable().run(),
-    },
-  ]
+    // The three destructive actions live behind a single trash dropdown so
+    // they are not confused with one another.
+    const deleteItems = [
+      {
+        icon: Delete,
+        label: t.deleteColumn,
+        onClick: () => editor.chain().focus().deleteColumn().run(),
+      },
+      {
+        icon: Delete,
+        label: t.deleteRow,
+        onClick: () => editor.chain().focus().deleteRow().run(),
+      },
+      {
+        icon: Delete,
+        label: t.deleteTable,
+        onClick: () => editor.chain().focus().deleteTable().run(),
+      },
+    ]
 
-  return (
-    <BubbleMenu
-      pluginKey="tableBubbleMenu"
-      editor={editor}
-      tippyOptions={{
-        duration: 100,
-        placement: "bottom",
-        hideOnClick: false,
-        appendTo: () =>
-          isFullscreen
-            ? document.body
-            : document.getElementById(editorId) || document.body,
-        zIndex: 9999,
-      }}
-      shouldShow={({ editor }) => editor.isEditable && editor.isActive("table")}
-    >
+    return (
       <div className="dark z-50 flex w-max flex-row items-center gap-0.5 rounded-lg border border-solid border-f1-border bg-f1-background p-1 drop-shadow-sm">
         {groups.map((group, groupIndex) => (
-          <Fragment key={group[0]?.key ?? groupIndex}>
+          <Fragment key={group[0]?.label ?? groupIndex}>
             {groupIndex > 0 && <ToolbarDivider />}
             {group.map((action) => (
               <F0ButtonToggle
-                key={action.key}
+                key={action.label}
                 label={action.label}
                 icon={action.icon}
                 selected={action.active ?? false}
@@ -178,6 +160,26 @@ export const TableBubbleMenu = ({
           items={deleteItems}
         />
       </div>
+    )
+  }
+
+  return (
+    <BubbleMenu
+      pluginKey="tableBubbleMenu"
+      editor={editor}
+      tippyOptions={{
+        duration: 100,
+        placement: "bottom",
+        hideOnClick: false,
+        appendTo: () =>
+          isFullscreen
+            ? document.body
+            : document.getElementById(editorId) || document.body,
+        zIndex: 9999,
+      }}
+      shouldShow={({ editor }) => editor.isEditable && editor.isActive("table")}
+    >
+      {inTable ? renderMenu() : null}
     </BubbleMenu>
   )
 }
