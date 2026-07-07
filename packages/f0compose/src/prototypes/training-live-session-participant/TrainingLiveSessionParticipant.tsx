@@ -53,6 +53,7 @@ import {
   ChartLine,
   CheckCircle,
   CheckDouble,
+  ChevronDown,
   Comment,
   Cross,
   Delete,
@@ -88,6 +89,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react"
 import { useSearchParams } from "react-router-dom"
@@ -584,7 +586,7 @@ const sessionModalityOptions: Array<{
 // in-Factorial call features).
 const videoCallOptions: Array<{ value: "factorial" | "external"; label: string; description: string; icon: IconType }> = [
   { value: "factorial", label: "In Factorial", description: "Runs in Factorial", icon: LogoAvatar },
-  { value: "external", label: "Externally hosted", description: "Runs outside Factorial", icon: ExternalLink },
+  { value: "external", label: "External app", description: "Runs in another video app (e.g. Zoom, Google Meet)", icon: ExternalLink },
 ]
 
 function SessionToggleField({ label, children }: { label: string; children: ReactNode }) {
@@ -1804,9 +1806,9 @@ function TrainingLiveSessionsExperience({ role }: { role: LiveSessionRole }) {
     const groupParams = { view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", session: session.id, stab: "details" }
     const endSession = () => {
       setEndedSessionIds((currentIds) => currentIds.includes(session.id) ? currentIds : [...currentIds, session.id])
-      // Leave the live room and land on the group's Sessions; the attendance
-      // review modal opens there (endReview flag), not over the live room.
-      setSearchParams({ view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", endReview: session.id })
+      // Leave the live room and land on the session's sidepanel, already open on
+      // the Attendance tab (no attendance-review modal anymore).
+      setSearchParams({ view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", session: session.id, stab: "attendance" })
     }
     if (view === "session-waiting-room" && role === "participant") {
       return <SessionWaitingRoomScreen course={selectedCourse} groupName={groupName} session={session} onExit={() => setSearchParams(groupParams)} />
@@ -4176,12 +4178,6 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
     setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions", session: sessionId, stab: "details" })
   }
 
-  // Set by ending a session in the live room: show the attendance-review modal
-  // here, on the screen after the session, then clear it on confirm.
-  const showEndReview = Boolean(searchParams.get("endReview"))
-  const closeEndReview = () =>
-    setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions" })
-
   return (
     <Page
       header={
@@ -4251,7 +4247,6 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
               onToast("draft")
             }}
           />
-          <EndSessionModal isOpen={showEndReview} onClose={closeEndReview} onConfirm={closeEndReview} />
           <TrainingActionDialog
             detail={activeDialog ? getGroupActionDetail(activeDialog, groupName) : null}
             onClose={() => setActiveDialog(null)}
@@ -4560,6 +4555,24 @@ const sessionFormSchema = z.object({
   }),
 })
 
+// Pre-fill date and time like a calendar does: start at the next full hour from
+// now, end one hour later, dated today.
+function getSessionFormDefaults() {
+  const now = new Date()
+  const start = new Date(now)
+  start.setMinutes(0, 0, 0)
+  start.setHours(now.getHours() + 1)
+  const end = new Date(start)
+  end.setHours(start.getHours() + 1)
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return {
+    ...sessionFormDefaultValues,
+    date: `${pad(start.getDate())}/${pad(start.getMonth() + 1)}/${start.getFullYear()}`,
+    startsAt: `${pad(start.getHours())}:00`,
+    endsAt: `${pad(end.getHours())}:00`,
+  }
+}
+
 const sessionFormDefaultValues = {
   name: "Fundamentos ISO 9001",
   date: "",
@@ -4579,11 +4592,12 @@ const sessionFormDefaultValues = {
 }
 
 function SessionFormBody({ onClose, onSave }: { onClose: () => void; onSave: () => void }) {
+  const defaultValues = useMemo(getSessionFormDefaults, [])
   const formDefinition = useF0FormDefinition({
     name: "create-session",
     schema: sessionFormSchema,
     sections: sessionFormSections,
-    defaultValues: sessionFormDefaultValues,
+    defaultValues,
     onSubmit: async () => {
       onSave()
       return { success: true }
@@ -5182,52 +5196,6 @@ function LiveSessionNotesDrawer({ session, scope }: { session: GroupSessionRow; 
   )
 }
 
-function EndSessionModal({ isOpen, onClose, onConfirm }: { isOpen: boolean; onClose: () => void; onConfirm: () => void }) {
-  // "quita la x": F0Dialog always renders a close (X) and exposes no prop to
-  // hide it, so we hide it for this dialog only. The action is "Confirm attendance".
-  useEffect(() => {
-    if (!isOpen) return
-    let attempts = 0
-    const tick = () => {
-      let hidden = false
-      document.querySelectorAll('[role="dialog"]').forEach((dialog) => {
-        if (!/Review attendance/.test(dialog.textContent ?? "")) return
-        dialog
-          .querySelectorAll<HTMLElement>('button[aria-label="Close"]')
-          .forEach((button) => {
-            button.style.opacity = "0"
-            button.style.pointerEvents = "none"
-            hidden = true
-          })
-      })
-      attempts += 1
-      if (hidden || attempts > 20) window.clearInterval(id)
-    }
-    const id = window.setInterval(tick, 50)
-    tick()
-    return () => window.clearInterval(id)
-  }, [isOpen])
-
-  const rows = sessionAttendance.map((row) => ({ ...row, attendance: attendanceFromThreshold(row.completedHours) }))
-  const attendedCount = rows.filter((row) => row.attendance === "Attended").length
-
-  return (
-    <F0Dialog
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Session ended. Review attendance"
-      description={`Attendance is automatically calculated from time spent in the session; anyone below ${COMPLETION_THRESHOLD_PCT}% is marked as “Not attended”. You can also edit this later in the Attendance tab.`}
-      width="xl"
-      primaryAction={{ label: "Confirm attendance", onClick: onConfirm }}
-    >
-      <F0Box display="flex" flexDirection="column" gap="sm">
-        <F0Text variant="description" content={`${attendedCount} of ${rows.length} attended`} />
-        <SessionAttendanceTable isEnded variant="modal" />
-      </F0Box>
-    </F0Dialog>
-  )
-}
-
 function FullscreenCallSurface({ children }: { children: ReactNode }) {
   return (
     <F0BoxWithClassName
@@ -5332,27 +5300,26 @@ function CallTopBar({
           <F0TagStatus text={statusTag.text} variant={statusTag.variant} />
           <F0Text content={timeText} variant="body" />
           {isInstructor && showLive && totalInvited > 0 ? (
-            <>
-              <F0BoxWithClassName height="4" width="0.5" background="tertiary" />
-              <F0BoxWithClassName
-                className="shrink-0 cursor-pointer rounded-full hover:bg-f1-background-secondary"
-                role="button"
-                aria-label="See who's in the call"
-                tabIndex={0}
-                onClick={onOpenParticipants}
-                display="flex"
-                alignItems="center"
-                paddingX="xs"
-                paddingY="xs"
-              >
-                <F0AvatarList
-                  avatars={attendees.map((p) => ({ type: "person", firstName: p.name.split(" ")[0] ?? p.name, lastName: p.name.split(" ")[1] ?? "" }))}
-                  size="sm"
-                  type="person"
-                  max={5}
-                />
+            <F0BoxWithClassName
+              className="cursor-pointer rounded-full hover:bg-f1-background-secondary"
+              role="button"
+              aria-label="See who's in the call"
+              tabIndex={0}
+              onClick={onOpenParticipants}
+              paddingX="xs"
+              paddingY="xs"
+              style={{ display: "inline-flex", flexWrap: "nowrap", alignItems: "center", gap: 6, flexShrink: 0, width: "fit-content" }}
+            >
+              <F0AvatarList
+                avatars={attendees.map((p) => ({ type: "person", firstName: p.name.split(" ")[0] ?? p.name, lastName: p.name.split(" ")[1] ?? "" }))}
+                size="sm"
+                type="person"
+                max={5}
+              />
+              <F0BoxWithClassName display="flex" className="text-f1-foreground-secondary">
+                <F0Icon icon={ChevronDown} size="sm" />
               </F0BoxWithClassName>
-            </>
+            </F0BoxWithClassName>
           ) : null}
         </F0Box>
       </F0Box>
@@ -5427,6 +5394,7 @@ function SessionRoomScreen({
   const [cameraEnabled, setCameraEnabled] = useState(true)
   const [screenShareEnabled, setScreenShareEnabled] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [confirmEnd, setConfirmEnd] = useState(false)
   const [activePanel, setActivePanel] = useState<LiveSessionPanelId>(null)
   const isInstructor = role === "instructor"
   const liveParticipants = groupParticipants.slice(0, 10)
@@ -5483,16 +5451,27 @@ function SessionRoomScreen({
           <F0ButtonToggle label={["Open notes", "Close notes"]} icon={[BookOpen, BookOpen]} selected={activePanel === "notes"} onSelectedChange={() => togglePanel("notes")} />
           <F0Button label="Settings" hideLabel icon={Settings} variant="outline" onClick={() => setSettingsOpen(true)} />
           {/* One CTA only: "Exit". For the instructor once the class is live it
-              doubles as ending the session (opens the attendance review); before
-              that, and for participants, it just leaves the room. */}
+              ends the session (after a confirm); before that, and for
+              participants, it just leaves the room. */}
           {isInstructor && canEndSession ? (
-            <F0Button label="Exit" variant="critical" onClick={onEndSession} />
+            <F0Button label="Exit" variant="critical" onClick={() => setConfirmEnd(true)} />
           ) : (
             <F0Button label="Exit" variant="critical" onClick={onExit} />
           )}
         </F0BoxWithClassName>
       </F0BoxWithClassName>
       <RoomSettingsDialog isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <F0Dialog
+        isOpen={confirmEnd}
+        onClose={() => setConfirmEnd(false)}
+        position="center"
+        width="sm"
+        title="End session for everyone?"
+        primaryAction={{ label: "End session", onClick: () => { setConfirmEnd(false); onEndSession?.() } }}
+        secondaryAction={{ label: "Cancel", onClick: () => setConfirmEnd(false) }}
+      >
+        <F0Text variant="body" content="If you exit, the session ends for all participants. You'll go straight to the attendance review." />
+      </F0Dialog>
     </FullscreenCallSurface>
   )
 }
