@@ -34,6 +34,16 @@ describe("ChatVoiceAttachment", () => {
     expect(screen.getByText("0:04")).toBeInTheDocument()
   })
 
+  it("swaps the duration for the speed pill on hover (group classes)", () => {
+    render(<ChatVoiceAttachment voice={VOICE} />)
+    expect(screen.getByTestId("chat-voice-time").className).toContain(
+      "group-hover/voice:hidden"
+    )
+    const pillWrapper = screen.getByTestId("chat-voice-rate").closest("div")
+    expect(pillWrapper?.className).toContain("hidden")
+    expect(pillWrapper?.className).toContain("group-hover/voice:block")
+  })
+
   it("cycles the playback rate 1x → 1.5x → 2x → 0.5x on the speed pill", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const pill = screen.getByTestId("chat-voice-rate")

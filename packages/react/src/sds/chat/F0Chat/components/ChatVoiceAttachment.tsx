@@ -144,7 +144,7 @@ export const ChatVoiceAttachment = ({
   return (
     <div
       className={cn(
-        "flex min-w-54 max-w-full items-center gap-2 border border-solid pl-2 pr-3.5 py-2.5",
+        "group/voice flex min-w-54 max-w-full items-center gap-2 border border-solid pl-2 pr-3.5 py-2.5",
         // Bubble-matching surface: mine grey, others white with the border.
         isMine
           ? "border-f1-background bg-f1-background-tertiary"
@@ -196,7 +196,12 @@ export const ChatVoiceAttachment = ({
         ))}
       </div>
 
-      <span className="shrink-0 text-base tabular-nums text-f1-foreground-secondary">
+      {/* The duration and the speed pill share the trailing slot: hovering the
+          card (or tabbing into it) swaps the time for the speed control. */}
+      <span
+        className="shrink-0 text-base tabular-nums text-f1-foreground-secondary group-focus-within/voice:hidden group-hover/voice:hidden"
+        data-testid="chat-voice-time"
+      >
         {formatTime(
           player.isPlaying || player.currentTime > 0
             ? player.currentTime
@@ -204,7 +209,7 @@ export const ChatVoiceAttachment = ({
         )}
       </span>
 
-      <div className="shrink-0">
+      <div className="hidden shrink-0 group-focus-within/voice:block group-hover/voice:block">
         <ButtonInternal
           variant="ghost"
           size="sm"
