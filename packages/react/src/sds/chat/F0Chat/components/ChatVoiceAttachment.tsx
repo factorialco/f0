@@ -144,7 +144,7 @@ export const ChatVoiceAttachment = ({
   return (
     <div
       className={cn(
-        "flex min-w-54 max-w-full items-center gap-2 border border-solid px-3.5 py-2.5",
+        "flex min-w-54 max-w-full items-center gap-2 border border-solid pl-2 pr-3.5 py-2.5",
         // Bubble-matching surface: mine grey, others white with the border.
         isMine
           ? "border-f1-background bg-f1-background-tertiary"
@@ -160,7 +160,7 @@ export const ChatVoiceAttachment = ({
       <div className="shrink-0" data-testid="chat-voice-toggle">
         <ButtonInternal
           variant="outline"
-          size="sm"
+          size="md"
           hideLabel
           label={
             player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
