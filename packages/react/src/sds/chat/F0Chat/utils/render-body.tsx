@@ -1,10 +1,14 @@
 import { Fragment, type ReactNode } from "react"
 import { parse } from "twemoji-parser"
 
+import { F0Link } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
 
 import { type F0ChatUser } from "../types"
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
+
+/** URLs in a body render as clickable links (matches the mobile bubble). */
+const URL_REGEX = /(https?:\/\/[^\s]+)/g
 
 /** Twemoji SVG source — shared with the bubble, reactions and the composer. */
 const buildUrl = (codePoints: string) =>
@@ -45,6 +49,35 @@ export const renderBodyWithEmojis = (body: string): ReactNode => {
   return nodes
 }
 
+/**
+ * Render a body with its URLs as clickable {@link F0Link}s (new tab) and
+ * everything else through {@link renderBodyWithEmojis}. `stopPropagation` keeps
+ * a link click from also triggering the message row's own handlers.
+ *
+ * Pure (no hooks): callers memoize the result per message.
+ */
+export const renderBodyWithLinks = (body: string): ReactNode => {
+  // Split on a capturing group: URLs land at the odd indices.
+  const parts = body.split(URL_REGEX)
+  if (parts.length === 1) return renderBodyWithEmojis(body)
+  return parts.map((part, i) => {
+    if (part.length === 0) return null
+    return i % 2 === 1 ? (
+      <F0Link
+        key={`link-${i}`}
+        href={part}
+        target="_blank"
+        stopPropagation
+        className="whitespace-normal break-all"
+      >
+        {part}
+      </F0Link>
+    ) : (
+      <Fragment key={`text-${i}`}>{renderBodyWithEmojis(part)}</Fragment>
+    )
+  })
+}
+
 /** A `@name` token to highlight in a message body. Slack-style colours: a
  * mention of someone else reads in info colours; a mention of you (`isSelf`) or
  * the whole group (`isEveryone`, `@here`) reads in warning/amber. `user`, when
@@ -58,7 +91,7 @@ export type MentionToken = {
 
 /**
  * Render a body with its `@name` mentions as chips and everything else through
- * {@link renderBodyWithEmojis}. Slack-style: a mention of someone else is an
+ * {@link renderBodyWithLinks} (links + emojis). Slack-style: a mention of someone else is an
  * info pill (and opens their profile hover card, like the sender avatar); a
  * mention of you or `@here` is an amber/warning pill that stands out. Falls back
  * to plain emoji rendering when there are no mentions.
@@ -69,7 +102,7 @@ export const renderBodyWithMentions = (
   body: string,
   tokens: MentionToken[]
 ): ReactNode => {
-  if (tokens.length === 0) return renderBodyWithEmojis(body)
+  if (tokens.length === 0) return renderBodyWithLinks(body)
 
   // Collect every `@name` occurrence (longest names first so "@Ana María" wins
   // over "@Ana"), then drop overlaps left-to-right.
@@ -94,7 +127,7 @@ export const renderBodyWithMentions = (
     clean.push(range)
     lastEnd = range.end
   }
-  if (clean.length === 0) return renderBodyWithEmojis(body)
+  if (clean.length === 0) return renderBodyWithLinks(body)
 
   const nodes: ReactNode[] = []
   let cursor = 0
@@ -102,7 +135,7 @@ export const renderBodyWithMentions = (
     if (range.start > cursor) {
       nodes.push(
         <Fragment key={`t-${i}`}>
-          {renderBodyWithEmojis(body.slice(cursor, range.start))}
+          {renderBodyWithLinks(body.slice(cursor, range.start))}
         </Fragment>
       )
     }
@@ -135,7 +168,7 @@ export const renderBodyWithMentions = (
   if (cursor < body.length) {
     nodes.push(
       <Fragment key="t-last">
-        {renderBodyWithEmojis(body.slice(cursor))}
+        {renderBodyWithLinks(body.slice(cursor))}
       </Fragment>
     )
   }

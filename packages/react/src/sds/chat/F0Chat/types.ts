@@ -86,7 +86,52 @@ export type F0ChatFileAttachment = {
   progress?: number
 }
 
-export type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment
+/**
+ * A shared (static) location. Rendered as a map preview card that opens the
+ * point in Google Maps; the host maps it to its transport's shape (factorial →
+ * a Stream custom attachment `{ type: "location", latitude, longitude }`).
+ */
+export type F0ChatLocationAttachment = {
+  kind: "location"
+  latitude: number
+  longitude: number
+  /** Optional place label shown under the map. */
+  name?: string
+}
+
+/**
+ * A voice note: recorded in the composer (mic button) and rendered as an audio
+ * player with playback-speed control. factorial → a Stream attachment
+ * `{ type: "voice_recording", asset_url, duration }`.
+ */
+export type F0ChatVoiceAttachment = {
+  kind: "voice"
+  url: string
+  /** Recording length in seconds (shown before playback starts). */
+  durationSeconds?: number
+  mimeType?: string
+  name?: string
+}
+
+export type F0ChatAttachment =
+  | F0ChatImageAttachment
+  | F0ChatFileAttachment
+  | F0ChatLocationAttachment
+  | F0ChatVoiceAttachment
+
+/**
+ * Open Graph preview of a URL in the body (WhatsApp-style card above the text).
+ * The host provides scraped metadata — F0 never fetches the URL itself
+ * (factorial → Stream's URL enrichment attachments, `og_scrape_url`).
+ */
+export type F0ChatLinkPreview = {
+  /** The link the card opens (the scraped page). */
+  url: string
+  title?: string
+  description?: string
+  /** Preview image (Open Graph `og:image`). */
+  imageUrl?: string
+}
 
 export type F0ChatReaction = {
   emoji: string
@@ -122,6 +167,13 @@ export type F0ChatMessage = {
   readAt?: string
   reactions?: F0ChatReaction[]
   attachments?: F0ChatAttachment[]
+  /**
+   * Preview cards for the URLs in the body (host-scraped metadata only; when
+   * omitted, links render as plain auto-linked text). A single preview shows a
+   * full card with its image; several stack as compact title/host rows
+   * (Slack-style unfurls).
+   */
+  linkPreviews?: F0ChatLinkPreview[]
   replyTo?: F0ChatMessageReply
   /**
    * People mentioned in this message (groups only). Drives the `@name` chip

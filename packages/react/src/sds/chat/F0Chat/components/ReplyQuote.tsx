@@ -43,7 +43,7 @@ export const ReplyQuote = ({
         type="button"
         onClick={() => jumpToMessage(reply.id)}
         className={cn(
-          "flex w-full items-center overflow-hidden rounded-xl text-left",
+          "flex w-full items-center overflow-hidden rounded-t-xl rounded-b-sm text-left",
           "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",
           // Tail-side top corner mirrors the host bubble: rounded to hug the
           // bubble at a run's start, tucked in when the message continues a run.

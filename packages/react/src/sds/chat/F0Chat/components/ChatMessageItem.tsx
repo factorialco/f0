@@ -102,7 +102,12 @@ export const ChatMessageItem = ({
               )}
             >
               {hasAttachments && (
-                <ChatMessageAttachments message={message} isMine={isMine} />
+                <ChatMessageAttachments
+                  message={message}
+                  isMine={isMine}
+                  isFirstOfRun={isFirstOfRun}
+                  isLastOfRun={isLastOfRun}
+                />
               )}
               {hasBubble && (
                 <ChatBubble
@@ -110,7 +115,11 @@ export const ChatMessageItem = ({
                   isMine={isMine}
                   author={author}
                   currentUserId={currentUserId}
-                  isFirstOfRun={isFirstOfRun}
+                  // Media above the caption counts as "continuing" for corners:
+                  // the bubble tucks its tail-side top so attachment + caption
+                  // read as one chained stack (the nested reply quote / link
+                  // preview mirror the same corner).
+                  isFirstOfRun={isFirstOfRun && !hasAttachments}
                   isLastOfRun={isLastOfRun}
                 />
               )}

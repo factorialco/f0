@@ -1,5 +1,5 @@
 import { type IconType } from "@/components/F0Icon"
-import { File, Image, Paperclip } from "@/icons/app"
+import { File, Image, Marker, Microphone, Paperclip } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { type F0ChatAttachment } from "../types"
@@ -51,12 +51,16 @@ export const useReplyPreview = (input: {
               summary.name ??
               i18n.t("chat.fileCount.other", { count: summary.count }),
           }
-        : {
-            icon: Paperclip,
-            label: i18n.t("chat.attachmentCount.other", {
-              count: summary.count,
-            }),
-          }
+        : summary.kind === "location"
+          ? { icon: Marker, label: i18n.chat.location }
+          : summary.kind === "voice"
+            ? { icon: Microphone, label: i18n.chat.voiceNote }
+            : {
+                icon: Paperclip,
+                label: i18n.t("chat.attachmentCount.other", {
+                  count: summary.count,
+                }),
+              }
 
   return { icon: media.icon, label: body || media.label, thumbnailUrl }
 }

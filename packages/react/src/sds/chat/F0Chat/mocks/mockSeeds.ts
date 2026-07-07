@@ -2,6 +2,8 @@ import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
+  type F0ChatAttachment,
+  type F0ChatLinkPreview,
   type F0ChatMention,
   type F0ChatMessage,
   type F0ChatUser,
@@ -111,6 +113,10 @@ type Line = {
   mentions?: F0ChatMention[]
   /** Whether the line mentions the whole group (`@here`). */
   mentionedEveryone?: boolean
+  /** Open Graph cards for the URLs in the body (link preview demo). */
+  linkPreviews?: F0ChatLinkPreview[]
+  /** Attachments (images, files, shared locations) for the media demos. */
+  attachments?: F0ChatAttachment[]
 }
 
 export type Seed = {
@@ -204,6 +210,35 @@ export const SEEDS: Seed[] = [
         body: "Just dropped the new mocks in Figma 🙌",
         min: 18 * MIN,
       },
+      // A shared location — renders the map preview card (opens Google Maps).
+      {
+        from: ELEANOR,
+        body: "I'm here, come find me!",
+        min: 12 * MIN,
+        attachments: [
+          {
+            kind: "location",
+            latitude: 41.3894,
+            longitude: 2.1607,
+            name: "Factorial HQ — Barcelona",
+          },
+        ],
+      },
+      // A voice note — renders the audio player with speed control (0.5×–2×).
+      {
+        from: ELEANOR,
+        body: "",
+        min: 10 * MIN,
+        attachments: [
+          {
+            kind: "voice",
+            url: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+            durationSeconds: 3,
+            mimeType: "audio/mpeg",
+            name: "voice-note.mp3",
+          },
+        ],
+      },
     ],
   },
   // DM — online, longer history spanning weeks (responds when messaged).
@@ -241,6 +276,40 @@ export const SEEDS: Seed[] = [
         min: 40 * MIN,
       },
       { from: MARCUS, body: "No rush — before EOD is fine", min: 38 * MIN },
+      // A message with a link — renders the full Open Graph card (with image).
+      {
+        from: MARCUS,
+        body: "Context is in the handbook: https://handbook.example.com/ci/flaky-tests",
+        min: 36 * MIN,
+        linkPreviews: [
+          {
+            url: "https://handbook.example.com/ci/flaky-tests",
+            title: "Dealing with flaky tests — Engineering Handbook",
+            description:
+              "How we detect, quarantine and fix flaky tests across the CI pipeline, including the retry budget policy.",
+            imageUrl: mockImage("card", 2),
+          },
+        ],
+      },
+      // Two links in one message — compact Slack-style unfurls (titles, no images).
+      {
+        from: ME,
+        body: "Comparing both dashboards: https://grafana.example.com/d/ci and https://status.example.com/incidents",
+        min: 30 * MIN,
+        linkPreviews: [
+          {
+            url: "https://grafana.example.com/d/ci",
+            title: "CI pipeline health — Grafana",
+            description: "Build durations, flake rate and queue times.",
+            imageUrl: mockImage("card", 0),
+          },
+          {
+            url: "https://status.example.com/incidents",
+            title: "Status page — incident history",
+            description: "Past incidents and current component status.",
+          },
+        ],
+      },
     ],
   },
   // DM — muted (online): the conversation is silenced (mute icon in the sidebar).
@@ -587,6 +656,8 @@ const buildSeedMessages = (seed: Seed): F0ChatMessage[] => {
       readAt: isMine ? new Date(sentMs + 60_000).toISOString() : undefined,
       mentions: line.mentions,
       mentionedEveryone: line.mentionedEveryone,
+      linkPreviews: line.linkPreviews,
+      attachments: line.attachments,
     }
   })
   // Second pass: resolve reply references now that every message has an id.

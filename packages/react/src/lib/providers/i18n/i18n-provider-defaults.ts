@@ -508,6 +508,11 @@ export const defaultTranslations = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
+    // Shared-location attachments (map preview card + reply quote descriptor).
+    location: "Location",
+    // Voice notes (mic in the composer records + sends audio, no transcript).
+    voiceNote: "Voice note",
+    sendVoiceNote: "Send voice note",
     moreActions: "Message actions",
     // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",

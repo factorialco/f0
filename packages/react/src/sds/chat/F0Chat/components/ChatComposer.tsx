@@ -158,15 +158,55 @@ export const ChatComposer = (): ReactNode => {
     "device-error": i18n.chat.micError,
     "transcription-failed": i18n.chat.transcriptionError,
   }
+
+  // Voice NOTES (WhatsApp-style): when the runtime can upload, the mic records
+  // audio and sends it as its own message on confirm — no transcription.
+  // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
+  const voiceNotesEnabled = !!uploadFiles
+  const handleVoiceNote = useCallback(
+    async (audio: Blob, durationMs: number) => {
+      if (!uploadFiles) return
+      const type = audio.type || "audio/webm"
+      const ext = type.includes("mp4")
+        ? "m4a"
+        : type.includes("ogg")
+          ? "ogg"
+          : "webm"
+      const file = new File([audio], `voice-note.${ext}`, { type })
+      try {
+        const [uploaded] = await uploadFiles([file])
+        if (!uploaded || !("url" in uploaded)) return
+        sendMessage({
+          body: "",
+          attachments: [
+            {
+              kind: "voice",
+              url: uploaded.url,
+              durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
+              mimeType: type,
+              name: file.name,
+            },
+          ],
+        })
+      } catch {
+        showTransientError(i18n.chat.fileUploadError)
+      }
+    },
+    [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
+  )
+
   const recorder = useAudioRecorder({
     onTranscribe: transcribe,
     onPartial: fillFromTranscript,
     onFinal: fillFromTranscript,
     onError: (error) => showTransientError(recorderErrorMessage[error]),
+    onAudio: voiceNotesEnabled
+      ? (audio, durationMs) => void handleVoiceNote(audio, durationMs)
+      : undefined,
   })
   const isTranscribing = recorder.status === "transcribing"
   const isRecording = recorder.status === "recording"
-  const canRecord = !!transcribe && recorder.isSupported
+  const canRecord = (voiceNotesEnabled || !!transcribe) && recorder.isSupported
 
   const canSend =
     (value.trim().length > 0 || attachments.length > 0) &&
@@ -493,7 +533,7 @@ export const ChatComposer = (): ReactNode => {
                       />
                     </div>
                   </div>
-                ) : (
+                ) : att.attachment.kind === "file" ? (
                   <F0FileItem
                     key={att.id}
                     size="md"
@@ -512,7 +552,9 @@ export const ChatComposer = (): ReactNode => {
                       },
                     ]}
                   />
-                )
+                ) : // Locations never sit in the composer (uploads only) — the
+                // narrowing here just satisfies the widened attachment union.
+                null
               )}
             </div>
           )}
@@ -552,7 +594,11 @@ export const ChatComposer = (): ReactNode => {
                   variant="default"
                   size="md"
                   hideLabel
-                  label={i18n.chat.stopRecording}
+                  label={
+                    voiceNotesEnabled
+                      ? i18n.chat.sendVoiceNote
+                      : i18n.chat.stopRecording
+                  }
                   icon={Check}
                   onClick={recorder.stop}
                 />
