@@ -86,8 +86,16 @@ export const ChatMessageActions = ({
   const withinEditWindow =
     editWindowMs == null ||
     Date.now() - new Date(message.createdAt).getTime() <= editWindowMs
+  // Voice notes can't be edited (there's no text to change) — only deleted.
+  const isVoiceNote = (message.attachments ?? []).some(
+    (attachment) => attachment.kind === "voice"
+  )
   const canEdit =
-    isMine && !message.deleted && !!editMessage && withinEditWindow
+    isMine &&
+    !message.deleted &&
+    !isVoiceNote &&
+    !!editMessage &&
+    withinEditWindow
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next)
