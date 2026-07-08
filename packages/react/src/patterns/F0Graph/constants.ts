@@ -56,3 +56,9 @@ export const NODE_WINDOW_QUANTIZE_STEP = 200
 // trades polish for responsiveness on large graphs. Tuned by feel — the
 // 200-node case still animates, the 4000-node case stays interactive.
 export const LARGE_GRAPH_SNAP_THRESHOLD = 700
+
+// Max zoom for the `initialFocusNodeId` first-frame fit. Fitting a single node
+// would otherwise clamp to the graph's `maxZoom` (2×) and open uncomfortably
+// zoomed-in; capping lower opens the node with surrounding context (parent /
+// siblings / reports visible). The user can still zoom in further afterwards.
+export const INITIAL_FOCUS_MAX_ZOOM = 1

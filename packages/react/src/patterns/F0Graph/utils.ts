@@ -1,5 +1,21 @@
 import type { GraphEdge, PositionedNode, TreeNode } from "./types"
 
+/**
+ * React Flow `fitViewOptions.nodes` for the initial frame: `[{ id }]` to open
+ * centered on `initialFocusNodeId`, or `undefined` to fit the whole graph.
+ * Returns `undefined` (fit-all fallback) when no target is given or the target
+ * isn't among the present nodes — so a missing node never leaves a blank frame.
+ */
+export function resolveInitialFitViewNodes(
+  initialFocusNodeId: string | undefined,
+  presentNodeIds: ReadonlySet<string>
+): [{ id: string }] | undefined {
+  if (!initialFocusNodeId || !presentNodeIds.has(initialFocusNodeId)) {
+    return undefined
+  }
+  return [{ id: initialFocusNodeId }]
+}
+
 /** Axis-aligned rectangle in flow-space coordinates. */
 export interface ViewportRect {
   minX: number

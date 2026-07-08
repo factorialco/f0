@@ -23,6 +23,7 @@ import {
   EMPTY_HIGHLIGHTED_NODES,
   FIT_VIEW_PADDING_LOOSE,
   FOCUS_SETTLE_DELAY_MS,
+  INITIAL_FOCUS_MAX_ZOOM,
   LARGE_GRAPH_SNAP_THRESHOLD,
   NODE_CLICK_DISTANCE_SQ,
 } from "../../constants"
@@ -57,6 +58,7 @@ import type {
   LayoutDirection,
   PositionedNode,
 } from "../../types"
+import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
@@ -148,6 +150,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onSelectedNodesChange,
     onPaneClick: onPaneClickProp,
     focusedNode,
+    initialFocusNodeId,
     highlightedNodes: highlightedProp,
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
@@ -426,6 +429,27 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     enabled: !enableNodeWindowing || viewportReady,
   })
 
+  // Initial frame: when `initialFocusNodeId` is set, open centered on that node
+  // (React Flow's `fitViewOptions.nodes`, capped zoom for context) instead of
+  // fit-to-all — no animation. Frozen at the first render with nodes present so
+  // React Flow's one-shot initial fit reads a stable value; falls back to
+  // fit-all when the target isn't present.
+  const initialFitRef = useRef<
+    { nodes: [{ id: string }]; maxZoom: number } | undefined
+  >(undefined)
+  const initialFitResolvedRef = useRef(false)
+  if (!initialFitResolvedRef.current && renderedNodeIds.length > 0) {
+    initialFitResolvedRef.current = true
+    const nodes = resolveInitialFitViewNodes(
+      initialFocusNodeId,
+      new Set(renderedNodeIds)
+    )
+    initialFitRef.current = nodes
+      ? { nodes, maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom) }
+      : undefined
+  }
+  const initialFitViewOptions = initialFitRef.current
+
   // ── Fly to the consumer-controlled focused node ──
   useEffect(() => {
     if (focusedNode) {
@@ -581,6 +605,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
                         }}
                         proOptions={{ hideAttribution: true }}
                         fitView
+                        fitViewOptions={initialFitViewOptions}
                         nodesDraggable={false}
                         nodesConnectable={false}
                         elementsSelectable={false}

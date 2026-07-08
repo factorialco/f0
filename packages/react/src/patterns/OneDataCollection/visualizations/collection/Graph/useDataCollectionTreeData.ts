@@ -353,38 +353,49 @@ export function useDataCollectionTreeData<
     [ensureFrontierLoaded]
   )
 
+  // Resolve+merge a node's ancestor path and load the chain's children so the
+  // node exists in the tree, then return the ancestor ids to expand. Shared by
+  // `revealNode` (which also focuses/highlights) and the initial `focusOnEntry`
+  // pre-resolution (which only needs the node present + expanded).
+  const resolvePath = useCallback(
+    async (nodeId: string): Promise<string[]> => {
+      const opts = optionsRef.current
+      const pathRecords = opts.loadNodePath
+        ? await opts.loadNodePath(nodeId)
+        : []
+      if (pathRecords.length > 0) {
+        setNodes((prev) => {
+          const existing = new Set(prev.map((node) => node.id))
+          const additions = pathRecords
+            .filter((record) => !existing.has(getId(record)))
+            .map((record, index) => {
+              const parentId = opts.getParentId
+                ? opts.getParentId(record)
+                : index > 0
+                  ? getId(pathRecords[index - 1])
+                  : null
+              return toNode(record, parentId)
+            })
+          return additions.length > 0 ? [...prev, ...additions] : prev
+        })
+      }
+
+      const ancestorIds = pathRecords.map(getId).filter((id) => id !== nodeId)
+
+      // Connect the chain and load the node's own children (for its expander).
+      await Promise.all(
+        [...ancestorIds, nodeId].map((id) => loadChildrenOf(id))
+      )
+
+      return ancestorIds
+    },
+    [getId, toNode, loadChildrenOf]
+  )
+
   const revealNode = useCallback(
     async (nodeId: string): Promise<void> => {
-      const opts = optionsRef.current
       try {
-        // Resolve and merge the ancestor path so the node exists in the tree.
-        const pathRecords = opts.loadNodePath
-          ? await opts.loadNodePath(nodeId)
-          : []
-        if (pathRecords.length > 0) {
-          setNodes((prev) => {
-            const existing = new Set(prev.map((node) => node.id))
-            const additions = pathRecords
-              .filter((record) => !existing.has(getId(record)))
-              .map((record, index) => {
-                const parentId = opts.getParentId
-                  ? opts.getParentId(record)
-                  : index > 0
-                    ? getId(pathRecords[index - 1])
-                    : null
-                return toNode(record, parentId)
-              })
-            return additions.length > 0 ? [...prev, ...additions] : prev
-          })
-        }
-
-        const ancestorIds = pathRecords.map(getId).filter((id) => id !== nodeId)
-
-        // Connect the chain and load the node's own children (for its expander).
-        await Promise.all(
-          [...ancestorIds, nodeId].map((id) => loadChildrenOf(id))
-        )
-
+        const ancestorIds = await resolvePath(nodeId)
         setExpandedNodes(new Set([...expandedNodesRef.current, ...ancestorIds]))
         setFocusedNode(nodeId)
         setHighlightedNodes(new Set([nodeId]))
@@ -394,7 +405,7 @@ export function useDataCollectionTreeData<
         callbacksRef.current.onLoadError(dataError)
       }
     },
-    [getId, toNode, loadChildrenOf, setExpandedNodes]
+    [resolvePath, setExpandedNodes]
   )
 
   // Drop the centered/highlighted node (e.g. when the user clicks the empty
@@ -463,6 +474,21 @@ export function useDataCollectionTreeData<
         frontier = loadable.flatMap((_, index) => childArrays[index])
       }
 
+      // Focus-on-entry: pre-resolve the target's ancestor path and expand it now,
+      // BEFORE the first paint, so the node exists in the layout and F0Graph can
+      // open framed on it (via `initialFocusNodeId`) with no fit-then-pan. No
+      // focus/highlight is set here — the initial viewport does the centering.
+      // On failure we skip silently → F0Graph falls back to fit-to-all.
+      const focusOnEntry = optionsRef.current.focusOnEntry
+      if (focusOnEntry && optionsRef.current.loadNodePath) {
+        try {
+          const ancestorIds = await resolvePath(focusOnEntry)
+          for (const id of ancestorIds) expanded.add(id)
+        } catch {
+          // Ignore — fall back to the default fit-to-all initial view.
+        }
+      }
+
       setExpandedState(expanded)
 
       callbacksRef.current.onLoadData({
@@ -479,7 +505,7 @@ export function useDataCollectionTreeData<
     } finally {
       setIsInitialLoading(false)
     }
-  }, [fetchRecords, toNode, loadChildrenOf])
+  }, [fetchRecords, toNode, loadChildrenOf, resolvePath])
 
   const filtersKey = JSON.stringify(source.currentFilters)
   const navigationFiltersKey = JSON.stringify(source.currentNavigationFilters)

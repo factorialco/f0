@@ -9,6 +9,7 @@ import {
   computeLayoutBounds,
   deriveEdgesFromTree,
   nodeIntersectsRect,
+  resolveInitialFitViewNodes,
   type ViewportRect,
 } from "../utils"
 
@@ -133,5 +134,21 @@ describe("computeLayoutBounds", () => {
       width: 240,
       height: 190,
     })
+  })
+})
+
+describe("resolveInitialFitViewNodes", () => {
+  const present = new Set(["a", "b", "me"])
+
+  it("returns undefined (fit-all) when no target is given", () => {
+    expect(resolveInitialFitViewNodes(undefined, present)).toBeUndefined()
+  })
+
+  it("frames the target when it is present", () => {
+    expect(resolveInitialFitViewNodes("me", present)).toEqual([{ id: "me" }])
+  })
+
+  it("falls back to fit-all when the target isn't present (never a blank frame)", () => {
+    expect(resolveInitialFitViewNodes("ghost", present)).toBeUndefined()
   })
 })
