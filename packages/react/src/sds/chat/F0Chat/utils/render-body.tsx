@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 
 import { type F0ChatUser } from "../types"
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
+import { sanitizeDisplayText } from "./sanitize-text"
 
 /** URLs in a body render as clickable links (matches the mobile bubble). */
 const URL_REGEX = /(https?:\/\/[^\s]+)/g
@@ -56,7 +57,9 @@ export const renderBodyWithEmojis = (body: string): ReactNode => {
  *
  * Pure (no hooks): callers memoize the result per message.
  */
-export const renderBodyWithLinks = (body: string): ReactNode => {
+export const renderBodyWithLinks = (rawBody: string): ReactNode => {
+  // Untrusted input: strip zalgo stacks / bidi overrides before rendering.
+  const body = sanitizeDisplayText(rawBody)
   // Split on a capturing group: URLs land at the odd indices.
   const parts = body.split(URL_REGEX)
   if (parts.length === 1) return renderBodyWithEmojis(body)
@@ -99,9 +102,11 @@ export type MentionToken = {
  * Pure (no hooks): callers memoize the result per message.
  */
 export const renderBodyWithMentions = (
-  body: string,
+  rawBody: string,
   tokens: MentionToken[]
 ): ReactNode => {
+  // Sanitize BEFORE the range math so mention indices match what renders.
+  const body = sanitizeDisplayText(rawBody)
   if (tokens.length === 0) return renderBodyWithLinks(body)
 
   // Collect every `@name` occurrence (longest names first so "@Ana María" wins
