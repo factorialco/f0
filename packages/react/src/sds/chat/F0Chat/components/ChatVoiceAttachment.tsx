@@ -201,9 +201,11 @@ export const ChatVoiceAttachment = ({
       </div>
 
       {/* The duration and the speed pill share the trailing slot: hovering the
-          card (or tabbing into it) swaps the time for the speed control. */}
+          card (or tabbing into it) swaps the time for the speed control. Both
+          have the same FIXED width so neither the ticking time ("0:04" → "0:12")
+          nor the cycling rate ("1x" → "1.5x") resizes the waveform. */}
       <span
-        className="shrink-0 text-base tabular-nums text-f1-foreground-secondary group-focus-within/voice:hidden group-hover/voice:hidden"
+        className="inline-block w-10 shrink-0 text-center text-base tabular-nums text-f1-foreground-secondary group-focus-within/voice:hidden group-hover/voice:hidden"
         data-testid="chat-voice-time"
       >
         {formatTime(
@@ -213,7 +215,7 @@ export const ChatVoiceAttachment = ({
         )}
       </span>
 
-      <div className="hidden shrink-0 group-focus-within/voice:block group-hover/voice:block">
+      <div className="hidden w-10 shrink-0 justify-center group-focus-within/voice:flex group-hover/voice:flex">
         <ButtonInternal
           variant="ghost"
           size="sm"

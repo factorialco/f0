@@ -48,7 +48,14 @@ describe("ChatVoiceAttachment", () => {
     )
     const pillWrapper = screen.getByTestId("chat-voice-rate").closest("div")
     expect(pillWrapper?.className).toContain("hidden")
-    expect(pillWrapper?.className).toContain("group-hover/voice:block")
+    expect(pillWrapper?.className).toContain("group-hover/voice:flex")
+  })
+
+  it("keeps a fixed-width trailing slot so the waveform never resizes", () => {
+    render(<ChatVoiceAttachment voice={VOICE} />)
+    expect(screen.getByTestId("chat-voice-time").className).toContain("w-10")
+    const pillWrapper = screen.getByTestId("chat-voice-rate").closest("div")
+    expect(pillWrapper?.className).toContain("w-10")
   })
 
   it("cycles the playback rate 1x → 1.5x → 2x → 0.5x on the speed pill", () => {
