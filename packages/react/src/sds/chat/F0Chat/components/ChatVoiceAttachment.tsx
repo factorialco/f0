@@ -177,7 +177,7 @@ export const ChatVoiceAttachment = ({
         onClick={handleSeek}
         // justify-between spreads the fixed set of bars across whatever width
         // the card gets, so the waveform stays proportioned at any size.
-        className="flex h-6 min-w-0 flex-1 cursor-pointer items-center justify-between gap-[2px]"
+        className="flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-[2px]"
         role="slider"
         aria-label={i18n.audioPlayer.seek}
         aria-valuemin={0}
