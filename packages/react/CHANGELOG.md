@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.26.0](https://github.com/factorialco/f0/compare/f0-react-v4.25.0...f0-react-v4.26.0) (2026-07-08)
+
+
+### Features
+
+* **F0Graph:** viewport node-array windowing (opt-in) + perf harness [FCT-57915] ([#4612](https://github.com/factorialco/f0/issues/4612)) ([5075e62](https://github.com/factorialco/f0/commit/5075e628b9e34a4909cac68540ed6e9c8dc42648))
+
 ## [4.25.0](https://github.com/factorialco/f0/compare/f0-react-v4.24.0...f0-react-v4.25.0) (2026-07-06)
 
 
