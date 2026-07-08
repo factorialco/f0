@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.28.0](https://github.com/factorialco/f0/compare/f0-react-v4.27.0...f0-react-v4.28.0) (2026-07-08)
+
+
+### Features
+
+* **OneDataCollection:** opt-in auto-focus-on-entry for the graph viz ([#4625](https://github.com/factorialco/f0/issues/4625)) ([cb02843](https://github.com/factorialco/f0/commit/cb0284307bea67f321266d15d01710dc59e05e75))
+
 ## [4.27.0](https://github.com/factorialco/f0/compare/f0-react-v4.26.0...f0-react-v4.27.0) (2026-07-08)
 
 
