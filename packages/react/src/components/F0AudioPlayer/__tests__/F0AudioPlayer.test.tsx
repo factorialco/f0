@@ -246,3 +246,69 @@ describe("F0AudioPlayerCard", () => {
     )
   })
 })
+
+describe("F0AudioPlayer lazy source", () => {
+  let playSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    playSpy = vi
+      .spyOn(HTMLMediaElement.prototype, "play")
+      .mockImplementation(() => Promise.resolve())
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("does not resolve or set a src until play is requested", () => {
+    const getSrc = vi.fn().mockResolvedValue("resolved.mp3")
+    render(<F0AudioPlayer getSrc={getSrc} duration={100} />)
+
+    expect(getSrc).not.toHaveBeenCalled()
+    expect(getAudio()).not.toHaveAttribute("src")
+  })
+
+  it("defaults preload to none in lazy mode", () => {
+    render(<F0AudioPlayer getSrc={vi.fn().mockResolvedValue("x.mp3")} />)
+    expect(getAudio()).toHaveAttribute("preload", "none")
+  })
+
+  it("shows the total time from the duration prop before loading", () => {
+    render(
+      <F0AudioPlayer
+        getSrc={vi.fn().mockResolvedValue("x.mp3")}
+        duration={272}
+      />
+    )
+    expect(screen.getByText("0:00 / 4:32")).toBeInTheDocument()
+  })
+
+  it("resolves the src via getSrc and plays on first click", async () => {
+    const getSrc = vi.fn().mockResolvedValue("resolved.mp3")
+    render(<F0AudioPlayer getSrc={getSrc} duration={100} />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Play" }))
+
+    expect(getSrc).toHaveBeenCalledOnce()
+    await waitFor(() =>
+      expect(getAudio()).toHaveAttribute("src", "resolved.mp3")
+    )
+    await waitFor(() => expect(playSpy).toHaveBeenCalled())
+  })
+
+  it("re-resolves via getSrc once after a media error", async () => {
+    const getSrc = vi
+      .fn()
+      .mockResolvedValueOnce("first.mp3")
+      .mockResolvedValueOnce("second.mp3")
+    render(<F0AudioPlayer getSrc={getSrc} duration={100} />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Play" }))
+    await waitFor(() => expect(getAudio()).toHaveAttribute("src", "first.mp3"))
+
+    fireEvent.error(getAudio())
+    await waitFor(() => expect(getAudio()).toHaveAttribute("src", "second.mp3"))
+    expect(getSrc).toHaveBeenCalledTimes(2)
+  })
+})

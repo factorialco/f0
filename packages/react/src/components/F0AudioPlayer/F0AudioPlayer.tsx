@@ -24,8 +24,8 @@ const containerVariants = cva({
 const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
   (props, ref) => {
     const {
-      src,
-      preload = "metadata",
+      getSrc,
+      preload,
       autoPlay = false,
       disabled = false,
       ariaLabel,
@@ -47,8 +47,8 @@ const F0AudioPlayerBase = forwardRef<HTMLDivElement, F0AudioPlayerProps>(
       >
         <audio
           ref={controller.audioRef}
-          src={src}
-          preload={preload}
+          src={controller.currentSrc}
+          preload={preload ?? (getSrc ? "none" : "metadata")}
           autoPlay={autoPlay}
         />
 
