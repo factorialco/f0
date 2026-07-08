@@ -70,6 +70,16 @@ export type GraphVisualizationOptions<
    */
   revealNodeId?: string
   /**
+   * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+   * root of their branch): when the tree first becomes ready, its ancestor
+   * path is loaded/expanded and the viewport centers on it. Unlike
+   * `revealNodeId` (which is ignored on entry so search stays clean), this is
+   * the opt-in "open the org chart already looking at me" behaviour. Requires
+   * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+   * the default entry view (roots expanded to `defaultExpandDepth`).
+   */
+  focusOnEntry?: string
+  /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for
    * revealing nodes in branches that have not been expanded yet.
