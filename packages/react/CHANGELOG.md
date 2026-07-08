@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.27.0](https://github.com/factorialco/f0/compare/f0-react-v4.26.0...f0-react-v4.27.0) (2026-07-08)
+
+
+### Features
+
+* **OneDataCollection:** type Kanban card metadata as CardMetadata ([#4634](https://github.com/factorialco/f0/issues/4634)) ([d0e72f6](https://github.com/factorialco/f0/commit/d0e72f69d5ea9588c7d1366c3fd30445c9bab237))
+
 ## [4.26.0](https://github.com/factorialco/f0/compare/f0-react-v4.25.0...f0-react-v4.26.0) (2026-07-08)
 
 
