@@ -52,6 +52,7 @@ import {
 } from "./groupingUtils"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
+import { useSectionScrollSpy } from "./useSectionScrollSpy"
 import { createZodErrorMap } from "./zodErrorMap"
 
 /**
@@ -136,19 +137,37 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
+  // Ref to the scrollable container that holds both sidebar + form content.
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Keep the sidebar highlight in sync with manual scrolling.
+  const { activeSection, setActiveSection, beginProgrammaticScroll } =
+    useSectionScrollSpy({
+      sectionIds,
+      getElementId: (sectionId) => generateAnchorId(name, sectionId),
+      containerRef: scrollContainerRef,
+      enabled: showSectionsSidepanel && !!sections && sectionIds.length > 0,
+    })
+
+  // Scroll to section when a TOC item is clicked and mark it active.
   const handleSectionClick = useCallback(
     (sectionId: string) => {
+      setActiveSection(sectionId)
       const anchorId = generateAnchorId(name, sectionId)
       const element = document.getElementById(anchorId)
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "start" })
+      const container = scrollContainerRef.current
+      if (element && container) {
+        // Mute scroll-spy for the duration of the smooth scroll so the
+        // highlight doesn't flicker through intermediate sections; it resumes
+        // once the scroll settles.
+        beginProgrammaticScroll()
+        container.scrollTo({
+          top: element.offsetTop - container.offsetTop,
+          behavior: "smooth",
+        })
       }
     },
-    [name]
-  )
-
-  const [activeSection, setActiveSection] = useState<string | undefined>(
-    sectionIds[0]
+    [name, setActiveSection, beginProgrammaticScroll]
   )
 
   const tocItems: TOCItem[] = useMemo(() => {
@@ -157,10 +176,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     return sectionIds.map((sectionId) => ({
       id: sectionId,
       label: sections[sectionId]?.title ?? sectionId,
-      onClick: () => {
-        setActiveSection(sectionId)
-        handleSectionClick(sectionId)
-      },
+      onClick: () => handleSectionClick(sectionId),
     }))
   }, [sections, sectionIds, showSectionsSidepanel, handleSectionClick])
 
@@ -205,7 +221,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
 
   if (showSectionsSidepanel && tocItems.length > 0) {
     return (
-      <div className="flex w-full overflow-scroll">
+      <div ref={scrollContainerRef} className="flex w-full overflow-scroll">
         <div className="sticky top-0 mr-4 h-fit shrink-0 self-start pt-2">
           <F0TableOfContent
             items={tocItems}
@@ -599,13 +615,19 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       .map((section) => section.id)
   }, [definition])
 
-  // Track active section (the last clicked section)
-  const [activeSection, setActiveSection] = useState<string | undefined>(
-    sectionIds[0]
-  )
-
   // Ref to the scrollable container that holds both sidebar + form content
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Track the active section and keep it in sync with manual scrolling so the
+  // sidebar highlight follows the section currently in view, not just the last
+  // clicked one.
+  const { activeSection, setActiveSection, beginProgrammaticScroll } =
+    useSectionScrollSpy({
+      sectionIds,
+      getElementId: (sectionId) => generateAnchorId(name, sectionId),
+      containerRef: scrollContainerRef,
+      enabled: showSectionsSidepanel && !!sections && sectionIds.length > 0,
+    })
 
   // Scroll to section when TOC item is clicked and mark it as active
   const handleSectionClick = useCallback(
@@ -615,6 +637,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       const element = document.getElementById(anchorId)
       const container = scrollContainerRef.current
       if (element && container) {
+        // Mute scroll-spy for the smooth scroll so the highlight doesn't
+        // flicker through intermediate sections; it resumes on scrollend.
+        beginProgrammaticScroll()
         // Scroll within the form's own scroll container to avoid
         // shifting parent containers (e.g. the canvas panel).
         container.scrollTo({
@@ -623,7 +648,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         })
       }
     },
-    [name]
+    [name, setActiveSection, beginProgrammaticScroll]
   )
 
   // Convert sections to TOCItems for the TableOfContent component

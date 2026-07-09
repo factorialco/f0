@@ -403,11 +403,20 @@ Use `sections` to split a long form into named groups with independent submit bu
 
 <Canvas of={Stories.WithSectionsSidepanel} />
 
+The sidebar highlight follows the form's scroll position. Clicking a section
+smoothly scrolls to it and highlights it; scrolling by hand moves the highlight
+to whichever section reaches the top of the form's scroll area, and the last
+section stays highlighted once you reach the bottom. This tracking works when
+the form scrolls inside its own container (as it does in a dialog or an AI
+canvas panel) — see the example below, where the form is given a fixed height.
+
+<Canvas of={Stories.WithSectionsSidepanelScrollSpy} />
+
 ## Styling
 
 The optional `styling` config controls the form layout:
 
-- `showSectionsSidepanel` — render a sticky table-of-contents sidebar for the form's sections (see the example above).
+- `showSectionsSidepanel` — render a sticky table-of-contents sidebar for the form's sections (see the example above). The highlighted section stays in sync with manual scrolling, not just clicks.
 - `noPadding` — remove the default `p-4` padding around the form content. Use it when embedding the form flush inside a host surface (e.g. an AI canvas panel) that already provides its own spacing. Defaults to `false`, so existing forms are unaffected.
 
 ```tsx
