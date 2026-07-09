@@ -35,6 +35,9 @@ export const useAudioPlayer = (
   const callbacksRef = useRef(callbacks)
   callbacksRef.current = callbacks
 
+  const initialDurationRef = useRef(initialDuration)
+  initialDurationRef.current = initialDuration
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(initialDuration)
@@ -49,7 +52,9 @@ export const useAudioPlayer = (
 
     const handleLoadedMetadata = () => {
       setDuration(
-        Number.isFinite(audio.duration) ? audio.duration : initialDuration
+        Number.isFinite(audio.duration)
+          ? audio.duration
+          : initialDurationRef.current
       )
       setIsLoading(false)
     }
@@ -110,7 +115,7 @@ export const useAudioPlayer = (
       audio.removeEventListener("ratechange", handleRateChange)
       audio.removeEventListener("error", handleError)
     }
-  }, [audioRef, initialDuration])
+  }, [audioRef])
 
   const play = useCallback(() => {
     audioRef.current?.play().catch(() => {})

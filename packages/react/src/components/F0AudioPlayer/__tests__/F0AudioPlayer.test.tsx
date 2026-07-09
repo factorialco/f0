@@ -311,4 +311,24 @@ describe("F0AudioPlayer lazy source", () => {
     await waitFor(() => expect(getAudio()).toHaveAttribute("src", "second.mp3"))
     expect(getSrc).toHaveBeenCalledTimes(2)
   })
+
+  it("routes a getSrc rejection to onError and recovers on retry", async () => {
+    const onError = vi.fn()
+    const getSrc = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("expired"))
+      .mockResolvedValueOnce("resolved.mp3")
+    render(<F0AudioPlayer getSrc={getSrc} duration={100} onError={onError} />)
+
+    fireEvent.click(screen.getByRole("button", { name: "Play" }))
+    await waitFor(() => expect(onError).toHaveBeenCalledWith(null))
+    expect(playSpy).not.toHaveBeenCalled()
+
+    fireEvent.click(screen.getByRole("button", { name: "Play" }))
+    await waitFor(() =>
+      expect(getAudio()).toHaveAttribute("src", "resolved.mp3")
+    )
+    await waitFor(() => expect(playSpy).toHaveBeenCalled())
+    expect(getSrc).toHaveBeenCalledTimes(2)
+  })
 })

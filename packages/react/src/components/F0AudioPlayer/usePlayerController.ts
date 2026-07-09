@@ -41,10 +41,13 @@ export const usePlayerController = (
     resolvingRef.current = true
     try {
       setResolvedSrc(await getSrc())
+    } catch {
+      playAfterResolveRef.current = false
+      onError?.(null)
     } finally {
       resolvingRef.current = false
     }
-  }, [getSrc])
+  }, [getSrc, onError])
 
   const handlePlay = useCallback(() => {
     refreshedRef.current = false
