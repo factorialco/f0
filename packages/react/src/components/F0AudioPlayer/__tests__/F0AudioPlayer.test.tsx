@@ -262,10 +262,10 @@ describe("F0AudioPlayer lazy source", () => {
   })
 
   it("does not resolve or set a src until play is requested", () => {
-    const getSrc = vi.fn().mockResolvedValue("resolved.mp3")
-    render(<F0AudioPlayer src={getSrc} duration={100} />)
+    const resolveSrc = vi.fn().mockResolvedValue("resolved.mp3")
+    render(<F0AudioPlayer src={resolveSrc} duration={100} />)
 
-    expect(getSrc).not.toHaveBeenCalled()
+    expect(resolveSrc).not.toHaveBeenCalled()
     expect(getAudio()).not.toHaveAttribute("src")
   })
 
@@ -281,41 +281,41 @@ describe("F0AudioPlayer lazy source", () => {
     expect(screen.getByText("0:00 / 4:32")).toBeInTheDocument()
   })
 
-  it("resolves the src via getSrc and plays on first click", async () => {
-    const getSrc = vi.fn().mockResolvedValue("resolved.mp3")
-    render(<F0AudioPlayer src={getSrc} duration={100} />)
+  it("resolves the src function and plays on first click", async () => {
+    const resolveSrc = vi.fn().mockResolvedValue("resolved.mp3")
+    render(<F0AudioPlayer src={resolveSrc} duration={100} />)
 
     fireEvent.click(screen.getByRole("button", { name: "Play" }))
 
-    expect(getSrc).toHaveBeenCalledOnce()
+    expect(resolveSrc).toHaveBeenCalledOnce()
     await waitFor(() =>
       expect(getAudio()).toHaveAttribute("src", "resolved.mp3")
     )
     await waitFor(() => expect(playSpy).toHaveBeenCalled())
   })
 
-  it("re-resolves via getSrc once after a media error", async () => {
-    const getSrc = vi
+  it("re-resolves the src function once after a media error", async () => {
+    const resolveSrc = vi
       .fn()
       .mockResolvedValueOnce("first.mp3")
       .mockResolvedValueOnce("second.mp3")
-    render(<F0AudioPlayer src={getSrc} duration={100} />)
+    render(<F0AudioPlayer src={resolveSrc} duration={100} />)
 
     fireEvent.click(screen.getByRole("button", { name: "Play" }))
     await waitFor(() => expect(getAudio()).toHaveAttribute("src", "first.mp3"))
 
     fireEvent.error(getAudio())
     await waitFor(() => expect(getAudio()).toHaveAttribute("src", "second.mp3"))
-    expect(getSrc).toHaveBeenCalledTimes(2)
+    expect(resolveSrc).toHaveBeenCalledTimes(2)
   })
 
-  it("routes a getSrc rejection to onError and recovers on retry", async () => {
+  it("routes a src-resolver rejection to onError and recovers on retry", async () => {
     const onError = vi.fn()
-    const getSrc = vi
+    const resolveSrc = vi
       .fn()
       .mockRejectedValueOnce(new Error("expired"))
       .mockResolvedValueOnce("resolved.mp3")
-    render(<F0AudioPlayer src={getSrc} duration={100} onError={onError} />)
+    render(<F0AudioPlayer src={resolveSrc} duration={100} onError={onError} />)
 
     fireEvent.click(screen.getByRole("button", { name: "Play" }))
     await waitFor(() => expect(onError).toHaveBeenCalledWith(null))
@@ -326,6 +326,6 @@ describe("F0AudioPlayer lazy source", () => {
       expect(getAudio()).toHaveAttribute("src", "resolved.mp3")
     )
     await waitFor(() => expect(playSpy).toHaveBeenCalled())
-    expect(getSrc).toHaveBeenCalledTimes(2)
+    expect(resolveSrc).toHaveBeenCalledTimes(2)
   })
 })
