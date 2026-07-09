@@ -620,7 +620,18 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
                           ge?.onEdgeClick?.(ge)
                         }}
                         proOptions={{ hideAttribution: true }}
-                        fitView
+                        // One-shot initial frame. React Flow defers its queued
+                        // `fitView` until the container is measured; if that
+                        // lands late, it would otherwise re-fire on the first
+                        // layout change (e.g. a collapse) after clearing
+                        // `fitViewOptions` — snapping the graph to fit-all and
+                        // repositioning the focused root. Disabling the prop
+                        // once the viewport has settled (or the user has moved)
+                        // makes the initial fit truly one-shot: collapse/expand
+                        // never re-fit. `viewportReady` flips on the first
+                        // `onViewportChange`, which the initial fit itself
+                        // triggers, so the initial frame is never cancelled.
+                        fitView={!viewportReady}
                         fitViewOptions={initialFitViewOptions}
                         nodesDraggable={false}
                         nodesConnectable={false}
