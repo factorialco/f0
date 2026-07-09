@@ -101,6 +101,32 @@ export type GraphVisualizationOptions<
    */
   loadNodeData?: (ids: string[]) => Promise<R[]>
   /**
+   * Apply targeted updates to the already-loaded tree **in place**, without the
+   * full reset (and collapse to `defaultExpandDepth`) that a filter change
+   * triggers. Use it to reflect real-time / collaborative changes while keeping
+   * the user's current expansion and viewport.
+   *
+   * Bump `version` to apply a batch **once** (the number dedups against React
+   * re-renders — reuse the same object identity freely):
+   * - `upsert` records are matched by node id: an existing node has its `data`,
+   *   `childrenCount` and parent refreshed (re-parenting if `getParentId`
+   *   returns a new parent); an unknown record is inserted when it is attachable
+   *   (a root, or its parent is already in the tree — a child of a not-yet-loaded
+   *   parent will appear when that parent is expanded).
+   * - `remove` ids are dropped together with their descendants, and pruned from
+   *   the expanded set.
+   *
+   * Applying a batch never re-fetches and never collapses; it reconciles the
+   * nodes already in memory. `childrenCount`/parent come from the same
+   * `getChildrenCount`/`getParentId` accessors, so those must reflect the new
+   * structure when the batch is applied.
+   */
+  liveUpdate?: {
+    version: number
+    upsert?: R[]
+    remove?: string[]
+  }
+  /**
    * Id of the node representing the current user. When set, a "Find me" button
    * is shown in the controls that centers the viewport on that node.
    */

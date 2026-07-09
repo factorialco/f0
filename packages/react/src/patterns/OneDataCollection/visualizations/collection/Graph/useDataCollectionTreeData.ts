@@ -431,6 +431,94 @@ export function useDataCollectionTreeData<
     [getId]
   )
 
+  // Apply a targeted `liveUpdate` batch to the loaded tree in place: refresh /
+  // insert `upsert` records (matched by id, re-parenting via getParentId) and
+  // drop `remove` ids with their descendants — all WITHOUT re-fetching or
+  // collapsing. Expansion and viewport are preserved; only removed ids leave the
+  // expanded set. Structure (childrenCount/parent) comes from the same accessors,
+  // so callers must refresh those before bumping the batch version.
+  const applyLiveUpdate = useCallback(
+    (upsert: R[], remove: string[]): void => {
+      if (upsert.length === 0 && remove.length === 0) return
+      const opts = optionsRef.current
+
+      setNodes((prev) => {
+        const byId = new Map(prev.map((node) => [node.id, node]))
+
+        // 1) Removals, cascading to descendants (BFS over the current parent links).
+        if (remove.length > 0) {
+          const childrenByParent = new Map<string, string[]>()
+          for (const node of prev) {
+            if (node.parentId === null) continue
+            const siblings = childrenByParent.get(node.parentId) ?? []
+            siblings.push(node.id)
+            childrenByParent.set(node.parentId, siblings)
+          }
+          const removeSet = new Set<string>()
+          const queue = [...remove]
+          while (queue.length > 0) {
+            const id = queue.shift() as string
+            if (removeSet.has(id)) continue
+            removeSet.add(id)
+            for (const childId of childrenByParent.get(id) ?? [])
+              queue.push(childId)
+          }
+          removeSet.forEach((id) => {
+            byId.delete(id)
+            loadedParents.current.delete(id)
+          })
+          const currentExpanded = expandedNodesRef.current
+          const nextExpanded = new Set(
+            [...currentExpanded].filter((id) => !removeSet.has(id))
+          )
+          if (nextExpanded.size !== currentExpanded.size)
+            setExpandedState(nextExpanded)
+        }
+
+        // 2) Upserts: refresh existing nodes (data + structure, re-parenting) and
+        //    insert new attachable ones (root, or parent already present).
+        for (const record of upsert) {
+          const id = getId(record)
+          const existing = byId.get(id)
+          const parentId = opts.getParentId
+            ? opts.getParentId(record)
+            : (existing?.parentId ?? null)
+          const childrenCount = opts.getChildrenCount(record)
+          if (existing) {
+            byId.set(id, {
+              ...existing,
+              data: record,
+              parentId,
+              childrenCount,
+              // We hold the full record now, so clear any hydration placeholder.
+              dataLoaded: opts.loadNodeData ? true : existing.dataLoaded,
+            })
+          } else if (parentId === null || byId.has(parentId)) {
+            byId.set(id, {
+              id,
+              parentId,
+              data: record,
+              childrenCount,
+              childrenLoaded: false,
+              dataLoaded: opts.loadNodeData ? true : undefined,
+            })
+          }
+        }
+
+        // Preserve prior order for survivors; append any newly inserted nodes.
+        const survivors = prev
+          .map((node) => byId.get(node.id))
+          .filter((node): node is GraphNode<R> => Boolean(node))
+        const survivorIds = new Set(survivors.map((node) => node.id))
+        const additions = [...byId.values()].filter(
+          (node) => !survivorIds.has(node.id)
+        )
+        return [...survivors, ...additions]
+      })
+    },
+    [getId]
+  )
+
   const loadInitial = useCallback(async (): Promise<void> => {
     setIsInitialLoading(true)
     setError(null)
@@ -488,6 +576,19 @@ export function useDataCollectionTreeData<
     void loadInitial()
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reload only when filters/navigation change, keyed by their serialized value
   }, [filtersKey, navigationFiltersKey, loadInitial])
+
+  // Apply a `liveUpdate` batch once per new `version`, in place (no reset). The
+  // version dedups against re-renders; the initial value is adopted as already
+  // applied so mounting never fires a spurious batch.
+  const liveUpdateVersion = options.liveUpdate?.version
+  const lastLiveUpdateVersionRef = useRef<number | undefined>(liveUpdateVersion)
+  useEffect(() => {
+    const liveUpdate = optionsRef.current.liveUpdate
+    if (!liveUpdate || liveUpdate.version === lastLiveUpdateVersionRef.current)
+      return
+    lastLiveUpdateVersionRef.current = liveUpdate.version
+    applyLiveUpdate(liveUpdate.upsert ?? [], liveUpdate.remove ?? [])
+  }, [liveUpdateVersion, applyLiveUpdate])
 
   return {
     nodes,
