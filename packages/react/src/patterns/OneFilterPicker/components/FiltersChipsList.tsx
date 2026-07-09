@@ -47,7 +47,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   }
 
   return (
-    <div className="mt-2 flex items-start gap-2">
+    <div className="mt-2 flex items-center gap-2">
       <div className="flex flex-wrap items-center gap-2">
         {resultCount !== undefined && hasVisibleChips && (
           <span className="whitespace-nowrap font-medium text-f1-foreground-secondary">
