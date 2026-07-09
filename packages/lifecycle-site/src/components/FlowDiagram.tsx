@@ -1,0 +1,141 @@
+import {
+  Background,
+  ReactFlow,
+  type Edge,
+  type Node,
+  type NodeMouseHandler,
+} from "@xyflow/react"
+import "@xyflow/react/dist/style.css"
+import { phases } from "../data/phases"
+
+const nodeBase =
+  "rounded-xl border-2 border-white/15 bg-surface2 px-4 py-3 text-sm font-medium text-ink shadow-sm"
+
+const nodes: Node[] = [
+  {
+    id: "idea",
+    position: { x: 0, y: 80 },
+    data: { label: "Idea" },
+    type: "default",
+    style: { width: 120 },
+    className: nodeBase,
+  },
+  ...phases.map((p, i) => ({
+    id: p.id,
+    position: { x: 180 + i * 200, y: i % 2 === 0 ? 0 : 160 },
+    data: { label: `${p.number}. ${p.title}` },
+    type: "default",
+    style: { width: 180 },
+    className: nodeBase,
+  })),
+  {
+    id: "stable",
+    position: { x: 180 + phases.length * 200, y: 80 },
+    data: { label: "Stable" },
+    type: "default",
+    style: { width: 140 },
+    className: `${nodeBase} !border-stable`,
+  },
+  {
+    id: "deprecated",
+    position: { x: 180 + phases.length * 200 + 200, y: 80 },
+    data: { label: "Deprecated" },
+    type: "default",
+    style: { width: 140 },
+    className: `${nodeBase} !border-deprecated`,
+  },
+  {
+    id: "removed",
+    position: { x: 180 + phases.length * 200 + 400, y: 80 },
+    data: { label: "Removed" },
+    type: "default",
+    style: { width: 120 },
+    className: `${nodeBase} opacity-60`,
+  },
+]
+
+const edges: Edge[] = [
+  { id: "e-idea-problem", source: "idea", target: "problem", animated: true },
+  ...phases.slice(0, -1).map((p, i) => ({
+    id: `e-${p.id}-${phases[i + 1].id}`,
+    source: p.id,
+    target: phases[i + 1].id,
+    animated: true,
+  })),
+  { id: "e-promote-stable", source: "promote", target: "stable", animated: true },
+  {
+    id: "e-stable-deprecated",
+    source: "stable",
+    target: "deprecated",
+    label: "after ≥1 quarter",
+    labelStyle: { fill: "#f4f4f5", fontSize: 11 },
+    labelBgStyle: { fill: "#1f1f1f" },
+    labelBgPadding: [6, 3],
+    labelBgBorderRadius: 4,
+  },
+  {
+    id: "e-deprecated-removed",
+    source: "deprecated",
+    target: "removed",
+    label: "@removeIn version",
+    labelStyle: { fill: "#f4f4f5", fontSize: 11 },
+    labelBgStyle: { fill: "#1f1f1f" },
+    labelBgPadding: [6, 3],
+    labelBgBorderRadius: 4,
+  },
+]
+
+const phaseIds = new Set<string>(phases.map((p) => p.id))
+
+// Anchors for the non-phase nodes in the diagram. Phase nodes resolve to
+// their own `phase-<id>` anchor in PhaseSection; the lifecycle states below
+// jump to the maturity-levels section, and "Idea" jumps to Phase 0 (Discovery).
+const nonPhaseAnchors: Record<string, string> = {
+  idea: "phase-discovery",
+  stable: "maturity",
+  deprecated: "maturity",
+  removed: "maturity",
+}
+
+function anchorForNode(id: string): string | null {
+  if (phaseIds.has(id)) return `phase-${id}`
+  return nonPhaseAnchors[id] ?? null
+}
+
+export function FlowDiagram() {
+  const handleNodeClick: NodeMouseHandler = (_evt, node) => {
+    const anchorId = anchorForNode(node.id)
+    if (!anchorId) return
+    const target = document.getElementById(anchorId)
+    if (target) target.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+
+  return (
+    <div className="h-[420px] rounded-2xl border border-white/10 bg-surface">
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodeClick={handleNodeClick}
+        fitView
+        fitViewOptions={{ padding: 0.18 }}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable={false}
+        nodesFocusable={false}
+        edgesFocusable={false}
+        zoomOnScroll={false}
+        zoomOnPinch={false}
+        zoomOnDoubleClick={false}
+        panOnScroll={false}
+        panOnDrag={false}
+        preventScrolling={false}
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background gap={24} size={1} color="#2a2a2a" />
+      </ReactFlow>
+      <p className="border-t border-white/10 px-4 py-2 text-xs text-muted">
+        Click any node to jump to its details below.
+      </p>
+    </div>
+  )
+}
