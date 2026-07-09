@@ -138,17 +138,33 @@ describe("computeLayoutBounds", () => {
 })
 
 describe("resolveInitialFitViewNodes", () => {
-  const present = new Set(["a", "b", "me"])
+  const present = new Set(["root", "c1", "c2", "me"])
 
   it("returns undefined (fit-all) when no target is given", () => {
-    expect(resolveInitialFitViewNodes(undefined, present)).toBeUndefined()
+    expect(resolveInitialFitViewNodes(undefined, [], present)).toBeUndefined()
   })
 
-  it("frames the target when it is present", () => {
-    expect(resolveInitialFitViewNodes("me", present)).toEqual([{ id: "me" }])
+  it("frames the target alone when it has no children", () => {
+    expect(resolveInitialFitViewNodes("me", [], present)).toEqual([
+      { id: "me" },
+    ])
+  })
+
+  it("frames the target together with its direct children (show first level)", () => {
+    expect(resolveInitialFitViewNodes("root", ["c1", "c2"], present)).toEqual([
+      { id: "root" },
+      { id: "c1" },
+      { id: "c2" },
+    ])
+  })
+
+  it("drops children that aren't present, keeps the target", () => {
+    expect(
+      resolveInitialFitViewNodes("root", ["c1", "ghost"], present)
+    ).toEqual([{ id: "root" }, { id: "c1" }])
   })
 
   it("falls back to fit-all when the target isn't present (never a blank frame)", () => {
-    expect(resolveInitialFitViewNodes("ghost", present)).toBeUndefined()
+    expect(resolveInitialFitViewNodes("ghost", ["c1"], present)).toBeUndefined()
   })
 })

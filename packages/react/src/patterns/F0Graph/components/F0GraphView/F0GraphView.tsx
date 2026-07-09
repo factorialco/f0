@@ -429,19 +429,24 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     enabled: !enableNodeWindowing || viewportReady,
   })
 
-  // Initial frame: when `initialFocusNodeId` is set, open centered on that node
-  // (React Flow's `fitViewOptions.nodes`, capped zoom for context) instead of
-  // fit-to-all — no animation. Frozen at the first render with nodes present so
-  // React Flow's one-shot initial fit reads a stable value; falls back to
-  // fit-all when the target isn't present.
+  // Initial frame: when `initialFocusNodeId` is set, open framed on that node
+  // AND its direct children (React Flow's `fitViewOptions.nodes`, capped zoom)
+  // so the first level is visible — instead of fit-to-all, and without zooming
+  // in on the single node. No animation. Frozen at the first render with nodes
+  // present so React Flow's one-shot initial fit reads a stable value; falls
+  // back to fit-all when the target isn't present.
   const initialFitRef = useRef<
-    { nodes: [{ id: string }]; maxZoom: number } | undefined
+    { nodes: Array<{ id: string }>; maxZoom: number } | undefined
   >(undefined)
   const initialFitResolvedRef = useRef(false)
   if (!initialFitResolvedRef.current && renderedNodeIds.length > 0) {
     initialFitResolvedRef.current = true
+    const childIds = initialFocusNodeId
+      ? (nodeMap.get(initialFocusNodeId)?.children.map((c) => c.id) ?? [])
+      : []
     const nodes = resolveInitialFitViewNodes(
       initialFocusNodeId,
+      childIds,
       new Set(renderedNodeIds)
     )
     initialFitRef.current = nodes

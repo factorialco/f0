@@ -8,12 +8,20 @@ import type { GraphEdge, PositionedNode, TreeNode } from "./types"
  */
 export function resolveInitialFitViewNodes(
   initialFocusNodeId: string | undefined,
+  childIds: readonly string[],
   presentNodeIds: ReadonlySet<string>
-): [{ id: string }] | undefined {
+): Array<{ id: string }> | undefined {
   if (!initialFocusNodeId || !presentNodeIds.has(initialFocusNodeId)) {
     return undefined
   }
-  return [{ id: initialFocusNodeId }]
+  // Frame the target together with its direct (present) children, so the
+  // initial view shows the top of the branch — the node and its first level —
+  // rather than zooming in on the single node.
+  const ids = [
+    initialFocusNodeId,
+    ...childIds.filter((id) => presentNodeIds.has(id)),
+  ]
+  return ids.map((id) => ({ id }))
 }
 
 /** Axis-aligned rectangle in flow-space coordinates. */
