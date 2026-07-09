@@ -456,23 +456,34 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
   const initialFitViewOptions = initialFitRef.current
 
   // ── Fly to the consumer-controlled focused node ──
+  // Latest fly-to logic, read via a ref so the effect below depends ONLY on
+  // `focusedNode`. Otherwise the effect would re-run on every layout-affecting
+  // change (collapse/expand recomputes `centerOnNode`'s identity) and re-center
+  // on the same node even though the focus never changed.
+  const flyToFocusedRef = useRef<(id: string) => void>(() => {})
+  flyToFocusedRef.current = (id: string) => {
+    // Windowing: the target may be off-screen and absent from React Flow's
+    // store, so center on its layout position instead of an id-based fitView
+    // (which silently no-ops for a missing node).
+    if (enableNodeWindowing && centerOnNode(id, 300)) return
+    reactFlow.fitView({
+      nodes: [{ id }],
+      duration: 300,
+      padding: FIT_VIEW_PADDING_LOOSE,
+    })
+  }
   useEffect(() => {
-    if (focusedNode) {
-      // Slight delay to allow layout to settle
-      const timer = setTimeout(() => {
-        // Windowing: the target may be off-screen and absent from React Flow's
-        // store, so center on its layout position instead of an id-based
-        // fitView (which silently no-ops for a missing node).
-        if (enableNodeWindowing && centerOnNode(focusedNode, 300)) return
-        reactFlow.fitView({
-          nodes: [{ id: focusedNode }],
-          duration: 300,
-          padding: FIT_VIEW_PADDING_LOOSE,
-        })
-      }, FOCUS_SETTLE_DELAY_MS)
-      return () => clearTimeout(timer)
-    }
-  }, [focusedNode, reactFlow, enableNodeWindowing, centerOnNode])
+    if (!focusedNode) return
+    // Fires only when `focusedNode` transitions to a new value (entry,
+    // search-select, "Find me") — never on layout re-renders while it's
+    // unchanged. Slight delay so the layout settles before flying.
+    const target = focusedNode
+    const timer = setTimeout(
+      () => flyToFocusedRef.current(target),
+      FOCUS_SETTLE_DELAY_MS
+    )
+    return () => clearTimeout(timer)
+  }, [focusedNode])
 
   // ── Split context values (wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
