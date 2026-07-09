@@ -26,16 +26,12 @@ export interface AudioPlayerDetailTab {
 export interface F0AudioPlayerProps
   extends WithDataTestIdProps, DataAttributes {
   /**
-   * The audio source URL. Provide this or `getSrc`.
+   * The audio source. Either a URL string, or a function that lazily resolves
+   * the URL the first time playback is requested. Use the function form for
+   * on-demand credentials (e.g. presigned URLs) so the URL is only fetched on
+   * user intent.
    */
-  src?: string
-
-  /**
-   * Lazily resolves the audio source URL the first time playback is requested.
-   * Use for on-demand credentials (e.g. presigned URLs) so the URL is only
-   * fetched on user intent. Ignored when `src` is set.
-   */
-  getSrc?: () => Promise<string>
+  src: string | (() => Promise<string>)
 
   /**
    * Known total duration in seconds. Lets the player show the total time and an
@@ -46,7 +42,7 @@ export interface F0AudioPlayerProps
 
   /**
    * How much of the audio to preload.
-   * @default "metadata" ("none" when `getSrc` is set)
+   * @default "metadata" ("none" when `src` is a function)
    */
   preload?: "none" | "metadata" | "auto"
 

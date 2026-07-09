@@ -17,7 +17,6 @@ export const usePlayerController = (
 ): PlayerController => {
   const {
     src,
-    getSrc,
     duration,
     playing,
     onPlayingChange,
@@ -30,8 +29,11 @@ export const usePlayerController = (
     onError,
   } = props
 
+  const getSrc = typeof src === "function" ? src : undefined
+  const eagerSrc = typeof src === "function" ? undefined : src
+
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [resolvedSrc, setResolvedSrc] = useState(src)
+  const [resolvedSrc, setResolvedSrc] = useState(eagerSrc)
   const resolvingRef = useRef(false)
   const playAfterResolveRef = useRef(false)
   const refreshedRef = useRef(false)
@@ -80,8 +82,8 @@ export const usePlayerController = (
   )
 
   useEffect(() => {
-    if (src !== undefined) setResolvedSrc(src)
-  }, [src])
+    if (eagerSrc !== undefined) setResolvedSrc(eagerSrc)
+  }, [eagerSrc])
 
   useEffect(() => {
     if (!resolvedSrc || !playAfterResolveRef.current) return

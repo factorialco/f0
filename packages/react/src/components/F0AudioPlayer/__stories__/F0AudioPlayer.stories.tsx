@@ -83,9 +83,8 @@ export const LazySource: StoryObj<typeof F0AudioPlayerCard> = {
   render: (args) => (
     <F0AudioPlayerCard
       {...args}
-      src={undefined}
       duration={200}
-      getSrc={() =>
+      src={() =>
         new Promise((resolve) => setTimeout(() => resolve(SAMPLE_SRC), 400))
       }
     />
