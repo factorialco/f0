@@ -1,16 +1,11 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp } from "@/icons/app"
 import { focusRing } from "@/lib/utils"
 import { cn } from "@/lib/utils"
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/ui/popover"
+import { Popover, PopoverAnchor, PopoverContent } from "@/ui/popover"
 
 import type {
   WelcomeScreenSuggestion,
@@ -65,6 +60,7 @@ export const WelcomeScreenSuggestionsRow = ({
   side = "top",
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
+  const rowRef = useRef<HTMLDivElement>(null)
   const activeGroup = activeIdx !== null ? suggestions[activeIdx] : null
 
   if (suggestions.length === 0) return null
@@ -80,20 +76,24 @@ export const WelcomeScreenSuggestionsRow = ({
       }}
     >
       <PopoverAnchor asChild>
-        <div className="flex w-full flex-wrap items-center gap-2">
+        <div ref={rowRef} className="flex w-full flex-wrap items-center gap-2">
+          {/* Plain buttons, NOT `PopoverTrigger`s: Radix registers a single
+              trigger per popover (the last one mounted), whose built-in toggle
+              fires after the button's own onClick and overwrites the group
+              selection — so switching to the last group closed the popover
+              instead. The buttons fully own the toggle/switch semantics. */}
           {suggestions.map((group, index) => (
-            <PopoverTrigger asChild key={`${group.label}-${index}`}>
-              <ButtonInternal
-                variant="outline"
-                label={group.label}
-                icon={group.icon}
-                pressed={activeIdx === index}
-                onClick={() => {
-                  setActiveIdx((current) => (current === index ? null : index))
-                  onItemHover?.(null)
-                }}
-              />
-            </PopoverTrigger>
+            <ButtonInternal
+              key={`${group.label}-${index}`}
+              variant="outline"
+              label={group.label}
+              icon={group.icon}
+              pressed={activeIdx === index}
+              onClick={() => {
+                setActiveIdx((current) => (current === index ? null : index))
+                onItemHover?.(null)
+              }}
+            />
           ))}
         </div>
       </PopoverAnchor>
@@ -103,6 +103,15 @@ export const WelcomeScreenSuggestionsRow = ({
           align="start"
           sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onPointerDownOutside={(event) => {
+            // Group-button clicks own the open/switch/close semantics; letting
+            // the popover also dismiss on the same pointerdown would race the
+            // click and close it before the switch lands.
+            const target = event.target as Node | null
+            if (target && rowRef.current?.contains(target)) {
+              event.preventDefault()
+            }
+          }}
           className={cn(
             "flex flex-col gap-1 rounded-md border border-solid border-f1-border-secondary bg-f1-background p-2",
             "w-[var(--radix-popover-trigger-width)]"
