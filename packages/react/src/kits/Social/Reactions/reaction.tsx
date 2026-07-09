@@ -1,5 +1,5 @@
 import NumberFlow from "@number-flow/react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { EmojiImage, getEmojiLabel, useEmojiConfetti } from "@/lib/emojis"
@@ -31,6 +31,15 @@ export function Reaction({
   const [count, setCount] = useState(initialCount)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { fireEmojiConfetti } = useEmojiConfetti()
+
+  // Reconcile with the source of truth: clicking this emoji elsewhere (e.g. the
+  // picker) updates the parent's items, so honor prop changes after mount.
+  useEffect(() => {
+    setIsActive(hasReacted)
+  }, [hasReacted])
+  useEffect(() => {
+    setCount(initialCount)
+  }, [initialCount])
 
   const handleClick = (
     event: React.MouseEvent<HTMLButtonElement>,
