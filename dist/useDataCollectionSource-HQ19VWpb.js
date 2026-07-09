@@ -43540,12 +43540,12 @@ function yN({
   f.current = e;
   const u = re(() => {
     const g = n.current, y = g ? g.getBoundingClientRect().top : 0, v = [];
-    for (const b of d.current) {
-      const x = document.getElementById(f.current(b));
-      x && v.push({ id: b, top: x.getBoundingClientRect().top - y });
+    for (const E of d.current) {
+      const C = document.getElementById(f.current(E));
+      C && v.push({ id: E, top: C.getBoundingClientRect().top - y });
     }
-    const w = g ? g.scrollTop + g.clientHeight >= g.scrollHeight - w4 : window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - w4, k = ete(v, r, w);
-    k !== void 0 && s(k);
+    const w = g ? g.scrollTop : window.scrollY, k = g ? g.clientHeight : window.innerHeight, b = g ? g.scrollHeight : document.documentElement.scrollHeight, _ = b > k + w4 && w + k >= b - w4, S = ete(v, r, _);
+    S !== void 0 && s(S);
   }, [n, r]), h = re(() => {
     a.current || l.current === null && (l.current = requestAnimationFrame(() => {
       l.current = null, u();
