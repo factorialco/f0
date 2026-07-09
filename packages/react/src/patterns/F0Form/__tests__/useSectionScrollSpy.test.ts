@@ -213,4 +213,18 @@ describe("useSectionScrollSpy", () => {
 
     expect(result.current.activeSection).toBe("c")
   })
+
+  it("does not clamp to the last section when the container has no overflow", () => {
+    const harness = mountDom()
+    // Content fits exactly: clientHeight === scrollHeight, so the container
+    // never scrolls. The initial recompute must NOT treat this as "at the
+    // bottom" and jump to the last section.
+    Object.defineProperty(harness.container, "clientHeight", {
+      value: 900,
+      configurable: true,
+    })
+    const { result } = renderSpy(harness.container)
+
+    expect(result.current.activeSection).toBe("a")
+  })
 })

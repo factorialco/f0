@@ -120,11 +120,19 @@ export function useSectionScrollSpy({
       sections.push({ id, top: el.getBoundingClientRect().top - rootTop })
     }
 
-    const atBottom = container
-      ? container.scrollTop + container.clientHeight >=
-        container.scrollHeight - BOTTOM_EPSILON
-      : window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - BOTTOM_EPSILON
+    const scrollTop = container ? container.scrollTop : window.scrollY
+    const clientHeight = container ? container.clientHeight : window.innerHeight
+    const scrollHeight = container
+      ? container.scrollHeight
+      : document.documentElement.scrollHeight
+
+    // Only clamp to the last section when there is real vertical overflow to
+    // scroll through. An unbounded container has clientHeight === scrollHeight,
+    // which would otherwise read as "at the bottom" on the very first recompute
+    // and wrongly activate the last section before the user has scrolled.
+    const canScroll = scrollHeight > clientHeight + BOTTOM_EPSILON
+    const atBottom =
+      canScroll && scrollTop + clientHeight >= scrollHeight - BOTTOM_EPSILON
 
     const next = getActiveSectionId(sections, topOffset, atBottom)
     if (next !== undefined) setActiveSection(next)
