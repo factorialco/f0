@@ -52,7 +52,10 @@ import {
 } from "./groupingUtils"
 import { useErrorNavigation } from "./useErrorNavigation"
 import { useSchemaDefinition } from "./useSchemaDefinition"
-import { useSectionScrollSpy } from "./useSectionScrollSpy"
+import {
+  scrollSectionIntoView,
+  useSectionScrollSpy,
+} from "./useSectionScrollSpy"
 import { createZodErrorMap } from "./zodErrorMap"
 
 /**
@@ -161,10 +164,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
         // highlight doesn't flicker through intermediate sections; it resumes
         // once the scroll settles.
         beginProgrammaticScroll()
-        container.scrollTo({
-          top: element.offsetTop - container.offsetTop,
-          behavior: "smooth",
-        })
+        scrollSectionIntoView(container, element)
       }
     },
     [name, setActiveSection, beginProgrammaticScroll]
@@ -640,12 +640,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         // Mute scroll-spy for the smooth scroll so the highlight doesn't
         // flicker through intermediate sections; it resumes on scrollend.
         beginProgrammaticScroll()
-        // Scroll within the form's own scroll container to avoid
-        // shifting parent containers (e.g. the canvas panel).
-        container.scrollTo({
-          top: element.offsetTop - container.offsetTop,
-          behavior: "smooth",
-        })
+        scrollSectionIntoView(container, element)
       }
     },
     [name, setActiveSection, beginProgrammaticScroll]

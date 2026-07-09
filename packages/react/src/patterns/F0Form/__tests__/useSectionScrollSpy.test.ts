@@ -6,11 +6,58 @@ import { zeroRenderHook } from "@/testing/test-utils"
 import {
   getActiveSectionId,
   SCROLL_SPY_TOP_OFFSET,
+  scrollSectionIntoView,
   type SectionTop,
   useSectionScrollSpy,
 } from "../useSectionScrollSpy"
 
 const sec = (id: string, top: number): SectionTop => ({ id, top })
+
+describe("scrollSectionIntoView", () => {
+  function setup(scrollHeight: number, clientHeight: number) {
+    const container = document.createElement("div")
+    Object.defineProperty(container, "scrollHeight", {
+      value: scrollHeight,
+      configurable: true,
+    })
+    Object.defineProperty(container, "clientHeight", {
+      value: clientHeight,
+      configurable: true,
+    })
+    Object.defineProperty(container, "offsetTop", {
+      value: 0,
+      configurable: true,
+    })
+    container.scrollTo = vi.fn()
+    const element = document.createElement("div")
+    Object.defineProperty(element, "offsetTop", {
+      value: 400,
+      configurable: true,
+    })
+    element.scrollIntoView = vi.fn()
+    return { container, element }
+  }
+
+  it("scrolls the container when it overflows", () => {
+    const { container, element } = setup(900, 300)
+    scrollSectionIntoView(container, element)
+    expect(container.scrollTo).toHaveBeenCalledWith({
+      top: 400,
+      behavior: "smooth",
+    })
+    expect(element.scrollIntoView).not.toHaveBeenCalled()
+  })
+
+  it("falls back to scrollIntoView when the container does not overflow", () => {
+    const { container, element } = setup(900, 900)
+    scrollSectionIntoView(container, element)
+    expect(element.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "smooth",
+      block: "start",
+    })
+    expect(container.scrollTo).not.toHaveBeenCalled()
+  })
+})
 
 describe("getActiveSectionId", () => {
   const offset = SCROLL_SPY_TOP_OFFSET

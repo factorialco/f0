@@ -60,6 +60,31 @@ export function getActiveSectionId(
   return active
 }
 
+/**
+ * Smoothly scroll a section to the top of its scroll container.
+ *
+ * When the container actually overflows, scroll it directly — this keeps the
+ * movement contained and avoids shifting parent surfaces (e.g. the canvas
+ * panel). When it doesn't (an unbounded layout where the wrapper grew to fit
+ * its content and the page is the real scroller), fall back to `scrollIntoView`
+ * so the click still moves the user to the section instead of no-opping.
+ */
+export function scrollSectionIntoView(
+  container: HTMLElement,
+  element: HTMLElement
+) {
+  const canScroll =
+    container.scrollHeight > container.clientHeight + BOTTOM_EPSILON
+  if (canScroll) {
+    container.scrollTo({
+      top: element.offsetTop - container.offsetTop,
+      behavior: "smooth",
+    })
+  } else {
+    element.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
+}
+
 interface UseSectionScrollSpyOptions {
   /** Ordered section ids to track (DOM order, top to bottom). */
   sectionIds: string[]
