@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.28.1](https://github.com/factorialco/f0/compare/f0-react-v4.28.0...f0-react-v4.28.1) (2026-07-09)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** align chips row and neutral Clear button ([#4645](https://github.com/factorialco/f0/issues/4645)) ([412d269](https://github.com/factorialco/f0/commit/412d26952c1cfc49706a024b0ad268d291e55d1a))
+
 ## [4.28.0](https://github.com/factorialco/f0/compare/f0-react-v4.27.0...f0-react-v4.28.0) (2026-07-08)
 
 
