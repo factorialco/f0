@@ -45,6 +45,7 @@ export const useEmptyState = (
         {
           label: i18n.collections.emptyStates.noResults.clearFilters,
           onClick: actions.clearFilters,
+          variant: "neutral",
         },
       ],
     },
@@ -55,6 +56,7 @@ export const useEmptyState = (
         {
           label: i18n.collections.emptyStates.error.retry,
           onClick: actions.retry,
+          variant: "neutral",
         },
       ],
     },
