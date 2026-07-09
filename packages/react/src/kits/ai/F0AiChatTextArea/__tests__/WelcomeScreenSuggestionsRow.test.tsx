@@ -171,4 +171,68 @@ describe("WelcomeScreenSuggestionsRow", () => {
       await screen.findByRole("button", { name: /out of office this week/i })
     ).toBeInTheDocument()
   })
+
+  // Regression: buttons used to be individual Radix PopoverTriggers, and only
+  // the last-mounted one was registered as THE trigger — its built-in toggle
+  // fired after the button's onClick, so switching TO the last group closed
+  // the popover instead of showing it.
+  it("switches to the last group while another group is open", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    expect(
+      await screen.findByRole("button", { name: /april leave and overtime/i })
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /create/i }))
+    expect(
+      await screen.findByRole("button", { name: /draft a job description/i })
+    ).toBeInTheDocument()
+  })
+
+  it("switches back from the last group to another group", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /create/i }))
+    expect(
+      await screen.findByRole("button", { name: /draft a job description/i })
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    expect(
+      await screen.findByRole("button", { name: /april leave and overtime/i })
+    ).toBeInTheDocument()
+  })
+
+  it("closes the popover when the open group's own tag is clicked", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    expect(
+      await screen.findByRole("button", { name: /april leave and overtime/i })
+    ).toBeInTheDocument()
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    expect(
+      screen.queryByRole("button", { name: /april leave and overtime/i })
+    ).not.toBeInTheDocument()
+  })
 })
