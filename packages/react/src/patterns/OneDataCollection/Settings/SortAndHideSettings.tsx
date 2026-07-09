@@ -57,13 +57,14 @@ export const SortAndHideSettings = ({
   return (
     <div className="relative -mr-2 flex flex-col gap-2">
       {/*
-        `type="auto"` keeps the scrollbar visible whenever the list overflows
-        its max height. The ScrollArea defaults to Radix's `type="hover"`, which
-        hides the scrollbar until the user hovers the list — with more entries
-        than fit in `max-h-56` (~8 rows) the extra columns then look absent
-        rather than scrollable.
+        Let the list grow to fit the full set of entries (up to `max-h-[32rem]`)
+        and, when it still overflows, keep the scrollbar visible with
+        `type="auto"`. The previous `max-h-56` (~8 rows) plus Radix's default
+        `type="hover"` capped the list short behind an invisible, hover-only
+        scrollbar, so any entries past the cap looked absent rather than
+        scrollable.
       */}
-      <ScrollArea type="auto" className="max-h-56">
+      <ScrollArea type="auto" className="max-h-[32rem]">
         <SortAndHideList
           items={items}
           onChange={onChange}
