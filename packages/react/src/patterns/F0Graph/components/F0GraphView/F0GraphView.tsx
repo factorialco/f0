@@ -430,10 +430,9 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
   })
 
   // Initial frame: when `initialFocusNodeId` is set, open framed on that node
-  // AND its direct children (React Flow's `fitViewOptions.nodes`, capped zoom)
-  // so the first level is visible — instead of fit-to-all, and without zooming
-  // in on the single node. No animation. Frozen at the first render with nodes
-  // present so React Flow's one-shot initial fit reads a stable value; falls
+  // AND its direct children (capped zoom) so the first level is visible —
+  // instead of fit-to-all, and without zooming in on the single node. Frozen at
+  // the first render with nodes present so the fit reads a stable value; falls
   // back to fit-all when the target isn't present.
   const initialFitRef = useRef<
     { nodes: Array<{ id: string }>; maxZoom: number } | undefined
@@ -454,6 +453,20 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       : undefined
   }
   const initialFitViewOptions = initialFitRef.current
+
+  // Apply the initial frame exactly once, imperatively — never via React Flow's
+  // `fitView` prop. That prop queues a fit deferred until the container/nodes
+  // are measured, and once it fires it clears `fitViewOptions`; a later layout
+  // change (the first collapse/expand) then re-fires it as a fit-all, snapping
+  // the focused node away. Fitting ourselves, guarded by a ref, guarantees a
+  // single fit framed on `initialFitViewOptions` and no re-fit on any later
+  // layout change. Consumer-driven reveals still fly via the effect below.
+  const didInitialFitRef = useRef(false)
+  useEffect(() => {
+    if (didInitialFitRef.current || renderedNodeIds.length === 0) return
+    didInitialFitRef.current = true
+    reactFlow.fitView(initialFitViewOptions)
+  }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
 
   // ── Fly to the consumer-controlled focused node ──
   // Latest fly-to logic, read via a ref so the effect below depends ONLY on
@@ -620,14 +633,9 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
                           ge?.onEdgeClick?.(ge)
                         }}
                         proOptions={{ hideAttribution: true }}
-                        // One-shot initial frame: disable React Flow's `fitView`
-                        // once the viewport has settled so a later layout change
-                        // (collapse/expand) can never re-fit and reposition the
-                        // focused root. `viewportReady` flips on the first
-                        // `onViewportChange` — which the initial fit triggers,
-                        // so the initial frame itself is never cancelled.
-                        fitView={!viewportReady}
-                        fitViewOptions={initialFitViewOptions}
+                        // No `fitView` prop: the initial frame is applied once,
+                        // imperatively (see `didInitialFitRef` above), so a later
+                        // layout change can never re-fire React Flow's queued fit.
                         nodesDraggable={false}
                         nodesConnectable={false}
                         elementsSelectable={false}
