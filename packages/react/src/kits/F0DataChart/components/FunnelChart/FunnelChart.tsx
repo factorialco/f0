@@ -109,10 +109,7 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
         </div>
       )}
 
-      <div
-        ref={ref}
-        className="h-full w-full [&_canvas]:animate-in [&_canvas]:fade-in [&_canvas]:duration-200"
-      />
+      <div ref={ref} className="h-full w-full" />
     </div>
   )
 }

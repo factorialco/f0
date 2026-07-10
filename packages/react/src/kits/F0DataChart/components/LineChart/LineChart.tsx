@@ -31,7 +31,7 @@ export const LineChart = (props: F0DataChartLineProps) => {
   return (
     <div
       ref={ref}
-      className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default [&_canvas]:animate-in [&_canvas]:fade-in [&_canvas]:duration-200"
+      className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default"
     />
   )
 }

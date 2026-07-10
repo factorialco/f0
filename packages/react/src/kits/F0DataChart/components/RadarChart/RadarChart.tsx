@@ -16,10 +16,5 @@ export const RadarChart = (props: F0DataChartRadarProps) => {
   const chart = useEChartsInstance(ref, options)
   useLegendInteraction(chart)
 
-  return (
-    <div
-      ref={ref}
-      className="h-full w-full [&_canvas]:animate-in [&_canvas]:fade-in [&_canvas]:duration-200"
-    />
-  )
+  return <div ref={ref} className="h-full w-full" />
 }

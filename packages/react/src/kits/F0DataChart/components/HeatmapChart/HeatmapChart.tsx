@@ -31,7 +31,7 @@ export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
     <div className="relative h-full w-full">
       <div
         ref={ref}
-        className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default [&_canvas]:animate-in [&_canvas]:fade-in [&_canvas]:duration-200"
+        className="h-full w-full data-[axis-hover=true]:[&_canvas]:!cursor-default"
       />
       {size === "sm" && (
         <div className="absolute inset-0 flex items-center justify-center bg-f1-background p-3 text-center text-sm font-medium text-f1-foreground-tertiary">
