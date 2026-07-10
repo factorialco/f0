@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 
-import type {
-  CardMetadata,
-  CardMetadataProperty,
-} from "@/components/F0Card/types"
-import type { IconType } from "@/components/F0Icon"
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import type { KanbanProps } from "@/ui/Kanban/types"
 
@@ -30,16 +25,6 @@ import type {
 
 import { ItemActionsDefinition } from "../../../item-actions"
 import { KanbanCollectionProps } from "./types"
-
-const toCardMetadata = (
-  items: ReadonlyArray<{
-    icon: IconType
-    property: CardMetadataProperty
-  }>
-): CardMetadata[] =>
-  items.map(({ icon, property }) =>
-    property.type === "file" ? { property } : { icon, property }
-  )
 
 const isInfiniteScrollPaginationInfo = (
   paginationInfo: PaginationInfo | undefined | null
@@ -273,9 +258,7 @@ export const KanbanCollection = <
           description={description ? description(item) : undefined}
           avatar={avatar ? avatar(item) : undefined}
           draggable={onMove !== undefined}
-          metadata={
-            optionsMetadata ? toCardMetadata(optionsMetadata(item)) : undefined
-          }
+          metadata={optionsMetadata ? [...optionsMetadata(item)] : undefined}
           compact
           forceVerticalMetadata
           selectable={source.selectable !== undefined}

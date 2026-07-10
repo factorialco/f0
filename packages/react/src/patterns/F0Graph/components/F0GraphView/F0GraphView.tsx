@@ -44,13 +44,19 @@ import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useLazyTree } from "../../hooks/useLazyTree"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
+import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
 import { ClickSpark } from "../../internal/ClickSpark"
 import {
   F0GraphCollapserWrapper,
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
 } from "../../internal/ReactFlowAdapters"
-import type { GraphEdge, GraphNode, LayoutDirection } from "../../types"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+} from "../../types"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
@@ -155,6 +161,11 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     defaultVisibleTagTypes,
     reserveTagRow,
     onVisibleNodesChange,
+    onRenderedNodesChange,
+    enableNodeWindowing,
+    nodeWindowPadding,
+    loadVisibleNodeData,
+    visibleDataDebounceMs,
     layoutEngine: layoutEngineProp,
     controlLabels,
     currentUserNodeId,
@@ -269,15 +280,35 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onExpandedNodesChange,
   })
 
+  // Full-layout accessors for windowing-aware navigation. Populated from the
+  // render model below; read through refs so `useGraphViewport` (called first,
+  // to break the zoomLevel⇄bounds cycle) always sees the latest values.
+  const contentBoundsRef = useRef<{
+    x: number
+    y: number
+    width: number
+    height: number
+  } | null>(null)
+  const getNodePositionRef = useRef<(id: string) => PositionedNode | undefined>(
+    () => undefined
+  )
+  const getContentBounds = useMemo(() => () => contentBoundsRef.current, [])
+  const getNodePositionStable = useMemo(
+    () => (id: string) => getNodePositionRef.current(id),
+    []
+  )
+
   // ── Viewport zoom + control handlers ──
   const {
     currentZoom,
     zoomLevel,
+    viewportReady,
     handleViewportChange,
     handleZoomIn,
     handleZoomOut,
     handleFitView,
     handleFocusUser,
+    centerOnNode,
   } = useGraphViewport({
     defaultZoom,
     zoomPreset,
@@ -285,6 +316,9 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     currentUserNodeId,
     onZoomLevelChange,
     onViewportChange,
+    nodeWindowingActive: enableNodeWindowing ?? false,
+    getContentBounds,
+    getNodePosition: getNodePositionStable,
   })
 
   // ── Selection + roving-tabindex focus ──
@@ -317,6 +351,10 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     rfEdges,
     reservedTagHeight,
     tagsAffectLayout,
+    renderedNodeCount,
+    renderedNodeIds,
+    contentBounds,
+    getNodePosition,
   } = useGraphRenderModel<T>({
     roots,
     nodeMap,
@@ -334,7 +372,15 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     direction,
     controlLabels,
     hoveredEdgeId,
+    // Gate windowing on the first settled viewport so the mount-time `fitView`
+    // frames the whole graph before the camera decides which nodes to keep.
+    enableNodeWindowing: (enableNodeWindowing ?? false) && viewportReady,
+    nodeWindowPadding,
   })
+
+  // Expose the full layout to the windowing-aware navigation handlers above.
+  contentBoundsRef.current = contentBounds
+  getNodePositionRef.current = getNodePosition
 
   // Empty-canvas click: clear our own selection/focus and let the consumer
   // clear any controlled highlight/focus (e.g. a search/"find me" reveal).
@@ -364,11 +410,31 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onVisibleNodesChange?.(visibleTreeNodes.length)
   }, [visibleTreeNodes.length, onVisibleNodesChange])
 
+  // Notify parent of the count actually handed to React Flow (post-windowing)
+  useEffect(() => {
+    onRenderedNodesChange?.(renderedNodeCount)
+  }, [renderedNodeCount, onRenderedNodesChange])
+
+  // Viewport-driven data loading: request rich data for on-screen nodes.
+  // With windowing, hold off until the viewport has settled — before then
+  // `renderedNodeIds` is the full (un-windowed) set, and flushing it would
+  // request the whole tree on mount instead of just what's on screen.
+  useViewportDataLoader({
+    nodeIds: renderedNodeIds,
+    loadVisibleNodeData,
+    debounceMs: visibleDataDebounceMs,
+    enabled: !enableNodeWindowing || viewportReady,
+  })
+
   // ── Fly to the consumer-controlled focused node ──
   useEffect(() => {
     if (focusedNode) {
       // Slight delay to allow layout to settle
       const timer = setTimeout(() => {
+        // Windowing: the target may be off-screen and absent from React Flow's
+        // store, so center on its layout position instead of an id-based
+        // fitView (which silently no-ops for a missing node).
+        if (enableNodeWindowing && centerOnNode(focusedNode, 300)) return
         reactFlow.fitView({
           nodes: [{ id: focusedNode }],
           duration: 300,
@@ -377,7 +443,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       }, FOCUS_SETTLE_DELAY_MS)
       return () => clearTimeout(timer)
     }
-  }, [focusedNode, reactFlow])
+  }, [focusedNode, reactFlow, enableNodeWindowing, centerOnNode])
 
   // ── Split context values (wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
@@ -408,6 +474,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       // Only publish a Set when the consumer opted in via `nodeTagTypes`.
       visibleTagTypes: nodeTagTypes ? visibleTagTypesSet : undefined,
       deferredLoading: isDeferredLoading || undefined,
+      dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
       largeGraph: visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD,
     }),
@@ -416,6 +483,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       nodeTagTypes,
       visibleTagTypesSet,
       isDeferredLoading,
+      loadVisibleNodeData,
       visibleTreeNodes.length,
       tagsAffectLayout,
       reservedTagHeight,
