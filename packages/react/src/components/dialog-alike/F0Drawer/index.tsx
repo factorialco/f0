@@ -12,7 +12,6 @@ export type {
   F0DrawerActionsProps,
   F0DrawerAction,
 } from "./types"
-export type { DrawerControls } from "../common/Header"
 
 /**
  * @experimental This is an experimental component use it at your own risk

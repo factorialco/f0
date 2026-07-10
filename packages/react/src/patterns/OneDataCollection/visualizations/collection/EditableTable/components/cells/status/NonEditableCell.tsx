@@ -19,6 +19,7 @@ export function NonEditableCell<R extends RecordType>({
       showRightBorder={!isLastColumn}
       borderOnHover={false}
       hint={hint}
+      hintPosition="right"
       cursor="default"
     >
       <div

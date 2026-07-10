@@ -218,6 +218,17 @@ export type AiChatMode = "chat" | "voice"
 export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
+ * A single piece of content hosted in the side panel — the same resizable +
+ * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
+ * the `id` keys the content so switching conversations unmounts the previous
+ * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ */
+export type SidePanelContent = {
+  id: string
+  content: React.ReactNode
+}
+
+/**
  * Tracking options for the AI chat
  */
 export type UploadedFile = {
@@ -288,12 +299,38 @@ export type AiChatTrackingOptions = {
 export type AiChatProviderProps = {
   enabled?: boolean
   /**
+   * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+   * Hosts set "left" for a chat-first experience (e.g. communications).
+   * @default "right"
+   */
+  side?: "left" | "right"
+  /**
    * Greeting phrase(s) shown by the welcome screen when the chat is empty.
    * A single string renders once; an array rotates through phrases. Purely
    * UI config — does not affect runtime behavior.
    */
   initialMessage?: string | string[]
+  /**
+   * Grouped suggestions rendered as outline buttons above the composer on the
+   * welcome screen. Optional and independent of `welcomeScreenCards` — provide
+   * either, both, or neither, in any counts. No hard limit on the number of
+   * groups yet.
+   */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  /**
+   * Cards rendered below the composer on the fullscreen welcome screen. Each
+   * card carries its own `onClick` — the chat owns the layout; the host owns
+   * the interaction.
+   *
+   * Hosts that must build a card's `onClick` inside the chat provider (e.g.
+   * needing `openCanvas`) can register the cards dynamically via
+   * `setWelcomeScreenCards` from `useAiChat()` instead of passing them here.
+   *
+   * Optional and independent of `welcomeScreenSuggestions` — provide either,
+   * both, or neither, in any counts. At most 4 cards are rendered (the row is a
+   * 2×2 grid); extras are dropped.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   /**
    * Enable resizable chat window
@@ -417,12 +454,42 @@ export type WelcomeScreenSuggestionItem = {
 
 /**
  * A welcome-screen group rendered as an outline button in the welcome row.
- * Clicking the group opens a popover listing its `items`.
+ * Clicking the group opens a popover listing its `items`. The number of groups
+ * is not capped yet (unlike welcome cards, which top out at 4).
  */
 export type WelcomeScreenSuggestion = {
   icon: IconType
   label: string
   items: WelcomeScreenSuggestionItem[]
+}
+
+/**
+ * A card shown below the composer on the fullscreen welcome screen, rendered
+ * as an `F0CardHorizontal`. Each card owns its behavior via `onClick`, so
+ * different cards can trigger different things (send a prompt, open a dialog,
+ * navigate, …).
+ *
+ * The chat owns the layout; the host owns the interaction. Up to 4 cards are
+ * rendered (a 2×2 grid); extras are dropped.
+ */
+export type F0AiChatWelcomeCard = {
+  /** Stable identifier, also used as the React key. */
+  id: string
+  icon: IconType
+  title: string
+  description?: string
+  /**
+   * Optional prompt the card represents. The card's own `onClick` decides
+   * whether to send it — cards without a `message` (e.g. a "Browse templates"
+   * card) simply do something else.
+   */
+  message?: string
+  /**
+   * Invoked when the card is clicked. The host wires the behavior per card —
+   * send `message` as a prompt, open a dialog, navigate, … A card without an
+   * `onClick` renders as non-interactive.
+   */
+  onClick?: () => void
 }
 
 /**

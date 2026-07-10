@@ -1,4 +1,54 @@
-import type { GraphEdge, TreeNode } from "./types"
+import type { GraphEdge, PositionedNode, TreeNode } from "./types"
+
+/** Axis-aligned rectangle in flow-space coordinates. */
+export interface ViewportRect {
+  minX: number
+  minY: number
+  maxX: number
+  maxY: number
+}
+
+/**
+ * Whether a node box (top-left `x`/`y`, size `width`/`height`) overlaps `rect`.
+ * Pure AABB intersection — the core predicate behind node-array windowing.
+ */
+export function nodeIntersectsRect(
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  rect: ViewportRect
+): boolean {
+  return (
+    x <= rect.maxX &&
+    x + width >= rect.minX &&
+    y <= rect.maxY &&
+    y + height >= rect.minY
+  )
+}
+
+/**
+ * Bounding box of every positioned node, as an `{ x, y, width, height }` rect
+ * suitable for `reactFlow.fitBounds`. Returns `null` for an empty layout.
+ * Lets navigation (fit-view, fly-to) target the full graph even when node-array
+ * windowing has removed off-screen nodes from the React Flow store.
+ */
+export function computeLayoutBounds(
+  nodes: PositionedNode[]
+): { x: number; y: number; width: number; height: number } | null {
+  if (nodes.length === 0) return null
+  let minX = Infinity
+  let minY = Infinity
+  let maxX = -Infinity
+  let maxY = -Infinity
+  for (const node of nodes) {
+    minX = Math.min(minX, node.x)
+    minY = Math.min(minY, node.y)
+    maxX = Math.max(maxX, node.x + node.width)
+    maxY = Math.max(maxY, node.y + node.height)
+  }
+  return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
+}
 
 /** Compute the initial expanded set by expanding every node above `depth`. */
 export function computeExpandedByDepth<T>(

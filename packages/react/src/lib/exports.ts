@@ -11,7 +11,8 @@ export { experimentalComponent as experimental } from "./experimental"
 export { OneEllipsis } from "./OneEllipsis"
 export { PrivacyModeProvider, usePrivacyMode } from "./privacyMode"
 export * from "./providers/datacollection/exports"
-export { dialogs, drawers } from "./providers/dialogs-alike"
+export { dialogs, drawers, dialogs as dialog } from "./providers/dialogs-alike"
+export { F0CardHorizontal as F0CardRow } from "@/experimental/F0CardHorizontal"
 export type {
   DialogDefinition,
   DialogActions,

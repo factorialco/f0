@@ -207,6 +207,26 @@ describe("imperative dialog / drawer API", () => {
     })
   })
 
+  describe("dialogs.confirm (v3 back-compat alias)", () => {
+    it("is the same implementation as confirmation", () => {
+      expect(dialogs.confirm).toBe(dialogs.confirmation)
+    })
+
+    it("builds confirm + cancel actions like the legacy dialog.confirm", () => {
+      dialogs.confirm({
+        type: "critical",
+        title: "Delete?",
+        msg: "This cannot be undone",
+        confirm: { label: "Delete", value: true },
+        cancel: { label: "Cancel" },
+      })
+      const item = currentItem()
+      expect(item.type).toBe("critical")
+      expect(item.actions.primary.label).toBe("Delete")
+      expect(item.actions.secondary.label).toBe("Cancel")
+    })
+  })
+
   describe("drawers.open", () => {
     it("adds a drawer-variant item to the store", () => {
       drawers.open({

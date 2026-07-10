@@ -27,7 +27,7 @@ const F0AudioPlayerCardBase = forwardRef<
     actions,
     className,
     src,
-    preload = "metadata",
+    preload,
     autoPlay = false,
     disabled = false,
     ariaLabel,
@@ -72,8 +72,8 @@ const F0AudioPlayerCardBase = forwardRef<
     >
       <audio
         ref={controller.audioRef}
-        src={src}
-        preload={preload}
+        src={controller.currentSrc}
+        preload={preload ?? (typeof src === "function" ? "none" : "metadata")}
         autoPlay={autoPlay}
       />
 

@@ -47,6 +47,7 @@ import {
   filterActions,
   getPrimaryActions,
   getSecondaryActions,
+  getUpsellAction,
   MAX_EXPANDED_ACTIONS,
 } from "./actions"
 import {
@@ -301,6 +302,7 @@ const OneDataCollectionComp = <
     primaryActions,
     primaryActionsLabel,
     secondaryActions,
+    upsellAction,
     // Summary
     totalItemSummary,
     currentGrouping,
@@ -413,6 +415,11 @@ const OneDataCollectionComp = <
     [secondaryActions]
   )
 
+  const upsellActionItem = useMemo(
+    () => getUpsellAction(upsellAction),
+    [upsellAction]
+  )
+
   // Export action - only available when csvExport is enabled
   const csvExportFilename =
     csvExport && typeof csvExport === "object"
@@ -479,6 +486,7 @@ const OneDataCollectionComp = <
   const hasCollectionsActions =
     primaryActionItems?.length > 0 ||
     allSecondaryActions?.length > 0 ||
+    !!upsellActionItem ||
     !!csvExport
 
   /**
@@ -1622,6 +1630,7 @@ const OneDataCollectionComp = <
                       primaryActionsLabel={primaryActionsLabel}
                       secondaryActions={secondaryActionsItems}
                       otherActions={otherActionsItems}
+                      upsellAction={upsellActionItem}
                     />
                   </>
                 )}
