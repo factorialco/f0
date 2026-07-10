@@ -35,6 +35,14 @@ export function useEChartsInstance(
   const optionsRef = useRef(options)
   optionsRef.current = options
 
+  // The exact options object the instance currently renders. Guards the
+  // options effect against re-applying what init just painted: `setInstance`
+  // re-renders the component, the effect fires with the same (memoized)
+  // options, and `setOption(..., notMerge)` would then rebuild the whole
+  // chart — restarting the entrance animation and visibly re-laying-out the
+  // grid one beat after the first paint.
+  const appliedOptionsRef = useRef<echarts.EChartsOption | null>(null)
+
   useEffect(() => {
     const container = ref.current
     if (!container) return
@@ -47,6 +55,7 @@ export function useEChartsInstance(
         return
       chart = echarts.init(container)
       chart.setOption(optionsRef.current, true)
+      appliedOptionsRef.current = optionsRef.current
       setInstance(chart)
     }
 
@@ -84,9 +93,10 @@ export function useEChartsInstance(
   }, [ref])
 
   useEffect(() => {
-    if (instance && !instance.isDisposed()) {
-      instance.setOption(options, true)
-    }
+    if (!instance || instance.isDisposed()) return
+    if (appliedOptionsRef.current === options) return
+    appliedOptionsRef.current = options
+    instance.setOption(options, true)
   }, [instance, options])
 
   return instance

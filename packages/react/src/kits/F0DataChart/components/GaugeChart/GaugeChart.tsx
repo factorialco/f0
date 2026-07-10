@@ -14,5 +14,10 @@ export const GaugeChart = (props: F0DataChartGaugeProps) => {
   const options = useGaugeChartOptions(ref, props, size)
   useEChartsInstance(ref, options)
 
-  return <div ref={ref} className="h-full w-full" />
+  return (
+    <div
+      ref={ref}
+      className="h-full w-full [&_canvas]:animate-in [&_canvas]:fade-in [&_canvas]:duration-200"
+    />
+  )
 }
