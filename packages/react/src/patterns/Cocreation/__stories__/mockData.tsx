@@ -192,62 +192,65 @@ export const ENGAGEMENT_TEMPLATE_CATEGORIES = [
   { value: "Wellbeing", label: "Wellbeing" },
 ]
 
+// Training's templates are organized by the same 3 types the guided creation
+// flow asks about up front (Satisfaction / Effectiveness / Knowledge Test), so
+// the plain browse tab and the AI canvas's type-scoped template list share one
+// taxonomy and one dataset.
 export const TRAINING_TEMPLATES: Template[] = [
   {
     id: "tt1",
-    name: "Compliance training assessment",
-    category: "Compliance",
+    name: "Course satisfaction survey",
+    category: "Satisfaction",
     description:
-      "Confirms course completion and checks comprehension of mandatory policies.",
-    questions: 8,
+      "A short pulse check on how participants felt about the course overall.",
+    questions: 4,
   },
   {
     id: "tt2",
-    name: "New hire onboarding training",
-    category: "Onboarding",
+    name: "Instructor & materials satisfaction",
+    category: "Satisfaction",
     description:
-      "Walks new hires through orientation modules and checks readiness.",
-    questions: 10,
+      "Focused on satisfaction with the instructor, pacing, and materials.",
+    questions: 4,
   },
   {
     id: "tt3",
-    name: "Manager coaching certification",
-    category: "Certification",
+    name: "Training effectiveness review",
+    category: "Effectiveness",
     description:
-      "Certifies managers on coaching fundamentals after the training course.",
-    questions: 9,
+      "Checks whether the course met its goals and improved performance.",
+    questions: 5,
   },
   {
     id: "tt4",
-    name: "Security awareness training",
-    category: "Compliance",
+    name: "Manager-observed effectiveness",
+    category: "Effectiveness",
     description:
-      "Checks understanding of phishing, data handling, and access policies.",
-    questions: 7,
+      "Gathers a manager's read on how training changed on-the-job performance.",
+    questions: 5,
   },
   {
     id: "tt5",
-    name: "Product training quiz",
-    category: "Skills",
+    name: "Course knowledge test",
+    category: "Knowledge Test",
     description:
-      "Short knowledge check after a product or sales-enablement training.",
-    questions: 6,
+      "A short graded quiz checking comprehension of the course material.",
+    questions: 5,
   },
   {
     id: "tt6",
-    name: "Leadership development check-in",
-    category: "Skills",
+    name: "Certification knowledge test",
+    category: "Knowledge Test",
     description:
-      "Gathers reflections and application plans after a leadership course.",
+      "A longer graded assessment used to certify course completion.",
     questions: 8,
   },
 ]
 
 export const TRAINING_TEMPLATE_CATEGORIES = [
-  { value: "Compliance", label: "Compliance" },
-  { value: "Onboarding", label: "Onboarding" },
-  { value: "Certification", label: "Certification" },
-  { value: "Skills", label: "Skills" },
+  { value: "Satisfaction", label: "Satisfaction" },
+  { value: "Effectiveness", label: "Effectiveness" },
+  { value: "Knowledge Test", label: "Knowledge Test" },
 ]
 
 /** Data adapter factory for the Templates browse view — one per flow's list. */

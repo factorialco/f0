@@ -267,87 +267,129 @@ export const mockEngagementTranscribe = makeMockTranscribe(
 
 // ---------------------------------------------------------------------------
 // Training Surveys flow
+//
+// Training's guided creation flow asks the user to pick a form type up front
+// (Satisfaction / Effectiveness / Knowledge Test) before it ever shows a
+// template. That choice determines a LOCKED first question every survey of
+// that type carries — seeded whether the user starts from "Empty Form" or
+// applies a template. Each `*_LOCKED_ELEMENT` below is that first section;
+// each `*_SURVEY_ELEMENTS` is the locked element plus the type's follow-up
+// questions (what a template preview/apply seeds); "Empty Form" seeds just
+// the locked element on its own.
 // ---------------------------------------------------------------------------
 
-export const TRAINING_SURVEY_ELEMENTS: SurveyFormBuilderElement[] = [
-  {
-    type: "section",
-    section: {
-      id: "section-training-intro",
-      title: "Before you start",
-      description: "A couple of quick details about the course you took.",
-      questions: [
-        {
-          id: "q-training-name",
-          title: "What is your name?",
-          description: "Responses stay anonymous in aggregate reporting.",
-          type: "text" as const,
+export const SATISFACTION_LOCKED_ELEMENT: SurveyFormBuilderElement = {
+  type: "section",
+  section: {
+    id: "section-satisfaction-score",
+    locked: true,
+    title: "Predefined satisfaction section",
+    description:
+      "This section powers your satisfaction score, so it can't be edited, moved, or removed.",
+    questions: [
+      {
+        id: "q-satisfaction-score",
+        title: "How satisfied are you with the overall quality of the course?",
+        description: "1 is very low, 5 is very high.",
+        type: "rating" as const,
+        options: [
+          { value: 1, label: "1" },
+          { value: 2, label: "2" },
+          { value: 3, label: "3" },
+          { value: 4, label: "4" },
+          { value: 5, label: "5" },
+        ],
+        required: true,
+        lockedNote: {
+          description:
+            "The standard satisfaction question — its wording and 1–5 scale are fixed so scores stay comparable over time.",
         },
-        {
-          id: "q-training-date",
-          title: "When did you complete the training?",
-          type: "date" as const,
-        },
-      ],
-    },
+      },
+    ],
   },
+}
+
+export const SATISFACTION_SURVEY_ELEMENTS: SurveyFormBuilderElement[] = [
+  SATISFACTION_LOCKED_ELEMENT,
   {
     type: "section",
     section: {
-      id: "section-content-delivery",
-      title: "Content & delivery",
-      description: "How the material and the delivery worked for you.",
+      id: "section-satisfaction-feedback",
+      title: "Your feedback",
+      description:
+        "A little context behind your score — these are yours to edit.",
       questions: [
         {
-          id: "q-content-rating",
-          title: "How would you rate the quality of the training content?",
-          description: "1 is poor, 5 is excellent.",
-          type: "rating" as const,
-          options: [
-            { value: 1, label: "1" },
-            { value: 2, label: "2" },
-            { value: 3, label: "3" },
-            { value: 4, label: "4" },
-            { value: 5, label: "5" },
-          ],
-          required: true,
-        },
-        {
-          id: "q-content-feedback",
-          title: "What could make the content clearer or more useful?",
+          id: "q-satisfaction-reason",
+          title: "What's the main reason for your score?",
+          description: "Tell us what's behind the number you picked.",
           type: "longText" as const,
         },
         {
-          id: "q-training-format",
-          title: "Which format did you take this training in?",
+          id: "q-satisfaction-format",
+          title: "Which parts of the course were you most satisfied with?",
           description: "Select all that apply.",
           type: "multi-select" as const,
           options: [
-            { value: "live", label: "Live session" },
-            { value: "self-paced", label: "Self-paced video" },
-            { value: "in-person", label: "In-person workshop" },
-            { value: "reading", label: "Reading material" },
+            { value: "instructor", label: "Instructor" },
+            { value: "materials", label: "Materials" },
+            { value: "pacing", label: "Pacing" },
+            { value: "format", label: "Format (live / self-paced)" },
           ],
         },
         {
-          id: "q-training-team",
+          id: "q-satisfaction-team",
           title: "Which team are you on?",
           type: "dropdown-single" as const,
           datasetKey: "teams",
-          required: true,
         },
       ],
     },
   },
+]
+
+export const EFFECTIVENESS_LOCKED_ELEMENT: SurveyFormBuilderElement = {
+  type: "section",
+  section: {
+    id: "section-effectiveness-score",
+    locked: true,
+    title: "Predefined effectiveness section",
+    description:
+      "This section powers your effectiveness score, so it can't be edited, moved, or removed.",
+    questions: [
+      {
+        id: "q-effectiveness-score",
+        title: "How would you rate the overall effectiveness of the course?",
+        description: "1 is very low, 5 is very high.",
+        type: "rating" as const,
+        options: [
+          { value: 1, label: "1" },
+          { value: 2, label: "2" },
+          { value: 3, label: "3" },
+          { value: 4, label: "4" },
+          { value: 5, label: "5" },
+        ],
+        required: true,
+        lockedNote: {
+          description:
+            "The standard effectiveness question — its wording and 1–5 scale are fixed so scores stay comparable over time.",
+        },
+      },
+    ],
+  },
+}
+
+export const EFFECTIVENESS_SURVEY_ELEMENTS: SurveyFormBuilderElement[] = [
+  EFFECTIVENESS_LOCKED_ELEMENT,
   {
     type: "section",
     section: {
-      id: "section-assessment",
-      title: "Assessment & application",
+      id: "section-effectiveness-application",
+      title: "Applying what you learned",
       description: "Checking comprehension and how you'll apply it.",
       questions: [
         {
-          id: "q-confidence",
+          id: "q-effectiveness-confidence",
           title: "How confident do you feel applying what you learned?",
           type: "select" as const,
           options: [
@@ -358,88 +400,84 @@ export const TRAINING_SURVEY_ELEMENTS: SurveyFormBuilderElement[] = [
           required: true,
         },
         {
-          id: "q-training-mentors",
+          id: "q-effectiveness-mentors",
           title: "Who else should take this training?",
           type: "dropdown-multi" as const,
           datasetKey: "employees",
         },
         {
-          id: "q-training-hours",
+          id: "q-effectiveness-hours",
           title: "How many hours did you spend on this training?",
           type: "numeric" as const,
-        },
-        {
-          id: "q-training-acknowledge",
-          title: "Acknowledgement",
-          description: "Please confirm before submitting.",
-          type: "checkbox" as const,
-          label: "I completed all required modules for this training.",
-          required: true,
         },
       ],
     },
   },
 ]
 
-// Survey seeded by the "Compliance training" welcome card. It opens with a
-// dedicated, blocked initial section holding the mandatory completion
-// question: `locked` on the section strips its edit menu, disables its fields
-// and removes its drag handle (and, by inheritance, blocks the question inside
-// it too), while its title and description explain why it's fixed and a
-// "Locked" tag marks it. A following "Your feedback" section holds the
-// ordinary editable questions, so the contrast (blocked vs editable) is
-// visible across sections — mirrors the eNPS preset in the Engagement flow.
-export const TRAINING_COMPLIANCE_ELEMENTS: SurveyFormBuilderElement[] = [
+// Unlike Satisfaction/Effectiveness, Knowledge Test has no standardized,
+// locked first question — grading is per-course, not comparable across
+// surveys. "Empty Form" for this type seeds a single blank, fully editable
+// question (mirrors `SurveyFormBuilder`'s own default when a question is
+// added: a "select" question with no title and one placeholder option).
+export const KNOWLEDGE_TEST_BLANK_ELEMENT: SurveyFormBuilderElement = {
+  type: "section",
+  section: {
+    id: "section-knowledge-test-question",
+    title: "",
+    questions: [
+      {
+        id: "q-knowledge-test-blank",
+        title: "",
+        description: "",
+        type: "select" as const,
+        options: [{ value: "option-1", label: "New option 1" }],
+        required: true,
+      },
+    ],
+  },
+}
+
+export const KNOWLEDGE_TEST_SURVEY_ELEMENTS: SurveyFormBuilderElement[] = [
   {
     type: "section",
     section: {
-      id: "section-compliance-completion",
-      locked: true,
-      title: "Predefined completion section",
-      description:
-        "This section powers your compliance completion record, so it can't be edited, moved, or removed.",
+      id: "section-knowledge-test-questions",
+      title: "Course knowledge",
+      description: "Graded questions checking course comprehension.",
       questions: [
         {
-          id: "q-compliance-completion",
-          title: "Did you complete all required modules in this course?",
-          description:
-            "This confirmation is recorded against your compliance record.",
+          id: "q-knowledge-test-1",
+          title: "Which of these is correct?",
           type: "select" as const,
           options: [
-            { value: "yes", label: "Yes, all modules" },
-            { value: "partial", label: "Some modules" },
-            { value: "no", label: "No" },
+            { value: "correct", label: "The correct answer" },
+            { value: "other", label: "Another option" },
           ],
           required: true,
-          lockedNote: {
-            description:
-              "The standard completion question — its wording and options are fixed so compliance records stay consistent.",
-          },
-        },
-      ],
-    },
-  },
-  {
-    type: "section",
-    section: {
-      id: "section-compliance-feedback",
-      title: "Your feedback",
-      description:
-        "A little context behind your answer — these are yours to edit.",
-      questions: [
-        {
-          id: "q-compliance-reason",
-          title: "Was anything unclear or hard to complete?",
-          description: "Tell us what tripped you up, if anything.",
-          type: "longText" as const,
         },
         {
-          id: "q-compliance-improve",
-          title: "What would make this training easier to complete?",
-          type: "longText" as const,
+          id: "q-knowledge-test-2",
+          title: "What's the first step in the standard procedure?",
+          type: "select" as const,
+          options: [
+            { value: "correct", label: "The correct answer" },
+            { value: "other", label: "Another option" },
+          ],
+          required: true,
         },
         {
-          id: "q-compliance-team",
+          id: "q-knowledge-test-3",
+          title: "When should you escalate an issue?",
+          type: "select" as const,
+          options: [
+            { value: "correct", label: "The correct answer" },
+            { value: "other", label: "Another option" },
+          ],
+          required: true,
+        },
+        {
+          id: "q-knowledge-test-team",
           title: "Which team are you on?",
           type: "dropdown-single" as const,
           datasetKey: "teams",
@@ -449,25 +487,34 @@ export const TRAINING_COMPLIANCE_ELEMENTS: SurveyFormBuilderElement[] = [
   },
 ]
 
-export const TRAINING_DEFAULT_VALUES: Partial<SurveyAnswers> = {
-  "q-training-name": { type: "text", value: "Jordan Lee" },
-  "q-content-rating": { type: "rating", value: 4 },
-  "q-training-format": { type: "multi-select", value: ["live", "reading"] },
-  "q-training-team": { type: "dropdown-single", value: "engineering" },
-  "q-confidence": { type: "select", value: "very-confident" },
+export const SATISFACTION_DEFAULT_VALUES: Partial<SurveyAnswers> = {
+  "q-satisfaction-score": { type: "rating", value: 4 },
+  "q-satisfaction-format": { type: "multi-select", value: ["instructor"] },
+  "q-satisfaction-team": { type: "dropdown-single", value: "engineering" },
+}
+
+export const EFFECTIVENESS_DEFAULT_VALUES: Partial<SurveyAnswers> = {
+  "q-effectiveness-score": { type: "rating", value: 4 },
+  "q-effectiveness-confidence": { type: "select", value: "very-confident" },
+}
+
+export const KNOWLEDGE_TEST_DEFAULT_VALUES: Partial<SurveyAnswers> = {
+  "q-knowledge-test-1": { type: "select", value: "correct" },
+  "q-knowledge-test-2": { type: "select", value: "correct" },
+  "q-knowledge-test-team": { type: "dropdown-single", value: "engineering" },
 }
 
 // Spoken-style refinement requests the user dictates into the chat composer.
-// Themed to the training / compliance surveys above and centred on the two
-// survey mechanics the flow is about — follow-up questions and the triggers
-// (conditional logic) that surface them.
+// Kept type-agnostic (the locked first question differs per type) and
+// centred on the two survey mechanics the flow is about — follow-up
+// questions and the triggers (conditional logic) that surface them.
 const TRAINING_DICTATION_TRANSCRIPTS = [
-  "Add a follow-up question after the content rating so that whenever someone scores three or lower we ask them what specifically felt unclear or unhelpful.",
-  "If a respondent says they're not yet confident applying what they learned, trigger an open text follow-up asking which part they'd like a refresher on.",
-  "Set up a branch where people who took the self-paced format get a couple of follow-ups about pacing and platform issues, while everyone else skips straight to the next section.",
-  "Whenever someone marks the completion question as 'Some modules' or 'No', show a follow-up asking what's blocking them and flag that response for L&D to follow up.",
+  "Add a follow-up question after the first rating so that whenever someone scores three or lower we ask them what specifically felt unclear or unhelpful.",
+  "If a respondent doesn't feel confident applying what they learned, trigger an open text follow-up asking which part they'd like a refresher on.",
+  "Set up a branch where people who took the course virtually get a couple of follow-ups about the online experience, while everyone else skips straight to the next section.",
+  "Whenever someone answers the first question negatively, show a follow-up asking what's blocking them and flag that response for L&D to follow up.",
   "Add a question about whether they'd recommend this course to a teammate, and if they say no trigger a follow-up asking what would change their mind.",
-  "For the completion question, add a trigger so anyone who answers 'No' gets a reminder follow-up with the deadline to finish the remaining modules.",
+  "For the first question, add a trigger so low scores get a follow-up asking for the single most important thing we should fix first.",
 ] as const
 
 /**
