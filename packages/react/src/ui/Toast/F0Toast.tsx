@@ -20,7 +20,7 @@ import {
 } from "./types"
 
 const toastVariants = cva({
-  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg p-3 shadow-lg bg-f1-foreground overflow-hidden",
+  base: "dark isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg p-3 shadow-lg bg-f1-background overflow-hidden",
   variants: {
     variant: {
       error: "",
@@ -38,10 +38,10 @@ const titleVariants = cva({
   base: "font-medium text-base",
   variants: {
     variant: {
-      error: "text-f1-icon-critical",
-      warning: "text-f1-icon-warning",
-      success: "text-f1-icon-positive",
-      default: "text-f1-foreground-inverse",
+      error: "text-f1-foreground",
+      warning: "text-f1-foreground",
+      success: "text-f1-foreground",
+      default: "text-f1-foreground",
     },
     hasIcon: {
       true: "pt-[3px]",
@@ -99,7 +99,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         error: "bg-f1-icon-critical",
         warning: "bg-f1-icon-warning",
         success: "bg-f1-icon-positive",
-        default: "bg-f1-foreground-inverse-secondary",
+        default: "bg-f1-foreground-secondary",
       }
 
       return {
@@ -198,7 +198,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
               </p>
             )}
             {description && (
-              <p className="line-clamp-3 text-base text-f1-foreground-inverse-secondary">
+              <p className="line-clamp-3 text-base text-f1-foreground-secondary">
                 {description}
               </p>
             )}
