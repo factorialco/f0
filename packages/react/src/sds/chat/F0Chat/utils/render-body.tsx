@@ -4,7 +4,7 @@ import { parse } from "twemoji-parser"
 import { F0Link } from "@/components/F0Link"
 import { cn } from "@/lib/utils"
 
-import { type F0ChatUser } from "../types"
+import { type F0ChatLinkPreview, type F0ChatUser } from "../types"
 import { ChatUserHoverCard } from "../components/ChatUserHoverCard"
 import { sanitizeDisplayText } from "./sanitize-text"
 
@@ -55,28 +55,46 @@ export const renderBodyWithEmojis = (body: string): ReactNode => {
  * everything else through {@link renderBodyWithEmojis}. `stopPropagation` keeps
  * a link click from also triggering the message row's own handlers.
  *
+ * When a URL has a scraped preview with a title, the link reads as that title
+ * instead of the raw URL (WhatsApp-style — "Gol de Mikel Merino…" beats a
+ * three-line URL). The real destination stays discoverable via the native
+ * `title` tooltip, so the friendlier text never masks where the link goes.
+ *
  * Pure (no hooks): callers memoize the result per message.
  */
-export const renderBodyWithLinks = (rawBody: string): ReactNode => {
+export const renderBodyWithLinks = (
+  rawBody: string,
+  previews?: F0ChatLinkPreview[]
+): ReactNode => {
   // Untrusted input: strip zalgo stacks / bidi overrides before rendering.
   const body = sanitizeDisplayText(rawBody)
   // Split on a capturing group: URLs land at the odd indices.
   const parts = body.split(URL_REGEX)
   if (parts.length === 1) return renderBodyWithEmojis(body)
+  const titleByUrl = new Map(
+    (previews ?? [])
+      .filter((preview) => preview.title)
+      .map((preview) => [preview.url, preview.title])
+  )
   return parts.map((part, i) => {
     if (part.length === 0) return null
-    return i % 2 === 1 ? (
+    if (i % 2 === 0) {
+      return <Fragment key={`text-${i}`}>{renderBodyWithEmojis(part)}</Fragment>
+    }
+    const title = titleByUrl.get(part)
+    return (
       <F0Link
         key={`link-${i}`}
         href={part}
         target="_blank"
         stopPropagation
-        className="whitespace-normal break-all"
+        title={title ? part : undefined}
+        // A raw URL has no spaces so it must break anywhere; a title is real
+        // text and should wrap on word boundaries like the rest of the body.
+        className={cn("whitespace-normal", title ? "break-words" : "break-all")}
       >
-        {part}
+        {title ?? part}
       </F0Link>
-    ) : (
-      <Fragment key={`text-${i}`}>{renderBodyWithEmojis(part)}</Fragment>
     )
   })
 }
@@ -103,11 +121,12 @@ export type MentionToken = {
  */
 export const renderBodyWithMentions = (
   rawBody: string,
-  tokens: MentionToken[]
+  tokens: MentionToken[],
+  previews?: F0ChatLinkPreview[]
 ): ReactNode => {
   // Sanitize BEFORE the range math so mention indices match what renders.
   const body = sanitizeDisplayText(rawBody)
-  if (tokens.length === 0) return renderBodyWithLinks(body)
+  if (tokens.length === 0) return renderBodyWithLinks(body, previews)
 
   // Collect every `@name` occurrence (longest names first so "@Ana María" wins
   // over "@Ana"), then drop overlaps left-to-right.
@@ -132,7 +151,7 @@ export const renderBodyWithMentions = (
     clean.push(range)
     lastEnd = range.end
   }
-  if (clean.length === 0) return renderBodyWithLinks(body)
+  if (clean.length === 0) return renderBodyWithLinks(body, previews)
 
   const nodes: ReactNode[] = []
   let cursor = 0
@@ -140,7 +159,7 @@ export const renderBodyWithMentions = (
     if (range.start > cursor) {
       nodes.push(
         <Fragment key={`t-${i}`}>
-          {renderBodyWithLinks(body.slice(cursor, range.start))}
+          {renderBodyWithLinks(body.slice(cursor, range.start), previews)}
         </Fragment>
       )
     }
@@ -173,7 +192,7 @@ export const renderBodyWithMentions = (
   if (cursor < body.length) {
     nodes.push(
       <Fragment key="t-last">
-        {renderBodyWithLinks(body.slice(cursor))}
+        {renderBodyWithLinks(body.slice(cursor), previews)}
       </Fragment>
     )
   }

@@ -88,10 +88,12 @@ const ChatBubbleImpl = ({
   )
 
   // Parse the body (twemoji + mention chips) once per content change — not on
-  // every scroll-driven re-render.
+  // every scroll-driven re-render. Link previews feed it so an inline URL
+  // reads as its scraped page title instead of the raw address.
   const renderedBody = useMemo(
-    () => renderBodyWithMentions(message.body, mentionTokens),
-    [message.body, mentionTokens]
+    () =>
+      renderBodyWithMentions(message.body, mentionTokens, message.linkPreviews),
+    [message.body, mentionTokens, message.linkPreviews]
   )
 
   const corners = bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun)

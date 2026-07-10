@@ -122,13 +122,18 @@ describe("ChatBubble link previews", () => {
         isMine={false}
       />
     )
-    // Two links: the inline body URL (F0Link) and the preview card itself.
+    // Two links: the inline body link (F0Link) and the preview card itself.
     const links = screen.getAllByRole("link")
     expect(links.map((link) => link.getAttribute("href"))).toEqual([
       PREVIEW.url,
       PREVIEW.url,
     ])
-    expect(screen.getByText("An interesting article")).toBeInTheDocument()
+    // The scraped title shows twice: on the card AND as the inline link's
+    // text (the raw URL is replaced by the friendlier title).
+    expect(screen.getAllByText("An interesting article")).toHaveLength(2)
+    expect(
+      screen.queryByText("https://www.example.com/some/article")
+    ).not.toBeInTheDocument()
   })
 
   it("shows no card when the message has no linkPreviews", () => {
