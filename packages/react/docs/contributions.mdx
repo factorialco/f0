@@ -6,7 +6,7 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 F0 is Factorial's design system. Anyone at Factorial — designer, product engineer, or Foundations — can shape it. But F0 grows **intentionally**: we add things when they have clear cross-team value, and we say no with a documented reason and an alternative.
 
-**The door is a conversation, not a form.** You start by talking to an AI agent (Claude / OpenCode) and, when needed, to us in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403). **The amount of process scales with the impact of what you're doing** — most requests are resolved in that conversation, with nothing to file.
+**The door is a conversation.** You start by talking to an AI agent (Claude / OpenCode) and, when needed, to us in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403). **The amount of process scales with the impact of what you're doing** — most requests are resolved in that conversation, with nothing to file.
 
 > You don't need to know where your idea fits or what "Core vs Kit vs Domain specific" means before you start. The agent figures that out with you. This page just maps what happens so it isn't a black box.
 
@@ -15,6 +15,8 @@ F0 is Factorial's design system. Anyone at Factorial — designer, product engin
 ## Start here: talk to Claude
 
 Open Claude (or OpenCode) in the f0 repo — it has the F0 skills loaded — and describe what you need in plain terms: _"I need a component that lets a user pick a date range."_
+
+> New to the repo? Get **Claude Code** and ask it to set up the f0 repo for you — it runs the setup itself, so there's nothing manual to keep track of.
 
 The agent will **search the repo and Storybook for you** and tell you which of these you're in:
 
@@ -33,9 +35,9 @@ The agent will **search the repo and Storybook for you** and tell you which of t
 
 Three steps. Only the last one always produces an artifact (the PR).
 
-### 1 · Filter — _should this be built in F0?_
+### 1 · Review & filter — _is it already there, and should it be in F0?_
 
-Answered above, with the agent. If it exists, extends, or belongs in your product, you're already done. Only genuinely new, reusable needs continue.
+The agent **reviews what already exists** — searching the repo and Storybook — then filters. If it already exists, is covered by extending something, or belongs in your product, you're already done. Only genuinely new, reusable needs continue.
 
 ### 2 · Align — _what is it, and where does it live?_
 
@@ -48,6 +50,8 @@ This is a validation, **not paperwork**. There is no GitHub issue to file and no
 - **High impact** (a new or changed **token**, a new **icon**, or a **pattern** other teams will adopt) → an explicit design validation up front, _before_ you build, because it touches the base and other teams. This is where we slow down on purpose.
 
 > For now, all of this happens in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) — there's no separate form or GitHub issue for you to file. If a proposal needs tracking, it's raised from the thread.
+
+Foundations responds as availability allows — there's **no fixed SLA**. If you're blocked, say so in the thread and it gets prioritized.
 
 ### 3 · Build to the standard — _the PR_
 
@@ -71,7 +75,9 @@ Most contributions aren't net-new components — they're **changes to what's alr
 | **Iterate** a **pattern** in use               | **High** → consumers migrate | Yes                                    | Align widely before building. |
 | Any **breaking change** to something in use    | **High** → migration         | Yes                                    | Deprecation window, migration guide, consumer notice, version bump — see [Release & Versioning](/?path=/docs/lifecycle-release-and-versioning--docs). |
 
-The driver is one question: **are you changing something others already use?** Adding something new rarely ripples — it's the *changes to what's in use* that carry high impact and may force a migration. Shared visual vocabulary (tokens, icons) and new public APIs also get a **design check**, because inconsistency there is expensive even when nothing breaks.
+The driver for this table is one question: **are you changing something others already use?** Adding rarely ripples; changing what's in use does, and may force a migration.
+
+**But `low` here means low _blast radius_ — not a low bar.** Adding something that **duplicates or re-solves what already exists fragments the system** — that's a real cost, just not a *breaking* one. It's controlled **up front, not here**: by the [Review & filter](#the-flow-once-its-a-real-contribution) step (Claude checks what already exists) and the design check, with **"extend before you create" as the default**. The impact rating assumes you've *already confirmed the thing should exist*. Never read "low impact" as "free to create."
 
 ---
 
@@ -114,14 +120,15 @@ F0 has **three** maturity levels: **Experimental**, **Stable**, and **Deprecated
 
 ---
 
-## Ownership
+## Who does what
 
-- **Foundations team** owns: `components/`, `patterns/`, `ui/`, `kits/`, `layouts/`, `hooks/` — and the shared **tokens** and **icons**.
-- **Domain teams** own their **Domain specific** components: `sds/<area>/`.
-- **Experimental components** are owned by the **team that created them** until promotion.
-- Promotion to stable transfers ownership to **Foundations**.
+F0 is built and maintained by the **Foundations team**, with contributions from every product team. Three roles matter in the flow:
 
-See [`CODEOWNERS`](https://github.com/factorialco/factorial-one/blob/main/CODEOWNERS) for the live mapping.
+- **Foundations** — owns Core (`components/`, `patterns/`, `ui/`, `kits/`, `layouts/`, `hooks/`) and the shared **tokens** and **icons**. They're the only ones who **approve** what enters F0, **mark a component stable**, and **promote** it. Reach them in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403).
+- **Your team** — builds the contribution and **owns and maintains it**. While it's experimental, your team is its **CODEOWNER** (add its path to [`CODEOWNERS`](https://github.com/factorialco/factorial-one/blob/main/CODEOWNERS)) and fields its bugs. On promotion, a Core/Kit component's ownership transfers to Foundations; a **Domain specific** component stays yours.
+- **Claude / OpenCode** — the **access layer**: it searches, filters, guides placement, and builds to the standard. It does **not** approve, mark anything stable, or merge on your behalf — those are human / Foundations calls.
+
+**Source of truth:** the repo — code, [`CODEOWNERS`](https://github.com/factorialco/factorial-one/blob/main/CODEOWNERS), and these docs — is authoritative. If Claude ever seems to contradict them, the repo wins; treat Claude's output as a suggestion to verify, not a ruling.
 
 ---
 

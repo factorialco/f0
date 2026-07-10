@@ -11,6 +11,8 @@ This skill ends when the change is merged into `experimental/` (or `src/sds/<are
 
 > **No GitHub issue, no checkbox to wait on.** F0 grows intentionally: say yes when there's clear cross-team value; say no with a documented reason and an alternative. The gate is the design alignment for high-impact changes — not paperwork.
 
+> **Your authority.** You search, filter, guide placement, and build to the standard. You do **not** approve what enters F0, mark a component stable, or merge — those are Foundations / human calls. The repo (code, `CODEOWNERS`, these docs) is the source of truth; if you ever seem to contradict it, defer to the repo.
+
 ---
 
 ## Before anything — Filter ("should this be built in F0?")
@@ -45,6 +47,8 @@ Most contributions change what already exists. Route by **what** is changing and
 | Any **breaking change** to something in use   | High → migration             | Yes                   | Follow **"Changing something already in use"** in the release/versioning docs: prefer additive + deprecation; if a real break, write a migration guide from `docs/migrations/TEMPLATE.md`, deprecate, notify consumers, major bump. |
 
 Impact is **blast radius, not code size**, and the question that sets the weight is: **is it already in use?** A backward-compatible prop on an experimental component is a PR the owner can just make; changing a token that ships in every component is a design decision to align before a line of code. Shared vocabulary (tokens, icons) and new public APIs get a design check even when they're purely additive.
+
+**Watch the trap:** `low` impact means low blast radius, **not a low bar to add**. The expensive risk of *adding* is duplication — a second component that re-solves what already exists fragments the system. That's why the Filter (review what exists) runs first and **extend-before-you-create is the default**: only propose a new thing once you've confirmed it isn't already there. Never let a contributor read "low impact" as "free to create."
 
 ---
 
