@@ -42,7 +42,7 @@ Load the relevant skill before starting work:
 - **f0-experimental-component-migration** — Promoting components from `experimental/` to stable. Load when migrating.
 - **f0-pr** — Create PRs with correct title format, PR template body, and gh CLI workflow. Load when opening a pull request.
 - **f0-ai-config-hygiene** — Audits AI config files for instruction duplication. Load when modifying `AGENTS.md`, `copilot-instructions.md`, or any skill file.
-- **f0-component-contribution** — Phases 1–3 of the lifecycle: proposal, triage, design, build in `experimental/`. Load when starting a new component.
+- **f0-component-contribution** — The entry point for adding or changing anything in F0 (component, prop, token, icon, pattern): filter, align, and build in `experimental/`. Load when someone wants to contribute.
 - **f0-component-promotion** — Phases 4–5: validating real-world adoption and promoting `experimental/` → `components/`. Load when promoting (Foundations only).
 
 For **MDX documentation** (the Docs tab), use the global `factorial-f0-component-documentation` skill — separate conventions from story files.
@@ -55,11 +55,11 @@ For **MDX documentation** (the Docs tab), use the global `factorial-f0-component
 src/
   components/    — stable public F0 components (promoted by Foundations)
     _primitives/ — DS primitives: shared chrome reused by ≥2 public components. Not exported.
-  experimental/  — ALL new artifacts start here, organized by destination (components/, patterns/, layouts/, kits/, sds/, hooks/, _primitives/)
+  experimental/  — new Core/Kit artifacts start here, organized by destination (components/, patterns/, layouts/, kits/, hooks/, _primitives/). Domain specific components start in their own sds/<area>/ folder instead, tagged experimental.
   patterns/      — stable compositions of F0 components
   layouts/       — stable page-level layouts
   kits/          — stable groupings of components around a functional area (charts, social…). See admission criteria in Where it goes.
-  sds/           — stable satellite design systems with their own visual identity (one, upselling). See admission criteria in Where it goes.
+  sds/           — Domain specific components, owned by a domain team and reused only within that domain (time tracking, surveys, upselling…). See admission criteria in Where it goes.
   hooks/         — public exported hooks
   icons/         — generated icons (do not edit manually)
   lib/           — internal utilities and providers
@@ -71,10 +71,10 @@ The current organization of legacy folders (`src/ui/`, `src/experimental/`, `src
 
 ### New component workflow
 
-**Every new component must start in `experimental/`**, regardless of how complete it feels.
-Only a member of the **Foundations team** can promote a component from `experimental/` to `components/` (stable).
+**Every new Core/Kit component must start in `experimental/`**, regardless of how complete it feels. Domain specific components start in their `sds/<area>/` folder (tagged experimental), owned by the domain team.
+Only a member of the **Foundations team** can promote a Core/Kit component from `experimental/` to its stable folder. Domain specific components are promoted in place (tag change only) and stay owned by their team.
 
-The full lifecycle (proposal → triage → design → build → promotion → deprecation) is defined in the [Definition of Done](../docs/definition-of-done.mdx) and the [Component Maturity model](../docs/components-maturity.mdx). Use the `f0-component-contribution` skill when building, and the `f0-component-promotion` skill when promoting.
+The full lifecycle (filter → align → design → build → promotion → deprecation) is defined in the [Definition of Done](../docs/definition-of-done.mdx) and the [Component Maturity model](../docs/components-maturity.mdx). Use the `f0-component-contribution` skill when building, and the `f0-component-promotion` skill when promoting.
 
 1. Create component in `experimental/<Category>/F0ComponentName/`
 2. Export from `experimental/<Category>/exports.ts`

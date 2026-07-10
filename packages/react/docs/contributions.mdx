@@ -4,51 +4,102 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # Contributing to F0
 
-F0 is Factorial's design system. Anyone at Factorial can propose, build, and ship components — but every component follows the same lifecycle so the system stays coherent, reliable, and easy to consume.
+F0 is Factorial's design system. Anyone at Factorial — designer, product engineer, or Foundations — can shape it. But F0 grows **intentionally**: we add things when they have clear cross-team value, and we say no with a documented reason and an alternative.
 
-This page is the entry point. It tells you **where to start** depending on what you want to do, and links to the documents that govern each step.
+**The door is a conversation, not a form.** You start by talking to an AI agent (Claude / OpenCode) and, when needed, to us in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403). **The amount of process scales with the impact of what you're doing** — most requests are resolved in that conversation, with nothing to file.
 
-Reach us in [#f0 Slack channel](https://factorialteam.slack.com/archives/C06QT46115K) — we're happy to support you.
+> You don't need to know where your idea fits or what "Core vs Kit vs Domain specific" means before you start. The agent figures that out with you. This page just maps what happens so it isn't a black box.
 
 ---
 
-## I want to…
+## Start here: talk to Claude
 
-### …propose a new component or pattern
+Open Claude (or OpenCode) in the f0 repo — it has the F0 skills loaded — and describe what you need in plain terms: _"I need a component that lets a user pick a date range."_
 
-> **Every proposal is evaluated on its merits.** F0 grows intentionally — we say yes when a component has clear cross-team value, and we say no with a documented reason and an alternative (extend an existing component, app-local solution, etc). Use Claude/OpenCode (or Storybook search) to walk through [Phase 0 — Discovery & Evaluation](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md#phase-0--discovery--evaluation-before-proposing) **before** opening the proposal: does it already exist? can something be extended? do at least 2 different teams need it? could a pattern solve it?
+The agent will **search the repo and Storybook for you** and tell you which of these you're in:
 
-1. Open a [**Component proposal** issue](https://github.com/factorialco/factorial-one/issues/new?template=component-proposal.yml). The template walks you through Phase 0 in-line.
-2. An F0 designer reviews the proposal and either approves it (checks the **"Reviewed and approved"** box on the issue), requests more evidence, or declines with a documented reason. Proposals need **≥2 real use cases from different teams**, but a designer can waive the team-count requirement for clearly foundational primitives.
-3. Once approved, follow the [`f0-component-contribution`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md) skill to design and build it in `experimental/`. See the [Where it goes](/?path=/docs/lifecycle-where-it-goes--docs) page to know which destination folder applies once promoted.
+| The agent finds…                                              | What you do                                        | Artifact |
+| ------------------------------------------------------------- | -------------------------------------------------- | -------- |
+| It already exists                                             | **Use it.** Done.                                  | none     |
+| An existing component covers it by adding a prop / variant    | **Extend it** (see _Evolving something_ below).    | PR       |
+| It's specific to one screen, no reuse, no shared identity     | **It lives in your product**, not F0.              | none     |
+| It's a real, reusable need not yet solved                     | **It's a contribution** → keep reading.            | PR       |
 
-### …improve or extend an existing component
+**Most requests end in the first or third row** — resolved in the conversation, nothing to file. That's the point: the filter removes work that shouldn't happen before anyone invests in it.
 
-1. Open a [**Component enhancement** issue](https://github.com/factorialco/factorial-one/issues/new?template=component-enhancement.yml) describing the change and its impact.
-2. If the component is **stable**, the change goes through the same design review as a new component (see [Design Review](/?path=/docs/lifecycle-design-review--docs)).
-3. If the component is **experimental**, the owning team can iterate freely.
+---
 
-### …report a bug
+## The flow, once it's a real contribution
 
-Open a [**Bug report** issue](https://github.com/factorialco/factorial-one/issues/new?template=bug-report.yml). Bugs are routed to the component's owner (see [CODEOWNERS](https://github.com/factorialco/factorial-one/blob/main/CODEOWNERS)).
+Three steps. Only the last one always produces an artifact (the PR).
 
-### …promote an experimental component to stable
+### 1 · Filter — _should this be built in F0?_
 
-Follow the [`f0-component-promotion`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-promotion/SKILL.md) skill. Promotion is owned by Foundations and gated by the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).
+Answered above, with the agent. If it exists, extends, or belongs in your product, you're already done. Only genuinely new, reusable needs continue.
 
-### …deprecate or remove a component
+### 2 · Align — _what is it, and where does it live?_
 
-See the [Deprecation & Removal policy](/?path=/docs/lifecycle-release-and-versioning--docs).
+Bring **whatever you have** to [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403): just the need, a Figma, a [Composer](/?path=/docs/lifecycle-getting-started--docs) prototype, or a draft PR. Foundations confirms the **systemic fit** — does it belong, and where does it live: **Core**, a **Kit**, or **Domain specific** (see [Where it goes](/?path=/docs/lifecycle-where-it-goes--docs)).
+
+This is a validation, **not paperwork**. There is no GitHub issue to file and no checkbox to wait on. How deep the alignment goes **scales with impact**:
+
+- **Low impact** (a prop, a variant) → agree in the thread and go.
+- **Medium** (a new component) → a quick design + placement check.
+- **High impact** (a new or changed **token**, a new **icon**, or a **pattern** other teams will adopt) → an explicit design validation up front, _before_ you build, because it touches the base and other teams. This is where we slow down on purpose.
+
+> For now, all of this happens in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) — there's no separate form or GitHub issue for you to file. If a proposal needs tracking, it's raised from the thread.
+
+### 3 · Build to the standard — _the PR_
+
+You (with Claude and the F0 skills) build it in `experimental/` to the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs): F0-prefixed named exports, design tokens, i18n, a11y, Storybook story, unit tests, MDX docs. The [`f0-component-contribution`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md) skill drives this end to end.
+
+**Every new or changed thing lands as a PR** — that's where code review happens and where it merges. It ships as **experimental** first. Later, once it's adopted and its API has settled, **Foundations promotes it to stable** (see [`f0-component-promotion`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-promotion/SKILL.md)).
+
+---
+
+## Evolving something that already exists
+
+Most contributions aren't net-new components — they're **changes to what's already there**. Same door (talk to Claude first), but the path and the amount of validation depend on **what** you're changing and **whether it's in use**:
+
+| Change                                         | Impact (blast radius)        | Design check?                          | What it takes |
+| ---------------------------------------------- | ---------------------------- | -------------------------------------- | ------------- |
+| Add a **prop / variant** (backward-compat)     | Low                          | Only if the component is **stable**    | Tests + story + docs updated. Experimental → the owner iterates freely. |
+| Add a new **component**                        | Low                          | Yes — it's a new public API            | The full build (see the flow above). |
+| Add a new **icon**                             | Low                          | Yes — consistency with the icon set    | Additive; follow the repo's icon-generation flow. |
+| Add a new **token**                            | Low–medium                   | Yes — avoid overlapping an existing one | Additive, but tokens are shared vocabulary. |
+| **Change** a token or icon **already in use**  | **High** → migration         | Yes                                    | Ripples through every consumer; needs a migration plan. |
+| **Iterate** a **pattern** in use               | **High** → consumers migrate | Yes                                    | Align widely before building. |
+| Any **breaking change** to something in use    | **High** → migration         | Yes                                    | Deprecation window, migration guide, consumer notice, version bump — see [Release & Versioning](/?path=/docs/lifecycle-release-and-versioning--docs). |
+
+The driver is one question: **are you changing something others already use?** Adding something new rarely ripples — it's the *changes to what's in use* that carry high impact and may force a migration. Shared visual vocabulary (tokens, icons) and new public APIs also get a **design check**, because inconsistency there is expensive even when nothing breaks.
+
+---
+
+## What if it's not a straight yes?
+
+The flow isn't only "enters F0 or disappears." Alignment can end in one of these — and **each has a next step**, none is a dead end:
+
+- **Iterate** — Foundations asks for changes or more evidence. → **Refine and bring it back to the same thread.** You pick up where you left off; nothing is thrown away.
+- **Redirected** — it's real, but it belongs in a **Kit**, as **Domain specific**, or as an **extension** of something existing rather than a new component. → **Re-enter the flow at that home** — the agent points you to the exact place, and it's often a smaller change than you thought.
+- **Lives in your product** — bespoke UI for one screen, with no reuse and no shared identity, belongs in your product, not F0. → **Build it there with Claude / Composer, assembled from F0 pieces** — you're not on your own; it just doesn't live in F0. A **valid outcome**, not a rejection — F0 stays lean because of it.
+- **Declined** — it doesn't fit F0's strategy. → You get a **documented reason and, where possible, a concrete alternative.** That's the end of the F0 path.
+
+---
+
+## Reporting a bug
+
+Bugs don't go through the contribution flow. Report them in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) — they're routed to the component's owner (see [CODEOWNERS](https://github.com/factorialco/factorial-one/blob/main/CODEOWNERS)). Or, if you can, fix it and open a PR against the owner directly.
 
 ---
 
 ## The lifecycle in one diagram
 
 ```
-1. Problem        →  2. Design        →  3. Build           →  4. Real use       →  5. Promote
-   (issue +          (design review,     (experimental/,        (≥3 teams in         (Foundations
-    designer          Figma, API)         owned by team)         production)          moves to stable)
-    review)
+     ┌─ use it / extend / lives in your product ─┐   (most requests end here, no artifact)
+     │                                            │
+1. Filter ──▶ 2. Align ──────▶ 3. Build ──▶ Review ──▶ Merge ──▶ Experimental ──▶ Promote
+  (with        (#f0-support,   (experimental/,  (PR)              (in real use)    (Foundations
+   Claude)      by impact)      to the DoD)                                         → stable)
 ```
 
 Each phase has clear entry and exit criteria. The full contract lives in the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).
@@ -65,8 +116,8 @@ F0 has **three** maturity levels: **Experimental**, **Stable**, and **Deprecated
 
 ## Ownership
 
-- **Foundations team** owns: `components/`, `patterns/`, `ui/`, `kits/`, `layouts/`, `hooks/`.
-- **Satellite Design System (SDS) teams** own: `sds/<area>/`.
+- **Foundations team** owns: `components/`, `patterns/`, `ui/`, `kits/`, `layouts/`, `hooks/` — and the shared **tokens** and **icons**.
+- **Domain teams** own their **Domain specific** components: `sds/<area>/`.
 - **Experimental components** are owned by the **team that created them** until promotion.
 - Promotion to stable transfers ownership to **Foundations**.
 
@@ -76,11 +127,11 @@ See [`CODEOWNERS`](https://github.com/factorialco/factorial-one/blob/main/CODEOW
 
 ## Working with AI agents
 
-Most contribution and promotion steps have a matching **skill** that guides AI agents (Claude, Copilot, etc.) through the work:
+The agent (Claude / OpenCode) is the **entry point** to F0 — it reads the repo, searches Storybook, filters your request, and drives the build. Each step has a matching **skill** that tells the agent exactly how F0 does things:
 
 | Task                                | Skill                                                                                                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Build a new component               | [`f0-component-contribution`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md)                      |
+| Propose & build a new component     | [`f0-component-contribution`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md)                      |
 | Promote experimental → stable       | [`f0-component-promotion`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-promotion/SKILL.md)                            |
 | Write Storybook stories             | [`f0-storybook-stories`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-storybook-stories/SKILL.md)                                |
 | Write MDX documentation             | [`f0-docs`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-docs/SKILL.md)                                                          |

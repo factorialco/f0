@@ -6,7 +6,7 @@
 
 <!-- Check all that apply -->
 
-- [ ] New component (proposal accepted, lands in `experimental/`)
+- [ ] New component (aligned in #f0-support, lands in `experimental/`)
 - [ ] Component enhancement / variant (existing component, no breaking change)
 - [ ] New pattern (composition of existing F0 components)
 - [ ] Variant or improvement of existing pattern
@@ -20,9 +20,9 @@
 
 ## Lifecycle phase (if applicable)
 
-<!-- For new components or promotions, link the proposal/promotion issue and confirm phase exit criteria are met. See https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx -->
+<!-- For new components or promotions, link the #f0-support alignment / promotion thread and confirm phase exit criteria are met. See https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx -->
 
-- Linked issue: #
+- Linked #f0-support thread:
 - Phase exit criteria met: <!-- e.g., design review approved, ≥3 product teams adopted, no breaking changes 60d -->
 
 ## Screenshots (if applicable)

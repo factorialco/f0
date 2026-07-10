@@ -14,7 +14,7 @@ For the human entry-point and "where do I start", see [Contributions](/?path=/do
 
 | Phase            | Owner                  | Output                                                  |
 | ---------------- | ---------------------- | ------------------------------------------------------- |
-| 1. Problem       | Proposer               | GitHub issue + Foundations triage decision              |
+| 1. Problem       | Proposer               | Alignment in #f0-support + Foundations decision         |
 | 2. Design        | Proposer + Foundations | Figma design + API draft + design review                |
 | 3. Build         | Proposer's team        | Component in `experimental/` with stories, tests, docs  |
 | 4. Real use      | Proposer's team        | Adoption by ≥3 product teams in production              |
@@ -24,22 +24,22 @@ For the human entry-point and "where do I start", see [Contributions](/?path=/do
 
 ## Phase 1 — Problem
 
-**Entry:** anyone identifies a recurring UI need.
+**Entry:** anyone identifies a recurring UI need and, with the F0 agent, has filtered it (it doesn't already exist, isn't covered by extending something, and belongs in F0). See [`f0-component-contribution`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md).
 
 **Exit (DoD):**
 
-- A [Component proposal issue](https://github.com/factorialco/factorial-one/issues/new?template=component-proposal.yml) is open.
-- Foundations has triaged it (based on team availability — no fixed SLA) with one of:
-  - `accepted` — fits F0; proceed to design.
-  - `accepted-as-domain` — valid need but belongs in a satellite design system (`sds/<area>/`), not core F0.
-  - `needs-info` — proposer must clarify before re-triage.
-  - `rejected` — does not fit F0 strategy; reason documented in the issue.
+- Alignment reached with Foundations in `#f0-support` — **that's where a proposal is raised, for now; no GitHub issue template to file yourself.** Foundations confirms the systemic fit and the destination, with one of:
+  - `proceed` — fits F0; destination confirmed (**Core**, a **Kit**, or **Domain specific** `sds/<area>/`). → go to Phase 2 (Design), then Build.
+  - `redirect` — real, but belongs elsewhere (Kit / Domain specific / an extension of something existing). → re-enter the flow at that placement.
+  - `needs-info` — not enough to decide. → clarify in the thread, then re-align (loop).
+  - `lives-in-product` — no cross-domain reuse or shared identity; it stays in the product monolith. → build it there (Claude / Composer can still assemble it from F0 pieces). A valid outcome, not a rejection.
+  - `declined` — doesn't fit F0 strategy. → documented reason + a concrete alternative where possible. End of the F0 path.
 
 ---
 
 ## Phase 2 — Design
 
-**Entry:** issue is `accepted` or `accepted-as-domain`.
+**Entry:** alignment reached — the need is accepted for Core, a Kit, or Domain specific.
 
 **Exit (DoD):**
 
@@ -82,7 +82,7 @@ For the human entry-point and "where do I start", see [Contributions](/?path=/do
 - **No breaking changes for ≥60 days.**
 - **Zero open critical or high-severity bugs.**
 - `f0-quality-gate` passes including extended subagent reviews (a11y, design tokens, dark mode).
-- Component owner declares the API stable in the promotion issue.
+- Component owner declares the API stable in the #f0-support promotion thread.
 
 **Foundations re-confirmation:**
 
@@ -102,9 +102,9 @@ For the human entry-point and "where do I start", see [Contributions](/?path=/do
 - Story `tags` updated to `["autodocs", "stable"]`.
 - MDX docs at **Good** tier minimum (Gold encouraged).
 - Ownership transferred to Foundations in `CODEOWNERS`.
-- Promotion announced in `#f0` Slack and changelog.
+- Promotion announced in `#f0-support` Slack and changelog.
 
-**Response time:** an F0 designer + Foundations engineer respond to promotion requests based on team availability and as quickly as possible — we don't commit to a fixed SLA today, as it depends on team size and current focus. For urgent or blocking cases, ping `#f0` in Slack.
+**Response time:** an F0 designer + Foundations engineer respond to promotion requests based on team availability and as quickly as possible — we don't commit to a fixed SLA today, as it depends on team size and current focus. For urgent or blocking cases, ping `#f0-support` in Slack.
 
 ---
 

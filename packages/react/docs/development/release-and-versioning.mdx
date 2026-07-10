@@ -110,6 +110,44 @@ the list of the alpha branches and the commits
 
 ---
 
+## Changing something already in use
+
+Adding something new rarely breaks anyone. Changing something consumers already depend on — a **stable** component's API, or a **token**, **icon**, or **pattern** in use — can. This is the highest-impact kind of change, so it follows a defined path and consumers are never surprised.
+
+> **Not the same as promotion.** Moving a component from `experimental/` to its stable home is handled by the [`f0-experimental-component-migration`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-experimental-component-migration/SKILL.md) skill, which preserves every export via deprecated re-exports — so it breaks nobody and needs no migration guide. This section is for the other case: a change to an in-use surface that consumers **must** react to.
+
+### 1. Prefer a non-breaking change
+
+Most "changes" don't have to break anything:
+
+- **Add, don't replace** — introduce the new prop / variant / token alongside the old one.
+- **Deprecate the old surface** with the three JSDoc tags (policy below). Consumers get an IDE warning and a migration link, but nothing breaks yet. If the change is a component moving path, the [`f0-experimental-component-migration`](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-experimental-component-migration/SKILL.md) skill does exactly this — deprecated re-exports that keep the old import working.
+- Ship it as a normal `feat:` (minor bump).
+
+A hard break is the exception, not the default. Reach for it only when additive-plus-deprecation genuinely can't express the change.
+
+### 2. If a real break is unavoidable
+
+Because it's high impact, **align it in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) first** (design + Foundations), then:
+
+1. **Write a migration guide** — copy [`docs/migrations/TEMPLATE.md`](https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/migrations/TEMPLATE.md) to `docs/migrations/f0-<old>-to-<new>.md`, and link it from the `@migration` tag. Model it on the shipped `factorial-migrations/references/f0-forms-mapping.md` — precise find-patterns and before→after mapping tables are what let the migration be automated.
+2. **Deprecate the old surface** with `@deprecated` / `@removeIn` / `@migration` (policy below). The removal target is a future major version, ≥90 days out.
+3. **Bump correctly** — a breaking change is a **major** bump: use a `BREAKING CHANGE:` footer or `!` after the type (`feat(F0X)!: …`). See Conventional Commits above.
+4. **Announce it** — post in `#f0-support` with the guide link, what breaks, and the removal version. The IDE `@deprecated` warning carries the same message for anyone who missed the post.
+5. **Provide a codemod** when the change is mechanical (renames, prop moves) so consumers migrate with one command. When it needs human judgment, say so in the guide and rely on the step-by-step.
+
+### Who reviews
+
+- The **component owner** approves the change to their component.
+- **Foundations** reviews the API / visual change (design review) and owns any token, icon, or Core pattern change.
+- The PR goes through normal code review + `f0-quality-gate`.
+
+### How consumers migrate
+
+Consumers migrate any time between deprecation and the `@removeIn` version. For anything beyond a couple of call sites, they don't do it by hand — they run the **`factorial-migrations`** skill with your guide as the plan: it discovers every usage, groups files that share a backend resource, and dispatches parallel migration units. Nothing is removed until the `@removeIn` version ships, no earlier than 90 days after deprecation.
+
+---
+
 ## Deprecation & Removal policy
 
 Components and props in F0 are removed in two stages: **deprecation** (mark as obsolete, keep working) and **removal** (delete the code). This policy makes the timeline predictable for consumers.

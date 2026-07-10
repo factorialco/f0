@@ -4,7 +4,7 @@ import { Meta } from "@storybook/addon-docs/blocks"
 
 # Where it goes
 
-> Canonical placement rules for any new artifact in F0. If you are adding a component, pattern, layout, hook, primitive, kit or satellite system — this page tells you where it goes and why.
+> Canonical placement rules for any new artifact in F0. If you are adding a component, pattern, layout, hook, primitive, kit or domain-specific component — this page tells you where it goes and why.
 
 This is the **single source of truth** for placement decisions. AGENTS files link to this page rather than duplicating the rules.
 
@@ -20,15 +20,15 @@ This is the **single source of truth** for placement decisions. AGENTS files lin
 | A new generic hook                                     | `src/experimental/hooks/useX/`                  | `src/hooks/useX.ts`                      | `useX`   | yes                   | `experimental`    |
 | Shared chrome used by ≥2 public F0 components          | `src/experimental/_primitives/F0X/`             | `src/components/_primitives/F0X/`        | `F0X`    | **no**                | `experimental`    |
 | A grouping of components for a general functional area | `src/experimental/kits/<area>/`                 | `src/kits/<area>/`                       | `F0X`    | yes                   | `experimental`    |
-| A satellite system with its own visual identity        | `src/experimental/sds/<name>/`                  | `src/sds/<name>/`                        | `F0X`    | yes                   | `experimental`    |
+| A component specific to one domain, owned by that team  | `src/sds/<area>/`                               | stays in `src/sds/<area>/`               | `F0X`    | yes                   | `experimental`    |
 | A direct wrapper over a third-party primitive          | `src/ui/x.tsx` (does not follow lifecycle)      | stays in `src/ui/`                       | lowercase| no                    | `internal` (technical) |
 | A legacy `One*` component being phased out             | `src/deprecated/<Name>/` when touched           | n/a                                      | as is    | yes with `@deprecated`| `deprecated`      |
 
 Rules that apply to every row:
 
-- Everything that follows the lifecycle is **born in `experimental/`**. There is no "this looks ready, I'll put it straight into `components/`".
-- Only the **Foundations team** can promote from `experimental/` to a final location.
-- Promotion = `git mv` + tag change + remove `experimentalComponent()` wrapper.
+- Core/Kit artifacts are **born in `experimental/`** — there is no "this looks ready, I'll put it straight into `components/`". **Domain specific** components are the exception: they're born in their `sds/<area>/` folder, tagged `experimental`.
+- Only the **Foundations team** can promote a Core/Kit artifact from `experimental/` to a final location. Domain specific components are promoted **in place** (tag change only) and stay owned by their domain team.
+- Promotion (Core/Kit) = `git mv` + tag change + remove `experimentalComponent()` wrapper. Promotion (Domain specific) = tag change + remove wrapper, no move.
 
 ---
 
@@ -64,32 +64,35 @@ If an entry does not meet the criteria, it belongs in `components/`, in `sds/<na
 
 ---
 
-## What is an **SDS** (satellite design system)?
+## What is a **Domain specific** component?
 
-An SDS is a **system with its own visual identity** that lives next to the core F0 (own tokens, colors, typography, or branding).
+A Domain specific component is a component that **only makes sense inside one product domain** (Time tracking, Surveys, Payroll, Upselling…) and is **owned and maintained by that domain's team**. It lives next to core F0 in `src/sds/<area>/`, is visible to everyone, but is not Foundations-owned.
+
+> Formerly called "Satellite / SDS". The old name and its "own visual identity" criterion caused confusion — a Domain specific component uses the **core F0 tokens** like everything else. What makes it Domain specific is **who owns it and how narrowly it's reused**, not how it looks.
 
 **Admission criteria** — **all** must be true:
 
-1. Has its own tokens, colors or typography differentiated from core F0 (own visual identity / branding).
-2. Has an identifiable owner team with product/area identity.
-3. Used across the Factorial product (not a single product feature).
-4. "Only my product uses it" does **not** qualify it for SDS.
+1. It's tied to **one domain** — other product areas won't reuse it.
+2. It has an **owner team** that builds and maintains it (not Foundations).
+3. It's a real, reusable component **within that domain's surfaces** (not a one-off assembly for a single screen — that stays in the product).
 
-Today valid SDS examples: `sds/one/` (Factorial One — AI brand), `sds/upselling/` (Growth — upselling brand).
+It's kept out of core F0 so the shared catalogue doesn't fill with domain noise. If a Domain specific composition ends up being rebuilt by several domains, that's the signal to promote it **up** into a Core pattern.
 
-If an entry does not meet the criteria, it belongs in `components/`, in `kits/<area>/`, or in the product monolith.
+Today's examples: `sds/home/` (Time tracking — `ClockInControls`), surveys (`…Question`), `sds/upselling/` (Growth), `sds/one/` (Factorial One).
+
+If an entry doesn't meet the criteria, it belongs in `components/`, in `kits/<area>/`, or in the product monolith.
 
 ---
 
-## SDS vs Kit — quick decision
+## Domain specific vs Kit vs Core — quick decision
 
-| Question                                                                  | If yes…  | If no…   |
-| ------------------------------------------------------------------------- | -------- | -------- |
-| Does it have its own tokens / colors / typography differentiated from F0? | SDS      | Kit candidate |
-| Is it grouping things for a general functional domain (charts, social…)?  | Kit      | Not a kit |
-| Is it used by ≥2 products?                                                | Continue | Not in F0 |
+| Question                                                                        | If yes…               | If no…        |
+| ------------------------------------------------------------------------------- | --------------------- | ------------- |
+| Is it specific to one domain and owned by that team?                            | **Domain specific**   | keep going    |
+| Does it group components for a general functional area (charts, social, AI…)?   | **Kit** candidate     | not a kit     |
+| Is it generic and reused across ≥2 domains?                                     | **Core**              | not in F0     |
 
-If none of the above fit — the artifact does not belong in F0. Put it in the product monolith.
+If none fit — the artifact doesn't belong in F0. Put it in the product monolith.
 
 ---
 

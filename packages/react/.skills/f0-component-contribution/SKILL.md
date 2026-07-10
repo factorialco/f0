@@ -1,73 +1,82 @@
 ---
 name: f0-component-contribution
-description: Use when starting a new F0 component. Covers Phases 1–3 of the lifecycle (proposal, triage, design, build in experimental/). For promotion to stable, use f0-component-promotion.
+description: Use when someone wants to add or change something in F0 (a component, prop, token, icon, or pattern). Covers the filter, the alignment, and the build in experimental/. You (the agent) are the door — you search, filter, and guide. For promotion to stable, use f0-component-promotion.
 ---
 
-# F0 Component Contribution (Phases 1–3)
+# F0 Component Contribution
 
-This skill guides contributors through proposing, designing, and building a new F0 component, ending when the component is merged into `src/experimental/` (or `src/sds/<area>/`). Promotion to stable is covered by `f0-component-promotion`.
+You are the entry point to F0. When a contributor says "I need X", **you** search the repo and Storybook, filter the request, help them align with Foundations, and drive the build. The amount of process **scales with the impact** of the change — most requests are resolved in the conversation and never need an issue or a PR.
 
-The full lifecycle contract is in [`packages/react/docs/definition-of-done.mdx`](../../docs/definition-of-done.mdx). This skill is the operational playbook.
+This skill ends when the change is merged into `experimental/` (or `src/sds/<area>/` for Domain specific). Promotion to stable is covered by `f0-component-promotion`. The full contract is in [`packages/react/docs/definition-of-done.mdx`](../../docs/definition-of-done.mdx); the placement rules are in [`packages/react/docs/where-it-goes.mdx`](../../docs/where-it-goes.mdx).
 
----
-
-## Phase 0 — Discovery & Evaluation (BEFORE proposing)
-
-> **Every proposal is evaluated on its merits.** F0 grows intentionally — we say yes when a component has clear cross-team value, and we say no with a documented reason and an alternative (extend an existing component, app-local solution, etc). Phase 0 exists so contributors get fast, friendly feedback before investing in design or code.
-
-Before opening any issue, the contributor (with help from Claude/OpenCode) should self-evaluate by answering 4 questions. **If the idea fails 0.1 or 0.2, do not proceed to Phase 1; the answer is reuse or extension.** Questions 0.3 and 0.4 are inputs to the design review — they don't auto-block.
-
-### 0.1 — Does it already exist?
-
-- Search Storybook (or ask Claude: "is there an F0 component for X?").
-- Check `experimental/` and `sds/` folders, not just `components/`.
-- If found → **use it. Stop here.**
-
-### 0.2 — Can an existing component be extended?
-
-- Could a new prop, variant, or slot solve the case?
-- If yes → open a **Component Enhancement issue**, NOT a Proposal. Skip the rest of this skill and follow the enhancement flow.
-
-### 0.3 — Is the need recurrent across teams?
-
-- We need at least **2 real use cases from different teams**. List them in the proposal with links (Slack, Jira, designs, ad-hoc implementations).
-- An F0 designer can waive the team-count requirement on review if the use case is clearly foundational (e.g., a new primitive that unlocks a category).
-- If the need is specific to a single feature in a single product, it likely does not belong in F0 — build it inside the feature.
-
-### 0.4 — Could a pattern, kit, or composition solve it?
-
-- Sometimes the answer is not a new component but documenting how to compose existing ones.
-- Patterns and kits are cheaper to maintain than components.
-
-**When in doubt, open the proposal anyway and ask for early design feedback.** Phase 0 is a self-help filter, not a gate. The real gate is the **design-review checkbox** on the proposal issue (see Phase 1).
-
-The remaining evaluation criteria (DS pertinence, API generality, cost/benefit, simpler alternatives) are evaluated by an F0 designer during Phase 1 review.
+> **No GitHub issue, no checkbox to wait on.** F0 grows intentionally: say yes when there's clear cross-team value; say no with a documented reason and an alternative. The gate is the design alignment for high-impact changes — not paperwork.
 
 ---
 
-## Phase 1 — Open a proposal
+## Before anything — Filter ("should this be built in F0?")
 
-1. Open a [Component proposal issue](https://github.com/factorialco/factorial-one/issues/new?template=component-proposal.yml). The template walks you through Phase 0 in-line.
-2. Fill all required sections: problem statement, Phase 0 self-eval (4 questions), proposed name, rough API.
-3. Labels `f0:proposal` and `needs-design-review` are auto-applied by the template.
-4. **Wait for design review.** An F0 designer will read the proposal and either:
-   - ✅ Check the **"Reviewed and approved by an F0 designer"** box → you can proceed to Phase 2 (`experimental/` build).
-   - 💬 Request changes / more evidence in the issue.
-   - ❌ Decline with a documented reason and (where possible) an alternative path.
+Do this **with** the contributor, in the conversation, before proposing or building anything. Its job is to remove work that shouldn't happen: things already solved, things that only need extending, things that don't belong in F0.
 
-   **Do not start building in `experimental/` until the design-review checkbox is checked.**
+Search the repo (`components/`, `experimental/`, `kits/`, `sds/`, `patterns/`) **and** Storybook. Then land on one of:
+
+| You find…                                                    | Outcome                                        | Stop here? |
+| ------------------------------------------------------------ | ---------------------------------------------- | ---------- |
+| It already exists                                            | **Use it.** Point them to it.                  | ✅ yes     |
+| An existing component covers it via a prop / variant / slot  | **Extend it** → go to _Evolving something_.    | continue   |
+| It's one screen, no reuse, no shared identity                | **It lives in their product**, not F0.         | ✅ yes     |
+| A pattern or composition of existing components solves it    | **Document the composition**, don't add a component. | ✅ often |
+| A real, reusable need with no existing solution              | **It's a contribution** → Phase 1.             | continue   |
+
+If you can resolve it here, **do** — don't push the contributor into a heavier flow than the change needs. "Extend before you create" is the default; a new component is the exception.
+
+---
+
+## Evolving something (the common case)
+
+Most contributions change what already exists. Route by **what** is changing and **whether it's in use** — impact is how many places a change touches, not how much code it is:
+
+| Change                                        | Impact                       | Design check          | How to handle it |
+| --------------------------------------------- | ---------------------------- | --------------------- | ---------------- |
+| Add a **prop / variant** (backward-compat)    | Low                          | Only if **stable**    | Stable → design-align first (Phase 2); experimental → the owning team iterates freely. Update tests + story + docs. |
+| Add a new **icon**                            | Low                          | Yes (icon-set consistency) | Additive; follow the repo's icon-generation flow. |
+| Add a new **token**                           | Low–medium                   | Yes (avoid duplicating) | Additive, but tokens are shared vocabulary — check it doesn't overlap an existing token. |
+| **Change** a token or icon **in use**         | High → migration             | Yes                   | Ripples through every consumer. Design-align, then plan the migration. |
+| **Iterate** a **pattern** in use              | High → consumers migrate     | Yes                   | Patterns are compositions other teams adopt. Align widely (Phase 2) before building. |
+| Any **breaking change** to something in use   | High → migration             | Yes                   | Follow **"Changing something already in use"** in the release/versioning docs: prefer additive + deprecation; if a real break, write a migration guide from `docs/migrations/TEMPLATE.md`, deprecate, notify consumers, major bump. |
+
+Impact is **blast radius, not code size**, and the question that sets the weight is: **is it already in use?** A backward-compatible prop on an experimental component is a PR the owner can just make; changing a token that ships in every component is a design decision to align before a line of code. Shared vocabulary (tokens, icons) and new public APIs get a design check even when they're purely additive.
+
+---
+
+## Phase 1 — Align ("what is it, where does it live?")
+
+**No GitHub issue to file.** Bring whatever exists — the need, a Figma, a Composer prototype, a draft PR — to `#f0-support`. Foundations confirms the **systemic fit** and the destination: **Core**, a **Kit**, or **Domain specific** (see [Where it goes](../../docs/where-it-goes.mdx)).
+
+- Help the contributor articulate: the problem, who else needs it (≥2 teams is the signal for Core; a designer can waive this for clearly foundational primitives), and a rough API.
+- Confirm the destination with the placement rules. Reuse within one domain → **Domain specific** (owned by that team). A functional bundle reused by ≥2 products → **Kit**. Generic across ≥2 domains → **Core** (patterns live in Core).
+- **This all happens in `#f0-support`.** For now there's no separate GitHub issue template to file — if a proposal needs tracking, it's raised from the support thread.
+
+**Alignment can end in five outcomes — always hand the contributor the next step, never leave them stranded:**
+
+- **proceed** → go to Phase 2 (Design), then Build.
+- **redirect** (Kit / Domain / an extension instead) → re-enter the flow at that placement; point them to the exact component/folder.
+- **needs-info** → tell them exactly what's missing; they clarify and re-align.
+- **lives-in-their-product** → help them build it in their product from F0 pieces (Composer / Claude); it's a valid outcome, not a failure.
+- **declined** → give a documented reason and a concrete alternative.
 
 ## Phase 2 — Design
 
-1. Create the Figma design (or attach existing).
-2. Document the API draft in the issue: prop names, types, variants, slots, default values.
-3. Request a **design review** (see [Design Review docs](../../docs/design-review.mdx) for the 10-category checklist).
-4. Address all blocking comments.
-5. Get explicit approval from at least one Foundations designer.
+Scale with impact:
+
+- **Low-impact** changes (a prop on experimental): skip formal design review; the owner decides.
+- **New components** and **any change to a stable component's API/visual/behavior**: run a design review (see [Design Review](../../docs/design-review.mdx) — the 10-category checklist).
+- **High-impact** (token, icon, pattern): design validation is **required up front, before building**.
+
+Document the API draft (props, types, variants, slots, defaults) in the `#f0-support` thread or the PR description. Resolve blocking comments; get explicit approval from at least one Foundations designer for reviewed changes.
 
 ## Phase 3 — Build
 
-Follow this sequence. Each step has a corresponding F0 skill — load it when needed.
+Follow this sequence. Each step has a matching F0 skill — load it when needed.
 
 ### 3.1 — Scaffold the folder
 
@@ -81,7 +90,7 @@ src/experimental/<Category>/F0Name/
   internal-types.ts  # private types (not exported)
 ```
 
-For `accepted-as-domain` proposals, use `src/sds/<area>/` instead of `src/experimental/<Category>/`.
+For **Domain specific** components, use `src/sds/<area>/` instead of `src/experimental/<Category>/`.
 
 ### 3.2 — Implement the component
 
@@ -117,9 +126,7 @@ Required:
 
 ### 3.5 — Write MDX docs
 
-Load the global **`factorial-f0-component-documentation`** skill.
-
-Target tier: **Acceptable** minimum for Phase 3 exit. Aim for **Good** if you plan to promote soon.
+Load the global **`factorial-f0-component-documentation`** skill. Target tier: **Acceptable** minimum for build exit. Aim for **Good** if you plan to promote soon.
 
 ### 3.6 — Run quality gate
 
@@ -127,25 +134,21 @@ Load **`f0-quality-gate`** and run the full workflow. Must pass before opening a
 
 ### 3.7 — Open the PR
 
-Load **`f0-pr`** for title format and PR template.
+Load **`f0-pr`** for title format and PR template. **Every new or changed thing lands as a PR** — this is where code review happens.
 
-PR title: `feat(F0Name): add experimental component (#<proposal-issue>)`.
+PR title: `feat(F0Name): add experimental component`.
 
-In the PR body:
-
-- Link the proposal issue.
-- Confirm design review approved.
-- Confirm `f0-quality-gate` passed.
+In the PR body: link the alignment (thread/issue), confirm design review where it applied, confirm `f0-quality-gate` passed.
 
 ### 3.8 — Merge
 
-Once reviewed and approved, merge. The component is now live as `experimental`.
+Once reviewed and approved, merge. The component is now live as **experimental**.
 
 ---
 
 ## After merge — what's next?
 
-The component lives in `experimental/` until it meets Phase 4 criteria (≥3 product teams in production, no breaking changes for 60 days, zero critical bugs). At that point, request promotion using **`f0-component-promotion`**.
+The component lives in `experimental/` until it meets the promotion criteria (adoption by ≥3 product teams in production, no breaking changes for 60 days, zero critical bugs, stable API). At that point, request promotion using **`f0-component-promotion`**.
 
 The owning team is responsible for the component until promotion (when ownership transfers to Foundations).
 
@@ -153,8 +156,9 @@ The owning team is responsible for the component until promotion (when ownership
 
 ## Common pitfalls
 
-- **Skipping triage** — implementing before `accepted` wastes work; the proposal may be rejected or redirected.
-- **Skipping design review** — the API will likely need to change later, breaking experimental consumers.
+- **Building before aligning a high-impact change** — a token/icon/pattern reworked without design validation gets reverted. Align first.
+- **Forcing a formal issue when a thread resolves it** — match the process to the impact.
+- **Skipping the filter** — implementing something that already exists or only needed extending wastes work.
 - **Naming without `F0` prefix** — required for all public components.
 - **Hard-coded colors or strings** — use design tokens and `useI18n()`.
 - **Importing Radix directly** — use `@/ui/` wrappers.

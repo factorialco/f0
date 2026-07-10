@@ -77,4 +77,4 @@ pnpm test-storybook -- --testPathPattern filename  # run one file
 
 ## Promotion evidence
 
-Storybook play function and a11y test results count as evidence for **Phase 4 (Real use)** of the F0 component lifecycle. When promoting a component from `experimental/` to stable, attach the latest passing test output to the promotion issue. See the `f0-component-promotion` skill.
+Storybook play function and a11y test results count as evidence for **Phase 4 (Real use)** of the F0 component lifecycle. When promoting a component from `experimental/` to stable, attach the latest passing test output to the #f0-support promotion thread. See the `f0-component-promotion` skill.
