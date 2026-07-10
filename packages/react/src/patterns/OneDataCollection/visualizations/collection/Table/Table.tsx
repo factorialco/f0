@@ -89,6 +89,15 @@ const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
   )
 }
 
+/**
+ * Wrapper classes for the `bordered` variant, shared by the loading skeleton
+ * and the loaded table so the swap between them is pixel-identical (the
+ * `!bg-transparent` overrides suppress the table's own hairlines, which would
+ * otherwise double up against the wrapper border).
+ */
+const borderedWrapperClasses =
+  "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
+
 export const TableCollection = <
   R extends RecordType,
   Filters extends FiltersDefinition,
@@ -338,13 +347,7 @@ export const TableCollection = <
   if (isInitialLoading) {
     return (
       <div className="flex h-full min-h-0 flex-col gap-4">
-        <div
-          className={cn(
-            "min-h-0",
-            bordered &&
-              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary"
-          )}
-        >
+        <div className={cn("min-h-0", bordered && borderedWrapperClasses)}>
           <OneTable.Skeleton columns={skeletonColumns} />
         </div>
       </div>
@@ -414,13 +417,7 @@ export const TableCollection = <
             dashboard widgets). Without it the wrapper grows with the table's
             content and overflows the widget card instead of scrolling. Tables
             shorter than the available space are unaffected. */}
-        <div
-          className={cn(
-            "min-h-0",
-            bordered &&
-              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
-          )}
-        >
+        <div className={cn("min-h-0", bordered && borderedWrapperClasses)}>
           <OneTable loading={isLoading}>
             <TableHeader sticky={true}>
               {headerGroups ? (
