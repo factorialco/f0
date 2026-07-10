@@ -154,6 +154,13 @@ export interface F0GraphRenderConfigContextValue {
   deferredLoading?: boolean
 
   /**
+   * `true` when viewport-driven data loading is active (`loadVisibleNodeData`
+   * provided). The node wrapper combines this with each node's `dataLoaded`
+   * flag to set `dataLoading` on the render context.
+   */
+  dataLoadingEnabled?: boolean
+
+  /**
    * Height of the tag row reserved in the node rect by the layout engine.
    * `0` when tags don't affect layout (overflow mode) or when no tag types
    * are configured. Used by the node wrapper to top-align the pill and

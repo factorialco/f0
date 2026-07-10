@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.58.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.57.0...f0-react-native-v0.58.0) (2026-07-10)
+
+
+### Features
+
+* **react-native:** support Expo SDK 56 (React Native 0.85) ([#4584](https://github.com/factorialco/f0/issues/4584)) ([c8312c9](https://github.com/factorialco/f0/commit/c8312c955f59dcb162c9dfbcabe6a5e60ee782a4))
+
+## [0.57.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.56.0...f0-react-native-v0.57.0) (2026-07-06)
+
+
+### Features
+
+* **F0Wizard:** add ScrollComponent prop for keyboard-aware scrolling ([1a2ae78](https://github.com/factorialco/f0/commit/1a2ae789094c4d8c86b331d3f073457afabc8b3d))
+
+
+### Bug Fixes
+
+* **F0Wizard:** type test scroll mock; add footer testID ([d1ba2ae](https://github.com/factorialco/f0/commit/d1ba2ae140f2da9ccba03fa1f0b89cf0b335c4a3))
+
 ## [0.56.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.55.0...f0-react-native-v0.56.0) (2026-06-29)
 
 

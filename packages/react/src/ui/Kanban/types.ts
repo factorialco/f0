@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 
+import type { NewColor } from "@/components/tags/F0TagDot"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
 
@@ -17,6 +18,8 @@ export type KanbanLaneAttributes<TRecord extends RecordType> = {
   fetchMore?: () => void
   /** Visual variant to mirror project status */
   variant?: Variant
+  /** Palette color for the lane header dot; overrides variant when set */
+  color?: NewColor
   /** Total number of items in the lane (for display in header) */
   total?: number
   /** Future: filters that would be applied to the shared data source */

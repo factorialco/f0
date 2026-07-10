@@ -696,9 +696,12 @@ describe("OneDataCollection - presets", () => {
       )!
     )
 
-    // The edit dialog surfaces a Remove action as a header button (dialog-alike
-    // renders up to two header actions as buttons rather than an overflow menu).
-    await user.click(await screen.findByRole("button", { name: "Remove" }))
+    // The edit dialog exposes a Remove action in its overflow menu (no separate
+    // confirmation step).
+    await user.click(
+      await screen.findByRole("button", { name: "Toggle dropdown menu" })
+    )
+    await user.click(await screen.findByRole("menuitem", { name: "Remove" }))
     await waitFor(() =>
       expect(screen.queryByText("Temp view")).not.toBeInTheDocument()
     )
@@ -835,9 +838,12 @@ describe("OneDataCollection - share preset", () => {
         (el) => !el.closest('[aria-hidden="true"]')
       )!
     )
-    // Share is surfaced as a header button (dialog-alike renders up to two
-    // header actions as buttons rather than an overflow menu).
-    await user.click(await screen.findByRole("button", { name: "Share view" }))
+    await user.click(
+      await screen.findByRole("button", { name: "Toggle dropdown menu" })
+    )
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Share view" })
+    )
 
     // The dropdown defers the action slightly (Radix close/animation workaround).
     await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1))

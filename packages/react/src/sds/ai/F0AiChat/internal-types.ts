@@ -15,8 +15,10 @@ import {
   type F0AIMessage,
   type PendingContext,
   type PendingQuote,
+  type SidePanelContent,
   type TranscribeFn,
   type VisualizationMode,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
 } from "./types"
 
@@ -27,12 +29,15 @@ import {
  */
 export interface AiChatState {
   enabled: boolean
+  /** Initial edge the panel docks to. @default "right" */
+  side?: "left" | "right"
   agent?: string
   initialMessage?: string | string[]
   chatHeader?: React.ReactNode
   chatMessages?: React.ReactNode
   chatInput?: React.ReactNode
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   resizable?: boolean
   defaultVisualizationMode?: VisualizationMode
@@ -83,6 +88,10 @@ export type AiChatProviderReturnValue = {
   welcomeScreenSuggestions: WelcomeScreenSuggestion[]
   setWelcomeScreenSuggestions: React.Dispatch<
     React.SetStateAction<WelcomeScreenSuggestion[]>
+  >
+  welcomeScreenCards: F0AiChatWelcomeCard[]
+  setWelcomeScreenCards: React.Dispatch<
+    React.SetStateAction<F0AiChatWelcomeCard[]>
   >
   onThumbsUp?: (
     message: F0AIMessage,
@@ -174,6 +183,28 @@ export type AiChatProviderReturnValue = {
   pendingQuote: PendingQuote | null
   /** Set the pending quote (pass null to clear). */
   setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
+  /**
+   * Content currently hosted in the side panel, or `null` to show the F0.ai
+   * chat. Only one is mounted at a time — see {@link SidePanelContent}.
+   */
+  panelContent: SidePanelContent | null
+  /**
+   * Mount `content` in the side panel (replacing whatever was there) and open
+   * the panel. Pass `null` to fall back to the AI chat. The previous content
+   * is unmounted thanks to the `id` key.
+   */
+  setPanelContent: (content: SidePanelContent | null) => void
+  /** Clear the custom panel content and fall back to the F0.ai chat. */
+  clearPanelContent: () => void
+  /**
+   * Edge the whole side panel docks to — the AI chat, hosted content and the
+   * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
+   * chat-first experience (e.g. communications), where left is comfier to
+   * navigate between conversations.
+   */
+  panelSide: "left" | "right"
+  /** Set which edge the side panel docks to. */
+  setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>
 } & Pick<
   AiChatState,
   | "agent"

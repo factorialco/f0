@@ -40,6 +40,23 @@ describe("NonEditableCell", () => {
     expect(container.firstChild).toHaveClass("cursor-default")
   })
 
+  it("renders the hint icon after the cell content", () => {
+    render(
+      <NonEditableCell
+        {...defaultProps}
+        hint={{ icon: InfoCircleLine, message: "Backfilling Jane's position" }}
+      />
+    )
+
+    const button = screen.getByRole("button", {
+      name: "Backfilling Jane's position",
+    })
+    const content = screen.getByText("John Doe")
+    expect(
+      content.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
   it("renders a hint icon when hint is provided", () => {
     render(
       <NonEditableCell

@@ -16,6 +16,7 @@ export interface ReactionProps {
   hasReacted?: boolean
   users?: User[]
   onInteraction?: (emoji: string) => void
+  size?: "sm" | "md" | "lg"
 }
 
 export function Reaction({
@@ -24,6 +25,7 @@ export function Reaction({
   hasReacted = false,
   users,
   onInteraction,
+  size = "md",
 }: ReactionProps) {
   const [isActive, setIsActive] = useState(hasReacted)
   const [count, setCount] = useState(initialCount)
@@ -56,12 +58,12 @@ export function Reaction({
         handleClick(event, emoji)
       }}
       className={cn(
-        "flex items-center gap-1 px-[3px] font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
+        "flex items-center gap-1 px-0.5 font-medium leading-tight shadow-none transition-all active:scale-90 motion-reduce:transition-none motion-reduce:active:scale-100",
         isActive &&
           "border-f1-border-selected bg-f1-background-selected hover:border-f1-border-selected-bold"
       )}
       aria-label={getEmojiLabel(emoji)}
-      prepend={<EmojiImage emoji={emoji} size="md" />}
+      prepend={<EmojiImage emoji={emoji} size={size} />}
     >
       <NumberFlow
         value={count}

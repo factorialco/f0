@@ -61,6 +61,12 @@ export type UseDataCollectionTreeData<R extends RecordType> = {
   revealNode: (nodeId: string) => Promise<void>
   /** Clears the centered/highlighted node (e.g. on empty-canvas click). */
   clearFocus: () => void
+  /**
+   * Viewport-driven hydration loader to pass to F0Graph, or `undefined` when
+   * `loadNodeData` isn't configured (eager mode). Fetches full records for the
+   * on-screen nodes and merges them into `nodes`.
+   */
+  loadVisibleNodeData?: (ids: string[]) => void
   isInitialLoading: boolean
   error: DataError | null
 }
@@ -124,6 +130,24 @@ const resolveFetchResult = <R>(result: unknown): Promise<R[]> => {
 
 const hasChildren = <R extends RecordType>(node: GraphNode<R>): boolean =>
   (node.childrenCount ?? 0) > 0
+
+/** Replaces the data of hydrated nodes (matched by id) and clears their loading flag. */
+const mergeHydratedData = <R extends RecordType>(
+  prev: GraphNode<R>[],
+  hydrated: Map<string, R>
+): GraphNode<R>[] => {
+  if (hydrated.size === 0) return prev
+  let changed = false
+  const next = prev.map((node) => {
+    const record = hydrated.get(node.id)
+    if (!record) return node
+    changed = true
+    // Preserve structure (childrenCount/childrenLoaded/parentId) from the
+    // skeleton; only swap in the rich record and mark it loaded.
+    return { ...node, data: record, dataLoaded: true }
+  })
+  return changed ? next : prev
+}
 
 /** Appends freshly loaded children for `parentId`, marking the parent as loaded. */
 const mergeChildren = <R extends RecordType>(
@@ -198,6 +222,9 @@ export function useDataCollectionTreeData<
       data: record,
       childrenCount: optionsRef.current.getChildrenCount(record),
       childrenLoaded: false,
+      // Two-phase hydration: mark unhydrated so F0Graph surfaces `dataLoading`.
+      // `undefined` (not `false`) when the feature is off keeps the flag absent.
+      dataLoaded: optionsRef.current.loadNodeData ? false : undefined,
     }),
     [getId]
   )
@@ -377,6 +404,33 @@ export function useDataCollectionTreeData<
     setHighlightedNodes(new Set())
   }, [])
 
+  // Two-phase hydration: F0Graph calls this (already debounced + batched +
+  // deduped per id by its own useViewportDataLoader) with the ids on screen.
+  // We fetch the full records for the still-unhydrated ones and merge them in;
+  // the hook owns `nodes`, so it must be the one to merge and re-render.
+  const loadVisibleNodeData = useCallback(
+    (ids: string[]) => {
+      const loader = optionsRef.current.loadNodeData
+      if (!loader) return
+      const byId = new Map(nodesRef.current.map((node) => [node.id, node]))
+      const wanted = ids.filter((id) => byId.get(id)?.dataLoaded === false)
+      if (wanted.length === 0) return
+      loader(wanted)
+        .then((records) => {
+          const hydrated = new Map(
+            records.map((record) => [getId(record), record])
+          )
+          setNodes((prev) => mergeHydratedData(prev, hydrated))
+        })
+        .catch((cause) => {
+          const dataError = toDataError(cause)
+          setError(dataError)
+          callbacksRef.current.onLoadError(dataError)
+        })
+    },
+    [getId]
+  )
+
   const loadInitial = useCallback(async (): Promise<void> => {
     setIsInitialLoading(true)
     setError(null)
@@ -443,6 +497,7 @@ export function useDataCollectionTreeData<
     highlightedNodes,
     revealNode,
     clearFocus,
+    loadVisibleNodeData: options.loadNodeData ? loadVisibleNodeData : undefined,
     isInitialLoading,
     error,
   }

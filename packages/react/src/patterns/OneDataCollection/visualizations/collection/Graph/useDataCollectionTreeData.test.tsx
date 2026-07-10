@@ -277,3 +277,98 @@ describe("useDataCollectionTreeData", () => {
     expect(result.current.error).not.toBeNull()
   })
 })
+
+describe("useDataCollectionTreeData — two-phase hydration", () => {
+  it("stays eager (no dataLoaded, no loader) when loadNodeData is absent", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({ defaultExpandDepth: 0 }),
+        callbacks()
+      )
+    )
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    expect(result.current.loadVisibleNodeData).toBeUndefined()
+    expect(result.current.nodes[0]?.dataLoaded).toBeUndefined()
+  })
+
+  it("builds nodes as unhydrated and exposes a loader when loadNodeData is set", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodeData = vi.fn(async () => [])
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({ defaultExpandDepth: 0, loadNodeData }),
+        callbacks()
+      )
+    )
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    expect(typeof result.current.loadVisibleNodeData).toBe("function")
+    expect(result.current.nodes[0]?.id).toBe("ceo")
+    expect(result.current.nodes[0]?.dataLoaded).toBe(false)
+  })
+
+  it("hydrates only the requested unhydrated nodes and merges the rich data", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodeData = vi.fn(async (ids: string[]) =>
+      ids.map((id) => ({ ...employees[id]!, name: `Hydrated ${id}` }))
+    )
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({ defaultExpandDepth: 0, loadNodeData }),
+        callbacks()
+      )
+    )
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    await act(async () => {
+      result.current.loadVisibleNodeData?.(["ceo"])
+    })
+    await waitFor(() => {
+      const ceo = result.current.nodes.find((n) => n.id === "ceo")
+      expect(ceo?.dataLoaded).toBe(true)
+      expect(ceo?.data.name).toBe("Hydrated ceo")
+    })
+    expect(loadNodeData).toHaveBeenCalledWith(["ceo"])
+
+    // Re-requesting an already-hydrated node does not fetch again.
+    await act(async () => {
+      result.current.loadVisibleNodeData?.(["ceo"])
+    })
+    expect(loadNodeData).toHaveBeenCalledTimes(1)
+  })
+
+  it("surfaces an error when hydration fails", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodeData = vi.fn(async () => {
+      throw new Error("hydrate boom")
+    })
+    const cbs = callbacks()
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({ defaultExpandDepth: 0, loadNodeData }),
+        cbs
+      )
+    )
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    await act(async () => {
+      result.current.loadVisibleNodeData?.(["ceo"])
+    })
+    await waitFor(() => expect(cbs.onLoadError).toHaveBeenCalled())
+    expect(result.current.error).not.toBeNull()
+  })
+})

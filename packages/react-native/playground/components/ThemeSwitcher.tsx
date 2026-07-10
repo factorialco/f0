@@ -1,69 +1,73 @@
-import { Pressable, Text, View } from 'react-native';
-import { Uniwind, useCSSVariable, useUniwind } from 'uniwind';
+import { SegmentedControl } from "@expo/ui/community/segmented-control"
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
+import { SymbolView } from "expo-symbols"
+import React from "react"
+import { View } from "react-native"
+import { Uniwind, useCSSVariable, useUniwind } from "uniwind"
 
+const THEMES = ["system", "light", "dark"] as const
+const LABELS = ["System", "Light", "Dark"]
+
+const asString = (value: string | number | undefined): string => {
+  if (typeof value === "string") return value
+  if (typeof value === "number") return String(value)
+  return "#000000"
+}
+
+/**
+ * Playground theme switcher.
+ *
+ * Native showcase-chrome element: a native SegmentedControl (@expo/ui) for the
+ * System / Light / Dark choice, paired with an expo-symbols SF/Material symbol,
+ * inside an iOS 26 Liquid Glass card (expo-glass-effect) when available — with a
+ * plain bordered fallback on older iOS / Android.
+ */
 export const ThemeSwitcher = () => {
-  const { theme, hasAdaptiveThemes } = useUniwind();
-  
-  // Get current theme colors
-  const [f0Background, f0Foreground, f0Border, f0BackgroundSecondary] = useCSSVariable([
-    '--color-f0-background',
-    '--color-f0-foreground',
-    '--color-f0-border',
-    '--color-f0-background-secondary',
-  ]);
+  const { theme, hasAdaptiveThemes } = useUniwind()
+  const [fg, border] = useCSSVariable([
+    "--color-f0-foreground",
+    "--color-f0-border",
+  ])
 
-  const asString = (value: string | number | undefined): string => {
-    if (typeof value === 'string') return value;
-    if (typeof value === 'number') return String(value);
-    return '#000000';
-  };
+  const active = hasAdaptiveThemes ? "system" : theme
+  const index = Math.max(0, THEMES.indexOf(active as (typeof THEMES)[number]))
 
-  const themes = [
-    { name: 'system' as const, label: 'System', icon: '⚙️' },
-    { name: 'light' as const, label: 'Light', icon: '☀️' },
-    { name: 'dark' as const, label: 'Dark', icon: '🌙' },
-  ];
-
-  const activeTheme = hasAdaptiveThemes ? 'system' : theme;
-
-  return (
-    <View 
-      className="p-2 rounded-lg border"
-      style={{
-        backgroundColor: asString(f0BackgroundSecondary),
-        borderColor: asString(f0Border),
-      }}
-    >
-      <View className="flex-row gap-1.5">
-        {themes.map((t) => {
-          const isActive = activeTheme === t.name;
-          return (
-            <Pressable
-              key={t.name}
-              onPress={() => Uniwind.setTheme(t.name)}
-              className={`
-                flex-1 px-2 py-1.5 rounded-lg items-center
-                ${isActive ? 'bg-blue-500' : ''}
-              `}
-              style={{
-                backgroundColor: isActive ? '#3b82f6' : asString(f0Background),
-                borderWidth: isActive ? 0 : 1,
-                borderColor: asString(f0Border),
-              }}
-            >
-              <Text className="text-lg mb-0.5">{t.icon}</Text>
-              <Text
-                className="text-xs font-medium"
-                style={{
-                  color: isActive ? '#ffffff' : asString(f0Foreground),
-                }}
-              >
-                {t.label}
-              </Text>
-            </Pressable>
-          );
-        })}
+  const content = (
+    <View className="flex-row items-center gap-3 p-2">
+      <SymbolView
+        name={{ ios: "circle.lefthalf.filled", android: "contrast" }}
+        size={22}
+        tintColor={asString(fg)}
+      />
+      <View className="flex-1">
+        <SegmentedControl
+          values={LABELS}
+          selectedIndex={index}
+          onChange={(e) =>
+            Uniwind.setTheme(THEMES[e.nativeEvent.selectedSegmentIndex])
+          }
+        />
       </View>
     </View>
-  );
-};
+  )
+
+  if (isLiquidGlassAvailable()) {
+    return (
+      <GlassView
+        glassEffectStyle="regular"
+        style={{ borderRadius: 16, overflow: "hidden" }}
+      >
+        {content}
+      </GlassView>
+    )
+  }
+
+  return (
+    <View
+      className="rounded-2xl border"
+      style={{ borderColor: asString(border) }}
+    >
+      {content}
+    </View>
+  )
+}

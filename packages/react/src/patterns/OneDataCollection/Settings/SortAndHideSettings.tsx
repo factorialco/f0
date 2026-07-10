@@ -85,7 +85,15 @@ export const SortAndHideSettings = ({
           />
         </div>
       )}
-      <ScrollArea className="max-h-56">
+      {/*
+        Cap the scrollable viewport (not the ScrollArea root) at ~8 rows.
+        Radix's viewport is `height: 100%`, which does not resolve against a
+        root that only has `max-height`, so a `max-h-*` on the root let the
+        list overflow and get clipped without ever scrolling — no scrollbar,
+        no wheel scroll. Constraining the viewport itself makes it scroll; the
+        scrollbar keeps the default hover behaviour.
+      */}
+      <ScrollArea className="[&_[data-scroll-container]]:max-h-56">
         <SortAndHideList
           items={items}
           onChange={onChange}

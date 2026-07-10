@@ -5,8 +5,6 @@ import { useState } from "react"
 import { Placeholder } from "@/icons/app"
 import CrossIcon from "@/icons/app/Cross"
 
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
-
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes"
 import { DialogNotificationInternal } from "../internal/DialogNotification"
 import { dialogNotificationTypes } from "../types"
@@ -70,7 +68,6 @@ export default meta
 type Story = StoryObj<typeof DialogNotificationInternal>
 
 export const Default: Story = {
-  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     title: "Team Status",
@@ -90,7 +87,6 @@ export const Default: Story = {
 }
 
 export const Critical: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     type: "critical",
@@ -100,7 +96,6 @@ export const Critical: Story = {
 }
 
 export const Warning: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     type: "warning",
@@ -110,7 +105,6 @@ export const Warning: Story = {
 }
 
 export const Positive: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     type: "positive",
