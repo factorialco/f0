@@ -19,6 +19,7 @@ import {
 } from "@/hooks/datasource/types/nested.typings"
 import { promiseToObservable, PromiseState } from "@/lib/promise-to-observable"
 
+import { normalizeSearch } from "../nested/internal-types"
 import { useNestedDataContext } from "../providers/NestedProvider"
 
 interface UseLoadChildrenProps<
@@ -108,7 +109,8 @@ export const useLoadChildren = <
   const previousFiltersRef = useRef(source.currentFilters)
   const previousSortingsRef = useRef(source.currentSortings)
   const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
-  const previousSearchRef = useRef(source.debouncedCurrentSearch)
+  const normalizedSearch = normalizeSearch(source.debouncedCurrentSearch)
+  const previousSearchRef = useRef(normalizedSearch)
 
   useEffect(() => {
     const filtersChanged = previousFiltersRef.current !== source.currentFilters
@@ -116,8 +118,9 @@ export const useLoadChildren = <
       previousSortingsRef.current !== source.currentSortings
     const navigationFiltersChanged =
       previousNavigationFiltersRef.current !== source.currentNavigationFilters
-    const searchChanged =
-      previousSearchRef.current !== source.debouncedCurrentSearch
+    // Normalized so an `undefined → ""` transition (e.g. a consumer calling
+    // `setSearch("")` on mount) is not read as a real search change.
+    const searchChanged = previousSearchRef.current !== normalizedSearch
 
     if (
       filtersChanged ||
@@ -136,13 +139,13 @@ export const useLoadChildren = <
       previousFiltersRef.current = source.currentFilters
       previousSortingsRef.current = source.currentSortings
       previousNavigationFiltersRef.current = source.currentNavigationFilters
-      previousSearchRef.current = source.debouncedCurrentSearch
+      previousSearchRef.current = normalizedSearch
     }
   }, [
     source.currentFilters,
     source.currentSortings,
     source.currentNavigationFilters,
-    source.debouncedCurrentSearch,
+    normalizedSearch,
     clearFetchedData,
   ])
 
@@ -183,7 +186,9 @@ export const useLoadChildren = <
       filters: source.currentFilters,
       pagination: paginationInfo,
       sortings: source.currentSortings,
-      search: source.debouncedCurrentSearch,
+      // Normalized so an empty string is passed as `undefined`, consistent
+      // with the main collection fetch.
+      search: normalizeSearch(source.debouncedCurrentSearch),
     })
 
     // Handle undefined result

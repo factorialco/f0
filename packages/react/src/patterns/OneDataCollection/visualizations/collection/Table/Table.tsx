@@ -51,6 +51,7 @@ import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
+import { normalizeSearch } from "./nested/internal-types"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
@@ -335,17 +336,18 @@ export const TableCollection = <
    * expansion policies can align with filtering.
    */
   const hasActiveFilters = useMemo(() => {
-    if (source.debouncedCurrentSearch ?? source.currentSearch) return true
+    // Use the debounced + normalized search exclusively (not `currentSearch`)
+    // so this stays in sync with the cache-invalidation check in
+    // `useLoadChildren`: falling back to the un-debounced value on the first
+    // keystroke would flip `hasActiveFilters` ~200ms before the nested-rows
+    // cache is actually invalidated.
+    if (normalizeSearch(source.debouncedCurrentSearch)) return true
     return Object.values(source.currentFilters ?? {}).some((value) =>
       Array.isArray(value)
         ? value.length > 0
         : value !== undefined && value !== null
     )
-  }, [
-    source.debouncedCurrentSearch,
-    source.currentSearch,
-    source.currentFilters,
-  ])
+  }, [source.debouncedCurrentSearch, source.currentFilters])
 
   /*
    * Initial loading
