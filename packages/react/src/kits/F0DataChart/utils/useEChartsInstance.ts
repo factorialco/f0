@@ -1,6 +1,6 @@
 import * as echarts from "echarts"
 import { AriaComponent } from "echarts/components"
-import { type RefObject, useEffect, useRef } from "react"
+import { type RefObject, useEffect, useRef, useState } from "react"
 
 // @ts-expect-error - Duplicate echarts types in dependency tree
 echarts.use(AriaComponent)
@@ -12,34 +12,71 @@ echarts.use(AriaComponent)
  * Accepts a ref to the container `<div>` so it can be shared with other
  * hooks that need access to the same DOM element (e.g. `useChartTheme`
  * for dark mode detection via `element.closest(".dark")`).
+ *
+ * Init is deferred until the container has a real size: dashboard widgets
+ * mount inside animated canvas panels, and calling `echarts.init` on a
+ * 0-sized element warns ("Can't get DOM width or height") and produces a
+ * blank chart that never recovers. The ResizeObserver performs the init on
+ * the first tick where the container has dimensions.
+ *
+ * The instance is returned as STATE (not a ref) so dependent hooks — axis
+ * label tooltip, legend interaction — re-run and attach their listeners
+ * when the instance is created late.
  */
 export function useEChartsInstance(
   ref: RefObject<HTMLDivElement | null>,
   options: echarts.EChartsOption
-): RefObject<echarts.ECharts | null> {
-  const chart = useRef<echarts.ECharts | null>(null)
+): echarts.ECharts | null {
+  const [instance, setInstance] = useState<echarts.ECharts | null>(null)
+
+  // Latest options for the deferred-init path: when the container gets its
+  // size after mount, init must apply the options rendered since then —
+  // the options effect below only fires on `options` changes.
+  const optionsRef = useRef(options)
+  optionsRef.current = options
 
   useEffect(() => {
-    if (ref.current) {
-      chart.current = echarts.init(ref.current)
+    const container = ref.current
+    if (!container) return
 
-      const container = ref.current
-      const resizeObserver = new ResizeObserver(() => {
-        chart.current?.resize()
-      })
+    let chart: echarts.ECharts | null = null
 
-      resizeObserver.observe(container)
+    const init = () => {
+      if (chart || container.clientWidth === 0 || container.clientHeight === 0)
+        return
+      chart = echarts.init(container)
+      chart.setOption(optionsRef.current, true)
+      setInstance(chart)
+    }
 
-      return () => {
-        resizeObserver.disconnect()
-        chart.current?.dispose()
+    init()
+
+    const resizeObserver = new ResizeObserver(() => {
+      if (!chart) {
+        init()
+        return
       }
+      if (!chart.isDisposed()) {
+        chart.resize()
+      }
+    })
+
+    resizeObserver.observe(container)
+
+    return () => {
+      resizeObserver.disconnect()
+      if (chart && !chart.isDisposed()) {
+        chart.dispose()
+      }
+      setInstance(null)
     }
   }, [ref])
 
   useEffect(() => {
-    chart.current?.setOption(options, true)
-  }, [options])
+    if (instance && !instance.isDisposed()) {
+      instance.setOption(options, true)
+    }
+  }, [instance, options])
 
-  return chart
+  return instance
 }

@@ -15,10 +15,10 @@ export const LineChart = (props: F0DataChartLineProps) => {
   const { width } = useContainerSize(ref)
   const size = resolveChartSize(width)
   const options = useLineChartOptions(ref, props, size)
-  const chartRef = useEChartsInstance(ref, options)
+  const chart = useEChartsInstance(ref, options)
   const theme = useChartTheme(ref)
-  useAxisLabelTooltip(chartRef, ref, theme)
-  useLegendInteraction(chartRef)
+  useAxisLabelTooltip(chart, ref, theme)
+  useLegendInteraction(chart)
 
   // ECharts (zrender) sets `cursor: pointer` on the canvas element via inline
   // style whenever an axis label has `triggerEvent: true` (which we need for

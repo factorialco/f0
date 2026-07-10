@@ -4,6 +4,10 @@ import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
 
+import { stubChartContainerLayout } from "./stubChartContainerLayout"
+
+stubChartContainerLayout()
+
 // ---------------------------------------------------------------------------
 // Same ECharts mock + container size mock as LineChart.test.tsx so the two
 // suites assert on the live `setOption` payload at each breakpoint.
@@ -16,6 +20,7 @@ vi.mock("echarts", () => ({
     setOption: setOptionMock,
     resize: vi.fn(),
     dispose: vi.fn(),
+    isDisposed: vi.fn(() => false),
     getDom: vi.fn(() => document.createElement("div")),
     on: vi.fn(),
     off: vi.fn(),

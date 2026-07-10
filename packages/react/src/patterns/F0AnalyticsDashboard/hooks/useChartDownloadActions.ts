@@ -22,7 +22,10 @@ function getEChartsInstance(
   containerRef: RefObject<HTMLDivElement | null>
 ): echarts.ECharts | null {
   const el = containerRef.current?.querySelector<HTMLDivElement>(":scope > div")
-  return el ? (echarts.getInstanceByDom(el) ?? null) : null
+  const instance = el ? (echarts.getInstanceByDom(el) ?? null) : null
+  // A download action can fire while the dashboard is closing — calling
+  // getDataURL on a disposed instance throws.
+  return instance && !instance.isDisposed() ? instance : null
 }
 
 interface UseChartDownloadActionsOptions {

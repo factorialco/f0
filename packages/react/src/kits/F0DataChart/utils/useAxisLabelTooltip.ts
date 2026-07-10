@@ -1,5 +1,5 @@
 import type * as echarts from "echarts"
-import { type RefObject, useEffect } from "react"
+import { useEffect, type RefObject } from "react"
 
 import type { ChartTheme } from "./theme"
 
@@ -64,12 +64,11 @@ function isLabelTruncated(
  * to show.
  */
 export function useAxisLabelTooltip(
-  chartRef: RefObject<echarts.ECharts | null>,
+  chart: echarts.ECharts | null,
   containerRef: RefObject<HTMLDivElement | null>,
   theme: ChartTheme
 ) {
   useEffect(() => {
-    const chart = chartRef.current
     const container = containerRef.current
     if (!chart || !container) return
 
@@ -193,13 +192,17 @@ export function useAxisLabelTooltip(
     chart.on("mouseout", onMouseOut)
 
     return () => {
-      chart.off("mouseover", onMouseOver)
-      chart.off("mouseout", onMouseOut)
+      // The instance-owning hook disposes the chart before sibling cleanups
+      // run — `off` on a disposed instance makes ECharts log a warning.
+      if (!chart.isDisposed()) {
+        chart.off("mouseover", onMouseOver)
+        chart.off("mouseout", onMouseOut)
+      }
       // Reset the cursor scope in case we tear down mid-hover.
       container.dataset.axisHover = "false"
       if (overlay && container.contains(overlay)) {
         container.removeChild(overlay)
       }
     }
-  }, [chartRef, containerRef, theme])
+  }, [chart, containerRef, theme])
 }
