@@ -63,16 +63,35 @@ export function useEChartsInstance(
     // — init synchronously, no delay.
     init()
 
+    // Deferred init: the container mounted at 0×0, so it is expanding inside
+    // an animation (canvas panels grow via a CSS transition). Initializing
+    // mid-growth paints the chart on a smaller responsive breakpoint and its
+    // axes/labels then pop in when the final size upgrades the breakpoint,
+    // visibly re-laying-out the grid. Wait until the size stops changing so
+    // the chart appears once, fully formed, at its final size. The timer
+    // re-checks the size when it fires: a rendering hiccup can starve
+    // ResizeObserver ticks for longer than the debounce while the CSS
+    // transition keeps progressing, and painting in that lull would land
+    // mid-animation again.
+    const scheduleSettledInit = () => {
+      window.clearTimeout(settleTimer)
+      const scheduledWidth = container.clientWidth
+      const scheduledHeight = container.clientHeight
+      settleTimer = window.setTimeout(() => {
+        if (
+          container.clientWidth !== scheduledWidth ||
+          container.clientHeight !== scheduledHeight
+        ) {
+          scheduleSettledInit()
+          return
+        }
+        init()
+      }, 120)
+    }
+
     const resizeObserver = new ResizeObserver(() => {
       if (!chart) {
-        // Deferred init: the container mounted at 0×0, so it is expanding
-        // inside an animation (canvas panels grow via a CSS transition).
-        // Initializing on the first sized tick paints the chart mid-growth —
-        // it lands on the small responsive breakpoint and its axes/labels
-        // pop in later as the breakpoints upgrade. Wait until the size stops
-        // changing so the chart appears once, fully formed, at final size.
-        window.clearTimeout(settleTimer)
-        settleTimer = window.setTimeout(init, 120)
+        scheduleSettledInit()
         return
       }
       if (!chart.isDisposed()) {
