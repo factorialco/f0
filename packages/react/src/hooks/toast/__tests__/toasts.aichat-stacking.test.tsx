@@ -82,13 +82,27 @@ describe("toasts over a fullscreen AI chat + dialog", () => {
     })
     await within(overlayRoot).findByText("Above the dialog")
 
-    // The toast container is the portal's root element; it carries z-[100],
-    // which beats the dialog overlay/content z-50 in the shared overlay root.
-    const container = overlayRoot.firstElementChild as HTMLElement | null
-    expect(container?.className).toContain("z-[100]")
+    // Sonner's toaster list carries an inline z-index of 100 (overriding its
+    // stylesheet), which beats the dialog overlay/content z-50 in the shared
+    // overlay root.
+    const toaster = overlayRoot.querySelector<HTMLElement>(
+      "[data-sonner-toaster]"
+    )
+    expect(toaster?.style.zIndex).toBe("100")
   })
 
   it("anchors the toast layer to the content region, not the full viewport", async () => {
+    // Give #content a concrete box (jsdom rects are all zeros by default).
+    content.getBoundingClientRect = () =>
+      ({
+        left: 200,
+        top: 0,
+        right: window.innerWidth,
+        bottom: window.innerHeight - 40,
+        width: window.innerWidth - 200,
+        height: window.innerHeight - 40,
+      }) as DOMRect
+
     render(
       <ToastProvider>
         <div />
@@ -100,12 +114,14 @@ describe("toasts over a fullscreen AI chat + dialog", () => {
     })
     await within(overlayRoot).findByText("Anchored to content")
 
-    // With #content present the fixed layer is sized to its box (explicit
-    // geometry) so it sits in the content's bottom-left corner — clear of the
-    // sidebar — rather than filling the viewport (`inset: 0`).
-    const container = overlayRoot.firstElementChild as HTMLElement
-    expect(container.style.width).not.toBe("")
-    expect(container.style.inset).toBe("")
+    // With #content present, sonner's offset CSS vars point at the content's
+    // bottom-left corner (rect edge + 24px inset) — clear of the sidebar —
+    // rather than at the viewport's.
+    const toaster = overlayRoot.querySelector<HTMLElement>(
+      "[data-sonner-toaster]"
+    ) as HTMLElement
+    expect(toaster.style.getPropertyValue("--offset-left")).toBe("224px")
+    expect(toaster.style.getPropertyValue("--offset-bottom")).toBe("64px")
   })
 
   it("keeps the overlay root outside the isolate so it paints above the chat", () => {
