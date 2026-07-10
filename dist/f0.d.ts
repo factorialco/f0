@@ -62,6 +62,7 @@ import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
 import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
+import { F0PdfViewerProps as F0PdfViewerProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0SliderProps as F0SliderProps_2 } from './types';
 import { F0SliderSkeletonProps } from './F0SliderSkeleton';
@@ -114,6 +115,7 @@ import { Observable } from 'zen-observable-ts';
 import { PageLayoutBlockComponent as PageLayoutBlockComponent_2 } from './types';
 import { PageLayoutGroupComponent as PageLayoutGroupComponent_2 } from './f0';
 import { PageProps } from './pages/Page';
+import { PDFDocumentProxy } from 'pdfjs-dist';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './f0';
 import { PersonCellValue as PersonCellValue_2 } from './types/person';
@@ -346,7 +348,7 @@ declare type ActionProps_2 = {
      * @default "default"
      * @optional
      */
-    variant?: "default" | "outline" | "promote";
+    variant?: "default" | "outline" | "neutral" | "promote";
     /**
      * The icon of the action
      * @optional
@@ -3236,6 +3238,8 @@ declare const componentTypes: readonly ["layout", "info", "action", "form"];
 
 export declare function computeSectionEndIds(elements: SurveyFormBuilderElement[]): Set<string>;
 
+export declare const configurePdfWorker: (src?: string) => void;
+
 export declare type ConfirmDialogOptions = NotificationDialogBaseOptions & {
     /** The confirm action (default: label "Ok", value true). */
     confirm?: DialogSimpleAction;
@@ -5191,6 +5195,20 @@ export declare const defaultTranslations: {
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
     };
+    readonly pdfViewer: {
+        readonly toolbar: "Document toolbar";
+        readonly previousPage: "Previous page";
+        readonly nextPage: "Next page";
+        readonly zoomIn: "Zoom in";
+        readonly zoomOut: "Zoom out";
+        readonly scaleSelector: "Zoom level";
+        readonly pageWidth: "Page width";
+        readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
+        readonly print: "Print";
+        readonly download: "Download";
+        readonly loading: "Loading document";
+    };
 };
 
 /**
@@ -6919,12 +6937,21 @@ export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
 
 export declare interface F0AudioPlayerProps extends WithDataTestIdProps, DataAttributes_2 {
     /**
-     * The audio source URL.
+     * The audio source. Either a URL string, or a function that lazily resolves
+     * the URL the first time playback is requested. Use the function form for
+     * on-demand credentials (e.g. presigned URLs) so the URL is only fetched on
+     * user intent.
      */
-    src: string;
+    src: string | (() => Promise<string>);
+    /**
+     * Known total duration in seconds. Lets the player show the total time and an
+     * active seek bar before the audio loads (e.g. with `preload="none"`).
+     * Superseded by the real duration once metadata loads.
+     */
+    duration?: number;
     /**
      * How much of the audio to preload.
-     * @default "metadata"
+     * @default "metadata" ("none" when `src` is a function)
      */
     preload?: "none" | "metadata" | "auto";
     /**
@@ -10125,6 +10152,42 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     autoOpen?: boolean;
 };
 
+declare type F0PdfRotation = 0 | 90 | 180 | 270;
+
+export declare type F0PdfScale = (typeof pdfScales)[number];
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0PdfViewer: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0PdfViewerProps_2 & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare interface F0PdfViewerProps extends WithDataTestIdProps, DataAttributes_2 {
+    /** Source URL of the PDF document. */
+    url: string;
+    /** File name used when downloading the document. Defaults to "document.pdf". */
+    filename?: string;
+    /** Zero-based page index to scroll to initially (and on change). */
+    page?: number;
+    /** Restrict rendering to a subset of pages (zero-based indexes). */
+    pagesToDisplay?: number[];
+    /** Initial zoom level. Defaults to "page-width". */
+    initialScale?: F0PdfScale;
+    /** Send credentials with the document request. Defaults to true. */
+    withCredentials?: boolean;
+    /** Show a toolbar control to rotate the document in 90° steps. */
+    rotatable?: boolean;
+    /** Initial rotation in degrees. Defaults to 0. */
+    initialRotation?: F0PdfRotation;
+    /** Called with the new rotation in degrees whenever the user rotates. */
+    onRotationChange?: (rotation: F0PdfRotation) => void;
+    /** Called once the document has loaded, with the pdf.js document proxy. */
+    onPdfLoaded?: (pdf: PDFDocumentProxy) => void;
+    /** Called with the 1-based page number when the visible page changes. */
+    onPageChange?: (page: number) => void;
+}
+
 /**
  * F0 config options specific to period fields.
  *
@@ -12013,6 +12076,16 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      */
     revealNodeId?: string;
     /**
+     * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+     * root of their branch): when the tree first becomes ready, its ancestor
+     * path is loaded/expanded and the viewport centers on it. Unlike
+     * `revealNodeId` (which is ignored on entry so search stays clean), this is
+     * the opt-in "open the org chart already looking at me" behaviour. Requires
+     * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+     * the default entry view (roots expanded to `defaultExpandDepth`).
+     */
+    focusOnEntry?: string;
+    /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
      * revealing nodes in branches that have not been expanded yet.
@@ -12020,6 +12093,19 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     loadNodePath?: (nodeId: string) => Promise<R[]>;
     /** Optional parent accessor used when linking the revealed ancestor path. */
     getParentId?: (record: R) => string | null;
+    /**
+     * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+     * built from whatever lightweight records `childrenFilters`/`fetchData`
+     * return, and the full record is fetched — batched, once per node — only for
+     * the nodes that enter the viewport, via this loader. The returned records
+     * replace each node's `data` (matched by node id) and clear its loading
+     * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+     * eager behavior (structure and data fetched together per expansion).
+     *
+     * The "lightness" of the initial records is entirely the source's choice and
+     * transparent to the hook — no special adapter mode is required.
+     */
+    loadNodeData?: (ids: string[]) => Promise<R[]>;
     /**
      * Id of the node representing the current user. When set, a "Find me" button
      * is shown in the controls that centers the viewport on that node.
@@ -12037,6 +12123,22 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     maxZoom?: number;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+     * the viewport are handed to React Flow — for very large trees (thousands of
+     * expand-visible nodes). Off by default; non-breaking.
+     */
+    enableNodeWindowing?: boolean;
+    /** Flow-space px kept materialized around the viewport (pass-through). */
+    nodeWindowPadding?: number;
+    /**
+     * Viewport-driven data loading (pass-through). Called (debounced + batched)
+     * with the ids of nodes that entered the viewport, so the consumer can
+     * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+     */
+    loadVisibleNodeData?: (ids: string[]) => void;
+    /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+    visibleDataDebounceMs?: number;
 };
 
 declare type GraphVisualizationSettings = {
@@ -12698,10 +12800,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<{
-        icon: IconType;
-        property: CardMetadataProperty;
-    }>;
+    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -14184,6 +14283,8 @@ export declare const parseDataCollectionUrlParams: <CurrentFiltersState extends 
 declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
+
+export declare const pdfScales: readonly ["page-width", "page-fit", "0.5", "0.75", "1", "1.25", "1.5", "2", "3", "4"];
 
 /**
  * Pre-loaded context shown as an empty state in the chat.
@@ -15976,6 +16077,7 @@ declare const tags: readonly ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "
 export declare interface TagStatusProps {
     text: string;
     variant: Variant;
+    icon?: IconType;
     /**
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
@@ -16623,7 +16725,7 @@ export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
 
-export declare const useAudioPlayer: (audioRef: RefObject<HTMLAudioElement>, callbacks?: UseAudioPlayerCallbacks) => AudioPlayerControls;
+export declare const useAudioPlayer: (audioRef: RefObject<HTMLAudioElement>, callbacks?: UseAudioPlayerCallbacks, initialDuration?: number) => AudioPlayerControls;
 
 declare interface UseAudioPlayerCallbacks {
     onPlay?: () => void;
