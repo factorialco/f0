@@ -22,6 +22,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
+import { formatClock } from "../utils/natural-time"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "😮", "🙏"]
@@ -123,8 +124,12 @@ export const ChatMessageActions = ({
   // edited or inspected — only resent (same id; the transport dedupes) or
   // discarded. Its trigger is the always-visible critical alert itself (the
   // hover ellipsis is not rendered: two buttons opening the same menu is
-  // redundant), and the menu is reduced to Retry / Delete.
+  // redundant), and the menu is reduced to Retry / Delete. The label carries
+  // the send time, mirroring the sending clock's tooltip.
   const isFailed = message.status === "failed"
+  const failedLabel = `${i18n.chat.notSent} · ${formatClock(
+    new Date(message.createdAt)
+  )}`
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -138,8 +143,8 @@ export const ChatMessageActions = ({
             mode="only"
             compact
             pressed={open}
-            aria-label={i18n.chat.notSent}
-            title={i18n.chat.notSent}
+            aria-label={failedLabel}
+            tooltip={failedLabel}
             data-testid="chat-failed-indicator"
           >
             <F0Icon icon={AlertCircleLine} size="md" color="critical-bold" />

@@ -150,7 +150,9 @@ export const ChatMessageItem = ({
                 the bubble's left). Adding/removing it never shifts the bubble
                 (right-anchored) nor the row height — stable measurements for
                 the virtualizer. */}
-            {isMine && message.status === "sending" && <SendingClock />}
+            {isMine && message.status === "sending" && (
+              <SendingClock sentAt={message.createdAt} />
+            )}
             {/* Deleted tombstones have nothing to act on, and an in-flight
                 (sending) message can't be acted on yet either — only the clock
                 shows until it settles. The menu stays visible while open (not

@@ -17,6 +17,7 @@ import {
 
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
+import { formatClock } from "../utils/natural-time"
 import {
   type F0ChatMessage,
   type F0ChatMessageStatus,
@@ -112,16 +113,22 @@ describe("sending clock", () => {
   afterEach(() => vi.useRealTimers())
 
   it("stays hidden for fast sends and reveals after the 500ms delay", () => {
-    renderChat(makeRuntime({ messages: [mine("sending")] }))
+    const message = mine("sending")
+    renderChat(makeRuntime({ messages: [message] }))
     const clock = screen.getByTestId("chat-sending-clock")
+    const sendTime = formatClock(new Date(message.createdAt))
     expect(clock).toHaveAttribute("aria-hidden", "true")
     expect(clock.className).toContain("opacity-0")
 
-    // Still hidden below the threshold (fast sends never see it)...
+    // Still hidden below the threshold (fast sends never see it) — the button
+    // isn't even mounted, so it can't be an invisible focus target.
     act(() => {
       vi.advanceTimersByTime(400)
     })
     expect(clock).toHaveAttribute("aria-hidden", "true")
+    expect(
+      screen.queryByRole("button", { name: sendTime })
+    ).not.toBeInTheDocument()
 
     // ...revealed once the send has been in flight for half a second.
     act(() => {
@@ -129,6 +136,21 @@ describe("sending clock", () => {
     })
     expect(clock).toHaveAttribute("aria-hidden", "false")
     expect(clock.className).toContain("opacity-100")
+  })
+
+  it("reveals an action-less button whose tooltip is the send time", () => {
+    const message = mine("sending")
+    renderChat(makeRuntime({ messages: [message] }))
+    act(() => {
+      vi.advanceTimersByTime(600)
+    })
+
+    // hideLabel makes the send time the button's accessible name and tooltip.
+    const sendTime = formatClock(new Date(message.createdAt))
+    const clockButton = screen.getByRole("button", { name: sendTime })
+    // It carries no action: clicking opens nothing and calls nothing.
+    fireEvent.click(clockButton)
+    expect(screen.queryByRole("button", { name: "Retry" })).toBeNull()
   })
 
   it("renders no clock for settled messages", () => {
@@ -145,17 +167,27 @@ describe("sending clock", () => {
 })
 
 describe("failed message", () => {
+  // The indicator's label is "Not sent · <send time>".
+  const notSent = /^Not sent · /
+
   it("shows the critical indicator without hover and dims the bubble", () => {
     renderChat(makeRuntime({ messages: [mine("failed")] }))
-    expect(screen.getByRole("button", { name: "Not sent" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: notSent })).toBeInTheDocument()
     expect(screen.getByText("My message").closest(".opacity-60")).not.toBeNull()
+  })
+
+  it("labels the indicator with the send time", () => {
+    const message = mine("failed")
+    renderChat(makeRuntime({ messages: [message] }))
+    const label = `Not sent · ${formatClock(new Date(message.createdAt))}`
+    expect(screen.getByRole("button", { name: label })).toBeInTheDocument()
   })
 
   it("opens a reduced Retry/Delete menu from the indicator", () => {
     const retryMessage = vi.fn()
     renderChat(makeRuntime({ messages: [mine("failed")], retryMessage }))
 
-    fireEvent.click(screen.getByRole("button", { name: "Not sent" }))
+    fireEvent.click(screen.getByRole("button", { name: notSent }))
 
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument()
@@ -177,7 +209,7 @@ describe("failed message", () => {
   it("deletes the failed echo via the reduced menu", () => {
     const deleteMessage = vi.fn()
     renderChat(makeRuntime({ messages: [mine("failed")], deleteMessage }))
-    fireEvent.click(screen.getByRole("button", { name: "Not sent" }))
+    fireEvent.click(screen.getByRole("button", { name: notSent }))
     fireEvent.click(screen.getByRole("button", { name: "Delete" }))
     expect(deleteMessage).toHaveBeenCalledWith("m2")
   })
@@ -188,7 +220,7 @@ describe("failed message", () => {
     expect(
       screen.queryByRole("button", { name: "Message actions" })
     ).not.toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Not sent" })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: notSent })).toBeInTheDocument()
   })
 
   it("shows no footer text under a failed last message", () => {
