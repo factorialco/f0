@@ -192,8 +192,6 @@ export function useAxisLabelTooltip(
     chart.on("mouseout", onMouseOut)
 
     return () => {
-      // The instance-owning hook disposes the chart before sibling cleanups
-      // run — `off` on a disposed instance makes ECharts log a warning.
       if (!chart.isDisposed()) {
         chart.off("mouseover", onMouseOver)
         chart.off("mouseout", onMouseOut)

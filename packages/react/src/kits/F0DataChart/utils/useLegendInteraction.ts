@@ -74,8 +74,6 @@ export function useLegendInteraction(chart: echarts.ECharts | null) {
     )
 
     return () => {
-      // The instance-owning hook disposes the chart before sibling cleanups
-      // run — `off` on a disposed instance makes ECharts log a warning.
       if (!chart.isDisposed()) {
         chart.off(
           "legendselectchanged",

@@ -89,12 +89,7 @@ const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
   )
 }
 
-/**
- * Wrapper classes for the `bordered` variant, shared by the loading skeleton
- * and the loaded table so the swap between them is pixel-identical (the
- * `!bg-transparent` overrides suppress the table's own hairlines, which would
- * otherwise double up against the wrapper border).
- */
+// Shared by the skeleton and the loaded table so the swap is pixel-identical
 const borderedWrapperClasses =
   "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
 
@@ -336,14 +331,6 @@ export const TableCollection = <
     source.itemsWithChildren?.(item)
   )
 
-  /*
-   * Initial loading
-   *
-   * The skeleton is rendered inside the same wrapper structure as the loaded
-   * table below so the swap doesn't change the widget's height (no layout
-   * jump) and the placeholder rows stay clipped to the same box the real
-   * table will occupy.
-   */
   if (isInitialLoading) {
     return (
       <div className="flex h-full min-h-0 flex-col gap-4">
@@ -410,13 +397,8 @@ export const TableCollection = <
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <TableWrapper>
-        {/* `min-h-0` lets this wrapper shrink to the height its flex parent
-            assigns (flex items refuse to shrink below their content height by
-            default), so OneTable's internal `h-full` + `overflow-auto` scroll
-            container actually engages in height-constrained contexts (e.g.
-            dashboard widgets). Without it the wrapper grows with the table's
-            content and overflows the widget card instead of scrolling. Tables
-            shorter than the available space are unaffected. */}
+        {/* min-h-0: without it this flex item never shrinks, OneTable's
+            internal scroll never engages and tall tables overflow the card */}
         <div className={cn("min-h-0", bordered && borderedWrapperClasses)}>
           <OneTable loading={isLoading}>
             <TableHeader sticky={true}>

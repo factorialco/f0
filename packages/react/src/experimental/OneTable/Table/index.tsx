@@ -49,11 +49,8 @@ function TableBase({ children, loading = false }: TableProps) {
     <TableContext.Provider
       value={{ isScrolled, setIsScrolled, isScrolledRight, setIsScrolledRight }}
     >
-      {/* The overlay lives OUTSIDE the scroll container (as a sibling) so it
-          always covers the visible viewport: `absolute inset-0` inside an
-          `overflow-auto` element only covers the first scroll page, so the
-          spinner scrolled out of view (and could paint past the widget's
-          rounded boundary) when the table was scrolled. */}
+      {/* The overlay is a sibling of the scroll container — inside it,
+          `absolute inset-0` only covers the first scroll page */}
       <div className="relative h-full w-full">
         <div ref={containerRef} className="h-full w-full overflow-auto">
           <TableRoot
@@ -102,9 +99,8 @@ function TableSkeleton({ columns = 5 }: TableSkeletonProps) {
         setIsScrolledRight: () => {},
       }}
     >
-      {/* Clip the fixed-size placeholder rows: the skeleton has no scroll
-          container of its own, so without this it paints past short
-          containers (e.g. a small dashboard widget card). */}
+      {/* The skeleton renders fixed-size rows with no scroll container —
+          clip them so they don't paint past short containers */}
       <div className="h-full w-full overflow-hidden">
         <TableRoot
           className="cursor-progress"

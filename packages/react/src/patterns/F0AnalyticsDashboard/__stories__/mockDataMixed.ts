@@ -750,11 +750,6 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
   visualizations: [employeeTableVisualization],
 }
 
-// ---------------------------------------------------------------------------
-// Widget loading-state items — every widget type on a deliberately slow source
-// ---------------------------------------------------------------------------
-
-/** Delay applied to every fetch below so loading states are human-visible. */
 const SLOW_FETCH_DELAY = 2000
 
 function slow<Args extends unknown[], T>(
@@ -763,25 +758,8 @@ function slow<Args extends unknown[], T>(
   return (...args) => delay(SLOW_FETCH_DELAY).then(() => fetch(...args))
 }
 
-/**
- * One row per widget type (metric, chart, collection), all fed through
- * `slow()` (~2s per fetch) so every loading state is visible on first render
- * and again on every dashboard-filter change:
- *
- * - metrics and charts show their type-specific skeletons via
- *   `DashboardItem`'s `isLoading`/`skeleton` contract,
- * - the SHORT table card (`itemHeight: 220`, clamped to the grid's 300px
- *   minimum) is the containment regression case — its skeleton and loaded
- *   table are both taller than the card, so they must clip at the rounded
- *   border and scroll internally instead of painting past it,
- * - the default-height table is the reference.
- *
- * Each item sits in its own grid row where it matters — the grid sizes a row
- * to the tallest item in it, so sharing a row would override the short
- * card's `itemHeight`.
- */
+/** Every widget type on a slow (~2s) source. The tables get their own grid rows — a row sizes to its tallest item, which would override the short card's itemHeight. */
 export const widgetLoadingStatesItems: DashboardItem<DashboardFiltersType>[] = [
-  // Row 0 — one metric per format (plain, currency, percent)
   {
     id: "loading-total-headcount",
     title: "Total Headcount",
@@ -815,7 +793,6 @@ export const widgetLoadingStatesItems: DashboardItem<DashboardFiltersType>[] = [
     decimals: 1,
     fetchData: slow(fetchAttritionMetric),
   },
-  // Row 1 — cartesian + circular chart skeleton variants
   {
     id: "loading-bar-chart",
     title: "Headcount by Department",
@@ -852,7 +829,6 @@ export const widgetLoadingStatesItems: DashboardItem<DashboardFiltersType>[] = [
     chart: { type: "pie", innerRadius: 60, showPercentage: true },
     fetchData: slow(fetchHeadcountPie),
   },
-  // Row 2 — the containment regression case
   {
     id: "short-employee-table",
     title: "Short table widget",
@@ -861,13 +837,11 @@ export const widgetLoadingStatesItems: DashboardItem<DashboardFiltersType>[] = [
     colSpan: 12,
     x: 0,
     y: 10,
-    // The grid clamps collection rows to MIN_ROW_HEIGHTS (300px), so this
-    // renders at 300px — still well below the table's natural height.
+    // Clamped to the grid's 300px collection minimum — still shorter than the table
     itemHeight: 220,
     createSource: (filters) => createEmployeeSource(filters, SLOW_FETCH_DELAY),
     visualizations: [employeeTableVisualization],
   },
-  // Row 3 — reference table at the default collection height
   {
     id: "default-employee-table",
     title: "Default table widget",

@@ -157,28 +157,7 @@ export const EmptyDashboard: Story = {
   ),
 }
 
-/**
- * Loading states for every widget type, all on a deliberately slow (~2s)
- * source so the skeleton phase is visible on first render:
- *
- * - **Metrics** (plain / currency / percent) and **charts** (bar, line, pie)
- *   show their type-specific skeletons and must not shift the card's height
- *   when data lands.
- * - **Short table widget** (300px — the grid's minimum collection row
- *   height): both the skeleton and the loaded table are taller than the
- *   card. Everything must clip at the rounded border — the loaded table
- *   scrolls internally and its pagination stays pinned inside the card.
- *   Before the containment fixes, placeholder rows and pagination painted
- *   past the card's bottom edge and the card height jumped on the
- *   loading→loaded swap.
- * - **Default table widget**: reference behaviour at the regular collection
- *   height.
- *
- * Change any dashboard filter (e.g. department) to re-fire the slow fetches
- * and see the reload treatment — for tables, the content dims to 50% with a
- * spinner overlay that covers the visible area even while the table is
- * scrolled.
- */
+/** Every widget type on a slow (~2s) source: skeletons must not shift card heights, and the short table must clip and scroll inside its card. Change any filter to replay the reload treatment. */
 export const WidgetLoadingStates: Story = {
   render: () => (
     <F0AnalyticsDashboard

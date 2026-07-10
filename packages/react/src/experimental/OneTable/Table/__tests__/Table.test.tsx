@@ -24,9 +24,6 @@ describe("OneTable loading overlay", () => {
 
     expect(scroller).not.toBeNull()
     expect(overlay).not.toBeNull()
-    // Inside the scroll container an `absolute inset-0` overlay only covers
-    // the first scroll page, so the spinner scrolls out of view on scrolled
-    // tables. It must live next to the scroll container instead.
     expect(scroller!.contains(overlay!)).toBe(false)
     expect(overlay!.parentElement).toBe(scroller!.parentElement)
   })
@@ -45,9 +42,6 @@ describe("OneTable.Skeleton", () => {
     const table = container.querySelector("table")
 
     expect(table).not.toBeNull()
-    // The skeleton renders a fixed number of rows regardless of the space it
-    // is given, so it must be clipped or it paints past short containers
-    // (e.g. a small dashboard widget card).
     expect(table!.closest(".overflow-hidden")).not.toBeNull()
   })
 })
