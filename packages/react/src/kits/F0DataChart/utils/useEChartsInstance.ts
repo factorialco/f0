@@ -40,6 +40,7 @@ export function useEChartsInstance(
     if (!container) return
 
     let chart: echarts.ECharts | null = null
+    let settleTimer: number | undefined
 
     const init = () => {
       if (chart || container.clientWidth === 0 || container.clientHeight === 0)
@@ -49,11 +50,20 @@ export function useEChartsInstance(
       setInstance(chart)
     }
 
+    // Mounted with a real size (the common case: grid cells, static layouts)
+    // — init synchronously, no delay.
     init()
 
     const resizeObserver = new ResizeObserver(() => {
       if (!chart) {
-        init()
+        // Deferred init: the container mounted at 0×0, so it is expanding
+        // inside an animation (canvas panels grow via a CSS transition).
+        // Initializing on the first sized tick paints the chart mid-growth —
+        // it lands on the small responsive breakpoint and its axes/labels
+        // pop in later as the breakpoints upgrade. Wait until the size stops
+        // changing so the chart appears once, fully formed, at final size.
+        window.clearTimeout(settleTimer)
+        settleTimer = window.setTimeout(init, 120)
         return
       }
       if (!chart.isDisposed()) {
@@ -64,6 +74,7 @@ export function useEChartsInstance(
     resizeObserver.observe(container)
 
     return () => {
+      window.clearTimeout(settleTimer)
       resizeObserver.disconnect()
       if (chart && !chart.isDisposed()) {
         chart.dispose()
