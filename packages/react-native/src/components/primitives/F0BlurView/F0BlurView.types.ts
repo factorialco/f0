@@ -10,7 +10,7 @@ export interface F0BlurViewProps extends Pick<
   | "intensity"
   | "tint"
   | "blurReductionFactor"
-  | "experimentalBlurMethod"
+  | "blurMethod"
   | "style"
   | "children"
   | "testID"
