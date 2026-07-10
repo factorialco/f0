@@ -435,8 +435,9 @@ export function useDataCollectionTreeData<
   // insert `upsert` records (matched by id, re-parenting via getParentId) and
   // drop `remove` ids with their descendants — all WITHOUT re-fetching or
   // collapsing. Expansion and viewport are preserved; only removed ids leave the
-  // expanded set. Structure (childrenCount/parent) comes from the same accessors,
-  // so callers must refresh those before bumping the batch version.
+  // expanded set. The structure of the parents whose child set is touched by the
+  // batch (old/new parent of a move, parent of a removal) is reconciled locally
+  // — the caller only needs to send the records that changed, not their parents.
   const applyLiveUpdate = useCallback(
     (upsert: R[], remove: string[]): void => {
       if (upsert.length === 0 && remove.length === 0) return
@@ -444,39 +445,46 @@ export function useDataCollectionTreeData<
 
       setNodes((prev) => {
         const byId = new Map(prev.map((node) => [node.id, node]))
+        // Ids dropped from the tree this batch — pruned from the expanded set.
+        const removedIds = new Set<string>()
+        // Parents whose child set changed — their childrenCount/childrenLoaded
+        // are reconciled at the end so expanders/spinners stay consistent.
+        const touchedParents = new Set<string>()
 
-        // 1) Removals, cascading to descendants (BFS over the current parent links).
-        if (remove.length > 0) {
+        // Drops `ids` and their descendants (BFS over the current parent links).
+        const cascadeRemove = (ids: string[]): void => {
+          if (ids.length === 0) return
           const childrenByParent = new Map<string, string[]>()
-          for (const node of prev) {
+          for (const node of byId.values()) {
             if (node.parentId === null) continue
             const siblings = childrenByParent.get(node.parentId) ?? []
             siblings.push(node.id)
             childrenByParent.set(node.parentId, siblings)
           }
-          const removeSet = new Set<string>()
-          const queue = [...remove]
+          const seen = new Set<string>()
+          const queue = [...ids]
           while (queue.length > 0) {
             const id = queue.shift() as string
-            if (removeSet.has(id)) continue
-            removeSet.add(id)
+            if (seen.has(id)) continue
+            seen.add(id)
+            const node = byId.get(id)
+            if (!node) continue
+            if (node.parentId !== null) touchedParents.add(node.parentId)
+            byId.delete(id)
+            loadedParents.current.delete(id)
+            removedIds.add(id)
             for (const childId of childrenByParent.get(id) ?? [])
               queue.push(childId)
           }
-          removeSet.forEach((id) => {
-            byId.delete(id)
-            loadedParents.current.delete(id)
-          })
-          const currentExpanded = expandedNodesRef.current
-          const nextExpanded = new Set(
-            [...currentExpanded].filter((id) => !removeSet.has(id))
-          )
-          if (nextExpanded.size !== currentExpanded.size)
-            setExpandedState(nextExpanded)
         }
 
-        // 2) Upserts: refresh existing nodes (data + structure, re-parenting) and
-        //    insert new attachable ones (root, or parent already present).
+        // 1) Explicit removals, cascading to descendants.
+        cascadeRemove(remove)
+
+        // 2) Upserts: refresh existing nodes (data + structure, re-parenting)
+        //    and insert new ones. Every record enters the map here; whether it
+        //    is actually attachable is resolved in the prune pass below, so the
+        //    order of records inside the batch doesn't matter.
         for (const record of upsert) {
           const id = getId(record)
           const existing = byId.get(id)
@@ -485,6 +493,11 @@ export function useDataCollectionTreeData<
             : (existing?.parentId ?? null)
           const childrenCount = opts.getChildrenCount(record)
           if (existing) {
+            if (existing.parentId !== parentId) {
+              if (existing.parentId !== null)
+                touchedParents.add(existing.parentId)
+              if (parentId !== null) touchedParents.add(parentId)
+            }
             byId.set(id, {
               ...existing,
               data: record,
@@ -493,7 +506,8 @@ export function useDataCollectionTreeData<
               // We hold the full record now, so clear any hydration placeholder.
               dataLoaded: opts.loadNodeData ? true : existing.dataLoaded,
             })
-          } else if (parentId === null || byId.has(parentId)) {
+          } else {
+            if (parentId !== null) touchedParents.add(parentId)
             byId.set(id, {
               id,
               parentId,
@@ -503,6 +517,64 @@ export function useDataCollectionTreeData<
               dataLoaded: opts.loadNodeData ? true : undefined,
             })
           }
+        }
+
+        // 3) Prune nodes left unattachable (parent not in the loaded tree): a
+        //    record inserted or re-parented under a not-yet-loaded parent leaves
+        //    the tree (with its descendants) and reappears when that parent is
+        //    expanded. Without this, a dangling parentId would be promoted to a
+        //    floating root by the tree builder.
+        cascadeRemove(
+          [...byId.values()]
+            .filter(
+              (node) => node.parentId !== null && !byId.has(node.parentId)
+            )
+            .map((node) => node.id)
+        )
+
+        // 4) Reconcile the structure of the touched parents. For a parent whose
+        //    children are fully loaded, the in-memory child set is ground truth:
+        //    losing its last child must drop childrenCount to 0 (or the expander
+        //    spins forever waiting for children that will never arrive). A
+        //    believed-leaf parent (count 0) that just gained children this way is
+        //    now fully loaded too — it gets its expander and expanding it must
+        //    not fetch (the server may not reflect the live change yet).
+        for (const parentId of touchedParents) {
+          const parent = byId.get(parentId)
+          if (!parent) continue
+          let inMemoryChildren = 0
+          for (const node of byId.values())
+            if (node.parentId === parentId) inMemoryChildren++
+          if (loadedParents.current.has(parentId) || parent.childrenLoaded) {
+            byId.set(parentId, {
+              ...parent,
+              childrenCount: inMemoryChildren,
+              childrenLoaded: true,
+            })
+            loadedParents.current.add(parentId)
+          } else {
+            const childrenCount = Math.max(
+              parent.childrenCount ?? 0,
+              inMemoryChildren
+            )
+            const fullyLoaded =
+              inMemoryChildren > 0 && childrenCount === inMemoryChildren
+            byId.set(parentId, {
+              ...parent,
+              childrenCount,
+              childrenLoaded: fullyLoaded || parent.childrenLoaded,
+            })
+            if (fullyLoaded) loadedParents.current.add(parentId)
+          }
+        }
+
+        if (removedIds.size > 0) {
+          const currentExpanded = expandedNodesRef.current
+          const nextExpanded = new Set(
+            [...currentExpanded].filter((id) => !removedIds.has(id))
+          )
+          if (nextExpanded.size !== currentExpanded.size)
+            setExpandedState(nextExpanded)
         }
 
         // Preserve prior order for survivors; append any newly inserted nodes.

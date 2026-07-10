@@ -117,9 +117,11 @@ export type GraphVisualizationOptions<
    *   the expanded set.
    *
    * Applying a batch never re-fetches and never collapses; it reconciles the
-   * nodes already in memory. `childrenCount`/parent come from the same
-   * `getChildrenCount`/`getParentId` accessors, so those must reflect the new
-   * structure when the batch is applied.
+   * nodes already in memory. The parents whose child set the batch touches (the
+   * old and new parent of a move, the parent of a removal) have their
+   * `childrenCount`/`childrenLoaded` reconciled locally from the in-memory tree
+   * — send only the records that changed; upserting the affected parents too is
+   * allowed but not required.
    */
   liveUpdate?: {
     version: number
