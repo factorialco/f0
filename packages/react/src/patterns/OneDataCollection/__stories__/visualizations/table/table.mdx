@@ -837,6 +837,29 @@ operations) to fetch every page eagerly so the subtree is fully visible. Eager
 loading is guarded by the reported `total` and a page cap, so a misbehaving
 adapter cannot cause an infinite fetch loop.
 
+#### Controlled expansion: `expanded`
+
+`expanded` accepts the same criteria shape as `defaultExpanded`, but unlike
+it, the provider re-applies it every time its reference changes — a
+controlled counterpart, mirroring `revealNodeId`/`focusOnEntry` on the Graph
+visualization. Precedence is `expanded` (controlled) > `control`
+(imperative) > `defaultExpanded` (uncontrolled, mount-only): calling
+`control` while `expanded` is set still works immediately, but the
+controlled criteria takes over again on the next `expanded` change. Pass a
+stable/memoized predicate (or a primitive) to avoid re-applying it every
+render.
+
+```tsx
+const [depth, setDepth] = useState(1)
+
+nested: {
+  expanded: depth, // re-applied whenever `depth` changes
+  control: nestedTable, // still usable, but overridden on the next `expanded` change
+}
+```
+
+<Canvas of={TableStories.TableNestedControlledExpansion} meta={TableStories} />
+
 #### Imperative controller: `useNestedTable`
 
 Create a controller with `useNestedTable()` and pass it via

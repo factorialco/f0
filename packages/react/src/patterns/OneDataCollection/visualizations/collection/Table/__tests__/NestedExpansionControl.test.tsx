@@ -18,6 +18,7 @@ import { TableCollection } from "../index"
 import { useNestedTable } from "../nested"
 import {
   matchesExpansionCriteria,
+  NestedExpansionCriteria,
   NestedTableController,
   NestedTableOptions,
 } from "../nested/types"
@@ -213,6 +214,100 @@ const MutableSourceHarness = ({
     [initialOverrides, overrides]
   )
   onApi({ control, setOverrides })
+
+  return (
+    <TableCollection<
+      Person,
+      FiltersDefinition,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<Person>
+    >
+      columns={columns}
+      source={source}
+      onSelectItems={vi.fn()}
+      onLoadData={vi.fn()}
+      onLoadError={vi.fn()}
+      nested={{ ...nested, control }}
+    />
+  )
+}
+
+/**
+ * Harness for the controlled `nested.expanded` option: lets a test change
+ * the criteria at runtime and observe the imperative controller alongside
+ * it (to exercise the documented precedence between the two).
+ */
+const ControlledExpansionHarness = ({
+  initialExpanded,
+  onApi,
+}: {
+  initialExpanded?: NestedExpansionCriteria<Person>
+  onApi: (api: {
+    control: NestedTableController<Person>
+    setExpanded: (value: NestedExpansionCriteria<Person> | undefined) => void
+  }) => void
+}) => {
+  const [expanded, setExpanded] = useState<
+    NestedExpansionCriteria<Person> | undefined
+  >(initialExpanded)
+  const control = useNestedTable<Person>()
+  onApi({ control, setExpanded })
+
+  return (
+    <TableCollection<
+      Person,
+      FiltersDefinition,
+      SortingsDefinition,
+      SummariesDefinition,
+      ItemActionsDefinition<Person>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<Person>
+    >
+      columns={columns}
+      source={createSource()}
+      onSelectItems={vi.fn()}
+      onLoadData={vi.fn()}
+      onLoadError={vi.fn()}
+      nested={{ control, expanded }}
+    />
+  )
+}
+
+/**
+ * Harness that only varies `debouncedCurrentSearch`, keeping every other
+ * source reference (filters, sortings, navigation filters) stable across
+ * updates. Needed to isolate the search-normalization fix from the
+ * `filtersChanged`/`sortingsChanged` identity checks in `useLoadChildren`,
+ * which — unlike search — compare by reference and would otherwise mask a
+ * spurious invalidation behind a legitimate one.
+ */
+const SearchOnlyMutableSourceHarness = ({
+  nested,
+  fetchChildren,
+  onApi,
+}: {
+  nested?: Omit<NestedTableOptions<Person>, "control">
+  fetchChildren: TestSource["fetchChildren"]
+  onApi: (api: {
+    control: NestedTableController<Person>
+    setSearch: (search: string | undefined) => void
+  }) => void
+}) => {
+  const [search, setSearch] = useState<string | undefined>(undefined)
+  const control = useNestedTable<Person>()
+  const baseSource = useMemo(() => createSource(), [])
+  const source = useMemo(
+    () => ({
+      ...baseSource,
+      fetchChildren,
+      debouncedCurrentSearch: search,
+    }),
+    [baseSource, fetchChildren, search]
+  )
+  onApi({ control, setSearch })
 
   return (
     <TableCollection<
@@ -699,6 +794,123 @@ describe("Nested table expansion control", () => {
         depth: 0,
         hasActiveFilters: false,
         expanded: false,
+      })
+    })
+  })
+
+  describe("search normalization (undefined vs empty string)", () => {
+    it('does not clear the children cache or refetch on an undefined→"" search transition', async () => {
+      const fetchChildren = vi.fn(({ item }: { item: Person }) => ({
+        records: item.children ?? [],
+      }))
+      let api!: {
+        control: NestedTableController<Person>
+        setSearch: (search: string | undefined) => void
+      }
+      render(
+        <SearchOnlyMutableSourceHarness
+          fetchChildren={
+            fetchChildren as unknown as TestSource["fetchChildren"]
+          }
+          nested={{ defaultExpanded: 1 }}
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+      const callsBeforeTransition = fetchChildren.mock.calls.length
+
+      // A consumer initializing a controlled search input commonly calls
+      // `setSearch("")` on mount, producing this exact transition.
+      act(() => api.setSearch(""))
+
+      // The row stays expanded with its cached children, and no refetch was
+      // triggered by the (spurious) cache invalidation this used to cause.
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+      expect(fetchChildren).toHaveBeenCalledTimes(callsBeforeTransition)
+    })
+  })
+
+  describe("re-expanding rows with empty cached children", () => {
+    it("refetches when a row whose children resolved to an empty list is re-expanded", async () => {
+      const fetchChildren = vi.fn(() => ({ records: [] }))
+      const table = renderNestedTable(undefined, {
+        fetchChildren,
+      } as unknown as Partial<TestSource>)
+      await waitForRootRows()
+
+      act(() => table.control.expand("p1"))
+      await waitFor(() => {
+        expect(fetchChildren).toHaveBeenCalledTimes(1)
+      })
+
+      act(() => table.control.collapse("p1"))
+      act(() => table.control.expand("p1"))
+
+      await waitFor(() => {
+        expect(fetchChildren).toHaveBeenCalledTimes(2)
+      })
+    })
+
+    it("does not refetch on every render while the row stays expanded (no fetch loop)", async () => {
+      const fetchChildren = vi.fn(() => ({ records: [] }))
+      const table = renderNestedTable(undefined, {
+        fetchChildren,
+      } as unknown as Partial<TestSource>)
+      await waitForRootRows()
+
+      act(() => table.control.expand("p1"))
+      await waitFor(() => {
+        expect(fetchChildren).toHaveBeenCalledTimes(1)
+      })
+
+      // Re-render without collapsing/re-expanding: still just one call.
+      act(() => table.control.expand("p1"))
+      await waitFor(() => {
+        expect(fetchChildren).toHaveBeenCalledTimes(1)
+      })
+    })
+  })
+
+  describe("controlled expansion (`nested.expanded`)", () => {
+    it("reactively applies the criteria on change, taking precedence over the imperative controller", async () => {
+      let api!: {
+        control: NestedTableController<Person>
+        setExpanded: (
+          value: NestedExpansionCriteria<Person> | undefined
+        ) => void
+      }
+      render(
+        <ControlledExpansionHarness
+          initialExpanded={1}
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+      expect(screen.queryByText("Grandchild One")).not.toBeInTheDocument()
+
+      // The imperative controller still works immediately…
+      act(() => api.control.collapse("p1"))
+      await waitFor(() => {
+        expect(screen.queryByText("Child One")).not.toBeInTheDocument()
+      })
+
+      // …but changing the controlled criteria reimposes it, overriding the
+      // controller's explicit collapse.
+      act(() => api.setExpanded(2))
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+        expect(screen.getByText("Grandchild One")).toBeInTheDocument()
       })
     })
   })

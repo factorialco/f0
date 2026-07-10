@@ -148,6 +148,25 @@ export type NestedTableOptions<R extends RecordType> = {
    * @default "paginated"
    */
   defaultExpandedChildren?: NestedChildrenDisplayMode
+  /**
+   * Declarative, **controlled** expansion criteria (mirrors `revealNodeId`/
+   * `focusOnEntry` on the Graph visualization): while defined, the provider
+   * reactively re-applies it every time its reference changes, clearing any
+   * explicit override left by a user click or a `control` call — the same
+   * way a controlled input value reasserts itself on the next render where
+   * the value prop changes.
+   *
+   * Precedence: `expanded` (controlled) > `control` (imperative) >
+   * `defaultExpanded` (uncontrolled, mount-only). Calling `control` while
+   * `expanded` is set still works immediately (it is not blocked), but the
+   * controlled criteria takes over again on the next change of `expanded` —
+   * so mixing both on the same table only makes sense transiently.
+   *
+   * Uses reference equality, like any other prop-driven effect: pass a
+   * stable/memoized predicate, or a primitive (`boolean`/`number`), to avoid
+   * re-applying it on every render.
+   */
+  expanded?: NestedExpansionCriteria<R>
   /** Controller created with `useNestedTable()` for programmatic control. */
   control?: NestedTableController<R>
   /**

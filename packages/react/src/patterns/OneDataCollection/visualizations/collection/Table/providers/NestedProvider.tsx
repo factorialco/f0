@@ -356,6 +356,34 @@ export const NestedDataProvider = <R extends RecordType>({
     }
   }, [applyPendingExpansion, commitExpansionState, emitExpandedChange])
 
+  /**
+   * Controlled expansion (`nested.expanded`): reactively re-applies the
+   * criteria every time its reference changes, taking over from whatever
+   * explicit overrides a user click or a `control` call may have set in the
+   * meantime — see the precedence note on `NestedTableOptions.expanded`.
+   * Unlike `defaultExpanded` (read once, at mount, via the initial state
+   * above), this runs on every `expanded` reference change, including the
+   * first one, so it also covers the initial render when `expanded` is
+   * defined from the start.
+   */
+  const controlledExpanded = nested?.expanded
+  useEffect(() => {
+    if (controlledExpanded === undefined) return
+    pendingExpandRef.current.clear()
+    commitExpansionState({
+      overrides: {},
+      eager: {},
+      policy: {
+        criteria: controlledExpanded,
+        children:
+          nestedOptionsRef.current?.defaultExpandedChildren ?? "paginated",
+      },
+    })
+    // Controlled re-application is not an explicit expansion change (same as
+    // defaultExpanded/expandAll), so onExpandedChange is intentionally not
+    // fired here.
+  }, [controlledExpanded, commitExpansionState])
+
   const control = nested?.control
   useEffect(() => {
     const internalControl = control as
