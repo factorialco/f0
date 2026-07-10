@@ -10,8 +10,8 @@ import { F0AnalyticsDashboard } from "../index"
 import {
   dashboardFilters,
   dashboardPresets,
-  loadingContainmentItems,
   mixedItems,
+  widgetLoadingStatesItems,
 } from "./mockDataMixed"
 
 const meta = {
@@ -158,29 +158,33 @@ export const EmptyDashboard: Story = {
 }
 
 /**
- * Table-widget loading containment. Both tables fetch through a deliberately
- * slow source (~2s), so on first render you can watch the skeleton phase and
- * verify it stays inside each card:
+ * Loading states for every widget type, all on a deliberately slow (~2s)
+ * source so the skeleton phase is visible on first render:
  *
- * - **Short widget** (300px — the grid's minimum collection row height): both
- *   the skeleton and the loaded table are taller than the card. Everything
- *   must clip at the rounded border — the
- *   loaded table scrolls internally and its pagination stays pinned inside
- *   the card. Before the containment fixes, placeholder rows and pagination
- *   painted past the card's bottom edge and the card height jumped on the
+ * - **Metrics** (plain / currency / percent) and **charts** (bar, line, pie)
+ *   show their type-specific skeletons and must not shift the card's height
+ *   when data lands.
+ * - **Short table widget** (300px — the grid's minimum collection row
+ *   height): both the skeleton and the loaded table are taller than the
+ *   card. Everything must clip at the rounded border — the loaded table
+ *   scrolls internally and its pagination stays pinned inside the card.
+ *   Before the containment fixes, placeholder rows and pagination painted
+ *   past the card's bottom edge and the card height jumped on the
  *   loading→loaded swap.
- * - **Default widget**: reference behaviour at the regular collection height.
+ * - **Default table widget**: reference behaviour at the regular collection
+ *   height.
  *
- * Change any dashboard filter (e.g. department) to re-fire the slow fetch and
- * see the reload treatment: the table dims to 50% with a spinner overlay that
- * covers the visible area even while the table is scrolled.
+ * Change any dashboard filter (e.g. department) to re-fire the slow fetches
+ * and see the reload treatment — for tables, the content dims to 50% with a
+ * spinner overlay that covers the visible area even while the table is
+ * scrolled.
  */
-export const TableLoadingContainment: Story = {
+export const WidgetLoadingStates: Story = {
   render: () => (
     <F0AnalyticsDashboard
       filters={dashboardFilters}
       presets={dashboardPresets}
-      items={loadingContainmentItems}
+      items={widgetLoadingStatesItems}
     />
   ),
 }

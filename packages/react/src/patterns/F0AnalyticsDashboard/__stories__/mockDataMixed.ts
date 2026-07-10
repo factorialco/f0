@@ -751,50 +751,133 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
 }
 
 // ---------------------------------------------------------------------------
-// Loading-containment items — exercises the table widget's loading states
+// Widget loading-state items — every widget type on a deliberately slow source
 // ---------------------------------------------------------------------------
 
+/** Delay applied to every fetch below so loading states are human-visible. */
+const SLOW_FETCH_DELAY = 2000
+
+function slow<Args extends unknown[], T>(
+  fetch: (...args: Args) => Promise<T>
+): (...args: Args) => Promise<T> {
+  return (...args) => delay(SLOW_FETCH_DELAY).then(() => fetch(...args))
+}
+
 /**
- * Two table widgets fed by a deliberately slow source (2s per fetch) so the
- * loading states are actually visible:
+ * One row per widget type (metric, chart, collection), all fed through
+ * `slow()` (~2s per fetch) so every loading state is visible on first render
+ * and again on every dashboard-filter change:
  *
- * - a SHORT card (`itemHeight: 220`) where the fixed-size skeleton and the
- *   loaded table are both taller than the widget — the regression case for
- *   skeleton/table containment (they must clip + scroll, never paint past
- *   the card's rounded border), and
- * - a default-height card for reference.
+ * - metrics and charts show their type-specific skeletons via
+ *   `DashboardItem`'s `isLoading`/`skeleton` contract,
+ * - the SHORT table card (`itemHeight: 220`, clamped to the grid's 300px
+ *   minimum) is the containment regression case — its skeleton and loaded
+ *   table are both taller than the card, so they must clip at the rounded
+ *   border and scroll internally instead of painting past it,
+ * - the default-height table is the reference.
  *
- * Changing any dashboard filter re-fires the slow fetch, which shows the
- * reload treatment (table dimmed + spinner overlay pinned to the visible
- * area).
+ * Each item sits in its own grid row where it matters — the grid sizes a row
+ * to the tallest item in it, so sharing a row would override the short
+ * card's `itemHeight`.
  */
-export const loadingContainmentItems: DashboardItem<DashboardFiltersType>[] = [
-  // Each item sits in its own grid row — the grid sizes a row to the tallest
-  // item in it, so sharing a row would override the short card's itemHeight.
+export const widgetLoadingStatesItems: DashboardItem<DashboardFiltersType>[] = [
+  // Row 0 — one metric per format (plain, currency, percent)
+  {
+    id: "loading-total-headcount",
+    title: "Total Headcount",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    rowSpan: 3,
+    fetchData: slow(fetchTotalHeadcount),
+  },
+  {
+    id: "loading-avg-salary",
+    title: "Avg. Salary",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: slow(fetchAvgSalary),
+  },
+  {
+    id: "loading-attrition",
+    title: "Attrition Rate",
+    type: "metric",
+    colSpan: 4,
+    x: 8,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: slow(fetchAttritionMetric),
+  },
+  // Row 1 — cartesian + circular chart skeleton variants
+  {
+    id: "loading-bar-chart",
+    title: "Headcount by Department",
+    description: "Bar-chart skeleton while loading",
+    type: "chart",
+    colSpan: 4,
+    x: 0,
+    y: 3,
+    rowSpan: 7,
+    chart: { type: "bar" },
+    fetchData: slow(fetchHeadcountByDepartment),
+  },
+  {
+    id: "loading-line-chart",
+    title: "Revenue Trend",
+    description: "Line-chart skeleton while loading",
+    type: "chart",
+    colSpan: 4,
+    x: 4,
+    y: 3,
+    rowSpan: 7,
+    chart: { type: "line" },
+    fetchData: slow(fetchRevenueTrend),
+  },
+  {
+    id: "loading-pie-chart",
+    title: "Headcount Distribution",
+    description: "Pie-chart skeleton while loading",
+    type: "chart",
+    colSpan: 4,
+    x: 8,
+    y: 3,
+    rowSpan: 7,
+    chart: { type: "pie", innerRadius: 60, showPercentage: true },
+    fetchData: slow(fetchHeadcountPie),
+  },
+  // Row 2 — the containment regression case
   {
     id: "short-employee-table",
-    title: "Short widget",
+    title: "Short table widget",
     description: "Content is taller than the card — must clip and scroll",
     type: "collection",
     colSpan: 12,
     x: 0,
-    y: 0,
+    y: 10,
     // The grid clamps collection rows to MIN_ROW_HEIGHTS (300px), so this
     // renders at 300px — still well below the table's natural height.
     itemHeight: 220,
-    createSource: (filters) => createEmployeeSource(filters, 2000),
+    createSource: (filters) => createEmployeeSource(filters, SLOW_FETCH_DELAY),
     visualizations: [employeeTableVisualization],
   },
+  // Row 3 — reference table at the default collection height
   {
     id: "default-employee-table",
-    title: "Default widget",
+    title: "Default table widget",
     description: "Reference table at the default collection height",
     type: "collection",
     colSpan: 12,
     x: 0,
-    y: 5,
+    y: 15,
     rowSpan: 10,
-    createSource: (filters) => createEmployeeSource(filters, 2000),
+    createSource: (filters) => createEmployeeSource(filters, SLOW_FETCH_DELAY),
     visualizations: [employeeTableVisualization],
   },
 ]
