@@ -10,6 +10,7 @@ import {
 import {
   type ReactNode,
   memo,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -347,6 +348,23 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
 
   const highlightedNodes = highlightedProp ?? EMPTY_HIGHLIGHTED_NODES
 
+  // Keep the toggled node visually fixed on collapse/expand: when the layout
+  // repositions the anchor, pan the camera by the same delta (in screen px)
+  // rather than offsetting node positions — no snap-back, and reveal/fit keep
+  // reading raw positions. Runs before paint (React Flow's `setViewport` is
+  // synchronous), so there is no flicker.
+  const handleAnchorReflow = useCallback(
+    (dx: number, dy: number) => {
+      const vp = reactFlow.getViewport()
+      reactFlow.setViewport({
+        x: vp.x + dx * vp.zoom,
+        y: vp.y + dy * vp.zoom,
+        zoom: vp.zoom,
+      })
+    },
+    [reactFlow]
+  )
+
   // ── React Flow render model (layout + anchor + rf nodes/edges) ──
   const {
     visibleTreeNodes,
@@ -363,6 +381,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     nodeMap,
     expandedNodes,
     anchorNodeRef,
+    onAnchorReflow: handleAnchorReflow,
     resolvedEdgesProp,
     stableRenderNode,
     nodeTagTypes,
