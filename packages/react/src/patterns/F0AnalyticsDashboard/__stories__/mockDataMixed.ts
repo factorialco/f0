@@ -592,7 +592,7 @@ const MOCK_EMPLOYEES: Employee[] = FIRST_NAMES.map((firstName, i) => {
 
 const PER_PAGE = 5
 
-function createEmployeeSource(filters: Filters) {
+function createEmployeeSource(filters: Filters, delayMs = 200) {
   return {
     dataAdapter: {
       paginationType: "pages" as const,
@@ -639,7 +639,7 @@ function createEmployeeSource(filters: Filters) {
               perPage,
               pagesCount: Math.ceil(filtered.length / perPage),
             })
-          }, 200)
+          }, delayMs)
         })
       },
     },
@@ -749,6 +749,55 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
   createSource: createEmployeeSource,
   visualizations: [employeeTableVisualization],
 }
+
+// ---------------------------------------------------------------------------
+// Loading-containment items — exercises the table widget's loading states
+// ---------------------------------------------------------------------------
+
+/**
+ * Two table widgets fed by a deliberately slow source (2s per fetch) so the
+ * loading states are actually visible:
+ *
+ * - a SHORT card (`itemHeight: 220`) where the fixed-size skeleton and the
+ *   loaded table are both taller than the widget — the regression case for
+ *   skeleton/table containment (they must clip + scroll, never paint past
+ *   the card's rounded border), and
+ * - a default-height card for reference.
+ *
+ * Changing any dashboard filter re-fires the slow fetch, which shows the
+ * reload treatment (table dimmed + spinner overlay pinned to the visible
+ * area).
+ */
+export const loadingContainmentItems: DashboardItem<DashboardFiltersType>[] = [
+  // Each item sits in its own grid row — the grid sizes a row to the tallest
+  // item in it, so sharing a row would override the short card's itemHeight.
+  {
+    id: "short-employee-table",
+    title: "Short widget",
+    description: "Content is taller than the card — must clip and scroll",
+    type: "collection",
+    colSpan: 12,
+    x: 0,
+    y: 0,
+    // The grid clamps collection rows to MIN_ROW_HEIGHTS (300px), so this
+    // renders at 300px — still well below the table's natural height.
+    itemHeight: 220,
+    createSource: (filters) => createEmployeeSource(filters, 2000),
+    visualizations: [employeeTableVisualization],
+  },
+  {
+    id: "default-employee-table",
+    title: "Default widget",
+    description: "Reference table at the default collection height",
+    type: "collection",
+    colSpan: 12,
+    x: 0,
+    y: 5,
+    rowSpan: 10,
+    createSource: (filters) => createEmployeeSource(filters, 2000),
+    visualizations: [employeeTableVisualization],
+  },
+]
 
 // ---------------------------------------------------------------------------
 // Mixed items — full dashboard with all types and filter reactivity

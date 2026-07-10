@@ -7,7 +7,12 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { DashboardItem } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
-import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
+import {
+  dashboardFilters,
+  dashboardPresets,
+  loadingContainmentItems,
+  mixedItems,
+} from "./mockDataMixed"
 
 const meta = {
   component: F0AnalyticsDashboard,
@@ -148,6 +153,34 @@ export const EmptyDashboard: Story = {
       filters={dashboardFilters}
       presets={dashboardPresets}
       items={emptyItems}
+    />
+  ),
+}
+
+/**
+ * Table-widget loading containment. Both tables fetch through a deliberately
+ * slow source (~2s), so on first render you can watch the skeleton phase and
+ * verify it stays inside each card:
+ *
+ * - **Short widget** (300px — the grid's minimum collection row height): both
+ *   the skeleton and the loaded table are taller than the card. Everything
+ *   must clip at the rounded border — the
+ *   loaded table scrolls internally and its pagination stays pinned inside
+ *   the card. Before the containment fixes, placeholder rows and pagination
+ *   painted past the card's bottom edge and the card height jumped on the
+ *   loading→loaded swap.
+ * - **Default widget**: reference behaviour at the regular collection height.
+ *
+ * Change any dashboard filter (e.g. department) to re-fire the slow fetch and
+ * see the reload treatment: the table dims to 50% with a spinner overlay that
+ * covers the visible area even while the table is scrolled.
+ */
+export const TableLoadingContainment: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={loadingContainmentItems}
     />
   ),
 }
