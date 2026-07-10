@@ -49,14 +49,23 @@ function TableBase({ children, loading = false }: TableProps) {
     <TableContext.Provider
       value={{ isScrolled, setIsScrolled, isScrolledRight, setIsScrolledRight }}
     >
-      <div ref={containerRef} className="relative h-full w-full overflow-auto">
-        <TableRoot
-          className={cn(loading && "select-none opacity-50 transition-opacity")}
-          aria-live={loading ? "polite" : undefined}
-          aria-busy={loading ? "true" : undefined}
-        >
-          {children}
-        </TableRoot>
+      {/* The overlay lives OUTSIDE the scroll container (as a sibling) so it
+          always covers the visible viewport: `absolute inset-0` inside an
+          `overflow-auto` element only covers the first scroll page, so the
+          spinner scrolled out of view (and could paint past the widget's
+          rounded boundary) when the table was scrolled. */}
+      <div className="relative h-full w-full">
+        <div ref={containerRef} className="h-full w-full overflow-auto">
+          <TableRoot
+            className={cn(
+              loading && "select-none opacity-50 transition-opacity"
+            )}
+            aria-live={loading ? "polite" : undefined}
+            aria-busy={loading ? "true" : undefined}
+          >
+            {children}
+          </TableRoot>
+        </div>
         <AnimatePresence>
           {loading && (
             <motion.div
@@ -93,32 +102,37 @@ function TableSkeleton({ columns = 5 }: TableSkeletonProps) {
         setIsScrolledRight: () => {},
       }}
     >
-      <TableRoot
-        className="cursor-progress"
-        role="presentation"
-        aria-hidden="true"
-      >
-        <TableHeader>
-          <TableRow>
-            {Array.from({ length: columns }).map((_, i) => (
-              <TableHead key={`skeleton-header-${i}`}>
-                <Skeleton className="h-4 w-[80px]" />
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {Array.from({ length: 5 }).map((_, rowIndex) => (
-            <TableRow key={`skeleton-row-${rowIndex}`}>
-              {Array.from({ length: columns }).map((_, colIndex) => (
-                <TableCell key={`skeleton-cell-${rowIndex}-${colIndex}`}>
+      {/* Clip the fixed-size placeholder rows: the skeleton has no scroll
+          container of its own, so without this it paints past short
+          containers (e.g. a small dashboard widget card). */}
+      <div className="h-full w-full overflow-hidden">
+        <TableRoot
+          className="cursor-progress"
+          role="presentation"
+          aria-hidden="true"
+        >
+          <TableHeader>
+            <TableRow>
+              {Array.from({ length: columns }).map((_, i) => (
+                <TableHead key={`skeleton-header-${i}`}>
                   <Skeleton className="h-4 w-[80px]" />
-                </TableCell>
+                </TableHead>
               ))}
             </TableRow>
-          ))}
-        </TableBody>
-      </TableRoot>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 5 }).map((_, rowIndex) => (
+              <TableRow key={`skeleton-row-${rowIndex}`}>
+                {Array.from({ length: columns }).map((_, colIndex) => (
+                  <TableCell key={`skeleton-cell-${rowIndex}-${colIndex}`}>
+                    <Skeleton className="h-4 w-[80px]" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </TableRoot>
+      </div>
     </TableContext.Provider>
   )
 }

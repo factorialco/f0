@@ -329,9 +329,26 @@ export const TableCollection = <
 
   /*
    * Initial loading
+   *
+   * The skeleton is rendered inside the same wrapper structure as the loaded
+   * table below so the swap doesn't change the widget's height (no layout
+   * jump) and the placeholder rows stay clipped to the same box the real
+   * table will occupy.
    */
   if (isInitialLoading) {
-    return <OneTable.Skeleton columns={skeletonColumns} />
+    return (
+      <div className="flex h-full min-h-0 flex-col gap-4">
+        <div
+          className={cn(
+            "min-h-0",
+            bordered &&
+              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary"
+          )}
+        >
+          <OneTable.Skeleton columns={skeletonColumns} />
+        </div>
+      </div>
+    )
   }
 
   // Enforce that sorting is only used when sortings are defined
@@ -390,8 +407,16 @@ export const TableCollection = <
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <TableWrapper>
+        {/* `min-h-0` lets this wrapper shrink to the height its flex parent
+            assigns (flex items refuse to shrink below their content height by
+            default), so OneTable's internal `h-full` + `overflow-auto` scroll
+            container actually engages in height-constrained contexts (e.g.
+            dashboard widgets). Without it the wrapper grows with the table's
+            content and overflows the widget card instead of scrolling. Tables
+            shorter than the available space are unaffected. */}
         <div
           className={cn(
+            "min-h-0",
             bordered &&
               "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}
