@@ -855,7 +855,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — list — company 1`] 
                     "type": 0,
                   }
                 }
-                name="«r2»-clip-0"
+                name="_r_2_-clip-0"
               >
                 <RNSVGPath
                   d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
@@ -869,7 +869,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — list — company 1`] 
               </RNSVGClipPath>
             </RNSVGDefs>
             <RNSVGGroup
-              clipPath="«r2»-clip-0"
+              clipPath="_r_2_-clip-0"
               fill={
                 {
                   "payload": 4278190080,
@@ -1081,7 +1081,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — list — person 1`] =
                     "type": 0,
                   }
                 }
-                name="«r0»-clip-0"
+                name="_r_0_-clip-0"
               >
                 <RNSVGPath
                   d="M18 4.19899C16.7442 5.95406 16 8.13577 16 10.5C16 12.8642 16.7442 15.0459 18 16.801C16.1755 19.3508 13.2712 21 10 21C4.47716 21 0 16.299 0 10.5C0 4.70102 4.47716 0 10 0C13.2712 0 16.1755 1.64923 18 4.19899Z"
@@ -1095,7 +1095,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — list — person 1`] =
               </RNSVGClipPath>
             </RNSVGDefs>
             <RNSVGGroup
-              clipPath="«r0»-clip-0"
+              clipPath="_r_0_-clip-0"
               fill={
                 {
                   "payload": 4278190080,
@@ -1305,7 +1305,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — list — team 1`] = `
                     "type": 0,
                   }
                 }
-                name="«r1»-clip-0"
+                name="_r_1_-clip-0"
               >
                 <RNSVGPath
                   d="M0.653961 3.27606C0 4.55953 0 6.23969 0 9.6V11.4C0 14.7603 0 16.4405 0.653961 17.7239C1.2292 18.8529 2.14708 19.7708 3.27606 20.346C4.55953 21 6.23969 21 9.6 21H10.4C13.7603 21 15.4405 21 16.7239 20.346C17.188 20.1096 17.6164 19.8152 18 19.4721C17.4504 18.9805 16.9927 18.3889 16.654 17.7239C16 16.4405 16 14.7603 16 11.4V9.6C16 6.23969 16 4.55953 16.654 3.27606C16.9927 2.61115 17.4504 2.01946 18 1.52786C17.6164 1.18476 17.188 0.890414 16.7239 0.653961C15.4405 0 13.7603 0 10.4 0H9.6C6.23969 0 4.55953 0 3.27606 0.653961C2.14708 1.2292 1.2292 2.14708 0.653961 3.27606Z"
@@ -1319,7 +1319,7 @@ exports[`F0Metadata Snapshots — value types Snapshot — list — team 1`] = `
               </RNSVGClipPath>
             </RNSVGDefs>
             <RNSVGGroup
-              clipPath="«r1»-clip-0"
+              clipPath="_r_1_-clip-0"
               fill={
                 {
                   "payload": 4278190080,
