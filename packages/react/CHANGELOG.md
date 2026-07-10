@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.29.3](https://github.com/factorialco/f0/compare/f0-react-v4.29.2...f0-react-v4.29.3) (2026-07-10)
+
+
+### Bug Fixes
+
+* make OneDataCollection column-settings list scrollable ([#4650](https://github.com/factorialco/f0/issues/4650)) ([aef71c7](https://github.com/factorialco/f0/commit/aef71c777ced6e2519070630371a1c043e3adf1b))
+
 ## [4.29.2](https://github.com/factorialco/f0/compare/f0-react-v4.29.1...f0-react-v4.29.2) (2026-07-10)
 
 
