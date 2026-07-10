@@ -1,6 +1,9 @@
 // Mock data for the "Walkthrough" co-creation story — the collection
-// records, filters, sortings, data adapter, and visualization backing the
-// Surveys tab. Pure data; consumed by FlowContent's OneDataCollection source.
+// records, filters, sortings, data adapters, and visualizations shared by
+// every flow (Engagement Surveys, Training Surveys, ...). Pure data;
+// consumed by FlowContent's OneDataCollection source and by `flow-configs.ts`,
+// which assigns the flow-specific records (`ENGAGEMENT_*` / `TRAINING_*`) to
+// each `FlowConfig`.
 
 import { File, Marketplace } from "@/icons/app"
 
@@ -45,7 +48,8 @@ export const resourceSortings = {
   status: { label: "Status" },
 } as const
 
-export const MOCK_RESOURCES: Resource[] = [
+// Collection rows for the Engagement Surveys flow.
+export const ENGAGEMENT_RESOURCES: Resource[] = [
   {
     id: "1",
     name: "Engineering onboarding plan",
@@ -72,9 +76,38 @@ export const MOCK_RESOURCES: Resource[] = [
   },
 ]
 
-export const filledDataAdapter = {
-  fetchData: () => Promise.resolve({ records: MOCK_RESOURCES }),
-}
+// Collection rows for the Training Surveys flow.
+export const TRAINING_RESOURCES: Resource[] = [
+  {
+    id: "1",
+    name: "New hire compliance training",
+    owner: "Alicia Keys",
+    status: "Complete",
+  },
+  {
+    id: "2",
+    name: "Manager coaching certification",
+    owner: "Marta Soler",
+    status: "Draft",
+  },
+  {
+    id: "3",
+    name: "Security awareness refresher",
+    owner: "Dani Moreno",
+    status: "Needs details",
+  },
+  {
+    id: "4",
+    name: "Product training Q1 rollout",
+    owner: "Nora Park",
+    status: "Draft",
+  },
+]
+
+/** Data adapter factory for the Collection phase table — one per flow's rows. */
+export const makeResourcesDataAdapter = (resources: Resource[]) => ({
+  fetchData: () => Promise.resolve({ records: resources }),
+})
 
 export const tableVisualization = {
   type: "table" as const,
@@ -90,6 +123,8 @@ export const tableVisualization = {
 // ---------------------------------------------------------------------------
 // Templates tab — a browse view backed by a card visualization. Pure mock
 // data: survey templates a user can start from, surfaced as metadata cards.
+// Each flow supplies its own template set + category filters so "Templates"
+// only ever shows resources relevant to that flow's domain.
 // ---------------------------------------------------------------------------
 
 export type Template = {
@@ -100,7 +135,7 @@ export type Template = {
   questions: number
 }
 
-export const MOCK_TEMPLATES: Template[] = [
+export const ENGAGEMENT_TEMPLATES: Template[] = [
   {
     id: "t1",
     name: "Employee engagement survey",
@@ -150,24 +185,86 @@ export const MOCK_TEMPLATES: Template[] = [
   },
 ]
 
-export const templatesDataAdapter = {
-  fetchData: () => Promise.resolve({ records: MOCK_TEMPLATES }),
-}
+export const ENGAGEMENT_TEMPLATE_CATEGORIES = [
+  { value: "Engagement", label: "Engagement" },
+  { value: "Lifecycle", label: "Lifecycle" },
+  { value: "Management", label: "Management" },
+  { value: "Wellbeing", label: "Wellbeing" },
+]
 
-export const templateFilters = {
+export const TRAINING_TEMPLATES: Template[] = [
+  {
+    id: "tt1",
+    name: "Compliance training assessment",
+    category: "Compliance",
+    description:
+      "Confirms course completion and checks comprehension of mandatory policies.",
+    questions: 8,
+  },
+  {
+    id: "tt2",
+    name: "New hire onboarding training",
+    category: "Onboarding",
+    description:
+      "Walks new hires through orientation modules and checks readiness.",
+    questions: 10,
+  },
+  {
+    id: "tt3",
+    name: "Manager coaching certification",
+    category: "Certification",
+    description:
+      "Certifies managers on coaching fundamentals after the training course.",
+    questions: 9,
+  },
+  {
+    id: "tt4",
+    name: "Security awareness training",
+    category: "Compliance",
+    description:
+      "Checks understanding of phishing, data handling, and access policies.",
+    questions: 7,
+  },
+  {
+    id: "tt5",
+    name: "Product training quiz",
+    category: "Skills",
+    description:
+      "Short knowledge check after a product or sales-enablement training.",
+    questions: 6,
+  },
+  {
+    id: "tt6",
+    name: "Leadership development check-in",
+    category: "Skills",
+    description:
+      "Gathers reflections and application plans after a leadership course.",
+    questions: 8,
+  },
+]
+
+export const TRAINING_TEMPLATE_CATEGORIES = [
+  { value: "Compliance", label: "Compliance" },
+  { value: "Onboarding", label: "Onboarding" },
+  { value: "Certification", label: "Certification" },
+  { value: "Skills", label: "Skills" },
+]
+
+/** Data adapter factory for the Templates browse view — one per flow's list. */
+export const makeTemplatesDataAdapter = (templates: Template[]) => ({
+  fetchData: () => Promise.resolve({ records: templates }),
+})
+
+/** Category filter factory for the Templates browse view — one per flow. */
+export const makeTemplateFilters = (
+  categories: { value: string; label: string }[]
+) => ({
   category: {
     type: "in" as const,
     label: "Category",
-    options: {
-      options: [
-        { value: "Engagement", label: "Engagement" },
-        { value: "Lifecycle", label: "Lifecycle" },
-        { value: "Management", label: "Management" },
-        { value: "Wellbeing", label: "Wellbeing" },
-      ],
-    },
+    options: { options: categories },
   },
-}
+})
 
 export const templateSortings = {
   name: { label: "Name" },
