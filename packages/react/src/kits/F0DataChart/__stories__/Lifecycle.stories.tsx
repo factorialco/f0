@@ -40,7 +40,10 @@ const CollapsiblePanel = () => {
         className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary transition-all duration-300"
         style={{ width: open ? 560 : 0, height: open ? 320 : 0 }}
       >
-        <F0DataChart {...SAMPLE} />
+        {/* Same content padding the dashboard's ChartItem gives its charts. */}
+        <div className="h-full w-full px-4 py-3">
+          <F0DataChart {...SAMPLE} />
+        </div>
       </div>
     </div>
   )
@@ -87,7 +90,7 @@ const MountChurn = () => {
           {cycles} unmount cycles — console must stay clean
         </span>
       </div>
-      <div className="h-[320px] w-[560px]">
+      <div className="h-[320px] w-[560px] px-4 py-3">
         {mounted && <F0DataChart {...SAMPLE} />}
       </div>
     </div>
