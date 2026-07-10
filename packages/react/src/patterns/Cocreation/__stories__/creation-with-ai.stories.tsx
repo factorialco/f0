@@ -758,6 +758,30 @@ function useOpenEmptyForm() {
   )
 }
 
+/**
+ * Leaves the "guidedType" flow (Training) without creating a survey: posts an
+ * assistant message acknowledging the departure (so re-opening the chat shows
+ * why the flow ended), then closes the chat entirely — which the phase-sync
+ * effect in `FlowContent` tears down to the starting collection page. Used by
+ * the templates-list and template-preview Close buttons once the user confirms
+ * the leave-creation warning.
+ */
+function useLeaveGuidedFlow() {
+  const { setOpen } = useAiChat()
+  const { appendMessages } = useMockAiChatRuntime()
+
+  return useCallback(() => {
+    appendMessages([
+      {
+        role: "assistant",
+        content:
+          "No problem — I've closed the survey creation without creating anything. You can start again anytime from Create.",
+      },
+    ])
+    setOpen(false)
+  }, [appendMessages, setOpen])
+}
+
 // Follow-up clarifying questions walked after the survey type (audience, then
 // length) before the AI "drafts" the questions onto the canvas. Shared by
 // every flow — only the survey "type" question (`flow.typeOptions`) varies.
@@ -928,6 +952,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
   const { armProposal } = useProposalFlow()
   const { config } = useFlowConfig()
+  const leaveGuidedFlow = useLeaveGuidedFlow()
 
   const useThisTemplate = () => {
     // A template copy is created already populated, so seed the flow's sample
@@ -1026,7 +1051,8 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           closes straight away. For "guidedType" (Training) there's no welcome
           screen to return to and no template has been chosen yet, so closing
           would abandon the creation flow — gate it behind a leave-creation
-          confirmation (same as the templates-list canvas' close). */}
+          confirmation and, once confirmed, close the chat back to the starting
+          collection page (same as the templates-list canvas' close). */}
       <ButtonInternal
         variant="outline"
         hideLabel
@@ -1035,7 +1061,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         onClick={() => {
           if (content.guidedTypeId) {
             void confirmLeaveGuidedCreation(config).then((leave) => {
-              if (leave) setVisualizationMode("fullscreen")
+              if (leave) leaveGuidedFlow()
             })
             return
           }
@@ -1696,13 +1722,14 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
  * welcome screen (suggestions + welcome cards). For "guidedType" (Training),
  * there's no welcome screen to return to and no template has been picked yet,
  * so closing would abandon the creation flow — it's gated behind a
- * leave-creation confirmation, and only leaves (fullscreen) once confirmed.
+ * leave-creation confirmation, and once confirmed closes the chat back to the
+ * starting collection page (see `useLeaveGuidedFlow`).
  *
- * Switching to "fullscreen" both closes the canvas (the provider drops canvas
- * content on any canvas → non-canvas transition) and reopens the chat full
- * width. We force fullscreen rather than letting `closeCanvas` restore the
- * pre-canvas mode, since templates may be opened from a side-panel welcome
- * screen and the first step is always the fullscreen chat.
+ * For the "cards" flow, switching to "fullscreen" both closes the canvas (the
+ * provider drops canvas content on any canvas → non-canvas transition) and
+ * reopens the chat full width. We force fullscreen rather than letting
+ * `closeCanvas` restore the pre-canvas mode, since templates may be opened from
+ * a side-panel welcome screen and the first step is always the fullscreen chat.
  */
 function TemplatesCanvasHeader({
   content,
@@ -1711,11 +1738,12 @@ function TemplatesCanvasHeader({
 }) {
   const { setVisualizationMode } = useAiChat()
   const { config } = useFlowConfig()
+  const leaveGuidedFlow = useLeaveGuidedFlow()
 
   const handleClose = () => {
     if (content.guidedTypeId) {
       void confirmLeaveGuidedCreation(config).then((leave) => {
-        if (leave) setVisualizationMode("fullscreen")
+        if (leave) leaveGuidedFlow()
       })
       return
     }
