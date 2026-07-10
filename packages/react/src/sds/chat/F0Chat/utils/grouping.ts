@@ -74,16 +74,25 @@ export function flattenChatRows(
       })
     }
 
-    // First of a run: a separator broke the flow, there's no previous, or the
-    // author changed. Continuing the run flips the previous row off "last".
+    // The "new messages" divider visually splits the transcript, so it also
+    // breaks the run: both sides read as separate stacks (corners, avatar,
+    // name) while it's shown, and rejoin once it's dismissed (rows recompute).
+    const dividerHere = dividerId != null && message.id === dividerId
+
+    // First of a run: a separator or the unread divider broke the flow, there's
+    // no previous, or the author changed. Continuing the run flips the previous
+    // row off "last".
     const isFirstOfRun =
-      separated || !previous || previous.author.id !== message.author.id
+      separated ||
+      dividerHere ||
+      !previous ||
+      previous.author.id !== message.author.id
     if (!isFirstOfRun && lastMessageRowIndex >= 0) {
       const prevRow = rows[lastMessageRowIndex]
       if (prevRow.type === "message") prevRow.isLastOfRun = false
     }
 
-    if (dividerId && message.id === dividerId) {
+    if (dividerHere) {
       rows.push({ type: "divider", key: "unread-divider" })
     }
 

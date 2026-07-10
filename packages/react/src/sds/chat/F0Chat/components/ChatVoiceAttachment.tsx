@@ -2,7 +2,7 @@ import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 
 import { useAudioPlayer } from "@/components/F0AudioPlayer"
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { PauseCircle, SolidPlay } from "@/icons/app"
+import { SolidPause, SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -143,87 +143,88 @@ export const ChatVoiceAttachment = ({
 
   return (
     <div
-      className={cn(
-        // Fills whatever width the message column offers (responsive), but
-        // never collapses below a usable minimum.
-        "group/voice flex w-full min-w-54 max-w-full items-center gap-2 border border-solid pl-2 pr-3.5 py-2.5",
-        // Bubble-matching surface: mine grey, others white with the border.
-        isMine
-          ? "border-f1-background bg-f1-background-tertiary"
-          : "border-f1-border-secondary bg-f1-background",
-        cornerClass,
-        className
-      )}
-      data-testid="chat-voice-attachment"
+      className={cn("flex w-full flex-col gap-1 bg-f1-background", cornerClass)}
     >
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- voice note */}
-      <audio ref={audioRef} src={voice.url} preload="metadata" />
-
-      <div className="shrink-0" data-testid="chat-voice-toggle">
-        <ButtonInternal
-          variant="outline"
-          size="md"
-          hideLabel
-          label={
-            player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
-          }
-          icon={player.isPlaying ? PauseCircle : SolidPlay}
-          onClick={handleToggle}
-        />
-      </div>
-
       <div
-        ref={barsRef}
-        onClick={handleSeek}
-        // justify-between spreads the fixed set of bars across whatever width
-        // the card gets, so the waveform stays proportioned at any size.
-        className="flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-[2px]"
-        role="slider"
-        aria-label={i18n.audioPlayer.seek}
-        aria-valuemin={0}
-        aria-valuemax={Math.round(duration)}
-        aria-valuenow={Math.round(player.currentTime)}
-        data-testid="chat-voice-waveform"
+        className={cn(
+          // 320px by default, shrinking with the column when it doesn't fit
+          // (floor ≈ 254px: button + minimum bars + time slot + paddings).
+          "group/voice flex w-80 min-w-0 max-w-full items-center gap-2 border border-solid border-f1-border-secondary p-3",
+          isMine ? "bg-f1-background-tertiary" : "bg-f1-background",
+          cornerClass,
+          className
+        )}
+        data-testid="chat-voice-attachment"
       >
-        {levels.map((level, i) => (
-          <span
-            key={i}
-            className={cn(
-              "w-0.5 min-w-0.5 shrink rounded-full transition-colors",
-              // Played part reads darker, WhatsApp-style.
-              i / levels.length <= progress && progress > 0
-                ? "bg-f1-foreground"
-                : "bg-f1-foreground-tertiary"
-            )}
-            style={{ height: `${Math.round(level * 100)}%` }}
-          />
-        ))}
-      </div>
+        {/* eslint-disable-next-line jsx-a11y/media-has-caption -- voice note */}
+        <audio ref={audioRef} src={voice.url} preload="metadata" />
 
-      {/* The duration and the speed pill share the trailing slot: hovering the
+        <div className="shrink-0" data-testid="chat-voice-toggle">
+          <ButtonInternal
+            variant="outline"
+            size="md"
+            hideLabel
+            label={
+              player.isPlaying ? i18n.audioPlayer.pause : i18n.audioPlayer.play
+            }
+            icon={player.isPlaying ? SolidPause : SolidPlay}
+            onClick={handleToggle}
+          />
+        </div>
+
+        <div
+          ref={barsRef}
+          onClick={handleSeek}
+          // justify-between spreads the fixed set of bars across whatever width
+          // the card gets, so the waveform stays proportioned at any size.
+          className="flex h-8 min-w-0 flex-1 cursor-pointer items-center justify-between gap-0.5"
+          role="slider"
+          aria-label={i18n.audioPlayer.seek}
+          aria-valuemin={0}
+          aria-valuemax={Math.round(duration)}
+          aria-valuenow={Math.round(player.currentTime)}
+          data-testid="chat-voice-waveform"
+        >
+          {levels.map((level, i) => (
+            <span
+              key={i}
+              className={cn(
+                "w-0.5 min-w-0.5 shrink rounded-full transition-colors",
+                // Played part reads darker, WhatsApp-style.
+                i / levels.length <= progress && progress > 0
+                  ? "bg-f1-foreground"
+                  : "bg-f1-foreground-tertiary"
+              )}
+              style={{ height: `${Math.round(level * 100)}%` }}
+            />
+          ))}
+        </div>
+
+        {/* The duration and the speed pill share the trailing slot: hovering the
           card (or tabbing into it) swaps the time for the speed control. Both
           have the same FIXED width so neither the ticking time ("0:04" → "0:12")
           nor the cycling rate ("1x" → "1.5x") resizes the waveform. */}
-      <span
-        className="inline-block w-10 shrink-0 text-center text-base tabular-nums text-f1-foreground-secondary group-focus-within/voice:hidden group-hover/voice:hidden"
-        data-testid="chat-voice-time"
-      >
-        {formatTime(
-          player.isPlaying || player.currentTime > 0
-            ? player.currentTime
-            : duration
-        )}
-      </span>
+        <span
+          className="inline-block w-12 shrink-0 text-end text-base font-medium pr-2 tabular-nums text-f1-foreground-secondary group-hover/voice:hidden"
+          data-testid="chat-voice-time"
+        >
+          {formatTime(
+            player.isPlaying || player.currentTime > 0
+              ? player.currentTime
+              : duration
+          )}
+        </span>
 
-      <div className="hidden w-10 shrink-0 justify-center group-focus-within/voice:flex group-hover/voice:flex">
-        <ButtonInternal
-          variant="ghost"
-          size="sm"
-          label={`${PLAYBACK_RATES[rateIndex]}x`}
-          aria-label={i18n.audioPlayer.playbackSpeed}
-          onClick={handleCycleRate}
-          data-testid="chat-voice-rate"
-        />
+        <div className="hidden w-12 shrink-0 justify-end group-hover/voice:flex">
+          <ButtonInternal
+            variant="ghost"
+            size="sm"
+            label={`${PLAYBACK_RATES[rateIndex]}x`}
+            aria-label={i18n.audioPlayer.playbackSpeed}
+            onClick={handleCycleRate}
+            data-testid="chat-voice-rate"
+          />
+        </div>
       </div>
     </div>
   )

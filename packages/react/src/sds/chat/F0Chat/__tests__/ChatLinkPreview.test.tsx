@@ -81,6 +81,34 @@ describe("ChatLinkPreview", () => {
     const { container } = render(<ChatLinkPreview previews={[]} />)
     expect(container).toBeEmptyDOMElement()
   })
+
+  it("tucks the edges where stacked cards meet, bubble-style", () => {
+    const THIRD_PREVIEW = { url: "https://docs.example.com/guide" }
+    render(
+      <ChatLinkPreview previews={[PREVIEW, OTHER_PREVIEW, THIRD_PREVIEW]} />
+    )
+    const [first, middle, last] = screen.getAllByRole("link")
+
+    expect(first.className).toContain("rounded-b-sm")
+    expect(first.className).not.toContain("rounded-t-sm")
+    expect(middle.className).toContain("rounded-t-sm")
+    expect(middle.className).toContain("rounded-b-sm")
+    expect(last.className).toContain("rounded-t-sm")
+    expect(last.className).not.toContain("rounded-b-sm")
+  })
+
+  it("keeps the bubble-hugging top tuck on the first card only", () => {
+    render(
+      <ChatLinkPreview
+        previews={[PREVIEW, OTHER_PREVIEW]}
+        isMine
+        isFirstOfRun={false}
+      />
+    )
+    const [first, second] = screen.getAllByRole("link")
+    expect(first.className).toContain("rounded-tr-xs")
+    expect(second.className).not.toContain("rounded-tr-xs")
+  })
 })
 
 describe("ChatBubble link previews", () => {

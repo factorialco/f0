@@ -1,5 +1,8 @@
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 
+import { AnimatePresence, motion } from "motion/react"
+
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -10,6 +13,7 @@ import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
+import { SendingClock } from "./ChatMessageStatusIcon"
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -37,11 +41,20 @@ export const ChatMessageItem = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
+  const reducedMotion = useReducedMotion()
   const [actionsOpen, setActionsOpen] = useState(false)
   const { highlightedId } = useChatHighlightedId()
   const { currentUserId } = useF0Chat()
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0
+  // Whether the row MOUNTED with its reactions already there (history, or a
+  // reacted message scrolled back into the virtual window): render them in
+  // place. Only reactions changing on an already-visible message animate.
+  const hadReactionsAtMountRef = useRef(hasReactions)
+  useEffect(() => {
+    // After the first commit, any (re)appearance of the row is a live change.
+    hadReactionsAtMountRef.current = false
+  }, [])
   const hasAttachments =
     !message.deleted && (message.attachments?.length ?? 0) > 0
   // Attachment-only messages (no caption) skip the empty bubble but still show.
@@ -132,12 +145,24 @@ export const ChatMessageItem = ({
                 </span>
               )}
             </div>
-            {/* Deleted tombstones have nothing to act on. The menu stays visible
-                while open (not just on hover) so the ellipsis doesn't flicker. */}
-            {!message.deleted && (
+            {/* Sending indicator for own messages, in the slot next to the
+                bubble (the row is flex-row-reverse for mine, so it reads to
+                the bubble's left). Adding/removing it never shifts the bubble
+                (right-anchored) nor the row height — stable measurements for
+                the virtualizer. */}
+            {isMine && message.status === "sending" && <SendingClock />}
+            {/* Deleted tombstones have nothing to act on, and an in-flight
+                (sending) message can't be acted on yet either — only the clock
+                shows until it settles. The menu stays visible while open (not
+                just on hover) so the ellipsis doesn't flicker. A FAILED message
+                swaps the hover ellipsis for an always-visible critical alert
+                (same popover, reduced to Retry / Delete). */}
+            {!message.deleted && message.status !== "sending" && (
               <div
                 className={cn(
-                  "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
+                  message.status === "failed"
+                    ? "opacity-100"
+                    : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
                   actionsOpen && "opacity-100"
                 )}
               >
@@ -152,14 +177,32 @@ export const ChatMessageItem = ({
           </div>
         </div>
       )}
-      {hasReactions && (
-        <div className="flex w-full gap-2">
-          {belowGutter}
-          <div className="min-w-0 flex-1">
-            <ChatMessageReactions message={message} isMine={isMine} />
-          </div>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {hasReactions && (
+          // Reactions grow the row in (height + fade) when the first one lands
+          // on a visible message, and collapse it back out when the last one is
+          // removed — never a pop. The transcript's slide layer absorbs the
+          // shift when pinned at the bottom. Pills/pickers portal their
+          // popovers, so the overflow clip never cuts them.
+          <motion.div
+            key="reactions"
+            className="flex w-full gap-2 overflow-hidden"
+            initial={
+              hadReactionsAtMountRef.current || reducedMotion
+                ? false
+                : { height: 0, opacity: 0 }
+            }
+            animate={{ height: "auto", opacity: 1 }}
+            exit={reducedMotion ? undefined : { height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {belowGutter}
+            <div className="min-w-0 flex-1">
+              <ChatMessageReactions message={message} isMine={isMine} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

@@ -13,18 +13,25 @@ const hostOf = (url: string): string => {
   }
 }
 
-const cardClass = (isMine: boolean, isFirstOfRun: boolean) =>
+/**
+ * Chained corners for the stacked cards, mirroring `bubbleCornerClass`
+ * (ChatBubble): outer corners stay rounded-xl while the edges where two cards
+ * meet tuck to the small radius, whatever the count. The first card's tail-side
+ * top corner additionally follows the host bubble's run corner (same as the
+ * reply quote).
+ */
+const cardClass = (
+  isMine: boolean,
+  isFirstOfRun: boolean,
+  isFirstCard: boolean,
+  isLastCard: boolean
+) =>
   cn(
     "flex w-full flex-col overflow-hidden rounded-xl text-left no-underline",
     "bg-f1-background-tertiary transition-colors hover:bg-f1-background-secondary",
-    // Tail-side top corner mirrors the host bubble (same as the reply quote).
-    isFirstOfRun
-      ? isMine
-        ? "rounded-tr-xl"
-        : "rounded-tl-xl"
-      : isMine
-        ? "rounded-tr-xs"
-        : "rounded-tl-xs"
+    !isFirstCard && "rounded-t-sm",
+    !isLastCard && "rounded-b-sm",
+    isFirstCard && !isFirstOfRun && (isMine ? "rounded-tr-xs" : "rounded-tl-xs")
   )
 
 const PreviewTexts = ({
@@ -84,8 +91,12 @@ export const ChatLinkPreview = ({
           href={preview.url}
           target="_blank"
           rel="noopener noreferrer"
-          // Only the first card touches the bubble's top corner.
-          className={cardClass(isMine, index === 0 ? isFirstOfRun : true)}
+          className={cardClass(
+            isMine,
+            isFirstOfRun,
+            index === 0,
+            index === previews.length - 1
+          )}
         >
           {!compact && preview.imageUrl && (
             <img

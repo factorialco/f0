@@ -513,6 +513,12 @@ export const defaultTranslations = {
     // Voice notes (mic in the composer records + sends audio, no transcript).
     voiceNote: "Voice note",
     sendVoiceNote: "Send voice note",
+    sendingVoiceNote: "Sending voice note…",
+    // Delivery-state indicators beside your own bubble (icon labels + the
+    // failed message's reduced actions menu).
+    sending: "Sending…",
+    notSent: "Not sent",
+    retry: "Retry",
     moreActions: "Message actions",
     // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",

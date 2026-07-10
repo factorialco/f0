@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { type ReactNode } from "react"
+import { type ReactNode, useState } from "react"
 
 import { F0Chat } from "./F0Chat"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
@@ -119,6 +119,89 @@ const GroupConversation = (): ReactNode => {
   )
 }
 
+/**
+ * Motion stress test: the button fires a burst of incoming messages (staggered
+ * 450ms, with their typing pauses interleaving) from several people. The
+ * transcript must read as ONE continuous glide — no restart stutter, no blank
+ * band below the last row, and the dots must be replaced in place by each
+ * arriving message.
+ */
+const BurstConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: groupChannel,
+    me,
+    others: [anaG, bruno, carmen],
+    initialCount: 30,
+    olderPages: 2,
+    ambientEveryMs: 0,
+  })
+  const others = [anaG, bruno, carmen]
+  const burst = () => {
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => runtime.receiveFrom(others[i % others.length]), i * 450)
+    }
+  }
+  return (
+    <Frame>
+      <div className="relative flex h-full flex-col">
+        <F0ChatProvider runtime={runtime}>
+          <F0Chat />
+        </F0ChatProvider>
+        <button
+          type="button"
+          onClick={burst}
+          className="absolute left-4 top-16 z-50 cursor-pointer rounded-md border border-solid border-f1-border bg-f1-background px-3 py-1 text-sm font-medium text-f1-foreground shadow-md"
+        >
+          Burst ×5
+        </button>
+      </div>
+    </Frame>
+  )
+}
+
+/**
+ * Resilient-send demo: toggle the simulated network off, send a few messages
+ * (instant bubble → delayed clock → red "not sent" indicator with a
+ * Retry/Delete menu), then bring the network back — everything pending
+ * re-sends on its own.
+ */
+const FlakyNetworkConversation = (): ReactNode => {
+  const [offline, setOffline] = useState(false)
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 20,
+    olderPages: 2,
+    ambientEveryMs: 0,
+    failSends: false,
+  })
+  const toggle = () => {
+    runtime.setFailSends(!offline)
+    setOffline(!offline)
+  }
+  return (
+    <Frame>
+      <div className="relative flex h-full flex-col">
+        <F0ChatProvider runtime={runtime}>
+          <F0Chat />
+        </F0ChatProvider>
+        <button
+          type="button"
+          onClick={toggle}
+          className={
+            offline
+              ? "absolute left-4 top-16 z-50 cursor-pointer rounded-md border border-solid border-f1-border bg-f1-background-critical px-3 py-1 text-sm font-medium text-f1-foreground-critical shadow-md"
+              : "absolute left-4 top-16 z-50 cursor-pointer rounded-md border border-solid border-f1-border bg-f1-background px-3 py-1 text-sm font-medium text-f1-foreground shadow-md"
+          }
+        >
+          {offline ? "Offline — back online" : "Go offline"}
+        </button>
+      </div>
+    </Frame>
+  )
+}
+
 const Conversation = ({
   initialCount,
 }: {
@@ -158,6 +241,20 @@ export const Default: Story = {
 export const Group: Story = {
   name: "Group with mentions",
   render: () => <GroupConversation />,
+}
+
+/** Resilient sending under a bad connection: instant bubble, delayed sending
+ * clock, failed state with Retry/Delete, auto-resend on reconnect. */
+export const FlakyNetwork: Story = {
+  name: "Flaky network (resilient send)",
+  render: () => <FlakyNetworkConversation />,
+}
+
+/** Rapid-fire incoming activity on demand — for verifying the transcript's
+ * slide coalescing and the typing→message in-place swap. */
+export const Burst: Story = {
+  name: "Burst (motion stress)",
+  render: () => <BurstConversation />,
 }
 
 /**

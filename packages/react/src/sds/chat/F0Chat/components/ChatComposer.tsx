@@ -163,9 +163,15 @@ export const ChatComposer = (): ReactNode => {
   // audio and sends it as its own message on confirm — no transcription.
   // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
   const voiceNotesEnabled = !!uploadFiles
+  // While the confirmed recording uploads, the action row swaps for a "sending
+  // voice note" status so the confirm→message gap isn't silent.
+  const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
   const handleVoiceNote = useCallback(
     async (audio: Blob, durationMs: number) => {
       if (!uploadFiles) return
+      // Set before any await so it batches with the recorder's own
+      // setStatus("idle") — the recording row swaps straight to the sending row.
+      setIsSendingVoiceNote(true)
       const type = audio.type || "audio/webm"
       const ext = type.includes("mp4")
         ? "m4a"
@@ -175,21 +181,24 @@ export const ChatComposer = (): ReactNode => {
       const file = new File([audio], `voice-note.${ext}`, { type })
       try {
         const [uploaded] = await uploadFiles([file])
-        if (!uploaded || !("url" in uploaded)) return
-        sendMessage({
-          body: "",
-          attachments: [
-            {
-              kind: "voice",
-              url: uploaded.url,
-              durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
-              mimeType: type,
-              name: file.name,
-            },
-          ],
-        })
+        if (uploaded && "url" in uploaded) {
+          sendMessage({
+            body: "",
+            attachments: [
+              {
+                kind: "voice",
+                url: uploaded.url,
+                durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
+                mimeType: type,
+                name: file.name,
+              },
+            ],
+          })
+        }
       } catch {
         showTransientError(i18n.chat.fileUploadError)
+      } finally {
+        setIsSendingVoiceNote(false)
       }
     },
     [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
@@ -211,7 +220,8 @@ export const ChatComposer = (): ReactNode => {
   const canSend =
     (value.trim().length > 0 || attachments.length > 0) &&
     !isTranscribing &&
-    !isUploading
+    !isUploading &&
+    !isSendingVoiceNote
 
   const handleChange = useCallback(
     (next: string, cursorPos: number) => {
@@ -640,10 +650,15 @@ export const ChatComposer = (): ReactNode => {
                     variant="outline"
                     size="md"
                     hideLabel
-                    label={i18n.chat.recordAudio}
+                    label={
+                      isSendingVoiceNote
+                        ? i18n.chat.sendingVoiceNote
+                        : i18n.chat.recordAudio
+                    }
                     icon={Microphone}
                     onClick={startRecording}
-                    loading={isTranscribing}
+                    // Spins while dictation transcribes or a voice note uploads.
+                    loading={isTranscribing || isSendingVoiceNote}
                   />
                 )}
                 <ButtonInternal

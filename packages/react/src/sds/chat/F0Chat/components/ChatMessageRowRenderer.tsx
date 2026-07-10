@@ -46,7 +46,7 @@ const ChatMessageRowRendererComponent = ({
   isLastRow,
   enterAnimation,
   animatedIds,
-  dividerLeaving = false,
+  typingLeaving = false,
 }: {
   row: ChatRow
   isGroup: boolean
@@ -56,8 +56,8 @@ const ChatMessageRowRendererComponent = ({
   enterAnimation: boolean
   /** Ids already shown — seeded with the initial set so only true arrivals animate. */
   animatedIds: Set<string>
-  /** Divider row only: fade it out in place before the row is removed. */
-  dividerLeaving?: boolean
+  /** Typing row only: fade the bubble out before the row is removed. */
+  typingLeaving?: boolean
 }): ReactNode => {
   const spacing = cn(topSpacing(row, isFirstRow), isLastRow && "pb-6")
 
@@ -87,16 +87,21 @@ const ChatMessageRowRendererComponent = ({
   if (row.type === "divider") {
     return (
       <div className={spacing}>
-        <UnreadDivider leaving={dividerLeaving} />
+        <UnreadDivider />
       </div>
     )
   }
 
   if (row.type === "typing") {
+    // Spacing goes INSIDE the bubble's height-animated wrapper so the whole row
+    // collapses to 0 when it leaves (outside, the padding would jump-cut).
     return (
-      <div className={spacing}>
-        <ChatTypingBubble users={row.users} isGroup={isGroup} />
-      </div>
+      <ChatTypingBubble
+        users={row.users}
+        isGroup={isGroup}
+        leaving={typingLeaving}
+        spacingClass={spacing}
+      />
     )
   }
 
@@ -147,15 +152,21 @@ const ChatMessageRowRendererComponent = ({
   )
 
   return animate ? (
-    // WhatsApp-style arrival: the bubble springs up into place from its own
-    // corner (mine → bottom-right, theirs → bottom-left) with a soft fade and a
-    // barely-there scale. A spring (not a fixed tween) gives the gentle, natural
-    // settle. Only the last row animates, so the brief scale-driven height change
-    // can't disturb rows above it.
+    // WhatsApp-style arrival: the transcript's slide layer provides the actual
+    // translation, so the bubble itself only adds presence — incoming ones are
+    // fade-dominant (the motion of the list leads), a sent one keeps a
+    // slightly more confident pop from its own corner (bottom-right). The row
+    // mounts at full height, keeping measurements stable for the virtualizer.
+    // Only the last unseen row animates, so scrolled-back history is never
+    // disturbed.
     <motion.div
       className={cn("flex flex-col gap-1", spacing)}
       style={{ transformOrigin: isMine ? "bottom right" : "bottom left" }}
-      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      initial={
+        isMine
+          ? { opacity: 0, y: 6, scale: 0.97 }
+          : { opacity: 0, y: 3, scale: 0.99 }
+      }
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.9 }}
     >

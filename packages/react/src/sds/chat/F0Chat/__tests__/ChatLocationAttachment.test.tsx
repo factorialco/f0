@@ -1,10 +1,20 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { ChatLocationAttachment } from "../components/ChatLocationAttachment"
 import { type F0ChatLocationAttachment } from "../types"
 import { summariseAttachments } from "../utils/reply-preview"
+
+// maplibre-gl needs WebGL (absent in jsdom) — stub the Map class; the card's
+// own structure (link, pin, footer, attribution) is what these tests cover.
+vi.mock("maplibre-gl", () => ({
+  default: {
+    Map: class {
+      remove() {}
+    },
+  },
+}))
 
 const LOCATION: F0ChatLocationAttachment = {
   kind: "location",
@@ -25,15 +35,24 @@ describe("ChatLocationAttachment", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer")
   })
 
-  it("embeds a keyless OpenStreetMap preview centered on the point", () => {
+  it("renders the lazy MapLibre map with the teardrop marker", async () => {
     render(<ChatLocationAttachment location={LOCATION} />)
-    const iframe = screen.getByTitle("Factorial HQ")
-    expect(iframe.getAttribute("src")).toContain(
-      "openstreetmap.org/export/embed.html"
+    // The map module is lazy-loaded — wait for the chunk to resolve.
+    expect(await screen.findByTestId("chat-location-map")).toBeInTheDocument()
+    expect(screen.getByTestId("chat-location-pin")).toBeInTheDocument()
+  })
+
+  it("is a map-only card: the name is the accessible label, not a footer", () => {
+    render(<ChatLocationAttachment location={LOCATION} />)
+    expect(screen.queryByText("Factorial HQ")).not.toBeInTheDocument()
+    expect(screen.getByRole("link")).toHaveAccessibleName("Factorial HQ")
+  })
+
+  it("falls back to the generic label without a name", () => {
+    render(
+      <ChatLocationAttachment location={{ ...LOCATION, name: undefined }} />
     )
-    expect(iframe.getAttribute("src")).toContain(
-      encodeURIComponent("41.3894,2.1607")
-    )
+    expect(screen.getByRole("link")).toHaveAccessibleName("Location")
   })
 
   it("applies the bubble's chained-corner classes when provided", () => {
@@ -46,17 +65,6 @@ describe("ChatLocationAttachment", () => {
     const link = screen.getByRole("link")
     expect(link.className).toContain("rounded-tl-sm")
     expect(link.className).not.toContain("rounded-xl ")
-  })
-
-  it("is a map-only card (no footer text)", () => {
-    render(<ChatLocationAttachment location={LOCATION} />)
-    expect(screen.queryByText("Factorial HQ")).not.toBeInTheDocument()
-    // The generic label only titles the iframe when no name is given.
-    render(
-      <ChatLocationAttachment location={{ ...LOCATION, name: undefined }} />
-    )
-    expect(screen.queryByText("Location")).not.toBeInTheDocument()
-    expect(screen.getByTitle("Location")).toBeInTheDocument()
   })
 })
 

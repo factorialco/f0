@@ -30,6 +30,8 @@ import {
 export type MockChatAppValue = {
   states: Record<string, ConvState>
   send: (convId: string, input: F0ChatSendInput) => void
+  /** Re-send a failed message (same id) — flips back to sending, then sent. */
+  retry: (convId: string, messageId: string) => void
   markRead: (convId: string) => void
   toggleReaction: (convId: string, messageId: string, emoji: string) => void
   deleteMessage: (convId: string, messageId: string) => void
@@ -137,6 +139,24 @@ export const useMockChatStore = (): MockChatAppValue => {
         return { ...s, messages: [...s.messages, message], lastReadId: id }
       })
 
+      // Flaky network simulation: roughly 1 in 4 sends stalls long enough for
+      // the delayed sending clock (>500ms) to appear, then FAILS — surfacing
+      // the red "Not sent" indicator with its Retry/Delete menu. The rest
+      // settle fast, so the clock never shows on them.
+      const flaky = Math.random() < 0.25
+      if (flaky) {
+        after(3000, () =>
+          patch(convId, (s) => ({
+            ...s,
+            messages: s.messages.map((m) =>
+              m.id === id ? { ...m, status: "failed" } : m
+            ),
+          }))
+        )
+        // No reply: the message never reached the other side.
+        return
+      }
+
       after(400, () =>
         patch(convId, (s) => ({
           ...s,
@@ -183,6 +203,28 @@ export const useMockChatStore = (): MockChatAppValue => {
               })
             ),
           ],
+        }))
+      )
+    },
+    [after, patch]
+  )
+
+  // Retrying always succeeds (the "network" recovered) — same id, so the row
+  // never remounts, mirroring the transport's server-side dedupe.
+  const retry = useCallback(
+    (convId: string, messageId: string) => {
+      patch(convId, (s) => ({
+        ...s,
+        messages: s.messages.map((m) =>
+          m.id === messageId ? { ...m, status: "sending" } : m
+        ),
+      }))
+      after(900, () =>
+        patch(convId, (s) => ({
+          ...s,
+          messages: s.messages.map((m) =>
+            m.id === messageId ? { ...m, status: "sent" } : m
+          ),
         }))
       )
     },
@@ -295,6 +337,7 @@ export const useMockChatStore = (): MockChatAppValue => {
     () => ({
       states,
       send,
+      retry,
       markRead,
       toggleReaction,
       deleteMessage,
@@ -308,6 +351,7 @@ export const useMockChatStore = (): MockChatAppValue => {
     [
       states,
       send,
+      retry,
       markRead,
       toggleReaction,
       deleteMessage,

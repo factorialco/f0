@@ -52,6 +52,10 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (input: F0ChatSendInput) => app.send(convId, input),
     [app, convId]
   )
+  const retryMessage = useCallback(
+    (messageId: string) => app.retry(convId, messageId),
+    [app, convId]
+  )
   const markRead = useCallback(() => app.markRead(convId), [app, convId])
   const togglePin = useCallback(() => app.togglePin(convId), [app, convId])
   const toggleReaction = useCallback(
@@ -174,7 +178,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     unreadCount: unread.length,
     firstUnreadId: unread[0]?.id ?? null,
     sendMessage,
-    retryMessage: () => {},
+    retryMessage,
     loadOlder,
     toggleReaction,
     deleteMessage,

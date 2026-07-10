@@ -3,6 +3,7 @@ import { type ReactNode, useState } from "react"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import {
+  ArrowCycle,
   ChevronRight,
   Delete,
   Ellipsis,
@@ -15,6 +16,7 @@ import {
 import { Picker } from "@/kits/Social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
@@ -74,8 +76,13 @@ export const ChatMessageActions = ({
   onOpenChange: (open: boolean) => void
 }): ReactNode => {
   const i18n = useI18n()
-  const { toggleReaction, deleteMessage, editMessage, editWindowMs } =
-    useF0Chat()
+  const {
+    toggleReaction,
+    deleteMessage,
+    editMessage,
+    editWindowMs,
+    retryMessage,
+  } = useF0Chat()
   const { setReplyTo } = useChatReply()
   const { setEditingMessage } = useChatEdit()
   const [view, setView] = useState<"menu" | "info">("menu")
@@ -112,23 +119,60 @@ export const ChatMessageActions = ({
     handleOpenChange(false)
   }
 
+  // A failed message only exists locally: it can't be reacted to, replied to,
+  // edited or inspected — only resent (same id; the transport dedupes) or
+  // discarded. Its trigger is the always-visible critical alert itself (the
+  // hover ellipsis is not rendered: two buttons opening the same menu is
+  // redundant), and the menu is reduced to Retry / Delete.
+  const isFailed = message.status === "failed"
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <ButtonInternal
-          variant="outline"
-          hideLabel
-          label={i18n.chat.moreActions}
-          icon={Ellipsis}
-          pressed={open}
-        />
+        {isFailed ? (
+          // The Action primitive directly (not ButtonInternal): its children
+          // are ours, so the icon can carry the critical color itself.
+          <Action
+            variant="ghost"
+            size="md"
+            mode="only"
+            compact
+            pressed={open}
+            aria-label={i18n.chat.notSent}
+            title={i18n.chat.notSent}
+            data-testid="chat-failed-indicator"
+          >
+            <F0Icon icon={AlertCircleLine} size="md" color="critical-bold" />
+          </Action>
+        ) : (
+          <ButtonInternal
+            variant="outline"
+            hideLabel
+            label={i18n.chat.moreActions}
+            icon={Ellipsis}
+            pressed={open}
+          />
+        )}
       </PopoverTrigger>
       {/* Fixed width so switching to the info view doesn't resize the popover. */}
       <PopoverContent
         align={isMine ? "end" : "start"}
         className="w-64 rounded-lg border border-solid border-f1-border-secondary p-0"
       >
-        {view === "info" ? (
+        {isFailed ? (
+          <div className="flex flex-col gap-0 p-1">
+            <MenuItem
+              icon={ArrowCycle}
+              label={i18n.chat.retry}
+              onClick={runAndClose(() => retryMessage(message.id))}
+            />
+            <MenuItem
+              icon={Delete}
+              label={i18n.actions.delete}
+              onClick={runAndClose(() => deleteMessage(message.id))}
+            />
+          </div>
+        ) : view === "info" ? (
           <ChatMessageInfoView
             message={message}
             onBack={() => setView("menu")}

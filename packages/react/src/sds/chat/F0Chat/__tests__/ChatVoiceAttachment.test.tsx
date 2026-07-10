@@ -29,11 +29,12 @@ describe("ChatVoiceAttachment", () => {
     expect(waveform.querySelectorAll("span").length).toBe(32)
   })
 
-  it("stretches to the available width while keeping a minimum size", () => {
+  it("defaults to 320px and never exceeds its container", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
     const card = screen.getByTestId("chat-voice-attachment")
-    expect(card.className).toContain("w-full")
-    expect(card.className).toContain("min-w-54")
+    expect(card.className).toContain("w-80")
+    expect(card.className).toContain("max-w-full")
+    expect(card.className).toContain("min-w-0")
   })
 
   it("shows the total duration before playback starts", () => {
@@ -53,9 +54,9 @@ describe("ChatVoiceAttachment", () => {
 
   it("keeps a fixed-width trailing slot so the waveform never resizes", () => {
     render(<ChatVoiceAttachment voice={VOICE} />)
-    expect(screen.getByTestId("chat-voice-time").className).toContain("w-10")
+    expect(screen.getByTestId("chat-voice-time").className).toContain("w-12")
     const pillWrapper = screen.getByTestId("chat-voice-rate").closest("div")
-    expect(pillWrapper?.className).toContain("w-10")
+    expect(pillWrapper?.className).toContain("w-12")
   })
 
   it("cycles the playback rate 1x → 1.5x → 2x → 0.5x on the speed pill", () => {

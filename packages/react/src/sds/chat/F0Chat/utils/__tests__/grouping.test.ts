@@ -73,6 +73,49 @@ describe("flattenChatRows", () => {
     expect(dividerIndex).toBe(bIndex - 1)
   })
 
+  it("breaks a same-author run at the divider, and rejoins it without one", () => {
+    const messages = [
+      msg("a", "u1", "2026-06-21T10:00:00"),
+      msg("b", "u1", "2026-06-21T10:01:00"),
+      msg("c", "u1", "2026-06-21T10:02:00"),
+    ]
+    const { rows } = flattenChatRows(messages, { dividerId: "b" })
+    const messageRows = rows.filter(
+      (r): r is Extract<ChatRow, { type: "message" }> => r.type === "message"
+    )
+    // The divider splits [a] | [b, c]: a stays last of its run, b restarts one.
+    expect(messageRows[0]).toMatchObject({
+      isFirstOfRun: true,
+      isLastOfRun: true,
+    })
+    expect(messageRows[1]).toMatchObject({
+      isFirstOfRun: true,
+      isLastOfRun: false,
+    })
+    expect(messageRows[2]).toMatchObject({
+      isFirstOfRun: false,
+      isLastOfRun: true,
+    })
+
+    // Same input without the divider: one continuous run again.
+    const { rows: joined } = flattenChatRows(messages)
+    const joinedRows = joined.filter(
+      (r): r is Extract<ChatRow, { type: "message" }> => r.type === "message"
+    )
+    expect(joinedRows[0]).toMatchObject({
+      isFirstOfRun: true,
+      isLastOfRun: false,
+    })
+    expect(joinedRows[1]).toMatchObject({
+      isFirstOfRun: false,
+      isLastOfRun: false,
+    })
+    expect(joinedRows[2]).toMatchObject({
+      isFirstOfRun: false,
+      isLastOfRun: true,
+    })
+  })
+
   it("maps every message id to its row index", () => {
     const { rows, indexById } = flattenChatRows([
       msg("a", "u1", "2026-06-20T10:00:00"),

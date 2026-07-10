@@ -140,7 +140,12 @@ export type F0ChatReaction = {
   users?: F0ChatUser[]
 }
 
-/** iMessage-style delivery state — only meaningful for messages I sent. */
+/**
+ * iMessage-style delivery state — only meaningful for messages I sent.
+ * `sending` renders a delayed clock beside the bubble (only if the send takes
+ * >500ms, so healthy networks never flash it); `failed` dims the bubble and
+ * shows a tappable critical alert whose menu is reduced to Retry / Delete.
+ */
 export type F0ChatMessageStatus = "sending" | "sent" | "read" | "failed"
 
 export type F0ChatMessageReply = {
@@ -273,9 +278,20 @@ export type F0ChatRuntime = {
   /** Id of the first unread message — where the "new messages" divider goes. */
   firstUnreadId: string | null
   sendMessage: (input: F0ChatSendInput) => void
+  /**
+   * Re-send a message whose `status` is `"failed"`, reusing the SAME message
+   * id so the transport can dedupe if the original send actually reached the
+   * server (factorial → Stream is idempotent on client-generated message ids).
+   * Flips the message back to `"sending"`.
+   */
   retryMessage: (id: string) => void
   loadOlder: () => void
   toggleReaction: (messageId: string, emoji: string) => void
+  /**
+   * Delete a message. For a `"failed"` message (never delivered) the host must
+   * discard the local echo only — no server call, the message doesn't exist
+   * server-side (factorial → `channel.state.removeMessage`).
+   */
   deleteMessage: (id: string) => void
   /**
    * Edit an existing message (text, mentions, attachments). Omit to disable

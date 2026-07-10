@@ -26,6 +26,8 @@ export type MockChatSeed = {
   ambientEveryMs?: number
   /** Extra messages appended after the seeded ones (e.g. to demo mentions). */
   extraMessages?: F0ChatMessage[]
+  /** Start with sends failing (flaky-network demo) — see `setFailSends`. */
+  failSends?: boolean
 }
 
 const SAMPLE_TEXTS = [
@@ -74,7 +76,17 @@ const buildMessages = (
  * reactions, deletion, uploads, transcription and ambient incoming messages —
  * no backend. Re-created per conversation (mount it keyed by channel id).
  */
-export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
+export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
+  /** Simulate the other side writing (typing pause, then a message) — exposed
+   * so stories can drive bursts of incoming activity on demand. */
+  receiveFrom: (responder: F0ChatUser) => void
+  /**
+   * Toggle the simulated network: while true, sends settle as `failed`;
+   * flipping back to false sweeps pending/failed messages and re-sends them
+   * (the "connection returns → queued messages auto-send" behavior).
+   */
+  setFailSends: (fail: boolean) => void
+} {
   const initialCount = seed.initialCount ?? 24
   const olderPagesTotal = seed.olderPages ?? 2
   const ambientEveryMs = seed.ambientEveryMs ?? 16000
@@ -151,6 +163,27 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     return () => clearInterval(interval)
   }, [ambientEveryMs, receiveFrom, seed.others])
 
+  // Simulated network health: while failing, sends settle as `failed` instead
+  // of `sent`. A ref (not state) so in-flight timers read the CURRENT value.
+  const failSendsRef = useRef(seed.failSends ?? false)
+
+  // Settle an in-flight message per the simulated network. The 1200ms latency
+  // is deliberate: long enough to see the delayed sending clock (>500ms).
+  const settleSend = useCallback(
+    (id: string) => {
+      after(1200, () =>
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === id
+              ? { ...m, status: failSendsRef.current ? "failed" : "sent" }
+              : m
+          )
+        )
+      )
+    },
+    [after]
+  )
+
   const sendMessage = useCallback(
     (input: F0ChatSendInput) => {
       const id = nextId("msg")
@@ -180,14 +213,10 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
       // Sending my own message reads everything before it.
       setLastReadId(id)
 
-      after(400, () =>
-        setMessages((prev) =>
-          prev.map((m) => (m.id === id ? { ...m, status: "sent" } : m))
-        )
-      )
+      settleSend(id)
 
       const responder = seed.others[0]
-      if (responder) {
+      if (responder && !failSendsRef.current) {
         after(900, () => setTypingUsers([responder]))
         after(2200, () => {
           setTypingUsers([])
@@ -205,21 +234,36 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
         })
       }
     },
-    [after, markMineRead, seed.me, seed.others]
+    [after, markMineRead, seed.me, seed.others, settleSend]
   )
 
-  const retryMessage = useCallback((id: string) => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, status: "sending" } : m))
-    )
-    setTimeout(
-      () =>
-        setMessages((prev) =>
-          prev.map((m) => (m.id === id ? { ...m, status: "sent" } : m))
-        ),
-      400
-    )
-  }, [])
+  // Same id kept across retries — mirrors the transport's server-side dedupe
+  // on client-generated message ids.
+  const retryMessage = useCallback(
+    (id: string) => {
+      setMessages((prev) =>
+        prev.map((m) => (m.id === id ? { ...m, status: "sending" } : m))
+      )
+      settleSend(id)
+    },
+    [settleSend]
+  )
+
+  // Flipping the network back on sweeps pending/failed messages and re-sends
+  // them — the "connection returns → queued messages auto-send" demo.
+  const setFailSends = useCallback(
+    (fail: boolean) => {
+      failSendsRef.current = fail
+      if (fail) return
+      after(800, () => {
+        const pending = messagesRef.current.filter(
+          (m) => m.isMine && (m.status === "failed" || m.status === "sending")
+        )
+        pending.forEach((m) => retryMessage(m.id))
+      })
+    },
+    [after, retryMessage]
+  )
 
   const loadOlder = useCallback(() => {
     if (loadingOlder || olderPagesLeft.current <= 0) return
@@ -269,6 +313,11 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     setMessages((prev) => {
       const target = prev.find((m) => m.id === id)
       if (!target) return prev
+      // A failed message never reached the "server" — discard the local echo
+      // entirely (no tombstone), matching the runtime contract.
+      if (target.status === "failed" || target.status === "sending") {
+        return prev.filter((m) => m.id !== id)
+      }
       const beyondWindow =
         Date.now() - new Date(target.createdAt).getTime() > UNSEND_WINDOW_MS
       return beyondWindow
@@ -380,5 +429,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime {
     togglePin,
     // Only meaningful for groups; the composer suppresses mentions in DMs.
     searchMembers,
+    receiveFrom,
+    setFailSends,
   }
 }
