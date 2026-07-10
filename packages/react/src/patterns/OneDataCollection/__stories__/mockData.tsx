@@ -172,6 +172,33 @@ export const nestedFilters = {
 
 export type NestedFiltersType = typeof nestedFilters
 
+// A user carrying a workplace assignment (office → space → desk). Used by
+// `SubfiltersExampleComponent` so the nested "Office" filter visibly narrows
+// the list when a group or sub-option is selected.
+export type WorkplaceMockUser = MockUser & {
+  officeId: string
+  spaceId: string
+  deskId?: string
+}
+
+// Deterministically assign each user to a space (and a desk within it, when the
+// space has any) so selections map to a predictable, stable subset of rows.
+export const subfilterMockUsers: WorkplaceMockUser[] = generateMockUsers(
+  24
+).map((user, i) => {
+  const space = SPACES[i % SPACES.length]
+  const desksInSpace = DESKS.filter((d) => d.spaceId === space.id)
+  const desk = desksInSpace.length
+    ? desksInSpace[i % desksInSpace.length]
+    : undefined
+  return {
+    ...user,
+    officeId: String(space.officeId),
+    spaceId: String(space.id),
+    deskId: desk ? String(desk.id) : undefined,
+  }
+})
+
 // Example filter definition
 export const filters = {
   search: {
@@ -1598,13 +1625,30 @@ export const SubfiltersExampleComponent = () => {
         const { filters: f, sortings: s, search } = options
         return new Promise<BaseResponse<MockUser>>((resolve) => {
           setTimeout(() => {
-            const filtered = filterUsers(
-              mockUsers,
+            // Reuse the shared helper for search/sort, then narrow by the
+            // nested workplace selections (office/space/desk) it doesn't know
+            // about. `filterUsers` only filters/sorts, so the surviving items
+            // are still the original WorkplaceMockUser objects.
+            const base = filterUsers(
+              subfilterMockUsers,
               f as FiltersState<FiltersType>,
               s,
               undefined,
               search
-            )
+            ) as WorkplaceMockUser[]
+
+            const officeSel = (f.office as string[] | undefined) ?? []
+            const spaceSel = (f.space as string[] | undefined) ?? []
+            const deskSel = (f.desk as string[] | undefined) ?? []
+
+            const filtered = base.filter((u) => {
+              if (officeSel.length && !officeSel.includes(u.officeId))
+                return false
+              if (spaceSel.length && !spaceSel.includes(u.spaceId)) return false
+              if (deskSel.length && (!u.deskId || !deskSel.includes(u.deskId)))
+                return false
+              return true
+            })
             resolve({ records: filtered })
           }, 100)
         })
