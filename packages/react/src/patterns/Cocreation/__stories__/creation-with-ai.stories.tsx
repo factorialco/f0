@@ -869,6 +869,21 @@ const confirmCloseUnsaved = (flow: FlowConfig) =>
     },
   })
 
+// "Leave creation" confirmation shown when the "guidedType" flow (Training)
+// template gallery or preview is closed BEFORE the user has picked a template
+// or an Empty Form. That flow has no welcome screen to fall back to, so closing
+// abandons the in-progress creation entirely — warn first instead of silently
+// bailing out. Resolves `true` when the user confirms leaving; dismissing the
+// dialog (backdrop / Esc) resolves `undefined`, treated as "stay".
+const confirmLeaveGuidedCreation = (flow: FlowConfig) =>
+  dialogs.confirmation({
+    type: "warning",
+    title: "Leave creation?",
+    msg: `You haven't picked a template or an empty form yet. Closing now leaves the ${flow.navLabel} creation flow without creating a survey.`,
+    confirm: { label: "Leave" },
+    cancel: { label: "Keep creating" },
+  })
+
 /**
  * The non-dismissable info banner shown atop a template preview. The "Templates"
  * link doesn't navigate (this is a mock); it opens the same leave-creation
@@ -913,7 +928,6 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
   const { armProposal } = useProposalFlow()
   const { config } = useFlowConfig()
-  const openEmptyForm = useOpenEmptyForm()
 
   const useThisTemplate = () => {
     // A template copy is created already populated, so seed the flow's sample
@@ -1008,20 +1022,25 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         ]}
       />
       {/* Close returns to the starting point of the flow. For the "cards"
-          entry flow (Engagement) that's the fullscreen welcome screen; for
-          "guidedType" (Training) there's no welcome screen to return to, so
-          closing is equivalent to selecting "Empty Form" for the chosen
-          type — same override as the templates-list canvas' close. */}
+          entry flow (Engagement) that's the fullscreen welcome screen, so it
+          closes straight away. For "guidedType" (Training) there's no welcome
+          screen to return to and no template has been chosen yet, so closing
+          would abandon the creation flow — gate it behind a leave-creation
+          confirmation (same as the templates-list canvas' close). */}
       <ButtonInternal
         variant="outline"
         hideLabel
         label="Close"
         icon={Cross}
-        onClick={() =>
-          content.guidedTypeId
-            ? openEmptyForm(content.guidedTypeId)
-            : setVisualizationMode("fullscreen")
-        }
+        onClick={() => {
+          if (content.guidedTypeId) {
+            void confirmLeaveGuidedCreation(config).then((leave) => {
+              if (leave) setVisualizationMode("fullscreen")
+            })
+            return
+          }
+          setVisualizationMode("fullscreen")
+        }}
       />
     </div>
   )
@@ -1675,8 +1694,9 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
  * the framework `onClose`. For the "cards" entry flow (Engagement), closing
  * the templates list returns to the FIRST step of cocreation — the fullscreen
  * welcome screen (suggestions + welcome cards). For "guidedType" (Training),
- * there's no welcome screen to return to, so closing is equivalent to
- * selecting "Empty Form" for the chosen type.
+ * there's no welcome screen to return to and no template has been picked yet,
+ * so closing would abandon the creation flow — it's gated behind a
+ * leave-creation confirmation, and only leaves (fullscreen) once confirmed.
  *
  * Switching to "fullscreen" both closes the canvas (the provider drops canvas
  * content on any canvas → non-canvas transition) and reopens the chat full
@@ -1690,11 +1710,13 @@ function TemplatesCanvasHeader({
   content: TemplatesCanvasContent
 }) {
   const { setVisualizationMode } = useAiChat()
-  const openEmptyForm = useOpenEmptyForm()
+  const { config } = useFlowConfig()
 
   const handleClose = () => {
     if (content.guidedTypeId) {
-      openEmptyForm(content.guidedTypeId)
+      void confirmLeaveGuidedCreation(config).then((leave) => {
+        if (leave) setVisualizationMode("fullscreen")
+      })
       return
     }
     setVisualizationMode("fullscreen")
