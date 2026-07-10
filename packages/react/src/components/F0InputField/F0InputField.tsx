@@ -513,7 +513,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
                 "aria-disabled": noEdit,
                 name,
                 className: cn(
-                  "h-full w-full min-w-0 px-3",
+                  "h-full w-full min-w-0 px-3 text-f1-foreground",
                   "[&::-webkit-search-cancel-button]:hidden",
                   (icon || avatar) && "pl-8",
                   (icon || avatar) && size === "md" && "pl-9",

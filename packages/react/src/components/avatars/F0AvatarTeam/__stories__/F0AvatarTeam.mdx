@@ -1,0 +1,52 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import * as TeamStories from "./F0AvatarTeam.stories"
+
+<Meta of={TeamStories} />
+
+# AvatarTeam
+
+The avatar for a team or group of people.
+
+---
+
+## Overview
+
+### Purpose
+
+- Represent a team or group consistently across the interface
+- Help distinguish teams at a glance in lists, headers and assignments
+
+### Anatomy
+
+A team avatar uses a square shape with rounded corners — the default shape
+shared by every avatar type except person.
+
+<Canvas of={TeamStories.Default} />
+
+<Controls of={TeamStories.Default} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- The entity is always a team and known at build time
+- Team pickers, group headers, ownership and assignment rows
+
+#### When NOT to use
+
+- The entity type is dynamic (could be a person or company): use `F0Avatar`
+- The entity is not a team: use the matching `F0Avatar*` component
+
+---
+
+## Behavior
+
+### Image fallback
+
+With no `src` — or if the image fails to load — the avatar shows the team's
+initials over a color derived deterministically from its name, so the same team
+always keeps the same color.

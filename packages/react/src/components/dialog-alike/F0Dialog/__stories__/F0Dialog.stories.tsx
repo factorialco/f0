@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, FC, useState } from "react"
-import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import {
@@ -18,7 +17,6 @@ import {
   expectDialogPaintsAboveChat,
   FullscreenChatFrame,
 } from "@/lib/storybook-utils/aiChatStacking"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { getDialogAlikeArgTypes } from "../../common/__stories__/argsTypes.ts"
 import { OTHER_ACTIONS, TABS } from "../../common/__stories__/mocks.ts"
@@ -117,7 +115,6 @@ const ExampleList = ({ itemsCount = 20 }: { itemsCount?: number }) => (
 )
 
 export const Default: Story = {
-  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -133,22 +130,7 @@ export const Default: Story = {
   },
 }
 
-export const WithDataTestId: Story = {
-  args: {
-    isOpen: true,
-    onClose: () => {},
-    title: "Dialog with Test ID",
-    dataTestId: "my-test-dialog",
-    children: <ExampleList itemsCount={2} />,
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    await expect(canvas.getByTestId("my-test-dialog")).toBeInTheDocument()
-  },
-}
-
 export const Notification: Story = {
-  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -198,7 +180,6 @@ export const Modal: Story = {
 }
 
 export const WithSmSize: Story = {
-  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     size: "sm",
@@ -211,7 +192,6 @@ export const WithSmSize: Story = {
 }
 
 export const WithMdSize: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...WithSmSize.args,
     size: "md",
@@ -219,7 +199,6 @@ export const WithMdSize: Story = {
 }
 
 export const WithLgSize: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...WithMdSize.args,
     size: "lg",
@@ -227,14 +206,12 @@ export const WithLgSize: Story = {
 }
 
 export const WithXlSize: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...WithLgSize.args,
     size: "xl",
   },
 }
 export const WithDescription: Story = {
-  parameters: withSnapshot({}),
   args: {
     isOpen: true,
     onClose: () => {},
@@ -269,7 +246,6 @@ export const WithPersonListItems: Story = {
 }
 
 export const WithFullscreenSize: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     size: "fullscreen",
@@ -277,7 +253,6 @@ export const WithFullscreenSize: Story = {
 }
 
 export const WithFullscreenSizeAndActions: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...WithFullscreenSize.args,
     tabs: TABS,
@@ -329,18 +304,17 @@ export const WithMultiplePrimaryActions: Story = {
     },
     children: <ExampleList itemsCount={3} />,
   },
-  parameters: withSnapshot({
+  parameters: {
     docs: {
       description: {
         story:
           "When `primaryAction` receives an array of actions, it renders a `F0ButtonDropdown` allowing the user to select between multiple primary actions.",
       },
     },
-  }),
+  },
 }
 
 export const WithModule: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...Default.args,
     title: "Team Status",
@@ -356,7 +330,6 @@ export const WithModule: Story = {
 }
 
 export const WithModuleAndFullscreenSize: Story = {
-  parameters: withSnapshot({}),
   args: {
     ...WithModule.args,
     size: "fullscreen",

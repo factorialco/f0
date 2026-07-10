@@ -19,7 +19,6 @@ const renderTabs = (
       tabs={tabs}
       activeTab="main"
       onTabChange={vi.fn()}
-      search={{}}
       {...overrides}
     />
   )
@@ -53,26 +52,23 @@ describe("SidebarTabs", () => {
     expect(onTabChange).toHaveBeenCalledWith("messages")
   })
 
-  it("renders the search action and fires its onClick", async () => {
-    const onClick = vi.fn()
-    renderTabs({ search: { onClick } })
-    await userEvent.click(screen.getByRole("button", { name: "Search" }))
-    expect(onClick).toHaveBeenCalled()
-  })
-
   it("shows an unread indicator on a tab when it has unread", () => {
     renderTabs({
       tabs: [tabs[0], { ...tabs[1], badge: 5 }],
       activeTab: "main",
     })
-    // The unread dot is the only absolutely-positioned element in the tab.
+    // The unread dot uses the critical-bold colour and only shows on an
+    // inactive tab that has unread (the active tab has the sliding pill, also
+    // absolutely positioned, so we target the dot's colour specifically).
     expect(
       screen
         .getByRole("button", { name: "Messages" })
-        .querySelector(".absolute")
+        .querySelector(".bg-f1-background-critical-bold")
     ).not.toBeNull()
     expect(
-      screen.getByRole("button", { name: "Main" }).querySelector(".absolute")
+      screen
+        .getByRole("button", { name: "Main" })
+        .querySelector(".bg-f1-background-critical-bold")
     ).toBeNull()
   })
 })

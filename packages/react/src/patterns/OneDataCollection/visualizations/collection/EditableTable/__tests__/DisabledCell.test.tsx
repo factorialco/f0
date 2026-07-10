@@ -53,6 +53,21 @@ describe("DisabledCell", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders the hint icon after the cell content", () => {
+    render(
+      <DisabledCell
+        {...defaultProps}
+        hint={{ icon: InfoCircleLine, message: "Locked by policy" }}
+      />
+    )
+
+    const button = screen.getByRole("button", { name: "Locked by policy" })
+    const content = screen.getByText("John Doe")
+    expect(
+      content.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
   it("does not render a hint icon when hint is omitted", () => {
     render(<DisabledCell {...defaultProps} />)
 

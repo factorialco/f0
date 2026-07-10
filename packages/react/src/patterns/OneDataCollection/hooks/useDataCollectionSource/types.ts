@@ -19,6 +19,7 @@ import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import {
   PrimaryActionsDefinitionFn,
   SecondaryActionsDefinition,
+  UpsellActionDefinitionFn,
 } from "../../actions"
 import { ItemActionsDefinition } from "../../item-actions"
 import {
@@ -153,6 +154,9 @@ export type DataCollectionSourceDefinition<
   primaryActionsLabel?: string
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
+  /** Optional upsell button rendered in the collection toolbar. Opt-in per
+   * collection: return a definition to show it, or undefined to hide it. */
+  upsellAction?: UpsellActionDefinitionFn
   /** Available summaries fields. If not provided, summaries is not allowed. */
   summaries?: Summaries & {
     label?: string // Optional label for the summaries row
