@@ -227,6 +227,7 @@ const FiltersControls = () => {
     <>
       <FiltersControlsComponent
         filters={shownFilters}
+        allFilters={filters}
         value={value}
         onChange={handleFilterChange}
         onOpenChange={setIsFiltersOpen}
