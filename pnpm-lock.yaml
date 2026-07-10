@@ -749,6 +749,9 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.6)
+      '@expo/ui':
+        specifier: ~56.0.18
+        version: 56.0.18(oan64ab32fs37vdlt54xl3ai7e)
       '@expo/vector-icons':
         specifier: ^15.1.1
         version: 15.1.1(expo-font@56.0.7)(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
@@ -809,6 +812,9 @@ importers:
       expo-font:
         specifier: ~56.0.7
         version: 56.0.7(expo@56.0.12)(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
+      expo-glass-effect:
+        specifier: ~56.0.4
+        version: 56.0.4(expo@56.0.12)(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
       expo-image:
         specifier: ~56.0.11
         version: 56.0.11(expo@56.0.12)(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
