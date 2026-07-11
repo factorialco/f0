@@ -20,7 +20,7 @@ import { Action } from "@/ui/Action"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import { useChatEdit, useChatReply } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
+import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { formatClock } from "../utils/natural-time"
 import { ChatMessageInfoView } from "./ChatMessageInfo"
@@ -80,16 +80,20 @@ export const ChatMessageActions = ({
   const {
     toggleReaction,
     deleteMessage,
+    deleteFailedMessage,
     editMessage,
     editWindowMs,
     retryMessage,
-  } = useF0Chat()
+    capabilities,
+  } = useF0ChatStable()
   const { setReplyTo } = useChatReply()
   const { setEditingMessage } = useChatEdit()
   const [view, setView] = useState<"menu" | "info">("menu")
 
-  // Editing is offered on your own, non-deleted messages while the host allows
-  // it (provides `editMessage`) and the message is still within the edit window.
+  // Editing is offered on non-deleted messages while the host allows it
+  // (provides `editMessage`). The POLICY (whose messages, for how long) comes
+  // from `capabilities.canEditMessage` when provided, else the default: own
+  // messages within the edit window.
   // `Date.now()` here is fine: the popover content only mounts when open.
   const withinEditWindow =
     editWindowMs == null ||
@@ -99,11 +103,17 @@ export const ChatMessageActions = ({
     (attachment) => attachment.kind === "voice"
   )
   const canEdit =
-    isMine &&
     !message.deleted &&
     !isVoiceNote &&
     !!editMessage &&
-    withinEditWindow
+    (capabilities?.canEditMessage
+      ? capabilities.canEditMessage(message)
+      : isMine && withinEditWindow)
+  // Delete policy: capability override, else own messages only.
+  const canDelete = capabilities?.canDeleteMessage
+    ? capabilities.canDeleteMessage(message)
+    : isMine
+  const canReact = capabilities?.canReact !== false
 
   const handleOpenChange = (next: boolean) => {
     onOpenChange(next)
@@ -127,9 +137,15 @@ export const ChatMessageActions = ({
   // redundant), and the menu is reduced to Retry / Delete. The label carries
   // the send time, mirroring the sending clock's tooltip.
   const isFailed = message.status === "failed"
-  const failedLabel = `${i18n.chat.notSent} · ${formatClock(
-    new Date(message.createdAt)
-  )}`
+  // The tooltip carries the send time and, when the host explains the failure
+  // (`failureReason`), the reason — so the user knows if retrying can help.
+  const failedLabel = [
+    `${i18n.chat.notSent} · ${formatClock(new Date(message.createdAt))}`,
+    ...(message.failureReason ? [message.failureReason] : []),
+  ].join(" — ")
+  // Discarding a failed echo is a local-only operation; fall back to
+  // `deleteMessage` for hosts that special-case failed ids there.
+  const discardFailed = deleteFailedMessage ?? deleteMessage
 
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
@@ -169,12 +185,12 @@ export const ChatMessageActions = ({
             <MenuItem
               icon={ArrowCycle}
               label={i18n.chat.retry}
-              onClick={runAndClose(() => retryMessage(message.id))}
+              onClick={runAndClose(() => void retryMessage(message.id))}
             />
             <MenuItem
               icon={Delete}
               label={i18n.actions.delete}
-              onClick={runAndClose(() => deleteMessage(message.id))}
+              onClick={runAndClose(() => void discardFailed(message.id))}
             />
           </div>
         ) : view === "info" ? (
@@ -184,27 +200,31 @@ export const ChatMessageActions = ({
           />
         ) : (
           <>
-            <div className="flex items-center justify-between p-2">
-              {QUICK_EMOJIS.map((emoji) => (
-                <ButtonInternal
-                  key={emoji}
-                  label={emoji}
-                  emoji={emoji}
-                  variant="ghost"
-                  aria-label={emoji}
-                  onClick={() => react(emoji)}
-                  className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
-                />
-              ))}
-              <Picker
-                size="md"
-                variant="ghost"
-                label={i18n.chat.react}
-                onSelect={react}
-                icon={Plus}
-              />
-            </div>
-            <div className="h-px bg-f1-border-secondary" />
+            {canReact && (
+              <>
+                <div className="flex items-center justify-between p-2">
+                  {QUICK_EMOJIS.map((emoji) => (
+                    <ButtonInternal
+                      key={emoji}
+                      label={emoji}
+                      emoji={emoji}
+                      variant="ghost"
+                      aria-label={emoji}
+                      onClick={() => react(emoji)}
+                      className="h-8 w-8 rounded text-base hover:bg-f1-background-secondary-hover"
+                    />
+                  ))}
+                  <Picker
+                    size="md"
+                    variant="ghost"
+                    label={i18n.chat.react}
+                    onSelect={react}
+                    icon={Plus}
+                  />
+                </div>
+                <div className="h-px bg-f1-border-secondary" />
+              </>
+            )}
             <div className="flex flex-col gap-0 p-1">
               <MenuItem
                 icon={AlertCircleLine}
@@ -234,7 +254,7 @@ export const ChatMessageActions = ({
                 })}
               />
             </div>
-            {(canEdit || isMine) && (
+            {(canEdit || canDelete) && (
               <>
                 <div className="h-px bg-f1-border-secondary" />
                 <div className="flex flex-col gap-0 p-1">
@@ -248,11 +268,13 @@ export const ChatMessageActions = ({
                       })}
                     />
                   )}
-                  {isMine && (
+                  {canDelete && (
                     <MenuItem
                       icon={Delete}
                       label={i18n.actions.delete}
-                      onClick={runAndClose(() => deleteMessage(message.id))}
+                      onClick={runAndClose(
+                        () => void deleteMessage(message.id)
+                      )}
                     />
                   )}
                 </div>

@@ -8,7 +8,11 @@ import {
   useState,
 } from "react"
 
-import { useVirtualizer } from "@tanstack/react-virtual"
+import {
+  useVirtualizer,
+  type VirtualItem,
+  type Virtualizer,
+} from "@tanstack/react-virtual"
 import { animate, AnimatePresence, motion, useMotionValue } from "motion/react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -23,7 +27,12 @@ import { ScrollShadow } from "@/sds/ai/F0AiMessagesContainer/components/ScrollSh
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { LATEST } from "../types"
-import { type ChatRow, flattenChatRows } from "../utils/grouping"
+import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
+import {
+  clampNoOvershootVelocity,
+  createRowHeightEstimator,
+  type RowHeightEstimator,
+} from "../utils/scroll-tuning"
 import { useChatScroll } from "../hooks/useChatScroll"
 import { ChatMessageRowRenderer } from "./ChatMessageRowRenderer"
 import { DateTimeSeparator } from "./DateTimeSeparator"
@@ -36,8 +45,20 @@ const TYPING_EXIT_MS = 250
  * beyond it (page loads, window swaps) the pin re-anchors instantly. */
 const MAX_SLIDE_PX = 400
 
+/** Breathing room between the last row and the transcript's bottom edge. */
+const BOTTOM_GAP_PX = 24
+
+/** Fallbacks until enough rows have measured — message rows switch to the
+ * adaptive median (see below) as soon as real measurements exist. The footer
+ * (status line) is a CONSTANT-height row: `min-h-5` + its `pt-1` = 24. */
 const estimateRowSize = (row: ChatRow): number =>
-  row.type === "message" ? 76 : row.type === "typing" ? 60 : 36
+  row.type === "message"
+    ? 48
+    : row.type === "typing"
+      ? 60
+      : row.type === "footer"
+        ? 24
+        : 36
 
 /** Date of the row at the top of the viewport, for the sticky header. */
 const dateForRow = (rows: ChatRow[], from: number): string | null => {
@@ -96,10 +117,40 @@ export const ChatMessagesContainer = (): ReactNode => {
     setDividerId(firstUnreadId)
   }
 
-  const { rows, indexById } = useMemo(
-    () => flattenChatRows(messages, { dividerId }),
-    [messages, dividerId]
-  )
+  // Rows keep their IDENTITY across appends (previousRows feeds the last
+  // build back in): the row renderer is memoized on it, so a new message
+  // re-renders ~2 rows instead of every visible one.
+  const rowCacheRef = useRef<Map<string, ChatRow> | undefined>(undefined)
+  const { rows, indexById } = useMemo(() => {
+    const flat = flattenChatRows(messages, {
+      dividerId,
+      previousRows: rowCacheRef.current,
+    })
+    rowCacheRef.current = flat.rowCache
+    return flat
+  }, [messages, dividerId])
+
+  // Fresh tail of this commit (transports coalesce bursts into ONE render):
+  // every appended message animates in, staggered by its batch order — not
+  // just the last one. Same Map instance forever (renderer prop stability);
+  // conversation switches reset it so a cross-channel tail never animates.
+  const freshIdsRef = useRef<Map<string, number>>(new Map())
+  const freshPrevLastRef = useRef<string | null>(null)
+  const freshChannelRef = useRef(channel.id)
+  if (freshChannelRef.current !== channel.id) {
+    freshChannelRef.current = channel.id
+    freshIdsRef.current.clear()
+    freshPrevLastRef.current = null
+  }
+  const currentLastId = messages[messages.length - 1]?.id ?? null
+  if (freshPrevLastRef.current !== currentLastId) {
+    const fresh = freshTailIds(messages, freshPrevLastRef.current)
+    if (fresh.length > 0) {
+      freshIdsRef.current.clear()
+      fresh.forEach((id, order) => freshIdsRef.current.set(id, order))
+    }
+    freshPrevLastRef.current = currentLastId
+  }
 
   // Typing exit hysteresis: when the writer pauses, the dots row is NOT dropped
   // immediately — it stays for TYPING_EXIT_MS with `typingLeaving` so the bubble
@@ -139,10 +190,23 @@ export const ChatMessagesContainer = (): ReactNode => {
   ) {
     suppressedTypersRef.current.add(lastMessage.author.id)
   }
-  const visibleTypingUsers =
+  const filteredTypingUsers =
     suppressedTypersRef.current.size > 0
       ? typingUsers.filter((u) => !suppressedTypersRef.current.has(u.id))
       : typingUsers
+  // Content-stable identity: the runtime rebuilds `typingUsers` on every
+  // transport event; without this, `displayRows` (and with it `getItemKey`)
+  // would change identity per event during a typing streak and virtual-core
+  // would rebuild every row's measurement each time.
+  const typingUsersKey = filteredTypingUsers.map((u) => u.id).join("|")
+  const typingMemoRef = useRef({
+    key: typingUsersKey,
+    users: filteredTypingUsers,
+  })
+  if (typingMemoRef.current.key !== typingUsersKey) {
+    typingMemoRef.current = { key: typingUsersKey, users: filteredTypingUsers }
+  }
+  const visibleTypingUsers = typingMemoRef.current.users
 
   const typingActive = visibleTypingUsers.length > 0
   const [typingLeaving, setTypingLeaving] = useState(false)
@@ -178,45 +242,105 @@ export const ChatMessagesContainer = (): ReactNode => {
 
   // A typing indicator is an extra incoming "dots" bubble at the very end of the
   // list while someone is writing — or just stopped (leaving). Not part of the
-  // message-derived rows.
+  // message-derived rows. The delivery-status footer is ALSO its own trailing
+  // row (constant height): inside the last message's row it made every send
+  // shrink the previous row while growing the new one — stale-measurement
+  // churn the pin could only correct a frame late (the send bounce).
   const showTypingRow = typingActive || typingLeaving
-  const displayRows = useMemo<ChatRow[]>(
-    () =>
-      showTypingRow
-        ? [
-            ...rows,
-            {
-              type: "typing",
-              key: "typing",
-              users: typingActive
-                ? visibleTypingUsers
-                : lastTypingUsersRef.current,
-            },
-          ]
-        : rows,
-    [rows, visibleTypingUsers, typingActive, showTypingRow]
-  )
+  const displayRows = useMemo<ChatRow[]>(() => {
+    const out = [...rows]
+    if (lastMessage) {
+      out.push({ type: "footer", key: "status-footer", message: lastMessage })
+    }
+    if (showTypingRow) {
+      out.push({
+        type: "typing",
+        key: "typing",
+        users: typingActive ? visibleTypingUsers : lastTypingUsersRef.current,
+      })
+    }
+    return out
+  }, [rows, lastMessage, visibleTypingUsers, typingActive, showTypingRow])
 
   const getScrollElement = useCallback(() => viewportRef.current, [])
-  const estimateSize = useCallback(
-    (i: number) => estimateRowSize(displayRows[i]),
-    [displayRows]
-  )
+  // FIXED identities, reading through refs: virtual-core memoizes its
+  // measurements on `getItemKey`'s identity — a per-render callback would
+  // rebuild every row's measurement on each event during a typing streak.
+  const displayRowsRef = useRef(displayRows)
+  displayRowsRef.current = displayRows
+  // Adaptive message-height estimate: the spacer height (scrollHeight) is
+  // estimate-based until a new row measures, so a fixed estimate ~30px off
+  // makes every append slide too far and snap back one frame later (the
+  // send/receive bounce). The median of real measurements keeps the error
+  // within a few pixels — invisible inside the slide spring.
+  const messageEstimatorRef = useRef<RowHeightEstimator | null>(null)
+  if (messageEstimatorRef.current === null) {
+    messageEstimatorRef.current = createRowHeightEstimator(48)
+  }
+  const estimateSize = useCallback((i: number) => {
+    const row = displayRowsRef.current[i]
+    if (!row) return 48
+    if (row.type === "message") {
+      const estimator = messageEstimatorRef.current
+      return estimator ? estimator.estimate() : estimateRowSize(row)
+    }
+    return estimateRowSize(row)
+  }, [])
   const getItemKey = useCallback(
-    (i: number) => displayRows[i].key,
-    [displayRows]
+    (i: number) => displayRowsRef.current[i].key,
+    []
   )
+  const measureElement = useCallback((el: Element) => {
+    // Round to whole pixels — sub-pixel measurements accumulate into translateY
+    // drift that shows as jitter while scrolling up.
+    const height = Math.round(el.getBoundingClientRect().height)
+    const indexAttr = el.getAttribute("data-index")
+    const row =
+      indexAttr != null ? displayRowsRef.current[Number(indexAttr)] : undefined
+    if (row?.type === "message") messageEstimatorRef.current?.record(height)
+    return height
+  }, [])
+
+  // "The pin owns the bottom" — at bottom AND the entry positioning already
+  // settled. Declared BEFORE the virtualizer so its resize hook can read it
+  // (assigned after useChatScroll computes both). Starts false: during the
+  // ENTRY (rows cascading from estimate to real height while
+  // scrollToIndexSettled positions), virtual-core's own scroll compensation
+  // must stay active or the initial placement lands off.
+  const atBottomRef = useRef(false)
 
   const virtualizer = useVirtualizer({
     count: displayRows.length,
     getScrollElement,
     estimateSize,
     getItemKey,
-    // Round to whole pixels — sub-pixel measurements accumulate into translateY
-    // drift that shows as jitter while scrolling up.
-    measureElement: (el) => Math.round(el.getBoundingClientRect().height),
+    measureElement,
     overscan: 8,
+    // Bottom breathing room INSIDE the virtualizer's math: totals, offsets and
+    // scrollHeight all agree on it (a padding/spacer outside the virtualizer
+    // left the entry's end-alignment landing short of the true bottom). It's
+    // constant, so no row gains/loses height by being last.
+    paddingEnd: BOTTOM_GAP_PX,
+    // scrollToIndex's own "end" target is `item.end + scrollPaddingEnd`, which
+    // does NOT include paddingEnd — and this virtual-core RETRIES the scroll
+    // (up to 10 rAFs) until the offset matches ITS target, undoing our
+    // true-bottom pin by exactly the gap after the entry settles. Matching
+    // scrollPaddingEnd to paddingEnd makes its target the true bottom, so the
+    // retry loop and the pin agree.
+    scrollPaddingEnd: BOTTOM_GAP_PX,
   })
+  // virtual-core's default compensates a resize of any row above the viewport
+  // by rewriting scrollTop itself. Scrolled up that's exactly right (the
+  // reading position holds). Pinned at the BOTTOM it's a second scrollTop
+  // writer racing our pin+slide (the send-time footer/padding handoff makes
+  // the previous row shrink on every send) — the visible bounce. The pin owns
+  // the bottom; disable the built-in adjustment there. Instance property (not
+  // a constructor option), assigned per render (cheap, idempotent).
+  virtualizer.shouldAdjustScrollPositionOnItemSizeChange = (
+    item: VirtualItem,
+    _delta: number,
+    instance: Virtualizer<HTMLDivElement, Element>
+  ) => !atBottomRef.current && item.start < (instance.scrollOffset ?? 0)
 
   const {
     scrolledUp,
@@ -302,10 +426,11 @@ export const ChatMessagesContainer = (): ReactNode => {
     if (seeingAll && unreadCount > 0) markRead?.()
   }, [seeingAll, unreadCount, markRead])
 
-  // Latest "at bottom" reading for the pin layout effect, so it doesn't re-run
-  // on every scroll-state change.
-  const atBottomRef = useRef(atBottom)
-  atBottomRef.current = atBottom
+  // Keep the pre-declared ref fresh (used by the pin layout effect and the
+  // virtualizer's resize hook, neither of which should re-run per scroll
+  // state). Pin ownership requires the entry to have settled — before that,
+  // virtual-core's own compensation keeps the initial placement correct.
+  atBottomRef.current = atBottom && entrySettled
 
   // Keep the bottom pinned while we're at the bottom as the content at the end
   // grows or shrinks (a typing bubble appearing/leaving, a sent message landing,
@@ -324,6 +449,13 @@ export const ChatMessagesContainer = (): ReactNode => {
   const slideY = useMotionValue(0)
   const slideAnimRef = useRef<ReturnType<typeof animate> | null>(null)
   const prevTotalRef = useRef<number | null>(null)
+  // scrollTop as the last pin left it. When bottom content SHRINKS (the
+  // typing→message swap removes the taller dots row), the BROWSER clamps
+  // scrollTop during React's DOM mutation — before this effect runs — so the
+  // pin's own movement reads zero and the shrink lands as a dry jump. The
+  // difference against this ref recovers that clamped displacement so it can
+  // be folded into the slide like any other delta.
+  const pinnedBottomRef = useRef<number | null>(null)
   const slideChannelRef = useRef(channel.id)
   const totalSize = virtualizer.getTotalSize()
   useLayoutEffect(() => {
@@ -333,20 +465,38 @@ export const ChatMessagesContainer = (): ReactNode => {
     prevTotalRef.current = totalSize
     if (!sameConversation) {
       slideChannelRef.current = channel.id
+      pinnedBottomRef.current = null
       // Kill any in-flight slide from the conversation we just left.
       slideAnimRef.current?.stop()
       slideY.jump(0)
     }
-    if (!entrySettledRef.current) return
-    if (smoothInFlightRef.current) return
-    if (!el || !atBottomRef.current || displayRows.length === 0) return
+    if (
+      !entrySettledRef.current ||
+      smoothInFlightRef.current ||
+      !el ||
+      !atBottomRef.current
+    ) {
+      // Not pinned this pass (entry still positioning, glide in flight, or
+      // away from the bottom) — a later scrollTop diff would be meaningless.
+      pinnedBottomRef.current = null
+      return
+    }
+    if (displayRows.length === 0) return
 
     // Pin, measuring the ACTUAL viewport displacement — not the totalSize
     // delta — so someone parked 40-80px up (still "at bottom") gets their
     // offset folded into the slide instead of a visible micro-teleport.
+    const preClamp = pinnedBottomRef.current
     const before = el.scrollTop
     el.scrollTop = el.scrollHeight
-    const visualDelta = el.scrollTop - before
+    let visualDelta = el.scrollTop - before
+    pinnedBottomRef.current = el.scrollTop
+    // Browser-clamped shrink since the last pin (scrollTop moved DOWN without
+    // us): fold it too. Only the downward direction — an upward drift here is
+    // the user nudging the wheel, which must not be animated against.
+    if (preClamp !== null && before < preClamp) {
+      visualDelta += before - preClamp
+    }
 
     if (reducedMotion || !sameConversation || prevTotal === null) return
     if (visualDelta !== 0 && Math.abs(visualDelta) <= MAX_SLIDE_PX) {
@@ -355,13 +505,19 @@ export const ChatMessagesContainer = (): ReactNode => {
       // it), reframe with .jump() (zeroes velocity), then hand the real
       // velocity to the spring. Clamp the ACCUMULATED offset — a burst can
       // stack deltas past the cap and expose blank space below the last row.
-      const velocity = slideY.getVelocity()
-      slideY.jump(
-        Math.min(
-          MAX_SLIDE_PX,
-          Math.max(-MAX_SLIDE_PX, slideY.get() + visualDelta)
-        )
+      const nextOffset = Math.min(
+        MAX_SLIDE_PX,
+        Math.max(-MAX_SLIDE_PX, slideY.get() + visualDelta)
       )
+      // Clamped so the spring can NEVER overshoot the bottom: when an
+      // estimate→measure correction shrinks the remaining offset mid-flight,
+      // the inherited velocity would carry the content past the resting point
+      // and bounce back — the "weird jump" on send/receive.
+      const velocity = clampNoOvershootVelocity(
+        slideY.getVelocity(),
+        nextOffset
+      )
+      slideY.jump(nextOffset)
       slideAnimRef.current?.stop()
       slideAnimRef.current = animate(slideY, 0, {
         // ζ ≈ 1.0 (critically damped): no overshoot, ~280ms perceived settle.
@@ -402,6 +558,8 @@ export const ChatMessagesContainer = (): ReactNode => {
     >
       <div
         ref={viewportRef}
+        // QA hook (Storm story HUD traces scrollTop/scrollHeight per frame).
+        data-chat-viewport=""
         onScroll={handleScroll}
         // The user taking over (wheel/touch) aborts any return-to-bottom glide;
         // a wheel UP with a slide in flight fast-tracks the transform out so
@@ -420,6 +578,11 @@ export const ChatMessagesContainer = (): ReactNode => {
         onTouchMove={cancelSmoothScroll}
         className={cn(
           "absolute inset-0 overflow-y-auto px-4",
+          // The browser's native scroll anchoring is a THIRD scrollTop writer:
+          // when a row above the anchor resizes it counter-scrolls on its own
+          // and fights the pin — position management here is fully manual
+          // (pin + slide + anchors).
+          "[overflow-anchor:none]",
           // Hidden (opacity keeps layout + the a11y tree, so the virtualizer
           // measures normally) until the entry positioning settles, then a
           // short fade — the transcript appears already in place, zero motion.
@@ -451,9 +614,9 @@ export const ChatMessagesContainer = (): ReactNode => {
                     row={displayRows[vi.index]}
                     isGroup={isGroup}
                     isFirstRow={vi.index === 0}
-                    isLastRow={vi.index === displayRows.length - 1}
                     enterAnimation={!reducedMotion}
                     animatedIds={animatedIds}
+                    freshIds={freshIdsRef.current}
                     typingLeaving={
                       displayRows[vi.index].type === "typing"
                         ? typingLeaving

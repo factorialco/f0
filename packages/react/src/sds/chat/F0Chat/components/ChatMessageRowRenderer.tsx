@@ -28,6 +28,8 @@ const avatarFor = (author: F0ChatUser): ReactNode => (
 const topSpacing = (row: ChatRow, isFirstRow: boolean): string => {
   if (isFirstRow) return "pt-2"
   if (row.type === "message") return row.isFirstOfRun ? "pt-4" : "pt-1"
+  // The status footer hugs its message (MessageStatus brings its own pt-1).
+  if (row.type === "footer") return "pt-0"
   return "pt-4"
 }
 
@@ -43,33 +45,40 @@ const ChatMessageRowRendererComponent = ({
   row,
   isGroup,
   isFirstRow,
-  isLastRow,
   enterAnimation,
   animatedIds,
+  freshIds,
   typingLeaving = false,
 }: {
   row: ChatRow
   isGroup: boolean
   isFirstRow: boolean
-  isLastRow: boolean
   /** Whether enter animations are enabled at all (off for reduced motion). */
   enterAnimation: boolean
   /** Ids already shown — seeded with the initial set so only true arrivals animate. */
   animatedIds: Set<string>
+  /** Ids appended at the tail THIS commit → their batch order. Transports
+   * coalesce bursts into one render: every fresh message animates, staggered
+   * by its order (before, only the last one did — the rest popped in dry). */
+  freshIds: Map<string, number>
   /** Typing row only: fade the bubble out before the row is removed. */
   typingLeaving?: boolean
 }): ReactNode => {
-  const spacing = cn(topSpacing(row, isFirstRow), isLastRow && "pb-6")
+  // No per-row bottom padding: the transcript's bottom breathing room lives on
+  // the viewport (constant), so being/stopping-being the last row never
+  // changes a row's height (stable measurements = no send-time churn).
+  const spacing = topSpacing(row, isFirstRow)
 
-  // Decided once at mount: animate only the conversation's last message when it
-  // hasn't been seen yet. `isLastMessage` excludes prepended/older messages.
-  const [animate] = useState(
-    () =>
-      enterAnimation &&
-      row.type === "message" &&
-      row.isLastMessage &&
-      !animatedIds.has(row.message.id)
-  )
+  // Decided once at mount: animate only genuinely fresh arrivals (in this
+  // commit's appended tail and never shown before) — prepends, scroll-backs
+  // and window swaps never enter `freshIds`.
+  const [entry] = useState(() => {
+    if (!enterAnimation || row.type !== "message") return null
+    const order = freshIds.get(row.message.id)
+    if (order === undefined || animatedIds.has(row.message.id)) return null
+    return { order }
+  })
+  const animate = entry !== null
   // Mark as "seen" after commit (not during render) so render stays pure and a
   // Strict-Mode double render can't wrongly flag a fresh arrival as already shown.
   useEffect(() => {
@@ -105,7 +114,25 @@ const ChatMessageRowRendererComponent = ({
     )
   }
 
-  const { message, isFirstOfRun, isLastOfRun, isLastMessage } = row
+  if (row.type === "footer") {
+    // Delivery-status footer as its OWN constant-height row (see ChatRow):
+    // sending a message only APPENDS rows — nothing shrinks, nothing shifts.
+    const showFooterGutter = isGroup && !row.message.isMine
+    return (
+      <div className={cn("flex w-full gap-2", spacing)}>
+        {showFooterGutter && (
+          <span aria-hidden className="invisible shrink-0">
+            {avatarFor(row.message.author)}
+          </span>
+        )}
+        <div className="min-w-0 flex-1">
+          <MessageStatus message={row.message} isGroup={isGroup} />
+        </div>
+      </div>
+    )
+  }
+
+  const { message, isFirstOfRun, isLastOfRun } = row
   const isMine = message.isMine
   const showIdentity = isGroup && !isMine
 
@@ -130,45 +157,53 @@ const ChatMessageRowRendererComponent = ({
   ) : undefined
 
   const content = (
-    <>
-      <ChatMessageItem
-        message={message}
-        isMine={isMine}
-        author={showIdentity && isFirstOfRun ? message.author : undefined}
-        bubbleGutter={bubbleGutter}
-        belowGutter={spacer}
-        isFirstOfRun={isFirstOfRun}
-        isLastOfRun={isLastOfRun}
-      />
-      {isLastMessage && (
-        <div className="flex w-full gap-2">
-          {spacer}
-          <div className="min-w-0 flex-1">
-            <MessageStatus message={message} isGroup={isGroup} />
-          </div>
-        </div>
-      )}
-    </>
+    <ChatMessageItem
+      message={message}
+      isMine={isMine}
+      author={showIdentity && isFirstOfRun ? message.author : undefined}
+      bubbleGutter={bubbleGutter}
+      belowGutter={spacer}
+      isFirstOfRun={isFirstOfRun}
+      isLastOfRun={isLastOfRun}
+    />
   )
 
   return animate ? (
-    // WhatsApp-style arrival: the transcript's slide layer provides the actual
-    // translation, so the bubble itself only adds presence — incoming ones are
-    // fade-dominant (the motion of the list leads), a sent one keeps a
-    // slightly more confident pop from its own corner (bottom-right). The row
-    // mounts at full height, keeping measurements stable for the virtualizer.
-    // Only the last unseen row animates, so scrolled-back history is never
-    // disturbed.
+    // WhatsApp-style arrival: the transcript's slide layer provides the shared
+    // translation; the bubble adds its own presence on top — a sent one pops
+    // from its corner with a micro-overshoot (mobile's entry vocabulary), an
+    // incoming one rises more gently. Springs are soft enough to read but
+    // settle before the slide does, so the two never fight. Batched arrivals
+    // stagger by their order (45ms) so a coalesced burst enters with rhythm.
+    // The row mounts at full height, keeping measurements stable for the
+    // virtualizer. Only fresh unseen rows animate — scrolled-back history is
+    // never disturbed.
     <motion.div
       className={cn("flex flex-col gap-1", spacing)}
       style={{ transformOrigin: isMine ? "bottom right" : "bottom left" }}
       initial={
         isMine
-          ? { opacity: 0, y: 6, scale: 0.97 }
-          : { opacity: 0, y: 3, scale: 0.99 }
+          ? { opacity: 0, y: 11, scale: 0.96 }
+          : { opacity: 0, y: 6, scale: 0.98 }
       }
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: "spring", stiffness: 460, damping: 34, mass: 0.9 }}
+      transition={
+        isMine
+          ? {
+              type: "spring",
+              stiffness: 320,
+              damping: 22,
+              mass: 0.8,
+              delay: (entry?.order ?? 0) * 0.045,
+            }
+          : {
+              type: "spring",
+              stiffness: 280,
+              damping: 26,
+              mass: 0.85,
+              delay: (entry?.order ?? 0) * 0.045,
+            }
+      }
     >
       {content}
     </motion.div>
@@ -178,9 +213,11 @@ const ChatMessageRowRendererComponent = ({
 }
 
 /**
- * Memoized so a container re-render (scroll state, typing, sticky date) doesn't
- * re-render every visible row — only rows whose props actually changed. Row
- * objects are stable (memoized by `flattenChatRows`) and `animatedIds` is a
- * stable ref, so equality holds across scroll-driven renders.
+ * Memoized so a container re-render (scroll state, typing, sticky date, an
+ * append elsewhere) doesn't re-render every visible row — only rows whose
+ * props actually changed. Row identity is real: `flattenChatRows` reuses the
+ * previous build's row objects when the message and its flags are unchanged
+ * (`previousRows`), and `animatedIds`/`freshIds` are stable (mutated)
+ * containers, so equality holds across event-driven renders.
  */
 export const ChatMessageRowRenderer = memo(ChatMessageRowRendererComponent)

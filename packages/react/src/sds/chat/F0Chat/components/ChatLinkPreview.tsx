@@ -102,7 +102,10 @@ export const ChatLinkPreview = ({
             <img
               src={preview.imageUrl}
               alt=""
-              className="max-h-40 w-full object-cover"
+              // Fixed height (not max-h): the box is reserved before the OG
+              // image loads, so late loads never re-measure the row and shift
+              // the transcript mid-conversation.
+              className="h-40 w-full bg-f1-background-secondary object-cover"
             />
           )}
           <PreviewTexts preview={preview} compact={compact} />

@@ -478,6 +478,8 @@ export const defaultTranslations = {
     noResults: "No chats found",
     backToLatest: "Jump to latest",
     muted: "Muted",
+    mute: "Mute",
+    unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
     recordAudio: "Record audio",

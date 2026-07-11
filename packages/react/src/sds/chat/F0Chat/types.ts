@@ -145,8 +145,16 @@ export type F0ChatReaction = {
  * `sending` renders a delayed clock beside the bubble (only if the send takes
  * >500ms, so healthy networks never flash it); `failed` dims the bubble and
  * shows a tappable critical alert whose menu is reduced to Retry / Delete.
+ * `delivered` (reached the counterpart's device, not read yet) is for backends
+ * that distinguish it — Stream doesn't, so the factorial adapter never emits it
+ * and those messages go straight from `sent` to `read`.
  */
-export type F0ChatMessageStatus = "sending" | "sent" | "read" | "failed"
+export type F0ChatMessageStatus =
+  | "sending"
+  | "sent"
+  | "delivered"
+  | "read"
+  | "failed"
 
 export type F0ChatMessageReply = {
   id: string
@@ -164,6 +172,12 @@ export type F0ChatMessage = {
   createdAt: string
   isMine: boolean
   status?: F0ChatMessageStatus
+  /**
+   * Why the send failed (host-provided, human-readable — e.g. "Message too
+   * long"). Shown alongside the failed indicator's tooltip so the user knows
+   * whether a retry can help. Only meaningful with `status: "failed"`.
+   */
+  failureReason?: string
   /**
    * When the message was read (DM read receipt), ISO. Approximated from the
    * counterpart's per-channel last-read pointer — Stream has no per-message
@@ -238,7 +252,47 @@ export type F0ChatEditInput = {
   mentionedEveryone?: boolean
 }
 
-export type F0ChatStatus = "connecting" | "ready" | "error"
+/**
+ * Conversation lifecycle as the host reports it. `connecting` (first load)
+ * shows the skeleton and `error` the error state (with a Retry button when
+ * {@link F0ChatRuntime.reconnect} is provided). `reconnecting` / `offline` are
+ * for hosts with a live/cached transport: F0 renders the transcript exactly
+ * like `ready` — deliberately NO banner (per-message sending/failed states
+ * already communicate connectivity, WhatsApp-style) — falling back to the
+ * skeleton only when there are no messages to show yet. Hosts with a simple
+ * request/response lifecycle can keep using the original three states.
+ */
+export type F0ChatStatus =
+  | "connecting"
+  | "ready"
+  | "reconnecting"
+  | "offline"
+  | "error"
+
+/**
+ * Per-channel permissions. Everything is optional and defaults to today's
+ * behavior, so hosts only express what their transport restricts (frozen /
+ * read-only channels, moderation roles…):
+ * - `canSend` (default true): false hides the composer entirely.
+ * - `canReact` (default true): false hides the quick-reaction row, the emoji
+ *   pickers and disables toggling existing reaction pills.
+ * - `canUpload` (default: whether `uploadFiles` exists): false disables the
+ *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
+ * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
+ *   overrides the edit policy per message. Structural gates still apply (the
+ *   host must provide `editMessage`; deleted messages and voice notes are
+ *   never editable).
+ * - `canDeleteMessage` (default: own message): overrides the delete policy per
+ *   message (e.g. moderators deleting others' messages). Failed local echoes
+ *   are always discardable — they don't exist server-side.
+ */
+export type F0ChatCapabilities = {
+  canSend?: boolean
+  canReact?: boolean
+  canUpload?: boolean
+  canEditMessage?: (message: F0ChatMessage) => boolean
+  canDeleteMessage?: (message: F0ChatMessage) => boolean
+}
 
 /** A message that matched an in-conversation search (room to grow: preview, author…). */
 export type F0ChatSearchResult = {
@@ -277,28 +331,57 @@ export type F0ChatRuntime = {
   unreadCount: number
   /** Id of the first unread message — where the "new messages" divider goes. */
   firstUnreadId: string | null
-  sendMessage: (input: F0ChatSendInput) => void
+  /**
+   * Send a message. F0 fires-and-forgets; the OPTIMISTIC LIFECYCLE is the
+   * host's contract (this is what makes any backend feel instant):
+   *
+   * 1. Generate the message id CLIENT-SIDE and synchronously insert a local
+   *    echo into `messages` with `status: "sending"` — the bubble must appear
+   *    in the same render, not after the server acks.
+   * 2. Reconcile by id: when the server echo arrives, replace the local one
+   *    (same id → same bubble, no flicker) and advance `status`.
+   * 3. On failure, flip the echo to `status: "failed"` (optionally with
+   *    `failureReason`) and keep it in `messages` — F0 renders the retry /
+   *    discard affordances.
+   * 4. `retryMessage` re-sends with the SAME id so the server can dedupe when
+   *    the original send actually landed (timeouts lie on bad networks).
+   *
+   * factorial → Stream: `channel.state.addMessageSorted` + client-generated
+   * UUID + id-idempotent `sendMessage`.
+   */
+  sendMessage: (input: F0ChatSendInput) => void | Promise<void>
   /**
    * Re-send a message whose `status` is `"failed"`, reusing the SAME message
    * id so the transport can dedupe if the original send actually reached the
    * server (factorial → Stream is idempotent on client-generated message ids).
    * Flips the message back to `"sending"`.
    */
-  retryMessage: (id: string) => void
+  retryMessage: (id: string) => void | Promise<void>
   loadOlder: () => void
-  toggleReaction: (messageId: string, emoji: string) => void
+  toggleReaction: (messageId: string, emoji: string) => void | Promise<void>
   /**
-   * Delete a message. For a `"failed"` message (never delivered) the host must
-   * discard the local echo only — no server call, the message doesn't exist
-   * server-side (factorial → `channel.state.removeMessage`).
+   * Delete a message that exists server-side (soft delete → tombstone, or hard
+   * delete → removed from `messages`).
+   *
+   * When `deleteFailedMessage` is not provided this is ALSO called for failed
+   * local echoes, and the host must special-case them: discard the local echo
+   * only — no server call, the message doesn't exist server-side (factorial →
+   * `channel.state.removeMessage`). Prefer providing `deleteFailedMessage` so
+   * the two semantics stay explicit.
    */
-  deleteMessage: (id: string) => void
+  deleteMessage: (id: string) => void | Promise<void>
+  /**
+   * Discard a `"failed"` local echo (never delivered — a purely local
+   * operation, no server call). When omitted, F0 falls back to
+   * `deleteMessage`, which then must handle the failed case itself.
+   */
+  deleteFailedMessage?: (id: string) => void | Promise<void>
   /**
    * Edit an existing message (text, mentions, attachments). Omit to disable
    * editing — the "Edit" action then never shows. factorial →
    * `client.partialUpdateMessage`.
    */
-  editMessage?: (id: string, input: F0ChatEditInput) => void
+  editMessage?: (id: string, input: F0ChatEditInput) => void | Promise<void>
   /**
    * How long after sending a message stays editable (ms). The "Edit" action is
    * hidden once a message is older than this. Omit for no limit (editable
@@ -307,6 +390,15 @@ export type F0ChatRuntime = {
   editWindowMs?: number
   /** Called as the user types so the runtime can emit typing.start/stop. */
   onInputActivity: () => void
+  /**
+   * Emit typing.stop immediately — the composer calls it on send, when the
+   * text is cleared and on unmount, so the counterpart's dots drop the very
+   * moment typing actually stopped. Hosts whose transport auto-expires typing
+   * (Stream's `keystroke()` does after a few seconds) can omit it and rely on
+   * the timeout; transports without auto-expiry need it (factorial →
+   * `channel.stopTyping()`).
+   */
+  stopTyping?: () => void | Promise<void>
   uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>
   /**
    * Max files attachable at once. When a selection/drop would exceed it, the
@@ -320,7 +412,24 @@ export type F0ChatRuntime = {
    * (the Stream adapter omits it, so the mic button stays hidden there).
    */
   transcribe?: TranscribeFn
-  markRead?: () => void
+  /**
+   * Mark the conversation read. `untilMessageId` supports partial reads
+   * ("read up to this message") for backends that track them; F0 currently
+   * always calls it without arguments (read everything), so simple hosts can
+   * ignore the parameter.
+   */
+  markRead?: (untilMessageId?: string) => void | Promise<void>
+  /**
+   * Per-channel permissions (frozen / read-only channels, moderation…). Omit
+   * for the default policy — see {@link F0ChatCapabilities}.
+   */
+  capabilities?: F0ChatCapabilities
+  /**
+   * Retry after a load failure — wired to the Retry button in the error state.
+   * Omit to render the error message without an action (previous behavior).
+   * factorial → re-run `channel.watch()`.
+   */
+  reconnect?: () => void | Promise<void>
   /**
    * Search the conversation's members for the `@`-mention popover, returning
    * matches for `query` (empty string → the full member list). Provide it
@@ -335,7 +444,14 @@ export type F0ChatRuntime = {
    * Drives the header "Pin / Unpin" action; omit to hide it. factorial →
    * `channel.pin()` / `channel.unpin()`.
    */
-  togglePin?: () => void
+  togglePin?: () => void | Promise<void>
+  /**
+   * Toggle the conversation's muted state for the current user. Drives the
+   * header "Mute / Unmute" action; omit to hide it (the header still shows the
+   * `channel.muted` icon either way). factorial → `channel.mute()` /
+   * `channel.unmute()`.
+   */
+  toggleMute?: () => void | Promise<void>
   /**
    * Full-text search within this conversation, returning matches oldest→newest.
    * Omit to fall back to a client-side substring search over the loaded

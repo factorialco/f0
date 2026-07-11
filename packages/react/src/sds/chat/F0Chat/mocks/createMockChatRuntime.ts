@@ -80,6 +80,16 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   /** Simulate the other side writing (typing pause, then a message) — exposed
    * so stories can drive bursts of incoming activity on demand. */
   receiveFrom: (responder: F0ChatUser) => void
+  /** N incoming messages landing in ONE commit (coalesced transport batch). */
+  receiveBatch: (
+    authors: F0ChatUser[],
+    count: number,
+    opts?: { withImage?: boolean }
+  ) => void
+  /** An incoming reaction on a random recent message. */
+  receiveReaction: () => void
+  /** The other side reads everything (my sent/delivered → read). */
+  readSweep: () => void
   /**
    * Toggle the simulated network: while true, sends settle as `failed`;
    * flipping back to false sweeps pending/failed messages and re-sends them
@@ -129,16 +139,29 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const markMineRead = useCallback(() => {
     setMessages((prev) =>
       prev.map((m) =>
-        m.isMine && m.status === "sent" ? { ...m, status: "read" } : m
+        m.isMine && (m.status === "sent" || m.status === "delivered")
+          ? { ...m, status: "read" }
+          : m
       )
     )
   }, [])
 
+  // Typing is ACCUMULATIVE: overlapping receives add/remove their own typer
+  // instead of stomping the whole array (multi-author bursts keep every dot).
+  const addTyper = useCallback((user: F0ChatUser) => {
+    setTypingUsers((prev) =>
+      prev.some((u) => u.id === user.id) ? prev : [...prev, user]
+    )
+  }, [])
+  const removeTyper = useCallback((userId: string) => {
+    setTypingUsers((prev) => prev.filter((u) => u.id !== userId))
+  }, [])
+
   const receiveFrom = useCallback(
     (responder: F0ChatUser) => {
-      setTypingUsers([responder])
+      addTyper(responder)
       after(1400, () => {
-        setTypingUsers([])
+        removeTyper(responder.id)
         setMessages((prev) => [
           ...prev,
           {
@@ -151,8 +174,75 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
         ])
       })
     },
-    [after]
+    [addTyper, after, removeTyper]
   )
+
+  // A coalesced batch: N messages land in ONE commit (real transports deliver
+  // reconnect/burst packets like this) — exercises the staggered entry.
+  const receiveBatch = useCallback(
+    (
+      authors: F0ChatUser[],
+      count: number,
+      opts: { withImage?: boolean } = {}
+    ) => {
+      if (authors.length === 0 || count <= 0) return
+      setMessages((prev) => [
+        ...prev,
+        ...Array.from({ length: count }, (_, i): F0ChatMessage => {
+          const author = authors[i % authors.length]
+          const withImage = opts.withImage && i === count - 1
+          return {
+            id: nextId("msg"),
+            author,
+            body: withImage
+              ? ""
+              : SAMPLE_TEXTS[(prev.length + i + 3) % SAMPLE_TEXTS.length],
+            createdAt: new Date(Date.now() + i).toISOString(),
+            isMine: false,
+            attachments: withImage
+              ? [
+                  {
+                    kind: "image",
+                    url: `https://picsum.photos/seed/${prev.length + i}/640/420`,
+                    name: "photo.jpg",
+                    // Half WITH dimensions (height reserved, zero shift) and
+                    // half without (exercises the fallback) — QA both paths.
+                    ...(i % 2 === 0 ? { width: 640, height: 420 } : {}),
+                  },
+                ]
+              : undefined,
+          }
+        }),
+      ])
+    },
+    []
+  )
+
+  /** An INCOMING reaction on a recent message (reactedByMe stays false). */
+  const receiveReaction = useCallback(() => {
+    const emojis = ["👍", "❤️", "😂", "🎉", "😮"]
+    setMessages((prev) => {
+      if (prev.length === 0) return prev
+      const window = Math.min(10, prev.length)
+      const target = prev[prev.length - 1 - Math.floor(Math.random() * window)]
+      const emoji = emojis[Math.floor(Math.random() * emojis.length)]
+      return prev.map((m) => {
+        if (m.id !== target.id) return m
+        const reactions = m.reactions ? [...m.reactions] : []
+        const idx = reactions.findIndex((r) => r.emoji === emoji)
+        if (idx === -1) reactions.push({ emoji, count: 1, reactedByMe: false })
+        else
+          reactions[idx] = {
+            ...reactions[idx],
+            count: reactions[idx].count + 1,
+          }
+        return { ...m, reactions }
+      })
+    })
+  }, [])
+
+  /** The other side "reads" everything — my sent/delivered flip to read. */
+  const readSweep = useCallback(() => markMineRead(), [markMineRead])
 
   // Ambient activity: the other side occasionally writes, so typing + unread +
   // the read divider are demonstrable without the user doing anything.
@@ -175,7 +265,23 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === id
-              ? { ...m, status: failSendsRef.current ? "failed" : "sent" }
+              ? failSendsRef.current
+                ? {
+                    ...m,
+                    status: "failed",
+                    failureReason: "Simulated network error",
+                  }
+                : { ...m, status: "sent", failureReason: undefined }
+              : m
+          )
+        )
+      )
+      // A visible "delivered" beat before the read receipt lands.
+      after(2000, () =>
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === id && m.status === "sent"
+              ? { ...m, status: "delivered" }
               : m
           )
         )
@@ -217,9 +323,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
 
       const responder = seed.others[0]
       if (responder && !failSendsRef.current) {
-        after(900, () => setTypingUsers([responder]))
+        after(900, () => addTyper(responder))
         after(2200, () => {
-          setTypingUsers([])
+          removeTyper(responder.id)
           setMessages((prev) => [
             ...prev,
             {
@@ -234,7 +340,15 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
         })
       }
     },
-    [after, markMineRead, seed.me, seed.others, settleSend]
+    [
+      addTyper,
+      after,
+      markMineRead,
+      removeTyper,
+      seed.me,
+      seed.others,
+      settleSend,
+    ]
   )
 
   // Same id kept across retries — mirrors the transport's server-side dedupe
@@ -304,6 +418,11 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
         return { ...m, reactions }
       })
     )
+  }, [])
+
+  // Discard a failed local echo — mirrors `deleteFailedMessage` (local only).
+  const deleteFailedMessage = useCallback((id: string) => {
+    setMessages((prev) => prev.filter((m) => m.id !== id))
   }, [])
 
   // Within the unsend window the message is removed entirely; after it, we leave
@@ -416,10 +535,12 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     loadOlder,
     toggleReaction,
     deleteMessage,
+    deleteFailedMessage,
     editMessage,
     // Generous window so seeded "mine" messages stay editable in the demo.
     editWindowMs: 24 * 60 * 60 * 1000,
     onInputActivity: () => {},
+    stopTyping: () => {},
     uploadFiles,
     // Demoes the "too many files" transient error (mirrors the AI chat).
     maxFiles: 5,
@@ -430,6 +551,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     // Only meaningful for groups; the composer suppresses mentions in DMs.
     searchMembers,
     receiveFrom,
+    receiveBatch,
+    receiveReaction,
+    readSweep,
     setFailSends,
   }
 }

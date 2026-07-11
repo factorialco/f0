@@ -11,6 +11,7 @@ import {
   Cross,
   Ellipsis,
   Maximize,
+  Microphone,
   MicrophoneNegative,
   Minimize,
   PushPin,
@@ -54,7 +55,7 @@ export const ChatHeader = ({
 }: ChatHeaderProps): ReactNode => {
   const i18n = useI18n()
   const { searchOpen, openSearch } = useChatSearch()
-  const { togglePin } = useF0Chat()
+  const { togglePin, toggleMute } = useF0Chat()
   // On mobile the chat already fills the screen, so the fullscreen toggle is a
   // no-op — hide it (matches F0AiChatHeader).
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
@@ -63,8 +64,9 @@ export const ChatHeader = ({
   // DMs show a presence dot (green online / grey offline).
   const showPresence = channel.type === "dm" && channel.presence !== undefined
 
-  // Overflow menu: search, plus pin/unpin when the host supports it. Built as
-  // data so adding actions later (mute, leave…) is a one-line change.
+  // Overflow menu: search, plus pin/unpin and mute/unmute when the host
+  // supports them. Built as data so adding actions later (leave…) is a
+  // one-line change.
   const menuItems: DropdownItem[] = [
     { label: i18n.actions.search, icon: Search, onClick: openSearch },
     ...(togglePin
@@ -72,7 +74,16 @@ export const ChatHeader = ({
           {
             label: channel.pinned ? i18n.chat.unpin : i18n.chat.pin,
             icon: channel.pinned ? PushPinSolid : PushPin,
-            onClick: togglePin,
+            onClick: () => void togglePin(),
+          },
+        ]
+      : []),
+    ...(toggleMute
+      ? [
+          {
+            label: channel.muted ? i18n.chat.unmute : i18n.chat.mute,
+            icon: channel.muted ? Microphone : MicrophoneNegative,
+            onClick: () => void toggleMute(),
           },
         ]
       : []),

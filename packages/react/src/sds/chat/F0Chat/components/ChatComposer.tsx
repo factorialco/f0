@@ -61,13 +61,18 @@ export const ChatComposer = (): ReactNode => {
     sendMessage,
     editMessage,
     onInputActivity,
+    stopTyping,
     uploadFiles,
     transcribe,
     maxFiles,
     channel,
     searchMembers,
     currentUserId,
+    capabilities,
   } = useF0Chat()
+  // Uploads need both the runtime hook AND the capability (a frozen channel
+  // can forbid attachments even when the transport could upload them).
+  const canUpload = !!uploadFiles && capabilities?.canUpload !== false
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
@@ -162,7 +167,7 @@ export const ChatComposer = (): ReactNode => {
   // Voice NOTES (WhatsApp-style): when the runtime can upload, the mic records
   // audio and sends it as its own message on confirm — no transcription.
   // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
-  const voiceNotesEnabled = !!uploadFiles
+  const voiceNotesEnabled = canUpload
   // While the confirmed recording uploads, the action row swaps for a "sending
   // voice note" status so the confirm→message gap isn't silent.
   const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
@@ -228,8 +233,19 @@ export const ChatComposer = (): ReactNode => {
       setValue(next)
       setCursorPosition(cursorPos)
       onInputActivity()
+      // Clearing the text means typing stopped NOW — don't leave the
+      // counterpart's dots hanging until the transport's timeout.
+      if (next.trim().length === 0) void stopTyping?.()
     },
-    [onInputActivity]
+    [onInputActivity, stopTyping]
+  )
+
+  // Leaving the conversation mid-type must also drop the dots immediately.
+  useEffect(
+    () => () => {
+      void stopTyping?.()
+    },
+    [stopTyping]
   )
 
   const updateCursorPosition = useCallback(() => {
@@ -244,7 +260,7 @@ export const ChatComposer = (): ReactNode => {
 
   const handleUpload = useCallback(
     async (files: File[]) => {
-      if (files.length === 0 || !uploadFiles) return
+      if (files.length === 0 || !uploadFiles || !canUpload) return
       // Reject the whole batch when it would exceed the cap — a transient banner
       // is friendlier than silently truncating the user's selection.
       if (
@@ -284,6 +300,7 @@ export const ChatComposer = (): ReactNode => {
     },
     [
       uploadFiles,
+      canUpload,
       maxFiles,
       showTransientError,
       i18n.chat.tooManyFilesError,
@@ -351,6 +368,8 @@ export const ChatComposer = (): ReactNode => {
 
   const handleSend = useCallback(() => {
     if (!canSend) return
+    // Typing stopped by definition — the message is out (or the edit saved).
+    void stopTyping?.()
     const ready = attachments.flatMap((a) =>
       a.status === "ready" ? [a.attachment] : []
     )
@@ -388,6 +407,7 @@ export const ChatComposer = (): ReactNode => {
     replyTo,
     sendMessage,
     setReplyTo,
+    stopTyping,
     value,
     editingMessage,
     editMessage,
@@ -634,7 +654,7 @@ export const ChatComposer = (): ReactNode => {
                   label={i18n.chat.attachFile}
                   icon={Paperclip}
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={!uploadFiles || isTranscribing}
+                  disabled={!canUpload || isTranscribing}
                 />
                 {/* Insert emoji into the message (reuses the reactions picker). */}
                 <Picker

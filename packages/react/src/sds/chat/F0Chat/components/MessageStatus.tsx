@@ -52,6 +52,8 @@ export const MessageStatus = ({
               { count: message.readByCount }
             )
           : `${i18n.chat.read} ${time}`
+    else if (message.status === "delivered")
+      label = `${i18n.chat.delivered} ${time}`
     else if (message.status === "sent") label = `${i18n.chat.sent} ${time}`
   }
 

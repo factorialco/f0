@@ -23,7 +23,9 @@ export const bubbleCornerClass = (
   isLastOfRun: boolean
 ): string =>
   cn(
-    "rounded-2xl",
+    // The radius transitions because extending a run flips the previous
+    // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
+    "rounded-2xl transition-[border-radius] duration-150",
     !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
     !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
   )

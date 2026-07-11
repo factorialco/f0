@@ -137,6 +137,11 @@ export type Seed = {
   alwaysTyping?: boolean
   /** Demo (groups): a random group of >1 people type before each reply. */
   multiTyping?: boolean
+  /** Demo: read-only channel — `capabilities` hide the composer, reactions and
+   * uploads (frozen/announcements channel). */
+  readOnly?: boolean
+  /** Demo: the conversation fails to load (error state + Retry via `reconnect`). */
+  failsToLoad?: boolean
 }
 
 /** Group avatar: the emoji when one is given, otherwise the company avatar
@@ -615,6 +620,57 @@ export const SEEDS: Seed[] = [
     avatar: groupAvatar("Leadership"),
     participants: [MARCUS, OWEN],
     lines: [],
+  },
+  // GROUP — read-only (capabilities demo): no composer, no reacting, no uploads.
+  // Existing reactions still render (they're real data).
+  {
+    id: "grp-announcements",
+    type: "group",
+    title: "Announcements",
+    avatar: groupAvatar("Announcements", "📣"),
+    participants: [MARCUS, OWEN, GRACE],
+    readOnly: true,
+    lines: [
+      {
+        from: MARCUS,
+        body: "Offices close early this Friday for the summer party 🎉",
+        min: 2 * DAY,
+      },
+      {
+        from: OWEN,
+        body: "Q2 results are out — great quarter everyone, thank you!",
+        min: 5 * HOUR,
+      },
+      {
+        from: MARCUS,
+        body: "@here the new expense policy kicks in on Monday",
+        min: 30 * MIN,
+        mentionedEveryone: true,
+      },
+    ],
+  },
+  // DM — fails to load (connection-state demo): error state with a Retry
+  // button (`reconnect`) that recovers after a short "reconnect".
+  {
+    id: "dm-viktor",
+    type: "dm",
+    title: VIKTOR.name,
+    avatar: VIKTOR.avatar,
+    presence: "offline",
+    participants: [VIKTOR],
+    failsToLoad: true,
+    lines: [
+      {
+        from: VIKTOR,
+        body: "Draft RFC is ready for a first pass",
+        min: 26 * HOUR,
+      },
+      {
+        from: ME,
+        body: "Nice — I'll read it tomorrow morning.",
+        min: 25 * HOUR,
+      },
+    ],
   },
 ]
 

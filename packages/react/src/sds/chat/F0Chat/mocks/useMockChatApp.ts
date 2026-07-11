@@ -35,6 +35,8 @@ export type MockChatAppValue = {
   markRead: (convId: string) => void
   toggleReaction: (convId: string, messageId: string, emoji: string) => void
   deleteMessage: (convId: string, messageId: string) => void
+  /** Discard a failed local echo — purely local, mirrors `deleteFailedMessage`. */
+  discardFailed: (convId: string, messageId: string) => void
   editMessage: (
     convId: string,
     messageId: string,
@@ -46,6 +48,13 @@ export type MockChatAppValue = {
   /** Pinned (favourite) state per conversation, toggled from the header. */
   pinned: Record<string, boolean>
   togglePin: (convId: string) => void
+  /** Muted state per conversation, toggled from the header overflow menu. */
+  muted: Record<string, boolean>
+  toggleMute: (convId: string) => void
+  /** Load state per conversation — `failsToLoad` seeds start in "error" and
+   * recover via `reconnect` (drives the error state's Retry button). */
+  loadState: Record<string, "ready" | "connecting" | "error">
+  reconnect: (convId: string) => void
 }
 
 const MockChatAppContext = createContext<MockChatAppValue | null>(null)
@@ -73,6 +82,22 @@ export const useMockChatStore = (): MockChatAppValue => {
   const togglePin = useCallback((convId: string) => {
     setPinned((prev) => ({ ...prev, [convId]: !prev[convId] }))
   }, [])
+  // Live muted state (seeded from the seeds' static flag) so the header's
+  // Mute/Unmute action updates the sidebar icon too.
+  const [muted, setMuted] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(SEEDS.filter((s) => s.muted).map((s) => [s.id, true]))
+  )
+  const toggleMute = useCallback((convId: string) => {
+    setMuted((prev) => ({ ...prev, [convId]: !prev[convId] }))
+  }, [])
+  // `failsToLoad` seeds open in the error state until Retry "reconnects" them.
+  const [loadState, setLoadState] = useState<
+    Record<string, "ready" | "connecting" | "error">
+  >(() =>
+    Object.fromEntries(
+      SEEDS.map((s) => [s.id, s.failsToLoad ? "error" : "ready"])
+    )
+  )
   const olderLeft = useRef<Record<string, number>>(
     Object.fromEntries(SEEDS.map((s) => [s.id, s.olderPages ?? 0]))
   )
@@ -141,15 +166,22 @@ export const useMockChatStore = (): MockChatAppValue => {
 
       // Flaky network simulation: roughly 1 in 4 sends stalls long enough for
       // the delayed sending clock (>500ms) to appear, then FAILS — surfacing
-      // the red "Not sent" indicator with its Retry/Delete menu. The rest
-      // settle fast, so the clock never shows on them.
+      // the red "Not sent" indicator with its Retry/Delete menu (the tooltip
+      // carries `failureReason`). The rest settle fast, so the clock never
+      // shows on them.
       const flaky = Math.random() < 0.25
       if (flaky) {
         after(3000, () =>
           patch(convId, (s) => ({
             ...s,
             messages: s.messages.map((m) =>
-              m.id === id ? { ...m, status: "failed" } : m
+              m.id === id
+                ? {
+                    ...m,
+                    status: "failed",
+                    failureReason: "Simulated network error",
+                  }
+                : m
             ),
           }))
         )
@@ -162,6 +194,18 @@ export const useMockChatStore = (): MockChatAppValue => {
           ...s,
           messages: s.messages.map((m) =>
             m.id === id ? { ...m, status: "sent" } : m
+          ),
+        }))
+      )
+      // A visible "delivered" stage before the reply reads it (backends that
+      // distinguish delivery — the footer shows "Delivered" for a beat).
+      after(1300, () =>
+        patch(convId, (s) => ({
+          ...s,
+          messages: s.messages.map((m) =>
+            m.id === id && m.status === "sent"
+              ? { ...m, status: "delivered" }
+              : m
           ),
         }))
       )
@@ -191,7 +235,9 @@ export const useMockChatStore = (): MockChatAppValue => {
           messages: [
             ...s.messages.map(
               (m): F0ChatMessage =>
-                m.isMine && m.status === "sent" ? { ...m, status: "read" } : m
+                m.isMine && (m.status === "sent" || m.status === "delivered")
+                  ? { ...m, status: "read" }
+                  : m
             ),
             ...typers.map(
               (responder, i): F0ChatMessage => ({
@@ -216,7 +262,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       patch(convId, (s) => ({
         ...s,
         messages: s.messages.map((m) =>
-          m.id === messageId ? { ...m, status: "sending" } : m
+          m.id === messageId
+            ? { ...m, status: "sending", failureReason: undefined }
+            : m
         ),
       }))
       after(900, () =>
@@ -229,6 +277,27 @@ export const useMockChatStore = (): MockChatAppValue => {
       )
     },
     [after, patch]
+  )
+
+  // Discard a failed local echo — mirrors `deleteFailedMessage`: purely local,
+  // no tombstone (the message never existed "server-side").
+  const discardFailed = useCallback(
+    (convId: string, messageId: string) => {
+      patch(convId, (s) => ({
+        ...s,
+        messages: s.messages.filter((m) => m.id !== messageId),
+      }))
+    },
+    [patch]
+  )
+
+  // Retry a failed load: brief "connecting" (skeleton), then ready.
+  const reconnect = useCallback(
+    (convId: string) => {
+      setLoadState((prev) => ({ ...prev, [convId]: "connecting" }))
+      after(900, () => setLoadState((prev) => ({ ...prev, [convId]: "ready" })))
+    },
+    [after]
   )
 
   const toggleReaction = useCallback(
@@ -341,12 +410,17 @@ export const useMockChatStore = (): MockChatAppValue => {
       markRead,
       toggleReaction,
       deleteMessage,
+      discardFailed,
       editMessage,
       loadOlder,
       loadingOlder,
       hasMoreOlder,
       pinned,
       togglePin,
+      muted,
+      toggleMute,
+      loadState,
+      reconnect,
     }),
     [
       states,
@@ -355,12 +429,17 @@ export const useMockChatStore = (): MockChatAppValue => {
       markRead,
       toggleReaction,
       deleteMessage,
+      discardFailed,
       editMessage,
       loadOlder,
       loadingOlder,
       hasMoreOlder,
       pinned,
       togglePin,
+      muted,
+      toggleMute,
+      loadState,
+      reconnect,
     ]
   )
 }

@@ -29,7 +29,7 @@ const ChatShell = ({
   onToggleFullscreen,
   onClose,
 }: F0ChatProps): ReactNode => {
-  const { channel, status, messages } = useF0Chat()
+  const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
@@ -83,12 +83,19 @@ const ChatShell = ({
         <ChatConnecting />
       ) : status === "error" ? (
         <ChatError />
-      ) : messages.length === 0 ? (
+      ) : messages.length > 0 ? (
+        // `reconnecting` / `offline` render the transcript exactly like
+        // `ready` — per-message states communicate connectivity, no banner.
+        <ChatMessagesContainer />
+      ) : status === "ready" ? (
         <ChatEmptyState />
       ) : (
-        <ChatMessagesContainer />
+        // reconnecting/offline with nothing loaded yet: can't tell "empty"
+        // from "not loaded" — show the skeleton until the transport settles.
+        <ChatConnecting />
       )}
-      <ChatComposer />
+      {/* A read-only channel (frozen, announcements…) hides the composer. */}
+      {capabilities?.canSend !== false && <ChatComposer />}
       <ChatDropOverlay visible={dragging} />
       <ChatImagePreview />
     </div>

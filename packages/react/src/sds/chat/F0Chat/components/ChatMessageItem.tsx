@@ -7,7 +7,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
+import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
@@ -44,7 +44,9 @@ export const ChatMessageItem = ({
   const reducedMotion = useReducedMotion()
   const [actionsOpen, setActionsOpen] = useState(false)
   const { highlightedId } = useChatHighlightedId()
-  const { currentUserId } = useF0Chat()
+  // Stable slice — the full runtime context changes on every transport event
+  // and would re-render every mounted row.
+  const { currentUserId } = useF0ChatStable()
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0
   // Whether the row MOUNTED with its reactions already there (history, or a
@@ -94,15 +96,16 @@ export const ChatMessageItem = ({
                 bubble), so it reads even on image-only / multi-part messages. */}
             <div
               className={cn(
-                // `transition-shadow` is always on so the jump-to highlight ring
-                // fades in/out instead of snapping when `highlighted` toggles.
-                // `min-w-0` lets this flex item shrink below its content's
-                // intrinsic width so the reply quote's single line truncates
-                // instead of forcing the bubble wider than the column.
-                "flex min-w-0 max-w-full flex-col gap-1 transition-shadow duration-200",
                 // Match the bubble's chained corners so the highlight ring and
                 // hover surface follow its exact shape (not a fixed 2xl box).
                 bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun),
+                // Shadow AND radius transition together (single property list —
+                // tailwind-merge would otherwise drop one): the jump-to ring
+                // fades instead of snapping, and a run extending animates the
+                // tail corner. `min-w-0` lets this flex item shrink below its
+                // content's intrinsic width so the reply quote's single line
+                // truncates instead of forcing the bubble wider than the column.
+                "flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and

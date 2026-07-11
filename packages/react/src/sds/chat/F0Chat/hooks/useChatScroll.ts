@@ -312,6 +312,14 @@ export function useChatScroll({
         if (align === "start" && startOffset > 0) {
           el.scrollTop = Math.max(0, el.scrollTop - startOffset)
         }
+        // An "end" target means the TRUE bottom — which includes bottom
+        // breathing room the row-alignment math doesn't cover. Pin EVERY tick
+        // (assigning past the max clamps), so the stability check below
+        // measures the real landing position and the entry can never settle
+        // a gap short of the bottom.
+        if (align === "end") {
+          el.scrollTop = el.scrollHeight
+        }
         const next = el.scrollTop
         frames += 1
         if (prev != null && Math.abs(next - prev) < 1) stableFrames += 1
@@ -319,13 +327,6 @@ export function useChatScroll({
         prev = next
         if (stableFrames >= 2 || frames >= 12) {
           initialRafRef.current = null
-          if (align === "end") {
-            // scrollHeight is the full virtual height; assigning past the max
-            // clamps to the true bottom (no-op when already there).
-            const distanceFromBottom =
-              el.scrollHeight - el.scrollTop - el.clientHeight
-            if (distanceFromBottom > 1) el.scrollTop = el.scrollHeight
-          }
           syncScrollFlags()
           onSettled?.()
           return

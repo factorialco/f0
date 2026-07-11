@@ -19,6 +19,7 @@ export type {
   F0ChatSendInput,
   F0ChatEditInput,
   F0ChatStatus,
+  F0ChatCapabilities,
   F0ChatSearchResult,
   F0ChatRuntime,
 } from "./types"

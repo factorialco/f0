@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { type ReactNode, useState } from "react"
+import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 
 import { F0Chat } from "./F0Chat"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
+import { useChatStorm } from "./mocks/useChatStorm"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
 import { type F0ChatRuntime, type F0ChatUser } from "./types"
 
@@ -202,6 +203,146 @@ const FlakyNetworkConversation = (): ReactNode => {
   )
 }
 
+/**
+ * QA HUD for the Storm story: FPS, storm events/s, React commit stats and a
+ * scroll trace (distance-from-bottom per frame, drawn as a sparkline). The
+ * send/receive bounce reads as spikes in the trace — a healthy transcript
+ * shows one continuous curve per arrival.
+ */
+const StormHud = ({
+  eventsPerSecond,
+  commitsRef,
+}: {
+  eventsPerSecond: number
+  commitsRef: React.MutableRefObject<{ count: number; totalMs: number }>
+}): ReactNode => {
+  const [fps, setFps] = useState(0)
+  const [commitLine, setCommitLine] = useState("—")
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    let raf = 0
+    let frames = 0
+    let last = performance.now()
+    const samples: number[] = []
+
+    const tick = () => {
+      frames++
+      const now = performance.now()
+      if (now - last >= 1000) {
+        setFps(Math.round((frames * 1000) / (now - last)))
+        frames = 0
+        last = now
+        const c = commitsRef.current
+        setCommitLine(
+          c.count === 0
+            ? "0 commits"
+            : `${c.count} commits · ${(c.totalMs / c.count).toFixed(1)}ms avg`
+        )
+        commitsRef.current = { count: 0, totalMs: 0 }
+      }
+
+      // Scroll trace: distance from the true bottom, sampled per frame.
+      const viewport = document.querySelector("[data-chat-viewport]")
+      if (viewport) {
+        const distance =
+          viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+        samples.push(distance)
+        if (samples.length > 120) samples.shift()
+        const canvas = canvasRef.current
+        const ctx = canvas?.getContext("2d")
+        if (canvas && ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          ctx.strokeStyle = "#3555ff"
+          ctx.lineWidth = 1.5
+          ctx.beginPath()
+          const max = Math.max(60, ...samples)
+          samples.forEach((s, i) => {
+            const x = (i / 119) * canvas.width
+            const y = canvas.height - (s / max) * (canvas.height - 4) - 2
+            if (i === 0) ctx.moveTo(x, y)
+            else ctx.lineTo(x, y)
+          })
+          ctx.stroke()
+        }
+      }
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [commitsRef])
+
+  return (
+    <div className="absolute right-4 top-16 z-50 flex w-56 flex-col gap-1 rounded-md border border-solid border-f1-border bg-f1-background p-2 font-mono text-xs text-f1-foreground shadow-md">
+      <div>
+        {fps} fps · {eventsPerSecond} ev/s
+      </div>
+      <div>{commitLine}</div>
+      <canvas ref={canvasRef} width={208} height={36} />
+      <div className="text-f1-foreground-secondary">
+        dist-from-bottom / frame
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Intensity stress: a jittered storm of typing→message swaps, same-commit
+ * batches, incoming reactions, read sweeps, images (with/without reserved
+ * dimensions) and own sends. The transcript must hold one continuous motion —
+ * no bounce on arrivals, staggered batch entries, stable FPS, and commit
+ * counts that stay proportional to what actually changed.
+ */
+const StormConversation = ({
+  ratePerSec,
+}: {
+  ratePerSec: number
+}): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: groupChannel,
+    me,
+    others: [anaG, bruno, carmen],
+    initialCount: 40,
+    olderPages: 2,
+    ambientEveryMs: 0,
+  })
+  const storm = useChatStorm(runtime, [anaG, bruno, carmen], { ratePerSec })
+  const commitsRef = useRef({ count: 0, totalMs: 0 })
+
+  return (
+    <Frame>
+      <div className="relative flex h-full flex-col">
+        <Profiler
+          id="f0chat-storm"
+          onRender={(_id, _phase, actualDuration) => {
+            commitsRef.current.count++
+            commitsRef.current.totalMs += actualDuration
+          }}
+        >
+          <F0ChatProvider runtime={runtime}>
+            <F0Chat />
+          </F0ChatProvider>
+        </Profiler>
+        <button
+          type="button"
+          onClick={storm.toggle}
+          className={
+            storm.running
+              ? "absolute left-4 top-16 z-50 cursor-pointer rounded-md border border-solid border-f1-border bg-f1-background-critical px-3 py-1 text-sm font-medium text-f1-foreground-critical shadow-md"
+              : "absolute left-4 top-16 z-50 cursor-pointer rounded-md border border-solid border-f1-border bg-f1-background px-3 py-1 text-sm font-medium text-f1-foreground shadow-md"
+          }
+        >
+          {storm.running ? "Stop storm" : `Storm ${ratePerSec}/s`}
+        </button>
+        <StormHud
+          eventsPerSecond={storm.eventsPerSecond}
+          commitsRef={commitsRef}
+        />
+      </div>
+    </Frame>
+  )
+}
+
 const Conversation = ({
   initialCount,
 }: {
@@ -255,6 +396,21 @@ export const FlakyNetwork: Story = {
 export const Burst: Story = {
   name: "Burst (motion stress)",
   render: () => <BurstConversation />,
+}
+
+/** Sustained intense-conversation QA: jittered multi-author storm (typing
+ * swaps, same-commit batches, reactions, read sweeps, images, own sends) with
+ * a HUD — FPS, events/s, React commit stats and a per-frame scroll trace where
+ * any arrival bounce shows as a spike. */
+export const Storm: Story = {
+  name: "Storm (intensity stress)",
+  render: () => <StormConversation ratePerSec={3} />,
+}
+
+/** Same storm at an unreasonable rate — the ceiling check. */
+export const StormFast: Story = {
+  name: "Storm ×5/s (ceiling)",
+  render: () => <StormConversation ratePerSec={5} />,
 }
 
 /**

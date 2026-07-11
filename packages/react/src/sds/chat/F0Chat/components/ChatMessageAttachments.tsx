@@ -113,12 +113,24 @@ export const ChatMessageAttachments = ({
               <img
                 src={image.thumbnailUrl ?? image.url}
                 alt={image.name}
+                // Native width/height reserve the box via aspect-ratio BEFORE
+                // the image loads — no late re-measure shifting the transcript
+                // (adapters should populate the dimensions; Stream sends
+                // original_width/height). Without them, min-h keeps the jump
+                // bounded.
+                width={singleImage ? image.width : undefined}
+                height={singleImage ? image.height : undefined}
                 className={cn(
                   "border border-solid border-f1-border-secondary object-cover",
+                  "bg-f1-background-secondary",
                   // A lone image follows the bubble's chained corners; grid
                   // thumbnails keep the uniform radius.
                   singleImage
-                    ? cn(imageCorners, "max-h-60 max-w-full")
+                    ? cn(
+                        imageCorners,
+                        "h-auto max-h-60 w-auto max-w-full",
+                        image.width == null && "min-h-28"
+                      )
                     : "h-28 w-28 rounded-xl"
                 )}
               />
