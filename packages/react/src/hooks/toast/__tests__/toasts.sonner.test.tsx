@@ -27,6 +27,24 @@ describe("toasts sonner engine", () => {
     toasts.closeAll()
   })
 
+  it("renders every toast at the toaster's full width, not sized to content", async () => {
+    renderProvider()
+
+    act(() => {
+      toasts.open({ title: "Hi" })
+      toasts.open({ title: "A much longer toast title with more content" })
+    })
+    expect(await screen.findByText("Hi")).toBeInTheDocument()
+
+    // Custom (jsx) toasts are unstyled in sonner, so without the explicit
+    // width they shrink to their content and the stack looks ragged.
+    const items = document.querySelectorAll<HTMLElement>("[data-sonner-toast]")
+    expect(items.length).toBe(2)
+    for (const item of items) {
+      expect(item.style.width).toBe("100%")
+    }
+  })
+
   it("re-opens a toast with the same id after it was closed", async () => {
     renderProvider()
 

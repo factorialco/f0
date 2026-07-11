@@ -111,6 +111,10 @@ const ToastsContainer = () => {
           gap={16}
           offset={offsets}
           mobileOffset={offsets}
+          // Custom (jsx) toasts are unstyled, so sonner's fixed-width rule
+          // doesn't apply to them; force every toast to the Toaster's width so
+          // they all match instead of shrinking to their content.
+          toastOptions={{ style: { width: "100%" } }}
           style={
             {
               // Above dialogs (z-50) and the fullscreen AI chat (z-20);
