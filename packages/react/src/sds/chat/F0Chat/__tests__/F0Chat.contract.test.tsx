@@ -174,6 +174,11 @@ describe("delivery states", () => {
     expect(screen.getByText(/^Delivered/)).toBeInTheDocument()
   })
 
+  it("shows Sending… in the footer from the very first frame (no empty beat)", () => {
+    renderChat(makeRuntime({ messages: [theirs, mine("sending")] }))
+    expect(screen.getByText("Sending…")).toBeInTheDocument()
+  })
+
   it("appends the failureReason to the failed indicator's label", () => {
     renderChat(
       makeRuntime({

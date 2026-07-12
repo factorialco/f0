@@ -254,6 +254,14 @@ export function useChatScroll({
     if (!el) return
     const { scrollTop, distanceFromBottom } = syncScrollFlags()
 
+    // Pagination only reacts to REAL scrolling, never to the entry
+    // positioning: while the initial scroll settles, rows are still growing
+    // from estimated to measured heights and the transient offsets can dip
+    // under the top trigger — firing loadOlder with an anchor captured on a
+    // position that won't exist a frame later (the page then lands ~1s in and
+    // yanks the settled view up: a flash + mid-history reposition).
+    if (!entrySettledRef.current) return
+
     if (scrollTop < TOP_TRIGGER_PX && hasMoreOlder && !loadingOlder) {
       // Anchor on the first visible message so the prepended page doesn't jump.
       const index = firstVisibleMessageIndex(scrollTop)

@@ -29,20 +29,14 @@ export const MessageStatus = ({
     yesterday: i18n.date.groups.yesterday,
   })
 
-  // While an own message is in flight or failed, the beside-bubble icon is the
-  // indicator (mobile parity) — no footer text. Reserve the line so the label
-  // doesn't pop the row's height in when the send settles (stable heights for
-  // the virtualizer / bottom pin).
-  if (
-    message.isMine &&
-    (message.status === "sending" || message.status === "failed")
-  ) {
-    return <div aria-hidden className="min-h-5 px-1 pt-1" />
-  }
-
   let label = time
   if (message.isMine) {
-    if (message.status === "read")
+    // In-flight: show "Sending…" right away — the footer is text from the
+    // very first frame (same line, same height) and just crossfades to
+    // "Sent hh:mm", instead of an empty beat while the send settles.
+    if (message.status === "sending") label = i18n.chat.sending
+    if (message.status === "failed") label = `${i18n.chat.notSent} · ${time}`
+    else if (message.status === "read")
       label =
         isGroup && message.readByCount
           ? i18n.t(
