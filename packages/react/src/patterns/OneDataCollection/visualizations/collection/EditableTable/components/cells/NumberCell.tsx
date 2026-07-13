@@ -12,6 +12,7 @@ import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
 export function NumberCell<R extends RecordType>({
   editableColumn,
   value,
+  inputPlaceholder,
   error,
   loading,
   onChange,
@@ -85,6 +86,7 @@ export function NumberCell<R extends RecordType>({
             label={editableColumn.label}
             hideLabel
             value={numericValue}
+            placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}
             onChange={handleChange}
             loading={loading}
             transparent

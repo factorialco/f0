@@ -1577,8 +1577,10 @@ export const EntitiesListFieldInlineMultiColumn: Story = {
           supportInlineEditing: true,
           labels: { addButton: "Add member" },
           columns: {
-            age: { width: 100 },
-            salary: { label: "Salary", width: 140 },
+            name: { placeholder: "Full name" },
+            email: { placeholder: "name@example.com" },
+            age: { width: 100, placeholder: "18–99" },
+            salary: { label: "Salary", width: 140, placeholder: "0" },
             role: { width: 140 },
           },
         },

@@ -8,6 +8,7 @@ import { BaseCell } from "./BaseCell"
 export function TextCell<R extends RecordType>({
   editableColumn,
   value,
+  inputPlaceholder,
   error,
   loading,
   onChange,
@@ -27,6 +28,7 @@ export function TextCell<R extends RecordType>({
           label={editableColumn.label}
           hideLabel
           value={value}
+          placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}
           onChange={onChange}
           loading={loading}
           transparent

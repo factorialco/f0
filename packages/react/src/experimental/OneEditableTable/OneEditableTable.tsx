@@ -59,7 +59,9 @@ const ROW_CLASSES = cn(
 // so cells sit flush and their inner content controls the padding — this also
 // gives the action column its full width so the icon buttons fit inside px-2.
 const CELL_CLASSES = "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
-const HEAD_CLASSES = "first:pl-0 last:pr-0"
+// Cells sit flush (pl-0) but their inputs have 12px of internal padding, so
+// headers use pl-3/pr-3 to line their text up with the cell content.
+const HEAD_CLASSES = "first:pl-3 last:pr-3"
 /**
  * Keeps a small leading gutter on the drag-handle cell/header so the grip
  * isn't flush against the edge (overrides the reset above).
