@@ -88,7 +88,11 @@ import {
   makeTemplatesSource,
   templatesForGuidedType,
 } from "./flow-configs"
-import type { CardsFlowConfig, FlowConfig } from "./flow-configs"
+import type {
+  CardsFlowConfig,
+  FlowConfig,
+  GuidedEntryFlowConfig,
+} from "./flow-configs"
 import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
 
 /**
@@ -802,7 +806,9 @@ const SURVEY_LENGTH_OPTIONS: ClarifyingOption[] = [
 // next question (the header shows a "X of Y" counter and a back arrow) and the
 // final question submits. Shared by both the "Empty survey" card and the typed
 // "Create" flow, which differ only in when the canvas opens.
-const surveyClarifyingSteps = (flow: CardsFlowConfig): ClarifyingStep[] => [
+const surveyClarifyingSteps = (
+  flow: CardsFlowConfig | GuidedEntryFlowConfig
+): ClarifyingStep[] => [
   {
     question: "What kind of survey are you working on?",
     options: flow.typeOptions,
@@ -2170,6 +2176,141 @@ function FlowContent({
     })
   }
 
+  // "guidedEntry" entry flow (Engagement Guided): the same message-first entry
+  // as "guidedType" — post "Let's create a Survey" on the user's behalf, think,
+  // then a clarifying panel — but the options are entry ACTIONS: Empty Survey,
+  // Use a Template, and the (up to) three most-used templates. Each action is
+  // sequenced into follow-able beats (echo answer → think → reply → think →
+  // act) exactly like the guided-type flow, so the transitions stay legible.
+  const startGuidedEntryFlow = () => {
+    if (config.entryMode !== "guidedEntry") return
+    const flow = config
+    // "Most used" isn't tracked in the mock, so take the first few templates.
+    const topTemplates = flow.templates.slice(0, 3)
+    const EMPTY_OPTION_ID = "empty-survey"
+    const TEMPLATES_OPTION_ID = "use-template"
+    const options: ClarifyingOption[] = [
+      { id: EMPTY_OPTION_ID, label: "Empty Survey" },
+      { id: TEMPLATES_OPTION_ID, label: "Use a Template" },
+      ...topTemplates.map((t) => ({ id: `template:${t.id}`, label: t.name })),
+    ]
+
+    // The blank-survey drafting conversation (type → audience → length), opened
+    // by the "Empty Survey" action — mirrors the "cards" flow's Empty survey
+    // card: draft the questions, then post the live "updated" card and arm the
+    // proposal loop.
+    const askSurveyDetails = (surveyId: string) =>
+      startClarifying({
+        steps: surveyClarifyingSteps(flow),
+        onConfirm: (answersByStep) => {
+          appendMessages(
+            surveyAnswerMessages(surveyClarifyingSteps(flow), answersByStep)
+          )
+          appendMessages([
+            {
+              role: "assistant",
+              content:
+                "Great — I'll draft a first set of questions on the canvas for you to review.",
+            },
+          ])
+          const surveyName = surveyNameForType(
+            answersByStep[0]?.[0] ?? "Untitled"
+          )
+          draftQuestions(surveyId, surveyName, flow.sampleElements, () => {
+            const cardId = nextCardId()
+            registerLiveCard(surveyId, cardId)
+            appendCard(() => (
+              <SurveyCard
+                surveyId={surveyId}
+                cardId={cardId}
+                title={surveyName}
+                description={SURVEY_UPDATED_DESCRIPTION}
+              />
+            ))
+            armProposal(surveyId, surveyName)
+          })
+        },
+      })
+
+    // Runs the picked entry action after its "reply + think" beat.
+    const runGuidedEntryAction = (optionId: string) => {
+      if (optionId === EMPTY_OPTION_ID) {
+        // Blank survey: open its canvas + "created" card up front, then walk
+        // the drafting conversation (same as the "cards" Empty survey card).
+        const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
+        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
+        const cardId = nextCardId()
+        registerLiveCard(surveyId, cardId)
+        appendCard(() => (
+          <SurveyCard
+            surveyId={surveyId}
+            cardId={cardId}
+            title={UNTITLED_SURVEY_NAME}
+            description={createdDescription(flow)}
+          />
+        ))
+        askSurveyDetails(surveyId)
+        return
+      }
+      if (optionId === TEMPLATES_OPTION_ID) {
+        // Browse: open the full templates gallery in the canvas.
+        openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
+        return
+      }
+      // A specific template: open it in the read-only preview framing (the
+      // "Use this template" / "Edit Template" actions live on its header).
+      const templateId = optionId.slice("template:".length)
+      const template = flow.templates.find((t) => t.id === templateId)
+      if (!template) return
+      openCanvas(
+        toCanvasContent({
+          type: "survey",
+          title: template.name,
+          mode: "preview",
+          templateName: template.name,
+          description: template.description,
+        })
+      )
+    }
+
+    // Copy for the assistant reply that precedes each action's canvas beat.
+    const replyForOption = (optionId: string): string => {
+      if (optionId === EMPTY_OPTION_ID)
+        return "Let's start with a blank survey."
+      if (optionId === TEMPLATES_OPTION_ID)
+        return "Sure — here are the templates to choose from."
+      return "Great — opening that template for you."
+    }
+
+    sendMessageWithThinkingOnly("Let's create a Survey", () => {
+      appendMessages([
+        { role: "assistant", content: "Sure — how would you like to start?" },
+      ])
+      startClarifying({
+        steps: [
+          {
+            question: flow.guidedQuestion,
+            options,
+            selectionMode: "single",
+          },
+        ],
+        onConfirm: (answersByStep) => {
+          const label = answersByStep[0]?.[0]
+          const picked = options.find((o) => o.label === label) ?? options[0]
+          sendMessageWithThinkingOnly(
+            `**${flow.guidedQuestion}**\\\n${label ?? picked.label}`,
+            () => {
+              appendMessages([
+                { role: "assistant", content: replyForOption(picked.id) },
+              ])
+              showThinking(() => runGuidedEntryAction(picked.id))
+            }
+          )
+        },
+      })
+    })
+  }
+
   // `phase` never actually reaches "split" (both flows dock the resource in
   // the AI canvas instead — see `openCanvas` above), so this is dead code
   // kept only for the type it once had; still needs to type-check for both
@@ -2219,8 +2360,10 @@ function FlowContent({
               ])
               runTypedClarifyingChain()
             })
-          } else {
+          } else if (config.entryMode === "guidedType") {
             startGuidedTypeFlow()
+          } else {
+            startGuidedEntryFlow()
           }
         },
       },
@@ -2506,4 +2649,13 @@ export const EngagementSurveys: Story = {
 // `FlowConfig` data (see `flow-configs.ts`), not hardcoded to one resource.
 export const TrainingSurveys: Story = {
   render: () => <CreationWithAIFlow flowId="training" />,
+}
+
+// "Engagement Guided" — a third example reusing Engagement's data, but with the
+// message-first guided entry (like Training) whose clarifying options are entry
+// ACTIONS: Empty Survey, Use a Template, and the most-used templates. Picking a
+// template opens its preview; "Use a Template" opens the full gallery; "Empty
+// Survey" runs Engagement's blank-survey drafting conversation.
+export const EngagementGuidedSurveys: Story = {
+  render: () => <CreationWithAIFlow flowId="engagementGuided" />,
 }

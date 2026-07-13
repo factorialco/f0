@@ -1,12 +1,15 @@
 // Per-flow configuration for the "Walkthrough" co-creation story. A "flow" is
 // one coexisting example of the co-creation pattern applied to a resource
-// domain — today, Engagement Surveys and Training Surveys. Both flows share
-// most mechanics (phases, chat, canvas, proposal loop), but they enter
-// creation differently:
-//   - "cards"      (Engagement): a welcome screen of entry-point cards.
-//   - "guidedType" (Training): an immediate clarifying question for the
-//     survey TYPE, then a type-scoped template gallery (with "Empty Form"
+// domain. All flows share most mechanics (phases, chat, canvas, proposal loop),
+// but they enter creation differently:
+//   - "cards"       (Engagement): a welcome screen of entry-point cards.
+//   - "guidedType"  (Training): an immediate clarifying question for the
+//     survey TYPE, then a type-scoped template gallery (with "Empty Survey"
 //     first) — no welcome cards or suggestions.
+//   - "guidedEntry" (Engagement Guided): the same message-first entry as
+//     "guidedType", but the clarifying options are entry ACTIONS — Empty
+//     Survey / Use a Template / the most-used templates — instead of survey
+//     types. Reuses Engagement's data and its blank-survey drafting flow.
 // `FlowConfig` is a discriminated union on `entryMode` so each mode only
 // carries the fields it actually uses. The story wires it up via
 // `FlowConfigProvider` / `useFlowConfig`.
@@ -96,7 +99,7 @@ export type GuidedTypeConfig = {
 }
 
 type SharedFlowConfig = {
-  id: "engagement" | "training"
+  id: "engagement" | "training" | "engagementGuided"
   /** Main page/module title, e.g. "Engagement" / "Training". */
   pageTitle: string
   /** Main nav tab label for this flow's collection — plain "Surveys" for
@@ -144,7 +147,30 @@ export type GuidedTypeFlowConfig = SharedFlowConfig & {
   guidedTypes: GuidedTypeConfig[]
 }
 
-export type FlowConfig = CardsFlowConfig | GuidedTypeFlowConfig
+/**
+ * Engagement Guided's entry mode: the same message-first entry as
+ * "guidedType", but the single clarifying question offers entry ACTIONS —
+ * Empty Survey / Use a Template / the most-used templates (derived from
+ * `templates`) — rather than survey types. Picking "Empty Survey" runs the
+ * same type → audience → length drafting conversation as the "cards" flow, so
+ * it carries that flow's `typeOptions` / `sampleElements` / `defaultValues`.
+ */
+export type GuidedEntryFlowConfig = SharedFlowConfig & {
+  entryMode: "guidedEntry"
+  /** The single clarifying question asked immediately on "Create". */
+  guidedQuestion: string
+  /** "What kind of survey are you working on?" options for the blank-survey
+   * drafting conversation (shared with the "cards" flow). */
+  typeOptions: ClarifyingOption[]
+  /** Questions drafted onto the canvas once the blank-survey chain completes. */
+  sampleElements: SurveyFormBuilderElement[]
+  defaultValues: Partial<SurveyAnswers>
+}
+
+export type FlowConfig =
+  | CardsFlowConfig
+  | GuidedTypeFlowConfig
+  | GuidedEntryFlowConfig
 
 export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
   engagement: {
@@ -252,6 +278,30 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
       },
     ],
     onTranscribe: mockTrainingTranscribe,
+  },
+  engagementGuided: {
+    id: "engagementGuided",
+    entryMode: "guidedEntry",
+    pageTitle: "Engagement",
+    navTabLabel: "Surveys",
+    navLabel: "Surveys",
+    moduleName: "Engagement",
+    avatarModule: "engagement",
+    resources: ENGAGEMENT_RESOURCES,
+    templates: ENGAGEMENT_TEMPLATES,
+    templateCategories: ENGAGEMENT_TEMPLATE_CATEGORIES,
+    composerPlaceholder: "Describe the type of survey you want to create",
+    draftedPlaceholder: "Improve the Survey by...",
+    guidedQuestion: "How would you like to start?",
+    typeOptions: [
+      { id: "engagement", label: "Employee engagement" },
+      { id: "onboarding", label: "Onboarding feedback" },
+      { id: "pulse", label: "Customer pulse check" },
+      { id: "enps", label: "eNPS" },
+    ],
+    sampleElements: ENGAGEMENT_SURVEY_ELEMENTS,
+    defaultValues: ENGAGEMENT_DEFAULT_VALUES,
+    onTranscribe: mockEngagementTranscribe,
   },
 }
 
