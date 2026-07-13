@@ -37,3 +37,21 @@ export const StatusType: Story = {
     },
   },
 }
+
+export const WithTooltip: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Status",
+      render: () => ({
+        type: "status",
+        value: {
+          status: "warning",
+          label: "Needs follow-up",
+          tooltip:
+            "The call ended before all screening information was collected.",
+        },
+      }),
+    },
+  },
+}
