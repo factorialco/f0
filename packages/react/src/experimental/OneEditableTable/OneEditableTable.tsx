@@ -44,10 +44,14 @@ import type {
 
 /** Width (px) of the leading drag-handle column. */
 const HANDLE_COL_WIDTH = 36
-/** Width (px) of the trailing actions column with a single button. */
-const SINGLE_ACTION_COL_WIDTH = 64
-/** Width (px) of the trailing actions column with an "Edit" button + remove. */
-const DOUBLE_ACTION_COL_WIDTH = 148
+/** Width (px) of the trailing actions column with a single (remove) button. */
+const SINGLE_ACTION_COL_WIDTH = 56
+/**
+ * Width (px) of the trailing actions column with an "Edit" button + remove.
+ * Sized to fit the content tightly (button + gap + button + px-2) so the
+ * column doesn't waste space and push the table past its container.
+ */
+const DOUBLE_ACTION_COL_WIDTH = 128
 
 const ROW_CLASSES = cn(
   "group transition-colors hover:bg-f1-background-hover",
@@ -145,13 +149,21 @@ function RowCells<R extends RecordType>({
           editType != null &&
           editType !== "display-only" &&
           editType !== "disabled"
+        // The last data cell draws a right border (the cell separator); hide it
+        // when an actions column follows so there's no divider before it.
+        const isLastBeforeActions =
+          hasActionsColumn && cellIndex === columns.length - 1
         return (
           <TableCell
             key={column.id ?? `cell-${cellIndex}`}
             firstCell={cellIndex === 0}
             width={column.width}
             minWidth={column.minWidth}
-            className={cn(CELL_CLASSES, isEditableCell && EDITABLE_CELL_RING)}
+            className={cn(
+              CELL_CLASSES,
+              isEditableCell && EDITABLE_CELL_RING,
+              isLastBeforeActions && "[&_*]:!border-r-0"
+            )}
           >
             <EditableCellRenderer
               item={item}
