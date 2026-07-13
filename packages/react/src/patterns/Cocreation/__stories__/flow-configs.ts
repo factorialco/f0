@@ -234,7 +234,7 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
         id: "effectiveness",
         label: "Effectiveness",
         description:
-          "Evaluate whether the course met its goals and improved participants' performance. Not anonymous.",
+          "Evaluate whether the course met its goals. (Not anonymous)",
         emptyFormElement: EFFECTIVENESS_LOCKED_ELEMENT,
         sampleElements: EFFECTIVENESS_SURVEY_ELEMENTS,
         defaultValues: EFFECTIVENESS_DEFAULT_VALUES,
@@ -244,7 +244,7 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
         id: "knowledgeTest",
         label: "Knowledge Test",
         description:
-          "Effortlessly create engaging knowledge tests with our intuitive tool. Design, customize, and evaluate assessments to improve learning outcomes. Not anonymous. Score 50%+ to pass.",
+          "Evaluate assessments to improve learning outcomes. (Not anonymous) (Score 50%+ to pass)",
         emptyFormElement: KNOWLEDGE_TEST_BLANK_ELEMENT,
         sampleElements: KNOWLEDGE_TEST_SURVEY_ELEMENTS,
         defaultValues: KNOWLEDGE_TEST_DEFAULT_VALUES,
