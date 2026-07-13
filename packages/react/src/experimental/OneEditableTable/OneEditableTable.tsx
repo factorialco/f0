@@ -80,12 +80,18 @@ const HANDLE_CELL_CLASSES = "first:pl-3"
 
 /**
  * Focus/hover highlight applied directly to the editable `td` (not the inner
- * cell) so the ring lands on the real cell boundary and lifts above the
- * neighbouring cells (`z-10`) instead of being clipped by them.
+ * cell) so it lands on the real cell boundary and lifts above the neighbouring
+ * cells (`z-10`) instead of being clipped by them.
+ *
+ * Focus keeps a selected inset ring; hover just recolors the cell border via
+ * an inset outline (no inner shadow). The inner cell's own hover shadow is
+ * suppressed so the two don't stack.
  */
 const EDITABLE_CELL_RING = cn(
+  "[&:hover_*]:!shadow-none",
   "focus-within:relative focus-within:z-10 focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
-  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-10 [&:not(:focus-within):hover]:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))]"
+  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-10",
+  "[&:not(:focus-within):hover]:outline [&:not(:focus-within):hover]:outline-1 [&:not(:focus-within):hover]:-outline-offset-1 [&:not(:focus-within):hover]:outline-[hsl(var(--neutral-30))]"
 )
 
 /**
