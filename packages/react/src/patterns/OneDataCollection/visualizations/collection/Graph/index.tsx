@@ -67,6 +67,7 @@ export const GraphCollection = <
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
+  searchSelectionNonce,
   focusOnEntry,
   loadNodePath,
   getParentId,
@@ -154,7 +155,10 @@ export const GraphCollection = <
   // focus is handled instead by `focusOnEntry`, which the tree-data hook
   // pre-resolves before first paint so F0Graph opens framed on it (no pan).
   // The decision lives in the pure `resolveGraphReveal`.
+  // `searchSelectionNonce` bumps on every shared-search pick, so re-selecting
+  // the SAME node still re-reveals/re-centers (the id alone wouldn't change).
   const lastRevealedRef = useRef<string | undefined>(undefined)
+  const lastNonceRef = useRef<number | undefined>(undefined)
   const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
     if (isInitialLoading) return
@@ -163,11 +167,14 @@ export const GraphCollection = <
       initialConsumed: initialRevealConsumedRef.current,
       revealNodeId,
       lastRevealed: lastRevealedRef.current,
+      revealNonce: searchSelectionNonce,
+      lastNonce: lastNonceRef.current,
     })
     if (decision.consumeInitial) initialRevealConsumedRef.current = true
     lastRevealedRef.current = decision.lastRevealed
+    lastNonceRef.current = decision.lastNonce
     if (decision.revealId) void revealAndFocus(decision.revealId)
-  }, [revealNodeId, revealAndFocus, isInitialLoading])
+  }, [revealNodeId, searchSelectionNonce, revealAndFocus, isInitialLoading])
 
   // Clear the shared header search when ENTERING and LEAVING the graph view, so
   // it never points at a node here (the graph is a tree, not a filtered list).
