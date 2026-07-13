@@ -674,9 +674,15 @@ const DetailField = ({ label, value }: { label: string; value: string }) => (
 const OrgChartExample = ({
   defaultExpandDepth,
   focusOnEntry,
+  graphLabel,
+  tableLabel,
 }: {
   defaultExpandDepth: number
   focusOnEntry?: string
+  /** Custom label for the graph chip; falls back to the localized "Graph". */
+  graphLabel?: string
+  /** Custom label for the table chip; falls back to the localized "Table". */
+  tableLabel?: string
 }) => {
   const [selected, setSelected] = useState<EmployeeNode | null>(null)
   const [revealId, setRevealId] = useState<string | undefined>(undefined)
@@ -690,6 +696,7 @@ const OrgChartExample = ({
         visualizations={[
           {
             ...graphVisualization,
+            label: graphLabel,
             options: {
               ...graphVisualization.options,
               defaultExpandDepth,
@@ -697,7 +704,7 @@ const OrgChartExample = ({
               focusOnEntry,
             },
           },
-          tableVisualization,
+          { ...tableVisualization, label: tableLabel },
         ]}
       />
       <F0Dialog
@@ -767,4 +774,20 @@ export const PreExpanded: Story = {
  */
 export const FocusOnRoot: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} focusOnEntry="ceo-a" />,
+}
+
+/**
+ * The view-switcher chips are renamed per instance with the optional `label` on
+ * each built-in visualization — here "Org chart" instead of the default "Graph"
+ * and "Directory" instead of "Table". Omit `label` to keep the localized
+ * built-in name. Icons are unchanged; only the text is overridden.
+ */
+export const CustomViewLabels: Story = {
+  render: () => (
+    <OrgChartExample
+      defaultExpandDepth={1}
+      graphLabel="Org chart"
+      tableLabel="Directory"
+    />
+  ),
 }
