@@ -121,37 +121,54 @@ const WarningBadge = ({ count }: { count: number }) => (
 
 const AutoPanel = () => {
   const warnings = useEChartsWarningCounter()
+  // Chart mounts only after the counter is armed, and only while the panel is
+  // open — mirroring the app's canvas, which mounts widgets while the panel
+  // is still 0-sized and unmounts them on close.
+  const [armed, setArmed] = useState(false)
   const [open, setOpen] = useState(false)
+  const [opens, setOpens] = useState(0)
 
+  useEffect(() => setArmed(true), [])
   useEffect(() => {
-    const timer = setInterval(() => setOpen((o) => !o), 2600)
+    const timer = setInterval(() => {
+      setOpen((o) => {
+        if (!o) setOpens((n) => n + 1)
+        return !o
+      })
+    }, 2600)
     return () => clearInterval(timer)
   }, [])
 
   return (
     <div className="flex flex-col items-start gap-4">
-      <WarningBadge count={warnings} />
+      <div className="flex items-center gap-3">
+        <WarningBadge count={warnings} />
+        <span className="text-base text-f1-foreground-secondary">
+          {opens} panel opens
+        </span>
+      </div>
       <div
         className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary transition-all duration-300"
         style={{ width: open ? 560 : 0, height: open ? 320 : 0 }}
       >
         <div className="h-full w-full px-4 py-3">
-          <F0DataChart {...SAMPLE} />
+          {armed && open && <F0DataChart {...SAMPLE} />}
         </div>
       </div>
     </div>
   )
 }
 
-/** Self-running showcase: the panel opens and closes on a loop while the badge
- * counts ECharts warnings. Broken lifecycle = the counter climbs by itself. */
+/** Self-running showcase: the panel opens and closes on a loop, mounting the
+ * chart while the panel is still 0-sized (like the app's canvas) while the
+ * badge counts ECharts warnings. Broken lifecycle = the counter climbs. */
 export const AutoReplayInsideAnimatedPanel: Story = {
   render: () => <AutoPanel />,
 }
 
 const AutoChurn = () => {
   const warnings = useEChartsWarningCounter()
-  const [mounted, setMounted] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const [cycles, setCycles] = useState(0)
 
   useEffect(() => {
