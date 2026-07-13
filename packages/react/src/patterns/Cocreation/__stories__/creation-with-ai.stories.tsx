@@ -2060,6 +2060,7 @@ function FlowContent({
     setUserMessageInterceptor,
     sendMessageWithThinkingOnly,
     showThinking,
+    setComposerHidden,
   } = useMockAiChatRuntime()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
@@ -2126,6 +2127,9 @@ function FlowContent({
   // survey is created yet — see `GuidedTemplatesCanvasBody` / `useOpenEmptyForm`).
   const startGuidedTypeFlow = () => {
     if (config.entryMode !== "guidedType") return
+    // Keep the composer out of view through the scripted intro; it reappears
+    // (as the clarifying panel, fading in) once the thinking beat resolves.
+    setComposerHidden(true)
     sendMessageWithThinkingOnly("Let's create a Survey", () => {
       appendMessages([
         {
@@ -2139,6 +2143,7 @@ function FlowContent({
           ].join("\n"),
         },
       ])
+      setComposerHidden(false)
       startClarifying({
         steps: [
           {
@@ -2290,10 +2295,14 @@ function FlowContent({
       return "Great — opening that template for you."
     }
 
+    // Keep the composer out of view through the scripted intro; it reappears
+    // (as the clarifying panel, fading in) once the thinking beat resolves.
+    setComposerHidden(true)
     sendMessageWithThinkingOnly("Let's create a Survey", () => {
       appendMessages([
         { role: "assistant", content: "Sure — how would you like to start?" },
       ])
+      setComposerHidden(false)
       startClarifying({
         steps: [
           {

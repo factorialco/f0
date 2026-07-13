@@ -1,4 +1,7 @@
+import { motion } from "motion/react"
 import { useCallback, useMemo, useRef } from "react"
+
+import { useReducedMotion } from "@/lib/a11y"
 
 import { F0AiChatTextArea } from "../../../F0AiChatTextArea"
 import { type F0AiChatTextAreaSubmitPayload } from "../../../F0AiChatTextArea/types"
@@ -25,7 +28,14 @@ export const MockConnectedChatInput = () => {
     isLoadingThread,
     currentThreadTitle,
     clarifyingQuestion,
+    composerHidden,
   } = useMockAiChatRuntime()
+  const shouldReduceMotion = useReducedMotion()
+  // Track whether the composer was ever hidden this session (guided flows only).
+  // Used to scope the mount fade-in-up to those flows — other flows render the
+  // composer exactly as before, no entrance change.
+  const wasHiddenRef = useRef(false)
+  if (composerHidden) wasHiddenRef.current = true
   const {
     placeholders,
     entityRefs,
@@ -84,7 +94,13 @@ export const MockConnectedChatInput = () => {
     [sendMessage, tracking]
   )
 
-  return (
+  // Guided flows keep the composer out of view during the scripted intro (the
+  // "Let's create a Survey" + thinking beat), until the first clarifying panel
+  // is ready. Rendering nothing here — rather than adding a "hidden" state to
+  // F0AiChatTextArea — keeps the component's own layout/animation rules intact.
+  if (composerHidden && !clarifyingQuestion) return null
+
+  const textArea = (
     <F0AiChatTextArea
       ref={containerRef}
       onSubmit={handleSubmit}
@@ -118,5 +134,25 @@ export const MockConnectedChatInput = () => {
         ) : undefined
       }
     />
+  )
+
+  // For guided flows, the input slot appears for the first time already holding
+  // the clarifying panel (the composer was hidden through the intro), so
+  // F0AiChatTextArea's own AnimatePresence — `initial={false}` — won't animate
+  // that first mount. Add a subtle fade-in-up on the slot itself. Other flows
+  // render `textArea` untouched, so their entrance is unchanged.
+  if (!wasHiddenRef.current) return textArea
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{
+        duration: shouldReduceMotion ? 0 : 0.4,
+        ease: [0.4, 0, 0.2, 1],
+      }}
+    >
+      {textArea}
+    </motion.div>
   )
 }

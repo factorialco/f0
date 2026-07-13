@@ -96,6 +96,14 @@ export type MockAiChatRuntime = {
    * one action at a time (e.g. reply → think → open canvas).
    */
   showThinking: (onComplete?: () => void) => void
+  /**
+   * When true, the connected chat input renders nothing. The guided flows set
+   * it during their scripted intro (the "Let's create a Survey" + thinking
+   * beat) so no composer shows until the first clarifying panel is ready, then
+   * clear it. Only affects flows that opt in — default false.
+   */
+  composerHidden: boolean
+  setComposerHidden: (hidden: boolean) => void
   appendMessages: (
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
@@ -343,6 +351,7 @@ export const MockAiChatRuntimeProvider = ({
 }: MockAiChatRuntimeProviderProps) => {
   const [messages, setMessages] = useState<F0Message[]>(seedMessages ?? [])
   const [inProgress, setInProgress] = useState(false)
+  const [composerHidden, setComposerHidden] = useState(false)
   const [threads, setThreads] = useState<ChatThread[]>(
     seedThreads ?? DEFAULT_MOCK_THREADS
   )
@@ -707,6 +716,7 @@ export const MockAiChatRuntimeProvider = ({
     clearTimers()
     setMessages([])
     setInProgress(false)
+    setComposerHidden(false)
     setCurrentThreadTitle(null)
     setCurrentThreadId(null)
     setIsLoadingThread(false)
@@ -791,6 +801,8 @@ export const MockAiChatRuntimeProvider = ({
         sendMessage,
         sendMessageWithThinkingOnly,
         showThinking,
+        composerHidden,
+        setComposerHidden,
         appendMessages,
         appendCard,
         setScript,
