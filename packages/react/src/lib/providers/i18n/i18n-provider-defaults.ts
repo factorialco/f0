@@ -204,7 +204,7 @@ export const defaultTranslations = {
       },
       addRow: "Add row",
       removeRow: "Remove row",
-      editRow: "Edit row",
+      editRow: "Edit",
       reorderRow: "Drag to reorder",
     },
     itemsCount: "items",

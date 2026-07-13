@@ -46,8 +46,8 @@ import type {
 const HANDLE_COL_WIDTH = 36
 /** Width (px) of the trailing actions column with a single button. */
 const SINGLE_ACTION_COL_WIDTH = 64
-/** Width (px) of the trailing actions column with edit + remove buttons. */
-const DOUBLE_ACTION_COL_WIDTH = 104
+/** Width (px) of the trailing actions column with an "Edit" button + remove. */
+const DOUBLE_ACTION_COL_WIDTH = 148
 
 const ROW_CLASSES = cn(
   "group transition-colors hover:bg-f1-background-hover",
@@ -175,7 +175,6 @@ function RowCells<R extends RecordType>({
                 type="button"
                 variant="outline"
                 size="md"
-                hideLabel
                 icon={Pencil}
                 label={editLabel}
                 onClick={() => onEditRow(item, index)}
