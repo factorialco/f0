@@ -1738,9 +1738,11 @@ function TemplatesCanvasHeader({
   const { setVisualizationMode } = useAiChat()
   const { config } = useFlowConfig()
   const leaveGuidedFlow = useLeaveGuidedFlow()
+  const openEmptyForm = useOpenEmptyForm()
+  const { guidedTypeId } = content
 
   const handleClose = () => {
-    if (content.guidedTypeId) {
+    if (guidedTypeId) {
       void confirmLeaveGuidedCreation(config).then((leave) => {
         if (leave) leaveGuidedFlow()
       })
@@ -1752,13 +1754,29 @@ function TemplatesCanvasHeader({
   return (
     <div className="flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
       <F0Heading content={content.title} as="h2" />
-      <ButtonInternal
-        variant="outline"
-        hideLabel
-        label="Close"
-        icon={Cross}
-        onClick={handleClose}
-      />
+      <div className="flex flex-row items-center gap-3">
+        {/* Skip the gallery and start from an empty survey — the header twin of
+            the gallery's "Empty Survey" card, offered only in the guided flow
+            (that's where `useOpenEmptyForm` has a type to seed). Divided from
+            Close by the same 1px separator ResourceHeader / modal headers use. */}
+        {guidedTypeId && (
+          <>
+            <ButtonInternal
+              variant="outline"
+              label="Start with a Blank Survey"
+              onClick={() => openEmptyForm(guidedTypeId)}
+            />
+            <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+          </>
+        )}
+        <ButtonInternal
+          variant="outline"
+          hideLabel
+          label="Close"
+          icon={Cross}
+          onClick={handleClose}
+        />
+      </div>
     </div>
   )
 }
