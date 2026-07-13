@@ -1,8 +1,9 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import "@xyflow/react/dist/style.css"
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
+import { F0Button } from "@/components/F0Button"
 import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import { F0Dialog } from "@/patterns/F0Dialog"
 
@@ -757,6 +758,292 @@ export const OrgChart: Story = {
  */
 export const PreExpanded: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} />,
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// LiveUpdate story: a small, self-contained mock org (independent of
+// EMPLOYEES above) that the demo controls mutate directly, so a later fetch
+// (e.g. re-expanding a node) stays consistent with whatever `liveUpdate`
+// already applied in place.
+// ─────────────────────────────────────────────────────────────────────────
+
+type LiveUpdateEmployee = {
+  id: string
+  name: string
+  title: string
+  managerId: string | null
+}
+
+type LiveUpdateNode = LiveUpdateEmployee & { childrenCount: number }
+
+const LIVE_UPDATE_MOVE_SOURCE_ID = "only-report"
+const LIVE_UPDATE_MOVE_TARGET_ID = "vp-sales"
+const LIVE_UPDATE_REMOVE_ID = "vp-support"
+
+const LIVE_UPDATE_INITIAL: LiveUpdateEmployee[] = [
+  { id: "ceo", name: "Alice Monroe", title: "CEO", managerId: null },
+  {
+    id: "vp-eng",
+    name: "Ben Ortiz",
+    title: "VP Engineering",
+    managerId: "ceo",
+  },
+  {
+    id: "em",
+    name: "Chloe Nguyen",
+    title: "Engineering Manager",
+    managerId: "vp-eng",
+  },
+  {
+    // The only direct report of "em" — moving it away leaves "em" childless.
+    id: LIVE_UPDATE_MOVE_SOURCE_ID,
+    name: "Owen Marsh",
+    title: "Junior Engineer",
+    managerId: "em",
+  },
+  {
+    id: "senior-eng",
+    name: "Diego Ruiz",
+    title: "Senior Engineer",
+    managerId: "vp-eng",
+  },
+  {
+    // A leaf today — the move target gains its first child without a fetch.
+    id: LIVE_UPDATE_MOVE_TARGET_ID,
+    name: "Farah Idris",
+    title: "VP Sales",
+    managerId: "ceo",
+  },
+  {
+    id: LIVE_UPDATE_REMOVE_ID,
+    name: "Grace Kim",
+    title: "VP Customer Support",
+    managerId: "ceo",
+  },
+  {
+    id: "support-lead",
+    name: "Hugo Costa",
+    title: "Support Team Lead",
+    managerId: LIVE_UPDATE_REMOVE_ID,
+  },
+  {
+    id: "support-agent",
+    name: "Ivy Chen",
+    title: "Support Agent",
+    managerId: "support-lead",
+  },
+]
+
+const liveUpdateChildrenOf = (
+  store: LiveUpdateEmployee[],
+  parentId: string | null
+): LiveUpdateEmployee[] =>
+  store.filter((employee) => employee.managerId === parentId)
+
+const toLiveUpdateNode = (
+  store: LiveUpdateEmployee[],
+  employee: LiveUpdateEmployee
+): LiveUpdateNode => ({
+  ...employee,
+  childrenCount: liveUpdateChildrenOf(store, employee.id).length,
+})
+
+/** Drops `id` and every descendant (by `managerId` chain) from the mock store. */
+const removeWithDescendants = (
+  store: LiveUpdateEmployee[],
+  id: string
+): LiveUpdateEmployee[] => {
+  const toRemove = new Set([id])
+  let changed = true
+  while (changed) {
+    changed = false
+    for (const employee of store) {
+      if (
+        employee.managerId &&
+        toRemove.has(employee.managerId) &&
+        !toRemove.has(employee.id)
+      ) {
+        toRemove.add(employee.id)
+        changed = true
+      }
+    }
+  }
+  return store.filter((employee) => !toRemove.has(employee.id))
+}
+
+const liveUpdateGraphVisualization = {
+  type: "graph" as const,
+  filters: {},
+  sortings: {},
+  options: {
+    title: (employee: LiveUpdateEmployee) => employee.name,
+    subtitle: (employee: LiveUpdateEmployee) => employee.title,
+    getChildrenCount: (employee: LiveUpdateNode) => employee.childrenCount,
+    childrenFilters: (parentId: string | null) =>
+      // eslint-disable-next-line no-type-assertion/no-type-assertion -- demo filter shape understood by the mock adapter
+      ({ parentId: [parentId ?? ROOT_TOKEN] }) as Record<string, string[]>,
+    getParentId: (employee: LiveUpdateEmployee) => employee.managerId,
+    // Pre-expand the whole (tiny) demo tree so every affected node is already
+    // visible — the point is to watch it change in place, not to hunt for it.
+    defaultExpandDepth: 3,
+  },
+}
+
+/**
+ * Buttons above the graph apply real `liveUpdate` batches: each click mutates
+ * the mock store, then bumps `version` with the matching `upsert`/`remove` —
+ * exactly like a caller reacting to a websocket/subscription event.
+ */
+const LiveUpdateGraphExample = () => {
+  const storeRef = useRef<LiveUpdateEmployee[]>(LIVE_UPDATE_INITIAL)
+  const [liveUpdate, setLiveUpdate] = useState<{
+    version: number
+    upsert?: LiveUpdateNode[]
+    remove?: string[]
+  }>({ version: 0 })
+  const [renamed, setRenamed] = useState(false)
+  const [moved, setMoved] = useState(false)
+  const [removed, setRemoved] = useState(false)
+
+  const source = useDataCollectionSource<LiveUpdateNode>({
+    dataAdapter: {
+      paginationType: "pages",
+      perPage: 20,
+      fetchData: async (options) => {
+        // eslint-disable-next-line no-type-assertion/no-type-assertion -- demo filter shape from the graph view
+        const requestedParent = (options.filters as { parentId?: string[] })
+          .parentId?.[0]
+        const managerId =
+          requestedParent === undefined || requestedParent === ROOT_TOKEN
+            ? null
+            : requestedParent
+        const records = liveUpdateChildrenOf(storeRef.current, managerId).map(
+          (employee) => toLiveUpdateNode(storeRef.current, employee)
+        )
+        return {
+          type: "pages" as const,
+          records,
+          total: records.length,
+          perPage: Math.max(records.length, 1),
+          currentPage: 1,
+          pagesCount: 1,
+        }
+      },
+    },
+  })
+
+  const handleRename = () => {
+    const current = storeRef.current.find(
+      (employee) => employee.id === LIVE_UPDATE_MOVE_SOURCE_ID
+    )
+    if (!current) return
+    const renamedEmployee: LiveUpdateEmployee = {
+      ...current,
+      title: "Senior Software Engineer",
+    }
+    storeRef.current = storeRef.current.map((employee) =>
+      employee.id === renamedEmployee.id ? renamedEmployee : employee
+    )
+    setLiveUpdate((prev) => ({
+      version: prev.version + 1,
+      upsert: [toLiveUpdateNode(storeRef.current, renamedEmployee)],
+    }))
+    setRenamed(true)
+  }
+
+  const handleMove = () => {
+    const current = storeRef.current.find(
+      (employee) => employee.id === LIVE_UPDATE_MOVE_SOURCE_ID
+    )
+    if (!current) return
+    const movedEmployee: LiveUpdateEmployee = {
+      ...current,
+      managerId: LIVE_UPDATE_MOVE_TARGET_ID,
+    }
+    storeRef.current = storeRef.current.map((employee) =>
+      employee.id === movedEmployee.id ? movedEmployee : employee
+    )
+    setLiveUpdate((prev) => ({
+      version: prev.version + 1,
+      upsert: [toLiveUpdateNode(storeRef.current, movedEmployee)],
+    }))
+    setMoved(true)
+  }
+
+  const handleRemove = () => {
+    storeRef.current = removeWithDescendants(
+      storeRef.current,
+      LIVE_UPDATE_REMOVE_ID
+    )
+    setLiveUpdate((prev) => ({
+      version: prev.version + 1,
+      remove: [LIVE_UPDATE_REMOVE_ID],
+    }))
+    setRemoved(true)
+  }
+
+  return (
+    <div className="flex h-screen w-full flex-col gap-3 bg-f1-background pt-4">
+      <div className="flex flex-wrap items-center gap-2 px-4">
+        <F0Button
+          label="Rename node"
+          variant="outline"
+          onClick={handleRename}
+          disabled={renamed}
+        />
+        <F0Button
+          label="Move node to another parent"
+          variant="outline"
+          onClick={handleMove}
+          disabled={moved}
+        />
+        <F0Button
+          label="Remove node (cascade)"
+          variant="critical"
+          onClick={handleRemove}
+          disabled={removed}
+        />
+      </div>
+      <div className="min-h-0 flex-1">
+        <OneDataCollection
+          source={source}
+          fullHeight
+          visualizations={[
+            {
+              ...liveUpdateGraphVisualization,
+              options: {
+                ...liveUpdateGraphVisualization.options,
+                liveUpdate,
+              },
+            },
+          ]}
+        />
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Demonstrates the `liveUpdate` option: three controls above the org chart
+ * apply real-time batches to the already-loaded tree, in place, with no
+ * re-fetch and no collapse back to `defaultExpandDepth`.
+ * - "Rename node" upserts `only-report` with a new title only.
+ * - "Move node to another parent" upserts `only-report` with a new
+ *   `managerId`. It's the *only* report of "Chloe Nguyen" (Engineering
+ *   Manager) and moves under "Farah Idris" (VP Sales), who had no reports —
+ *   covering both sides of the reconciliation: the old parent drops to zero
+ *   children, the new (believed-leaf) parent gains its first child and
+ *   becomes "loaded" without a fetch.
+ * - "Remove node (cascade)" removes "Grace Kim" (VP Customer Support) along
+ *   with her two descendants in a single batch, pruning them from the
+ *   expanded set too.
+ *
+ * Each click only ever sends the record(s) that actually changed — the
+ * touched parents' `childrenCount`/expander state are reconciled locally by
+ * the hook from the in-memory tree.
+ */
+export const LiveUpdate: Story = {
+  render: () => <LiveUpdateGraphExample />,
 }
 
 /**
