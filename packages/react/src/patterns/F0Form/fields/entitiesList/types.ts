@@ -73,6 +73,13 @@ export interface F0EntitiesListOptions {
    * @default true
    */
   canAddItems?: boolean
+  /**
+   * Forces inline cell editing on/off, overriding the automatic behavior.
+   * By default, lists with 2 or fewer columns edit inline and larger ones
+   * add/edit through a dialog. Set `true` to edit inline even with 3+ columns,
+   * or `false` to always use the dialog.
+   */
+  supportInlineEditing?: boolean
   /** User-facing text (add button, dialog description/title). */
   labels?: F0EntitiesListLabels
   /**
@@ -120,6 +127,8 @@ export type F0EntitiesListField = F0BaseField & {
   sortable?: boolean
   /** Whether the user can append new rows (defaults to true) */
   canAddItems?: boolean
+  /** Forces inline cell editing on/off, overriding the column-count heuristic */
+  supportInlineEditing?: boolean
   /** User-facing text (add button, dialog description/title) */
   labels?: F0EntitiesListLabels
   /** Ids of the items that can be edited (matched against `item.id`) */

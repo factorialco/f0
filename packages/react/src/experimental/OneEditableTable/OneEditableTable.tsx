@@ -54,12 +54,12 @@ const ROW_CLASSES = cn(
   "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']"
 )
 
-// The shared table primitive adds an edge gutter (`first:pl-6 last:pr-6`) meant
-// for full-width collection tables. `cn` (tailwind-merge) dedupes it back to the
-// standard 12px padding here so cells align uniformly.
-const CELL_CLASSES = "h-[48px] p-0 align-middle first:pl-3 last:pr-3"
-/** Reset the same edge gutter on header cells. */
-const HEAD_CLASSES = "first:pl-3 last:pr-3"
+const CELL_CLASSES = "h-[48px] p-0 align-middle"
+/**
+ * Tightens the leading edge gutter for the drag-handle cell/header so the
+ * small grip isn't pushed in by the table primitive's `first:pl-6`.
+ */
+const HANDLE_CELL_CLASSES = "first:pl-3"
 
 /**
  * Fills in the `render` fallback so columns satisfy the full editable-table
@@ -107,7 +107,10 @@ function RowCells<R extends RecordType>({
   return (
     <>
       {dragHandle !== undefined && (
-        <TableCell width={HANDLE_COL_WIDTH} className={CELL_CLASSES}>
+        <TableCell
+          width={HANDLE_COL_WIDTH}
+          className={cn(CELL_CLASSES, HANDLE_CELL_CLASSES)}
+        >
           <div className="pointer-events-auto flex h-full items-center justify-center">
             {dragHandle}
           </div>
@@ -337,7 +340,7 @@ function OneEditableTableBase<R extends RecordType>({
           {sortableRows && (
             <TableHead
               width={HANDLE_COL_WIDTH}
-              className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
+              className={cn(HANDLE_CELL_CLASSES, "hover:after:!bg-transparent")}
             >
               <span className="sr-only">{reorderLabel}</span>
             </TableHead>
@@ -349,7 +352,6 @@ function OneEditableTableBase<R extends RecordType>({
               minWidth={column.minWidth}
               align={column.align}
               info={column.info}
-              className={HEAD_CLASSES}
             >
               {column.label}
             </TableHead>
@@ -361,7 +363,7 @@ function OneEditableTableBase<R extends RecordType>({
                   ? DOUBLE_ACTION_COL_WIDTH
                   : SINGLE_ACTION_COL_WIDTH
               }
-              className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
+              className="hover:after:!bg-transparent"
             >
               <span className="sr-only">{actionsLabel}</span>
             </TableHead>

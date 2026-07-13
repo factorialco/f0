@@ -1555,6 +1555,73 @@ export const EntitiesListFieldInline: Story = {
 }
 
 /**
+ * Inline editing forced on for a list with more than 2 columns via
+ * `config.supportInlineEditing: true`. Exercises inline cell types beyond
+ * text: number (`z.number()`), email (`z.string().email()`), and select
+ * (`z.enum`). Edit any cell directly in the table — no dialog.
+ */
+export const EntitiesListFieldInlineMultiColumn: Story = {
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText: "Inline editing across text, number, email and select cells.",
+        schema: z.object({
+          name: z.string().min(1),
+          email: z.string().email(),
+          age: z.number().min(18).max(99),
+          salary: z.number().min(0),
+          role: z.enum(["Admin", "Editor", "Viewer"]),
+        }),
+        config: {
+          supportInlineEditing: true,
+          labels: { addButton: "Add member" },
+          columns: {
+            age: { width: 100 },
+            salary: { label: "Salary", width: 140 },
+            role: { width: 140 },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-inline-multi",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Dani Smith",
+            email: "dani@example.com",
+            age: 34,
+            salary: 52000,
+            role: "Admin",
+          },
+          {
+            id: "m-2",
+            name: "Eliseo Williams",
+            email: "eliseo@example.com",
+            age: 29,
+            salary: 47000,
+            role: "Editor",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * File field with pre-existing files loaded via `initialFiles` on F0Form.
  * The shared pool is automatically matched to each file field by comparing
  * `InitialFile.value` against the field's `defaultValues`.

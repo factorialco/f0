@@ -297,6 +297,7 @@ function configToF0Field(
         itemSchema: "schema" in config ? config.schema : undefined,
         sortable: listOptions?.sortable,
         canAddItems: listOptions?.canAddItems,
+        supportInlineEditing: listOptions?.supportInlineEditing,
         labels: listOptions?.labels,
         editableIds: listOptions?.editableIds,
         maxItems: listOptions?.maxItems,

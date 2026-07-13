@@ -92,7 +92,12 @@ export function EntitiesListFieldRenderer({
 
   const itemShape: Record<string, ZodTypeAny> = field.itemSchema?.shape ?? {}
   const itemKeys = Object.keys(itemShape)
-  const useDialogMode = itemKeys.length > MAX_INLINE_FIELDS
+  // Explicit `supportInlineEditing` wins; otherwise fall back to the
+  // column-count heuristic (inline for small lists, dialog for larger ones).
+  const useDialogMode =
+    field.supportInlineEditing != null
+      ? !field.supportInlineEditing
+      : itemKeys.length > MAX_INLINE_FIELDS
 
   const makeRows = useCallback(
     (value: unknown): EntitiesListRow[] =>
