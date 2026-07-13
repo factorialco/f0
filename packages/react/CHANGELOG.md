@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.32.0](https://github.com/factorialco/f0/compare/f0-react-v4.31.0...f0-react-v4.32.0) (2026-07-13)
+
+
+### Features
+
+* **OneDataCollection:** add liveUpdate to graph visualization ([#4664](https://github.com/factorialco/f0/issues/4664)) ([0608b7f](https://github.com/factorialco/f0/commit/0608b7f69fa7dacf8359099791e97a9796d0411e))
+
 ## [4.31.0](https://github.com/factorialco/f0/compare/f0-react-v4.30.2...f0-react-v4.31.0) (2026-07-13)
 
 
