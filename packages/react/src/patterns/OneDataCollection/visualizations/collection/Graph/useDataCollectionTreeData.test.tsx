@@ -632,3 +632,62 @@ describe("useDataCollectionTreeData — two-phase hydration", () => {
     ).toBe("Marcus")
   })
 })
+
+describe("useDataCollectionTreeData — focus on entry", () => {
+  it("pre-resolves and expands the focusOnEntry path on initial load, without focusing", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodePath = vi.fn(async () => [
+      employees.ceo,
+      employees.vp1,
+      employees.mgr1,
+    ])
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({
+          defaultExpandDepth: 0,
+          loadNodePath,
+          focusOnEntry: "mgr1",
+        }),
+        callbacks()
+      )
+    )
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    // Path resolved + ancestors expanded before the first paint...
+    expect(loadNodePath).toHaveBeenCalledWith("mgr1")
+    expect(result.current.expandedNodes.has("ceo")).toBe(true)
+    expect(result.current.expandedNodes.has("vp1")).toBe(true)
+    expect(result.current.nodes.map((node) => node.id)).toContain("mgr1")
+    // ...but NO focus/highlight — the initial viewport frames it (initialFocusNodeId).
+    expect(result.current.focusedNode).toBeUndefined()
+    expect(result.current.highlightedNodes.size).toBe(0)
+  })
+
+  it("falls back to the default view when focusOnEntry path resolution fails", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const loadNodePath = vi.fn(async () => {
+      throw new Error("no path")
+    })
+
+    const { result } = renderHook(() =>
+      useDataCollectionTreeData(
+        source,
+        buildOptions({
+          defaultExpandDepth: 1,
+          loadNodePath,
+          focusOnEntry: "mgr1",
+        }),
+        callbacks()
+      )
+    )
+
+    // Initial load still completes (no throw) → fit-to-all fallback.
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+    expect(result.current.nodes.map((node) => node.id)).toContain("ceo")
+  })
+})
