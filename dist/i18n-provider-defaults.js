@@ -100,7 +100,7 @@ const e = {
   jo: "Jordan",
   jp: "Japan",
   ke: "Kenya"
-}, a = {
+}, t = {
   countries: e,
   approvals: {
     history: "Approval history",
@@ -118,6 +118,10 @@ const e = {
   navigation: {
     sidebar: {
       label: "Main navigation",
+      search: "Search",
+      tabs: {
+        label: "Sidebar sections"
+      },
       companySelector: {
         label: "Select a company",
         placeholder: "Select a company"
@@ -130,10 +134,26 @@ const e = {
     password: {
       show: "Show password",
       hide: "Hide password"
+    },
+    private: {
+      show: "Show {{label}}",
+      hide: "Hide {{label}}"
     }
   },
   link: {
     opensInNewTab: "opens in new tab"
+  },
+  audioPlayer: {
+    label: "Audio player",
+    play: "Play",
+    pause: "Pause",
+    seek: "Seek",
+    options: "Recording options",
+    playbackSpeed: "Playback speed",
+    position: "{{current}} of {{total}}",
+    viewDetail: "View detail",
+    hideDetail: "Hide detail",
+    details: "Recording details"
   },
   actions: {
     add: "Add",
@@ -141,14 +161,18 @@ const e = {
     save: "Save",
     send: "Send",
     cancel: "Cancel",
+    ok: "Ok",
     delete: "Delete",
     copy: "Copy",
     paste: "Paste",
     close: "Close",
     collapse: "Collapse",
+    collapseItem: "Collapse {{title}}",
     expand: "Expand",
+    expandItem: "Expand {{title}}",
     showAll: "Show all",
     showLess: "Show less",
+    seeMore: "See more",
     skipToContent: "Skip to content",
     view: "View",
     unselect: "Unselect",
@@ -163,7 +187,10 @@ const e = {
     toggle: "Toggle",
     toggleDropdownMenu: "Toggle dropdown menu",
     selectAll: "Select all",
-    selectAllItems: "Select all {{total}} items"
+    selectAllItems: "Select all {{total}} items",
+    apply: "Apply",
+    saveAsPreset: "Save view",
+    editPreset: "Edit view"
   },
   status: {
     selected: {
@@ -186,6 +213,10 @@ const e = {
     availableFilters: "Available filters",
     label: "Filters",
     applyFilters: "Apply filters",
+    resultsFor: {
+      one: "{{count}} result for:",
+      other: "{{count}} results for:"
+    },
     applySelection: "Apply selection",
     cancel: "Cancel",
     failedToLoadOptions: "Failed to load options",
@@ -230,22 +261,42 @@ const e = {
     actions: {
       actions: "Actions"
     },
+    presets: {
+      createTitle: "Save view",
+      createDescription: "Save the current filters, sorting, grouping and columns as a view.",
+      updateTitle: "Update view",
+      updateDescription: "Update this view's name and description.",
+      nameLabel: "Title",
+      namePlaceholder: "View name",
+      duplicateName: "A view with this name already exists",
+      descriptionLabel: "Description",
+      descriptionPlaceholder: "Optional description",
+      save: "Save",
+      delete: "Remove",
+      share: "Share view",
+      copiedToClipboard: "Copied to your clipboard",
+      cancel: "Cancel"
+    },
     visualizations: {
-      table: "Table view",
-      editableTable: "Editable table view",
-      card: "Card view",
-      list: "List view",
-      kanban: "Kanban view",
+      table: "Table",
+      editableTable: "Editable table",
+      card: "Card",
+      list: "List",
+      kanban: "Kanban",
+      graph: "Graph",
       pagination: {
         of: "of"
       },
       settings: "{{visualizationName}} settings",
-      reset: "Reset to default"
+      reset: "Reset to default",
+      viewSelectorLabel: "Select view"
     },
     table: {
       settings: {
         showAllColumns: "Show all",
-        hideAllColumns: "Hide all"
+        hideAllColumns: "Hide all",
+        addColumn: "Add column",
+        removeColumn: "Remove column"
       }
     },
     editableTable: {
@@ -373,16 +424,11 @@ const e = {
     inputPlaceholder: "Ask about time, people, or company info and a lot of other things...",
     stopAnswerGeneration: "Stop generating",
     responseStopped: "You stopped this response",
+    applyingChanges: "Applying changes",
     sendMessage: "Send message",
-    thoughtsGroupTitle: "Reflection",
+    thoughtsGroupTitle: "Reasoning",
     resourcesGroupTitle: "Resources",
     thinking: "Thinking...",
-    closeDashboard: "Close dashboard",
-    unsavedChanges: "Unsaved changes",
-    saveChanges: "Save changes",
-    discardChanges: "Discard",
-    exportTable: "Download table",
-    generatedTableFilename: "OneGeneratedTable",
     feedbackModal: {
       positive: {
         title: "What did you like about this response?",
@@ -395,7 +441,6 @@ const e = {
         placeholder: "Share what didn’t work"
       }
     },
-    dataDownloadPreview: "Preview {{shown}} of {{total}} rows — download the Excel to see all data.",
     expandChat: "Expand chat",
     collapseChat: "Collapse chat",
     chatHistory: "Chat history",
@@ -413,9 +458,20 @@ const e = {
     deleteChat: "Delete chat",
     ask: "Ask One",
     view: "View",
-    tools: "Tools",
+    entityRef: {
+      candidate: {
+        source: "Source",
+        applied: "Applied on"
+      },
+      requisition: {
+        lineManager: "Line manager",
+        reason: "Reason",
+        status: "Status"
+      }
+    },
     credits: {
       title: "Credits",
+      employeeCredits: "Your credits",
       creditsLeft: "{{total}} left",
       monthlyCredits: "Monthly credits",
       creditsError: "Could not load credits",
@@ -423,15 +479,22 @@ const e = {
       needMoreCredits: "Need more credits?"
     },
     reportCard: {
-      reportLabel: "Report",
+      tableLabel: "Table",
       openButton: "Open"
+    },
+    formCard: {
+      moreFields: "Open to see all fields"
+    },
+    aiTable: {
+      title: "Table",
+      downloadExcel: "Download Excel",
+      downloadCsv: "Download CSV"
     },
     dataDownload: {
       title: "Download",
       download: "Download {{format}}",
       exportDashboard: "Export dashboard as {{format}}",
-      exporting: "Exporting...",
-      rows: "{{amount}} rows"
+      exporting: "Exporting…"
     },
     dashboardItem: {
       chartType: "Chart type",
@@ -450,24 +513,38 @@ const e = {
     creditWarning: {
       soft: "You're running low on AI credits.",
       getCredits: "Get credits",
-      dismiss: "Dismiss",
-      messageBanner: {
-        title: "This response requires credits",
-        description: "Your company has run out of AI credits.",
-        actionLabel: "Get credits"
-      }
+      dismiss: "Dismiss"
     },
     attachFile: "Attach file",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    transcribing: "Transcribing…",
+    micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
     removeFile: "Remove",
+    fileUploadError: "Upload failed",
+    fileUploadBlockedSubmit: "Your message wasn't sent because one of the attachments failed to upload. Remove it or retry.",
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
     dropFilesHere: "Drop your files here",
+    reply: "Reply",
+    removeQuote: "Remove quote",
     clarifyingQuestion: {
       submit: "Submit",
       next: "Next",
       back: "Back",
+      skip: "Skip",
       typeYourAnswer: "Type your answer…",
       stepOf: "{{current}} of {{total}}",
       custom: "own answer",
-      skipped: "skipped"
+      skipped: "skipped",
+      navHint: {
+        navigate: "navigate",
+        select: "select",
+        cancel: "cancel"
+      }
     },
     growth: {
       demoCard: {
@@ -492,6 +569,98 @@ const e = {
       }
     }
   },
+  chat: {
+    placeholder: "Write something here..",
+    searchPlaceholder: "Search messages",
+    closeSearch: "Close search",
+    noResults: "No chats found",
+    backToLatest: "Jump to latest",
+    muted: "Muted",
+    attachFile: "Attach file",
+    addEmoji: "Add emoji",
+    recordAudio: "Record audio",
+    listening: "Listening…",
+    stopRecording: "Stop and transcribe",
+    cancelRecording: "Cancel recording",
+    dropFilesHere: "Drop your files here",
+    removeFile: "Remove",
+    // Transient composer errors (flashed in the textarea, mirroring the AI chat).
+    tooManyFilesError: "You can attach up to {{maxFiles}} files at once",
+    fileUploadError: "Upload failed",
+    micPermissionDenied: "Microphone access is blocked. Allow it in your browser settings to dictate.",
+    micError: "Couldn't access the microphone.",
+    transcriptionError: "Couldn't transcribe the audio. Try again.",
+    sent: "Sent",
+    read: "Read",
+    // Plural shape (one/other) so other languages can diverge — selected by the
+    // consumer with `i18n.t(count === 1 ? "chat.readBy.one" : "chat.readBy.other")`.
+    readBy: {
+      one: "Read by {{count}}",
+      other: "Read by {{count}}"
+    },
+    delivered: "Delivered",
+    back: "Back",
+    writing: "Writing…",
+    isTyping: "{{name}} is writing…",
+    twoTyping: "{{first}} and {{second}} are writing…",
+    severalTyping: "Several people are writing…",
+    deletedMessage: "Message deleted",
+    moreActions: "Message actions",
+    // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
+    options: "Options",
+    pin: "Pin",
+    unpin: "Unpin",
+    info: "Info",
+    viewProfile: "View profile",
+    // Mentions (groups only). `mentionEveryone` is the token inserted after `@`
+    // for a group-wide ping (localize the word, e.g. es "aquí").
+    mentionEveryone: "here",
+    mentionEveryoneDescription: "Notify everyone in this group",
+    reply: "Reply",
+    react: "Add reaction",
+    download: "Download",
+    removeQuote: "Remove quote",
+    // Editing your own message (within the edit window). `editing` heads the
+    // composer chip; `edited` is the muted marker after an edited message body.
+    edit: "Edit",
+    editing: "Editing",
+    edited: "edited",
+    cancelEdit: "Cancel edit",
+    saveEdit: "Save",
+    // Shown as the quoted sender's name when the replied-to message is your own.
+    you: "You",
+    // In-chat image lightbox.
+    openImage: "Open image",
+    imagePreview: "Image preview",
+    closePreview: "Close",
+    previousImage: "Previous image",
+    nextImage: "Next image",
+    // Attachment previews in reply quotes + the composer chip (a lone file shows
+    // its real name instead of a count).
+    photo: "Photo",
+    photoCount: {
+      one: "{{count}} photo",
+      other: "{{count}} photos"
+    },
+    fileCount: {
+      one: "{{count}} file",
+      other: "{{count}} files"
+    },
+    attachmentCount: {
+      one: "{{count}} attachment",
+      other: "{{count}} attachments"
+    },
+    scrollToBottom: "Scroll to bottom",
+    newMessages: "New messages",
+    unreadCount: {
+      one: "{{count}} unread",
+      other: "{{count}} unread"
+    },
+    emptyConversation: "No messages yet",
+    emptyConversationDescription: "Send a message to start the conversation.",
+    error: "Couldn't load this conversation",
+    loadingOlder: "Loading earlier messages…"
+  },
   dataChart: {
     heatmapNotSupported: "Heatmap not supported at this size",
     barChartVertical: "Bar (vertical)",
@@ -499,12 +668,19 @@ const e = {
     lineChart: "Line",
     funnel: "Funnel",
     pieChart: "Pie",
-    table: "Table"
+    table: "Table",
+    emptyState: {
+      title: "No data available",
+      description: "Try a different date or fewer filters"
+    }
   },
   select: {
     noResults: "No results found",
     loadingMore: "Loading...",
-    applySelection: "Apply selection"
+    applySelection: "Apply selection",
+    create: "Create",
+    createWithValue: 'Create "{{value}}"',
+    createEmptyMessage: "Try another search or create a new item"
   },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
@@ -580,11 +756,15 @@ const e = {
       sectionDescriptionPlaceholder: "Describe the section in a few words",
       required: "Required",
       allowMultiSelection: "Allow multi-selection",
+      allowCreate: "Allow creation",
       singleSelection: "Single selection",
       multiSelection: "Multi selection",
       questionType: "Question type",
       questionOptions: "Question options",
       actions: "Actions",
+      locked: "Locked",
+      lockedSectionNotice: "These questions are predefined and can't be edited, moved, or removed.",
+      lockedQuestionNotice: "This question is predefined and can't be edited or removed.",
       sectionTitlePlaceholder: "Section title",
       lastQuestionDialogTitle: "Remove last question from section",
       lastQuestionDialogDescription: "Moving this question will leave the section empty and it will be removed. Do you want to continue?"
@@ -644,7 +824,7 @@ const e = {
       blocks: "Blocks"
     },
     ai: {
-      enhanceButtonLabel: "Enhance",
+      enhanceButtonLabel: "Generate",
       loadingEnhanceLabel: "Loading...",
       defaultError: "An error occurred while loading",
       closeErrorButtonLabel: "Continue editing",
@@ -675,7 +855,8 @@ const e = {
       processing: "Processing…",
       uploadFailed: "Upload failed",
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
-      invalidFileType: "File type not accepted. Accepted formats: {{types}}"
+      invalidFileType: "File type not accepted. Accepted formats: {{types}}",
+      maxFilesReached: "Maximum {{maxFiles}} files"
     },
     moreInformation: "More information",
     validation: {
@@ -708,13 +889,38 @@ const e = {
       }
     }
   },
+  graph: {
+    canvas: "Graph canvas",
+    view: "Graph view",
+    controls: {
+      findMe: "Find me",
+      fitToView: "Fit to view",
+      zoomIn: "Zoom in",
+      zoomOut: "Zoom out",
+      navigation: "Graph navigation"
+    }
+  },
   wizard: {
     previous: "Previous",
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}"
+  },
+  pdfViewer: {
+    toolbar: "Document toolbar",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    scaleSelector: "Zoom level",
+    pageWidth: "Page width",
+    pageFit: "Page fit",
+    rotate: "Rotate",
+    print: "Print",
+    download: "Download",
+    loading: "Loading document"
   }
 };
 export {
-  a as defaultTranslations
+  t as defaultTranslations
 };
