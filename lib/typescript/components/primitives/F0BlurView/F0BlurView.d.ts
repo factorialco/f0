@@ -6,9 +6,9 @@ import type { F0BlurViewProps } from "./F0BlurView.types";
  * Thin wrapper around `expo-blur`'s `BlurView` with className support via
  * UniWind. Use for blurred background effects inside F0 components.
  *
- * On Android, `experimentalBlurMethod` defaults to `"none"` (semi-transparent
+ * On Android, `blurMethod` defaults to `"none"` (semi-transparent
  * overlay) to avoid graphical artifacts with elevated children. Pass
- * `experimentalBlurMethod="dimezisBlurView"` explicitly to opt in to real blur
+ * `blurMethod="dimezisBlurView"` explicitly to opt in to real blur
  * on Android, only when no elevated children are inside the BlurView.
  *
  * @internal

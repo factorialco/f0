@@ -10,10 +10,8 @@ const SvgCross = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.95 7.05 12 12l-4.95 4.95M12 12 7.05 7.05l9.9 9.9"
+      fill="currentColor"
+      d="M17.364 5.364a.9.9 0 0 1 1.272 1.272L13.273 12l5.364 5.364a.902.902 0 0 1-1.273 1.274L12 13.273l-5.364 5.364a.901.901 0 0 1-1.272-1.274L10.726 12 5.364 6.636a.9.9 0 0 1 1.272-1.272L12 10.726z"
     />
   </Svg>
 )

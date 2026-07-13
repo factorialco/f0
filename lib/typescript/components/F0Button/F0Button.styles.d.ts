@@ -1,6 +1,7 @@
 import type { IconColor } from "../primitives/F0Icon";
 import type { TextColor } from "../primitives/F0Text";
-import type { ButtonVariant } from "./F0Button.types";
+import type { ButtonSize, ButtonVariant } from "./F0Button.types";
+export declare const getButtonPadding: (size: ButtonSize, icon: boolean, hideLabel: boolean, round: boolean, iconPosition: "left" | "right") => string;
 export declare const buttonVariants: import("tailwind-variants").TVReturnType<{
     variant: {
         default: string;
@@ -77,6 +78,10 @@ export declare const pressedVariants: import("tailwind-variants").TVReturnType<{
         ghost: string;
         promote: string;
     };
+    isDark: {
+        true: string;
+        false: string;
+    };
 }, undefined, "", {
     variant: {
         default: string;
@@ -86,6 +91,10 @@ export declare const pressedVariants: import("tailwind-variants").TVReturnType<{
         ghost: string;
         promote: string;
     };
+    isDark: {
+        true: string;
+        false: string;
+    };
 }, undefined, import("tailwind-variants").TVReturnType<{
     variant: {
         default: string;
@@ -94,6 +103,10 @@ export declare const pressedVariants: import("tailwind-variants").TVReturnType<{
         critical: string;
         ghost: string;
         promote: string;
+    };
+    isDark: {
+        true: string;
+        false: string;
     };
 }, undefined, "", unknown, unknown, undefined>>;
 export declare const loadingContentVariants: import("tailwind-variants").TVReturnType<{
@@ -126,6 +139,10 @@ export declare const loadingIndicatorVariants: import("tailwind-variants").TVRet
         md: string;
         lg: string;
     };
+    isDark: {
+        true: string;
+        false: string;
+    };
 }, undefined, "rounded-full border-solid border-t-transparent", {
     variant: {
         default: string;
@@ -139,6 +156,10 @@ export declare const loadingIndicatorVariants: import("tailwind-variants").TVRet
         sm: string;
         md: string;
         lg: string;
+    };
+    isDark: {
+        true: string;
+        false: string;
     };
 }, undefined, import("tailwind-variants").TVReturnType<{
     variant: {
@@ -154,8 +175,12 @@ export declare const loadingIndicatorVariants: import("tailwind-variants").TVRet
         md: string;
         lg: string;
     };
+    isDark: {
+        true: string;
+        false: string;
+    };
 }, undefined, "rounded-full border-solid border-t-transparent", unknown, unknown, undefined>>;
-export declare const getIconColor: (variant: ButtonVariant, isPressed: boolean) => IconColor;
-export declare const getIconOnlyColor: (variant: ButtonVariant, isPressed: boolean) => IconColor;
-export declare const getTextColor: (variant: ButtonVariant, isPressed: boolean) => TextColor;
+export declare const getIconColor: (variant: ButtonVariant, isPressed: boolean, isDark?: boolean) => IconColor;
+export declare const getIconOnlyColor: (variant: ButtonVariant, isPressed: boolean, isDark?: boolean) => IconColor;
+export declare const getTextColor: (variant: ButtonVariant, isPressed: boolean, isDark?: boolean) => TextColor;
 //# sourceMappingURL=F0Button.styles.d.ts.map

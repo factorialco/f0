@@ -1,0 +1,19 @@
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
+const SvgIndent = (props: SvgProps, ref: Ref<Svg>) => (
+  <Svg
+    fill="none"
+    viewBox="0 0 24 24"
+    className={props.className}
+    ref={ref}
+    {...props}
+  >
+    <Path
+      fill="currentColor"
+      d="M6 3.1a.9.9 0 0 1 .9.9v2.6c0 1.135 0 1.933.052 2.554.05.611.143.975.286 1.254a3.1 3.1 0 0 0 1.354 1.355c.28.142.643.236 1.254.286.622.05 1.42.051 2.554.051H18a.9.9 0 0 1 0 1.8h-5.6c-1.105 0-1.988.001-2.7-.057-.723-.059-1.349-.184-1.925-.477a4.9 4.9 0 0 1-2.14-2.141c-.294-.576-.418-1.202-.477-1.924-.059-.712-.058-1.595-.058-2.7V4a.9.9 0 0 1 .9-.9"
+    />
+  </Svg>
+)
+const ForwardRef = forwardRef(SvgIndent)
+export default ForwardRef

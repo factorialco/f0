@@ -10,10 +10,8 @@ const SvgChevronLeft = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m15 6-6 6M15 18l-6-6"
+      fill="currentColor"
+      d="M15.249 5.144a.9.9 0 0 0-1.273 0l-6.219 6.22a.897.897 0 0 0 0 1.272l6.22 6.219a.9.9 0 1 0 1.272-1.273L9.666 12l5.583-5.583a.9.9 0 0 0 0-1.273"
     />
   </Svg>
 )

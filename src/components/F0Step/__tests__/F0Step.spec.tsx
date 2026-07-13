@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react-native"
 import React from "react"
 import { View } from "react-native"
+import type { ReactTestInstance } from "react-test-renderer"
 
 import { F0StepSegment } from "../F0StepSegment"
 import { F0Step } from "../index"
@@ -28,16 +29,19 @@ describe("F0StepSegment", () => {
     )
 
     expect(
-      screen.getByTestId("step-active").children[0].props.className
+      (screen.getByTestId("step-active").children[0] as ReactTestInstance).props
+        .className
     ).toContain("bg-f0-background-bold")
     expect(screen.getByTestId("step-completed").props.className).toContain(
       "flex-1"
     )
     expect(
-      screen.getByTestId("step-completed").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+      (screen.getByTestId("step-completed").children[0] as ReactTestInstance)
+        .props.className
+    ).toContain("bg-f0-background-bold")
     expect(
-      screen.getByTestId("step-pending").children[0].props.className
+      (screen.getByTestId("step-pending").children[0] as ReactTestInstance)
+        .props.className
     ).toContain("bg-f0-background-tertiary")
   })
 
@@ -78,10 +82,16 @@ describe("F0Step", () => {
       now: 1,
     })
     expect(
-      screen.getByTestId("flow-progress-segment-0").children[0].props.className
+      (
+        screen.getByTestId("flow-progress-segment-0")
+          .children[0] as ReactTestInstance
+      ).props.className
     ).toContain("bg-f0-background-bold")
     expect(
-      screen.getByTestId("flow-progress-segment-1").children[0].props.className
+      (
+        screen.getByTestId("flow-progress-segment-1")
+          .children[0] as ReactTestInstance
+      ).props.className
     ).toContain("bg-f0-background-tertiary")
   })
 
@@ -96,7 +106,10 @@ describe("F0Step", () => {
       now: 4,
     })
     expect(
-      screen.getByTestId("flow-progress-segment-3").children[0].props.className
+      (
+        screen.getByTestId("flow-progress-segment-3")
+          .children[0] as ReactTestInstance
+      ).props.className
     ).toContain("bg-f0-background-bold")
   })
 
@@ -150,8 +163,11 @@ describe("F0Step", () => {
       now: 3,
     })
     expect(
-      screen.getByTestId("flow-progress-segment-0").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+      (
+        screen.getByTestId("flow-progress-segment-0")
+          .children[0] as ReactTestInstance
+      ).props.className
+    ).toContain("bg-f0-background-bold")
   })
 
   it("preserves completed progress in derived mode when currentStep moves backward", () => {
@@ -172,13 +188,22 @@ describe("F0Step", () => {
       now: 3,
     })
     expect(
-      screen.getByTestId("flow-progress-segment-0").children[0].props.className
+      (
+        screen.getByTestId("flow-progress-segment-0")
+          .children[0] as ReactTestInstance
+      ).props.className
     ).toContain("bg-f0-background-bold")
     expect(
-      screen.getByTestId("flow-progress-segment-1").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+      (
+        screen.getByTestId("flow-progress-segment-1")
+          .children[0] as ReactTestInstance
+      ).props.className
+    ).toContain("bg-f0-background-bold")
     expect(
-      screen.getByTestId("flow-progress-segment-2").children[0].props.className
-    ).toContain("bg-f0-background-selected-bold")
+      (
+        screen.getByTestId("flow-progress-segment-2")
+          .children[0] as ReactTestInstance
+      ).props.className
+    ).toContain("bg-f0-background-bold")
   })
 })

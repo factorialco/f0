@@ -8,8 +8,16 @@ export declare const f0TabsContainerVariants: import("tailwind-variants").TVRetu
         true: string;
         false: string;
     };
-}, undefined, "relative flex-row items-center gap-1 px-3", {
+    fullWidth: {
+        true: string;
+        false: string;
+    };
+}, undefined, "relative flex-row items-center gap-1", {
     secondary: {
+        true: string;
+        false: string;
+    };
+    fullWidth: {
         true: string;
         false: string;
     };
@@ -18,7 +26,26 @@ export declare const f0TabsContainerVariants: import("tailwind-variants").TVRetu
         true: string;
         false: string;
     };
-}, undefined, "relative flex-row items-center gap-1 px-3", unknown, unknown, undefined>>;
+    fullWidth: {
+        true: string;
+        false: string;
+    };
+}, undefined, "relative flex-row items-center gap-1", unknown, unknown, undefined>>;
+/**
+ * Horizontal content inset tokens for tabs.
+ * - `sm`: 12px (legacy default)
+ * - `md`: 16px (compact containers)
+ * - `lg`: 20px (mobile page gutter)
+ * - `xl`: 24px (web parity)
+ * - `none`: 0px
+ */
+export declare const f0TabsContentInsetVariants: import("tailwind-variants").TVReturnType<{
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
+}, undefined, undefined, {
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
+}, undefined, import("tailwind-variants").TVReturnType<{
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
+}, undefined, undefined, unknown, unknown, undefined>>;
 /**
  * The PressableFeedback IS the pill — same as web's `<span py-1.5 px-3 rounded-md bg-...>`.
  * Active state applies the background color directly on the pressable.
@@ -32,12 +59,28 @@ export declare const f0TabItemVariants: import("tailwind-variants").TVReturnType
         true: string;
         false: string;
     };
+    fullWidth: {
+        true: string;
+        false: string;
+    };
+    disabled: {
+        true: string;
+        false: string;
+    };
 }, undefined, "items-center justify-center rounded-md px-3 py-1.5", {
     active: {
         true: string;
         false: string;
     };
     secondary: {
+        true: string;
+        false: string;
+    };
+    fullWidth: {
+        true: string;
+        false: string;
+    };
+    disabled: {
         true: string;
         false: string;
     };
@@ -50,6 +93,14 @@ export declare const f0TabItemVariants: import("tailwind-variants").TVReturnType
         true: string;
         false: string;
     };
+    fullWidth: {
+        true: string;
+        false: string;
+    };
+    disabled: {
+        true: string;
+        false: string;
+    };
 }, undefined, "items-center justify-center rounded-md px-3 py-1.5", unknown, unknown, undefined>>;
 /**
  * Underline shown only on primary tabs (secondary=false).
@@ -59,5 +110,31 @@ export declare const f0TabUnderlineClass = "absolute bottom-0 h-px rounded-full 
 /**
  * Full-width separator at the bottom of the primary container (mirrors web's border div).
  */
-export declare const f0TabSeparatorClass = "absolute bottom-0 left-0 right-0 h-px bg-f0-border";
+export declare const f0TabSeparatorVariants: import("tailwind-variants").TVReturnType<{
+    inset: {
+        full: string;
+        content: string;
+    };
+}, undefined, "absolute bottom-0 h-px bg-f0-border", {
+    inset: {
+        full: string;
+        content: string;
+    };
+}, undefined, import("tailwind-variants").TVReturnType<{
+    inset: {
+        full: string;
+        content: string;
+    };
+}, undefined, "absolute bottom-0 h-px bg-f0-border", unknown, unknown, undefined>>;
+/**
+ * Content-aligned separator inset tokens.
+ * Uses the same token map as `f0TabsContentInsetVariants`.
+ */
+export declare const f0TabSeparatorContentInsetVariants: import("tailwind-variants").TVReturnType<{
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
+}, undefined, undefined, {
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
+}, undefined, import("tailwind-variants").TVReturnType<{
+    contentInset: Record<"none" | "md" | "xl" | "lg" | "sm", string>;
+}, undefined, undefined, unknown, unknown, undefined>>;
 //# sourceMappingURL=F0Tabs.styles.d.ts.map

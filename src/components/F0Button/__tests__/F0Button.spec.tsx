@@ -41,6 +41,20 @@ describe("F0Button", () => {
     expect(toJSON()).toMatchSnapshot()
   })
 
+  it("Snapshot - with icon on the right", () => {
+    const { toJSON } = render(
+      <F0Button {...defaultProps} icon={mockIcon} iconPosition="right" />
+    )
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("accepts iconPosition right without error", () => {
+    const { toJSON } = render(
+      <F0Button {...defaultProps} icon={mockIcon} iconPosition="right" />
+    )
+    expect(toJSON()).toBeDefined()
+  })
+
   it("Snapshot - with emoji", () => {
     const { toJSON } = render(<F0Button {...defaultProps} emoji="👋" />)
     expect(toJSON()).toMatchSnapshot()
@@ -73,9 +87,54 @@ describe("F0Button", () => {
     })
   })
 
+  it("Snapshot - fullWidth button", () => {
+    const { toJSON } = render(<F0Button {...defaultProps} fullWidth />)
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("applies w-full wrapper when fullWidth is true", () => {
+    const { toJSON } = render(<F0Button {...defaultProps} fullWidth />)
+    const tree = toJSON() as unknown as { props: { className: string } }
+    expect(tree.props.className).toContain("w-full")
+    expect(tree.props.className).not.toContain("flex-1")
+  })
+
+  it("applies items-start wrapper when fullWidth is false", () => {
+    const { toJSON } = render(<F0Button {...defaultProps} />)
+    const tree = toJSON() as unknown as { props: { className: string } }
+    expect(tree.props.className).toContain("items-start")
+  })
+
   it("Snapshot - round button with hidden label", () => {
     const { toJSON } = render(<F0Button {...defaultProps} round hideLabel />)
     expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("Snapshot - ghost isDark button", () => {
+    const { toJSON } = render(
+      <F0Button {...defaultProps} variant="ghost" isDark />
+    )
+    expect(toJSON()).toMatchSnapshot()
+  })
+
+  it("uses inverse text color for ghost variant when isDark is true", () => {
+    render(
+      <F0Button {...defaultProps} variant="ghost" isDark testID="dark-ghost" />
+    )
+    const text = screen.getByText("Test Button")
+    expect(text.props.className).toContain("inverse")
+  })
+
+  it("ignores isDark for non-ghost variants", () => {
+    const { toJSON: withDark, unmount } = render(
+      <F0Button label="A" variant="default" isDark />
+    )
+    const darkSnapshot = JSON.stringify(withDark())
+    unmount()
+    const { toJSON: withoutDark } = render(
+      <F0Button label="A" variant="default" />
+    )
+    expect(darkSnapshot).toEqual(JSON.stringify(withoutDark()))
   })
 
   it("renders correctly with required props", () => {

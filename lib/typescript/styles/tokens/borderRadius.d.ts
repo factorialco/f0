@@ -8,6 +8,7 @@ export declare const borderRadius: {
     lg: string;
     xl: string;
     "2xl": string;
+    "3xl": string;
     full: string;
 };
 //# sourceMappingURL=borderRadius.d.ts.map

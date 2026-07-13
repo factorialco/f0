@@ -51,7 +51,7 @@ export type MetadataItemValue = {
 } | {
     type: "date";
     formattedDate: string;
-    icon?: "warning" | "critical";
+    icon?: "warning" | "critical" | "calendar";
 } | {
     type: "progress-bar";
     value: number;

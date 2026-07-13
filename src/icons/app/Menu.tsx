@@ -10,10 +10,8 @@ const SvgMenu = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5 7h14M5 12h14M5 17h14"
+      fill="currentColor"
+      d="M19 16.1a.9.9 0 0 1 0 1.8H5a.9.9 0 1 1 0-1.8zm0-5a.9.9 0 0 1 0 1.8H5a.9.9 0 0 1 0-1.8zm0-5a.9.9 0 0 1 0 1.8H5a.9.9 0 0 1 0-1.8z"
     />
   </Svg>
 )

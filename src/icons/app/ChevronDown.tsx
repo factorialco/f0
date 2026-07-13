@@ -10,10 +10,8 @@ const SvgChevronDown = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m18 10-6 6M6 10l6 6"
+      fill="currentColor"
+      d="M5.143 8.756a.9.9 0 0 0 0 1.273l6.22 6.22c.33.329.852.35 1.205.062l.068-.062 6.22-6.22a.9.9 0 0 0-1.272-1.273L12 14.34 6.416 8.756a.9.9 0 0 0-1.273 0"
     />
   </Svg>
 )

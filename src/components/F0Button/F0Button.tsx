@@ -25,6 +25,7 @@ import {
   loadingContentVariants,
   loadingIndicatorVariants,
   pressedVariants,
+  getButtonPadding,
   getIconColor,
   getIconOnlyColor,
   getTextColor,
@@ -54,6 +55,7 @@ const F0Button = React.memo(
       disabled = false,
       loading = false,
       icon,
+      iconPosition = "left",
       emoji,
       hideLabel = false,
       variant = "default",
@@ -62,6 +64,7 @@ const F0Button = React.memo(
       accessibilityHint,
       showBadge = false,
       fullWidth = false,
+      isDark = false,
       testID,
       feedback = "both",
       ...rest
@@ -127,13 +130,16 @@ const F0Button = React.memo(
 
     const baseClassName = useMemo(
       () =>
-        buttonVariants({
-          variant,
-          size,
-          disabled: isDisabled,
-          round: isRound,
-        }),
-      [variant, size, isDisabled, isRound]
+        cn(
+          buttonVariants({
+            variant,
+            size,
+            disabled: isDisabled,
+            round: isRound,
+          }),
+          getButtonPadding(size, !!icon, hideLabel, isRound, iconPosition)
+        ),
+      [variant, size, isDisabled, isRound, icon, hideLabel, iconPosition]
     )
 
     const accessibilityLabel = useMemo(() => {
@@ -145,17 +151,19 @@ const F0Button = React.memo(
 
     const shouldShowPressed = isPressed && !isDisabled
 
+    const isDarkGhost = isDark && variant === "ghost"
+
     const className = shouldShowPressed
-      ? cn(baseClassName, pressedVariants({ variant }))
+      ? cn(baseClassName, pressedVariants({ variant, isDark: isDarkGhost }))
       : baseClassName
 
     const iconIsOnly = isRound || (hideLabel && !emoji)
     const iconColor = icon
       ? iconIsOnly
-        ? getIconOnlyColor(variant, shouldShowPressed)
-        : getIconColor(variant, shouldShowPressed)
+        ? getIconOnlyColor(variant, shouldShowPressed, isDark)
+        : getIconColor(variant, shouldShowPressed, isDark)
       : undefined
-    const textColor = getTextColor(variant, shouldShowPressed)
+    const textColor = getTextColor(variant, shouldShowPressed, isDark)
     const forwardedProps = omitProps(rest, F0_BUTTON_BLOCKED_FORWARD_PROPS)
     const loadingIndicatorStyle = useAnimatedStyle(() => {
       return {
@@ -165,7 +173,7 @@ const F0Button = React.memo(
     })
 
     return (
-      <View className={`flex ${fullWidth ? "flex-1" : "items-start"}`}>
+      <View className={`flex ${fullWidth ? "w-full" : "items-start"}`}>
         <PressableFeedback
           ref={ref}
           {...forwardedProps}
@@ -189,13 +197,8 @@ const F0Button = React.memo(
               className={loadingContentVariants({ loading: isBusy })}
             >
               <View className="flex-row items-center justify-center gap-1">
-                {icon && (
-                  <F0Icon
-                    icon={icon}
-                    size="lg"
-                    className={isRound ? undefined : "-ml-0.5"}
-                    color={iconColor}
-                  />
+                {icon && iconPosition === "left" && (
+                  <F0Icon icon={icon} size="lg" color={iconColor} />
                 )}
                 {emoji && (
                   <F0Text variant="body-md-medium" color={textColor}>
@@ -207,6 +210,9 @@ const F0Button = React.memo(
                     {label}
                   </F0Text>
                 )}
+                {icon && iconPosition === "right" && (
+                  <F0Icon icon={icon} size="lg" color={iconColor} />
+                )}
               </View>
             </View>
             {isBusy && (
@@ -217,7 +223,11 @@ const F0Button = React.memo(
                 <Animated.View
                   testID="f0-button-loading-indicator"
                   accessibilityLabel="Loading indicator"
-                  className={loadingIndicatorVariants({ variant, size })}
+                  className={loadingIndicatorVariants({
+                    variant,
+                    size,
+                    isDark: isDarkGhost,
+                  })}
                   style={loadingIndicatorStyle}
                 />
               </View>
