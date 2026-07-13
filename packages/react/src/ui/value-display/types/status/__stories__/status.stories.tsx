@@ -39,6 +39,9 @@ export const StatusType: Story = {
 }
 
 export const WithTooltip: Story = {
+  parameters: {
+    layout: "centered",
+  },
   args: {
     item: mockItem,
     property: {
