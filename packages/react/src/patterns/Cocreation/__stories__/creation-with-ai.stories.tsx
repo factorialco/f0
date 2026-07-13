@@ -2027,6 +2027,7 @@ function FlowContent({
     startClarifying,
     setUserMessageInterceptor,
     sendMessageWithThinkingOnly,
+    showThinking,
   } = useMockAiChatRuntime()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
@@ -2122,24 +2123,29 @@ function FlowContent({
           const type =
             config.guidedTypes.find((t) => t.label === label) ??
             config.guidedTypes[0]
-          appendMessages([
-            {
-              role: "user",
-              content: `**${config.guidedQuestion}**\\\n${label ?? type.label}`,
-            },
-          ])
-          appendMessages([
-            {
-              role: "assistant",
-              content: "Great — here are some templates to start from.",
-            },
-          ])
-          openCanvas(
-            toCanvasContent({
-              type: "templates",
-              title: guidedTemplatesTitle(config, type.id),
-              guidedTypeId: type.id,
-            })
+          // Play the steps one at a time so the user can follow each action
+          // instead of everything landing at once: echo their answer and think
+          // (composer disabled), reply, think again, and only THEN open the
+          // templates canvas so its entrance animation reads as its own beat.
+          sendMessageWithThinkingOnly(
+            `**${config.guidedQuestion}**\\\n${label ?? type.label}`,
+            () => {
+              appendMessages([
+                {
+                  role: "assistant",
+                  content: "Great — here are some templates to start from.",
+                },
+              ])
+              showThinking(() => {
+                openCanvas(
+                  toCanvasContent({
+                    type: "templates",
+                    title: guidedTemplatesTitle(config, type.id),
+                    guidedTypeId: type.id,
+                  })
+                )
+              })
+            }
           )
         },
       })

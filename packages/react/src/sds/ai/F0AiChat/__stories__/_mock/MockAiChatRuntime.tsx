@@ -89,6 +89,13 @@ export type MockAiChatRuntime = {
    * panel, …) once the "thinking" has visibly finished.
    */
   sendMessageWithThinkingOnly: (text: string, onComplete?: () => void) => void
+  /**
+   * Plays a "thinking" beat with NO message on either side: `inProgress` goes
+   * true (composer disabled), thinking steps stream, then it flips false and
+   * `onComplete` fires. Used to space out scripted steps so the user can follow
+   * one action at a time (e.g. reply → think → open canvas).
+   */
+  showThinking: (onComplete?: () => void) => void
   appendMessages: (
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
@@ -503,15 +510,8 @@ export const MockAiChatRuntimeProvider = ({
     [streamAssistantResponse]
   )
 
-  const sendMessageWithThinkingOnly = useCallback(
-    (text: string, onComplete?: () => void) => {
-      const trimmed = text.trim()
-      if (!trimmed) return
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), role: "user", content: trimmed },
-      ])
-
+  const showThinking = useCallback(
+    (onComplete?: () => void) => {
       const thinkingSteps = pickRandomThinkingSteps(3)
       const thinkingId = nextId()
 
@@ -529,6 +529,19 @@ export const MockAiChatRuntimeProvider = ({
       timersRef.current.push(startThinking)
     },
     [emitThinkingSteps]
+  )
+
+  const sendMessageWithThinkingOnly = useCallback(
+    (text: string, onComplete?: () => void) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "user", content: trimmed },
+      ])
+      showThinking(onComplete)
+    },
+    [showThinking]
   )
 
   const appendMessages = useCallback<MockAiChatRuntime["appendMessages"]>(
@@ -777,6 +790,7 @@ export const MockAiChatRuntimeProvider = ({
         inProgress,
         sendMessage,
         sendMessageWithThinkingOnly,
+        showThinking,
         appendMessages,
         appendCard,
         setScript,
