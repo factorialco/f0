@@ -1408,6 +1408,153 @@ export const FileFields: Story = {
 }
 
 /**
+ * Entities list field: an editable table for an array of objects whose shape
+ * is defined by a Zod item schema. Columns and cell types are derived from
+ * the schema (`string` → text, `number` → number, `enum` → select).
+ *
+ * With more than 2 schema properties (like here), adding and editing happen
+ * through a form dialog (FormInDialog pattern): the add button opens a
+ * create dialog, and editable rows show a pencil action that opens an edit
+ * dialog. `editableIds` restricts which items can be edited — here the
+ * "Referrals Program" row (id `link-3`) is locked and shows no pencil.
+ */
+export const EntitiesListField: Story = {
+  parameters: { docs: { story: { inline: false, height: "600px" } } },
+  render() {
+    const formSchema = z.object({
+      name: f0FormField.text({
+        label: "Collection name",
+        placeholder: "e.g. Company resources",
+      }),
+      links: f0FormField.entitiesList({
+        label: "Links",
+        helpText: "Add links and drag to reorder them.",
+        schema: z.object({
+          title: z.string().min(1),
+          url: z.string().url(),
+          category: z.enum(["People", "Finance", "Legal", "Benefits"]),
+        }),
+        config: {
+          canAddItems: true,
+          labels: {
+            addButton: "Add link",
+            addButtonDescription:
+              "Add a link to the collection. It will be shown to all employees.",
+          },
+          editableIds: ["link-1", "link-2"],
+          maxItems: 8,
+          columns: {
+            title: { placeholder: "e.g. People Handbook" },
+            url: { label: "URL", placeholder: "https://…" },
+            category: { width: 160 },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "sortable-list",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        name: "",
+        links: [
+          {
+            id: "link-1",
+            title: "People Handbook",
+            url: "https://app.factorialhr.com/dash",
+            category: "People",
+          },
+          {
+            id: "link-2",
+            title: "Travel policy",
+            url: "https://example.com/travel",
+            category: "Finance",
+          },
+          {
+            id: "link-3",
+            title: "Referrals Program",
+            url: "https://example.com/referrals",
+            category: "People",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Entities list field with 2 schema properties: rows are edited inline (no
+ * dialog) and the add button appends an empty row. `editableIds` disables
+ * inline editing per row — the last row (id `faq-3`) is read-only. This list
+ * also sets `sortable: false`, so rows show no drag handle and keep their
+ * order.
+ */
+export const EntitiesListFieldInline: Story = {
+  render() {
+    const formSchema = z.object({
+      faqs: f0FormField.entitiesList({
+        label: "FAQ links",
+        helpText: "Inline editing: 2 columns or fewer.",
+        schema: z.object({
+          title: z.string().min(1),
+          url: z.string().url(),
+        }),
+        config: {
+          sortable: false,
+          labels: { addButton: "Add FAQ" },
+          editableIds: ["faq-1", "faq-2"],
+          columns: {
+            url: { label: "URL", placeholder: "https://…" },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "sortable-list-inline",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        faqs: [
+          {
+            id: "faq-1",
+            title: "How to book time off",
+            url: "https://example.com/pto",
+          },
+          {
+            id: "faq-2",
+            title: "Expenses policy",
+            url: "https://example.com/expenses",
+          },
+          {
+            id: "faq-3",
+            title: "Payroll calendar",
+            url: "https://example.com/payroll",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * File field with pre-existing files loaded via `initialFiles` on F0Form.
  * The shared pool is automatically matched to each file field by comparing
  * `InitialFile.value` against the field's `defaultValues`.

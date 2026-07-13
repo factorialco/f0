@@ -203,6 +203,9 @@ export const defaultTranslations = {
         saveFailed: "Save failed",
       },
       addRow: "Add row",
+      removeRow: "Remove row",
+      editRow: "Edit row",
+      reorderRow: "Drag to reorder",
     },
     itemsCount: "items",
     emptyStates: {
@@ -763,6 +766,10 @@ export const defaultTranslations = {
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
       maxFilesReached: "Maximum {{maxFiles}} files",
+    },
+    entitiesList: {
+      add: "Add",
+      edit: "Edit",
     },
     moreInformation: "More information",
     validation: {

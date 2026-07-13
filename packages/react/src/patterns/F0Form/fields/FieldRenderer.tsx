@@ -182,7 +182,10 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     field.type !== "checkbox" &&
     field.type !== "custom" &&
     !(field.type === "cardSelect" && field.hideLabel)
-  const showFormMessage = field.type !== "custom"
+  // Entities list fields surface item-level and array-level errors inline,
+  // so suppress the generic outer FormMessage (same as custom fields).
+  const showFormMessage =
+    field.type !== "custom" && field.type !== "entitiesList"
 
   // Determine if field is required based on validation schema and field type
   const isRequired =

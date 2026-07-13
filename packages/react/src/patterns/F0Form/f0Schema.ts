@@ -22,6 +22,7 @@ import type { F0NumberConfig } from "./fields/number/types"
 import type { F0PeriodConfig } from "./fields/period/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0SelectConfig } from "./fields/select/types"
+import type { F0EntitiesListConfig } from "./fields/entitiesList/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
 import type { F0TextConfig } from "./fields/text/types"
 import type { F0TextareaConfig } from "./fields/textarea/types"
@@ -92,6 +93,7 @@ export type F0FieldType =
   | "richtext"
   | "file"
   | "cardSelect"
+  | "entitiesList"
   | "custom"
 
 /**
@@ -211,6 +213,7 @@ export type {
   F0RichTextConfig,
   F0CustomConfig,
   F0FileConfig,
+  F0EntitiesListConfig,
 }
 
 /**
@@ -480,6 +483,15 @@ export type F0ArrayFileConfig = F0BaseConfig &
 export type F0FileFieldConfig = F0StringFileConfig | F0ArrayFileConfig
 
 /**
+ * Config for entities list fields (array of `{ title, url }` objects with
+ * drag-to-reorder and per-row removal).
+ */
+export type F0EntitiesListFieldConfig = F0BaseConfig &
+  F0EntitiesListConfig & {
+    fieldType: "entitiesList"
+  }
+
+/**
  * Config for object fields (richtext, daterange, or custom)
  *
  * @typeParam TValue - Type of the field value (for custom fields)
@@ -510,6 +522,7 @@ export type F0FieldConfig<
   | F0ObjectConfig
   | F0PeriodFieldConfig
   | F0StringCardSelectConfig
+  | F0EntitiesListFieldConfig
 
 /**
  * Extended Zod type with F0 metadata
@@ -1406,5 +1419,62 @@ export namespace f0FormField {
     const base = z.array(z.string()).min(1)
     const schema = optional ? base.optional() : base
     return f0FormField(schema as never, { ...rest, multiple: true } as never)
+  }
+
+  // ---- entitiesList --------------------------------------------------------
+
+  /** @internal */
+  type EntitiesListConfig<TItem extends z.ZodObject<z.ZodRawShape>> = Omit<
+    F0EntitiesListFieldConfig,
+    "fieldType" | "schema"
+  > & {
+    /** Zod object schema describing one row of the list */
+    schema: TItem
+    optional?: boolean
+  }
+
+  /**
+   * Entities list field: an editable table for an array of objects.
+   *
+   * The row shape is defined by `schema` and columns are derived from it
+   * (`z.string()` → text, `z.number()` → number, `z.enum()` → select).
+   *
+   * @example
+   * links: f0FormField.entitiesList({
+   *   label: "Links",
+   *   schema: z.object({
+   *     title: z.string().min(1),
+   *     url: z.string().url(),
+   *     category: z.enum(["People", "Finance"]),
+   *   }),
+   *   config: {
+   *     canAddItems: true,
+   *     labels: { addButton: "Add link" },
+   *     maxItems: 8,
+   *   },
+   * })
+   */
+  export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
+    config: EntitiesListConfig<TItem> & { optional: true }
+  ): z.ZodOptional<z.ZodArray<TItem>> &
+    F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>
+  export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
+    config: EntitiesListConfig<TItem> & { optional?: false | undefined }
+  ): z.ZodArray<TItem> & F0ZodType<z.ZodArray<TItem>>
+  export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>({
+    optional,
+    schema,
+    ...config
+  }: EntitiesListConfig<TItem>) {
+    const options = config.config
+    let base = z.array(schema)
+    const effectiveMin = options?.minItems ?? (optional ? undefined : 1)
+    if (effectiveMin !== undefined) base = base.min(effectiveMin)
+    if (options?.maxItems !== undefined) base = base.max(options.maxItems)
+    const finalSchema = optional ? base.optional() : base
+    return f0FormField(
+      finalSchema as never,
+      { ...config, schema, fieldType: "entitiesList" } as never
+    )
   }
 }

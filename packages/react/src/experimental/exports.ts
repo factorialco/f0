@@ -32,6 +32,7 @@ export * from "./Lists/DetailsItem"
 export * from "./Lists/DetailsItemsList"
 export * from "./Lists/OnePersonListItem"
 export * from "./Navigation/exports"
+export * from "./OneEditableTable"
 /**
  * @deprecated OneApprovalHistory has moved to @/sds/inbox/OneApprovalHistory. Import from there instead.
  */

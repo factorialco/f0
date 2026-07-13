@@ -289,6 +289,21 @@ function configToF0Field(
         useUpload: "useUpload" in config ? config.useUpload : undefined,
         renderIf: config.renderIf,
       } as F0Field
+    case "entitiesList": {
+      const listOptions = "config" in config ? config.config : undefined
+      return {
+        ...baseProps,
+        type: "entitiesList",
+        itemSchema: "schema" in config ? config.schema : undefined,
+        sortable: listOptions?.sortable,
+        canAddItems: listOptions?.canAddItems,
+        labels: listOptions?.labels,
+        editableIds: listOptions?.editableIds,
+        maxItems: listOptions?.maxItems,
+        columns: listOptions?.columns,
+        renderIf: config.renderIf,
+      } as F0Field
+    }
     case "cardSelect":
       return {
         ...baseProps,
