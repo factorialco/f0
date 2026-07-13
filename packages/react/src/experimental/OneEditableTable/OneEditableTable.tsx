@@ -69,6 +69,16 @@ const HEAD_CLASSES = "first:pl-3 last:pr-3"
 const HANDLE_CELL_CLASSES = "first:pl-3"
 
 /**
+ * Focus/hover highlight applied directly to the editable `td` (not the inner
+ * cell) so the ring lands on the real cell boundary and lifts above the
+ * neighbouring cells (`z-10`) instead of being clipped by them.
+ */
+const EDITABLE_CELL_RING = cn(
+  "focus-within:relative focus-within:z-10 focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
+  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-10 [&:not(:focus-within):hover]:shadow-[inset_0_0_0_1px_hsl(var(--neutral-30))]"
+)
+
+/**
  * Fills in the `render` fallback so columns satisfy the full editable-table
  * column contract expected by EditableCellRenderer.
  */
@@ -123,24 +133,33 @@ function RowCells<R extends RecordType>({
           </div>
         </TableCell>
       )}
-      {columns.map((column, cellIndex) => (
-        <TableCell
-          key={column.id ?? `cell-${cellIndex}`}
-          firstCell={cellIndex === 0}
-          width={column.width}
-          minWidth={column.minWidth}
-          className={CELL_CLASSES}
-        >
-          <EditableCellRenderer
-            item={item}
-            column={column}
-            cellIndex={cellIndex}
-            isLastColumn={!hasActionsColumn && cellIndex === columns.length - 1}
+      {columns.map((column, cellIndex) => {
+        const editType = column.editType?.(item)
+        const isEditableCell =
+          editType != null &&
+          editType !== "display-only" &&
+          editType !== "disabled"
+        return (
+          <TableCell
+            key={column.id ?? `cell-${cellIndex}`}
+            firstCell={cellIndex === 0}
+            width={column.width}
+            minWidth={column.minWidth}
+            className={cn(CELL_CLASSES, isEditableCell && EDITABLE_CELL_RING)}
           >
-            {null}
-          </EditableCellRenderer>
-        </TableCell>
-      ))}
+            <EditableCellRenderer
+              item={item}
+              column={column}
+              cellIndex={cellIndex}
+              isLastColumn={
+                !hasActionsColumn && cellIndex === columns.length - 1
+              }
+            >
+              {null}
+            </EditableCellRenderer>
+          </TableCell>
+        )
+      })}
       {hasActionsColumn && (
         <TableCell
           width={
