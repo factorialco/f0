@@ -29,14 +29,18 @@ export interface AudioPlayerControls extends AudioPlayerState {
 
 export const useAudioPlayer = (
   audioRef: RefObject<HTMLAudioElement>,
-  callbacks: UseAudioPlayerCallbacks = {}
+  callbacks: UseAudioPlayerCallbacks = {},
+  initialDuration = 0
 ): AudioPlayerControls => {
   const callbacksRef = useRef(callbacks)
   callbacksRef.current = callbacks
 
+  const initialDurationRef = useRef(initialDuration)
+  initialDurationRef.current = initialDuration
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
+  const [duration, setDuration] = useState(initialDuration)
   const [buffered, setBuffered] = useState(0)
   const [playbackRate, setPlaybackRateState] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
@@ -47,7 +51,11 @@ export const useAudioPlayer = (
     if (!audio) return
 
     const handleLoadedMetadata = () => {
-      setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
+      setDuration(
+        Number.isFinite(audio.duration)
+          ? audio.duration
+          : initialDurationRef.current
+      )
       setIsLoading(false)
     }
     const handleTimeUpdate = () => {

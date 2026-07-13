@@ -192,10 +192,55 @@ export interface F0GraphProps<T = unknown> {
    */
   reserveTagRow?: boolean
 
+  // ---- Viewport virtualization (opt-in, non-breaking) ----
+  /**
+   * Opt into node-array windowing. When enabled, only the nodes whose layout
+   * box intersects the current viewport (grown by `nodeWindowPadding`) are
+   * handed to React Flow, instead of every expand-visible node. The tree
+   * structure and layout are still computed in full — positions, bounds and
+   * fit-view stay correct — so this is safe for very large graphs (thousands
+   * of nodes) where React Flow otherwise chokes on the full node array even
+   * with `onlyRenderVisibleElements` (which only culls the DOM).
+   *
+   * Off by default; existing consumers are unaffected.
+   */
+  enableNodeWindowing?: boolean
+  /**
+   * Flow-space px kept materialized around the viewport when
+   * `enableNodeWindowing` is on. Larger values pre-render more off-screen nodes
+   * (smoother fast pans, more work); smaller values window more aggressively.
+   * Defaults to `600`.
+   */
+  nodeWindowPadding?: number
+  /**
+   * Viewport-driven data loading. Called (debounced + batched) with the ids of
+   * nodes that have entered the viewport and not been requested before, so the
+   * consumer can hydrate rich `data` on demand — the tree can be built from a
+   * lightweight structure and heavy per-node data fetched only for what's on
+   * screen. Each id is requested at most once. Most effective together with
+   * `enableNodeWindowing` (then it fires per on-screen node rather than per
+   * expand-visible node). Mark not-yet-loaded nodes with `dataLoaded: false` to
+   * surface `dataLoading` on the render context.
+   *
+   * Each id is requested at most once for the lifetime of the mounted graph.
+   * If you reuse the same mounted graph across different datasets that share
+   * node ids, remount it (e.g. via `key`) so the request cache resets.
+   */
+  loadVisibleNodeData?: (ids: string[]) => void
+  /** Debounce (ms) before flushing a batch of newly-visible ids. Defaults to `200`. */
+  visibleDataDebounceMs?: number
+
   // ---- Callbacks ----
   onZoomLevelChange?: (level: ZoomLevel) => void
   onViewportChange?: (viewport: { x: number; y: number; zoom: number }) => void
   onVisibleNodesChange?: (count: number) => void
+  /**
+   * Fired with the number of nodes actually handed to React Flow. Without
+   * windowing this equals the visible-node count; with `enableNodeWindowing`
+   * it approximates the on-screen count. Useful for perf assertions and
+   * debugging.
+   */
+  onRenderedNodesChange?: (count: number) => void
 }
 
 // ─── Custom Node Type for React Flow ───────────────────────────
@@ -232,6 +277,12 @@ export interface F0GraphNodeRenderContext {
    * may receive additional children once resolved.
    */
   deferredLoading?: boolean
+  /**
+   * `true` when viewport-driven data loading is active (`loadVisibleNodeData`
+   * provided) and this node's rich data hasn't been fetched yet
+   * (`dataLoaded === false`). Render a skeleton/placeholder while true.
+   */
+  dataLoading?: boolean
 }
 
 // ─── Public component (wraps the view in a ReactFlowProvider) ──────────────

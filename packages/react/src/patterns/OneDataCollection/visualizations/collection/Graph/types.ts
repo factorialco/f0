@@ -70,6 +70,16 @@ export type GraphVisualizationOptions<
    */
   revealNodeId?: string
   /**
+   * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+   * root of their branch): when the tree first becomes ready, its ancestor
+   * path is loaded/expanded and the viewport centers on it. Unlike
+   * `revealNodeId` (which is ignored on entry so search stays clean), this is
+   * the opt-in "open the org chart already looking at me" behaviour. Requires
+   * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+   * the default entry view (roots expanded to `defaultExpandDepth`).
+   */
+  focusOnEntry?: string
+  /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for
    * revealing nodes in branches that have not been expanded yet.
@@ -77,6 +87,19 @@ export type GraphVisualizationOptions<
   loadNodePath?: (nodeId: string) => Promise<R[]>
   /** Optional parent accessor used when linking the revealed ancestor path. */
   getParentId?: (record: R) => string | null
+  /**
+   * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+   * built from whatever lightweight records `childrenFilters`/`fetchData`
+   * return, and the full record is fetched — batched, once per node — only for
+   * the nodes that enter the viewport, via this loader. The returned records
+   * replace each node's `data` (matched by node id) and clear its loading
+   * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+   * eager behavior (structure and data fetched together per expansion).
+   *
+   * The "lightness" of the initial records is entirely the source's choice and
+   * transparent to the hook — no special adapter mode is required.
+   */
+  loadNodeData?: (ids: string[]) => Promise<R[]>
   /**
    * Id of the node representing the current user. When set, a "Find me" button
    * is shown in the controls that centers the viewport on that node.
@@ -94,4 +117,20 @@ export type GraphVisualizationOptions<
   maxZoom?: number
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
+  /**
+   * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+   * the viewport are handed to React Flow — for very large trees (thousands of
+   * expand-visible nodes). Off by default; non-breaking.
+   */
+  enableNodeWindowing?: boolean
+  /** Flow-space px kept materialized around the viewport (pass-through). */
+  nodeWindowPadding?: number
+  /**
+   * Viewport-driven data loading (pass-through). Called (debounced + batched)
+   * with the ids of nodes that entered the viewport, so the consumer can
+   * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+   */
+  loadVisibleNodeData?: (ids: string[]) => void
+  /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+  visibleDataDebounceMs?: number
 }

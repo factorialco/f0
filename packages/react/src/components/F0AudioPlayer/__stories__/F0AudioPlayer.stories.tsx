@@ -79,6 +79,22 @@ export const WithDataTestId: Story = {
   args: { dataTestId: "audio-player" },
 }
 
+export const LazySource: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => (
+    <F0AudioPlayerCard
+      {...args}
+      duration={200}
+      src={() =>
+        new Promise((resolve) => setTimeout(() => resolve(SAMPLE_SRC), 400))
+      }
+    />
+  ),
+  args: {
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+  },
+}
+
 // Sample copy lifted from the design, long enough to demonstrate the
 // height-restricted scrollable transcript.
 const SAMPLE_SUMMARY =
