@@ -9,7 +9,7 @@ You are the entry point to F0. When a contributor says "I need X", **you** searc
 
 This skill ends when the change is merged into `experimental/` (or `src/sds/<area>/` for Domain specific). Promotion to stable is covered by `f0-component-promotion`. The full contract is in [`packages/react/docs/definition-of-done.mdx`](../../docs/definition-of-done.mdx); the placement rules are in [`packages/react/docs/where-it-goes.mdx`](../../docs/where-it-goes.mdx).
 
-> **No GitHub issue, no checkbox to wait on.** F0 grows intentionally: say yes when there's clear cross-team value; say no with a documented reason and an alternative. The gate is the design alignment for high-impact changes — not paperwork.
+> F0 grows intentionally: say yes when there's clear cross-team value; say no with a documented reason and an alternative. The gate is the design alignment for high-impact changes.
 
 > **Your authority.** You search, filter, guide placement, and build to the standard. You do **not** approve what enters F0, mark a component stable, or merge — those are Foundations / human calls. The repo (code, `CODEOWNERS`, these docs) is the source of truth; if you ever seem to contradict it, defer to the repo.
 
@@ -17,54 +17,47 @@ This skill ends when the change is merged into `experimental/` (or `src/sds/<are
 
 ## Before anything — Filter ("should this be built in F0?")
 
-Do this **with** the contributor, in the conversation, before proposing or building anything. Its job is to remove work that shouldn't happen: things already solved, things that only need extending, things that don't belong in F0.
+Do this **with** the contributor, in the conversation, before proposing or building anything. Its job is to remove work that shouldn't happen: things already solved, things that don't belong in F0.
 
 Search the repo (`components/`, `experimental/`, `kits/`, `sds/`, `patterns/`) **and** Storybook. Then land on one of:
 
-| You find…                                                    | Outcome                                        | Stop here? |
-| ------------------------------------------------------------ | ---------------------------------------------- | ---------- |
-| It already exists                                            | **Use it.** Point them to it.                  | ✅ yes     |
-| An existing component covers it via a prop / variant / slot  | **Extend it** → go to _Evolving something_.    | continue   |
-| It's one screen, no reuse, no shared identity                | **It lives in their product**, not F0.         | ✅ yes     |
-| A pattern or composition of existing components solves it    | **Document the composition**, don't add a component. | ✅ often |
-| A real, reusable need with no existing solution              | **It's a contribution** → Phase 1.             | continue   |
+| You find…                                                         | Outcome                                        | Stop here? |
+| ----------------------------------------------------------------- | ---------------------------------------------- | ---------- |
+| A component (or a composition of existing ones) covers their case | **Use it** (document the composition if needed). Point them to it. | ✅ yes |
+| It's one screen, no reuse, no shared identity                     | **It lives in their product**, not F0.         | ✅ yes     |
+| A real, reusable need with no existing solution                   | **It's a contribution** → Phase 1.             | continue   |
 
-If you can resolve it here, **do** — don't push the contributor into a heavier flow than the change needs. "Extend before you create" is the default; a new component is the exception.
+If you can resolve it here, **do** — don't push the contributor into a heavier flow than the change needs. Whether it's **new or an extension** of something existing is decided in Phase 1, not here.
 
 ---
 
-## Evolving something (the common case)
+## How much validation a change needs
 
-Most contributions change what already exists. Route by **what** is changing and **whether it's in use** — impact is how many places a change touches, not how much code it is:
+**Everything that enters F0 is reviewed — always**, whatever the maturity: Foundations confirms in `#f0-support` that it belongs and where (Phase 1), and the PR goes through **code review + `f0-quality-gate`**. A **new component** also gets a **design review** (Phase 2). "Iterating freely" only means the owner can change an already-**experimental** component's API without a fresh design review — experimental is unstable by design; it still entered through the same review.
 
-| Change                                        | Impact                       | Design check          | How to handle it |
-| --------------------------------------------- | ---------------------------- | --------------------- | ---------------- |
-| Add a **prop / variant** (backward-compat)    | Low                          | Only if **stable**    | Stable → design-align first (Phase 2); experimental → the owning team iterates freely. Update tests + story + docs. |
-| Add a new **icon**                            | Low                          | Yes (icon-set consistency) | Additive; follow the repo's icon-generation flow. |
-| Add a new **token**                           | Low–medium                   | Yes (avoid duplicating) | Additive, but tokens are shared vocabulary — check it doesn't overlap an existing token. |
-| **Change** a token or icon **in use**         | High → migration             | Yes                   | Ripples through every consumer. Design-align, then plan the migration. |
-| **Iterate** a **pattern** in use              | High → consumers migrate     | Yes                   | Patterns are compositions other teams adopt. Align widely (Phase 2) before building. |
-| Any **breaking change** to something in use   | High → migration             | Yes                   | Follow **"Changing something already in use"** in the release/versioning docs: prefer additive + deprecation; if a real break, write a migration guide from `docs/migrations/TEMPLATE.md`, deprecate, notify consumers, major bump. |
+Beyond that, how much *extra* validation is set by **two questions**:
 
-Impact is **blast radius, not code size**, and the question that sets the weight is: **is it already in use?** A backward-compatible prop on an experimental component is a PR the owner can just make; changing a token that ships in every component is a design decision to align before a line of code. Shared vocabulary (tokens, icons) and new public APIs get a design check even when they're purely additive.
+1. **Is it already in use?** Changing something consumers already use is high-impact → it needs a **migration plan** (see "Changing something already in use" in the release/versioning docs: prefer additive + deprecation; if a real break, a migration guide from `docs/migrations/TEMPLATE.md`, deprecation, consumer notice, major bump). Adding something new rarely ripples.
+2. **Is it shared vocabulary, or a new public API?** A new or changed **token** or **icon**, or a new component's API, gets a **design review** — consistency is expensive even when nothing breaks. A backward-compatible prop on an experimental component doesn't.
 
-**Watch the trap:** `low` impact means low blast radius, **not a low bar to add**. The expensive risk of *adding* is duplication — a second component that re-solves what already exists fragments the system. That's why the Filter (review what exists) runs first and **extend-before-you-create is the default**: only propose a new thing once you've confirmed it isn't already there. Never let a contributor read "low impact" as "free to create."
+**Adding is never "free":** something that duplicates what already exists fragments the system. That's what the Filter and "extend before you create" are for — `low` impact means low blast radius, not a low bar.
 
 ---
 
 ## Phase 1 — Align ("what is it, where does it live?")
 
-**No GitHub issue to file.** Bring whatever exists — the need, a Figma, a Composer prototype, a draft PR — to `#f0-support`. Foundations confirms the **systemic fit** and the destination: **Core**, a **Kit**, or **Domain specific** (see [Where it goes](../../docs/where-it-goes.mdx)).
+**Raise it as a message in `#f0-support`** — bring whatever exists: the need, a Figma, a Composer prototype, a draft PR. Foundations confirms the **systemic fit** and the destination: **Core**, a **Kit**, or **Domain specific** (see [Where it goes](../../docs/where-it-goes.mdx)).
 
+- **New or an extension?** An **extension** (a prop / variant on an existing component) lives **where that component already is** — extend it, don't create a new home. Something **new** picks its home (next bullet). Extend before you create.
 - Help the contributor articulate: the problem, who else needs it (≥2 teams is the signal for Core; a designer can waive this for clearly foundational primitives), and a rough API.
-- Confirm the destination with the placement rules. Reuse within one domain → **Domain specific** (owned by that team). A functional bundle reused by ≥2 products → **Kit**. Generic across ≥2 domains → **Core** (patterns live in Core).
-- **This all happens in `#f0-support`.** For now there's no separate GitHub issue template to file — if a proposal needs tracking, it's raised from the support thread.
+- For something **new**, confirm the destination with the placement rules: reuse within one domain → **Domain specific** (owned by that team); a functional bundle reused by ≥2 products → **Kit**; generic across ≥2 domains → **Core** (patterns live in Core).
+- **A rough need is enough to start** — the proposal takes shape in the `#f0-support` conversation.
 
 **Alignment can end in five outcomes — always hand the contributor the next step, never leave them stranded:**
 
 - **proceed** → go to Phase 2 (Design), then Build.
 - **redirect** (Kit / Domain / an extension instead) → re-enter the flow at that placement; point them to the exact component/folder.
-- **needs-info** → tell them exactly what's missing; they clarify and re-align.
+- **needs-info** → tell them exactly what's missing; they clarify (in the thread or a quick call) and re-align.
 - **lives-in-their-product** → help them build it in their product from F0 pieces (Composer / Claude); it's a valid outcome, not a failure.
 - **declined** → give a documented reason and a concrete alternative.
 
@@ -76,7 +69,7 @@ Scale with impact:
 - **New components** and **any change to a stable component's API/visual/behavior**: run a design review (see [Design Review](../../docs/design-review.mdx) — the 10-category checklist).
 - **High-impact** (token, icon, pattern): design validation is **required up front, before building**.
 
-Document the API draft (props, types, variants, slots, defaults) in the `#f0-support` thread or the PR description. Resolve blocking comments; get explicit approval from at least one Foundations designer for reviewed changes.
+Document the API draft (props, types, variants, slots, defaults) in the `#f0-support` thread — the design conversation lives there, not on a PR (there may not be one yet). Resolve blocking comments; get explicit approval from at least one Foundations designer for reviewed changes.
 
 ## Phase 3 — Build
 
