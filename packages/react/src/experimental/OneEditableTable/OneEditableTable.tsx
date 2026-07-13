@@ -60,8 +60,14 @@ const ROW_CLASSES = cn(
 // gives the action column its full width so the icon buttons fit inside px-2.
 const CELL_CLASSES = "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
 // Cells sit flush (pl-0) but their inputs have 12px of internal padding, so
-// headers use pl-3/pr-3 to line their text up with the cell content.
-const HEAD_CLASSES = "first:pl-3 last:pr-3"
+// headers use pl-3/pr-3 to line their text up with the cell content. The
+// primitive also insets the first/last header's hover highlight
+// (`first:after:left-3` / `last:after:right-3`) for the old 24px edge gutter;
+// reset those to 0 so every header's hover spans the full column like the rest.
+const HEAD_CLASSES = cn(
+  "first:pl-3 last:pr-3",
+  "first:after:!left-1 last:after:!right-1"
+)
 /**
  * Keeps a small leading gutter on the drag-handle cell/header so the grip
  * isn't flush against the edge (overrides the reset above).
