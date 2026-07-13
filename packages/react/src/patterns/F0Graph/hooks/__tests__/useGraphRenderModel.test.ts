@@ -225,3 +225,71 @@ describe("useGraphRenderModel — node windowing", () => {
     ).toEqual(["child"])
   })
 })
+
+describe("useGraphRenderModel — anchor viewport compensation", () => {
+  beforeEach(() => {
+    mockViewportRect = null
+  })
+
+  it("reports the anchor's (dx, dy) delta so the owner can pan the viewport", () => {
+    const onAnchorReflow = vi.fn()
+    const anchorNodeRef = { current: null } as MutableRefObject<string | null>
+    const roots = [treeNode("a", null, 0)]
+    const { rerender } = renderHook(
+      (opts: Parameters<typeof useGraphRenderModel>[0]) =>
+        useGraphRenderModel(opts),
+      {
+        wrapper,
+        initialProps: {
+          ...baseOptions(roots, []),
+          anchorNodeRef,
+          onAnchorReflow,
+          layoutEngineProp: fixedLayout({ a: { x: 100, y: 0 } }),
+        },
+      }
+    )
+
+    // Simulate a toggle: mark the node as the anchor and let the layout move it
+    // (dagre would re-center it). The delta must be reported once.
+    anchorNodeRef.current = "a"
+    onAnchorReflow.mockClear()
+    rerender({
+      ...baseOptions(roots, []),
+      anchorNodeRef,
+      onAnchorReflow,
+      layoutEngineProp: fixedLayout({ a: { x: 0, y: 0 } }),
+    })
+
+    expect(onAnchorReflow).toHaveBeenCalledWith(100, 0)
+  })
+
+  it("does not pan when the anchor node's position is unchanged", () => {
+    const onAnchorReflow = vi.fn()
+    const anchorNodeRef = { current: null } as MutableRefObject<string | null>
+    const roots = [treeNode("a", null, 0)]
+    const { rerender } = renderHook(
+      (opts: Parameters<typeof useGraphRenderModel>[0]) =>
+        useGraphRenderModel(opts),
+      {
+        wrapper,
+        initialProps: {
+          ...baseOptions(roots, []),
+          anchorNodeRef,
+          onAnchorReflow,
+          layoutEngineProp: fixedLayout({ a: { x: 100, y: 0 } }),
+        },
+      }
+    )
+
+    anchorNodeRef.current = "a"
+    onAnchorReflow.mockClear()
+    rerender({
+      ...baseOptions(roots, []),
+      anchorNodeRef,
+      onAnchorReflow,
+      layoutEngineProp: fixedLayout({ a: { x: 100, y: 0 } }),
+    })
+
+    expect(onAnchorReflow).not.toHaveBeenCalled()
+  })
+})

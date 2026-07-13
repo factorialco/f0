@@ -1,5 +1,82 @@
 # Changelog
 
+## [4.31.0](https://github.com/factorialco/f0/compare/f0-react-v4.30.2...f0-react-v4.31.0) (2026-07-13)
+
+
+### Features
+
+* **F0Graph:** open centered on a node (first-frame focus) ([#4621](https://github.com/factorialco/f0/issues/4621)) ([11dae57](https://github.com/factorialco/f0/commit/11dae578db75efd82f8d20da30e67088ffd20a37))
+
+## [4.30.2](https://github.com/factorialco/f0/compare/f0-react-v4.30.1...f0-react-v4.30.2) (2026-07-13)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** emit filter-change for object-valued filters ([#4655](https://github.com/factorialco/f0/issues/4655)) ([930f4b0](https://github.com/factorialco/f0/commit/930f4b0666f2c33a175e95a31b55e63761a3c678))
+
+## [4.30.1](https://github.com/factorialco/f0/compare/f0-react-v4.30.0...f0-react-v4.30.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** disabled cell background fills full cell height ([#4643](https://github.com/factorialco/f0/issues/4643)) ([5b1603c](https://github.com/factorialco/f0/commit/5b1603c2327bb6caf8fed681a9998e9dd3f427bc))
+
+## [4.30.0](https://github.com/factorialco/f0/compare/f0-react-v4.29.4...f0-react-v4.30.0) (2026-07-13)
+
+
+### Features
+
+* **OneDataCollection:** add column add/remove affordances to the table settings popover ([#4587](https://github.com/factorialco/f0/issues/4587)) ([327b913](https://github.com/factorialco/f0/commit/327b9137150ced8c21150b49336568403ea9d260))
+
+## [4.29.4](https://github.com/factorialco/f0/compare/f0-react-v4.29.3...f0-react-v4.29.4) (2026-07-11)
+
+
+### Bug Fixes
+
+* **F0AudioPlayer:** use secondary border token on card ([#4656](https://github.com/factorialco/f0/issues/4656)) ([2db8ce5](https://github.com/factorialco/f0/commit/2db8ce554c8f37e18ab7bda0687afda3276220e3))
+
+## [4.29.3](https://github.com/factorialco/f0/compare/f0-react-v4.29.2...f0-react-v4.29.3) (2026-07-10)
+
+
+### Bug Fixes
+
+* make OneDataCollection column-settings list scrollable ([#4650](https://github.com/factorialco/f0/issues/4650)) ([aef71c7](https://github.com/factorialco/f0/commit/aef71c777ced6e2519070630371a1c043e3adf1b))
+
+## [4.29.2](https://github.com/factorialco/f0/compare/f0-react-v4.29.1...f0-react-v4.29.2) (2026-07-10)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** apply nested grouped filter selections ([#4654](https://github.com/factorialco/f0/issues/4654)) ([6ced59c](https://github.com/factorialco/f0/commit/6ced59c92b85539ea0e57877738b2dcbb6528935))
+
+## [4.29.1](https://github.com/factorialco/f0/compare/f0-react-v4.29.0...f0-react-v4.29.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** enable send with attachment-only (no text) ([#4640](https://github.com/factorialco/f0/issues/4640)) ([034a369](https://github.com/factorialco/f0/commit/034a369f8d2e4bda4e53180b0930c3d738954898))
+
+## [4.29.0](https://github.com/factorialco/f0/compare/f0-react-v4.28.2...f0-react-v4.29.0) (2026-07-09)
+
+
+### Features
+
+* **F0AudioPlayer:** support lazy src resolution and known duration ([#4642](https://github.com/factorialco/f0/issues/4642)) ([2463d08](https://github.com/factorialco/f0/commit/2463d08974da3b9911753da2950f1ecf916398b9))
+
+## [4.28.2](https://github.com/factorialco/f0/compare/f0-react-v4.28.1...f0-react-v4.28.2) (2026-07-09)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** use neutral variant for empty state actions ([#4648](https://github.com/factorialco/f0/issues/4648)) ([ec331fe](https://github.com/factorialco/f0/commit/ec331fecb9d11cc3330984bf3caaacc75fc1e036))
+
+## [4.28.1](https://github.com/factorialco/f0/compare/f0-react-v4.28.0...f0-react-v4.28.1) (2026-07-09)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** align chips row and neutral Clear button ([#4645](https://github.com/factorialco/f0/issues/4645)) ([412d269](https://github.com/factorialco/f0/commit/412d26952c1cfc49706a024b0ad268d291e55d1a))
+
 ## [4.28.0](https://github.com/factorialco/f0/compare/f0-react-v4.27.0...f0-react-v4.28.0) (2026-07-08)
 
 

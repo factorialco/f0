@@ -3,8 +3,6 @@ interface RevealState {
   isInitialLoading: boolean
   /** Whether the first ready render has already been handled. */
   initialConsumed: boolean
-  /** Opt-in node to auto-reveal once, on entry. */
-  focusOnEntry?: string
   /** Search-driven reveal target (ignored on entry). */
   revealNodeId?: string
   /** Last `revealNodeId` we adopted/acted on, to detect a *new* search pick. */
@@ -26,16 +24,16 @@ interface RevealDecision {
  *
  * Rules:
  * - While loading: nothing.
- * - First ready render: adopt the current `revealNodeId` as "already handled"
- *   (so an initial search value never yanks the view), and — only if
- *   `focusOnEntry` is set — reveal that node (the opt-in auto-focus).
+ * - First ready render: never reveal — adopt the current `revealNodeId` as
+ *   "already handled" so an initial search value doesn't yank the view. (Entry
+ *   focus is handled separately by `focusOnEntry` → `initialFocusNodeId`, which
+ *   frames the node on the first paint without a reveal/pan.)
  * - Later renders: reveal `revealNodeId` only when it *changes* (a fresh search
  *   selection). "Find me" reveals via the controls, outside this path.
  */
 export function resolveGraphReveal({
   isInitialLoading,
   initialConsumed,
-  focusOnEntry,
   revealNodeId,
   lastRevealed,
 }: RevealState): RevealDecision {
@@ -43,10 +41,9 @@ export function resolveGraphReveal({
     return { revealId: null, consumeInitial: false, lastRevealed }
   }
   if (!initialConsumed) {
-    // Keep `lastRevealed` tracking the search value (not focusOnEntry) so a
-    // later search selection of a different node still fires.
+    // Adopt the current search value as handled; never reveal on entry.
     return {
-      revealId: focusOnEntry ?? null,
+      revealId: null,
       consumeInitial: true,
       lastRevealed: revealNodeId,
     }

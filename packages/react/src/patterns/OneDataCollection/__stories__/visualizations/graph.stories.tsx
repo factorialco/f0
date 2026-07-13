@@ -673,8 +673,10 @@ const DetailField = ({ label, value }: { label: string; value: string }) => (
  */
 const OrgChartExample = ({
   defaultExpandDepth,
+  focusOnEntry,
 }: {
   defaultExpandDepth: number
+  focusOnEntry?: string
 }) => {
   const [selected, setSelected] = useState<EmployeeNode | null>(null)
   const [revealId, setRevealId] = useState<string | undefined>(undefined)
@@ -692,6 +694,7 @@ const OrgChartExample = ({
               ...graphVisualization.options,
               defaultExpandDepth,
               revealNodeId: revealId,
+              focusOnEntry,
             },
           },
           tableVisualization,
@@ -754,4 +757,14 @@ export const OrgChart: Story = {
  */
 export const PreExpanded: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} />,
+}
+
+/**
+ * Opens framed on a specific root (`focusOnEntry: "ceo-a"`) instead of
+ * fit-to-all — via the OneDataCollection controlled path (expandedNodes is
+ * owned by the tree-data hook). Collapsing/expanding any node keeps the initial
+ * frame: the initial fit is one-shot and never re-fits on a later layout change.
+ */
+export const FocusOnRoot: Story = {
+  render: () => <OrgChartExample defaultExpandDepth={2} focusOnEntry="ceo-a" />,
 }

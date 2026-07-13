@@ -112,6 +112,16 @@ export interface F0GraphProps<T = unknown> {
   // ---- Navigation ----
   focusedNode?: string
   highlightedNodes?: Set<string>
+  /**
+   * Id of a node to frame on the **first paint**, instead of the default
+   * fit-to-all. The initial viewport opens already centered on this node with
+   * no animation — use it to open "already looking at" a node (e.g. the current
+   * user). The node must exist in the initial `nodes` (expand its ancestors
+   * before mount); if it's absent, this falls back to the normal fit-to-all.
+   * Only affects the initial frame — later `focusedNode` / "Find me" reveals
+   * still animate with the smooth pan.
+   */
+  initialFocusNodeId?: string
 
   // ---- Layout ----
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows). */
