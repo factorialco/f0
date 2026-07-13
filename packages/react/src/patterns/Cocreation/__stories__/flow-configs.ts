@@ -224,7 +224,7 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
         id: "satisfaction",
         label: "Satisfaction",
         description:
-          "Assess participants' satisfaction with the course taken. Can be anonymous.",
+          "Assess participants' satisfaction with the course taken. (Can be anonymous)",
         emptyFormElement: SATISFACTION_LOCKED_ELEMENT,
         sampleElements: SATISFACTION_SURVEY_ELEMENTS,
         defaultValues: SATISFACTION_DEFAULT_VALUES,
