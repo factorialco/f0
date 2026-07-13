@@ -89,10 +89,6 @@ const HighlightedCount = ({ text, count }: { text: string; count: number }) => {
   )
 }
 
-// Shared by the skeleton and the loaded table so the swap is pixel-identical
-const borderedWrapperClasses =
-  "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
-
 export const TableCollection = <
   R extends RecordType,
   Filters extends FiltersDefinition,
@@ -331,14 +327,11 @@ export const TableCollection = <
     source.itemsWithChildren?.(item)
   )
 
+  /*
+   * Initial loading
+   */
   if (isInitialLoading) {
-    return (
-      <div className="flex h-full min-h-0 flex-col gap-4">
-        <div className={cn("min-h-0", bordered && borderedWrapperClasses)}>
-          <OneTable.Skeleton columns={skeletonColumns} />
-        </div>
-      </div>
-    )
+    return <OneTable.Skeleton columns={skeletonColumns} />
   }
 
   // Enforce that sorting is only used when sortings are defined
@@ -399,7 +392,13 @@ export const TableCollection = <
       <TableWrapper>
         {/* min-h-0: without it this flex item never shrinks, OneTable's
             internal scroll never engages and tall tables overflow the card */}
-        <div className={cn("min-h-0", bordered && borderedWrapperClasses)}>
+        <div
+          className={cn(
+            "min-h-0",
+            bordered &&
+              "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
+          )}
+        >
           <OneTable loading={isLoading}>
             <TableHeader sticky={true}>
               {headerGroups ? (

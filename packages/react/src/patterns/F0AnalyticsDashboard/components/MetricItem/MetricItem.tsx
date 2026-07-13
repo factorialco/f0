@@ -88,8 +88,6 @@ export function MetricItem<Filters extends FiltersDefinition>({
   actions,
   editMode,
   handleDelete,
-  isFullscreen,
-  onFullscreenChange,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -112,8 +110,6 @@ export function MetricItem<Filters extends FiltersDefinition>({
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}
-      isFullscreen={isFullscreen}
-      onFullscreenChange={onFullscreenChange}
     >
       {data && (
         <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">
