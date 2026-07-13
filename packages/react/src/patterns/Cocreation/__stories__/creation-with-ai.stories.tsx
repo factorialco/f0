@@ -903,7 +903,7 @@ const confirmLeaveGuidedCreation = (flow: FlowConfig) =>
   dialogs.confirmation({
     type: "warning",
     title: "Leave creation?",
-    msg: `You haven't picked a template or an empty form yet. Closing now leaves the ${flow.navLabel} creation flow without creating a survey.`,
+    msg: `You haven't picked a template or an empty survey yet. Closing now leaves the ${flow.navLabel} creation flow without creating a survey.`,
     confirm: { label: "Leave" },
     cancel: { label: "Keep creating" },
   })
@@ -1634,7 +1634,7 @@ const EMPTY_FORM_TEMPLATE_ID = "empty-form"
 // Card visualization for the guided-type template gallery: no Category
 // property (the type is already in the gallery's own title — "Satisfaction
 // Survey Templates" etc. — so repeating it per card is redundant), and the
-// "Empty Form" card hides the questions count (it isn't a real template).
+// "Empty Survey" card hides the questions count (it isn't a real template).
 const guidedGalleryCardVisualization = {
   type: "card" as const,
   options: {
@@ -1653,12 +1653,11 @@ const guidedGalleryCardVisualization = {
 
 /**
  * Templates gallery for the "guidedType" entry flow (Training), scoped to one
- * guided type: the type's own templates, with a synthetic "Empty Form" entry
- * first (per spec — the first element on the templates is an Empty Form).
+ * guided type: the type's own templates, with a synthetic "Empty Survey" entry
+ * first (per spec — the first element on the templates is an empty survey).
  * Selecting a real template opens it in the same preview framing as the
- * "cards" flow's `TemplatesCanvasBody`; selecting "Empty Form" skips preview
- * and opens a blank editor directly (mirrors the templates-list Close, which
- * is equivalent to picking "Empty Form" for this flow).
+ * "cards" flow's `TemplatesCanvasBody`; selecting "Empty Survey" skips preview
+ * and opens a blank editor directly.
  */
 function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
   const { openCanvas } = useAiChat()
@@ -1673,7 +1672,7 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
   const galleryItems: Template[] = [
     {
       id: EMPTY_FORM_TEMPLATE_ID,
-      name: "Empty Form",
+      name: "Empty Survey",
       category: "",
       description: "Start from scratch",
       questions: 0,
@@ -2027,6 +2026,7 @@ function FlowContent({
     appendCard,
     startClarifying,
     setUserMessageInterceptor,
+    sendMessageWithThinkingOnly,
   } = useMockAiChatRuntime()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
@@ -2082,63 +2082,67 @@ function FlowContent({
     })
   }
 
-  // "guidedType" entry flow (Training): unlike "cards", the clarifying
-  // question for the form TYPE shows immediately on "Create" — no welcome
-  // screen, no waiting for a typed message. `ClarifyingOption` only renders a
-  // short label, so the full descriptions are posted as chat text first.
-  // Once a type is picked, the canvas opens straight to that type's
-  // template gallery (no survey is created yet — see `GuidedTemplatesCanvasBody`
-  // / `useOpenEmptyForm`).
+  // "guidedType" entry flow (Training): unlike "cards", no welcome screen and
+  // no waiting for a typed message. On "Create" we post the opening user
+  // message on their behalf ("Let's create a Survey"), then let the AI "think"
+  // — the composer stays disabled for that beat (`inProgress`, via
+  // `sendMessageWithThinkingOnly`) — before it writes out the form-type options
+  // and opens the clarifying panel. `ClarifyingOption` only renders a short
+  // label, so the full descriptions go in the assistant text first. Once a type
+  // is picked, the canvas opens straight to that type's template gallery (no
+  // survey is created yet — see `GuidedTemplatesCanvasBody` / `useOpenEmptyForm`).
   const startGuidedTypeFlow = () => {
     if (config.entryMode !== "guidedType") return
-    appendMessages([
-      {
-        role: "assistant",
-        content: [
-          config.guidedQuestion,
-          "",
-          ...config.guidedTypes.map(
-            (t) => `- **${t.label}** — ${t.description}`
-          ),
-        ].join("\n"),
-      },
-    ])
-    startClarifying({
-      steps: [
+    sendMessageWithThinkingOnly("Let's create a Survey", () => {
+      appendMessages([
         {
-          question: config.guidedQuestion,
-          options: config.guidedTypes.map((t) => ({
-            id: t.id,
-            label: t.label,
-          })),
-          selectionMode: "single",
+          role: "assistant",
+          content: [
+            config.guidedQuestion,
+            "",
+            ...config.guidedTypes.map(
+              (t) => `- **${t.label}** — ${t.description}`
+            ),
+          ].join("\n"),
         },
-      ],
-      onConfirm: (answersByStep) => {
-        const label = answersByStep[0]?.[0]
-        const type =
-          config.guidedTypes.find((t) => t.label === label) ??
-          config.guidedTypes[0]
-        appendMessages([
+      ])
+      startClarifying({
+        steps: [
           {
-            role: "user",
-            content: `**${config.guidedQuestion}**\\\n${label ?? type.label}`,
+            question: config.guidedQuestion,
+            options: config.guidedTypes.map((t) => ({
+              id: t.id,
+              label: t.label,
+            })),
+            selectionMode: "single",
           },
-        ])
-        appendMessages([
-          {
-            role: "assistant",
-            content: "Great — here are some templates to start from.",
-          },
-        ])
-        openCanvas(
-          toCanvasContent({
-            type: "templates",
-            title: guidedTemplatesTitle(config, type.id),
-            guidedTypeId: type.id,
-          })
-        )
-      },
+        ],
+        onConfirm: (answersByStep) => {
+          const label = answersByStep[0]?.[0]
+          const type =
+            config.guidedTypes.find((t) => t.label === label) ??
+            config.guidedTypes[0]
+          appendMessages([
+            {
+              role: "user",
+              content: `**${config.guidedQuestion}**\\\n${label ?? type.label}`,
+            },
+          ])
+          appendMessages([
+            {
+              role: "assistant",
+              content: "Great — here are some templates to start from.",
+            },
+          ])
+          openCanvas(
+            toCanvasContent({
+              type: "templates",
+              title: guidedTemplatesTitle(config, type.id),
+              guidedTypeId: type.id,
+            })
+          )
+        },
+      })
     })
   }
 

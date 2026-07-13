@@ -81,8 +81,14 @@ export type MockAiChatRuntime = {
   messages: F0Message[]
   inProgress: boolean
   sendMessage: (text: string, options?: { replyQuote?: string }) => void
-  /** Sends a user message and shows thinking steps, but emits no text response. */
-  sendMessageWithThinkingOnly: (text: string) => void
+  /**
+   * Sends a user message and shows thinking steps, but emits no text response.
+   * `inProgress` stays true for the thinking beat (so the composer stays
+   * disabled), then flips false and the optional `onComplete` fires — the hook
+   * a caller uses to post its own scripted follow-up (a message, a clarifying
+   * panel, …) once the "thinking" has visibly finished.
+   */
+  sendMessageWithThinkingOnly: (text: string, onComplete?: () => void) => void
   appendMessages: (
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
@@ -498,7 +504,7 @@ export const MockAiChatRuntimeProvider = ({
   )
 
   const sendMessageWithThinkingOnly = useCallback(
-    (text: string) => {
+    (text: string, onComplete?: () => void) => {
       const trimmed = text.trim()
       if (!trimmed) return
       setMessages((prev) => [
@@ -515,6 +521,7 @@ export const MockAiChatRuntimeProvider = ({
         const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
         const done = setTimeout(() => {
           setInProgress(false)
+          onComplete?.()
         }, totalThinkingMs)
         timersRef.current.push(done)
       }, THINKING_DELAY_MS)
