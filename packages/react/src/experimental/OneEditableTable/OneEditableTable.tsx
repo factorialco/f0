@@ -54,10 +54,15 @@ const ROW_CLASSES = cn(
   "after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:h-px after:w-full after:bg-f1-border-secondary after:content-['']"
 )
 
-const CELL_CLASSES = "h-[48px] p-0 align-middle"
+// The shared table primitive forces an edge gutter (`first:pl-6 last:pr-6`)
+// for full-width collection tables. `cn` (tailwind-merge) dedupes it to 0 here
+// so cells sit flush and their inner content controls the padding — this also
+// gives the action column its full width so the icon buttons fit inside px-2.
+const CELL_CLASSES = "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
+const HEAD_CLASSES = "first:pl-0 last:pr-0"
 /**
- * Tightens the leading edge gutter for the drag-handle cell/header so the
- * small grip isn't pushed in by the table primitive's `first:pl-6`.
+ * Keeps a small leading gutter on the drag-handle cell/header so the grip
+ * isn't flush against the edge (overrides the reset above).
  */
 const HANDLE_CELL_CLASSES = "first:pl-3"
 
@@ -340,7 +345,11 @@ function OneEditableTableBase<R extends RecordType>({
           {sortableRows && (
             <TableHead
               width={HANDLE_COL_WIDTH}
-              className={cn(HANDLE_CELL_CLASSES, "hover:after:!bg-transparent")}
+              className={cn(
+                HEAD_CLASSES,
+                HANDLE_CELL_CLASSES,
+                "hover:after:!bg-transparent"
+              )}
             >
               <span className="sr-only">{reorderLabel}</span>
             </TableHead>
@@ -352,6 +361,7 @@ function OneEditableTableBase<R extends RecordType>({
               minWidth={column.minWidth}
               align={column.align}
               info={column.info}
+              className={HEAD_CLASSES}
             >
               {column.label}
             </TableHead>
@@ -363,7 +373,7 @@ function OneEditableTableBase<R extends RecordType>({
                   ? DOUBLE_ACTION_COL_WIDTH
                   : SINGLE_ACTION_COL_WIDTH
               }
-              className="hover:after:!bg-transparent"
+              className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
             >
               <span className="sr-only">{actionsLabel}</span>
             </TableHead>
