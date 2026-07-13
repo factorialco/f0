@@ -8,7 +8,8 @@ var borderRadius = {
   md: "0.75rem",
   lg: "0.875rem",
   xl: "1rem",
-  "2xl": "1.5rem",
+  "2xl": "1.25rem",
+  "3xl": "1.5rem",
   full: "9999px"
 };
 
@@ -207,7 +208,7 @@ var f1Colors = {
   border: {
     DEFAULT: "hsl(var(--neutral-30))",
     hover: "hsl(var(--neutral-40))",
-    secondary: "hsl(var(--neutral-10))",
+    secondary: "hsl(var(--neutral-20))",
     inverse: "hsl(var(--neutral-0) / 0.2)",
     bold: "hsl(var(--neutral-100))",
     promote: {
@@ -359,6 +360,18 @@ var betweenSpacing = {
   lg: relativeSpacing[3],
   xl: relativeSpacing[4]
 };
+var pageSpacing = {
+  page: absoluteSpacing[6]
+  // 24px
+};
+var interactiveHeights = {
+  sm: absoluteSpacing[6],
+  // 24px
+  md: absoluteSpacing[8],
+  // 32px
+  lg: absoluteSpacing[10]
+  // 40px
+};
 
 // src/tokens/typography.ts
 var fontSize = {
@@ -386,6 +399,8 @@ export {
   f1Colors,
   fontSize,
   fontWeight,
+  interactiveHeights,
+  pageSpacing,
   relativeSpacing
 };
 //# sourceMappingURL=index.mjs.map

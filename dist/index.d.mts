@@ -1,5 +1,25 @@
 import { ThemeConfig } from 'tailwindcss/types/config';
 
+/**
+ * Border radius scale.
+ *
+ * ## Usage convention for interactive components
+ *
+ * Interactive elements (buttons, toggle items, segments) follow a size-based mapping
+ * derived from `buttonSizeVariants` in `packages/react/src/ui/Action/variants.ts`:
+ *
+ *   sm  → rounded-sm  (0.5rem)
+ *   md  → rounded     (0.625rem, DEFAULT)
+ *   lg  → rounded-md  (0.75rem)
+ *
+ * When a component has a container that wraps interactive elements (e.g. a segmented
+ * control track, a button group background), the container uses one step up from the
+ * inner element so the pill fits visually with the internal padding:
+ *
+ *   inner sm  → container rounded     (DEFAULT)
+ *   inner md  → container rounded-md
+ *   inner lg  → container rounded-lg
+ */
 declare const borderRadius: {
     none: string;
     "2xs": string;
@@ -10,6 +30,7 @@ declare const borderRadius: {
     lg: string;
     xl: string;
     "2xl": string;
+    "3xl": string;
     full: string;
 };
 
@@ -207,7 +228,7 @@ declare const f1Colors: {
     readonly border: {
         readonly DEFAULT: "hsl(var(--neutral-30))";
         readonly hover: "hsl(var(--neutral-40))";
-        readonly secondary: "hsl(var(--neutral-10))";
+        readonly secondary: "hsl(var(--neutral-20))";
         readonly inverse: "hsl(var(--neutral-0) / 0.2)";
         readonly bold: "hsl(var(--neutral-100))";
         readonly promote: {
@@ -288,6 +309,24 @@ declare const boxShadow: {
 declare const absoluteSpacing: ThemeConfig["spacing"];
 declare const relativeSpacing: ThemeConfig["spacing"];
 declare const betweenSpacing: ThemeConfig["spacing"];
+declare const pageSpacing: ThemeConfig["spacing"];
+/**
+ * Standard height scale for interactive components (buttons, inputs, segmented controls, etc.)
+ *
+ * | Size | Height | Tailwind |
+ * |------|--------|---------|
+ * | sm   | 24px   | h-6     |
+ * | md   | 32px   | h-8     |
+ * | lg   | 40px   | h-10    |
+ *
+ * Derived from `buttonSizeVariants` in `packages/react/src/ui/Action/variants.ts`.
+ * Use this as the reference when building any new interactive component.
+ */
+declare const interactiveHeights: {
+    readonly sm: string;
+    readonly md: string;
+    readonly lg: string;
+};
 
 declare const fontSize: {
     readonly xs: {
@@ -335,4 +374,4 @@ declare const fontWeight: {
     readonly semibold: "600";
 };
 
-export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontSize, fontWeight, relativeSpacing };
+export { type BaseColor, type F1Color, absoluteSpacing, baseColors, betweenSpacing, borderRadius, boxShadow, breakpoints, f1Colors, fontSize, fontWeight, interactiveHeights, pageSpacing, relativeSpacing };
