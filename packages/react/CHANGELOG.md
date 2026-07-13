@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.30.1](https://github.com/factorialco/f0/compare/f0-react-v4.30.0...f0-react-v4.30.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** disabled cell background fills full cell height ([#4643](https://github.com/factorialco/f0/issues/4643)) ([5b1603c](https://github.com/factorialco/f0/commit/5b1603c2327bb6caf8fed681a9998e9dd3f427bc))
+
 ## [4.30.0](https://github.com/factorialco/f0/compare/f0-react-v4.29.4...f0-react-v4.30.0) (2026-07-13)
 
 
