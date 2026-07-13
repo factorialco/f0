@@ -1029,15 +1029,23 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           )
         }
       />
-      <div className="min-w-0 flex-shrink truncate">
-        <F0Heading content={`Template · ${content.templateName}`} as="h2" />
+      <div className="min-w-0 flex-1">
+        <F0Heading
+          content={`Template · ${content.templateName}`}
+          as="h2"
+          ellipsis
+        />
       </div>
       {/* ButtonGroup owns the responsive collapse: when the row is wide both
           actions show; when the title grows or the canvas narrows, the
           secondary "Edit Template" sheds into the "⋯" menu while the primary
-          "Use this template" stays pinned. */}
+          "Use this template" stays pinned. `flex-1` (WITHOUT `min-w-0`) keeps
+          the group's min-content floor — the pinned primary + "⋯" width — so
+          the primary can never be squeezed to nothing; the title (also
+          `flex-1`, but `min-w-0`) is what truncates instead. Mirrors the
+          F0CardHorizontal actions recipe. */}
       <ButtonGroup
-        className="min-w-0 flex-1"
+        className="flex-1"
         align="end"
         primaryAction={{
           id: "use-template",
@@ -2686,10 +2694,11 @@ export const EngagementGuidedSurveys: Story = {
   render: () => <CreationWithAIFlow flowId="engagementGuided" />,
 }
 
-// "Engagement (No Credits)" — the Engagement flow with AI credits exhausted:
-// a soft credit-warning banner sits above the composer (with a "Get credits"
+// "Engagement (No Credits)" — the guided Engagement flow (message-first:
+// "Let's create a Survey" → clarifying questions) with AI credits exhausted.
+// A soft credit-warning banner sits above the composer (with a "Get credits"
 // CTA). The banner only shows on the text input — it's suppressed whenever a
 // clarifying panel occupies the composer.
 export const EngagementNoCredits: Story = {
-  render: () => <CreationWithAIFlow flowId="engagement" noCredits />,
+  render: () => <CreationWithAIFlow flowId="engagementGuided" noCredits />,
 }
