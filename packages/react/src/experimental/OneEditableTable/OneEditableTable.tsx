@@ -90,6 +90,15 @@ const HEAD_CLASSES = cn(
 const HANDLE_CELL_CLASSES = "first:pl-3"
 
 /**
+ * Shrink-wraps the actions column to its buttons (as small as possible). A `w-full`
+ * table with `table-layout: auto` otherwise hands spare width to the auto-sized
+ * actions column, so a tiny 1px preferred width + `nowrap` makes the browser
+ * size it to content instead; `overflow-visible` stops CELL_CLASSES' clip from
+ * hiding the buttons.
+ */
+const ACTIONS_SHRINK_CLASSES = "w-px overflow-visible whitespace-nowrap"
+
+/**
  * Focus/hover highlight applied directly to the editable `td` (not the inner
  * cell) so it lands on the real cell boundary and lifts above the neighbouring
  * cells (`z-10`) instead of being clipped by them.
@@ -260,7 +269,7 @@ function RowCells<R extends RecordType>({
         <TableCell
           width={actionsColWidth}
           sticky={{ right: 0 }}
-          className={CELL_CLASSES}
+          className={cn(CELL_CLASSES, ACTIONS_SHRINK_CLASSES)}
         >
           <div className="pointer-events-auto flex h-full items-center justify-center gap-2 px-2">
             {showEdit && (
@@ -506,7 +515,11 @@ function OneEditableTableBase<R extends RecordType>({
             <TableHead
               width={actionsColWidth}
               sticky={{ right: 0 }}
-              className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
+              className={cn(
+                HEAD_CLASSES,
+                ACTIONS_SHRINK_CLASSES,
+                "hover:after:!bg-transparent"
+              )}
             >
               <span className="sr-only">{actionsLabel}</span>
             </TableHead>
