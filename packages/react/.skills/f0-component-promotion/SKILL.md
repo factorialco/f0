@@ -20,7 +20,7 @@ The component owner (or a Foundations engineer) starts a **promotion request in 
 Run a cross-repo search across the `factorialco` GitHub org. Use GitHub code search (not local `rg`):
 
 ```
-org:factorialco "F0MyComponent" -repo:factorialco/factorial-one
+org:factorialco "F0MyComponent" -repo:factorialco/f0
 ```
 
 Required: **≥3 distinct product teams** import or use the component in production code (not tests, not docs, not examples).
@@ -49,7 +49,7 @@ Verify all four:
 
 ### 4.3 — Foundations re-confirmation
 
-A Foundations team member explicitly approves promotion in the issue. There is **no auto-promotion**.
+A Foundations team member explicitly approves promotion in the `#f0-support` promotion thread. There is **no auto-promotion**.
 
 If any axis fails, the promotion is deferred with a documented explanation in the thread.
 
@@ -105,7 +105,7 @@ Load **`f0-quality-gate`** and run the full workflow on the promoted component.
 
 Load **`f0-pr`**.
 
-PR title: `feat(F0Name): promote to stable (#<promotion-issue>)`
+PR title: `feat(F0Name): promote to stable`
 
 The promotion is **not a breaking change** for consumers — the public import path doesn't change and the API was already stable de facto during Phase 4. So we use plain `feat:` (which the release pipeline interprets as a MINOR bump) without the `!` marker. Using `feat!:` would trigger an unintended MAJOR version bump in Conventional Commits / `semantic-release`. PR body:
 

@@ -5,7 +5,7 @@ description: Use when someone wants to add or change something in F0 (a componen
 
 # F0 Component Contribution
 
-You are the entry point to F0. When a contributor says "I need X", **you** search the repo and Storybook, filter the request, help them align with Foundations, and drive the build. The amount of process **scales with the impact** of the change — most requests are resolved in the conversation and never need an issue or a PR.
+You are the entry point to F0. When a contributor says "I need X", **you** search the repo and Storybook, filter the request, help them align with Foundations, and drive the build. The amount of process **scales with the impact** of the change.
 
 This skill ends when the change is merged into `experimental/` (or `src/sds/<area>/` for Domain specific). Promotion to stable is covered by `f0-component-promotion`. The full contract is in [`packages/react/docs/definition-of-done.mdx`](../../docs/definition-of-done.mdx); the placement rules are in [`packages/react/docs/where-it-goes.mdx`](../../docs/where-it-goes.mdx).
 
@@ -135,7 +135,7 @@ Load **`f0-pr`** for title format and PR template. **Every new or changed thing 
 
 PR title: `feat(F0Name): add experimental component`.
 
-In the PR body: link the alignment (thread/issue), confirm design review where it applied, confirm `f0-quality-gate` passed.
+In the PR body: link the alignment (the `#f0-support` thread), confirm design review where it applied, confirm `f0-quality-gate` passed.
 
 ### 3.8 — Merge
 
@@ -154,7 +154,7 @@ The owning team is responsible for the component until promotion (when ownership
 ## Common pitfalls
 
 - **Building before aligning a high-impact change** — a token/icon/pattern reworked without design validation gets reverted. Align first.
-- **Forcing a formal issue when a thread resolves it** — match the process to the impact.
+- **Forcing heavier process than the change needs** — a `#f0-support` thread resolves most alignments; match the process to the blast radius.
 - **Skipping the filter** — implementing something that already exists or only needed extending wastes work.
 - **Naming without `F0` prefix** — required for all public components.
 - **Hard-coded colors or strings** — use design tokens and `useI18n()`.

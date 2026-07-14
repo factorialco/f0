@@ -1,10 +1,19 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { Flow } from "./_lifecycle-visuals"
 
 <Meta title="Lifecycle/Components Maturity" />
 
 # Component Maturity
 
 F0 components have **three** maturity levels. Each one tells consumers what to expect from the component's API and what guarantees it carries.
+
+<Unstyled>
+  <Flow steps={[
+    { k: "may change", t: "Experimental", d: "Owned by the creator team. The default entry point.", color: "#d99a3c" },
+    { k: "backwards-compat", t: "Stable", d: "Owned by Foundations. Promoted after real adoption.", color: "#3fae74" },
+    { k: "frozen", t: "Deprecated", d: "Scheduled for removal (≥90 days). @deprecated + @removeIn + @migration.", color: "#e06666" },
+  ]} />
+</Unstyled>
 
 | Level            | What it guarantees                                                                            |
 | ---------------- | --------------------------------------------------------------------------------------------- |
@@ -78,7 +87,7 @@ The tag is the single source of truth for maturity. Tooling (components dashboar
 /**
  * @deprecated Use F0NewComponent instead.
  * @removeIn 2.0.0
- * @migration https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/migrations/f0-old-to-new.md
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-old-to-new.md
  */
 ```
 

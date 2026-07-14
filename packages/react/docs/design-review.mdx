@@ -1,4 +1,5 @@
-import { Meta } from "@storybook/addon-docs/blocks"
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { Grid, Callout } from "./_lifecycle-visuals"
 
 <Meta title="Lifecycle/Design Review" />
 
@@ -8,7 +9,9 @@ A design review is a synchronous (or asynchronous) checkpoint between the propos
 
 It is **not** a code review and **not** a quality gate — those happen in Phase 3 via the `f0-quality-gate` skill. The design review focuses on the **subjective and systemic** decisions that automation cannot check.
 
-> **Design Review is NOT the place to evaluate whether the component should exist at all.** That decision is made earlier — in Phase 0 (self-evaluation by the contributor with help from Claude) and Phase 1 (Foundations triage). By the time a component reaches Design Review, the question is "is this design correct?", not "should we build this?". See the [Component Contribution skill](https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md) for the evaluation flow.
+<Callout tone="hot" title="Design review is NOT where we decide whether it should exist">
+That's decided earlier — in the Review & filter step and the alignment with Foundations. By the time something reaches design review, the question is "is this design correct?", not "should we build this?".
+</Callout>
 
 ---
 
@@ -32,66 +35,22 @@ Async review (comments on the design — a Figma, a Composer prototype, or anoth
 
 ## The 10-category checklist
 
-Every reviewer evaluates these categories. Any blocking comment must be resolved before the review is approved.
+Every reviewer evaluates these categories. Any blocking comment must be resolved before approval.
 
-### 1. Problem clarity
-
-- Is the problem this component solves clearly stated?
-- Is there evidence of recurring need across teams?
-
-### 2. System fit (consistency check)
-
-> The "should this exist?" question was already answered in Phase 0/1. Here we verify the design respects the system.
-
-- Is the component coherent with similar F0 components (naming, behavior, visual language)?
-- If new, does it share patterns with existing components (e.g., consistent slot API, prop conventions)?
-- Final placement confirmed: Core F0 (`components/`), a Kit (`kits/<area>/`), or Domain specific (`sds/<area>/`)? See the [Where it goes](/?path=/docs/lifecycle-where-it-goes--docs) page for the placement rules.
-
-### 3. API design
-
-- Are prop names clear, functional, and consistent with F0 conventions (e.g., `onlyIcon`, not `hideLabel`)?
-- Are mutually exclusive props expressed as discriminated unions?
-- Are sensible defaults provided?
-
-### 4. Composition
-
-- Does the component compose with existing F0 layouts, dialogs, forms?
-- Are slots used where flexibility is needed?
-
-### 5. Variants and density
-
-- Are variants minimal and meaningful (no decorative options)?
-- Are size, density, and spacing tokens used (not hard-coded)?
-
-### 6. Visual design
-
-- Uses F0 design tokens (`f1-foreground`, `f1-background`, etc.) — no hex colors.
-- Dark mode renders correctly.
-- Iconography uses F0 icons.
-
-### 7. Accessibility
-
-- Keyboard navigation defined for all interactive elements.
-- ARIA roles and labels are correct.
-- Focus order and `focusRing()` applied.
-- Reduced-motion variant exists for animations.
-
-### 8. Internationalization
-
-- All user-facing strings go through `useI18n()`.
-- Pluralization (`one` / `other`) handled where relevant.
-- Layout works in RTL languages.
-
-### 9. States and edge cases
-
-- Loading, error, empty, and disabled states are designed.
-- Skeleton variant exists if the component is data-driven.
-- Long content (overflow, truncation) is handled.
-
-### 10. Documentation plan
-
-- MDX target tier (Acceptable / Good / Gold) is declared.
-- At least 3 example stories planned (default, edge case, full configuration).
+<Unstyled>
+  <Grid min={280} items={[
+    { label: "1 · Problem clarity", text: "Is the problem clear? Evidence of recurring need across teams?" },
+    { label: "2 · System fit", text: "Coherent with similar F0 components; final placement confirmed (Core / Kit / Domain specific)." },
+    { label: "3 · API design", text: "Clear, conventional prop names; discriminated unions for exclusive props; sensible defaults." },
+    { label: "4 · Composition", text: "Composes with existing layouts, dialogs, forms; slots where flexibility is needed." },
+    { label: "5 · Variants & density", text: "Minimal, meaningful variants; size / density / spacing via tokens." },
+    { label: "6 · Visual design", text: "F0 design tokens (no hex); dark mode correct; F0 icons." },
+    { label: "7 · Accessibility", text: "Keyboard nav, ARIA, focus order + focusRing(), reduced-motion." },
+    { label: "8 · Internationalization", text: "Strings via useI18n(); pluralization; RTL layout." },
+    { label: "9 · States & edge cases", text: "Loading, error, empty, disabled; skeleton if data-driven; overflow handled." },
+    { label: "10 · Documentation plan", text: "MDX tier declared; ≥3 example stories planned." },
+  ]} />
+</Unstyled>
 
 ---
 
@@ -103,4 +62,6 @@ A design review ends with one of:
 - **Approved with comments** — proceed; address comments in build.
 - **Needs revision** — address blocking comments and re-review.
 
-The whole design conversation and its decision live in the `#f0-support` thread — not as comments on a PR. The design can be just a need, a Figma, or a prototype, so there may be no PR yet; the code review on the PR comes later and is separate.
+<Callout>
+The whole design conversation and its decision live in the #f0-support thread — not as PR comments. The design can be just a need, a Figma, or a prototype, so there may be no PR yet; the code review on the PR comes later and is separate.
+</Callout>

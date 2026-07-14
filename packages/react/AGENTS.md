@@ -148,7 +148,7 @@ To deprecate a component or prop, add JSDoc tags above the export:
 /**
  * @deprecated Use F0NewComponent instead.
  * @removeIn 2.0.0
- * @migration https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/migrations/f0-old-to-new.md
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-old-to-new.md
  */
 export const F0OldComponent = ...
 ```

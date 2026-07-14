@@ -20,7 +20,7 @@
 
 ## Lifecycle phase (if applicable)
 
-<!-- For new components or promotions, link the #f0-support alignment / promotion thread and confirm phase exit criteria are met. See https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx -->
+<!-- For new components or promotions, link the #f0-support alignment / promotion thread and confirm phase exit criteria are met. See https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx -->
 
 - Linked #f0-support thread:
 - Phase exit criteria met: <!-- e.g., design review approved, ≥3 product teams adopted, no breaking changes 60d -->
