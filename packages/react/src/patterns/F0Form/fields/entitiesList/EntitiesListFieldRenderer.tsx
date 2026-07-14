@@ -15,9 +15,14 @@ import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition
 import type { ResolvedField } from "../types"
 import type { F0EntitiesListField, EntitiesListItem } from "./types"
 
-import { f0FormField, isZodType, unwrapZodSchema } from "../../f0Schema"
+import {
+  f0FormField,
+  getF0Config,
+  isZodType,
+  unwrapZodSchema,
+} from "../../f0Schema"
 import { openFormDialog } from "../../openFormDialog"
-import { inferInputType } from "../text/schema"
+import { resolveEntitiesListCell } from "./resolveCell"
 
 /**
  * With more than this many item-schema properties, adding and editing happen
@@ -216,6 +221,13 @@ export function EntitiesListFieldRenderer({
     const shape: Record<string, ZodTypeAny> = {}
     for (const key of itemKeys) {
       const original = itemShape[key]
+      // Fields authored with an f0FormField shortcut already carry their field
+      // config (type, options, currency, ...); reuse them so the dialog renders
+      // the right control for every field type. Only plain Zod needs wrapping.
+      if (getF0Config(original)) {
+        shape[key] = original
+        continue
+      }
       const clone = original.describe(original.description ?? "")
       const inner = unwrapZodSchema(original)
       const columnConfig = field.columns?.[key]
@@ -323,61 +335,74 @@ export function EntitiesListFieldRenderer({
   const isAtLimit = field.maxItems != null && rows.length >= field.maxItems
   const canAddItems = field.canAddItems !== false
 
-  // Hidden columns keep their value in each row (so row actions can read them)
-  // but aren't rendered as editable cells.
-  const visibleKeys = itemKeys.filter((key) => !field.columns?.[key]?.hidden)
+  // In dialog mode cells are read-only; editing happens via the pencil dialog.
+  // Inline mode disables cells per row via `editableIds`.
+  const editTypeFor = (
+    row: EntitiesListRow,
+    editable: "text" | "number" | "money" | "select"
+  ) => {
+    if (useDialogMode) return "display-only" as const
+    if (isDisabled || !isRowEditable(row)) return "disabled" as const
+    return editable
+  }
 
+  // Build one column per item-schema field, skipping:
+  // - hidden columns (value kept for row actions, no cell), and
+  // - fields whose type has no inline cell (e.g. boolean, date, file); those
+  //   keep their value but aren't shown as a column (editable via the dialog).
   const columns: ReadonlyArray<OneEditableTableColumn<EntitiesListRow>> =
-    visibleKeys.map((key) => {
-      const inner = unwrapZodSchema(itemShape[key])
-      const columnConfig = field.columns?.[key]
-      const base = {
-        id: key,
-        label: columnConfig?.label ?? humanizeKey(key),
-        width: columnConfig?.width,
-        inputPlaceholder: columnConfig?.placeholder,
-      }
+    itemKeys
+      .map((key): OneEditableTableColumn<EntitiesListRow> | null => {
+        if (field.columns?.[key]?.hidden) return null
+        const resolution = resolveEntitiesListCell(itemShape[key])
+        if (!resolution) return null
 
-      // In dialog mode cells are read-only; editing happens via the pencil
-      // dialog. Inline mode disables cells per row via `editableIds`.
-      const editTypeFor = (
-        row: EntitiesListRow,
-        editable: "text" | "number" | "select"
-      ) => {
-        if (useDialogMode) return "display-only" as const
-        if (isDisabled || !isRowEditable(row)) return "disabled" as const
-        return editable
-      }
-
-      if (isZodType(inner, "ZodEnum")) {
-        const values: string[] = inner._def.values
-        return {
-          ...base,
-          editType: (row: EntitiesListRow) => editTypeFor(row, "select"),
-          selectConfig: {
-            options: values.map((value) => ({ value, label: value })),
-          },
+        const columnConfig = field.columns?.[key]
+        const base = {
+          id: key,
+          label:
+            columnConfig?.label ??
+            getF0Config(itemShape[key])?.label ??
+            humanizeKey(key),
+          width: columnConfig?.width,
+          inputPlaceholder: columnConfig?.placeholder,
         }
-      }
 
-      if (isZodType(inner, "ZodNumber")) {
-        return {
-          ...base,
-          editType: (row: EntitiesListRow) => editTypeFor(row, "number"),
+        switch (resolution.kind) {
+          case "select":
+            return {
+              ...base,
+              editType: (row) => editTypeFor(row, "select"),
+              selectConfig: { options: resolution.options },
+            }
+          case "number":
+            return {
+              ...base,
+              editType: (row) => editTypeFor(row, "number"),
+              numberConfig: resolution.units
+                ? { units: resolution.units }
+                : undefined,
+            }
+          case "money":
+            return {
+              ...base,
+              editType: (row) => editTypeFor(row, "money"),
+              numberConfig: resolution.units
+                ? { units: resolution.units }
+                : undefined,
+            }
+          case "text":
+            return {
+              ...base,
+              editType: (row) => editTypeFor(row, "text"),
+              textConfig: { inputType: resolution.inputType },
+            }
         }
-      }
-
-      // Derive the text input type from the schema so url/email cells get
-      // their leading icon (link/envelope), matching F0Form's text fields.
-      const detected = inferInputType(itemShape[key])
-      const inputType =
-        detected === "email" || detected === "url" ? detected : "text"
-      return {
-        ...base,
-        editType: (row: EntitiesListRow) => editTypeFor(row, "text"),
-        textConfig: { inputType },
-      }
-    })
+      })
+      .filter(
+        (column): column is OneEditableTableColumn<EntitiesListRow> =>
+          column !== null
+      )
 
   // Array-level error (e.g. min items). Cell errors render as an error border
   // on the offending cell with the message in a hover/focus tooltip.

@@ -1408,74 +1408,124 @@ export const FileFields: Story = {
 }
 
 /**
- * Entities list field: an editable table for an array of objects whose shape
- * is defined by a Zod item schema. Columns and cell types are derived from
- * the schema (`string` → text, `number` → number, `enum` → select).
+ * Entities list field with **every F0Form field type** in the item schema,
+ * authored with `f0FormField` shortcuts. Columns and cell types are derived
+ * from each field:
  *
- * With more than 2 schema properties (like here), adding and editing happen
- * through a form dialog (FormInDialog pattern): the add button opens a
- * create dialog, and editable rows show a pencil action that opens an edit
- * dialog. `editableIds` restricts which items can be edited — here the
- * "Referrals Program" row (id `link-3`) is locked and shows no pencil.
+ * Shown as inline columns (types that have an editable-table cell): `text`,
+ * `email` and `url` (text cells, with the envelope/link leading icon),
+ * `select`, `number`, `percentage` (number with a "%" unit) and `money`.
+ *
+ * Kept on the row but **not shown as a column** (no inline cell yet): `date`,
+ * `boolean`, `checkbox` and `richText`. They stay in the schema and on each
+ * row's value; they simply aren't rendered as a column.
+ *
+ * `editableIds` locks the "Alan Turing" row (id `m-3`) — its cells render as
+ * disabled (still showing their leading icon).
  */
 export const EntitiesListField: Story = {
   parameters: { docs: { story: { inline: false, height: "600px" } } },
   render() {
     const formSchema = z.object({
-      name: f0FormField.text({
-        label: "Collection name",
-        placeholder: "e.g. Company resources",
-      }),
-      links: f0FormField.entitiesList({
-        label: "Links",
-        helpText: "Add links and drag to reorder them.",
+      members: f0FormField.entitiesList({
+        label: "Team",
+        helpText:
+          "Every field type lives in the schema; only the ones with an inline cell are shown as columns.",
         schema: z.object({
-          title: z.string().min(1),
-          url: z.string().url(),
-          category: z.enum(["People", "Finance", "Legal", "Benefits"]),
+          // Shown as columns
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          website: f0FormField.url({ label: "Website" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: [
+              { value: "Admin", label: "Admin" },
+              { value: "Editor", label: "Editor" },
+              { value: "Viewer", label: "Viewer" },
+            ],
+          }),
+          seniority: f0FormField.number({ label: "Years", min: 0 }),
+          allocation: f0FormField.percentage({
+            label: "Allocation",
+            min: 0,
+            max: 100,
+          }),
+          salary: f0FormField.money({ label: "Salary", currency: "EUR" }),
+          // In the schema + editable via the dialog, but no inline cell
+          startDate: f0FormField.date({ label: "Start date", optional: true }),
+          remote: f0FormField.boolean({ label: "Remote", optional: true }),
+          agreedToTerms: f0FormField.checkbox({
+            label: "Agreed to terms",
+            optional: true,
+          }),
+          bio: f0FormField.richText({ label: "Bio", optional: true }),
         }),
         config: {
           canAddItems: true,
-          labels: {
-            addButton: "Add link",
-            addButtonDescription:
-              "Add a link to the collection. It will be shown to all employees.",
-          },
-          editableIds: ["link-1", "link-2"],
+          supportInlineEditing: true,
+          labels: { addButton: "Add member" },
+          editableIds: ["m-1", "m-2"],
           maxItems: 8,
           columns: {
-            title: { placeholder: "e.g. People Handbook" },
-            url: { label: "URL", placeholder: "https://…", width: 220 },
-            category: { width: 160 },
+            name: { placeholder: "e.g. Ada Lovelace", width: 160 },
+            email: { placeholder: "name@example.com", width: 200 },
+            website: { placeholder: "https://…", width: 190 },
+            role: { width: 130 },
+            seniority: { width: 90 },
+            allocation: { width: 120 },
+            salary: { width: 120 },
           },
         },
       }),
     })
 
     const formDefinition = useF0FormDefinition({
-      name: "sortable-list",
+      name: "entities-list-all-types",
       schema: formSchema,
       errorTriggerMode: "on-change",
       defaultValues: {
-        name: "",
-        links: [
+        members: [
           {
-            id: "link-1",
-            title: "People Handbook",
-            url: "https://app.factorialhr.com/dash",
-            category: "People",
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            website: "https://example.com/ada",
+            role: "Admin",
+            seniority: 6,
+            allocation: 100,
+            salary: 62000,
+            startDate: new Date(2022, 2, 1),
+            remote: true,
+            agreedToTerms: true,
+            bio: "Founding engineer.",
           },
           {
-            id: "link-2",
-            title: "Travel policy",
-            url: "https://example.com/travel",
-            category: "Finance",
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            website: "https://example.com/grace",
+            role: "Editor",
+            seniority: 4,
+            allocation: 80,
+            salary: 54000,
+            startDate: new Date(2023, 8, 15),
+            remote: false,
+            agreedToTerms: true,
+            bio: "Compiler wizard.",
           },
           {
-            id: "link-3",
-            title: "Referrals Program",
-            url: "https://example.com/referrals",
-            category: "People",
+            id: "m-3",
+            name: "Alan Turing",
+            email: "alan@example.com",
+            website: "https://example.com/alan",
+            role: "Viewer",
+            seniority: 2,
+            allocation: 50,
+            salary: 48000,
+            startDate: new Date(2024, 0, 8),
+            remote: true,
+            agreedToTerms: false,
+            bio: "",
           },
         ],
       },
