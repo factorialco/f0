@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.35.3](https://github.com/factorialco/f0/compare/f0-react-v4.35.2...f0-react-v4.35.3) (2026-07-14)
+
+
+### Bug Fixes
+
+* **OneDataCollection/table:** keep tag text legible in striked rows ([#4687](https://github.com/factorialco/f0/issues/4687)) ([50a7110](https://github.com/factorialco/f0/commit/50a711010252afe4a8ce73271f419caf340b75fe))
+
 ## [4.35.2](https://github.com/factorialco/f0/compare/f0-react-v4.35.1...f0-react-v4.35.2) (2026-07-14)
 
 
