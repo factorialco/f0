@@ -10,7 +10,6 @@ describe("BaseTag", () => {
 
     const optOut = container.querySelector("[data-no-strike]")
     expect(optOut).not.toBeNull()
-    // The label lives inside the opted-out subtree.
     expect(optOut).toHaveTextContent("Rejected")
   })
 })

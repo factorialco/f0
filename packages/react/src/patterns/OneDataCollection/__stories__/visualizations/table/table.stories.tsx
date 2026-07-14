@@ -721,9 +721,6 @@ export const StrikedRowsVisualization: Story = {
                   { label: "Name", render: (item) => item.name, id: "name" },
                   { label: "Email", render: (item) => item.email, id: "email" },
                   {
-                    // The strike must NOT cross tag text: on striked (inactive)
-                    // rows the Name/Email cells are struck but this status tag
-                    // stays legible.
                     label: "Status",
                     id: "status",
                     render: (item) => ({

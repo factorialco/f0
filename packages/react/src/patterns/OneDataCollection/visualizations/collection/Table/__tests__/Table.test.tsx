@@ -202,8 +202,6 @@ describe("TableCollection", () => {
 
       const struckRow = screen.getByText(testData[0].name).closest("tr")
       expect(struckRow?.className).toMatch(/line-through/)
-      // Tags opt out of the strike via data-no-strike (see BaseTag); the
-      // selector must exclude that subtree so tag text is never struck.
       expect(struckRow?.className).toMatch(/:not\(\[data-no-strike\]/)
 
       const plainRow = screen.getByText(testData[1].name).closest("tr")
