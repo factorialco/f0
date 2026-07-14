@@ -14,6 +14,33 @@ describe("DetailsItem", () => {
     expect(screen.getByText("Hello")).toBeInTheDocument()
   })
 
+  describe("fullWidth", () => {
+    // The ~320px cap (`md:max-w-80`) lives on DataList's inner div; DetailsItem
+    // drops it from the outside via the `[&>div]:md:max-w-none` variant only
+    // when `fullWidth` is set.
+    const capOverride = "[&>div]:md:max-w-none"
+
+    it("keeps the width cap by default", () => {
+      const { container } = render(
+        <DetailsItem title="Email" content={{ type: "item", text: "a@b.co" }} />
+      )
+
+      expect(container.firstChild).not.toHaveClass(capOverride)
+    })
+
+    it("drops the width cap when fullWidth is set", () => {
+      const { container } = render(
+        <DetailsItem
+          title="Email"
+          content={{ type: "item", text: "a@b.co" }}
+          fullWidth
+        />
+      )
+
+      expect(container.firstChild).toHaveClass(capOverride)
+    })
+  })
+
   describe("file content", () => {
     const fileContent = {
       type: "file" as const,

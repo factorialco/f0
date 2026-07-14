@@ -69,6 +69,7 @@ const _DetailsItemsList = forwardRef<HTMLDivElement, DetailsItemsListProps>(
                   spacingAtTheBottom={item.spacingAtTheBottom}
                   isHorizontal={tableView}
                   verticalLayout={item.verticalLayout}
+                  fullWidth={item.fullWidth}
                 />
                 {tableView && index !== details.length - 1 && (
                   <div className="h-[1px] w-full bg-f1-border-secondary" />

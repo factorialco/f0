@@ -70,6 +70,14 @@ export interface DetailsItemType {
    * long-form text fields like rich-text or textarea.
    */
   verticalLayout?: boolean
+  /**
+   * When true, removes the default ~320px (`max-w-80`) width cap so the item
+   * stretches to 100% of its container width. Independent of `isHorizontal` /
+   * `verticalLayout` (those control layout direction, this controls width).
+   * Use it to fill a wide container such as a side panel or drawer instead of
+   * abusing `isHorizontal` to drop the cap.
+   */
+  fullWidth?: boolean
   spacingAtTheBottom?: boolean
 }
 
@@ -116,6 +124,7 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
       content,
       isHorizontal = false,
       verticalLayout = false,
+      fullWidth = false,
       spacingAtTheBottom,
     },
     ref
@@ -131,7 +140,9 @@ const _DetailsItem = forwardRef<HTMLDivElement, DetailsItemType>(
           isHorizontal && !verticalLayout && "xs:[&_ul>li]:p-0 [&_ul]:flex-1",
           isHorizontal &&
             verticalLayout &&
-            "[&_ul>li>*]:px-0 [&_ul]:flex-1 xs:[&>div]:flex-col"
+            "[&_ul>li>*]:px-0 [&_ul]:flex-1 xs:[&>div]:flex-col",
+          // Drop DataList's `md:max-w-80` cap so the item fills its container.
+          fullWidth && "[&>div]:md:max-w-none"
         )}
       >
         <DataList label={title} isHorizontal={isHorizontal}>

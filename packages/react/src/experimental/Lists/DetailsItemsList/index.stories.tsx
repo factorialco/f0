@@ -150,6 +150,63 @@ export const TableView: Story = {
   },
 }
 
+/**
+ * `fullWidth` set on individual `details` items flows through the list, so each
+ * item drops the ~320px cap and fills the container. Reach for it when the list
+ * renders in a wide surface such as a side panel or drawer. The 600px bordered
+ * box mimics such a container.
+ */
+export const FullWidth: Story = {
+  args: {
+    title: "Details",
+    details: [
+      {
+        title: "Legal entity",
+        content: {
+          type: "item",
+          text: "Everyday Software SL",
+          action: {
+            type: "copy",
+          },
+        },
+        fullWidth: true,
+      },
+      {
+        title: "Address",
+        content: {
+          type: "item",
+          text: "Paseo Mara, 62, Bajos\nPáez del Vallès\nCeuta",
+          action: {
+            type: "copy",
+          },
+        },
+        fullWidth: true,
+      },
+      {
+        title: "Manager",
+        content: {
+          type: "person",
+          firstName: "Saul",
+          lastName: "Dominguez",
+          avatarUrl: "/avatars/person01.jpg",
+          action: {
+            type: "navigate",
+            href: "",
+          },
+        },
+        fullWidth: true,
+      },
+    ],
+  },
+  decorators: [
+    (Story) => (
+      <div className="w-[600px] rounded-md border border-solid border-f1-border-secondary p-4">
+        <Story />
+      </div>
+    ),
+  ],
+}
+
 export const WithDataTestId: Story = {
   args: {
     ...Primary.args,
