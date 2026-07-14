@@ -412,6 +412,8 @@ export const defaultTranslations = {
     },
     creditWarning: {
       soft: "You're running low on AI credits.",
+      hard: "You've run out of AI credits.",
+      sendDisabled: "You've run out of AI credits. Get more to keep chatting.",
       getCredits: "Get credits",
       dismiss: "Dismiss",
     },

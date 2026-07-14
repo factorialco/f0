@@ -165,8 +165,16 @@ export type AiChatCredits = {
  * When provided, a warning banner is shown above the chat textarea.
  */
 export type AiChatCreditWarning = {
-  /** The severity level of the warning. */
-  level: "soft"
+  /**
+   * The severity level of the warning.
+   *
+   * - `soft`: informational banner; the composer stays fully usable.
+   * - `hard`: credits are exhausted. The banner turns critical AND the send
+   *   and microphone buttons are disabled with an explanatory tooltip. Sending
+   *   is blocked at every entry point (button click and the Enter key), while
+   *   the textarea itself stays editable so the user keeps their draft.
+   */
+  level: "soft" | "hard"
   /** Called when the user dismisses the credit warning banner. */
   onDismiss?: () => void
   /** Called when the user clicks the "Get Credits" button. */
