@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.34.0](https://github.com/factorialco/f0/compare/f0-react-v4.33.0...f0-react-v4.34.0) (2026-07-14)
+
+
+### Features
+
+* **value-display:** support tooltip on status cell ([#4673](https://github.com/factorialco/f0/issues/4673)) ([646107e](https://github.com/factorialco/f0/commit/646107eceb7038ca5b025ce870ee818098864328))
+
 ## [4.33.0](https://github.com/factorialco/f0/compare/f0-react-v4.32.0...f0-react-v4.33.0) (2026-07-14)
 
 
