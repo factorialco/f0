@@ -11,9 +11,7 @@ const SvgPartiallyCompleted = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      fillRule="evenodd"
-      d="M4.65 12a7.35 7.35 0 1 1 14.7 0 7.35 7.35 0 0 1-14.7 0M12 3.35a8.65 8.65 0 1 0 0 17.3 8.65 8.65 0 0 0 0-17.3M18 12a6 6 0 0 1-6 6c-4.8 0-6-4-6-6h6V6a6 6 0 0 1 6 6"
-      clipRule="evenodd"
+      d="M12 4.8a7.2 7.2 0 1 1 0 14.4 7.2 7.2 0 0 1 0-14.4M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0m14.4 0A5.4 5.4 0 0 0 12 6.6V12H6.6c0 1.8 1.08 5.4 5.4 5.4a5.4 5.4 0 0 0 5.4-5.4"
     />
   </Svg>
 )

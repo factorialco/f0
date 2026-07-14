@@ -8,12 +8,15 @@ export const ResizeHandle = ({
   isResizing,
   setIsResizing,
   isCanvasMode,
+  side = "right",
 }: {
   onResize: (deltaX: number) => void
   onReset: () => void
   isResizing: boolean
   setIsResizing: (value: boolean) => void
   isCanvasMode?: boolean
+  /** Edge the panel docks to. Determines which drag direction widens it. */
+  side?: "left" | "right"
 }) => {
   const startXRef = useRef(0)
 
@@ -36,7 +39,12 @@ export const ResizeHandle = ({
     if (!isResizing) return
 
     const handleMouseMove = (e: MouseEvent) => {
-      const deltaX = startXRef.current - e.clientX
+      // Right-docked: dragging the (left-edge) handle leftward widens the panel.
+      // Left-docked: the handle is on the right edge, so dragging right widens.
+      const deltaX =
+        side === "left"
+          ? e.clientX - startXRef.current
+          : startXRef.current - e.clientX
       startXRef.current = e.clientX
       onResize(deltaX)
     }
@@ -52,7 +60,7 @@ export const ResizeHandle = ({
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [isResizing, onResize, setIsResizing])
+  }, [isResizing, onResize, setIsResizing, side])
 
   return (
     // z-10 so the handle — and its invisible hit-area extension — paints

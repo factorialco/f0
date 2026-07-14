@@ -9,22 +9,14 @@ import {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import { EventScalar, useF0EventCatcher } from "../../lib/providers/events"
+import { useF0EventCatcher } from "../../lib/providers/events"
+import { normalizeEventValue } from "../../lib/providers/events/normalize"
 
 type UseEventEmitterParams<Sortings extends SortingsDefinition> = {
   defaultFilters?: FiltersState<FiltersDefinition>
   defaultSorting?: SortingsState<Sortings>
   /** Current visualization index, included in filter/preset change events when per-visualization filters are active */
   currentVisualization?: number
-}
-
-const isScalar = (value: unknown): value is EventScalar => {
-  return (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    Array.isArray(value)
-  )
 }
 
 export const useEventEmitter = <Sortings extends SortingsDefinition>({
@@ -53,13 +45,15 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
 
       const [field, value] = changedFilter
 
-      if (!isScalar(value)) return
+      const normalizedValue = normalizeEventValue(value)
+
+      if (normalizedValue === undefined) return
 
       latestFilters.current = filters
 
       onEvent("datacollection.filter-change", {
         name: field,
-        value: value,
+        value: normalizedValue,
         ...(currentVisualization !== undefined && {
           visualization: currentVisualization,
         }),
@@ -100,13 +94,15 @@ export const useEventEmitter = <Sortings extends SortingsDefinition>({
 
       const [field, value] = changedFilter
 
-      if (!isScalar(value)) return
+      const normalizedValue = normalizeEventValue(value)
+
+      if (normalizedValue === undefined) return
 
       latestFilters.current = filters
 
       onEvent("datacollection.preset-click", {
         name: field,
-        value: value,
+        value: normalizedValue,
         ...(currentVisualization !== undefined && {
           visualization: currentVisualization,
         }),

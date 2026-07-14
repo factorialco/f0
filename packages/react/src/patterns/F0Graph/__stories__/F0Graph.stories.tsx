@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
 import { F0Button } from "@/components/F0Button"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -65,6 +65,13 @@ const meta = {
     onZoomLevelChange: { table: { disable: true } },
     onViewportChange: { table: { disable: true } },
     onVisibleNodesChange: { table: { disable: true } },
+    onRenderedNodesChange: { table: { disable: true } },
+    loadVisibleNodeData: { table: { disable: true } },
+    visibleDataDebounceMs: { table: { disable: true } },
+    enableNodeWindowing: { control: "boolean" },
+    nodeWindowPadding: {
+      control: { type: "number", min: 0, max: 2000, step: 100 },
+    },
   },
 } satisfies Meta<F0GraphProps<Employee>>
 
@@ -709,6 +716,231 @@ export const LargeTree: Story = {
     showControls: true,
     defaultExpandDepth: 2,
   },
+}
+
+/**
+ * `initialFocusNodeId`: open already centered on a specific node instead of
+ * fitting the whole tree. The graph mounts framed on a deep, off-center member
+ * (no fit-to-all, no pan) — the "open looking at me" behaviour used by the
+ * org chart. Compare with `LargeTree` (same data) which opens fit-to-all.
+ */
+export const InitialFocus: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Opens framed on `initialFocusNodeId` (a deep, off-center node) on the first paint — no fit-to-all then pan. The node must be present in the initial `nodes` (here `defaultExpandDepth: 2` makes members visible); if it's absent, F0Graph falls back to fit-to-all.",
+      },
+    },
+  },
+  args: {
+    nodes: makeLargeTree(600),
+    renderNode: renderEmployee,
+    showControls: true,
+    defaultExpandDepth: 2,
+    initialFocusNodeId: "dept-4-member-100",
+  },
+}
+
+// ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
+
+/**
+ * The "broken orgchart" shape from FCT-57915: thousands of root employees with
+ * no manager. Every root is expand-visible at once, so this is the worst case
+ * for the React Flow node array.
+ */
+function makeBrokenOrgchart(rootCount: number): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  let nameIndex = 0
+  for (let i = 0; i < rootCount; i++) {
+    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
+    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    nameIndex++
+    nodes.push({
+      id: `root-${i}`,
+      parentId: null,
+      data: { name: `${first} ${last}`, title: "Employee" },
+      childrenCount: 0,
+    })
+  }
+  return nodes
+}
+
+const BROKEN_ORGCHART_3K = makeBrokenOrgchart(3000)
+
+/**
+ * Interactive perf harness: renders 3,000 root nodes and lets you toggle
+ * `enableNodeWindowing` live while watching how many nodes are actually handed
+ * to React Flow. With windowing on, the rendered count collapses to roughly
+ * what's on screen (pan/zoom to see it track the camera); with it off, all
+ * 3,000 nodes stay in the array. This is both the A0 baseline and the A1 demo.
+ */
+function ViewportWindowingDemo() {
+  const [windowing, setWindowing] = useState(true)
+  const [padding, setPadding] = useState(600)
+  const [visible, setVisible] = useState(0)
+  const [rendered, setRendered] = useState(0)
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 flex flex-col gap-2 rounded-md bg-f1-background p-3 text-sm shadow-md">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={windowing}
+            onChange={(e) => setWindowing(e.target.checked)}
+          />
+          Node windowing
+        </label>
+        <label className="flex items-center gap-2">
+          Padding
+          <input
+            type="range"
+            min={0}
+            max={2000}
+            step={100}
+            value={padding}
+            onChange={(e) => setPadding(Number(e.target.value))}
+          />
+          <span className="tabular-nums">{padding}px</span>
+        </label>
+        <div className="tabular-nums">
+          Visible nodes: <strong>{visible}</strong>
+        </div>
+        <div className="tabular-nums">
+          Rendered nodes: <strong>{rendered}</strong>
+        </div>
+      </div>
+      <F0Graph<Employee>
+        nodes={BROKEN_ORGCHART_3K}
+        renderNode={renderEmployee}
+        showControls
+        enableNodeWindowing={windowing}
+        nodeWindowPadding={padding}
+        onVisibleNodesChange={setVisible}
+        onRenderedNodesChange={setRendered}
+      />
+    </div>
+  )
+}
+
+export const ViewportWindowing: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Perf harness for FCT-57915: 3,000 root nodes (the 'broken orgchart' case). Toggle `enableNodeWindowing` and pan/zoom to watch the rendered-node count track the viewport instead of the full 3,000.",
+      },
+    },
+  },
+  render: () => <ViewportWindowingDemo />,
+}
+
+// ─── Viewport-driven data loading (A2) ─────────────────────────
+
+// Structure-only skeleton: ids + parent links, no rich data yet.
+function makeSkeletonForest(rootCount: number): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  for (let r = 0; r < rootCount; r++) {
+    const rootId = `r-${r}`
+    nodes.push({
+      id: rootId,
+      parentId: null,
+      data: { name: "", title: "" },
+      dataLoaded: false,
+      childrenCount: 3,
+    })
+    for (let c = 0; c < 3; c++) {
+      nodes.push({
+        id: `${rootId}-${c}`,
+        parentId: rootId,
+        data: { name: "", title: "" },
+        dataLoaded: false,
+      })
+    }
+  }
+  return nodes
+}
+
+/**
+ * Viewport-driven data loading: the tree is built from a lightweight skeleton
+ * (ids + structure only). `loadVisibleNodeData` fires for the nodes on screen,
+ * and the story simulates an async fetch that hydrates just those. Nodes render
+ * a shimmer while `ctx.dataLoading` is true.
+ */
+function ViewportDataLoadingDemo() {
+  const [nodes, setNodes] = useState(() => makeSkeletonForest(400))
+  const [fetches, setFetches] = useState(0)
+
+  const loadVisibleNodeData = useCallback((ids: string[]) => {
+    setFetches((n) => n + 1)
+    // Simulate a batched network round-trip for the on-screen nodes.
+    setTimeout(() => {
+      const wanted = new Set(ids)
+      setNodes((prev) =>
+        prev.map((node, i) =>
+          wanted.has(node.id)
+            ? {
+                ...node,
+                dataLoaded: true,
+                data: {
+                  name: `${FIRST_NAMES[i % FIRST_NAMES.length]} ${LAST_NAMES[i % LAST_NAMES.length]}`,
+                  title: node.parentId ? "Team member" : "Manager",
+                },
+              }
+            : node
+        )
+      )
+    }, 600)
+  }, [])
+
+  const renderNode = useCallback(
+    (node: GraphNode<Employee>, ctx: F0GraphNodeRenderContext) => {
+      if (ctx.dataLoading) {
+        return (
+          <div className="h-14 w-64 animate-pulse rounded-md bg-f1-background-secondary" />
+        )
+      }
+      const [firstName = "", lastName = ""] = node.data.name.split(" ")
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={node.data.name}
+          subtitle={node.data.title}
+        />
+      )
+    },
+    []
+  )
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 rounded-md bg-f1-background p-3 text-sm shadow-md tabular-nums">
+        Batched fetches: <strong>{fetches}</strong>
+      </div>
+      <F0Graph<Employee>
+        nodes={nodes}
+        renderNode={renderNode}
+        showControls
+        defaultExpandDepth={2}
+        enableNodeWindowing
+        loadVisibleNodeData={loadVisibleNodeData}
+      />
+    </div>
+  )
+}
+
+export const ViewportDataLoading: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A2 for FCT-57915: the tree is built from a lightweight skeleton and `loadVisibleNodeData` hydrates only the nodes on screen (debounced + batched). Pan/zoom around and watch the batched-fetch count grow only as new nodes enter the viewport; nodes shimmer until their data arrives.",
+      },
+    },
+  },
+  render: () => <ViewportDataLoadingDemo />,
 }
 
 // ─── Intent-searchable stories ─────────────────────────────────

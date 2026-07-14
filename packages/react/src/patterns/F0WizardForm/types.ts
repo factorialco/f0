@@ -13,6 +13,7 @@ import type {
 import type { RenderCustomFieldFunction } from "@/patterns/F0Form/types"
 
 import { F0DialogSize } from "@/components/dialog-alike/F0Dialog"
+import { DialogWidth } from "@/patterns/F0Dialog"
 
 export type F0FormSchema<T extends ZodRawShape = ZodRawShape> =
   | z.ZodObject<T>
@@ -151,7 +152,7 @@ interface F0WizardFormBaseProps {
   onClose?: () => void
   title?: string
   /** @deprecated Use `size` instead. */
-  width?: Exclude<F0DialogSize, "fullscreen">
+  width?: DialogWidth
   /** The size of the wizard dialog. Preferred over the deprecated `width`. */
   size?: F0DialogSize
   defaultStepIndex?: number

@@ -14,12 +14,18 @@ export function DisabledCell<R extends RecordType>({
   const i18n = useI18n()
 
   return (
-    <BaseCell borderOnHover={false} hint={hint} cursor="not-allowed">
+    <BaseCell
+      disabled
+      borderOnHover={false}
+      hint={hint}
+      hintPosition="right"
+      cursor="not-allowed"
+    >
       <div
         className={cn(
           editableColumn.align === "right" ? "justify-end" : "",
           "flex p-4 min-h-12 items-center border-0 h-full",
-          "bg-f1-background-disabled h-full",
+          "h-full",
           "w-full",
           "[&_*]:text-f1-foreground-secondary"
         )}

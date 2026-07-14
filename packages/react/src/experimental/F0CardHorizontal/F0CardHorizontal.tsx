@@ -135,6 +135,19 @@ export interface F0CardHorizontalProps {
    * drag-and-drop while still allowing click navigation via `onClick`.
    */
   disableOverlayLink?: boolean
+
+  /**
+   * Dims the whole card and disables interaction (including its actions and any
+   * row-level link/click). Purely a visual + interaction affordance.
+   */
+  disabled?: boolean
+
+  /**
+   * Renders the description on a single line, truncating overflow with an
+   * ellipsis (and a tooltip with the full text) instead of wrapping. Has no
+   * effect when there's no `description`.
+   */
+  descriptionAsSingleLine?: boolean
 }
 
 /**
@@ -163,6 +176,8 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
       onClick,
       disableOverlayLink = false,
       stackAt = "never",
+      disabled = false,
+      descriptionAsSingleLine = false,
     },
     ref
   ) {
@@ -170,7 +185,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
     // The row is a click target only when it explicitly opts in via `link` or
     // `onClick`; otherwise it's static (only its actions are interactive). This
     // keeps the hover affordance + pointer cursor tied to an actual click action.
-    const clickable = !!link || !!onClick
+    const clickable = (!!link || !!onClick) && !disabled
 
     const body = (
       <Card
@@ -180,7 +195,8 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
           fullHeight && "h-full",
           // Pointer + hover/focus affordance only when the whole row is clickable.
           clickable &&
-            "cursor-pointer focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md"
+            "cursor-pointer focus-within:border-f1-border-hover focus-within:shadow-md hover:border-f1-border-hover hover:shadow-md",
+          disabled && "pointer-events-none opacity-50"
         )}
         style={
           hasAlert
@@ -190,7 +206,7 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
               }
             : undefined
         }
-        onClick={onClick}
+        onClick={disabled ? undefined : onClick}
         data-testid="card"
       >
         {link && !disableOverlayLink && (
@@ -230,7 +246,11 @@ const F0CardHorizontalBase = forwardRef<HTMLDivElement, F0CardHorizontalProps>(
                 <Text
                   variant="description"
                   content={description}
-                  className={cn("break-words", inactive && "line-through")}
+                  ellipsis={descriptionAsSingleLine || undefined}
+                  className={cn(
+                    !descriptionAsSingleLine && "break-words",
+                    inactive && "line-through"
+                  )}
                 />
               )}
             </div>

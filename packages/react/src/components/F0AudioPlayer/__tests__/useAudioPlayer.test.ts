@@ -91,4 +91,10 @@ describe("useAudioPlayer", () => {
     expect(result.current.isLoading).toBe(false)
     expect(onError).toHaveBeenCalledOnce()
   })
+
+  it("seeds the duration from initialDuration", () => {
+    const ref = makeRef()
+    const { result } = renderHook(() => useAudioPlayer(ref, {}, 272))
+    expect(result.current.duration).toBe(272)
+  })
 })

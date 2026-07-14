@@ -1,11 +1,4 @@
 import type {
-  FiltersDefinition,
-  FiltersState,
-  PresetsDefinition,
-} from "@/patterns/OneFilterPicker/types"
-import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
-
-import type {
   ChartColorToken,
   F0DataChartBarSeries,
   F0DataChartFunnelSeries,
@@ -14,6 +7,12 @@ import type {
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
+import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
+import type {
+  FiltersDefinition,
+  FiltersState,
+  PresetsDefinition,
+} from "@/patterns/OneFilterPicker/types"
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -269,6 +268,13 @@ export interface DashboardMetricItem<
   format?: MetricFormat
   /** Number of decimal places. @default 0 */
   decimals?: number
+  /**
+   * Custom value formatter — takes precedence over `format`/`decimals`.
+   * The built-in presets format with the browser locale; this lets the
+   * consumer control locale and currency, mirroring the chart configs'
+   * `valueFormatter`.
+   */
+  valueFormatter?: (value: number) => string
   /** Async data fetcher — receives dashboard filters */
   fetchData: (filters: FiltersState<Filters>) => Promise<DashboardMetricData>
 }

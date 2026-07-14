@@ -3,8 +3,8 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - "packages/react/components/**"
-      - "packages/react/patterns/**"
+      - "packages/react/src/components/**"
+      - "packages/react/src/patterns/**"
     types:
       - opened
       - synchronize

@@ -6,7 +6,7 @@ import { action } from "storybook/actions"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { Delete, Pencil } from "@/icons/app"
+import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 
 import { OneDataCollection } from "../../.."
@@ -378,6 +378,59 @@ export const EditableTableWithDisabledCells: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-disabled-cells/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithCellHint: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A `cellHint` (ⓘ tooltip) renders its icon to the right of the cell content for read-only cell types (FCT-56432). Here the Role column is `disabled` (gray background) with a hint; Email stays editable for contrast.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.editType !== undefined && col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "disabled" as const,
+                    cellHint: () => ({
+                      icon: InfoCircleLine,
+                      iconColor: "secondary" as const,
+                      message:
+                        "This value is managed elsewhere and can't be edited here.",
+                    }),
+                  }
+                }
+                return col
+              }),
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-cell-hint/v1"
       />
     )
   },

@@ -8,7 +8,10 @@ import React from "react"
 import { Text } from "react-native"
 
 import { F0Wizard } from "../F0Wizard"
-import type { F0WizardStep } from "../F0Wizard.types"
+import type {
+  F0WizardScrollComponentProps,
+  F0WizardStep,
+} from "../F0Wizard.types"
 
 const makeSteps = (count: number): F0WizardStep[] =>
   Array.from({ length: count }, (_, i) => ({
@@ -403,6 +406,72 @@ describe("F0Wizard", () => {
     render(<F0Wizard steps={makeSteps(1)} testID="wizard" {...LABELS} />)
 
     expect(screen.queryByText("Tell us about yourself")).toBeNull()
+  })
+
+  it("renders step content through an injected ScrollComponent", () => {
+    const ScrollComponent = jest.fn(
+      ({ children }: F0WizardScrollComponentProps) => <>{children}</>
+    )
+
+    render(
+      <F0Wizard
+        steps={makeSteps(1)}
+        testID="wizard"
+        {...LABELS}
+        ScrollComponent={ScrollComponent}
+      />
+    )
+
+    // The injected component is used and still renders the step content.
+    expect(ScrollComponent).toHaveBeenCalled()
+    expect(screen.getByTestId("content-0")).toBeTruthy()
+  })
+
+  it("forwards the measured footer height as bottomOffset to ScrollComponent", async () => {
+    const ScrollComponent = jest.fn(
+      ({ children }: F0WizardScrollComponentProps) => <>{children}</>
+    )
+
+    render(
+      <F0Wizard
+        steps={makeSteps(1)}
+        testID="wizard"
+        {...LABELS}
+        ScrollComponent={ScrollComponent}
+      />
+    )
+
+    // Fire the footer's onLayout with a known height and assert F0Wizard
+    // forwards it to the scroll component as bottomOffset.
+    const footerHeight = 72
+    fireEvent(screen.getByTestId("wizard-footer"), "layout", {
+      nativeEvent: { layout: { height: footerHeight, width: 300, x: 0, y: 0 } },
+    })
+
+    await waitFor(() => {
+      const lastCall =
+        ScrollComponent.mock.calls[ScrollComponent.mock.calls.length - 1]
+      expect(lastCall?.[0]?.bottomOffset).toBe(footerHeight)
+    })
+  })
+
+  it("passes keyboardShouldPersistTaps='handled' to ScrollComponent", () => {
+    const ScrollComponent = jest.fn(
+      ({ children }: F0WizardScrollComponentProps) => <>{children}</>
+    )
+
+    render(
+      <F0Wizard
+        steps={makeSteps(1)}
+        testID="wizard"
+        {...LABELS}
+        ScrollComponent={ScrollComponent}
+      />
+    )
+
+    expect(ScrollComponent.mock.calls[0]?.[0]?.keyboardShouldPersistTaps).toBe(
+      "handled"
+    )
   })
 
   it("canAdvance:false disables button and onNext is never called", async () => {

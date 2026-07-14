@@ -10,16 +10,8 @@ const SvgReset = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5 13.5a7 7 0 1 0 7-7H5.5"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m8 3.5-3 3 3 3"
+      fill="currentColor"
+      d="M7.363 2.863a.9.9 0 0 1 1.273 1.273L7.172 5.6H12a7.9 7.9 0 0 1 7.3 4.877 7.9 7.9 0 0 1-1.713 8.609A7.9 7.9 0 0 1 4.1 13.499a.9.9 0 0 1 1.8 0 6.103 6.103 0 0 0 7.29 5.984A6.1 6.1 0 0 0 12 7.4H7.171l1.464 1.463a.9.9 0 0 1-1.273 1.273l-3-3a.9.9 0 0 1-.062-1.205l.062-.068z"
     />
   </Svg>
 )

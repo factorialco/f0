@@ -3,6 +3,8 @@ import { screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it } from "vitest"
 
+import InfoCircleLine from "@/icons/app/InfoCircleLine"
+
 import { zeroRender as render } from "../../../../../../testing/test-utils"
 import { BaseCell } from "../components/cells/BaseCell"
 
@@ -132,6 +134,37 @@ describe("BaseCell", () => {
 
     const cell = container.firstChild as HTMLElement
     expect(cell.className).toContain("bg-f1-background-secondary")
+  })
+
+  it("renders the hint icon before the content by default", () => {
+    render(
+      <BaseCell hint={{ icon: InfoCircleLine, message: "More info" }}>
+        <span>Cell content</span>
+      </BaseCell>
+    )
+
+    const button = screen.getByRole("button", { name: "More info" })
+    const content = screen.getByText("Cell content")
+    expect(
+      button.compareDocumentPosition(content) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("renders the hint icon after the content when hintPosition is right", () => {
+    render(
+      <BaseCell
+        hint={{ icon: InfoCircleLine, message: "More info" }}
+        hintPosition="right"
+      >
+        <span>Cell content</span>
+      </BaseCell>
+    )
+
+    const button = screen.getByRole("button", { name: "More info" })
+    const content = screen.getByText("Cell content")
+    expect(
+      content.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
   })
 
   it("preserves input focus when error transitions from undefined to a string", async () => {
