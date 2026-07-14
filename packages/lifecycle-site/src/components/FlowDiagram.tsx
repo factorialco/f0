@@ -89,7 +89,7 @@ const phaseIds = new Set<string>(phases.map((p) => p.id))
 
 // Anchors for the non-phase nodes in the diagram. Phase nodes resolve to
 // their own `phase-<id>` anchor in PhaseSection; the lifecycle states below
-// jump to the maturity-levels section, and "Idea" jumps to Phase 0 (Discovery).
+// jump to the maturity-levels section, and "Idea" jumps to the Review & filter pre-step.
 const nonPhaseAnchors: Record<string, string> = {
   idea: "phase-discovery",
   stable: "maturity",

@@ -33,7 +33,7 @@ export const surfaces: Surface[] = [
     label: "Storybook",
     audience: "Anyone using F0",
     purpose:
-      "The catalogue. Browse 262 components. Read MDX docs. See the maturity badge of each component.",
+      "The catalogue. Browse every component, read its MDX docs, and see its maturity badge.",
     howAccessed: "Click a link Claude gives you, or browse manually when you already know what you want.",
   },
   {
@@ -51,13 +51,13 @@ export const sourceOfTruth = {
   what: "The F0 repo (code + MDX + skills)",
   why: "Everything else (Storybook, Compose, Claude, Dashboard) reads from it. Nothing maintains its own truth in parallel.",
   consequence:
-    "If a piece of information requires manual sync between systems, it is wrongly designed. Figma is no longer source of truth — it is an optional sandbox in Phase 2.",
+    "If a piece of information requires manual sync between systems, it is wrongly designed. The repo is the source of truth; Figma is an optional sandbox.",
 }
 
 export const goldenRules = [
   "The repo is the only source of truth.",
-  "Folder = source of truth for maturity. Tag = mirror.",
-  "F0 grows intentionally. Every proposal is evaluated on its merits; Phase 0 is a self-help filter, not a gate.",
+  "The story tag is the source of truth for maturity; the folder is placement.",
+  "F0 grows intentionally. The review & filter step (with Claude) is a self-help filter, not a gate.",
   "Anyone contributing only needs Claude. No tool to learn — only intent to express.",
   "Figma is not source of truth. Optional sandbox in Phase 2 only.",
   "Format + tsc before every commit. Quality gate after every code change.",

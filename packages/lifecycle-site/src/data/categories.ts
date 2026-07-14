@@ -64,6 +64,7 @@ export const categories: Category[] = [
     folder: "src/sds/<area>/",
     owner: "The domain's team",
     rules: [
+      "Uses the same F0 tokens — no separate visual identity.",
       "Shipped as its own import.",
       "The domain team owns and maintains it — not Foundations.",
       "It stays in its domain; no need to push it into Core.",

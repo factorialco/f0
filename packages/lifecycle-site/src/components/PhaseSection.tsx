@@ -10,7 +10,13 @@ export function PhaseSection() {
           className="section-anchor flex flex-col rounded-2xl border border-white/10 bg-surface p-6 shadow-sm"
         >
           <header className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-accent">{p.number}</span>
+            {p.number === 0 ? (
+              <span className="rounded-full bg-accent/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
+                Pre-step
+              </span>
+            ) : (
+              <span className="text-3xl font-bold text-accent">{p.number}</span>
+            )}
             <h3 className="text-xl font-semibold">{p.title}</h3>
           </header>
           <p className="mt-3 text-sm text-muted">{p.goal}</p>

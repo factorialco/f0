@@ -38,27 +38,22 @@ const surfaces: Surface[] = [
     link: { label: "GitHub", url: "https://github.com/factorialco/f0" },
   },
   {
-    name: "GitHub Issues & PRs",
+    name: "#f0-support (Slack)",
     oneLine:
-      "The one official place for proposals, enhancements, bugs and promotions. Nothing else counts as a formal request.",
+      "Where every request starts — contributions, bugs, promotions. You raise it as a message and Foundations picks it up.",
     link: {
-      label: "Open an issue",
-      url: "https://github.com/factorialco/f0/issues/new/choose",
+      label: "Open #f0-support",
+      url: "https://factorialteam.slack.com/archives/C082ZNKS403",
     },
   },
   {
     name: "Figma library",
     oneLine:
-      "An optional sandbox to sketch variants in Phase 2. Not source of truth — the code is.",
+      "An optional sandbox to sketch variants (a Composer prototype works too). Not the source of truth — the code is.",
     link: {
       label: "F0 library in Figma",
       url: "https://www.figma.com/files/1209519141454845458/team/1359486354120896816",
     },
-  },
-  {
-    name: "#f0-support (Slack)",
-    oneLine:
-      "Optional visibility: paste the link to an issue or PR you've already opened. Decisions still happen on GitHub.",
   },
 ]
 

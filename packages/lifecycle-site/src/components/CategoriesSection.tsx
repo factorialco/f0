@@ -32,6 +32,51 @@ const icons: Record<CategoryId, ReactNode> = {
   ),
 }
 
+const STORYBOOK = "https://f0.factorial.dev"
+
+const examples = [
+  {
+    cat: "Core",
+    chip: { background: "#6ea8fe22", color: "#8fb8ff" },
+    name: "F0Button",
+    storyId: "components-button-button--default",
+    useCase:
+      "Every screen needs the same primary action — Save, Confirm, Continue. Rather than each team styling its own, they all reach for the one button.",
+    trace: [
+      ["Would extending an existing component cover it?", "No — it's a new primitive."],
+      ["Will it be reused?", "Yes — by every product, across all domains."],
+      ["Where does it live?", "Core."],
+    ],
+  },
+  {
+    cat: "Kit",
+    chip: { background: "#b08cff22", color: "#c4b0ff" },
+    name: "BarChart",
+    storyId: "kits-charts-barchart--default",
+    useCase:
+      "You're building an analytics view and need bars, lines and donuts that already share F0 styling. You pull them from the Charts kit instead of rebuilding each one.",
+    trace: [
+      ["Standalone, or part of a set?", "Part of a set used together (bars, lines, donuts)."],
+      ["Reused across domains?", "Yes — any analytics view."],
+      ["Where does it live?", "Kit (Charts)."],
+    ],
+  },
+  {
+    cat: "Domain specific",
+    chip: { background: "#f0b35722", color: "#f3c07b" },
+    name: "ClockInControls",
+    storyId: "sds-home-clockincontrols--clocked-in",
+    useCase:
+      "The Time Tracking team needs clock-in / clock-out controls on the attendance screen — start a shift, pause for lunch, clock out. It only makes sense in attendance, so the team owns it.",
+    trace: [
+      ["Does it already exist?", "No."],
+      ["Would extending cover it?", "No — attendance-specific behavior."],
+      ["Will it be reused?", "Within the Time Tracking domain only."],
+      ["Where does it live?", "Domain specific."],
+    ],
+  },
+]
+
 function Label({ children }: { children: ReactNode }) {
   return (
     <p className="mt-4 text-[11px] font-semibold uppercase tracking-wider text-muted">
@@ -133,6 +178,67 @@ export function CategoriesSection() {
         <p className="font-semibold text-sky-200">{patternsNote.title}</p>
         <p className="mt-1 text-muted">{patternsNote.body}</p>
         <p className="mt-2 font-mono text-xs text-muted">{patternsNote.examples}</p>
+      </div>
+
+      {/* ── A real one of each, live from Storybook ───────────────────── */}
+      <div className="pt-2">
+        <h4 className="text-sm font-semibold uppercase tracking-wider text-muted">
+          One real component of each
+        </h4>
+        <p className="mt-1 text-sm text-muted">
+          Live from Storybook — and why each lives where it does.
+        </p>
+        <div className="mt-4 grid gap-4 md:grid-cols-3">
+          {examples.map((e) => (
+            <div
+              key={e.name}
+              className="flex flex-col rounded-2xl border border-white/10 bg-surface p-5"
+            >
+              <span
+                className="w-fit rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                style={e.chip}
+              >
+                {e.cat}
+              </span>
+
+              <div className="relative mt-4 h-48 overflow-hidden rounded-lg border border-white/10 bg-white">
+                <iframe
+                  src={`${STORYBOOK}/iframe.html?id=${e.storyId}&viewMode=story`}
+                  title={`${e.name} — live in Storybook`}
+                  loading="lazy"
+                  scrolling="no"
+                  className="absolute left-0 top-0 origin-top-left"
+                  style={{ width: "154%", height: "154%", transform: "scale(0.65)" }}
+                />
+              </div>
+              <a
+                href={`${STORYBOOK}/?path=/story/${e.storyId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1.5 inline-block text-[11px] text-accent hover:underline"
+              >
+                Open in Storybook ↗
+              </a>
+
+              <p className="mt-3 font-mono text-sm text-ink">{e.name}</p>
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                Use case
+              </p>
+              <p className="mt-1 text-sm text-muted">{e.useCase}</p>
+              <p className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                How it's classified
+              </p>
+              <ol className="mt-1 space-y-1 text-[13px]">
+                {e.trace.map(([q, a]) => (
+                  <li key={q}>
+                    <span className="text-ink">{q}</span>{" "}
+                    <span className="text-muted">{a}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

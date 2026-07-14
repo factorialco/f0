@@ -1,6 +1,6 @@
 // Source: packages/react/docs/definition-of-done.mdx
-//         packages/react/.skills/f0-component-contribution/SKILL.md (Phase 0)
-// 5 phases of the F0 component lifecycle, plus Phase 0 (Discovery & Evaluation).
+//         packages/react/.skills/f0-component-contribution/SKILL.md
+// The 5 lifecycle phases, plus the "Review & filter" pre-step (number 0).
 
 export type PhaseId = "discovery" | "problem" | "design" | "build" | "real-use" | "promote"
 
@@ -20,11 +20,11 @@ export const phases: Phase[] = [
   {
     id: "discovery",
     number: 0,
-    title: "Discovery & Evaluation",
-    goal: "Decide if a new component is even needed, BEFORE proposing.",
+    title: "Review & filter",
+    goal: "Review what already exists and decide if it's needed in F0 — before building anything.",
     gates: [
       "Does it already exist? (search Storybook + repo)",
-      "Can an existing component be extended? (open Enhancement instead)",
+      "Can an existing component be extended? (extend it — no new component needed)",
       "Is the need recurrent (≥2 product teams)?",
       "Could a pattern, kit or composition solve it?",
     ],
@@ -32,7 +32,7 @@ export const phases: Phase[] = [
     duration: "Minutes (a conversation, not a meeting)",
     skill: "f0-component-contribution",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md#phase-0--discovery--evaluation-before-proposing",
+      "https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md",
   },
   {
     id: "problem",
@@ -42,30 +42,30 @@ export const phases: Phase[] = [
     gates: [
       "Use cases documented (≥2 real use cases from different teams; an F0 designer can waive for clearly foundational primitives)",
       "Alternatives considered (existing F0 components, primitives)",
-      "Foundations triage decision recorded",
+      "Aligned with Foundations via a message in #f0-support",
     ],
     owner: "Proposer (any team)",
     duration: "Variable",
     skill: "f0-component-contribution",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#phase-1--problem",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#phase-1--problem",
   },
   {
     id: "design",
     number: 2,
     title: "Design",
-    goal: "Reach a design that satisfies the F0 design review checklist.",
+    goal: "Agree the design and where it lives, with Foundations in #f0-support.",
     gates: [
-      "10-category design review passed",
-      "API sketch reviewed by Foundations",
-      "Accessibility considered (WCAG AA)",
-      "Tokens used (no hardcoded values)",
+      "New or an extension? Placement confirmed (Core / Kit / Domain specific)",
+      "Design shared — a Figma, a Composer prototype, or another",
+      "Design review for a new component, or a change to a stable one (scaled to impact)",
+      "Accessibility considered (WCAG AA); F0 tokens, no hardcoded values",
     ],
-    owner: "Proposer + Foundations design pair",
+    owner: "Proposer + Foundations",
     duration: "Variable",
     skill: null,
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/design-review.mdx",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/design-review.mdx",
   },
   {
     id: "build",
@@ -84,7 +84,7 @@ export const phases: Phase[] = [
     duration: "Variable",
     skill: "f0-component-contribution",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#phase-3--build",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#phase-3--build",
   },
   {
     id: "real-use",
@@ -102,7 +102,7 @@ export const phases: Phase[] = [
     duration: "No minimum (evidence-based)",
     skill: null,
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#phase-4--real-world-use",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#phase-4--real-world-use",
   },
   {
     id: "promote",
@@ -115,12 +115,12 @@ export const phases: Phase[] = [
       "experimentalComponent() wrapper removed",
       "Storybook tag changed from 'experimental' → 'stable'",
       "Good docs tier (per f0-docs) — Gold encouraged",
-      "PR labeled lifecycle:promotion (uses ! breaking marker)",
+      "PR uses plain `feat:` — promotion is not a breaking change (the public import path is unchanged)",
     ],
     owner: "Foundations",
     duration: "Variable",
     skill: "f0-component-promotion",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#phase-5--promote",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#phase-5--promote",
   },
 ]

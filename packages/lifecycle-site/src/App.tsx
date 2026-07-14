@@ -8,10 +8,9 @@ import { PhaseSection } from "./components/PhaseSection"
 import { DefinitionOfDone } from "./components/DefinitionOfDone"
 import { PrototypeSection } from "./components/PrototypeSection"
 import { ContributeSection } from "./components/ContributeSection"
-import { Troubleshooting } from "./components/Troubleshooting"
+import { SetupSection } from "./components/SetupSection"
 import { Footer } from "./components/Footer"
 import { HeroMatrix } from "./components/HeroMatrix"
-import { RulesPage } from "./components/RulesPage"
 
 type SectionDef = {
   id: string
@@ -79,6 +78,12 @@ const PARTS: Part[] = [
     tagline: "The jobs you come here for. Pick what you need to do.",
     sections: [
       {
+        id: "setup",
+        title: "Set up Claude + F0",
+        blurb: "Install the tools once — then prototype or contribute.",
+        render: () => <SetupSection />,
+      },
+      {
         id: "prototype",
         title: "Prototype a screen",
         blurb: "Build a screen out of what already exists. You use the design system.",
@@ -89,12 +94,6 @@ const PARTS: Part[] = [
         title: "Contribute to F0",
         blurb: "Add or change something in the design system itself.",
         render: () => <ContributeSection />,
-      },
-      {
-        id: "troubleshooting",
-        title: "Stuck? Start here",
-        blurb: "The questions people hit most, and where to go for help.",
-        render: () => <Troubleshooting />,
       },
     ],
   },
@@ -119,8 +118,6 @@ function useHashRoute(): string {
 export function App() {
   const hash = useHashRoute()
 
-  if (hash.startsWith("#/rules")) return <RulesPage />
-
   const sectionId = hash.startsWith("#/s/") ? hash.slice("#/s/".length) : ""
   const entry = SECTION_INDEX.get(sectionId)
   if (entry) return <SectionView section={entry.section} partLabel={entry.part.label} />
@@ -140,51 +137,118 @@ function Wordmark({ className = "" }: { className?: string }) {
   )
 }
 
+const START_HERE = [
+  {
+    id: "prototype",
+    tag: "use",
+    title: "Build a screen",
+    blurb:
+      "Assemble a screen out of components that already exist. What you'll do most days — you use F0, you don't change it.",
+  },
+  {
+    id: "contribute",
+    tag: "contribute",
+    title: "Add or change something in F0",
+    blurb:
+      "The component you need doesn't exist yet, or one needs to evolve. That's contributing to the design system itself.",
+  },
+  {
+    id: "what-is-f0",
+    tag: "learn",
+    title: "Just understand how F0 works",
+    blurb:
+      "The whole system in a few short pages: how it's organized, the flow a change follows, and what each maturity level promises.",
+  },
+] as const
+
 function Overview() {
   return (
     <>
-      <header className="relative min-h-[55vh] overflow-hidden border-b border-white/10">
+      <header className="relative min-h-[52vh] overflow-hidden border-b border-white/10">
         <HeroMatrix />
         <div className="relative mx-auto max-w-4xl px-6 pb-16 pt-10">
           <Wordmark />
           <p className="mt-10 text-sm font-medium uppercase tracking-widest text-accent">
-            F0 — Factorial's design system
+            Factorial's design system
           </p>
           <h1 className="mt-3 text-5xl font-semibold tracking-tight md:text-6xl">
-            Get started with F0
+            Start with F0
           </h1>
           <p className="mt-5 max-w-2xl text-lg text-muted">
-            Everything you need to understand and work with F0 — the components,
-            patterns and rules every Factorial product shares. Pick a topic below;
-            you'll get just that, nothing else to wade through.
+            F0 is the components, patterns and rules every Factorial product shares — so
+            screens stay consistent and you never rebuild the basics. New here? You don't
+            need to learn a tool: you talk to <span className="text-ink">Claude</span>, and it
+            works with F0 for you.
           </p>
         </div>
       </header>
 
       <main className="mx-auto max-w-4xl px-6 pb-24">
-        <div className="mt-16 space-y-14">
-        {PARTS.map((part) => (
-          <section key={part.label}>
-            <h2 className="text-2xl font-bold tracking-tight">{part.label}</h2>
-            <p className="mt-1 text-muted">{part.tagline}</p>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {part.sections.map((s) => (
-                <a
-                  key={s.id}
-                  href={`#/s/${s.id}`}
-                  className="group flex flex-col rounded-2xl border border-white/10 bg-surface p-6 shadow-sm transition hover:border-accent/50 hover:shadow-md"
-                >
-                  <h3 className="text-lg font-semibold tracking-tight">{s.title}</h3>
-                  <p className="mt-2 flex-1 text-sm text-muted">{s.blurb}</p>
-                  <span className="mt-4 text-sm font-semibold text-accent group-hover:underline">
-                    Open →
-                  </span>
-                </a>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+        {/* The one thing to remember */}
+        <div className="mt-12 rounded-2xl border border-accent/30 bg-accent/[0.06] p-6">
+          <p className="text-xs font-semibold uppercase tracking-widest text-accent">
+            The one thing to remember
+          </p>
+          <h2 className="mt-1 text-2xl font-semibold tracking-tight">The door is Claude</h2>
+          <p className="mt-2 max-w-2xl text-muted">
+            Open Claude (or OpenCode) in the f0 repo and say what you need — it searches the
+            system, tells you what already exists, guides where things go, and builds to the
+            standard. You don't need to know the rules up front; it walks you through them.
+          </p>
+          <a
+            href="#/s/setup"
+            className="mt-4 inline-block text-sm font-semibold text-accent hover:underline"
+          >
+            First time? Set up Claude + F0 →
+          </a>
+        </div>
+
+        {/* Where do you start */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-bold tracking-tight">Where do you start?</h2>
+          <p className="mt-1 text-muted">Pick what you're here to do.</p>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {START_HERE.map((s) => (
+              <a
+                key={s.id}
+                href={`#/s/${s.id}`}
+                className="group flex flex-col rounded-2xl border border-white/10 bg-surface p-6 transition hover:border-accent/50 hover:shadow-md"
+              >
+                <span className="w-fit rounded-full bg-accent/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent">
+                  {s.tag}
+                </span>
+                <h3 className="mt-3 text-lg font-semibold tracking-tight">{s.title}</h3>
+                <p className="mt-2 flex-1 text-sm text-muted">{s.blurb}</p>
+                <span className="mt-4 text-sm font-semibold text-accent group-hover:underline">
+                  Open →
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        {/* Understand the system — the learning topics (jobs are the guided cards above) */}
+        <section className="mt-16">
+          <h2 className="text-2xl font-bold tracking-tight">Understand the system</h2>
+          <p className="mt-1 text-muted">
+            The details, page by page — read these when you want the full picture.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {PARTS[0].sections.map((s) => (
+              <a
+                key={s.id}
+                href={`#/s/${s.id}`}
+                className="group flex flex-col rounded-xl border border-white/10 bg-surface p-5 transition hover:border-accent/50"
+              >
+                <h4 className="font-semibold tracking-tight">{s.title}</h4>
+                <p className="mt-1.5 flex-1 text-sm text-muted">{s.blurb}</p>
+                <span className="mt-3 text-xs font-semibold text-accent group-hover:underline">
+                  Open →
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
 
         <Footer />
       </main>

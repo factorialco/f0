@@ -19,7 +19,7 @@ const skills = [
   "f0-ai-config-hygiene",
 ]
 
-const REPO = "https://github.com/factorialco/factorial-one/blob/main/"
+const REPO = "https://github.com/factorialco/f0/blob/main/"
 
 export function Footer() {
   return (

@@ -31,12 +31,12 @@ export const dodLevels: DoDLevel[] = [
     label: "Experimental",
     intent: "Minimum bar to ship a component into the catalogue.",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#phase-3--build",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#phase-3--build",
     criteria: [
       {
         id: "exp-folder",
         label: "Lives under src/experimental/<area>/",
-        detail: "Or src/sds/<area>/ for satellite design systems.",
+        detail: "Or src/sds/<area>/ for Domain specific components.",
       },
       {
         id: "exp-wrapper",
@@ -76,7 +76,7 @@ export const dodLevels: DoDLevel[] = [
     intent:
       "The technical contract for promotion. Foundations validates every item before re-tagging.",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#phase-5--promote",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#phase-5--promote",
     criteria: [
       {
         id: "stable-folder",
@@ -140,7 +140,7 @@ export const dodLevels: DoDLevel[] = [
     intent:
       "What deprecation requires before a component can be retired. Removal is never sooner than 90 days.",
     sourceLink:
-      "https://github.com/factorialco/factorial-one/blob/main/packages/react/docs/definition-of-done.mdx#deprecation",
+      "https://github.com/factorialco/f0/blob/main/packages/react/docs/definition-of-done.mdx#deprecation",
     criteria: [
       {
         id: "dep-jsdoc-deprecated",
