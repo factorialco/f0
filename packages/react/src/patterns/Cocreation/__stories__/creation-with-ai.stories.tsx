@@ -319,6 +319,8 @@ function TemplatesCollection({
   onSelect,
   onEmpty,
   fillHeight = true,
+  visualization = listVisualization,
+  tmpFullWidth = false,
 }: {
   onSelect?: (item: Template) => void
   /**
@@ -335,6 +337,17 @@ function TemplatesCollection({
    * (toolbar + list together) instead of scrolling inside the data collection.
    */
   fillHeight?: boolean
+  /**
+   * List visualization to render. Defaults to the full `listVisualization`
+   * (with the Category property) for the browse tab; the AI Canvas gallery
+   * passes the category-less `galleryListVisualization` instead.
+   */
+  visualization?: typeof listVisualization
+  /**
+   * Drop the data collection's horizontal padding (list rows + filter toolbar),
+   * so the gallery runs edge-to-edge inside the AI Canvas panel body.
+   */
+  tmpFullWidth?: boolean
 } = {}) {
   const { config } = useFlowConfig()
   const templatesSource = makeTemplatesSource(config)
@@ -362,8 +375,9 @@ function TemplatesCollection({
   return (
     <OneDataCollection
       source={source}
-      visualizations={[listVisualization]}
+      visualizations={[visualization]}
       fullHeight={fillHeight}
+      tmpFullWidth={tmpFullWidth}
     />
   )
 }
@@ -395,8 +409,14 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
   // first step of cocreation rather than just dismissing the canvas (see
   // `TemplatesCanvasHeader`); the framework `onClose` is intentionally dropped.
   renderHeader: ({ content }) => <TemplatesCanvasHeader content={content} />,
+  // The canvas keeps its own `p-4` padding; the gallery inside drops the data
+  // collection's *own* horizontal padding so it doesn't double-pad against the
+  // wrapper. `tmpFullWidth` zeroes the list rows' `px-page`; the filter toolbar
+  // still emits `px-page` alongside `px-0` (the collection's `cn` doesn't merge
+  // the custom `px-page` utility, so `px-page` wins), so `[&_.px-page]:px-0`
+  // overrides it on specificity — filters then align to the wrapper like the list.
   renderContent: ({ content }) => (
-    <div className="h-full w-full overflow-y-auto px-4 py-3">
+    <div className="h-full w-full overflow-y-auto p-4 [&_.px-page]:px-0">
       {content.guidedTypeId ? (
         <GuidedTemplatesCanvasBody guidedTypeId={content.guidedTypeId} />
       ) : (
@@ -1813,15 +1833,18 @@ function TemplatesCanvasBody() {
       onSelect={openPreview}
       onEmpty={startBlankSurvey}
       fillHeight={false}
+      visualization={galleryListVisualization}
+      tmpFullWidth
     />
   )
 }
 
-// List visualization for the guided-type template gallery: no Category
-// property (the type is already in the gallery's own title — "Satisfaction
-// Survey Templates" etc. — so repeating it per row is redundant), and the
-// "Empty Survey" row hides the questions count (it isn't a real template).
-const guidedGalleryListVisualization = {
+// List visualization for the AI Canvas template galleries (both the "cards" and
+// "guidedType" flows): just the title + description and the questions count — no
+// Category property (the gallery is all surveys, and its title already frames
+// the scope, so repeating the type per row is redundant). The synthetic "Empty
+// Survey" row hides the questions count (it isn't a real template).
+const galleryListVisualization = {
   type: "list" as const,
   options: {
     itemDefinition: (item: Template) => ({
@@ -1886,7 +1909,8 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
   return (
     <OneDataCollection
       source={source}
-      visualizations={[guidedGalleryListVisualization]}
+      visualizations={[galleryListVisualization]}
+      tmpFullWidth
     />
   )
 }
