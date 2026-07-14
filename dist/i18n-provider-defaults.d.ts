@@ -295,6 +295,8 @@ export declare const defaultTranslations: {
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
+                readonly addColumn: "Add column";
+                readonly removeColumn: "Remove column";
             };
         };
         readonly editableTable: {
@@ -891,6 +893,20 @@ export declare const defaultTranslations: {
         readonly next: "Continue";
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
+    };
+    readonly pdfViewer: {
+        readonly toolbar: "Document toolbar";
+        readonly previousPage: "Previous page";
+        readonly nextPage: "Next page";
+        readonly zoomIn: "Zoom in";
+        readonly zoomOut: "Zoom out";
+        readonly scaleSelector: "Zoom level";
+        readonly pageWidth: "Page width";
+        readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
+        readonly print: "Print";
+        readonly download: "Download";
+        readonly loading: "Loading document";
     };
 };
 

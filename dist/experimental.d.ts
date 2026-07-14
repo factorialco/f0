@@ -297,7 +297,7 @@ declare type ActionProps_3 = {
      * @default "default"
      * @optional
      */
-    variant?: "default" | "outline" | "promote";
+    variant?: "default" | "outline" | "neutral" | "promote";
     /**
      * The icon of the action
      * @optional
@@ -1733,6 +1733,18 @@ declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-hei
 declare type CardImageSize = (typeof cardImageSizes)[number];
 
 declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
+
+declare type CardMetadata = {
+    /** Leading icon. Optional — when omitted the row renders just the value. */
+    icon?: IconType;
+    property: Exclude<CardMetadataProperty, {
+        type: "file";
+    }>;
+} | {
+    property: Extract<CardMetadataProperty, {
+        type: "file";
+    }>;
+};
 
 /**
  * Card metadata property renderers.
@@ -3391,6 +3403,8 @@ declare const defaultTranslations: {
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
+                readonly addColumn: "Add column";
+                readonly removeColumn: "Remove column";
             };
         };
         readonly editableTable: {
@@ -3987,6 +4001,20 @@ declare const defaultTranslations: {
         readonly next: "Continue";
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
+    };
+    readonly pdfViewer: {
+        readonly toolbar: "Document toolbar";
+        readonly previousPage: "Previous page";
+        readonly nextPage: "Next page";
+        readonly zoomIn: "Zoom in";
+        readonly zoomOut: "Zoom out";
+        readonly scaleSelector: "Zoom level";
+        readonly pageWidth: "Page width";
+        readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
+        readonly print: "Print";
+        readonly download: "Download";
+        readonly loading: "Loading document";
     };
 };
 
@@ -5753,6 +5781,7 @@ declare type F0TagRawProps = {
 declare interface F0TagStatusProps {
     text: string;
     variant: Variant;
+    icon?: IconType;
     /**
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
@@ -6208,6 +6237,16 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      */
     revealNodeId?: string;
     /**
+     * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+     * root of their branch): when the tree first becomes ready, its ancestor
+     * path is loaded/expanded and the viewport centers on it. Unlike
+     * `revealNodeId` (which is ignored on entry so search stays clean), this is
+     * the opt-in "open the org chart already looking at me" behaviour. Requires
+     * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+     * the default entry view (roots expanded to `defaultExpandDepth`).
+     */
+    focusOnEntry?: string;
+    /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
      * revealing nodes in branches that have not been expanded yet.
@@ -6215,6 +6254,47 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     loadNodePath?: (nodeId: string) => Promise<R[]>;
     /** Optional parent accessor used when linking the revealed ancestor path. */
     getParentId?: (record: R) => string | null;
+    /**
+     * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+     * built from whatever lightweight records `childrenFilters`/`fetchData`
+     * return, and the full record is fetched — batched, once per node — only for
+     * the nodes that enter the viewport, via this loader. The returned records
+     * replace each node's `data` (matched by node id) and clear its loading
+     * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+     * eager behavior (structure and data fetched together per expansion).
+     *
+     * The "lightness" of the initial records is entirely the source's choice and
+     * transparent to the hook — no special adapter mode is required.
+     */
+    loadNodeData?: (ids: string[]) => Promise<R[]>;
+    /**
+     * Apply targeted updates to the already-loaded tree **in place**, without the
+     * full reset (and collapse to `defaultExpandDepth`) that a filter change
+     * triggers. Use it to reflect real-time / collaborative changes while keeping
+     * the user's current expansion and viewport.
+     *
+     * Bump `version` to apply a batch **once** (the number dedups against React
+     * re-renders — reuse the same object identity freely):
+     * - `upsert` records are matched by node id: an existing node has its `data`,
+     *   `childrenCount` and parent refreshed (re-parenting if `getParentId`
+     *   returns a new parent); an unknown record is inserted when it is attachable
+     *   (a root, or its parent is already in the tree — a child of a not-yet-loaded
+     *   parent will appear when that parent is expanded).
+     * - `remove` ids are dropped together with their descendants, and pruned from
+     *   the expanded set.
+     *
+     * Applying a batch never re-fetches and never collapses; it reconciles the
+     * nodes already in memory. The parents whose child set the batch touches (the
+     * old and new parent of a move, the parent of a removal) have their
+     * `childrenCount`/`childrenLoaded` reconciled locally from the in-memory tree
+     * — send only the records that changed; upserting the affected parents too is
+     * allowed but not required.
+     */
+    liveUpdate?: {
+        version: number;
+        upsert?: R[];
+        remove?: string[];
+    };
     /**
      * Id of the node representing the current user. When set, a "Find me" button
      * is shown in the controls that centers the viewport on that node.
@@ -6232,6 +6312,22 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     maxZoom?: number;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+     * the viewport are handed to React Flow — for very large trees (thousands of
+     * expand-visible nodes). Off by default; non-breaking.
+     */
+    enableNodeWindowing?: boolean;
+    /** Flow-space px kept materialized around the viewport (pass-through). */
+    nodeWindowPadding?: number;
+    /**
+     * Viewport-driven data loading (pass-through). Called (debounced + batched)
+     * with the ids of nodes that entered the viewport, so the consumer can
+     * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+     */
+    loadVisibleNodeData?: (ids: string[]) => void;
+    /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+    visibleDataDebounceMs?: number;
 };
 
 declare type GraphVisualizationSettings = {
@@ -6758,10 +6854,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<{
-        icon: IconType;
-        property: CardMetadataProperty;
-    }>;
+    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -9324,6 +9417,12 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      */
     noHiding?: boolean;
     /**
+     * Avoid removing the column by the user. Only relevant when the
+     * visualization sets `onRemoveColumn`; the per-row trash affordance in the
+     * settings popover is hidden for this column. Mirrors `noHiding`.
+     */
+    noRemoving?: boolean;
+    /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
      * The label for each group is provided via `headerGroupLabels` in
@@ -9438,6 +9537,20 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
+    /**
+     * Called when the user clicks the "Add column" entry at the top of the
+     * column-settings popover. When omitted, the entry is not shown. Open your
+     * own column picker and update `columns` in response.
+     */
+    onAddColumn?: () => void;
+    /**
+     * Called when the user removes a column via the trash affordance revealed on
+     * hovering its row in the column-settings popover. When omitted, no remove
+     * affordance is shown. Removing is distinct from hiding: drop the column from
+     * `columns` in response. Frozen/leading columns and columns flagged
+     * `noRemoving` are never removable.
+     */
+    onRemoveColumn?: (columnId: ColId) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
