@@ -203,12 +203,12 @@ export function OperatorFilter({
     options.suggestions && options.suggestions.length > 0
       ? options.suggestions.slice(0, 3).join(", ")
       : mode === "multiple"
-        ? i18n.filters.operator.valuesPlaceholder
-        : i18n.filters.operator.valuePlaceholder
+        ? i18n.t("filters.operator.valuesPlaceholder")
+        : i18n.t("filters.operator.valuePlaceholder")
 
   const booleanOptions = [
-    { value: "true", label: i18n.filters.operator.trueLabel },
-    { value: "false", label: i18n.filters.operator.falseLabel },
+    { value: "true", label: i18n.t("filters.operator.trueLabel") },
+    { value: "false", label: i18n.t("filters.operator.falseLabel") },
   ]
 
   const renderSingleInput = (
@@ -235,36 +235,36 @@ export function OperatorFilter({
   return (
     <div className="flex flex-col gap-3 p-2">
       <F0Select
-        label={i18n.filters.operator.operatorLabel}
+        label={i18n.t("filters.operator.operatorLabel")}
         options={operatorOptions}
         value={operator?.value}
         onChange={(next: string) => emit({ ...draft, operator: next })}
       />
       {mode === "none" && (
         <p className="m-0 text-base text-f1-foreground-secondary">
-          {i18n.filters.operator.noValueRequired}
+          {i18n.t("filters.operator.noValueRequired")}
         </p>
       )}
       {mode === "single" &&
-        renderSingleInput("single", i18n.filters.operator.valueLabel)}
+        renderSingleInput("single", i18n.t("filters.operator.valueLabel"))}
       {mode === "multiple" && (
         <div className="flex flex-col gap-1">
           <InputInternal
-            label={i18n.filters.operator.valuesLabel}
+            label={i18n.t("filters.operator.valuesLabel")}
             placeholder={placeholder}
             value={draft.multiple}
             onChange={(next: string) => emit({ ...draft, multiple: next })}
             clearable
           />
           <p className="m-0 text-sm text-f1-foreground-secondary">
-            {i18n.filters.operator.valuesHint}
+            {i18n.t("filters.operator.valuesHint")}
           </p>
         </div>
       )}
       {mode === "range" && (
         <div className="flex items-start gap-2 [&>*]:flex-1">
-          {renderSingleInput("from", i18n.filters.operator.fromLabel)}
-          {renderSingleInput("to", i18n.filters.operator.toLabel)}
+          {renderSingleInput("from", i18n.t("filters.operator.fromLabel"))}
+          {renderSingleInput("to", i18n.t("filters.operator.toLabel"))}
         </div>
       )}
     </div>
