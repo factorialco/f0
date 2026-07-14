@@ -84,8 +84,9 @@ export const AsBadge: Story = {
 }
 
 /**
- * The module badge across entity-avatar sizes. The `md` and `lg` avatars share
- * the same badge size (16px container, 12px icon).
+ * The module badge across entity-avatar sizes. Each avatar gets a badge sized
+ * to roughly half the avatar: `sm`→12px, `md`→16px, `lg`→20px. `xl` and `2xl`
+ * keep their existing 20px / 24px badges.
  */
 export const AsBadgeSizes: Story = {
   parameters: withSnapshot({}),
