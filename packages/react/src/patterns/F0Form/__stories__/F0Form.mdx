@@ -427,7 +427,13 @@ With **2 or fewer** item fields the table edits **inline** (type directly in the
 config: { supportInlineEditing: true } // force inline even with many columns
 ```
 
+A 2-column list edits inline — type straight into the cells:
+
 <Canvas of={Stories.EntitiesListFieldInline} />
+
+With more than 2 fields it switches to **dialog** mode by default: the cells are read-only, and the add button (plus a per-row pencil) opens a form built from the same schema. No `supportInlineEditing` is set here — the field count alone drives the choice:
+
+<Canvas of={Stories.EntitiesListFieldDialogMode} />
 
 `editableIds` locks editing to items whose `id` is listed — locked rows render as read-only (disabled) cells. Items without an `id` (rows the user just added) always stay editable.
 
