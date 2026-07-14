@@ -8,9 +8,9 @@ import type {
 
 /**
  * A custom trailing action button for a row (see
- * {@link OneEditableTableProps.rowActions}).
+ * {@link F0FormEditableTableProps.rowActions}).
  */
-export type OneEditableTableRowAction<R extends RecordType> = {
+export type F0FormEditableTableRowAction<R extends RecordType> = {
   /** Stable key within the row's action list (defaults to the label). */
   id?: string
   /** Icon shown in the button. */
@@ -32,7 +32,7 @@ export type EditableColumn<R extends RecordType> =
   EditableTableColumnDefinition<R, SortingsDefinition, SummariesDefinition>
 
 /**
- * Column definition for OneEditableTable.
+ * Column definition for F0FormEditableTable.
  *
  * Reuses the editable-table column contract — same `editType` cell types
  * (`text`, `number`, `money`, `date`, `select`, `display-only`, `disabled`),
@@ -40,7 +40,7 @@ export type EditableColumn<R extends RecordType> =
  * minus the data-collection-only options (sorting, summaries, column
  * settings, header groups).
  */
-export type OneEditableTableColumn<R extends RecordType> = Omit<
+export type F0FormEditableTableColumn<R extends RecordType> = Omit<
   EditableColumn<R>,
   | "render"
   | "sorting"
@@ -63,13 +63,13 @@ export type OneEditableTableColumn<R extends RecordType> = Omit<
 }
 
 /**
- * Props for {@link OneEditableTable}: a lightweight, fully controlled editable
+ * Props for {@link F0FormEditableTable}: a lightweight, fully controlled editable
  * table built on the OneTable primitives and the editable-table cell
  * components — no data collection (source, adapters, filters) required.
  */
-export type OneEditableTableProps<R extends RecordType> = {
-  /** Column definitions (see {@link OneEditableTableColumn}). */
-  columns: ReadonlyArray<OneEditableTableColumn<R>>
+export type F0FormEditableTableProps<R extends RecordType> = {
+  /** Column definitions (see {@link F0FormEditableTableColumn}). */
+  columns: ReadonlyArray<F0FormEditableTableColumn<R>>
   /**
    * Rows in display order. The table is controlled: edits, reorders and
    * removals are reported via callbacks and the parent updates `items`.
@@ -120,7 +120,7 @@ export type OneEditableTableProps<R extends RecordType> = {
    * Rendered in the trailing actions column, between the edit and remove
    * buttons when those are also present.
    */
-  rowActions?: (item: R, index: number) => OneEditableTableRowAction<R>[]
+  rowActions?: (item: R, index: number) => F0FormEditableTableRowAction<R>[]
   /**
    * External validation error for a cell, keyed by the column id. When it
    * returns a message the cell shows an error border and a tooltip with the

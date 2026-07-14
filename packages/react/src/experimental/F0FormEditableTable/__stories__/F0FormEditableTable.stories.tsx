@@ -5,11 +5,11 @@ import { action } from "storybook/actions"
 
 import { Archive, ArchiveOpen } from "@/icons/app"
 
-import { OneEditableTable } from "../index"
+import { F0FormEditableTable } from "../index"
 
 const meta = {
-  title: "OneEditableTable",
-  component: OneEditableTable,
+  title: "F0FormEditableTable",
+  component: F0FormEditableTable,
   tags: ["experimental"],
   parameters: {
     layout: "padded",
@@ -78,7 +78,7 @@ export const SortableWithAddAndRemove: Story = {
     const addCounter = useRef(0)
 
     return (
-      <OneEditableTable<LinkRow>
+      <F0FormEditableTable<LinkRow>
         items={items}
         columns={[
           {
@@ -179,7 +179,7 @@ export const CellTypes: Story = {
     ])
 
     return (
-      <OneEditableTable<BudgetRow>
+      <F0FormEditableTable<BudgetRow>
         items={items}
         columns={[
           {
@@ -246,7 +246,7 @@ export const CustomRowActions: Story = {
       )
 
     return (
-      <OneEditableTable<OptionRow>
+      <F0FormEditableTable<OptionRow>
         items={items}
         columns={[
           {

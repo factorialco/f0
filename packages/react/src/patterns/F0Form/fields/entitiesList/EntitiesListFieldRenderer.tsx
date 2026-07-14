@@ -7,9 +7,9 @@ import {
 } from "react-hook-form"
 import { z, ZodTypeAny } from "zod"
 
-import type { OneEditableTableColumn } from "@/experimental/OneEditableTable"
+import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTable"
 
-import { OneEditableTable } from "@/experimental/OneEditableTable"
+import { F0FormEditableTable } from "@/experimental/F0FormEditableTable"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 
@@ -402,9 +402,9 @@ export function EntitiesListFieldRenderer({
   // - hidden columns (value kept for row actions, no cell), and
   // - fields whose type has no inline cell (e.g. boolean, date, file); those
   //   keep their value but aren't shown as a column (editable via the dialog).
-  const columns: ReadonlyArray<OneEditableTableColumn<EntitiesListRow>> =
+  const columns: ReadonlyArray<F0FormEditableTableColumn<EntitiesListRow>> =
     itemKeys
-      .map((key): OneEditableTableColumn<EntitiesListRow> | null => {
+      .map((key): F0FormEditableTableColumn<EntitiesListRow> | null => {
         if (field.columns?.[key]?.hidden) return null
         const resolution = resolveEntitiesListCell(itemShape[key])
         if (!resolution) return null
@@ -465,7 +465,7 @@ export function EntitiesListFieldRenderer({
         }
       })
       .filter(
-        (column): column is OneEditableTableColumn<EntitiesListRow> =>
+        (column): column is F0FormEditableTableColumn<EntitiesListRow> =>
           column !== null
       )
 
@@ -480,7 +480,7 @@ export function EntitiesListFieldRenderer({
     [error, shouldShowCellError]
   )
 
-  // Map the field's custom row actions onto OneEditableTable's action shape,
+  // Map the field's custom row actions onto F0FormEditableTable's action shape,
   // supplying `update`/`remove` helpers that commit back to the form value.
   const rowActionsFn = field.rowActions
   const rowActions = rowActionsFn
@@ -525,7 +525,7 @@ export function EntitiesListFieldRenderer({
 
   return (
     <div className="flex flex-col gap-2">
-      <OneEditableTable<EntitiesListRow>
+      <F0FormEditableTable<EntitiesListRow>
         items={rows}
         getRowId={(row) => row.__key}
         columns={columns}

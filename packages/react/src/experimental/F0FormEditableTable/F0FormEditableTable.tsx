@@ -45,9 +45,9 @@ import { EditableRowProvider } from "@/patterns/OneDataCollection/visualizations
 
 import type {
   EditableColumn,
-  OneEditableTableColumn,
-  OneEditableTableProps,
-  OneEditableTableRowAction,
+  F0FormEditableTableColumn,
+  F0FormEditableTableProps,
+  F0FormEditableTableRowAction,
 } from "./types"
 
 /** Width (px) of the leading drag-handle column. */
@@ -137,7 +137,7 @@ const EDITABLE_CELL_ERROR_RING =
  * column contract expected by EditableCellRenderer.
  */
 function withRenderFallback<R extends RecordType>(
-  column: OneEditableTableColumn<R>
+  column: F0FormEditableTableColumn<R>
 ): EditableColumn<R> {
   return {
     render: (item: R) => {
@@ -159,7 +159,7 @@ function RowActionButton<R extends RecordType>({
   item,
   index,
 }: {
-  action: OneEditableTableRowAction<R>
+  action: F0FormEditableTableRowAction<R>
   item: R
   index: number
 }) {
@@ -190,7 +190,7 @@ type RowCellsProps<R extends RecordType> = {
   onRemoveRow?: (item: R, index: number) => void
   onEditRow?: (item: R, index: number) => void
   canEditRow?: (item: R, index: number) => boolean
-  rowActions?: (item: R, index: number) => OneEditableTableRowAction<R>[]
+  rowActions?: (item: R, index: number) => F0FormEditableTableRowAction<R>[]
   getCellError?: (
     item: R,
     columnId: string,
@@ -401,7 +401,7 @@ function SortableRow<R extends RecordType>({
  * `onCellChange`, reorders via `onReorderRows`, removals via `onRemoveRow`,
  * and additions via `addRow.onClick`.
  */
-function OneEditableTableBase<R extends RecordType>({
+function F0FormEditableTableBase<R extends RecordType>({
   columns: columnsProp,
   items,
   getRowId,
@@ -415,7 +415,7 @@ function OneEditableTableBase<R extends RecordType>({
   getCellError,
   addRow,
   bordered = true,
-}: OneEditableTableProps<R>) {
+}: F0FormEditableTableProps<R>) {
   const { t } = useI18n()
 
   const columns = columnsProp.map(withRenderFallback)
@@ -634,9 +634,9 @@ function OneEditableTableBase<R extends RecordType>({
 }
 
 /**
- * OneEditableTable is experimental — its API may change without a major bump.
+ * F0FormEditableTable is experimental — its API may change without a major bump.
  */
-export const OneEditableTable = experimentalComponent(
-  "OneEditableTable",
-  OneEditableTableBase
+export const F0FormEditableTable = experimentalComponent(
+  "F0FormEditableTable",
+  F0FormEditableTableBase
 )

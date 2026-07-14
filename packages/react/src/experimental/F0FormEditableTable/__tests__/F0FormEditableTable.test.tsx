@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
 
-import type { OneEditableTableColumn } from "../types"
+import type { F0FormEditableTableColumn } from "../types"
 
-import { OneEditableTable } from "../OneEditableTable"
+import { F0FormEditableTable } from "../F0FormEditableTable"
 
 type Row = { id: string; title: string; archived?: boolean }
 
-const columns: OneEditableTableColumn<Row>[] = [
+const columns: F0FormEditableTableColumn<Row>[] = [
   { id: "title", label: "Title", editType: () => "text" as const },
 ]
 
@@ -17,10 +17,10 @@ const items: Row[] = [
   { id: "2", title: "Two" },
 ]
 
-describe("OneEditableTable", () => {
+describe("F0FormEditableTable", () => {
   it("renders a header and a row per item, plus the add button", () => {
     render(
-      <OneEditableTable<Row>
+      <F0FormEditableTable<Row>
         items={items}
         columns={columns}
         onCellChange={async () => {}}
@@ -38,7 +38,7 @@ describe("OneEditableTable", () => {
 
   it("disables the add button when addRow.disabled is set", () => {
     render(
-      <OneEditableTable<Row>
+      <F0FormEditableTable<Row>
         items={items}
         columns={columns}
         onCellChange={async () => {}}
@@ -51,7 +51,7 @@ describe("OneEditableTable", () => {
   it("calls onRemoveRow with the row", async () => {
     const onRemoveRow = vi.fn()
     render(
-      <OneEditableTable<Row>
+      <F0FormEditableTable<Row>
         items={items}
         columns={columns}
         onCellChange={async () => {}}
@@ -67,7 +67,7 @@ describe("OneEditableTable", () => {
   it("renders custom row actions and calls their onClick", async () => {
     const onArchive = vi.fn()
     render(
-      <OneEditableTable<Row>
+      <F0FormEditableTable<Row>
         items={items}
         columns={columns}
         onCellChange={async () => {}}
@@ -89,7 +89,7 @@ describe("OneEditableTable", () => {
 
   it("applies the critical error ring to a cell flagged by getCellError", () => {
     render(
-      <OneEditableTable<Row>
+      <F0FormEditableTable<Row>
         items={[items[0]]}
         columns={columns}
         onCellChange={async () => {}}
