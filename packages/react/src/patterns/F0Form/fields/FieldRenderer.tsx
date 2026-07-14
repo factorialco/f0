@@ -203,7 +203,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
       <FormFieldPrimitive
         control={form.control}
         name={field.id}
-        {...(isAutosubmit ? { disabled: false } : {})}
+        {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
         render={() => <span className="hidden" aria-hidden="true" />}
       />
     )
@@ -213,7 +213,7 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
     <FormFieldPrimitive
       control={form.control}
       name={field.id}
-      {...(isAutosubmit ? { disabled: false } : {})}
+      {...(isAutosubmit || field.autoSave ? { disabled: false } : {})}
       render={({ field: formField, fieldState }) => (
         <FormItem id={anchorId} className="scroll-mt-4">
           {showLabel && (
