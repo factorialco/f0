@@ -2736,20 +2736,20 @@ function CreationWithAIFlow({
   )
 }
 
-// "With Welcome Screen" — entry via a welcome screen of entry-point cards
+// "Welcome Screen" — entry via a welcome screen of entry-point cards
 // (`cards` mode). Uses the engagement/eNPS survey data.
-export const WithWelcomeScreen: Story = {
-  name: "With Welcome Screen",
+export const WelcomeScreen: Story = {
+  name: "Welcome Screen",
   render: () => <CreationWithAIFlow flowId="engagement" />,
 }
 
-// "With Welcome Screen · No Credits" — the same welcome-screen flow with AI
+// "Welcome Screen · No Credits" — the same welcome-screen flow with AI
 // credits exhausted. The soft credit-warning banner sits on the composer, the
 // starter-prompt buttons above the input are dropped, and free-text chat is
 // blocked (typing returns an "out of credits" reply). The welcome cards stay
 // fully interactive and behave exactly as in the normal flow.
-export const WithWelcomeScreenNoCredits: Story = {
-  name: "With Welcome Screen · No Credits",
+export const WelcomeScreenNoCredits: Story = {
+  name: "Welcome Screen · No Credits",
   render: () => <CreationWithAIFlow flowId="engagement" noCredits />,
 }
 
