@@ -147,13 +147,15 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
 
   const isAutosubmit = submitConfig?.type === "autosubmit"
 
-  // In autosubmit mode the form silently saves while the user keeps typing.
-  // Surfacing `isSubmitting` to field renderers would disable the active
-  // input and the browser would blur it mid-keystroke — breaking the entire
-  // point of autosubmit. Mask it out here so both the `<Controller disabled>`
-  // path (in ui/form FormField) and the inner input's `isDisabled` derivation
-  // (in renderFieldInput) treat the form as idle.
-  const isSubmitting = isAutosubmit ? false : isFormSubmitting
+  // Auto-saving fields save silently while the user keeps editing them — the
+  // whole form in autosubmit mode, or an individual field with `autoSave`.
+  // Surfacing `isSubmitting` would disable the active input and blur it
+  // mid-keystroke (and for the entities table it would swap the editable cell
+  // for a disabled one, remounting — losing — the input). Mask it out for those
+  // so both the `<Controller disabled>` path (in ui/form FormField) and the
+  // inner input's `isDisabled` derivation (in renderFieldInput) treat the form
+  // as idle.
+  const isSubmitting = isAutosubmit || field.autoSave ? false : isFormSubmitting
 
   // Evaluate if field is currently disabled
   const isDisabled = evaluateDisabled(field.disabled, values)
