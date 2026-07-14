@@ -1497,7 +1497,7 @@ export const EntitiesListField: Story = {
             startDate: new Date(2022, 2, 1),
             remote: true,
             agreedToTerms: true,
-            bio: "Founding engineer.",
+            bio: { value: "Founding engineer." },
           },
           {
             id: "m-2",
@@ -1511,7 +1511,7 @@ export const EntitiesListField: Story = {
             startDate: new Date(2023, 8, 15),
             remote: false,
             agreedToTerms: true,
-            bio: "Compiler wizard.",
+            bio: { value: "Compiler wizard." },
           },
           {
             id: "m-3",
@@ -1525,7 +1525,6 @@ export const EntitiesListField: Story = {
             startDate: new Date(2024, 0, 8),
             remote: true,
             agreedToTerms: false,
-            bio: "",
           },
         ],
       },
