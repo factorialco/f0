@@ -1,3 +1,22 @@
+import { type ReactNode } from "react"
+
+/**
+ * A single reasoning step in the Thinking accordion: a title plus optional
+ * freeform content rendered beneath it. f0 owns the accordion container and
+ * the step chrome (icon, connector, collapse); the consumer composes whatever
+ * `content` renders (catalog pills, citations, charts, …), so the design
+ * system stays domain-agnostic.
+ */
+export type ThinkingStep = {
+  /** Step sentence shown next to the status icon. */
+  title: string
+  /**
+   * Optional freeform content rendered under the title, inside the
+   * collapsible. Omit for a plain text-only step.
+   */
+  content?: ReactNode
+}
+
 /**
  * Loose message shape used by the headless container and its
  * subcomponents. Mirrors the CopilotKit `Message`/`AIMessage` shape
@@ -47,10 +66,18 @@ export type RenderableTurn = {
   userMessages: Message[]
   /**
    * Optional collapsible "thinking" header rendered between user and
-   * assistant blocks. Titles are pre-parsed upstream.
+   * assistant blocks. Steps are pre-parsed upstream — provide plain
+   * `titles` and/or rich `items` (a per-step content slot). When both are
+   * present, `items` wins.
    */
   thinking?: {
-    titles: string[]
+    /** Plain step titles. Back-compat shorthand for `items` without content. */
+    titles?: string[]
+    /**
+     * Per-step items with an optional freeform `content` slot rendered under
+     * each title. Takes precedence over `titles`.
+     */
+    items?: ThinkingStep[]
     /**
      * Whether this turn is still streaming. The collapsible stays locked
      * open while true (no chevron, no toggle) and auto-collapses on the
@@ -90,8 +117,16 @@ export type RenderableTurn = {
 
 /** Props for the Thinking collapsible section. */
 export type ThinkingProps = {
-  /** Pre-parsed step titles to show inside the collapsed group. */
-  titles: string[]
+  /**
+   * Pre-parsed step titles to show inside the collapsed group. Back-compat
+   * shorthand for `items` with no content; ignored when `items` is provided.
+   */
+  titles?: string[]
+  /**
+   * Per-step items with an optional freeform `content` slot rendered under
+   * each title. Takes precedence over `titles`.
+   */
+  items?: ThinkingStep[]
   /** Section heading (defaults to "Thoughts" from i18n). */
   title?: string
   /**

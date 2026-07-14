@@ -62,6 +62,56 @@ const turnWithThinking = (): RenderableTurn => {
   }
 }
 
+// Demonstrates the generic per-step content slot: the consumer composes
+// whatever it wants (here, simple "source"/"field" pills) under a step title.
+// f0 owns only the accordion + step chrome — it knows nothing about pills.
+const Pill = ({ children }: { children: React.ReactNode }) => (
+  <span className="inline-flex items-center rounded-full border border-solid border-f1-border bg-f1-background-secondary px-2 py-0.5 text-sm text-f1-foreground">
+    {children}
+  </span>
+)
+
+const turnWithRichThinking = (): RenderableTurn => {
+  const target = assistantMessage(
+    "a2r",
+    "Voluntary turnover was **4.2%** over the last 6 months, highest in the EU entity."
+  )
+  return {
+    userMessages: [
+      userMessage("u2r", "Voluntary turnover last 6 months by legal entity"),
+    ],
+    thinking: {
+      items: [
+        {
+          title: "Pulling the latest employee data",
+          content: (
+            <div className="flex flex-wrap gap-1">
+              <Pill>Employee data</Pill>
+            </div>
+          ),
+        },
+        {
+          title: "Assembling the columns for your turnover breakdown",
+          content: (
+            <div className="flex flex-wrap gap-1">
+              <Pill>Employee name</Pill>
+              <Pill>Team</Pill>
+              <Pill>Base salary</Pill>
+            </div>
+          ),
+        },
+        { title: "Breaking your turnover rate down by legal entity" },
+      ],
+    },
+    assistantMessages: [target],
+    isInProgress: false,
+    feedback: {
+      content: target.content as string,
+      targetMessage: target,
+    },
+  }
+}
+
 const turnStreamingThinkingIndicator = (): RenderableTurn => ({
   userMessages: [userMessage("u3", "What does my calendar look like today?")],
   assistantMessages: [],
@@ -159,6 +209,13 @@ export const Conversation: Story = {
     turns: [completedTurn(), turnWithThinking()],
     feedback: noopFeedback,
     onReplyQuote: (text) => console.log("reply quote", text),
+  },
+}
+
+export const WithRichThinking: Story = {
+  args: {
+    turns: [turnWithRichThinking()],
+    feedback: noopFeedback,
   },
 }
 

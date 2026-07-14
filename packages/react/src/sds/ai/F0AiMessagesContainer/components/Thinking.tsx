@@ -7,10 +7,11 @@ import { F0ActionItem } from "../../F0ActionItem"
 
 import { CollapsibleMessage } from "./CollapsibleMessage"
 
-import { ThinkingProps } from "../types"
+import { ThinkingProps, ThinkingStep } from "../types"
 
 export const Thinking = ({
   titles,
+  items,
   title,
   inProgress,
   isWriting,
@@ -32,7 +33,10 @@ export const Thinking = ({
   const headerTitle = inProgress
     ? translations.ai.thoughtsGroupTitle
     : (title ?? translations.ai.thoughtsGroupTitle)
-  const lastIndex = titles.length - 1
+  // `items` (rich, optional content) wins over `titles` (plain back-compat).
+  const steps: ThinkingStep[] =
+    items ?? (titles ?? []).map((stepTitle) => ({ title: stepTitle }))
+  const lastIndex = steps.length - 1
   const itemStatus = (index: number): "executing" | "completed" => {
     if (!inProgress || isWriting) return "completed"
     return index === lastIndex ? "executing" : "completed"
@@ -47,14 +51,15 @@ export const Thinking = ({
       lockOpen={inProgress}
     >
       <div className="flex flex-col gap-3 pb-4">
-        {titles.map((stepTitle, index) => (
+        {steps.map((step, index) => (
           <div key={index} className="relative">
             <F0ActionItem
-              title={stepTitle}
+              title={step.title}
+              content={step.content}
               status={itemStatus(index)}
               inGroup
             />
-            {index < titles.length - 1 && (
+            {index < steps.length - 1 && (
               <div
                 aria-hidden
                 className="absolute -bottom-3 left-2 ml-px top-5 w-px bg-f1-border-secondary rounded"

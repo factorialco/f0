@@ -16,7 +16,12 @@ const ICON_MOTION = {
   exit: { opacity: 0 },
 }
 
-export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
+export const F0ActionItem = ({
+  title,
+  status,
+  inGroup,
+  content,
+}: F0ActionItemProps) => {
   const shouldReduceMotion = useReducedMotion()
   const transition = {
     duration: shouldReduceMotion ? 0 : 0.18,
@@ -68,15 +73,20 @@ export const F0ActionItem = ({ title, status, inGroup }: F0ActionItemProps) => {
           )}
         </AnimatePresence>
       </div>
-      {title && (
-        <p
-          className={cn(
-            "text-pretty leading-5",
-            (executing || writing) && "shine-text"
+      {(title || content) && (
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          {title && (
+            <p
+              className={cn(
+                "text-pretty leading-5",
+                (executing || writing) && "shine-text"
+              )}
+            >
+              {title}
+            </p>
           )}
-        >
-          {title}
-        </p>
+          {content && <div className="min-w-0">{content}</div>}
+        </div>
       )}
     </div>
   )

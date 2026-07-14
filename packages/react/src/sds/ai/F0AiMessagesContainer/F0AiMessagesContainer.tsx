@@ -236,14 +236,17 @@ const Messages = ({
         {turn.userMessages.map((message, index) =>
           renderUserMessage(message, index)
         )}
-        {turn.thinking && turn.thinking.titles.length > 0 && (
-          <Thinking
-            titles={turn.thinking.titles}
-            title={translations.ai.thoughtsGroupTitle}
-            inProgress={turn.thinking.inProgress}
-            isWriting={turn.thinking.isWriting}
-          />
-        )}
+        {turn.thinking &&
+          ((turn.thinking.items?.length ?? 0) > 0 ||
+            (turn.thinking.titles?.length ?? 0) > 0) && (
+            <Thinking
+              titles={turn.thinking.titles}
+              items={turn.thinking.items}
+              title={translations.ai.thoughtsGroupTitle}
+              inProgress={turn.thinking.inProgress}
+              isWriting={turn.thinking.isWriting}
+            />
+          )}
         {turn.assistantMessages.map((message, index) =>
           renderAssistantMessage(message, index)
         )}
