@@ -68,10 +68,13 @@ const ROW_CLASSES = cn(
 // bleeds into the neighbouring cell when a column gets squeezed.
 // The input placeholder slot carries a size-based vertical padding
 // (`inputElementVariants`) that misaligns it inside our fixed 48px cells;
-// neutralize it and center the placeholder instead.
+// neutralize it and center the placeholder instead. A final -1px nudges the
+// placeholder onto the input's text baseline, and -3px lifts the input's
+// leading icon (positioned a touch low by the field) onto the cell center.
 const CELL_CLASSES = cn(
   "h-[48px] overflow-hidden p-0 align-middle first:pl-0 last:pr-0",
-  "[&_[data-slot='placeholder']]:!flex [&_[data-slot='placeholder']]:!items-center [&_[data-slot='placeholder']]:!py-0"
+  "[&_[data-slot='placeholder']]:!flex [&_[data-slot='placeholder']]:!items-center [&_[data-slot='placeholder']]:!py-0 [&_[data-slot='placeholder']]:!-mt-px",
+  "[&_[data-testid=input-field-wrapper]_.absolute.h-5]:!-mt-[3px]"
 )
 // Cells sit flush (pl-0) but their inputs have 12px of internal padding, so
 // headers use pl-3/pr-3 to line their text up with the cell content. The
