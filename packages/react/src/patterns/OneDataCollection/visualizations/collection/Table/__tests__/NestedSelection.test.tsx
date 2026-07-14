@@ -125,6 +125,27 @@ const expandAllParents = async (user: ReturnType<typeof userEvent.setup>) => {
 }
 
 describe("Table nested-row selection (registry-backed select all)", () => {
+  it("selecting one child checkbox does not select its siblings", async () => {
+    const user = userEvent.setup()
+    render(
+      <EditableTableCollection
+        columns={columns}
+        source={createSource(vi.fn())}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await waitFor(() => expect(screen.getByText("Parent")).toBeInTheDocument())
+    await expandParent(user)
+
+    await user.click(screen.getByTitle("Select c1"))
+
+    await waitFor(() => expect(screen.getByTitle("Select c1")).toBeChecked())
+    expect(screen.getByTitle("Select c2")).not.toBeChecked()
+  })
+
   it("header select-all checks every loaded nested child", async () => {
     const user = userEvent.setup()
     render(
