@@ -793,6 +793,119 @@ function useOpenEmptyForm() {
 }
 
 /**
+ * Blank-survey entry for the non-"guidedType" flows — the twin of
+ * `useOpenEmptyForm` (which serves the "guidedType" flow's type-seeded blank
+ * form). Creates + opens a blank survey on the canvas, posts the "created"
+ * card, then either walks the drafting conversation (type → audience → length)
+ * or, with no credits, invites a typed request met by an out-of-credits reply.
+ *
+ * Single source of truth for three surfaces: the "cards" flow's "Empty survey"
+ * welcome card, the "guidedEntry" flow's "Empty Survey" action, and the
+ * templates-canvas header's "Start with a Blank Survey" CTA. Behavior matches
+ * each flow's prior inline copy exactly — the "cards" flow leads with an intro
+ * line (the "guidedEntry" flow's beat copy already posted one before running
+ * the action), and only "guidedEntry" gates the drafting step behind credits.
+ */
+function useStartBlankSurvey() {
+  const { config, noCredits } = useFlowConfig()
+  const { appendCard, appendMessages, startClarifying } = useMockAiChatRuntime()
+  const { openCanvas } = useAiChat()
+  const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
+    useSurveyStore()
+  const { armProposal, armNoCredits } = useProposalFlow()
+
+  return useCallback(() => {
+    // The "guidedType" flow seeds a type-scoped blank FORM instead — see
+    // `useOpenEmptyForm`.
+    if (config.entryMode === "guidedType") return
+
+    // Walk type → audience → length as a single consecutive panel, then draft
+    // the questions onto the canvas: echo the picks, post a drafting line, and
+    // (after a processing beat) fill the form + post the live "updated" card
+    // that supersedes the "created" one, arming the proposal loop.
+    const askSurveyDetails = (surveyId: string) =>
+      startClarifying({
+        steps: surveyClarifyingSteps(config),
+        onConfirm: (answersByStep) => {
+          appendMessages(
+            surveyAnswerMessages(surveyClarifyingSteps(config), answersByStep)
+          )
+          appendMessages([
+            {
+              role: "assistant",
+              content:
+                "Great — I'll draft a first set of questions on the canvas for you to review.",
+            },
+          ])
+          const surveyName = surveyNameForType(
+            answersByStep[0]?.[0] ?? "Untitled"
+          )
+          draftQuestions(surveyId, surveyName, config.sampleElements, () => {
+            const cardId = nextCardId()
+            registerLiveCard(surveyId, cardId)
+            appendCard(() => (
+              <SurveyCard
+                surveyId={surveyId}
+                cardId={cardId}
+                title={surveyName}
+                description={SURVEY_UPDATED_DESCRIPTION}
+              />
+            ))
+            armProposal(surveyId, surveyName)
+          })
+        },
+      })
+
+    const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
+    openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
+    // "cards" leads with an intro line; "guidedEntry" already posted its beat
+    // reply ("Let's start with a blank survey.") before running this action.
+    if (config.entryMode === "cards") {
+      appendMessages([
+        { role: "assistant", content: "Let's start with a blank survey." },
+      ])
+    }
+    const cardId = nextCardId()
+    registerLiveCard(surveyId, cardId)
+    appendCard(() => (
+      <SurveyCard
+        surveyId={surveyId}
+        cardId={cardId}
+        title={UNTITLED_SURVEY_NAME}
+        description={createdDescription(config)}
+      />
+    ))
+    // No credits (the "guidedEntry" no-credits story): skip AI drafting and
+    // invite a typed request that gets met with an out-of-credits reply.
+    if (noCredits && config.entryMode === "guidedEntry") {
+      appendMessages([
+        {
+          role: "assistant",
+          content:
+            "Your blank survey is ready. Tell me what you'd like to add.",
+        },
+      ])
+      armNoCredits()
+    } else {
+      askSurveyDetails(surveyId)
+    }
+  }, [
+    config,
+    noCredits,
+    appendCard,
+    appendMessages,
+    startClarifying,
+    openCanvas,
+    createSurvey,
+    draftQuestions,
+    nextCardId,
+    registerLiveCard,
+    armProposal,
+    armNoCredits,
+  ])
+}
+
+/**
  * Leaves the "guidedType" flow (Training) without creating a survey: posts an
  * assistant message acknowledging the departure (so re-opening the chat shows
  * why the flow ended), then closes the chat entirely — which the phase-sync
@@ -1788,6 +1901,7 @@ function TemplatesCanvasHeader({
   const { config } = useFlowConfig()
   const leaveGuidedFlow = useLeaveGuidedFlow()
   const openEmptyForm = useOpenEmptyForm()
+  const startBlankSurvey = useStartBlankSurvey()
   const { guidedTypeId } = content
 
   const handleClose = () => {
@@ -1800,24 +1914,35 @@ function TemplatesCanvasHeader({
     setVisualizationMode("fullscreen")
   }
 
+  // Every flow's templates header carries the same "Start with a Blank Survey"
+  // CTA — the header twin of the gallery's empty-survey entry. The action
+  // differs by entry mode: "guidedType" (Training) seeds the picked type's
+  // blank form (`useOpenEmptyForm`), while the "cards"/"guidedEntry"
+  // (Engagement) flows kick off the blank-survey drafting conversation
+  // (`useStartBlankSurvey`).
+  const startBlank = () =>
+    guidedTypeId ? openEmptyForm(guidedTypeId) : startBlankSurvey()
+
+  // The "guidedType" gallery is scoped to a picked type, so it keeps that
+  // type's title (e.g. "Satisfaction Survey Templates"); the flow-wide
+  // "cards"/"guidedEntry" gallery is titled by its module, e.g.
+  // "Engagement Surveys".
+  const title = guidedTypeId
+    ? content.title
+    : `${config.pageTitle} ${config.navLabel}`
+
   return (
     <div className="flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
-      <F0Heading content={content.title} as="h2" />
+      <F0Heading content={title} as="h2" />
       <div className="flex flex-row items-center gap-3">
-        {/* Skip the gallery and start from an empty survey — the header twin of
-            the gallery's "Empty Survey" card, offered only in the guided flow
-            (that's where `useOpenEmptyForm` has a type to seed). Divided from
-            Close by the shared ButtonGroup hairline. */}
-        {guidedTypeId && (
-          <>
-            <F0Button
-              variant="outline"
-              label="Start with a Blank Survey"
-              onClick={() => openEmptyForm(guidedTypeId)}
-            />
-            <ButtonGroupSeparator />
-          </>
-        )}
+        {/* Skip the gallery and start from a blank survey. Divided from Close by
+            the shared ButtonGroup hairline. */}
+        <F0Button
+          variant="outline"
+          label="Start with a Blank Survey"
+          onClick={startBlank}
+        />
+        <ButtonGroupSeparator />
         <F0Button
           variant="outline"
           hideLabel
@@ -1869,53 +1994,11 @@ function SurveyWelcomeCardsRegistrar() {
   const { config, noCredits } = useFlowConfig()
   if (config.entryMode !== "cards") return null
 
-  const { appendCard, appendMessages, startClarifying } = useMockAiChatRuntime()
+  const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { openCanvas, setWelcomeScreenCards } = useAiChat()
-  const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
-    useSurveyStore()
+  const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
   const { armProposal, armNoCredits } = useProposalFlow()
-
-  // The blank-survey conversation walks three clarifying questions — type →
-  // audience → length — as a single consecutive panel, then "drafts" the
-  // questions onto the canvas: echo the picks back into the transcript, post a
-  // drafting line, and (after a brief processing beat) fill the form with mock
-  // questions plus an "updated" card that supersedes the "created" one.
-  const askSurveyDetails = (surveyId: string) =>
-    startClarifying({
-      steps: surveyClarifyingSteps(config),
-      onConfirm: (answersByStep) => {
-        appendMessages(
-          surveyAnswerMessages(surveyClarifyingSteps(config), answersByStep)
-        )
-        appendMessages([
-          {
-            role: "assistant",
-            content:
-              "Great — I'll draft a first set of questions on the canvas for you to review.",
-          },
-        ])
-        const surveyName = surveyNameForType(
-          answersByStep[0]?.[0] ?? "Untitled"
-        )
-        // Once the form is drafted (questions land), post a new openable card
-        // and mark it live — which disables Open/Close on the "created" card —
-        // then arm the proposal flow so further typing keeps refining the
-        // survey (each accepted change supersedes the prior card in turn).
-        draftQuestions(surveyId, surveyName, config.sampleElements, () => {
-          const cardId = nextCardId()
-          registerLiveCard(surveyId, cardId)
-          appendCard(() => (
-            <SurveyCard
-              surveyId={surveyId}
-              cardId={cardId}
-              title={surveyName}
-              description={SURVEY_UPDATED_DESCRIPTION}
-            />
-          ))
-          armProposal(surveyId, surveyName)
-        })
-      },
-    })
+  const startBlankSurvey = useStartBlankSurvey()
 
   const cards: F0AiChatWelcomeCard[] = [
     {
@@ -1960,23 +2043,9 @@ function SurveyWelcomeCardsRegistrar() {
         // Blank-survey flow: create + seed the survey, open its canvas, then
         // post the guided sequence — an intro line, the "created" canvas card
         // (live/openable), and the first clarifying question (the chain walks
-        // the rest).
-        const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
-        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
-        appendMessages([
-          { role: "assistant", content: "Let's start with a blank survey." },
-        ])
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
-        appendCard(() => (
-          <SurveyCard
-            surveyId={surveyId}
-            cardId={cardId}
-            title={UNTITLED_SURVEY_NAME}
-            description={createdDescription(config)}
-          />
-        ))
-        askSurveyDetails(surveyId)
+        // the rest). Shared with the templates-header CTA (see
+        // `useStartBlankSurvey`).
+        startBlankSurvey()
         break
       }
       case "templates": {
@@ -2107,7 +2176,8 @@ function FlowContent({
   } = useMockAiChatRuntime()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
-  const { armProposal, armNoCredits } = useProposalFlow()
+  const { armProposal } = useProposalFlow()
+  const startBlankSurvey = useStartBlankSurvey()
 
   // Typed "Create" flow ("cards" entry — Engagement): the same three
   // clarifying questions as the Empty survey card, walked as a single
@@ -2252,74 +2322,14 @@ function FlowContent({
       ...topTemplates.map((t) => ({ id: `template:${t.id}`, label: t.name })),
     ]
 
-    // The blank-survey drafting conversation (type → audience → length), opened
-    // by the "Empty Survey" action — mirrors the "cards" flow's Empty survey
-    // card: draft the questions, then post the live "updated" card and arm the
-    // proposal loop.
-    const askSurveyDetails = (surveyId: string) =>
-      startClarifying({
-        steps: surveyClarifyingSteps(flow),
-        onConfirm: (answersByStep) => {
-          appendMessages(
-            surveyAnswerMessages(surveyClarifyingSteps(flow), answersByStep)
-          )
-          appendMessages([
-            {
-              role: "assistant",
-              content:
-                "Great — I'll draft a first set of questions on the canvas for you to review.",
-            },
-          ])
-          const surveyName = surveyNameForType(
-            answersByStep[0]?.[0] ?? "Untitled"
-          )
-          draftQuestions(surveyId, surveyName, flow.sampleElements, () => {
-            const cardId = nextCardId()
-            registerLiveCard(surveyId, cardId)
-            appendCard(() => (
-              <SurveyCard
-                surveyId={surveyId}
-                cardId={cardId}
-                title={surveyName}
-                description={SURVEY_UPDATED_DESCRIPTION}
-              />
-            ))
-            armProposal(surveyId, surveyName)
-          })
-        },
-      })
-
     // Runs the picked entry action after its "reply + think" beat.
     const runGuidedEntryAction = (optionId: string) => {
       if (optionId === EMPTY_OPTION_ID) {
-        // Blank survey: open its canvas + "created" card up front. Normally we
-        // then walk the drafting conversation; with no credits that AI step is
-        // blocked, so instead invite a typed request and meet it with an
-        // "out of credits" reply (see `armNoCredits`).
-        const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
-        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
-        appendCard(() => (
-          <SurveyCard
-            surveyId={surveyId}
-            cardId={cardId}
-            title={UNTITLED_SURVEY_NAME}
-            description={createdDescription(flow)}
-          />
-        ))
-        if (noCredits) {
-          appendMessages([
-            {
-              role: "assistant",
-              content:
-                "Your blank survey is ready. Tell me what you'd like to add.",
-            },
-          ])
-          armNoCredits()
-        } else {
-          askSurveyDetails(surveyId)
-        }
+        // Blank survey: open its canvas + "created" card up front, then walk the
+        // drafting conversation — or, with no credits, invite a typed request
+        // met by an out-of-credits reply. Shared with the "cards" flow's Empty
+        // survey card and the templates-header CTA (see `useStartBlankSurvey`).
+        startBlankSurvey()
         return
       }
       if (optionId === TEMPLATES_OPTION_ID) {
