@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from "react"
+import { flushSync } from "react-dom"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
@@ -32,6 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import type { DashboardItemAction } from "../../types"
+
 interface DashboardItemProps {
   title: string
   description?: string
@@ -42,7 +45,9 @@ interface DashboardItemProps {
   skeleton?: ReactNode
   children: ReactNode
   /** Download actions shown inside a "Download" submenu */
-  actions?: DropdownItemType[]
+  downloadActions?: DropdownItemType[]
+  /** Host-provided actions shown at the top level of the widget menu. */
+  itemActions?: ReadonlyArray<DashboardItemAction>
   /** When true, adds a "Delete" option to the dropdown menu */
   editMode?: boolean
   /** Called when the user clicks the delete action */
@@ -86,7 +91,8 @@ export function DashboardItem({
   onRetry,
   skeleton,
   children,
-  actions = [],
+  downloadActions = [],
+  itemActions = [],
   editMode,
   handleDelete,
   itemId,
@@ -113,56 +119,34 @@ export function DashboardItem({
   }
 
   // Filter to only actionable items (not separators/labels)
-  const downloadActions = actions.filter(
+  const actionableDownloads = downloadActions.filter(
     (a): a is DropdownItemObject =>
       !("type" in a) || a.type === "item" || a.type === undefined
   )
-  const hasDownloads = downloadActions.length > 0
+  const hasDownloads = actionableDownloads.length > 0
+  const hasItemActions = itemActions.length > 0
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
   const hasFullscreen = !!onFullscreenChange
-  const showMenu = hasDownloads || hasDelete || hasChartTypes || hasExplanation
-
-  if (error) {
-    return (
-      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary">
-        <div className="flex shrink-0 flex-col p-4">
-          <h3 className="text-base font-medium text-f1-foreground">{title}</h3>
-          {description && (
-            <p className="text-base text-f1-foreground-secondary">
-              {description}
-            </p>
-          )}
-        </div>
-        <div className="min-h-0 flex-1 overflow-auto">
-          <OneEmptyState
-            variant="critical"
-            title={translations.ai.dashboardItem.errorTitle}
-            description={error.message}
-            actions={
-              onRetry
-                ? [
-                    {
-                      type: "default",
-                      label: translations.ai.dashboardItem.retry,
-                      onClick: onRetry,
-                    },
-                  ]
-                : []
-            }
-          />
-        </div>
-      </div>
-    )
-  }
+  const showMenu =
+    hasDownloads ||
+    hasItemActions ||
+    hasDelete ||
+    hasChartTypes ||
+    hasExplanation
 
   return (
     <div
-      className="group/dashitem flex h-full flex-col rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
+      className="group/dashitem flex h-full flex-col overflow-hidden rounded-lg border border-solid border-f1-border-secondary bg-f1-background"
       aria-busy={isLoading ? "true" : undefined}
       aria-live={isLoading ? "polite" : undefined}
     >
+      <div className="sr-only" role="alert" aria-atomic="true">
+        {error
+          ? `${translations.ai.dashboardItem.errorTitle}: ${error.message}`
+          : ""}
+      </div>
       <div className="flex items-start px-4 py-3">
         <div className="flex min-w-0 flex-1 flex-col">
           <OneEllipsis
@@ -255,6 +239,27 @@ export function DashboardItem({
                         />
                       </div>
                     )}
+                    {hasItemActions && (
+                      <DropdownMenuGroup>
+                        {itemActions.map((action) => (
+                          <DropdownMenuItem
+                            key={action.id}
+                            onSelect={() => {
+                              flushSync(() => setIsDropdownOpen(false))
+                              window.setTimeout(action.onClick, 0)
+                            }}
+                            className={cn(
+                              action.critical && "text-f1-foreground-critical"
+                            )}
+                          >
+                            <div className="flex w-full flex-row items-center gap-2">
+                              {action.icon && <F0Icon icon={action.icon} />}
+                              <span className="flex-1">{action.label}</span>
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuGroup>
+                    )}
                     {hasExplanation && (
                       <DropdownMenuGroup>
                         <DropdownMenuItem
@@ -286,7 +291,7 @@ export function DashboardItem({
                           </DropdownMenuSubTrigger>
                           <DropdownMenuPortal>
                             <DropdownMenuSubContent>
-                              {downloadActions.map((action) => (
+                              {actionableDownloads.map((action) => (
                                 <DropdownMenuItem
                                   key={action.label}
                                   onClick={action.onClick}
@@ -331,7 +336,32 @@ export function DashboardItem({
           )}
         </div>
       </div>
-      <div className="min-h-0 flex-1">{isLoading ? skeleton : children}</div>
+      <div className="min-h-0 flex-1">
+        {error ? (
+          <div className="h-full overflow-auto">
+            <OneEmptyState
+              variant="critical"
+              title={translations.ai.dashboardItem.errorTitle}
+              description={error.message}
+              actions={
+                onRetry
+                  ? [
+                      {
+                        type: "default",
+                        label: translations.ai.dashboardItem.retry,
+                        onClick: onRetry,
+                      },
+                    ]
+                  : []
+              }
+            />
+          </div>
+        ) : isLoading ? (
+          skeleton
+        ) : (
+          children
+        )}
+      </div>
     </div>
   )
 }

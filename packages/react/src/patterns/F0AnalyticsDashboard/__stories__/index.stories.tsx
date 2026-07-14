@@ -1,7 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
+import { expect, fn, userEvent, waitFor, within } from "storybook/test"
 
+import { Filter } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import type { DashboardItem } from "../types"
@@ -12,7 +14,7 @@ import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
 const meta = {
   component: F0AnalyticsDashboard,
   title: "AnalyticsDashboard",
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
 } satisfies Meta<typeof F0AnalyticsDashboard>
 
 export default meta
@@ -68,6 +70,87 @@ export const MixedDashboard: Story = {
   render: () => <InteractiveDashboard editMode />,
 }
 
+const onItemAction = fn()
+
+/**
+ * Host applications can add actions to every widget menu without putting
+ * callbacks in the serializable dashboard item configuration. Open any
+ * widget's three-dot menu to see the top-level action.
+ */
+export const WithItemActions: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={mixedItems}
+      itemActions={(item) => [
+        {
+          id: `manage-filters-${item.id}`,
+          label: "Manage filters",
+          icon: Filter,
+          onClick: () => onItemAction(item.id),
+        },
+      ]}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+    const [firstTrigger] = page.getAllByLabelText("Other actions")
+
+    await userEvent.click(firstTrigger)
+    await userEvent.click(page.getByText("Manage filters"))
+
+    await expect(onItemAction).toHaveBeenCalledWith(mixedItems[0].id)
+    await waitFor(() =>
+      expect(page.queryByText("Manage filters")).not.toBeInTheDocument()
+    )
+  },
+}
+
+const errorItem: DashboardItem = {
+  id: "failed-headcount",
+  title: "Headcount",
+  type: "metric",
+  fetchData: async () => {
+    throw new Error("Could not load this widget")
+  },
+}
+const onErrorItemAction = fn()
+
+/**
+ * Host actions stay available when a widget's data request fails so recovery
+ * actions cannot be hidden by the error they are meant to fix.
+ */
+export const ItemActionsInErrorState: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      items={[errorItem]}
+      itemActions={() => [
+        {
+          id: "manage-filters",
+          label: "Manage filters",
+          icon: Filter,
+          onClick: onErrorItemAction,
+        },
+      ]}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await expect(
+      await page.findByText("Could not load this widget")
+    ).toBeInTheDocument()
+    await userEvent.click(page.getByLabelText("Other actions"))
+    await userEvent.click(page.getByText("Manage filters"))
+
+    await expect(onErrorItemAction).toHaveBeenCalledOnce()
+    await waitFor(() =>
+      expect(page.queryByText("Manage filters")).not.toBeInTheDocument()
+    )
+  },
+}
+
 /**
  * Dashboard with the global export button enabled (PDF / Excel).
  */
@@ -89,8 +172,22 @@ export const Snapshot: Story = {
       filters={dashboardFilters}
       presets={dashboardPresets}
       items={mixedItems}
+      itemActions={(item) => [
+        {
+          id: `manage-filters-${item.id}`,
+          label: "Manage filters",
+          icon: Filter,
+          onClick: fn(),
+        },
+      ]}
     />
   ),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+    const [firstTrigger] = page.getAllByLabelText("Other actions")
+    await userEvent.click(firstTrigger)
+    await expect(page.getByText("Manage filters")).toBeInTheDocument()
+  },
 }
 
 // ---------------------------------------------------------------------------

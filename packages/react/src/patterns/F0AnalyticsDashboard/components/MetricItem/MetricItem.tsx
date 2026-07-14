@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 import type {
   DashboardMetricData,
   DashboardMetricItem,
+  DashboardItemAction,
   MetricFormat,
 } from "../../types"
 
@@ -20,7 +21,7 @@ import { MetricSkeleton } from "../DashboardItem/DashboardItemSkeleton"
 interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
-  actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
+  itemActions?: ReadonlyArray<DashboardItemAction>
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   isFullscreen?: boolean
@@ -85,9 +86,11 @@ function computeTrend(
 export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
-  actions,
+  itemActions,
   editMode,
   handleDelete,
+  isFullscreen,
+  onFullscreenChange,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
   const { data, isLoading, error, retry } = useDashboardItemData<
@@ -106,10 +109,12 @@ export function MetricItem<Filters extends FiltersDefinition>({
       error={error}
       onRetry={retry}
       skeleton={<MetricSkeleton />}
-      actions={actions}
+      itemActions={itemActions}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}
+      isFullscreen={isFullscreen}
+      onFullscreenChange={onFullscreenChange}
     >
       {data && (
         <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">

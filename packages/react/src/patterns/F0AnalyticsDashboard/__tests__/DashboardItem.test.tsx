@@ -1,5 +1,6 @@
+import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
 
 import { DashboardItem } from "../components/DashboardItem/DashboardItem"
 
@@ -66,13 +67,141 @@ describe("DashboardItem", () => {
       <DashboardItem
         title="Revenue"
         isLoading={false}
-        actions={[{ label: "Delete", onClick: vi.fn() }]}
+        downloadActions={[{ label: "Delete", onClick: vi.fn() }]}
       >
         <div>Content</div>
       </DashboardItem>
     )
 
     expect(screen.getByLabelText("Other actions")).toBeInTheDocument()
+  })
+
+  it("renders host item actions at the top level instead of under Download", async () => {
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemActions={[
+          {
+            id: "manage-filters",
+            label: "Manage filters",
+            onClick: vi.fn(),
+          },
+        ]}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await userEvent.click(screen.getByLabelText("Other actions"))
+
+    expect(screen.getByText("Manage filters")).toBeInTheDocument()
+    expect(screen.queryByText("Download")).not.toBeInTheDocument()
+  })
+
+  it("closes the menu before invoking a host item action", async () => {
+    let triggerFocusedWhenCalled = false
+    const onClick = vi.fn(() => {
+      expect(screen.queryByText("Manage filters")).not.toBeInTheDocument()
+      triggerFocusedWhenCalled =
+        document.activeElement === screen.getByLabelText("Other actions")
+    })
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemActions={[
+          {
+            id: "manage-filters",
+            label: "Manage filters",
+            onClick,
+          },
+        ]}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await userEvent.click(screen.getByLabelText("Other actions"))
+    await userEvent.click(screen.getByText("Manage filters"))
+
+    await waitFor(() => expect(onClick).toHaveBeenCalledOnce())
+    expect(triggerFocusedWhenCalled).toBe(true)
+  })
+
+  it("keeps host item actions available in the error state", async () => {
+    const onClick = vi.fn()
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        error={new Error("Invalid filter")}
+        itemActions={[
+          {
+            id: "manage-filters",
+            label: "Manage filters",
+            onClick,
+          },
+        ]}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await userEvent.click(screen.getByLabelText("Other actions"))
+    await userEvent.click(screen.getByText("Manage filters"))
+
+    await waitFor(() => expect(onClick).toHaveBeenCalledOnce())
+    expect(screen.getByText("Invalid filter")).toBeInTheDocument()
+  })
+
+  it("announces an error that replaces a loading state", () => {
+    const { rerender } = render(
+      <DashboardItem title="Revenue" isLoading skeleton={<div>Loading</div>}>
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement()
+
+    rerender(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        error={new Error("Invalid filter")}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    expect(screen.getAllByRole("alert")[0]).toHaveTextContent(
+      "Error loading data: Invalid filter"
+    )
+  })
+
+  it("keeps item actions separate when downloads are also available", async () => {
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemActions={[
+          {
+            id: "manage-filters",
+            label: "Manage filters",
+            onClick: vi.fn(),
+          },
+        ]}
+        downloadActions={[{ label: "Download CSV", onClick: vi.fn() }]}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    await userEvent.click(screen.getByLabelText("Other actions"))
+
+    expect(screen.getByText("Manage filters")).toBeInTheDocument()
+    expect(screen.getByText("Download")).toBeInTheDocument()
+    expect(screen.queryByText("Download CSV")).not.toBeInTheDocument()
   })
 
   it("does not render actions dropdown when no actions", () => {

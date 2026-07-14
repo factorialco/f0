@@ -7,6 +7,7 @@ import type {
   F0DataChartRadarIndicator,
   F0DataChartRadarSeries,
 } from "@/kits/F0DataChart"
+import type { IconType } from "@/components/F0Icon"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
   FiltersDefinition,
@@ -328,6 +329,25 @@ export type DashboardItem<
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
 
+/**
+ * A host-provided action rendered in a dashboard widget's top-level menu.
+ *
+ * Actions intentionally live on `F0AnalyticsDashboardProps` rather than the
+ * serializable item definition so dashboard configs remain JSON-compatible.
+ */
+export interface DashboardItemAction {
+  /** Stable key used for React reconciliation. */
+  id: string
+  /** User-facing action label. */
+  label: string
+  /** Optional leading icon. */
+  icon?: IconType
+  /** Whether to render the action with critical/destructive emphasis. */
+  critical?: boolean
+  /** Called after the widget menu has closed. */
+  onClick: () => void
+}
+
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks
 // ---------------------------------------------------------------------------
@@ -392,6 +412,16 @@ export interface F0AnalyticsDashboardProps<
    * Each item declares its type, visual config, grid span, and data fetcher.
    */
   items: DashboardItem<Filters>[]
+  /**
+   * Resolve host-provided actions for each dashboard widget.
+   *
+   * The actions are rendered at the top level of the widget menu, separately
+   * from download actions, and remain available when the widget is loading or
+   * showing an error.
+   */
+  itemActions?: (
+    item: DashboardItem<Filters>
+  ) => ReadonlyArray<DashboardItemAction> | undefined
   /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */

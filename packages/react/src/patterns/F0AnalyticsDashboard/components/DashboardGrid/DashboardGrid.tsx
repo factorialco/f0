@@ -11,14 +11,13 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
-
 import { F0Icon } from "@/components/F0Icon"
 import Handle from "@/icons/app/Handle"
 import { cn } from "@/lib/utils"
 
 import type {
   DashboardItem as DashboardItemType,
+  DashboardItemAction,
   DashboardItemLayout,
 } from "../../types"
 
@@ -56,6 +55,9 @@ type Row = {
 
 interface DashboardGridProps<Filters extends FiltersDefinition> {
   items: DashboardItemType<Filters>[]
+  itemActions?: (
+    item: DashboardItemType<Filters>
+  ) => ReadonlyArray<DashboardItemAction> | undefined
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
@@ -88,6 +90,7 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
  */
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
+  itemActions,
   filters,
   editMode,
   onLayoutChange,
@@ -411,6 +414,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       <div ref={containerRef} className="flex h-full min-h-0 flex-col">
         <DashboardGridItem
           item={soleItem}
+          itemActions={itemActions?.(soleItem)}
           filters={filters}
           editMode={editMode}
           onDelete={handleDelete}
@@ -432,6 +436,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         <div ref={containerRef} className="flex h-full min-h-0 flex-col">
           <DashboardGridItem
             item={fullscreenItem}
+            itemActions={itemActions?.(fullscreenItem)}
             filters={filters}
             editMode={editMode}
             onDelete={handleDelete}
@@ -504,6 +509,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                   >
                     <DashboardGridItem
                       item={item}
+                      itemActions={itemActions?.(item)}
                       filters={filters}
                       editMode={editMode}
                       onDelete={handleDelete}
@@ -883,7 +889,7 @@ function resolveItemHeight<Filters extends FiltersDefinition>(
 function DashboardGridItem<Filters extends FiltersDefinition>({
   item,
   filters,
-  actions,
+  itemActions,
   editMode,
   onDelete,
   onTransformChart,
@@ -892,7 +898,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
 }: {
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
-  actions?: DropdownItemType[]
+  itemActions?: ReadonlyArray<DashboardItemAction>
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -909,7 +915,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
         <ChartItem
           item={item}
           filters={filters}
-          actions={actions}
+          itemActions={itemActions}
           editMode={editMode}
           handleDelete={onDelete}
           onTransformChart={onTransformChart}
@@ -922,7 +928,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
         <MetricItem
           item={item}
           filters={filters}
-          actions={actions}
+          itemActions={itemActions}
           editMode={editMode}
           handleDelete={onDelete}
           isFullscreen={isFullscreen}
@@ -934,7 +940,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
         <CollectionItem
           item={item}
           filters={filters}
-          actions={actions}
+          itemActions={itemActions}
           editMode={editMode}
           handleDelete={onDelete}
           isFullscreen={isFullscreen}

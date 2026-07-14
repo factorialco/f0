@@ -4,13 +4,12 @@ import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
-import type { DashboardCollectionItem } from "../../types"
+import type { DashboardCollectionItem, DashboardItemAction } from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
@@ -18,7 +17,7 @@ import { DashboardItem } from "../DashboardItem/DashboardItem"
 interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
-  actions?: DropdownItem[]
+  itemActions?: ReadonlyArray<DashboardItemAction>
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   isFullscreen?: boolean
@@ -36,7 +35,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
 export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
-  actions,
+  itemActions,
   editMode,
   handleDelete,
   isFullscreen,
@@ -110,18 +109,14 @@ export function CollectionItem<Filters extends FiltersDefinition>({
     tableSettings,
   })
 
-  const allActions: DropdownItem[] = useMemo(
-    () => [...(actions ?? []), ...downloadActions],
-    [actions, downloadActions]
-  )
-
   return (
     <DashboardItem
       title={item.title}
       description={item.description}
       explanation={item.explanation}
       isLoading={false}
-      actions={allActions}
+      downloadActions={downloadActions}
+      itemActions={itemActions}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

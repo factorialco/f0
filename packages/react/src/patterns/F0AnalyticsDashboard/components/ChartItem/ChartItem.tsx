@@ -1,7 +1,6 @@
 import { useMemo, useRef, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
-import type { DropdownItem } from "@/experimental/Navigation/Dropdown"
 import type { RecordType } from "@/hooks/datasource"
 import type { F0DataChartProps } from "@/kits/F0DataChart"
 import type {
@@ -35,6 +34,7 @@ import type {
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,
+  DashboardItemAction,
 } from "../../types"
 
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
@@ -386,7 +386,7 @@ function ChartTableView({
 interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
-  actions?: DropdownItem[]
+  itemActions?: ReadonlyArray<DashboardItemAction>
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onTransformChart?: (
@@ -401,7 +401,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
 export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
-  actions,
+  itemActions,
   editMode,
   handleDelete,
   onTransformChart,
@@ -429,11 +429,6 @@ export function ChartItem<Filters extends FiltersDefinition>({
     data,
     title: item.title,
   })
-
-  const allActions: DropdownItem[] = useMemo(
-    () => [...(actions ?? []), ...downloadActions],
-    [actions, downloadActions]
-  )
 
   // No fabricated error when data is absent — `F0DataChart` (or the explicit
   // fallback below for `!data`) renders a proper empty state instead.
@@ -509,7 +504,8 @@ export function ChartItem<Filters extends FiltersDefinition>({
       error={error}
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
-      actions={allActions}
+      downloadActions={downloadActions}
+      itemActions={itemActions}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

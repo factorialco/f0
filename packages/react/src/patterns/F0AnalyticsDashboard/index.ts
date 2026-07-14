@@ -9,6 +9,7 @@ export type {
   DashboardChartItem,
   DashboardCollectionItem,
   DashboardItem,
+  DashboardItemAction,
   DashboardItemBase,
   DashboardMetricData,
   DashboardMetricItem,
