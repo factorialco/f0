@@ -2078,8 +2078,8 @@ function SurveyWelcomeCardsRegistrar() {
       description: config.presetCard.description,
       onClick: () => handleCardSelectRef.current(config.presetCard.id),
     },
-    // Visual-only template card — its `onClick` hits no branch below, so
-    // clicking is inert (mock placeholder, no behavior wired yet).
+    // Second template card — opens the flow's sample survey (employee
+    // engagement) in the same read-only preview as the preset card.
     {
       id: config.placeholderCard.id,
       icon: config.placeholderCard.icon,
@@ -2132,8 +2132,24 @@ function SurveyWelcomeCardsRegistrar() {
         )
         break
       }
-      // The placeholder card (config.placeholderCard.id) is a visual-only
-      // placeholder — no behavior yet.
+      case config.placeholderCard.id: {
+        // Second template card: it has no preset questions of its own, so
+        // preview the flow's generic sample survey (employee engagement). Like
+        // every template card it opens the read-only preview FIRST; "Use this
+        // template" then seeds `config.sampleElements` (no `presetCardId`, so
+        // `useThisTemplate` takes its non-preset "cards" branch).
+        const { placeholderCard } = config
+        openCanvas(
+          toCanvasContent({
+            type: "survey",
+            title: placeholderCard.title,
+            mode: "preview",
+            templateName: placeholderCard.title,
+            description: placeholderCard.description,
+          })
+        )
+        break
+      }
     }
   }
 
