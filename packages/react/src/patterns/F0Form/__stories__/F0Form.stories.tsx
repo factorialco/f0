@@ -1757,6 +1757,83 @@ export const EntitiesListFieldRowActions: Story = {
 }
 
 /**
+ * Dialog mode — the default for a list whose item schema has more than 2
+ * properties (here: name, email, role, start date). No `supportInlineEditing`
+ * is set, so the field falls back to the dialog behavior: cells are read-only,
+ * the **Add member** button opens a form dialog to create a row, and each row
+ * gets a pencil action that opens the same dialog to edit it. Rows can still be
+ * reordered by dragging and removed inline.
+ */
+export const EntitiesListFieldDialogMode: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText:
+          "With more than two fields, adding and editing happen in a dialog.",
+        schema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: [
+              { value: "Admin", label: "Admin" },
+              { value: "Editor", label: "Editor" },
+              { value: "Viewer", label: "Viewer" },
+            ],
+          }),
+          startDate: f0FormField.date({ label: "Start date" }),
+        }),
+        config: {
+          labels: {
+            addButton: "Add member",
+            addButtonDescription: "Fill in the details of the new team member.",
+            editDialogTitle: "Edit member",
+          },
+          columns: {
+            name: { placeholder: "e.g. Ada Lovelace" },
+            email: { placeholder: "name@example.com" },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-dialog-mode",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            role: "Admin",
+            startDate: new Date(2022, 2, 1),
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            role: "Editor",
+            startDate: new Date(2023, 8, 15),
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Per-field auto-save. Only the entities list opts in with `autoSave: true`, so
  * editing a link (or adding/removing/reordering rows) saves the form after a
  * short debounce — no Save click needed. The other fields (`name`, `notes`)
