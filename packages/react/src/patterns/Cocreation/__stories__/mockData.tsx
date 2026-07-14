@@ -135,6 +135,20 @@ export type Template = {
   questions: number
 }
 
+// Sentinel id for the synthetic "Empty Survey" entry prepended to a templates
+// gallery. Not a real template — selecting it starts a blank survey/form
+// instead of previewing. Shared by the guided-type gallery and the
+// "cards"/"guidedEntry" gallery so both render the same first row.
+export const EMPTY_SURVEY_TEMPLATE_ID = "empty-form"
+
+export const EMPTY_SURVEY_TEMPLATE: Template = {
+  id: EMPTY_SURVEY_TEMPLATE_ID,
+  name: "Empty Survey",
+  category: "",
+  description: "Start from scratch",
+  questions: 0,
+}
+
 export const ENGAGEMENT_TEMPLATES: Template[] = [
   {
     id: "t1",
@@ -304,10 +318,15 @@ export const listVisualization = {
     fields: [
       {
         label: "Category",
+        // The synthetic "Empty Survey" row has no category/questions — hide both
+        // so it reads as a plain "start from scratch" entry (it only ever
+        // appears in the AI Canvas gallery, never the inert browse tab).
+        hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
         render: (item: Template) => item.category,
       },
       {
         label: "Questions",
+        hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
         render: (item: Template) => `${item.questions} questions`,
         sorting: "questions" as const,
       },
