@@ -1445,7 +1445,7 @@ export const EntitiesListField: Story = {
           maxItems: 8,
           columns: {
             title: { placeholder: "e.g. People Handbook" },
-            url: { label: "URL", placeholder: "https://…" },
+            url: { label: "URL", placeholder: "https://…", width: 220 },
             category: { width: 160 },
           },
         },

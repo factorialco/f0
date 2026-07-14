@@ -1,20 +1,10 @@
-import type { IconType } from "@/components/F0Icon"
-
 import { F0TextInput } from "@/components/F0TextInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
-import { Envelope, Link } from "@/icons/app"
 import { cn } from "@/lib/utils"
-
-import type { TextCellInputType } from "../../types"
 
 import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
-
-/** Default leading icon per input type — mirrors F0Form's text fields. */
-const DEFAULT_TEXT_ICONS: Partial<Record<TextCellInputType, IconType>> = {
-  url: Link,
-  email: Envelope,
-}
+import { resolveTextCellIcon } from "./textIcon"
 
 export function TextCell<R extends RecordType>({
   editableColumn,
@@ -27,7 +17,7 @@ export function TextCell<R extends RecordType>({
 }: EditableCellProps<R>) {
   const config = editableColumn.textConfig
   const inputType = config?.inputType ?? "text"
-  const icon = config?.icon ?? DEFAULT_TEXT_ICONS[inputType]
+  const icon = resolveTextCellIcon(config)
 
   return (
     <BaseCell error={error} hint={hint}>
