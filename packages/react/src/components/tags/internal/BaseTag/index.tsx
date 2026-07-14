@@ -56,7 +56,10 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
     additionalAccessibleText =
       additionalAccessibleText || (hideLabel ? text : undefined)
     return (
-      <div className="flex w-fit max-w-full flex-row items-center justify-start gap-1">
+      <div
+        data-no-strike
+        className="flex w-fit max-w-full flex-row items-center justify-start gap-1"
+      >
         <div
           ref={ref}
           className={cn(
