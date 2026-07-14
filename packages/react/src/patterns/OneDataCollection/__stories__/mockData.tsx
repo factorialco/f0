@@ -1206,28 +1206,25 @@ const createdMixedNestedRecords = (filteredData: MockUser[]) => {
         ? [
             {
               ...user,
-              id: `${user.id}-a`,
               children: [
-                { ...user, id: `${user.id}-a1` },
+                { ...user },
                 {
                   ...user,
-                  id: `${user.id}-a2`,
                   detailed: index === 0,
                   children: [
-                    { ...user, id: `${user.id}-a2x`, detailed: index === 0 },
-                    { ...user, id: `${user.id}-a2y`, detailed: index === 0 },
+                    { ...user, detailed: index === 0 },
+                    { ...user, detailed: index === 0 },
                   ],
                 },
-                { ...user, id: `${user.id}-a3` },
+                { ...user },
               ],
             },
             {
               ...user,
-              id: `${user.id}-b`,
               detailed: index === 0,
               children: [
-                { ...user, id: `${user.id}-b1`, detailed: index === 0 },
-                { ...user, id: `${user.id}-b2`, detailed: index === 0 },
+                { ...user, detailed: index === 0 },
+                { ...user, detailed: index === 0 },
               ],
             },
           ]
@@ -1239,8 +1236,8 @@ const createdBasicNestedRecords = (filteredData: MockUser[]) => {
   return filteredData.map((user) => ({
     ...user,
     children: [
-      { ...user, id: `${user.id}-c1`, name: "Child_of " + user.name },
-      { ...user, id: `${user.id}-c2`, name: "Child_of " + user.name },
+      { ...user, name: "Child_of " + user.name },
+      { ...user, name: "Child_of " + user.name },
     ],
   }))
 }
@@ -1250,18 +1247,8 @@ const createdDetailedNestedRecords = (filteredData: MockUser[]) => {
     ...user,
     detailed: true,
     children: [
-      {
-        ...user,
-        id: `${user.id}-c1`,
-        name: "Child_of " + user.name,
-        detailed: true,
-      },
-      {
-        ...user,
-        id: `${user.id}-c2`,
-        name: "Child_of " + user.name,
-        detailed: true,
-      },
+      { ...user, name: "Child_of " + user.name, detailed: true },
+      { ...user, name: "Child_of " + user.name, detailed: true },
     ],
   }))
 }

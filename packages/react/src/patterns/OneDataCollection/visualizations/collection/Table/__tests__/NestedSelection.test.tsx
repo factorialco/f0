@@ -1,4 +1,4 @@
-import { waitFor, within } from "@testing-library/react"
+import { waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -52,8 +52,7 @@ const parents: Person[] = [
 const columns = [{ label: "name", render: (item: Person) => item.name }]
 
 const createSource = (
-  onSelectItems: () => void,
-  opts: { hasMore?: boolean } = {}
+  onSelectItems: () => void
 ): DataCollectionSource<
   Person,
   FiltersDefinition,
@@ -83,9 +82,6 @@ const createSource = (
     itemsWithChildren: (item: Person) => !!item.children?.length,
     fetchChildren: ({ item }: { item: Person }) => ({
       records: item.children ?? [],
-      ...(opts.hasMore
-        ? { paginationInfo: { type: "pages", hasMore: true } }
-        : {}),
     }),
     dataAdapter: {
       paginationType: "pages",
@@ -118,38 +114,7 @@ const expandParent = async (user: ReturnType<typeof userEvent.setup>) => {
   })
 }
 
-const expandAllParents = async (user: ReturnType<typeof userEvent.setup>) => {
-  await expandParent(user)
-  const secondChevron = document.querySelector(".lucide-chevron-right")
-  expect(secondChevron).not.toBeNull()
-  await user.click(secondChevron as Element)
-  await waitFor(() => {
-    expect(screen.getByTitle("Select c3")).toBeInTheDocument()
-  })
-}
-
 describe("Table nested-row selection (registry-backed select all)", () => {
-  it("selecting one child checkbox does not select its siblings", async () => {
-    const user = userEvent.setup()
-    render(
-      <EditableTableCollection
-        columns={columns}
-        source={createSource(vi.fn())}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
-
-    await waitFor(() => expect(screen.getByText("Parent")).toBeInTheDocument())
-    await expandParent(user)
-
-    await user.click(screen.getByTitle("Select c1"))
-
-    await waitFor(() => expect(screen.getByTitle("Select c1")).toBeChecked())
-    expect(screen.getByTitle("Select c2")).not.toBeChecked()
-  })
-
   it("header select-all checks every loaded nested child", async () => {
     const user = userEvent.setup()
     render(
@@ -201,74 +166,5 @@ describe("Table nested-row selection (registry-backed select all)", () => {
       expect(screen.getByTitle("Select c1")).toBeChecked()
       expect(screen.getByTitle("Select c2")).toBeChecked()
     })
-  })
-
-  it("'Select all N items' banner counts rendered selectable rows, not the top-level total", async () => {
-    // source reports total = 2 (parent rows) but there are 3 selectable children
-    const user = userEvent.setup()
-    render(
-      <EditableTableCollection
-        columns={columns}
-        source={createSource(vi.fn())}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
-
-    await waitFor(() => expect(screen.getByText("Parent")).toBeInTheDocument())
-    await expandAllParents(user)
-
-    await user.click(screen.getByTitle("Select c1"))
-
-    const selectAllItems = await screen.findByRole("button", {
-      name: /select all/i,
-    })
-    expect(selectAllItems).toHaveTextContent("Select all 3 items")
-  })
-
-  it("the 'See more' (load-more) row has no selection checkbox", async () => {
-    const user = userEvent.setup()
-    render(
-      <EditableTableCollection
-        columns={columns}
-        source={createSource(vi.fn(), { hasMore: true })}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-      />
-    )
-
-    await waitFor(() => expect(screen.getByText("Parent")).toBeInTheDocument())
-    await expandParent(user)
-
-    const seeMoreRow = screen.getByText("See more").closest("tr") as HTMLElement
-    expect(within(seeMoreRow).queryByRole("checkbox")).toBeNull()
-  })
-
-  it("the add-child row has no selection checkbox", async () => {
-    const user = userEvent.setup()
-    render(
-      <EditableTableCollection
-        columns={columns}
-        source={createSource(vi.fn())}
-        onSelectItems={vi.fn()}
-        onLoadData={vi.fn()}
-        onLoadError={vi.fn()}
-        addNestedRowActions={() => ({
-          label: "Add child row",
-          onClick: vi.fn(),
-        })}
-        addNestedRowActionsLabel="Add item"
-      />
-    )
-
-    await waitFor(() => expect(screen.getByText("Parent")).toBeInTheDocument())
-    await expandParent(user)
-
-    const addRow = (await screen.findByText("Add child row")).closest(
-      "tr"
-    ) as HTMLElement
-    expect(within(addRow).queryByRole("checkbox")).toBeNull()
   })
 })

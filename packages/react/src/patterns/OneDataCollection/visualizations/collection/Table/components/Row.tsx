@@ -198,32 +198,14 @@ const RowComponentInner = <
     nestedRowProps?.hasLoadedChildren === undefined ||
     nestedRowProps?.hasLoadedChildren
 
-  // Synthetic action rows (add-row, load-more) reuse the parent item, so they must
-  // not render a selection checkbox nor register the parent id as selectable.
-  const isActionRow =
-    !!nestedRowProps?.onAddRow || !!nestedRowProps?.onLoadMoreChildren
-
   // Only the row that owns the rendered checkbox registers (not the one
   // delegating to NestedRow), so each selectable id is registered once.
   const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
   useEffect(() => {
-    if (
-      id === undefined ||
-      !willRenderOwnRow ||
-      isActionRow ||
-      !registerSelectable
-    )
-      return
+    if (id === undefined || !willRenderOwnRow || !registerSelectable) return
     registerSelectable(id, item)
     return () => unregisterSelectable?.(id)
-  }, [
-    id,
-    item,
-    willRenderOwnRow,
-    isActionRow,
-    registerSelectable,
-    unregisterSelectable,
-  ])
+  }, [id, item, willRenderOwnRow, registerSelectable, unregisterSelectable])
 
   if (rowWithChildren && hasChildrenLoaded) {
     return (
@@ -290,7 +272,7 @@ const RowComponentInner = <
           )}
           referenceRowType={referenceRowType}
         >
-          {id !== undefined && !isActionRow && (
+          {id !== undefined && (
             <div className="pointer-events-auto ml-3.5 flex h-full items-center justify-start">
               <Checkbox
                 checked={selectedItems.has(id)}

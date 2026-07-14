@@ -141,14 +141,6 @@ export const EditableTableWithSelectableRows: Story = {
  * must select all loaded children without wiping the current selection.
  */
 export const EditableTableWithNestedSelectableRows: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "Nested table where only leaf rows are selectable and the data source reports a top-level total (2 parents) smaller than the selectable children. Expand both parents and select a row: the header select-all, the 'Select all N items' banner and the selected count all reflect the rendered selectable rows, never the top-level total, and the count never goes negative.",
-      },
-    },
-  },
   render: () => {
     const mockVisualizations = getMockVisualizations({ table: {} })
 
@@ -739,7 +731,9 @@ export const EditableTableWithSelectableNestedRecordsDetailed: Story = {
       <ExampleComponent
         noSorting
         storage={false}
-        selectable={(item) => item.id}
+        selectable={() => {
+          return ""
+        }}
         visualizations={[
           {
             type: "editableTable" as const,

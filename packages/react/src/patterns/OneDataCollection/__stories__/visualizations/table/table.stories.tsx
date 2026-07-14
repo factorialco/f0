@@ -276,7 +276,9 @@ export const TableWithSelectableNestedRecords: Story = {
         id="employees/v1"
         nestedRecords
         nestedRecordsType="mixed"
-        selectable={(item) => item.id}
+        selectable={() => {
+          return ""
+        }}
       />
     )
   },
