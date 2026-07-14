@@ -241,11 +241,20 @@ export function EntitiesListFieldRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- itemShape/itemKeys derive from field.itemSchema
   }, [field.itemSchema, field.columns])
 
-  /** Blank item values: strings start empty, the rest unset. */
+  /**
+   * Blank item values: honor a schema `.default()` first (e.g. a hidden
+   * `archived: z.boolean().default(false)`), then start strings empty and
+   * leave the rest unset.
+   */
   const makeEmptyItem = useCallback((): EntitiesListItem => {
     const item: EntitiesListItem = {}
     for (const key of itemKeys) {
-      const inner = unwrapZodSchema(itemShape[key])
+      const schema = itemShape[key]
+      if (isZodType(schema, "ZodDefault")) {
+        item[key] = schema._def.defaultValue()
+        continue
+      }
+      const inner = unwrapZodSchema(schema)
       if (isZodType(inner, "ZodString")) item[key] = ""
     }
     return item
@@ -313,8 +322,12 @@ export function EntitiesListFieldRenderer({
   const isAtLimit = field.maxItems != null && rows.length >= field.maxItems
   const canAddItems = field.canAddItems !== false
 
+  // Hidden columns keep their value in each row (so row actions can read them)
+  // but aren't rendered as editable cells.
+  const visibleKeys = itemKeys.filter((key) => !field.columns?.[key]?.hidden)
+
   const columns: ReadonlyArray<OneEditableTableColumn<EntitiesListRow>> =
-    itemKeys.map((key) => {
+    visibleKeys.map((key) => {
       const inner = unwrapZodSchema(itemShape[key])
       const columnConfig = field.columns?.[key]
       const base = {
@@ -370,6 +383,37 @@ export function EntitiesListFieldRenderer({
     [error, shouldShowCellError]
   )
 
+  // Map the field's custom row actions onto OneEditableTable's action shape,
+  // supplying `update`/`remove` helpers that commit back to the form value.
+  const rowActionsFn = field.rowActions
+  const rowActions = rowActionsFn
+    ? (row: EntitiesListRow, index: number) => {
+        const { __key: _key, ...item } = row
+        return rowActionsFn(item, index).map((action) => ({
+          icon: action.icon,
+          label: action.label,
+          showLabel: action.showLabel,
+          critical: action.critical,
+          disabled: action.disabled,
+          onClick: () =>
+            action.onClick({
+              item,
+              index,
+              update: (partial) =>
+                commit(
+                  rows.map((r) =>
+                    r.__key === row.__key ? { ...r, ...partial } : r
+                  )
+                ),
+              remove: () => {
+                commit(rows.filter((r) => r.__key !== row.__key))
+                formField.onBlur()
+              },
+            }),
+        }))
+      }
+    : undefined
+
   // Block adding another row while an existing one is still invalid (e.g. the
   // row the user just added and hasn't filled out yet).
   const hasInvalidRow = useMemo(
@@ -414,6 +458,7 @@ export function EntitiesListFieldRenderer({
             : undefined
         }
         canEditRow={isRowEditable}
+        rowActions={rowActions}
         addRow={
           isDisabled || isAtLimit || !canAddItems
             ? undefined

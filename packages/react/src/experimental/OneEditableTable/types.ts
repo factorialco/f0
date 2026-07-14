@@ -1,9 +1,31 @@
+import type { IconType } from "@/components/F0Icon"
 import type { RecordType, SortingsDefinition } from "@/hooks/datasource"
 import type { SummariesDefinition } from "@/patterns/OneDataCollection/summary"
 import type {
   EditableTableColumnDefinition,
   EditableTableOnCellChangeParams,
 } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/types"
+
+/**
+ * A custom trailing action button for a row (see
+ * {@link OneEditableTableProps.rowActions}).
+ */
+export type OneEditableTableRowAction<R extends RecordType> = {
+  /** Stable key within the row's action list (defaults to the label). */
+  id?: string
+  /** Icon shown in the button. */
+  icon: IconType
+  /** Accessible label; also shown next to the icon when `showLabel` is set. */
+  label: string
+  /** Render the label next to the icon. Icon-only by default. */
+  showLabel?: boolean
+  /** Use the destructive (critical) button styling. */
+  critical?: boolean
+  /** Disables the button. */
+  disabled?: boolean
+  /** Called when the button is clicked. */
+  onClick: (item: R, index: number) => void | Promise<void>
+}
 
 /** @internal Full editable-table column contract, with the datasource generics fixed. */
 export type EditableColumn<R extends RecordType> =
@@ -91,6 +113,14 @@ export type OneEditableTableProps<R extends RecordType> = {
    * `onEditRow` is provided). Defaults to showing it on every row.
    */
   canEditRow?: (item: R, index: number) => boolean
+  /**
+   * Custom trailing actions per row. Return the actions to show for the given
+   * row; because it's resolved per row, the actions can depend on the row's
+   * value (e.g. an "Archive" vs "Unarchive" toggle driven by a hidden column).
+   * Rendered in the trailing actions column, between the edit and remove
+   * buttons when those are also present.
+   */
+  rowActions?: (item: R, index: number) => OneEditableTableRowAction<R>[]
   /**
    * External validation error for a cell, keyed by the column id. When it
    * returns a message the cell shows an error border and a tooltip with the

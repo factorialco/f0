@@ -1,5 +1,7 @@
 import { z } from "zod"
 
+import type { IconType } from "@/components/F0Icon"
+
 import type {
   F0BaseField,
   F0BaseFieldRenderIfFunction,
@@ -41,6 +43,44 @@ export interface F0EntitiesListColumnConfig {
   placeholder?: string
   /** Fixed column width in pixels */
   width?: number
+  /**
+   * Hides the column while keeping its value in each row. Useful for values
+   * that drive row actions (e.g. an `archived` flag toggled from a custom
+   * action) but shouldn't be shown or edited as a cell.
+   */
+  hidden?: boolean
+}
+
+// ============================================================================
+// Entities List custom row actions
+// ============================================================================
+
+/** Helpers passed to a row action's `onClick` to mutate that row. */
+export interface F0EntitiesListRowActionContext {
+  /** The row's current values. */
+  item: EntitiesListItem
+  /** The row's index. */
+  index: number
+  /** Merge a partial update into this row and commit it to the form value. */
+  update: (partial: EntitiesListItem) => void
+  /** Remove this row. */
+  remove: () => void
+}
+
+/** A custom trailing action for a row. */
+export interface F0EntitiesListRowAction {
+  /** Icon shown in the action button. */
+  icon: IconType
+  /** Accessible label; also shown next to the icon when `showLabel` is set. */
+  label: string
+  /** Render the label next to the icon. Icon-only by default. */
+  showLabel?: boolean
+  /** Use the destructive (critical) button styling. */
+  critical?: boolean
+  /** Disables the button. */
+  disabled?: boolean
+  /** Called when the action is clicked, with helpers to mutate the row. */
+  onClick: (context: F0EntitiesListRowActionContext) => void
 }
 
 /**
@@ -98,6 +138,16 @@ export interface F0EntitiesListOptions {
   maxItems?: number
   /** Per-column presentation options, keyed by item-schema property name */
   columns?: Record<string, F0EntitiesListColumnConfig>
+  /**
+   * Custom trailing actions per row. Resolved per row, so the actions can
+   * depend on the row's value — e.g. show "Archive" or "Unarchive" based on a
+   * hidden `archived` column. Each action's `onClick` receives helpers to
+   * update or remove the row.
+   */
+  rowActions?: (
+    item: EntitiesListItem,
+    index: number
+  ) => F0EntitiesListRowAction[]
 }
 
 /**
@@ -137,6 +187,11 @@ export type F0EntitiesListField = F0BaseField & {
   maxItems?: number
   /** Per-column presentation options, keyed by item-schema property name */
   columns?: Record<string, F0EntitiesListColumnConfig>
+  /** Custom trailing actions per row (resolved per row) */
+  rowActions?: (
+    item: EntitiesListItem,
+    index: number
+  ) => F0EntitiesListRowAction[]
   /** Conditional rendering based on another field's value */
   renderIf?: EntitiesListFieldRenderIf
 }

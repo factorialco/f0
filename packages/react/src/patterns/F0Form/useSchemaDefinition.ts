@@ -302,6 +302,7 @@ function configToF0Field(
         editableIds: listOptions?.editableIds,
         maxItems: listOptions?.maxItems,
         columns: listOptions?.columns,
+        rowActions: listOptions?.rowActions,
         renderIf: config.renderIf,
       } as F0Field
     }

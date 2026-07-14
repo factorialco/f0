@@ -5,7 +5,7 @@ import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
-import { ExternalLink, Plus, Settings } from "@/icons/app"
+import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
@@ -1609,6 +1609,75 @@ export const EntitiesListFieldInlineMultiColumn: Story = {
             salary: 47000,
             role: "Editor",
           },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Custom per-row actions via `config.rowActions`. A hidden `archived` column
+ * (`config.columns.archived.hidden`) holds each row's state, and the action
+ * resolved per row toggles between "Archive" and "Unarchive" based on it —
+ * mirroring the archived/unarchived options pattern from the previous design
+ * system. `onClick` receives `update`/`remove` helpers to mutate the row.
+ */
+export const EntitiesListFieldRowActions: Story = {
+  render() {
+    const formSchema = z.object({
+      options: f0FormField.entitiesList({
+        label: "Options",
+        helpText: "Archive an option to keep it without offering it.",
+        schema: z.object({
+          name: z.string().min(1),
+          archived: z.boolean().default(false),
+        }),
+        config: {
+          sortable: true,
+          labels: { addButton: "Add an option" },
+          columns: {
+            name: { label: "Option", placeholder: "Option name" },
+            archived: { hidden: true },
+          },
+          rowActions: (item) =>
+            item.archived
+              ? [
+                  {
+                    icon: ArchiveOpen,
+                    label: "Unarchive",
+                    onClick: ({ update }) => update({ archived: false }),
+                  },
+                ]
+              : [
+                  {
+                    icon: Archive,
+                    label: "Archive",
+                    onClick: ({ update }) => update({ archived: true }),
+                  },
+                ],
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-row-actions",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        options: [
+          { name: "Permanent part-time", archived: false },
+          { name: "Temporary full-time", archived: false },
+          { name: "Ticket restaurant", archived: false },
+          { name: "Permanent full-time", archived: true },
+          { name: "Temporary part-time", archived: true },
         ],
       },
       onSubmit: async ({ data }) => {

@@ -3,6 +3,8 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
 import { action } from "storybook/actions"
 
+import { Archive, ArchiveOpen } from "@/icons/app"
+
 import { OneEditableTable } from "../index"
 
 const meta = {
@@ -211,6 +213,77 @@ export const CellTypes: Story = {
             prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
           )
         }}
+      />
+    )
+  },
+}
+
+type OptionRow = {
+  id: string
+  name: string
+  archived: boolean
+}
+
+/**
+ * Custom per-row actions via `rowActions`. Because the actions are resolved per
+ * row, they can depend on the row's value — here a hidden `archived` flag
+ * decides whether the row shows "Archive" or "Unarchive". The actions column
+ * auto-sizes to whatever buttons each row renders.
+ */
+export const CustomRowActions: Story = {
+  render: () => {
+    const [items, setItems] = useState<OptionRow[]>([
+      { id: "o-1", name: "Permanent part-time", archived: false },
+      { id: "o-2", name: "Temporary full-time", archived: false },
+      { id: "o-3", name: "Ticket restaurant", archived: false },
+      { id: "o-4", name: "Permanent full-time", archived: true },
+      { id: "o-5", name: "Temporary part-time", archived: true },
+    ])
+
+    const setArchived = (id: string, archived: boolean) =>
+      setItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, archived } : i))
+      )
+
+    return (
+      <OneEditableTable<OptionRow>
+        items={items}
+        columns={[
+          {
+            id: "name",
+            label: "Option",
+            editType: () => "text" as const,
+            inputPlaceholder: "Option name",
+          },
+        ]}
+        onCellChange={async ({ updatedItem }) => {
+          setItems((prev) =>
+            prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
+          )
+        }}
+        rowActions={(item) =>
+          item.archived
+            ? [
+                {
+                  icon: ArchiveOpen,
+                  label: "Unarchive",
+                  onClick: () => {
+                    action("unarchive")(item.id)
+                    setArchived(item.id, false)
+                  },
+                },
+              ]
+            : [
+                {
+                  icon: Archive,
+                  label: "Archive",
+                  onClick: () => {
+                    action("archive")(item.id)
+                    setArchived(item.id, true)
+                  },
+                },
+              ]
+        }
       />
     )
   },

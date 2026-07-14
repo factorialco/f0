@@ -17,6 +17,7 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { ReactNode } from "react"
 
+import type { ColumnWidth } from "@/experimental/OneTable/utils/sizes"
 import type { RecordType } from "@/hooks/datasource"
 
 import { F0Button } from "@/components/F0Button"
@@ -40,6 +41,7 @@ import type {
   EditableColumn,
   OneEditableTableColumn,
   OneEditableTableProps,
+  OneEditableTableRowAction,
 } from "./types"
 
 /** Width (px) of the leading drag-handle column. */
@@ -128,6 +130,41 @@ function withRenderFallback<R extends RecordType>(
   } as EditableColumn<R>
 }
 
+/**
+ * Renders a single trailing row-action button. Critical actions are wrapped so
+ * their icon keeps the critical color on row hover (the surrounding row
+ * `.group` would otherwise invert it) and only flips when the button itself is
+ * hovered/active — same treatment as the built-in remove button.
+ */
+function RowActionButton<R extends RecordType>({
+  action,
+  item,
+  index,
+}: {
+  action: OneEditableTableRowAction<R>
+  item: R
+  index: number
+}) {
+  const button = (
+    <F0Button
+      type="button"
+      variant={action.critical ? "critical" : "outline"}
+      size="md"
+      icon={action.icon}
+      label={action.label}
+      hideLabel={!action.showLabel}
+      disabled={action.disabled}
+      onClick={() => action.onClick(item, index)}
+    />
+  )
+  if (!action.critical) return button
+  return (
+    <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold hover:[&_svg]:!text-f1-icon-inverse active:[&_svg]:!text-f1-icon-inverse">
+      {button}
+    </span>
+  )
+}
+
 type RowCellsProps<R extends RecordType> = {
   item: R
   index: number
@@ -135,11 +172,17 @@ type RowCellsProps<R extends RecordType> = {
   onRemoveRow?: (item: R, index: number) => void
   onEditRow?: (item: R, index: number) => void
   canEditRow?: (item: R, index: number) => boolean
+  rowActions?: (item: R, index: number) => OneEditableTableRowAction<R>[]
   getCellError?: (
     item: R,
     columnId: string,
     index: number
   ) => string | undefined
+  /** Whether this table has a trailing actions column (kept consistent across
+   * rows so cells stay aligned even when a given row has no actions). */
+  hasActionsColumn: boolean
+  /** Width of the trailing actions column. */
+  actionsColWidth: ColumnWidth
   removeLabel: string
   editLabel: string
   /** Present only when the row is sortable */
@@ -154,13 +197,16 @@ function RowCells<R extends RecordType>({
   onRemoveRow,
   onEditRow,
   canEditRow,
+  rowActions,
   getCellError,
+  hasActionsColumn,
+  actionsColWidth,
   removeLabel,
   editLabel,
   dragHandle,
 }: RowCellsProps<R>) {
-  const hasActionsColumn = !!onRemoveRow || !!onEditRow
   const showEdit = !!onEditRow && (canEditRow?.(item, index) ?? true)
+  const customActions = rowActions?.(item, index) ?? []
   return (
     <>
       {dragHandle !== undefined && (
@@ -209,14 +255,7 @@ function RowCells<R extends RecordType>({
         )
       })}
       {hasActionsColumn && (
-        <TableCell
-          width={
-            onEditRow && onRemoveRow
-              ? DOUBLE_ACTION_COL_WIDTH
-              : SINGLE_ACTION_COL_WIDTH
-          }
-          className={CELL_CLASSES}
-        >
+        <TableCell width={actionsColWidth} className={CELL_CLASSES}>
           <div className="pointer-events-auto flex h-full items-center justify-end gap-2 px-2">
             {showEdit && (
               <F0Button
@@ -228,6 +267,14 @@ function RowCells<R extends RecordType>({
                 onClick={() => onEditRow(item, index)}
               />
             )}
+            {customActions.map((action, actionIndex) => (
+              <RowActionButton
+                key={action.id ?? `${action.label}-${actionIndex}`}
+                action={action}
+                item={item}
+                index={index}
+              />
+            ))}
             {onRemoveRow && (
               // The critical variant inverts its icon on `group-hover`, which
               // the surrounding `.group` table row also triggers — turning the
@@ -334,6 +381,7 @@ function OneEditableTableBase<R extends RecordType>({
   onRemoveRow,
   onEditRow,
   canEditRow,
+  rowActions,
   getCellError,
   addRow,
   bordered = true,
@@ -376,7 +424,19 @@ function OneEditableTableBase<R extends RecordType>({
   const editLabel = t("collections.editableTable.editRow")
   const reorderLabel = t("collections.editableTable.reorderRow")
   const actionsLabel = t("collections.actions.actions")
-  const hasActionsColumn = !!onRemoveRow || !!onEditRow
+
+  // Whether any row contributes a custom action. Kept table-wide so every row
+  // renders the actions column (empty cell included) and stays aligned.
+  const hasAnyRowAction =
+    !!rowActions && items.some((item, i) => rowActions(item, i).length > 0)
+  const hasActionsColumn = !!onRemoveRow || !!onEditRow || hasAnyRowAction
+  // Custom actions have unknown widths (icon-only or labelled), so let the
+  // column size to its content; the built-in edit/remove pair uses fixed widths.
+  const actionsColWidth: ColumnWidth = hasAnyRowAction
+    ? "auto"
+    : onEditRow && onRemoveRow
+      ? DOUBLE_ACTION_COL_WIDTH
+      : SINGLE_ACTION_COL_WIDTH
 
   const rows = items.map((item, index) => {
     const rowId = rowIds[index]
@@ -387,7 +447,10 @@ function OneEditableTableBase<R extends RecordType>({
       onRemoveRow,
       onEditRow,
       canEditRow,
+      rowActions,
       getCellError,
+      hasActionsColumn,
+      actionsColWidth,
       removeLabel,
       editLabel,
     }
@@ -438,11 +501,7 @@ function OneEditableTableBase<R extends RecordType>({
           ))}
           {hasActionsColumn && (
             <TableHead
-              width={
-                onEditRow && onRemoveRow
-                  ? DOUBLE_ACTION_COL_WIDTH
-                  : SINGLE_ACTION_COL_WIDTH
-              }
+              width={actionsColWidth}
               className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
             >
               <span className="sr-only">{actionsLabel}</span>
