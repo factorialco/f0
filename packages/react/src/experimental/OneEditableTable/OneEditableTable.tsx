@@ -466,7 +466,9 @@ function OneEditableTableBase<R extends RecordType>({
   )
 
   return (
-    <div className="flex flex-col items-start gap-3">
+    // The data attribute lets global styles scope exceptions to this table
+    // (e.g. F0Form's error-navigate shake skips the many cell inputs here).
+    <div className="flex flex-col items-start gap-3" data-f0-editable-table="">
       <div
         className={cn(
           "w-full",
