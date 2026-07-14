@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.35.0](https://github.com/factorialco/f0/compare/f0-react-v4.34.0...f0-react-v4.35.0) (2026-07-14)
+
+
+### Features
+
+* **OneDataCollection:** support tooltip on single primary action ([#4671](https://github.com/factorialco/f0/issues/4671)) ([8a10702](https://github.com/factorialco/f0/commit/8a1070297fc1769bef82f5c909deab1945d53893))
+
 ## [4.34.0](https://github.com/factorialco/f0/compare/f0-react-v4.33.0...f0-react-v4.34.0) (2026-07-14)
 
 
