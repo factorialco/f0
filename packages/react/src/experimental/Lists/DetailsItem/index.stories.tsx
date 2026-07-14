@@ -4,7 +4,7 @@ import { expect, within } from "storybook/test"
 
 import { DetailsItem } from "./index"
 
-const meta: Meta = {
+const meta = {
   title: "List/DetailsItem",
   component: DetailsItem,
   tags: ["autodocs", "experimental"],
@@ -18,7 +18,7 @@ const meta: Meta = {
       },
     },
   },
-}
+} satisfies Meta<typeof DetailsItem>
 
 export default meta
 type Story = StoryObj<typeof meta>
