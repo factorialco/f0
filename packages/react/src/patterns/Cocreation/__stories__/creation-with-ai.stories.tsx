@@ -320,7 +320,6 @@ function TemplatesCollection({
   onEmpty,
   fillHeight = true,
   visualization = listVisualization,
-  tmpFullWidth = false,
 }: {
   onSelect?: (item: Template) => void
   /**
@@ -343,11 +342,6 @@ function TemplatesCollection({
    * passes the category-less `galleryListVisualization` instead.
    */
   visualization?: typeof listVisualization
-  /**
-   * Drop the data collection's horizontal padding (list rows + filter toolbar),
-   * so the gallery runs edge-to-edge inside the AI Canvas panel body.
-   */
-  tmpFullWidth?: boolean
 } = {}) {
   const { config } = useFlowConfig()
   const templatesSource = makeTemplatesSource(config)
@@ -377,7 +371,6 @@ function TemplatesCollection({
       source={source}
       visualizations={[visualization]}
       fullHeight={fillHeight}
-      tmpFullWidth={tmpFullWidth}
     />
   )
 }
@@ -409,14 +402,12 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
   // first step of cocreation rather than just dismissing the canvas (see
   // `TemplatesCanvasHeader`); the framework `onClose` is intentionally dropped.
   renderHeader: ({ content }) => <TemplatesCanvasHeader content={content} />,
-  // The canvas keeps its own `p-4` padding; the gallery inside drops the data
-  // collection's *own* horizontal padding so it doesn't double-pad against the
-  // wrapper. `tmpFullWidth` zeroes the list rows' `px-page`; the filter toolbar
-  // still emits `px-page` alongside `px-0` (the collection's `cn` doesn't merge
-  // the custom `px-page` utility, so `px-page` wins), so `[&_.px-page]:px-0`
-  // overrides it on specificity — filters then align to the wrapper like the list.
+  // No horizontal padding on the wrapper: the data collection provides its own
+  // `px-page` (the design-system default), which aligns with the header's
+  // `px-page` — so header, filters, and list all sit at the standard 24px inset.
+  // Only vertical padding here (`py-3`, matching the other canvas bodies).
   renderContent: ({ content }) => (
-    <div className="h-full w-full overflow-y-auto p-4 [&_.px-page]:px-0">
+    <div className="h-full w-full overflow-y-auto py-3">
       {content.guidedTypeId ? (
         <GuidedTemplatesCanvasBody guidedTypeId={content.guidedTypeId} />
       ) : (
@@ -455,6 +446,14 @@ type SurveyCanvasContent = CanvasContentBase & {
    * templates" reopens the same type-scoped gallery.
    */
   guidedTypeId?: string
+  /**
+   * Set only by the "cards" entry flow (Engagement) when previewing its preset
+   * welcome-card template (e.g. "Employee NPS"): identifies which preset this
+   * preview belongs to, so the preview renders that preset's own questions and
+   * "Use this template" seeds them (plus the preset's created-card subtitle and
+   * intro message) instead of the flow's generic sample set.
+   */
+  presetCardId?: string
 }
 
 // Bridge the story-local canvas types to the SDS API. `CanvasContent` /
@@ -1150,14 +1149,25 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
     // A template copy is created already populated, so seed the flow's sample
     // questions — for the "guidedType" entry flow (Training), that's the
     // chosen type's locked question + follow-ups (every template under that
-    // type shares this content); for "cards" (Engagement), the flow's single
-    // sample set. No AI drafting follows, so this single card stays live.
-    const elements =
-      config.entryMode === "guidedType"
+    // type shares this content); for the "cards" preset welcome card
+    // (Engagement, `content.presetCardId`), that preset's own questions; for
+    // any other "cards" template, the flow's single sample set. No AI drafting
+    // follows, so this single card stays live.
+    const preset =
+      config.entryMode === "cards" &&
+      content.presetCardId === config.presetCard.id
+        ? config.presetCard
+        : undefined
+    const elements = preset
+      ? preset.elements
+      : config.entryMode === "guidedType"
         ? config.guidedTypes.find((t) => t.id === content.guidedTypeId)
             ?.sampleElements
         : config.sampleElements
     if (!elements) return
+    // The preset carries its own created-card subtitle / resource-header
+    // description; other templates fall back to the flow's "Created in …" copy.
+    const description = preset ? preset.createdDescription : content.description
     const surveyId = createSurvey(content.templateName, { elements })
     openCanvas(
       toCanvasContent({
@@ -1166,7 +1176,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         mode: "edit",
         templateName: content.templateName,
         surveyId,
-        description: content.description,
+        description,
       })
     )
     // Acknowledge the survey created from this template — an openable canvas card
@@ -1178,14 +1188,17 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         surveyId={surveyId}
         cardId={cardId}
         title={content.templateName}
-        description={createdDescription(config)}
+        description={
+          preset ? preset.createdDescription : createdDescription(config)
+        }
       />
     ))
     appendMessages([
       {
         role: "assistant",
-        content:
-          "I have created the survey using the template. What would you like to customize or change?",
+        content: preset
+          ? preset.introMessage
+          : "I have created the survey using the template. What would you like to customize or change?",
       },
     ])
     // Arm the next typed message. Normally the user describes a change, the
@@ -1200,7 +1213,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   }
 
   return (
-    <div className="flex flex-row items-center gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
+    <div className="px-page flex flex-row items-center gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary py-3">
       <F0Button
         variant="outline"
         hideLabel
@@ -1727,7 +1740,7 @@ function SurveyEditorCanvasBody() {
     // While the AI is "drafting" questions, blur + lock the builder behind the
     // "applying changes" overlay.
     <F0AiProcessingOverlay active={processing} className="h-full w-full">
-      <div className="h-full w-full overflow-auto px-4 py-3">
+      <div className="px-page h-full w-full overflow-auto py-3">
         {tabId === "settings" ? (
           <SurveySettingsForm />
         ) : (
@@ -1781,20 +1794,29 @@ function SurveyTemplatePreviewBody({
   content: SurveyCanvasContent
 }) {
   const { config } = useFlowConfig()
+  // The "cards" preset welcome card previews its OWN questions (NPS's locked
+  // eNPS question + follow-ups), not the flow's generic sample set.
+  const preset =
+    config.entryMode === "cards" &&
+    content.presetCardId === config.presetCard.id
+      ? config.presetCard
+      : undefined
   const guidedType =
     config.entryMode === "guidedType"
       ? config.guidedTypes.find((t) => t.id === content.guidedTypeId)
       : undefined
-  const elements =
-    config.entryMode === "guidedType"
+  const elements = preset
+    ? preset.elements
+    : config.entryMode === "guidedType"
       ? (guidedType?.sampleElements ?? [])
       : config.sampleElements
-  const defaultValues =
-    config.entryMode === "guidedType"
+  const defaultValues = preset
+    ? {}
+    : config.entryMode === "guidedType"
       ? (guidedType?.defaultValues ?? {})
       : config.defaultValues
   return (
-    <div className="flex h-full w-full flex-col gap-3 px-4 py-3">
+    <div className="px-page flex h-full w-full flex-col gap-3 py-3">
       <TemplatePreviewAlert />
       <SurveyAnsweringForm
         inline
@@ -1834,7 +1856,6 @@ function TemplatesCanvasBody() {
       onEmpty={startBlankSurvey}
       fillHeight={false}
       visualization={galleryListVisualization}
-      tmpFullWidth
     />
   )
 }
@@ -1910,7 +1931,6 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
     <OneDataCollection
       source={source}
       visualizations={[galleryListVisualization]}
-      tmpFullWidth
     />
   )
 }
@@ -1970,7 +1990,7 @@ function TemplatesCanvasHeader({
   const title = guidedTypeId ? content.title : "Survey Templates"
 
   return (
-    <div className="flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
+    <div className="px-page flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary py-3">
       <F0Heading content={title} as="h2" />
       <div className="flex flex-row items-center gap-3">
         {/* Skip the gallery and start from a blank survey. Divided from Close by
@@ -2032,10 +2052,8 @@ function SurveyWelcomeCardsRegistrar() {
   const { config, noCredits } = useFlowConfig()
   if (config.entryMode !== "cards") return null
 
-  const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { openCanvas, setWelcomeScreenCards } = useAiChat()
-  const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
-  const { armProposal, armNoCredits } = useProposalFlow()
+  const { armNoCredits } = useProposalFlow()
   const startBlankSurvey = useStartBlankSurvey()
 
   const cards: F0AiChatWelcomeCard[] = [
@@ -2095,41 +2113,23 @@ function SurveyWelcomeCardsRegistrar() {
         break
       }
       case config.presetCard.id: {
-        // Predefined-template flow: open a ready-made survey on the canvas
-        // (mirrors "Use this template" — seeded with questions, no AI
-        // drafting). Its first question is a blocked/locked question (+
-        // in-card warning); the rest stay editable.
+        // Predefined-template card: open the template in the read-only preview
+        // framing FIRST (same as the guided flows and the "Templates" browse) —
+        // the survey isn't created until "Use this template" on the preview
+        // header. `presetCardId` tells the preview + that button to seed this
+        // preset's own questions (its locked first question + follow-ups) and
+        // intro copy instead of the flow's generic sample set.
         const { presetCard } = config
-        const surveyId = createSurvey(presetCard.title, {
-          elements: presetCard.elements,
-        })
         openCanvas(
           toCanvasContent({
             type: "survey",
             title: presetCard.title,
-            mode: "edit",
+            mode: "preview",
             templateName: presetCard.title,
-            surveyId,
-            description: presetCard.createdDescription,
+            description: presetCard.description,
+            presetCardId: presetCard.id,
           })
         )
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
-        appendCard(() => (
-          <SurveyCard
-            surveyId={surveyId}
-            cardId={cardId}
-            title={presetCard.title}
-            description={presetCard.createdDescription}
-          />
-        ))
-        appendMessages([
-          {
-            role: "assistant",
-            content: presetCard.introMessage,
-          },
-        ])
-        armProposal(surveyId, presetCard.title)
         break
       }
       // The placeholder card (config.placeholderCard.id) is a visual-only
