@@ -191,6 +191,9 @@ export function CollectionItem<Filters extends FiltersDefinition>({
         fullHeight
         source={source}
         visualizations={item.visualizations}
+        // Embedded widget: view state lives in the dashboard (Save/Discard),
+        // so OneDataCollection's own "Save view" affordance is disabled.
+        presetsAction="none"
         // We deliberately do NOT enable `csvExport` here — the dashboard
         // surface already exposes Excel + CSV downloads from the
         // DashboardItem 3-dot menu (`downloadActions` above) and both
