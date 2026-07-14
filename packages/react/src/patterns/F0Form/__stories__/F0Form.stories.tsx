@@ -1834,6 +1834,154 @@ export const EntitiesListFieldDialogMode: Story = {
 }
 
 /**
+ * List-view visualization (`config.visualization: "list-view"`). When there's
+ * no inline editing, the items render as a OneDataCollection **list** instead
+ * of a read-only table: each row shows a title (first field) and description
+ * lines (the rest), the **Add member** button opens the create dialog, and each
+ * row has edit/remove actions. Drag-reorder isn't available in list mode.
+ */
+export const EntitiesListFieldListView: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText: "Items are shown as a list; add and edit happen in a dialog.",
+        schema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: [
+              { value: "Admin", label: "Admin" },
+              { value: "Editor", label: "Editor" },
+              { value: "Viewer", label: "Viewer" },
+            ],
+          }),
+          startDate: f0FormField.date({ label: "Start date" }),
+        }),
+        config: {
+          visualization: "list-view",
+          labels: {
+            addButton: "Add member",
+            addButtonDescription: "Fill in the details of the new team member.",
+            editDialogTitle: "Edit member",
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-list-view",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            role: "Admin",
+            startDate: new Date(2022, 2, 1),
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            role: "Editor",
+            startDate: new Date(2023, 8, 15),
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Split create/update schemas. New members are added with a reduced
+ * `createSchema` (just name + email); clicking **Edit** opens the fuller
+ * `updateSchema` (adds role + start date). `updateSchema` is the canonical row
+ * shape, so its extra fields are `optional` to keep freshly-added rows valid.
+ * Shown here with the list-view visualization.
+ */
+export const EntitiesListFieldSplitSchema: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  render() {
+    const roleOptions = [
+      { value: "Admin", label: "Admin" },
+      { value: "Editor", label: "Editor" },
+      { value: "Viewer", label: "Viewer" },
+    ]
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText: "Add with name + email; edit to set role and start date.",
+        createSchema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+        }),
+        updateSchema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: roleOptions,
+            optional: true,
+          }),
+          startDate: f0FormField.date({ label: "Start date", optional: true }),
+        }),
+        config: {
+          visualization: "list-view",
+          labels: {
+            addButton: "Add member",
+            addButtonDescription: "Start with just a name and email.",
+            editDialogTitle: "Edit member",
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-split-schema",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            role: "Admin",
+            startDate: new Date(2022, 2, 1),
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Per-field auto-save. Only the entities list opts in with `autoSave: true`, so
  * editing a link (or adding/removing/reordering rows) saves the form after a
  * short debounce — no Save click needed. The other fields (`name`, `notes`)

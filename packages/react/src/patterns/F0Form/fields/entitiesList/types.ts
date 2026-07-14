@@ -1,5 +1,6 @@
 import { z } from "zod"
 
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
 
 import type {
@@ -100,6 +101,28 @@ export interface F0EntitiesListLabels {
 }
 
 /**
+ * How the list is presented when inline cell editing is off (dialog mode).
+ * - `"editable-table"` (default): a read-only editable-style table.
+ * - `"list-view"`: a OneDataCollection list of the items; add/edit still go
+ *   through the form dialog, and each row gets edit/remove actions.
+ */
+export type F0EntitiesListVisualization = "editable-table" | "list-view"
+
+/**
+ * Overrides how each row is labelled in `list-view` mode. When omitted, the
+ * first visible field becomes the title and the remaining visible fields
+ * become description lines.
+ */
+export interface F0EntitiesListItemDefinition {
+  /** Row title (defaults to the first visible field's value). */
+  title?: (item: EntitiesListItem) => string
+  /** Description lines shown under the title (defaults to the other fields). */
+  description?: (item: EntitiesListItem) => string[]
+  /** Optional leading avatar for the row. */
+  avatar?: (item: EntitiesListItem) => AvatarVariant | undefined
+}
+
+/**
  * Behavior options for a entities list field.
  */
 export interface F0EntitiesListOptions {
@@ -120,6 +143,17 @@ export interface F0EntitiesListOptions {
    * or `false` to always use the dialog.
    */
   supportInlineEditing?: boolean
+  /**
+   * How the list is presented when there's no inline editing (dialog mode).
+   * @default "editable-table"
+   * @see {@link F0EntitiesListVisualization}
+   */
+  visualization?: F0EntitiesListVisualization
+  /**
+   * Overrides how each row is labelled in `list-view` mode. Ignored for the
+   * `editable-table` visualization.
+   */
+  listItem?: F0EntitiesListItemDefinition
   /** User-facing text (add button, dialog description/title). */
   labels?: F0EntitiesListLabels
   /**
@@ -160,8 +194,18 @@ export interface F0EntitiesListOptions {
  * individually, and appended (when `config.canAddItems` is not false).
  */
 export interface F0EntitiesListConfig {
-  /** Zod object schema describing one row of the list */
-  schema: z.ZodObject<z.ZodRawShape>
+  /**
+   * Zod object schema describing one row of the list (used for add, edit and
+   * display). Provide this, or `createSchema` + `updateSchema` for split forms.
+   */
+  schema?: z.ZodObject<z.ZodRawShape>
+  /** Reduced schema for the add dialog (split-form mode). */
+  createSchema?: z.ZodObject<z.ZodRawShape>
+  /**
+   * Fuller schema for the edit dialog (split-form mode). Also the canonical row
+   * shape for columns, display and the field value.
+   */
+  updateSchema?: z.ZodObject<z.ZodRawShape>
   /** Behavior options (add button, min/max items, column presentation) */
   config?: F0EntitiesListOptions
 }
@@ -171,14 +215,22 @@ export interface F0EntitiesListConfig {
  */
 export type F0EntitiesListField = F0BaseField & {
   type: "entitiesList"
-  /** Zod object schema describing one row; columns are derived from it */
+  /** Canonical row schema; columns/display/value are derived from it */
   itemSchema: z.ZodObject<z.ZodRawShape>
+  /** Schema for the add dialog (defaults to `itemSchema`) */
+  createSchema?: z.ZodObject<z.ZodRawShape>
+  /** Schema for the edit dialog (defaults to `itemSchema`) */
+  updateSchema?: z.ZodObject<z.ZodRawShape>
   /** Whether rows can be reordered by dragging (defaults to true) */
   sortable?: boolean
   /** Whether the user can append new rows (defaults to true) */
   canAddItems?: boolean
   /** Forces inline cell editing on/off, overriding the column-count heuristic */
   supportInlineEditing?: boolean
+  /** How the list is presented in dialog mode (@default "editable-table") */
+  visualization?: F0EntitiesListVisualization
+  /** Overrides row title/description/avatar in `list-view` mode */
+  listItem?: F0EntitiesListItemDefinition
   /** User-facing text (add button, dialog description/title) */
   labels?: F0EntitiesListLabels
   /** Ids of the items that can be edited (matched against `item.id`) */

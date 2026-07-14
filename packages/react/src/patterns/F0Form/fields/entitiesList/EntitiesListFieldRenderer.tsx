@@ -9,12 +9,22 @@ import { z, ZodTypeAny } from "zod"
 
 import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTable"
 
+import { F0Button } from "@/components/F0Button"
 import { F0FormEditableTable } from "@/experimental/F0FormEditableTable"
+import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/ui/tooltip"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
 
 import type { ResolvedField } from "../types"
 import type { F0EntitiesListField, EntitiesListItem } from "./types"
+
+import { EntitiesListView } from "./EntitiesListView"
 
 import {
   f0FormField,
@@ -66,6 +76,46 @@ interface EntitiesListFieldRendererProps {
   error?: unknown
 }
 
+/**
+ * The list-view footer "add" button. Mirrors the table's built-in add button:
+ * a disabled button with a hover tooltip explaining why it's blocked.
+ */
+function AddButton({
+  config,
+}: {
+  config: {
+    label: string
+    disabled: boolean
+    disabledTooltip?: string
+    onClick: () => void
+  }
+}) {
+  const button = (
+    <F0Button
+      type="button"
+      variant="outline"
+      size="md"
+      icon={Add}
+      label={config.label}
+      onClick={config.onClick}
+      disabled={config.disabled}
+    />
+  )
+  if (!config.disabled || !config.disabledTooltip) return button
+  return (
+    <TooltipProvider delayDuration={100}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex cursor-not-allowed [&_button]:pointer-events-none">
+            {button}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="top">{config.disabledTooltip}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
+}
+
 /** Coerce an unknown form value into a normalized list of items. */
 function normalizeValue(value: unknown): EntitiesListItem[] {
   if (!Array.isArray(value)) return []
@@ -79,6 +129,46 @@ function normalizeValue(value: unknown): EntitiesListItem[] {
 /** Capitalizes the first letter of a schema property name for column headers. */
 function humanizeKey(key: string): string {
   return key.charAt(0).toUpperCase() + key.slice(1)
+}
+
+/**
+ * Builds the form schema for an add/edit dialog from an item schema. Each
+ * property is tagged with F0 field config on a fresh clone (via `.describe()`)
+ * so the original item schema stays untouched. Fields authored with an
+ * `f0FormField` shortcut already carry their config and are reused as-is.
+ */
+function buildDialogSchema(
+  itemSchema: z.ZodObject<z.ZodRawShape> | undefined,
+  columns: F0EntitiesListField["columns"]
+): z.ZodObject<z.ZodRawShape> {
+  const shape: Record<string, ZodTypeAny> = {}
+  const itemShape = itemSchema?.shape ?? {}
+  for (const key of Object.keys(itemShape)) {
+    const original = itemShape[key]
+    if (getF0Config(original)) {
+      shape[key] = original
+      continue
+    }
+    const clone = original.describe(original.description ?? "")
+    const inner = unwrapZodSchema(original)
+    const columnConfig = columns?.[key]
+    const label = columnConfig?.label ?? humanizeKey(key)
+    const placeholder = columnConfig?.placeholder
+    if (isZodType(inner, "ZodEnum")) {
+      const values: string[] = inner._def.values
+      shape[key] = f0FormField(
+        clone as never,
+        {
+          label,
+          placeholder,
+          options: values.map((value) => ({ value, label: value })),
+        } as never
+      )
+    } else {
+      shape[key] = f0FormField(clone as never, { label, placeholder } as never)
+    }
+  }
+  return z.object(shape)
 }
 
 /**
@@ -127,12 +217,24 @@ export function EntitiesListFieldRenderer({
 
   const itemShape: Record<string, ZodTypeAny> = field.itemSchema?.shape ?? {}
   const itemKeys = Object.keys(itemShape)
+  // The list-view visualization is always read-only + dialog-edited, so it
+  // never uses inline cells regardless of the field count.
+  const useListView = field.visualization === "list-view"
+  // Split create/update schemas can't be inline-edited (the add and edit forms
+  // differ), so they always use the dialog.
+  const hasSplitSchemas =
+    field.createSchema != null &&
+    field.updateSchema != null &&
+    field.createSchema !== field.updateSchema
   // Explicit `supportInlineEditing` wins; otherwise fall back to the
   // column-count heuristic (inline for small lists, dialog for larger ones).
+  // `list-view` and split schemas imply dialog editing.
   const useDialogMode =
-    field.supportInlineEditing != null
+    useListView ||
+    hasSplitSchemas ||
+    (field.supportInlineEditing != null
       ? !field.supportInlineEditing
-      : itemKeys.length > MAX_INLINE_FIELDS
+      : itemKeys.length > MAX_INLINE_FIELDS)
 
   // Fields that render as date cells. The date cell works with ISO strings, so
   // their values are stored as strings on the row and converted back to `Date`
@@ -259,77 +361,58 @@ export function EntitiesListFieldRenderer({
     [field.editableIds]
   )
 
-  // --- Dialog mode (more than MAX_INLINE_FIELDS schema properties) ----------
+  // --- Dialog editing (dialog mode, or a split create/update schema) --------
+
+  // The add dialog uses `createSchema`; the edit dialog uses `updateSchema`.
+  // Both default to the canonical item schema (single-schema fields).
+  const createItemSchema = field.createSchema ?? field.itemSchema
+  const updateItemSchema = field.updateSchema ?? field.itemSchema
+
+  const createDialogSchema = useMemo(
+    () => buildDialogSchema(createItemSchema, field.columns),
+    [createItemSchema, field.columns]
+  )
+  const updateDialogSchema = useMemo(
+    () => buildDialogSchema(updateItemSchema, field.columns),
+    [updateItemSchema, field.columns]
+  )
 
   /**
-   * Form schema for the add/edit dialog, derived from the item schema. Each
-   * property is tagged with F0 field config on a fresh clone (via
-   * `.describe()`) so the original item schema stays untouched.
+   * Blank item values for a given schema: honor a `.default()` first (e.g. a
+   * hidden `archived: z.boolean().default(false)`), then start strings empty
+   * and multi-select arrays empty, and leave the rest unset.
    */
-  const dialogSchema = useMemo(() => {
-    const shape: Record<string, ZodTypeAny> = {}
-    for (const key of itemKeys) {
-      const original = itemShape[key]
-      // Fields authored with an f0FormField shortcut already carry their field
-      // config (type, options, currency, ...); reuse them so the dialog renders
-      // the right control for every field type. Only plain Zod needs wrapping.
-      if (getF0Config(original)) {
-        shape[key] = original
-        continue
+  const makeEmptyItem = useCallback(
+    (schema: z.ZodObject<z.ZodRawShape> | undefined): EntitiesListItem => {
+      const item: EntitiesListItem = {}
+      const shape = schema?.shape ?? {}
+      for (const key of Object.keys(shape)) {
+        const propSchema = shape[key]
+        if (isZodType(propSchema, "ZodDefault")) {
+          item[key] = propSchema._def.defaultValue()
+          continue
+        }
+        const inner = unwrapZodSchema(propSchema)
+        if (isZodType(inner, "ZodString")) item[key] = ""
+        else if (isZodType(inner, "ZodArray")) item[key] = []
       }
-      const clone = original.describe(original.description ?? "")
-      const inner = unwrapZodSchema(original)
-      const columnConfig = field.columns?.[key]
-      const label = columnConfig?.label ?? humanizeKey(key)
-      const placeholder = columnConfig?.placeholder
-      if (isZodType(inner, "ZodEnum")) {
-        const values: string[] = inner._def.values
-        shape[key] = f0FormField(
-          clone as never,
-          {
-            label,
-            placeholder,
-            options: values.map((value) => ({ value, label: value })),
-          } as never
-        )
-      } else {
-        shape[key] = f0FormField(
-          clone as never,
-          { label, placeholder } as never
-        )
-      }
-    }
-    return z.object(shape)
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemShape/itemKeys derive from field.itemSchema
-  }, [field.itemSchema, field.columns])
+      return item
+    },
+    []
+  )
 
-  /**
-   * Blank item values: honor a schema `.default()` first (e.g. a hidden
-   * `archived: z.boolean().default(false)`), then start strings empty and
-   * multi-select arrays empty, and leave the rest unset.
-   */
-  const makeEmptyItem = useCallback((): EntitiesListItem => {
-    const item: EntitiesListItem = {}
-    for (const key of itemKeys) {
-      const schema = itemShape[key]
-      if (isZodType(schema, "ZodDefault")) {
-        item[key] = schema._def.defaultValue()
-        continue
-      }
-      const inner = unwrapZodSchema(schema)
-      if (isZodType(inner, "ZodString")) item[key] = ""
-      else if (isZodType(inner, "ZodArray")) item[key] = []
-    }
-    return item
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemShape derives from field.itemSchema
-  }, [field.itemSchema])
-
-  // Defaults are read through a ref at dialog-open time, so a single form
-  // definition serves both the add (empty) and edit (row values) dialogs.
+  // Defaults are read through a ref at dialog-open time, so each form
+  // definition serves both empty (add) and row-value (edit) seeding.
   const dialogDefaultsRef = useRef<EntitiesListItem>({})
-  const dialogFormDefinition = useF0FormDefinition({
-    name: `${field.id}-item`,
-    schema: dialogSchema,
+  const createFormDefinition = useF0FormDefinition({
+    name: `${field.id}-create`,
+    schema: createDialogSchema,
+    defaultValues: async () => dialogDefaultsRef.current,
+    onSubmit: async () => ({ success: true }),
+  })
+  const updateFormDefinition = useF0FormDefinition({
+    name: `${field.id}-update`,
+    schema: updateDialogSchema,
     defaultValues: async () => dialogDefaultsRef.current,
     onSubmit: async () => ({ success: true }),
   })
@@ -342,13 +425,14 @@ export function EntitiesListFieldRenderer({
         // date strings back before seeding the defaults.
         dialogDefaultsRef.current = rowItemToForm(item)
       } else {
-        dialogDefaultsRef.current = makeEmptyItem()
+        dialogDefaultsRef.current = makeEmptyItem(createItemSchema)
       }
 
       const addLabel = field.labels?.addButton ?? translations.add
       const editTitle = field.labels?.editDialogTitle ?? translations.edit
       const result = await openFormDialog({
-        formDefinition: dialogFormDefinition,
+        formDefinition:
+          mode === "add" ? createFormDefinition : updateFormDefinition,
         title: mode === "add" ? addLabel : editTitle,
         description:
           mode === "add" ? field.labels?.addButtonDescription : undefined,
@@ -373,9 +457,11 @@ export function EntitiesListFieldRenderer({
       rows,
       commit,
       makeEmptyItem,
+      createItemSchema,
       rowItemToForm,
       formItemToRow,
-      dialogFormDefinition,
+      createFormDefinition,
+      updateFormDefinition,
       field.labels,
       translations,
       formField,
@@ -523,6 +609,91 @@ export function EntitiesListFieldRenderer({
     [rows, field.itemSchema, rowItemToForm]
   )
 
+  // Shared add affordance used by both the table's built-in add button and the
+  // list-view footer button.
+  const addConfig =
+    isDisabled || isAtLimit || !canAddItems
+      ? undefined
+      : {
+          label: field.labels?.addButton ?? translations.add,
+          disabled: hasInvalidRow,
+          disabledTooltip: translations.addBlockedHint,
+          onClick: () => {
+            if (useDialogMode) {
+              openItemDialog("add")
+              return
+            }
+            const key = `row-${keyCounter.current++}`
+            // Fresh rows don't show validation errors until touched
+            freshRowKeysRef.current.add(key)
+            commit([
+              ...rows,
+              { __key: key, ...makeEmptyItem(field.itemSchema) },
+            ])
+          },
+        }
+
+  // Row callbacks keyed by the stable row key, for the list-view visualization.
+  const findRow = useCallback(
+    (rowKey: string) => rows.find((r) => r.__key === rowKey),
+    [rows]
+  )
+  const editRowByKey = useCallback(
+    (rowKey: string) => {
+      const row = findRow(rowKey)
+      if (row) openItemDialog("edit", row)
+    },
+    [findRow, openItemDialog]
+  )
+  const removeRowByKey = useCallback(
+    (rowKey: string) => {
+      commit(rows.filter((r) => r.__key !== rowKey))
+      formField.onBlur()
+    },
+    [rows, commit, formField]
+  )
+  const canEditRowByKey = useCallback(
+    (rowKey: string) => {
+      const row = findRow(rowKey)
+      return row ? isRowEditable(row) : true
+    },
+    [findRow, isRowEditable]
+  )
+
+  if (useListView) {
+    // Display rows with dates as `Date` (rows hold ISO strings) so the list
+    // formats them; the stable `__key` still maps actions back to the row.
+    const listRows = rows.map(({ __key, ...item }) => ({
+      __key,
+      ...rowItemToForm(item),
+    }))
+    return (
+      <div className="flex flex-col items-start gap-3">
+        <EntitiesListView
+          rows={listRows}
+          fields={columns.map((column) => ({
+            id: column.id,
+            label: column.label,
+          }))}
+          listItem={field.listItem}
+          canEditRow={canEditRowByKey}
+          onEditRow={isDisabled ? undefined : editRowByKey}
+          onRemoveRow={isDisabled ? undefined : removeRowByKey}
+          editLabel={field.labels?.editDialogTitle ?? translations.edit}
+          removeLabel={translations.remove}
+        />
+
+        {addConfig && <AddButton config={addConfig} />}
+
+        {rootError && (
+          <p className="text-sm font-medium text-f1-foreground-critical">
+            {rootError}
+          </p>
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <F0FormEditableTable<EntitiesListRow>
@@ -557,25 +728,7 @@ export function EntitiesListFieldRenderer({
         }
         canEditRow={isRowEditable}
         rowActions={rowActions}
-        addRow={
-          isDisabled || isAtLimit || !canAddItems
-            ? undefined
-            : {
-                label: field.labels?.addButton ?? translations.add,
-                disabled: hasInvalidRow,
-                disabledTooltip: translations.addBlockedHint,
-                onClick: () => {
-                  if (useDialogMode) {
-                    openItemDialog("add")
-                    return
-                  }
-                  const key = `row-${keyCounter.current++}`
-                  // Fresh rows don't show validation errors until touched
-                  freshRowKeysRef.current.add(key)
-                  commit([...rows, { __key: key, ...makeEmptyItem() }])
-                },
-              }
-        }
+        addRow={addConfig}
       />
 
       {rootError && (

@@ -1431,13 +1431,33 @@ export namespace f0FormField {
 
   // ---- entitiesList --------------------------------------------------------
 
-  /** @internal */
-  type EntitiesListConfig<TItem extends z.ZodObject<z.ZodRawShape>> = Omit<
+  /** @internal Fields shared by every entities-list config variant. */
+  type EntitiesListBaseConfig = Omit<
     F0EntitiesListFieldConfig,
-    "fieldType" | "schema"
-  > & {
-    /** Zod object schema describing one row of the list */
-    schema: TItem
+    "fieldType" | "schema" | "createSchema" | "updateSchema"
+  >
+  /** @internal Single-schema config: one `schema` for both add and edit. */
+  type EntitiesListSingleConfig<TItem extends z.ZodObject<z.ZodRawShape>> =
+    EntitiesListBaseConfig & {
+      /** Zod object schema describing one row (add, edit and display). */
+      schema: TItem
+      createSchema?: never
+      updateSchema?: never
+      optional?: boolean
+    }
+  /**
+   * @internal Split-schema config: a reduced `createSchema` for the add dialog
+   * and a (typically larger) `updateSchema` for the edit dialog. `updateSchema`
+   * is the canonical row shape (columns, display, value type), so fields only
+   * in `updateSchema` should be optional to keep freshly-created rows valid.
+   */
+  type EntitiesListSplitConfig<
+    TCreate extends z.ZodObject<z.ZodRawShape>,
+    TUpdate extends z.ZodObject<z.ZodRawShape>,
+  > = EntitiesListBaseConfig & {
+    schema?: never
+    createSchema: TCreate
+    updateSchema: TUpdate
     optional?: boolean
   }
 
@@ -1471,41 +1491,79 @@ export namespace f0FormField {
    * (`z.string()` → text, `z.number()` → number, `z.enum()` → select).
    *
    * @example
+   * // Single schema — same fields for add and edit:
    * links: f0FormField.entitiesList({
    *   label: "Links",
    *   schema: z.object({
    *     title: z.string().min(1),
    *     url: z.string().url(),
-   *     category: z.enum(["People", "Finance"]),
    *   }),
-   *   config: {
-   *     canAddItems: true,
-   *     labels: { addButton: "Add link" },
-   *     maxItems: 8,
-   *   },
+   *   config: { labels: { addButton: "Add link" }, maxItems: 8 },
+   * })
+   *
+   * @example
+   * // Split schemas — add with fewer fields, edit with more:
+   * members: f0FormField.entitiesList({
+   *   label: "Members",
+   *   createSchema: z.object({ name: z.string(), email: z.string().email() }),
+   *   updateSchema: z.object({
+   *     name: z.string(),
+   *     email: z.string().email(),
+   *     role: f0FormField.select({ label: "Role", options }).optional(),
+   *   }),
    * })
    */
+  // Single-schema overloads.
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
-    config: EntitiesListConfig<TItem> & { optional: true }
+    config: EntitiesListSingleConfig<TItem> & { optional: true }
   ): OptionalEntitiesListArray<TItem> &
     F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
-    config: EntitiesListConfig<TItem> & { optional?: false | undefined }
+    config: EntitiesListSingleConfig<TItem> & { optional?: false | undefined }
   ): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>
-  export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>({
-    optional,
-    schema,
-    ...config
-  }: EntitiesListConfig<TItem>) {
-    const options = config.config
-    let base = z.array(schema)
+  // Split-schema overloads: the value type follows `updateSchema`.
+  export function entitiesList<
+    TCreate extends z.ZodObject<z.ZodRawShape>,
+    TUpdate extends z.ZodObject<z.ZodRawShape>,
+  >(
+    config: EntitiesListSplitConfig<TCreate, TUpdate> & { optional: true }
+  ): OptionalEntitiesListArray<TUpdate> &
+    F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>
+  export function entitiesList<
+    TCreate extends z.ZodObject<z.ZodRawShape>,
+    TUpdate extends z.ZodObject<z.ZodRawShape>,
+  >(
+    config: EntitiesListSplitConfig<TCreate, TUpdate> & {
+      optional?: false | undefined
+    }
+  ): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>
+  export function entitiesList(
+    config: EntitiesListBaseConfig & {
+      optional?: boolean
+      schema?: z.ZodObject<z.ZodRawShape>
+      createSchema?: z.ZodObject<z.ZodRawShape>
+      updateSchema?: z.ZodObject<z.ZodRawShape>
+    }
+  ) {
+    const { optional, schema, createSchema, updateSchema, ...rest } = config
+    // Canonical row schema: the single `schema`, or the `updateSchema` (the
+    // fuller edit shape) in split mode.
+    const canonical = (schema ?? updateSchema) as z.ZodObject<z.ZodRawShape>
+    const options = rest.config
+    let base = z.array(canonical)
     const effectiveMin = options?.minItems ?? (optional ? undefined : 1)
     if (effectiveMin !== undefined) base = base.min(effectiveMin)
     if (options?.maxItems !== undefined) base = base.max(options.maxItems)
     const finalSchema = optional ? base.optional() : base
     return f0FormField(
       finalSchema as never,
-      { ...config, schema, fieldType: "entitiesList" } as never
+      {
+        ...rest,
+        schema: canonical,
+        createSchema: createSchema ?? canonical,
+        updateSchema: updateSchema ?? canonical,
+        fieldType: "entitiesList",
+      } as never
     )
   }
 }

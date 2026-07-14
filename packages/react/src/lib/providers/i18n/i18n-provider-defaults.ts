@@ -775,6 +775,7 @@ export const defaultTranslations = {
     entitiesList: {
       add: "Add",
       edit: "Edit",
+      remove: "Remove",
       addBlockedHint:
         "Finish filling out the last item you just added in order to add another one",
     },

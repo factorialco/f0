@@ -439,6 +439,41 @@ With more than 2 fields it switches to **dialog** mode by default: the cells are
 
 `editableIds` locks editing to items whose `id` is listed — locked rows render as read-only (disabled) cells. Items without an `id` (rows the user just added) always stay editable.
 
+### List-view visualization
+
+When there's no inline editing, set `config.visualization: "list-view"` to render the items as a OneDataCollection **list** instead of a read-only table. Each row shows a title (the first field) and description lines (the rest); **Add** and the per-row **Edit** action open the form dialog, and rows have a **Remove** action. Override the row labelling with `config.listItem` (`title` / `description` / `avatar` functions). Drag-reorder isn't available in list mode.
+
+```tsx
+config: {
+  visualization: "list-view",
+  // optional — defaults to first field as title, the rest as description:
+  listItem: {
+    title: (m) => m.name,
+    description: (m) => [m.email, m.role].filter(Boolean),
+  },
+}
+```
+
+<Canvas of={Stories.EntitiesListFieldListView} />
+
+### Split create / update schemas
+
+Instead of a single `schema`, provide `createSchema` (the reduced set of fields shown when **adding**) and `updateSchema` (the fuller set shown when **editing**). `updateSchema` is the canonical row shape used for columns, display and the field value — so any field only in `updateSchema` should be `optional`, keeping freshly-added rows valid. Split schemas always edit through the dialog.
+
+```tsx
+members: f0FormField.entitiesList({
+  label: "Members",
+  createSchema: z.object({ name: z.string(), email: z.string().email() }),
+  updateSchema: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    role: f0FormField.select({ label: "Role", options, optional: true }),
+  }),
+})
+```
+
+<Canvas of={Stories.EntitiesListFieldSplitSchema} />
+
 ### Custom row actions
 
 `config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row:
@@ -461,6 +496,7 @@ config: {
 - `canAddItems` (default `true`) — show the add button. Adding is blocked while an existing row is still invalid.
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
 - `labels` — `addButton`, `addButtonDescription` and `editDialogTitle` (dialog mode).
+- `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
 
 ### Auto-save
 
