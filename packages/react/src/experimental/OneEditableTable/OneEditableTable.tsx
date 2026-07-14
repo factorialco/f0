@@ -99,6 +99,14 @@ const HANDLE_CELL_CLASSES = "first:pl-3"
 const ACTIONS_SHRINK_CLASSES = "w-px overflow-visible whitespace-nowrap"
 
 /**
+ * Minimum width for a column with no explicit width: a quarter of the table's
+ * visible width, so auto columns can't collapse to a couple of characters (the
+ * table scrolls instead). `cqw` resolves against the container-query context on
+ * the table root.
+ */
+const DATA_CELL_MIN_WIDTH = "min-w-[25cqw]"
+
+/**
  * Focus/hover highlight applied directly to the editable `td` (not the inner
  * cell) so it lands on the real cell boundary and lifts above the neighbouring
  * cells (`z-10`) instead of being clipped by them.
@@ -247,6 +255,13 @@ function RowCells<R extends RecordType>({
             minWidth={column.minWidth}
             className={cn(
               CELL_CLASSES,
+              // Columns without an explicit width keep a minimum of a quarter of
+              // the table's visible width so they can't collapse to a few
+              // characters (the table scrolls instead). `cqw` resolves against
+              // the container-query context on the root.
+              column.width == null &&
+                column.minWidth == null &&
+                DATA_CELL_MIN_WIDTH,
               isEditableCell &&
                 (cellError ? EDITABLE_CELL_ERROR_RING : EDITABLE_CELL_RING)
             )}
@@ -544,7 +559,12 @@ function OneEditableTableBase<R extends RecordType>({
   return (
     // The data attribute lets global styles scope exceptions to this table
     // (e.g. F0Form's error-navigate shake skips the many cell inputs here).
-    <div className="flex flex-col items-start gap-3" data-f0-editable-table="">
+    <div
+      // `container-type: inline-size` makes `cqw` on cells resolve against this
+      // root's width (the field's visible width) — see DATA_CELL_MIN_WIDTH.
+      className="flex flex-col items-start gap-3 [container-type:inline-size]"
+      data-f0-editable-table=""
+    >
       <div
         className={cn(
           "w-full",
