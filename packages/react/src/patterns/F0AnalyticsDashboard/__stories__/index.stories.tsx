@@ -308,13 +308,45 @@ export const WithItemFilters: Story = {
     await waitFor(() => expect(metricTrigger).toHaveTextContent("1"))
     await expect(chartTrigger).not.toHaveTextContent("1")
 
+    // — Reopen: the operator select must render its options after a previous
+    // popover session (regression guard: the dropdown used to collapse when
+    // the popover was modal) —
+    await userEvent.click(metricTrigger)
+    await userEvent.click(await page.findByText("Country"))
+    const operatorTrigger = await page.findByRole("combobox")
+    await userEvent.click(operatorTrigger)
+    await userEvent.click(
+      await page.findByRole("option", { name: "Is one of" })
+    )
+    // Switching to a multiple-value operator swaps the form to the values
+    // input with the comma hint.
+    await expect(
+      await page.findByText("Separate multiple values with commas")
+    ).toBeInTheDocument()
+    const valuesInput = await page.findByRole("textbox")
+    await userEvent.type(valuesInput, "Spain, France")
+    await userEvent.click(page.getByRole("button", { name: "Apply selection" }))
+    await userEvent.click(page.getByRole("button", { name: "Apply filters" }))
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("total-headcount", {
+        country: { operator: "in", values: ["Spain", "France"] },
+      })
+    )
+
     // — Collection: native toolbar picker (next to search/settings) —
     onItemFiltersChange.mockClear()
     await userEvent.click(tableTrigger)
 
+    // Scope every query to the table's own picker. The metric popover may
+    // still be animating out — Radix keeps popover content mounted until the
+    // exit animation ends — so a global "Apply filters" lookup could
+    // transiently match both popovers' buttons.
     const tableInput = await page.findByRole("textbox")
     await userEvent.type(tableInput, "Germany")
-    await userEvent.click(page.getByRole("button", { name: "Apply filters" }))
+    const tablePicker = tableInput.closest("[role='dialog']") as HTMLElement
+    await userEvent.click(
+      within(tablePicker).getByRole("button", { name: "Apply filters" })
+    )
 
     await waitFor(() =>
       expect(onItemFiltersChange).toHaveBeenCalledWith("employee-table", {

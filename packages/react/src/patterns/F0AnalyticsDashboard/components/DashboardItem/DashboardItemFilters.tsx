@@ -90,7 +90,7 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange} modal>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <ButtonInternal
           label={i18n.filters.label}

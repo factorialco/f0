@@ -411,7 +411,10 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   // Default mode uses FilterPickerInner for the content
   return (
     <div className="flex items-center gap-2">
-      <Popover open={isOpen} onOpenChange={onOpenChange} modal>
+      {/* Deliberately non-modal: filter forms can host dropdowns (e.g. the
+          operator filter's condition select) whose popper content collapses
+          on reopen when nested inside a modal popover's scroll/focus lock. */}
+      <Popover open={isOpen} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <ButtonInternal
             variant="outline"

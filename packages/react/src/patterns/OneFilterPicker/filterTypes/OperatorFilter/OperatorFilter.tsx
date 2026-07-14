@@ -1,12 +1,38 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useId, useMemo, useState } from "react"
 
-import { F0Select } from "@/components/F0Select"
+import { F0Icon } from "@/components/F0Icon"
+import { Label } from "@/components/F0InputField/components/Label"
 import { InputInternal } from "@/components/F0TextInput/internal"
+import { ChevronDown } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/Select"
 
 import { FilterTypeComponentProps } from "../types"
+
+/**
+ * Input-styled trigger for the operator/value dropdowns.
+ *
+ * These pickers use the raw Select primitives with static `SelectItem`
+ * children (not `F0Select`) on purpose: `F0Select` virtualizes its list and
+ * only reveals it once the open animation emits `animationstart`. Inside a
+ * compact anchored popover that event can fail to fire, leaving the list
+ * stuck invisible and unmeasured. A fixed enum like the operator set has no
+ * need for virtualization, so the static path is both simpler and robust.
+ */
+const selectTriggerClassName =
+  "flex h-8 w-full items-center justify-between gap-2 rounded-md border " +
+  "border-solid border-f1-border-secondary bg-f1-background px-3 text-base " +
+  "text-f1-foreground outline-none transition-colors hover:bg-f1-background-hover " +
+  "focus-visible:ring-1 focus-visible:ring-f1-border-selected-bold " +
+  "data-[state=open]:bg-f1-background-hover [&>span]:truncate"
 
 /** How many value inputs an operator requires. */
 export type OperatorFilterValueMode = "none" | "single" | "multiple" | "range"
@@ -146,6 +172,7 @@ export function OperatorFilter({
   onChange,
 }: OperatorFilterComponentProps) {
   const i18n = useI18n()
+  const fieldId = useId()
   const options = schema.options
   const valueType = options.valueType ?? "string"
 
@@ -211,17 +238,47 @@ export function OperatorFilter({
     { value: "false", label: i18n.t("filters.operator.falseLabel") },
   ]
 
+  const renderEnumSelect = (
+    fieldKey: string,
+    label: string,
+    selectOptions: { value: string; label: string }[],
+    selectedValue: string | undefined,
+    onSelect: (next: string) => void,
+    placeholderText?: string
+  ): React.ReactNode => {
+    const id = `${fieldId}-${fieldKey}`
+    return (
+      <div className="flex flex-col gap-1.5">
+        <Label label={label} htmlFor={id} />
+        <Select value={selectedValue} onValueChange={onSelect}>
+          <SelectTrigger id={id} className={selectTriggerClassName}>
+            <SelectValue placeholder={placeholderText} />
+            <F0Icon icon={ChevronDown} size="sm" />
+          </SelectTrigger>
+          <SelectContent>
+            {selectOptions.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    )
+  }
+
   const renderSingleInput = (
     key: "single" | "from" | "to",
     label: string
   ): React.ReactNode =>
     valueType === "boolean" ? (
-      <F0Select
-        label={label}
-        options={booleanOptions}
-        value={draft[key] || undefined}
-        onChange={(next: string) => emit({ ...draft, [key]: next })}
-      />
+      renderEnumSelect(
+        key,
+        label,
+        booleanOptions,
+        draft[key] || undefined,
+        (next) => emit({ ...draft, [key]: next })
+      )
     ) : (
       <InputInternal
         label={label}
@@ -234,12 +291,13 @@ export function OperatorFilter({
 
   return (
     <div className="flex flex-col gap-3 p-2">
-      <F0Select
-        label={i18n.t("filters.operator.operatorLabel")}
-        options={operatorOptions}
-        value={operator?.value}
-        onChange={(next: string) => emit({ ...draft, operator: next })}
-      />
+      {renderEnumSelect(
+        "operator",
+        i18n.t("filters.operator.operatorLabel"),
+        operatorOptions,
+        operator?.value,
+        (next) => emit({ ...draft, operator: next })
+      )}
       {mode === "none" && (
         <p className="m-0 text-base text-f1-foreground-secondary">
           {i18n.t("filters.operator.noValueRequired")}
