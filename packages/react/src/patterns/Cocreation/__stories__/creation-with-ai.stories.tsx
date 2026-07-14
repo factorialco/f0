@@ -315,8 +315,16 @@ function SurveySettingsForm() {
  */
 function TemplatesCollection({
   onSelect,
+  fillHeight = true,
 }: {
   onSelect?: (item: Template) => void
+  /**
+   * When true (default, the browse tab) the collection fills its container and
+   * scrolls its list body internally. Pass false in the AI Canvas gallery so
+   * the collection sizes to its content and the panel body scrolls as one
+   * (toolbar + list together) instead of scrolling inside the data collection.
+   */
+  fillHeight?: boolean
 } = {}) {
   const { config } = useFlowConfig()
   const source = useDataCollectionSource({
@@ -332,7 +340,7 @@ function TemplatesCollection({
     <OneDataCollection
       source={source}
       visualizations={[listVisualization]}
-      fullHeight
+      fullHeight={fillHeight}
     />
   )
 }
@@ -365,7 +373,7 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
   // `TemplatesCanvasHeader`); the framework `onClose` is intentionally dropped.
   renderHeader: ({ content }) => <TemplatesCanvasHeader content={content} />,
   renderContent: ({ content }) => (
-    <div className="h-full w-full px-4 py-3">
+    <div className="h-full w-full overflow-y-auto px-4 py-3">
       {content.guidedTypeId ? (
         <GuidedTemplatesCanvasBody guidedTypeId={content.guidedTypeId} />
       ) : (
@@ -1663,7 +1671,7 @@ function TemplatesCanvasBody() {
         description: item.description,
       })
     )
-  return <TemplatesCollection onSelect={openPreview} />
+  return <TemplatesCollection onSelect={openPreview} fillHeight={false} />
 }
 
 // Sentinel id for the synthetic "Empty Form" entry prepended to the
@@ -1750,7 +1758,6 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
     <OneDataCollection
       source={source}
       visualizations={[guidedGalleryListVisualization]}
-      fullHeight
     />
   )
 }
