@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.33.0](https://github.com/factorialco/f0/compare/f0-react-v4.32.0...f0-react-v4.33.0) (2026-07-14)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add valueFormatter to metric items ([#4678](https://github.com/factorialco/f0/issues/4678)) ([0600ea1](https://github.com/factorialco/f0/commit/0600ea1e2eb7fdcaed86d81316034e0c8f9e13ea))
+
 ## [4.32.0](https://github.com/factorialco/f0/compare/f0-react-v4.31.0...f0-react-v4.32.0) (2026-07-13)
 
 
