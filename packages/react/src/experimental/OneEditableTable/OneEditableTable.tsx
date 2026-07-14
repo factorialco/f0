@@ -159,7 +159,7 @@ function RowActionButton<R extends RecordType>({
   )
   if (!action.critical) return button
   return (
-    <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold hover:[&_svg]:!text-f1-icon-inverse active:[&_svg]:!text-f1-icon-inverse">
+    <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold [&:hover_svg]:!text-f1-icon-inverse [&:active_svg]:!text-f1-icon-inverse">
       {button}
     </span>
   )
@@ -281,7 +281,7 @@ function RowCells<R extends RecordType>({
               // icon white on mere row hover. Pin it to the critical color and
               // only invert on the button's own hover/active (when it fills
               // red). F0Button strips `className`, so scope it via a wrapper.
-              <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold hover:[&_svg]:!text-f1-icon-inverse active:[&_svg]:!text-f1-icon-inverse">
+              <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold [&:hover_svg]:!text-f1-icon-inverse [&:active_svg]:!text-f1-icon-inverse">
                 <F0Button
                   type="button"
                   variant="critical"

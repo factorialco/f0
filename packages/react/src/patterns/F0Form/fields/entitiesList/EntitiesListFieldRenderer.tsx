@@ -17,6 +17,7 @@ import type { F0EntitiesListField, EntitiesListItem } from "./types"
 
 import { f0FormField, isZodType, unwrapZodSchema } from "../../f0Schema"
 import { openFormDialog } from "../../openFormDialog"
+import { inferInputType } from "../text/schema"
 
 /**
  * With more than this many item-schema properties, adding and editing happen
@@ -366,9 +367,15 @@ export function EntitiesListFieldRenderer({
         }
       }
 
+      // Derive the text input type from the schema so url/email cells get
+      // their leading icon (link/envelope), matching F0Form's text fields.
+      const detected = inferInputType(itemShape[key])
+      const inputType =
+        detected === "email" || detected === "url" ? detected : "text"
       return {
         ...base,
         editType: (row: EntitiesListRow) => editTypeFor(row, "text"),
+        textConfig: { inputType },
       }
     })
 
