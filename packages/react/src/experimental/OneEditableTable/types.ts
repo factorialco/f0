@@ -139,6 +139,8 @@ export type OneEditableTableProps<R extends RecordType> = {
     onClick: () => void | Promise<void>
     /** Disables the add button (e.g. while an existing row is still invalid). */
     disabled?: boolean
+    /** Tooltip shown on hover while the add button is `disabled`, explaining why. */
+    disabledTooltip?: string
   }
   /** Wraps the table in a rounded border container. @default true */
   bordered?: boolean

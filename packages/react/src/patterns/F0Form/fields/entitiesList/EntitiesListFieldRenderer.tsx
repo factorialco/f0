@@ -101,26 +101,28 @@ export function EntitiesListFieldRenderer({
   const translations = forms.entitiesList
   const keyCounter = useRef(0)
 
-  // After a submit attempt, errors show on every cell (even untouched ones).
+  // After a submit attempt, errors show on every cell (even untouched ones) —
+  // except when the field auto-saves, since auto-save submits silently and
+  // would otherwise light up a just-added row before the user edits it.
   const { formState } = useFormContext()
-  const submitCount = formState.submitCount
+  const revealAllOnSubmit = formState.submitCount > 0 && !field.autoSave
 
   /**
    * Error-display gating so a freshly added (still empty) row doesn't light up
    * with validation errors before the user had a chance to fill it:
    * - Rows added inline start "fresh"; their cells show no error.
    * - A cell shows its error once it has been edited ("touched").
-   * - A submit attempt reveals all errors.
+   * - An explicit submit reveals all errors (auto-save doesn't).
    */
   const freshRowKeysRef = useRef<Set<string>>(new Set())
   const touchedCellsRef = useRef<Set<string>>(new Set())
   const shouldShowCellError = useCallback(
     (rowKey: string, columnId: string): boolean => {
-      if (submitCount > 0) return true
+      if (revealAllOnSubmit) return true
       if (!freshRowKeysRef.current.has(rowKey)) return true
       return touchedCellsRef.current.has(`${rowKey}:${columnId}`)
     },
-    [submitCount]
+    [revealAllOnSubmit]
   )
 
   const itemShape: Record<string, ZodTypeAny> = field.itemSchema?.shape ?? {}
@@ -561,6 +563,7 @@ export function EntitiesListFieldRenderer({
             : {
                 label: field.labels?.addButton ?? translations.add,
                 disabled: hasInvalidRow,
+                disabledTooltip: translations.addBlockedHint,
                 onClick: () => {
                   if (useDialogMode) {
                     openItemDialog("add")

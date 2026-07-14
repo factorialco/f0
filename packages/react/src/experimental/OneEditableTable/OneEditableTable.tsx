@@ -34,6 +34,12 @@ import { Add, Delete, Handle, Pencil } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/ui/tooltip"
 import { EditableCellRenderer } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/components/EditableCellRenderer"
 import { EditableRowProvider } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/context/EditableRowContext"
 
@@ -46,14 +52,6 @@ import type {
 
 /** Width (px) of the leading drag-handle column. */
 const HANDLE_COL_WIDTH = 36
-/** Width (px) of the trailing actions column with a single (remove) button. */
-const SINGLE_ACTION_COL_WIDTH = 56
-/**
- * Width (px) of the trailing actions column with an "Edit" button + remove.
- * Sized to fit the content tightly (button + gap + button + px-2) so the
- * column doesn't waste space and push the table past its container.
- */
-const DOUBLE_ACTION_COL_WIDTH = 128
 
 const ROW_CLASSES = cn(
   "group transition-colors hover:bg-f1-background-hover",
@@ -264,7 +262,7 @@ function RowCells<R extends RecordType>({
           sticky={{ right: 0 }}
           className={CELL_CLASSES}
         >
-          <div className="pointer-events-auto flex h-full items-center justify-end gap-2 px-2">
+          <div className="pointer-events-auto flex h-full items-center justify-center gap-2 px-2">
             {showEdit && (
               <F0Button
                 type="button"
@@ -438,13 +436,9 @@ function OneEditableTableBase<R extends RecordType>({
   const hasAnyRowAction =
     !!rowActions && items.some((item, i) => rowActions(item, i).length > 0)
   const hasActionsColumn = !!onRemoveRow || !!onEditRow || hasAnyRowAction
-  // Custom actions have unknown widths (icon-only or labelled), so let the
-  // column size to its content; the built-in edit/remove pair uses fixed widths.
-  const actionsColWidth: ColumnWidth = hasAnyRowAction
-    ? "auto"
-    : onEditRow && onRemoveRow
-      ? DOUBLE_ACTION_COL_WIDTH
-      : SINGLE_ACTION_COL_WIDTH
+  // The actions column always sizes to its content (as small as possible), so
+  // its width isn't configurable.
+  const actionsColWidth: ColumnWidth = "auto"
 
   const rows = items.map((item, index) => {
     const rowId = rowIds[index]
@@ -560,17 +554,44 @@ function OneEditableTableBase<R extends RecordType>({
           table
         )}
       </div>
-      {addRow && (
-        <F0Button
-          type="button"
-          variant="outline"
-          size="md"
-          icon={Add}
-          label={addRow.label ?? t("collections.editableTable.addRow")}
-          onClick={addRow.onClick}
-          disabled={addRow.disabled}
-        />
-      )}
+      {addRow &&
+        (addRow.disabled && addRow.disabledTooltip ? (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              {/* A disabled button emits no hover events, so the span wrapper
+                  is the tooltip trigger and the button is pointer-transparent
+                  (hover passes through to the span). */}
+              <TooltipTrigger asChild>
+                <span className="inline-flex cursor-not-allowed [&_button]:pointer-events-none">
+                  <F0Button
+                    type="button"
+                    variant="outline"
+                    size="md"
+                    icon={Add}
+                    label={
+                      addRow.label ?? t("collections.editableTable.addRow")
+                    }
+                    onClick={addRow.onClick}
+                    disabled
+                  />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {addRow.disabledTooltip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : (
+          <F0Button
+            type="button"
+            variant="outline"
+            size="md"
+            icon={Add}
+            label={addRow.label ?? t("collections.editableTable.addRow")}
+            onClick={addRow.onClick}
+            disabled={addRow.disabled}
+          />
+        ))}
     </div>
   )
 }

@@ -773,6 +773,8 @@ export const defaultTranslations = {
     entitiesList: {
       add: "Add",
       edit: "Edit",
+      addBlockedHint:
+        "Finish filling out the last item you just added in order to add another one",
     },
     moreInformation: "More information",
     validation: {
