@@ -11,6 +11,7 @@ export function DisabledCell<R extends RecordType>({
 }: EditableCellProps<R>) {
   return (
     <BaseCell
+      disabled
       borderOnHover={false}
       hint={hint}
       hintPosition="right"

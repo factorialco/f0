@@ -199,6 +199,8 @@ export const defaultTranslations = {
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
+        addColumn: "Add column",
+        removeColumn: "Remove column",
       },
     },
     editableTable: {

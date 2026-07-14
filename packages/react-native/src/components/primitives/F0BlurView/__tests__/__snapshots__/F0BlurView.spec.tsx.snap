@@ -2,8 +2,8 @@
 
 exports[`F0BlurView Snapshots renders with children 1`] = `
 <View
+  blurMethod="none"
   className="overflow-hidden"
-  experimentalBlurMethod="none"
   intensity={40}
   style={
     [
@@ -22,8 +22,8 @@ exports[`F0BlurView Snapshots renders with children 1`] = `
 
 exports[`F0BlurView Snapshots renders with custom intensity 1`] = `
 <View
+  blurMethod="none"
   className="overflow-hidden"
-  experimentalBlurMethod="none"
   intensity={80}
   style={
     [
@@ -38,8 +38,8 @@ exports[`F0BlurView Snapshots renders with custom intensity 1`] = `
 
 exports[`F0BlurView Snapshots renders with dark tint 1`] = `
 <View
+  blurMethod="none"
   className="overflow-hidden"
-  experimentalBlurMethod="none"
   intensity={40}
   style={
     [
@@ -54,8 +54,8 @@ exports[`F0BlurView Snapshots renders with dark tint 1`] = `
 
 exports[`F0BlurView Snapshots renders with defaults 1`] = `
 <View
+  blurMethod="none"
   className="overflow-hidden"
-  experimentalBlurMethod="none"
   intensity={40}
   style={
     [

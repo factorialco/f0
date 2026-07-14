@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.57.0...f0-react-native-v0.58.0) (2026-07-10)
+
+
+### Features
+
+* **react-native:** support Expo SDK 56 (React Native 0.85) ([#4584](https://github.com/factorialco/f0/issues/4584)) ([c8312c9](https://github.com/factorialco/f0/commit/c8312c955f59dcb162c9dfbcabe6a5e60ee782a4))
+
 ## [0.57.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.56.0...f0-react-native-v0.57.0) (2026-07-06)
 
 

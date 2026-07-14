@@ -287,6 +287,77 @@ describe("CollectionActions", () => {
     })
   })
 
+  describe("primary action tooltip", () => {
+    it("wraps a single primary action with Tooltip when tooltip returns a string", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "Process payroll results",
+          icon: mockIcon,
+          onClick: vi.fn(),
+          disabled: true,
+          tooltip: ({ disabled }) =>
+            disabled ? "Results are not available yet" : undefined,
+        },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      const tooltip = screen.getByTestId("tooltip")
+      expect(tooltip).toBeInTheDocument()
+      expect(tooltip).toHaveAttribute(
+        "data-description",
+        "Results are not available yet"
+      )
+      expect(screen.getByText("Process payroll results")).toBeInTheDocument()
+    })
+
+    it("renders a single primary action without Tooltip when tooltip returns undefined", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "Process payroll results",
+          icon: mockIcon,
+          onClick: vi.fn(),
+          disabled: false,
+          tooltip: ({ disabled }) =>
+            disabled ? "Results are not available yet" : undefined,
+        },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
+      expect(screen.getByText("Process payroll results")).toBeInTheDocument()
+    })
+
+    it("renders a single primary action without Tooltip when tooltip is not provided", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        { label: "New expense", icon: mockIcon, onClick: vi.fn() },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
+      expect(screen.getByText("New expense")).toBeInTheDocument()
+    })
+
+    it("receives the loading state in the tooltip params", () => {
+      const tooltip = vi.fn(() => undefined)
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "New expense",
+          icon: mockIcon,
+          onClick: vi.fn(),
+          loading: true,
+          tooltip,
+        },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(tooltip).toHaveBeenCalledWith({ disabled: false, loading: true })
+    })
+  })
+
   describe("secondary actions tooltip", () => {
     it("wraps secondary action with Tooltip when tooltip returns a string", () => {
       render(
