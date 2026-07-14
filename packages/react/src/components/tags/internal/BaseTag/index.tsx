@@ -56,7 +56,12 @@ export const BaseTag = forwardRef<HTMLDivElement, BaseTagProps>(
     additionalAccessibleText =
       additionalAccessibleText || (hideLabel ? text : undefined)
     return (
-      <div className="flex w-fit max-w-full flex-row items-center justify-start gap-1">
+      // data-no-strike opts the whole tag subtree out of row-level decorations
+      // (e.g. the "striked" referenceRowType), which must not cross tag text.
+      <div
+        data-no-strike
+        className="flex w-fit max-w-full flex-row items-center justify-start gap-1"
+      >
         <div
           ref={ref}
           className={cn(
