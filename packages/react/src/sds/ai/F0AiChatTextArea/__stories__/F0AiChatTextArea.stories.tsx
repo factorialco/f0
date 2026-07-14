@@ -100,11 +100,6 @@ const CREDIT_WARNING: AiChatCreditWarning = {
   onDismiss: () => console.log("dismiss clicked"),
 }
 
-const NO_CREDITS_WARNING: AiChatCreditWarning = {
-  level: "hard",
-  onGetCredits: () => console.log("get credits clicked"),
-}
-
 const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
   {
     id: "empty-survey",
@@ -464,23 +459,6 @@ export const InProgress: Story = {
 export const WithCreditWarning: Story = {
   args: {
     creditWarning: CREDIT_WARNING,
-  },
-}
-
-/**
- * Credits exhausted (`level: "hard"`). The banner turns critical, and the send
- * and microphone buttons are disabled with a tooltip explaining why. Sending is
- * blocked at every entry point — button click and the Enter key — while the
- * textarea stays editable so the draft survives. Hover the send button to see
- * the reason.
- */
-export const NoCredits: Story = {
-  args: {
-    isWelcomeScreen: true,
-    fullscreen: true,
-    placeholders: ROTATING_PLACEHOLDERS,
-    onTranscribe: mockTranscribe,
-    creditWarning: NO_CREDITS_WARNING,
   },
 }
 

@@ -1,7 +1,6 @@
-import { type ReactNode, type RefObject } from "react"
+import { type RefObject } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { TooltipInternal } from "@/experimental/Overlays/Tooltip"
 import {
   ArrowUp,
   Check,
@@ -25,14 +24,6 @@ interface ActionBarProps {
   inProgress?: boolean
   hasDataToSend: boolean
   isPreSending?: boolean
-  /**
-   * Hard-blocks sending (send + microphone disabled) regardless of input —
-   * e.g. AI credits are exhausted. The real submit guard lives in
-   * `F0AiChatTextArea`; this only drives the button affordance.
-   */
-  sendDisabled?: boolean
-  /** Tooltip explaining why sending is disabled. Shown on the send + mic buttons. */
-  sendDisabledReason?: string
   /** Voice dictation — when canRecord is false the microphone is hidden. */
   canRecord?: boolean
   recordingStatus?: RecorderStatus
@@ -41,28 +32,6 @@ interface ActionBarProps {
   onStopRecording?: () => void
   onCancelRecording?: () => void
 }
-
-/**
- * Wrap a disabled button so its tooltip still fires on hover. A native
- * `disabled` <button> swallows pointer events, so the tooltip that
- * `ButtonInternal` renders on the button itself never opens. Putting the
- * tooltip trigger on a hoverable wrapper (same pattern as F0OneSwitch) keeps
- * the reason discoverable while the button stays disabled.
- */
-const DisabledTooltip = ({
-  reason,
-  children,
-}: {
-  reason?: string
-  children: ReactNode
-}) =>
-  reason ? (
-    <TooltipInternal description={reason}>
-      <span className="inline-flex">{children}</span>
-    </TooltipInternal>
-  ) : (
-    <>{children}</>
-  )
 
 export const ActionBar = ({
   onUploadFiles,
@@ -74,8 +43,6 @@ export const ActionBar = ({
   inProgress,
   hasDataToSend,
   isPreSending,
-  sendDisabled,
-  sendDisabledReason,
   canRecord,
   recordingStatus = "idle",
   recordingStream,
@@ -153,25 +120,17 @@ export const ActionBar = ({
       </div>
       <div className="flex items-center gap-2">
         {canRecord && (
-          <DisabledTooltip
-            reason={sendDisabled ? sendDisabledReason : undefined}
-          >
-            <ButtonInternal
-              label={translation.ai.recordAudio}
-              hideLabel
-              // Suppress the button's own auto-tooltip while disabled — it
-              // wouldn't fire (disabled buttons swallow hover) and would
-              // shadow the wrapper's reason tooltip.
-              noAutoTooltip={sendDisabled}
-              type="button"
-              icon={Microphone}
-              variant="outline"
-              size="md"
-              disabled={inProgress || sendDisabled}
-              onClick={onStartRecording}
-              loading={recordingStatus === "transcribing"}
-            />
-          </DisabledTooltip>
+          <ButtonInternal
+            label={translation.ai.recordAudio}
+            hideLabel
+            type="button"
+            icon={Microphone}
+            variant="outline"
+            size="md"
+            disabled={inProgress}
+            onClick={onStartRecording}
+            loading={recordingStatus === "transcribing"}
+          />
         )}
         {recordingStatus !== "transcribing" && inProgress ? (
           <ButtonInternal
@@ -182,22 +141,16 @@ export const ActionBar = ({
             hideLabel
           />
         ) : (
-          <DisabledTooltip
-            reason={sendDisabled ? sendDisabledReason : undefined}
-          >
-            <ButtonInternal
-              type="submit"
-              // Stays enabled while an attachment uploads so the click queues the
-              // send (fired once the upload finishes) instead of being a no-op.
-              // `sendDisabled` (e.g. no credits) hard-blocks it regardless.
-              disabled={!hasDataToSend || isPreSending || sendDisabled}
-              noAutoTooltip={sendDisabled}
-              variant={"default"}
-              label={translation.ai.sendMessage}
-              icon={ArrowUp}
-              hideLabel
-            />
-          </DisabledTooltip>
+          <ButtonInternal
+            type="submit"
+            // Stays enabled while an attachment uploads so the click queues the
+            // send (fired once the upload finishes) instead of being a no-op.
+            disabled={!hasDataToSend || isPreSending}
+            variant={"default"}
+            label={translation.ai.sendMessage}
+            icon={ArrowUp}
+            hideLabel
+          />
         )}
       </div>
     </div>

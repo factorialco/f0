@@ -207,10 +207,6 @@ export const F0AiChatTextArea = ({
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
   const hasDataToSend = inputValue.trim().length > 0
-  // Hard credit warning = credits exhausted. Sending is blocked everywhere
-  // (send button, mic, and the Enter key); the textarea stays editable so the
-  // user keeps their draft while they top up.
-  const creditsExhausted = creditWarning?.level === "hard"
 
   // Fire a queued submit once all attachments finish uploading. If an upload
   // failed, do NOT auto-send (the message would go without the file) — surface
@@ -241,7 +237,7 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend && !isPreSending && !creditsExhausted) {
+    } else if (hasDataToSend && !isPreSending) {
       // Attachment still uploading: queue the send instead of dropping it.
       if (isUploading) {
         setPendingSubmit(true)
@@ -294,9 +290,7 @@ export const F0AiChatTextArea = ({
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      // Out of credits: Enter must not send either (the button being disabled
-      // only covers clicks). Swallow the key so no newline is inserted.
-      if (!inProgress && !creditsExhausted) {
+      if (!inProgress) {
         formRef.current?.requestSubmit()
       }
     }
@@ -553,10 +547,6 @@ export const F0AiChatTextArea = ({
                     inProgress={inProgress}
                     hasDataToSend={hasDataToSend}
                     isPreSending={isPreSending || pendingSubmit}
-                    sendDisabled={creditsExhausted}
-                    sendDisabledReason={
-                      translation.ai.creditWarning.sendDisabled
-                    }
                     canRecord={canRecord}
                     recordingStatus={recorder.status}
                     recordingStream={recorder.stream}

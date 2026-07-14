@@ -9,14 +9,10 @@ import { type AiChatCreditWarning } from "../../F0AiChat/types"
 
 const creditWarningConfig = {
   soft: {
+    text: "" as string,
     bg: "bg-f1-background-info",
     fontColor: "text-f1-foreground-info",
     formBorder: "[&_form]:border-f1-border-info",
-  },
-  hard: {
-    bg: "bg-f1-background-warning",
-    fontColor: "text-f1-foreground-warning",
-    formBorder: "[&_form]:border-f1-border-warning",
   },
 }
 
@@ -35,10 +31,7 @@ export const CreditWarningWrapper = ({
 
   const config = {
     ...creditWarningConfig[creditWarning.level],
-    text:
-      creditWarning.level === "hard"
-        ? translation.ai.creditWarning.hard
-        : translation.ai.creditWarning.soft,
+    text: translation.ai.creditWarning.soft,
   }
 
   return (
