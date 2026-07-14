@@ -32,7 +32,12 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
-import type { DashboardItemAction } from "../../types"
+import type {
+  DashboardItemAction,
+  DashboardItemFiltersConfig,
+} from "../../types"
+
+import { DashboardItemFilters } from "./DashboardItemFilters"
 
 interface DashboardItemProps {
   title: string
@@ -47,6 +52,12 @@ interface DashboardItemProps {
   downloadActions?: DropdownItemType[]
   /** Host-provided actions shown at the top level of the widget menu. */
   itemActions?: ReadonlyArray<DashboardItemAction>
+  /**
+   * Per-widget filter configuration. When set, a filter icon is rendered in
+   * the header (between the fullscreen and menu buttons) opening a compact
+   * anchored filter popover.
+   */
+  itemFilters?: DashboardItemFiltersConfig
   /** When true, adds a "Delete" option to the dropdown menu */
   editMode?: boolean
   /** Called when the user clicks the delete action */
@@ -92,6 +103,7 @@ export function DashboardItem({
   children,
   downloadActions = [],
   itemActions = [],
+  itemFilters,
   editMode,
   handleDelete,
   itemId,
@@ -101,6 +113,7 @@ export function DashboardItem({
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false)
   const pendingItemActionRef = useRef<(() => void) | null>(null)
   /**
    * When true, the dropdown menu's content is swapped from the action list
@@ -127,6 +140,9 @@ export function DashboardItem({
   )
   const hasDownloads = actionableDownloads.length > 0
   const hasItemActions = itemActions.length > 0
+  // `value` only ever contains applied filters, so any key means "filtered".
+  const hasAppliedItemFilters =
+    !!itemFilters && Object.keys(itemFilters.value).length > 0
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
@@ -167,7 +183,7 @@ export function DashboardItem({
           className={cn(
             "flex flex-shrink-0 gap-0.5",
             !isFullscreen &&
-              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`
+              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen || isFilterPopoverOpen || hasAppliedItemFilters ? "delay-0 sm:opacity-100" : ""}`
           )}
         >
           {hasFullscreen && (
@@ -183,6 +199,12 @@ export function DashboardItem({
               hideLabel
               compact
               onClick={() => onFullscreenChange?.(!isFullscreen)}
+            />
+          )}
+          {itemFilters && (
+            <DashboardItemFilters
+              {...itemFilters}
+              onOpenChange={setIsFilterPopoverOpen}
             />
           )}
           {showMenu && (

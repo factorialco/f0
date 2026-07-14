@@ -5,6 +5,8 @@ import dateFilter, { DateFilterDefinition } from "./DateFilter"
 import inFilter, { InFilterDefinition } from "./InFilter"
 import { numberFilter, NumberFilterDefinition } from "./NumberFilter"
 import { NumberFilterValue } from "./NumberFilter/NumberFilter"
+import operatorFilter, { OperatorFilterDefinition } from "./OperatorFilter"
+import { OperatorFilterValue } from "./OperatorFilter/OperatorFilter"
 import searchFilter, { SearchFilterDefinition } from "./SearchFilter"
 import { FilterTypeDefinition } from "./types"
 
@@ -12,6 +14,7 @@ export type {
   DateFilterDefinition,
   InFilterDefinition,
   NumberFilterDefinition,
+  OperatorFilterDefinition,
   SearchFilterDefinition,
 }
 
@@ -26,6 +29,7 @@ export type FilterDefinitionsByType<
   search: SearchFilterDefinition
   date: DateFilterDefinition
   number: NumberFilterDefinition
+  operator: OperatorFilterDefinition
 }
 
 export const filterTypes = {
@@ -33,6 +37,7 @@ export const filterTypes = {
   search: searchFilter,
   date: dateFilter,
   number: numberFilter,
+  operator: operatorFilter,
 } as const
 
 /**
@@ -50,9 +55,11 @@ export type FilterValue<T extends FilterDefinition> =
       ? string
       : T extends DateFilterDefinition
         ? DateRange | Date | undefined
-        : T extends NumberFilterDefinition
-          ? NumberFilterValue | undefined
-          : never
+        : T extends OperatorFilterDefinition
+          ? OperatorFilterValue | undefined
+          : T extends NumberFilterDefinition
+            ? NumberFilterValue | undefined
+            : never
 
 /**
  * Base definition for all filter types.

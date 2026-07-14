@@ -330,6 +330,29 @@ export type DashboardItem<
   | DashboardCollectionItem<Filters>
 
 /**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * When provided for an item, its header shows a filter icon (between the
+ * fullscreen and menu buttons) that opens a compact anchored popover built on
+ * the OneFilterPicker filter types. The picker holds a draft state; `onChange`
+ * fires only when the user applies, with the emitted state containing active
+ * filters only (cleared/incomplete entries are stripped).
+ *
+ * Like `itemActions`, this lives on `F0AnalyticsDashboardProps` — not on the
+ * serializable item definition — so dashboard configs remain JSON-compatible.
+ */
+export interface DashboardItemFiltersConfig<
+  ItemFilters extends FiltersDefinition = FiltersDefinition,
+> {
+  /** Filter definitions available for this widget. */
+  filters: ItemFilters
+  /** Currently applied filter state for this widget. */
+  value: FiltersState<ItemFilters>
+  /** Called with the new state when the user applies changes. */
+  onChange: (value: FiltersState<ItemFilters>) => void
+}
+
+/**
  * A host-provided action rendered in a dashboard widget's top-level menu.
  *
  * Actions intentionally live on `F0AnalyticsDashboardProps` rather than the
@@ -422,6 +445,16 @@ export interface F0AnalyticsDashboardProps<
   itemActions?: (
     item: DashboardItem<Filters>
   ) => ReadonlyArray<DashboardItemAction> | undefined
+  /**
+   * Resolve the per-widget filter configuration for each dashboard item.
+   *
+   * Return a config to show a filter icon in that widget's header (between
+   * the fullscreen and menu buttons) opening a compact filter popover; return
+   * `undefined` to hide the control for that item.
+   */
+  itemFilters?: (
+    item: DashboardItem<Filters>
+  ) => DashboardItemFiltersConfig | undefined
   /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */

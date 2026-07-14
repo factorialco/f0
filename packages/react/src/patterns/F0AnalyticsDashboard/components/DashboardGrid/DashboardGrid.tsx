@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils"
 import type {
   DashboardItem as DashboardItemType,
   DashboardItemAction,
+  DashboardItemFiltersConfig,
   DashboardItemLayout,
 } from "../../types"
 
@@ -58,6 +59,9 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
   itemActions?: (
     item: DashboardItemType<Filters>
   ) => ReadonlyArray<DashboardItemAction> | undefined
+  itemFilters?: (
+    item: DashboardItemType<Filters>
+  ) => DashboardItemFiltersConfig | undefined
   filters: FiltersState<Filters>
   editMode?: boolean
   onLayoutChange?: (layout: DashboardItemLayout[]) => void
@@ -91,6 +95,7 @@ interface DashboardGridProps<Filters extends FiltersDefinition> {
 export function DashboardGrid<Filters extends FiltersDefinition>({
   items,
   itemActions,
+  itemFilters,
   filters,
   editMode,
   onLayoutChange,
@@ -415,6 +420,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         <DashboardGridItem
           item={soleItem}
           itemActions={itemActions?.(soleItem)}
+          itemFilters={itemFilters?.(soleItem)}
           filters={filters}
           editMode={editMode}
           onDelete={handleDelete}
@@ -437,6 +443,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
           <DashboardGridItem
             item={fullscreenItem}
             itemActions={itemActions?.(fullscreenItem)}
+            itemFilters={itemFilters?.(fullscreenItem)}
             filters={filters}
             editMode={editMode}
             onDelete={handleDelete}
@@ -510,6 +517,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     <DashboardGridItem
                       item={item}
                       itemActions={itemActions?.(item)}
+                      itemFilters={itemFilters?.(item)}
                       filters={filters}
                       editMode={editMode}
                       onDelete={handleDelete}
@@ -890,6 +898,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   item,
   filters,
   itemActions,
+  itemFilters,
   editMode,
   onDelete,
   onTransformChart,
@@ -899,6 +908,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
   item: DashboardItemType<Filters>
   filters: FiltersState<Filters>
   itemActions?: ReadonlyArray<DashboardItemAction>
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   onDelete?: (id: string) => void
   onTransformChart?: (
@@ -916,6 +926,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           itemActions={itemActions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
           onTransformChart={onTransformChart}
@@ -929,6 +940,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           itemActions={itemActions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
           isFullscreen={isFullscreen}
@@ -941,6 +953,7 @@ function DashboardGridItem<Filters extends FiltersDefinition>({
           item={item}
           filters={filters}
           itemActions={itemActions}
+          itemFilters={itemFilters}
           editMode={editMode}
           handleDelete={onDelete}
           isFullscreen={isFullscreen}

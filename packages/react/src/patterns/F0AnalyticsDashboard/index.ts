@@ -11,6 +11,7 @@ export type {
   DashboardItem,
   DashboardItemAction,
   DashboardItemBase,
+  DashboardItemFiltersConfig,
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardProps,

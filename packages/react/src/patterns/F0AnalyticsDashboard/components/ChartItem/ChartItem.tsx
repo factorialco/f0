@@ -35,6 +35,7 @@ import type {
   DashboardChartData,
   DashboardChartItem,
   DashboardItemAction,
+  DashboardItemFiltersConfig,
 } from "../../types"
 
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
@@ -387,6 +388,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
   itemActions?: ReadonlyArray<DashboardItemAction>
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onTransformChart?: (
@@ -402,6 +404,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
   itemActions,
+  itemFilters,
   editMode,
   handleDelete,
   onTransformChart,
@@ -506,6 +509,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       skeleton={chartSkeleton(item.chart)}
       downloadActions={downloadActions}
       itemActions={itemActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

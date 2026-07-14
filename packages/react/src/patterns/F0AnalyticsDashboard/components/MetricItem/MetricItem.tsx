@@ -11,6 +11,7 @@ import type {
   DashboardMetricData,
   DashboardMetricItem,
   DashboardItemAction,
+  DashboardItemFiltersConfig,
   MetricFormat,
 } from "../../types"
 
@@ -22,6 +23,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
   itemActions?: ReadonlyArray<DashboardItemAction>
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   isFullscreen?: boolean
@@ -87,6 +89,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
   itemActions,
+  itemFilters,
   editMode,
   handleDelete,
   isFullscreen,
@@ -110,6 +113,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={<MetricSkeleton />}
       itemActions={itemActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

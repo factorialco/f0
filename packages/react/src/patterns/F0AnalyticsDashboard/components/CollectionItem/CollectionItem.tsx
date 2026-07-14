@@ -9,7 +9,11 @@ import type { RecordType } from "@/hooks/datasource"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
-import type { DashboardCollectionItem, DashboardItemAction } from "../../types"
+import type {
+  DashboardCollectionItem,
+  DashboardItemAction,
+  DashboardItemFiltersConfig,
+} from "../../types"
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
@@ -18,6 +22,7 @@ interface CollectionItemProps<Filters extends FiltersDefinition> {
   item: DashboardCollectionItem<Filters>
   filters: FiltersState<Filters>
   itemActions?: ReadonlyArray<DashboardItemAction>
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   isFullscreen?: boolean
@@ -36,6 +41,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   item,
   filters,
   itemActions,
+  itemFilters,
   editMode,
   handleDelete,
   isFullscreen,
@@ -117,6 +123,7 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       isLoading={false}
       downloadActions={downloadActions}
       itemActions={itemActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

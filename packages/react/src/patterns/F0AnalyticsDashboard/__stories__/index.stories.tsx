@@ -640,3 +640,168 @@ export const EmptyDashboard: Story = {
     />
   ),
 }
+
+// ─── Item filters ────────────────────────────────────────────────
+
+const itemFilterIds = [
+  "total-headcount",
+  "headcount",
+  "employee-table",
+  "attrition-rate",
+]
+
+const itemFilterItems = itemFilterIds.flatMap((id, index) => {
+  const item = mixedItems.find((candidate) => candidate.id === id)
+  if (!item) return []
+
+  return [
+    {
+      ...item,
+      x: index < 3 ? index * 4 : 0,
+      y: index < 3 ? 0 : 7,
+      colSpan: 4,
+      rowSpan: index < 3 ? 7 : 3,
+      ...(id === "attrition-rate"
+        ? { title: "No filters (undefined)", explanation: undefined }
+        : {}),
+    },
+  ]
+})
+
+/**
+ * Operator-based filter definitions, mimicking a cube/semantic catalog where
+ * each field advertises the operators it supports.
+ */
+const itemFilterDefinitions = {
+  country: {
+    type: "operator" as const,
+    label: "Country",
+    options: {
+      operators: [
+        { value: "equals", label: "Is" },
+        { value: "not_equals", label: "Is not" },
+        { value: "in", label: "Is one of", valueMode: "multiple" as const },
+        { value: "contains", label: "Contains" },
+        { value: "set", label: "Has any value", valueMode: "none" as const },
+        { value: "not_set", label: "Has no value", valueMode: "none" as const },
+      ],
+      valueType: "string" as const,
+      suggestions: ["Spain", "France", "Germany"],
+    },
+  },
+  headcount: {
+    type: "operator" as const,
+    label: "Headcount",
+    options: {
+      operators: [
+        { value: "equals", label: "Equals" },
+        { value: "gt", label: "Greater than" },
+        { value: "lt", label: "Less than" },
+        { value: "between", label: "Between", valueMode: "range" as const },
+      ],
+      valueType: "number" as const,
+    },
+  },
+}
+
+const onItemFiltersChange = fn()
+
+const ItemFiltersDemo = ({
+  initialValues = {},
+}: {
+  initialValues?: Record<
+    string,
+    { [key: string]: { operator: string; values: (string | number)[] } }
+  >
+}) => {
+  const [valuesByItem, setValuesByItem] = useState(initialValues)
+
+  return (
+    <F0AnalyticsDashboard
+      items={itemFilterItems}
+      itemFilters={(item) => {
+        if (item.id === "attrition-rate") return undefined
+        return {
+          filters: itemFilterDefinitions,
+          value: valuesByItem[item.id] ?? {},
+          onChange: (value) => {
+            onItemFiltersChange(item.id, value)
+            setValuesByItem((prev) => ({
+              ...prev,
+              [item.id]: value as (typeof initialValues)[string],
+            }))
+          },
+        }
+      }}
+    />
+  )
+}
+
+/**
+ * Per-widget filters: each eligible widget header shows a filter icon
+ * (between fullscreen and the three-dot menu) that opens a compact anchored
+ * popover. The popover lists this widget's fields; drilling into a field
+ * shows an operator selector plus the value inputs that operator needs
+ * (single, multiple, range, or none). Applying emits `onChange` for that
+ * widget only. The last metric returns `undefined`, so it has no filter icon.
+ */
+export const WithItemFilters: Story = {
+  render: () => <ItemFiltersDemo />,
+  play: async ({ canvasElement }) => {
+    onItemFiltersChange.mockClear()
+    const page = within(canvasElement.closest("body")!)
+
+    const triggers = page.getAllByLabelText("Filters")
+    // Three eligible widgets — the fourth resolver returns undefined.
+    await expect(triggers).toHaveLength(3)
+
+    await userEvent.click(triggers[0])
+    await userEvent.click(await page.findByText("Country"))
+
+    const input = await page.findByRole("textbox")
+    await userEvent.type(input, "Spain")
+    await userEvent.click(page.getByRole("button", { name: "Apply selection" }))
+    await userEvent.click(page.getByRole("button", { name: "Apply filters" }))
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("total-headcount", {
+        country: { operator: "equals", values: ["Spain"] },
+      })
+    )
+    await expect(onItemFiltersChange).toHaveBeenCalledOnce()
+
+    // The applied filter surfaces as a counter on this widget's trigger only.
+    await waitFor(() => expect(triggers[0]).toHaveTextContent("1"))
+    await expect(triggers[1]).not.toHaveTextContent("1")
+  },
+}
+
+/**
+ * A widget with a filter already applied: the header controls stay visible
+ * (no hover needed) and the filter icon shows the applied-filter counter.
+ * Dismissing the popover without applying keeps the value intact.
+ */
+export const ItemFiltersApplied: Story = {
+  render: () => (
+    <ItemFiltersDemo
+      initialValues={{
+        headcount: { country: { operator: "not_set", values: [] } },
+      }}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    const triggers = page.getAllByLabelText("Filters")
+    const filtered = triggers.find((trigger) =>
+      trigger.textContent?.includes("1")
+    )
+    await expect(filtered).toBeDefined()
+
+    // Open and dismiss without applying — the counter must not change.
+    await userEvent.click(filtered!)
+    await expect(await page.findByText("Country")).toBeInTheDocument()
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => expect(filtered).toHaveTextContent("1"))
+  },
+}
