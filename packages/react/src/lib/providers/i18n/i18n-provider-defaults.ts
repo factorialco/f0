@@ -1,6 +1,9 @@
 import { i18nCountries } from "./partials/countries"
 
 export const defaultTranslations = {
+  common: {
+    selectPlaceholder: "Select",
+  },
   countries: i18nCountries,
   approvals: {
     history: "Approval history",
@@ -206,7 +209,6 @@ export const defaultTranslations = {
       removeRow: "Remove row",
       editRow: "Edit",
       reorderRow: "Drag to reorder",
-      selectPlaceholder: "Select",
     },
     itemsCount: "items",
     emptyStates: {

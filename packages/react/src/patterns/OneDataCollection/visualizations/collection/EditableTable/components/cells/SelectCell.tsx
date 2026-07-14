@@ -49,9 +49,7 @@ export function SelectCell<R extends RecordType>({
     },
     loading,
     size: "sm" as const,
-    placeholder:
-      config.placeholder ??
-      i18n.t("collections.editableTable.selectPlaceholder"),
+    placeholder: config.placeholder ?? i18n.t("common.selectPlaceholder"),
     showSearchBox: config.showSearchBox,
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
