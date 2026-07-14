@@ -6,7 +6,12 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
-import { F0Graph, F0GraphNode, F0GraphSkeleton } from "@/patterns/F0Graph"
+import {
+  F0Graph,
+  F0GraphNode,
+  F0GraphSkeleton,
+  tagColumn,
+} from "@/patterns/F0Graph"
 
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { ItemActionsDefinition } from "../../../item-actions"
@@ -182,7 +187,8 @@ export const GraphCollection = <
     ? (record: Record) =>
         [...tags(record)].sort(
           (a, b) =>
-            orderedTagTypes.indexOf(a.type) - orderedTagTypes.indexOf(b.type)
+            orderedTagTypes.indexOf(tagColumn(a)) -
+            orderedTagTypes.indexOf(tagColumn(b))
         )
     : undefined
 
