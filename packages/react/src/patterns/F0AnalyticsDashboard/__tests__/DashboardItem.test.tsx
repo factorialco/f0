@@ -129,7 +129,75 @@ describe("DashboardItem", () => {
     expect(triggerFocusedWhenCalled).toBe(true)
   })
 
+  it("supports keyboard activation after the menu restores trigger focus", async () => {
+    const user = userEvent.setup()
+    let triggerFocusedWhenCalled = false
+    const onClick = vi.fn(() => {
+      triggerFocusedWhenCalled =
+        document.activeElement === screen.getByLabelText("Other actions")
+    })
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemActions={[
+          {
+            id: "manage-filters",
+            label: "Manage filters",
+            onClick,
+          },
+        ]}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    const trigger = screen.getByLabelText("Other actions")
+    trigger.focus()
+    await user.keyboard(" ")
+    expect(screen.getByText("Manage filters")).toBeInTheDocument()
+
+    await user.keyboard("{Enter}")
+
+    await waitFor(() => expect(onClick).toHaveBeenCalledOnce())
+    expect(triggerFocusedWhenCalled).toBe(true)
+  })
+
+  it("dismisses a host item action menu with Escape without invoking it", async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+    render(
+      <DashboardItem
+        title="Revenue"
+        isLoading={false}
+        itemActions={[
+          {
+            id: "manage-filters",
+            label: "Manage filters",
+            onClick,
+          },
+        ]}
+      >
+        <div>Content</div>
+      </DashboardItem>
+    )
+
+    const trigger = screen.getByLabelText("Other actions")
+    trigger.focus()
+    await user.keyboard("{Enter}")
+    expect(screen.getByText("Manage filters")).toBeInTheDocument()
+
+    await user.keyboard("{Escape}")
+
+    await waitFor(() =>
+      expect(screen.queryByText("Manage filters")).not.toBeInTheDocument()
+    )
+    expect(trigger).toHaveFocus()
+    expect(onClick).not.toHaveBeenCalled()
+  })
+
   it("keeps host item actions available in the error state", async () => {
+    const user = userEvent.setup()
     const onClick = vi.fn()
     render(
       <DashboardItem
@@ -148,8 +216,9 @@ describe("DashboardItem", () => {
       </DashboardItem>
     )
 
-    await userEvent.click(screen.getByLabelText("Other actions"))
-    await userEvent.click(screen.getByText("Manage filters"))
+    screen.getByLabelText("Other actions").focus()
+    await user.keyboard("{Enter}")
+    await user.keyboard("{Enter}")
 
     await waitFor(() => expect(onClick).toHaveBeenCalledOnce())
     expect(screen.getByText("Invalid filter")).toBeInTheDocument()

@@ -206,6 +206,18 @@ A `DashboardItemAction` requires a stable `id`, a user-facing `label`, and an `o
 
 <Canvas of={Stories.WithItemActions} />
 
+The resolver can return different actions for each widget, including no actions
+for ineligible widgets. This example also shows icon and text-only actions,
+multiple actions, critical emphasis, and download coexistence across metric,
+chart, and collection widgets.
+
+<Canvas of={Stories.ItemActionVariants} />
+
+In edit mode, host actions compose with chart-type, explanation, download, and
+delete controls in the same menu.
+
+<Canvas of={Stories.ItemActionsWithBuiltInControls} />
+
 ## Guidelines
 
 ### Design best practices
@@ -282,6 +294,8 @@ A `DashboardItemAction` requires a stable `id`, a user-facing `label`, and an `o
 - WHEN a widget is loading or its data request fails → THEN host actions remain available so recovery workflows are not trapped behind the error.
 - WHEN `itemActions` returns `undefined` or an empty array and no built-in action applies → THEN the widget menu is omitted.
 - WHEN the dashboard has one item or an item enters fullscreen → THEN the same host actions remain available.
+- WHEN an action is edit-only → THEN the host resolver must omit it outside edit mode; `itemActions` itself is independent of `editMode`.
+- WHEN the dashboard renders → THEN `itemActions` may run for every widget, so keep the resolver pure and inexpensive.
 
 ### Usage examples
 
@@ -290,6 +304,18 @@ A `DashboardItemAction` requires a stable `id`, a user-facing `label`, and an `o
 Keep configuration and recovery actions reachable even when the data request they affect is invalid.
 
 <Canvas of={Stories.ItemActionsInErrorState} />
+
+**Working while data loads**
+
+Loading the widget body does not hide its contextual actions.
+
+<Canvas of={Stories.ItemActionsInLoadingState} />
+
+**Working in fullscreen**
+
+Fullscreen reuses the same per-widget action contract as the regular grid.
+
+<Canvas of={Stories.ItemActionsInFullscreen} />
 
 ## Accessibility
 
@@ -330,4 +356,5 @@ Keep configuration and recovery actions reachable even when the data request the
 
 - Widget menu triggers have an accessible “Other actions” label.
 - Loading widgets expose `aria-busy` and a polite live region.
+- Widget data errors are announced through an alert region.
 - Action labels identify the operation; provide distinct labels when several actions could otherwise sound identical.
