@@ -219,8 +219,47 @@ describe("usePerVisualizationFilters", () => {
         })
       )
 
-      // Per-viz presets REPLACE source presets
-      expect(result.current.effectivePresets).toEqual(viewPresets)
+      // Per-viz presets REPLACE source presets, and capture their own
+      // visualization index so applying one doesn't snap back to the first view.
+      expect(result.current.effectivePresets).toEqual(
+        viewPresets.map((preset) => ({ ...preset, visualization: 0 }))
+      )
+    })
+
+    it("captures the visualization index on per-view presets that don't declare one", () => {
+      const sourceSetCurrentFilters = vi.fn()
+      const viewPresets = [
+        {
+          label: "Active",
+          filter: { department: ["Engineering"] as string[] },
+        },
+        {
+          label: "Pinned",
+          filter: { department: ["Marketing"] as string[] },
+          visualization: 0,
+        },
+      ]
+
+      const { result } = renderHook(() =>
+        usePerVisualizationFilters<AllFilters>({
+          sourceFilters: allFilters,
+          sourcePresets: undefined,
+          sourceCurrentFilters: {},
+          sourceSetCurrentFilters,
+          visualizations: [
+            { type: "table", options: {} },
+            { type: "card", options: {}, presets: viewPresets },
+          ],
+          currentVisualization: 1,
+        })
+      )
+
+      // The preset without a declared visualization gets the active index (1);
+      // one that already declares a visualization is left untouched.
+      expect(result.current.effectivePresets).toEqual([
+        { ...viewPresets[0], visualization: 1 },
+        viewPresets[1],
+      ])
     })
 
     it("should filter global presets to only include those relevant to the active view's filters", () => {
