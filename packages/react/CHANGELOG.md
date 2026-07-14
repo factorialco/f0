@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.35.2](https://github.com/factorialco/f0/compare/f0-react-v4.35.1...f0-react-v4.35.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* **toast:** always-dark surface (fix dark mode) + neutral titles ([#4657](https://github.com/factorialco/f0/issues/4657)) ([1a9d7bd](https://github.com/factorialco/f0/commit/1a9d7bdd29743233584a2a1c9172530cd6e54c0e))
+
 ## [4.35.1](https://github.com/factorialco/f0/compare/f0-react-v4.35.0...f0-react-v4.35.1) (2026-07-14)
 
 
