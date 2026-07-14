@@ -4,7 +4,7 @@ import { ControllerRenderProps, FieldValues } from "react-hook-form"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import { F0TextInput } from "@/components/F0TextInput"
-import { Clock } from "@/icons/app"
+import { getFieldInputIcon } from "@/lib/field-input-icons"
 
 import type { ResolvedTimeField } from "./types"
 
@@ -72,7 +72,7 @@ export function TimeFieldRenderer({
       clearable={field.clearable}
       name={formField.name}
       ref={formField.ref}
-      icon={Clock}
+      icon={getFieldInputIcon("time")}
     />
   )
 }

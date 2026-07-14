@@ -5,6 +5,7 @@ import type { F0IconProps } from "@/components/F0Icon"
 import { F0Icon } from "@/components/F0Icon"
 import { Arrow } from "@/components/F0Select/components/Arrow"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
+import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { renderProperty } from "@/patterns/OneDataCollection/property-render"
@@ -39,7 +40,11 @@ export function ReadOnlyCellContent<R extends RecordType>({
 }: ReadOnlyCellContentProps<R>) {
   const i18n = useI18n()
 
-  const leadingIcon = resolveTextCellIcon(editableColumn.textConfig)
+  // A date column shows the shared calendar icon (same as the editable date
+  // cell / F0Form date field); otherwise a text cell's url/email icon.
+  const leadingIcon = editableColumn.dateConfig
+    ? getFieldInputIcon("date")
+    : resolveTextCellIcon(editableColumn.textConfig)
   const isSelect = !!editableColumn.selectConfig
   const alignRight = editableColumn.align === "right"
 

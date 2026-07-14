@@ -7,7 +7,7 @@ import type {
 
 import { DateStringFormat } from "@/components/OneCalendar/granularities/types"
 import { isActiveDate } from "@/components/OneCalendar/utils"
-import { Calendar } from "@/icons/app"
+import { getFieldInputIcon } from "@/lib/field-input-icons"
 import { useI18n } from "@/lib/providers/i18n"
 import { Input } from "@/ui/input"
 import { InputFieldProps } from "@/components/F0InputField"
@@ -108,7 +108,7 @@ const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
         <Input
           {...inputProps}
           placeholder={placeholder}
-          icon={showIcon ? Calendar : undefined}
+          icon={showIcon ? getFieldInputIcon("date") : undefined}
           ref={ref}
           onFocus={() => onOpenChange?.(true)}
           onClear={() => {

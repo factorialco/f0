@@ -215,6 +215,7 @@ function RowCells<R extends RecordType>({
       {dragHandle !== undefined && (
         <TableCell
           width={HANDLE_COL_WIDTH}
+          sticky={{ left: 0 }}
           className={cn(CELL_CLASSES, HANDLE_CELL_CLASSES)}
         >
           <div className="pointer-events-auto flex h-full items-center justify-center">
@@ -258,7 +259,11 @@ function RowCells<R extends RecordType>({
         )
       })}
       {hasActionsColumn && (
-        <TableCell width={actionsColWidth} className={CELL_CLASSES}>
+        <TableCell
+          width={actionsColWidth}
+          sticky={{ right: 0 }}
+          className={CELL_CLASSES}
+        >
           <div className="pointer-events-auto flex h-full items-center justify-end gap-2 px-2">
             {showEdit && (
               <F0Button
@@ -481,6 +486,7 @@ function OneEditableTableBase<R extends RecordType>({
           {sortableRows && (
             <TableHead
               width={HANDLE_COL_WIDTH}
+              sticky={{ left: 0 }}
               className={cn(
                 HEAD_CLASSES,
                 HANDLE_CELL_CLASSES,
@@ -505,6 +511,7 @@ function OneEditableTableBase<R extends RecordType>({
           {hasActionsColumn && (
             <TableHead
               width={actionsColWidth}
+              sticky={{ right: 0 }}
               className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
             >
               <span className="sr-only">{actionsLabel}</span>
