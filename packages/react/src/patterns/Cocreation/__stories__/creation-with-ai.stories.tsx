@@ -30,10 +30,10 @@ import {
   SolidPlay,
 } from "@/icons/app"
 import { F0Alert } from "@/components/F0Alert"
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Button } from "@/components/F0Button"
 import { F0Heading } from "@/components/F0Heading"
 import { dialogs } from "@/lib/providers/dialogs-alike"
-import { ButtonGroup } from "@/ui/ButtonGroup"
+import { ButtonGroup, ButtonGroupSeparator } from "@/ui/ButtonGroup"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
 import { Tabs } from "@/patterns/Navigation/Tabs"
@@ -1037,7 +1037,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
 
   return (
     <div className="flex flex-row items-center gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
-      <ButtonInternal
+      <F0Button
         variant="outline"
         hideLabel
         label="Back to templates"
@@ -1083,9 +1083,9 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           },
         ]}
       />
-      {/* Divide the template actions from Close with the same 1px hairline the
-          templates-list header (and ResourceHeader / modal headers) use. */}
-      <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+      {/* Divide the template actions from Close with the shared ButtonGroup
+          hairline (same one ButtonGroup draws between its own action clusters). */}
+      <ButtonGroupSeparator />
       {/* Close returns to the starting point of the flow. For the "cards"
           entry flow (Engagement) that's the fullscreen welcome screen, so it
           closes straight away. For "guidedType" (Training) there's no welcome
@@ -1093,7 +1093,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           would abandon the creation flow — gate it behind a leave-creation
           confirmation and, once confirmed, close the chat back to the starting
           collection page (same as the templates-list canvas' close). */}
-      <ButtonInternal
+      <F0Button
         variant="outline"
         hideLabel
         label="Close"
@@ -1798,18 +1798,18 @@ function TemplatesCanvasHeader({
         {/* Skip the gallery and start from an empty survey — the header twin of
             the gallery's "Empty Survey" card, offered only in the guided flow
             (that's where `useOpenEmptyForm` has a type to seed). Divided from
-            Close by the same 1px separator ResourceHeader / modal headers use. */}
+            Close by the shared ButtonGroup hairline. */}
         {guidedTypeId && (
           <>
-            <ButtonInternal
+            <F0Button
               variant="outline"
               label="Start with a Blank Survey"
               onClick={() => openEmptyForm(guidedTypeId)}
             />
-            <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
+            <ButtonGroupSeparator />
           </>
         )}
-        <ButtonInternal
+        <F0Button
           variant="outline"
           hideLabel
           label="Close"
