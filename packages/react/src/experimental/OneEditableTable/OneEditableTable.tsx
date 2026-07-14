@@ -62,7 +62,10 @@ const ROW_CLASSES = cn(
 // for full-width collection tables. `cn` (tailwind-merge) dedupes it to 0 here
 // so cells sit flush and their inner content controls the padding — this also
 // gives the action column its full width so the icon buttons fit inside px-2.
-const CELL_CLASSES = "h-[48px] p-0 align-middle first:pl-0 last:pr-0"
+// `overflow-hidden` clips cell content (e.g. long placeholders) so it never
+// bleeds into the neighbouring cell when a column gets squeezed.
+const CELL_CLASSES =
+  "h-[48px] overflow-hidden p-0 align-middle first:pl-0 last:pr-0"
 // Cells sit flush (pl-0) but their inputs have 12px of internal padding, so
 // headers use pl-3/pr-3 to line their text up with the cell content. The
 // primitive also insets the first/last header's hover highlight
@@ -97,6 +100,14 @@ const EDITABLE_CELL_RING = cn(
 )
 
 /**
+ * Error highlight for a cell with an external validation error: a critical
+ * ring on the `td` boundary. Used INSTEAD of {@link EDITABLE_CELL_RING} so the
+ * hover shadow-suppression doesn't wipe the inner cell's error styling.
+ */
+const EDITABLE_CELL_ERROR_RING =
+  "relative z-10 shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
+
+/**
  * Fills in the `render` fallback so columns satisfy the full editable-table
  * column contract expected by EditableCellRenderer.
  */
@@ -119,6 +130,11 @@ type RowCellsProps<R extends RecordType> = {
   onRemoveRow?: (item: R, index: number) => void
   onEditRow?: (item: R, index: number) => void
   canEditRow?: (item: R, index: number) => boolean
+  getCellError?: (
+    item: R,
+    columnId: string,
+    index: number
+  ) => string | undefined
   removeLabel: string
   editLabel: string
   /** Present only when the row is sortable */
@@ -133,6 +149,7 @@ function RowCells<R extends RecordType>({
   onRemoveRow,
   onEditRow,
   canEditRow,
+  getCellError,
   removeLabel,
   editLabel,
   dragHandle,
@@ -157,13 +174,20 @@ function RowCells<R extends RecordType>({
           editType != null &&
           editType !== "display-only" &&
           editType !== "disabled"
+        const cellError = column.id
+          ? getCellError?.(item, column.id, index)
+          : undefined
         return (
           <TableCell
             key={column.id ?? `cell-${cellIndex}`}
             firstCell={cellIndex === 0}
             width={column.width}
             minWidth={column.minWidth}
-            className={cn(CELL_CLASSES, isEditableCell && EDITABLE_CELL_RING)}
+            className={cn(
+              CELL_CLASSES,
+              isEditableCell &&
+                (cellError ? EDITABLE_CELL_ERROR_RING : EDITABLE_CELL_RING)
+            )}
           >
             <EditableCellRenderer
               item={item}
@@ -172,6 +196,7 @@ function RowCells<R extends RecordType>({
               isLastColumn={
                 !hasActionsColumn && cellIndex === columns.length - 1
               }
+              externalError={cellError}
             >
               {null}
             </EditableCellRenderer>
@@ -304,6 +329,7 @@ function OneEditableTableBase<R extends RecordType>({
   onRemoveRow,
   onEditRow,
   canEditRow,
+  getCellError,
   addRow,
   bordered = true,
 }: OneEditableTableProps<R>) {
@@ -356,6 +382,7 @@ function OneEditableTableBase<R extends RecordType>({
       onRemoveRow,
       onEditRow,
       canEditRow,
+      getCellError,
       removeLabel,
       editLabel,
     }
@@ -465,6 +492,7 @@ function OneEditableTableBase<R extends RecordType>({
           icon={Add}
           label={addRow.label ?? t("collections.editableTable.addRow")}
           onClick={addRow.onClick}
+          disabled={addRow.disabled}
         />
       )}
     </div>

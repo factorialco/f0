@@ -25,7 +25,7 @@ export function DisabledCell<R extends RecordType>({
           editableColumn.align === "right" ? "justify-end" : "",
           // px only (no vertical padding) so the cell matches the 48px height
           // of editable/display-only cells and rows stay vertically aligned.
-          "flex px-4 min-h-12 items-center border-0 h-full",
+          "flex px-3 min-h-12 items-center border-0 h-full",
           "bg-f1-background-disabled h-full",
           "w-full",
           "[&_*]:text-f1-foreground-secondary"

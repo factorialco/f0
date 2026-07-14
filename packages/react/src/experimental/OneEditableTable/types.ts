@@ -91,11 +91,24 @@ export type OneEditableTableProps<R extends RecordType> = {
    * `onEditRow` is provided). Defaults to showing it on every row.
    */
   canEditRow?: (item: R, index: number) => boolean
+  /**
+   * External validation error for a cell, keyed by the column id. When it
+   * returns a message the cell shows an error border and a tooltip with the
+   * message on hover/focus. Use for errors coming from outside the table
+   * (e.g. schema validation), on top of the errors `onCellChange` can return.
+   */
+  getCellError?: (
+    item: R,
+    columnId: string,
+    index: number
+  ) => string | undefined
   /** When provided, renders an add-row button under the last row. */
   addRow?: {
     /** Button label (defaults to the i18n editable-table "Add row"). */
     label?: string
     onClick: () => void | Promise<void>
+    /** Disables the add button (e.g. while an existing row is still invalid). */
+    disabled?: boolean
   }
   /** Wraps the table in a rounded border container. @default true */
   bordered?: boolean

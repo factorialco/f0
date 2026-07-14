@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { ControllerRenderProps, FieldValues } from "react-hook-form"
+import {
+  ControllerRenderProps,
+  FieldValues,
+  useFormContext,
+} from "react-hook-form"
 import { z, ZodTypeAny } from "zod"
 
 import type { OneEditableTableColumn } from "@/experimental/OneEditableTable"
@@ -89,6 +93,28 @@ export function EntitiesListFieldRenderer({
   const { forms } = useI18n()
   const translations = forms.entitiesList
   const keyCounter = useRef(0)
+
+  // After a submit attempt, errors show on every cell (even untouched ones).
+  const { formState } = useFormContext()
+  const submitCount = formState.submitCount
+
+  /**
+   * Error-display gating so a freshly added (still empty) row doesn't light up
+   * with validation errors before the user had a chance to fill it:
+   * - Rows added inline start "fresh"; their cells show no error.
+   * - A cell shows its error once it has been edited ("touched").
+   * - A submit attempt reveals all errors.
+   */
+  const freshRowKeysRef = useRef<Set<string>>(new Set())
+  const touchedCellsRef = useRef<Set<string>>(new Set())
+  const shouldShowCellError = useCallback(
+    (rowKey: string, columnId: string): boolean => {
+      if (submitCount > 0) return true
+      if (!freshRowKeysRef.current.has(rowKey)) return true
+      return touchedCellsRef.current.has(`${rowKey}:${columnId}`)
+    },
+    [submitCount]
+  )
 
   const itemShape: Record<string, ZodTypeAny> = field.itemSchema?.shape ?? {}
   const itemKeys = Object.keys(itemShape)
@@ -333,18 +359,27 @@ export function EntitiesListFieldRenderer({
       }
     })
 
-  // Array-level error (e.g. min items). Item errors are listed below the table.
+  // Array-level error (e.g. min items). Cell errors render as an error border
+  // on the offending cell with the message in a hover/focus tooltip.
   const rootError = error?.root?.message ?? error?.message
-  const itemErrors = rows
-    .map((_row, index) => {
-      const itemError = error?.[index]
-      if (!itemError) return undefined
-      const message = itemKeys
-        .map((key) => itemError[key]?.message)
-        .find((m): m is string => !!m)
-      return message ? { index, message } : undefined
-    })
-    .filter((e): e is { index: number; message: string } => e !== undefined)
+  const getCellError = useCallback(
+    (row: EntitiesListRow, columnId: string, index: number) => {
+      if (!shouldShowCellError(row.__key, columnId)) return undefined
+      return error?.[index]?.[columnId]?.message
+    },
+    [error, shouldShowCellError]
+  )
+
+  // Block adding another row while an existing one is still invalid (e.g. the
+  // row the user just added and hasn't filled out yet).
+  const hasInvalidRow = useMemo(
+    () =>
+      rows.some(({ __key: _key, ...item }) => {
+        const result = field.itemSchema?.safeParse(item)
+        return result ? !result.success : false
+      }),
+    [rows, field.itemSchema]
+  )
 
   return (
     <div className="flex flex-col gap-2">
@@ -352,8 +387,13 @@ export function EntitiesListFieldRenderer({
         items={rows}
         getRowId={(row) => row.__key}
         columns={columns}
-        onCellChange={async ({ updatedItem }) => {
+        getCellError={getCellError}
+        onCellChange={async ({ updatedItem, changes }) => {
           const coerced = coerceRow(updatedItem)
+          // The edited cells are now fair game for error display
+          for (const columnId of Object.keys(changes)) {
+            touchedCellsRef.current.add(`${coerced.__key}:${columnId}`)
+          }
           commit(
             rows.map((row) => (row.__key === coerced.__key ? coerced : row))
           )
@@ -379,16 +419,17 @@ export function EntitiesListFieldRenderer({
             ? undefined
             : {
                 label: field.labels?.addButton ?? translations.add,
-                onClick: () =>
-                  useDialogMode
-                    ? openItemDialog("add")
-                    : commit([
-                        ...rows,
-                        {
-                          __key: `row-${keyCounter.current++}`,
-                          ...makeEmptyItem(),
-                        },
-                      ]),
+                disabled: hasInvalidRow,
+                onClick: () => {
+                  if (useDialogMode) {
+                    openItemDialog("add")
+                    return
+                  }
+                  const key = `row-${keyCounter.current++}`
+                  // Fresh rows don't show validation errors until touched
+                  freshRowKeysRef.current.add(key)
+                  commit([...rows, { __key: key, ...makeEmptyItem() }])
+                },
               }
         }
       />
@@ -398,14 +439,6 @@ export function EntitiesListFieldRenderer({
           {rootError}
         </p>
       )}
-      {itemErrors.map(({ index, message }) => (
-        <p
-          key={`item-error-${index}`}
-          className="text-sm font-medium text-f1-foreground-critical"
-        >
-          {`${index + 1}. ${message}`}
-        </p>
-      ))}
     </div>
   )
 }
