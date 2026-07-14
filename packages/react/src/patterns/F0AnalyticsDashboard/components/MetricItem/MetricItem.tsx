@@ -8,6 +8,7 @@ import { ArrowUp, ArrowDown } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import type {
+  DashboardItemFiltersConfig,
   DashboardMetricData,
   DashboardMetricItem,
   MetricFormat,
@@ -21,6 +22,7 @@ interface MetricItemProps<Filters extends FiltersDefinition> {
   item: DashboardMetricItem<Filters>
   filters: FiltersState<Filters>
   actions?: import("@/experimental/Navigation/Dropdown").DropdownItem[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   isFullscreen?: boolean
@@ -86,6 +88,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   handleDelete,
 }: MetricItemProps<Filters>) {
@@ -107,6 +110,7 @@ export function MetricItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={<MetricSkeleton />}
       actions={actions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

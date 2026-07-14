@@ -32,6 +32,10 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import type { DashboardItemFiltersConfig } from "../../types"
+
+import { DashboardItemFilters } from "./DashboardItemFilters"
+
 interface DashboardItemProps {
   title: string
   description?: string
@@ -43,6 +47,12 @@ interface DashboardItemProps {
   children: ReactNode
   /** Download actions shown inside a "Download" submenu */
   actions?: DropdownItemType[]
+  /**
+   * Per-widget filter configuration. When set, a filter icon is rendered in
+   * the header (next to the fullscreen and menu buttons) opening a compact
+   * anchored filter popover.
+   */
+  itemFilters?: DashboardItemFiltersConfig
   /** When true, adds a "Delete" option to the dropdown menu */
   editMode?: boolean
   /** Called when the user clicks the delete action */
@@ -87,6 +97,7 @@ export function DashboardItem({
   skeleton,
   children,
   actions = [],
+  itemFilters,
   editMode,
   handleDelete,
   itemId,
@@ -96,6 +107,7 @@ export function DashboardItem({
   onFullscreenChange,
 }: DashboardItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isFilterPopoverOpen, setIsFilterPopoverOpen] = useState(false)
   /**
    * When true, the dropdown menu's content is swapped from the action list
    * to a markdown rendering of `explanation`. The dropdown trigger stays
@@ -118,6 +130,9 @@ export function DashboardItem({
       !("type" in a) || a.type === "item" || a.type === undefined
   )
   const hasDownloads = downloadActions.length > 0
+  // `value` only ever contains applied filters, so any key means "filtered".
+  const hasAppliedItemFilters =
+    !!itemFilters && Object.keys(itemFilters.value).length > 0
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0
@@ -181,7 +196,7 @@ export function DashboardItem({
           className={cn(
             "flex flex-shrink-0 gap-0.5",
             !isFullscreen &&
-              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen ? "delay-0 sm:opacity-100" : ""}`
+              `opacity-100 transition-opacity delay-150 duration-150 focus-within:delay-0 group-hover/dashitem:delay-0 sm:opacity-0 focus-within:sm:opacity-100 group-hover/dashitem:sm:opacity-100 ${isDropdownOpen || isFilterPopoverOpen || hasAppliedItemFilters ? "delay-0 sm:opacity-100" : ""}`
           )}
         >
           {hasFullscreen && (
@@ -197,6 +212,12 @@ export function DashboardItem({
               hideLabel
               compact
               onClick={() => onFullscreenChange?.(!isFullscreen)}
+            />
+          )}
+          {itemFilters && (
+            <DashboardItemFilters
+              {...itemFilters}
+              onOpenChange={setIsFilterPopoverOpen}
             />
           )}
           {showMenu && (

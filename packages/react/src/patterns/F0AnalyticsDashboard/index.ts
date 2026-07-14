@@ -10,6 +10,7 @@ export type {
   DashboardCollectionItem,
   DashboardItem,
   DashboardItemBase,
+  DashboardItemFiltersConfig,
   DashboardMetricData,
   DashboardMetricItem,
   F0AnalyticsDashboardProps,
