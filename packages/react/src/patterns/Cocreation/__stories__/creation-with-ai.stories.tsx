@@ -2237,7 +2237,7 @@ function FlowContent({
   } = useMockAiChatRuntime()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
-  const { armProposal } = useProposalFlow()
+  const { armProposal, armNoCredits } = useProposalFlow()
   const startBlankSurvey = useStartBlankSurvey()
 
   // Typed "Create" flow ("cards" entry — Engagement): the same three
@@ -2392,8 +2392,12 @@ function FlowContent({
         return
       }
       if (optionId === TEMPLATES_OPTION_ID) {
-        // Browse: open the full templates gallery in the canvas.
+        // Browse: open the full templates gallery in the canvas. With no
+        // credits, the composer stays live while browsing, so arm the
+        // out-of-credits reply — otherwise a typed message falls through to a
+        // simulated AI answer (see `armNoCredits` / the mock's default reply).
         openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
+        if (noCredits) armNoCredits()
         return
       }
       // A specific template: open it in the read-only preview framing (the
@@ -2410,6 +2414,10 @@ function FlowContent({
           description: template.description,
         })
       )
+      // As above: keep the no-credits reply armed while previewing so typing
+      // never triggers a fake AI reply. `useThisTemplate` re-arms it once the
+      // template is actually used.
+      if (noCredits) armNoCredits()
     }
 
     // Copy for the assistant reply that precedes each action's canvas beat.
