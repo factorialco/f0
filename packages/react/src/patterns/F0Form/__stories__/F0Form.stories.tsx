@@ -1616,13 +1616,23 @@ export const EntitiesListFieldInlineMultiColumn: Story = {
     const formSchema = z.object({
       members: f0FormField.entitiesList({
         label: "Team members",
-        helpText: "Inline editing across text, number, email and select cells.",
+        helpText:
+          "Inline editing across text, number, email, select and multi-select cells.",
         schema: z.object({
           name: z.string().min(1),
           email: z.string().email(),
           age: z.number().min(18).max(99),
           salary: z.number().min(0),
           role: z.enum(["Admin", "Editor", "Viewer"]),
+          skills: f0FormField.multiSelect({
+            label: "Skills",
+            options: [
+              { value: "js", label: "JavaScript" },
+              { value: "ts", label: "TypeScript" },
+              { value: "go", label: "Go" },
+              { value: "rust", label: "Rust" },
+            ],
+          }),
         }),
         config: {
           supportInlineEditing: true,
@@ -1633,6 +1643,7 @@ export const EntitiesListFieldInlineMultiColumn: Story = {
             age: { width: 100, placeholder: "18–99" },
             salary: { label: "Salary", width: 140, placeholder: "0" },
             role: { width: 140 },
+            skills: { width: 200 },
           },
         },
       }),
@@ -1651,6 +1662,7 @@ export const EntitiesListFieldInlineMultiColumn: Story = {
             age: 34,
             salary: 52000,
             role: "Admin",
+            skills: ["js", "ts"],
           },
           {
             id: "m-2",
@@ -1659,6 +1671,7 @@ export const EntitiesListFieldInlineMultiColumn: Story = {
             age: 29,
             salary: 47000,
             role: "Editor",
+            skills: ["go"],
           },
         ],
       },

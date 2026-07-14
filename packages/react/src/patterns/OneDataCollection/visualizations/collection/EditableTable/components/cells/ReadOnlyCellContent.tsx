@@ -62,6 +62,28 @@ export function ReadOnlyCellContent<R extends RecordType>({
       ? format(parseISO(rawDateValue), "dd MMM yyyy")
       : undefined
 
+  // Multi-select cells hold an array; show the selected options as a
+  // comma-separated list of their labels (falling back to raw values).
+  const rawValue =
+    editableColumn.id !== undefined
+      ? item[editableColumn.id as keyof R]
+      : undefined
+  const multiSelectLabel = Array.isArray(rawValue)
+    ? (() => {
+        const config = editableColumn.selectConfig
+        const opts =
+          config && typeof config.options === "function"
+            ? config.options(item)
+            : config?.options
+        const byValue = new Map(
+          (Array.isArray(opts) ? opts : []).map((o) => [o.value, o.label])
+        )
+        return rawValue
+          .map((v) => (byValue.get(v) as string | undefined) ?? String(v))
+          .join(", ")
+      })()
+    : undefined
+
   // Number/money/percentage cells show a unit next to the value (e.g. "%",
   // "€"); mirror it here so read-only cells match the editable ones.
   const units = resolveUnits(editableColumn.numberConfig, item)
@@ -94,6 +116,7 @@ export function ReadOnlyCellContent<R extends RecordType>({
         {unitsBefore && unit}
         <span className="min-w-0 truncate">
           {formattedDate ??
+            multiSelectLabel ??
             renderProperty(item, editableColumn, "editableTable", i18n)}
         </span>
         {!unitsBefore && unit}

@@ -187,6 +187,57 @@ describe("EntitiesListFieldRenderer — add / remove", () => {
   })
 })
 
+describe("EntitiesListFieldRenderer — multi-select", () => {
+  it("renders a multi-select column and keeps the array value across a commit", async () => {
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+    const schema = z.object({
+      people: f0FormField.entitiesList({
+        label: "People",
+        schema: z.object({
+          name: z.string().min(1),
+          skills: f0FormField.multiSelect({
+            label: "Skills",
+            options: [
+              { value: "js", label: "JS" },
+              { value: "ts", label: "TS" },
+            ],
+          }),
+        }),
+        config: { supportInlineEditing: true },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="multiselect"
+        schema={schema}
+        defaultValues={{ people: [{ name: "Ada", skills: ["js"] }] }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    expect(
+      screen.getByRole("columnheader", { name: "Skills" })
+    ).toBeInTheDocument()
+
+    // Editing the name commits every row; the untouched multi-select value must
+    // stay an array (it flows through as a value, not a stringified cell).
+    const input = screen.getByDisplayValue("Ada")
+    await userEvent.clear(input)
+    await userEvent.type(input, "Ada L")
+    await waitFor(() => expect(input).toHaveValue("Ada L"), { timeout: 1000 })
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await userEvent.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ people: [{ name: "Ada L", skills: ["js"] }] })
+      )
+    })
+  })
+})
+
 describe("EntitiesListFieldRenderer — custom row actions", () => {
   it("resolves the action per row from a hidden value and updates it on click", async () => {
     const onSubmit = vi.fn(async () => ({ success: true }))

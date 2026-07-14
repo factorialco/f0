@@ -82,7 +82,7 @@ export function EditableCellRenderer<
     cellEditType !== undefined && typingEditTypes.has(cellEditType)
 
   const onChange = (
-    value: string | null,
+    value: string | string[] | null,
     context?: { selectedItem?: RecordType }
   ) => {
     if (editableColumn.id !== undefined) {

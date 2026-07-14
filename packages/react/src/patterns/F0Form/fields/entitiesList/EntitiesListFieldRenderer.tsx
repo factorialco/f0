@@ -304,7 +304,7 @@ export function EntitiesListFieldRenderer({
   /**
    * Blank item values: honor a schema `.default()` first (e.g. a hidden
    * `archived: z.boolean().default(false)`), then start strings empty and
-   * leave the rest unset.
+   * multi-select arrays empty, and leave the rest unset.
    */
   const makeEmptyItem = useCallback((): EntitiesListItem => {
     const item: EntitiesListItem = {}
@@ -316,6 +316,7 @@ export function EntitiesListFieldRenderer({
       }
       const inner = unwrapZodSchema(schema)
       if (isZodType(inner, "ZodString")) item[key] = ""
+      else if (isZodType(inner, "ZodArray")) item[key] = []
     }
     return item
     // eslint-disable-next-line react-hooks/exhaustive-deps -- itemShape derives from field.itemSchema
@@ -388,7 +389,7 @@ export function EntitiesListFieldRenderer({
   // Inline mode disables cells per row via `editableIds`.
   const editTypeFor = (
     row: EntitiesListRow,
-    editable: "text" | "number" | "money" | "date" | "select"
+    editable: "text" | "number" | "money" | "date" | "select" | "multiselect"
   ) => {
     if (useDialogMode) return "display-only" as const
     if (isDisabled || !isRowEditable(row)) return "disabled" as const
@@ -422,6 +423,12 @@ export function EntitiesListFieldRenderer({
             return {
               ...base,
               editType: (row) => editTypeFor(row, "select"),
+              selectConfig: { options: resolution.options },
+            }
+          case "multiselect":
+            return {
+              ...base,
+              editType: (row) => editTypeFor(row, "multiselect"),
               selectConfig: { options: resolution.options },
             }
           case "number":

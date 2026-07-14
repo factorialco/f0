@@ -107,6 +107,35 @@ describe("resolveEntitiesListCell", () => {
     })
   })
 
+  describe("multi-select cells", () => {
+    it("maps the multiSelect shortcut to a multiselect cell with labels", () => {
+      const schema = f0FormField.multiSelect({
+        label: "Tags",
+        options: [
+          { value: "a", label: "Alpha" },
+          { value: "b", label: "Beta" },
+        ],
+      })
+      expect(resolveEntitiesListCell(schema)).toEqual({
+        kind: "multiselect",
+        options: [
+          { value: "a", label: "Alpha" },
+          { value: "b", label: "Beta" },
+        ],
+      })
+    })
+
+    it("maps a z.array(z.enum) to a multiselect cell (enum values)", () => {
+      expect(resolveEntitiesListCell(z.array(z.enum(["a", "b"])))).toEqual({
+        kind: "multiselect",
+        options: [
+          { value: "a", label: "a" },
+          { value: "b", label: "b" },
+        ],
+      })
+    })
+  })
+
   describe("date cells", () => {
     it.each([
       ["z.date()", z.date()],
