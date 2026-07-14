@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.35.1](https://github.com/factorialco/f0/compare/f0-react-v4.35.0...f0-react-v4.35.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **dialog-alike:** don't preventDefault inner dialog clicks (unblocks file picker) ([#4683](https://github.com/factorialco/f0/issues/4683)) ([db652a9](https://github.com/factorialco/f0/commit/db652a9a828ccd656b8f8a19bd8cba578184af5a))
+* **F0SegmentedControl:** increase segment text size to label variant ([#4682](https://github.com/factorialco/f0/issues/4682)) ([d9b7165](https://github.com/factorialco/f0/commit/d9b716545213261880dcd024c4af967935a07414))
+
 ## [4.35.0](https://github.com/factorialco/f0/compare/f0-react-v4.34.0...f0-react-v4.35.0) (2026-07-14)
 
 
