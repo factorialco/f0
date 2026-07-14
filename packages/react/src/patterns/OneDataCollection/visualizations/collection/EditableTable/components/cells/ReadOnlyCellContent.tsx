@@ -9,6 +9,7 @@ import { renderProperty } from "@/patterns/OneDataCollection/property-render"
 
 import type { EditableCellProps } from "."
 
+import { resolveUnits } from "./hooks/useNumberCellLayout"
 import { resolveTextCellIcon } from "./textIcon"
 
 type ReadOnlyCellContentProps<R extends RecordType> = Pick<
@@ -40,11 +41,23 @@ export function ReadOnlyCellContent<R extends RecordType>({
   const isSelect = !!editableColumn.selectConfig
   const alignRight = editableColumn.align === "right"
 
+  // Number/money/percentage cells show a unit next to the value (e.g. "%",
+  // "€"); mirror it here so read-only cells match the editable ones.
+  const units = resolveUnits(editableColumn.numberConfig, item)
+  const unitsBefore = editableColumn.numberConfig?.unitsPosition === "before"
+  const unit = units ? (
+    <span className="shrink-0 select-none pt-px text-sm">{units}</span>
+  ) : null
+
   return (
     <div
       className={cn(
-        "flex h-full w-full min-w-0 items-center gap-1.5 px-3",
-        isSelect ? "justify-between" : alignRight && "justify-end",
+        "flex h-full w-full min-w-0 items-center gap-1.5 pl-3",
+        // The select chevron aligns with the editable select cell's arrow
+        // (~4px from the edge), so selects use a tighter right padding.
+        isSelect
+          ? "justify-between pr-1"
+          : cn("pr-3", alignRight && "justify-end"),
         className
       )}
     >
@@ -54,9 +67,11 @@ export function ReadOnlyCellContent<R extends RecordType>({
             <F0Icon icon={leadingIcon} color={iconColor} />
           </span>
         )}
+        {unitsBefore && unit}
         <span className="min-w-0 truncate">
           {renderProperty(item, editableColumn, "editableTable", i18n)}
         </span>
+        {!unitsBefore && unit}
       </span>
       {isSelect && (
         <span className="flex shrink-0 items-center">
