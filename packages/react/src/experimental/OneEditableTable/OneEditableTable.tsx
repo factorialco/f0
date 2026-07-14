@@ -88,7 +88,9 @@ const HANDLE_CELL_CLASSES = "first:pl-3"
  * suppressed so the two don't stack.
  */
 const EDITABLE_CELL_RING = cn(
-  "[&:hover_*]:!shadow-none",
+  // Suppress the inner cell's hover shadow only when NOT focused, so a focused
+  // cell keeps its ring even while hovered.
+  "[&:not(:focus-within):hover_*]:!shadow-none",
   "focus-within:relative focus-within:z-10 focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
   "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-10",
   "[&:not(:focus-within):hover]:outline [&:not(:focus-within):hover]:outline-1 [&:not(:focus-within):hover]:-outline-offset-1 [&:not(:focus-within):hover]:outline-[hsl(var(--neutral-30))]"
@@ -155,21 +157,13 @@ function RowCells<R extends RecordType>({
           editType != null &&
           editType !== "display-only" &&
           editType !== "disabled"
-        // The last data cell draws a right border (the cell separator); hide it
-        // when an actions column follows so there's no divider before it.
-        const isLastBeforeActions =
-          hasActionsColumn && cellIndex === columns.length - 1
         return (
           <TableCell
             key={column.id ?? `cell-${cellIndex}`}
             firstCell={cellIndex === 0}
             width={column.width}
             minWidth={column.minWidth}
-            className={cn(
-              CELL_CLASSES,
-              isEditableCell && EDITABLE_CELL_RING,
-              isLastBeforeActions && "[&_*]:!border-r-0"
-            )}
+            className={cn(CELL_CLASSES, isEditableCell && EDITABLE_CELL_RING)}
           >
             <EditableCellRenderer
               item={item}
