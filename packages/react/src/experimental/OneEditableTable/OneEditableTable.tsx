@@ -549,7 +549,11 @@ function OneEditableTableBase<R extends RecordType>({
         className={cn(
           "w-full",
           bordered &&
-            "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
+            // Drop the last row's bottom separator so it doesn't double the
+            // container's border — both the row's `::after` and the sticky
+            // cells' own separator `::after` (drawn by OneTable under their
+            // background).
+            "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent [&_tbody>tr:last-child_td::after]:!bg-transparent"
         )}
       >
         {sortableRows ? (
