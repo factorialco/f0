@@ -206,6 +206,7 @@ export const defaultTranslations = {
       removeRow: "Remove row",
       editRow: "Edit",
       reorderRow: "Drag to reorder",
+      selectPlaceholder: "Select",
     },
     itemsCount: "items",
     emptyStates: {

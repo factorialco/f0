@@ -64,8 +64,13 @@ const ROW_CLASSES = cn(
 // gives the action column its full width so the icon buttons fit inside px-2.
 // `overflow-hidden` clips cell content (e.g. long placeholders) so it never
 // bleeds into the neighbouring cell when a column gets squeezed.
-const CELL_CLASSES =
-  "h-[48px] overflow-hidden p-0 align-middle first:pl-0 last:pr-0"
+// The input placeholder slot carries a size-based vertical padding
+// (`inputElementVariants`) that misaligns it inside our fixed 48px cells;
+// neutralize it and center the placeholder instead.
+const CELL_CLASSES = cn(
+  "h-[48px] overflow-hidden p-0 align-middle first:pl-0 last:pr-0",
+  "[&_[data-slot='placeholder']]:!flex [&_[data-slot='placeholder']]:!items-center [&_[data-slot='placeholder']]:!py-0"
+)
 // Cells sit flush (pl-0) but their inputs have 12px of internal padding, so
 // headers use pl-3/pr-3 to line their text up with the cell content. The
 // primitive also insets the first/last header's hover highlight
