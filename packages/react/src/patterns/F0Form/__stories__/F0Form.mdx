@@ -364,7 +364,9 @@ Columns are derived from each item-schema field. A field is shown as a column on
         <td>text</td>
       </tr>
       <tr>
-        <td>`z.string().email()` / `.url()` (or `f0FormField.email` / `.url`)</td>
+        <td>
+          `z.string().email()` / `.url()` (or `f0FormField.email` / `.url`)
+        </td>
         <td>text with a leading envelope / link icon</td>
       </tr>
       <tr>
@@ -392,9 +394,7 @@ Columns are derived from each item-schema field. A field is shown as a column on
         <td>date (day-granularity picker)</td>
       </tr>
       <tr>
-        <td>
-          everything else — `boolean`, `time`, `richText`, `file`, …
-        </td>
+        <td>everything else — `boolean`, `time`, `richText`, `file`, …</td>
         <td>no column (value kept on the row)</td>
       </tr>
     </tbody>
@@ -424,7 +424,9 @@ Each visible column accepts `label`, `placeholder` and a fixed `width`.
 With **2 or fewer** item fields the table edits **inline** (type directly in the cells); with more it switches to a **dialog** (the add button and a per-row pencil open a form built from the same schema). Override the heuristic with `supportInlineEditing`:
 
 ```tsx
-config: { supportInlineEditing: true } // force inline even with many columns
+config: {
+  supportInlineEditing: true
+} // force inline even with many columns
 ```
 
 A 2-column list edits inline — type straight into the cells:

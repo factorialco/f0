@@ -7,7 +7,7 @@ import { Archive, ArchiveOpen } from "@/icons/app"
 
 import { F0FormEditableTable } from "../index"
 
-const meta = {
+const meta: Meta<typeof F0FormEditableTable> = {
   title: "F0FormEditableTable",
   component: F0FormEditableTable,
   tags: ["experimental"],
@@ -20,10 +20,10 @@ const meta = {
       },
     },
   },
-} satisfies Meta
+}
 
 export default meta
-type Story = StoryObj<typeof meta>
+type Story = StoryObj<typeof F0FormEditableTable>
 
 type LinkRow = {
   id: string

@@ -17,7 +17,6 @@ import {
 import { CSS } from "@dnd-kit/utilities"
 import { ReactNode } from "react"
 
-import type { ColumnWidth } from "@/experimental/OneTable/utils/sizes"
 import type { RecordType } from "@/hooks/datasource"
 
 import { F0Button } from "@/components/F0Button"
@@ -198,8 +197,8 @@ type RowCellsProps<R extends RecordType> = {
   /** Whether this table has a trailing actions column (kept consistent across
    * rows so cells stay aligned even when a given row has no actions). */
   hasActionsColumn: boolean
-  /** Width of the trailing actions column. */
-  actionsColWidth: ColumnWidth
+  /** Width of the trailing actions column (matches the table cell `width` prop). */
+  actionsColWidth: number | "auto"
   removeLabel: string
   editLabel: string
   /** Present only when the row is sortable */
@@ -464,7 +463,7 @@ function F0FormEditableTableBase<R extends RecordType>({
   const hasActionsColumn = !!onRemoveRow || !!onEditRow || hasAnyRowAction
   // The actions column always sizes to its content (as small as possible), so
   // its width isn't configurable.
-  const actionsColWidth: ColumnWidth = "auto"
+  const actionsColWidth: number | "auto" = "auto"
 
   const rows = items.map((item, index) => {
     const rowId = rowIds[index]

@@ -1442,6 +1442,29 @@ export namespace f0FormField {
   }
 
   /**
+   * A row value: the item type plus an optional `id`. `id` is the row identity
+   * used for React keys and `config.editableIds`; it isn't an editable column,
+   * so it's intentionally absent from the item `schema` and added at the value
+   * type level here (the runtime schema stays `z.array(schema)`).
+   * @internal
+   */
+  type WithRowId<V> = V & { id?: string | number }
+  /** @internal Array schema whose inferred value carries the optional row `id`. */
+  type EntitiesListArray<TItem extends z.ZodObject<z.ZodRawShape>> = Omit<
+    z.ZodArray<TItem>,
+    "_output" | "_input"
+  > & {
+    _output: WithRowId<z.infer<TItem>>[]
+    _input: WithRowId<z.input<TItem>>[]
+  }
+  /** @internal Optional variant of {@link EntitiesListArray}. */
+  type OptionalEntitiesListArray<TItem extends z.ZodObject<z.ZodRawShape>> =
+    Omit<z.ZodOptional<z.ZodArray<TItem>>, "_output" | "_input"> & {
+      _output: WithRowId<z.infer<TItem>>[] | undefined
+      _input: WithRowId<z.input<TItem>>[] | undefined
+    }
+
+  /**
    * Entities list field: an editable table for an array of objects.
    *
    * The row shape is defined by `schema` and columns are derived from it
@@ -1464,11 +1487,11 @@ export namespace f0FormField {
    */
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
     config: EntitiesListConfig<TItem> & { optional: true }
-  ): z.ZodOptional<z.ZodArray<TItem>> &
+  ): OptionalEntitiesListArray<TItem> &
     F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
     config: EntitiesListConfig<TItem> & { optional?: false | undefined }
-  ): z.ZodArray<TItem> & F0ZodType<z.ZodArray<TItem>>
+  ): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>({
     optional,
     schema,

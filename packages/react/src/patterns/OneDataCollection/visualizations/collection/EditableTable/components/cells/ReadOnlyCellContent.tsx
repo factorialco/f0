@@ -76,7 +76,13 @@ export function ReadOnlyCellContent<R extends RecordType>({
             ? config.options(item)
             : config?.options
         const byValue = new Map(
-          (Array.isArray(opts) ? opts : []).map((o) => [o.value, o.label])
+          (Array.isArray(opts) ? opts : [])
+            // Options can include non-selectable separators (`{ type: "separator" }`);
+            // keep only real items, which carry `value`/`label`.
+            .filter(
+              (o): o is Extract<typeof o, { value: unknown }> => "value" in o
+            )
+            .map((o) => [o.value, o.label])
         )
         return rawValue
           .map((v) => (byValue.get(v) as string | undefined) ?? String(v))
