@@ -1036,14 +1036,10 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           ellipsis
         />
       </div>
-      {/* ButtonGroup owns the responsive collapse: when the row is wide both
-          actions show; when the title grows or the canvas narrows, the
-          secondary "Edit Template" sheds into the "⋯" menu while the primary
-          "Use this template" stays pinned. `flex-1` (WITHOUT `min-w-0`) keeps
-          the group's min-content floor — the pinned primary + "⋯" width — so
-          the primary can never be squeezed to nothing; the title (also
-          `flex-1`, but `min-w-0`) is what truncates instead. Mirrors the
-          F0CardHorizontal actions recipe. */}
+      {/* `flex-1` WITHOUT `min-w-0` keeps the group's min-content floor, so the
+          primary "Use this template" never squeezes — the title (flex-1 min-w-0)
+          truncates instead. "Edit Template" sheds into the "⋯" menu under
+          pressure. Mirrors the F0CardHorizontal actions recipe. */}
       <ButtonGroup
         className="flex-1"
         align="end"
@@ -2143,7 +2139,6 @@ function FlowContent({
           ].join("\n"),
         },
       ])
-      setComposerHidden(false)
       startClarifying({
         steps: [
           {
@@ -2156,6 +2151,8 @@ function FlowContent({
           },
         ],
         onConfirm: (answersByStep) => {
+          // Answered — hand the composer back (the guided intro is over).
+          setComposerHidden(false)
           const label = answersByStep[0]?.[0]
           const type =
             config.guidedTypes.find((t) => t.label === label) ??
@@ -2302,7 +2299,6 @@ function FlowContent({
       appendMessages([
         { role: "assistant", content: "Sure — how would you like to start?" },
       ])
-      setComposerHidden(false)
       startClarifying({
         steps: [
           {
@@ -2312,6 +2308,8 @@ function FlowContent({
           },
         ],
         onConfirm: (answersByStep) => {
+          // Answered — hand the composer back (the guided intro is over).
+          setComposerHidden(false)
           const label = answersByStep[0]?.[0]
           const picked = options.find((o) => o.label === label) ?? options[0]
           sendMessageWithThinkingOnly(

@@ -1,7 +1,4 @@
-import { motion } from "motion/react"
 import { useCallback, useMemo, useRef } from "react"
-
-import { useReducedMotion } from "@/lib/a11y"
 
 import { F0AiChatTextArea } from "../../../F0AiChatTextArea"
 import { type F0AiChatTextAreaSubmitPayload } from "../../../F0AiChatTextArea/types"
@@ -30,12 +27,6 @@ export const MockConnectedChatInput = () => {
     clarifyingQuestion,
     composerHidden,
   } = useMockAiChatRuntime()
-  const shouldReduceMotion = useReducedMotion()
-  // Track whether the composer was ever hidden this session (guided flows only).
-  // Used to scope the mount fade-in-up to those flows — other flows render the
-  // composer exactly as before, no entrance change.
-  const wasHiddenRef = useRef(false)
-  if (composerHidden) wasHiddenRef.current = true
   const {
     placeholders,
     entityRefs,
@@ -100,7 +91,33 @@ export const MockConnectedChatInput = () => {
   // F0AiChatTextArea — keeps the component's own layout/animation rules intact.
   if (composerHidden && !clarifyingQuestion) return null
 
-  const textArea = (
+  // The guided flows keep `composerHidden` true from the intro through their
+  // FIRST clarifying panel (it's cleared when the user answers), so this slot's
+  // first visible content is that panel on a fresh mount — F0's own
+  // composer→clarifying transition never ran (its `AnimatePresence` is
+  // `initial={false}`), and it would pop in. Give that first appearance its own
+  // fade-in-and-up entrance. Once the composer has taken over (composerHidden
+  // false), later clarifying panels use F0's built-in transition, so the
+  // entrance isn't doubled up. Driven by tailwindcss-animate (CSS keyframes)
+  // rather than framer, so it also plays where framer's global `skipAnimations`
+  // is set (the automation/Chromatic preview); respects reduced motion.
+  const clarifyingPanel = clarifyingQuestion ? (
+    <F0ClarifyingPanel
+      clarifyingQuestion={clarifyingQuestion}
+      isSubmitDisabled={inProgress}
+    />
+  ) : undefined
+
+  const clarifyingUI =
+    clarifyingPanel && composerHidden ? (
+      <div className="duration-500 ease-out animate-in fade-in slide-in-from-bottom-4 motion-reduce:animate-none">
+        {clarifyingPanel}
+      </div>
+    ) : (
+      clarifyingPanel
+    )
+
+  return (
     <F0AiChatTextArea
       ref={containerRef}
       onSubmit={handleSubmit}
@@ -125,34 +142,7 @@ export const MockConnectedChatInput = () => {
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       onSuggestionClick={handleSuggestionClick}
       welcomeScreenCards={welcomeScreenCards}
-      clarifyingUI={
-        clarifyingQuestion ? (
-          <F0ClarifyingPanel
-            clarifyingQuestion={clarifyingQuestion}
-            isSubmitDisabled={inProgress}
-          />
-        ) : undefined
-      }
+      clarifyingUI={clarifyingUI}
     />
-  )
-
-  // For guided flows, the input slot appears for the first time already holding
-  // the clarifying panel (the composer was hidden through the intro), so
-  // F0AiChatTextArea's own AnimatePresence — `initial={false}` — won't animate
-  // that first mount. Add a subtle fade-in-up on the slot itself. Other flows
-  // render `textArea` untouched, so their entrance is unchanged.
-  if (!wasHiddenRef.current) return textArea
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: shouldReduceMotion ? 0 : 0.4,
-        ease: [0.4, 0, 0.2, 1],
-      }}
-    >
-      {textArea}
-    </motion.div>
   )
 }
