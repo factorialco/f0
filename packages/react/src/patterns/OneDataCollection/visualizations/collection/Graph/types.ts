@@ -5,7 +5,7 @@ import type { RecordType } from "@/hooks/datasource"
 import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
 import type {
   F0GraphNodeTag,
-  F0GraphNodeTagType,
+  F0GraphNodeTagColumn,
   ZoomPreset,
 } from "@/patterns/F0Graph"
 import type {
@@ -43,13 +43,13 @@ export type GraphVisualizationOptions<
    * toggle to show/hide each metadata column (like configuring table columns).
    * Values are tag `column` keys (or `type` when a tag has no `column`).
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /** Friendly labels per tag column, shown in the metadata visibility toggle. */
-  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>
+  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>
   /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /** Tag columns that are always visible and cannot be hidden in the settings. */
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
