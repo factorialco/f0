@@ -162,6 +162,14 @@ export interface F0BaseConfig {
    * @default false
    */
   resetOnDisable?: boolean
+  /**
+   * When true, a change to this field auto-saves the form (a debounced submit),
+   * without waiting for the submit button. Other fields still save on submit.
+   * Independent from the form-level `submitConfig: { type: "autosubmit" }`,
+   * which auto-saves on any field change.
+   * @default false
+   */
+  autoSave?: boolean
   /** Row ID for horizontal grouping with other fields */
   row?: string
   /**

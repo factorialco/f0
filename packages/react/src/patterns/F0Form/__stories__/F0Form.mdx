@@ -450,6 +450,20 @@ config: {
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
 - `labels` — `addButton`, `addButtonDescription` and `editDialogTitle` (dialog mode).
 
+### Auto-save
+
+Any field accepts `autoSave: true` — a change to it saves the form (a debounced submit) without waiting for the Save button; other fields still save on submit. It's handy for an entities list so row edits persist as they happen. This is per-field and independent from the form-level `submitConfig: { type: "autosubmit" }` (which auto-saves on _any_ change). Auto-save submits the whole form, so it also persists pending changes elsewhere and validates every field.
+
+```tsx
+links: f0FormField.entitiesList({
+  label: "Links",
+  autoSave: true,
+  schema: z.object({ title: z.string().min(1), url: z.string().url() }),
+})
+```
+
+<Canvas of={Stories.EntitiesListFieldAutoSave} />
+
 ---
 
 # Guidelines

@@ -123,6 +123,13 @@ export interface F0BaseField {
    * @default false
    */
   resetOnDisable?: boolean
+  /**
+   * When true, a change to this field auto-saves the form (a debounced submit).
+   * Other fields still save on submit. Independent from the form-level
+   * `submitConfig: { type: "autosubmit" }`.
+   * @default false
+   */
+  autoSave?: boolean
   /** Alert displayed below the field (static props or conditional callback) */
   alert?: F0FieldAlert
   /**

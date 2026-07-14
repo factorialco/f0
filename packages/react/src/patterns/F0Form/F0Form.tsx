@@ -599,6 +599,32 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       .map((section) => section.id)
   }, [definition])
 
+  // Field ids that opt into auto-save (a change to them saves the form),
+  // gathered across root fields, rows and sections.
+  const autoSaveFieldIds = useMemo(() => {
+    const ids = new Set<string>()
+    const add = (field: { id: string; autoSave?: boolean }) => {
+      if (field.autoSave) ids.add(field.id)
+    }
+    for (const item of definition) {
+      if (item.type === "field") add(item.field)
+      else if (item.type === "row") item.fields.forEach(add)
+      else if (item.type === "section") {
+        for (const sub of item.section.fields) {
+          if (sub.type === "field") add(sub.field)
+          else if (sub.type === "row") sub.fields.forEach(add)
+        }
+      }
+    }
+    return ids
+  }, [definition])
+  const hasFieldAutoSave = autoSaveFieldIds.size > 0
+  // Read the (possibly re-created) set from a ref inside the watch callback so
+  // the auto-save effect stays subscribed instead of re-running — and clearing
+  // its pending debounce timer — on every render.
+  const autoSaveFieldIdsRef = useRef(autoSaveFieldIds)
+  autoSaveFieldIdsRef.current = autoSaveFieldIds
+
   // Track active section (the last clicked section)
   const [activeSection, setActiveSection] = useState<string | undefined>(
     sectionIds[0]
@@ -832,19 +858,33 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
   }, [isSubmitting])
 
-  // Autosubmit: debounced auto-submit when fields change.
-  // `form.handleSubmit` runs validation; invalid forms surface errors and skip onSubmit.
+  // Auto-save: debounced auto-submit when fields change. Triggered by every
+  // field in form-level autosubmit mode, or only by fields with `autoSave` when
+  // some are set. `form.handleSubmit` runs validation; invalid forms surface
+  // errors and skip onSubmit.
   const autosubmitDelay =
     submitConfig?.type === "autosubmit"
       ? (submitConfig.delay ?? DEFAULT_AUTOSUBMIT_DELAY_MS)
       : DEFAULT_AUTOSUBMIT_DELAY_MS
 
   useEffect(() => {
-    if (!isAutosubmit) return
+    if (!isAutosubmit && !hasFieldAutoSave) return
 
-    const subscription = form.watch(() => {
-      if (!form.formState.isDirty) return
+    const subscription = form.watch((_values, { name }) => {
       if (form.formState.isSubmitting) return
+
+      if (isAutosubmit) {
+        // Form-level: any change once the form is dirty.
+        if (!form.formState.isDirty) return
+      } else {
+        // Per-field auto-save: only a change to a designated `autoSave` field.
+        // `name` is the changed path, e.g. "links.0.url" → root field id
+        // "links"; a matching name is itself the "field changed" signal (the
+        // watch fires with an undefined name on mount, which is skipped).
+        const rootFieldId = name?.split(".")[0]
+        if (!rootFieldId || !autoSaveFieldIdsRef.current.has(rootFieldId))
+          return
+      }
 
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
@@ -865,7 +905,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
         autosubmitTimerRef.current = null
       }
     }
-  }, [isAutosubmit, autosubmitDelay, form, snapshotFocus])
+  }, [isAutosubmit, hasFieldAutoSave, autosubmitDelay, form, snapshotFocus])
 
   // Handle discard action
   const handleDiscard = () => {

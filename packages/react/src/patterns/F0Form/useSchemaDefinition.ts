@@ -61,6 +61,7 @@ function configToF0Field(
     status: config.status,
     disabled: config.disabled,
     resetOnDisable: config.resetOnDisable,
+    autoSave: "autoSave" in config ? config.autoSave : undefined,
     alert: config.alert,
     customFieldName:
       "customFieldName" in config ? config.customFieldName : undefined,

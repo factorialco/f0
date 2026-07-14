@@ -1744,6 +1744,82 @@ export const EntitiesListFieldRowActions: Story = {
 }
 
 /**
+ * Per-field auto-save. Only the entities list opts in with `autoSave: true`, so
+ * editing a link (or adding/removing/reordering rows) saves the form after a
+ * short debounce — no Save click needed. The other fields (`name`, `notes`)
+ * still save only when the user clicks **Save**.
+ *
+ * Auto-save submits the whole form, so it also persists any pending changes to
+ * the other fields and runs their validation. The "Auto-saves" counter below
+ * only increments from an entities change; typing in the text fields doesn't
+ * move it until you press Save.
+ */
+export const EntitiesListFieldAutoSave: Story = {
+  render() {
+    const AutoSaveDemo = () => {
+      const [saves, setSaves] = useState(0)
+
+      const formSchema = z.object({
+        name: f0FormField.text({
+          label: "Collection name",
+          placeholder: "e.g. Company resources",
+          helpText: "Saved when you click Save.",
+        }),
+        notes: f0FormField.textarea({
+          label: "Notes",
+          optional: true,
+          helpText: "Saved when you click Save.",
+        }),
+        links: f0FormField.entitiesList({
+          label: "Links",
+          helpText: "Saved automatically as you edit.",
+          autoSave: true,
+          schema: z.object({
+            title: z.string().min(1),
+            url: z.string().url(),
+          }),
+          config: {
+            sortable: true,
+            labels: { addButton: "Add link" },
+            columns: { url: { label: "URL", placeholder: "https://…" } },
+          },
+        }),
+      })
+
+      const formDefinition = useF0FormDefinition({
+        name: "entities-list-autosave",
+        schema: formSchema,
+        defaultValues: {
+          name: "Company resources",
+          notes: "",
+          links: [
+            { title: "People Handbook", url: "https://example.com/handbook" },
+          ],
+        },
+        onSubmit: async ({ data }) => {
+          await sleep(300)
+          setSaves((count) => count + 1)
+          console.info(`Saved: ${JSON.stringify(data)}`)
+          return { success: true, message: "Saved" }
+        },
+        submitConfig: { label: "Save" },
+      })
+
+      return (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-f1-foreground-secondary">
+            Auto-saves: <span className="font-semibold">{saves}</span>
+          </p>
+          <F0Form formDefinition={formDefinition} />
+        </div>
+      )
+    }
+
+    return <AutoSaveDemo />
+  },
+}
+
+/**
  * File field with pre-existing files loaded via `initialFiles` on F0Form.
  * The shared pool is automatically matched to each file field by comparing
  * `InitialFile.value` against the field's `defaultValues`.
