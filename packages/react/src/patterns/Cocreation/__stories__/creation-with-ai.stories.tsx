@@ -68,6 +68,8 @@ import type { SurveyFormBuilderElement } from "@/sds/surveys/SurveyFormBuilder/t
 import { mockDatasets } from "@/sds/surveys/__stories__/mocks"
 
 import {
+  EMPTY_SURVEY_TEMPLATE,
+  EMPTY_SURVEY_TEMPLATE_ID,
   listVisualization,
   makeTemplatesDataAdapter,
   resourceFilters,
@@ -315,9 +317,17 @@ function SurveySettingsForm() {
  */
 function TemplatesCollection({
   onSelect,
+  onEmpty,
   fillHeight = true,
 }: {
   onSelect?: (item: Template) => void
+  /**
+   * When set, prepend a synthetic "Empty Survey" row as the first item;
+   * selecting it runs this instead of `onSelect` (it starts a blank survey
+   * rather than previewing a template — mirrors the guided-type gallery).
+   * Omitted for the inert browse tab, which shows real templates only.
+   */
+  onEmpty?: () => void
   /**
    * When true (default, the browse tab) the collection fills its container and
    * scrolls its list body internally. Pass false in the AI Canvas gallery so
@@ -327,14 +337,27 @@ function TemplatesCollection({
   fillHeight?: boolean
 } = {}) {
   const { config } = useFlowConfig()
+  const templatesSource = makeTemplatesSource(config)
   const source = useDataCollectionSource({
-    ...makeTemplatesSource(config),
+    ...templatesSource,
+    // With `onEmpty` (the AI Canvas gallery) lead with the synthetic "Empty
+    // Survey" row; without it (the browse tab) show real templates only.
+    dataAdapter: onEmpty
+      ? makeTemplatesDataAdapter([EMPTY_SURVEY_TEMPLATE, ...config.templates])
+      : templatesSource.dataAdapter,
     sortings: templateSortings,
     search: { enabled: true, sync: true },
     // No card CTAs — actions live on the preview surface. The card-body click
-    // is omitted entirely when no handler is supplied so the browse-tab cards
-    // stay inert (no pointer, no action); in the AI Canvas it opens the preview.
-    itemOnClick: onSelect ? (item) => () => onSelect(item) : undefined,
+    // is omitted entirely when neither handler is supplied so the browse-tab
+    // rows stay inert (no pointer, no action); in the AI Canvas it opens the
+    // preview, or starts a blank survey for the "Empty Survey" row.
+    itemOnClick:
+      onSelect || onEmpty
+        ? (item) => () => {
+            if (onEmpty && item.id === EMPTY_SURVEY_TEMPLATE_ID) onEmpty()
+            else onSelect?.(item)
+          }
+        : undefined,
   })
   return (
     <OneDataCollection
@@ -1774,6 +1797,7 @@ function SurveyTemplatePreviewBody({
  */
 function TemplatesCanvasBody() {
   const { openCanvas } = useAiChat()
+  const startBlankSurvey = useStartBlankSurvey()
   const openPreview = (item: Template) =>
     openCanvas(
       toCanvasContent({
@@ -1784,13 +1808,14 @@ function TemplatesCanvasBody() {
         description: item.description,
       })
     )
-  return <TemplatesCollection onSelect={openPreview} fillHeight={false} />
+  return (
+    <TemplatesCollection
+      onSelect={openPreview}
+      onEmpty={startBlankSurvey}
+      fillHeight={false}
+    />
+  )
 }
-
-// Sentinel id for the synthetic "Empty Form" entry prepended to the
-// guided-type template gallery (Training). Not a real `Template` record —
-// selecting it skips preview and opens a blank editor directly.
-const EMPTY_FORM_TEMPLATE_ID = "empty-form"
 
 // List visualization for the guided-type template gallery: no Category
 // property (the type is already in the gallery's own title — "Satisfaction
@@ -1806,7 +1831,7 @@ const guidedGalleryListVisualization = {
     fields: [
       {
         label: "Questions",
-        hide: (item: Template) => item.id === EMPTY_FORM_TEMPLATE_ID,
+        hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
         render: (item: Template) => `${item.questions} questions`,
         sorting: "questions" as const,
       },
@@ -1832,19 +1857,10 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
       ? templatesForGuidedType(config, guidedTypeId)
       : []
 
-  const galleryItems: Template[] = [
-    {
-      id: EMPTY_FORM_TEMPLATE_ID,
-      name: "Empty Survey",
-      category: "",
-      description: "Start from scratch",
-      questions: 0,
-    },
-    ...templates,
-  ]
+  const galleryItems: Template[] = [EMPTY_SURVEY_TEMPLATE, ...templates]
 
   const openPreview = (item: Template) => {
-    if (item.id === EMPTY_FORM_TEMPLATE_ID) {
+    if (item.id === EMPTY_SURVEY_TEMPLATE_ID) {
       openEmptyForm(guidedTypeId)
       return
     }
@@ -1925,11 +1941,9 @@ function TemplatesCanvasHeader({
 
   // The "guidedType" gallery is scoped to a picked type, so it keeps that
   // type's title (e.g. "Satisfaction Survey Templates"); the flow-wide
-  // "cards"/"guidedEntry" gallery is titled by its module, e.g.
-  // "Engagement Surveys".
-  const title = guidedTypeId
-    ? content.title
-    : `${config.pageTitle} ${config.navLabel}`
+  // "cards"/"guidedEntry" gallery lists every survey template, so it's just
+  // "Survey Templates".
+  const title = guidedTypeId ? content.title : "Survey Templates"
 
   return (
     <div className="flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
