@@ -94,6 +94,13 @@ export type UseSelectableProps<
    * reaches rows absent from `data.records`. Falls back to `data.records`.
    */
   getRenderedSelectableEntries?: () => Array<[SelectionId, R]>
+  /**
+   * Number of currently-rendered selectable rows (incl. lazily-loaded nested
+   * children). Used as the selectable-item total so counts stay correct when
+   * `paginationInfo.total` reflects top-level rows rather than selectable rows
+   * (e.g. nested/tree tables). Ignored when smaller than `paginationInfo.total`.
+   */
+  renderedSelectableCount?: number
 }
 
 export type SelectionMeta<R extends RecordType> = {

@@ -1360,5 +1360,78 @@ describe("useSelectable", () => {
         expect(result.current.selectedItems.has(1)).toBe(true)
       })
     })
+
+    // Production case (e.g. HC planning): paginationInfo.total reflects the 2
+    // top-level parent rows (TOP_LEVEL_PARENT_ROW_COUNT), NOT the selectable
+    // child rows. renderedSelectableCount comes from the row registry.
+    const undercountingPagination: PaginationInfo = {
+      type: "pages",
+      total: parentRecords.length, // 2 — undercounts the 6 selectable children
+      currentPage: 1,
+      perPage: parentRecords.length,
+      pagesCount: 1,
+    }
+
+    it("counts rendered selectable rows, not paginationInfo.total (fixes 'Select all 2 items')", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo: undercountingPagination,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+          renderedSelectableCount: childRecords.length,
+        })
+      )
+
+      expect(result.current.selectionStatus.totalKnownItemsCount).toBe(6)
+
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+
+      await waitFor(() => {
+        // Before the fix this was `selectAllTotal` (2), not the real 6.
+        expect(result.current.allSelectedStatus.selectedCount).toBe(6)
+      })
+    })
+
+    it("never reports a negative selected count when children are unchecked (fixes '-2 selected')", async () => {
+      const { result } = renderHook(() =>
+        useSelectable({
+          data: nestedData,
+          paginationInfo: undercountingPagination,
+          source: nestedSource,
+          onSelectItems: vi.fn(),
+          selectionMode: "multi",
+          allPagesSelection: true,
+          getRenderedSelectableEntries: renderedEntries,
+          renderedSelectableCount: childRecords.length,
+        })
+      )
+
+      act(() => {
+        result.current.handleSelectAllItems(true)
+      })
+      await waitFor(() =>
+        expect(result.current.allSelectedStatus.selectedCount).toBe(6)
+      )
+
+      // Uncheck 4 of 6 — more than paginationInfo.total (2). Pre-fix this
+      // computed selectAllTotal(2) - uncheckedCount(4) = -2.
+      act(() => {
+        for (const item of childRecords.slice(0, 4)) {
+          result.current.handleSelectItemChange(item, false)
+        }
+      })
+
+      await waitFor(() => {
+        const count = result.current.allSelectedStatus.selectedCount
+        expect(count).toBeGreaterThanOrEqual(0)
+        expect(count).toBe(2)
+      })
+    })
   })
 })

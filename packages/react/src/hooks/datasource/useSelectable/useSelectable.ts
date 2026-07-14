@@ -42,6 +42,7 @@ export function useSelectable<
   resetOnPageChange = true,
   preserveSelectionOnDatasetChange = false,
   getRenderedSelectableEntries,
+  renderedSelectableCount = 0,
 }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<
   R,
   Filters
@@ -95,8 +96,19 @@ export function useSelectable<
     if (isPageOnlySelection) {
       return data.records?.length || 0
     }
-    return paginationInfo ? paginationInfo.total : data.records?.length
-  }, [paginationInfo, data.records?.length, isPageOnlySelection])
+    const base = paginationInfo
+      ? paginationInfo.total
+      : (data.records?.length ?? 0)
+    // paginationInfo.total can undercount selectable rows (e.g. nested/tree
+    // tables where it reflects top-level rows, not the lazily-loaded selectable
+    // children). Never report fewer selectable items than are actually rendered.
+    return Math.max(base, renderedSelectableCount)
+  }, [
+    paginationInfo,
+    data.records?.length,
+    isPageOnlySelection,
+    renderedSelectableCount,
+  ])
 
   const currentPageIdentifier = useMemo(() => {
     if (!paginationInfo) return null
@@ -211,7 +223,12 @@ export function useSelectable<
       )
     }
     if (allSelectedCheck && selectAllTotal !== null) {
-      return selectAllTotal - uncheckedCount
+      // `selectAllTotal` is snapshotted when "select all" is clicked; more
+      // selectable rows may have rendered since (lazily-loaded children), so
+      // take the larger of the two. Clamp at 0 — otherwise a total that
+      // undercounts loaded selectable rows yields a negative "N selected".
+      const effectiveTotal = Math.max(selectAllTotal, renderedSelectableCount)
+      return Math.max(0, effectiveTotal - uncheckedCount)
     }
     return checkedCount
   }, [
@@ -221,6 +238,7 @@ export function useSelectable<
     checkedCount,
     isGrouped,
     allSelectedCheck,
+    renderedSelectableCount,
   ])
 
   const { itemsStatus, selectedIds } = useMemo(() => {
