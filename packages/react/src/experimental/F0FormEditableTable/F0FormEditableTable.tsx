@@ -84,12 +84,6 @@ const HEAD_CLASSES = cn(
   "first:after:!left-1 last:after:!right-1"
 )
 /**
- * Keeps a small leading gutter on the drag-handle cell/header so the grip
- * isn't flush against the edge (overrides the reset above).
- */
-const HANDLE_CELL_CLASSES = "first:pl-3"
-
-/**
  * Shrink-wraps the actions column to its buttons (as small as possible). A `w-full`
  * table with `table-layout: auto` otherwise hands spare width to the auto-sized
  * actions column, so a tiny 1px preferred width + `nowrap` makes the browser
@@ -109,7 +103,11 @@ const DATA_CELL_MIN_WIDTH = "min-w-[25cqw]"
 /**
  * Focus/hover highlight applied directly to the editable `td` (not the inner
  * cell) so it lands on the real cell boundary and lifts above the neighbouring
- * cells (`z-10`) instead of being clipped by them.
+ * cells instead of being clipped by them.
+ *
+ * The lift uses `z-[9]` — above plain cells but below the sticky handle/actions
+ * columns (`z-10`), so a hovered cell's content can't bleed over them when the
+ * table is scrolled sideways.
  *
  * Focus keeps a selected inset ring; hover just recolors the cell border via
  * an inset outline (no inner shadow). The inner cell's own hover shadow is
@@ -119,18 +117,19 @@ const EDITABLE_CELL_RING = cn(
   // Suppress the inner cell's hover shadow only when NOT focused, so a focused
   // cell keeps its ring even while hovered.
   "[&:not(:focus-within):hover_*]:!shadow-none",
-  "focus-within:relative focus-within:z-10 focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
-  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-10",
+  "focus-within:relative focus-within:z-[9] focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
+  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-[9]",
   "[&:not(:focus-within):hover]:outline [&:not(:focus-within):hover]:outline-1 [&:not(:focus-within):hover]:-outline-offset-1 [&:not(:focus-within):hover]:outline-[hsl(var(--neutral-30))]"
 )
 
 /**
  * Error highlight for a cell with an external validation error: a critical
  * ring on the `td` boundary. Used INSTEAD of {@link EDITABLE_CELL_RING} so the
- * hover shadow-suppression doesn't wipe the inner cell's error styling.
+ * hover shadow-suppression doesn't wipe the inner cell's error styling. Lifts
+ * with the same `z-[9]` (below the sticky columns) as {@link EDITABLE_CELL_RING}.
  */
 const EDITABLE_CELL_ERROR_RING =
-  "relative z-10 shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
+  "relative z-[9] shadow-[inset_0_0_0_1px_hsl(var(--critical-50))]"
 
 /**
  * Fills in the `render` fallback so columns satisfy the full editable-table
@@ -231,7 +230,10 @@ function RowCells<R extends RecordType>({
         <TableCell
           width={HANDLE_COL_WIDTH}
           sticky={{ left: 0 }}
-          className={cn(CELL_CLASSES, HANDLE_CELL_CLASSES)}
+          // No first:pl-0 override needed: CELL_CLASSES already zeroes the edge
+          // gutter, so justify-center centers the grip in the full cell width
+          // (symmetric left/right spacing, unlike a one-sided leading pad).
+          className={CELL_CLASSES}
         >
           <div className="pointer-events-auto flex h-full items-center justify-center">
             {dragHandle}
@@ -505,11 +507,7 @@ function F0FormEditableTableBase<R extends RecordType>({
             <TableHead
               width={HANDLE_COL_WIDTH}
               sticky={{ left: 0 }}
-              className={cn(
-                HEAD_CLASSES,
-                HANDLE_CELL_CLASSES,
-                "hover:after:!bg-transparent"
-              )}
+              className={cn(HEAD_CLASSES, "hover:after:!bg-transparent")}
             >
               <span className="sr-only">{reorderLabel}</span>
             </TableHead>
