@@ -107,15 +107,22 @@ describe("resolveEntitiesListCell", () => {
     })
   })
 
+  describe("date cells", () => {
+    it.each([
+      ["z.date()", z.date()],
+      ["date shortcut", f0FormField.date({ label: "D" })],
+      ["datetime shortcut", f0FormField.datetime({ label: "DT" })],
+    ])("maps %s to a date cell", (_name, schema) => {
+      expect(resolveEntitiesListCell(schema)).toEqual({ kind: "date" })
+    })
+  })
+
   describe("unsupported field types resolve to null (no inline cell)", () => {
     it.each([
       ["boolean", z.boolean()],
       ["boolean shortcut", f0FormField.boolean({ label: "B" })],
       ["checkbox", f0FormField.checkbox({ label: "C" })],
-      ["date", z.date()],
-      ["date shortcut", f0FormField.date({ label: "D" })],
-      ["datetime", f0FormField.datetime({ label: "DT" })],
-      ["time", f0FormField.time({ label: "Ti" })],
+      ["time (no calendar representation)", f0FormField.time({ label: "Ti" })],
       ["richText", f0FormField.richText({ label: "R", optional: true })],
     ])("returns null for %s", (_name, schema) => {
       expect(resolveEntitiesListCell(schema)).toBeNull()

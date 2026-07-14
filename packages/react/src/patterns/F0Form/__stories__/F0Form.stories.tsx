@@ -1414,14 +1414,15 @@ export const FileFields: Story = {
  *
  * Shown as inline columns (types that have an editable-table cell): `text`,
  * `email` and `url` (text cells, with the envelope/link leading icon),
- * `select`, `number`, `percentage` (number with a "%" unit) and `money`.
+ * `select`, `number`, `percentage` (number with a "%" unit), `money` and
+ * `date` (day-granularity date picker).
  *
- * Kept on the row but **not shown as a column** (no inline cell yet): `date`,
- * `boolean`, `checkbox` and `richText`. They stay in the schema and on each
- * row's value; they simply aren't rendered as a column.
+ * Kept on the row but **not shown as a column** (no inline cell yet):
+ * `boolean`, `checkbox`, `richText` and `time`. They stay in the schema and on
+ * each row's value; they simply aren't rendered as a column.
  *
  * `editableIds` locks the "Alan Turing" row (id `m-3`) — its cells render as
- * disabled (still showing their leading icon).
+ * disabled (still showing their leading icon and a formatted date).
  */
 export const EntitiesListField: Story = {
   parameters: { docs: { story: { inline: false, height: "600px" } } },
@@ -1474,6 +1475,7 @@ export const EntitiesListField: Story = {
             seniority: { width: 90 },
             allocation: { width: 120 },
             salary: { width: 120 },
+            startDate: { width: 150 },
           },
         },
       }),

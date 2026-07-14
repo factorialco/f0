@@ -21,9 +21,10 @@ describe("EntitiesListFieldRenderer — columns", () => {
           name: z.string().min(1),
           role: z.enum(["Admin", "Viewer"]),
           salary: f0FormField.money({ label: "Salary", currency: "EUR" }),
-          // No inline cell → not a column:
           startDate: f0FormField.date({ label: "Start", optional: true }),
+          // No inline cell → not a column:
           active: f0FormField.boolean({ label: "Active", optional: true }),
+          when: f0FormField.time({ label: "When", optional: true }),
           // Hidden → kept on the row, not a column:
           secretId: z.string(),
         }),
@@ -55,9 +56,12 @@ describe("EntitiesListFieldRenderer — columns", () => {
     expect(
       screen.getByRole("columnheader", { name: "Salary" })
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole("columnheader", { name: "Start" })
+    ).toBeInTheDocument()
     // Unsupported and hidden fields have no column
-    expect(screen.queryByRole("columnheader", { name: "Start" })).toBeNull()
     expect(screen.queryByRole("columnheader", { name: "Active" })).toBeNull()
+    expect(screen.queryByRole("columnheader", { name: "When" })).toBeNull()
     expect(screen.queryByRole("columnheader", { name: /secret/i })).toBeNull()
   })
 })
@@ -102,6 +106,53 @@ describe("EntitiesListFieldRenderer — inline editing", () => {
         expect.objectContaining({ faqs: [{ title: "New title" }] })
       )
     })
+  })
+})
+
+describe("EntitiesListFieldRenderer — date fields", () => {
+  it("keeps a date field as a Date across an inline edit (ISO round-trip)", async () => {
+    const onSubmit = vi.fn(async () => ({ success: true }))
+    const start = new Date(2024, 0, 8)
+    const schema = z.object({
+      events: f0FormField.entitiesList({
+        label: "Events",
+        schema: z.object({ title: z.string().min(1), date: z.date() }),
+        config: { supportInlineEditing: true },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="dates"
+        schema={schema}
+        defaultValues={{ events: [{ title: "Kickoff", date: start }] }}
+        onSubmit={onSubmit}
+        submitConfig={{ label: "Save" }}
+      />
+    )
+
+    // The date column renders (no inline change needed for it).
+    expect(
+      screen.getByRole("columnheader", { name: "Date" })
+    ).toBeInTheDocument()
+
+    // Editing the title triggers a commit of every row; the untouched date must
+    // still be a Date in the submitted value (row stores ISO, commit converts).
+    const input = screen.getByDisplayValue("Kickoff")
+    await userEvent.clear(input)
+    await userEvent.type(input, "Launch")
+    await waitFor(() => expect(input).toHaveValue("Launch"), { timeout: 1000 })
+    await new Promise((resolve) => setTimeout(resolve, 350))
+    await userEvent.click(screen.getByText("Save"))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+    const submitted = onSubmit.mock.calls[0][0] as {
+      events: Array<{ title: string; date: unknown }>
+    }
+    expect(submitted.events[0].title).toBe("Launch")
+    expect(submitted.events[0].date).toBeInstanceOf(Date)
   })
 })
 

@@ -17,6 +17,7 @@ export type EntitiesListCellResolution =
   | { kind: "text"; inputType: "text" | "email" | "url" }
   | { kind: "number"; units?: string }
   | { kind: "money"; units?: string }
+  | { kind: "date" }
   | { kind: "select"; options: Array<{ value: string; label: string }> }
 
 /** Common currency codes shown as their symbol in the money cell. */
@@ -101,6 +102,12 @@ export function resolveEntitiesListCell(
         units: currency ? (CURRENCY_SYMBOLS[currency] ?? currency) : undefined,
       }
     }
+    // The editable-table date cell is day-granularity. `datetime` uses it too
+    // (its time-of-day is preserved unless the date is edited); `time` has no
+    // calendar representation and falls through to `null`.
+    case "date":
+    case "datetime":
+      return { kind: "date" }
     case "select": {
       const options = resolveSelectOptions(schema, cfg)
       return options ? { kind: "select", options } : null

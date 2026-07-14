@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   ControllerRenderProps,
@@ -131,13 +132,59 @@ export function EntitiesListFieldRenderer({
       ? !field.supportInlineEditing
       : itemKeys.length > MAX_INLINE_FIELDS
 
+  // Fields that render as date cells. The date cell works with ISO strings, so
+  // their values are stored as strings on the row and converted back to `Date`
+  // for the form value (which the schema validates as `z.date()`).
+  const dateKeys = useMemo(
+    () =>
+      itemKeys.filter(
+        (key) => resolveEntitiesListCell(itemShape[key])?.kind === "date"
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemShape derives from field.itemSchema
+    [field.itemSchema]
+  )
+
+  /** Form item (`Date`) → row item (ISO string) for date fields. */
+  const formItemToRow = useCallback(
+    (item: EntitiesListItem): EntitiesListItem => {
+      if (dateKeys.length === 0) return item
+      const next = { ...item }
+      for (const key of dateKeys) {
+        if (next[key] instanceof Date) {
+          next[key] = (next[key] as Date).toISOString()
+        }
+      }
+      return next
+    },
+    [dateKeys]
+  )
+
+  /** Row item (ISO string) → form item (`Date`) for date fields. */
+  const rowItemToForm = useCallback(
+    (item: EntitiesListItem): EntitiesListItem => {
+      if (dateKeys.length === 0) return item
+      const next = { ...item }
+      for (const key of dateKeys) {
+        const value = next[key]
+        if (typeof value === "string" && value !== "") {
+          const parsed = parseISO(value)
+          next[key] = Number.isNaN(parsed.getTime()) ? undefined : parsed
+        } else if (value === "") {
+          next[key] = undefined
+        }
+      }
+      return next
+    },
+    [dateKeys]
+  )
+
   const makeRows = useCallback(
     (value: unknown): EntitiesListRow[] =>
       normalizeValue(value).map((item) => ({
         __key: `row-${keyCounter.current++}`,
-        ...item,
+        ...formItemToRow(item),
       })),
-    []
+    [formItemToRow]
   )
 
   const [rows, setRows] = useState<EntitiesListRow[]>(() =>
@@ -163,13 +210,13 @@ export function EntitiesListFieldRenderer({
   const commit = useCallback(
     (next: EntitiesListRow[]) => {
       setRows(next)
-      const value: EntitiesListItem[] = next.map(
-        ({ __key: _key, ...item }) => item
+      const value: EntitiesListItem[] = next.map(({ __key: _key, ...item }) =>
+        rowItemToForm(item)
       )
       lastCommittedRef.current = JSON.stringify(value)
       formField.onChange(value)
     },
-    [formField]
+    [formField, rowItemToForm]
   )
 
   /**
@@ -288,7 +335,9 @@ export function EntitiesListFieldRenderer({
     async (mode: "add" | "edit", row?: EntitiesListRow) => {
       if (mode === "edit" && row) {
         const { __key: _key, ...item } = row
-        dialogDefaultsRef.current = item
+        // The dialog form validates dates as `Date`, so convert the row's ISO
+        // date strings back before seeding the defaults.
+        dialogDefaultsRef.current = rowItemToForm(item)
       } else {
         dialogDefaultsRef.current = makeEmptyItem()
       }
@@ -304,16 +353,14 @@ export function EntitiesListFieldRenderer({
       })
       if (!result.submitted) return
 
+      // Dialog data has `Date`s; store ISO strings on the row (commit converts
+      // them back to `Date` for the form value).
+      const rowData = formItemToRow(result.data as EntitiesListItem)
       if (mode === "add") {
-        commit([
-          ...rows,
-          { __key: `row-${keyCounter.current++}`, ...result.data },
-        ])
+        commit([...rows, { __key: `row-${keyCounter.current++}`, ...rowData }])
       } else if (row) {
         commit(
-          rows.map((r) =>
-            r.__key === row.__key ? { ...r, ...result.data } : r
-          )
+          rows.map((r) => (r.__key === row.__key ? { ...r, ...rowData } : r))
         )
       }
       // Re-validate the array after the dialog closes
@@ -323,6 +370,8 @@ export function EntitiesListFieldRenderer({
       rows,
       commit,
       makeEmptyItem,
+      rowItemToForm,
+      formItemToRow,
       dialogFormDefinition,
       field.labels,
       translations,
@@ -339,7 +388,7 @@ export function EntitiesListFieldRenderer({
   // Inline mode disables cells per row via `editableIds`.
   const editTypeFor = (
     row: EntitiesListRow,
-    editable: "text" | "number" | "money" | "select"
+    editable: "text" | "number" | "money" | "date" | "select"
   ) => {
     if (useDialogMode) return "display-only" as const
     if (isDisabled || !isRowEditable(row)) return "disabled" as const
@@ -390,6 +439,13 @@ export function EntitiesListFieldRenderer({
               numberConfig: resolution.units
                 ? { units: resolution.units }
                 : undefined,
+            }
+          case "date":
+            return {
+              ...base,
+              editType: (row) => editTypeFor(row, "date"),
+              // Present so read-only cells format the value as a date.
+              dateConfig: {},
             }
           case "text":
             return {
@@ -451,10 +507,11 @@ export function EntitiesListFieldRenderer({
   const hasInvalidRow = useMemo(
     () =>
       rows.some(({ __key: _key, ...item }) => {
-        const result = field.itemSchema?.safeParse(item)
+        // Validate the form representation (ISO date strings → Date).
+        const result = field.itemSchema?.safeParse(rowItemToForm(item))
         return result ? !result.success : false
       }),
-    [rows, field.itemSchema]
+    [rows, field.itemSchema, rowItemToForm]
   )
 
   return (
