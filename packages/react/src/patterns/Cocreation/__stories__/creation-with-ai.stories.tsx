@@ -157,6 +157,10 @@ const resetAiChatPersistence = () => {
 type FlowConfigContextValue = {
   flowId: FlowConfig["id"]
   config: FlowConfig
+  /** The user has no AI credits: post-creation AI editing is blocked (see the
+   * "No Credits" story). Stable for the session — unlike the dismissable
+   * credit-warning banner. */
+  noCredits: boolean
 }
 
 const FlowConfigContext = createContext<FlowConfigContextValue | null>(null)
@@ -171,14 +175,16 @@ function useFlowConfig(): FlowConfigContextValue {
 
 function FlowConfigProvider({
   flowId,
+  noCredits = false,
   children,
 }: {
   flowId: FlowConfig["id"]
+  noCredits?: boolean
   children: ReactNode
 }) {
   const config = FLOW_CONFIGS[flowId]
   return (
-    <FlowConfigContext.Provider value={{ flowId, config }}>
+    <FlowConfigContext.Provider value={{ flowId, config, noCredits }}>
       {children}
     </FlowConfigContext.Provider>
   )
@@ -694,8 +700,24 @@ function useProposalFlow() {
     },
     [appendMessages, appendCard, setUserMessageInterceptor]
   )
-  return { armProposal }
+  // No-credits variant of `armProposal`: instead of proposing a change, every
+  // typed message is met with an "out of credits" reply (and re-arms, so each
+  // further message gets the same answer). Used once a survey is created in the
+  // credit-exhausted flow, where AI edits are blocked.
+  const armNoCredits = useCallback(() => {
+    const handler = () => {
+      appendMessages([{ role: "assistant", content: NO_CREDITS_MESSAGE }])
+      setUserMessageInterceptor(handler)
+    }
+    setUserMessageInterceptor(handler)
+  }, [appendMessages, setUserMessageInterceptor])
+  return { armProposal, armNoCredits }
 }
+
+// Assistant reply when the user tries to refine a survey with no AI credits
+// left (the "No Credits" demo). Ends the AI editing loop with an upgrade nudge.
+const NO_CREDITS_MESSAGE =
+  "You're out of AI credits, so I can't make changes right now. Upgrade your plan to keep editing with AI."
 
 /**
  * Opens a blank "Empty Form" for a Training guided type: seeds a survey with
@@ -956,8 +978,8 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
   const { openCanvas, setVisualizationMode } = useAiChat()
   const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
-  const { armProposal } = useProposalFlow()
-  const { config } = useFlowConfig()
+  const { armProposal, armNoCredits } = useProposalFlow()
+  const { config, noCredits } = useFlowConfig()
   const leaveGuidedFlow = useLeaveGuidedFlow()
 
   const useThisTemplate = () => {
@@ -1002,10 +1024,15 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           "I have created the survey using the template. What would you like to customize or change?",
       },
     ])
-    // Arm the next typed message: the user describes a change, the assistant
-    // proposes one, and a human-in-the-loop confirmation card lets them accept
-    // (apply + supersede the card) or reject it — then re-arms for the next.
-    armProposal(surveyId, content.templateName)
+    // Arm the next typed message. Normally the user describes a change, the
+    // assistant proposes one, and a confirmation card lets them accept/reject
+    // (then re-arms). With no credits, AI edits are blocked — every typed
+    // message gets an "out of credits" reply instead.
+    if (noCredits) {
+      armNoCredits()
+    } else {
+      armProposal(surveyId, content.templateName)
+    }
   }
 
   return (
@@ -2036,7 +2063,7 @@ function FlowContent({
   phase: Phase
   setPhase: (phase: Phase) => void
 }) {
-  const { config } = useFlowConfig()
+  const { config, noCredits } = useFlowConfig()
   // Single-level primary nav: the flow's own collection (id === config.id,
   // e.g. "engagement"/"training") vs the Templates browse view (id
   // "templates"). Starts on the flow's own collection.
@@ -2060,7 +2087,7 @@ function FlowContent({
   } = useMockAiChatRuntime()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
-  const { armProposal } = useProposalFlow()
+  const { armProposal, armNoCredits } = useProposalFlow()
 
   // Typed "Create" flow ("cards" entry — Engagement): the same three
   // clarifying questions as the Empty survey card, walked as a single
@@ -2245,8 +2272,10 @@ function FlowContent({
     // Runs the picked entry action after its "reply + think" beat.
     const runGuidedEntryAction = (optionId: string) => {
       if (optionId === EMPTY_OPTION_ID) {
-        // Blank survey: open its canvas + "created" card up front, then walk
-        // the drafting conversation (same as the "cards" Empty survey card).
+        // Blank survey: open its canvas + "created" card up front. Normally we
+        // then walk the drafting conversation; with no credits that AI step is
+        // blocked, so instead invite a typed request and meet it with an
+        // "out of credits" reply (see `armNoCredits`).
         const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
         openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
         const cardId = nextCardId()
@@ -2259,7 +2288,18 @@ function FlowContent({
             description={createdDescription(flow)}
           />
         ))
-        askSurveyDetails(surveyId)
+        if (noCredits) {
+          appendMessages([
+            {
+              role: "assistant",
+              content:
+                "Your blank survey is ready. Tell me what you'd like to add.",
+            },
+          ])
+          armNoCredits()
+        } else {
+          askSurveyDetails(surveyId)
+        }
         return
       }
       if (optionId === TEMPLATES_OPTION_ID) {
@@ -2659,7 +2699,7 @@ function CreationWithAIFlow({
 
   return (
     <MockAiChatRuntimeProvider>
-      <FlowConfigProvider flowId={flowId}>
+      <FlowConfigProvider flowId={flowId} noCredits={noCredits}>
         <SurveyStoreProvider>
           <ApplicationFrame
             ai={ai}
@@ -2678,34 +2718,36 @@ function CreationWithAIFlow({
   )
 }
 
-// "Engagement Surveys" — the original walkthrough resource: engagement/eNPS
-// surveys, living in the Engagement module.
-export const EngagementSurveys: Story = {
+// "With Welcome Screen" — entry via a welcome screen of entry-point cards
+// (`cards` mode). Uses the engagement/eNPS survey data.
+export const WithWelcomeScreen: Story = {
+  name: "With Welcome Screen",
   render: () => <CreationWithAIFlow flowId="engagement" />,
 }
 
-// "Training Surveys" — a second, coexisting example of the same co-creation
-// pattern applied to a different resource: training/compliance surveys in the
-// Learning module. Demonstrates that a co-creation flow is driven entirely by
-// `FlowConfig` data (see `flow-configs.ts`), not hardcoded to one resource.
-export const TrainingSurveys: Story = {
+// "Guided Chat · Triage" — the message-first guided-chat flow (`guidedType`),
+// example A: the clarifying question triages the survey TYPE, then opens a
+// type-scoped template gallery. Uses the training/compliance survey data.
+export const GuidedChatTriage: Story = {
+  name: "Guided Chat · Triage",
   render: () => <CreationWithAIFlow flowId="training" />,
 }
 
-// "Engagement Guided" — a third example reusing Engagement's data, but with the
-// message-first guided entry (like Training) whose clarifying options are entry
-// ACTIONS: Empty Survey, Use a Template, and the most-used templates. Picking a
-// template opens its preview; "Use a Template" opens the full gallery; "Empty
-// Survey" runs Engagement's blank-survey drafting conversation.
-export const EngagementGuidedSurveys: Story = {
+// "Guided Chat · Entry Actions" — the same message-first guided-chat flow
+// (`guidedEntry`), example B: the clarifying options are entry ACTIONS — Empty
+// Survey, Use a Template, and the most-used templates. Picking a template opens
+// its preview; "Use a Template" opens the full gallery; "Empty Survey" runs the
+// blank-survey drafting conversation. Reuses the engagement data.
+export const GuidedChatEntryActions: Story = {
+  name: "Guided Chat · Entry Actions",
   render: () => <CreationWithAIFlow flowId="engagementGuided" />,
 }
 
-// "Engagement (No Credits)" — the guided Engagement flow (message-first:
-// "Let's create a Survey" → clarifying questions) with AI credits exhausted.
-// A soft credit-warning banner sits above the composer (with a "Get credits"
-// CTA). The banner only shows on the text input — it's suppressed whenever a
-// clarifying panel occupies the composer.
-export const EngagementNoCredits: Story = {
+// "Guided Chat · No Credits" — the guided-chat entry-actions flow with AI
+// credits exhausted. A soft credit-warning banner sits above the composer (with
+// a "Get credits" CTA). The banner only shows on the text input — it's
+// suppressed whenever a clarifying panel occupies the composer.
+export const GuidedChatNoCredits: Story = {
+  name: "Guided Chat · No Credits",
   render: () => <CreationWithAIFlow flowId="engagementGuided" noCredits />,
 }
