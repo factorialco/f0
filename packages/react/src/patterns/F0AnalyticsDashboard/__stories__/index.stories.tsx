@@ -249,12 +249,18 @@ const ItemFiltersDemo = ({
 }
 
 /**
- * Per-widget filters: each eligible widget header shows a filter icon
- * (between fullscreen and the three-dot menu) that opens a compact anchored
- * popover. The popover lists this widget's fields; drilling into a field
- * shows an operator selector plus the value inputs that operator needs
- * (single, multiple, range, or none). Applying emits `onChange` for that
- * widget only. The last metric returns `undefined`, so it has no filter icon.
+ * Per-widget filters, routed per widget type:
+ *
+ * - **Metric and chart** widgets get a filter icon in the header (between
+ *   fullscreen and the three-dot menu) opening a compact anchored popover:
+ *   a list of this widget's fields, then per-field an operator selector plus
+ *   the value inputs that operator needs (single, multiple, range, or none).
+ * - The **collection (table)** widget surfaces the same filters as the
+ *   table's own toolbar picker — the button next to search/settings — with
+ *   applied-filter chips, exactly like tables elsewhere in the product.
+ *
+ * Applying emits `onChange` for that widget only. The last metric's resolver
+ * returns `undefined`, so it has no filter control at all.
  */
 export const WithItemFilters: Story = {
   render: () => <ItemFiltersDemo />,
@@ -262,11 +268,28 @@ export const WithItemFilters: Story = {
     onItemFiltersChange.mockClear()
     const page = within(canvasElement.closest("body")!)
 
-    const triggers = page.getAllByLabelText("Filters")
-    // Three eligible widgets — the fourth resolver returns undefined.
-    await expect(triggers).toHaveLength(3)
+    const widgetOf = (title: string) =>
+      page.getByText(title).closest("[class*='dashitem']") as HTMLElement
 
-    await userEvent.click(triggers[0])
+    // Header icons appear on the metric and the chart. The collection routes
+    // its filters through the table toolbar instead, and the fourth widget's
+    // resolver returns undefined so it gets no control at all.
+    const metricTrigger = within(widgetOf("Total Headcount")).getByLabelText(
+      "Filters"
+    )
+    const chartTrigger = within(
+      widgetOf("Headcount by Department")
+    ).getByLabelText("Filters")
+    const tableTrigger = within(widgetOf("Employee Directory")).getByRole(
+      "button",
+      { name: "Filters" }
+    )
+    await expect(
+      within(widgetOf("No filters (undefined)")).queryByLabelText("Filters")
+    ).toBeNull()
+
+    // — Metric: header icon → compact popover → drill in → apply —
+    await userEvent.click(metricTrigger)
     await userEvent.click(await page.findByText("Country"))
 
     const input = await page.findByRole("textbox")
@@ -282,21 +305,44 @@ export const WithItemFilters: Story = {
     await expect(onItemFiltersChange).toHaveBeenCalledOnce()
 
     // The applied filter surfaces as a counter on this widget's trigger only.
-    await waitFor(() => expect(triggers[0]).toHaveTextContent("1"))
-    await expect(triggers[1]).not.toHaveTextContent("1")
+    await waitFor(() => expect(metricTrigger).toHaveTextContent("1"))
+    await expect(chartTrigger).not.toHaveTextContent("1")
+
+    // — Collection: native toolbar picker (next to search/settings) —
+    onItemFiltersChange.mockClear()
+    await userEvent.click(tableTrigger)
+
+    const tableInput = await page.findByRole("textbox")
+    await userEvent.type(tableInput, "Germany")
+    await userEvent.click(page.getByRole("button", { name: "Apply filters" }))
+
+    await waitFor(() =>
+      expect(onItemFiltersChange).toHaveBeenCalledWith("employee-table", {
+        country: { operator: "equals", values: ["Germany"] },
+      })
+    )
+
+    // The applied filter renders as a chip in the table toolbar.
+    await expect(
+      await within(widgetOf("Employee Directory")).findByText(/Is Germany/)
+    ).toBeInTheDocument()
   },
 }
 
 /**
- * A widget with a filter already applied: the header controls stay visible
- * (no hover needed) and the filter icon shows the applied-filter counter.
- * Dismissing the popover without applying keeps the value intact.
+ * Widgets with filters already applied: the chart's header controls stay
+ * visible (no hover needed) and its filter icon shows the applied-filter
+ * counter; the table shows its applied filter as a toolbar chip. Dismissing
+ * the popover without applying keeps the value intact.
  */
 export const ItemFiltersApplied: Story = {
   render: () => (
     <ItemFiltersDemo
       initialValues={{
         headcount: { country: { operator: "not_set", values: [] } },
+        "employee-table": {
+          country: { operator: "in", values: ["ES", "FR"] },
+        },
       }}
     />
   ),
@@ -309,9 +355,15 @@ export const ItemFiltersApplied: Story = {
     )
     await expect(filtered).toBeDefined()
 
+    // The table's pre-applied filter renders as a toolbar chip.
+    await expect(await page.findByText(/Is one of ES, FR/)).toBeInTheDocument()
+
     // Open and dismiss without applying — the counter must not change.
     await userEvent.click(filtered!)
-    await expect(await page.findByText("Country")).toBeInTheDocument()
+    const popover = await page.findByRole("dialog")
+    await expect(
+      await within(popover).findByText("Country")
+    ).toBeInTheDocument()
     await userEvent.keyboard("{Escape}")
     await waitFor(() => expect(filtered).toHaveTextContent("1"))
   },

@@ -331,11 +331,15 @@ export type DashboardItem<
 /**
  * Per-widget filter configuration resolved by the host.
  *
- * When provided for an item, its header shows a filter icon (next to the
- * fullscreen and menu buttons) that opens a compact anchored popover built on
- * the OneFilterPicker filter types. The picker holds a draft state; `onChange`
- * fires only when the user applies, with the emitted state containing active
- * filters only (cleared/incomplete entries are stripped).
+ * Chart and metric items show a filter icon in their header (next to the
+ * fullscreen and menu buttons) opening a compact anchored popover built on
+ * the OneFilterPicker filter types. Collection items surface the filters as
+ * the table's own toolbar filter picker (next to search/settings) with
+ * applied-filter chips, matching table filtering across the product.
+ *
+ * Either way the picker holds a draft state; `onChange` fires only when the
+ * user applies, with the emitted state containing active filters only
+ * (cleared/incomplete entries are stripped).
  *
  * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
  * definition — so dashboard configs remain JSON-compatible.
