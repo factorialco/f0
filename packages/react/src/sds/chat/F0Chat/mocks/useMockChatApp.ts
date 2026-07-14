@@ -11,7 +11,9 @@ import {
 } from "react"
 
 import {
+  isUserMessage,
   type F0ChatEditInput,
+  type F0ChatItem,
   type F0ChatMessage,
   type F0ChatSendInput,
 } from "../types"
@@ -140,7 +142,9 @@ export const useMockChatStore = (): MockChatAppValue => {
       const id = nextId()
       patch(convId, (s) => {
         const replyTo = input.replyToId
-          ? s.messages.find((m) => m.id === input.replyToId)
+          ? s.messages
+              .filter(isUserMessage)
+              .find((m) => m.id === input.replyToId)
           : undefined
         const message: F0ChatMessage = {
           id,
@@ -175,7 +179,7 @@ export const useMockChatStore = (): MockChatAppValue => {
           patch(convId, (s) => ({
             ...s,
             messages: s.messages.map((m) =>
-              m.id === id
+              isUserMessage(m) && m.id === id
                 ? {
                     ...m,
                     status: "failed",
@@ -193,7 +197,7 @@ export const useMockChatStore = (): MockChatAppValue => {
         patch(convId, (s) => ({
           ...s,
           messages: s.messages.map((m) =>
-            m.id === id ? { ...m, status: "sent" } : m
+            isUserMessage(m) && m.id === id ? { ...m, status: "sent" } : m
           ),
         }))
       )
@@ -203,7 +207,7 @@ export const useMockChatStore = (): MockChatAppValue => {
         patch(convId, (s) => ({
           ...s,
           messages: s.messages.map((m) =>
-            m.id === id && m.status === "sent"
+            isUserMessage(m) && m.id === id && m.status === "sent"
               ? { ...m, status: "delivered" }
               : m
           ),
@@ -234,8 +238,10 @@ export const useMockChatStore = (): MockChatAppValue => {
           typingIds: restingTypingIds(replySeed),
           messages: [
             ...s.messages.map(
-              (m): F0ChatMessage =>
-                m.isMine && (m.status === "sent" || m.status === "delivered")
+              (m): F0ChatItem =>
+                isUserMessage(m) &&
+                m.isMine &&
+                (m.status === "sent" || m.status === "delivered")
                   ? { ...m, status: "read" }
                   : m
             ),
@@ -262,7 +268,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       patch(convId, (s) => ({
         ...s,
         messages: s.messages.map((m) =>
-          m.id === messageId
+          isUserMessage(m) && m.id === messageId
             ? { ...m, status: "sending", failureReason: undefined }
             : m
         ),
@@ -271,7 +277,9 @@ export const useMockChatStore = (): MockChatAppValue => {
         patch(convId, (s) => ({
           ...s,
           messages: s.messages.map((m) =>
-            m.id === messageId ? { ...m, status: "sent" } : m
+            isUserMessage(m) && m.id === messageId
+              ? { ...m, status: "sent" }
+              : m
           ),
         }))
       )
@@ -305,7 +313,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       patch(convId, (s) => ({
         ...s,
         messages: s.messages.map((m) => {
-          if (m.id !== messageId) return m
+          if (!isUserMessage(m) || m.id !== messageId) return m
           const reactions = m.reactions ? [...m.reactions] : []
           const idx = reactions.findIndex((r) => r.emoji === emoji)
           if (idx === -1) reactions.push({ emoji, count: 1, reactedByMe: true })
@@ -325,7 +333,9 @@ export const useMockChatStore = (): MockChatAppValue => {
   const deleteMessage = useCallback(
     (convId: string, messageId: string) => {
       patch(convId, (s) => {
-        const target = s.messages.find((m) => m.id === messageId)
+        const target = s.messages
+          .filter(isUserMessage)
+          .find((m) => m.id === messageId)
         if (!target) return s
         const beyondWindow =
           Date.now() - new Date(target.createdAt).getTime() > 5 * 60_000
@@ -333,7 +343,7 @@ export const useMockChatStore = (): MockChatAppValue => {
           ...s,
           messages: beyondWindow
             ? s.messages.map((m) =>
-                m.id === messageId
+                isUserMessage(m) && m.id === messageId
                   ? { ...m, deleted: true, body: "", reactions: undefined }
                   : m
               )
@@ -349,7 +359,7 @@ export const useMockChatStore = (): MockChatAppValue => {
       patch(convId, (s) => ({
         ...s,
         messages: s.messages.map((m) =>
-          m.id === messageId
+          isUserMessage(m) && m.id === messageId
             ? {
                 ...m,
                 body: input.body,

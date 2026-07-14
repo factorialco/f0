@@ -5,6 +5,7 @@ import { Profiler, type ReactNode, useEffect, useRef, useState } from "react"
 import { F0Chat } from "./F0Chat"
 import { useMockChatRuntime } from "./mocks/createMockChatRuntime"
 import { useChatStorm } from "./mocks/useChatStorm"
+import { useDemoHeaderActions } from "./mocks/useDemoHeaderActions"
 import { F0ChatProvider } from "./providers/F0ChatProvider"
 import { type F0ChatRuntime, type F0ChatUser } from "./types"
 
@@ -111,10 +112,13 @@ const GroupConversation = (): ReactNode => {
       },
     ],
   })
+  // Pin/mute live in `headerActions` now (nothing is built into the header but
+  // search) — this is the standard "member" wiring every host would ship.
+  const { headerActions } = useDemoHeaderActions(runtime)
   return (
     <Frame>
       <F0ChatProvider runtime={runtime}>
-        <F0Chat />
+        <F0Chat headerActions={headerActions} />
       </F0ChatProvider>
     </Frame>
   )
@@ -356,11 +360,183 @@ const Conversation = ({
     olderPages: 4,
     ambientEveryMs: 0,
   })
+  const { headerActions } = useDemoHeaderActions(runtime)
   return (
     <Frame>
       <F0ChatProvider runtime={runtime}>
-        <F0Chat />
+        <F0Chat headerActions={headerActions} />
       </F0ChatProvider>
+    </Frame>
+  )
+}
+
+// Extra people for the membership demos (system-row members don't need to be
+// existing authors — GetStream resolves them from the channel state the same way).
+const diego: F0ChatUser = {
+  id: "diego",
+  name: "Diego Fernández",
+  subtitle: "Backend Engineer",
+  avatar: { type: "person", firstName: "Diego", lastName: "Fernández" },
+  profileHref: "/people/diego",
+}
+const elena: F0ChatUser = {
+  id: "elena",
+  name: "Elena Ruiz",
+  subtitle: "QA Engineer",
+  avatar: { type: "person", firstName: "Elena", lastName: "Ruiz" },
+  profileHref: "/people/elena",
+}
+const fatima: F0ChatUser = {
+  id: "fatima",
+  name: "Fátima El Amrani",
+  subtitle: "Product Manager",
+  avatar: { type: "person", firstName: "Fátima", lastName: "El Amrani" },
+  profileHref: "/people/fatima",
+}
+const gabriel: F0ChatUser = {
+  id: "gabriel",
+  name: "Gabriel Costa",
+  subtitle: "Designer",
+  avatar: { type: "person", firstName: "Gabriel", lastName: "Costa" },
+  profileHref: "/people/gabriel",
+}
+const hugo: F0ChatUser = {
+  id: "hugo",
+  name: "Hugo Navarro",
+  subtitle: "Data Engineer",
+  avatar: { type: "person", firstName: "Hugo", lastName: "Navarro" },
+  profileHref: "/people/hugo",
+}
+const irene: F0ChatUser = {
+  id: "irene",
+  name: "Irene Vidal",
+  subtitle: "People Partner",
+  avatar: { type: "person", firstName: "Irene", lastName: "Vidal" },
+  profileHref: "/people/irene",
+}
+
+const membershipButton =
+  "z-50 cursor-pointer rounded-md border border-solid border-f1-border bg-f1-background px-3 py-1 text-sm font-medium text-f1-foreground shadow-md"
+
+/**
+ * Membership system rows, WhatsApp/Slack-style: people added to the group,
+ * leaving or being removed render as centered rows with an F0TagList of person
+ * tags that compacts itself (max 5, then a "+N" counter whose hover lists the
+ * collapsed people) and break the author runs around them. The buttons drive
+ * live events through the runtime — "Add 8" demos the "+N" counter, and the
+ * seeded history includes a multi-person leave and the plain-text fallback.
+ * As the admin here, the host offers the Edit group header action, whose
+ * callback opens an F0Dialog owned by the story (not F0Chat).
+ */
+const MembershipConversation = (): ReactNode => {
+  const hourAgo = (h: number) => new Date(Date.now() - h * 3600_000)
+  const runtime = useMockChatRuntime({
+    channel: { ...groupChannel, id: "grp-membership" },
+    me,
+    others: [anaG, bruno, carmen],
+    initialCount: 10,
+    olderPages: 1,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        // Directly after a same-author run → demos the run breaking.
+        type: "system",
+        id: "sys-added-1",
+        createdAt: hourAgo(3).toISOString(),
+        system: { event: "member.added", members: [anaG, carmen] },
+      },
+      {
+        id: "post-system",
+        author: anaG,
+        body: "Thanks for adding us! 👋",
+        createdAt: hourAgo(2.9).toISOString(),
+        isMine: false,
+      },
+      {
+        // A big batch in the history — F0TagList compacts it to 5 tags + "+N".
+        type: "system",
+        id: "sys-added-batch",
+        createdAt: hourAgo(2).toISOString(),
+        system: {
+          event: "member.added",
+          members: [diego, elena, fatima, gabriel, hugo, irene, bruno],
+        },
+      },
+      {
+        // Two people leaving at once — a coalesced multi-person "left" row.
+        type: "system",
+        id: "sys-left-1",
+        createdAt: hourAgo(1).toISOString(),
+        system: { event: "member.left", members: [bruno, hugo] },
+      },
+      {
+        // Body-only fallback — what an unknown GetStream system message renders.
+        type: "system",
+        id: "sys-fallback",
+        createdAt: hourAgo(0.5).toISOString(),
+        body: "This conversation is now end-to-end encrypted",
+      },
+    ],
+  })
+  const { headerActions, editDialog } = useDemoHeaderActions(runtime, "admin", {
+    members: [anaG, bruno, carmen],
+  })
+  return (
+    <Frame>
+      <div className="relative flex h-full flex-col">
+        <F0ChatProvider runtime={runtime}>
+          <F0Chat headerActions={headerActions} />
+        </F0ChatProvider>
+        {editDialog}
+        <div className="absolute left-4 top-16 z-50 flex flex-col items-start gap-2">
+          <button
+            type="button"
+            className={membershipButton}
+            onClick={() => runtime.addMembers([diego, elena])}
+          >
+            Add 2 members
+          </button>
+          <button
+            type="button"
+            className={membershipButton}
+            onClick={() =>
+              runtime.addMembers([
+                diego,
+                elena,
+                fatima,
+                gabriel,
+                hugo,
+                irene,
+                anaG,
+                bruno,
+              ])
+            }
+          >
+            Add 8 members (+N)
+          </button>
+          <button
+            type="button"
+            className={membershipButton}
+            onClick={() => runtime.memberLeaves(carmen)}
+          >
+            Member leaves
+          </button>
+          <button
+            type="button"
+            className={membershipButton}
+            onClick={() => runtime.addMembers([carmen])}
+          >
+            Member re-joins
+          </button>
+          <button
+            type="button"
+            className={membershipButton}
+            onClick={() => runtime.removeMember(diego)}
+          >
+            Remove member
+          </button>
+        </div>
+      </div>
     </Frame>
   )
 }
@@ -382,6 +558,14 @@ export const Default: Story = {
 export const Group: Story = {
   name: "Group with mentions",
   render: () => <GroupConversation />,
+}
+
+/** Membership events as centered system rows (added / left / removed) with
+ * person avatar-tags, "+N" overflow, the plain-text fallback, and the
+ * admin-only Edit group header action opening a host-owned F0Dialog. */
+export const GroupMembershipEvents: Story = {
+  name: "Group membership events",
+  render: () => <MembershipConversation />,
 }
 
 /** Resilient sending under a bad connection: instant bubble, delayed sending

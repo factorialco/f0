@@ -189,7 +189,9 @@ describe("delivery states", () => {
       })
     )
     expect(
-      screen.getByRole("button", { name: /^Not sent · .* — Message too long$/ })
+      screen.getByRole("button", {
+        name: /^Not sent · .* — Message too long$/,
+      })
     ).toBeInTheDocument()
   })
 
@@ -283,38 +285,59 @@ describe("capabilities", () => {
   })
 })
 
-describe("mute toggle", () => {
-  it("surfaces Mute in the header menu when the host provides toggleMute", async () => {
-    const toggleMute = vi.fn()
-    renderChat(makeRuntime({ toggleMute }))
-
+describe("header actions", () => {
+  it("no longer auto-renders Mute/Pin from the runtime toggles — hosts pass headerActions", async () => {
+    renderChat(makeRuntime({ toggleMute: vi.fn(), togglePin: vi.fn() }))
     await userEvent.click(screen.getByRole("button", { name: "Options" }))
-    await userEvent.click(await screen.findByRole("menuitem", { name: "Mute" }))
-
-    // The Dropdown defers item onClick by 200ms (radix animation workaround).
-    await waitFor(() => expect(toggleMute).toHaveBeenCalledTimes(1))
+    // Search is the only built-in action.
+    expect(await screen.findByText("Search")).toBeInTheDocument()
+    expect(screen.queryByText("Mute")).not.toBeInTheDocument()
+    expect(screen.queryByText("Pin")).not.toBeInTheDocument()
   })
 
-  it("labels the action Unmute on a muted channel", async () => {
-    renderChat(
-      makeRuntime({
-        toggleMute: vi.fn(),
-        channel: {
-          id: "c1",
-          type: "dm",
-          title: "María José",
-          avatar: { type: "person", firstName: "María", lastName: "José" },
-          muted: true,
-        },
-      })
+  it("surfaces a host action in the menu and fires its callback with the channel", async () => {
+    const onClick = vi.fn()
+    const runtime = makeRuntime()
+    render(
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat headerActions={[{ id: "mute", label: "Mute", onClick }]} />
+      </F0ChatProvider>
     )
     await userEvent.click(screen.getByRole("button", { name: "Options" }))
-    expect(await screen.findByText("Unmute")).toBeInTheDocument()
+    await userEvent.click(await screen.findByRole("menuitem", { name: "Mute" }))
+    // The Dropdown defers item onClick by 200ms (radix animation workaround).
+    await waitFor(() => expect(onClick).toHaveBeenCalledTimes(1))
+    expect(onClick).toHaveBeenCalledWith(runtime.channel)
   })
 
-  it("hides the action when the host doesn't provide toggleMute", async () => {
-    renderChat(makeRuntime())
+  it("filters actions by channelTypes — a group-only action never shows in a DM", async () => {
+    render(
+      <F0ChatProvider runtime={makeRuntime()}>
+        <F0Chat
+          headerActions={[
+            {
+              id: "edit",
+              label: "Edit group",
+              channelTypes: ["group"],
+              onClick: vi.fn(),
+            },
+          ]}
+        />
+      </F0ChatProvider>
+    )
     await userEvent.click(screen.getByRole("button", { name: "Options" }))
-    expect(screen.queryByText("Mute")).not.toBeInTheDocument()
+    expect(await screen.findByText("Search")).toBeInTheDocument()
+    expect(screen.queryByText("Edit group")).not.toBeInTheDocument()
+  })
+
+  it("resolves the function form per channel — per-channel permissions", () => {
+    const headerActions = vi.fn(() => [])
+    const runtime = makeRuntime()
+    render(
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat headerActions={headerActions} />
+      </F0ChatProvider>
+    )
+    expect(headerActions).toHaveBeenCalledWith(runtime.channel)
   })
 })

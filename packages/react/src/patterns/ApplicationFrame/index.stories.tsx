@@ -77,6 +77,8 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
@@ -919,6 +921,16 @@ export const WithAiAssistant: Story = {
  */
 const MockChatPanel = ({ convId }: { convId: string }) => {
   const runtime = useConversationRuntime(convId)
+  // Header actions are PER CHANNEL, derived from my role there (what a real
+  // host derives from its permission system): admin channels get Edit group
+  // (an F0Dialog owned by the host, prefilled with the group name + member
+  // tags), guests get nothing beyond the built-in search.
+  const seed = SEED_BY_ID.get(convId)
+  const { headerActions, editDialog } = useDemoHeaderActions(
+    runtime,
+    seed?.myRole,
+    { members: seed?.participants }
+  )
   const {
     visualizationMode,
     setVisualizationMode,
@@ -938,7 +950,10 @@ const MockChatPanel = ({ convId }: { convId: string }) => {
           clearPanelContent()
           setOpen(false)
         }}
+        headerActions={headerActions}
       />
+      {/* The Edit action's dialog is the HOST's — rendered outside F0Chat. */}
+      {editDialog}
     </F0ChatProvider>
   )
 }

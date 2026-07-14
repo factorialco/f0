@@ -20,13 +20,12 @@ import { ArrowDown } from "@/icons/app"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { Spinner } from "@/ui/Spinner"
 
 import { ScrollShadow } from "@/sds/ai/F0AiMessagesContainer/components/ScrollShadow"
 
 import { useChatJump } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
-import { LATEST } from "../types"
+import { isUserMessage, LATEST } from "../types"
 import { type ChatRow, flattenChatRows, freshTailIds } from "../utils/grouping"
 import {
   clampNoOvershootVelocity,
@@ -50,7 +49,9 @@ const BOTTOM_GAP_PX = 24
 
 /** Fallbacks until enough rows have measured — message rows switch to the
  * adaptive median (see below) as soon as real measurements exist. The footer
- * (status line) is a CONSTANT-height row: `min-h-5` + its `pt-1` = 24. */
+ * (status line) is a CONSTANT-height row: `min-h-5` + its `pt-1` = 24.
+ * Separators are the padded pill (`py-6` + ~26px pill + the row's pt-4);
+ * system rows are one muted text line (the shared default). */
 const estimateRowSize = (row: ChatRow): number =>
   row.type === "message"
     ? 48
@@ -58,13 +59,16 @@ const estimateRowSize = (row: ChatRow): number =>
       ? 60
       : row.type === "footer"
         ? 24
-        : 36
+        : row.type === "separator"
+          ? 90
+          : 36
 
 /** Date of the row at the top of the viewport, for the sticky header. */
 const dateForRow = (rows: ChatRow[], from: number): string | null => {
   for (let i = from; i < rows.length; i++) {
     const row = rows[i]
-    if (row.type === "message") return row.message.createdAt
+    if (row.type === "message" || row.type === "system")
+      return row.message.createdAt
     if (row.type === "separator") return row.at
   }
   return null
@@ -170,8 +174,13 @@ export const ChatMessagesContainer = (): ReactNode => {
   // leaving fade) and message-then-stop (the author is still in `typingUsers`
   // when their bubble lands — suppress them locally until their stop arrives,
   // otherwise their dots ghost under the new message for the inter-event gap).
-  const lastMessage = messages[messages.length - 1]
-  const prevLastMsgIdRef = useRef<string | null>(lastMessage?.id ?? null)
+  // The transcript's final item vs its final USER message: the typing logic and
+  // the delivery footer only apply when the last item is a user message — a
+  // trailing system row ("Luis left the group") gets neither dots suppression
+  // nor a "Read" footer under it.
+  const lastItem = messages[messages.length - 1]
+  const lastMessage = lastItem && isUserMessage(lastItem) ? lastItem : undefined
+  const prevLastMsgIdRef = useRef<string | null>(lastItem?.id ?? null)
   const suppressedTypersRef = useRef<Set<string>>(new Set())
   // A suppression lives until the runtime actually drops the user (their
   // typing_stop landed) — their next typing_start then shows dots again.
@@ -232,7 +241,7 @@ export const ChatMessagesContainer = (): ReactNode => {
     // backends do this) — cancel the leaving fade mid-window.
     setTypingLeaving(false)
   }
-  prevLastMsgIdRef.current = lastMessage?.id ?? null
+  prevLastMsgIdRef.current = lastItem?.id ?? null
 
   useEffect(() => {
     if (!typingLeaving) return
@@ -637,25 +646,36 @@ export const ChatMessagesContainer = (): ReactNode => {
       </AnimatePresence>
 
       {/* Sticky date header: pinned date of the top-most visible group. While
-          older messages load, a spinner sits beside the date in the same pill. */}
+          older messages load, a spinner sits beside the date in the same pill.
+          Hidden only at the REAL top of the history (nothing older to load) —
+          the transcript's own first day separator is in view there and the two
+          pills would show the same date twice. Reaching the top mid-pagination
+          keeps it: that top is transient and the pill carries the spinner. */}
       <AnimatePresence>
-        {scrolledUp && stickyDate && (
-          <motion.div
-            className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.15 }}
-          >
-            <div
-              className="flex items-center gap-1.5 rounded-full bg-f1-background border border-solid border-f1-border-secondary px-2.5 py-0.5 backdrop-blur z-50"
-              aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
+        {scrolledUp &&
+          (!atTop || hasMoreOlder || loadingOlder) &&
+          stickyDate && (
+            <motion.div
+              className="pointer-events-none absolute inset-x-0 top-2 flex justify-center"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15 }}
             >
-              {loadingOlder && <Spinner size="small" className="h-3.5 w-3.5" />}
-              <DateTimeSeparator at={stickyDate} withTime />
-            </div>
-          </motion.div>
-        )}
+              <div
+                className="z-50"
+                aria-label={loadingOlder ? i18n.chat.loadingOlder : undefined}
+              >
+                {/* The pill (border, background, spinner) is the separator's
+                  own — same look as the in-transcript day rows. */}
+                <DateTimeSeparator
+                  at={stickyDate}
+                  withTime
+                  loading={loadingOlder}
+                />
+              </div>
+            </motion.div>
+          )}
       </AnimatePresence>
 
       <AnimatePresence>

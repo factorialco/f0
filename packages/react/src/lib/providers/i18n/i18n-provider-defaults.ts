@@ -568,6 +568,29 @@ export const defaultTranslations = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
+    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
+    // are replaced with React nodes (`@name` hover-card chips) by the component
+    // via token split — NOT through `t(key, args)`, whose interpolation is
+    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
+    // @Raúl" / "…and 5 more") so every language words the conjunction its own
+    // way. Plural shape mirrors `readBy`.
+    system: {
+      memberAdded: {
+        one: "{{members}} was added to the group",
+        other: "{{members}} were added to the group",
+      },
+      memberRemoved: {
+        one: "{{members}} was removed from the group",
+        other: "{{members}} were removed from the group",
+      },
+      memberLeft: {
+        one: "{{members}} left the group",
+        other: "{{members}} left the group",
+      },
+      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
+      membersWithLast: "{{names}} and {{last}}",
+      membersWithMore: "{{names}} and {{count}} more",
+    },
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread",

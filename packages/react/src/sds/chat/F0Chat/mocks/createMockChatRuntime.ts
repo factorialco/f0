@@ -3,12 +3,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
 
 import {
+  isUserMessage,
   type F0ChatAttachment,
   type F0ChatChannel,
   type F0ChatEditInput,
+  type F0ChatItem,
   type F0ChatMessage,
   type F0ChatRuntime,
   type F0ChatSendInput,
+  type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
 
@@ -24,8 +27,9 @@ export type MockChatSeed = {
   olderPages?: number
   /** Ambient incoming-message cadence (ms). 0 disables it. */
   ambientEveryMs?: number
-  /** Extra messages appended after the seeded ones (e.g. to demo mentions). */
-  extraMessages?: F0ChatMessage[]
+  /** Extra items appended after the seeded ones (e.g. to demo mentions or
+   * membership system rows). */
+  extraMessages?: F0ChatItem[]
   /** Start with sends failing (flaky-network demo) — see `setFailSends`. */
   failSends?: boolean
 }
@@ -96,12 +100,19 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
    * (the "connection returns → queued messages auto-send" behavior).
    */
   setFailSends: (fail: boolean) => void
+  /** People join the group: appends a `member.added` system row (one item for
+   * the whole batch, like a coalescing adapter would) and bumps memberCount. */
+  addMembers: (users: F0ChatUser[]) => void
+  /** Someone is removed by an admin: a `member.removed` system row. */
+  removeMember: (user: F0ChatUser) => void
+  /** Someone leaves on their own: a `member.left` system row. */
+  memberLeaves: (user: F0ChatUser) => void
 } {
   const initialCount = seed.initialCount ?? 24
   const olderPagesTotal = seed.olderPages ?? 2
   const ambientEveryMs = seed.ambientEveryMs ?? 16000
 
-  const [messages, setMessages] = useState<F0ChatMessage[]>(() => [
+  const [messages, setMessages] = useState<F0ChatItem[]>(() => [
     ...buildMessages(
       seed,
       initialCount,
@@ -139,7 +150,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const markMineRead = useCallback(() => {
     setMessages((prev) =>
       prev.map((m) =>
-        m.isMine && (m.status === "sent" || m.status === "delivered")
+        isUserMessage(m) &&
+        m.isMine &&
+        (m.status === "sent" || m.status === "delivered")
           ? { ...m, status: "read" }
           : m
       )
@@ -223,11 +236,12 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     const emojis = ["👍", "❤️", "😂", "🎉", "😮"]
     setMessages((prev) => {
       if (prev.length === 0) return prev
-      const window = Math.min(10, prev.length)
-      const target = prev[prev.length - 1 - Math.floor(Math.random() * window)]
+      const recent = prev.slice(-10).filter(isUserMessage)
+      if (recent.length === 0) return prev
+      const target = recent[Math.floor(Math.random() * recent.length)]
       const emoji = emojis[Math.floor(Math.random() * emojis.length)]
       return prev.map((m) => {
-        if (m.id !== target.id) return m
+        if (!isUserMessage(m) || m.id !== target.id) return m
         const reactions = m.reactions ? [...m.reactions] : []
         const idx = reactions.findIndex((r) => r.emoji === emoji)
         if (idx === -1) reactions.push({ emoji, count: 1, reactedByMe: false })
@@ -264,7 +278,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
       after(1200, () =>
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === id
+            isUserMessage(m) && m.id === id
               ? failSendsRef.current
                 ? {
                     ...m,
@@ -280,7 +294,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
       after(2000, () =>
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === id && m.status === "sent"
+            isUserMessage(m) && m.id === id && m.status === "sent"
               ? { ...m, status: "delivered" }
               : m
           )
@@ -296,7 +310,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
       const replyTarget = input.replyToId
       setMessages((prev) => {
         const replyTo = replyTarget
-          ? prev.find((m) => m.id === replyTarget)
+          ? prev.filter(isUserMessage).find((m) => m.id === replyTarget)
           : undefined
         return [
           ...prev,
@@ -356,7 +370,9 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const retryMessage = useCallback(
     (id: string) => {
       setMessages((prev) =>
-        prev.map((m) => (m.id === id ? { ...m, status: "sending" } : m))
+        prev.map((m) =>
+          isUserMessage(m) && m.id === id ? { ...m, status: "sending" } : m
+        )
       )
       settleSend(id)
     },
@@ -371,7 +387,10 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
       if (fail) return
       after(800, () => {
         const pending = messagesRef.current.filter(
-          (m) => m.isMine && (m.status === "failed" || m.status === "sending")
+          (m) =>
+            isUserMessage(m) &&
+            m.isMine &&
+            (m.status === "failed" || m.status === "sending")
         )
         pending.forEach((m) => retryMessage(m.id))
       })
@@ -404,7 +423,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const toggleReaction = useCallback((messageId: string, emoji: string) => {
     setMessages((prev) =>
       prev.map((m) => {
-        if (m.id !== messageId) return m
+        if (!isUserMessage(m) || m.id !== messageId) return m
         const reactions = m.reactions ? [...m.reactions] : []
         const idx = reactions.findIndex((r) => r.emoji === emoji)
         if (idx === -1) {
@@ -430,7 +449,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const UNSEND_WINDOW_MS = 5 * 60 * 1000
   const deleteMessage = useCallback((id: string) => {
     setMessages((prev) => {
-      const target = prev.find((m) => m.id === id)
+      const target = prev.filter(isUserMessage).find((m) => m.id === id)
       if (!target) return prev
       // A failed message never reached the "server" — discard the local echo
       // entirely (no tombstone), matching the runtime contract.
@@ -441,7 +460,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
         Date.now() - new Date(target.createdAt).getTime() > UNSEND_WINDOW_MS
       return beyondWindow
         ? prev.map((m) =>
-            m.id === id
+            isUserMessage(m) && m.id === id
               ? {
                   ...m,
                   deleted: true,
@@ -462,7 +481,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   const editMessage = useCallback((id: string, input: F0ChatEditInput) => {
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === id
+        isUserMessage(m) && m.id === id
           ? {
               ...m,
               body: input.body,
@@ -495,9 +514,47 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     []
   )
 
-  // Pinned (favourite) state — toggled from the header overflow menu.
+  // Pinned (favourite) / muted state — surfaced by the host as header actions
+  // (F0ChatHeaderAction) wired to these transport methods.
   const [pinned, setPinned] = useState(seed.channel.pinned ?? false)
   const togglePin = useCallback(() => setPinned((value) => !value), [])
+  const [muted, setMuted] = useState(seed.channel.muted ?? false)
+  const toggleMute = useCallback(() => setMuted((value) => !value), [])
+
+  // Membership events (groups): each appends a centered system row — one item
+  // per batch, the shape a coalescing adapter would produce — and keeps the
+  // header's memberCount in sync.
+  const [memberCount, setMemberCount] = useState(seed.channel.memberCount)
+  const pushSystem = useCallback(
+    (event: F0ChatSystemEvent, users: F0ChatUser[], delta: number) => {
+      if (users.length === 0) return
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "system",
+          id: nextId("sys"),
+          createdAt: new Date().toISOString(),
+          system: { event, members: users },
+        },
+      ])
+      setMemberCount((count) =>
+        count === undefined ? count : Math.max(0, count + delta)
+      )
+    },
+    []
+  )
+  const addMembers = useCallback(
+    (users: F0ChatUser[]) => pushSystem("member.added", users, users.length),
+    [pushSystem]
+  )
+  const removeMember = useCallback(
+    (user: F0ChatUser) => pushSystem("member.removed", [user], -1),
+    [pushSystem]
+  )
+  const memberLeaves = useCallback(
+    (user: F0ChatUser) => pushSystem("member.left", [user], -1),
+    [pushSystem]
+  )
 
   // Mention autocomplete source: filter the members by query. The current user
   // is included (you can @-mention yourself).
@@ -516,13 +573,16 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
   // compute it from the last-read message).
   const { unreadCount, firstUnreadId } = useMemo(() => {
     const idx = lastReadId ? messages.findIndex((m) => m.id === lastReadId) : -1
-    const unread = messages.slice(idx + 1).filter((m) => !m.isMine)
+    // System rows never count as unread (they still sit below the divider).
+    const unread = messages
+      .slice(idx + 1)
+      .filter((m) => isUserMessage(m) && !m.isMine)
     return { unreadCount: unread.length, firstUnreadId: unread[0]?.id ?? null }
   }, [messages, lastReadId])
 
   return {
     currentUserId: seed.me.id,
-    channel: { ...seed.channel, pinned },
+    channel: { ...seed.channel, pinned, muted, memberCount },
     status: "ready",
     messages,
     typingUsers,
@@ -548,6 +608,7 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     transcribe: mockTranscribe,
     markRead,
     togglePin,
+    toggleMute,
     // Only meaningful for groups; the composer suppresses mentions in DMs.
     searchMembers,
     receiveFrom,
@@ -555,5 +616,8 @@ export function useMockChatRuntime(seed: MockChatSeed): F0ChatRuntime & {
     receiveReaction,
     readSweep,
     setFailSends,
+    addMembers,
+    removeMember,
+    memberLeaves,
   }
 }

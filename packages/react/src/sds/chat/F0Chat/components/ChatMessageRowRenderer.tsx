@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 import { type F0ChatUser } from "../types"
 import { type ChatRow } from "../utils/grouping"
 import { ChatMessageItem } from "./ChatMessageItem"
+import { ChatSystemMessage } from "./ChatSystemMessage"
 import { ChatTypingBubble } from "./ChatTypingBubble"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { DateTimeSeparator } from "./DateTimeSeparator"
@@ -88,7 +89,7 @@ const ChatMessageRowRendererComponent = ({
   if (row.type === "separator") {
     return (
       <div className={spacing}>
-        <DateTimeSeparator at={row.at} />
+        <DateTimeSeparator at={row.at} padded />
       </div>
     )
   }
@@ -97,6 +98,15 @@ const ChatMessageRowRendererComponent = ({
     return (
       <div className={spacing}>
         <UnreadDivider />
+      </div>
+    )
+  }
+
+  if (row.type === "system") {
+    // Centered membership row — no enter animation (same as separators).
+    return (
+      <div className={spacing}>
+        <ChatSystemMessage message={row.message} />
       </div>
     )
   }

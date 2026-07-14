@@ -7,6 +7,7 @@ import { MicrophoneNegative, PalmTree } from "@/icons/app"
 import { type SidebarChatGroup } from "@/patterns/Navigation/Sidebar/Chats/types"
 
 import {
+  isUserMessage,
   type F0ChatAttachment,
   type F0ChatEditInput,
   type F0ChatRuntime,
@@ -111,6 +112,7 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
     (query: string): Promise<F0ChatSearchResult[]> => {
       const needle = query.trim().toLowerCase()
       const hits = (app.states[convId]?.messages ?? [])
+        .filter(isUserMessage)
         .filter((m) => !m.deleted && m.body.toLowerCase().includes(needle))
         .map((m): F0ChatSearchResult => ({ id: m.id }))
       return Promise.resolve(hits)
@@ -150,7 +152,9 @@ export const useConversationRuntime = (convId: string): F0ChatRuntime => {
   const idx = state?.lastReadId
     ? messages.findIndex((m) => m.id === state.lastReadId)
     : -1
-  const unread = messages.slice(idx + 1).filter((m) => !m.isMine)
+  const unread = messages
+    .slice(idx + 1)
+    .filter((m) => isUserMessage(m) && !m.isMine)
 
   return {
     currentUserId: ME.id,

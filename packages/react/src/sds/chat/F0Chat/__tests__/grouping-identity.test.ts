@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { flattenChatRows, freshTailIds } from "../utils/grouping"
-import { type F0ChatMessage } from "../types"
+import { type F0ChatMessage, type F0ChatSystemMessage } from "../types"
 
 const msg = (
   id: string,
@@ -77,6 +77,59 @@ describe("flattenChatRows row identity (previousRows)", () => {
     )
     expect(second.rows[second.indexById.get("b")!]).toBe(
       first.rows[first.indexById.get("b")!]
+    )
+  })
+
+  it("reuses an untouched system row on append", () => {
+    const a = msg("a", "other", 0)
+    const s: F0ChatSystemMessage = {
+      type: "system",
+      id: "s1",
+      createdAt: new Date(2026, 0, 10, 10, 1).toISOString(),
+      system: { event: "member.added", members: [{ id: "n", name: "n" }] },
+    }
+    const first = flattenChatRows([a, s])
+
+    const b = msg("b", "other", 2)
+    const second = flattenChatRows([a, s, b], {
+      previousRows: first.rowCache,
+    })
+
+    expect(second.rows[second.indexById.get("s1")!]).toBe(
+      first.rows[first.indexById.get("s1")!]
+    )
+  })
+
+  it("rebuilds only the system row when its item is replaced (coalescing update)", () => {
+    const a = msg("a", "other", 0)
+    const s: F0ChatSystemMessage = {
+      type: "system",
+      id: "s1",
+      createdAt: new Date(2026, 0, 10, 10, 1).toISOString(),
+      system: { event: "member.added", members: [{ id: "n", name: "n" }] },
+    }
+    const first = flattenChatRows([a, s])
+
+    // The adapter coalesces a second member into the SAME item id.
+    const grown: F0ChatSystemMessage = {
+      ...s,
+      system: {
+        event: "member.added",
+        members: [
+          { id: "n", name: "n" },
+          { id: "m", name: "m" },
+        ],
+      },
+    }
+    const second = flattenChatRows([a, grown], {
+      previousRows: first.rowCache,
+    })
+
+    expect(second.rows[second.indexById.get("s1")!]).not.toBe(
+      first.rows[first.indexById.get("s1")!]
+    )
+    expect(second.rows[second.indexById.get("a")!]).toBe(
+      first.rows[first.indexById.get("a")!]
     )
   })
 })

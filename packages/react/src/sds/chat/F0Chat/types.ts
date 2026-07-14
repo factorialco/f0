@@ -165,6 +165,11 @@ export type F0ChatMessageReply = {
 }
 
 export type F0ChatMessage = {
+  /**
+   * Discriminant against {@link F0ChatSystemMessage}. Optional — an absent
+   * `type` means "message", so existing literals keep compiling.
+   */
+  type?: "message"
   id: string
   author: F0ChatUser
   body: string
@@ -225,6 +230,63 @@ export type F0ChatMessage = {
    */
   editedAt?: string
 }
+
+/**
+ * Membership / lifecycle events rendered as a centered system row. Closed
+ * union — the host maps unknown transport event kinds to a body-only system
+ * message (the plain-text fallback). Room to grow: "channel.renamed", ….
+ */
+export type F0ChatSystemEvent =
+  | "member.added"
+  | "member.removed"
+  | "member.left"
+
+/** Structured system payload → rendered as a sentence with inline person tags. */
+export type F0ChatSystemPayload = {
+  event: F0ChatSystemEvent
+  /**
+   * The people the event is about. One message can carry several — the host /
+   * adapter coalesces bursts into one item (Slack-style "Ana, Luis and 2
+   * more") by REPLACING the previous item with an updated `members` array
+   * (same id); coalescing never happens in the view layer.
+   */
+  members: F0ChatUser[]
+  /** How many more people beyond `members` (host truncation) — added to the
+   * "+N" overflow tag on top of the visual max. */
+  remainingCount?: number
+  /** Who performed the action (the admin who added/removed), when known.
+   * Not rendered today; reserved for "added by X" templates. */
+  actor?: F0ChatUser
+}
+
+/**
+ * A transcript item that is ABOUT the conversation, not from a person: no
+ * author, no isMine, no reactions/replies/status — by construction. Rendered
+ * as a centered row (like the date separator). factorial → a Stream message
+ * with `type: "system"`; `system` comes from its custom fields, `body` from
+ * its free-form `text`.
+ */
+export type F0ChatSystemMessage = {
+  type: "system"
+  id: string
+  /** ISO timestamp — participates in day separators and ordering. */
+  createdAt: string
+  /** Structured payload → avatar-tag sentence. Omit to render `body` as-is. */
+  system?: F0ChatSystemPayload
+  /** Plain-text fallback (e.g. GetStream's free-form system `text`), shown
+   * centered when `system` is absent or the event kind is unknown. */
+  body?: string
+}
+
+/** Anything that can appear in the transcript, oldest → newest. */
+export type F0ChatItem = F0ChatMessage | F0ChatSystemMessage
+
+export const isSystemMessage = (
+  item: F0ChatItem
+): item is F0ChatSystemMessage => item.type === "system"
+
+export const isUserMessage = (item: F0ChatItem): item is F0ChatMessage =>
+  item.type !== "system"
 
 export type F0ChatSendInput = {
   body: string
@@ -299,6 +361,30 @@ export type F0ChatSearchResult = {
   id: string
 }
 
+/**
+ * A host-provided header action (the only built-in one is Search). Pin/mute,
+ * edit-group, leave… are all expressed through this, so each channel can offer
+ * exactly the actions the current user's PERMISSIONS allow — pass different
+ * arrays per channel (or the function form of `headerActions`), and `[]` for a
+ * channel where the user can do nothing but search.
+ */
+export type F0ChatHeaderAction = {
+  id: string
+  /** Already-localized label. For toggles (mute/unmute) the host rebuilds the
+   * array per render with the current label — labels are plain strings. */
+  label: string
+  icon?: IconType
+  /** The host decides what happens: call a runtime method (togglePin,
+   * toggleMute), open its own modal, navigate… */
+  onClick: (channel: F0ChatChannel) => void
+  /** Where the action renders: inside the ellipsis overflow menu (default) or
+   * as its own icon button next to it. Inline requires `icon` — an inline
+   * action without one falls back to the menu. */
+  placement?: "menu" | "inline"
+  /** Restrict the action to a channel type. Omit for both. */
+  channelTypes?: F0ChatChannelType[]
+}
+
 /** Sentinel for {@link F0ChatRuntime.loadMessageContext} meaning "the live tail". */
 export const LATEST = "latest" as const
 
@@ -311,8 +397,8 @@ export type F0ChatRuntime = {
   currentUserId: string
   channel: F0ChatChannel
   status: F0ChatStatus
-  /** Oldest → newest. */
-  messages: F0ChatMessage[]
+  /** Oldest → newest. May interleave system items (membership events). */
+  messages: F0ChatItem[]
   /** Users currently typing (excluding me). */
   typingUsers: F0ChatUser[]
   hasMoreOlder: boolean
@@ -441,15 +527,18 @@ export type F0ChatRuntime = {
   searchMembers?: (query: string) => Promise<F0ChatUser[]>
   /**
    * Toggle the conversation's pinned (favourite) state for the current user.
-   * Drives the header "Pin / Unpin" action; omit to hide it. factorial →
+   * Transport capability only — the header no longer auto-renders a Pin
+   * action; the host surfaces one via {@link F0ChatHeaderAction} (`onClick:
+   * () => runtime.togglePin()`) where its permissions allow. factorial →
    * `channel.pin()` / `channel.unpin()`.
    */
   togglePin?: () => void | Promise<void>
   /**
-   * Toggle the conversation's muted state for the current user. Drives the
-   * header "Mute / Unmute" action; omit to hide it (the header still shows the
-   * `channel.muted` icon either way). factorial → `channel.mute()` /
-   * `channel.unmute()`.
+   * Toggle the conversation's muted state for the current user. Transport
+   * capability only — the header no longer auto-renders a Mute action; the
+   * host surfaces one via {@link F0ChatHeaderAction} (the header still shows
+   * the `channel.muted` status icon either way). factorial →
+   * `channel.mute()` / `channel.unmute()`.
    */
   toggleMute?: () => void | Promise<void>
   /**
