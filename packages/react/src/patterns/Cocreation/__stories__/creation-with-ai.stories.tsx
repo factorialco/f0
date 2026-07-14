@@ -68,7 +68,7 @@ import type { SurveyFormBuilderElement } from "@/sds/surveys/SurveyFormBuilder/t
 import { mockDatasets } from "@/sds/surveys/__stories__/mocks"
 
 import {
-  cardVisualization,
+  listVisualization,
   makeTemplatesDataAdapter,
   resourceFilters,
   resourceSortings,
@@ -331,7 +331,7 @@ function TemplatesCollection({
   return (
     <OneDataCollection
       source={source}
-      visualizations={[cardVisualization]}
+      visualizations={[listVisualization]}
       fullHeight
     />
   )
@@ -1671,21 +1671,23 @@ function TemplatesCanvasBody() {
 // selecting it skips preview and opens a blank editor directly.
 const EMPTY_FORM_TEMPLATE_ID = "empty-form"
 
-// Card visualization for the guided-type template gallery: no Category
+// List visualization for the guided-type template gallery: no Category
 // property (the type is already in the gallery's own title — "Satisfaction
-// Survey Templates" etc. — so repeating it per card is redundant), and the
-// "Empty Survey" card hides the questions count (it isn't a real template).
-const guidedGalleryCardVisualization = {
-  type: "card" as const,
+// Survey Templates" etc. — so repeating it per row is redundant), and the
+// "Empty Survey" row hides the questions count (it isn't a real template).
+const guidedGalleryListVisualization = {
+  type: "list" as const,
   options: {
-    title: (item: Template) => item.name,
-    description: (item: Template) => item.description,
-    cardProperties: [
+    itemDefinition: (item: Template) => ({
+      title: item.name,
+      description: [item.description],
+    }),
+    fields: [
       {
         label: "Questions",
-        icon: File,
         hide: (item: Template) => item.id === EMPTY_FORM_TEMPLATE_ID,
         render: (item: Template) => `${item.questions} questions`,
+        sorting: "questions" as const,
       },
     ],
   },
@@ -1747,7 +1749,7 @@ function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
   return (
     <OneDataCollection
       source={source}
-      visualizations={[guidedGalleryCardVisualization]}
+      visualizations={[guidedGalleryListVisualization]}
       fullHeight
     />
   )

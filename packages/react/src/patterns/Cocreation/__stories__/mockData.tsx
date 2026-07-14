@@ -293,3 +293,24 @@ export const cardVisualization = {
     ],
   },
 }
+
+export const listVisualization = {
+  type: "list" as const,
+  options: {
+    itemDefinition: (item: Template) => ({
+      title: item.name,
+      description: [item.description],
+    }),
+    fields: [
+      {
+        label: "Category",
+        render: (item: Template) => item.category,
+      },
+      {
+        label: "Questions",
+        render: (item: Template) => `${item.questions} questions`,
+        sorting: "questions" as const,
+      },
+    ],
+  },
+}
