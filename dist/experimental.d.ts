@@ -7638,6 +7638,13 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     fullHeight?: boolean;
     /** Function to handle state change */
     onStateChange?: (state: DataCollectionStatusComplete<FiltersState<Filters>>) => void;
+    /**
+     * Whether the "Save view" affordance is offered when the current view
+     * diverges from the baseline. Use "none" for embedded collections (e.g.
+     * dashboard widgets) where saving views doesn't make sense.
+     * @default "auto"
+     */
+    presetsAction?: "auto" | "none";
     /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
      */
     id?: string;
