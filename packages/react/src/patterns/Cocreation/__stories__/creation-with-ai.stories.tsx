@@ -1083,6 +1083,9 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           },
         ]}
       />
+      {/* Divide the template actions from Close with the same 1px hairline the
+          templates-list header (and ResourceHeader / modal headers) use. */}
+      <div className="mx-1 h-4 w-px bg-f1-background-secondary-hover" />
       {/* Close returns to the starting point of the flow. For the "cards"
           entry flow (Engagement) that's the fullscreen welcome screen, so it
           closes straight away. For "guidedType" (Training) there's no welcome
@@ -1854,14 +1857,14 @@ function ComposerPlaceholderRegistrar() {
  * the "Create" button (see `FlowContent`).
  */
 function SurveyWelcomeCardsRegistrar() {
-  const { config } = useFlowConfig()
+  const { config, noCredits } = useFlowConfig()
   if (config.entryMode !== "cards") return null
 
   const { appendCard, appendMessages, startClarifying } = useMockAiChatRuntime()
   const { openCanvas, setWelcomeScreenCards } = useAiChat()
   const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
     useSurveyStore()
-  const { armProposal } = useProposalFlow()
+  const { armProposal, armNoCredits } = useProposalFlow()
 
   // The blank-survey conversation walks three clarifying questions — type →
   // audience → length — as a single consecutive panel, then "drafts" the
@@ -2032,6 +2035,14 @@ function SurveyWelcomeCardsRegistrar() {
       setWelcomeScreenCards([])
     }
   }, [setWelcomeScreenCards])
+
+  // No-credits welcome screen: the cards stay fully interactive (they don't
+  // need AI generation), but free-text chat is blocked — arm the "out of
+  // credits" responder so any typed message gets the upgrade nudge instead of
+  // the canned reply / typed-Create clarifying chain.
+  useEffect(() => {
+    if (noCredits) armNoCredits()
+  }, [noCredits, armNoCredits])
 
   return null
 }
@@ -2405,16 +2416,21 @@ function FlowContent({
           setVisualizationMode("fullscreen")
           setPhase("chat")
           if (config.entryMode === "cards") {
-            setUserMessageInterceptor(() => {
-              appendMessages([
-                {
-                  role: "assistant",
-                  content:
-                    "Sure — let's set up your survey. A few quick questions first.",
-                },
-              ])
-              runTypedClarifyingChain()
-            })
+            // No credits: leave the "out of credits" responder armed (see
+            // `SurveyWelcomeCardsRegistrar`) so typing is blocked — the welcome
+            // cards remain the only working entry point.
+            if (!noCredits) {
+              setUserMessageInterceptor(() => {
+                appendMessages([
+                  {
+                    role: "assistant",
+                    content:
+                      "Sure — let's set up your survey. A few quick questions first.",
+                  },
+                ])
+                runTypedClarifyingChain()
+              })
+            }
           } else if (config.entryMode === "guidedType") {
             startGuidedTypeFlow()
           } else {
@@ -2656,9 +2672,11 @@ function CreationWithAIFlow({
     // Prompt actions rendered as outline buttons at the top of the text area
     // on the welcome screen. Each group opens a popover of starter prompts.
     // "guidedType" (Training) has none — no suggestions, no welcome cards;
-    // its entry point is the immediate type clarifying question instead.
+    // its entry point is the immediate type clarifying question instead. With
+    // no credits, the prompts are dropped too: free-text AI is blocked, so the
+    // welcome cards are the only working entry point.
     welcomeScreenSuggestions:
-      config.entryMode === "cards"
+      config.entryMode === "cards" && !noCredits
         ? [
             {
               icon: Pencil,
@@ -2723,6 +2741,16 @@ function CreationWithAIFlow({
 export const WithWelcomeScreen: Story = {
   name: "With Welcome Screen",
   render: () => <CreationWithAIFlow flowId="engagement" />,
+}
+
+// "With Welcome Screen · No Credits" — the same welcome-screen flow with AI
+// credits exhausted. The soft credit-warning banner sits on the composer, the
+// starter-prompt buttons above the input are dropped, and free-text chat is
+// blocked (typing returns an "out of credits" reply). The welcome cards stay
+// fully interactive and behave exactly as in the normal flow.
+export const WithWelcomeScreenNoCredits: Story = {
+  name: "With Welcome Screen · No Credits",
+  render: () => <CreationWithAIFlow flowId="engagement" noCredits />,
 }
 
 // "Guided Chat · Triage" — the message-first guided-chat flow (`guidedType`),
