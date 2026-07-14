@@ -1361,12 +1361,10 @@ describe("useSelectable", () => {
       })
     })
 
-    // Production case (e.g. HC planning): paginationInfo.total reflects the 2
-    // top-level parent rows (TOP_LEVEL_PARENT_ROW_COUNT), NOT the selectable
-    // child rows. renderedSelectableCount comes from the row registry.
+    // total reflects the 2 parent rows, not the 6 selectable children (as in HC planning)
     const undercountingPagination: PaginationInfo = {
       type: "pages",
-      total: parentRecords.length, // 2 — undercounts the 6 selectable children
+      total: parentRecords.length,
       currentPage: 1,
       perPage: parentRecords.length,
       pagesCount: 1,
@@ -1393,7 +1391,6 @@ describe("useSelectable", () => {
       })
 
       await waitFor(() => {
-        // Before the fix this was `selectAllTotal` (2), not the real 6.
         expect(result.current.allSelectedStatus.selectedCount).toBe(6)
       })
     })
@@ -1419,8 +1416,7 @@ describe("useSelectable", () => {
         expect(result.current.allSelectedStatus.selectedCount).toBe(6)
       )
 
-      // Uncheck 4 of 6 — more than paginationInfo.total (2). Pre-fix this
-      // computed selectAllTotal(2) - uncheckedCount(4) = -2.
+      // uncheck 4 of 6 — more than total (2); pre-fix this gave 2 - 4 = -2
       act(() => {
         for (const item of childRecords.slice(0, 4)) {
           result.current.handleSelectItemChange(item, false)

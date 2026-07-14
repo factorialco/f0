@@ -95,10 +95,9 @@ export type UseSelectableProps<
    */
   getRenderedSelectableEntries?: () => Array<[SelectionId, R]>
   /**
-   * Number of currently-rendered selectable rows (incl. lazily-loaded nested
-   * children). Used as the selectable-item total so counts stay correct when
-   * `paginationInfo.total` reflects top-level rows rather than selectable rows
-   * (e.g. nested/tree tables). Ignored when smaller than `paginationInfo.total`.
+   * Count of currently-rendered selectable rows (incl. nested children). Used
+   * as the item total when it exceeds `paginationInfo.total`, so selection
+   * counts stay correct in nested/tree tables.
    */
   renderedSelectableCount?: number
 }

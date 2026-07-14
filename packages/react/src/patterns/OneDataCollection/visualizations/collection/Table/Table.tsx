@@ -365,10 +365,7 @@ export const TableCollection = <
     currentPageSelectableIds.length > 0 &&
     currentPageSelectableIds.every((id) => selectedItems.has(id))
 
-  // Total selectable items for the "select all" banner. paginationInfo.total can
-  // reflect top-level rows rather than selectable rows (e.g. nested/tree tables
-  // where the real selectable rows are lazily-loaded children), so never report
-  // fewer than are actually rendered.
+  // nested/tree tables: paginationInfo.total counts top-level rows, not selectable children
   const selectableTotal = Math.max(
     paginationInfo?.total ?? 0,
     currentPageSelectableIds.length

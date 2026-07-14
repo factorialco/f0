@@ -179,8 +179,7 @@ describe("Table nested-row selection (registry-backed select all)", () => {
   })
 
   it("'Select all N items' banner counts rendered selectable rows, not the top-level total", async () => {
-    // The source reports total = 2 (parent rows) but there are 3 selectable
-    // children. Before the fix the banner read "Select all 2 items".
+    // source reports total = 2 (parent rows) but there are 3 selectable children
     const user = userEvent.setup()
     render(
       <EditableTableCollection

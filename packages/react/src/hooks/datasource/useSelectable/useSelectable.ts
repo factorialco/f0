@@ -99,9 +99,7 @@ export function useSelectable<
     const base = paginationInfo
       ? paginationInfo.total
       : (data.records?.length ?? 0)
-    // paginationInfo.total can undercount selectable rows (e.g. nested/tree
-    // tables where it reflects top-level rows, not the lazily-loaded selectable
-    // children). Never report fewer selectable items than are actually rendered.
+    // nested/tree tables: paginationInfo.total counts top-level rows, not the selectable children
     return Math.max(base, renderedSelectableCount)
   }, [
     paginationInfo,
@@ -223,10 +221,7 @@ export function useSelectable<
       )
     }
     if (allSelectedCheck && selectAllTotal !== null) {
-      // `selectAllTotal` is snapshotted when "select all" is clicked; more
-      // selectable rows may have rendered since (lazily-loaded children), so
-      // take the larger of the two. Clamp at 0 — otherwise a total that
-      // undercounts loaded selectable rows yields a negative "N selected".
+      // clamp at 0: selectAllTotal can lag behind children rendered after "select all"
       const effectiveTotal = Math.max(selectAllTotal, renderedSelectableCount)
       return Math.max(0, effectiveTotal - uncheckedCount)
     }
