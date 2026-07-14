@@ -1,5 +1,6 @@
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
+import { Observable } from "zen-observable-ts"
 
 import { DataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource/types"
 import {
@@ -115,5 +116,139 @@ describe("KanbanCollection - item click", () => {
     expect(onItemClick).toHaveBeenCalledWith(
       expect.objectContaining({ id: 1, name: "John" })
     )
+  })
+})
+
+describe("KanbanCollection - lane loading", () => {
+  it("renders cards when data arrived but the source never settles loading", async () => {
+    const people: Person[] = [
+      { id: 1, name: "John" },
+      { id: 2, name: "Jane" },
+    ]
+
+    const source = {
+      ...createSource(people),
+      dataAdapter: {
+        fetchData: () =>
+          new Observable<{
+            loading: boolean
+            error: null
+            data: {
+              records: Person[]
+              total: number
+              perPage: number
+              type: "infinite-scroll"
+              cursor: string | null
+              hasMore: boolean
+            }
+          }>((subscriber) => {
+            subscriber.next({
+              loading: true,
+              error: null,
+              data: {
+                records: people,
+                total: people.length,
+                perPage: people.length,
+                type: "infinite-scroll",
+                cursor: null,
+                hasMore: false,
+              },
+            })
+          }),
+        paginationType: "infinite-scroll" as const,
+        perPage: people.length,
+      },
+      lanes: [{ id: "todo", filters: {} }],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        lanes={[{ id: "todo", title: "Todo" }]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    const cards = await screen.findAllByTestId("card")
+    expect(cards).toHaveLength(2)
+    expect(screen.getAllByText("John").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Jane").length).toBeGreaterThan(0)
+    expect(screen.queryAllByTestId("skeleton")).toHaveLength(0)
+  })
+
+  it("clears the skeleton when an empty lane settles loading", async () => {
+    const emptyResponse = {
+      records: [] as Person[],
+      total: 0,
+      perPage: 10,
+      type: "infinite-scroll" as const,
+      cursor: null,
+      hasMore: false,
+    }
+
+    const source = {
+      ...createSource([]),
+      dataAdapter: {
+        fetchData: () =>
+          new Observable<{
+            loading: boolean
+            error: null
+            data: typeof emptyResponse
+          }>((subscriber) => {
+            subscriber.next({ loading: true, error: null, data: emptyResponse })
+            const settle = setTimeout(() => {
+              subscriber.next({
+                loading: false,
+                error: null,
+                data: emptyResponse,
+              })
+            }, 10)
+            return () => clearTimeout(settle)
+          }),
+        paginationType: "infinite-scroll" as const,
+        perPage: 10,
+      },
+      lanes: [{ id: "todo", filters: {} }],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        Person,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<Person>,
+        TestNavigationFilters,
+        GroupingDefinition<Person>
+      >
+        lanes={[{ id: "todo", title: "Todo" }]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0)
+
+    await waitFor(() => {
+      expect(screen.queryAllByTestId("skeleton")).toHaveLength(0)
+    })
   })
 })

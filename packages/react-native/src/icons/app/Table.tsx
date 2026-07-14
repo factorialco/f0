@@ -10,10 +10,8 @@ const SvgTable = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 9.5V17a2 2 0 0 0 2 2h6M4 9.5V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2.5m-16 0h8m8 0V17a2 2 0 0 1-2 2h-6m8-9.5h-8M4 14h16m-8 5V9.5"
+      fill="currentColor"
+      d="M18 4.1A2.9 2.9 0 0 1 20.9 7v10a2.9 2.9 0 0 1-2.9 2.9H6A2.9 2.9 0 0 1 3.1 17V7A2.9 2.9 0 0 1 6 4.1zM4.9 17c0 .608.493 1.1 1.1 1.1h5.1v-3.2H4.9zm8 1.1H18a1.1 1.1 0 0 0 1.1-1.1v-2.1h-6.2zm-8-5h6.2v-2.7H4.9zm8 0h6.2v-2.7h-6.2zM6 5.9A1.1 1.1 0 0 0 4.9 7v1.6h14.2V7A1.1 1.1 0 0 0 18 5.9z"
     />
   </Svg>
 )

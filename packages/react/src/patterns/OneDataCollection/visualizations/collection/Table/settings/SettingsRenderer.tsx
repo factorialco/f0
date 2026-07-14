@@ -19,7 +19,12 @@ export const SettingsRenderer = <
     TableVisualizationOptions<R, Filters, Sortings, Summaries>
   > & { visualizationKey?: TableVisualizationSettingsKey }
 ) => {
-  if (!props.allowColumnHiding && !props.allowColumnReordering) {
+  if (
+    !props.allowColumnHiding &&
+    !props.allowColumnReordering &&
+    !props.onAddColumn &&
+    !props.onRemoveColumn
+  ) {
     return null
   }
 
@@ -30,6 +35,8 @@ export const SettingsRenderer = <
       allowSorting={props.allowColumnReordering ?? false}
       allowHiding={props.allowColumnHiding ?? false}
       visualizationKey={props.visualizationKey}
+      onAddColumn={props.onAddColumn}
+      onRemoveColumn={props.onRemoveColumn}
     />
   )
 }

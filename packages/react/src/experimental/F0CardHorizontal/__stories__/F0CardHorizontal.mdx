@@ -1,0 +1,240 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0CardHorizontal.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# CardHorizontal
+
+A horizontal card for items shown as a **vertical stack of standalone cards** — an
+optional avatar, a title and an optional description on the left, actions on the
+right. Each item keeps its own surface and spacing (it is not a table or a
+divided list); for a vertical, content-rich card with an image, metadata or
+selection, use `F0Card`.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+## Guidelines
+
+### Design best practices
+
+`F0CardHorizontal` and `F0Card` overlap — both can carry an avatar, a title, a
+description and actions — so the same item could often be built with either. The
+deciding question is **the user's job, not the parts**:
+
+- Reach for `F0CardHorizontal` when the item is **one scannable card in a vertical
+  stack** and the user works down many of them, acting on each — open,
+  approve/reject, toggle, select.
+- Reach for `F0Card` when the item is a **standalone object the user reads or
+  explores** — media, several metadata facts, multiple sections — usually a tile in a
+  grid or gallery.
+
+When an item could go either way, default to `F0CardHorizontal` if it lives in a list
+and the task is scanning or acting; switch to `F0Card` once it needs an image, more
+than a couple of metadata facts, or a grid/tile layout.
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0CardHorizontal when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Scanning and acting on many items</td>
+        <td>
+          They stack as standalone cards in a column — each one line plus an
+          optional description — worked through one by one; not a table to sort
+          or a tile to study
+        </td>
+      </tr>
+      <tr>
+        <td>A decision taken inline, per item</td>
+        <td>
+          Each card resolves in place — approve/reject, accept/decline, or a
+          settings toggle (the icon-only <code>confirmAction</code> /{" "}
+          <code>rejectAction</code> variant)
+        </td>
+      </tr>
+      <tr>
+        <td>Picking or opening an entry</td>
+        <td>
+          A short selectable list, or an entry-point card whose whole surface
+          navigates (<code>link</code> / <code>onClick</code>)
+        </td>
+      </tr>
+      <tr>
+        <td>Reporting the outcome of an action</td>
+        <td>
+          A resolved card shows a <code>status</code> icon in place of the
+          buttons (e.g. an approval that has been accepted or rejected)
+        </td>
+      </tr>
+      <tr>
+        <td>Space is tight and vertical</td>
+        <td>
+          A panel, drawer or settings page where a vertical stack of full-width
+          cards reads better than a grid of tiles
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>The item needs an image, cover or media header</td>
+        <td>
+          <code>F0Card</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          The item carries rich metadata — multiple property fields, tags, a
+          progress bar
+        </td>
+        <td>
+          <code>F0Card</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Items are laid out as tiles in a grid or gallery, each a focal point
+        </td>
+        <td>
+          <code>F0Card</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          The item is a selectable tile with a checkbox or bookmark in a
+          collection
+        </td>
+        <td>
+          <code>F0Card</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Drive a card by its action buttons or by a whole-card click target — pick one.",
+    guidelines: [
+      "Action buttons for cards that offer one or more explicit actions",
+      "link / onClick for entry-point cards whose whole surface is the action",
+    ],
+  }}
+  dont={{
+    description:
+      "Don't combine a whole-card link with separate action buttons.",
+    guidelines: [
+      "The click target becomes ambiguous — a tap could mean “open the card” or “press the button”",
+    ],
+  }}
+/>
+
+<DoDonts
+  stacked
+  do={{
+    description: "Use F0CardHorizontal for a dense, scannable list.",
+    children: <Canvas of={Stories.HorizontalCardStack} sourceState="none" />,
+  }}
+  dont={{
+    description:
+      "Don't stack F0Card to fake a list of horizontal cards — it wastes vertical space and weakens scanning.",
+    children: <Canvas of={Stories.VerticalCardStack} sourceState="none" />,
+  }}
+/>
+
+### Content best practices
+
+- **Title**: the primary line. Keep it to one scannable phrase — a name, a subject, a question
+- **Description**: optional secondary line. Keep it short; it wraps when long and grows the card
+- **Action labels**: verb-first, no articles
+  - **Correct:** "Approve", "Open", "Renew"
+  - **Incorrect:** "Approval", "Open the card", "Click to renew"
+- **Status label**: required — the icon carries the meaning, so name the outcome ("Accepted", "Rejected") for assistive tech
+
+### Behavior
+
+- The card becomes a click target **only** when `link` or `onClick` is set (opt-in): it then gains a pointer cursor and a hover/focus affordance. Otherwise only its actions are interactive — the card is driven by its buttons or by a whole-card click, never both.
+- `stackAt` reacts to the **container** width (a container query on the card itself), not the viewport — so the actions stack correctly inside grids, columns and drawers. Below the breakpoint they drop to their own line with a separator, and secondary buttons fold into the left ⋯ menu.
+- `status` reports a resolved outcome and **replaces** the actions; `confirmAction` / `rejectAction` render the icon-only approve/reject pair. Both take precedence over the standard actions.
+- The avatar renders at a fixed `lg` size on the left; types without an `lg` variant render at their intrinsic size.
+- `inactive` is purely presentational — it strikes through and dims the text (e.g. a voided card). Pair it with the matching `status`.
+
+### Usage examples
+
+**Inline approve/reject**
+
+An icon-only ✓ / ✗ pair for a decision taken directly on the card.
+
+<Canvas of={Stories.ConfirmReject} />
+
+**Resolved outcome**
+
+Once the decision is made, a `status` icon replaces the buttons; pair the rejected
+state with `inactive`.
+
+<Canvas of={Stories.Accepted} />
+
+<Canvas of={Stories.Rejected} />
+
+**Whole-card click target**
+
+An entry-point card whose entire surface opens the destination — no action buttons.
+
+<Canvas of={Stories.ClickableCard} />
+
+**Responsive stacking**
+
+`stackAt` reacts to the card's own width (a container query, not the viewport), with
+breakpoints `sm` (384px), `md` (448px) and `lg` (512px). At or above the breakpoint the
+actions stay inline at the trailing edge; below it they drop onto their own full-width
+line with a separator, and secondary buttons fold into the left ⋯. The same
+`stackAt: "md"` card across a ladder of widths:
+
+<Canvas of={Stories.ResponsiveStacking} />
+
+**Long content**
+
+The title and description wrap and the card grows; the avatar and actions stay
+top-aligned with the title's first line.
+
+<Canvas of={Stories.LongContent} />
+
+**Avatar types**
+
+The `avatar` prop accepts every single-avatar type in the system, each at the same
+fixed size.
+
+<Canvas of={Stories.AvatarTypes} />
+
+## Accessibility
+
+- The `status` icon conveys the outcome through its required `label` — assistive technology reads the label, so never rely on the icon or colour alone.
+- A whole-card `link` renders a full-card overlay link labelled by the title; action buttons stop click propagation, so they stay operable independently of the card link.
+- Actions and the overlay link are reachable with `Tab` and activated with `Enter`.

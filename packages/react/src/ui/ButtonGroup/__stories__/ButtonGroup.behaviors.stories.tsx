@@ -4,6 +4,7 @@ import { type DropdownItem } from "@/experimental/Navigation/Dropdown"
 import {
   Archive,
   ArrowUp,
+  Check,
   Cross,
   Delete,
   Download,
@@ -394,5 +395,62 @@ export const OverflowMenu: Story = {
         </div>
       ))}
     </div>
+  ),
+}
+
+// =============================================================================
+// Composition — confirm/reject pair never collapses (canOverflow=false)
+// =============================================================================
+
+// An icon-only accept/reject pair (as used by F0HILActionConfirmation): reject
+// is a secondary, confirm the pinned primary.
+const reject = {
+  id: "reject",
+  label: "Reject",
+  icon: Cross,
+  hideLabel: true,
+  onClick: noop,
+}
+const confirm = {
+  id: "confirm",
+  label: "Confirm",
+  icon: Check,
+  hideLabel: true,
+  onClick: noop,
+}
+
+const PairBox = ({ children }: { children: React.ReactNode }) => (
+  <div
+    style={{ width: 96 }}
+    className="rounded-lg border border-solid border-f1-border-secondary p-3"
+  >
+    {children}
+  </div>
+)
+
+/**
+ * An icon-only confirm/reject pair must never collapse. By default the row's
+ * overflow machinery reserves the ellipsis width and sheds the lone reject into
+ * the "⋯" menu (the bug). `canOverflow={false}` keeps both inline at any width.
+ */
+export const ConfirmRejectNeverCollapses: Story = {
+  name: "Confirm/reject never collapses",
+  render: () => (
+    <Cases>
+      <Case caption="Issue — default: the reject sheds into the ⋯ menu, leaving ⋯ + the confirm check">
+        <PairBox>
+          <ButtonGroup primaryAction={confirm} secondaryActions={[reject]} />
+        </PairBox>
+      </Case>
+      <Case caption="Fix — canOverflow={false}: the pair always stays inline">
+        <PairBox>
+          <ButtonGroup
+            primaryAction={confirm}
+            secondaryActions={[reject]}
+            canOverflow={false}
+          />
+        </PairBox>
+      </Case>
+    </Cases>
   ),
 }

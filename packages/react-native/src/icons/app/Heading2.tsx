@@ -10,10 +10,8 @@ const SvgHeading2 = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 7v5m0 5v-5m0 0h7V7v10M15 9.5A2.5 2.5 0 0 1 17.5 7v0A2.5 2.5 0 0 1 20 9.5v0a2.5 2.5 0 0 1-2.5 2.5v0a2.5 2.5 0 0 0-2.5 2.5V17h5"
+      fill="currentColor"
+      d="M11 6.1a.9.9 0 0 1 .9.9v10a.9.9 0 0 1-1.8 0v-4.1H4.9V17a.9.9 0 0 1-1.8 0V7a.9.9 0 1 1 1.8 0v4.1h5.2V7a.9.9 0 0 1 .9-.9m6.5 0a3.4 3.4 0 1 1 0 6.8 1.6 1.6 0 0 0-1.6 1.6v1.6H20a.9.9 0 0 1 0 1.8h-5a.9.9 0 0 1-.9-.9v-2.5a3.4 3.4 0 0 1 3.4-3.4 1.6 1.6 0 1 0-1.6-1.6.9.9 0 0 1-1.8 0 3.4 3.4 0 0 1 3.4-3.4"
     />
   </Svg>
 )

@@ -4,6 +4,10 @@
 
 Before starting any task, check if `factorial-skills` is available (look for skills with `factorial-` prefix via the Skill tool or check `~/.config/opencode/skills/`). If factorial-skills are installed, always search for and load the most relevant skill before proceeding — they contain institutional knowledge, workflows, and MCP integration guides specific to Factorial. If they are not installed, ask the user: "Would you like me to install factorial-skills? (`npx skills add factorialco/factorial-skills -g -y`)"
 
+## Repo Skills
+
+This repo ships its own skills in `vendor/skills/` (canonical source, committed). `pnpm install` (or `pnpm skills:sync`) copies them into `.claude/skills/` and `.opencode/skills/` so Claude Code and opencode auto-discover them. If your agent doesn't read those locations, load skills directly from `vendor/skills/<name>/SKILL.md`. Never edit the synced copies — edit `vendor/skills/` and re-run `pnpm skills:sync`.
+
 ## F0 Design System — Overview
 
 F0 is Factorial's design system. It provides modular, reusable UI components for web and mobile platforms.

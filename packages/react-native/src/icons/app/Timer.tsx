@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Circle, Path } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgTimer = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,17 +9,9 @@ const SvgTimer = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Circle cx={12} cy={13} r={7.35} stroke="currentColor" />
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M12 10.33v2.667l3 1.666"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 5.5V3M10 3h4M19.09 6l1.414 1.414M4.91 6 3.496 7.414"
+      fill="currentColor"
+      d="M14 2.85a.9.9 0 0 1 0 1.8h-1.1v.226a8.17 8.17 0 0 1-.9 16.287 8.169 8.169 0 0 1-.9-16.287V4.65H10a.9.9 0 0 1 0-1.8zm-1.824 3.78a1 1 0 0 1-.176.02 1 1 0 0 1-.177-.02 6.367 6.367 0 1 0 6.545 6.365 6.367 6.367 0 0 0-6.192-6.365M12 9.6a.9.9 0 0 1 .9.9v2.127l2.236 2.236a.9.9 0 0 1-1.273 1.273l-2.5-2.5a1 1 0 0 1-.102-.123q-.006-.008-.01-.015-.017-.027-.03-.054-.028-.049-.052-.101-.012-.034-.02-.067a.9.9 0 0 1-.05-.276l.001-2.5a.9.9 0 0 1 .9-.9M5.228 4.614A.9.9 0 0 1 6.5 5.886l-.863.865-.865.864a.9.9 0 0 1-1.273-1.273l.864-.865zm12.272 0a.9.9 0 0 1 1.272 0l.865.863.864.865a.9.9 0 0 1-1.273 1.273l-.865-.864-.863-.865a.9.9 0 0 1 0-1.272"
     />
   </Svg>
 )

@@ -52,4 +52,69 @@ describe("OneCalendar", () => {
 
     vi.useRealTimers()
   })
+
+  describe("selectOnCellOnly", () => {
+    const selected = {
+      from: new Date(2026, 0, 1),
+      to: new Date(2026, 11, 31),
+    }
+
+    it("emits onSelect on granularity change by default", () => {
+      const onSelect = vi.fn()
+      const { rerender } = render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="year"
+            defaultSelected={selected}
+            onSelect={onSelect}
+          />
+        </TestWrapper>
+      )
+
+      onSelect.mockClear()
+      rerender(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="quarter"
+            defaultSelected={selected}
+            onSelect={onSelect}
+          />
+        </TestWrapper>
+      )
+
+      expect(onSelect).toHaveBeenCalled()
+    })
+
+    it("does not emit onSelect on granularity change when selectOnCellOnly is true", () => {
+      const onSelect = vi.fn()
+      const { rerender } = render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="year"
+            defaultSelected={selected}
+            onSelect={onSelect}
+            selectOnCellOnly
+          />
+        </TestWrapper>
+      )
+
+      onSelect.mockClear()
+      rerender(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="quarter"
+            defaultSelected={selected}
+            onSelect={onSelect}
+            selectOnCellOnly
+          />
+        </TestWrapper>
+      )
+
+      expect(onSelect).not.toHaveBeenCalled()
+    })
+  })
 })

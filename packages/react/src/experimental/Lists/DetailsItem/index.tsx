@@ -2,7 +2,7 @@ import { ComponentProps, FC, forwardRef } from "react"
 
 import { F0AvatarList } from "@/components/avatars/F0AvatarList"
 import { F0AvatarListProps } from "@/components/avatars/F0AvatarList/types"
-import { FileItem } from "@/components/RichText/FileItem"
+import { F0FileItem } from "@/components/F0FileItem"
 import { TagAlertProps } from "@/components/tags/F0TagAlert"
 import { TagBalanceProps } from "@/components/tags/F0TagBalance"
 import { TagListProps, TagType } from "@/components/tags/F0TagList"
@@ -56,7 +56,7 @@ export type DetailsItemContent =
       type: "avatar-list"
       avatarList: F0AvatarListProps
     }
-  | (ComponentProps<typeof FileItem> & {
+  | (ComponentProps<typeof F0FileItem> & {
       type: "file"
     })
 
@@ -102,7 +102,7 @@ const ItemContent: FC<{ content: DetailsItemContent }> = ({ content }) => (
         const { type: _type, ...fileProps } = content
         return (
           <li className="list-none px-1.5 py-1">
-            <FileItem {...fileProps} />
+            <F0FileItem {...fileProps} />
           </li>
         )
       })()}

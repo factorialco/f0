@@ -194,6 +194,11 @@ describe("SelectCell", () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it("applies pointer cursor", () => {
+    const { container } = render(<SelectCell {...defaultProps} />)
+    expect(container.firstChild).toHaveClass("cursor-pointer")
+  })
+
   it("renders non-editable fallback when selectConfig is missing", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
 

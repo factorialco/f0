@@ -14,6 +14,13 @@ import { F0WizardForm as F0WizardFormComponent } from "./F0WizardForm"
 export { useF0FormDefinition } from "./useF0FormDefinition"
 export type { AsyncOrSync } from "./useF0FormDefinition"
 
+// `openFormWizard` is the building block behind `forms.open({ mode: "wizard" })`
+// (assembled in `patterns/forms`). It is not part of the public surface.
+export type {
+  OpenFormWizardOptions,
+  OpenFormWizardResult,
+} from "./openFormWizard"
+
 export type {
   F0FormDefinition,
   F0FormDefinitionSingleSchema,

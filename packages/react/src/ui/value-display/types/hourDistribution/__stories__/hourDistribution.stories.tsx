@@ -120,6 +120,48 @@ export const HourDistributionWithJustifiedAbsences: Story = {
   },
 }
 
+/** Per-point neutralLabel: weekends show "Non-workable", leave days show the leave type name. */
+export const HourDistributionWithMixedLabels: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Hour distribution",
+      render: () => ({
+        type: "hourDistribution",
+        value: {
+          dataPoints: [
+            { date: "2025-12-15", value: 480, plannedValue: 480 },
+            {
+              date: "2025-12-16",
+              value: 0,
+              plannedValue: 480,
+              justifiedAbsenceFullDay: true,
+              neutralLabel: "Sick leave",
+            },
+            { date: "2025-12-17", value: 360, plannedValue: 480 },
+            { date: "2025-12-18", value: 480, plannedValue: 480 },
+            { date: "2025-12-19", value: 480, plannedValue: 480 },
+            {
+              date: "2025-12-20",
+              value: 0,
+              justifiedAbsenceFullDay: true,
+              neutralLabel: "Non-workable",
+            },
+            {
+              date: "2025-12-21",
+              value: 0,
+              justifiedAbsenceFullDay: true,
+              neutralLabel: "Non-workable",
+            },
+          ],
+          workedLabel: "Worked",
+          justifiedAbsenceLabel: "Justified absence",
+        },
+      }),
+    },
+  },
+}
+
 export const HourDistributionEmpty: Story = {
   args: {
     item: mockItem,

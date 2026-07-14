@@ -1,0 +1,23 @@
+import { Ref, forwardRef } from "react"
+import Svg, { Path } from "react-native-svg"
+import type { SvgProps } from "react-native-svg"
+const SvgSidebarShow = (props: SvgProps, ref: Ref<Svg>) => (
+  <Svg
+    fill="none"
+    viewBox="0 0 24 24"
+    className={props.className}
+    ref={ref}
+    {...props}
+  >
+    <Path
+      fill="currentColor"
+      d="M10.137 8.864a.9.9 0 0 0-1.272 1.273l.963.963H7.501a.9.9 0 0 0 0 1.8h2.328l-.964.964a.9.9 0 0 0 1.272 1.273l2.5-2.5a.9.9 0 0 0 0-1.273z"
+    />
+    <Path
+      fill="currentColor"
+      d="M6.5 4.6a3.9 3.9 0 0 0-3.9 3.9v7a3.9 3.9 0 0 0 3.9 3.9h11a3.9 3.9 0 0 0 3.9-3.9v-7a3.9 3.9 0 0 0-3.9-3.9zm8.6 13H6.5a2.1 2.1 0 0 1-2.1-2.1v-7c0-1.16.94-2.1 2.1-2.1h8.6zm2.4-11.2c1.16 0 2.1.94 2.1 2.1v7a2.1 2.1 0 0 1-2.1 2.1h-.6V6.4z"
+    />
+  </Svg>
+)
+const ForwardRef = forwardRef(SvgSidebarShow)
+export default ForwardRef

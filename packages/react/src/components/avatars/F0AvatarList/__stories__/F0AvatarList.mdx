@@ -1,0 +1,116 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as ListStories from "./F0AvatarList.stories"
+
+<Meta of={ListStories} />
+
+# AvatarList
+
+A compact, overlapping stack of avatars that represents a **group of entities of
+the same type** (people, teams, companies, flags or files) — for example the
+members of a project or the attendees of an event.
+
+---
+
+## Overview
+
+### Purpose
+
+- Show that several entities are related or belong together, in little space
+- Summarise large groups with a trailing **`+N`** counter instead of a long row
+- Give quick access to each entity's name (and optional secondary detail)
+  through per-avatar tooltips
+
+### Anatomy
+
+The list renders each entity through the matching `F0Avatar*` component, stacks
+them with a slight overlap, and — when there are more than `max` — collapses the
+extras into a `+N` counter. Every avatar carries a tooltip with its name, and
+can show a secondary line (`tooltipDescription`) such as an email or role.
+
+<Canvas of={ListStories.Default} />
+
+<Controls of={ListStories.Default} />
+
+### Variants
+
+#### Types
+
+A list is homogeneous: every avatar shares the same `type`. AvatarList supports
+`person`, `team`, `company`, `flag` and `file`, rendering the matching avatar
+for each entry.
+
+<Canvas of={ListStories.AllTypes} />
+
+#### Overflow
+
+Use `max` to cap how many avatars are visible; the rest collapse into a `+N`
+counter. When you already know the total, pass `remainingCount` to set the
+number shown in the counter directly.
+
+<Canvas of={ListStories.WithRemainingCount} />
+
+Hovering the `+N` counter opens a popover listing the hidden avatars by name.
+
+<Canvas of={ListStories.OverflowPopover} />
+
+#### Tooltip detail
+
+Each entry may carry a `tooltipDescription` (e.g. an email or role) rendered as
+the tooltip's secondary line. Hover any avatar to see it.
+
+<Canvas of={ListStories.WithTooltipDescription} />
+
+#### Sizes
+
+AvatarList uses the shared avatar size scale, so a token means the same pixels
+as every other avatar. It supports the three smaller sizes; `md` (medium) is the
+default.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Dimensions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>md</code> (medium, default)
+        </td>
+        <td>32px</td>
+      </tr>
+      <tr>
+        <td>
+          <code>sm</code> (small)
+        </td>
+        <td>24px</td>
+      </tr>
+      <tr>
+        <td>
+          <code>xs</code> (extra small)
+        </td>
+        <td>20px</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- Representing a group of related entities of the same type (project members,
+  event attendees, companies in a deal)
+- Condensing a long list into a fixed footprint with a `+N` overflow
+
+#### When NOT to use
+
+- A single entity: use the matching `F0Avatar*` component directly
+- Mixing entity types in one list: a list is homogeneous by design — render
+  separate lists instead

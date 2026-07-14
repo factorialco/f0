@@ -7,7 +7,7 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { Kanban, List, Pencil, Table } from "@/icons/app"
+import { Kanban, List, Organization, Pencil, Table } from "@/icons/app"
 
 import { DataCollectionSettingsContextType } from "../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../types"
@@ -17,6 +17,11 @@ import {
   EditableTableCollectionProps,
 } from "./EditableTable"
 import { EditableTableVisualizationSettings } from "./EditableTable/types"
+import { GraphCollection, GraphCollectionProps } from "./Graph"
+import {
+  SettingsRenderer as graphSettingsRenderer,
+  type GraphVisualizationSettings,
+} from "./Graph/settings/SettingsRenderer"
 import { KanbanCollection, KanbanCollectionProps } from "./Kanban"
 import { ListCollection, ListCollectionProps } from "./List"
 import {
@@ -105,6 +110,18 @@ type CollectionVisualizations<
       NavigationFilters,
       Grouping
     >
+  >
+  graph: VisualizacionTypeDefinition<
+    GraphCollectionProps<
+      Record,
+      Filters,
+      Sortings,
+      Summaries,
+      ItemActions,
+      NavigationFilters,
+      Grouping
+    >,
+    GraphVisualizationSettings
   >
 }
 
@@ -312,6 +329,49 @@ export const collectionVisualizations: CollectionVisualizations<
     ) => {
       return (
         <KanbanCollection<
+          Record,
+          Filters,
+          Sortings,
+          Summaries,
+          ItemActions,
+          NavigationFilters,
+          Grouping
+        >
+          {...props}
+        />
+      )
+    },
+  },
+  graph: {
+    name: "Graph",
+    icon: Organization,
+    settings: {
+      default: {},
+      renderer: (props) => graphSettingsRenderer(props),
+      resetHandler: (settings) =>
+        settings.setVisualizationSettings("graph", {}),
+    },
+    render: <
+      Record extends RecordType,
+      Filters extends FiltersDefinition,
+      Sortings extends SortingsDefinition,
+      Summaries extends SummariesDefinition,
+      ItemActions extends ItemActionsDefinition<Record>,
+      NavigationFilters extends NavigationFiltersDefinition,
+      Grouping extends GroupingDefinition<Record>,
+    >(
+      props: GraphCollectionProps<
+        Record,
+        Filters,
+        Sortings,
+        Summaries,
+        ItemActions,
+        NavigationFilters,
+        Grouping
+      >
+    ) => {
+      return (
+        <GraphCollection<
           Record,
           Filters,
           Sortings,

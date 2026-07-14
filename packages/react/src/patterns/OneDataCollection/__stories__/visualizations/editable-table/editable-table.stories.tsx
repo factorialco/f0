@@ -6,7 +6,7 @@ import { action } from "storybook/actions"
 import type { StatusVariant } from "@/components/tags/F0TagStatus/types"
 
 import { createDataSourceDefinition, RecordType } from "@/hooks/datasource"
-import { Delete, Pencil } from "@/icons/app"
+import { Delete, InfoCircleLine, Pencil } from "@/icons/app"
 import { ROLES_MOCK } from "@/mocks"
 
 import { OneDataCollection } from "../../.."
@@ -112,7 +112,7 @@ export const EditableTableWithSelectableRows: Story = {
     const { dataAdapter, onCellChange } = useEditableTableData()
     return (
       <ExampleComponent
-        selectable={() => ""}
+        selectable={(item) => item.id}
         visualizations={[
           {
             type: "editableTable" as const,
@@ -129,6 +129,80 @@ export const EditableTableWithSelectableRows: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-selectable/v1"
+      />
+    )
+  },
+}
+
+/**
+ * Nested editable table with selection (FCT-56547): non-selectable parent rows
+ * whose lazily-loaded children are selectable. Expand a parent, then use the
+ * header "Select all" checkbox or the "Select all N items" banner — select-all
+ * must select all loaded children without wiping the current selection.
+ */
+export const EditableTableWithNestedSelectableRows: Story = {
+  render: () => {
+    const mockVisualizations = getMockVisualizations({ table: {} })
+
+    // Build two non-selectable parent rows, each owning unique-id leaf rows.
+    const nestedData = useMemo<MockUser[]>(() => {
+      const base = generateMockUsers(8)
+      const makeParent = (
+        parent: MockUser,
+        label: string,
+        childSlice: MockUser[]
+      ): MockUser => ({
+        ...parent,
+        name: label,
+        children: childSlice.map((child, i) => ({
+          ...child,
+          id: `${parent.id}-child-${i + 1}`,
+          name: `${label} · request ${i + 1}`,
+          children: undefined,
+        })),
+      })
+
+      return [
+        makeParent(
+          { ...base[0], id: "parent-new" },
+          "New headcount",
+          base.slice(1, 4)
+        ),
+        makeParent(
+          { ...base[4], id: "parent-actual" },
+          "Actual headcount",
+          base.slice(5, 8)
+        ),
+      ]
+    }, [])
+
+    const { dataAdapter, onCellChange } = useEditableTableData(nestedData)
+
+    return (
+      <ExampleComponent
+        // Parents (rows with children) are not selectable; only leaf rows are.
+        selectable={(item) => (item.children?.length ? undefined : item.id)}
+        allPagesSelection
+        bulkActions={() => ({
+          primary: [{ id: "approve", label: "Approve" }],
+          secondary: [{ id: "delete", label: "Delete" }],
+        })}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...(
+                mockVisualizations.editableTable as Extract<
+                  typeof mockVisualizations.editableTable,
+                  { type: "editableTable" }
+                >
+              ).options,
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-nested-selectable/v1"
       />
     )
   },
@@ -257,6 +331,106 @@ export const EditableTableWithEditableCallback: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-editable-callback/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithDisabledCells: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Disabled cells (`editType: () => 'disabled'`) render with the disabled background and secondary foreground color, so they read as inactive (FCT-56243). Here the Role column is disabled; Email stays editable for contrast.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.editType !== undefined && col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "disabled" as const,
+                  }
+                }
+                return col
+              }),
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-disabled-cells/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithCellHint: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A `cellHint` (ⓘ tooltip) renders its icon to the right of the cell content for read-only cell types (FCT-56432). Here the Role column is `disabled` (gray background) with a hint; Email stays editable for contrast.",
+      },
+    },
+  },
+  render: () => {
+    const mockVisualizations = getMockVisualizations()
+    const { dataAdapter, onCellChange } = useEditableTableData()
+
+    const baseOptions = (
+      mockVisualizations.editableTable as Extract<
+        typeof mockVisualizations.editableTable,
+        { type: "editableTable" }
+      >
+    ).options
+
+    return (
+      <ExampleComponent
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              ...baseOptions,
+              columns: baseOptions.columns.map((col) => {
+                if (col.editType !== undefined && col.id === "role") {
+                  return {
+                    ...col,
+                    editType: () => "disabled" as const,
+                    cellHint: () => ({
+                      icon: InfoCircleLine,
+                      iconColor: "secondary" as const,
+                      message:
+                        "This value is managed elsewhere and can't be edited here.",
+                    }),
+                  }
+                }
+                return col
+              }),
+              onCellChange,
+            },
+          },
+        ]}
+        dataAdapter={dataAdapter}
+        id="editable-table-cell-hint/v1"
       />
     )
   },

@@ -1,6 +1,7 @@
 import { ReactNode } from "react"
 
 import type { IconType } from "@/components/F0Icon"
+import type { NewColor } from "@/components/tags/F0TagDot"
 import type { Variant } from "@/components/tags/F0TagStatus"
 import type { RecordType } from "@/hooks/datasource"
 
@@ -60,6 +61,12 @@ export interface LaneProps<Record extends RecordType> {
    * The variant of the lane
    */
   variant?: Variant
+
+  /**
+   * Palette color for the lane header dot. When set, the header renders an
+   * F0TagDot in this color instead of the semantic F0TagStatus variant.
+   */
+  color?: NewColor
 
   /**
    * The total number of items in the lane (for display in header)

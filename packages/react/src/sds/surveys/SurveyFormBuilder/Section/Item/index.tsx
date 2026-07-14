@@ -32,7 +32,7 @@ export const Item = ({ question }: ItemProps) => {
     setDraggedItemId(null)
   }
 
-  const questionLocked = question.locked || containingSection?.locked
+  const questionLocked = containingSection?.locked
 
   const dragEnabled = !disabled && !answering && !questionLocked
 

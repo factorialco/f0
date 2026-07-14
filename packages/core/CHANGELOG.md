@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.54.0](https://github.com/factorialco/f0/compare/f0-core-v1.53.0...f0-core-v1.54.0) (2026-06-29)
+
+
+### Features
+
+* **icons:** add ReceiptAi to the AI icon set ([#4570](https://github.com/factorialco/f0/issues/4570)) ([6df4849](https://github.com/factorialco/f0/commit/6df4849e86eaf9ee8e9dfb2645819b293688cdc9))
+
+## [1.53.0](https://github.com/factorialco/f0/compare/f0-core-v1.52.0...f0-core-v1.53.0) (2026-06-16)
+
+
+### Features
+
+* headcount planning icons module app ([#4439](https://github.com/factorialco/f0/issues/4439)) ([17ef7bd](https://github.com/factorialco/f0/commit/17ef7bd99c7f51c6b379babc270b13bce173e643))
+
 ## [1.52.0](https://github.com/factorialco/f0/compare/f0-core-v1.51.1...f0-core-v1.52.0) (2026-05-26)
 
 

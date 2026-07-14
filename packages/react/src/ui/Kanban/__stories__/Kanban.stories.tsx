@@ -89,6 +89,52 @@ export const Default: Story = {
   },
 }
 
+export const PaletteColors: Story = {
+  args: {
+    lanes: [],
+    renderCard: () => null,
+    getKey: () => "",
+  },
+  render: function Render() {
+    const [instanceId] = useState(() => Symbol("kanban-instance"))
+    const lanes: KanbanProps<Task>["lanes"] = [
+      { id: "new", title: "New", items: mockLeft, color: "purple" },
+      {
+        id: "screening",
+        title: "Screening",
+        items: mockRight,
+        color: "viridian",
+      },
+      { id: "interview", title: "Interview", items: [], color: "yellow" },
+      { id: "assessment", title: "Assessment", items: [], color: "barbie" },
+      { id: "offer", title: "Offer", items: [], color: "malibu" },
+      { id: "hired", title: "Hired", items: [], color: "flubber" },
+    ]
+    return (
+      <DndProvider driver={createAtlaskitDriver(instanceId)}>
+        <Kanban<Task>
+          lanes={lanes}
+          getKey={(item: Task) => item.id}
+          renderCard={(item: Task, index: number, total: number) => (
+            <KanbanCard<Task>
+              drag={{
+                id: item.id,
+                type: "list-card",
+                data: { ...item },
+              }}
+              id={item.id}
+              index={index}
+              total={total}
+              title={item.title}
+              description={item.description}
+            />
+          )}
+        />
+      </DndProvider>
+    )
+  },
+}
+
 export const ProjectStatuses: Story = {
   args: {
     lanes: [],

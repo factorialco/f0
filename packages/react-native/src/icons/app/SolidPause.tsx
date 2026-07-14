@@ -11,7 +11,7 @@ const SvgSolidPause = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      d="M6 17V7a2 2 0 1 1 4 0v10a2 2 0 1 1-4 0M14 17V7a2 2 0 1 1 4 0v10a2 2 0 1 1-4 0"
+      d="M6.2 18V6a1.8 1.8 0 0 1 3.6 0v12a1.8 1.8 0 0 1-3.6 0m8 0V6a1.8 1.8 0 0 1 3.6 0v12a1.8 1.8 0 0 1-3.6 0"
     />
   </Svg>
 )

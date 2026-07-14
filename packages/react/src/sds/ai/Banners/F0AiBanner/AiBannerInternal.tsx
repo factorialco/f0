@@ -2,7 +2,7 @@ import { forwardRef } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { OneEllipsis } from "@/lib/OneEllipsis"
-import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import { Cross } from "@/icons/app"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
@@ -45,7 +45,7 @@ export const AiBannerInternal = forwardRef<
               : "rounded-[13.25px]"
           )}
         >
-          <RichTextDisplay content={content} />
+          <F0RichTextDisplay content={content} />
         </div>
         {(secondaryAction || primaryAction) && (
           <div className="flex flex-row items-center justify-between gap-3 rounded-b-[13.25px] bg-f1-background px-4 py-3">

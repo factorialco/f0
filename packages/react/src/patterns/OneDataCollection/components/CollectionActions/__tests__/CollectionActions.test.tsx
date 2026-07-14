@@ -1,14 +1,27 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { IconType } from "@/components/F0Icon"
-import { zeroRender as render, screen } from "@/testing/test-utils"
+import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
 
 import { PrimaryActionItemDefinition } from "../../../actions"
 import { CollectionActions } from "../CollectionActions"
 
 vi.mock("@/components/F0Button", () => ({
-  F0Button: ({ label, onClick, ...props }: Record<string, unknown>) => (
-    <button data-testid="f0-button" onClick={onClick as () => void} {...props}>
+  F0Button: ({
+    label,
+    onClick,
+    variant,
+    size,
+    icon: _icon,
+    ...props
+  }: Record<string, unknown>) => (
+    <button
+      data-testid="f0-button"
+      data-variant={variant as string}
+      data-size={size as string}
+      onClick={onClick as () => void}
+      {...props}
+    >
       {label as string}
     </button>
   ),
@@ -104,6 +117,10 @@ vi.mock("@/experimental/Overlays/Tooltip", () => ({
 
 vi.mock("@/icons/app", () => ({
   Ellipsis: () => <div data-testid="ellipsis-icon">...</div>,
+}))
+
+vi.mock("@/icons/app/Upsell", () => ({
+  default: () => <div data-testid="upsell-icon">upsell</div>,
 }))
 
 const mockIcon: IconType = (() => (
@@ -270,6 +287,77 @@ describe("CollectionActions", () => {
     })
   })
 
+  describe("primary action tooltip", () => {
+    it("wraps a single primary action with Tooltip when tooltip returns a string", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "Process payroll results",
+          icon: mockIcon,
+          onClick: vi.fn(),
+          disabled: true,
+          tooltip: ({ disabled }) =>
+            disabled ? "Results are not available yet" : undefined,
+        },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      const tooltip = screen.getByTestId("tooltip")
+      expect(tooltip).toBeInTheDocument()
+      expect(tooltip).toHaveAttribute(
+        "data-description",
+        "Results are not available yet"
+      )
+      expect(screen.getByText("Process payroll results")).toBeInTheDocument()
+    })
+
+    it("renders a single primary action without Tooltip when tooltip returns undefined", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "Process payroll results",
+          icon: mockIcon,
+          onClick: vi.fn(),
+          disabled: false,
+          tooltip: ({ disabled }) =>
+            disabled ? "Results are not available yet" : undefined,
+        },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
+      expect(screen.getByText("Process payroll results")).toBeInTheDocument()
+    })
+
+    it("renders a single primary action without Tooltip when tooltip is not provided", () => {
+      const actions: PrimaryActionItemDefinition[] = [
+        { label: "New expense", icon: mockIcon, onClick: vi.fn() },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
+      expect(screen.getByText("New expense")).toBeInTheDocument()
+    })
+
+    it("receives the loading state in the tooltip params", () => {
+      const tooltip = vi.fn(() => undefined)
+      const actions: PrimaryActionItemDefinition[] = [
+        {
+          label: "New expense",
+          icon: mockIcon,
+          onClick: vi.fn(),
+          loading: true,
+          tooltip,
+        },
+      ]
+
+      render(<CollectionActions primaryActions={actions} />)
+
+      expect(tooltip).toHaveBeenCalledWith({ disabled: false, loading: true })
+    })
+  })
+
   describe("secondary actions tooltip", () => {
     it("wraps secondary action with Tooltip when tooltip returns a string", () => {
       render(
@@ -328,6 +416,68 @@ describe("CollectionActions", () => {
 
       expect(screen.queryByTestId("tooltip")).not.toBeInTheDocument()
       expect(screen.getByText("Export")).toBeInTheDocument()
+    })
+  })
+
+  describe("upsell action", () => {
+    it("renders the upsell button with the outlinePromote variant and md size by default", () => {
+      render(
+        <CollectionActions
+          upsellAction={{
+            label: "Upgrade plan",
+            onClick: vi.fn(),
+          }}
+        />
+      )
+
+      const button = screen.getByText("Upgrade plan").closest("button")
+      expect(button).toBeInTheDocument()
+      expect(button).toHaveAttribute("data-variant", "outlinePromote")
+      expect(button).toHaveAttribute("data-size", "md")
+    })
+
+    it("lets the host override the variant via the upsellAction definition", () => {
+      render(
+        <CollectionActions
+          upsellAction={{
+            label: "Upgrade plan",
+            onClick: vi.fn(),
+            variant: "promote",
+          }}
+        />
+      )
+
+      expect(
+        screen.getByText("Upgrade plan").closest("button")
+      ).toHaveAttribute("data-variant", "promote")
+    })
+
+    it("renders the upsell button even when there are no other actions", () => {
+      render(
+        <CollectionActions
+          upsellAction={{ label: "Upgrade", onClick: vi.fn() }}
+        />
+      )
+
+      expect(screen.getByText("Upgrade")).toBeInTheDocument()
+    })
+
+    it("does not render the upsell button when upsellAction is absent", () => {
+      render(
+        <CollectionActions
+          primaryActions={[{ label: "New", icon: mockIcon, onClick: vi.fn() }]}
+        />
+      )
+
+      expect(screen.queryByText("Upgrade")).not.toBeInTheDocument()
+    })
+
+    it("invokes onClick when the upsell button is clicked", () => {
+      const onClick = vi.fn()
+      render(<CollectionActions upsellAction={{ label: "Upgrade", onClick }} />)
+
+      fireEvent.click(screen.getByText("Upgrade"))
+      expect(onClick).toHaveBeenCalledTimes(1)
     })
   })
 })

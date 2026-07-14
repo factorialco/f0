@@ -57,8 +57,8 @@ export const DocsContainer: FC<PropsWithChildren<DocsContainerProps>> = (
           </div>
         )}
         <ImportBanner isDark={isDark} />
+        {children}
       </I18nProvider>
-      {children}
     </BaseContainer>
   )
 }

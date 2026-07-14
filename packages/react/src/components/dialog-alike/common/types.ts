@@ -76,6 +76,13 @@ export type DialogAlikeInternalProps = {
   children: ReactNode
   // Disable the default padding from the dialog content area
   disableContentPadding?: boolean
+  /**
+   * Override the DOM element the dialog is portaled into. By default center
+   * dialogs portal to the top-level `#f0-overlay-root` (escaping app stacking
+   * contexts such as the ApplicationFrame's `isolate` layer) and side drawers
+   * to `#content`. Pass an element, or `null` to portal to `document.body`.
+   */
+  container?: HTMLElement | null
 } & (
   | DialogAlikeTabsProps
   | {

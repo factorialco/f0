@@ -1,14 +1,10 @@
 import { useMemo } from "react"
 
-import { F0Button } from "@/components/F0Button"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
-import { useI18n } from "@/lib/providers/i18n"
-import { ScrollArea } from "@/ui/scrollarea"
+import { SortAndHideSettings } from "@/patterns/OneDataCollection/Settings/SortAndHideSettings"
 
 import { useColumns } from "../hooks/useColums"
 import { TableColumnDefinition } from "../types"
-import { SortAndHideList } from "./SortAndHideList"
-import { SortAndHideListItem } from "./SortAndHideList/types"
 
 export type TableVisualizationSettingsKey = "table" | "editableTable"
 
@@ -20,6 +16,13 @@ type TableSettingsProps = {
   allowHiding: boolean
   /** Settings key for column order/hidden state. Use "editableTable" for EditableTable visualization. */
   visualizationKey?: TableVisualizationSettingsKey
+  /** Shows an "Add column" entry at the top of the popover when provided. */
+  onAddColumn?: () => void
+  /**
+   * Enables a hover trash affordance per non-frozen column (unless the column
+   * sets `noRemoving`). Called with the column id to drop it from the table.
+   */
+  onRemoveColumn?: (columnId: string) => void
 }
 
 export const TableSettings = ({
@@ -28,9 +31,10 @@ export const TableSettings = ({
   allowSorting,
   allowHiding,
   visualizationKey = "table",
+  onAddColumn,
+  onRemoveColumn,
 }: TableSettingsProps) => {
-  const i18n = useI18n()
-  const { settings, setVisualizationSettings } = useDataCollectionSettings()
+  const { settings } = useDataCollectionSettings()
 
   const visualizationSettings = settings.visualization[visualizationKey]
 
@@ -42,11 +46,17 @@ export const TableSettings = ({
     allowHiding
   )
 
-  const items = useMemo(
-    () =>
+  const items = useMemo(() => {
+    // The leading `frozenColumns || 1` columns are non-editable (always-visible,
+    // not reorderable). They can never be removed — mirror that for the trash.
+    const lockedCount = frozenColumns || 1
+    const lockedIds = new Set(
+      columnsWithStatus.slice(0, lockedCount).map((column) => column.column.id)
+    )
+
+    return (
       columnsWithStatus
         // If allowHiding is false, we show only the columns that are visible
-
         .filter((column) => allowHiding || column.visible)
         .map((column) => ({
           id: column.column.id,
@@ -54,61 +64,22 @@ export const TableSettings = ({
           sortable: column.sortable,
           canHide: column.canHide,
           visible: column.visible,
-        })),
-    [columnsWithStatus, allowHiding]
-  )
-
-  const onChangeSettings = (newOrder: SortAndHideListItem[]) => {
-    setVisualizationSettings(visualizationKey, (prev) => ({
-      ...prev,
-      order: newOrder.map((item) => item.id),
-      hidden: newOrder.filter((item) => !item.visible).map((item) => item.id),
-    }))
-  }
-
-  const toggleAllColumns = (visible: boolean) => {
-    onChangeSettings(
-      items.map((item) => ({
-        ...item,
-        visible: item.canHide ? visible : item.visible,
-      }))
+          removable:
+            !!onRemoveColumn &&
+            !lockedIds.has(column.column.id) &&
+            !column.column.noRemoving,
+        }))
     )
-  }
-
-  const showHideToggleAllColumns =
-    allowHiding && items.filter((item) => item.canHide).length > 1
+  }, [columnsWithStatus, allowHiding, frozenColumns, onRemoveColumn])
 
   return (
-    <div className="relative -mr-2 flex h-[200px] flex-col gap-2">
-      <ScrollArea className="h-[200px]">
-        <SortAndHideList
-          items={items}
-          onChange={onChangeSettings}
-          allowSorting={allowSorting}
-          allowHiding={allowHiding}
-        />
-        {showHideToggleAllColumns && (
-          <div className="sticky bottom-0 flex justify-between bg-f1-background/80 p-2 pl-0 backdrop-blur-sm">
-            <F0Button
-              variant="outline"
-              size="sm"
-              label={i18n.collections.table.settings.showAllColumns}
-              onClick={() => {
-                toggleAllColumns(true)
-              }}
-            />
-
-            <F0Button
-              variant="ghost"
-              size="sm"
-              label={i18n.collections.table.settings.hideAllColumns}
-              onClick={() => {
-                toggleAllColumns(false)
-              }}
-            />
-          </div>
-        )}
-      </ScrollArea>
-    </div>
+    <SortAndHideSettings
+      items={items}
+      visualizationKey={visualizationKey}
+      allowSorting={allowSorting}
+      allowHiding={allowHiding}
+      onAddColumn={onAddColumn}
+      onRemoveColumn={onRemoveColumn}
+    />
   )
 }

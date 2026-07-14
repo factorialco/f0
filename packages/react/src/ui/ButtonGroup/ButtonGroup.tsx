@@ -73,7 +73,7 @@ export type ButtonGroupSecondaryItem =
   | ButtonGroupSplitAction
   | ButtonGroupInlineSeparator
 
-/** A single link rendered in place of secondary buttons (mirrors F0CardRow). */
+/** A single link rendered in place of secondary buttons (mirrors F0CardHorizontal). */
 export interface ButtonGroupSecondaryLink {
   label: string
   href: string
@@ -84,17 +84,32 @@ export interface ButtonGroupSecondaryLink {
 /** A constant size, or a responsive pair: `base` while stacked, `md` in the row. */
 export type ButtonGroupSize = ButtonSize | { base: ButtonSize; md: ButtonSize }
 
+/**
+ * The pinned primary action. A button or split action that also accepts an
+ * optional `variant`: `"outline"` renders it as an outline button while keeping
+ * it pinned (never shed into the "⋯" menu). @default variant "default"
+ */
+export type ButtonGroupPrimaryAction = (
+  | ButtonGroupButton
+  | ButtonGroupSplitAction
+) & {
+  variant?: "default" | "outline"
+}
+
 export interface ButtonGroupProps {
-  /** The single primary action. A single object structurally guarantees ≤1 primary. */
-  primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  /**
+   * The single primary action. A single object structurally guarantees ≤1 primary.
+   * Set `variant: "outline"` to render it as an outline button while keeping it
+   * pinned (never shed into the "⋯" menu) — for a lone CTA that shouldn't carry
+   * full primary weight. @default variant "default"
+   */
+  primaryAction?: ButtonGroupPrimaryAction
   /** Secondary actions (buttons / split buttons / inline separators), or a single link. */
   secondaryActions?: ButtonGroupSecondaryItem[] | ButtonGroupSecondaryLink
   /** Extra actions, always reachable through the "⋯" menu (supports separators / critical). */
   otherActions?: DropdownItem[]
   /** Button + menu-trigger size. Responsive `{ base, md }` flips with `stack`. @default "md" */
   size?: ButtonGroupSize
-  /** Pixel gap between items. @default 8 */
-  gap?: number
   /** Row alignment. @default "end" */
   align?: "end" | "between"
   /** Stack into a column below the named viewport / container breakpoint. @default "none" */
@@ -103,10 +118,22 @@ export interface ButtonGroupProps {
   fullWidthOnStack?: boolean
   /** Reverse the stacked column so the primary lands on top. */
   reverseOnStack?: boolean
+  /**
+   * When `false`, secondary buttons never shed into the "⋯" menu — they always
+   * render inline (e.g. a confirm/reject pair that must never collapse).
+   * `otherActions` still populate the menu when present. @default true
+   */
+  canOverflow?: boolean
   className?: string
 }
 
 const BREAKPOINT_PX = { sm: 640, md: 768, "container-md": 448 } as const
+
+// Fixed gap between items, in pixels. The visible spacing is rendered with the
+// `gap-md` Tailwind class; this constant feeds the width-measured overflow math
+// (which needs a number) and MUST stay in sync with the `gap-md` token (8px).
+// Exported so a unit test can assert it against the token (see ButtonGroup.test).
+export const BUTTON_GROUP_GAP_PX = 8
 
 const isInlineSeparator = (
   item: ButtonGroupSecondaryItem
@@ -175,21 +202,23 @@ const renderSecondaryLink = (
 )
 
 const renderPrimaryNode = (
-  action: ButtonGroupButton | ButtonGroupSplitAction,
+  action: ButtonGroupPrimaryAction,
   size: ButtonSize
-) =>
-  isSplitAction(action)
-    ? renderSplitButton(action, size, "default")
-    : renderActionButton(action, size, "default")
+) => {
+  const variant = action.variant ?? "default"
+  return isSplitAction(action)
+    ? renderSplitButton(action, size, variant)
+    : renderActionButton(action, size, variant)
+}
 
 interface ButtonGroupBranchProps {
-  primaryAction?: ButtonGroupButton | ButtonGroupSplitAction
+  primaryAction?: ButtonGroupPrimaryAction
   secondaryItems: ButtonGroupSecondaryItem[]
   secondaryLink?: ButtonGroupSecondaryLink
   otherActions: DropdownItem[]
   size: ButtonSize
-  gap: number
   align: "end" | "between"
+  canOverflow: boolean
 }
 
 /**
@@ -216,11 +245,11 @@ export function ButtonGroup({
   secondaryActions,
   otherActions = [],
   size = "md",
-  gap = 8,
   align = "end",
   stack = "none",
   fullWidthOnStack = false,
   reverseOnStack = false,
+  canOverflow = true,
   className,
 }: ButtonGroupProps) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -263,8 +292,8 @@ export function ButtonGroup({
     secondaryLink,
     otherActions,
     size: resolvedSize,
-    gap,
     align,
+    canOverflow,
   }
 
   return (
@@ -273,7 +302,10 @@ export function ButtonGroup({
       role="group"
       className={cn(
         isRowMode
-          ? "flex w-full items-center"
+          ? // Keep the pinned trailing items (splits, divider, primary) at their
+            // natural width; only the first child — the flex-1 cluster — shrinks,
+            // so the title truncates against it rather than squeezing the buttons.
+            "flex w-full items-center gap-md [&>*:not(:first-child)]:shrink-0"
           : buttonGroupVariants({
               align,
               stack,
@@ -282,7 +314,6 @@ export function ButtonGroup({
             }),
         className
       )}
-      style={{ gap }}
     >
       {isRowMode ? (
         <ButtonGroupRow key="row" {...branchProps} />
@@ -329,8 +360,8 @@ function ButtonGroupRow({
   secondaryLink,
   otherActions,
   size,
-  gap,
   align,
+  canOverflow,
 }: ButtonGroupBranchProps) {
   // Only plain buttons are width-measured; splits + separators are pinned/excluded.
   // Memoized so the reference is stable across renders — a fresh array would
@@ -348,7 +379,7 @@ function ButtonGroupRow({
     visibleItems,
     overflowItems,
     isInitialized,
-  } = useOverflowCalculation(plainSecondaries, gap)
+  } = useOverflowCalculation(plainSecondaries, BUTTON_GROUP_GAP_PX)
 
   // `inert` isn't a typed JSX prop in this React version, so set it on the
   // measurement copy imperatively — it removes the copy from focus + a11y.
@@ -357,8 +388,14 @@ function ButtonGroupRow({
   }, [measurementContainerRef])
 
   // Before the first measurement, optimistically show everything to avoid a flash.
-  const shownPlain = isInitialized ? visibleItems : plainSecondaries
-  const overflowedPlain = isInitialized ? overflowItems : []
+  // When `canOverflow` is false the group never sheds: every secondary stays
+  // inline and nothing is measured away into the "⋯" menu.
+  const shownPlain = !canOverflow
+    ? plainSecondaries
+    : isInitialized
+      ? visibleItems
+      : plainSecondaries
+  const overflowedPlain = !canOverflow ? [] : isInitialized ? overflowItems : []
   const shownIds = new Set(shownPlain.map((action) => action.id))
 
   const primaryNode = primaryAction
@@ -418,22 +455,33 @@ function ButtonGroupRow({
       <div
         ref={containerRef}
         className={cn(
-          "relative flex min-w-0 flex-1 items-center",
+          // `[&>*]:shrink-0` keeps each rendered secondary, separator, link and
+          // the "⋯" trigger at its natural width: the row overflows by shedding
+          // into the menu, never by squeezing a button to nothing.
+          "relative flex flex-1 items-center gap-md [&>*]:shrink-0",
+          // `min-w-0` only when the cluster can shed: it lets the cluster shrink
+          // below its content so the title truncates against it and plain
+          // secondaries spill into the "⋯" menu. When the group can't overflow
+          // (e.g. a confirm/reject pair), dropping `min-w-0` keeps the cluster's
+          // min-content floor so the buttons reserve their width and are never
+          // squeezed to nothing — there's no menu to catch what gets squeezed out.
+          canOverflow && "min-w-0",
           align === "end" && "justify-end"
         )}
-        style={{ gap }}
       >
-        {/* Hidden measurement copy, used to compute the visible/overflow split. */}
-        <div
-          ref={measurementContainerRef}
-          aria-hidden="true"
-          className="pointer-events-none invisible absolute left-0 top-0 flex items-center whitespace-nowrap"
-          style={{ gap }}
-        >
-          {plainSecondaries.map((action) =>
-            renderActionButton(action, size, "outline")
-          )}
-        </div>
+        {/* Hidden measurement copy, used to compute the visible/overflow split.
+            Skipped when the group can't overflow — nothing is ever measured away. */}
+        {canOverflow && (
+          <div
+            ref={measurementContainerRef}
+            aria-hidden="true"
+            className="pointer-events-none invisible absolute left-0 top-0 flex items-center gap-md whitespace-nowrap"
+          >
+            {plainSecondaries.map((action) =>
+              renderActionButton(action, size, "outline")
+            )}
+          </div>
+        )}
 
         {menuItems.length > 0 && (
           <div ref={customOverflowIndicatorRef}>

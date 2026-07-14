@@ -35,6 +35,11 @@ describe("DisabledCell", () => {
     expect(screen.getByText("John Doe")).toBeInTheDocument()
   })
 
+  it("applies not-allowed cursor", () => {
+    const { container } = render(<DisabledCell {...defaultProps} />)
+    expect(container.firstChild).toHaveClass("cursor-not-allowed")
+  })
+
   it("renders a hint icon when hint is provided", () => {
     render(
       <DisabledCell
@@ -46,6 +51,21 @@ describe("DisabledCell", () => {
     expect(
       screen.getByRole("button", { name: "Locked by policy" })
     ).toBeInTheDocument()
+  })
+
+  it("renders the hint icon after the cell content", () => {
+    render(
+      <DisabledCell
+        {...defaultProps}
+        hint={{ icon: InfoCircleLine, message: "Locked by policy" }}
+      />
+    )
+
+    const button = screen.getByRole("button", { name: "Locked by policy" })
+    const content = screen.getByText("John Doe")
+    expect(
+      content.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
   })
 
   it("does not render a hint icon when hint is omitted", () => {

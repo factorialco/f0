@@ -10,20 +10,8 @@ const SvgOffice = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 7a3 3 0 0 1 3-3h6a3 3 0 0 1 3 3v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1zM10 12h4M10 8h4"
-    />
-    <Path
-      stroke="currentColor"
-      d="M10 16.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V20h-4z"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 20H5"
+      fill="currentColor"
+      d="M15.501 2.6a3.9 3.9 0 0 1 3.9 3.9v13.1h1.1a.9.9 0 0 1 0 1.8H3.5a.9.9 0 0 1 0-1.8h1.1V6.5a3.9 3.9 0 0 1 3.9-3.9zm-7 1.8a2.1 2.1 0 0 0-2.1 2.1v13.1h1.7V14a1.9 1.9 0 0 1 1.9-1.9h4a1.9 1.9 0 0 1 1.9 1.9v5.6h1.7V6.5a2.1 2.1 0 0 0-2.1-2.1zm1.5 9.5a.1.1 0 0 0-.1.1v5.6h4.2V14a.1.1 0 0 0-.1-.1zm3.789-4.786a.9.9 0 0 1 0 1.8h-3.5a.9.9 0 0 1 0-1.8zM13.75 6.1a.9.9 0 0 1 0 1.8h-3.5a.9.9 0 0 1 0-1.8z"
     />
   </Svg>
 )

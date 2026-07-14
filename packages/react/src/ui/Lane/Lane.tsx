@@ -23,6 +23,7 @@ export function Lane<Record extends RecordType>({
   emptyState,
   fetchMore,
   variant = "neutral",
+  color,
   loading = false,
   hasMore = false,
   loadingMore = false,
@@ -55,6 +56,7 @@ export function Lane<Record extends RecordType>({
       <LaneHeader
         label={title || "Lane"}
         variant={variant}
+        color={color}
         count={total ?? items.length}
         onPrimaryAction={onPrimaryAction}
       />

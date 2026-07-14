@@ -2,13 +2,17 @@ import { forwardRef } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { useTextFormatEnforcer } from "@/lib/text"
+import { cn } from "@/lib/utils"
 
 import type { F0TagRawProps } from "./types"
 
 import { BaseTag } from "../internal/BaseTag"
 
 export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
-  ({ text, additionalAccessibleText, icon, onlyIcon, info }, ref) => {
+  (
+    { text, additionalAccessibleText, icon, onlyIcon, info, className },
+    ref
+  ) => {
     useTextFormatEnforcer(
       text,
       { disallowEmpty: true },
@@ -18,7 +22,10 @@ export const F0TagRaw = forwardRef<HTMLDivElement, F0TagRawProps>(
     return (
       <BaseTag
         ref={ref}
-        className="border-[1px] border-solid border-f1-border-secondary"
+        className={cn(
+          "border-[1px] border-solid border-f1-border-secondary",
+          className
+        )}
         left={
           icon ? (
             <F0Icon

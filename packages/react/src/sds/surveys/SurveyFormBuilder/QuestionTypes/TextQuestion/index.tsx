@@ -63,20 +63,18 @@ export const TextQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
-        <F0FormField
-          field={field}
-          value={answering ? (value ?? "") : placeholder}
-          onChange={(v) => {
-            onQuestionChange?.({
-              ...baseQuestionComponentProps,
-              value: v as string,
-            })
-          }}
-          disabled={disabled}
-          hideLabel
-        />
-      </div>
+      <F0FormField
+        field={field}
+        value={answering ? (value ?? "") : placeholder}
+        onChange={(v) => {
+          onQuestionChange?.({
+            ...baseQuestionComponentProps,
+            value: v as string,
+          })
+        }}
+        disabled={disabled}
+        hideLabel
+      />
     </BaseQuestion>
   )
 }

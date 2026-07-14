@@ -84,11 +84,19 @@ export const F0AvatarList = ({
         const description = extras.tooltipDescription
 
         const hasBadge = Boolean((avatar as { badge?: unknown }).badge)
+        // Clip the avatar to leave a notch for whatever overlaps it on the
+        // right: the next avatar, or — for the last one — the `+N` counter when
+        // it is forced via `remainingCount`. Without this the forced counter
+        // overlaps an unclipped last avatar and the mask looks broken.
+        const isLast = index === avatars.length - 1
+        const isOverlappedByForcedCounter =
+          isLast && initialRemainingCount !== undefined
+        const shouldClip = (!isLast || isOverlappedByForcedCounter) && !hasBadge
         const clippedAvatar = (
           <div
             className="flex h-fit w-fit shrink-0 items-center justify-center"
             style={
-              index !== avatars.length - 1 && !hasBadge
+              shouldClip
                 ? {
                     clipPath:
                       CLIP_MASK[type === "person" ? "rounded" : "base"][size],

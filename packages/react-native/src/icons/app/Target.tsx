@@ -10,20 +10,8 @@ const SvgTarget = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m12 12 3-3m0 0V6l3-3 1 2 2 1-3 3z"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M19 12a7 7 0 1 1-7-7"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M15.5 12A3.5 3.5 0 1 1 12 8.5"
+      fill="currentColor"
+      d="M12 4.1a.9.9 0 0 1 0 1.8 6.1 6.1 0 1 0 6.1 6.1.9.9 0 0 1 1.8 0c0 4.363-3.537 7.9-7.9 7.9a7.901 7.901 0 0 1 0-15.8m0 3.5a.9.9 0 0 1 0 1.8 2.6 2.6 0 1 0 2.6 2.6.9.9 0 0 1 1.8 0A4.4 4.4 0 1 1 12 7.6m6.144-5.488a.9.9 0 0 1 .661.486l.865 1.731 1.732.866a.9.9 0 0 1 .234 1.441l-3 3A.9.9 0 0 1 18 9.9h-2.627l-2.737 2.736a.9.9 0 0 1-1.272-1.272L14.1 8.628V6a.9.9 0 0 1 .264-.636l3-3 .08-.072a.9.9 0 0 1 .7-.18M15.9 6.372V8.1h1.727l1.853-1.854-.882-.44a.9.9 0 0 1-.403-.403l-.442-.884z"
     />
   </Svg>
 )

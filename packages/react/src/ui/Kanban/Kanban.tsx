@@ -300,7 +300,13 @@ export function Kanban<TRecord extends RecordType>(
         <div className="relative mb-2 flex h-full items-start gap-2">
           {localLanes.map(
             (lane: KanbanLaneAttributes<TRecord>, laneIndex: number) => {
-              const total = lane.total ?? lane.items.length
+              const liveLane = lanes.find((l) => l.id === lane.id)
+              const loading = liveLane?.loading ?? lane.loading
+              const hasMore = liveLane?.hasMore ?? lane.hasMore
+              const loadingMore = liveLane?.loadingMore ?? lane.loadingMore
+              const fetchMore = liveLane?.fetchMore ?? lane.fetchMore
+              // snapshot-first: localLanes holds the optimistic count during a drag; prop total lags until refetch
+              const total = lane.total ?? liveLane?.total ?? lane.items.length
               return (
                 <div
                   key={lane.id ?? String(laneIndex)}
@@ -323,12 +329,13 @@ export function Kanban<TRecord extends RecordType>(
                       return node
                     }}
                     emptyState={lane.emptyState}
-                    loading={lane.loading}
+                    loading={loading}
                     variant={lane.variant}
+                    color={lane.color}
                     total={total}
-                    hasMore={lane.hasMore}
-                    loadingMore={lane.loadingMore}
-                    fetchMore={lane.fetchMore}
+                    hasMore={hasMore}
+                    loadingMore={loadingMore}
+                    fetchMore={fetchMore}
                     onPrimaryAction={
                       onCreate && lane.id ? () => onCreate(lane.id!) : undefined
                     }

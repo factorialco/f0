@@ -10,10 +10,12 @@ const SvgExit = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10 12h9m0 0-3-3m3 3-3 3M11 19H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3h3"
+      fill="currentColor"
+      d="M11.9 19a.9.9 0 0 1-.9.9H8A3.9 3.9 0 0 1 4.1 16V8A3.9 3.9 0 0 1 8 4.1h3a.9.9 0 1 1 0 1.8H8A2.1 2.1 0 0 0 5.9 8v8c0 1.16.94 2.1 2.1 2.1h3a.9.9 0 0 1 .9.9"
+    />
+    <Path
+      fill="currentColor"
+      d="M19.699 11.432a.9.9 0 0 1-.062 1.204l-3 3a.9.9 0 0 1-1.273-1.272l1.464-1.464H10a.9.9 0 1 1 0-1.8h6.827l-1.464-1.464a.9.9 0 1 1 1.273-1.272l3 3z"
     />
   </Svg>
 )

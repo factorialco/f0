@@ -15,6 +15,7 @@ import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
+import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
@@ -181,6 +182,21 @@ export function renderFieldInput({
       return (
         <DateRangeFieldRenderer
           field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
+    case "period":
+      return (
+        <PeriodFieldRenderer
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
           formField={formField}
           {...errorAndLoadingProps}
           status={visualStatus}

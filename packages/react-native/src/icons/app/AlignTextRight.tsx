@@ -10,10 +10,8 @@ const SvgAlignTextRight = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5 8h14M5 12h14M13 16h6"
+      fill="currentColor"
+      d="M19 15.1a.9.9 0 0 1 0 1.8h-6a.9.9 0 0 1 0-1.8zm0-4a.9.9 0 0 1 0 1.8H5a.9.9 0 1 1 0-1.8zm0-4a.9.9 0 0 1 0 1.8H5a.9.9 0 0 1 0-1.8z"
     />
   </Svg>
 )

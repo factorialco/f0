@@ -69,7 +69,7 @@ export function F0AiProposalCard(props: F0AiProposalCardProps) {
       {...dataAttributes}
     >
       <div className="flex items-center gap-3 px-4 py-3">
-        {module && <F0AvatarModule module={module} size="lg" />}
+        {module && <F0AvatarModule module={module} size="md" />}
         <div className="min-w-0 flex-1">
           <h2 className="truncate text-lg font-semibold text-f1-foreground">
             {heading}

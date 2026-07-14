@@ -45,9 +45,10 @@ export type WelcomeScreenSuggestionsRowProps = {
    */
   onItemHover?: (item: WelcomeScreenSuggestionItem | null) => void
   /**
-   * Side the popover opens towards. Defaults to "top" (sidepanel, row sits
-   * above the textarea). Fullscreen passes "bottom" so the popover opens into
-   * the empty space below the textarea instead of covering it.
+   * Side the popover opens towards. Defaults to "top" — the row sits above the
+   * textarea, so the popover opens upward into the empty space rather than
+   * covering the composer. "bottom" remains available for layouts that place
+   * the row below the textarea.
    */
   side?: "top" | "bottom"
 }

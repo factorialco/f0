@@ -27,7 +27,7 @@ export const buttonGroupVariants = cva({
      * - `sm` / `md`: stack as a column below the named *viewport* breakpoint and
      *   become a row at/above it (matches Card footer `sm`, ResourceHeader `md`).
      * - `container-md`: stack below the *container* `@md` breakpoint (28rem / 448px);
-     *   requires an ancestor with `@container` (matches the Card oneLiner).
+     *   requires an ancestor with `@container` (matches F0CardHorizontal).
      */
     stack: {
       none: "flex-row items-center",

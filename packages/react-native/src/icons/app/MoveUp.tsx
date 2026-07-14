@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Path, Rect } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgMoveUp = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -10,31 +10,8 @@ const SvgMoveUp = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      d="M12.5 17H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2.5"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m8 5 2 2-2 2"
-    />
-    <Rect
-      width={6.7}
-      height={6.7}
-      x={12.65}
-      y={3.65}
       fill="currentColor"
-      stroke="currentColor"
-      rx={1.35}
-    />
-    <Rect
-      width={6.7}
-      height={6.7}
-      x={12.65}
-      y={13.65}
-      stroke="currentColor"
-      rx={1.35}
+      d="M7.364 4.364a.9.9 0 0 1 1.273 0l2 2a.9.9 0 0 1 0 1.273l-2 2a.9.9 0 0 1-1.273-1.273l.464-.464h-.827c-.607 0-1.1.493-1.1 1.1v6A1.1 1.1 0 0 0 7 16.1h5V15a2 2 0 0 1 1.795-1.99L14 13h4c1.104 0 2 .896 2 2v4l-.011.203a2 2 0 0 1-1.786 1.787L18 21h-4l-.204-.01a2 2 0 0 1-1.785-1.787L12 19v-1.1H7a2.9 2.9 0 0 1-2.9-2.9V9c0-1.601 1.298-2.9 2.9-2.9h.826l-.463-.463a.9.9 0 0 1 0-1.273M14.001 14.8c-.11 0-.2.09-.2.2v4c0 .11.09.2.2.2h4a.2.2 0 0 0 .2-.2v-4c0-.11-.09-.2-.2-.2zM18 3a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"
     />
   </Svg>
 )

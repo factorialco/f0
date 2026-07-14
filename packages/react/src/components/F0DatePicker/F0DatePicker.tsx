@@ -20,6 +20,7 @@ export function F0DatePicker({
   open = false,
   showIcon = true,
   displayFormat,
+  selectOnCellOnly,
   ...inputProps
 }: F0DatePickerProps) {
   const [localValue, setLocalValue] = useState<DatePickerValue | undefined>()
@@ -139,6 +140,7 @@ export function F0DatePicker({
       maxDate={maxDate}
       open={isOpen}
       onOpenChange={handlePickerOpenChange}
+      selectOnCellOnly={selectOnCellOnly}
       asChild
     >
       <DateInput

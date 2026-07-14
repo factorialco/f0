@@ -23,6 +23,8 @@ export * from "../kits/Charts/exports"
  * @deprecated F0ActionBar has moved to @/components/F0ActionBar. Import from there instead.
  */
 export * from "../components/F0ActionBar"
+export * from "./F0CardHorizontal"
+export * from "./F0SegmentedBar"
 export * from "./F0VersionHistory"
 export * from "./Forms/exports"
 export * from "./Information/exports"
@@ -60,9 +62,11 @@ export * from "../components/OneEmptyState"
 export * from "../ui/OnePagination"
 export * from "./Overlays/exports"
 /**
- * @deprecated RichText has moved to @/components/RichText. Import from there instead.
+ * @deprecated RichText components have moved to @/components/RichText. Import from there instead.
  */
 export * from "../components/RichText/exports"
+export * from "../components/F0FileItem"
+export * from "../sds/chat/F0Chat"
 export * from "./Utilities/exports"
 export * from "./Widgets/exports"
 /**

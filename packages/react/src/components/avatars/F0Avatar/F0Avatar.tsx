@@ -83,7 +83,7 @@ export const F0Avatar = ({
       return (
         <F0AvatarFlag
           flag={avatar.flag}
-          size={size as ComponentProps<typeof F0AvatarFile>["size"]}
+          size={size}
           badge={avatar.badge}
           aria-label={avatar["aria-label"]}
           aria-labelledby={avatar["aria-labelledby"]}

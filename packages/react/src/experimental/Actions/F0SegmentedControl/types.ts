@@ -29,6 +29,12 @@ export interface F0SegmentedControlProps {
    */
   fullWidth?: boolean
   /**
+   * Render segments icon-only, keeping the label accessible to screen readers.
+   * Segments without an icon still show their label. Useful in tight headers.
+   * @default false
+   */
+  hideLabels?: boolean
+  /**
    * Accessible name for the segmented control. The underlying ToggleGroup
    * (single mode) renders as a `radiogroup`, which requires a name.
    * Provide either `ariaLabel` or `ariaLabelledBy`.

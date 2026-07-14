@@ -1,17 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import "@xyflow/react/dist/style.css"
-import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import { F0Card } from "@/components/F0Card"
-import { F0TagPerson } from "@/components/tags/F0TagPerson"
-import { DataList } from "@/experimental/Lists/DataList"
-import { Weekdays } from "@/experimental/Widgets/Content/Weekdays"
-import { WhatsappChat } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-import type { Searchable } from "../F0GraphSearch"
 import type { DeferredNodesPayload, GraphNode } from "../types"
 
 import {
@@ -19,7 +12,7 @@ import {
   type F0GraphNodeRenderContext,
   type F0GraphProps,
 } from "../F0Graph"
-import { F0GraphNode } from "../F0GraphNode"
+import { F0GraphNode } from "../components/F0GraphNode"
 
 const meta = {
   title: "Graph/F0Graph",
@@ -39,7 +32,6 @@ const meta = {
       options: ["single", "multi", "none"],
     },
     showControls: { control: "boolean" },
-    fullScreen: { control: "boolean" },
     defaultExpandDepth: { control: { type: "number", min: 0, max: 5 } },
     zoomPreset: {
       control: "select",
@@ -50,9 +42,6 @@ const meta = {
     },
     maxZoom: {
       control: { type: "number", min: 1, max: 4, step: 0.1 },
-    },
-    detailPanelWidth: {
-      control: { type: "range", min: 200, max: 600, step: 8 },
     },
 
     // ---- Hidden from controls ----
@@ -72,17 +61,17 @@ const meta = {
     focusedNode: { table: { disable: true } },
     highlightedNodes: { table: { disable: true } },
     layoutEngine: { table: { disable: true } },
-    searchValue: { table: { disable: true } },
-    onSearchChange: { table: { disable: true } },
-    searchLoading: { table: { disable: true } },
-    searchable: { table: { disable: true } },
-    onSearchResultSelect: { table: { disable: true } },
-    detailPanel: { table: { disable: true } },
-    detailPanelAriaLabel: { table: { disable: true } },
     controlLabels: { table: { disable: true } },
     onZoomLevelChange: { table: { disable: true } },
     onViewportChange: { table: { disable: true } },
     onVisibleNodesChange: { table: { disable: true } },
+    onRenderedNodesChange: { table: { disable: true } },
+    loadVisibleNodeData: { table: { disable: true } },
+    visibleDataDebounceMs: { table: { disable: true } },
+    enableNodeWindowing: { control: "boolean" },
+    nodeWindowPadding: {
+      control: { type: "number", min: 0, max: 2000, step: 100 },
+    },
   },
 } satisfies Meta<F0GraphProps<Employee>>
 
@@ -105,18 +94,6 @@ interface Employee {
   workplace?: string
   workableDays?: ReadonlyArray<"M" | "T" | "W" | "R" | "F" | "S" | "U">
   teams?: ReadonlyArray<Team>
-}
-
-const ALL_DAYS = ["M", "T", "W", "R", "F", "S", "U"] as const
-
-const DAY_CODE_TO_INDEX: Record<(typeof ALL_DAYS)[number], number> = {
-  M: 0,
-  T: 1,
-  W: 2,
-  R: 3,
-  F: 4,
-  S: 5,
-  U: 6,
 }
 
 function profileDefaults(
@@ -328,25 +305,6 @@ export const WithControls: Story = {
     renderNode: renderEmployee,
     showControls: true,
     defaultExpandDepth: 2,
-  },
-}
-
-/** F0Graph rendered without the fullscreen toggle — useful when embedding inside a constrained container, modal, or panel. */
-export const WithoutFullscreen: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "F0Graph rendered with `fullScreen={false}`. The canvas is inset from its container with a rounded border instead of bleeding edge-to-edge — use this when embedding the graph inside a card, modal, or constrained panel rather than as a standalone page.",
-      },
-    },
-  },
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: renderEmployee,
-    showControls: true,
-    defaultExpandDepth: 2,
-    fullScreen: false,
   },
 }
 
@@ -760,6 +718,231 @@ export const LargeTree: Story = {
   },
 }
 
+/**
+ * `initialFocusNodeId`: open already centered on a specific node instead of
+ * fitting the whole tree. The graph mounts framed on a deep, off-center member
+ * (no fit-to-all, no pan) — the "open looking at me" behaviour used by the
+ * org chart. Compare with `LargeTree` (same data) which opens fit-to-all.
+ */
+export const InitialFocus: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Opens framed on `initialFocusNodeId` (a deep, off-center node) on the first paint — no fit-to-all then pan. The node must be present in the initial `nodes` (here `defaultExpandDepth: 2` makes members visible); if it's absent, F0Graph falls back to fit-to-all.",
+      },
+    },
+  },
+  args: {
+    nodes: makeLargeTree(600),
+    renderNode: renderEmployee,
+    showControls: true,
+    defaultExpandDepth: 2,
+    initialFocusNodeId: "dept-4-member-100",
+  },
+}
+
+// ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
+
+/**
+ * The "broken orgchart" shape from FCT-57915: thousands of root employees with
+ * no manager. Every root is expand-visible at once, so this is the worst case
+ * for the React Flow node array.
+ */
+function makeBrokenOrgchart(rootCount: number): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  let nameIndex = 0
+  for (let i = 0; i < rootCount; i++) {
+    const first = FIRST_NAMES[nameIndex % FIRST_NAMES.length] ?? "Alex"
+    const last = LAST_NAMES[nameIndex % LAST_NAMES.length] ?? "Smith"
+    nameIndex++
+    nodes.push({
+      id: `root-${i}`,
+      parentId: null,
+      data: { name: `${first} ${last}`, title: "Employee" },
+      childrenCount: 0,
+    })
+  }
+  return nodes
+}
+
+const BROKEN_ORGCHART_3K = makeBrokenOrgchart(3000)
+
+/**
+ * Interactive perf harness: renders 3,000 root nodes and lets you toggle
+ * `enableNodeWindowing` live while watching how many nodes are actually handed
+ * to React Flow. With windowing on, the rendered count collapses to roughly
+ * what's on screen (pan/zoom to see it track the camera); with it off, all
+ * 3,000 nodes stay in the array. This is both the A0 baseline and the A1 demo.
+ */
+function ViewportWindowingDemo() {
+  const [windowing, setWindowing] = useState(true)
+  const [padding, setPadding] = useState(600)
+  const [visible, setVisible] = useState(0)
+  const [rendered, setRendered] = useState(0)
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 flex flex-col gap-2 rounded-md bg-f1-background p-3 text-sm shadow-md">
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={windowing}
+            onChange={(e) => setWindowing(e.target.checked)}
+          />
+          Node windowing
+        </label>
+        <label className="flex items-center gap-2">
+          Padding
+          <input
+            type="range"
+            min={0}
+            max={2000}
+            step={100}
+            value={padding}
+            onChange={(e) => setPadding(Number(e.target.value))}
+          />
+          <span className="tabular-nums">{padding}px</span>
+        </label>
+        <div className="tabular-nums">
+          Visible nodes: <strong>{visible}</strong>
+        </div>
+        <div className="tabular-nums">
+          Rendered nodes: <strong>{rendered}</strong>
+        </div>
+      </div>
+      <F0Graph<Employee>
+        nodes={BROKEN_ORGCHART_3K}
+        renderNode={renderEmployee}
+        showControls
+        enableNodeWindowing={windowing}
+        nodeWindowPadding={padding}
+        onVisibleNodesChange={setVisible}
+        onRenderedNodesChange={setRendered}
+      />
+    </div>
+  )
+}
+
+export const ViewportWindowing: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Perf harness for FCT-57915: 3,000 root nodes (the 'broken orgchart' case). Toggle `enableNodeWindowing` and pan/zoom to watch the rendered-node count track the viewport instead of the full 3,000.",
+      },
+    },
+  },
+  render: () => <ViewportWindowingDemo />,
+}
+
+// ─── Viewport-driven data loading (A2) ─────────────────────────
+
+// Structure-only skeleton: ids + parent links, no rich data yet.
+function makeSkeletonForest(rootCount: number): GraphNode<Employee>[] {
+  const nodes: GraphNode<Employee>[] = []
+  for (let r = 0; r < rootCount; r++) {
+    const rootId = `r-${r}`
+    nodes.push({
+      id: rootId,
+      parentId: null,
+      data: { name: "", title: "" },
+      dataLoaded: false,
+      childrenCount: 3,
+    })
+    for (let c = 0; c < 3; c++) {
+      nodes.push({
+        id: `${rootId}-${c}`,
+        parentId: rootId,
+        data: { name: "", title: "" },
+        dataLoaded: false,
+      })
+    }
+  }
+  return nodes
+}
+
+/**
+ * Viewport-driven data loading: the tree is built from a lightweight skeleton
+ * (ids + structure only). `loadVisibleNodeData` fires for the nodes on screen,
+ * and the story simulates an async fetch that hydrates just those. Nodes render
+ * a shimmer while `ctx.dataLoading` is true.
+ */
+function ViewportDataLoadingDemo() {
+  const [nodes, setNodes] = useState(() => makeSkeletonForest(400))
+  const [fetches, setFetches] = useState(0)
+
+  const loadVisibleNodeData = useCallback((ids: string[]) => {
+    setFetches((n) => n + 1)
+    // Simulate a batched network round-trip for the on-screen nodes.
+    setTimeout(() => {
+      const wanted = new Set(ids)
+      setNodes((prev) =>
+        prev.map((node, i) =>
+          wanted.has(node.id)
+            ? {
+                ...node,
+                dataLoaded: true,
+                data: {
+                  name: `${FIRST_NAMES[i % FIRST_NAMES.length]} ${LAST_NAMES[i % LAST_NAMES.length]}`,
+                  title: node.parentId ? "Team member" : "Manager",
+                },
+              }
+            : node
+        )
+      )
+    }, 600)
+  }, [])
+
+  const renderNode = useCallback(
+    (node: GraphNode<Employee>, ctx: F0GraphNodeRenderContext) => {
+      if (ctx.dataLoading) {
+        return (
+          <div className="h-14 w-64 animate-pulse rounded-md bg-f1-background-secondary" />
+        )
+      }
+      const [firstName = "", lastName = ""] = node.data.name.split(" ")
+      return (
+        <F0GraphNode
+          {...ctx}
+          avatar={{ type: "person", firstName, lastName }}
+          title={node.data.name}
+          subtitle={node.data.title}
+        />
+      )
+    },
+    []
+  )
+
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute right-4 top-4 z-20 rounded-md bg-f1-background p-3 text-sm shadow-md tabular-nums">
+        Batched fetches: <strong>{fetches}</strong>
+      </div>
+      <F0Graph<Employee>
+        nodes={nodes}
+        renderNode={renderNode}
+        showControls
+        defaultExpandDepth={2}
+        enableNodeWindowing
+        loadVisibleNodeData={loadVisibleNodeData}
+      />
+    </div>
+  )
+}
+
+export const ViewportDataLoading: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "A2 for FCT-57915: the tree is built from a lightweight skeleton and `loadVisibleNodeData` hydrates only the nodes on screen (debounced + batched). Pan/zoom around and watch the batched-fetch count grow only as new nodes enter the viewport; nodes shimmer until their data arrives.",
+      },
+    },
+  },
+  render: () => <ViewportDataLoadingDemo />,
+}
+
 // ─── Intent-searchable stories ─────────────────────────────────
 
 /**
@@ -871,186 +1054,6 @@ export const Controlled: Story = {
   },
 }
 
-/** Demonstrates declarative `searchable` config for indexed search with auto-expand and fly-to. */
-export const WithSearch: Story = {
-  args: {
-    nodes: makeLargeTree(60),
-    renderNode: renderEmployee,
-    searchable: {
-      getLabel: (node: GraphNode<Employee>) => node.data.name,
-      getSecondaryLabel: (node: GraphNode<Employee>) => node.data.title,
-      placeholder: "Search people…",
-      noResultsLabel: "No matches found",
-    } satisfies Searchable<Employee>,
-    showControls: true,
-    defaultExpandDepth: 1,
-  },
-}
-
-// ─── Detail Panel ──────────────────────────────────────────────
-
-function DetailPanelSection({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="flex flex-col border-0 border-t border-dashed border-f1-border-secondary">
-      <header className="flex items-center px-4 pb-2 pt-3">
-        <span className="text-base font-semibold leading-5 text-f1-foreground">
-          {title}
-        </span>
-      </header>
-      <div className="flex flex-col gap-2 pb-2">{children}</div>
-    </section>
-  )
-}
-
-const DETAIL_NODES_BY_ID = new Map(BASIC_NODES.map((n) => [n.id, n]))
-
-/**
- * Demonstrates the `resource` detail-panel variant with a rich header,
- * primary + secondary actions, an overflow menu, and grouped content
- * sections — the same pattern used in the F0Graph dev playground.
- */
-export const WithDetailPanel: Story = {
-  parameters: {
-    docs: {
-      description: {
-        story:
-          "The detail panel uses the `resource` variant: a custom avatar header, action row (primary + secondary + overflow), and grouped sections built with `DataList`, `Weekdays`, `F0TagPerson`, and `F0Card`. Click any node to open it.",
-      },
-    },
-  },
-  args: {
-    nodes: BASIC_NODES,
-    renderNode: renderEmployee,
-    detailPanel: (node: GraphNode<Employee>) => {
-      const e = node.data
-      const [firstName = "", lastName = ""] = e.name.split(" ")
-      const manager = node.parentId
-        ? DETAIL_NODES_BY_ID.get(node.parentId)
-        : undefined
-      const days = e.workableDays ?? []
-      return {
-        variant: "resource" as const,
-        header: (
-          <div className="flex flex-col gap-[10px] px-5 pb-3 pt-6">
-            <F0AvatarPerson
-              firstName={firstName}
-              lastName={lastName}
-              size="xl"
-            />
-            <div className="flex flex-col">
-              <div className="flex items-end gap-1.5">
-                <span className="text-xl font-semibold leading-7 text-f1-foreground">
-                  {e.name}
-                </span>
-                {e.pronouns && (
-                  <span className="text-sm font-medium leading-5 text-f1-foreground-secondary">
-                    {`(${e.pronouns})`}
-                  </span>
-                )}
-              </div>
-              {e.title && (
-                <span className="text-lg text-f1-foreground-secondary">
-                  {e.title}
-                </span>
-              )}
-            </div>
-          </div>
-        ),
-        actions: [
-          {
-            label: "View profile",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("view profile", node.id),
-          },
-          {
-            label: "Send message",
-            icon: WhatsappChat,
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("message", node.id),
-          },
-          {
-            label: "Copy link",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("copy link", node.id),
-          },
-          {
-            label: "Remove",
-            // eslint-disable-next-line no-console
-            onClick: () => console.log("remove", node.id),
-          },
-        ],
-        children: (
-          <>
-            <DetailPanelSection title="Contact details">
-              <div className="flex flex-col px-3 pb-1">
-                <DataList label="Email">
-                  <DataList.Item text={e.email ?? "—"} />
-                </DataList>
-                <DataList label="Phone number">
-                  <DataList.Item text={e.phone ?? "—"} />
-                </DataList>
-              </div>
-            </DetailPanelSection>
-            <DetailPanelSection title="Work details">
-              <div className="flex flex-col px-3 pb-1">
-                <DataList label="Email">
-                  <DataList.Item text={e.workEmail ?? "—"} />
-                </DataList>
-                <DataList label="Workplace">
-                  <DataList.Item text={e.workplace ?? "—"} />
-                </DataList>
-              </div>
-              <div className="flex flex-col gap-0.5 px-4 pb-2">
-                <span className="text-base leading-5 text-f1-foreground-secondary">
-                  Workable days
-                </span>
-                <Weekdays
-                  activatedDays={days
-                    .map((d) => DAY_CODE_TO_INDEX[d])
-                    .filter((i): i is number => typeof i === "number")}
-                />
-              </div>
-              {manager && (
-                <div className="flex flex-col gap-0.5 px-4 pb-2">
-                  <span className="text-base leading-5 text-f1-foreground-secondary">
-                    Managed by
-                  </span>
-                  <F0TagPerson name={manager.data.name} />
-                </div>
-              )}
-            </DetailPanelSection>
-            {e.teams && e.teams.length > 0 && (
-              <DetailPanelSection title="Teams">
-                <div className="flex items-stretch gap-2 px-3 pb-5">
-                  {e.teams.map((t) => (
-                    <div key={t.name} className="flex-1">
-                      <F0Card
-                        compact
-                        fullHeight
-                        avatar={{ type: "team", name: t.name }}
-                        title={t.name}
-                        description={`${t.members} members`}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </DetailPanelSection>
-            )}
-          </>
-        ),
-      }
-    },
-    defaultExpandDepth: 2,
-    showControls: true,
-  },
-}
-
 // ─── Progressive / staged loading stories ─────────────────────
 
 const INITIAL_STAGED_NODES = makeLargeTree(30)
@@ -1153,46 +1156,6 @@ export const Snapshot: Story = {
           renderNode={renderEmployee}
           showControls
           defaultExpandDepth={2}
-        />
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
-        <F0Graph<Employee>
-          nodes={makeLargeTree(60)}
-          renderNode={renderEmployee}
-          searchable={{
-            getLabel: (node: GraphNode<Employee>) => node.data.name,
-            getSecondaryLabel: (node: GraphNode<Employee>) => node.data.title,
-            placeholder: "Search people…",
-            noResultsLabel: "No matches found",
-          }}
-          showControls
-          defaultExpandDepth={1}
-        />
-      </div>
-      <div className="min-h-0 flex-1 overflow-hidden rounded-md border border-f1-border-secondary bg-f1-background">
-        <F0Graph<Employee>
-          nodes={BASIC_NODES}
-          renderNode={renderEmployee}
-          detailPanel={(node: GraphNode<Employee>) => {
-            const { name, title } = node.data
-            return {
-              variant: "default" as const,
-              title: name,
-              description: title,
-              children: (
-                <div className="flex flex-col gap-3 p-4">
-                  <p className="text-sm text-f1-foreground">
-                    Direct reports: {node.childrenCount ?? 0}
-                  </p>
-                  <p className="text-xs text-f1-foreground-secondary">
-                    Node ID: {node.id}
-                  </p>
-                </div>
-              ),
-            }
-          }}
-          defaultExpandDepth={2}
-          showControls
         />
       </div>
     </div>

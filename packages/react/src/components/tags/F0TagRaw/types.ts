@@ -13,6 +13,10 @@ export type F0TagRawProps = {
    * Info text to display an i icon and a tooltip next to the tag
    */
   info?: string
+  /**
+   * Extra classes merged onto the tag (e.g. to give it a background).
+   */
+  className?: string
 } & (
   | {
       icon: IconType

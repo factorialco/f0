@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon } from "@/components/F0Icon"
-import { AcademicCap, Add, Check, CheckDouble } from "@/icons/app"
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+import { AcademicCap, Add, Check, CheckDouble, LockLocked } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import {
@@ -38,9 +39,10 @@ export const BaseQuestion = ({
   description,
   children,
   required,
-  locked: questionLocked,
   type: questionType,
   hiddenActions,
+  locked: ownLocked,
+  lockedNote,
 }: BaseQuestionProps) => {
   const {
     onQuestionChange,
@@ -54,7 +56,9 @@ export const BaseQuestion = ({
 
   const containingSection = getSectionContainingQuestion(id)
 
-  const locked = containingSection?.locked || questionLocked
+  // A question is locked either on its own (`locked` prop) or by living inside a
+  // locked section.
+  const locked = !!containingSection?.locked || !!ownLocked
 
   const isWithinSection = !!containingSection
 
@@ -127,13 +131,39 @@ export const BaseQuestion = ({
 
   const showCursorNotAllowed = !answering && inputDisabled
 
-  return (
+  // A read-only question (locked/disabled) with no description has nothing to
+  // edit, so hide the input rather than show an editable-looking placeholder.
+  // Editable questions always render it so authors can add one.
+  const showDescription = !inputDisabled || !!description
+
+  // Blocked question: an instant, title-less tooltip shown on the lock icon. It
+  // prefers the question's own `lockedNote`, falls back to the parent section's
+  // `lockedNote`, and finally to a default so a locked question always says
+  // something.
+  const lockTooltipProps: { description: string } | null = !locked
+    ? null
+    : {
+        description:
+          lockedNote?.description ??
+          containingSection?.lockedNote?.description ??
+          t("surveyFormBuilder.labels.lockedQuestionNotice"),
+      }
+
+  const questionCard = (
     <div
       id={`co-creation-question-${id}`}
       className={cn(
-        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-4",
-        !isDragging && !answering && "hover:border-f1-border-hover",
-        !answering || !!description ? "gap-4" : "gap-2"
+        "group/question relative flex w-full flex-col rounded-xl border border-solid border-f1-border bg-f1-background px-3 py-3",
+        // Blocked question: it lives inside a locked section, so the card keeps
+        // the default white fill (the section's muted grey panel sets it apart)
+        // and a not-allowed cursor signals it can't be edited. The `[&_*]` rule
+        // forces that cursor onto every descendant (inputs, textareas, options)
+        // so hovering anything inside the card keeps it, overriding their own
+        // (text/default) cursors.
+        locked && !answering && "cursor-not-allowed [&_*]:!cursor-not-allowed",
+        !isDragging && !answering && !locked && "hover:border-f1-border-hover",
+        // Tighten the title↔input gap when no description sits between them.
+        showDescription ? "gap-4" : "gap-2"
       )}
     >
       <div className="flex flex-col gap-0.5">
@@ -156,7 +186,7 @@ export const BaseQuestion = ({
                   onChange={handleChangeTitle}
                   disabled={inputDisabled}
                   className={cn(
-                    "w-full resize-none px-2 py-1 text-lg font-semibold disabled:text-f1-foreground [&::-webkit-search-cancel-button]:hidden",
+                    "w-full resize-none px-2 py-1 text-lg font-semibold text-f1-foreground placeholder:text-f1-foreground-tertiary [&::-webkit-search-cancel-button]:hidden",
                     showCursorNotAllowed && "cursor-not-allowed"
                   )}
                   style={TEXT_AREA_STYLE}
@@ -199,6 +229,43 @@ export const BaseQuestion = ({
               />
             </div>
           )}
+          {!answering && locked && (
+            // Blocked question: a static lock sits where the actions "⋯" menu
+            // would be, signalling the card is predefined and can't be edited.
+            // Hovering just the lock (not the whole card) reveals why.
+            <div>
+              {lockTooltipProps ? (
+                <Tooltip instant {...lockTooltipProps}>
+                  {/* A disabled button doesn't fire hover events, so the
+                      tooltip hangs off this wrapper span (which stays
+                      pointer-interactive) rather than the button itself. */}
+                  <span className="inline-flex">
+                    <F0Button
+                      icon={LockLocked}
+                      label={t("surveyFormBuilder.labels.locked")}
+                      size="md"
+                      variant="ghost"
+                      tooltip={false}
+                      hideLabel
+                      disabled
+                      withoutDisabledAppearance
+                    />
+                  </span>
+                </Tooltip>
+              ) : (
+                <F0Button
+                  icon={LockLocked}
+                  label={t("surveyFormBuilder.labels.locked")}
+                  size="md"
+                  variant="ghost"
+                  tooltip={false}
+                  hideLabel
+                  disabled
+                  withoutDisabledAppearance
+                />
+              )}
+            </div>
+          )}
         </div>
         {answering ? (
           description ? (
@@ -206,7 +273,7 @@ export const BaseQuestion = ({
               {description}
             </p>
           ) : null
-        ) : (
+        ) : showDescription ? (
           <textarea
             value={description}
             aria-label={t("surveyFormBuilder.labels.description")}
@@ -221,7 +288,7 @@ export const BaseQuestion = ({
             )}
             style={TEXT_AREA_STYLE}
           />
-        )}
+        ) : null}
       </div>
       {children}
       {answering && (
@@ -234,7 +301,7 @@ export const BaseQuestion = ({
           }
         />
       )}
-      {!disabled && !answering && !containingSection?.locked && (
+      {!disabled && !answering && !locked && (
         <div
           className={cn(
             "absolute bottom-0 left-1/2 translate-x-[-50%] translate-y-[50%] bg-f1-background opacity-0 group-hover/question:opacity-100",
@@ -349,4 +416,6 @@ export const BaseQuestion = ({
       )}
     </div>
   )
+
+  return questionCard
 }

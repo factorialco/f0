@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Circle, Path } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgOrganization = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,15 +9,9 @@ const SvgOrganization = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Circle cx={12} cy={6} r={2} stroke="currentColor" />
-    <Circle cx={12} cy={18} r={2} stroke="currentColor" />
-    <Circle cx={4} cy={18} r={2} stroke="currentColor" />
-    <Circle cx={20} cy={18} r={2} stroke="currentColor" />
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 16v-.5a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v.5M12 8v8"
+      fill="currentColor"
+      d="M12 3.1a2.9 2.9 0 0 1 .9 5.655V10.6H16a4.9 4.9 0 0 1 4.891 4.64 2.9 2.9 0 1 1-1.805.008A3.097 3.097 0 0 0 16 12.4h-3.1v2.843a2.9 2.9 0 1 1-1.8.001V12.4H8a3.1 3.1 0 0 0-3.088 2.848 2.9 2.9 0 1 1-1.806-.007A4.9 4.9 0 0 1 8 10.6h3.1V8.754A2.898 2.898 0 0 1 12 3.1M4 16.9a1.1 1.1 0 1 0 0 2.201A1.1 1.1 0 0 0 4 16.9m8 0a1.1 1.1 0 1 0 .001 2.201 1.1 1.1 0 0 0 0-2.201m8 0a1.101 1.101 0 0 0 0 2.2 1.1 1.1 0 0 0 0-2.2m-8-12a1.1 1.1 0 1 0 .001 2.201 1.1 1.1 0 0 0 0-2.201"
     />
   </Svg>
 )

@@ -1,5 +1,5 @@
 import { motion } from "motion/react"
-import { useCallback, useState } from "react"
+import { type ReactNode, useCallback, useState } from "react"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { F0Button } from "@/components/F0Button"
@@ -13,9 +13,11 @@ import type { AiChatCredits, CreditsUsage } from "../../F0AiChat/types"
 
 type CreditsPopoverProps = {
   credits?: AiChatCredits
+  /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
+  trigger?: ReactNode
 }
 
-export function CreditsPopover({ credits }: CreditsPopoverProps) {
+export function CreditsPopover({ credits, trigger }: CreditsPopoverProps) {
   const i18n = useI18n()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -56,19 +58,22 @@ export function CreditsPopover({ credits }: CreditsPopoverProps) {
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <ButtonInternal
-          variant="ghost"
-          hideLabel
-          label={i18n.t("ai.credits.title")}
-          icon={Sliders}
-          pressed={open}
-        />
+        {trigger ?? (
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={i18n.t("ai.credits.title")}
+            icon={Sliders}
+            pressed={open}
+          />
+        )}
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="end"
         alignOffset={-68}
         sideOffset={4}
+        collisionPadding={12}
         className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
         {hasHeader && (

@@ -12,7 +12,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[240px] bg-f1-background-tertiary p-3">
+      <div className="w-fit bg-f1-background-tertiary p-3">
         <Story />
       </div>
     ),

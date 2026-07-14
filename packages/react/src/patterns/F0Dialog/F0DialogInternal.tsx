@@ -141,6 +141,12 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
     })
   }, [variant, position, localWidth])
 
+  // Center & fullscreen modals portal to the top-level overlay root so they
+  // escape app stacking contexts (e.g. the ApplicationFrame `isolate` layer
+  // where the fullscreen AI chat paints at z-20). Side drawers (left/right)
+  // stay docked inside `#content`.
+  const defaultContainerId = isSidePosition ? "content" : "f0-overlay-root"
+
   if (resourceHeader && !isSidePosition) {
     console.warn(
       "F0Dialog: `resourceHeader` is only applicable to side panel positions (left/right)"
@@ -208,6 +214,7 @@ export const F0DialogInternal: FC<F0DialogInternalProps> = ({
           className={contentClassName}
           onOpenAutoFocus={(e) => e.preventDefault()}
           container={containerProp}
+          defaultContainerId={defaultContainerId}
         >
           <F0DialogHeader {...headerProps} />
           <F0DialogContent disableContentPadding={disableContentPadding}>

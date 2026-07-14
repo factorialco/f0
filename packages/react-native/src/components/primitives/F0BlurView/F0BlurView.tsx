@@ -15,9 +15,9 @@ const UniwindBlurView = withUniwind(ExpoBlurView)
  * Thin wrapper around `expo-blur`'s `BlurView` with className support via
  * UniWind. Use for blurred background effects inside F0 components.
  *
- * On Android, `experimentalBlurMethod` defaults to `"none"` (semi-transparent
+ * On Android, `blurMethod` defaults to `"none"` (semi-transparent
  * overlay) to avoid graphical artifacts with elevated children. Pass
- * `experimentalBlurMethod="dimezisBlurView"` explicitly to opt in to real blur
+ * `blurMethod="dimezisBlurView"` explicitly to opt in to real blur
  * on Android, only when no elevated children are inside the BlurView.
  *
  * @internal
@@ -30,9 +30,7 @@ export const F0BlurView = React.memo(function F0BlurView({
   intensity = 40,
   tint = "default",
   blurReductionFactor,
-  experimentalBlurMethod = Platform.OS === "android"
-    ? "dimezisBlurView"
-    : "none",
+  blurMethod = Platform.OS === "android" ? "dimezisBlurView" : "none",
   className,
   style,
   children,
@@ -43,7 +41,7 @@ export const F0BlurView = React.memo(function F0BlurView({
       intensity={intensity}
       tint={tint}
       blurReductionFactor={blurReductionFactor}
-      experimentalBlurMethod={experimentalBlurMethod}
+      blurMethod={blurMethod}
       className={cn("overflow-hidden", className)}
       style={style}
       testID={testID}

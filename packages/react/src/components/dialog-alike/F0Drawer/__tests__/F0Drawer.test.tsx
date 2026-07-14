@@ -108,6 +108,24 @@ describe("F0Drawer", () => {
         expect.anything()
       )
     })
+
+    it("should forward the container override to DrawerInternal", () => {
+      // `container` is a public prop (not in dialogAlikePrivateProps), so it
+      // must pass straight through to the internal — and on to DialogWrapper /
+      // DialogContent, which uses it as the portal target.
+      const container = document.createElement("div")
+
+      render(
+        <F0Drawer {...defaultProps} container={container}>
+          <div>Content</div>
+        </F0Drawer>
+      )
+
+      expect(DrawerInternal).toHaveBeenCalledWith(
+        expect.objectContaining({ container }),
+        expect.anything()
+      )
+    })
   })
 
   describe("prop combinations", () => {

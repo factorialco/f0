@@ -52,6 +52,7 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
+import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -222,9 +223,7 @@ export const TableCollection = <
     return `index:${String(index)}`
   }
 
-  /**
-   * Item selection
-   */
+  const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
     selectedItems,
     allSelectedStatus,
@@ -240,6 +239,7 @@ export const TableCollection = <
     onSelectItems,
     selectionMode: "multi",
     selectedState: source.defaultSelectedItems,
+    getRenderedSelectableEntries: selectionRegistry.getEntries,
   })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
@@ -353,11 +353,12 @@ export const TableCollection = <
   // allPagesSelection modes — unlike comparing the cross-page selectedCount to
   // data.records.length, which can produce false positives when selections from
   // another page happen to equal the current page size.
-  // Non-selectable rows (source.selectable returns undefined) are filtered out
-  // so pages with mixed selectable/non-selectable rows still report correctly.
-  const currentPageSelectableIds = (data?.records ?? [])
-    .map((record) => source.selectable?.(record))
-    .filter((id): id is SelectionId => id !== undefined)
+  const currentPageSelectableIds =
+    selectionRegistry.ids.length > 0
+      ? selectionRegistry.ids
+      : (data?.records ?? [])
+          .map((record) => source.selectable?.(record))
+          .filter((id): id is SelectionId => id !== undefined)
 
   const allPageRowsSelected =
     currentPageSelectableIds.length > 0 &&
@@ -699,6 +700,10 @@ export const TableCollection = <
                                 cellRenderer={cellRenderer}
                                 headerGroups={headerGroups}
                                 fromVisualization={fromVisualization}
+                                registerSelectable={selectionRegistry.register}
+                                unregisterSelectable={
+                                  selectionRegistry.unregister
+                                }
                               />
                             )
                             if (RowWrapper) {
@@ -743,6 +748,8 @@ export const TableCollection = <
                       cellRenderer={cellRenderer}
                       fromVisualization={fromVisualization}
                       headerGroups={headerGroups}
+                      registerSelectable={selectionRegistry.register}
+                      unregisterSelectable={selectionRegistry.unregister}
                     />
                   )
                   if (RowWrapper) {

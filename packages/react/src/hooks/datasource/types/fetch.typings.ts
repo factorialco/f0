@@ -135,6 +135,45 @@ export type PaginationInfo =
   | Omit<InfiniteScrollPaginatedResponse<unknown>, "records">
 
 /**
+ * Identifier used to reference an item in id-relative fetches.
+ * Symbols are excluded on purpose: the id must be serializable so it can
+ * cross a network boundary to a backend.
+ */
+export type ItemNeighborsId = string | number
+
+/**
+ * Options for an id-relative neighbours fetch. Derived from the adapter's own
+ * fetch options, so extended adapters (e.g. OneDataCollection's, which add
+ * `navigationFilters`) carry their extra context automatically. Pagination is
+ * stripped: the request is relative to an item id, not to a page.
+ */
+export type ItemNeighborsFetchOptions<
+  Filters extends FiltersDefinition,
+  Options extends BaseFetchOptions<Filters> = BaseFetchOptions<Filters>,
+> = Omit<Options, "pagination"> & {
+  /** Id of the reference item (as produced by the source's idProvider) */
+  id: ItemNeighborsId
+}
+
+/**
+ * Result of an id-relative neighbours fetch.
+ *
+ * `previous`/`next` are the immediate neighbours of the reference item under
+ * the given filters/sortings/search, or null at the collection edges. If the
+ * reference item itself does not match the current filters, return
+ * `{ previous: null, next: null }` (optionally with `total`) — consumers
+ * disable navigation in that case.
+ */
+export type ItemNeighborsResponse<R> = {
+  previous: R | null
+  next: R | null
+  /** 1-indexed position of the reference item in the filtered+sorted collection */
+  position?: number
+  /** Total number of records matching the current filters/search */
+  total?: number
+}
+
+/**
  * Base data adapter configuration for non-paginated collections
  * @template R - The type of records in the collection
  * @template Filters - The available filter configurations
@@ -164,6 +203,19 @@ export type BaseDataAdapter<
    * side-effects on reactive adapters (e.g. Apollo watchQuery).
    */
   exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>
+  /**
+   * Optional id-relative capability: fetch the immediate neighbours of an
+   * item under the current filters/sortings/search, without loading pages.
+   * Enables detail-page prev/next on direct links / hard refresh, where the
+   * item may not be in any loaded page window. One-shot semantics: when an
+   * Observable is returned, only the first settled emission is consumed.
+   */
+  fetchItemNeighbors?: (
+    options: ItemNeighborsFetchOptions<Filters, Options>
+  ) =>
+    | ItemNeighborsResponse<R>
+    | Promise<ItemNeighborsResponse<R>>
+    | Observable<PromiseState<ItemNeighborsResponse<R>>>
 }
 
 /**
@@ -199,6 +251,19 @@ export type PaginatedDataAdapter<
    * side-effects on reactive adapters (e.g. Apollo watchQuery).
    */
   exportFetchData?: (options: Options) => FetchReturn | Promise<FetchReturn>
+  /**
+   * Optional id-relative capability: fetch the immediate neighbours of an
+   * item under the current filters/sortings/search, without loading pages.
+   * Enables detail-page prev/next on direct links / hard refresh, where the
+   * item may not be in any loaded page window. One-shot semantics: when an
+   * Observable is returned, only the first settled emission is consumed.
+   */
+  fetchItemNeighbors?: (
+    options: ItemNeighborsFetchOptions<Filters, Options>
+  ) =>
+    | ItemNeighborsResponse<R>
+    | Promise<ItemNeighborsResponse<R>>
+    | Observable<PromiseState<ItemNeighborsResponse<R>>>
 }
 
 /**

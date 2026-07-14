@@ -176,7 +176,7 @@ export function useAsyncDefaultValues<T>(
   const [resolved, setResolved] = useState<T | undefined>(
     isAsync ? undefined : (defaultValues as T | undefined)
   )
-  const [isLoading, setIsLoading] = useState(isAsync && !hasParamsSchema)
+  const [isLoading, setIsLoading] = useState(isAsync)
 
   // Keep a ref to the function to avoid re-running the effect on every render
   const asyncFnRef = useRef(defaultValues)
@@ -187,31 +187,20 @@ export function useAsyncDefaultValues<T>(
 
   useEffect(() => {
     if (typeof asyncFnRef.current !== "function") return
-    // When a params schema is declared, the function requires typed params
-    // that aren't available at mount time — resolution is delegated to the
-    // consumer (e.g. canvas layer) which calls with actual validated params.
-    if (hasParamsSchema) return
 
     const controller = new AbortController()
     setIsLoading(true)
 
     const fn = asyncFnRef.current
 
-    // Safety check: if the function expects params and a schema is somehow
-    // provided, validate before calling to prevent calling with wrong args.
-    if (paramsSchemaRef.current) {
-      const parseResult = paramsSchemaRef.current.safeParse(controller.signal)
-      if (!parseResult.success) {
-        setIsLoading(false)
-        return () => {
-          controller.abort()
-        }
-      }
-    }
-
-    const promise = (fn as (signal: AbortSignal) => Promise<T>)(
-      controller.signal
-    )
+    // With a params schema, the function expects typed params (from AI
+    // presentForm). None exist at mount, so resolve with empty params ({});
+    // the AI registry later calls the same function with actual params.
+    // The empty object is intentionally NOT validated against the schema —
+    // it typically has required fields the function must handle as absent.
+    const promise = paramsSchemaRef.current
+      ? (fn as (params: Record<string, unknown>) => Promise<T>)({})
+      : (fn as (signal: AbortSignal) => Promise<T>)(controller.signal)
 
     promise
       .then((data) => {

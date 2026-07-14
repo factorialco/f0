@@ -8,6 +8,7 @@ import {
 
 import { Breadcrumb, BreadcrumbList } from "@/ui/breadcrumb"
 
+import { getBreadcrumbKey } from "./getBreadcrumbKey"
 import { BreadcrumbItem } from "./internal/BreadcrumbItem"
 import { CollapsedBreadcrumbItem } from "./internal/CollapsedBreadcrumbItem"
 import { calculateBreadcrumbState } from "./layoutCalculation"
@@ -93,7 +94,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
       style={{
         minWidth: state?.minWidth,
       }}
-      key={`breadcrumb-${breadcrumbs.at(-1)?.id ?? 0}`}
+      key={`breadcrumb-${getBreadcrumbKey(breadcrumbs.at(-1)) ?? 0}`}
     >
       <ol
         className="invisible absolute -left-full"
@@ -102,7 +103,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
       >
         {breadcrumbs.map((item, index) => (
           <BreadcrumbItem
-            key={item.id}
+            key={getBreadcrumbKey(item)}
             item={item}
             isLast={index === breadcrumbs.length - 1}
             isFirst={index === 0}
@@ -116,7 +117,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
           <BreadcrumbItem
             isOnly={state.isOnly}
             isFirst={true}
-            key={`first-item-${state.headItem.id}`}
+            key={`first-item-${getBreadcrumbKey(state.headItem)}`}
             item={state.headItem}
             isLast={false}
           />
@@ -134,7 +135,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
               />
               {state.tailItems.map((item, index) => (
                 <BreadcrumbItem
-                  key={item.id}
+                  key={getBreadcrumbKey(item)}
                   item={item}
                   isLast={index === state.tailItems.length - 1}
                   isFirst={false}
@@ -148,7 +149,7 @@ export function Breadcrumbs({ breadcrumbs, append }: BreadcrumbsProps) {
             <>
               {state.tailItems.map((item, index) => (
                 <BreadcrumbItem
-                  key={item.id}
+                  key={getBreadcrumbKey(item)}
                   item={item}
                   isLast={index === state.tailItems.length - 1}
                   isFirst={false}

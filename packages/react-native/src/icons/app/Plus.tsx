@@ -11,9 +11,7 @@ const SvgPlus = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      fillRule="evenodd"
-      d="M12.65 5a.65.65 0 1 0-1.3 0v6.35H5a.65.65 0 1 0 0 1.3h6.35V19a.65.65 0 1 0 1.3 0v-6.35H19a.65.65 0 1 0 0-1.3h-6.35z"
-      clipRule="evenodd"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
     />
   </Svg>
 )

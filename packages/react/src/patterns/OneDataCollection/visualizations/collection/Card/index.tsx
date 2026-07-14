@@ -208,7 +208,7 @@ const GroupCards = <
           property: propertyWithLabel,
         }
       })
-      .filter((item): item is CardMetadata => item !== null)
+      .filter((item) => item !== null)
   }
 
   function convertToCardMetadataProperty(

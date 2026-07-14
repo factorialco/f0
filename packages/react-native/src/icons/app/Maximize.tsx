@@ -10,10 +10,8 @@ const SvgMaximize = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M13.5 10.5 19 5m0 0h-4m4 0v4M10.5 13.5 5 19m0 0h4m-4 0v-4"
+      fill="currentColor"
+      d="M9.864 12.864a.9.9 0 0 1 1.273 1.272l-3.24 3.24h1.69a.9.9 0 0 1 0 1.8H5.723a.9.9 0 0 1-.9-.9v-3.862a.9.9 0 0 1 1.8 0v1.69zm8.413-8.04a.9.9 0 0 1 .9.9v3.862a.9.9 0 0 1-1.8 0v-1.69l-3.24 3.24a.9.9 0 0 1-1.273-1.272l3.24-3.24h-1.69a.9.9 0 1 1 0-1.8z"
     />
   </Svg>
 )

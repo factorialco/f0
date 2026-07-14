@@ -444,6 +444,42 @@ describe("useData", () => {
       expect(unsubscribeCalls).toBe(initialUnsubscribeCalls + 1)
     })
   })
+
+  describe("with the enabled option", () => {
+    it("does not fetch while enabled is false and keeps isInitialLoading", async () => {
+      const fetchData = vi.fn(() => ({ records: mockData }))
+      const source = createMockDataSource(fetchData)
+
+      const { result } = renderHook(() => useData(source, { enabled: false }))
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(fetchData).not.toHaveBeenCalled()
+      expect(result.current.isInitialLoading).toBe(true)
+    })
+
+    it("fetches exactly once when enabled becomes true", async () => {
+      const fetchData = vi.fn(() => ({ records: mockData }))
+      const source = createMockDataSource(fetchData)
+
+      const { result, rerender } = renderHook(
+        ({ enabled }: { enabled: boolean }) => useData(source, { enabled }),
+        { initialProps: { enabled: false } }
+      )
+
+      rerender({ enabled: true })
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+      })
+
+      expect(fetchData).toHaveBeenCalledTimes(1)
+      expect(result.current.data).toMatchObject({ records: mockData })
+      expect(result.current.isInitialLoading).toBe(false)
+    })
+  })
 })
 
 // Test the filter merging utility function

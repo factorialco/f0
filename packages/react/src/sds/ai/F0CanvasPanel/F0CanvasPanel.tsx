@@ -14,6 +14,12 @@ export type F0CanvasPanelProps = {
   /** Canvas entity registry keyed by `CanvasContent["type"]`. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   entities?: Record<string, CanvasEntityDefinition<any>>
+  /**
+   * Edge the adjacent chat panel docks to. The canvas hugs the seam on the
+   * opposite side, so the rounded corner / open border face the chat.
+   * Defaults to "right" (chat on the right -> canvas seam on its right).
+   */
+  side?: "left" | "right"
 }
 
 /**
@@ -31,7 +37,9 @@ export function F0CanvasPanel({
   content,
   onClose,
   entities,
+  side = "right",
 }: F0CanvasPanelProps): ReactNode {
+  const isLeft = side === "left"
   const shouldReduceMotion = useReducedMotion()
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -103,7 +111,16 @@ export function F0CanvasPanel({
             ease: [0, 0, 0.1, 1],
           }}
         >
-          <div className="flex h-full flex-col bg-f1-special-page p-0 md:rounded-l-lg md:py-1 md:pl-1 border border-solid border-f1-border-secondary border-r-0">
+          <div
+            className={cn(
+              "flex h-full flex-col bg-f1-special-page p-0 md:py-1 border border-solid border-f1-border-secondary",
+              // Seam faces the chat: chat-right -> canvas opens on its right;
+              // chat-left -> canvas opens on its left (mirrored).
+              isLeft
+                ? "md:rounded-r-lg md:pr-1 border-l-0"
+                : "md:rounded-l-lg md:pl-1 border-r-0"
+            )}
+          >
             <motion.div
               className={cn(
                 // overflow-hidden only on the inner card (where rounded

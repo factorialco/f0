@@ -4,6 +4,7 @@ export {
   type ButtonGroupButton,
   type ButtonGroupButtonBase,
   type ButtonGroupInlineSeparator,
+  type ButtonGroupPrimaryAction,
   type ButtonGroupProps,
   type ButtonGroupSecondaryItem,
   type ButtonGroupSecondaryLink,

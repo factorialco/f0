@@ -51,6 +51,12 @@ interface UseLayoutEngineOptions {
   rankSep?: number
   nodeSep?: number
   rootSep?: number
+  /**
+   * When > 0, node centers are snapped to this pixel grid so columns/rows line
+   * up with the canvas background dots and edges stay crisp. `0` only rounds to
+   * integers. Defaults to `0`.
+   */
+  snapGrid?: number
 }
 
 /**
@@ -75,6 +81,7 @@ export function useLayoutEngine(
   const rankSep = options?.rankSep ?? DEFAULT_RANK_SEP
   const nodeSep = options?.nodeSep ?? DEFAULT_NODE_SEP
   const rootSep = options?.rootSep ?? DEFAULT_ROOT_SEP
+  const snapGrid = options?.snapGrid ?? 0
 
   return useMemo(
     (): LayoutEngine => ({
@@ -91,11 +98,12 @@ export function useLayoutEngine(
           nodeHeight,
           rankSep,
           nodeSep,
-          rootSep
+          rootSep,
+          snapGrid
         )
       },
     }),
-    [nodeWidth, nodeHeight, rankSep, nodeSep, rootSep]
+    [nodeWidth, nodeHeight, rankSep, nodeSep, rootSep, snapGrid]
   )
 }
 
@@ -137,7 +145,8 @@ function computeTreeLayout(
   nodeHeight: number,
   rankSep: number,
   nodeSep: number,
-  rootSep: number
+  rootSep: number,
+  snapGrid: number
 ): LayoutResult {
   if (treeNodes.length === 0) {
     return { nodes: [], edges: [], width: 0, height: 0 }
@@ -296,6 +305,13 @@ function computeTreeLayout(
   let maxX = -Infinity
   let maxY = -Infinity
 
+  // Snap the cross axis (sibling spread) to the background grid so node columns
+  // line up with the dots. The main axis (depth) is only rounded to whole pixels
+  // — snapping it too would make rank spacing uneven. Without a grid, both axes
+  // are just rounded for crisp edges.
+  const snapCross = (value: number) =>
+    snapGrid > 0 ? Math.round(value / snapGrid) * snapGrid : Math.round(value)
+
   const positionedNodes: PositionedNode[] = treeNodes.map((node) => {
     const isExpander = node.id.startsWith("expander-")
     const width = isExpander ? DEFAULT_EXPANDER_WIDTH : nodeWidth
@@ -313,11 +329,15 @@ function computeTreeLayout(
       mainCenter = (maxDepth - depth) * mainStep + mainSize / 2
     }
 
-    const centerX = isHorizontal ? mainCenter : cross
-    const centerY = isHorizontal ? cross : mainCenter
+    // Snap the cross axis to the grid; round the main (depth) axis only.
+    // Expanders inherit their parent's position in F0Graph, so leave them raw.
+    const snappedCross = isExpander ? cross : snapCross(cross)
+    const roundedMain = Math.round(mainCenter)
+    const centerX = isHorizontal ? roundedMain : snappedCross
+    const centerY = isHorizontal ? snappedCross : roundedMain
 
-    const x = centerX - width / 2
-    const y = centerY - height / 2
+    const x = Math.round(centerX - width / 2)
+    const y = Math.round(centerY - height / 2)
 
     if (x < minX) minX = x
     if (y < minY) minY = y

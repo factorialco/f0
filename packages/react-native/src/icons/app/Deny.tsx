@@ -4,16 +4,14 @@ import type { SvgProps } from "react-native-svg"
 const SvgDeny = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
     fill="none"
-    viewBox="0 0 20 20"
+    viewBox="0 0 24 24"
     className={props.className}
     ref={ref}
     {...props}
   >
     <Path
       fill="currentColor"
-      fillRule="evenodd"
-      d="M3.983 10a6.017 6.017 0 0 1 9.787-4.69l-8.46 8.46A6 6 0 0 1 3.983 10m2.247 4.69a6.017 6.017 0 0 0 8.46-8.46zM10 2.682a7.317 7.317 0 1 0 0 14.634 7.317 7.317 0 0 0 0-14.634"
-      clipRule="evenodd"
+      d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18M7.586 17.686a7.2 7.2 0 0 0 10.1-10.1zM12 4.8a7.2 7.2 0 0 0-5.687 11.613l10.1-10.1A7.17 7.17 0 0 0 12 4.8"
     />
   </Svg>
 )

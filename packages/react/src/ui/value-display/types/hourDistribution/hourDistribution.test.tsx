@@ -149,4 +149,74 @@ describe("HourDistributionCell", () => {
       )
     ).toBeInTheDocument()
   })
+
+  it("uses per-point neutralLabel over chart-level justifiedAbsenceLabel", () => {
+    const args: HourDistributionCellValue = {
+      dataPoints: [
+        {
+          date: "2025-12-18",
+          value: 240,
+          plannedValue: 480,
+          justifiedAbsenceValue: 120,
+          neutralLabel: "Sick leave",
+        },
+      ],
+      justifiedAbsenceLabel: "Justified absence",
+    }
+
+    const { container } = render(HourDistributionCell(args, defaultMeta))
+
+    expect(
+      container.querySelector('[role="img"][aria-label*="Sick leave 2h"]')
+    ).toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-label*="Justified absence"]')
+    ).not.toBeInTheDocument()
+  })
+
+  it("uses per-point neutralLabel for full-day neutral bars", () => {
+    const args: HourDistributionCellValue = {
+      dataPoints: [
+        {
+          date: "2025-12-18",
+          value: 0,
+          plannedValue: 480,
+          justifiedAbsenceFullDay: true,
+          neutralLabel: "Non-workable",
+        },
+      ],
+      justifiedAbsenceLabel: "Justified absence",
+    }
+
+    const { container } = render(HourDistributionCell(args, defaultMeta))
+
+    expect(
+      container.querySelector('[role="img"][aria-label*="Non-workable"]')
+    ).toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-label*="Justified absence"]')
+    ).not.toBeInTheDocument()
+  })
+
+  it("falls back to justifiedAbsenceLabel when neutralLabel is not set", () => {
+    const args: HourDistributionCellValue = {
+      dataPoints: [
+        {
+          date: "2025-12-18",
+          value: 0,
+          plannedValue: 480,
+          justifiedAbsenceFullDay: true,
+        },
+      ],
+      justifiedAbsenceLabel: "Ausencia justificada",
+    }
+
+    const { container } = render(HourDistributionCell(args, defaultMeta))
+
+    expect(
+      container.querySelector(
+        '[role="img"][aria-label*="Ausencia justificada"]'
+      )
+    ).toBeInTheDocument()
+  })
 })

@@ -15,6 +15,7 @@ import type {
 } from "../../types"
 import type { CardVisualizationOptions } from "./Card"
 import type { EditableTableVisualizationOptions } from "./EditableTable"
+import type { GraphVisualizationOptions } from "./Graph/types"
 import type { KanbanVisualizationOptions } from "./Kanban"
 import type { TableVisualizationOptions } from "./Table"
 
@@ -31,7 +32,10 @@ import { ListVisualizationOptions } from "./List/types"
  *
  * @template Filters - The filters type extending FiltersDefinition
  */
-export type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
+export type VisualizationFilterOverrides<
+  Filters extends FiltersDefinition,
+  Sortings extends SortingsDefinition = SortingsDefinition,
+> = {
   /** Override which filters are available when this visualization is active.
    *  If not provided, the global source filters are used.
    *  Can be a subset of the source filters definition. */
@@ -39,6 +43,10 @@ export type VisualizationFilterOverrides<Filters extends FiltersDefinition> = {
   /** Preset configuration used only when this visualization is active.
    *  These replace the global source presets for this visualization. */
   presets?: PresetsDefinition<Filters>
+  /** Override which sortings are available when this visualization is active.
+   *  If not provided, the global source sortings are used. Pass `{}` to hide the
+   *  sort selector for views that don't support sorting (e.g. the org chart). */
+  sortings?: Partial<Sortings>
 }
 
 /**
@@ -63,19 +71,19 @@ export type Visualization<
       type: "card"
       /** Configuration options for card visualization */
       options: CardVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationFilterOverrides<Filters, Sortings>)
   | ({
       /** Kanban-based visualization type */
       type: "kanban"
       /** Configuration options for kanban visualization */
       options: KanbanVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationFilterOverrides<Filters, Sortings>)
   | ({
       /** Table-based visualization type */
       type: "table"
       /** Configuration options for table visualization */
       options: TableVisualizationOptions<R, Filters, Sortings, Summaries>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationFilterOverrides<Filters, Sortings>)
   | ({
       /** Editable table-based visualization type */
       type: "editableTable"
@@ -86,13 +94,19 @@ export type Visualization<
         Sortings,
         Summaries
       >
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationFilterOverrides<Filters, Sortings>)
   | ({
       /** List-based visualization type */
       type: "list"
       /** Configuration options for list visualization */
       options: ListVisualizationOptions<R, Filters, Sortings>
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationFilterOverrides<Filters, Sortings>)
+  | ({
+      /** Graph/org-chart-based visualization type */
+      type: "graph"
+      /** Configuration options for graph visualization */
+      options: GraphVisualizationOptions<R, Filters, Sortings>
+    } & VisualizationFilterOverrides<Filters, Sortings>)
   | ({
       /** Human-readable label for the visualization */
       label: string
@@ -115,7 +129,7 @@ export type Visualization<
           Grouping
         >
       }) => JSX.Element
-    } & VisualizationFilterOverrides<Filters>)
+    } & VisualizationFilterOverrides<Filters, Sortings>)
 
 /**
  * Represents the type of visualization.

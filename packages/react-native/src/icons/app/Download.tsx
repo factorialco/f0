@@ -10,10 +10,8 @@ const SvgDownload = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 15v1a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-1M12 5v9m0 0-3-3m3 3 3-3"
+      fill="currentColor"
+      d="M20.4 11.1a.9.9 0 0 1 .9.9v4.2a3.9 3.9 0 0 1-3.9 3.9H6.6a3.9 3.9 0 0 1-3.9-3.9V12a.9.9 0 1 1 1.8 0v4.2c0 1.16.94 2.1 2.1 2.1h10.8a2.1 2.1 0 0 0 2.1-2.1V12a.9.9 0 0 1 .9-.9M12 2.85a.9.9 0 0 1 .9.9v9.327l1.64-1.64a.9.9 0 0 1 1.273 1.273l-3.176 3.176a.9.9 0 0 1-1.273 0L8.188 12.71a.9.9 0 0 1 1.273-1.272l1.64 1.638V3.75a.9.9 0 0 1 .9-.9"
     />
   </Svg>
 )

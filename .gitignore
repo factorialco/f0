@@ -64,3 +64,7 @@ expo-env.d.ts
 
 # Local planning docs
 docs/plans/
+
+# Generated on install — synced from vendor/skills via scripts/install-skills.ts; never edit or commit
+/.claude/skills/
+/.opencode/skills/

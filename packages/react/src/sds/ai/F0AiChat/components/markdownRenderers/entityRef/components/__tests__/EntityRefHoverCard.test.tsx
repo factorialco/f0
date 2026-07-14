@@ -30,6 +30,7 @@ const TestTrigger = forwardRef<HTMLButtonElement>((props, ref) => (
     @Test
   </button>
 ))
+TestTrigger.displayName = "TestTrigger"
 
 const defaultProps = {
   id: "42",

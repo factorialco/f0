@@ -11,9 +11,7 @@ const SvgWindows = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      fillRule="evenodd"
-      d="m20 4-8.537 1.247v6.16H20zm0 16.25v-7.524l-8.537-.016v6.19zm-9.671-7.587v6.129l-6.324-.885v-5.275zm0-7.307L4 6.24l.003 5.244h6.326z"
-      clipRule="evenodd"
+      d="M20 12.726v7.524l-8.537-1.35v-6.19zm-9.672-.062v6.127l-6.323-.883v-5.276zm0-1.18H4.004L4 6.242l6.328-.885zM20 11.407h-8.537v-6.16L20 4z"
     />
   </Svg>
 )

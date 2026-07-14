@@ -12,11 +12,11 @@ const meta = {
     docs: {
       description: {
         component:
-          "An inline human-in-the-loop approve/reject row built on `F0CardRow`'s confirm/reject variant: the prompt sits on the left as the row title (with an optional avatar and description) and icon-only ✓ (confirm) / ✗ (reject) buttons pin to the trailing edge.",
+          "An inline human-in-the-loop approve/reject row built on `F0CardHorizontal`'s confirm/reject variant: the prompt sits on the left as the row title (with an optional avatar and description) and icon-only ✓ (confirm) / ✗ (reject) buttons pin to the trailing edge.",
       },
     },
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "deprecated"],
   decorators: [
     (Story) => (
       <div className="w-full max-w-[480px]">

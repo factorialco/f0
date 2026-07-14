@@ -1,9 +1,11 @@
 import { Reorder, useDragControls } from "motion/react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
 import { OneEllipsis } from "@/lib/OneEllipsis"
+import { useI18n } from "@/lib/providers/i18n"
 import { Switch } from "@/experimental/Forms/Fields/Switch"
-import { Handle, LockLocked } from "@/icons/app"
+import { Delete, Handle, LockLocked } from "@/icons/app"
 import { cn } from "@/lib/utils"
 
 import { SortAndHideListItem } from "./types"
@@ -11,6 +13,7 @@ import { SortAndHideListItem } from "./types"
 type ItemProps = {
   item: SortAndHideListItem
   onChangeVisibility: (item: SortAndHideListItem) => void
+  onRemove?: (item: SortAndHideListItem) => void
   allowSorting: boolean
   allowHiding: boolean
 }
@@ -18,11 +21,14 @@ type ItemProps = {
 const Item = ({
   item,
   onChangeVisibility,
+  onRemove,
   allowSorting,
   allowHiding,
 }: ItemProps) => {
-  const classes = "flex items-center gap-2 text-medium text-sm pr-4"
+  const i18n = useI18n()
+  const classes = "group flex items-center gap-2 text-medium text-sm pr-4"
   const controls = useDragControls()
+  const showRemove = !!item.removable && !!onRemove
 
   const content = (
     <div className={classes}>
@@ -54,6 +60,19 @@ const Item = ({
       >
         <OneEllipsis>{item.label}</OneEllipsis>
       </span>
+      {showRemove && (
+        <div className="shrink-0 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+          <ButtonInternal
+            variant="ghost"
+            size="sm"
+            compact
+            hideLabel
+            icon={Delete}
+            label={i18n.collections.table.settings.removeColumn}
+            onClick={() => onRemove?.(item)}
+          />
+        </div>
+      )}
       {allowHiding && (
         <Switch
           checked={item.visible}
@@ -92,6 +111,12 @@ const Item = ({
 export type SortAndHideListProps = {
   items: SortAndHideListItem[]
   onChange?: (items: SortAndHideListItem[]) => void
+  /**
+   * Called when the user removes an entry via its hover trash affordance. Only
+   * items flagged `removable` show the affordance. Removing is distinct from
+   * hiding: the caller is expected to drop the entry from its source.
+   */
+  onRemove?: (item: SortAndHideListItem) => void
   allowSorting: boolean
   allowHiding: boolean
 }
@@ -99,6 +124,7 @@ export type SortAndHideListProps = {
 export const SortAndHideList = ({
   items,
   onChange,
+  onRemove,
   allowSorting,
   allowHiding,
 }: SortAndHideListProps) => {
@@ -123,6 +149,7 @@ export const SortAndHideList = ({
           item={item}
           key={item.id}
           onChangeVisibility={onChangeVisibility}
+          onRemove={onRemove}
           allowSorting={allowSorting}
           allowHiding={allowHiding}
         />

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 
 import { aiTranslations } from "@/sds/ai/F0AiChat"
 
@@ -56,16 +56,14 @@ describe("I18nProvider", () => {
     expect(screen.getByTestId("translation")).toHaveTextContent("Desar")
   })
 
-  it("throws error when useI18n is used outside provider", () => {
-    // Suppress console.error for this test as we expect an error
-    const consoleSpy = vi.spyOn(console, "error")
-    consoleSpy.mockImplementation(() => {})
+  it("falls back to default translations when used outside a provider", () => {
+    // No provider: the hook must not throw — it degrades to the built-in
+    // (English) defaults so the subtree still renders.
+    render(<TestComponent />)
 
-    expect(() => {
-      render(<TestComponent />)
-    }).toThrow("useI18n must be used within an I18nProvider")
-
-    consoleSpy.mockRestore()
+    expect(screen.getByTestId("translation")).toHaveTextContent(
+      defaultTranslations.actions.save
+    )
   })
 
   // Type tests - these will fail at compile time if types are wrong

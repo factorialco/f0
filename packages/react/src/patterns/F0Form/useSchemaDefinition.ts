@@ -243,6 +243,26 @@ function configToF0Field(
         renderIf: config.renderIf,
       } as F0Field
 
+    case "period": {
+      // Period keeps the full DatePickerValue. minDate/maxDate come from config
+      // only (z.custom() carries no Zod constraints) and can be static or dynamic.
+      const configMinDate = "minDate" in config ? config.minDate : undefined
+      const configMaxDate = "maxDate" in config ? config.maxDate : undefined
+      return {
+        ...baseProps,
+        type: "period",
+        granularities:
+          "granularities" in config ? config.granularities : undefined,
+        minDate: configMinDate,
+        maxDate: configMaxDate,
+        presets: "presets" in config ? config.presets : undefined,
+        displayFormat:
+          "displayFormat" in config ? config.displayFormat : undefined,
+        clearable,
+        renderIf: config.renderIf,
+      } as F0Field
+    }
+
     case "richtext":
       return {
         ...baseProps,

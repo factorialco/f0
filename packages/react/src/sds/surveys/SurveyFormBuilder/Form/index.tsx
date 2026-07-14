@@ -1,5 +1,5 @@
 import { motion, Reorder } from "motion/react"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, type ReactNode } from "react"
 
 import { withDataTestId } from "@/lib/data-testid"
 import { cn } from "@/lib/utils"
@@ -110,6 +110,16 @@ const _SurveyFormBuilder = ({
     return result
   }, [elements])
 
+  const lockedSectionIds = useMemo(() => {
+    const result = new Set<string>()
+    for (const element of elements) {
+      if (element.type === "section" && element.section.locked) {
+        result.add(element.section.id)
+      }
+    }
+    return result
+  }, [elements])
+
   const {
     handleFlatReorder,
     handleConfirmLastQuestionMove,
@@ -164,32 +174,107 @@ const _SurveyFormBuilder = ({
                 as="div"
               >
                 <div className="flex flex-col">
-                  {reorderableItems.map((item, index) => {
-                    const gapClass =
-                      index === 0
-                        ? ""
-                        : inSectionQuestionIds.has(item.id)
-                          ? "mt-4"
-                          : "mt-8"
+                  {(() => {
+                    const nodes: ReactNode[] = []
 
-                    if (item.type === "section-header") {
-                      return (
-                        <SectionHeaderItem
-                          key={item.id}
-                          item={item}
-                          className={gapClass}
-                        />
-                      )
+                    for (
+                      let index = 0;
+                      index < reorderableItems.length;
+                      index++
+                    ) {
+                      const item = reorderableItems[index]
+
+                      // A locked section renders as one muted grey rounded
+                      // panel wrapping its header and all of its questions. The
+                      // right padding mirrors the drag-and-drop gutter reserved
+                      // on the left so the cards sit symmetrically in the panel.
+                      if (
+                        item.type === "section-header" &&
+                        lockedSectionIds.has(item.section.id)
+                      ) {
+                        const groupItems: typeof reorderableItems = [item]
+                        let next = index + 1
+                        while (
+                          next < reorderableItems.length &&
+                          reorderableItems[next].type === "question" &&
+                          inSectionQuestionIds.has(reorderableItems[next].id)
+                        ) {
+                          groupItems.push(reorderableItems[next])
+                          next++
+                        }
+
+                        nodes.push(
+                          <div
+                            key={`locked-${item.section.id}`}
+                            className={cn(
+                              "rounded-2xl bg-f1-background-secondary pb-8 pt-4",
+                              index === 0 ? "" : "mt-8"
+                            )}
+                          >
+                            {groupItems.map((groupItem, groupIndex) => {
+                              if (groupItem.type === "section-header") {
+                                return (
+                                  <SectionHeaderItem
+                                    key={groupItem.id}
+                                    item={groupItem}
+                                    className=""
+                                  />
+                                )
+                              }
+                              if (groupItem.type === "question") {
+                                // The grey panel delimits the section, so the
+                                // "end of section" divider is suppressed here.
+                                // The first question sits closer to the header,
+                                // which has no inline description beneath it.
+                                return (
+                                  <QuestionItem
+                                    key={groupItem.id}
+                                    item={groupItem}
+                                    showEndOfSection={false}
+                                    className={
+                                      groupIndex === 1 ? "mt-2" : "mt-4"
+                                    }
+                                  />
+                                )
+                              }
+                              return null
+                            })}
+                          </div>
+                        )
+
+                        index = next - 1
+                        continue
+                      }
+
+                      const gapClass =
+                        index === 0
+                          ? ""
+                          : inSectionQuestionIds.has(item.id)
+                            ? "mt-4"
+                            : "mt-8"
+
+                      if (item.type === "section-header") {
+                        nodes.push(
+                          <SectionHeaderItem
+                            key={item.id}
+                            item={item}
+                            className={gapClass}
+                          />
+                        )
+                      } else if (item.type === "question") {
+                        nodes.push(
+                          <QuestionItem
+                            key={item.id}
+                            item={item}
+                            showEndOfSection={sectionEndIds.has(item.id)}
+                            className={gapClass}
+                          />
+                        )
+                      }
                     }
-                    return (
-                      <QuestionItem
-                        key={item.id}
-                        item={item}
-                        showEndOfSection={sectionEndIds.has(item.id)}
-                        className={gapClass}
-                      />
-                    )
-                  })}
+
+                    return nodes
+                  })()}
                 </div>
               </Reorder.Group>
               {shouldShowAddButton && <AddButton />}

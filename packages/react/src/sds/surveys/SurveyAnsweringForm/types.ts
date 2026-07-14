@@ -75,6 +75,11 @@ interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormSharedProps 
 /** Inline mode: read-only rendering embedded in the page, no dialog */
 interface SurveyAnsweringFormInlineProps extends SurveyAnsweringFormSharedProps {
   inline: true
+  /**
+   * Hide the built-in ResourceHeader (title + description). Useful when the
+   * embedding page already renders its own resource header above the form.
+   */
+  hideResourceHeader?: boolean
   mode?: never
   module?: never
   position?: never

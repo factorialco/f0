@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef } from "react"
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
 import {
-  RichTextEditor,
+  F0RichTextEditor,
   type RichTextEditorHandle,
-} from "@/components/RichText/RichTextEditor"
+} from "@/components/RichText/F0RichTextEditor"
 
 import type { ResolvedField } from "../types"
 import type { F0RichTextField, RichTextValue } from "./types"
@@ -59,7 +59,7 @@ export function RichTextFieldRenderer({
   }, [currentContent])
 
   return (
-    <RichTextEditor
+    <F0RichTextEditor
       ref={composedRef}
       {...formFieldRest}
       title={field.label}

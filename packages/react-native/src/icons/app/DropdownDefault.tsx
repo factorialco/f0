@@ -18,7 +18,10 @@ const SvgDropdownDefault = (props: SvgProps, ref: Ref<Svg>) => (
       fillOpacity={0.06}
       rx={4}
     />
-    <Path stroke="currentColor" d="m8.5 10.25 3.5 3.5 3.5-3.5" />
+    <Path
+      fill="currentColor"
+      d="M7.244 9.644a.9.9 0 0 0 0 1.272l4.11 4.11.01.01q.016.018.034.032a.896.896 0 0 0 1.238-.031l4.2-4.2a.9.9 0 0 0-1.273-1.273L12 13.126 8.517 9.644a.9.9 0 0 0-1.273 0"
+    />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgDropdownDefault)

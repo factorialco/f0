@@ -11,9 +11,7 @@ const SvgPauseCircle = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      fillRule="evenodd"
-      d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16M10 8.35a.65.65 0 0 1 .65.65v6a.65.65 0 1 1-1.3 0V9a.65.65 0 0 1 .65-.65m4.65.65a.65.65 0 1 0-1.3 0v6a.65.65 0 1 0 1.3 0z"
-      clipRule="evenodd"
+      d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18m-2 5.1a.9.9 0 0 0-.9.9v6a.9.9 0 0 0 1.8 0V9a.9.9 0 0 0-.9-.9m4 0a.9.9 0 0 0-.9.9v6a.9.9 0 0 0 1.8 0V9a.9.9 0 0 0-.9-.9"
     />
   </Svg>
 )

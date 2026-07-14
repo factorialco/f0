@@ -10,12 +10,12 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Input as ShadcnInput } from "@/ui/input"
 import { InputFieldProps } from "@/components/F0InputField"
 
-export type InputInternalProps<T extends string> = Pick<
+export type InputInternalProps = Pick<
   ComponentProps<typeof ShadcnInput>,
   "ref" | "id" | "aria-describedby" | "aria-invalid"
 > &
   Pick<
-    InputFieldProps<T>,
+    InputFieldProps<string>,
     | "autoFocus"
     | "required"
     | "disabled"
@@ -41,46 +41,85 @@ export type InputInternalProps<T extends string> = Pick<
     | "onBlur"
     | "readonly"
   > & {
-    type?: Exclude<HTMLInputTypeAttribute, "number">
+    /**
+     * `"private"` is a non-HTML subtype for sensitive, non-credential data:
+     * masked like a password but with no lock icon and with password managers
+     * disabled. It never reaches the DOM (mapped to text/password internally).
+     */
+    type?: Exclude<HTMLInputTypeAttribute, "number"> | "private"
     onPressEnter?: () => void
   }
 
-const InputInternal = <T extends string = string>({
+/**
+ * Attributes that ask password managers (1Password, LastPass, Bitwarden) and
+ * browser autofill to ignore the field — used by `type="private"` so sensitive
+ * non-credential data is never captured or suggested.
+ */
+const passwordManagerAvoidance = {
+  autoComplete: "off",
+  "data-1p-ignore": true,
+  "data-lpignore": "true",
+  "data-form-type": "other",
+  "data-bwignore": true,
+}
+
+const InputInternal = ({
   type,
+  onPressEnter,
   ...props
-}: InputInternalProps<T>) => {
+}: InputInternalProps) => {
   const [showPassword, setShowPassword] = useState(false)
 
+  // `password` and `private` are both masked; the eye toggle flips them to text.
+  const maskable = type === "password" || type === "private"
+
   const localType = useMemo(() => {
-    return type === "password" ? (showPassword ? "text" : "password") : type
-  }, [showPassword, type])
+    return maskable ? (showPassword ? "text" : "password") : type
+  }, [showPassword, maskable, type])
 
   const localIcon = useMemo(() => {
+    // Only `password` forces the lock icon; `private` keeps the consumer's icon.
     return type === "password" ? LockLocked : props.icon
   }, [type, props.icon])
 
   const i18n = useI18n()
-  const buttonToggle: InputFieldProps<T>["buttonToggle"] = useMemo(() => {
-    if (type !== "password") {
-      return props.buttonToggle
+  const buttonToggle: InputFieldProps<string>["buttonToggle"] = useMemo(() => {
+    if (type === "password") {
+      return {
+        label: [i18n.inputs.password.show, i18n.inputs.password.hide],
+        icon: [EyeInvisible, EyeVisible],
+        selected: showPassword,
+        onChange: setShowPassword,
+      }
     }
-    return {
-      label: [i18n.inputs.password.show, i18n.inputs.password.hide],
-      icon: [EyeInvisible, EyeVisible],
-      selected: showPassword,
-      onChange: setShowPassword,
+    if (type === "private") {
+      // Build the toggle's accessible name from the field label so screen-reader
+      // users can tell multiple private fields apart (e.g. "Show social security
+      // number"). The label feeds F0ButtonToggle's aria-label + title only — the
+      // toggle renders an icon, so there is no visible-text change.
+      return {
+        label: [
+          i18n.t("inputs.private.show", { label: props.label }),
+          i18n.t("inputs.private.hide", { label: props.label }),
+        ],
+        icon: [EyeInvisible, EyeVisible],
+        selected: showPassword,
+        onChange: setShowPassword,
+      }
     }
+    return props.buttonToggle
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showPassword, type, props.buttonToggle])
+  }, [showPassword, type, props.buttonToggle, props.label])
 
   return (
     <ShadcnInput
       {...props}
+      {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
-      onChange={(value) => props.onChange?.(value as T)}
+      onChange={(value) => props.onChange?.(value)}
       onKeyDown={(event) => {
         if (event.key === "Enter") {
-          props.onPressEnter?.()
+          onPressEnter?.()
         }
       }}
       icon={localIcon}

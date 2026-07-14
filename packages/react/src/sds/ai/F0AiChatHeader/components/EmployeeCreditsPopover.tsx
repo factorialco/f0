@@ -1,5 +1,5 @@
 import { motion } from "motion/react"
-import { useCallback, useState } from "react"
+import { type ReactNode, useCallback, useState } from "react"
 
 import { F0AvatarCompany } from "@/components/avatars/F0AvatarCompany"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -19,6 +19,8 @@ const CREDITS_GRADIENT =
 
 type EmployeeCreditsPopoverProps = {
   employeeCredits?: AiChatEmployeeCredits
+  /** Custom popover trigger (asChild). Defaults to the Sliders icon button. */
+  trigger?: ReactNode
 }
 
 /**
@@ -37,6 +39,7 @@ type EmployeeCreditsPopoverProps = {
  */
 export function EmployeeCreditsPopover({
   employeeCredits,
+  trigger,
 }: EmployeeCreditsPopoverProps) {
   const i18n = useI18n()
   const reduceMotion = useReducedMotion()
@@ -80,19 +83,22 @@ export function EmployeeCreditsPopover({
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <ButtonInternal
-          variant="ghost"
-          hideLabel
-          label={i18n.t("ai.credits.title")}
-          icon={Sliders}
-          pressed={open}
-        />
+        {trigger ?? (
+          <ButtonInternal
+            variant="ghost"
+            hideLabel
+            label={i18n.t("ai.credits.title")}
+            icon={Sliders}
+            pressed={open}
+          />
+        )}
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
         align="end"
         alignOffset={-68}
         sideOffset={4}
+        collisionPadding={12}
         className="flex w-[324px] flex-col gap-3 rounded-md border border-solid border-f1-border-secondary p-3"
       >
         {hasHeader && (

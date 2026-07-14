@@ -10,10 +10,8 @@ const SvgCheck = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m10.75 16.75 7-9.5M6.25 11.75l4.5 5"
+      fill="currentColor"
+      d="M17.587 6.955a.9.9 0 0 1 1.273 1.273l-8.816 8.816a1 1 0 0 1-.141.115.9.9 0 0 1-1.132-.115l-3.63-3.63a.9.9 0 0 1 1.272-1.273l2.994 2.993z"
     />
   </Svg>
 )

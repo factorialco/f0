@@ -132,6 +132,7 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
   } = props
 
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  const noPadding = styling?.noPadding ?? false
 
   const sectionIds = useMemo(() => Object.keys(schema), [schema])
 
@@ -218,7 +219,11 @@ function F0FormPerSection<T extends F0PerSectionSchema>(
     )
   }
 
-  return <div className="flex justify-center p-4">{content}</div>
+  return (
+    <div className={cn("flex justify-center", !noPadding && "p-4")}>
+      {content}
+    </div>
+  )
 }
 
 /**
@@ -407,7 +412,8 @@ function F0FormFromSingleDefinition<TSchema extends F0FormSchema>({
 
   const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
     useAsyncDefaultValues<Partial<z.infer<TSchema>>>(
-      def.asyncDefaultValues ?? def.defaultValues
+      def.asyncDefaultValues ?? def.defaultValuesFn ?? def.defaultValues,
+      def.defaultValuesParamsSchema
     )
 
   const adaptedOnSubmit = useCallback(
@@ -457,7 +463,8 @@ function F0FormFromPerSectionDefinition<T extends F0PerSectionSchema>({
 
   const { resolved: resolvedDefaults, isLoading: isLoadingDefaults } =
     useAsyncDefaultValues<{ [K in keyof T]?: Partial<z.infer<T[K]>> }>(
-      def.asyncDefaultValues ?? def.defaultValues
+      def.asyncDefaultValues ?? def.defaultValuesFn ?? def.defaultValues,
+      def.defaultValuesParamsSchema
     )
 
   const fullDataRef = useRef<Record<string, unknown>>(
@@ -536,6 +543,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   // Resolve styling configuration
   const showSectionsSidepanel = styling?.showSectionsSidepanel ?? false
+  const noPadding = styling?.noPadding ?? false
 
   // Resolve submit type from config
   const isActionBar = submitConfig?.type === "action-bar"
@@ -1165,7 +1173,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
             </div>
           </div>
         ) : (
-          <div className="flex justify-center p-4">{formContent}</div>
+          <div className={cn("flex justify-center", !noPadding && "p-4")}>
+            {formContent}
+          </div>
         )}
 
         {!hideActionBar && (

@@ -32,18 +32,26 @@ type RecordingWaveformProps = {
   /** Live mic stream. Drives the timeline via a Web Audio analyser. */
   stream: MediaStream | null
   className?: string
+  /**
+   * Which edge the newest sample sits at, so the timeline grows away from the
+   * recording controls: "right" in the chat textarea (controls on the right),
+   * "left" in the rich text editor footer (controls on the left).
+   */
+  anchor?: "left" | "right"
 }
 
 /**
  * Scrolling amplitude timeline (à la Claude/voice memos): every `SAMPLE_MS` a
  * new bar is appended whose height is the current mic loudness. Bars are
- * right-anchored, so the newest sample sits at the right edge and the line
- * builds up right→left as seconds pass, scrolling once it fills the width.
- * Degrades to an empty track where Web Audio is missing (SSR / tests).
+ * anchored to one edge (`anchor`), so the newest sample sits at that edge and
+ * the line builds up away from it as seconds pass, scrolling once it fills
+ * the width. Degrades to an empty track where Web Audio is missing
+ * (SSR / tests).
  */
 export const RecordingWaveform = ({
   stream,
   className,
+  anchor = "right",
 }: RecordingWaveformProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [capacity, setCapacity] = useState(0)
@@ -108,16 +116,21 @@ export const RecordingWaveform = ({
     }
   }, [stream, capacity])
 
+  // Levels are stored oldest→newest; flip them for a left anchor so the
+  // newest bar renders at the left edge and history flows right.
+  const bars = anchor === "left" ? [...levels].reverse() : levels
+
   return (
     <div
       ref={containerRef}
       className={cn(
-        "flex h-6 items-center justify-end overflow-hidden gap-0.5",
+        "flex h-6 items-center overflow-hidden gap-0.5",
+        anchor === "left" ? "justify-start" : "justify-end",
         className
       )}
       aria-hidden="true"
     >
-      {levels.map((level, i) => (
+      {bars.map((level, i) => (
         <span
           key={i}
           className="shrink-0 rounded-full bg-f1-foreground-secondary w-0.5"

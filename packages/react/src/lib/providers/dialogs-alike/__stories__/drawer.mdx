@@ -1,0 +1,205 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as DrawerStories from "./drawer.stories"
+
+<Meta of={DrawerStories} />
+
+# Drawers API
+
+## Introduction
+
+The drawers API is an imperative API for opening side drawers from anywhere in your app — including outside React (event handlers, callbacks, utilities). It wraps the `F0Drawer` component internally and handles all state management for you.
+
+```tsx
+import { drawers } from "@factorialco/f0-react"
+```
+
+> Requires your app to be wrapped in `<F0Provider>` (which mounts the renderer that displays the drawers).
+
+### Why imperative functions?
+
+- **No hooks, no boilerplate:** call `drawers.open(...)` directly — no `useState`, no conditional rendering, no `useDrawer()`.
+- **Promise-based:** `await` the result; it resolves with the `value` of the action the user picked.
+- **Callable anywhere:** from components, event handlers, or plain functions.
+
+### Before: using F0Drawer directly
+
+```tsx
+import { useState } from "react"
+import { F0Drawer, F0Button } from "@factorialco/f0-react"
+
+function EditItemButton() {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <F0Button label="Edit Item" onClick={() => setIsOpen(true)} />
+      {isOpen && (
+        <F0Drawer
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Edit Item"
+          primaryAction={{ label: "Save", onClick: () => setIsOpen(false) }}
+          secondaryAction={{ label: "Cancel", onClick: () => setIsOpen(false) }}
+        >
+          <div>Form content goes here...</div>
+        </F0Drawer>
+      )}
+    </>
+  )
+}
+```
+
+### After: using the drawers API
+
+```tsx
+import { drawers, F0Button } from "@factorialco/f0-react"
+
+function EditItemButton() {
+  const handleClick = async () => {
+    const result = await drawers.open({
+      title: "Edit Item",
+      content: <div>Form content goes here...</div>,
+      actions: {
+        primary: { label: "Save", value: "save" },
+        secondary: { label: "Cancel", value: "cancel" },
+      },
+    })
+
+    if (result === "save") {
+      // Perform save action
+    }
+  }
+
+  return <F0Button label="Edit Item" onClick={handleClick} />
+}
+```
+
+## Basic Usage
+
+`drawers.open` accepts a drawer definition and returns a promise that resolves with the value of the action the user clicked.
+
+```tsx
+import { drawers } from "@factorialco/f0-react"
+
+const result = await drawers.open({
+  title: "Drawer Title",
+  description: "Drawer Description",
+  content: <div>Custom drawer content goes here</div>,
+  actions: {
+    primary: { value: "primary", label: "Primary Action" },
+    secondary: { value: "secondary", label: "Secondary Action" },
+  },
+})
+
+console.log("User selected:", result)
+```
+
+<Canvas of={DrawerStories.Default} />
+
+## Positioning
+
+Drawers can be positioned on the `left` or `right` (default).
+
+```tsx
+await drawers.open({
+  title: "Left Drawer",
+  position: "left",
+  content: <div>Content...</div>,
+  actions: { primary: { label: "OK", value: true } },
+})
+```
+
+<Canvas of={DrawerStories.DrawerLeft} />
+
+## Advanced Usage
+
+### Multiple actions (dropdown)
+
+When `primary` or `secondary` is given an **array** of actions, the footer renders them as a dropdown menu. Each item resolves the promise with its own `value`, and items can be individually `disabled`.
+
+```tsx
+await drawers.open({
+  title: "Drawer with Dropdown Actions",
+  description: "This drawer has multiple secondary actions",
+  content: <div>Check the actions menu</div>,
+  actions: {
+    primary: { value: "primary", label: "Primary Action" },
+    secondary: [
+      { value: "delete", icon: Delete, label: "Delete" },
+      { value: "other", icon: Pencil, label: "Other" },
+      { value: "cancel", label: "Cancel", disabled: true },
+    ],
+  },
+})
+```
+
+<Canvas of={DrawerStories.DrawerWithDropdown} />
+
+### Promise-Based Actions
+
+An action `value` can be a primitive **or** a function that returns a Promise. When a function is provided, the drawer stays open until the promise resolves, the button shows a loading state, and all actions are disabled during the async operation (unless `nonBlocking` is `true`). The resolved value becomes the result of `drawers.open`.
+
+```tsx
+const result = await drawers.open({
+  title: "Drawer with Async Action",
+  description: "The primary action takes time to resolve",
+  content: <div>Click the primary action to see the loading state</div>,
+  actions: {
+    primary: {
+      label: "Save (Async)",
+      value: () =>
+        new Promise((resolve) => setTimeout(() => resolve("Saved"), 2000)),
+    },
+    secondary: { value: "cancel", label: "Cancel" },
+  },
+})
+```
+
+<Canvas of={DrawerStories.DrawerWithPromises} />
+
+### Modal
+
+By default a drawer slides in alongside the page and can be dismissed by clicking outside or pressing <kbd>Escape</kbd>. Pass `modal: true` to add a backdrop overlay that **blocks interaction with the rest of the page** and makes the drawer require an explicit action — clicking outside no longer dismisses it and <kbd>Escape</kbd> is ignored. Close it through one of its actions or programmatically via `drawers.close(id)`.
+
+Use it when the drawer holds a task the user should finish or explicitly cancel (e.g. an edit form with unsaved changes) rather than dismiss by accident.
+
+```tsx
+import { drawers, F0Button } from "@factorialco/f0-react"
+
+function MyComponent() {
+  const showModalDrawer = async () => {
+    const result = await drawers.open({
+      title: "Modal Drawer",
+      description: "This drawer blocks interaction with the page behind it.",
+      content: <div>Use one of the actions below to close it.</div>,
+      modal: true,
+      actions: {
+        primary: { value: "confirm", label: "Confirm" },
+        secondary: { value: "cancel", label: "Cancel" },
+      },
+    })
+
+    console.log("Result:", result)
+  }
+
+  return <F0Button label="Open modal drawer" onClick={showModalDrawer} />
+}
+```
+
+<Canvas of={DrawerStories.DrawerModal} />
+
+### Closing programmatically
+
+Pass an `id` when opening, then call `drawers.close(id)` to close it from elsewhere (its promise resolves with `undefined`).
+
+```tsx
+drawers.open({
+  id: "my-drawer",
+  title: "...",
+  content: <div />,
+  actions: { primary: { label: "OK", value: true } },
+})
+
+// later, from anywhere:
+drawers.close("my-drawer")
+```

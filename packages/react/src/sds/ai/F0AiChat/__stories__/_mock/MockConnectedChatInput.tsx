@@ -2,6 +2,7 @@ import { useCallback, useMemo, useRef } from "react"
 
 import { F0AiChatTextArea } from "../../../F0AiChatTextArea"
 import { type F0AiChatTextAreaSubmitPayload } from "../../../F0AiChatTextArea/types"
+import { F0ClarifyingPanel } from "../../../F0ClarifyingPanel"
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import type {
   WelcomeScreenSuggestion,
@@ -17,7 +18,14 @@ import { filterNonRenderableMessages } from "./turn-utils"
  * to `mock.sendMessage()`. Mirrors factorial's production wrapper.
  */
 export const MockConnectedChatInput = () => {
-  const { messages, inProgress, sendMessage } = useMockAiChatRuntime()
+  const {
+    messages,
+    inProgress,
+    sendMessage,
+    isLoadingThread,
+    currentThreadTitle,
+    clarifyingQuestion,
+  } = useMockAiChatRuntime()
   const {
     placeholders,
     entityRefs,
@@ -33,6 +41,7 @@ export const MockConnectedChatInput = () => {
     visualizationMode,
     creditWarning,
     welcomeScreenSuggestions,
+    welcomeScreenCards,
     tracking,
     openGame,
   } = useAiChat()
@@ -51,7 +60,12 @@ export const MockConnectedChatInput = () => {
     () => filterNonRenderableMessages(messages),
     [messages]
   )
-  const isWelcomeScreen = filteredMessages.length === 0
+  // The welcome screen (suggestions + footer, centred textarea) is only for a
+  // brand-new chat. When a thread is loading or already loaded from history,
+  // render the started-conversation layout (textarea at the bottom, no
+  // suggestions/footer) — including in fullscreen.
+  const isWelcomeScreen =
+    filteredMessages.length === 0 && !isLoadingThread && !currentThreadTitle
   const fullscreen = visualizationMode === "fullscreen"
 
   const handleSubmit = useCallback(
@@ -91,6 +105,15 @@ export const MockConnectedChatInput = () => {
       fullscreen={fullscreen}
       welcomeScreenSuggestions={welcomeScreenSuggestions}
       onSuggestionClick={handleSuggestionClick}
+      welcomeScreenCards={welcomeScreenCards}
+      clarifyingUI={
+        clarifyingQuestion ? (
+          <F0ClarifyingPanel
+            clarifyingQuestion={clarifyingQuestion}
+            isSubmitDisabled={inProgress}
+          />
+        ) : undefined
+      }
     />
   )
 }

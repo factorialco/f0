@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Path, Circle } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgEyeVisible = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -10,11 +10,9 @@ const SvgEyeVisible = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinejoin="round"
-      d="M20 12c-1-3-4-6-8-6s-7 3-8 6c1 3 4 6 8 6s7-3 8-6Z"
+      fill="currentColor"
+      d="M12 4.6c2.263 0 4.336.988 5.951 2.334 1.611 1.342 2.842 3.103 3.402 4.782a.9.9 0 0 1 0 .57c-.56 1.678-1.791 3.438-3.402 4.78-1.615 1.346-3.688 2.334-5.952 2.334s-4.336-.988-5.95-2.333c-1.612-1.343-2.844-3.103-3.404-4.781a.9.9 0 0 1 0-.57c.56-1.678 1.792-3.44 3.403-4.782C7.663 5.588 9.735 4.6 12 4.6m0 1.8c-1.736 0-3.415.762-4.8 1.916-1.29 1.075-2.259 2.438-2.743 3.685.484 1.247 1.454 2.609 2.743 3.683C8.585 16.838 10.264 17.6 12 17.6c1.734 0 3.413-.762 4.798-1.916 1.29-1.074 2.259-2.436 2.743-3.683-.484-1.247-1.453-2.61-2.743-3.685C15.413 7.162 13.735 6.4 11.999 6.4M12 8a4 4 0 0 1 4 4l-.006.206A4 4 0 0 1 11.999 16l-.205-.005A4 4 0 0 1 11.999 8m0 1.8a2.2 2.2 0 1 0 0 4.4 2.2 2.2 0 0 0 0-4.4"
     />
-    <Circle cx={12} cy={12} r={2.35} stroke="currentColor" />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgEyeVisible)

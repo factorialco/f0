@@ -191,6 +191,77 @@ between related items.
   <Canvas of={PageHeaderStories.WithSelectBreadcrumb} />
 </div>
 
+### With Collection-Bound Select Breadcrumb (jump-to)
+
+A `type: "collection-select"` breadcrumb item binds the jump-to select to a
+`OneDataCollection`: pass the list's **declared** data source (`source`) plus
+the list's collection id (`collectionId`), and F0 does the rest — no mounted
+list needed, so it works on a direct link / hard refresh of the detail page.
+
+What F0 owns:
+
+- **Persisted-state seeding**: the filters (resolved per visualization) and
+  the sorting the list persisted under `datacollection-<collectionId>` are
+  validated against the declared definitions and applied as
+  `currentFilters`/`currentSortings`. The list's _search_ is never seeded —
+  the select has its own searchbox. Empty storage → unfiltered fallback.
+- **In-dropdown filters** (`showFilters`): opt in to render the source's
+  filter definitions as an editable picker inside the dropdown, pre-applied
+  with the seeded persisted filters, so users can refine the jump-to list in
+  place. Off by default — the seeded filters are still applied, just not
+  editable. Pair it with `onFiltersChange` → the navigation hook's
+  `currentFilters` so the header arrows + counter follow the same refined
+  context after the user jumps to an item from it.
+- **Pagination**: a `pages` list adapter is transparently consumed as
+  infinite scroll, so the same declaration the list uses works here.
+- **Navigation**: picking an option navigates to `getItemHref(value, item)`
+  through the app's `LinkProvider`; `onSelect` is the imperative escape
+  hatch. Re-selecting the current `value` is a no-op.
+- **Loop-safety**: `source` is captured when the crumb mounts —
+  inline-recreated item objects never retrigger fetches. Give the item a new
+  `id` to remount and swap sources.
+- **Direct-link display**: the item `label` (and optional `defaultItem`)
+  shows the current record instantly, before any options are fetched.
+
+The same wiring extends to the header's prev/next arrows: feed
+`useDataCollectionItemNavigation` (from `OneDataCollection`) the same
+`source` + `collectionId` and pass its render-ready `navigation` result to
+PageHeader's `navigation` prop — arrows and the `current/total` counter then
+walk the same filtered, sorted set the breadcrumb select shows, navigating
+through each item's `itemUrl`. When the adapter also implements the
+id-relative `fetchItemNeighbors` capability, items beyond the loaded page —
+including deep direct links — resolve their neighbors backend-side, so the
+arrows behave as if the whole filtered set were loaded. The story below
+demonstrates all of it together.
+
+`useDataCollectionItemNavigation` exposes the arrows in two modes via
+`navigationMode`, both producing the same `NavigationProps` contract:
+
+- **`"url"`** (default) — each arrow is a link to the item's `itemUrl`. Use it
+  for full-page detail views where prev/next changes the route (the PageHeader
+  story above).
+- **`"callback"`** — each arrow calls `goToPrevious`/`goToNext`, swapping the
+  active item **in place with no URL change**. Use it for a mounted
+  sidepanel/dialog: pass the result to `F0Dialog`'s
+  `controls={{ kind: "resource", navigation }}` and drive `activeItemId` from
+  `onActiveItemChange`. See `Dialog` → _WithMountedSidepanelNavigation_.
+
+For the mounted-dialog case, pair callback arrows with an "Open detail"
+escape hatch: feed `F0Dialog`'s `controls.expand` a `url` set to the hook's
+`activeItemUrl` (derived from the source's `itemUrl`). In-place arrows browse
+the set; the expand link jumps to the item's full-page view and is
+cmd/middle-clickable.
+
+<div
+  className="header-container"
+  style={{
+    maxHeight: "180px",
+    width: "100%",
+  }}
+>
+  <Canvas of={PageHeaderStories.WithCollectionBoundSelectBreadcrumb} />
+</div>
+
 ## Guidelines
 
 ### Content best practices

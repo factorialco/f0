@@ -10,10 +10,8 @@ const SvgSort = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16 9v9m0 0-3-3m3 3 3-3M8 15V6m0 0L5 9m3-3 3 3"
+      fill="currentColor"
+      d="M16 8.1a.9.9 0 0 1 .9.9v6.827l1.464-1.464a.9.9 0 0 1 1.272 1.273l-3 3a.9.9 0 0 1-1.272 0l-3-3a.9.9 0 0 1 1.272-1.273l1.464 1.464V9a.9.9 0 0 1 .9-.9M7.363 5.363a.9.9 0 0 1 1.273 0l3 3a.9.9 0 0 1-1.273 1.273L8.9 8.172V15a.9.9 0 1 1-1.8 0V8.172L5.636 9.636a.9.9 0 1 1-1.273-1.273z"
     />
   </Svg>
 )

@@ -11,7 +11,6 @@ import {
   F0AvatarModule,
   type ModuleId,
 } from "@/components/avatars/F0AvatarModule"
-import { F0AvatarPulse, type Pulse } from "@/components/avatars/F0AvatarPulse"
 import { IconType } from "@/components/F0Icon"
 import { cn } from "@/lib/utils"
 
@@ -23,14 +22,6 @@ type CardAvatarVariant =
   | { type: "module"; module: ModuleId }
   | { type: "alert"; variant: AlertAvatarProps["type"] }
   | { type: "date"; date: Date }
-  | {
-      type: "pulse"
-      firstName: string
-      lastName: string
-      src?: string
-      pulse?: Pulse
-      onPulseClick: () => void
-    }
 
 type CardAvatarSize = "sm" | "md" | "lg"
 
@@ -53,7 +44,7 @@ interface CardAvatarProps {
   /**
    * Explicit size override. When omitted, the size derives from `compact`
    * (sm) or the default vertical layout (lg). Passing a size also signals
-   * inline usage (e.g. the card row) and drops the vertical margin.
+   * inline usage (e.g. the horizontal card) and drops the vertical margin.
    */
   size?: CardAvatarSize
 }
@@ -83,18 +74,6 @@ const AvatarRender = ({
   if (avatar.type === "date") {
     // F0AvatarDate has a fixed intrinsic size (no size prop).
     return <F0AvatarDate date={avatar.date} />
-  }
-  if (avatar.type === "pulse") {
-    // F0AvatarPulse has a fixed intrinsic size (no size prop).
-    return (
-      <F0AvatarPulse
-        firstName={avatar.firstName}
-        lastName={avatar.lastName}
-        src={avatar.src}
-        pulse={avatar.pulse}
-        onPulseClick={avatar.onPulseClick}
-      />
-    )
   }
   return <F0Avatar avatar={avatar} size={size} />
 }

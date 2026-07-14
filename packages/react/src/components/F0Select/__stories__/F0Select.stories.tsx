@@ -1252,6 +1252,39 @@ export const MultipleClearSelectionsOnDatasetChange: Story = {
 }
 
 /**
+ * Multi-select with "Select all" + filters, `preserveSelectionOnDatasetChange: true`.
+ *
+ * Use this to verify the select-all behavior:
+ * 1. Apply a Department filter, then click "Select all" — it selects the
+ *    currently filtered set.
+ * 2. Change or clear the filter — the select-all is dropped (it was scoped to
+ *    the previous query); the count resets to 0.
+ * 3. By contrast, MANUALLY ticking individual rows and then changing the filter
+ *    keeps those rows selected — `preserveSelectionOnDatasetChange` governs
+ *    manual selection only.
+ */
+export const MultipleSelectAllWithFilters: Story = {
+  args: {
+    label: "Select Team Members (preserve + select all)",
+    placeholder: "Search employees...",
+    multiple: true,
+    clearable: true,
+    showSearchBox: true,
+    preserveSelectionOnDatasetChange: true,
+    source: employeeNestedPaginatedSource,
+    mapOptions: (item: Employee) => ({
+      value: item.value,
+      label: item.label,
+      avatar: item.avatar,
+      description: `${item.jobTitle} · ${item.departmentName}`,
+    }),
+    onSelectItems: fn((selectionStatus) => {
+      console.log("selectionStatus", selectionStatus)
+    }),
+  },
+}
+
+/**
  * Single select with paginated data and filters.
  * Use `defaultItem` to provide label for pre-selected value not in the first page.
  * Filter by department, office, or legal entity to narrow down results.

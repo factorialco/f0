@@ -64,6 +64,14 @@ export interface ClockInControlsProps {
   onBreak?: (breakTypeId?: string) => void
   canShowProject?: boolean
   projectSelectorElement?: React.ReactNode
+  /**
+   * Optional custom location control. When provided, it replaces the built-in
+   * flat location `F0Select` (in both the editable clocked-out state and the
+   * read-only clocked-in state), letting the consumer supply its own control —
+   * e.g. a drill-in selector (location → workplace → work area). The consumer
+   * owns its data and editable/disabled state, mirroring `projectSelectorElement`.
+   */
+  locationSelectorElement?: React.ReactNode
   breakTypeName?: string
 }
 
@@ -88,6 +96,7 @@ export function ClockInControls({
   onChangeLocationId,
   canShowProject = true,
   projectSelectorElement,
+  locationSelectorElement,
   breakTypeName,
 }: ClockInControlsProps) {
   const { status, statusText, subtitle, statusColor } = getInfo({
@@ -151,6 +160,29 @@ export function ClockInControls({
   const canShowBreakTypeName = status === "break"
 
   const [locationPickerOpen, setLocationPickerOpen] = useState(false)
+
+  const builtInLocationControl = canSelectLocation ? (
+    <F0Select
+      label={labels.selectLocation}
+      hideLabel
+      value={locationId}
+      options={locationOptions}
+      onChange={onChangeLocationId}
+      open={locationPickerOpen}
+      onOpenChange={setLocationPickerOpen}
+      disabled={locationSelectorDisabled}
+    >
+      <div aria-label="Select location">
+        <Selector
+          text={location?.name}
+          placeholder={labels.selectLocation}
+          icon={location?.icon}
+        />
+      </div>
+    </F0Select>
+  ) : location ? (
+    <F0TagRaw text={location.name} icon={location.icon} />
+  ) : null
 
   return (
     <div className="@container">
@@ -271,40 +303,11 @@ export function ClockInControls({
           )}
         </div>
         <div className="mt-6 flex flex-row flex-wrap items-center justify-center gap-2 @xs:justify-start">
-          {canSelectLocation ? (
-            <>
-              <F0Select
-                label={labels.selectLocation}
-                hideLabel
-                value={locationId}
-                options={locationOptions}
-                onChange={onChangeLocationId}
-                open={locationPickerOpen}
-                onOpenChange={setLocationPickerOpen}
-                disabled={locationSelectorDisabled}
-              >
-                <div aria-label="Select location">
-                  <Selector
-                    text={location?.name}
-                    placeholder={labels.selectLocation}
-                    icon={location?.icon}
-                  />
-                </div>
-              </F0Select>
-              {canShowProject && projectSelectorElement}
-            </>
-          ) : (
-            <>
-              {canShowLocation && location && (
-                <>
-                  <F0TagRaw text={location.name} icon={location.icon} />
-                </>
-              )}
-              {canShowProject && projectSelectorElement}
-              {canShowBreakTypeName && breakTypeName && (
-                <F0TagRaw text={breakTypeName} />
-              )}
-            </>
+          {canShowLocation &&
+            (locationSelectorElement ?? builtInLocationControl)}
+          {canShowProject && projectSelectorElement}
+          {canShowBreakTypeName && breakTypeName && (
+            <F0TagRaw text={breakTypeName} />
           )}
         </div>
       </div>

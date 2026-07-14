@@ -53,7 +53,14 @@ export type F0DialogActionsProps = {
 export type DialogControls =
   | {
       kind: "resource"
-      expand?: { label: string; onClick: () => void }
+      /**
+       * "Open detail" affordance. Provide `url` to render a link to the
+       * resource's full-page view (routed through the app's `LinkProvider`,
+       * so it is cmd/middle-clickable) — typically the active item's
+       * `itemUrl` from `useDataCollectionItemNavigation`. Provide `onClick`
+       * for imperative expansion. `url` wins when both are set.
+       */
+      expand?: { label: string; url?: string; onClick?: () => void }
       navigation?: NavigationProps
     }
   | {

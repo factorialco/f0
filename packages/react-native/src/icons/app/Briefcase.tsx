@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Rect, Path } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgBriefcase = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,9 +9,10 @@ const SvgBriefcase = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Rect width={16} height={12} x={4} y={7} stroke="currentColor" rx={3} />
-    <Path stroke="currentColor" d="M9 7V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
-    <Path stroke="currentColor" strokeLinejoin="round" d="M8 7v12M16 7v12" />
+    <Path
+      fill="currentColor"
+      d="M12.999 3.1a2.9 2.9 0 0 1 2.9 2.9v.1H17a3.9 3.9 0 0 1 3.9 3.9v6a3.9 3.9 0 0 1-3.9 3.9H7A3.9 3.9 0 0 1 3.1 16v-6A3.9 3.9 0 0 1 7 6.1h1.1V6c0-1.6 1.298-2.9 2.9-2.9zM7 7.9A2.1 2.1 0 0 0 4.9 10v6c0 1.16.94 2.1 2.1 2.1h.1V7.9zm9.9 10.2h.1a2.1 2.1 0 0 0 2.1-2.1v-6A2.1 2.1 0 0 0 17 7.9h-.1zm-8 0h6.2V7.9H8.9zM11 4.9c-.607 0-1.1.493-1.1 1.1v.1h4.2V6a1.1 1.1 0 0 0-1.101-1.1z"
+    />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgBriefcase)

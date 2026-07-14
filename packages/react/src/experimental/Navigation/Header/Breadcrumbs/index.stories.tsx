@@ -6,7 +6,11 @@ import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { F0SelectItemProps } from "@/components/F0Select/types"
 import { FiltersDefinition } from "@/patterns/OneFilterPicker"
-import { PaginatedFetchOptions } from "@/hooks/datasource"
+import {
+  PageBasedPaginatedResponse,
+  PaginatedFetchOptions,
+} from "@/hooks/datasource"
+import { writeDataCollectionStorage } from "@/lib/providers/datacollection/dataCollectionUrlParams"
 import {
   FIRST_NAMES_MOCK,
   getMockValue,
@@ -191,6 +195,130 @@ export const WithSelectBreadcrumbWithDatasource: Story = {
             onChange: (value) => {
               console.log("WithSelectBreadcrumb value", value)
             },
+          },
+        ]}
+      />
+    )
+  },
+  args: {},
+}
+
+const employeesMock = Array.from({ length: 60 }, (_, i) => ({
+  id: `${i + 1}`,
+  name: `${getMockValue(FIRST_NAMES_MOCK, i)} ${getMockValue(SURNAMES_MOCK, i)}`,
+  department: i % 2 === 0 ? "Engineering" : "Design",
+}))
+type EmployeeMock = (typeof employeesMock)[number]
+
+/**
+ * A jump-to select bound to a OneDataCollection: pass the list's declared
+ * source + its collection id and F0 seeds the persisted filters/sortings,
+ * consumes the `pages` adapter as infinite scroll, and navigates via
+ * `getItemHref`. Here the persisted state (department = Engineering, sorted
+ * by name) is written to localStorage before rendering — the dropdown only
+ * lists Engineering employees, in name order, without the list mounted.
+ * With `showFilters` the dropdown also renders the declared filters as an
+ * editable picker, pre-applied with that seeded state, so users can refine
+ * the jump-to list in place.
+ */
+export const WithCollectionBoundSelect: Story = {
+  render: () => {
+    writeDataCollectionStorage("storybook/employees-breadcrumb/v1", {
+      filters: { department: ["Engineering"] },
+      sortings: { field: "name", order: "asc" },
+    })
+
+    const source = {
+      filters: {
+        department: {
+          type: "in" as const,
+          label: "Department",
+          options: {
+            options: [
+              { value: "Engineering", label: "Engineering" },
+              { value: "Design", label: "Design" },
+            ],
+          },
+        },
+      },
+      sortings: { name: { label: "Name" } },
+      dataAdapter: {
+        paginationType: "pages" as const,
+        perPage: 10,
+        fetchData: (options: PaginatedFetchOptions<FiltersDefinition>) => {
+          const departments = options.filters.department as string[] | undefined
+          const search = options.search?.toLowerCase()
+          let results = employeesMock.filter(
+            (employee) =>
+              !departments?.length || departments.includes(employee.department)
+          )
+          if (search) {
+            results = results.filter((employee) =>
+              employee.name.toLowerCase().includes(search)
+            )
+          }
+          const sorting = options.sortings.find((s) => s.field === "name")
+          if (sorting) {
+            results = [...results].sort(
+              (a, b) =>
+                a.name.localeCompare(b.name) *
+                (sorting.order === "asc" ? 1 : -1)
+            )
+          }
+          const currentPage =
+            "currentPage" in options.pagination
+              ? (options.pagination.currentPage ?? 1)
+              : 1
+          return new Promise<PageBasedPaginatedResponse<EmployeeMock>>(
+            (resolve) =>
+              setTimeout(
+                () =>
+                  resolve({
+                    type: "pages" as const,
+                    records: results.slice(
+                      (currentPage - 1) * 10,
+                      currentPage * 10
+                    ),
+                    total: results.length,
+                    perPage: 10,
+                    currentPage,
+                    pagesCount: Math.ceil(results.length / 10),
+                  }),
+                100
+              )
+          )
+        },
+      },
+    }
+
+    return (
+      <Breadcrumbs
+        breadcrumbs={[
+          {
+            id: "employees",
+            label: "Employees",
+            href: "/employees",
+            module: "employees",
+          },
+          {
+            id: "employee-detail",
+            type: "collection-select",
+            collectionId: "storybook/employees-breadcrumb/v1",
+            source,
+            searchbox: true,
+            showFilters: true,
+            mapOptions: (item) => {
+              const employee = item as EmployeeMock
+              return {
+                value: employee.id,
+                label: employee.name,
+                description: employee.department,
+                item,
+              }
+            },
+            label: employeesMock[0].name,
+            value: employeesMock[0].id,
+            getItemHref: (value) => `#/employees/${value}`,
           },
         ]}
       />

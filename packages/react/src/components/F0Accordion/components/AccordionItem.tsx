@@ -51,12 +51,8 @@ export const AccordionItem = ({
               </span>
             </button>
           </CollapsibleTrigger>
-          {hasActions && (
-            <div className="flex items-center gap-2 px-2 py-3">
-              <AccordionActions actions={item.actions!} />
-            </div>
-          )}
-          <div className={cn("flex items-center py-3 pl-2 pr-4")}>
+          <div className="flex items-center gap-2 py-3 pl-2 pr-4">
+            {hasActions && <AccordionActions actions={item.actions!} />}
             <CollapsibleTrigger asChild>
               <F0Button
                 variant="outline"

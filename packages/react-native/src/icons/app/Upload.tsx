@@ -10,10 +10,8 @@ const SvgUpload = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 14V5m0 0L9 8m3-3 3 3M19 15v1a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-1"
+      fill="currentColor"
+      d="M20.4 11.1a.9.9 0 0 1 .9.9v4.2a3.9 3.9 0 0 1-3.9 3.9H6.6a3.9 3.9 0 0 1-3.9-3.9V12a.9.9 0 1 1 1.8 0v4.2c0 1.16.94 2.1 2.1 2.1h10.8a2.1 2.1 0 0 0 2.1-2.1V12a.9.9 0 0 1 .9-.9M12 2.85a.9.9 0 0 1 .636.264l3.176 3.175a.9.9 0 0 1-1.272 1.273l-1.64-1.64v9.328a.9.9 0 0 1-1.8 0V5.923l-1.64 1.64a.9.9 0 0 1-1.272-1.274l3.176-3.175A.9.9 0 0 1 12 2.85"
     />
   </Svg>
 )

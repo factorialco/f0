@@ -89,6 +89,11 @@ export type UseSelectableProps<
    * @default false
    */
   preserveSelectionOnDatasetChange?: boolean
+  /**
+   * Selectable rows currently rendered (incl. nested children), so "select all"
+   * reaches rows absent from `data.records`. Falls back to `data.records`.
+   */
+  getRenderedSelectableEntries?: () => Array<[SelectionId, R]>
 }
 
 export type SelectionMeta<R extends RecordType> = {

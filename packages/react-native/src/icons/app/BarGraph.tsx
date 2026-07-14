@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Rect, Path } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgBarGraph = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,11 +9,9 @@ const SvgBarGraph = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Rect width={16} height={12} x={4} y={6} stroke="currentColor" rx={3} />
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M8 13v2M12 9v6M16 11v4"
+      fill="currentColor"
+      d="M17.27 4.825a3.9 3.9 0 0 1 3.9 3.9v6.552a3.9 3.9 0 0 1-3.9 3.9H6.73a3.9 3.9 0 0 1-3.9-3.9V8.725a3.9 3.9 0 0 1 3.9-3.9zm-10.54 1.8a2.1 2.1 0 0 0-2.1 2.1v6.552c0 1.159.94 2.1 2.1 2.1h10.54a2.1 2.1 0 0 0 2.1-2.1V8.725a2.1 2.1 0 0 0-2.1-2.1zM8 11.813a.9.9 0 0 1 .9.9v2.539a.9.9 0 0 1-1.8 0v-2.54a.9.9 0 0 1 .9-.9m4-3.958a.9.9 0 0 1 .9.9v6.488a.9.9 0 0 1-1.8 0V8.755a.9.9 0 0 1 .9-.9m4 2.026a.9.9 0 0 1 .9.9v4.462a.9.9 0 0 1-1.8 0V10.78a.9.9 0 0 1 .9-.9"
     />
   </Svg>
 )

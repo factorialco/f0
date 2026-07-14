@@ -6,7 +6,6 @@ import { z } from "zod"
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { ExternalLink, Plus, Settings } from "@/icons/app"
-import { F0Dialog } from "@/patterns/F0Dialog"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
@@ -16,11 +15,12 @@ import type {
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
 
+import { forms } from "@/patterns/forms"
+
 import {
   f0FormField,
   F0Form,
   F0SectionConfig,
-  useF0Form,
   RenderCustomFieldProps,
   F0FormRef,
 } from "../index"
@@ -1072,6 +1072,11 @@ export const AllFieldTypes: Story = {
         fromLabel: "Start",
         toLabel: "End",
       }),
+      periodField: f0FormField.datePeriod({
+        label: "Period Field",
+        granularities: ["year", "halfyear", "quarter", "month", "range"],
+        helpText: "Keeps the full period (range + granularity)",
+      }),
       richTextField: f0FormField.richText({
         label: "Rich Text Field",
         placeholder: "Write something with formatting...",
@@ -1099,6 +1104,7 @@ export const AllFieldTypes: Story = {
         timeField: undefined,
         datetimeField: undefined,
         dateRangeField: undefined,
+        periodField: undefined,
         richTextField: { value: "" },
       },
       submitConfig: {
@@ -1106,6 +1112,48 @@ export const AllFieldTypes: Story = {
       },
       onSubmit: async ({ data }) => {
         await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Native `period` field — a granularity-aware period selector
+ * (Year / Half year / Quarter / Month / Range) backed by `F0DatePicker`.
+ *
+ * Unlike the `date` field, the form value keeps the full `DatePickerValue`
+ * (`{ value: { from, to }, granularity }`), so the chosen granularity and range
+ * survive. Label, required asterisk, size and error handling are wired by the
+ * form automatically — no manual re-wiring needed.
+ */
+export const PeriodField: Story = {
+  render() {
+    const formSchema = z.object({
+      goalPeriod: f0FormField.datePeriod({
+        label: "Goal period",
+        granularities: ["year", "halfyear", "quarter", "month", "range"],
+        minDate: new Date(2024, 0, 1),
+        maxDate: new Date(2027, 11, 31),
+        helpText: "Pick the period this goal applies to",
+      }),
+      comparisonPeriod: f0FormField.datePeriod({
+        label: "Comparison period",
+        granularities: ["year", "quarter", "month"],
+        helpText: "Optional — leave empty to skip",
+        optional: true,
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "period-field",
+      schema: formSchema,
+      defaultValues: { goalPeriod: undefined, comparisonPeriod: undefined },
+      onSubmit: async ({ data }) => {
+        await sleep(600)
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
         return { success: true }
       },
@@ -2441,23 +2489,25 @@ export const SelectWithDataSource: Story = {
 }
 
 /**
- * Form inside a Dialog using `useF0Form` hook for external control.
+ * Form inside a Dialog using the imperative `forms.open` helper.
  *
- * The `useF0Form` hook provides:
- * - `formRef`: Pass to F0Form to enable external control
- * - `submit()`: Programmatically submit the form (validates first)
- * - `reset()`: Reset the form to default values
- * - `isDirty()`: Check if the form has unsaved changes
- * - `isSubmitting`: Whether the form is currently submitting
- * - `hasErrors`: Whether the form has validation errors
+ * `forms.open({ formDefinition, mode: "dialog", title })` opens the form in a
+ * `dialog-alike` dialog and returns a promise:
+ * - resolves `{ submitted: true, data }` when the form submits successfully
+ *   (the dialog closes automatically),
+ * - resolves `{ submitted: false }` when cancelled, dismissed, or closed.
  *
- * This is useful when the submit button needs to be outside the form,
- * such as in a dialog's footer with F0Dialog.
+ * Validation failures keep the dialog open with inline errors — no manual
+ * `useF0Form` / `formRef` wiring needed. Requires `<F0Provider>` to be mounted.
  */
 export const FormInDialog: Story = {
+  // `forms.open` mounts a fixed, centered modal via a portal. On the inline docs
+  // page many `F0Provider`s coexist (one per canvas), so the portal target is
+  // ambiguous and the modal mispositions. Render this demo in its own iframe so
+  // it has a single provider and the dialog centers correctly.
+  parameters: { docs: { story: { inline: false, height: "600px" } } },
   render() {
-    const [open, setOpen] = useState(false)
-    const { formRef, submit, isSubmitting, hasErrors } = useF0Form()
+    const [lastResult, setLastResult] = useState<string | null>(null)
 
     const formSchema = z.object({
       name: f0FormField.text({
@@ -2488,43 +2538,36 @@ export const FormInDialog: Story = {
         email: "",
         role: undefined,
       },
-      submitConfig: { type: "default", hideSubmitButton: true },
       onSubmit: async ({ data }) => {
         await sleep(1000)
         console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
-        setOpen(false)
         return { success: true }
       },
     })
 
+    const handleAdd = async () => {
+      const result = await forms.open({
+        formDefinition,
+        mode: "dialog",
+        title: "Add Team Member",
+        description:
+          "Add a new member to your team. They will receive an invitation email.",
+        labels: { submit: "Add Member" },
+      })
+      setLastResult(
+        result.submitted
+          ? `Added ${result.data.name} (${result.data.role})`
+          : "Cancelled"
+      )
+    }
+
     return (
-      <>
-        <F0Button
-          label="Add Team Member"
-          icon={Plus}
-          onClick={() => setOpen(true)}
-        />
-        <F0Dialog
-          isOpen={open}
-          onClose={() => setOpen(false)}
-          title="Add Team Member"
-          description="Add a new member to your team. They will receive an invitation email."
-          primaryAction={{
-            label: "Add Member",
-            icon: Plus,
-            onClick: submit,
-            loading: isSubmitting,
-            disabled: hasErrors,
-          }}
-          secondaryAction={{
-            label: "Cancel",
-            onClick: () => setOpen(false),
-          }}
-          disableContentPadding
-        >
-          <F0Form formDefinition={formDefinition} formRef={formRef} />
-        </F0Dialog>
-      </>
+      <div className="flex flex-col items-start gap-3">
+        <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
+        {lastResult && (
+          <p className="text-f1-foreground-secondary text-sm">{lastResult}</p>
+        )}
+      </div>
     )
   },
 }
@@ -3081,6 +3124,87 @@ export const WithDefaultValuesParamsSchema: Story = {
         return { success: true, message: "Employee updated" }
       },
       submitConfig: { label: "Save Changes" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-section form definition with `defaultValuesParamsSchema`.
+ *
+ * Same as `WithDefaultValuesParamsSchema` but with a per-section schema:
+ * `defaultValues` is a function receiving typed params and returning values
+ * keyed by section ID. At mount time it's resolved with empty params (`{}`),
+ * showing loading indicators until the values arrive.
+ */
+export const WithDefaultValuesParamsSchemaPerSection: Story = {
+  render() {
+    const schema = {
+      personal: z.object({
+        firstName: f0FormField.text({
+          label: "First Name",
+          placeholder: "Enter first name",
+        }),
+        lastName: f0FormField.text({
+          label: "Last Name",
+          placeholder: "Enter last name",
+        }),
+      }),
+      contact: z.object({
+        email: f0FormField.email({
+          label: "Email",
+          placeholder: "you@example.com",
+        }),
+      }),
+    }
+
+    const employees: Record<
+      string,
+      { firstName: string; lastName: string; email: string }
+    > = {
+      "emp-1": {
+        firstName: "Jane",
+        lastName: "Doe",
+        email: "jane.doe@factorial.co",
+      },
+      "emp-2": {
+        firstName: "John",
+        lastName: "Smith",
+        email: "john.smith@factorial.co",
+      },
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "edit-employee-per-section",
+      schema,
+      sections: {
+        personal: { title: "Personal Information" },
+        contact: { title: "Contact Details" },
+      },
+      defaultValuesParamsSchema: z.object({
+        employeeId: z.string().describe("The ID of the employee to edit"),
+      }),
+      defaultValues: async ({ employeeId }) => {
+        await sleep(1500)
+        // At mount time params is {} so employeeId is undefined — fall back
+        const employee = employeeId ? employees[employeeId] : employees["emp-1"]
+        return {
+          personal: {
+            firstName: employee?.firstName ?? "",
+            lastName: employee?.lastName ?? "",
+          },
+          contact: { email: employee?.email ?? "" },
+        }
+      },
+      onSubmit: async ({ sectionId, data }) => {
+        await sleep(1000)
+        console.info(
+          `Section "${sectionId}" submitted: ${JSON.stringify(data, null, 2)}`
+        )
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
     })
 
     return <F0Form formDefinition={formDefinition} />

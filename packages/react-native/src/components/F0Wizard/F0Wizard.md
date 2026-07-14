@@ -33,6 +33,28 @@ The **React Native** `F0Wizard` is a standalone `View`-based container with no b
 
 This design keeps `F0Wizard` composable and avoids coupling it to any specific navigation or overlay library.
 
+## Keyboard handling
+
+The Back/Next footer is pinned to the bottom of the container. By default, step content scrolls inside a plain React Native `ScrollView`, so a text input low on the screen can end up hidden behind the keyboard.
+
+To keep a focused input visible **while the footer stays pinned**, inject a keyboard-aware scroll component via `ScrollComponent`. `F0Wizard` measures the footer height (via `onLayout`) and forwards it as `bottomOffset`, so the focused field is scrolled clear of the Back/Next buttons — no magic numbers, and it adapts to button size and locale.
+
+`F0Wizard` intentionally adds **no keyboard dependency of its own**. Consumers opt in by passing a component such as `react-native-keyboard-controller`'s `KeyboardAwareScrollView` (which requires `KeyboardProvider` mounted at the app root). A plain `ScrollView` ignores the extra `bottomOffset` prop, so the default behavior is unchanged.
+
+<!-- prettier-ignore -->
+```tsx
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller"
+
+<F0Wizard
+  ScrollComponent={KeyboardAwareScrollView}
+  steps={steps}
+  nextLabel="Next"
+  previousLabel="Back"
+  submitLabel="Submit"
+  onSubmit={handleSubmit}
+/>
+```
+
 ## Usage examples
 
 ### Basic

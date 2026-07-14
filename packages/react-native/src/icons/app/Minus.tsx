@@ -10,10 +10,8 @@ const SvgMinus = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 12H5"
+      fill="currentColor"
+      d="M18.5 11.1a.9.9 0 0 1 0 1.8h-13a.9.9 0 1 1 0-1.8z"
     />
   </Svg>
 )

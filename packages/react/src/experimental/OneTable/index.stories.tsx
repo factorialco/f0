@@ -246,6 +246,48 @@ export const InfoHeader: Story = {
   ),
 }
 
+export const RichInfoHeader: Story = {
+  render: () => (
+    <OneTable>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead
+            info={{
+              label: "About base salary",
+              title: "Annual base salary",
+              description: "Per employee · Per year · In Euro",
+              link: {
+                label: "Learn more",
+                onClick: () => alert("Open data catalog on this field"),
+              },
+            }}
+          >
+            Base salary
+          </TableHead>
+          <TableHead
+            info={{
+              title: "Access level",
+              description: "Access level assigned to the employee account.",
+            }}
+          >
+            Role
+          </TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {sampleData.map((row) => (
+          <TableRow key={row.id}>
+            <TableCell>{row.name}</TableCell>
+            <TableCell>€42,000</TableCell>
+            <TableCell>{row.role}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </OneTable>
+  ),
+}
+
 type SortState = "asc" | "desc" | undefined
 type SortColumn = "name" | "email" | "role"
 

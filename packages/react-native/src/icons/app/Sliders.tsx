@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Path, Rect } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgSliders = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -10,12 +10,9 @@ const SvgSliders = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M8 13v8M16 3v8M8 3v1M16 20v1"
+      fill="currentColor"
+      d="M8 12.1a.9.9 0 0 1 .9.9v8a.9.9 0 0 1-1.8 0v-8a.9.9 0 0 1 .9-.9m8 7a.9.9 0 0 1 .9.9v1a.9.9 0 0 1-1.8 0v-1a.9.9 0 0 1 .9-.9m1.5-6a2.4 2.4 0 0 1 0 4.8h-3a2.4 2.4 0 0 1 0-4.8zm-3 1.8a.6.6 0 0 0 0 1.2h3a.6.6 0 1 0 0-1.2zM16 2.1a.9.9 0 0 1 .9.9v8a.9.9 0 0 1-1.8 0V3a.9.9 0 0 1 .9-.9m-6.5 4a2.4 2.4 0 0 1 0 4.8h-3a2.4 2.4 0 1 1 0-4.8zm-3 1.8a.6.6 0 0 0 0 1.2h3a.6.6 0 0 0 0-1.2zM8 2.1a.9.9 0 0 1 .9.9v1a.9.9 0 0 1-1.8 0V3a.9.9 0 0 1 .9-.9"
     />
-    <Rect width={6} height={3} x={5} y={7} stroke="currentColor" rx={1.5} />
-    <Rect width={6} height={3} x={13} y={14} stroke="currentColor" rx={1.5} />
   </Svg>
 )
 const ForwardRef = forwardRef(SvgSliders)

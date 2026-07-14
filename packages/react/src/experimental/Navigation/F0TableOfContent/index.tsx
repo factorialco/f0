@@ -22,7 +22,8 @@ import { ScrollArea } from "@/ui/scrollarea"
 
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
-import { TOCItem, TOCItemAction, TOCProps } from "./types"
+import { TOCFooter } from "./TOCFooter"
+import { TOCAction, TOCItem, TOCItemAction, TOCProps } from "./types"
 import {
   calculateAdjustedIndex,
   convertToIds,
@@ -272,6 +273,7 @@ function TOCContent({
   onReorder,
   hideChildrenCounter = false,
   scrollable = true,
+  actions,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -986,6 +988,7 @@ function TOCContent({
           </div>
         )
       })()}
+      <TOCFooter actions={actions} />
     </nav>
   )
 }
@@ -1012,4 +1015,4 @@ export const F0TableOfContent = withDataTestId(
 )
 
 export { Item, ItemSectionHeader }
-export type { TOCItem, TOCItemAction, TOCProps }
+export type { TOCAction, TOCItem, TOCItemAction, TOCProps }

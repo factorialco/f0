@@ -16,6 +16,7 @@ vi.mock("../components/TextareaField", () => ({
   ),
 }))
 
+import { AiChatStateProvider } from "../../F0AiChat/providers/AiChatStateProvider"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 
 // Minimal MediaRecorder stand-in: stop() emits one chunk then fires onstop.
@@ -125,6 +126,61 @@ describe("F0AiChatTextArea voice dictation", () => {
         "world world"
       )
     )
+  })
+
+  it("fires tracking callbacks for dictation start and cancel", async () => {
+    installMediaMocks(async () => fakeStream())
+    const onDictationStart = vi.fn()
+    const onDictationCancel = vi.fn()
+    const user = userEvent.setup()
+
+    render(
+      <AiChatStateProvider
+        enabled
+        tracking={{ onDictationStart, onDictationCancel }}
+      >
+        <F0AiChatTextArea onSubmit={vi.fn()} onTranscribe={vi.fn()} />
+      </AiChatStateProvider>
+    )
+
+    await user.click(screen.getByRole("button", { name: /record audio/i }))
+    expect(onDictationStart).toHaveBeenCalledTimes(1)
+    expect(onDictationCancel).not.toHaveBeenCalled()
+
+    await user.click(
+      await screen.findByRole("button", { name: /cancel recording/i })
+    )
+    expect(onDictationCancel).toHaveBeenCalledTimes(1)
+  })
+
+  it("does not fire the cancel tracking callback when dictation is confirmed", async () => {
+    installMediaMocks(async () => fakeStream())
+    const onDictationStart = vi.fn()
+    const onDictationCancel = vi.fn()
+    const onTranscribe: TranscribeFn = vi.fn(async () => "hello")
+    const user = userEvent.setup()
+
+    render(
+      <AiChatStateProvider
+        enabled
+        tracking={{ onDictationStart, onDictationCancel }}
+      >
+        <F0AiChatTextArea onSubmit={vi.fn()} onTranscribe={onTranscribe} />
+      </AiChatStateProvider>
+    )
+
+    await user.click(screen.getByRole("button", { name: /record audio/i }))
+    await user.click(
+      await screen.findByRole("button", { name: /stop and transcribe/i })
+    )
+
+    await waitFor(() =>
+      expect(screen.getByRole("textbox", { name: "Message" })).toHaveValue(
+        "hello"
+      )
+    )
+    expect(onDictationStart).toHaveBeenCalledTimes(1)
+    expect(onDictationCancel).not.toHaveBeenCalled()
   })
 
   it("surfaces an error when microphone permission is denied", async () => {

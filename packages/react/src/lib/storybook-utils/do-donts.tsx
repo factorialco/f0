@@ -1,6 +1,7 @@
 import { FC, ReactNode } from "react"
 
 import { F0TagStatus } from "@/components/tags/F0TagStatus"
+import { cn } from "@/lib/utils"
 
 interface DoDontsProps {
   do: {
@@ -13,13 +14,25 @@ interface DoDontsProps {
     guidelines?: Array<string>
     children?: ReactNode
   }
+  /**
+   * Stack the Do and Don't blocks vertically instead of side by side. Use it when
+   * each block holds wide content (e.g. a full-width card example) that would
+   * overflow a half-width column. Defaults to the side-by-side layout.
+   */
+  stacked?: boolean
 }
 
 export const DoDonts: FC<DoDontsProps> = ({
   do: doExample,
   dont: dontExample,
+  stacked = false,
 }) => (
-  <div className="grid gap-4 [&:not(:first-child)]:mt-4 md:grid-cols-2">
+  <div
+    className={cn(
+      "grid gap-4 [&:not(:first-child)]:mt-4",
+      !stacked && "md:grid-cols-2"
+    )}
+  >
     <div className="flex flex-col gap-4 rounded-lg bg-f1-background-tertiary p-5">
       <div className="w-fit">
         <F0TagStatus text="Do" variant="positive" />

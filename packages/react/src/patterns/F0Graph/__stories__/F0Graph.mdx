@@ -9,8 +9,7 @@ import * as F0GraphStories from "./F0Graph.stories"
 
 A canvas for visualizing hierarchical relationships — org
 charts, team structures, project trees, account hierarchies —
-with built-in zoom, search, selection, and detail-panel
-interactions.
+with built-in zoom, expand/collapse, and selection.
 
 ## Quickstart
 
@@ -60,8 +59,6 @@ export function Example() {
 | `Lazy`               | On-demand subtree loading with `rootNodes` + `loadChildren` |
 | `LargeTree`          | Higher node-count tree (≥ 600 nodes) for stress testing     |
 | `Controlled`         | Controlled expansion and selection state                    |
-| `WithSearch`         | Declarative indexed search with auto-expand and fly-to      |
-| `WithDetailPanel`    | Right-side detail panel on node selection                   |
 | `StagedLoading`      | Progressive deferred node loading after initial paint       |
 | `StagedLoadingError` | Deferred loading error path and fallback behavior           |
 
@@ -94,9 +91,6 @@ A Graph is composed of:
 3. **Edges** — connectors between nodes; the default style adapts
    to the current zoom level
 4. **Controls** — zoom in / out, fit-to-view, selection mode, collapse
-5. **Search** — expandable pill that filters and flies to a result
-6. **Detail panel** — right-side panel that opens on node click
-   and centers the selected node in the remaining canvas space
 
 ---
 
@@ -157,32 +151,9 @@ Every node with `childrenCount > 0` shows an expander. Use
 ### Selection
 
 Single, multi, or none — set via `selectionMode`. Selection is
-decoupled from focus and from the detail panel.
-
-### Search
-
-Two flavors:
-
-- **Raw** — pass `searchValue` / `onSearchChange` and own the input. The
-  pill renders, you drive everything.
-
-- **Declarative** — pass a `searchable` config and F0Graph indexes the data,
-  filters results, expands ancestors of the chosen result, selects it, and
-  flies the viewport to it.
-
-<Canvas of={F0GraphStories.WithSearch} />
-
-### Detail panel
-
-When `detailPanel` is provided, clicking a node opens a right-side panel
-and centers the node in the remaining canvas space. The same
-panel powers two layouts:
-
-- **Default variant** — title, description, optional alert, optional menu
-- **Resource variant** — custom header (typically an avatar block) plus a
-  primary + secondary action row and an overflow menu
-
-<Canvas of={F0GraphStories.WithDetailPanel} />
+decoupled from focus. Search and node detail are owned by the consumer
+(e.g. OneDataCollection's search and an `F0Dialog` opened from the node
+click), not by F0Graph.
 
 ---
 
@@ -220,9 +191,6 @@ panel powers two layouts:
   scannability across a tree.
 - **Prefer counts over numbers in parentheses.** "12 members" reads better
   than "Engineering (12)".
-- **Action labels in the detail panel** follow the standard verb + noun
-  convention ("View profile", "Send message"). Capitalize only the first
-  word.
 - **Empty states matter.** A single root with no children is still a tree —
   render it; don't fall back to a list.
 
@@ -237,18 +205,6 @@ Land users on the variant that matches their task:
 - **Surveying the whole company** (100+ nodes) — start in `dot` and let
   users zoom in
 
-#### Reserve the detail panel for inspection
-
-The panel is for **reading and acting on a single node**. If a
-click should navigate away, link the node directly — don't open
-a panel only to put a "Go to page" button inside it.
-
-#### One primary action per panel
-
-Match the rest of F0: one primary button, one secondary,
-everything else in the overflow menu. The action row collapses
-gracefully when only a primary is provided.
-
 #### Keep edges quiet
 
 Default edges are intentionally low-contrast so the eye reads
@@ -259,11 +215,7 @@ color = team).
 ### Accessibility
 
 - The canvas is keyboard-navigable: arrow keys move focus between nodes,
-  `Enter` opens the detail panel, `Space` toggles expansion
-- The detail panel is a landmark region — provide a meaningful
-  `detailPanelAriaLabel` (defaults to "Details")
-- Search is a combobox with full keyboard support: type to filter,
-  ArrowDown / ArrowUp to navigate results, Enter to fly to and select
+  `Enter` selects the focused node, `Space` toggles expansion
 - Override the default English control labels via `controlLabels` for
   localized experiences
 
@@ -284,7 +236,6 @@ All public props on `<F0Graph>`, grouped by behavior.
 
 | Prop           | Type           | Default              | Description                                                        |
 | -------------- | -------------- | -------------------- | ------------------------------------------------------------------ |
-| `fullScreen`   | `boolean`      | `true`               | Whether the graph canvas fills its container.                      |
 | `nodeWidth`    | `number`       | `256`                | Layout sizing hint passed to the built-in layout engine.           |
 | `nodeHeight`   | `number`       | `56`                 | Layout sizing hint passed to the built-in layout engine.           |
 | `layoutEngine` | `LayoutEngine` | built-in tree engine | Custom layout engine. Overrides the built-in layout when provided. |
@@ -357,30 +308,11 @@ All public props on `<F0Graph>`, grouped by behavior.
 | `focusedNode`      | `string`      | —         | Imperatively focuses and fits the viewport to a specific node ID. |
 | `highlightedNodes` | `Set<string>` | empty set | Node IDs rendered with highlighted edge/node variants.            |
 
-### Search
-
-| Prop                   | Type                                   | Default | Description                                                                                                  |
-| ---------------------- | -------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
-| `searchValue`          | `string`                               | —       | Raw controlled search value. Mutually exclusive with `searchable`.                                           |
-| `onSearchChange`       | `(value: string \| undefined) => void` | —       | Raw controlled search change handler.                                                                        |
-| `searchLoading`        | `boolean`                              | —       | Loading state shown in the search input.                                                                     |
-| `searchable`           | `Searchable<T>`                        | —       | Declarative search config with built-in indexing, result selection, ancestor expansion, and fly-to behavior. |
-| `onSearchResultSelect` | `(id: string) => void`                 | —       | Optional callback fired when a search result is selected.                                                    |
-
 ### Canvas actions
 
-| Prop            | Type        | Default | Description                                                            |
-| --------------- | ----------- | ------- | ---------------------------------------------------------------------- |
-| `canvasActions` | `ReactNode` | —       | Optional action buttons rendered below the search input on the canvas. |
-
-### Detail panel
-
-| Prop                   | Type                                                                                                   | Default     | Description                                                                |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ | ----------- | -------------------------------------------------------------------------- |
-| `detailPanel`          | `(node: GraphNode<T>) => Omit<F0GraphDetailPanelProps, "open" \| "onClose" \| "width" \| "ariaLabel">` | —           | Enables the right-side panel and returns panel config for a selected node. |
-| `detailPanelAriaLabel` | `string`                                                                                               | `"Details"` | Optional landmark label for the detail panel.                              |
-| `detailPanelWidth`     | `number`                                                                                               | `384`       | Initial detail panel width in pixels.                                      |
-| `graphId`              | `string`                                                                                               | `"default"` | Stable ID used to scope persisted detail panel width in localStorage.      |
+| Prop            | Type        | Default | Description                                                     |
+| --------------- | ----------- | ------- | --------------------------------------------------------------- |
+| `canvasActions` | `ReactNode` | —       | Optional action buttons rendered at the top-left of the canvas. |
 
 ### Controls
 

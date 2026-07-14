@@ -1,6 +1,7 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import {
   CSSProperties,
+  ComponentProps,
   type ReactNode,
   forwardRef,
   useCallback,
@@ -14,6 +15,7 @@ import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
 import { Calculator, Check } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
+import { Input as ShadcnInput } from "@/ui/input"
 import { cn } from "@/lib/utils"
 import { Input } from "@/ui/input"
 import { InputMessages } from "@/components/F0InputField/components/InputMessages"
@@ -21,7 +23,7 @@ import { Label } from "@/components/F0InputField/components/Label"
 import { InputFieldStatus } from "@/components/F0InputField/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import { InputInternalProps } from "@/components/F0TextInput/internal"
+import { InputFieldProps } from "@/components/F0InputField"
 import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"
 
@@ -117,22 +119,47 @@ function NumberRow({
   )
 }
 
-export type NumberInputInternalProps = Omit<
-  InputInternalProps<string>,
-  "value" | "type" | "onChange"
-> & {
-  locale: string
-  value?: number | null
-  step?: number
-  min?: number
-  max?: number
-  maxDecimals?: number
-  onChange?: (value: number | null) => void
-  units?: string
-  extraContent?: ReactNode
-  inputWidth?: string
-  popover?: NumberInputPopoverConfig
-}
+export type NumberInputInternalProps = Pick<
+  ComponentProps<typeof ShadcnInput>,
+  "ref" | "id" | "aria-describedby" | "aria-invalid"
+> &
+  Pick<
+    InputFieldProps<string>,
+    | "autoFocus"
+    | "required"
+    | "disabled"
+    | "size"
+    | "placeholder"
+    | "clearable"
+    | "maxLength"
+    | "label"
+    | "labelIcon"
+    | "icon"
+    | "hideLabel"
+    | "name"
+    | "error"
+    | "status"
+    | "hint"
+    | "autocomplete"
+    | "buttonToggle"
+    | "hideMaxLength"
+    | "loading"
+    | "transparent"
+    | "onBlur"
+    | "readonly"
+  > & {
+    locale: string
+    value?: number | null
+    step?: number
+    min?: number
+    max?: number
+    maxDecimals?: number
+    onChange?: (value: number | null) => void
+    units?: string
+    extraContent?: ReactNode
+    inputWidth?: string
+    popover?: NumberInputPopoverConfig
+  }
 
 export const NumberInputInternal = forwardRef<
   HTMLInputElement,

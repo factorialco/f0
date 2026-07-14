@@ -41,7 +41,12 @@ export function DateCell<R extends RecordType>({
   }
 
   return (
-    <BaseCell showRightBorder={!isLastColumn} error={error} hint={hint}>
+    <BaseCell
+      showRightBorder={!isLastColumn}
+      error={error}
+      hint={hint}
+      cursor="pointer"
+    >
       <div
         className={cn(
           "flex w-full min-w-0 items-center",

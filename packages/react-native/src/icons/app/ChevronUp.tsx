@@ -10,10 +10,8 @@ const SvgChevronUp = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m18 14-6-6M6 14l6-6"
+      fill="currentColor"
+      d="M5.144 15.25a.9.9 0 0 1 0-1.273l6.22-6.22a.9.9 0 0 1 1.273 0l.01.011 6.21 6.209a.9.9 0 0 1-1.273 1.272L12 9.668 6.417 15.25a.9.9 0 0 1-1.273 0"
     />
   </Svg>
 )

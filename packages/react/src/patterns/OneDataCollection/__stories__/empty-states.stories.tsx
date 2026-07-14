@@ -130,6 +130,7 @@ export const CustomMessagesAndActions: Story = {
           },
           {
             label: "Clear filters",
+            variant: "neutral" as const,
             onClick: () => {
               console.log("clicked")
             },

@@ -1,0 +1,53 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import * as AlertStories from "./F0AvatarAlert.stories"
+
+<Meta of={AlertStories} />
+
+# AvatarAlert
+
+An avatar-sized status indicator that signals a state through an icon and color.
+
+---
+
+## Overview
+
+### Purpose
+
+Represent a specific, meaningful status of an item — critical, warning, info or
+positive.
+
+### Anatomy
+
+An alert avatar is square and pairs a status icon with a matching semantic
+color, both driven by the `type` prop: `critical`, `warning`, `info` or
+`positive`. It is available in sizes `sm`–`lg`.
+
+<Canvas of={AlertStories.Default} />
+
+<Controls of={AlertStories.Default} />
+
+### Variants
+
+#### Types
+
+Each type maps to a fixed icon and semantic color.
+
+<Canvas of={AlertStories.Snapshot} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- Flagging the status or severity of an item where an avatar-sized marker fits
+
+#### When NOT to use
+
+- As a generic attention-grabber or decoration — reserve it for a genuine
+  status; overusing it dilutes the signal
+- Representing an entity (person, team, …): use `F0Avatar` or the matching
+  `F0Avatar*` component
+- Inline or text-level status: use a Badge or Tag instead

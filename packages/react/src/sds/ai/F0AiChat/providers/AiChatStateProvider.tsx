@@ -21,7 +21,9 @@ import {
   type CanvasContent,
   type PendingContext,
   type PendingQuote,
+  type SidePanelContent,
   type VisualizationMode,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
 } from "../types"
 import { DEFAULT_CHAT_WIDTH } from "../utils/constants"
@@ -51,12 +53,14 @@ const noop = () => {}
 export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
+  side = "right",
   agent: initialAgent,
   initialMessage: initialInitialMessage,
   chatHeader,
   chatMessages,
   chatInput,
   welcomeScreenSuggestions: initialWelcomeScreenSuggestions = [],
+  welcomeScreenCards: initialWelcomeScreenCards = [],
   disclaimer,
   resizable = false,
   defaultVisualizationMode = "sidepanel",
@@ -114,6 +118,9 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [welcomeScreenSuggestions, setWelcomeScreenSuggestions] = useState<
     WelcomeScreenSuggestion[]
   >(initialWelcomeScreenSuggestions)
+  const [welcomeScreenCards, setWelcomeScreenCards] = useState<
+    F0AiChatWelcomeCard[]
+  >(initialWelcomeScreenCards)
   const i18n = useI18n()
   const [placeholders, setPlaceholders] = useState<string[]>([
     i18n.t("ai.inputPlaceholder"),
@@ -139,10 +146,18 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         if (prev === "canvas" && resolved !== "canvas") {
           setCanvasContent(null)
         }
+        // Fullscreen implies the panel is open. Open here, on the mode change
+        // itself, rather than via an effect on `open`: a reactive effect would
+        // also fire when the panel is *closing* (open → false while the mode is
+        // still "fullscreen"), reopening it as the bare AI chat. Closing must
+        // always close the panel fully, regardless of its content.
+        if (resolved === "fullscreen") {
+          setOpen(true)
+        }
         return resolved
       })
     },
-    [setVisualizationModeRaw]
+    [setVisualizationModeRaw, setOpen]
   )
 
   const previousVisualizationModeRef = useRef<VisualizationMode>("sidepanel")
@@ -204,12 +219,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
     }
   }, [open])
 
-  useEffect(() => {
-    if (visualizationMode === "fullscreen" && !open) {
-      setOpen(true)
-    }
-  }, [visualizationMode, open])
-
   const openCanvas = useCallback(
     (content: CanvasContent) => {
       if (visualizationMode !== "canvas") {
@@ -234,6 +243,28 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [activeGame, setActiveGame] = useState<"pong" | null>(null)
   const openGame = useCallback((game: "pong") => setActiveGame(game), [])
   const closeGame = useCallback(() => setActiveGame(null), [])
+
+  // Generic side-panel content. When set, `<F0AiChat />` renders it inside the
+  // same SidebarWindow shell instead of the chat — so any view (a conversation,
+  // …) inherits resize + fullscreen. Setting content opens the panel, mirroring
+  // `openCanvas`. Only one content at a time: a single state slot.
+  const [panelContent, setPanelContentState] =
+    useState<SidePanelContent | null>(null)
+  const setPanelContent = useCallback(
+    (content: SidePanelContent | null) => {
+      setPanelContentState(content)
+      if (content && !open) {
+        setOpen(true)
+      }
+    },
+    [open, setOpen]
+  )
+  const clearPanelContent = useCallback(() => setPanelContentState(null), [])
+
+  // Which edge the whole panel docks to (AI chat, hosted content and canvas).
+  // Initialised from the `side` prop ("right" by default); hosts can also flip
+  // it at runtime via `setPanelSide` for a chat-first experience.
+  const [panelSide, setPanelSide] = useState<"left" | "right">(side)
 
   return (
     <AiChatStateContext.Provider
@@ -262,6 +293,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         chatInput,
         welcomeScreenSuggestions,
         setWelcomeScreenSuggestions,
+        welcomeScreenCards,
+        setWelcomeScreenCards,
         onThumbsUp,
         onThumbsDown,
         placeholders,
@@ -296,6 +329,11 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         setPendingContext,
         pendingQuote,
         setPendingQuote,
+        panelContent,
+        setPanelContent,
+        clearPanelContent,
+        panelSide,
+        setPanelSide,
       }}
     >
       {children}
@@ -327,6 +365,7 @@ const NULL_KEYS = new Set<ProviderKey>([
   "pendingContext",
   "pendingQuote",
   "activeGame",
+  "panelContent",
 ])
 
 const UNDEFINED_KEYS = new Set<ProviderKey>([
@@ -353,11 +392,13 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   chatWidth: DEFAULT_CHAT_WIDTH,
+  panelSide: "right",
   visualizationMode: "sidepanel",
   mode: "chat",
   shouldPlayEntranceAnimation: true,
   placeholders: [],
   welcomeScreenSuggestions: [],
+  welcomeScreenCards: [],
 }
 
 const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {

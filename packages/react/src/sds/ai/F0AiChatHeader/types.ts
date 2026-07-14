@@ -39,6 +39,13 @@ export type F0AiChatHeaderProps = {
   /** Legacy variant gate: only renders the "new chat" button when true. */
   hasMessages?: boolean
 
+  /**
+   * Minimal header: render only the expand + close controls (no title, new
+   * chat or credits popover). Use when a sidebar owns the chat navigation and
+   * the credits/settings popover (see `F0AiChatCreditsButton`).
+   */
+  compact?: boolean
+
   /** Credits configuration. When present, renders the credits popover button. */
   credits?: AiChatCredits
 

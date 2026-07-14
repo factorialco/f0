@@ -396,6 +396,7 @@ function SurveyAnsweringFormInline({
   labels,
   useUpload,
   datasets,
+  hideResourceHeader = false,
 }: SurveyAnsweringFormInlineReadonlyProps) {
   const { t } = useI18n()
 
@@ -439,13 +440,15 @@ function SurveyAnsweringFormInline({
       datasets={datasets}
     >
       <div className="mx-auto flex w-full max-w-3xl flex-col">
-        <div className="mb-6">
-          <ResourceHeader
-            title={title}
-            description={description}
-            {...resourceHeader}
-          />
-        </div>
+        {!hideResourceHeader && (
+          <div className="mb-6">
+            <ResourceHeader
+              title={title}
+              description={description}
+              {...resourceHeader}
+            />
+          </div>
+        )}
         {loading ? (
           <SurveyAllQuestionsLoadingSkeleton />
         ) : !hasQuestions ? (

@@ -123,6 +123,44 @@ function newComponentFromTitle(
   };
 }
 
+// Organisational "area" folders a component dir sits directly inside.
+const AREA_SEGMENTS = new Set([
+  "components", "patterns", "kits", "lib", "library", "layouts", "hooks", "ui",
+  "experimental", "sds", "ai", "surveys", "home", "communities", "charts",
+  "navigation", "information", "actions", "inputs", "utilities", "data",
+  "datacollection", "visualizations", "post", "feedback", "forms",
+]);
+
+/**
+ * Detect a brand-new component from ADDED source files: the component's ROOT
+ * file (`index.tsx` or `<Component>.tsx`) added, with the component dir directly
+ * inside a known area folder. Catches new components whose PR title doesn't use
+ * the "add <Component> component" phrasing (e.g. "add slider" → F0Slider), while
+ * ignoring sub-files added inside an existing component.
+ */
+function newComponentFromFiles(
+  files: PrFile[],
+): { component: string; kind: "pattern" | "component" } | null {
+  const cands: Array<{ comp: string; depth: number; kind: "pattern" | "component" }> = [];
+  for (const f of files) {
+    if (f.status !== "added" || !f.filename.startsWith(REACT_SRC)) continue;
+    const parts = f.filename.split("/");
+    const file = parts[parts.length - 1];
+    const comp = parts[parts.length - 2];
+    const parent = parts[parts.length - 3];
+    if (!isComponentName(comp)) continue;
+    const isRoot = /^index\.tsx?$/.test(file) || file === `${comp}.tsx`;
+    if (!isRoot || !parent || !AREA_SEGMENTS.has(parent.toLowerCase())) continue;
+    cands.push({
+      comp,
+      depth: parts.length,
+      kind: /\/patterns\//.test(f.filename) ? "pattern" : "component",
+    });
+  }
+  cands.sort((a, b) => a.depth - b.depth);
+  return cands.length ? { component: cands[0].comp, kind: cands[0].kind } : null;
+}
+
 /**
  * Resolve a component name from the PR title — the last PascalCase / F0·One
  * token that actually exists in Storybook. Used when the conventional scope is
@@ -203,6 +241,11 @@ export interface PrFacts {
   unclassified: string[];
 }
 
+// Explicit promotion in the PR title — catches "promote to stable" PRs that
+// only flip the tag / transfer CODEOWNERS without adding new MDX docs.
+const PROMOTE_RE =
+  /\bpromot\w+\b[^.]*\bstable\b|\bmark\w*\s+as\s+stable\b|\bstabili[sz]\w+\b/i;
+
 export function classifyMergedPrs(
   prs: PrWithFiles[],
   storyIndex?: StoryIndex,
@@ -234,7 +277,13 @@ export function classifyMergedPrs(
     // 1. New component/pattern — the PR title introduces it ("add <Component>").
     //    Adding a feature to an existing component is NOT new — it's an
     //    enhancement.
-    const newComp = newComponentFromTitle(subject);
+    // Title signal works for any type; the file signal only for feat/perf so a
+    // `refactor` that MOVES a component (new file in a new path) isn't "new".
+    const newComp =
+      newComponentFromTitle(subject) ??
+      (type === "feat" || type === "perf"
+        ? newComponentFromFiles(pr.files)
+        : null);
     if (newComp) {
       newEntries.push({
         component: newComp.component,
@@ -247,20 +296,33 @@ export function classifyMergedPrs(
       continue;
     }
 
-    // 2. Stabilization — the component's manual MDX docs were added (the final
-    //    Definition-of-Done step). NOT inferred from the `stable` tag alone.
-    //    AND only counts if the author is on the F0/Foundations team: only
-    //    Foundations promotes to stable; other teams can ship new components
-    //    but can't mark something stable.
-    const stabilizedComps = stabilizedComponents(pr.files);
-    if (stabilizedComps.length > 0) {
+    // 2. Stabilization (Foundations only). Two signals:
+    //    (a) the PR ADDS the component's manual MDX docs (DoD complete), or
+    //    (b) the PR title is an explicit promotion ("promote … to stable",
+    //        "stabilize", "mark as stable") — e.g. a tag flip with no new docs.
+    //    The `stable` tag alone is NOT trusted, and only Foundations promotes:
+    //    other teams can ship new components but can't mark something stable.
+    const stabilizedComps = new Set(stabilizedComponents(pr.files));
+    if (PROMOTE_RE.test(pr.title)) {
+      const c = isComponentName(scope)
+        ? scope
+        : pr.files
+            .map((f) => componentFromMdxPath(f.filename))
+            .find((x): x is string => x !== null) ??
+          reactStories
+            .map((f) => componentFromStoryPath(f.filename))
+            .find((x): x is string => x !== null) ??
+          null;
+      if (c) stabilizedComps.add(c);
+    }
+    if (stabilizedComps.size > 0) {
       const byFoundations =
         !foundationsAuthors || foundationsAuthors.has(pr.author);
       if (byFoundations) {
         for (const component of stabilizedComps) {
           stabilized.push({
             component,
-            summary: "Now documented and stable — safe to use in production",
+            summary: "Now stable — safe to use in production",
             storybook: true,
             author: pr.author,
           });
@@ -268,8 +330,8 @@ export function classifyMergedPrs(
         contributors.add(pr.author);
         continue;
       }
-      // MDX docs added by a non-Foundations author → NOT a stable promotion.
-      // Fall through and let it be classified as an enhancement/other instead.
+      // Detected as a promotion but by a non-Foundations author → not stable.
+      // Fall through and let it be classified as an enhancement/other.
     }
 
     // 3. Breaking change
@@ -354,11 +416,31 @@ export function classifyMergedPrs(
     });
   }
 
+  // One component → one section. Priority: stabilized > new > breaking >
+  // enhancements. A component promoted/new this week shouldn't also be repeated
+  // under Enhancements for its other PRs.
+  const claimed = new Set<string>();
+  const ckey = (c: string) => c.trim().toLowerCase();
+  for (const e of stabilized) claimed.add(ckey(e.component));
+  const newDeduped = newEntries.filter((e) => !claimed.has(ckey(e.component)));
+  for (const e of newDeduped) claimed.add(ckey(e.component));
+  for (const e of breaking) claimed.add(ckey(e.component));
+  const enhDeduped = enhancements.filter((e) => !claimed.has(ckey(e.component)));
+
+  // "What's new" only announces components that are actually browsable in
+  // Storybook — internal components with no docs page (e.g. PresetFormDialog)
+  // aren't something the team can go see/use, so we drop them from the section.
+  const browsableNew = storyIndex
+    ? newDeduped.filter(
+        (e) => resolveStoryUrl(e.component, storyIndex.urlByKey) !== null,
+      )
+    : newDeduped;
+
   const skeleton: SummaryJson = {
     sections: {
-      ...(newEntries.length > 0 ? { new: newEntries } : {}),
+      ...(browsableNew.length > 0 ? { new: browsableNew } : {}),
       ...(stabilized.length > 0 ? { stabilized } : {}),
-      ...(enhancements.length > 0 ? { enhancements } : {}),
+      ...(enhDeduped.length > 0 ? { enhancements: enhDeduped } : {}),
       ...(breaking.length > 0 ? { breaking_changes: breaking } : {}),
     },
   };

@@ -39,27 +39,17 @@ exports[`F0Badge Snapshot - all sizes 1`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -104,27 +94,17 @@ exports[`F0Badge Snapshot - all sizes 2`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -169,27 +149,17 @@ exports[`F0Badge Snapshot - all sizes 3`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -234,27 +204,17 @@ exports[`F0Badge Snapshot - all sizes 4`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -299,27 +259,17 @@ exports[`F0Badge Snapshot - all variants 1`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -364,27 +314,17 @@ exports[`F0Badge Snapshot - all variants 2`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -429,27 +369,17 @@ exports[`F0Badge Snapshot - all variants 3`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -494,27 +424,17 @@ exports[`F0Badge Snapshot - all variants 4`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -559,27 +479,17 @@ exports[`F0Badge Snapshot - all variants 5`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>
@@ -624,27 +534,17 @@ exports[`F0Badge Snapshot - default 1`] = `
     }
   >
     <RNSVGPath
-      d="M12 5v14M12 12H5h14"
+      d="M12.006 4.836a.9.9 0 0 1 .9.9v5.37h5.37a.9.9 0 0 1 0 1.8h-5.37v5.37a.9.9 0 0 1-1.8 0v-5.37h-5.37a.9.9 0 0 1 0-1.8h5.37v-5.37a.9.9 0 0 1 .9-.9"
       fill={
-        {
-          "payload": 4278190080,
-          "type": 0,
-        }
-      }
-      propList={
-        [
-          "stroke",
-          "strokeLinecap",
-          "strokeLinejoin",
-        ]
-      }
-      stroke={
         {
           "type": 2,
         }
       }
-      strokeLinecap={1}
-      strokeLinejoin={1}
+      propList={
+        [
+          "fill",
+        ]
+      }
     />
   </RNSVGGroup>
 </RNSVGSvgView>

@@ -5,6 +5,7 @@ import { AlertTagCell } from "./types/alertTag"
 import { AmountCell } from "./types/amount"
 import { AvatarListCell } from "./types/avatarList"
 import { BarSeriesCell } from "./types/barSeries"
+import { CategoryBarChartCell } from "./types/categoryBarChart"
 import { CompanyCell } from "./types/company"
 import { CompoundCell } from "./types/compound"
 import { CountCell } from "./types/count"
@@ -55,6 +56,7 @@ export const valueDisplayRenderers = {
   percentage: PercentageCell,
   progressBar: ProgressBarCell,
   barSeries: BarSeriesCell,
+  categoryBarChart: CategoryBarChartCell,
   hourDistribution: HourDistributionCell,
   company: CompanyCell,
   team: TeamCell,

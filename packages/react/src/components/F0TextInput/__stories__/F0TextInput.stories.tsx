@@ -11,7 +11,7 @@ import { inputSizes } from "../types"
 const meta = {
   component: F0TextInput,
   title: "Inputs/Text input",
-  tags: ["autodocs", "experimental"],
+  tags: ["stable", "!autodocs"],
   args: {
     type: "text",
     disabled: false,
@@ -20,6 +20,7 @@ const meta = {
   argTypes: {
     type: {
       control: { type: "radio" },
+      options: ["text", "email", "password", "url", "tel", "private", "file"],
     },
     value: {
       control: { type: "text" },
@@ -56,13 +57,7 @@ const meta = {
       defaultValue: false,
     },
   },
-  parameters: {
-    docs: {
-      description: {
-        component: "A text input field",
-      },
-    },
-  },
+  parameters: {},
   decorators: [
     (Story) => (
       <div className="max-w-96">
@@ -95,6 +90,16 @@ export const Password: Story = {
   args: {
     label: "Label text here",
     type: "password",
+    disabled: false,
+    placeholder: "Placeholder text here",
+  },
+}
+
+export const Private: Story = {
+  args: {
+    label: "Social security number",
+    type: "private",
+    value: "123-45-6789",
     disabled: false,
     placeholder: "Placeholder text here",
   },
@@ -209,6 +214,7 @@ export const Snapshot: Story = {
       { ...base, error: true },
       { ...base, icon: Placeholder },
       { ...base, icon: Placeholder, type: "password" },
+      { ...base, type: "private" as const, value: "Value" },
       { ...base, status: { type: "error" as const, message: "Error message" } },
       {
         ...base,

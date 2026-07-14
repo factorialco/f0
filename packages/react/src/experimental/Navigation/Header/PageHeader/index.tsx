@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { ReactElement, useRef, useState } from "react"
+import { ReactElement, useContext, useRef, useState } from "react"
 
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
 
@@ -23,6 +23,18 @@ import { Breadcrumbs, BreadcrumbsProps } from "../Breadcrumbs"
 import { FavoriteButton } from "../Favorites"
 import { NavigationProps, PageNavigation } from "../PageNavigation"
 import { ProductUpdates, ProductUpdatesProp } from "../ProductUpdates"
+import { PageHeaderNavigationContext } from "./PageHeaderNavigationContext"
+
+export {
+  PageHeaderNavigationContext,
+  PageHeaderNavigationProvider,
+  usePageHeaderNavigation,
+} from "./PageHeaderNavigationContext"
+export {
+  usePageHeaderItemNavigation,
+  type PageHeaderItemNavigationInput,
+  type UsePageHeaderItemNavigationConfig,
+} from "./usePageHeaderItemNavigation"
 
 export type PageAction = {
   label: string
@@ -68,6 +80,11 @@ type HeaderProps = {
     whenEnabled?: string
   }
   oneSwitchAutoOpen?: boolean
+  /**
+   * Hide the per-page One switch. Use when One is reachable from elsewhere
+   * (e.g. a sidebar tab) so the page header doesn't duplicate the entry point.
+   */
+  hideOneSwitch?: boolean
 }
 
 export function PageHeader({
@@ -81,8 +98,13 @@ export function PageHeader({
   favorites,
   oneSwitchTooltip,
   oneSwitchAutoOpen,
+  hideOneSwitch = false,
 }: HeaderProps) {
   const { sidebarState, toggleSidebar } = useSidebar()
+  const contextNavigation = useContext(PageHeaderNavigationContext)
+  // The prop always wins; context is the fallback for pages that inject
+  // navigation from below (e.g. useDataCollectionItemNavigation).
+  const effectiveNavigation = navigation ?? contextNavigation ?? undefined
 
   const breadcrumbsTree: typeof breadcrumbs = [
     {
@@ -192,11 +214,11 @@ export function PageHeader({
         )}
         {!embedded &&
           hasStatus &&
-          (navigation || hasActions || hasProductUpdates) && (
+          (effectiveNavigation || hasActions || hasProductUpdates) && (
             <div className="h-4 w-px bg-f1-border-secondary" />
           )}
-        {navigation && <PageNavigation {...navigation} />}
-        {navigation && hasActions && (
+        {effectiveNavigation && <PageNavigation {...effectiveNavigation} />}
+        {effectiveNavigation && hasActions && (
           <div className="h-4 w-px bg-f1-border-secondary" />
         )}
         {(hasProductUpdates || hasActions) && (
@@ -219,10 +241,12 @@ export function PageHeader({
           </div>
         )}
         <div className="flex items-center gap-3">
-          <F0OneSwitch
-            tooltip={oneSwitchTooltip}
-            autoOpen={oneSwitchAutoOpen}
-          />
+          {!hideOneSwitch && (
+            <F0OneSwitch
+              tooltip={oneSwitchTooltip}
+              autoOpen={oneSwitchAutoOpen}
+            />
+          )}
           <OnePromotionSwitch />
         </div>
       </div>

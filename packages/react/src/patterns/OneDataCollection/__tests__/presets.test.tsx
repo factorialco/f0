@@ -143,14 +143,15 @@ const renderHarness = (props: Parameters<typeof Harness>[0] = {}) => {
   return { ...result, set }
 }
 
-const openSettingsAndSwitchTo = async (
+// Visualizations are switched from the header VisualizationSwitcher (a
+// segmented control), not from Settings — each segment is a button labelled
+// with the visualization name.
+const switchVisualizationTo = async (
   user: ReturnType<typeof userEvent.setup>,
   visualizationName: string
 ) => {
-  await user.click(screen.getByRole("button", { name: "Settings" }))
-  await user.click(
-    await screen.findByRole("button", { name: visualizationName })
-  )
+  const segment = await screen.findByText(visualizationName)
+  await user.click(segment.closest("button") ?? segment)
 }
 
 // A non-view-mode change: clicking the sortable "Name" column header toggles
@@ -185,7 +186,7 @@ describe("OneDataCollection - presets", () => {
     await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
 
     // Switching only the view mode is too transient to warrant a preset.
-    await openSettingsAndSwitchTo(user, "Card view")
+    await switchVisualizationTo(user, "Card")
 
     expect(
       screen.queryByRole("button", { name: "Save view" })
@@ -370,7 +371,7 @@ describe("OneDataCollection - presets", () => {
     )
 
     // Switch the view mode (to a non-default view) on top of the developer preset.
-    await openSettingsAndSwitchTo(user, "Card view")
+    await switchVisualizationTo(user, "Card")
 
     // The captured view no longer matches → the preset de-selects...
     await waitFor(() =>
@@ -443,7 +444,7 @@ describe("OneDataCollection - presets", () => {
     // (Switching back to the default view restores the baseline filters, so no
     // "Save view" is offered here — see the table → card case above for
     // the diverged-from-a-preset save affordance.)
-    await openSettingsAndSwitchTo(user, "Table view")
+    await switchVisualizationTo(user, "Table")
 
     await waitFor(() =>
       expect(chip()).not.toHaveClass("bg-f1-background-selected-secondary")
@@ -533,7 +534,7 @@ describe("OneDataCollection - presets", () => {
     await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
 
     // Unpersisted change before any preset: switch to the Card view.
-    await openSettingsAndSwitchTo(user, "Card view")
+    await switchVisualizationTo(user, "Card")
     await waitFor(() =>
       expect(onState.mock.calls.at(-1)?.[0]?.visualization).toBe(1)
     )
@@ -892,5 +893,42 @@ describe("OneDataCollection - share preset", () => {
       expect(saved.label).toBe("Imported view")
       expect(saved.filter).toEqual({ department: ["eng"] })
     })
+  })
+})
+
+describe("OneDataCollection - presets render resilience", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it("keeps rendering and fetching data when the presets row throws during render", async () => {
+    // Silence React's error-boundary logging and our own degradation report
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {})
+
+    renderHarness({
+      presets: [
+        {
+          id: "broken",
+          label: "Broken preset",
+          filter: {},
+          // Runs during the presets row render — simulates any render crash
+          // in FiltersPresets (e.g. the OverflowList stale-items regression)
+          itemsCount: () => {
+            throw new Error("presets render crash")
+          },
+        },
+      ],
+    })
+
+    // The collection survives: data is fetched and rows render
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+    expect(screen.getByText("Jane")).toBeInTheDocument()
+
+    // The presets row degraded to nothing instead of taking down the tree
+    expect(screen.queryByText("Broken preset")).not.toBeInTheDocument()
+    expect(consoleError).toHaveBeenCalledWith(
+      "[f0-react] FiltersPresets failed to render; hiding the presets row",
+      expect.any(Error)
+    )
   })
 })

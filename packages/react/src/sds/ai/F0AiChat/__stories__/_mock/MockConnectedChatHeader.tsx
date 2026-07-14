@@ -17,7 +17,12 @@ import { filterNonRenderableMessages } from "./turn-utils"
  * threads. Selecting a thread swaps the message list to that thread's
  * canned snapshot (`mock.loadThread(id, title)`).
  */
-export const MockConnectedChatHeader = () => {
+export const MockConnectedChatHeader = ({
+  compact = false,
+}: {
+  /** Minimal header (expand + close only) — used when a sidebar owns chat nav. */
+  compact?: boolean
+} = {}) => {
   const {
     messages,
     clear,
@@ -76,6 +81,7 @@ export const MockConnectedChatHeader = () => {
   return (
     <>
       <F0AiChatHeader
+        compact={compact}
         historyEnabled={historyEnabled}
         currentThreadTitle={currentThreadTitle}
         fullscreen={fullscreen}

@@ -35,6 +35,7 @@ export type RenderIfCondition =
   | SelectRenderIfCondition
   | DateRenderIfCondition
   | DateRangeRenderIfCondition
+  | PeriodRenderIfCondition
 
 /**
  * Function type for dynamic renderIf evaluation based on form values
@@ -58,6 +59,7 @@ import type { BooleanRenderIfCondition } from "./checkbox/types"
 import type { DateRenderIfCondition } from "./date/types"
 import type { DateRangeRenderIfCondition } from "./daterange/types"
 import type { NumberRenderIfCondition } from "./number/types"
+import type { PeriodRenderIfCondition } from "./period/types"
 import type { SelectRenderIfCondition } from "./select/types"
 import type { TextRenderIfCondition } from "./text/types"
 
@@ -69,6 +71,7 @@ export type {
   SelectRenderIfCondition,
   DateRenderIfCondition,
   DateRangeRenderIfCondition,
+  PeriodRenderIfCondition,
 }
 
 // ============================================================================
@@ -152,6 +155,7 @@ export type FieldType =
   | "time"
   | "datetime"
   | "daterange"
+  | "period"
   | "richtext"
   | "file"
   | "cardSelect"
@@ -184,6 +188,7 @@ export type {
   F0DateRangeField,
   DateRangeValue,
 } from "./daterange/types"
+export type { F0PeriodConfig, F0PeriodField } from "./period/types"
 export type {
   F0RichTextConfig,
   F0RichTextField,
@@ -219,6 +224,7 @@ import type { F0DateRangeField } from "./daterange/types"
 import type { F0DurationField } from "./duration/types"
 import type { F0FileField } from "./file/types"
 import type { F0NumberField } from "./number/types"
+import type { F0PeriodField } from "./period/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0SelectField } from "./select/types"
 import type { F0SwitchField } from "./switch/types"
@@ -241,6 +247,7 @@ export type F0Field =
   | F0TimeField
   | F0DateTimeField
   | F0DateRangeField
+  | F0PeriodField
   | F0RichTextField
   | F0FileField
   | F0CardSelectField

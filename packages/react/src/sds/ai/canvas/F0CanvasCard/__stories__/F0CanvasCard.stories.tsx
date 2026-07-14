@@ -11,7 +11,7 @@ const meta = {
   parameters: {
     layout: "centered",
   },
-  tags: ["autodocs"],
+  tags: ["autodocs", "deprecated"],
   decorators: [
     (Story) => (
       <div className="w-96">

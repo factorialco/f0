@@ -1,7 +1,15 @@
-import { F0CardRow } from "@/components/F0Card"
+import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
 
 import { F0HILActionConfirmationProps } from "./types"
 
+/**
+ * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
+ * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
+ * `rejectAction` for the pending state, `status` for the resolved outcome, and
+ * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * don't add new usages.
+ * @removeIn 5.0.0
+ */
 export const F0HILActionConfirmation = ({
   text,
   description,
@@ -13,7 +21,7 @@ export const F0HILActionConfirmation = ({
   stackAt = "sm",
 }: F0HILActionConfirmationProps) => {
   return (
-    <F0CardRow
+    <F0CardHorizontal
       title={text}
       description={description}
       avatar={avatar}

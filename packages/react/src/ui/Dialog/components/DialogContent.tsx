@@ -13,6 +13,13 @@ export const DialogContent = forwardRef<
     wrapperClassName?: string
     withTranslateAnimation?: boolean
     container?: HTMLElement | null
+    /**
+     * Id of the element to portal into when no explicit `container` is given.
+     * Resolved at mount; falls back to `#content`, then to `document.body`
+     * (Radix default) when neither element exists.
+     * @default "content"
+     */
+    defaultContainerId?: string
   }
 >(
   (
@@ -22,6 +29,7 @@ export const DialogContent = forwardRef<
       children,
       withTranslateAnimation = true,
       container: propContainer,
+      defaultContainerId = "content",
       ...props
     },
     ref
@@ -32,9 +40,17 @@ export const DialogContent = forwardRef<
       if (propContainer !== undefined) {
         setContainer(propContainer)
       } else {
-        setContainer(document.getElementById("content"))
+        // Prefer the requested default target (e.g. the top-level overlay root
+        // for center/fullscreen modals, escaping app stacking contexts), then
+        // the app shell's `#content`, and finally the document body so the
+        // dialog still renders in contexts that have neither.
+        setContainer(
+          document.getElementById(defaultContainerId) ??
+            document.getElementById("content") ??
+            document.body
+        )
       }
-    }, [propContainer])
+    }, [propContainer, defaultContainerId])
 
     if (container === undefined) return null
 

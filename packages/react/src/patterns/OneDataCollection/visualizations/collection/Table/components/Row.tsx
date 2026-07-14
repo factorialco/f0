@@ -1,4 +1,4 @@
-import { forwardRef } from "react"
+import { forwardRef, useEffect } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -7,6 +7,7 @@ import { TableCell, TableRow } from "@/experimental/OneTable"
 import {
   GroupingDefinition,
   RecordType,
+  SelectionId,
   SortingsDefinition,
 } from "@/hooks/datasource"
 import { NestedVariant } from "@/hooks/datasource/types/nested.typings"
@@ -67,7 +68,7 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
-  /** Optional predicate to mark a row as reference row with slanted background pattern. */
+  /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
   cellRenderer?: React.ComponentType<
@@ -77,6 +78,8 @@ export type RowProps<
   rowWrapper?: React.ComponentType<RowWrapperProps<R>>
   fromVisualization?: TableVisualizationType
   headerGroups: HeaderGroupEntry[] | null
+  registerSelectable?: (id: SelectionId, item: R) => void
+  unregisterSelectable?: (id: SelectionId) => void
 }
 
 export type AddRowAction = {
@@ -111,6 +114,7 @@ const referenceTypeClasses: Record<ReferenceType, string> = {
   none: "",
   striped:
     "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]",
+  striked: "[&_*]:line-through text-f1-foreground-secondary",
 }
 
 const RowComponentInner = <
@@ -143,6 +147,8 @@ const RowComponentInner = <
     rowWrapper,
     fromVisualization,
     headerGroups,
+    registerSelectable,
+    unregisterSelectable,
   }: RowProps<
     R,
     Filters,
@@ -192,6 +198,15 @@ const RowComponentInner = <
     nestedRowProps?.hasLoadedChildren === undefined ||
     nestedRowProps?.hasLoadedChildren
 
+  // Only the row that owns the rendered checkbox registers (not the one
+  // delegating to NestedRow), so each selectable id is registered once.
+  const willRenderOwnRow = !(rowWithChildren && hasChildrenLoaded)
+  useEffect(() => {
+    if (id === undefined || !willRenderOwnRow || !registerSelectable) return
+    registerSelectable(id, item)
+    return () => unregisterSelectable?.(id)
+  }, [id, item, willRenderOwnRow, registerSelectable, unregisterSelectable])
+
   if (rowWithChildren && hasChildrenLoaded) {
     return (
       <NestedRow
@@ -213,6 +228,8 @@ const RowComponentInner = <
         headerGroups={headerGroups}
         key={key}
         fromVisualization={fromVisualization}
+        registerSelectable={registerSelectable}
+        unregisterSelectable={unregisterSelectable}
       />
     )
   }

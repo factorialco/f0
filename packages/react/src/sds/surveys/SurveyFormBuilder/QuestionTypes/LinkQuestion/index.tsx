@@ -42,21 +42,19 @@ export const LinkQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
-        <F0FormField
-          field={field}
-          value={answering ? (value ?? "") : placeholder}
-          onChange={(v) => {
-            onQuestionChange?.({
-              ...baseQuestionComponentProps,
-              type: "link",
-              value: (v as string) || null,
-            })
-          }}
-          disabled={disabled}
-          hideLabel
-        />
-      </div>
+      <F0FormField
+        field={field}
+        value={answering ? (value ?? "") : placeholder}
+        onChange={(v) => {
+          onQuestionChange?.({
+            ...baseQuestionComponentProps,
+            type: "link",
+            value: (v as string) || null,
+          })
+        }}
+        disabled={disabled}
+        hideLabel
+      />
     </BaseQuestion>
   )
 }

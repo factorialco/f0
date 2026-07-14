@@ -115,7 +115,9 @@ export function MetricItem<Filters extends FiltersDefinition>({
         <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">
           <div className="flex items-baseline gap-3">
             <span className="whitespace-nowrap text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
-              {formatValue(data.value, item.format, item.decimals)}
+              {item.valueFormatter
+                ? item.valueFormatter(data.value)
+                : formatValue(data.value, item.format, item.decimals)}
             </span>
             {trend && trend.direction !== "flat" && (
               <div className="flex shrink-0 items-center">

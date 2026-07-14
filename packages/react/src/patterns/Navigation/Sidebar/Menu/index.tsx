@@ -1,6 +1,5 @@
-import { LayoutGroup, motion, Reorder, useDragControls } from "motion/react"
+import { LayoutGroup, Reorder, useDragControls } from "motion/react"
 import {
-  ReactNode,
   RefObject,
   useCallback,
   useEffect,
@@ -11,30 +10,25 @@ import {
 
 import { AvatarVariant, F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon, IconType } from "@/components/F0Icon"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { Counter } from "@/ui/Counter"
 import { Dropdown, DropdownItem } from "@/experimental/Navigation/Dropdown"
 import { NavigationItem } from "@/experimental/Navigation/utils"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
-import {
-  ChevronDown,
-  Delete,
-  EllipsisHorizontal,
-  MoveDown,
-  MoveUp,
-} from "@/icons/app"
-import { useReducedMotion } from "@/lib/a11y"
+import { Delete, EllipsisHorizontal, MoveDown, MoveUp } from "@/icons/app"
 import { Link, useNavigation } from "@/lib/linkHandler"
 import { useI18n } from "@/lib/providers/i18n"
 import { useTouchScreen } from "@/lib/useTouchScreen"
 import { cn, focusRing } from "@/lib/utils"
-import { Collapsible, CollapsibleContent } from "@/ui/collapsible"
 
+import { SidebarCollapsibleSection } from "../CollapsibleSection"
 import { DragProvider, useDragContext } from "./DragContext"
 
 export interface MenuItem extends NavigationItem {
   icon: IconType
   badge?: number
+  tag?: string
 }
 
 type FavoriteMenuItem = (
@@ -76,7 +70,7 @@ const MenuItemContent = ({
 }) => {
   return (
     <div className="flex w-full items-center justify-between">
-      <div className="flex items-center gap-1.5 font-medium text-f1-foreground">
+      <div className="flex min-w-0 items-center gap-1.5 font-medium text-f1-foreground">
         <F0Icon
           icon={item.icon}
           size="md"
@@ -87,7 +81,12 @@ const MenuItemContent = ({
         />
         <span>{item.label}</span>
       </div>
-      {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+      {(item.tag || item.badge) && (
+        <div className="flex flex-shrink-0 items-center gap-1.5">
+          {item.tag && <F0TagRaw text={item.tag} />}
+          {item.badge && <Counter value={item.badge} size="sm" type="bold" />}
+        </div>
+      )}
     </div>
   )
 }
@@ -290,90 +289,6 @@ const FavoriteItem = ({
   )
 }
 
-interface BaseCategoryProps {
-  title: string
-  isOpen?: boolean
-  isRoot?: boolean
-  onCollapse?: (isOpen: boolean) => void
-  children?: ReactNode
-  isDragging?: boolean
-  wasDragging?: RefObject<boolean>
-}
-
-const BaseCategory = ({
-  title,
-  isOpen: initialIsOpen = true,
-  isRoot,
-  onCollapse,
-  children,
-  isDragging,
-  wasDragging,
-}: BaseCategoryProps) => {
-  const [isOpen, setIsOpen] = useState(initialIsOpen)
-  const shouldReduceMotion = useReducedMotion()
-
-  const handleClick = () => {
-    if (isDragging || wasDragging?.current) return
-
-    const newIsOpen = !isOpen
-    setIsOpen(newIsOpen)
-    onCollapse?.(newIsOpen)
-  }
-
-  return (
-    <div>
-      <Collapsible open={isOpen}>
-        <div className="group relative flex items-center">
-          <div
-            className={cn(
-              "group relative flex w-full select-none items-center gap-1 rounded px-1.5 py-2 text-sm font-medium text-f1-foreground-secondary transition-colors hover:cursor-pointer hover:bg-f1-background-secondary",
-              focusRing("focus-visible:ring-inset"),
-              isRoot && "hidden"
-            )}
-            onClick={handleClick}
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                handleClick()
-              }
-            }}
-          >
-            {title}
-            <motion.div
-              initial={false}
-              animate={{ rotate: isOpen ? 0 : -90 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.1 }}
-              className="h-3 w-3"
-            >
-              <F0Icon
-                icon={ChevronDown}
-                size="xs"
-                className="text-f1-icon-secondary"
-              />
-            </motion.div>
-          </div>
-        </div>
-        <CollapsibleContent forceMount className="flex flex-col gap-1">
-          <motion.div
-            initial={false}
-            animate={{
-              height: isOpen ? "auto" : 0,
-              opacity: isOpen ? 1 : 0,
-              visibility: isOpen ? "visible" : "hidden",
-            }}
-            transition={{
-              duration: shouldReduceMotion ? 0 : 0.15,
-              ease: [0.165, 0.84, 0.44, 1],
-            }}
-          >
-            <div className="flex flex-col gap-0.5">{children}</div>
-          </motion.div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
-  )
-}
-
 interface CategoryItemProps {
   category: MenuCategory
   isSortable?: boolean
@@ -417,7 +332,7 @@ const CategoryItem = ({
   }
 
   const content = (
-    <BaseCategory
+    <SidebarCollapsibleSection
       title={category.title}
       isOpen={category.isOpen}
       isRoot={category.isRoot}
@@ -435,7 +350,7 @@ const CategoryItem = ({
           <MenuItem key={index} item={item} />
         ))}
       </div>
-    </BaseCategory>
+    </SidebarCollapsibleSection>
   )
 
   if (!isSortable) return content
@@ -728,7 +643,7 @@ function MenuContent({
 
       {hasFavorites && (
         <div className="mt-3 flex w-full flex-col gap-3 bg-transparent px-3">
-          <BaseCategory title={t.favorites.favorites}>
+          <SidebarCollapsibleSection title={t.favorites.favorites}>
             <div ref={favoritesRef}>
               {disableDragging ? (
                 <div className={favoritesContentWrapperClasses}>
@@ -745,7 +660,7 @@ function MenuContent({
                 </Reorder.Group>
               )}
             </div>
-          </BaseCategory>
+          </SidebarCollapsibleSection>
         </div>
       )}
 

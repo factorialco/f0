@@ -10,10 +10,8 @@ const SvgEqual = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 10H5M19 14H5"
+      fill="currentColor"
+      d="M18.5 13.6a.9.9 0 0 1 0 1.8h-13a.9.9 0 0 1 0-1.8zM18.5 8.6a.9.9 0 1 1 0 1.8h-13a.9.9 0 0 1 0-1.8z"
     />
   </Svg>
 )

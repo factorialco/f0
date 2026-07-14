@@ -12,6 +12,7 @@ export const F0SegmentedControl = ({
   onChange,
   disabled = false,
   fullWidth = false,
+  hideLabels = false,
   ariaLabel,
   ariaLabelledBy,
 }: F0SegmentedControlProps) => {
@@ -60,7 +61,11 @@ export const F0SegmentedControl = ({
           )}
         >
           {item.icon && <F0Icon icon={item.icon} size="md" />}
-          {item.label}
+          {hideLabels && item.icon ? (
+            <span className="sr-only">{item.label}</span>
+          ) : (
+            item.label
+          )}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

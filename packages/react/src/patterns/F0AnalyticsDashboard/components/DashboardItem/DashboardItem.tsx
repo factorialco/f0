@@ -4,7 +4,7 @@ import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0ButtonToggleGroup } from "@/components/F0ButtonToggleGroup"
 import { F0Icon, type IconType } from "@/components/F0Icon"
 import { OneEmptyState } from "@/components/OneEmptyState"
-import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 import {
   type DropdownItem as DropdownItemType,
   type DropdownItemObject,
@@ -222,7 +222,7 @@ export function DashboardItem({
               >
                 {isExplanationView && hasExplanation ? (
                   <div className="px-3 py-2 text-base text-f1-foreground [&>div]:flex [&>div]:flex-col [&>div]:gap-2">
-                    <RichTextDisplay
+                    <F0RichTextDisplay
                       content={explanation as string}
                       format="markdown"
                     />

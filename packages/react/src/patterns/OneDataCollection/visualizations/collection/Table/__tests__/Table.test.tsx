@@ -175,6 +175,39 @@ describe("TableCollection", () => {
     })
   })
 
+  describe("referenceRowType striked variant", () => {
+    it("applies line-through only to rows the predicate marks as striked", async () => {
+      render(
+        <TableCollection<
+          Person,
+          TestFilters,
+          SortingsDefinition,
+          SummariesDefinition,
+          ItemActionsDefinition<Person>,
+          TestNavigationFilters,
+          GroupingDefinition<Person>
+        >
+          columns={testColumns}
+          source={createTestSource()}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+          referenceRowType={(item) => (item.id === 1 ? "striked" : "none")}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getByText(testData[0].name)).toBeInTheDocument()
+      })
+
+      const struckRow = screen.getByText(testData[0].name).closest("tr")
+      expect(struckRow?.className).toMatch(/line-through/)
+
+      const plainRow = screen.getByText(testData[1].name).closest("tr")
+      expect(plainRow?.className).not.toMatch(/line-through/)
+    })
+  })
+
   describe("features", () => {
     it("renders custom column formatting", async () => {
       const columnsWithCustomRender = [

@@ -31,6 +31,8 @@ load the `f0-quality-gate` skill and execute its full workflow before presenting
 
 ## Skills
 
+Skills live in `vendor/skills/` at the repo root (canonical source, committed) and are synced to `.claude/skills/` and `.opencode/skills/` by `pnpm skills:sync` (runs automatically on `pnpm install`). Never edit the synced copies — they are overwritten on every sync.
+
 Load the relevant skill before starting work:
 
 - **f0-quality-gate** — Post-implementation quality gate. Runs automatically after any code change — typecheck, lint, tests, plus parallel subagent reviews for code quality, a11y, and Storybook.

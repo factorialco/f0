@@ -1,0 +1,106 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+
+import * as Stories from "./F0TextAreaInput.stories"
+
+<Meta of={Stories} />
+
+# F0TextAreaInput
+
+`F0TextAreaInput` is the writable multi-line text field — a box where the user types longer text spanning multiple lines (notes, descriptions, comments, feedback). It is a thin wrapper over [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation) that swaps the single-line `<input>` for a `<textarea>` and adds height auto-grow.
+
+---
+
+## Overview
+
+### Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+---
+
+## Guidelines
+
+### Design best practices
+
+#### When to use
+
+- Free-form text that spans more than one line: notes, descriptions, comments, feedback, addresses.
+- Whenever the user might press Enter to start a new paragraph.
+
+#### When NOT to use
+
+- The value is single-line free-form text. Use [F0TextInput](?path=/docs/components-inputs-text-input--documentation).
+- The text is rich (formatting, mentions, links). Use the dedicated rich-text editor.
+
+---
+
+## Behavior
+
+### Auto-grow
+
+The textarea grows in height as the user types, never forcing the user to scroll inside a tiny box. It starts at `rows` lines tall (defaults to 2) and expands until it hits `maxHeight` (in pixels), at which point an inner scrollbar appears.
+
+- `rows={4}` → starts 4 lines tall, grows from there.
+- `maxHeight={300}` → grows up to 300px, then scrolls.
+- `maxHeight` unset → grows without bound.
+
+### New lines
+
+`Enter` inserts a new line — there is no `onPressEnter` shortcut, because submitting a multi-line field with `Enter` would conflict with paragraph breaks. Wrap in `<form onSubmit>` and use a submit button.
+
+---
+
+## Props
+
+The textarea-specific props are listed below. All other props (label, hint, status, error, size, clearable, maxLength, icon, hideLabel, value, onChange, onBlur, onFocus, name, required, disabled, loading, placeholder) come from [F0InputField](?path=/docs/components-primitives-f0inputfield--documentation).
+
+### Textarea behavior
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Prop</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>rows</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>Initial visible rows. Defaults to 2.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>cols</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          Native HTML attribute, rarely needed because the textarea fills its
+          container.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>maxHeight</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          Maximum height in pixels before auto-grow stops and an inner scrollbar
+          appears. Unset means unbounded growth.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>

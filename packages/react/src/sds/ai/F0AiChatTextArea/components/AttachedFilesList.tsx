@@ -1,5 +1,5 @@
 import { F0Icon } from "@/components/F0Icon"
-import { FileItem } from "@/components/RichText/FileItem"
+import { F0FileItem } from "@/components/F0FileItem"
 import { Tooltip } from "@/experimental/Overlays/Tooltip"
 import { AlertCircle, Cross } from "@/icons/app"
 import { focusRing } from "@/lib/utils"
@@ -39,7 +39,7 @@ export const AttachedFilesList = ({
             removeLabel={removeLabel}
           />
         ) : (
-          <FileItem
+          <F0FileItem
             key={att.id}
             file={att.file}
             size="md"

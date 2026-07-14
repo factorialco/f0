@@ -15,11 +15,17 @@ export function NonEditableCell<R extends RecordType>({
   const i18n = useI18n()
 
   return (
-    <BaseCell showRightBorder={!isLastColumn} borderOnHover={false} hint={hint}>
+    <BaseCell
+      showRightBorder={!isLastColumn}
+      borderOnHover={false}
+      hint={hint}
+      hintPosition="right"
+      cursor="default"
+    >
       <div
         className={cn(
           "flex w-full min-w-0",
-          "cursor-pointer items-center px-3",
+          "items-center px-3",
           editableColumn.align === "right" && "justify-end"
         )}
       >

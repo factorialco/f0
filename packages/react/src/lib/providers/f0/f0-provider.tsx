@@ -12,11 +12,14 @@ import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
 
 import { FormCardValueFormatterProvider } from "@/sds/ai/F0AiChat/providers/FormCardValueFormatterProvider"
 
+import { ToastProvider } from "../../../hooks/toast/ToastProvider"
 import { ImageContextValue, ImageProvider } from "../../imageHandler"
 import { LinkContextValue, LinkProvider } from "../../linkHandler"
 import { PrivacyModeProvider } from "../../privacyMode"
 import { cn } from "../../utils"
 import { XRayProvider } from "../../xray"
+import { DialogsAlikeLayoutProvider } from "../dialogs-alike/DialogsAlikeLayoutProvider"
+import { FormOverlaysProvider } from "../form-overlays"
 import { DataCollectionStorageProvider } from "../datacollection/DataCollectionStorageProvider"
 import { DataCollectionStorageHandler } from "../datacollection/types"
 import { I18nProvider, I18nProviderProps } from "../i18n"
@@ -62,6 +65,15 @@ export const LayoutProvider: React.FC<
         })}
       >
         {children}
+        {/*
+         * Top-level portal target for modal dialogs. It lives above any app
+         * content (e.g. the ApplicationFrame's `isolate` stacking context, where
+         * the AI canvas/chat would otherwise paint over a dialog) but inside
+         * `#f0-layout`, so design tokens and the theme `.dark` class still apply.
+         * `display: contents` keeps it out of the flex layout; portaled dialogs
+         * position themselves with `fixed`.
+         */}
+        <div id="f0-overlay-root" className="contents" />
       </div>
     </LayoutContext.Provider>
   )
@@ -135,11 +147,24 @@ export const F0Provider: React.FC<{
                       <DataCollectionStorageProvider
                         handler={dataCollectionStorageHandler}
                       >
-                        <FormComponentContext.Provider value={formComponent}>
-                          <FormCardValueFormatterProvider>
-                            {children}
-                          </FormCardValueFormatterProvider>
-                        </FormComponentContext.Provider>
+                        <DialogsAlikeLayoutProvider>
+                          <ToastProvider
+                            portalTargets={{
+                              mobile: "#f0-overlay-root",
+                              desktop: "#f0-overlay-root",
+                            }}
+                          >
+                            <FormOverlaysProvider>
+                              <FormComponentContext.Provider
+                                value={formComponent}
+                              >
+                                <FormCardValueFormatterProvider>
+                                  {children}
+                                </FormCardValueFormatterProvider>
+                              </FormComponentContext.Provider>
+                            </FormOverlaysProvider>
+                          </ToastProvider>
+                        </DialogsAlikeLayoutProvider>
                       </DataCollectionStorageProvider>
                     </ImageProvider>
                   </PrivacyModeProvider>

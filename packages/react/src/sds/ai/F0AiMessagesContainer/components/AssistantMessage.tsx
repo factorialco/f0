@@ -6,7 +6,7 @@ import {
   useRef,
 } from "react"
 
-import { RichTextDisplay } from "@/components/RichText/RichTextDisplay"
+import { F0RichTextDisplay } from "@/components/RichText/F0RichTextDisplay"
 
 import { type Message } from "../types"
 import { useReplySelection } from "../useReplySelection"
@@ -44,7 +44,7 @@ export type F0AssistantMessageExtraProps = {
 }
 
 const defaultMarkdownFallback = (content: string): ReactNode => (
-  <RichTextDisplay content={content} format="markdown" />
+  <F0RichTextDisplay content={content} format="markdown" />
 )
 
 type AssistantMessageBaseProps = {

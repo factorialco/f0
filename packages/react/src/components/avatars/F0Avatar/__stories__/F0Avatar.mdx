@@ -1,0 +1,300 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as AvatarStories from "./F0Avatar.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import { F0Avatar } from "../F0Avatar"
+
+<Meta of={AvatarStories} />
+
+# Avatar
+
+Avatar gives any entity — a person, team, company, file and more — a compact,
+recognizable visual identity. It lets people identify and tell entities apart at
+a glance, providing visual feedback so they don't have to read a name or label
+to know what something is.
+
+---
+
+## Overview
+
+### Purpose
+
+- **Visual recognition**: Identify an entity instantly from an image, initials
+  or icon instead of reading text
+- **Scannability**: Help users tell items apart at a glance in lists, tables,
+  comments and assignments
+- **Consistent identity**: Give any entity the same visual representation
+  wherever it appears across the product
+- **Context and hierarchy**: Convey relative importance and optional status
+  through a shared sizing and badge system
+
+### Anatomy
+
+`F0Avatar` is polymorphic: a single `avatar` prop carries a `type` discriminator
+plus the data for that type, and the component renders the matching avatar.
+Person avatars are fully circular; every other type uses a square with rounded
+corners. When no image is provided, the avatar falls back to initials or a type
+icon, so it is never empty.
+
+<Canvas of={AvatarStories.Default} />
+
+<Controls of={AvatarStories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Element</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Container</code>
+        </td>
+        <td>
+          Base container carrying the size, shape and color styling, built on
+          the Radix Avatar root
+        </td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Content</code>
+        </td>
+        <td>
+          Image, initials, icon, emoji or other specialized content representing
+          the entity
+        </td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Badge</code>
+        </td>
+        <td>Optional status or contextual indicator layered on the corner</td>
+        <td>No</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Variants
+
+#### Type
+
+Choose the `type` that matches the entity you are representing.
+
+<Canvas of={AvatarStories.AllTypes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Type</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>person</code>
+        </td>
+        <td>An individual — employee, user or contact</td>
+        <td>Representing a person; circular, shows photo or initials</td>
+      </tr>
+      <tr>
+        <td>
+          <code>team</code>
+        </td>
+        <td>A team or group of people</td>
+        <td>Representing a team or group</td>
+      </tr>
+      <tr>
+        <td>
+          <code>company</code>
+        </td>
+        <td>A company or legal entity</td>
+        <td>Representing an organization</td>
+      </tr>
+      <tr>
+        <td>
+          <code>file</code>
+        </td>
+        <td>A file or document</td>
+        <td>Representing a file, with an icon derived from its type</td>
+      </tr>
+      <tr>
+        <td>
+          <code>flag</code>
+        </td>
+        <td>A country or locale</td>
+        <td>Representing a country or region by its flag</td>
+      </tr>
+      <tr>
+        <td>
+          <code>emoji</code>
+        </td>
+        <td>An emoji</td>
+        <td>Representing a concept or reaction with an emoji</td>
+      </tr>
+      <tr>
+        <td>
+          <code>icon</code>
+        </td>
+        <td>A generic icon</td>
+        <td>Representing an entity that has no photo, with an icon</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+#### Sizes
+
+All avatar types share a single sizing system, so they stay aligned wherever
+they appear. Pick the size from the surrounding density rather than the entity
+type.
+
+<Canvas of={AvatarStories.PersonAvatar} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Dimensions</th>
+        <th className="text-left">Usage context</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>2xl</code>
+        </td>
+        <td>72px</td>
+        <td>Hero sections, large displays</td>
+      </tr>
+      <tr>
+        <td>
+          <code>xl</code>
+        </td>
+        <td>56px</td>
+        <td>Headers, profile sections</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>40px</td>
+        <td>Prominent display, cards</td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code>
+        </td>
+        <td>32px</td>
+        <td>Standard interface use</td>
+      </tr>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>24px</td>
+        <td>Secondary information</td>
+      </tr>
+      <tr>
+        <td>
+          <code>xs</code>
+        </td>
+        <td>20px</td>
+        <td>Compact lists, tags</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+## Guidelines
+
+### Design best practices
+
+Reach for `F0Avatar` when the **entity type is dynamic** — driven by data rather
+than known at build time.
+
+#### When to use
+
+- The type comes from data and can vary per item — a row, dropdown entry or
+  collection item that could be a person, team, company, file, etc. Pass
+  `avatar={item.avatar}` and `F0Avatar` renders the right type without a `switch`.
+- You want one component to render heterogeneous entities consistently across
+  lists, tables, dropdowns, data collections and graph nodes.
+
+#### When NOT to use
+
+- **The type is fixed and known** (e.g. always a person): use the specific
+  component directly — `F0AvatarPerson`, `F0AvatarTeam`, `F0AvatarCompany`… —
+  with its own props, instead of wrapping the data in `{ type, … }`.
+- **Specialized avatars**: a date, an alert/status, a module, or a stack of
+  several avatars are not entity types and don't follow the shared size system
+  (a date chip, for instance, is fixed-size and shows month + day). They live as
+  dedicated components — `F0AvatarDate`, `F0AvatarAlert`, `F0AvatarModule`,
+  `F0AvatarList` — rather than `F0Avatar` types, so use those directly.
+- **Decoration**: when the graphic does not stand for a real entity, use an icon
+  instead of an avatar.
+
+#### How to use
+
+- Use a badge only to surface meaningful status or context
+- Match the avatar size to the surrounding density
+
+<DoDonts
+  do={{
+    description:
+      "Use the type that matches the entity — a person avatar for a person",
+    children: (
+      <F0Avatar
+        size="lg"
+        avatar={{
+          type: "person",
+          firstName: "Jane",
+          lastName: "Smith",
+          src: "/avatars/person02.jpg",
+          "aria-label": "Jane Smith",
+        }}
+      />
+    ),
+  }}
+  dont={{
+    description:
+      "Don't stand in for a real entity with an emoji or generic icon",
+    children: (
+      <F0Avatar
+        size="lg"
+        avatar={{ type: "emoji", emoji: "🙂", "aria-label": "Jane Smith" }}
+      />
+    ),
+  }}
+/>
+
+---
+
+## Behavior
+
+### Polymorphic rendering
+
+`F0Avatar` renders a different underlying avatar depending on `avatar.type`. The
+`avatar` object is a discriminated union, so TypeScript only allows the props
+that belong to the selected type — `firstName`/`lastName` for `person`, `name`
+for `team` and `company`, `flag` for `flag`, and so on.
+
+### Accessible name
+
+An avatar carries no inherent text, so it is hidden from assistive technology
+(`aria-hidden`) unless you give it a name. Pass `aria-label` (or
+`aria-labelledby`) only when the avatar stands on its own; when it sits next to
+the entity's visible name, leave it unlabeled so screen readers don't announce
+it twice.

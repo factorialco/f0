@@ -1,6 +1,7 @@
 import { AnimatePresence } from "motion/react"
 
 import { F0Button } from "@/components/F0Button"
+import { F0TagRaw } from "@/components/tags/F0TagRaw"
 import { useI18n } from "@/lib/providers/i18n"
 
 import type { FiltersDefinition, FiltersState, FilterValue } from "../types"
@@ -47,17 +48,17 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
   }
 
   return (
-    <div className="mt-2 flex items-start justify-between gap-2">
+    <div className="mt-2 flex items-center gap-2">
       <div className="flex flex-wrap items-center gap-2">
         {resultCount !== undefined && hasVisibleChips && (
-          <span className="whitespace-nowrap font-medium text-f1-foreground-secondary">
-            {i18n.t(
+          <F0TagRaw
+            text={i18n.t(
               resultCount === 1
                 ? "filters.resultsFor.one"
                 : "filters.resultsFor.other",
               { count: resultCount }
             )}
-          </span>
+          />
         )}
         <AnimatePresence presenceAffectsLayout initial={false}>
           {hasVisibleChips &&
@@ -103,7 +104,7 @@ export function FiltersChipsList<Filters extends FiltersDefinition>({
       </div>
 
       <F0Button
-        variant="ghost"
+        variant="neutral"
         label={i18n.actions.clear}
         size="sm"
         onClick={onClearAll}

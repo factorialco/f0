@@ -11,9 +11,7 @@ const SvgInfoCircle = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      fillRule="evenodd"
-      d="M20 12a8 8 0 1 1-16 0 8 8 0 0 1 16 0m-8.65-2.9a.65.65 0 1 0 1.3 0V9a.65.65 0 1 0-1.3 0zm0 6a.65.65 0 1 0 1.3 0v-3a.65.65 0 1 0-1.3 0z"
-      clipRule="evenodd"
+      d="M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18m0 1.8a7.2 7.2 0 1 0 0 14.4 7.2 7.2 0 0 0 0-14.4m-.002 5.8a.9.9 0 0 1 .9.9v3.75a.9.9 0 0 1-1.8 0V11.5a.9.9 0 0 1 .9-.9M12 8a.9.9 0 1 1 0 1.8.9.9 0 0 1 0-1.8"
     />
   </Svg>
 )

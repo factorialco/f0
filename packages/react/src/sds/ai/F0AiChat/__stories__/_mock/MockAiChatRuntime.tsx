@@ -9,6 +9,11 @@ import {
 } from "react"
 
 import { type ChatThread } from "../../../F0AiChatHistory"
+import type {
+  ClarifyingOption,
+  ClarifyingQuestionState,
+  ClarifyingSelectionMode,
+} from "../../../F0ClarifyingPanel"
 
 import { type F0Message } from "../../types"
 
@@ -29,18 +34,93 @@ import { pickRandomResponse, pickRandomThinkingSteps } from "./mockPhrases"
  * runtime. Factorial's production adapter mirrors this shape but reads
  * messages from CopilotKit instead.
  */
+/** A single step within a (possibly multi-step) clarifying flow. */
+export type ClarifyingStep = {
+  question: string
+  options: ClarifyingOption[]
+  selectionMode?: ClarifyingSelectionMode
+  optional?: boolean
+  allowCustomAnswer?: boolean
+}
+
+/**
+ * Config for a clarifying flow rendered in the composer (the
+ * `F0ClarifyingPanel` slot). One or more `steps` are walked consecutively in a
+ * single panel: picking an answer advances to the next step (the header shows a
+ * "X of Y" counter and a back arrow), and the final step submits. The runtime
+ * owns the per-step selection state; `onConfirm` receives the picked option
+ * labels for every step, in order, once the whole flow resolves.
+ *
+ * A single-step flow (one entry in `steps`) behaves like the old one-shot
+ * question — no counter, no navigation, just a Submit button.
+ */
+export type ClarifyingConfig = {
+  steps: ClarifyingStep[]
+  onConfirm?: (answersByStep: string[][]) => void
+}
+
+/** Per-step interaction state tracked while a clarifying flow is open. */
+type ClarifyingInteraction = {
+  selectedIds: string[]
+  customText: string
+  isCustomActive: boolean
+}
+
+const EMPTY_CLARIFYING_INTERACTION: ClarifyingInteraction = {
+  selectedIds: [],
+  customText: "",
+  isCustomActive: false,
+}
+
+const getClarifyingInteraction = (
+  map: Record<number, ClarifyingInteraction>,
+  index: number
+): ClarifyingInteraction => map[index] ?? EMPTY_CLARIFYING_INTERACTION
+
 export type MockAiChatRuntime = {
   messages: F0Message[]
   inProgress: boolean
   sendMessage: (text: string, options?: { replyQuote?: string }) => void
+  /** Sends a user message and shows thinking steps, but emits no text response. */
+  sendMessageWithThinkingOnly: (text: string) => void
   appendMessages: (
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
   ) => void
+  /**
+   * Appends an assistant message that renders a custom card/component (via the
+   * message's `generativeUI` slot) instead of markdown text.
+   */
+  appendCard: (render: () => ReactNode) => void
+  /** Swaps the scripted assistant responses and restarts from the first turn. */
+  setScript: (script: string[]) => void
+  /**
+   * Arms a one-shot handler for the NEXT user message: the user's text is still
+   * posted, but instead of streaming a reply the handler runs (e.g. to kick off
+   * a scripted flow). Cleared after it fires. Pass `null` to disarm.
+   */
+  setUserMessageInterceptor: (
+    interceptor: ((text: string) => void) | null
+  ) => void
   clear: () => void
+
+  // ── Clarifying question ─────────────────────────────────────────
+  /**
+   * The active clarifying question (rendered by the connected chat input as a
+   * `F0ClarifyingPanel`), or `null` when none is in progress.
+   */
+  clarifyingQuestion: ClarifyingQuestionState | null
+  /**
+   * Opens a clarifying flow in the composer. Pass one step for a one-shot
+   * question, or several to walk them consecutively in a single panel (with a
+   * step counter + back arrow) before a final submit.
+   */
+  startClarifying: (config: ClarifyingConfig) => void
 
   // ── Chat history ────────────────────────────────────────────────
   currentThreadTitle: string | null
+  /** Id of the thread currently loaded (null on a fresh / new chat). */
+  currentThreadId: string | null
   isLoadingThread: boolean
   /** Returns the in-memory list of threads (excluding any deleted). */
   fetchThreads: () => Promise<ChatThread[]>
@@ -235,12 +315,18 @@ export type MockAiChatRuntimeProviderProps = {
    * state.
    */
   seedThreads?: ChatThread[]
+  /**
+   * Optional scripted assistant responses used in order, one per text reply.
+   * Falls back to a random phrase when the script is exhausted or absent.
+   */
+  script?: string[]
 }
 
 export const MockAiChatRuntimeProvider = ({
   children,
   seedMessages,
   seedThreads,
+  script,
 }: MockAiChatRuntimeProviderProps) => {
   const [messages, setMessages] = useState<F0Message[]>(seedMessages ?? [])
   const [inProgress, setInProgress] = useState(false)
@@ -250,12 +336,22 @@ export const MockAiChatRuntimeProvider = ({
   const [currentThreadTitle, setCurrentThreadTitle] = useState<string | null>(
     null
   )
+  const [currentThreadId, setCurrentThreadId] = useState<string | null>(null)
   const [isLoadingThread, setIsLoadingThread] = useState(false)
   const snapshotsRef = useRef<Record<string, F0Message[]>>(
     buildDefaultSnapshots()
   )
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
   const intervalsRef = useRef<ReturnType<typeof setInterval>[]>([])
+  const scriptRef = useRef<string[]>(script ?? [])
+  const scriptTurnRef = useRef(0)
+  const [clarifyingConfig, setClarifyingConfig] =
+    useState<ClarifyingConfig | null>(null)
+  const [clarifyingStepIndex, setClarifyingStepIndex] = useState(0)
+  const [clarifyingInteractions, setClarifyingInteractions] = useState<
+    Record<number, ClarifyingInteraction>
+  >({})
+  const interceptorRef = useRef<((text: string) => void) | null>(null)
 
   // Allow late-arriving seed messages (story decorators that prefill async).
   useEffect(() => {
@@ -276,25 +372,19 @@ export const MockAiChatRuntimeProvider = ({
     return () => clearTimers()
   }, [clearTimers])
 
-  const streamAssistantResponse = useCallback(() => {
-    const thinkingSteps = pickRandomThinkingSteps(3)
-    const response = pickRandomResponse()
-    const thinkingId = nextId()
-    const assistantId = nextId()
-
-    setInProgress(true)
-
-    // Append the thinking message + first step
-    const startThinking = setTimeout(() => {
+  // Emits thinking-step messages and returns the total duration in ms.
+  // Caller is responsible for what happens after thinking completes.
+  const emitThinkingSteps = useCallback(
+    (thinkingSteps: string[], baseId: string): number => {
       setMessages((prev) => [
         ...prev,
         {
-          id: thinkingId,
+          id: baseId,
           role: "assistant",
           content: "",
           toolCalls: [
             {
-              id: `${thinkingId}_tc0`,
+              id: `${baseId}_tc0`,
               type: "function",
               function: {
                 name: "orchestratorThinking",
@@ -305,7 +395,6 @@ export const MockAiChatRuntimeProvider = ({
         },
       ])
 
-      // Add subsequent thinking steps every THINKING_STEP_MS
       thinkingSteps.slice(1).forEach((step, i) => {
         const t = setTimeout(
           () => {
@@ -317,7 +406,7 @@ export const MockAiChatRuntimeProvider = ({
                 content: "",
                 toolCalls: [
                   {
-                    id: `${assistantId}_tc${i + 1}`,
+                    id: `${baseId}_tc${i + 1}`,
                     type: "function",
                     function: {
                       name: "orchestratorThinking",
@@ -333,8 +422,24 @@ export const MockAiChatRuntimeProvider = ({
         timersRef.current.push(t)
       })
 
+      return THINKING_STEP_MS * thinkingSteps.length
+    },
+    []
+  )
+
+  const streamAssistantResponse = useCallback(() => {
+    const thinkingSteps = pickRandomThinkingSteps(3)
+    const response =
+      scriptRef.current[scriptTurnRef.current++] ?? pickRandomResponse()
+    const thinkingId = nextId()
+    const assistantId = nextId()
+
+    setInProgress(true)
+
+    const startThinking = setTimeout(() => {
+      const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
+
       // Once thinking is done, open the assistant text message and stream chars.
-      const totalThinkingMs = THINKING_STEP_MS * thinkingSteps.length
       const startText = setTimeout(() => {
         setMessages((prev) => [
           ...prev,
@@ -364,7 +469,7 @@ export const MockAiChatRuntimeProvider = ({
     }, THINKING_DELAY_MS)
 
     timersRef.current.push(startThinking)
-  }, [])
+  }, [emitThinkingSteps])
 
   const sendMessage = useCallback(
     (text: string, options?: { replyQuote?: string }) => {
@@ -379,9 +484,44 @@ export const MockAiChatRuntimeProvider = ({
           replyQuote: options?.replyQuote,
         },
       ])
+      // A one-shot interceptor short-circuits the canned reply so a scripted
+      // flow can take over from the user's first message.
+      const interceptor = interceptorRef.current
+      if (interceptor) {
+        interceptorRef.current = null
+        interceptor(trimmed)
+        return
+      }
       streamAssistantResponse()
     },
     [streamAssistantResponse]
+  )
+
+  const sendMessageWithThinkingOnly = useCallback(
+    (text: string) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "user", content: trimmed },
+      ])
+
+      const thinkingSteps = pickRandomThinkingSteps(3)
+      const thinkingId = nextId()
+
+      setInProgress(true)
+
+      const startThinking = setTimeout(() => {
+        const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
+        const done = setTimeout(() => {
+          setInProgress(false)
+        }, totalThinkingMs)
+        timersRef.current.push(done)
+      }, THINKING_DELAY_MS)
+
+      timersRef.current.push(startThinking)
+    },
+    [emitThinkingSteps]
   )
 
   const appendMessages = useCallback<MockAiChatRuntime["appendMessages"]>(
@@ -398,12 +538,163 @@ export const MockAiChatRuntimeProvider = ({
     []
   )
 
+  const appendCard = useCallback<MockAiChatRuntime["appendCard"]>((render) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: nextId(), role: "assistant", content: "", generativeUI: render },
+    ])
+  }, [])
+
+  const setScript = useCallback<MockAiChatRuntime["setScript"]>((next) => {
+    scriptRef.current = next
+    scriptTurnRef.current = 0
+  }, [])
+
+  const setUserMessageInterceptor = useCallback<
+    MockAiChatRuntime["setUserMessageInterceptor"]
+  >((interceptor) => {
+    interceptorRef.current = interceptor
+  }, [])
+
+  const startClarifying = useCallback<MockAiChatRuntime["startClarifying"]>(
+    (config) => {
+      setClarifyingStepIndex(0)
+      setClarifyingInteractions({})
+      setClarifyingConfig(config)
+    },
+    []
+  )
+
+  const closeClarifying = useCallback(() => {
+    setClarifyingConfig(null)
+    setClarifyingStepIndex(0)
+    setClarifyingInteractions({})
+  }, [])
+
+  // Rebuilt each render so the option-toggle / confirm closures always read the
+  // latest selection. The runtime owns the per-step selection state and the
+  // current step index; `confirm` advances through the steps and, on the final
+  // one, fires `onConfirm` with the picked labels for every step in order.
+  const clarifyingQuestion: ClarifyingQuestionState | null = (() => {
+    if (!clarifyingConfig) return null
+    const steps = clarifyingConfig.steps
+    const stepIndex = clarifyingStepIndex
+    const step = steps[stepIndex]
+    if (!step) return null
+
+    const mode = step.selectionMode ?? "single"
+    const interaction = getClarifyingInteraction(
+      clarifyingInteractions,
+      stepIndex
+    )
+
+    const updateInteraction = (patch: Partial<ClarifyingInteraction>) =>
+      setClarifyingInteractions((prev) => ({
+        ...prev,
+        [stepIndex]: { ...getClarifyingInteraction(prev, stepIndex), ...patch },
+      }))
+
+    // Collect the picked labels for every step, in order — single-select steps
+    // fall back to their custom answer when nothing is selected; multi-select
+    // steps append the custom answer when it's active and non-empty.
+    const buildAnswers = (): string[][] =>
+      steps.map((s, i) => {
+        const inter = getClarifyingInteraction(clarifyingInteractions, i)
+        const labels = s.options
+          .filter((o) => inter.selectedIds.includes(o.id))
+          .map((o) => o.label)
+        const isSingle = (s.selectionMode ?? "single") === "single"
+        const includeCustom = isSingle
+          ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
+          : inter.isCustomActive && inter.customText.trim().length > 0
+        if (includeCustom) labels.push(inter.customText.trim())
+        return labels
+      })
+
+    const resolve = () => {
+      const answers = buildAnswers()
+      const onConfirm = clarifyingConfig.onConfirm
+      closeClarifying()
+      onConfirm?.(answers)
+    }
+
+    const isFinalStep = stepIndex === steps.length - 1
+
+    return {
+      currentStep: {
+        question: step.question,
+        options: step.options,
+        selectionMode: mode,
+        optional: step.optional ?? false,
+        allowCustomAnswer: step.allowCustomAnswer ?? false,
+        selectedOptionIds: interaction.selectedIds,
+        customAnswerText: interaction.customText || undefined,
+        isCustomAnswerActive: interaction.isCustomActive,
+      },
+      currentStepIndex: stepIndex,
+      totalSteps: steps.length,
+      toggleOption: (optionId) => {
+        if (mode === "single") {
+          updateInteraction({ selectedIds: [optionId] })
+        } else {
+          setClarifyingInteractions((prev) => {
+            const current = getClarifyingInteraction(
+              prev,
+              stepIndex
+            ).selectedIds
+            const next = current.includes(optionId)
+              ? current.filter((id) => id !== optionId)
+              : [...current, optionId]
+            return {
+              ...prev,
+              [stepIndex]: {
+                ...getClarifyingInteraction(prev, stepIndex),
+                selectedIds: next,
+              },
+            }
+          })
+        }
+      },
+      confirm: () => {
+        if (!isFinalStep) {
+          setClarifyingStepIndex(stepIndex + 1)
+        } else {
+          resolve()
+        }
+      },
+      skip: () => {
+        if (!step.optional) return
+        if (!isFinalStep) {
+          setClarifyingStepIndex(stepIndex + 1)
+        } else {
+          resolve()
+        }
+      },
+      cancel: closeClarifying,
+      back: () => setClarifyingStepIndex((i) => Math.max(0, i - 1)),
+      setCustomAnswerText: (text) => updateInteraction({ customText: text }),
+      setCustomAnswerActive: (active) =>
+        updateInteraction({ isCustomActive: active }),
+      activateCustomAnswer: () => {
+        const patch: Partial<ClarifyingInteraction> = { isCustomActive: true }
+        if (mode === "single") patch.selectedIds = []
+        updateInteraction(patch)
+      },
+    }
+  })()
+
   const clear = useCallback(() => {
     clearTimers()
     setMessages([])
     setInProgress(false)
     setCurrentThreadTitle(null)
+    setCurrentThreadId(null)
     setIsLoadingThread(false)
+    scriptTurnRef.current = 0
+    setClarifyingConfig(null)
+    setClarifyingStepIndex(0)
+    setClarifyingInteractions({})
+    interceptorRef.current = null
   }, [clearTimers])
 
   // ── Chat history ────────────────────────────────────────────────
@@ -426,15 +717,16 @@ export const MockAiChatRuntimeProvider = ({
         const t = setTimeout(() => {
           setThreads((prev) => prev.filter((thread) => thread.id !== id))
           // If the deleted thread is the one currently loaded, clear it.
-          setCurrentThreadTitle((title) => {
-            const deleted = threads.find((thread) => thread.id === id)
-            return deleted && deleted.title === title ? null : title
+          setCurrentThreadId((current) => {
+            if (current !== id) return current
+            setCurrentThreadTitle(null)
+            return null
           })
           resolve()
         }, 200)
         timersRef.current.push(t)
       }),
-    [threads]
+    []
   )
 
   const loadThread = useCallback<MockAiChatRuntime["loadThread"]>(
@@ -442,6 +734,7 @@ export const MockAiChatRuntimeProvider = ({
       clearTimers()
       setIsLoadingThread(true)
       setCurrentThreadTitle(title)
+      setCurrentThreadId(id)
       setMessages([])
       const t = setTimeout(() => {
         const snapshot = snapshotsRef.current[id]
@@ -476,9 +769,16 @@ export const MockAiChatRuntimeProvider = ({
         messages,
         inProgress,
         sendMessage,
+        sendMessageWithThinkingOnly,
         appendMessages,
+        appendCard,
+        setScript,
+        setUserMessageInterceptor,
         clear,
+        clarifyingQuestion,
+        startClarifying,
         currentThreadTitle,
+        currentThreadId,
         isLoadingThread,
         fetchThreads,
         deleteThread,
