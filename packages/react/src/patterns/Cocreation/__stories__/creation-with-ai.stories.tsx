@@ -769,6 +769,17 @@ function useProposalFlow() {
 const NO_CREDITS_MESSAGE =
   "You're out of AI credits, so I can't make changes right now. Upgrade your plan to keep editing with AI."
 
+// Assistant reply when the user types on the no-credits WELCOME screen. Free-text
+// AI needs credits, but guided creation (templates / blank survey) doesn't — so
+// instead of a dead end we redirect into the guided-entry panel.
+const NO_CREDITS_REDIRECT_MESSAGE =
+  "I can't help with that because you're out of AI credits — but I can still help you create a survey."
+
+// Question shown on that redirected guided-entry panel. Mirrors the guidedEntry
+// flow's own `guidedQuestion`; kept as a literal because the "cards" config
+// (which the No Credits story uses) has no `guidedQuestion` field.
+const GUIDED_ENTRY_QUESTION = "How would you like to start?"
+
 /**
  * Opens a blank "Empty Form" for a Training guided type: seeds a survey with
  * just that type's locked question, opens its editor canvas, posts the
@@ -2049,11 +2060,10 @@ function ComposerPlaceholderRegistrar() {
  * the "Create" button (see `FlowContent`).
  */
 function SurveyWelcomeCardsRegistrar() {
-  const { config, noCredits } = useFlowConfig()
+  const { config } = useFlowConfig()
   if (config.entryMode !== "cards") return null
 
   const { openCanvas, setWelcomeScreenCards } = useAiChat()
-  const { armNoCredits } = useProposalFlow()
   const startBlankSurvey = useStartBlankSurvey()
 
   const cards: F0AiChatWelcomeCard[] = [
@@ -2169,12 +2179,9 @@ function SurveyWelcomeCardsRegistrar() {
   }, [setWelcomeScreenCards])
 
   // No-credits welcome screen: the cards stay fully interactive (they don't
-  // need AI generation), but free-text chat is blocked — arm the "out of
-  // credits" responder so any typed message gets the upgrade nudge instead of
-  // the canned reply / typed-Create clarifying chain.
-  useEffect(() => {
-    if (noCredits) armNoCredits()
-  }, [noCredits, armNoCredits])
+  // need AI generation). Typed messages are handled by the "Create" flow's
+  // interceptor, which redirects them into the guided-entry panel (see
+  // `FlowContent`) — so nothing extra is armed here.
 
   return null
 }
@@ -2357,17 +2364,15 @@ function FlowContent({
     })
   }
 
-  // "guidedEntry" entry flow (Engagement Guided): the same message-first entry
-  // as "guidedType" — post "Let's create a Survey" on the user's behalf, think,
-  // then a clarifying panel — but the options are entry ACTIONS: Empty Survey,
-  // Use a Template, and the (up to) three most-used templates. Each action is
-  // sequenced into follow-able beats (echo answer → think → reply → think →
-  // act) exactly like the guided-type flow, so the transitions stay legible.
-  const startGuidedEntryFlow = () => {
-    if (config.entryMode !== "guidedEntry") return
-    const flow = config
+  // Opens the guided-entry clarifying panel: entry ACTIONS as options — Empty
+  // Survey, Use a Template, and the (up to) three most-used templates — and runs
+  // the picked action through its "echo answer → think → reply → think → act"
+  // beats. `templates` is a base `FlowConfig` field, so this works for any entry
+  // mode; the calling `question` varies. Reused by the guidedEntry "Create"
+  // intro (`startGuidedEntryFlow`) and the cards no-credits redirect.
+  const openGuidedEntryPanel = (question: string) => {
     // "Most used" isn't tracked in the mock, so take the first few templates.
-    const topTemplates = flow.templates.slice(0, 3)
+    const topTemplates = config.templates.slice(0, 3)
     const EMPTY_OPTION_ID = "empty-survey"
     const TEMPLATES_OPTION_ID = "use-template"
     const options: ClarifyingOption[] = [
@@ -2394,7 +2399,7 @@ function FlowContent({
       // A specific template: open it in the read-only preview framing (the
       // "Use this template" / "Edit Template" actions live on its header).
       const templateId = optionId.slice("template:".length)
-      const template = flow.templates.find((t) => t.id === templateId)
+      const template = config.templates.find((t) => t.id === templateId)
       if (!template) return
       openCanvas(
         toCanvasContent({
@@ -2416,6 +2421,37 @@ function FlowContent({
       return "Great — opening that template for you."
     }
 
+    startClarifying({
+      steps: [
+        {
+          question,
+          options,
+          selectionMode: "single",
+        },
+      ],
+      onConfirm: (answersByStep) => {
+        // Answered — hand the composer back (the guided intro is over).
+        setComposerHidden(false)
+        const label = answersByStep[0]?.[0]
+        const picked = options.find((o) => o.label === label) ?? options[0]
+        sendMessageWithThinkingOnly(
+          `**${question}**\\\n${label ?? picked.label}`,
+          () => {
+            appendMessages([
+              { role: "assistant", content: replyForOption(picked.id) },
+            ])
+            showThinking(() => runGuidedEntryAction(picked.id))
+          }
+        )
+      },
+    })
+  }
+
+  // "guidedEntry" entry flow (Engagement Guided): the same message-first entry
+  // as "guidedType" — post "Let's create a Survey" on the user's behalf, think,
+  // then the guided-entry clarifying panel (see `openGuidedEntryPanel`).
+  const startGuidedEntryFlow = () => {
+    if (config.entryMode !== "guidedEntry") return
     // Keep the composer out of view through the scripted intro; it reappears
     // (as the clarifying panel, fading in) once the thinking beat resolves.
     setComposerHidden(true)
@@ -2423,30 +2459,7 @@ function FlowContent({
       appendMessages([
         { role: "assistant", content: "Sure — how would you like to start?" },
       ])
-      startClarifying({
-        steps: [
-          {
-            question: flow.guidedQuestion,
-            options,
-            selectionMode: "single",
-          },
-        ],
-        onConfirm: (answersByStep) => {
-          // Answered — hand the composer back (the guided intro is over).
-          setComposerHidden(false)
-          const label = answersByStep[0]?.[0]
-          const picked = options.find((o) => o.label === label) ?? options[0]
-          sendMessageWithThinkingOnly(
-            `**${flow.guidedQuestion}**\\\n${label ?? picked.label}`,
-            () => {
-              appendMessages([
-                { role: "assistant", content: replyForOption(picked.id) },
-              ])
-              showThinking(() => runGuidedEntryAction(picked.id))
-            }
-          )
-        },
-      })
+      openGuidedEntryPanel(config.guidedQuestion)
     })
   }
 
@@ -2489,10 +2502,18 @@ function FlowContent({
           setVisualizationMode("fullscreen")
           setPhase("chat")
           if (config.entryMode === "cards") {
-            // No credits: leave the "out of credits" responder armed (see
-            // `SurveyWelcomeCardsRegistrar`) so typing is blocked — the welcome
-            // cards remain the only working entry point.
-            if (!noCredits) {
+            if (noCredits) {
+              // No credits: free-text AI is blocked, so the first typed message
+              // gets a short "can't do that" reply and is redirected into the
+              // credit-free guided-entry panel (Empty Survey / Use a Template /
+              // top templates) — the welcome cards' options, offered inline.
+              setUserMessageInterceptor(() => {
+                appendMessages([
+                  { role: "assistant", content: NO_CREDITS_REDIRECT_MESSAGE },
+                ])
+                showThinking(() => openGuidedEntryPanel(GUIDED_ENTRY_QUESTION))
+              })
+            } else {
               setUserMessageInterceptor(() => {
                 appendMessages([
                   {
@@ -2817,10 +2838,11 @@ export const WelcomeScreen: Story = {
 }
 
 // "Welcome Screen · No Credits" — the same welcome-screen flow with AI
-// credits exhausted. The soft credit-warning banner sits on the composer, the
-// starter-prompt buttons above the input are dropped, and free-text chat is
-// blocked (typing returns an "out of credits" reply). The welcome cards stay
-// fully interactive and behave exactly as in the normal flow.
+// credits exhausted. The soft credit-warning banner sits on the composer and the
+// starter-prompt buttons above the input are dropped. Free-text AI needs credits,
+// so a typed message gets a short "can't do that" reply and is redirected into
+// the credit-free guided-entry panel (Empty Survey / Use a Template / top
+// templates). The welcome cards stay fully interactive as in the normal flow.
 export const WelcomeScreenNoCredits: Story = {
   name: "Welcome Screen · No Credits",
   render: () => <CreationWithAIFlow flowId="engagement" noCredits />,
