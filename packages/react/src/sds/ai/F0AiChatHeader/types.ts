@@ -1,3 +1,5 @@
+import type { IconType } from "@/components/F0Icon"
+
 import type { AiChatCredits, AiChatEmployeeCredits } from "../F0AiChat/types"
 
 export type F0AiChatHeaderProps = {
@@ -16,6 +18,13 @@ export type F0AiChatHeaderProps = {
    * a brand-new conversation (renders the "New conversation" placeholder).
    */
   currentThreadTitle?: string | null
+
+  /**
+   * With-history variant: optional icon rendered immediately before the thread
+   * title, marking the conversation with a mode or category (e.g. an analytics
+   * chat). Omit for a plain title.
+   */
+  titleIcon?: IconType
 
   /** Whether the chat is currently in fullscreen mode (controls expand/minimize icon). */
   fullscreen?: boolean

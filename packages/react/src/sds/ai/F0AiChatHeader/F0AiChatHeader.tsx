@@ -66,6 +66,7 @@ export const F0AiChatHeader = ({
   historyEnabled = false,
   title,
   currentThreadTitle,
+  titleIcon,
   fullscreen = false,
   lockVisualizationMode = false,
   onToggleVisualizationMode,
@@ -148,6 +149,9 @@ export const F0AiChatHeader = ({
               onClick={onOpenHistory}
             >
               <div className="flex min-w-0 items-center gap-1">
+                {titleIcon && (
+                  <F0Icon icon={titleIcon} color="default" size="md" />
+                )}
                 <OneEllipsis lines={1} className="min-w-0 text-left">
                   {currentThreadTitle ?? translations.ai.newConversation}
                 </OneEllipsis>

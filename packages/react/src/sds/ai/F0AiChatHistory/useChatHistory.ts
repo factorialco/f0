@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 
+import type { IconType } from "@/components/F0Icon"
+
 import {
   readFromLocalStorage,
   writeToLocalStorage,
@@ -10,6 +12,15 @@ export type ChatThread = {
   title: string
   createdAt: string
   updatedAt: string
+  /**
+   * Optional mode/category marker. When set, the thread row renders the icon
+   * before the title and the label on the trailing edge (e.g. an analytics
+   * chat). Omit for an ordinary thread.
+   */
+  badge?: {
+    label: string
+    icon?: IconType
+  }
 }
 
 type UseChatHistoryReturn = {

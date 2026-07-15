@@ -42,3 +42,23 @@ describe("ThreadItem pending state", () => {
     expect(container.querySelector('[aria-busy="true"]')).toBeInTheDocument()
   })
 })
+
+describe("ThreadItem badge", () => {
+  it("shows the mode label when the thread carries a badge", () => {
+    zeroRender(
+      <ThreadItem
+        thread={{ ...thread, badge: { label: "Analytics" } }}
+        isPinned={false}
+        {...handlers}
+      />
+    )
+
+    expect(screen.getByText("Analytics")).toBeInTheDocument()
+  })
+
+  it("shows no mode label for an ordinary thread", () => {
+    zeroRender(<ThreadItem thread={thread} isPinned={false} {...handlers} />)
+
+    expect(screen.queryByText("Analytics")).not.toBeInTheDocument()
+  })
+})
