@@ -340,5 +340,34 @@ describe("operatorFilter", () => {
         "FR, DE"
       )
     })
+
+    it("does not reactivate a valueless condition after an external clear", async () => {
+      const onChange = vi.fn()
+      const { rerender } = render(
+        <OperatorFilter
+          schema={{ label: "Country", options }}
+          value={{ operator: "not_set", values: [] }}
+          onChange={onChange}
+        />
+      )
+
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+
+      rerender(
+        <OperatorFilter
+          schema={{ label: "Country", options }}
+          value={undefined}
+          onChange={onChange}
+        />
+      )
+
+      await waitFor(() =>
+        expect(screen.getByRole("textbox", { name: "Value" })).toHaveValue("")
+      )
+      expect(onChange).not.toHaveBeenCalledWith({
+        operator: "not_set",
+        values: [],
+      })
+    })
   })
 })

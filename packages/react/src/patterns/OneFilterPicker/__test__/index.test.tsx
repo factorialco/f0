@@ -74,6 +74,44 @@ describe("Filters", () => {
   })
 
   describe("Filter Operations", () => {
+    it("clears a staged valueless operator instead of reapplying it", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+      const operatorDefinition = {
+        employeeId: {
+          type: "operator",
+          label: "Employee ID",
+          options: {
+            operators: [
+              { value: "equals", label: "Is" },
+              {
+                value: "not_set",
+                label: "Has no value",
+                valueMode: "none",
+              },
+            ],
+            valueType: "number",
+          },
+        },
+      } as const satisfies FiltersDefinition
+
+      render(
+        <OneFilterPicker
+          filters={operatorDefinition}
+          value={{ employeeId: { operator: "not_set", values: [] } }}
+          onChange={onChange}
+        />
+      )
+
+      await openFilterPopover(user)
+      expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole("button", { name: "Clear filters" }))
+      await user.click(screen.getByRole("button", { name: "Apply filters" }))
+
+      expect(onChange).toHaveBeenLastCalledWith({})
+    })
+
     it("auto-selects the first filter when opening the popover with no active filters", async () => {
       const user = userEvent.setup()
       const onChange = vi.fn()

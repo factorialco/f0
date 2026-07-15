@@ -234,16 +234,28 @@ export function OperatorFilter({
   // the form opens so a first/only "Has no value" operator can be applied
   // without the impossible requirement to switch away and back first.
   useEffect(() => {
-    if (!value && operatorValue && mode === "none") {
+    const defaultOperatorValue = options.operators[0]?.value
+    if (
+      !value &&
+      operatorValue &&
+      operatorValue === defaultOperatorValue &&
+      mode === "none"
+    ) {
       onChange({ operator: operatorValue, values: [] })
     }
-  }, [mode, onChange, operatorValue, value])
+  }, [mode, onChange, operatorValue, options.operators, value])
 
   // Re-sync the raw inputs when the value is changed from outside the form
   // (e.g. "clear filters", or reopening the popover on another filter).
   // While the user types, `value` follows the draft, so this never fires.
   useEffect(() => {
     setDraft((current) => {
+      // `undefined` is an explicit external clear. Reset the draft even when
+      // the current operator is valueless: its empty `values` array does not
+      // make the condition empty, and keeping it would let the seeding effect
+      // immediately reactivate the condition that was just cleared.
+      if (!value) return draftFromValue(options, value)
+
       const currentOperator = resolveOperator(options, current.operator)
       const currentValues = draftValues(
         current,
@@ -251,10 +263,9 @@ export function OperatorFilter({
         valueType
       )
 
-      const matchesDraft = value
-        ? value.operator === currentOperator?.value &&
-          sameValues(value.values, currentValues)
-        : currentValues.length === 0
+      const matchesDraft =
+        value.operator === currentOperator?.value &&
+        sameValues(value.values, currentValues)
 
       return matchesDraft ? current : draftFromValue(options, value)
     })

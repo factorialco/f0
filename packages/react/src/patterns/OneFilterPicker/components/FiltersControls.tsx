@@ -134,6 +134,10 @@ export function FiltersControls<Filters extends RegisteredFiltersDefinition>({
 
   const handleClearFilters = () => {
     setLocalFiltersValue(getClearedFiltersValue(filtersForValue))
+    // Unmount the active editor while clearing. A complete valueless operator
+    // (for example "Has no value") can otherwise re-emit itself from a stale
+    // draft before the cleared controlled value reaches the form.
+    setSelectedFilterKey(null)
   }
 
   const handleGoBack = () => {
