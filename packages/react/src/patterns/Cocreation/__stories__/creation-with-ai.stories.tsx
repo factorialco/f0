@@ -1114,6 +1114,23 @@ function useLeaveGuidedFlow() {
   }, [appendMessages, setOpen])
 }
 
+/**
+ * Shared "Leave creation?" gate for the guided / no-credits flows: shows the
+ * confirmation and, on confirm, leaves (posts the exit note + closes the chat
+ * via `leaveGuidedFlow`). Used by the templates-gallery Close button; the chat's
+ * own ✕ is gated separately (before it animates) via `setBeforeClose` in
+ * `FlowContent`.
+ */
+function useConfirmLeaveCreation() {
+  const { config } = useFlowConfig()
+  const leaveGuidedFlow = useLeaveGuidedFlow()
+  return useCallback(() => {
+    void confirmLeaveGuidedCreation(config).then((leave) => {
+      if (leave) leaveGuidedFlow()
+    })
+  }, [config, leaveGuidedFlow])
+}
+
 // Follow-up clarifying questions walked after the survey type (audience, then
 // length) before the AI "drafts" the questions onto the canvas. Shared by
 // every flow — only the survey "type" question (`flow.typeOptions`) varies.
@@ -1281,12 +1298,28 @@ function TemplatePreviewAlert() {
  * component so it can read `openCanvas` / `setVisualizationMode` from context.
  */
 function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
-  const { openCanvas, setVisualizationMode } = useAiChat()
+  const { openCanvas } = useAiChat()
   const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
   const { armProposal, armNoCredits } = useProposalFlow()
   const { config, noCredits } = useFlowConfig()
-  const leaveGuidedFlow = useLeaveGuidedFlow()
+
+  // Both the "Back to templates" arrow and the Close ✕ return to the template
+  // selection screen this preview was opened from — the type-scoped gallery for
+  // the "guidedType" flow, the flow-wide gallery otherwise. Closing a preview
+  // steps back to the list, never out of creation.
+  const backToTemplates = () =>
+    openCanvas(
+      toCanvasContent(
+        content.guidedTypeId && config.entryMode === "guidedType"
+          ? {
+              type: "templates",
+              title: guidedTemplatesTitle(config, content.guidedTypeId),
+              guidedTypeId: content.guidedTypeId,
+            }
+          : TEMPLATES_CANVAS_CONTENT
+      )
+    )
 
   const useThisTemplate = () => {
     // A template copy is created already populated, so seed the flow's sample
@@ -1362,19 +1395,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         hideLabel
         label="Back to templates"
         icon={ArrowLeft}
-        onClick={() =>
-          openCanvas(
-            toCanvasContent(
-              content.guidedTypeId && config.entryMode === "guidedType"
-                ? {
-                    type: "templates",
-                    title: guidedTemplatesTitle(config, content.guidedTypeId),
-                    guidedTypeId: content.guidedTypeId,
-                  }
-                : TEMPLATES_CANVAS_CONTENT
-            )
-          )
-        }
+        onClick={backToTemplates}
       />
       <div className="min-w-0 flex-1">
         <F0Heading
@@ -1406,27 +1427,15 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
       {/* Divide the template actions from Close with the shared ButtonGroup
           hairline (same one ButtonGroup draws between its own action clusters). */}
       <ButtonGroupSeparator />
-      {/* Close returns to the starting point of the flow. For the "cards"
-          entry flow (Engagement) that's the fullscreen welcome screen, so it
-          closes straight away. For "guidedType" (Training) there's no welcome
-          screen to return to and no template has been chosen yet, so closing
-          would abandon the creation flow — gate it behind a leave-creation
-          confirmation and, once confirmed, close the chat back to the starting
-          collection page (same as the templates-list canvas' close). */}
+      {/* Close steps back to the template selection screen (same as the Back
+          arrow) rather than closing the canvas — a preview is a sub-view of the
+          gallery, so dismissing it returns to the list, not out of creation. */}
       <F0Button
         variant="outline"
         hideLabel
         label="Close"
         icon={Cross}
-        onClick={() => {
-          if (content.guidedTypeId) {
-            void confirmLeaveGuidedCreation(config).then((leave) => {
-              if (leave) leaveGuidedFlow()
-            })
-            return
-          }
-          setVisualizationMode("fullscreen")
-        }}
+        onClick={backToTemplates}
       />
     </div>
   )
@@ -2101,17 +2110,18 @@ function TemplatesCanvasHeader({
   content: TemplatesCanvasContent
 }) {
   const { setVisualizationMode } = useAiChat()
-  const { config } = useFlowConfig()
-  const leaveGuidedFlow = useLeaveGuidedFlow()
+  const { config, noCredits } = useFlowConfig()
+  const confirmLeave = useConfirmLeaveCreation()
   const openEmptySurvey = useOpenEmptySurvey()
   const startBlankSurvey = useStartBlankSurvey()
   const { guidedTypeId } = content
 
+  // The plain "cards" flow has a welcome screen to fall back to, so Close just
+  // collapses the canvas. The guided flows and the no-credits flows have no
+  // fallback, so closing abandons creation — confirm first (then leave).
   const handleClose = () => {
-    if (guidedTypeId) {
-      void confirmLeaveGuidedCreation(config).then((leave) => {
-        if (leave) leaveGuidedFlow()
-      })
+    if (config.entryMode !== "cards" || noCredits) {
+      confirmLeave()
       return
     }
     setVisualizationMode("fullscreen")
@@ -2355,8 +2365,14 @@ function FlowContent({
   // survey questions show under "Editor", which is the default focused tab in
   // the co-creation flow.
   const [surveyTabId, setSurveyTabId] = useState("editor")
-  const { open, setOpen, visualizationMode, setVisualizationMode, openCanvas } =
-    useAiChat()
+  const {
+    open,
+    setOpen,
+    visualizationMode,
+    setVisualizationMode,
+    openCanvas,
+    canvasContent,
+  } = useAiChat()
   const {
     inProgress,
     appendMessages,
@@ -2366,6 +2382,8 @@ function FlowContent({
     sendMessageWithThinkingOnly,
     showThinking,
     setComposerHidden,
+    clarifyingQuestion,
+    setBeforeClose,
   } = useMockAiChatRuntime()
   const { createSurvey } = useSurveyStore()
   const { armNoCredits } = useProposalFlow()
@@ -2726,8 +2744,40 @@ function FlowContent({
     }
   }, [phase, setOpen, setVisualizationMode])
 
-  // Keep `phase` in sync when the user toggles the chat via the header One
-  // switch (or the chat's own close button). Guarded on an actual `open`
+  // Closing the chat should confirm "Leave creation?" first — but only in the
+  // guided flows and the no-credits flows (the plain "cards" flow has a welcome
+  // screen to fall back to), and only mid-SELECTION: answering clarifying
+  // questions or browsing/previewing templates, before anything is created.
+  const canvas = canvasContent as unknown as {
+    type?: string
+    mode?: string
+  } | null
+  const selectionInProgress =
+    clarifyingQuestion != null ||
+    canvas?.type === "templates" ||
+    (canvas?.type === "survey" && canvas.mode === "preview")
+  const confirmOnClose =
+    (config.entryMode !== "cards" || noCredits) && selectionInProgress
+  const confirmOnCloseRef = useRef(confirmOnClose)
+  confirmOnCloseRef.current = confirmOnClose
+
+  // Gate the chat's own close (its ✕) BEFORE it animates: if a survey is being
+  // selected, confirm leaving first and abort the close (return false) so no
+  // docking animation runs. "Leave" tears the flow down via `leaveGuidedFlow`.
+  useEffect(() => {
+    setBeforeClose(async () => {
+      if (!confirmOnCloseRef.current) return true
+      const leave = await confirmLeaveGuidedCreation(config)
+      if (leave) leaveGuidedFlow()
+      // Either we've closed via `leaveGuidedFlow`, or the user stayed — the
+      // header shouldn't run its own close/animation in either case.
+      return false
+    })
+    return () => setBeforeClose(null)
+  }, [setBeforeClose, config, leaveGuidedFlow])
+
+  // Keep `phase` in sync when the chat opens/closes (the header One switch, the
+  // chat's own close, or `leaveGuidedFlow`). Guarded on an actual `open`
   // transition so it never fights the phase→open effect above.
   const prevOpenRef = useRef(open)
   useEffect(() => {
@@ -2737,7 +2787,6 @@ function FlowContent({
     if (open && phase === "collection") {
       setPhase("chat")
     } else if (!open && phase !== "collection") {
-      // The user closed the chat mid-creation — tear the flow down directly.
       setPhase("collection")
     }
   }, [open, phase, setPhase])

@@ -127,6 +127,16 @@ export type MockAiChatRuntime = {
   setUserMessageInterceptor: (
     interceptor: ((text: string) => void) | null
   ) => void
+  /**
+   * Registers a guard run BEFORE the chat closes (its ✕, via the connected
+   * header). Returning `false` — or a promise resolving to `false` — aborts the
+   * close, so no docking animation runs until the user confirms (e.g. a
+   * "Leave creation?" dialog). Pass `null` to clear.
+   */
+  setBeforeClose: (guard: (() => boolean | Promise<boolean>) | null) => void
+  /** Runs the registered `beforeClose` guard (resolves `true` if none is set).
+   * The connected header awaits this before closing the chat. */
+  runBeforeClose: () => boolean | Promise<boolean>
   clear: () => void
 
   // ── Clarifying question ─────────────────────────────────────────
@@ -378,6 +388,7 @@ export const MockAiChatRuntimeProvider = ({
     Record<number, ClarifyingInteraction>
   >({})
   const interceptorRef = useRef<((text: string) => void) | null>(null)
+  const beforeCloseRef = useRef<(() => boolean | Promise<boolean>) | null>(null)
 
   // Allow late-arriving seed messages (story decorators that prefill async).
   useEffect(() => {
@@ -590,6 +601,17 @@ export const MockAiChatRuntimeProvider = ({
     MockAiChatRuntime["setUserMessageInterceptor"]
   >((interceptor) => {
     interceptorRef.current = interceptor
+  }, [])
+
+  const setBeforeClose = useCallback<MockAiChatRuntime["setBeforeClose"]>(
+    (guard) => {
+      beforeCloseRef.current = guard
+    },
+    []
+  )
+
+  const runBeforeClose = useCallback((): boolean | Promise<boolean> => {
+    return beforeCloseRef.current?.() ?? true
   }, [])
 
   const startClarifying = useCallback<MockAiChatRuntime["startClarifying"]>(
@@ -824,6 +846,8 @@ export const MockAiChatRuntimeProvider = ({
         appendCard,
         setScript,
         setUserMessageInterceptor,
+        setBeforeClose,
+        runBeforeClose,
         clear,
         clarifyingQuestion,
         startClarifying,
