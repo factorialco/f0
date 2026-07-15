@@ -57,6 +57,10 @@ export type ClarifyingStep = {
 export type ClarifyingConfig = {
   steps: ClarifyingStep[]
   onConfirm?: (answersByStep: string[][]) => void
+  /** Fired when the user dismisses the panel (the ✕/Cancel button), after it
+   * closes — lets a flow react to a dismissal (e.g. restart the guided flow so
+   * the next typed message reopens it, instead of a dead composer). */
+  onCancel?: () => void
 }
 
 /** Per-step interaction state tracked while a clarifying flow is open. */
@@ -708,7 +712,11 @@ export const MockAiChatRuntimeProvider = ({
           resolve()
         }
       },
-      cancel: closeClarifying,
+      cancel: () => {
+        const onCancel = clarifyingConfig.onCancel
+        closeClarifying()
+        onCancel?.()
+      },
       back: () => setClarifyingStepIndex((i) => Math.max(0, i - 1)),
       setCustomAnswerText: (text) => updateInteraction({ customText: text }),
       setCustomAnswerActive: (active) =>

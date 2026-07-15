@@ -2370,6 +2370,7 @@ function FlowContent({
   const { createSurvey } = useSurveyStore()
   const { armNoCredits } = useProposalFlow()
   const startBlankSurvey = useStartBlankSurvey()
+  const leaveGuidedFlow = useLeaveGuidedFlow()
 
   // Typed "Create" flow ("cards" entry — Engagement): the same three
   // clarifying questions as the Empty survey card, walked as a single
@@ -2409,15 +2410,97 @@ function FlowContent({
     })
   }
 
+  // Arms the next typed message to RESTART the guided flow by reopening its
+  // clarifying panel, instead of falling through to a simulated AI reply. With
+  // no credits it first posts the "can't do that, but I can still help you
+  // create a survey" note. One-shot: the reopened panel re-registers this via
+  // its `onCancel`, so dismissing + typing again restarts again; picking an
+  // option instead lets the chosen action arm its own follow-up.
+  const armGuidedRestart = (reopenPanel: () => void) => {
+    setUserMessageInterceptor(() => {
+      if (noCredits) {
+        appendMessages([
+          { role: "assistant", content: NO_CREDITS_REDIRECT_MESSAGE },
+        ])
+      }
+      showThinking(() => reopenPanel())
+    })
+  }
+
+  // Dismissing a guided clarifying panel (its ✕/Cancel) means the user wants out
+  // of creation — but these flows have no welcome screen to fall back to, so
+  // confirm first with the "Leave creation?" modal. "Leave" closes the chat;
+  // "Keep creating" reopens the same panel so the flow continues.
+  const confirmExitOrReopen = (reopenPanel: () => void) => {
+    void confirmLeaveGuidedCreation(config).then((leave) => {
+      if (leave) leaveGuidedFlow()
+      else reopenPanel()
+    })
+  }
+
+  // Opens the "guidedType" clarifying panel — the core of the flow. The full
+  // type descriptions are posted as assistant text by `startGuidedTypeFlow`
+  // first (options only render a short label), so reopening this on "Keep
+  // creating" doesn't repeat them. Once a type is picked, the canvas opens
+  // straight to that type's template gallery (no survey is created yet — see
+  // `GuidedTemplatesCanvasBody` / `useOpenEmptySurvey`). Dismissing the panel
+  // asks to confirm leaving creation.
+  const openGuidedTypeClarifying = () => {
+    if (config.entryMode !== "guidedType") return
+    startClarifying({
+      steps: [
+        {
+          question: config.guidedQuestion,
+          options: config.guidedTypes.map((t) => ({
+            id: t.id,
+            label: t.label,
+          })),
+          selectionMode: "single",
+        },
+      ],
+      onConfirm: (answersByStep) => {
+        // Answered — hand the composer back (the guided intro is over).
+        setComposerHidden(false)
+        const label = answersByStep[0]?.[0]
+        const type =
+          config.guidedTypes.find((t) => t.label === label) ??
+          config.guidedTypes[0]
+        // Play the steps one at a time so the user can follow each action
+        // instead of everything landing at once: echo their answer and think
+        // (composer disabled), reply, think again, and only THEN open the
+        // templates canvas so its entrance animation reads as its own beat.
+        sendMessageWithThinkingOnly(
+          `**${config.guidedQuestion}**\\\n${label ?? type.label}`,
+          () => {
+            appendMessages([
+              {
+                role: "assistant",
+                content: "Great — here are some templates to start from.",
+              },
+            ])
+            showThinking(() => {
+              openCanvas(
+                toCanvasContent({
+                  type: "templates",
+                  title: guidedTemplatesTitle(config, type.id),
+                  guidedTypeId: type.id,
+                })
+              )
+            })
+          }
+        )
+      },
+      // Dismissed — confirm leaving creation; "Keep creating" reopens the panel.
+      onCancel: () => confirmExitOrReopen(openGuidedTypeClarifying),
+    })
+  }
+
   // "guidedType" entry flow (Training): unlike "cards", no welcome screen and
   // no waiting for a typed message. On "Create" we post the opening user
   // message on their behalf ("Let's create a Survey"), then let the AI "think"
   // — the composer stays disabled for that beat (`inProgress`, via
-  // `sendMessageWithThinkingOnly`) — before it writes out the form-type options
-  // and opens the clarifying panel. `ClarifyingOption` only renders a short
-  // label, so the full descriptions go in the assistant text first. Once a type
-  // is picked, the canvas opens straight to that type's template gallery (no
-  // survey is created yet — see `GuidedTemplatesCanvasBody` / `useOpenEmptySurvey`).
+  // `sendMessageWithThinkingOnly`) — before writing out the form-type options
+  // and opening the clarifying panel.
   const startGuidedTypeFlow = () => {
     if (config.entryMode !== "guidedType") return
     // Keep the composer out of view through the scripted intro; it reappears
@@ -2436,50 +2519,7 @@ function FlowContent({
           ].join("\n"),
         },
       ])
-      startClarifying({
-        steps: [
-          {
-            question: config.guidedQuestion,
-            options: config.guidedTypes.map((t) => ({
-              id: t.id,
-              label: t.label,
-            })),
-            selectionMode: "single",
-          },
-        ],
-        onConfirm: (answersByStep) => {
-          // Answered — hand the composer back (the guided intro is over).
-          setComposerHidden(false)
-          const label = answersByStep[0]?.[0]
-          const type =
-            config.guidedTypes.find((t) => t.label === label) ??
-            config.guidedTypes[0]
-          // Play the steps one at a time so the user can follow each action
-          // instead of everything landing at once: echo their answer and think
-          // (composer disabled), reply, think again, and only THEN open the
-          // templates canvas so its entrance animation reads as its own beat.
-          sendMessageWithThinkingOnly(
-            `**${config.guidedQuestion}**\\\n${label ?? type.label}`,
-            () => {
-              appendMessages([
-                {
-                  role: "assistant",
-                  content: "Great — here are some templates to start from.",
-                },
-              ])
-              showThinking(() => {
-                openCanvas(
-                  toCanvasContent({
-                    type: "templates",
-                    title: guidedTemplatesTitle(config, type.id),
-                    guidedTypeId: type.id,
-                  })
-                )
-              })
-            }
-          )
-        },
-      })
+      openGuidedTypeClarifying()
     })
   }
 
@@ -2571,32 +2611,16 @@ function FlowContent({
           }
         )
       },
+      // Dismissed — confirm leaving creation; "Keep creating" reopens the panel.
+      onCancel: () => confirmExitOrReopen(() => openGuidedEntryPanel(question)),
     })
-  }
-
-  // No credits: arm the next typed message to redirect into the guided-entry
-  // panel with a short "can't do that, but I can still help you create a survey"
-  // note. RE-ARMS itself, so dismissing the panel and typing again redirects
-  // again (rather than falling through to a simulated AI reply). Shared by both
-  // no-credits entries — the "cards" welcome composer and the "guidedEntry"
-  // flow. Picking a panel option overwrites it with that action's own arming
-  // (e.g. `armNoCredits`), so this only governs the "typed instead of picked"
-  // path.
-  const armNoCreditsRedirect = () => {
-    const handler = () => {
-      appendMessages([
-        { role: "assistant", content: NO_CREDITS_REDIRECT_MESSAGE },
-      ])
-      // Re-arm before the panel reopens so a second dismiss + type is caught too.
-      setUserMessageInterceptor(handler)
-      showThinking(() => openGuidedEntryPanel(GUIDED_ENTRY_QUESTION))
-    }
-    setUserMessageInterceptor(handler)
   }
 
   // "guidedEntry" entry flow (Engagement Guided): the same message-first entry
   // as "guidedType" — post "Let's create a Survey" on the user's behalf, think,
   // then the guided-entry clarifying panel (see `openGuidedEntryPanel`).
+  // Dismissing the panel restarts the flow on the next typed message via the
+  // panel's `onCancel`.
   const startGuidedEntryFlow = () => {
     if (config.entryMode !== "guidedEntry") return
     // Keep the composer out of view through the scripted intro; it reappears
@@ -2607,9 +2631,6 @@ function FlowContent({
         { role: "assistant", content: "Sure — how would you like to start?" },
       ])
       openGuidedEntryPanel(config.guidedQuestion)
-      // No credits: if the user dismisses the panel and types, redirect them
-      // back into it instead of a simulated reply.
-      if (noCredits) armNoCreditsRedirect()
     })
   }
 
@@ -2656,9 +2677,12 @@ function FlowContent({
               // No credits: free-text AI is blocked, so any typed message gets a
               // short "can't do that" reply and is redirected into the
               // credit-free guided-entry panel (Empty Survey / Use a Template /
-              // top templates) — the welcome cards' options, offered inline. Re-
-              // arms, so dismissing the panel and typing again redirects again.
-              armNoCreditsRedirect()
+              // top templates) — the welcome cards' options, offered inline. The
+              // panel's `onCancel` re-arms this, so dismissing + typing redirects
+              // again.
+              armGuidedRestart(() =>
+                openGuidedEntryPanel(GUIDED_ENTRY_QUESTION)
+              )
             } else {
               setUserMessageInterceptor(() => {
                 appendMessages([
