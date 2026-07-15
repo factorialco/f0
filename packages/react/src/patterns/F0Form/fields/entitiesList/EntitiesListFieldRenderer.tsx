@@ -382,6 +382,10 @@ export function EntitiesListFieldRenderer({
         const inner = unwrapZodSchema(propSchema)
         if (isZodType(inner, "ZodString")) item[key] = ""
         else if (isZodType(inner, "ZodArray")) item[key] = []
+        // A boolean field (e.g. an optional switch/checkbox) has no inline cell,
+        // so seed `false` — otherwise a new inline row can never satisfy the
+        // required `z.boolean()` and the add button stays blocked.
+        else if (isZodType(inner, "ZodBoolean")) item[key] = false
       }
       return item
     },
@@ -619,34 +623,32 @@ export function EntitiesListFieldRenderer({
     return { hasInvalidRow: anyInvalid, hasInvalidExistingRow: existingInvalid }
   }, [rows, field.itemSchema, rowItemToForm])
 
-  // Shared add affordance shown in the field header. Kept visible while the
-  // field is disabled (e.g. during submit) — just disabled — so it doesn't pop
-  // in/out.
-  const addConfig =
-    isAtLimit || !canAddItems
-      ? undefined
-      : {
-          label: field.labels?.addButton ?? translations.add,
-          disabled: isDisabled || hasInvalidRow,
-          disabledTooltip: hasInvalidRow
+  // Shared add affordance shown in the field header. Kept visible (just
+  // disabled) while the field is disabled (e.g. submitting) or at the max-items
+  // limit, so it doesn't pop in/out; only hidden when adding is turned off.
+  const addConfig = !canAddItems
+    ? undefined
+    : {
+        label: field.labels?.addButton ?? translations.add,
+        disabled: isDisabled || isAtLimit || hasInvalidRow,
+        disabledTooltip: isAtLimit
+          ? translations.addBlockedMaxHint
+          : hasInvalidRow
             ? hasInvalidExistingRow
               ? translations.addBlockedErrorHint
               : translations.addBlockedHint
             : undefined,
-          onClick: () => {
-            if (useDialogMode) {
-              openItemDialog("add")
-              return
-            }
-            const key = `row-${keyCounter.current++}`
-            // Fresh rows don't show validation errors until touched
-            freshRowKeysRef.current.add(key)
-            commit([
-              ...rows,
-              { __key: key, ...makeEmptyItem(field.itemSchema) },
-            ])
-          },
-        }
+        onClick: () => {
+          if (useDialogMode) {
+            openItemDialog("add")
+            return
+          }
+          const key = `row-${keyCounter.current++}`
+          // Fresh rows don't show validation errors until touched
+          freshRowKeysRef.current.add(key)
+          commit([...rows, { __key: key, ...makeEmptyItem(field.itemSchema) }])
+        },
+      }
 
   // Row callbacks keyed by the stable row key, for the list-view visualization.
   const findRow = useCallback(

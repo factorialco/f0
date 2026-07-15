@@ -781,6 +781,7 @@ export const defaultTranslations = {
         "Finish filling out the last item you just added in order to add another one",
       addBlockedErrorHint:
         "Fix the errors in the existing items before adding another one",
+      addBlockedMaxHint: "You've reached the maximum number of items",
     },
     moreInformation: "More information",
     validation: {
