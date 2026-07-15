@@ -57,10 +57,12 @@ export type ClarifyingStep = {
 export type ClarifyingConfig = {
   steps: ClarifyingStep[]
   onConfirm?: (answersByStep: string[][]) => void
-  /** Fired when the user dismisses the panel (the ✕/Cancel button), after it
-   * closes — lets a flow react to a dismissal (e.g. restart the guided flow so
-   * the next typed message reopens it, instead of a dead composer). */
-  onCancel?: () => void
+  /** Fired when the user dismisses the panel (the ✕/Cancel button). The panel
+   * stays mounted while this runs, so a flow can put a "Leave creation?"
+   * confirmation on top of it without the composer flashing in behind. Return
+   * `false` (or a promise resolving to `false`) to KEEP the panel open — e.g.
+   * the user chose "Keep creating"; any other result (void/true) closes it. */
+  onCancel?: () => boolean | void | Promise<boolean | void>
 }
 
 /** Per-step interaction state tracked while a clarifying flow is open. */
@@ -736,8 +738,17 @@ export const MockAiChatRuntimeProvider = ({
       },
       cancel: () => {
         const onCancel = clarifyingConfig.onCancel
-        closeClarifying()
-        onCancel?.()
+        if (!onCancel) {
+          closeClarifying()
+          return
+        }
+        // Keep the panel mounted while `onCancel` runs — it may raise a
+        // "Leave creation?" confirmation, and closing eagerly would reveal the
+        // composer behind the dialog (the "weird in-between state"). Close only
+        // once `onCancel` resolves to anything other than `false`.
+        void Promise.resolve(onCancel()).then((result) => {
+          if (result !== false) closeClarifying()
+        })
       },
       back: () => setClarifyingStepIndex((i) => Math.max(0, i - 1)),
       setCustomAnswerText: (text) => updateInteraction({ customText: text }),

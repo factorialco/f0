@@ -2384,6 +2384,7 @@ function FlowContent({
     setComposerHidden,
     clarifyingQuestion,
     setBeforeClose,
+    clear,
   } = useMockAiChatRuntime()
   const { createSurvey } = useSurveyStore()
   const { armNoCredits } = useProposalFlow()
@@ -2447,14 +2448,17 @@ function FlowContent({
 
   // Dismissing a guided clarifying panel (its ✕/Cancel) means the user wants out
   // of creation — but these flows have no welcome screen to fall back to, so
-  // confirm first with the "Leave creation?" modal. "Leave" closes the chat;
-  // "Keep creating" reopens the same panel so the flow continues.
-  const confirmExitOrReopen = (reopenPanel: () => void) => {
-    void confirmLeaveGuidedCreation(config).then((leave) => {
+  // confirm first with the "Leave creation?" modal. Returns whether the panel
+  // should close (the runtime keeps it mounted until this resolves): "Leave"
+  // tears the flow down and closes; "Keep creating" resolves `false`, so the
+  // SAME panel stays open — no reopen, and no composer flashing in behind the
+  // dialog.
+  const confirmExitOrStay = (): Promise<boolean> =>
+    confirmLeaveGuidedCreation(config).then((confirmed) => {
+      const leave = confirmed === true
       if (leave) leaveGuidedFlow()
-      else reopenPanel()
+      return leave
     })
-  }
 
   // Opens the "guidedType" clarifying panel — the core of the flow. The full
   // type descriptions are posted as assistant text by `startGuidedTypeFlow`
@@ -2508,8 +2512,8 @@ function FlowContent({
           }
         )
       },
-      // Dismissed — confirm leaving creation; "Keep creating" reopens the panel.
-      onCancel: () => confirmExitOrReopen(openGuidedTypeClarifying),
+      // Dismissed — confirm leaving creation; "Keep creating" keeps the panel.
+      onCancel: confirmExitOrStay,
     })
   }
 
@@ -2629,8 +2633,8 @@ function FlowContent({
           }
         )
       },
-      // Dismissed — confirm leaving creation; "Keep creating" reopens the panel.
-      onCancel: () => confirmExitOrReopen(() => openGuidedEntryPanel(question)),
+      // Dismissed — confirm leaving creation; "Keep creating" keeps the panel.
+      onCancel: confirmExitOrStay,
     })
   }
 
@@ -2688,6 +2692,12 @@ function FlowContent({
         label: "Create",
         icon: Add,
         onClick: () => {
+          // Always start the flow from a clean slate: if the user closed or
+          // interrupted a previous run, its transcript (and any half-walked
+          // clarifying/interceptor state) is still in the runtime. Wipe it so
+          // "Create" restarts the flow AND the conversation from the beginning,
+          // before the entry starters below re-arm composer/interceptor state.
+          clear()
           setVisualizationMode("fullscreen")
           setPhase("chat")
           if (config.entryMode === "cards") {
