@@ -27,11 +27,25 @@ describe("NumberCell", () => {
     item: { id: "1", salary: 42000 },
   }
 
-  it("renders with the provided numeric value", () => {
+  it("renders with the provided numeric value, grouped by default", () => {
     render(<NumberCell {...defaultProps} />)
 
     const input = screen.getByRole("textbox")
-    expect(input).toHaveValue("42000")
+    // Number cells group thousands in their resting display by default.
+    expect(input).toHaveValue("42,000")
+  })
+
+  it("renders ungrouped when numberConfig.grouping is false", () => {
+    render(
+      <NumberCell
+        {...defaultProps}
+        editableColumn={makeEditableColumn({
+          numberConfig: { grouping: false },
+        })}
+      />
+    )
+
+    expect(screen.getByRole("textbox")).toHaveValue("42000")
   })
 
   it("renders empty when value is an empty string", () => {

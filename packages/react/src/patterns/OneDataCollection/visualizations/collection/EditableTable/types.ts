@@ -84,6 +84,12 @@ export type NumberCellConfig<R extends RecordType = RecordType> = {
   maxDecimals?: number
   locale?: string
   /**
+   * Show the locale's thousands separators in the resting display (grouped
+   * while blurred, ungrouped while editing). Defaults to `true`; set `false`
+   * for numbers that shouldn't be grouped (years, IDs, …).
+   */
+  grouping?: boolean
+  /**
    * Unit label displayed next to the number input.
    * Can be a static string (e.g. `"h"`) or a function that receives the
    * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).

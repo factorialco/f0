@@ -25,11 +25,8 @@ export function NumberCell<R extends RecordType>({
   const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
   const numericValue: number | null = isFinite(parsed) ? parsed : null
 
-  const { ref, width, locale, units, unitsBefore } = useNumberCellLayout(
-    config,
-    numericValue,
-    item
-  )
+  const { ref, width, locale, units, unitsBefore, grouping } =
+    useNumberCellLayout(config, numericValue, item)
 
   const handleChange = (newValue: number | null) => {
     if (newValue == null) {
@@ -92,6 +89,7 @@ export function NumberCell<R extends RecordType>({
             transparent
             hint=""
             locale={locale}
+            grouping={grouping}
             min={config?.min}
             max={config?.max}
             step={config?.step}

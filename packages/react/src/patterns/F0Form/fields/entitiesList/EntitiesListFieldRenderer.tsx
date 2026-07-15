@@ -555,17 +555,23 @@ export function EntitiesListFieldRenderer({
             return {
               ...base,
               editType: (row) => editTypeFor(row, "number"),
-              numberConfig: resolution.units
-                ? { units: resolution.units }
-                : undefined,
+              numberConfig: {
+                ...(resolution.units ? { units: resolution.units } : {}),
+                ...(columnConfig?.grouping !== undefined
+                  ? { grouping: columnConfig.grouping }
+                  : {}),
+              },
             }
           case "money":
             return {
               ...base,
               editType: (row) => editTypeFor(row, "money"),
-              numberConfig: resolution.units
-                ? { units: resolution.units }
-                : undefined,
+              numberConfig: {
+                ...(resolution.units ? { units: resolution.units } : {}),
+                ...(columnConfig?.grouping !== undefined
+                  ? { grouping: columnConfig.grouping }
+                  : {}),
+              },
             }
           case "date":
             return {

@@ -72,6 +72,13 @@ export interface F0EntitiesListColumnConfig {
   /** Fixed column width in pixels */
   width?: number
   /**
+   * For number/money columns, show the locale's thousands separators in the
+   * resting cell display (grouped while blurred, ungrouped while editing).
+   * Defaults to `true`; set `false` for numbers that shouldn't group (years,
+   * IDs, …).
+   */
+  grouping?: boolean
+  /**
    * Hides the column while keeping its value in each row. Useful for values
    * that drive row actions (e.g. an `archived` flag toggled from a custom
    * action) but shouldn't be shown or edited as a cell.
