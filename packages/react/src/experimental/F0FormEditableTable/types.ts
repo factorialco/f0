@@ -144,4 +144,11 @@ export type F0FormEditableTableProps<R extends RecordType> = {
   }
   /** Wraps the table in a rounded border container. @default true */
   bordered?: boolean
+  /**
+   * Disables interaction (dragging, edit/remove/row-action buttons) while
+   * keeping the handle and actions columns in place, so toggling it (e.g. while
+   * a form submits) doesn't shift the layout. Cell editability is controlled
+   * separately via each column's `editType`.
+   */
+  disabled?: boolean
 }

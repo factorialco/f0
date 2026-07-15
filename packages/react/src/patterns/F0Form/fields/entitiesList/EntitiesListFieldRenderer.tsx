@@ -614,15 +614,18 @@ export function EntitiesListFieldRenderer({
     [rows, field.itemSchema, rowItemToForm]
   )
 
-  // Shared add affordance used by both the table's built-in add button and the
-  // list-view footer button.
+  // Shared add affordance shown in the field header. Kept visible while the
+  // field is disabled (e.g. during submit) — just disabled — so it doesn't pop
+  // in/out.
   const addConfig =
-    isDisabled || isAtLimit || !canAddItems
+    isAtLimit || !canAddItems
       ? undefined
       : {
           label: field.labels?.addButton ?? translations.add,
-          disabled: hasInvalidRow,
-          disabledTooltip: translations.addBlockedHint,
+          disabled: isDisabled || hasInvalidRow,
+          disabledTooltip: hasInvalidRow
+            ? translations.addBlockedHint
+            : undefined,
           onClick: () => {
             if (useDialogMode) {
               openItemDialog("add")
@@ -784,23 +787,20 @@ export function EntitiesListFieldRenderer({
             rows.map((row) => (row.__key === coerced.__key ? coerced : row))
           )
         }}
-        sortableRows={!isDisabled && field.sortable !== false}
+        // Keep the handle/actions columns mounted while disabled (they're
+        // disabled via `disabled` below) so submitting doesn't shift the layout.
+        sortableRows={field.sortable !== false}
         onReorderRows={({ items }) => commit(items)}
-        onRemoveRow={
-          isDisabled
-            ? undefined
-            : (row) => {
-                commit(rows.filter((r) => r.__key !== row.__key))
-                formField.onBlur()
-              }
-        }
+        onRemoveRow={(row) => {
+          commit(rows.filter((r) => r.__key !== row.__key))
+          formField.onBlur()
+        }}
         onEditRow={
-          useDialogMode && !isDisabled
-            ? (row) => openItemDialog("edit", row)
-            : undefined
+          useDialogMode ? (row) => openItemDialog("edit", row) : undefined
         }
         canEditRow={isRowEditable}
         rowActions={rowActions}
+        disabled={isDisabled}
       />
 
       {rootError && (

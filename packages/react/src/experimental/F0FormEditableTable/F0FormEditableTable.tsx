@@ -156,10 +156,12 @@ function RowActionButton<R extends RecordType>({
   action,
   item,
   index,
+  disabled,
 }: {
   action: F0FormEditableTableRowAction<R>
   item: R
   index: number
+  disabled?: boolean
 }) {
   const button = (
     <F0Button
@@ -169,7 +171,7 @@ function RowActionButton<R extends RecordType>({
       icon={action.icon}
       label={action.label}
       hideLabel={!action.showLabel}
-      disabled={action.disabled}
+      disabled={disabled || action.disabled}
       onClick={() => action.onClick(item, index)}
     />
   )
@@ -201,6 +203,8 @@ type RowCellsProps<R extends RecordType> = {
   actionsColWidth: number | "auto"
   removeLabel: string
   editLabel: string
+  /** Disables the row's edit/remove/action buttons (kept visible). */
+  disabled?: boolean
   /** Present only when the row is sortable */
   dragHandle?: ReactNode
 }
@@ -219,6 +223,7 @@ function RowCells<R extends RecordType>({
   actionsColWidth,
   removeLabel,
   editLabel,
+  disabled,
   dragHandle,
 }: RowCellsProps<R>) {
   const showEdit = !!onEditRow && (canEditRow?.(item, index) ?? true)
@@ -295,6 +300,7 @@ function RowCells<R extends RecordType>({
                 size="md"
                 icon={Pencil}
                 label={editLabel}
+                disabled={disabled}
                 onClick={() => onEditRow(item, index)}
               />
             )}
@@ -304,6 +310,7 @@ function RowCells<R extends RecordType>({
                 action={action}
                 item={item}
                 index={index}
+                disabled={disabled}
               />
             ))}
             {onRemoveRow && (
@@ -320,6 +327,7 @@ function RowCells<R extends RecordType>({
                   hideLabel
                   icon={Delete}
                   label={removeLabel}
+                  disabled={disabled}
                   onClick={() => onRemoveRow(item, index)}
                 />
               </span>
@@ -353,7 +361,7 @@ function SortableRow<R extends RecordType>({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: rowId })
+  } = useSortable({ id: rowId, disabled: cellProps.disabled })
 
   return (
     <TableRow
@@ -375,10 +383,12 @@ function SortableRow<R extends RecordType>({
             type="button"
             ref={setActivatorNodeRef}
             aria-label={reorderLabel}
+            disabled={cellProps.disabled}
             className={cn(
               "flex h-6 w-6 scale-75 cursor-grab touch-none items-center justify-center rounded-md text-f1-foreground opacity-40 transition-opacity",
               "hover:opacity-60 focus-visible:opacity-60",
               isDragging && "cursor-grabbing opacity-60",
+              cellProps.disabled && "cursor-not-allowed hover:opacity-40",
               focusRing("rounded-md")
             )}
             {...attributes}
@@ -416,6 +426,7 @@ function F0FormEditableTableBase<R extends RecordType>({
   getCellError,
   addRow,
   bordered = true,
+  disabled,
 }: F0FormEditableTableProps<R>) {
   const { t } = useI18n()
 
@@ -480,6 +491,7 @@ function F0FormEditableTableBase<R extends RecordType>({
       actionsColWidth,
       removeLabel,
       editLabel,
+      disabled,
     }
     return (
       <EditableRowProvider key={rowId} item={item} onCellChange={onCellChange}>
