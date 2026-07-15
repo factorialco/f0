@@ -92,11 +92,14 @@ actually abandon the work.
 
 A **Guided Chat** flow has one extra case. Because it has no welcome screen to fall back to, backing
 out **before** a survey has been picked would abandon the creation with nothing to return to — so it
-warns first ("Leave creation?"), whether the user closes the template gallery or preview **or
-dismisses the opening clarifying panel itself**. **Keep creating** reopens the panel where they left
-off; **Leave** exits and notes that nothing was created. On a Welcome Screen flow the same actions
-simply drop back to the welcome screen, so they don't warn — match the warning to whether backing
-out actually strands the user.
+warns first ("Leave creation?"). This covers **dismissing the opening clarifying panel**, **closing
+the template gallery**, and **closing the chat panel itself** while a survey is still being chosen
+(the one place the "collapsing the chat is friction-free" rule above yields — here there is nothing
+preserved to reopen). **Keep creating** leaves the flow exactly where it was; **Leave** closes the
+chat and notes that nothing was created. A template preview is a sub-view of the gallery, so its own
+Close steps back to the gallery list rather than out of creation — it doesn't warn. On a Welcome
+Screen flow the same actions simply drop back to the welcome screen, so they don't warn — match the
+warning to whether backing out actually strands the user.
 
 <DoDonts
   do={{

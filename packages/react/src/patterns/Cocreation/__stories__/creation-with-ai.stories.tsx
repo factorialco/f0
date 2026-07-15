@@ -1288,11 +1288,14 @@ function TemplatePreviewAlert() {
 }
 
 /**
- * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits:
- * "Back to templates" (left) re-opens the templates list, and "Close" (right)
- * returns to the starting point of the flow — the fullscreen welcome screen —
- * the same behaviour as the templates-list canvas' close. The framework
- * `onClose` is intentionally ignored in favour of these. "Use this template"
+ * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits,
+ * both stepping back to the gallery this preview was opened from (never out of
+ * creation): "Back to templates" (left) and "Close" (right) both re-open the
+ * template selection screen — the type-scoped gallery for the "guidedType"
+ * flow, the flow-wide gallery otherwise. Leaving creation from a preview instead
+ * happens by closing the chat panel itself, which the guided/no-credits flows
+ * gate with the "Leave creation?" warning (see `FlowContent`'s `setBeforeClose`).
+ * The framework `onClose` is intentionally ignored in favour of these. "Use this template"
  * swaps in the editable resource view (mode "edit"), carrying the template's
  * name and description so its `ResourceHeader` is populated. Defined as a
  * component so it can read `openCanvas` / `setVisualizationMode` from context.

@@ -227,11 +227,12 @@ blank canvas. See
 for the decision.
 
 Because Guided Chat has no welcome screen to fall back to, backing out **before** a survey is picked
-is treated as leaving creation and warns first ("Leave creation?") — whether the user closes the
-template gallery or preview, or dismisses the opening clarifying panel itself. **Keep creating**
-reopens the same panel where they left off; **Leave** closes the chat and notes that nothing was
-created. In the entry-actions shape, picking "Empty Survey" runs the same clarifying →
-draft-confirmation chain described above.
+is treated as leaving creation and warns first ("Leave creation?") — whether the user dismisses the
+opening clarifying panel, closes the template gallery, or closes the chat panel itself while a survey
+is still being chosen. **Keep creating** leaves the flow where it was; **Leave** closes the chat and
+notes that nothing was created. Closing a template preview is a step back to the gallery it was
+opened from, not an exit, so it doesn't warn. In the entry-actions shape, picking "Empty Survey" runs
+the same clarifying → draft-confirmation chain described above.
 
 ### Split
 
