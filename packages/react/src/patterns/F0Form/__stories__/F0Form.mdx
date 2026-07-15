@@ -493,7 +493,10 @@ const updateFormDefinition = useF0FormDefinition({
   },
 })
 
-members: f0FormField.entitiesList({ createFormDefinition, updateFormDefinition })
+members: f0FormField.entitiesList({
+  createFormDefinition,
+  updateFormDefinition,
+})
 ```
 
 <Canvas of={Stories.EntitiesListFieldFormDefinitions} />
