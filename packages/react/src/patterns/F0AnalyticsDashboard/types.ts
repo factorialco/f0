@@ -385,8 +385,19 @@ export interface F0AnalyticsDashboardProps<
   presets?: PresetsDefinition<Filters>
   /**
    * Initial filter values applied when the dashboard first renders.
+   * Used only when `filtersValue` is not provided.
    */
   defaultFilters?: FiltersState<Filters>
+  /**
+   * Applied dashboard-level filter values.
+   * When provided, filter state is controlled by the consumer.
+   */
+  filtersValue?: FiltersState<Filters>
+  /**
+   * Called when applied dashboard-level filters change through Apply, Clear,
+   * chip removal, or preset selection.
+   */
+  onFiltersChange?: (value: FiltersState<Filters>) => void
   /**
    * Ordered list of dashboard items to render in the grid.
    * Each item declares its type, visual config, grid span, and data fetcher.

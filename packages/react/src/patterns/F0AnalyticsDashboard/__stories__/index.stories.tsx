@@ -3,16 +3,22 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useState } from "react"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
+import type { FiltersState } from "@/patterns/OneFilterPicker/types"
 
 import type { DashboardItem } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
-import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
+import {
+  dashboardFilters,
+  dashboardPresets,
+  type DashboardFiltersType,
+  mixedItems,
+} from "./mockDataMixed"
 
 const meta = {
   component: F0AnalyticsDashboard,
   title: "AnalyticsDashboard",
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
 } satisfies Meta<typeof F0AnalyticsDashboard>
 
 export default meta
@@ -72,6 +78,7 @@ export const MixedDashboard: Story = {
  * Dashboard with the global export button enabled (PDF / Excel).
  */
 export const WithExport: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <F0AnalyticsDashboard
       filters={dashboardFilters}
@@ -82,11 +89,37 @@ export const WithExport: Story = {
   ),
 }
 
+/**
+ * A consumer-controlled dashboard with a pre-applied report filter. Applied,
+ * cleared, chip, and preset changes are reflected through `onFiltersChange`.
+ */
+export const ControlledFilters: Story = {
+  tags: ["no-sidebar"],
+  args: { items: mixedItems },
+  render: () => {
+    const [filtersValue, setFiltersValue] = useState<
+      FiltersState<DashboardFiltersType>
+    >({ department: ["Engineering"] })
+
+    return (
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        filtersValue={filtersValue}
+        onFiltersChange={setFiltersValue}
+        presets={dashboardPresets}
+        items={mixedItems}
+      />
+    )
+  },
+}
+
 export const Snapshot: Story = {
+  tags: ["no-sidebar"],
   parameters: withSnapshot({}),
   render: () => (
     <F0AnalyticsDashboard
       filters={dashboardFilters}
+      defaultFilters={{ department: ["Engineering"] }}
       presets={dashboardPresets}
       items={mixedItems}
     />
@@ -143,6 +176,7 @@ const emptyItems: DashboardItem<typeof dashboardFilters>[] = [
  * instead of bare axes.
  */
 export const EmptyDashboard: Story = {
+  tags: ["no-sidebar"],
   render: () => (
     <F0AnalyticsDashboard
       filters={dashboardFilters}

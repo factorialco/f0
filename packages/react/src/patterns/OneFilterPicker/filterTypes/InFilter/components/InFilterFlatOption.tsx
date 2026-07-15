@@ -19,8 +19,6 @@ export function InFilterFlatOption<T extends string>({
   onToggle,
   isCompactMode,
 }: InFilterFlatOptionProps<T>) {
-  const optionId = `option-${String(option.value)}`
-
   return (
     <div className={cn("w-full", !isCompactMode && "px-2")}>
       <div
@@ -34,24 +32,16 @@ export function InFilterFlatOption<T extends string>({
         <span className="min-w-0 flex-1">
           <OneEllipsis>{option.label}</OneEllipsis>
         </span>
-        {/* The presentational checkbox is purely visual — the row handles the
-            click via onToggle. `pointer-events-none` lets a real click on the
-            checkbox fall through to the row's onToggle (in and out of a <form>).
-            Inside a <form> Radix also renders a hidden BubbleInput whose sync
-            effect dispatches a synthetic click on each `checked` change; that
-            click (target = the hidden <input>) bubbles here and would re-trigger
-            onToggle in an infinite select/deselect loop, so stop just that one. */}
-        <div
-          className="pointer-events-none shrink-0"
-          onClick={(e) => {
-            if (e.target instanceof HTMLInputElement) e.stopPropagation()
-          }}
-        >
+        {/* Keep the checkbox interactive so keyboard and assistive-technology
+            users can toggle the option. Stop its click from reaching the
+            mouse-friendly row handler and toggling the value twice. */}
+        <div className="shrink-0" onClick={(event) => event.stopPropagation()}>
           <F0Checkbox
-            id={optionId}
             title={option.label}
             checked={isSelected}
-            presentational
+            onCheckedChange={(checked) => {
+              if (checked !== isSelected) onToggle()
+            }}
             hideLabel
           />
         </div>

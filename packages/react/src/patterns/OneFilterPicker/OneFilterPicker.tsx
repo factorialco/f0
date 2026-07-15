@@ -141,15 +141,8 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     onOpenChange?.(isFiltersOpen)
   }, [isFiltersOpen, onOpenChange])
 
-  const [localFiltersValue, setLocalFiltersValue] = useState(value)
-
-  useEffect(() => {
-    setLocalFiltersValue(value ?? {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
-  }, [JSON.stringify(filters), JSON.stringify(value)])
-
   const removeFilterValue = (key: keyof Definition) => {
-    const newFilters = { ...localFiltersValue }
+    const newFilters = { ...value }
     delete newFilters[key]
 
     // Also clear nested child filter keys to avoid orphaned values
@@ -161,12 +154,10 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
       })
     }
 
-    setLocalFiltersValue(newFilters as FiltersState<Definition>)
     props.onChange(newFilters as FiltersState<Definition>)
   }
 
   const setFiltersValue = (filters: FiltersState<Definition>) => {
-    setLocalFiltersValue(filters)
     props.onChange(filters)
   }
 
@@ -177,7 +168,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
         mode,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
         presetsLoading,
-        value: localFiltersValue,
+        value,
         filters: filters,
         removeFilterValue,
         setFiltersValue: (value: FiltersState<FiltersDefinition>) =>

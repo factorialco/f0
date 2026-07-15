@@ -6,6 +6,7 @@ import { F0Button } from "@/components/F0Button"
 import { F0Checkbox } from "@/components/F0Checkbox"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { ChevronDown, ChevronRight } from "@/icons/app"
+import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { InFilterOptionItem } from "../types"
@@ -38,6 +39,7 @@ export function InFilterOptionRow<T extends string>({
   autoExpand,
 }: InFilterOptionRowProps<T>) {
   const [expanded, setExpanded] = useState(false)
+  const i18n = useI18n()
   const hasChildren = !!option.children?.options.length
 
   const effectiveExpanded = expanded || (autoExpand && hasChildren)
@@ -66,9 +68,12 @@ export function InFilterOptionRow<T extends string>({
     [childFilterKey, childValues, onFilterChange, cacheKey, option.label]
   )
 
-  const optionId = `option-${String(option.value)}-d${depth}`
   const hasDescendantSelected =
     hasChildren && hasSelectedDescendant(option, allFiltersValue)
+  const expansionLabel = i18n.t(
+    effectiveExpanded ? "actions.collapseItem" : "actions.expandItem",
+    { title: option.label }
+  )
 
   return (
     <div
@@ -90,11 +95,20 @@ export function InFilterOptionRow<T extends string>({
               size="sm"
               onClick={() => setExpanded((prev) => !prev)}
               icon={effectiveExpanded ? ChevronDown : ChevronRight}
-              label={""}
+              label={expansionLabel}
+              aria-label={
+                hasDescendantSelected
+                  ? `${expansionLabel}. ${i18n.status.selected.singular}`
+                  : expansionLabel
+              }
+              aria-expanded={effectiveExpanded}
               hideLabel
             />
             {hasDescendantSelected && !effectiveExpanded && (
-              <span className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold" />
+              <span
+                aria-hidden="true"
+                className="absolute -right-px -top-px h-2 w-2 rounded-full bg-f1-background-selected-bold"
+              />
             )}
           </div>
         )}
@@ -112,24 +126,19 @@ export function InFilterOptionRow<T extends string>({
             <span className="min-w-0 flex-1">
               <OneEllipsis>{option.label}</OneEllipsis>
             </span>
-            {/* The presentational checkbox is purely visual — the row handles
-                the click via onToggle. `pointer-events-none` lets a real click on
-                the checkbox fall through to the row's onToggle. Inside a <form>
-                Radix renders a hidden BubbleInput whose sync effect dispatches a
-                synthetic click on each `checked` change; that click (target = the
-                hidden <input>) bubbles here and would re-trigger onToggle in an
-                infinite loop, so stop just that one. */}
+            {/* Keep the checkbox interactive so keyboard and assistive-technology
+                users can toggle the option. Stop its click from reaching the
+                mouse-friendly row handler and toggling the value twice. */}
             <div
-              className="pointer-events-none shrink-0"
-              onClick={(e) => {
-                if (e.target instanceof HTMLInputElement) e.stopPropagation()
-              }}
+              className="shrink-0"
+              onClick={(event) => event.stopPropagation()}
             >
               <F0Checkbox
-                id={optionId}
                 title={option.label}
                 checked={isSelected}
-                presentational
+                onCheckedChange={(checked) => {
+                  if (checked !== isSelected) onToggle()
+                }}
                 hideLabel
               />
             </div>
