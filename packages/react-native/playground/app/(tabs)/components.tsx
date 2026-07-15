@@ -31,7 +31,6 @@ import { F0TagShowcase } from "../../components/F0TagShowcase"
 import { F0TextShowcase } from "../../components/F0TextShowcase/F0TextShowcase"
 import { F0WizardShowcase } from "../../components/F0WizardShowcase"
 import { OneChipShowcase } from "../../components/OneChipShowcase"
-import { OnePresetShowcase } from "../../components/OnePresetShowcase"
 import { PageHeaderShowcase } from "../../components/PageHeaderShowcase"
 import { PressableFeedbackShowcase } from "../../components/PressableFeedbackShowcase"
 import { Select } from "../../components/Select"
@@ -68,7 +67,6 @@ type ComponentType =
   | "f0tag"
   | "f0text"
   | "onechip"
-  | "onepreset"
   | "pageheader"
   | "pressablefeedback"
   | "f0wizard"
@@ -103,7 +101,6 @@ const componentOptions = [
   { value: "f0tag" as ComponentType, label: "F0Tag" },
   { value: "f0text" as ComponentType, label: "F0Text" },
   { value: "onechip" as ComponentType, label: "OneChip (deprecated)" },
-  { value: "onepreset" as ComponentType, label: "OnePreset (deprecated)" },
   { value: "pageheader" as ComponentType, label: "PageHeader" },
   { value: "pressablefeedback" as ComponentType, label: "PressableFeedback" },
   { value: "tag" as ComponentType, label: "Tag (deprecated)" },
@@ -182,8 +179,6 @@ export default function ComponentsShowcase() {
         return <F0TextShowcase />
       case "onechip":
         return <OneChipShowcase />
-      case "onepreset":
-        return <OnePresetShowcase />
       case "pageheader":
         return <PageHeaderShowcase />
       case "pressablefeedback":
