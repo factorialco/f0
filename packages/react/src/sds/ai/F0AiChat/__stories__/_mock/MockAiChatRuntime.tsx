@@ -601,6 +601,12 @@ export const MockAiChatRuntimeProvider = ({
     setClarifyingConfig(null)
     setClarifyingStepIndex(0)
     setClarifyingInteractions({})
+    // The composer is hidden only while a guided flow's scripted intro runs into
+    // its first clarifying panel. Whenever that panel closes — answered OR
+    // cancelled — hand the composer back; otherwise cancelling strands the user
+    // with an empty input slot (MockConnectedChatInput renders nothing when
+    // `composerHidden && !clarifyingQuestion`).
+    setComposerHidden(false)
   }, [])
 
   // Rebuilt each render so the option-toggle / confirm closures always read the
