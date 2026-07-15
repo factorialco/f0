@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.37.1](https://github.com/factorialco/f0/compare/f0-react-v4.37.0...f0-react-v4.37.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** count selectable rows in selection banner (FCT-56547) ([#4692](https://github.com/factorialco/f0/issues/4692)) ([83e3b6e](https://github.com/factorialco/f0/commit/83e3b6ecffed369fb4215f0c40814efd0f326d5c))
+
 ## [4.37.0](https://github.com/factorialco/f0/compare/f0-react-v4.36.3...f0-react-v4.37.0) (2026-07-15)
 
 
