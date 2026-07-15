@@ -5,12 +5,12 @@ import { type ReactNode } from "react"
 import { F0CardHorizontal } from "@/experimental/F0CardHorizontal"
 import { Check, Cross } from "@/icons/app"
 
-// Illustrative-only stories for the Co-creation "Standard flow" docs page. They
+// Illustrative-only stories for the AI Cocreation "Standard flow" docs page. They
 // render compact mocks (not the full-screen flow) so they can be embedded inline
 // via <Canvas> in standard-flow.mdx. Hidden from the sidebar; the page itself is
 // the manual MDX, so opt out of the globally enabled autodocs.
 const meta = {
-  title: "Co-creation/Standard flow",
+  title: "AI Cocreation/Standard flow",
   tags: ["!autodocs"],
   parameters: {
     layout: "padded",

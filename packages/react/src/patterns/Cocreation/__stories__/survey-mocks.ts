@@ -1,4 +1,4 @@
-// Survey split-canvas mocks for the "Walkthrough" co-creation story — sample
+// Survey split-canvas mocks for the "Walkthrough" cocreation story — sample
 // question sets reproduced with the real SurveyAnsweringForm (inline,
 // read-only). Modeled on the SurveyAnsweringForm story's `sampleElements`.
 // Each flow (Engagement, Training) gets its own themed element/answer/

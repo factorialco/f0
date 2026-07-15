@@ -2,12 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { type ReactNode } from "react"
 
-// Illustrative-only story for the Co-creation "Phases" docs page. It renders a
+// Illustrative-only story for the AI Cocreation "Phases" docs page. It renders a
 // compact flow diagram (not the full-screen mock) so it can be embedded inline
 // via <Canvas> in phases.mdx. Hidden from the sidebar; the page itself is the
 // manual MDX, so opt out of the globally enabled autodocs.
 const meta = {
-  title: "Co-creation/Phases",
+  title: "AI Cocreation/Phases",
   tags: ["!autodocs"],
   parameters: {
     layout: "padded",
@@ -106,7 +106,7 @@ function GateNode({ title, desc }: { title: string; desc: string }) {
 }
 
 /**
- * A top-to-bottom map of the co-creation flow: the three phases (Collection →
+ * A top-to-bottom map of the cocreation flow: the three phases (Collection →
  * Chat → Split), the two ways Chat can open (welcome screen vs. guided chat),
  * and the human-in-the-loop gates where the user approves what the AI writes
  * (the initial draft, then every later edit). Embedded in the Phases docs via
@@ -119,13 +119,13 @@ export const PhaseFlow: Story = {
   render: () => (
     <div
       role="img"
-      aria-label="Co-creation runs top to bottom through three phases. Phase 1, Collection: the surface the user starts on; opening the AI moves to Chat. Phase 2, Chat: the user describes what to build through either a welcome screen or a guided chat, answers clarifying questions, then approves a draft-confirmation gate before the AI writes anything. Phase 3, Split: the canvas and chat sit side by side, and every further edit is proposed and confirmed."
+      aria-label="AI Cocreation runs top to bottom through three phases. Phase 1, Collection: the surface the user starts on; opening the AI moves to Chat. Phase 2, Chat: the user describes what to build through either a welcome screen or a guided chat, answers clarifying questions, then approves a draft-confirmation gate before the AI writes anything. Phase 3, Split: the canvas and chat sit side by side, and every further edit is proposed and confirmed."
       className="mx-auto flex w-full max-w-[560px] flex-col items-stretch"
     >
       <PhaseBox n={1} title="Collection">
         <p className="m-0 text-sm text-f1-foreground-secondary">
-          The surface the user starts on — a data collection or page.
-          Co-creation is one trigger away.
+          The surface the user starts on — a data collection or page. AI
+          Cocreation is one trigger away.
         </p>
       </PhaseBox>
 

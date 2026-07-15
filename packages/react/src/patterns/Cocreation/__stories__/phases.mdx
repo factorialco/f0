@@ -3,11 +3,11 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as Stories from "./phases.stories"
 
-<Meta title="Co-creation/Phases" />
+<Meta title="AI Cocreation/Phases" />
 
 # Phases
 
-Every co-creation flow moves through three phases — **Collection → Chat → Split**. They run
+Every cocreation flow moves through three phases — **Collection → Chat → Split**. They run
 on one chat-enabled [`ApplicationFrame`](?path=/docs/patterns-applicationframe--documentation),
 so the AI trigger in the header is available throughout. The whole flow is coordinated by a
 single `phase` value: the chat's open state and visualization follow from it, staying in sync
@@ -20,7 +20,7 @@ before anything the AI generates is written:
 
 Picking a template instead of describing a survey seeds it directly and skips the draft gate —
 the two entry approaches and that shortcut are covered in the
-[Walkthrough](?path=/docs/patterns-co-creation-walkthrough--documentation).
+[Walkthrough](?path=/docs/patterns-ai-cocreation-walkthrough--documentation).
 
 ## The three phases
 
@@ -40,7 +40,7 @@ the two entry approaches and that shortcut are covered in the
         </td>
         <td>
           The starting surface — a data collection, page, or list. The user
-          works as usual; co-creation is one trigger away.
+          works as usual; cocreation is one trigger away.
         </td>
         <td>
           Enters from the surface itself. Exits to Chat when the user opens the
@@ -93,7 +93,7 @@ Walkthrough:
 <Unstyled>
   <a
     target="_parent"
-    href="/?path=/docs/patterns-co-creation-walkthrough--documentation"
+    href="/?path=/docs/patterns-ai-cocreation-walkthrough--documentation"
     className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
   >
     Explore the flows in the Walkthrough ↗
@@ -109,7 +109,7 @@ Walkthrough:
   the user can open, collapse, or return to the conversation at any point.
 - In Split, the resource lives in a canvas **inside the chat** — the flow never navigates to a
   separate resource page. See the
-  [Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) for this and
+  [Standard flow](?path=/docs/patterns-ai-cocreation-standard-flow--documentation) for this and
   the other rules that hold across the phases.
 
 ## Guidelines

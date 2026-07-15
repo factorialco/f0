@@ -1,5 +1,5 @@
-// Per-flow configuration for the "Walkthrough" co-creation story. A "flow" is
-// one coexisting example of the co-creation pattern applied to a resource
+// Per-flow configuration for the "Walkthrough" cocreation story. A "flow" is
+// one coexisting example of the cocreation pattern applied to a resource
 // domain. All flows share most mechanics (phases, chat, canvas, proposal loop),
 // but they enter creation differently:
 //   - "cards"       (Engagement): a welcome screen of entry-point cards.

@@ -5,12 +5,12 @@ import { Menu, Comment, Messages, CreditCard, Wallet } from "@/icons/app"
 import chatFullscreen from "./assets/chat-fullscreen.png"
 import splitEmpty from "./assets/split-empty.png"
 
-<Meta title="Co-creation/Walkthrough" />
+<Meta title="AI Cocreation/Walkthrough" />
 
 # Walkthrough
 
 This is an end-to-end walkthrough of the
-[Co-creation](?path=/docs/patterns-co-creation--documentation) pattern — the abstract flow
+[AI Cocreation](?path=/docs/patterns-ai-cocreation--documentation) pattern — the abstract flow
 grounded in one real resource. The resource here is a survey, but the structure is the
 pattern's, not the survey's: the user starts on a collection (Collection), describes what they
 want in a chat (Chat), then refines the resulting draft on a canvas while the conversation
@@ -28,35 +28,35 @@ each. Open any of them:
         title: "Welcome Screen",
         description:
           "A full-width welcome screen of entry-point cards and starter-prompt suggestions. Uses the Engagement / eNPS data.",
-        href: "/?path=/story/patterns-co-creation-walkthrough--welcome-screen",
+        href: "/?path=/story/patterns-ai-cocreation-walkthrough--welcome-screen",
       },
       {
         icon: Comment,
         title: "Guided Chat · Triage",
         description:
           "One clarifying question up front that triages the survey type, then a type-scoped template gallery. Uses the Training data.",
-        href: "/?path=/story/patterns-co-creation-walkthrough--guided-chat-triage",
+        href: "/?path=/story/patterns-ai-cocreation-walkthrough--guided-chat-triage",
       },
       {
         icon: Messages,
         title: "Guided Chat · Entry Actions",
         description:
           "One clarifying question whose options are entry actions — Empty Survey, Use a Template, or the most-used templates.",
-        href: "/?path=/story/patterns-co-creation-walkthrough--guided-chat-entry-actions",
+        href: "/?path=/story/patterns-ai-cocreation-walkthrough--guided-chat-entry-actions",
       },
       {
         icon: CreditCard,
         title: "Welcome Screen · No Credits",
         description:
           "The welcome-screen flow with AI credits exhausted — the soft credit banner and the typed-message redirect into guided entry.",
-        href: "/?path=/story/patterns-co-creation-walkthrough--welcome-screen-no-credits",
+        href: "/?path=/story/patterns-ai-cocreation-walkthrough--welcome-screen-no-credits",
       },
       {
         icon: Wallet,
         title: "Guided Chat · No Credits",
         description:
           "The guided-chat flow with credits exhausted. Guided creation (templates, blank survey) still needs no credits, so it keeps working.",
-        href: "/?path=/story/patterns-co-creation-walkthrough--guided-chat-no-credits",
+        href: "/?path=/story/patterns-ai-cocreation-walkthrough--guided-chat-no-credits",
       },
     ]}
   />
@@ -156,7 +156,7 @@ blank-composer cost. When a flow includes them, populate them with prompts tied 
 resource being created — the survey example offers "Employee satisfaction survey," "Onboarding
 feedback survey," and "Remote work pulse check." They render on both the side-panel and
 full-width welcome screens, and are independent of the cards: provide either, both, or neither.
-See [Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation) for the
+See [Building blocks](?path=/docs/patterns-ai-cocreation-building-blocks--documentation) for the
 full cards-vs-suggestions contract.
 
 Clarifying questions narrow the intent — here, the survey's type, audience, and length. When the
@@ -170,7 +170,7 @@ first click — so only the drafted questions wait for the confirmation (this is
 pictured below). Starting from a **typed request**, there's no survey to show yet, so the canvas
 stays hidden until Apply reveals it. Either way, the _generated questions_ are what the confirmation
 gates. This mirrors the accept/reject on every later edit; see
-[Confirm before drafting, confirm before editing](?path=/docs/patterns-co-creation-standard-flow--documentation).
+[Confirm before drafting, confirm before editing](?path=/docs/patterns-ai-cocreation-standard-flow--documentation).
 
 #### Guided Chat
 
@@ -223,7 +223,7 @@ The single question takes one of two shapes:
 
 Prefer Guided Chat when the flow has **one clear first action**: a started conversation beats a
 blank canvas. See
-[When to use Welcome Screen vs Guided Chat](?path=/docs/patterns-co-creation-guidelines--documentation)
+[When to use Welcome Screen vs Guided Chat](?path=/docs/patterns-ai-cocreation-guidelines--documentation)
 for the decision.
 
 Because Guided Chat has no welcome screen to fall back to, backing out **before** a survey is picked
@@ -307,7 +307,7 @@ proposal.
 ## Composed building blocks
 
 This flow assembles the blocks documented in
-[Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation):
+[Building blocks](?path=/docs/patterns-ai-cocreation-building-blocks--documentation):
 `F0OneSwitch`, `F0AiChat` (including its data-driven welcome cards and voice dictation),
 `F0ClarifyingPanel` (both the clarifying questions and the guided-chat entry question),
 `F0CardHorizontal` (the in-chat resource card plus the draft-confirmation and proposal cards), and

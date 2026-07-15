@@ -98,7 +98,7 @@ import type {
 import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
 
 /**
- * Co-creation patterns — "Walkthrough".
+ * AI Cocreation patterns — "Walkthrough".
  *
  * Interactive mockup of the AI-creation flow, built on a single chat-enabled
  * ApplicationFrame so the "One" switch (the F0AiChat trigger) is always in the
@@ -120,7 +120,7 @@ import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
  * template cards).
  */
 const meta = {
-  title: "Co-creation/Walkthrough",
+  title: "AI Cocreation/Walkthrough",
   // Manual MDX docs live in creation-with-ai.mdx; opt out of the globally
   // enabled autodocs so the section shows a single Documentation page.
   tags: ["!autodocs"],
@@ -2366,7 +2366,7 @@ function FlowContent({
   const i18n = useI18n()
   // The Surveys resource view has its own tab strip (Editor / Settings); the
   // survey questions show under "Editor", which is the default focused tab in
-  // the co-creation flow.
+  // the cocreation flow.
   const [surveyTabId, setSurveyTabId] = useState("editor")
   const {
     open,

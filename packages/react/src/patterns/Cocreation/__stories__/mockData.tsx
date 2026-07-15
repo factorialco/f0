@@ -1,4 +1,4 @@
-// Mock data for the "Walkthrough" co-creation story — the collection
+// Mock data for the "Walkthrough" cocreation story — the collection
 // records, filters, sortings, data adapters, and visualizations shared by
 // every flow (Engagement Surveys, Training Surveys, ...). Pure data;
 // consumed by FlowContent's OneDataCollection source and by `flow-configs.ts`,

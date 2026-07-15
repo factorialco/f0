@@ -1,11 +1,11 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-<Meta title="Co-creation/Adoption" />
+<Meta title="AI Cocreation/Adoption" />
 
 # Adoption
 
-How to apply co-creation to a **new** resource. Co-creation is not a component you import —
+How to apply cocreation to a **new** resource. AI Cocreation is not a component you import —
 it is an orchestration of existing AI blocks around a small state machine. Surveys is the
 first instance; a job description, a policy draft, or a goal plan follows the same recipe.
 This page is the recipe: the state to own, the blocks to wire, the contracts to honor, and
@@ -13,12 +13,12 @@ the few things that are actually specific to your resource.
 
 ## 1. Own a single `phase`
 
-A co-creation flow runs on one chat-enabled
+A cocreation flow runs on one chat-enabled
 [`ApplicationFrame`](?path=/docs/patterns-applicationframe--documentation) and is driven by a
 single `phase` value — `"collection" | "chat" | "split"`. Everything else (whether the chat
 is open, and whether it shows full width or as a side panel) is **derived** from `phase`,
 never set independently, so the header trigger and the in-flow buttons can't disagree. See
-[Phases](?path=/docs/patterns-co-creation-phases--documentation) for what each phase is and
+[Phases](?path=/docs/patterns-ai-cocreation-phases--documentation) for what each phase is and
 how the transitions fire.
 
 <DoDonts
@@ -37,7 +37,7 @@ how the transitions fire.
 Reach for the existing AI blocks for every conversational part of the flow. You are
 assembling, not authoring — when a block improves, your flow inherits it. Each is documented
 on its own page; the catalog and responsibilities live in
-[Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation).
+[Building blocks](?path=/docs/patterns-ai-cocreation-building-blocks--documentation).
 
 <Unstyled>
   <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
@@ -85,9 +85,9 @@ on its own page; the catalog and responsibilities live in
 
 ## 3. Honor the contracts
 
-These are the invariants that make every co-creation flow feel like the same pattern. They
+These are the invariants that make every cocreation flow feel like the same pattern. They
 are defined in full on the
-[Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) page:
+[Standard flow](?path=/docs/patterns-ai-cocreation-standard-flow--documentation) page:
 
 - **Canvas in chat** — the resource is built and edited in a canvas that opens inside the
   chat, never on a separate page you route the user to.
@@ -100,8 +100,8 @@ are defined in full on the
 - **Card lifecycle** — keep only the latest card for a resource interactive (active / live),
   and leave superseded cards in the chat as history.
 
-Co-creation is also held to the pattern's
-[Accessibility](?path=/docs/patterns-co-creation-accessibility--documentation) contract —
+AI Cocreation is also held to the pattern's
+[Accessibility](?path=/docs/patterns-ai-cocreation-accessibility--documentation) contract —
 keyboard, focus, announcements, and reduced motion.
 
 ## 4. Bring only your resource surfaces
@@ -122,7 +122,7 @@ The conversational machinery is shared; what's specific to your resource is smal
 - **Entry approach** — how the conversation opens. A **guided chat** posts an opening line and
   asks one clarifying question up front; a **welcome screen** shows entry-point cards and
   suggestions. Prefer guided chat when your flow has one clear first action — see
-  [Welcome Screen vs Guided Chat](?path=/docs/patterns-co-creation-guidelines--documentation).
+  [Welcome Screen vs Guided Chat](?path=/docs/patterns-ai-cocreation-guidelines--documentation).
 - **Welcome cards** — if you use a welcome screen, the starting points worth offering (blank,
   browse templates, seed a known template).
 
@@ -139,7 +139,7 @@ The conversational machinery is shared; what's specific to your resource is smal
 
 ## Checklist
 
-When standing up a new co-creation flow:
+When standing up a new cocreation flow:
 
 1. Mount it on one chat-enabled `ApplicationFrame` with `F0OneSwitch` in the header.
 2. Model a single `phase`; derive the chat's open / visualization state from it.
@@ -151,8 +151,8 @@ When standing up a new co-creation flow:
 6. Manage the resource/proposal card lifecycle (active, live, superseded, resolved).
 7. Warn before navigation that abandons an in-progress creation (including a guided-chat close
    before anything is picked).
-8. Verify the [Accessibility](?path=/docs/patterns-co-creation-accessibility--documentation)
+8. Verify the [Accessibility](?path=/docs/patterns-ai-cocreation-accessibility--documentation)
    contract — keyboard, focus, announcements, reduced motion.
 
 For the end-to-end walkthrough to read alongside this checklist, see the
-[Walkthrough](?path=/docs/patterns-co-creation-walkthrough--documentation).
+[Walkthrough](?path=/docs/patterns-ai-cocreation-walkthrough--documentation).

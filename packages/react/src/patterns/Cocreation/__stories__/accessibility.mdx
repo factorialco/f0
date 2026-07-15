@@ -1,16 +1,16 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-<Meta title="Co-creation/Accessibility" />
+<Meta title="AI Cocreation/Accessibility" />
 
 # Accessibility
 
-Co-creation puts a conversation, a set of accept/reject decisions, and a live resource canvas
+AI Cocreation puts a conversation, a set of accept/reject decisions, and a live resource canvas
 on screen at once, and changes them as the AI works. That makes a few things load-bearing:
 the user must be able to **drive every decision from the keyboard**, **hear what the AI just
 did** without watching the canvas, and **keep their place** when panels open, close, and
 swap. The building blocks already implement most of this; this page states the contract the
-pattern relies on so a new co-creation flow inherits it instead of re-deriving it.
+pattern relies on so a new cocreation flow inherits it instead of re-deriving it.
 
 ## Keyboard
 
@@ -120,7 +120,7 @@ keyboard or screen-reader user is never left on a control that just disappeared.
 
 ## Announcements
 
-Much of what co-creation does is visual and asynchronous — the AI streams a reply, then an
+Much of what cocreation does is visual and asynchronous — the AI streams a reply, then an
 overlay applies a change to the canvas. A screen-reader user needs those moments narrated.
 
 - **Applying a change** — `F0AiProcessingOverlay` renders with `role="status"` and
@@ -161,4 +161,4 @@ keyframes that no-op under `motion-reduce`.
 />
 
 For broader, component-level accessibility expectations, see the foundations docs; this page
-covers only what is specific to co-creation.
+covers only what is specific to cocreation.
