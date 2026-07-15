@@ -89,11 +89,13 @@ Closing or collapsing the chat panel is **not** leaving — the flow is preserve
 where it was, so that action does not warn. Reserve the confirmation for navigation that would
 actually abandon the work.
 
-A **Guided Chat** flow has one extra case. Because it has no welcome screen to fall back to, closing
-the template gallery or preview **before** a survey has been picked would abandon the creation with
-nothing to return to — so that close warns first ("Leave creation?"), where the same close on a
-Welcome Screen flow would simply drop back to the welcome screen. Match the warning to whether the
-close actually strands the user.
+A **Guided Chat** flow has one extra case. Because it has no welcome screen to fall back to, backing
+out **before** a survey has been picked would abandon the creation with nothing to return to — so it
+warns first ("Leave creation?"), whether the user closes the template gallery or preview **or
+dismisses the opening clarifying panel itself**. **Keep creating** reopens the panel where they left
+off; **Leave** exits and notes that nothing was created. On a Welcome Screen flow the same actions
+simply drop back to the welcome screen, so they don't warn — match the warning to whether backing
+out actually strands the user.
 
 <DoDonts
   do={{
