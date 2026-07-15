@@ -873,14 +873,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     const subscription = form.watch((_values, { name }) => {
       if (form.formState.isSubmitting) return
 
-      if (isAutosubmit) {
-        // Form-level: any change once the form is dirty.
-        if (!form.formState.isDirty) return
-      } else {
-        // Per-field auto-save: only a change to a designated `autoSave` field.
-        // `name` is the changed path, e.g. "links.0.url" → root field id
-        // "links"; a matching name is itself the "field changed" signal (the
-        // watch fires with an undefined name on mount, which is skipped).
+      if (!isAutosubmit) {
+        // Per-field auto-save: only react to a change on a designated
+        // `autoSave` field. `name` is the changed path, e.g. "links.0.url" →
+        // root field id "links"; a matching name is itself the "field changed"
+        // signal (the watch fires with an undefined name on mount, skipped).
         const rootFieldId = name?.split(".")[0]
         if (!rootFieldId || !autoSaveFieldIdsRef.current.has(rootFieldId))
           return
@@ -891,6 +888,11 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
+        // Re-check dirtiness at fire time (RHF's `isDirty` has settled by now,
+        // unlike inside the synchronous watch callback): skip a save when the
+        // form is back to its last-saved state — e.g. a row was added then
+        // removed, netting no change from the snapshot.
+        if (!form.formState.isDirty) return
         snapshotFocus()
         form.handleSubmit((data) =>
           handleSubmitForAutosubmitRef.current(data)
