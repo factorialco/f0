@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.38.0](https://github.com/factorialco/f0/compare/f0-react-v4.37.1...f0-react-v4.38.0) (2026-07-15)
+
+
+### Features
+
+* **tags:** add size prop to F0TagRaw (md/sm) ([#4553](https://github.com/factorialco/f0/issues/4553)) ([09c4591](https://github.com/factorialco/f0/commit/09c459124f1cda05d11268236b0fa751f6fe1539))
+
 ## [4.37.1](https://github.com/factorialco/f0/compare/f0-react-v4.37.0...f0-react-v4.37.1) (2026-07-15)
 
 
