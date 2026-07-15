@@ -63,8 +63,11 @@ export type F0EntitiesListFieldTag =
 
 /**
  * Per-column presentation options, keyed by the item-schema property name.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema` so
+ * callbacks like `listTag` receive a fully-typed `item`.
  */
-export interface F0EntitiesListColumnConfig {
+export interface F0EntitiesListColumnConfig<T = EntitiesListItem> {
   /** Column header (defaults to the capitalized property name) */
   label?: string
   /** Placeholder shown in the cell input */
@@ -91,10 +94,7 @@ export interface F0EntitiesListColumnConfig {
    * text. The tag shows on the right side of the row and the field is dropped
    * from the description lines. Ignored in `editable-table` mode.
    */
-  listTag?: (
-    value: unknown,
-    item: EntitiesListItem
-  ) => F0EntitiesListFieldTag | undefined
+  listTag?: (value: unknown, item: T) => F0EntitiesListFieldTag | undefined
 }
 
 // ============================================================================
@@ -102,19 +102,23 @@ export interface F0EntitiesListColumnConfig {
 // ============================================================================
 
 /** Helpers passed to a row action's `onClick` to mutate that row. */
-export interface F0EntitiesListRowActionContext {
+export interface F0EntitiesListRowActionContext<T = EntitiesListItem> {
   /** The row's current values. */
-  item: EntitiesListItem
+  item: T
   /** The row's index. */
   index: number
   /** Merge a partial update into this row and commit it to the form value. */
-  update: (partial: EntitiesListItem) => void
+  update: (partial: Partial<T>) => void
   /** Remove this row. */
   remove: () => void
 }
 
-/** A custom trailing action for a row. */
-export interface F0EntitiesListRowAction {
+/**
+ * A custom trailing action for a row.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema`.
+ */
+export interface F0EntitiesListRowAction<T = EntitiesListItem> {
   /** Icon shown in the action button. */
   icon: IconType
   /** Accessible label; also shown next to the icon when `showLabel` is set. */
@@ -126,7 +130,7 @@ export interface F0EntitiesListRowAction {
   /** Disables the button. */
   disabled?: boolean
   /** Called when the action is clicked, with helpers to mutate the row. */
-  onClick: (context: F0EntitiesListRowActionContext) => void
+  onClick: (context: F0EntitiesListRowActionContext<T>) => void
 }
 
 /** Title and supporting description for one of the add/edit dialogs. */
@@ -182,20 +186,25 @@ export type F0EntitiesListVisualization = "editable-table" | "list-view"
  * Overrides how each row is labelled in `list-view` mode. When omitted, the
  * first visible field becomes the title and the remaining visible fields
  * become description lines.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema`.
  */
-export interface F0EntitiesListItemDefinition {
+export interface F0EntitiesListItemDefinition<T = EntitiesListItem> {
   /** Row title (defaults to the first visible field's value). */
-  title?: (item: EntitiesListItem) => string
+  title?: (item: T) => string
   /** Description lines shown under the title (defaults to the other fields). */
-  description?: (item: EntitiesListItem) => string[]
+  description?: (item: T) => string[]
   /** Optional leading avatar for the row. */
-  avatar?: (item: EntitiesListItem) => AvatarVariant | undefined
+  avatar?: (item: T) => AvatarVariant | undefined
 }
 
 /**
  * Behavior options for a entities list field.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema` so
+ * `itemHref`, `listItem`, `rowActions` and `columns` receive a typed `item`.
  */
-export interface F0EntitiesListOptions {
+export interface F0EntitiesListOptions<T = EntitiesListItem> {
   /**
    * Whether rows can be reordered by dragging their handle.
    * @default true
@@ -223,14 +232,14 @@ export interface F0EntitiesListOptions {
    * Overrides how each row is labelled in `list-view` mode. Ignored for the
    * `editable-table` visualization.
    */
-  listItem?: F0EntitiesListItemDefinition
+  listItem?: F0EntitiesListItemDefinition<T>
   /**
    * Per-item link (`list-view` only). When set, each row becomes navigable —
    * clicking the row (or its trailing arrow) goes to the returned URL. Only
    * honored when there's no `updateSchema`: with a split schema the row shows
    * the edit (pencil) action and opens the update dialog on click instead.
    */
-  itemHref?: (item: EntitiesListItem) => string | undefined
+  itemHref?: (item: T) => string | undefined
   /** User-facing text (add button, dialog description/title). */
   labels?: F0EntitiesListLabels
   /**
@@ -248,17 +257,14 @@ export interface F0EntitiesListOptions {
   /** Maximum number of rows allowed. When reached the add button is hidden. */
   maxItems?: number
   /** Per-column presentation options, keyed by item-schema property name */
-  columns?: Record<string, F0EntitiesListColumnConfig>
+  columns?: Record<string, F0EntitiesListColumnConfig<T>>
   /**
    * Custom trailing actions per row. Resolved per row, so the actions can
    * depend on the row's value — e.g. show "Archive" or "Unarchive" based on a
    * hidden `archived` column. Each action's `onClick` receives helpers to
    * update or remove the row.
    */
-  rowActions?: (
-    item: EntitiesListItem,
-    index: number
-  ) => F0EntitiesListRowAction[]
+  rowActions?: (item: T, index: number) => F0EntitiesListRowAction<T>[]
 }
 
 /**

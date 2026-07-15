@@ -23,7 +23,11 @@ import type { F0NumberConfig } from "./fields/number/types"
 import type { F0PeriodConfig } from "./fields/period/types"
 import type { F0RichTextConfig } from "./fields/richtext/types"
 import type { F0SelectConfig } from "./fields/select/types"
-import type { F0EntitiesListConfig } from "./fields/entitiesList/types"
+import type {
+  EntitiesListItem,
+  F0EntitiesListConfig,
+  F0EntitiesListOptions,
+} from "./fields/entitiesList/types"
 import type { F0SwitchConfig } from "./fields/switch/types"
 import type { F0TextConfig } from "./fields/text/types"
 import type { F0TextareaConfig } from "./fields/textarea/types"
@@ -1432,14 +1436,25 @@ export namespace f0FormField {
 
   // ---- entitiesList --------------------------------------------------------
 
-  /** @internal Fields shared by every entities-list config variant. */
-  type EntitiesListBaseConfig = Omit<
+  /**
+   * @internal Fields shared by every entities-list config variant. `T` is the
+   * inferred row value type, so `config` callbacks (`itemHref`, `listItem`,
+   * `rowActions`, `columns.*.listTag`) receive a typed `item`.
+   */
+  type EntitiesListBaseConfig<T = EntitiesListItem> = Omit<
     F0EntitiesListFieldConfig,
-    "fieldType" | "schema" | "createFormDefinition" | "updateFormDefinition"
-  >
+    | "fieldType"
+    | "schema"
+    | "createFormDefinition"
+    | "updateFormDefinition"
+    | "config"
+  > & {
+    /** Behavior options, with callbacks typed against the row value `T`. */
+    config?: F0EntitiesListOptions<T>
+  }
   /** @internal Single-schema config: one `schema` for both add and edit. */
   type EntitiesListSingleConfig<TItem extends z.ZodObject<z.ZodRawShape>> =
-    EntitiesListBaseConfig & {
+    EntitiesListBaseConfig<WithRowId<z.infer<TItem>>> & {
       /** Zod object schema describing one row (add, edit and display). */
       schema: TItem
       createFormDefinition?: never
@@ -1457,7 +1472,7 @@ export namespace f0FormField {
   type EntitiesListFormDefsConfig<
     TCreate extends z.ZodObject<z.ZodRawShape>,
     TUpdate extends z.ZodObject<z.ZodRawShape>,
-  > = EntitiesListBaseConfig & {
+  > = EntitiesListBaseConfig<WithRowId<z.infer<TUpdate>>> & {
     schema?: never
     createFormDefinition: F0FormDefinitionSingleSchema<TCreate>
     updateFormDefinition: F0FormDefinitionSingleSchema<TUpdate>
@@ -1552,8 +1567,13 @@ export namespace f0FormField {
       >
     }
   ) {
-    const { optional, schema, createFormDefinition, updateFormDefinition, ...rest } =
-      config
+    const {
+      optional,
+      schema,
+      createFormDefinition,
+      updateFormDefinition,
+      ...rest
+    } = config
     // Canonical row schema: the single `schema`, or the update form's schema
     // (the fuller edit shape) in split-form mode.
     const canonical = (schema ??
