@@ -2050,6 +2050,8 @@ export declare const defaultTranslations: {
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
+                readonly addColumn: "Add column";
+                readonly removeColumn: "Remove column";
             };
         };
         readonly editableTable: {
@@ -2647,6 +2649,20 @@ export declare const defaultTranslations: {
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
     };
+    readonly pdfViewer: {
+        readonly toolbar: "Document toolbar";
+        readonly previousPage: "Previous page";
+        readonly nextPage: "Next page";
+        readonly zoomIn: "Zoom in";
+        readonly zoomOut: "Zoom out";
+        readonly scaleSelector: "Zoom level";
+        readonly pageWidth: "Page width";
+        readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
+        readonly print: "Print";
+        readonly download: "Download";
+        readonly loading: "Loading document";
+    };
 };
 
 declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
@@ -2711,6 +2727,7 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -3960,6 +3977,7 @@ declare type F0TagRawProps = {
 declare interface F0TagStatusProps {
     text: string;
     variant: Variant;
+    icon?: IconType;
     /**
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
@@ -5093,10 +5111,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -5104,8 +5120,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }

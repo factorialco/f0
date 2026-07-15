@@ -62,6 +62,7 @@ import { F0FormDefinition as F0FormDefinition_2 } from './f0';
 import { F0FormDefinitionPerSection as F0FormDefinitionPerSection_2 } from './f0';
 import { F0FormDefinitionSingleSchema as F0FormDefinitionSingleSchema_2 } from './f0';
 import { F0GridStackProps as F0GridStackProps_2 } from './F0GridStack';
+import { F0PdfViewerProps as F0PdfViewerProps_2 } from './types';
 import { F0SelectProps as F0SelectProps_2 } from './types';
 import { F0SliderProps as F0SliderProps_2 } from './types';
 import { F0SliderSkeletonProps } from './F0SliderSkeleton';
@@ -114,6 +115,7 @@ import { Observable } from 'zen-observable-ts';
 import { PageLayoutBlockComponent as PageLayoutBlockComponent_2 } from './types';
 import { PageLayoutGroupComponent as PageLayoutGroupComponent_2 } from './f0';
 import { PageProps } from './pages/Page';
+import { PDFDocumentProxy } from 'pdfjs-dist';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './f0';
 import { PersonCellValue as PersonCellValue_2 } from './types/person';
@@ -346,7 +348,7 @@ declare type ActionProps_2 = {
      * @default "default"
      * @optional
      */
-    variant?: "default" | "outline" | "promote";
+    variant?: "default" | "outline" | "neutral" | "promote";
     /**
      * The icon of the action
      * @optional
@@ -1556,7 +1558,7 @@ declare type BaseFilterDefinition<T extends FilterTypeKey> = {
     hideSelector?: boolean;
 };
 
-declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, }: BaseHeaderProps_2): JSX_2.Element;
+declare function BaseHeader({ title, avatar, deactivated, description, primaryAction, secondaryActions, otherActions, status, metadata, metadataRowGap, showBottomBorder, onClose, }: BaseHeaderProps_2): JSX_2.Element;
 
 declare type BaseHeaderProps = ComponentProps<typeof BaseHeader>;
 
@@ -1584,6 +1586,8 @@ declare interface BaseHeaderProps_2 {
     metadataRowGap?: MetadataProps["rowGap"];
     /** Renders a 1px bottom border at the very bottom of the header. */
     showBottomBorder?: boolean;
+    /** When set, renders a close button in the header actions that calls this on click. */
+    onClose?: () => void;
 }
 
 /**
@@ -1843,6 +1847,11 @@ export declare type ButtonDropdownItem<T = string> = {
      * The description of the item.
      */
     description?: string;
+    /**
+     * Whether the item is disabled.
+     * @default false
+     */
+    disabled?: boolean;
 };
 
 export declare type ButtonDropdownMode = (typeof buttonDropdownModes)[number];
@@ -3234,6 +3243,8 @@ declare const componentTypes: readonly ["layout", "info", "action", "form"];
 
 export declare function computeSectionEndIds(elements: SurveyFormBuilderElement[]): Set<string>;
 
+export declare const configurePdfWorker: (src?: string) => void;
+
 export declare type ConfirmDialogOptions = NotificationDialogBaseOptions & {
     /** The confirm action (default: label "Ok", value true). */
     confirm?: DialogSimpleAction;
@@ -3696,6 +3707,13 @@ export declare interface DashboardMetricItem<Filters extends FiltersDefinition =
     format?: MetricFormat;
     /** Number of decimal places. @default 0 */
     decimals?: number;
+    /**
+     * Custom value formatter — takes precedence over `format`/`decimals`.
+     * The built-in presets format with the browser locale; this lets the
+     * consumer control locale and currency, mirroring the chart configs'
+     * `valueFormatter`.
+     */
+    valueFormatter?: (value: number) => string;
     /** Async data fetcher — receives dashboard filters */
     fetchData: (filters: FiltersState<Filters>) => Promise<DashboardMetricData>;
 }
@@ -4590,6 +4608,8 @@ export declare const defaultTranslations: {
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
+                readonly addColumn: "Add column";
+                readonly removeColumn: "Remove column";
             };
         };
         readonly editableTable: {
@@ -5187,6 +5207,20 @@ export declare const defaultTranslations: {
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
     };
+    readonly pdfViewer: {
+        readonly toolbar: "Document toolbar";
+        readonly previousPage: "Previous page";
+        readonly nextPage: "Next page";
+        readonly zoomIn: "Zoom in";
+        readonly zoomOut: "Zoom out";
+        readonly scaleSelector: "Zoom level";
+        readonly pageWidth: "Page width";
+        readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
+        readonly print: "Print";
+        readonly download: "Download";
+        readonly loading: "Loading document";
+    };
 };
 
 /**
@@ -5420,10 +5454,6 @@ declare type DialogWrapperContextType = {
     portalContainer: HTMLDivElement | null;
 };
 
-declare const DialogWrapperProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
-export { DialogWrapperProvider as F0DialogAlikeProvider }
-export { DialogWrapperProvider as F0DialogProvider }
-
 /**
  * The props for the F0DialogProvider component.
  */
@@ -5484,20 +5514,6 @@ export declare type DragPayload<T = unknown> = {
     kind: string;
     id: string;
     data?: T;
-};
-
-export declare type DrawerControls = {
-    kind: "resource";
-    expand?: {
-        label: string;
-        url?: string;
-        onClick?: () => void;
-    };
-    navigation?: NavigationProps;
-} | {
-    kind: "back";
-    label: string;
-    onClick: () => void;
 };
 
 export declare type DrawerDefinition = {
@@ -5564,6 +5580,7 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -5918,9 +5935,19 @@ declare interface EventCatcherProviderProps {
 
 declare type EventName = "datacollection.filter-change" | "datacollection.sorting-change" | "datacollection.preset-click";
 
-declare type EventParams = Record<string, EventScalar | Array<EventScalar>>;
+declare type EventParams = Record<string, EventValue>;
 
 declare type EventScalar = string | number | boolean | undefined | null;
+
+/**
+ * A JSON-serializable event value. Scalars and arrays are emitted as-is; object
+ * values (for example a date-range or number-range filter) are normalized to a
+ * nested record of scalars via `normalizeEventValue` before being emitted, so
+ * consumers never receive `Date` instances or other non-serializable values.
+ */
+declare type EventValue = EventScalar | EventValue[] | {
+    [key: string]: EventValue;
+};
 
 /**
  * Profile data for an expense entity, resolved asynchronously
@@ -6933,12 +6960,21 @@ export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
 
 export declare interface F0AudioPlayerProps extends WithDataTestIdProps, DataAttributes_2 {
     /**
-     * The audio source URL.
+     * The audio source. Either a URL string, or a function that lazily resolves
+     * the URL the first time playback is requested. Use the function form for
+     * on-demand credentials (e.g. presigned URLs) so the URL is only fetched on
+     * user intent.
      */
-    src: string;
+    src: string | (() => Promise<string>);
+    /**
+     * Known total duration in seconds. Lets the player show the total time and an
+     * active seek bar before the audio loads (e.g. with `preload="none"`).
+     * Superseded by the real duration once metadata loads.
+     */
+    duration?: number;
     /**
      * How much of the audio to preload.
-     * @default "metadata"
+     * @default "metadata" ("none" when `src` is a function)
      */
     preload?: "none" | "metadata" | "auto";
     /**
@@ -8531,10 +8567,7 @@ export declare interface F0DemoCardProps {
 }
 
 /**
- * @deprecated Use `F0Dialog` from `@/components/dialog-alike/F0Dialog` for
- * center/fullscreen dialogs, or `F0Drawer` from
- * `@/components/dialog-alike/F0Drawer` for side panels. This is a
- * backward-compatible shim that maps the legacy props onto those components.
+ * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0Dialog: WithDataTestIdReturnType_3<FC<F0DialogInternalProps>>;
 
@@ -8554,12 +8587,8 @@ export declare type F0DialogActionsProps = {
 
 export declare const F0DialogAlikeContext: Context<DialogWrapperContextType>;
 
-/**
- * The dialog-alike context, retyped under the original name so the public
- * `Context<F0DialogContextType>` signature is preserved (the runtime value is
- * the same context the dialog-alike components populate).
- * @deprecated Import `F0DialogContext` from `@/components/dialog-alike/F0Dialog`.
- */
+export declare const F0DialogAlikeProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: DialogWrapperProviderProps) => JSX_2.Element;
+
 export declare const F0DialogContext: Context<F0DialogContextType>;
 
 declare type F0DialogContextType = {
@@ -8585,6 +8614,17 @@ export declare type F0DialogPrimaryAction = {
 };
 
 export declare type F0DialogPrimaryActionItem = F0DialogActionItem;
+
+export declare const F0DialogProvider: ({ isOpen, onClose, shownBottomSheet, position, children, portalContainer, }: F0DialogProviderProps) => JSX_2.Element;
+
+declare type F0DialogProviderProps = {
+    isOpen: boolean;
+    onClose: () => void;
+    shownBottomSheet?: boolean;
+    position: DialogPosition;
+    children: ReactNode;
+    portalContainer: HTMLDivElement | null;
+};
 
 export declare type F0DialogSecondaryAction = {
     label: string;
@@ -9815,8 +9855,28 @@ export declare interface F0FormValidationResult {
     rootError?: string;
 }
 
-/** Tag types that can be rendered in a node's metadata row. */
-declare type F0GraphNodeTagType = TagVariant["type"];
+/**
+ * A tag rendered in a node's metadata row. Its visual is driven by the
+ * `TagVariant` `type`; its column identity — which toggle/label/default-
+ * visibility bucket it falls into — is `column ?? type`.
+ */
+declare type F0GraphNodeTag = TagVariant & {
+    /**
+     * Optional column identity, decoupling this tag's show/hide toggle, hover-
+     * card label and default visibility from its visual `type`. Defaults to
+     * `type` when omitted. Use it to give two tags of the same `type` (e.g. a
+     * second `raw` pill) their own independent column.
+     */
+    column?: F0GraphNodeTagColumn;
+};
+
+/**
+ * Identifies the show/hide column a tag belongs to. A column defaults to the
+ * tag's visual `type` (`"raw"`, `"status"`, …) but can be any custom string, so
+ * two tags sharing a `type` — e.g. two `raw` pills — can occupy independent
+ * columns with their own toggle, label and default visibility.
+ */
+declare type F0GraphNodeTagColumn = string;
 
 export declare const F0GridStack: WithDataTestIdReturnType_7<    {
 ({ options, widgets, onChange, className, static: isStatic, forcePositionSync, }: F0GridStackProps_2): JSX_2.Element;
@@ -10152,6 +10212,42 @@ export declare type F0OneSwitchProps = React.ComponentPropsWithoutRef<typeof Swi
     /** When true, the tooltip is opened automatically for 3 seconds*/
     autoOpen?: boolean;
 };
+
+declare type F0PdfRotation = 0 | 90 | 180 | 270;
+
+export declare type F0PdfScale = (typeof pdfScales)[number];
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ */
+export declare const F0PdfViewer: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0PdfViewerProps_2 & RefAttributes<HTMLDivElement>> & {
+Skeleton: () => JSX_2.Element;
+}>;
+
+export declare interface F0PdfViewerProps extends WithDataTestIdProps, DataAttributes_2 {
+    /** Source URL of the PDF document. */
+    url: string;
+    /** File name used when downloading the document. Defaults to "document.pdf". */
+    filename?: string;
+    /** Zero-based page index to scroll to initially (and on change). */
+    page?: number;
+    /** Restrict rendering to a subset of pages (zero-based indexes). */
+    pagesToDisplay?: number[];
+    /** Initial zoom level. Defaults to "page-width". */
+    initialScale?: F0PdfScale;
+    /** Send credentials with the document request. Defaults to true. */
+    withCredentials?: boolean;
+    /** Show a toolbar control to rotate the document in 90° steps. */
+    rotatable?: boolean;
+    /** Initial rotation in degrees. Defaults to 0. */
+    initialRotation?: F0PdfRotation;
+    /** Called with the new rotation in degrees whenever the user rotates. */
+    onRotationChange?: (rotation: F0PdfRotation) => void;
+    /** Called once the document has loaded, with the pdf.js document proxy. */
+    onPdfLoaded?: (pdf: PDFDocumentProxy) => void;
+    /** Called with the 1-based page number when the visible page changes. */
+    onPageChange?: (page: number) => void;
+}
 
 /**
  * F0 config options specific to period fields.
@@ -11256,7 +11352,7 @@ declare interface F0WizardFormBaseProps {
     onClose?: () => void;
     title?: string;
     /** @deprecated Use `size` instead. */
-    width?: Exclude<F0DialogSize, "fullscreen">;
+    width?: DialogWidth;
     /** The size of the wizard dialog. Preferred over the deprecated `width`. */
     size?: F0DialogSize;
     defaultStepIndex?: number;
@@ -12000,19 +12096,24 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     subtitle?: (record: R) => string;
     /** Avatar shown on the leading side of the node pill. */
     avatar?: (record: R) => AvatarVariant;
-    /** Tags rendered in the node metadata row. */
-    tags?: (record: R) => TagVariant[];
     /**
-     * Tag types present on the nodes. When provided, the controls bar gains a
-     * toggle to show/hide each metadata type (like configuring table columns).
+     * Tags rendered in the node metadata row. A tag may set `column` to place it
+     * in its own show/hide column independent of its visual `type` (e.g. a second
+     * `raw` pill that must not merge into the first `raw` column).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
-    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Tag types that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    tags?: (record: R) => F0GraphNodeTag[];
+    /**
+     * Tag columns present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata column (like configuring table columns).
+     * Values are tag `column` keys (or `type` when a tag has no `column`).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Tag columns that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -12041,6 +12142,16 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      */
     revealNodeId?: string;
     /**
+     * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+     * root of their branch): when the tree first becomes ready, its ancestor
+     * path is loaded/expanded and the viewport centers on it. Unlike
+     * `revealNodeId` (which is ignored on entry so search stays clean), this is
+     * the opt-in "open the org chart already looking at me" behaviour. Requires
+     * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+     * the default entry view (roots expanded to `defaultExpandDepth`).
+     */
+    focusOnEntry?: string;
+    /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
      * revealing nodes in branches that have not been expanded yet.
@@ -12048,6 +12159,47 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     loadNodePath?: (nodeId: string) => Promise<R[]>;
     /** Optional parent accessor used when linking the revealed ancestor path. */
     getParentId?: (record: R) => string | null;
+    /**
+     * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+     * built from whatever lightweight records `childrenFilters`/`fetchData`
+     * return, and the full record is fetched — batched, once per node — only for
+     * the nodes that enter the viewport, via this loader. The returned records
+     * replace each node's `data` (matched by node id) and clear its loading
+     * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+     * eager behavior (structure and data fetched together per expansion).
+     *
+     * The "lightness" of the initial records is entirely the source's choice and
+     * transparent to the hook — no special adapter mode is required.
+     */
+    loadNodeData?: (ids: string[]) => Promise<R[]>;
+    /**
+     * Apply targeted updates to the already-loaded tree **in place**, without the
+     * full reset (and collapse to `defaultExpandDepth`) that a filter change
+     * triggers. Use it to reflect real-time / collaborative changes while keeping
+     * the user's current expansion and viewport.
+     *
+     * Bump `version` to apply a batch **once** (the number dedups against React
+     * re-renders — reuse the same object identity freely):
+     * - `upsert` records are matched by node id: an existing node has its `data`,
+     *   `childrenCount` and parent refreshed (re-parenting if `getParentId`
+     *   returns a new parent); an unknown record is inserted when it is attachable
+     *   (a root, or its parent is already in the tree — a child of a not-yet-loaded
+     *   parent will appear when that parent is expanded).
+     * - `remove` ids are dropped together with their descendants, and pruned from
+     *   the expanded set.
+     *
+     * Applying a batch never re-fetches and never collapses; it reconciles the
+     * nodes already in memory. The parents whose child set the batch touches (the
+     * old and new parent of a move, the parent of a removal) have their
+     * `childrenCount`/`childrenLoaded` reconciled locally from the in-memory tree
+     * — send only the records that changed; upserting the affected parents too is
+     * allowed but not required.
+     */
+    liveUpdate?: {
+        version: number;
+        upsert?: R[];
+        remove?: string[];
+    };
     /**
      * Id of the node representing the current user. When set, a "Find me" button
      * is shown in the controls that centers the viewport on that node.
@@ -12065,6 +12217,22 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     maxZoom?: number;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+     * the viewport are handed to React Flow — for very large trees (thousands of
+     * expand-visible nodes). Off by default; non-breaking.
+     */
+    enableNodeWindowing?: boolean;
+    /** Flow-space px kept materialized around the viewport (pass-through). */
+    nodeWindowPadding?: number;
+    /**
+     * Viewport-driven data loading (pass-through). Called (debounced + batched)
+     * with the ids of nodes that entered the viewport, so the consumer can
+     * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+     */
+    loadVisibleNodeData?: (ids: string[]) => void;
+    /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+    visibleDataDebounceMs?: number;
 };
 
 declare type GraphVisualizationSettings = {
@@ -12726,10 +12894,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<{
-        icon: IconType;
-        property: CardMetadataProperty;
-    }>;
+    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -14062,6 +14227,8 @@ declare type PathsToStringProps<T> = T extends string ? [] : {
     [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>];
 }[Extract<keyof T, string>];
 
+export declare const pdfScales: readonly ["page-width", "page-fit", "0.5", "0.75", "1", "1.25", "1.5", "2", "3", "4"];
+
 /**
  * Pre-loaded context shown as an empty state in the chat.
  * The `context` string is prepended to the user's first message
@@ -14276,6 +14443,10 @@ declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "i
     loading?: boolean;
     onClick?: () => void | Promise<void>;
     disabled?: boolean;
+    tooltip?: (params: {
+        disabled: boolean;
+        loading: boolean;
+    }) => string | undefined;
 };
 
 /**
@@ -14511,7 +14682,7 @@ declare type Props_3 = {
     list?: TagCounterItem[];
 };
 
-declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder">;
+declare type Props_4 = {} & Pick<BaseHeaderProps, "avatar" | "title" | "description" | "primaryAction" | "secondaryActions" | "otherActions" | "metadata" | "status" | "deactivated" | "metadataRowGap" | "showBottomBorder" | "onClose">;
 
 export declare type QuestionActionParams = {
     questionId: string;
@@ -15376,7 +15547,7 @@ declare interface SurveyAnsweringFormDialogProps extends SurveyAnsweringFormShar
     inline?: false;
     mode: SurveyAnsweringFormMode;
     module: SurveyAnsweringFormModule;
-    position?: SurveyDialogPosition;
+    position?: DialogPosition;
     isOpen: boolean;
     onClose: () => void;
     allowToChangeFullscreen?: boolean;
@@ -15487,9 +15658,6 @@ export declare type SurveyDataset = {
 
 export declare type SurveyDatasets = Record<string, SurveyDataset>;
 
-/** Where the answering dialog is anchored. */
-declare type SurveyDialogPosition = "center" | "left" | "right" | "fullscreen";
-
 export declare const SurveyFormBuilder: WithDataTestIdReturnType_8<({ elements: elementsProp, disabled, onChange, disallowOptionalQuestions, allowedQuestionTypes, applyingChanges, useUpload, datasets, }: SurveyFormBuilderProps) => JSX_2.Element>;
 
 export declare type SurveyFormBuilderCallbacks = {
@@ -15587,6 +15755,12 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      * Avoid hiding the column by the user
      */
     noHiding?: boolean;
+    /**
+     * Avoid removing the column by the user. Only relevant when the
+     * visualization sets `onRemoveColumn`; the per-row trash affordance in the
+     * settings popover is hidden for this column. Mirrors `noHiding`.
+     */
+    noRemoving?: boolean;
     /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
@@ -15704,6 +15878,20 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
+    /**
+     * Called when the user clicks the "Add column" entry at the top of the
+     * column-settings popover. When omitted, the entry is not shown. Open your
+     * own column picker and update `columns` in response.
+     */
+    onAddColumn?: () => void;
+    /**
+     * Called when the user removes a column via the trash affordance revealed on
+     * hovering its row in the column-settings popover. When omitted, no remove
+     * affordance is shown. Removing is distinct from hiding: drop the column from
+     * `columns` in response. Frozen/leading columns and columns flagged
+     * `noRemoving` are never removable.
+     */
+    onRemoveColumn?: (columnId: ColId) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
@@ -15850,6 +16038,7 @@ declare const tags: readonly ["h1", "h2", "h3", "h4", "h5", "h6", "p", "span", "
 export declare interface TagStatusProps {
     text: string;
     variant: Variant;
+    icon?: IconType;
     /**
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
@@ -16497,7 +16686,7 @@ export declare function useAiChat(): AiChatProviderReturnValue;
 
 export declare function useAiChatTranslations(): AiChatTranslations;
 
-export declare const useAudioPlayer: (audioRef: RefObject<HTMLAudioElement>, callbacks?: UseAudioPlayerCallbacks) => AudioPlayerControls;
+export declare const useAudioPlayer: (audioRef: RefObject<HTMLAudioElement>, callbacks?: UseAudioPlayerCallbacks, initialDuration?: number) => AudioPlayerControls;
 
 declare interface UseAudioPlayerCallbacks {
     onPlay?: () => void;
@@ -16789,10 +16978,6 @@ export declare interface UseDataSourceItemNavigationReturn<R extends RecordType>
     previousItemUrl: string | null;
 }
 
-declare const useDialogWrapperContext: () => DialogWrapperContextType;
-export { useDialogWrapperContext as useF0Dialog }
-export { useDialogWrapperContext as useF0DialogAlikeContext }
-
 export declare function useDndEvents(handler: (e: {
     phase: "start" | "over" | "drop" | "cancel";
     source: DragPayload;
@@ -16820,6 +17005,10 @@ export declare const useEmojiConfetti: () => {
  * Returns null if not inside a F0AiFormRegistryProvider.
  */
 export declare function useF0AiFormRegistry(): F0AiFormRegistryContextValue | null;
+
+export declare const useF0Dialog: () => F0DialogContextType;
+
+export declare const useF0DialogAlikeContext: () => DialogWrapperContextType;
 
 /**
  * Hook to control F0Form programmatically.
@@ -17624,10 +17813,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -17635,8 +17822,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
