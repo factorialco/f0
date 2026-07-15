@@ -7559,7 +7559,7 @@ export declare type F0ButtonToggleProps = Omit<F0ButtonToggleInternalProps, (typ
  * Shows an avatar, title, optional description, and a configurable action button.
  *
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`).
- * The co-creation flow already renders these cards with `F0CardHorizontal` directly
+ * The AI Cocreation flow already renders these cards with `F0CardHorizontal` directly
  * (Open/Close → `primaryAction`; superseded → a faded `opacity-50 pointer-events-none`
  * wrapper). Don't add new usages; migrate the remaining one
  * (`F0AiMessagesContainer/FormCard`) once its inline `children` preview has an
@@ -9835,7 +9835,7 @@ export declare type F0HeadingProps = Omit<TextProps, "className" | "variant" | "
  * @deprecated Being replaced by `F0CardHorizontal` (`@/experimental/F0CardHorizontal`),
  * which this component already wraps. Use `F0CardHorizontal` directly: `confirmAction` /
  * `rejectAction` for the pending state, `status` for the resolved outcome, and
- * `secondaryActions` for a single CTA. The co-creation flow no longer uses this component —
+ * `secondaryActions` for a single CTA. The AI Cocreation flow no longer uses this component —
  * don't add new usages.
  * @removeIn 5.0.0
  */
