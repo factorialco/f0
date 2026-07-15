@@ -325,23 +325,96 @@ F0AnalyticsDashboard presents related metrics, charts, and tables as one report 
 
 ### Usage examples
 
-**Controlled report filters**
+**Report-level filter review matrix**
 
-Keep saved report state outside the component and feed every committed value back through <code>filtersValue</code>.
+Report filters are one controlled state for the entire dashboard. Every example keeps the applied value visible above the report so changes can be reviewed without inspecting component internals.
 
-<Canvas of={Stories.ControlledFilters} />
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th scope="col" className="text-left">
+          Review case
+        </th>
+        <th scope="col" className="text-left">
+          What it demonstrates
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Empty controlled state</td>
+        <td>No chips or counter until the first committed filter.</td>
+      </tr>
+      <tr>
+        <td>Pre-applied controlled state</td>
+        <td>
+          Apply, dismiss/rollback, Clear, chip removal, presets, and counter
+          behavior.
+        </td>
+      </tr>
+      <tr>
+        <td>Scalar values</td>
+        <td>
+          Search text, one selected option, a single date, and a single number.
+        </td>
+      </tr>
+      <tr>
+        <td>Collection and range values</td>
+        <td>Multiple selected options, a date range, and a numeric range.</td>
+      </tr>
+      <tr>
+        <td>Export, no-data, and no-item reports</td>
+        <td>
+          The same report-level state remains available across established
+          dashboard variants.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
 
-**Dashboard export**
+**Empty controlled state**
 
-Enable export when the report contains multiple related items that belong in one workbook.
+Start from an empty saved value. There are no applied chips or filter counter until a reviewer commits the first report filter.
+
+<Canvas of={Stories.ReportFiltersEmpty} />
+
+**Pre-applied and commit lifecycle**
+
+Start from a saved Department filter. Draft changes roll back on dismiss; Apply, Clear, chip removal, and presets update the visible parent state.
+
+<Canvas of={Stories.ReportFiltersPreApplied} />
+
+**Scalar values**
+
+Review search text, one selected option, a single date, and a single number together.
+
+<Canvas of={Stories.ReportFilterScalarValues} />
+
+**Collection and range values**
+
+Review multiple selected options, a date range, and a numeric range together. Boolean and valueless filters are not native <code>OneFilterPicker</code> filter types and are intentionally not represented as supported dashboard controls.
+
+<Canvas of={Stories.ReportFilterRangeAndMultipleValues} />
+
+**With dashboard export**
+
+The export control and every dashboard item consume the same applied report filter value.
 
 <Canvas of={Stories.WithExport} />
 
-**Empty report data**
+**With no report data**
 
-Keep report controls available when valid filters produce no rows or chart points.
+The filter bar remains usable when valid report filters return empty chart data.
 
 <Canvas of={Stories.EmptyDashboard} />
+
+**With no dashboard items**
+
+The filter bar remains usable when the report has no items, without starting an item fetch.
+
+<Canvas of={Stories.ReportFiltersNoItems} />
 
 ## Accessibility
 
@@ -383,6 +456,6 @@ Keep report controls available when valid filters produce no rows or chart point
 
 ### Screen reader behavior
 
-- The filter trigger includes the labels and count of applied report filters.
+- The filter trigger names the applied filter labels, while a visible counter shows how many report filters are active.
 - The filter popover has a dialog name, and filter options expose native checkbox semantics.
 - Applied filter removal buttons include the filter label and selected value in their accessible names.
