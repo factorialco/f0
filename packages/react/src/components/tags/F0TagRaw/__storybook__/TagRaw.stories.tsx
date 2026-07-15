@@ -20,6 +20,15 @@ const meta: Meta = {
     },
   },
   argTypes: {
+    size: {
+      control: "inline-radio",
+      description: "The size of the tag",
+      options: ["md", "sm"],
+      table: {
+        defaultValue: { summary: "md" },
+        type: { summary: '"md" | "sm"' },
+      },
+    },
     onlyIcon: {
       control: "boolean",
       description: "Whether to only display the icon and not the label",
@@ -60,6 +69,23 @@ export const IconTag: Story = {
   },
 }
 
+export const Sizes: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The tag is available in two sizes: `md` (default, 14px) and `sm` (12px).",
+      },
+    },
+  },
+  render: () => (
+    <div className="flex flex-col items-start gap-3">
+      <F0TagRaw text="Medium" icon={Ai} size="md" />
+      <F0TagRaw text="Small" icon={Ai} size="sm" />
+    </div>
+  ),
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   render: () => (
@@ -69,6 +95,8 @@ export const Snapshot: Story = {
       <F0TagRaw text="Label" />
       <F0TagRaw text="Label" icon={Ai} />
       <F0TagRaw text="Label" onlyIcon icon={Ai} />
+      <F0TagRaw text="Label" icon={Ai} size="sm" />
+      <F0TagRaw text="Label" size="sm" />
     </div>
   ),
 }

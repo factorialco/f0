@@ -27,10 +27,21 @@ import { InputFieldProps } from "@/components/F0InputField"
 import { Arrows } from "./components/Arrows"
 import { extractNumber } from "./internal/extractNumber"
 
-const formatValue = (value: number, locale: string, maxDecimals?: number) =>
+/**
+ * Formats a number for display. `useGrouping` adds the locale's thousands
+ * separators (e.g. `1,234,567`) — used for the resting display; while the
+ * field is focused it's off so the user edits a plain, ungrouped number
+ * (which keeps `extractNumber` and caret handling simple).
+ */
+const formatValue = (
+  value: number,
+  locale: string,
+  maxDecimals?: number,
+  useGrouping = false
+) =>
   new Intl.NumberFormat(locale, {
     maximumFractionDigits: maxDecimals,
-    useGrouping: false,
+    useGrouping,
   }).format(value)
 
 export interface NumberInputPopoverConfig {
@@ -154,6 +165,13 @@ export type NumberInputInternalProps = Pick<
     min?: number
     max?: number
     maxDecimals?: number
+    /**
+     * Show the locale's thousands separators in the resting display (e.g.
+     * `1,234,567`). While the field is focused the number is shown ungrouped
+     * for easy editing. Off by default — enable it for amounts/quantities, but
+     * leave it off for years, IDs and other non-grouped numbers. @default false
+     */
+    grouping?: boolean
     onChange?: (value: number | null) => void
     units?: string
     extraContent?: ReactNode
@@ -170,6 +188,7 @@ export const NumberInputInternal = forwardRef<
     id,
     value,
     maxDecimals,
+    grouping = false,
     step,
     min,
     max,
@@ -186,6 +205,7 @@ export const NumberInputInternal = forwardRef<
     disabled,
     readonly,
     loading,
+    onBlur,
     ...props
   },
   ref
@@ -198,8 +218,11 @@ export const NumberInputInternal = forwardRef<
     defaultProp: false,
     onChange: popover?.onOpenChange,
   })
+  // The resting display is grouped (thousands separators); it switches to a
+  // plain ungrouped number while the field is focused for editing.
+  const [isFocused, setIsFocused] = useState(false)
   const [fieldValue, setFieldValue] = useState<string>(() =>
-    value != null ? formatValue(value, locale, maxDecimals) : ""
+    value != null ? formatValue(value, locale, maxDecimals, grouping) : ""
   )
   const [draftValue, setDraftValue] = useState<number | null>(
     value != null ? value : null
@@ -328,15 +351,25 @@ export const NumberInputInternal = forwardRef<
   }
 
   useEffect(() => {
-    // This reconciles the fieldValue when `value` changes external to this component
+    // With grouping, the resting (blurred) display shows thousands separators
+    // and the focused display drops them for editing. This branch also drives
+    // the focus/blur transitions (re-formatting when `isFocused` flips).
+    if (grouping && !isFocused) {
+      setFieldValue(
+        inputValue != null
+          ? formatValue(inputValue, locale, maxDecimals, true)
+          : ""
+      )
+      return
+    }
+    // Otherwise (grouping off, or focused): reconcile the field only when
+    // `value` changed externally, so in-progress typing isn't clobbered.
     const extractedData = extractNumber(fieldValue, { maxDecimals })
-
     if (inputValue === undefined || inputValue == extractedData?.value) return
-
     setFieldValue(
       inputValue != null ? formatValue(inputValue, locale, maxDecimals) : ""
     )
-  }, [fieldValue, inputValue, locale, maxDecimals])
+  }, [fieldValue, inputValue, locale, maxDecimals, isFocused, grouping])
 
   const innerStatusTypeOnly = resolvedStatus
     ? { type: resolvedStatus.type }
@@ -362,6 +395,11 @@ export const NumberInputInternal = forwardRef<
         disabled={disabled}
         loading={loading}
         readonly={readonly}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => {
+          setIsFocused(false)
+          onBlur?.()
+        }}
         onBeforeInput={handleBeforeInput}
         appendTag={units}
         append={

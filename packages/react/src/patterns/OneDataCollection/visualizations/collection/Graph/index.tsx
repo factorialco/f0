@@ -11,6 +11,7 @@ import {
   type F0GraphHandle,
   F0GraphNode,
   F0GraphSkeleton,
+  tagColumn,
 } from "@/patterns/F0Graph"
 
 import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
@@ -72,6 +73,7 @@ export const GraphCollection = <
   loadNodePath,
   getParentId,
   loadNodeData,
+  liveUpdate,
   zoomPreset,
   minZoom,
   maxZoom,
@@ -122,6 +124,7 @@ export const GraphCollection = <
       loadNodePath,
       getParentId,
       loadNodeData,
+      liveUpdate,
       focusOnEntry,
       zoomPreset,
       showControls,
@@ -212,7 +215,8 @@ export const GraphCollection = <
     ? (record: Record) =>
         [...tags(record)].sort(
           (a, b) =>
-            orderedTagTypes.indexOf(a.type) - orderedTagTypes.indexOf(b.type)
+            orderedTagTypes.indexOf(tagColumn(a)) -
+            orderedTagTypes.indexOf(tagColumn(b))
         )
     : undefined
 

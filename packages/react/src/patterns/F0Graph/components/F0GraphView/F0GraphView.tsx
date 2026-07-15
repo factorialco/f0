@@ -69,7 +69,7 @@ import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
-import type { F0GraphNodeTagType } from "../F0GraphNode"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {
@@ -197,7 +197,7 @@ export function F0GraphView<T = unknown>(
   const visibleTagTypesArr =
     controlledVisibleTagTypes ?? defaultVisibleTagTypes ?? nodeTagTypes ?? []
   const visibleTagTypesSet = useMemo(
-    () => new Set<F0GraphNodeTagType>(visibleTagTypesArr),
+    () => new Set<F0GraphNodeTagColumn>(visibleTagTypesArr),
     [visibleTagTypesArr]
   )
 

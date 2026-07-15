@@ -145,7 +145,7 @@ export interface F0GraphRenderConfigContextValue {
    * `visibleTagTypes` props and the controls popover.
    */
   visibleTagTypes?: ReadonlySet<
-    import("./components/F0GraphNode").F0GraphNodeTagType
+    import("./components/F0GraphNode").F0GraphNodeTagColumn
   >
   /**
    * `true` while a deferred payload is still loading. Used by

@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import type { F0GraphNodeProps } from "./types"
+import { tagColumn } from "./types"
 
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
@@ -123,7 +124,7 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
     const isDetail = variant === "detail"
     const filteredTags = tags
       ? visibleTagTypes
-        ? tags.filter((t) => visibleTagTypes.has(t.type))
+        ? tags.filter((t) => visibleTagTypes.has(tagColumn(t)))
         : tags
       : undefined
     const tagsVisible = isDetail && !!filteredTags && filteredTags.length > 0

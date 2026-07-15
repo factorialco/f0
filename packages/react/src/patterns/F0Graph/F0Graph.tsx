@@ -5,7 +5,7 @@ import "./F0Graph.css"
 import { F0GraphView } from "./components/F0GraphView"
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
-  F0GraphNodeTagType,
+  F0GraphNodeTagColumn,
   GraphNodeState,
   GraphNodeVariant,
 } from "./components/F0GraphNode"
@@ -184,18 +184,18 @@ export interface F0GraphProps<T = unknown> {
    *
    * Order is preserved in the popover.
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Controlled set of currently visible tag types. When omitted, falls
    * back to `defaultVisibleTagTypes` (or all of `nodeTagTypes`). The
    * visibility UI itself is owned by the consumer.
    */
-  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Initial visible tag types when `visibleTagTypes` is not controlled.
    * Defaults to all of `nodeTagTypes`.
    */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Whether the layout should reserve vertical room for one tag row beneath
    * each node so the source handle (and outgoing edges) anchors below the
@@ -312,7 +312,7 @@ export interface F0GraphNodeRenderContext {
    * rendered. Driven by the `visibleTagTypes` / `nodeTagTypes` props and
    * the popover toggle in the controls bar.
    */
-  visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
+  visibleTagTypes?: ReadonlySet<F0GraphNodeTagColumn>
   /**
    * `true` while a deferred payload is still loading and this node
    * may receive additional children once resolved.
