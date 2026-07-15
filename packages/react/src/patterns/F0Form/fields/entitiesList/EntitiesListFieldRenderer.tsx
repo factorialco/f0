@@ -602,17 +602,22 @@ export function EntitiesListFieldRenderer({
       }
     : undefined
 
-  // Block adding another row while an existing one is still invalid (e.g. the
-  // row the user just added and hasn't filled out yet).
-  const hasInvalidRow = useMemo(
-    () =>
-      rows.some(({ __key: _key, ...item }) => {
-        // Validate the form representation (ISO date strings → Date).
-        const result = field.itemSchema?.safeParse(rowItemToForm(item))
-        return result ? !result.success : false
-      }),
-    [rows, field.itemSchema, rowItemToForm]
-  )
+  // Block adding another row while any existing one is invalid. Distinguish the
+  // common case — a freshly added row the user hasn't filled out yet — from an
+  // error on an already-existing row, so the tooltip can explain the right one.
+  const { hasInvalidRow, hasInvalidExistingRow } = useMemo(() => {
+    let anyInvalid = false
+    let existingInvalid = false
+    for (const { __key, ...item } of rows) {
+      // Validate the form representation (ISO date strings → Date).
+      const result = field.itemSchema?.safeParse(rowItemToForm(item))
+      if (result && !result.success) {
+        anyInvalid = true
+        if (!freshRowKeysRef.current.has(__key)) existingInvalid = true
+      }
+    }
+    return { hasInvalidRow: anyInvalid, hasInvalidExistingRow: existingInvalid }
+  }, [rows, field.itemSchema, rowItemToForm])
 
   // Shared add affordance shown in the field header. Kept visible while the
   // field is disabled (e.g. during submit) — just disabled — so it doesn't pop
@@ -624,7 +629,9 @@ export function EntitiesListFieldRenderer({
           label: field.labels?.addButton ?? translations.add,
           disabled: isDisabled || hasInvalidRow,
           disabledTooltip: hasInvalidRow
-            ? translations.addBlockedHint
+            ? hasInvalidExistingRow
+              ? translations.addBlockedErrorHint
+              : translations.addBlockedHint
             : undefined,
           onClick: () => {
             if (useDialogMode) {

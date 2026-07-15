@@ -3,6 +3,7 @@ import {
   DndContext,
   DragEndEvent,
   KeyboardSensor,
+  type Modifier,
   PointerSensor,
   useSensor,
   useSensors,
@@ -144,6 +145,32 @@ function withRenderFallback<R extends RecordType>(
     },
     ...column,
   } as EditableColumn<R>
+}
+
+/** Rows only move vertically — no sideways drift while dragging. */
+const restrictToVerticalAxis: Modifier = ({ transform }) => ({
+  ...transform,
+  x: 0,
+})
+
+/**
+ * Clamps the drag so a row can't be pulled past the top/bottom of its container.
+ * Without this the over-drag pushes content beyond the scroll area and pops up a
+ * stray scrollbar. (Inlined; @dnd-kit/modifiers isn't a dependency.)
+ */
+const restrictToParentElement: Modifier = ({
+  containerNodeRect,
+  draggingNodeRect,
+  transform,
+}) => {
+  if (!draggingNodeRect || !containerNodeRect) return transform
+  const value = { ...transform }
+  if (draggingNodeRect.top + transform.y < containerNodeRect.top) {
+    value.y = containerNodeRect.top - draggingNodeRect.top
+  } else if (draggingNodeRect.bottom + transform.y > containerNodeRect.bottom) {
+    value.y = containerNodeRect.bottom - draggingNodeRect.bottom
+  }
+  return value
 }
 
 /**
@@ -593,6 +620,7 @@ function F0FormEditableTableBase<R extends RecordType>({
             sensors={sensors}
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           >
             {table}
           </DndContext>

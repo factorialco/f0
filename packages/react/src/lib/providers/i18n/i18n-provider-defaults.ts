@@ -778,6 +778,8 @@ export const defaultTranslations = {
       remove: "Remove",
       view: "View",
       addBlockedHint:
+        "Finish filling out the last item you just added in order to add another one",
+      addBlockedErrorHint:
         "Fix the errors in the existing items before adding another one",
     },
     moreInformation: "More information",
