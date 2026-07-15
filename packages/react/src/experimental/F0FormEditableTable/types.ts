@@ -142,6 +142,10 @@ export type F0FormEditableTableProps<R extends RecordType> = {
     /** Tooltip shown on hover while the add button is `disabled`, explaining why. */
     disabledTooltip?: string
   }
+  /** Label for the per-row edit action (defaults to the i18n "Edit row"). */
+  editLabel?: string
+  /** Label for the per-row remove action (defaults to the i18n "Remove row"). */
+  removeLabel?: string
   /** Wraps the table in a rounded border container. @default true */
   bordered?: boolean
   /**

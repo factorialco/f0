@@ -519,7 +519,7 @@ config: {
 - `sortable` (default `true`) — drag rows by their handle to reorder.
 - `canAddItems` (default `true`) — show the add button. Adding is blocked while an existing row is still invalid.
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
-- `labels` — `addButton`, `addButtonDescription` and `editDialogTitle` (dialog mode).
+- `labels` — `addButton`, `create`/`update` (each `{ title, description }`) and `edit`/`remove` action labels. The create description doubles as the add button's tooltip; the update title as the icon-only edit action's tooltip.
 - `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
 
 ### Auto-save

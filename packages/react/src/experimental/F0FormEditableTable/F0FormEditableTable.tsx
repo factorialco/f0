@@ -457,6 +457,8 @@ function F0FormEditableTableBase<R extends RecordType>({
   rowActions,
   getCellError,
   addRow,
+  editLabel: editLabelProp,
+  removeLabel: removeLabelProp,
   bordered = true,
   disabled,
 }: F0FormEditableTableProps<R>) {
@@ -494,8 +496,9 @@ function F0FormEditableTableBase<R extends RecordType>({
     })
   }
 
-  const removeLabel = t("collections.editableTable.removeRow")
-  const editLabel = t("collections.editableTable.editRow")
+  const removeLabel =
+    removeLabelProp ?? t("collections.editableTable.removeRow")
+  const editLabel = editLabelProp ?? t("collections.editableTable.editRow")
   const reorderLabel = t("collections.editableTable.reorderRow")
   const actionsLabel = t("collections.actions.actions")
 

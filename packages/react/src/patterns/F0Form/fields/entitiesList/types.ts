@@ -85,20 +85,45 @@ export interface F0EntitiesListRowAction {
   onClick: (context: F0EntitiesListRowActionContext) => void
 }
 
+/** Title and supporting description for one of the add/edit dialogs. */
+export interface F0EntitiesListDialogLabels {
+  /**
+   * Dialog title. For the edit dialog this is also the tooltip of the per-row
+   * edit action when it's shown icon-only (e.g. in `list-view`).
+   */
+  title?: string
+  /**
+   * Supporting description shown under the dialog title. For the add (create)
+   * dialog this is also shown as the add button's hover tooltip.
+   */
+  description?: string
+}
+
 /**
  * User-facing text for a entities list field. All labels are optional and
  * fall back to sensible i18n defaults.
  */
 export interface F0EntitiesListLabels {
-  /** Label for the button that appends a new row (also the create dialog title). */
+  /** Label for the button that appends a new row (defaults to i18n "Add"). */
   addButton?: string
   /**
-   * Supporting description shown under the create dialog title. Only visible in
-   * dialog mode (when the item schema has more than 2 properties).
+   * Title/description for the add (create) dialog. `title` defaults to
+   * `addButton`; `description` also becomes the add button's hover tooltip.
    */
-  addButtonDescription?: string
-  /** Title for the edit dialog (dialog mode only; defaults to an i18n string). */
-  editDialogTitle?: string
+  create?: F0EntitiesListDialogLabels
+  /**
+   * Title/description for the edit (update) dialog. `title` also becomes the
+   * tooltip of the per-row edit action when it's shown icon-only (list-view).
+   */
+  update?: F0EntitiesListDialogLabels
+  /**
+   * Label for the per-row edit action. Shown as visible text in the editable
+   * table and as the tooltip on the icon-only edit action in `list-view`
+   * (where it defaults to the `update` dialog title).
+   */
+  edit?: string
+  /** Label for the per-row remove action (defaults to i18n "Remove"). */
+  remove?: string
 }
 
 /**
@@ -237,9 +262,13 @@ export type F0EntitiesListField = F0BaseField & {
   /** Canonical row schema; columns/display/value are derived from it */
   itemSchema: z.ZodObject<z.ZodRawShape>
   /** User-provided add-dialog form definition (own onSubmit), if any */
-  createFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>
+  createFormDefinition?: F0FormDefinitionSingleSchema<
+    z.ZodObject<z.ZodRawShape>
+  >
   /** User-provided edit-dialog form definition (own onSubmit), if any */
-  updateFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>
+  updateFormDefinition?: F0FormDefinitionSingleSchema<
+    z.ZodObject<z.ZodRawShape>
+  >
   /** Whether rows can be reordered by dragging (defaults to true) */
   sortable?: boolean
   /** Whether the user can append new rows (defaults to true) */

@@ -80,8 +80,9 @@ interface EntitiesListFieldRendererProps {
 }
 
 /**
- * The list-view footer "add" button. Mirrors the table's built-in add button:
- * a disabled button with a hover tooltip explaining why it's blocked.
+ * The field header "add" button. When disabled it shows a hover tooltip
+ * explaining why it's blocked; when enabled it shows the optional `tooltip`
+ * hint (the create dialog's description).
  */
 function AddButton({
   config,
@@ -89,7 +90,10 @@ function AddButton({
   config: {
     label: string
     disabled: boolean
+    /** Tooltip shown while disabled, explaining why adding is blocked. */
     disabledTooltip?: string
+    /** Hint tooltip shown while enabled (the create dialog description). */
+    tooltip?: string
     onClick: () => void
   }
 }) {
@@ -104,16 +108,21 @@ function AddButton({
       disabled={config.disabled}
     />
   )
-  if (!config.disabled || !config.disabledTooltip) return button
+  const tooltip = config.disabled ? config.disabledTooltip : config.tooltip
+  if (!tooltip) return button
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="inline-flex cursor-not-allowed [&_button]:pointer-events-none">
-            {button}
-          </span>
+          {config.disabled ? (
+            <span className="inline-flex cursor-not-allowed [&_button]:pointer-events-none">
+              {button}
+            </span>
+          ) : (
+            <span className="inline-flex">{button}</span>
+          )}
         </TooltipTrigger>
-        <TooltipContent side="top">{config.disabledTooltip}</TooltipContent>
+        <TooltipContent side="top">{tooltip}</TooltipContent>
       </Tooltip>
     </TooltipProvider>
   )
@@ -193,6 +202,20 @@ export function EntitiesListFieldRenderer({
   const { forms } = useI18n()
   const translations = forms.entitiesList
   const keyCounter = useRef(0)
+
+  // Resolved user-facing labels, each falling back to an i18n default.
+  const labels = field.labels
+  const addButtonLabel = labels?.addButton ?? translations.add
+  const createTitle = labels?.create?.title ?? addButtonLabel
+  const createDescription = labels?.create?.description
+  const updateTitle = labels?.update?.title ?? translations.edit
+  const updateDescription = labels?.update?.description
+  // Visible edit-action text (editable table); the icon-only list-view action
+  // falls back to the update dialog title so its tooltip stays meaningful.
+  const editLabel = labels?.edit ?? translations.edit
+  const editTooltipLabel =
+    labels?.edit ?? labels?.update?.title ?? translations.edit
+  const removeLabel = labels?.remove ?? translations.remove
 
   // After a submit attempt, errors show on every cell (even untouched ones) —
   // except when the field auto-saves, since auto-save submits silently and
@@ -437,14 +460,11 @@ export function EntitiesListFieldRenderer({
         seedDefaults(makeEmptyItem(field.itemSchema))
       }
 
-      const addLabel = field.labels?.addButton ?? translations.add
-      const editTitle = field.labels?.editDialogTitle ?? translations.edit
       const result = await openFormDialog({
         formDefinition,
-        title: mode === "add" ? addLabel : editTitle,
-        description:
-          mode === "add" ? field.labels?.addButtonDescription : undefined,
-        ...(mode === "add" ? { labels: { submit: addLabel } } : {}),
+        title: mode === "add" ? createTitle : updateTitle,
+        description: mode === "add" ? createDescription : updateDescription,
+        ...(mode === "add" ? { labels: { submit: addButtonLabel } } : {}),
       })
       if (!result.submitted) return
 
@@ -471,8 +491,11 @@ export function EntitiesListFieldRenderer({
       formItemToRow,
       createFormDefinition,
       updateFormDefinition,
-      field.labels,
-      translations,
+      createTitle,
+      updateTitle,
+      createDescription,
+      updateDescription,
+      addButtonLabel,
       formField,
     ]
   )
@@ -629,7 +652,7 @@ export function EntitiesListFieldRenderer({
   const addConfig = !canAddItems
     ? undefined
     : {
-        label: field.labels?.addButton ?? translations.add,
+        label: addButtonLabel,
         disabled: isDisabled || isAtLimit || hasInvalidRow,
         disabledTooltip: isAtLimit
           ? translations.addBlockedMaxHint
@@ -638,6 +661,8 @@ export function EntitiesListFieldRenderer({
               ? translations.addBlockedErrorHint
               : translations.addBlockedHint
             : undefined,
+        // When enabled, hint the create dialog's description on hover.
+        tooltip: createDescription,
         onClick: () => {
           if (useDialogMode) {
             openItemDialog("add")
@@ -764,8 +789,8 @@ export function EntitiesListFieldRenderer({
           onRemoveRow={isDisabled ? undefined : removeRowByKey}
           getRowActions={rowActionsFn ? rowActionsByKey : undefined}
           getRowHref={isNavigable ? hrefByKey : undefined}
-          editLabel={translations.edit}
-          removeLabel={translations.remove}
+          editLabel={editTooltipLabel}
+          removeLabel={removeLabel}
           viewLabel={translations.view}
         />
 
@@ -809,6 +834,8 @@ export function EntitiesListFieldRenderer({
         }
         canEditRow={isRowEditable}
         rowActions={rowActions}
+        editLabel={editLabel}
+        removeLabel={removeLabel}
         disabled={isDisabled}
       />
 

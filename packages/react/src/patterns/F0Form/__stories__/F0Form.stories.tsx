@@ -1788,8 +1788,10 @@ export const EntitiesListFieldDialogMode: Story = {
         config: {
           labels: {
             addButton: "Add member",
-            addButtonDescription: "Fill in the details of the new team member.",
-            editDialogTitle: "Edit member",
+            create: {
+              description: "Fill in the details of the new team member.",
+            },
+            update: { title: "Edit member" },
           },
           columns: {
             name: { placeholder: "e.g. Ada Lovelace" },
@@ -1867,8 +1869,10 @@ export const EntitiesListFieldListView: Story = {
           columns: { archived: { hidden: true } },
           labels: {
             addButton: "Add member",
-            addButtonDescription: "Fill in the details of the new team member.",
-            editDialogTitle: "Edit member",
+            create: {
+              description: "Fill in the details of the new team member.",
+            },
+            update: { title: "Edit member" },
           },
           rowActions: (item) =>
             item.archived
@@ -2036,7 +2040,10 @@ export const EntitiesListFieldFormDefinitions: Story = {
         updateFormDefinition,
         config: {
           visualization: "list-view",
-          labels: { addButton: "Add member", editDialogTitle: "Edit member" },
+          labels: {
+            addButton: "Add member",
+            update: { title: "Edit member" },
+          },
         },
       }),
     })
