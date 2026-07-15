@@ -44,7 +44,15 @@ export const CollectionActions = ({
           if (acc.length > 0) {
             acc.push({ type: "separator" })
           }
-          acc.push(...curr)
+          acc.push(
+            ...curr.map((item) => ({
+              ...item,
+              tooltip: item.tooltip?.({
+                disabled: !!item.disabled,
+                loading: !!item.loading,
+              }),
+            }))
+          )
           return acc
         }, []),
     [otherActions]
@@ -77,6 +85,10 @@ export const CollectionActions = ({
             icon: action.icon,
             description: action.description,
             disabled: action.disabled,
+            tooltip: action.tooltip?.({
+              disabled: !!action.disabled,
+              loading: !!action.loading,
+            }),
             value: index.toString(),
           }))}
           onClick={(value) => {

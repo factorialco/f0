@@ -18,6 +18,8 @@ import {
   DropdownMenuTrigger,
 } from "@/ui/dropdown-menu"
 
+import { Tooltip } from "@/experimental/Overlays/Tooltip"
+
 import { NavigationItem } from "../utils"
 import { DropdownItemContent } from "./DropdownItem"
 
@@ -36,6 +38,7 @@ export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   critical?: boolean
   avatar?: AvatarVariant
   disabled?: boolean
+  tooltip?: string
 }
 
 export type DropdownInternalProps = {
@@ -67,6 +70,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     href,
     critical,
     disabled,
+    tooltip,
     ...props
   } = item
 
@@ -75,7 +79,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     critical && "text-f1-foreground-critical"
   )
 
-  return (
+  const menuItem = (
     <DropdownMenuItem
       asChild
       className={cn(itemClass, "cursor-pointer")}
@@ -99,6 +103,20 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
       )}
     </DropdownMenuItem>
   )
+
+  if (tooltip) {
+    // Wrap in an outer div so the Tooltip trigger sits above the DropdownMenuItem.
+    // When disabled, Radix applies data-[disabled]:pointer-events-none (specificity 0,1,1)
+    // which beats pointer-events-auto (0,1,0), so the trigger must be the outer wrapper —
+    // pointer events pass through the inner disabled element to the parent.
+    return (
+      <Tooltip description={tooltip}>
+        <div>{menuItem}</div>
+      </Tooltip>
+    )
+  }
+
+  return menuItem
 }
 
 function renderDropdownItem(

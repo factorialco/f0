@@ -36,6 +36,10 @@ export type ButtonDropdownItem<T = string> = {
    * @default false
    */
   disabled?: boolean
+  /**
+   * Tooltip text shown when hovering the item.
+   */
+  tooltip?: string
 }
 
 export type ButtonDropdownGroup<T = string> = {
