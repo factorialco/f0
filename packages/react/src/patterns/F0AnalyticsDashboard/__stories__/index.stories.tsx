@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { useId, useState } from "react"
+import { expect, userEvent, waitFor, within } from "storybook/test"
+
+import type { FiltersState } from "@/patterns/OneFilterPicker/types"
 
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
-import type { FiltersState } from "@/patterns/OneFilterPicker/types"
 
 import type { DashboardItem } from "../types"
 
@@ -299,16 +300,16 @@ export const ReportFilterScalarValues: Story = {
 
     await expect(within(trigger).getByText("4")).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: "Status: Active" })
+      await canvas.findByRole("button", { name: "Status: Active" })
     ).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: "Employee search: Alice" })
+      await canvas.findByRole("button", { name: "Employee search: Alice" })
     ).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: /^Review date:/ })
+      await canvas.findByRole("button", { name: /^Review date:/ })
     ).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: "Exact salary: = 85000" })
+      await canvas.findByRole("button", { name: "Exact salary: = 85000" })
     ).toBeInTheDocument()
   },
 }
@@ -339,13 +340,15 @@ export const ReportFilterRangeAndMultipleValues: Story = {
 
     await expect(within(trigger).getByText("3")).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: "Department: Engineering +1" })
+      await canvas.findByRole("button", {
+        name: "Department: Engineering +1",
+      })
     ).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: /^Date range:/ })
+      await canvas.findByRole("button", { name: /^Date range:/ })
     ).toBeInTheDocument()
     await expect(
-      canvas.getByRole("button", { name: /^Salary range:/ })
+      await canvas.findByRole("button", { name: /^Salary range:/ })
     ).toBeInTheDocument()
   },
 }
