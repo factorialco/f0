@@ -223,18 +223,16 @@ export function EntitiesListFieldRenderer({
   // The list-view visualization is always read-only + dialog-edited, so it
   // never uses inline cells regardless of the field count.
   const useListView = field.visualization === "list-view"
-  // Split create/update schemas can't be inline-edited (the add and edit forms
-  // differ), so they always use the dialog.
-  const hasSplitSchemas =
-    field.createSchema != null &&
-    field.updateSchema != null &&
-    field.createSchema !== field.updateSchema
+  // Separate create/update form definitions can't be inline-edited (their
+  // dialogs differ and run their own onSubmit), so they always use the dialog.
+  const hasFormDefinitions =
+    field.createFormDefinition != null || field.updateFormDefinition != null
   // Explicit `supportInlineEditing` wins; otherwise fall back to the
   // column-count heuristic (inline for small lists, dialog for larger ones).
-  // `list-view` and split schemas imply dialog editing.
+  // `list-view` and split form definitions imply dialog editing.
   const useDialogMode =
     useListView ||
-    hasSplitSchemas ||
+    hasFormDefinitions ||
     (field.supportInlineEditing != null
       ? !field.supportInlineEditing
       : itemKeys.length > MAX_INLINE_FIELDS)
@@ -366,20 +364,6 @@ export function EntitiesListFieldRenderer({
 
   // --- Dialog editing (dialog mode, or a split create/update schema) --------
 
-  // The add dialog uses `createSchema`; the edit dialog uses `updateSchema`.
-  // Both default to the canonical item schema (single-schema fields).
-  const createItemSchema = field.createSchema ?? field.itemSchema
-  const updateItemSchema = field.updateSchema ?? field.itemSchema
-
-  const createDialogSchema = useMemo(
-    () => buildDialogSchema(createItemSchema, field.columns),
-    [createItemSchema, field.columns]
-  )
-  const updateDialogSchema = useMemo(
-    () => buildDialogSchema(updateItemSchema, field.columns),
-    [updateItemSchema, field.columns]
-  )
-
   /**
    * Blank item values for a given schema: honor a `.default()` first (e.g. a
    * hidden `archived: z.boolean().default(false)`), then start strings empty
@@ -404,38 +388,55 @@ export function EntitiesListFieldRenderer({
     []
   )
 
-  // Defaults are read through a ref at dialog-open time, so each form
-  // definition serves both empty (add) and row-value (edit) seeding.
-  const dialogDefaultsRef = useRef<EntitiesListItem>({})
-  const createFormDefinition = useF0FormDefinition({
-    name: `${field.id}-create`,
-    schema: createDialogSchema,
-    defaultValues: async () => dialogDefaultsRef.current,
+  // Dialog form derived from the item schema, used when the field doesn't bring
+  // its own create/update form definitions. Its submit is a no-op — the item is
+  // committed to the parent form value (shared submit).
+  const dialogSchema = useMemo(
+    () => buildDialogSchema(field.itemSchema, field.columns),
+    [field.itemSchema, field.columns]
+  )
+  const internalDialogDefinition = useF0FormDefinition({
+    name: `${field.id}-item`,
+    schema: dialogSchema,
+    defaultValues: {},
     onSubmit: async () => ({ success: true }),
   })
-  const updateFormDefinition = useF0FormDefinition({
-    name: `${field.id}-update`,
-    schema: updateDialogSchema,
-    defaultValues: async () => dialogDefaultsRef.current,
-    onSubmit: async () => ({ success: true }),
-  })
+  // User-provided create/update forms (each with its own onSubmit) win.
+  const createFormDefinition =
+    field.createFormDefinition ?? internalDialogDefinition
+  const updateFormDefinition =
+    field.updateFormDefinition ?? internalDialogDefinition
 
   const openItemDialog = useCallback(
     async (mode: "add" | "edit", row?: EntitiesListRow) => {
+      const baseDef =
+        mode === "add" ? createFormDefinition : updateFormDefinition
+
+      // Seed this open's defaults, overriding the definition's own (a fresh
+      // dialog form is mounted per open). For add with a user-provided create
+      // form, keep that form's own defaults instead.
+      let formDefinition = baseDef
+      const seedDefaults = (seed: EntitiesListItem) => {
+        formDefinition = {
+          ...baseDef,
+          defaultValues: undefined,
+          asyncDefaultValues: (async () =>
+            seed) as typeof baseDef.asyncDefaultValues,
+        }
+      }
       if (mode === "edit" && row) {
         const { __key: _key, ...item } = row
         // The dialog form validates dates as `Date`, so convert the row's ISO
-        // date strings back before seeding the defaults.
-        dialogDefaultsRef.current = rowItemToForm(item)
-      } else {
-        dialogDefaultsRef.current = makeEmptyItem(createItemSchema)
+        // date strings back before seeding.
+        seedDefaults(rowItemToForm(item))
+      } else if (mode === "add" && !field.createFormDefinition) {
+        seedDefaults(makeEmptyItem(field.itemSchema))
       }
 
       const addLabel = field.labels?.addButton ?? translations.add
       const editTitle = field.labels?.editDialogTitle ?? translations.edit
       const result = await openFormDialog({
-        formDefinition:
-          mode === "add" ? createFormDefinition : updateFormDefinition,
+        formDefinition,
         title: mode === "add" ? addLabel : editTitle,
         description:
           mode === "add" ? field.labels?.addButtonDescription : undefined,
@@ -460,7 +461,8 @@ export function EntitiesListFieldRenderer({
       rows,
       commit,
       makeEmptyItem,
-      createItemSchema,
+      field.itemSchema,
+      field.createFormDefinition,
       rowItemToForm,
       formItemToRow,
       createFormDefinition,
@@ -727,7 +729,7 @@ export function EntitiesListFieldRenderer({
     // A per-item `href` (only without a split `updateSchema`) makes rows
     // navigable instead of editable: the row links out and shows a trailing
     // arrow, with no edit dialog.
-    const isNavigable = !hasSplitSchemas && !!field.itemHref
+    const isNavigable = !hasFormDefinitions && !!field.itemHref
     // Display rows with dates as `Date` (rows hold ISO strings) so the list
     // formats them; the stable `__key` still maps actions back to the row.
     const listRows = rows.map(({ __key, ...item }) => ({

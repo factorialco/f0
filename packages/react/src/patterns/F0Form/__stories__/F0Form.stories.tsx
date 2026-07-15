@@ -1981,13 +1981,15 @@ export const EntitiesListFieldNavigable: Story = {
 }
 
 /**
- * Split create/update schemas. New members are added with a reduced
- * `createSchema` (just name + email); clicking **Edit** opens the fuller
- * `updateSchema` (adds role + start date). `updateSchema` is the canonical row
- * shape, so its extra fields are `optional` to keep freshly-added rows valid.
- * Shown here with the list-view visualization.
+ * Separate create/update form definitions. Instead of a single `schema`, the
+ * field takes a `createFormDefinition` (reduced: name + email) and an
+ * `updateFormDefinition` (fuller: adds role + start date), each with its **own**
+ * `onSubmit` — so adding vs editing can persist independently (watch the
+ * console: `CREATE` vs `UPDATE`). The item is still committed to the field
+ * value. `updateFormDefinition`'s schema is canonical, so its extra fields are
+ * `optional` to keep freshly-added rows valid.
  */
-export const EntitiesListFieldSplitSchema: Story = {
+export const EntitiesListFieldFormDefinitions: Story = {
   parameters: { docs: { story: { inline: false, height: "560px" } } },
   render() {
     const roleOptions = [
@@ -1995,37 +1997,52 @@ export const EntitiesListFieldSplitSchema: Story = {
       { value: "Editor", label: "Editor" },
       { value: "Viewer", label: "Viewer" },
     ]
+    const createFormDefinition = useF0FormDefinition({
+      name: "member-create",
+      schema: z.object({
+        name: f0FormField.text({ label: "Name" }),
+        email: f0FormField.email({ label: "Email" }),
+      }),
+      onSubmit: async ({ data }) => {
+        await sleep(300)
+        console.info(`CREATE member: ${JSON.stringify(data)}`)
+        return { success: true }
+      },
+    })
+    const updateFormDefinition = useF0FormDefinition({
+      name: "member-update",
+      schema: z.object({
+        name: f0FormField.text({ label: "Name" }),
+        email: f0FormField.email({ label: "Email" }),
+        role: f0FormField.select({
+          label: "Role",
+          options: roleOptions,
+          optional: true,
+        }),
+        startDate: f0FormField.date({ label: "Start date", optional: true }),
+      }),
+      onSubmit: async ({ data }) => {
+        await sleep(300)
+        console.info(`UPDATE member: ${JSON.stringify(data)}`)
+        return { success: true }
+      },
+    })
     const formSchema = z.object({
       members: f0FormField.entitiesList({
         label: "Team members",
-        helpText: "Add with name + email; edit to set role and start date.",
-        createSchema: z.object({
-          name: f0FormField.text({ label: "Name" }),
-          email: f0FormField.email({ label: "Email" }),
-        }),
-        updateSchema: z.object({
-          name: f0FormField.text({ label: "Name" }),
-          email: f0FormField.email({ label: "Email" }),
-          role: f0FormField.select({
-            label: "Role",
-            options: roleOptions,
-            optional: true,
-          }),
-          startDate: f0FormField.date({ label: "Start date", optional: true }),
-        }),
+        helpText:
+          "Add and edit run their own submit — see the console (CREATE vs UPDATE).",
+        createFormDefinition,
+        updateFormDefinition,
         config: {
           visualization: "list-view",
-          labels: {
-            addButton: "Add member",
-            addButtonDescription: "Start with just a name and email.",
-            editDialogTitle: "Edit member",
-          },
+          labels: { addButton: "Add member", editDialogTitle: "Edit member" },
         },
       }),
     })
 
     const formDefinition = useF0FormDefinition({
-      name: "entities-list-split-schema",
+      name: "entities-list-form-defs",
       schema: formSchema,
       errorTriggerMode: "on-change",
       defaultValues: {

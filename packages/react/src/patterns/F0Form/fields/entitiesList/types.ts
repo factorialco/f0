@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import type {
   F0BaseField,
@@ -203,16 +204,27 @@ export interface F0EntitiesListOptions {
 export interface F0EntitiesListConfig {
   /**
    * Zod object schema describing one row of the list (used for add, edit and
-   * display). Provide this, or `createSchema` + `updateSchema` for split forms.
+   * display). Provide this — the add/edit dialogs share the parent form's
+   * submit — or `createFormDefinition` + `updateFormDefinition` for separate
+   * submit handlers.
    */
   schema?: z.ZodObject<z.ZodRawShape>
-  /** Reduced schema for the add dialog (split-form mode). */
-  createSchema?: z.ZodObject<z.ZodRawShape>
   /**
-   * Fuller schema for the edit dialog (split-form mode). Also the canonical row
-   * shape for columns, display and the field value.
+   * Form definition (own `onSubmit`) for the add dialog. Pair with
+   * `updateFormDefinition`. Its submit runs on add, then the item is committed
+   * to the field value.
    */
-  updateSchema?: z.ZodObject<z.ZodRawShape>
+  createFormDefinition?: F0FormDefinitionSingleSchema<
+    z.ZodObject<z.ZodRawShape>
+  >
+  /**
+   * Form definition (own `onSubmit`) for the edit dialog. Its schema is the
+   * canonical row shape (columns, display, value type). Its submit runs on
+   * edit, then the row is updated in the field value.
+   */
+  updateFormDefinition?: F0FormDefinitionSingleSchema<
+    z.ZodObject<z.ZodRawShape>
+  >
   /** Behavior options (add button, min/max items, column presentation) */
   config?: F0EntitiesListOptions
 }
@@ -224,10 +236,10 @@ export type F0EntitiesListField = F0BaseField & {
   type: "entitiesList"
   /** Canonical row schema; columns/display/value are derived from it */
   itemSchema: z.ZodObject<z.ZodRawShape>
-  /** Schema for the add dialog (defaults to `itemSchema`) */
-  createSchema?: z.ZodObject<z.ZodRawShape>
-  /** Schema for the edit dialog (defaults to `itemSchema`) */
-  updateSchema?: z.ZodObject<z.ZodRawShape>
+  /** User-provided add-dialog form definition (own onSubmit), if any */
+  createFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>
+  /** User-provided edit-dialog form definition (own onSubmit), if any */
+  updateFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>
   /** Whether rows can be reordered by dragging (defaults to true) */
   sortable?: boolean
   /** Whether the user can append new rows (defaults to true) */

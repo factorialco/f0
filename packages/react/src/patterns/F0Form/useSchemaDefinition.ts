@@ -296,10 +296,14 @@ function configToF0Field(
         ...baseProps,
         type: "entitiesList",
         itemSchema: "schema" in config ? config.schema : undefined,
-        createSchema:
-          "createSchema" in config ? config.createSchema : undefined,
-        updateSchema:
-          "updateSchema" in config ? config.updateSchema : undefined,
+        createFormDefinition:
+          "createFormDefinition" in config
+            ? config.createFormDefinition
+            : undefined,
+        updateFormDefinition:
+          "updateFormDefinition" in config
+            ? config.updateFormDefinition
+            : undefined,
         sortable: listOptions?.sortable,
         canAddItems: listOptions?.canAddItems,
         supportInlineEditing: listOptions?.supportInlineEditing,

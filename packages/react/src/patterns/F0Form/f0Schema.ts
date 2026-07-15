@@ -7,6 +7,7 @@ import type {
   DurationUnit,
 } from "@/components/F0DurationInput/types"
 import type { InputFieldStatus } from "@/components/F0InputField/types"
+import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import type { F0CardSelectConfig } from "./fields/cardSelect/types"
 import type { F0CheckboxConfig } from "./fields/checkbox/types"
@@ -1434,30 +1435,32 @@ export namespace f0FormField {
   /** @internal Fields shared by every entities-list config variant. */
   type EntitiesListBaseConfig = Omit<
     F0EntitiesListFieldConfig,
-    "fieldType" | "schema" | "createSchema" | "updateSchema"
+    "fieldType" | "schema" | "createFormDefinition" | "updateFormDefinition"
   >
   /** @internal Single-schema config: one `schema` for both add and edit. */
   type EntitiesListSingleConfig<TItem extends z.ZodObject<z.ZodRawShape>> =
     EntitiesListBaseConfig & {
       /** Zod object schema describing one row (add, edit and display). */
       schema: TItem
-      createSchema?: never
-      updateSchema?: never
+      createFormDefinition?: never
+      updateFormDefinition?: never
       optional?: boolean
     }
   /**
-   * @internal Split-schema config: a reduced `createSchema` for the add dialog
-   * and a (typically larger) `updateSchema` for the edit dialog. `updateSchema`
-   * is the canonical row shape (columns, display, value type), so fields only
-   * in `updateSchema` should be optional to keep freshly-created rows valid.
+   * @internal Split-form config: separate `createFormDefinition` and
+   * `updateFormDefinition` (each a `useF0FormDefinition` with its own
+   * `onSubmit`), so add and update can persist independently. The
+   * `updateFormDefinition`'s schema is the canonical row shape (columns,
+   * display, value type), so fields only there should be optional to keep
+   * freshly-created rows valid.
    */
-  type EntitiesListSplitConfig<
+  type EntitiesListFormDefsConfig<
     TCreate extends z.ZodObject<z.ZodRawShape>,
     TUpdate extends z.ZodObject<z.ZodRawShape>,
   > = EntitiesListBaseConfig & {
     schema?: never
-    createSchema: TCreate
-    updateSchema: TUpdate
+    createFormDefinition: F0FormDefinitionSingleSchema<TCreate>
+    updateFormDefinition: F0FormDefinitionSingleSchema<TUpdate>
     optional?: boolean
   }
 
@@ -1502,16 +1505,16 @@ export namespace f0FormField {
    * })
    *
    * @example
-   * // Split schemas — add with fewer fields, edit with more:
-   * members: f0FormField.entitiesList({
-   *   label: "Members",
-   *   createSchema: z.object({ name: z.string(), email: z.string().email() }),
-   *   updateSchema: z.object({
-   *     name: z.string(),
-   *     email: z.string().email(),
-   *     role: f0FormField.select({ label: "Role", options }).optional(),
-   *   }),
+   * // Split form definitions — add and update persist independently:
+   * const createFormDefinition = useF0FormDefinition({
+   *   schema: z.object({ name: z.string(), email: z.string().email() }),
+   *   onSubmit: async ({ data }) => { await api.create(data); return { success: true } },
    * })
+   * const updateFormDefinition = useF0FormDefinition({
+   *   schema: z.object({ name: z.string(), email: z.string().email(), role: … }),
+   *   onSubmit: async ({ data }) => { await api.update(data); return { success: true } },
+   * })
+   * members: f0FormField.entitiesList({ createFormDefinition, updateFormDefinition })
    */
   // Single-schema overloads.
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
@@ -1521,19 +1524,19 @@ export namespace f0FormField {
   export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(
     config: EntitiesListSingleConfig<TItem> & { optional?: false | undefined }
   ): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>
-  // Split-schema overloads: the value type follows `updateSchema`.
+  // Split-form overloads: the value type follows the update form's schema.
   export function entitiesList<
     TCreate extends z.ZodObject<z.ZodRawShape>,
     TUpdate extends z.ZodObject<z.ZodRawShape>,
   >(
-    config: EntitiesListSplitConfig<TCreate, TUpdate> & { optional: true }
+    config: EntitiesListFormDefsConfig<TCreate, TUpdate> & { optional: true }
   ): OptionalEntitiesListArray<TUpdate> &
     F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>
   export function entitiesList<
     TCreate extends z.ZodObject<z.ZodRawShape>,
     TUpdate extends z.ZodObject<z.ZodRawShape>,
   >(
-    config: EntitiesListSplitConfig<TCreate, TUpdate> & {
+    config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
       optional?: false | undefined
     }
   ): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>
@@ -1541,14 +1544,20 @@ export namespace f0FormField {
     config: EntitiesListBaseConfig & {
       optional?: boolean
       schema?: z.ZodObject<z.ZodRawShape>
-      createSchema?: z.ZodObject<z.ZodRawShape>
-      updateSchema?: z.ZodObject<z.ZodRawShape>
+      createFormDefinition?: F0FormDefinitionSingleSchema<
+        z.ZodObject<z.ZodRawShape>
+      >
+      updateFormDefinition?: F0FormDefinitionSingleSchema<
+        z.ZodObject<z.ZodRawShape>
+      >
     }
   ) {
-    const { optional, schema, createSchema, updateSchema, ...rest } = config
-    // Canonical row schema: the single `schema`, or the `updateSchema` (the
-    // fuller edit shape) in split mode.
-    const canonical = (schema ?? updateSchema) as z.ZodObject<z.ZodRawShape>
+    const { optional, schema, createFormDefinition, updateFormDefinition, ...rest } =
+      config
+    // Canonical row schema: the single `schema`, or the update form's schema
+    // (the fuller edit shape) in split-form mode.
+    const canonical = (schema ??
+      updateFormDefinition?.schema) as z.ZodObject<z.ZodRawShape>
     const options = rest.config
     let base = z.array(canonical)
     const effectiveMin = options?.minItems ?? (optional ? undefined : 1)
@@ -1560,8 +1569,8 @@ export namespace f0FormField {
       {
         ...rest,
         schema: canonical,
-        createSchema: createSchema ?? canonical,
-        updateSchema: updateSchema ?? canonical,
+        createFormDefinition,
+        updateFormDefinition,
         fieldType: "entitiesList",
       } as never
     )

@@ -458,7 +458,7 @@ config: {
 
 #### Navigable rows
 
-In list-view, add `config.itemHref` to make each row **navigate** instead of edit: the row links to the returned URL (clicking the row or its trailing arrow) and there's no edit dialog — just add and remove. This is only honored **without** a split `updateSchema`; when `updateSchema` is present the row shows the edit pencil and opens the update dialog on click instead.
+In list-view, add `config.itemHref` to make each row **navigate** instead of edit: the row links to the returned URL (clicking the row or its trailing arrow) and there's no edit dialog — just add and remove. This is only honored **without** an `updateFormDefinition`; when one is present the row shows the edit pencil and opens the update dialog on click instead.
 
 ```tsx
 config: {
@@ -469,23 +469,34 @@ config: {
 
 <Canvas of={Stories.EntitiesListFieldNavigable} />
 
-### Split create / update schemas
+### Separate create / update form definitions
 
-Instead of a single `schema`, provide `createSchema` (the reduced set of fields shown when **adding**) and `updateSchema` (the fuller set shown when **editing**). `updateSchema` is the canonical row shape used for columns, display and the field value — so any field only in `updateSchema` should be `optional`, keeping freshly-added rows valid. Split schemas always edit through the dialog.
+Instead of a single `schema` (whose add/edit dialogs share the parent form's submit), pass a `createFormDefinition` and an `updateFormDefinition` — each a `useF0FormDefinition` with its **own** `onSubmit`. Adding runs the create form's submit; editing runs the update form's submit, so the two can persist independently (e.g. `POST` vs `PATCH`). The item is still committed to the field's array value. `updateFormDefinition`'s schema is the canonical row shape (columns, display, value type), so fields only there should be `optional` to keep freshly-added rows valid.
 
 ```tsx
-members: f0FormField.entitiesList({
-  label: "Members",
-  createSchema: z.object({ name: z.string(), email: z.string().email() }),
-  updateSchema: z.object({
+const createFormDefinition = useF0FormDefinition({
+  schema: z.object({ name: z.string(), email: z.string().email() }),
+  onSubmit: async ({ data }) => {
+    await api.create(data)
+    return { success: true }
+  },
+})
+const updateFormDefinition = useF0FormDefinition({
+  schema: z.object({
     name: z.string(),
     email: z.string().email(),
     role: f0FormField.select({ label: "Role", options, optional: true }),
   }),
+  onSubmit: async ({ data }) => {
+    await api.update(data)
+    return { success: true }
+  },
 })
+
+members: f0FormField.entitiesList({ createFormDefinition, updateFormDefinition })
 ```
 
-<Canvas of={Stories.EntitiesListFieldSplitSchema} />
+<Canvas of={Stories.EntitiesListFieldFormDefinitions} />
 
 ### Custom row actions
 
