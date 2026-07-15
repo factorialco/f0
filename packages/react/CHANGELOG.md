@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.36.2](https://github.com/factorialco/f0/compare/f0-react-v4.36.1...f0-react-v4.36.2) (2026-07-15)
+
+
+### Bug Fixes
+
+* change the separator condition in InFilterOptionRow from hasChildren to depth === 0, so only root-level items render border-b — internal nested siblings no longer get separated ([95e6804](https://github.com/factorialco/f0/commit/95e6804b54117eac71c3e2758e07fce67c204ed5))
+* **InFilter:** scope nested tree separator to root-level items only ([#4487](https://github.com/factorialco/f0/issues/4487)) ([95e6804](https://github.com/factorialco/f0/commit/95e6804b54117eac71c3e2758e07fce67c204ed5))
+
 ## [4.36.1](https://github.com/factorialco/f0/compare/f0-react-v4.36.0...f0-react-v4.36.1) (2026-07-15)
 
 
