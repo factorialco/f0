@@ -84,12 +84,12 @@ export type GuidedTypeConfig = {
    * options only render a short label. */
   description: string
   /**
-   * The first section/question seeded by "Empty Form" for this type. Locked
+   * The first section/question seeded by "Empty Survey" for this type. Locked
    * for Satisfaction/Effectiveness (a standardized, comparable-over-time
    * question); Knowledge Test has no locked question, so this is just a
    * blank editable one instead.
    */
-  emptyFormElement: SurveyFormBuilderElement
+  emptySurveyElement: SurveyFormBuilderElement
   /** This type's full sample questions — seeded by "Use this template"
    * (every template under this type shares this same content). */
   sampleElements: SurveyFormBuilderElement[]
@@ -251,7 +251,7 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
         label: "Satisfaction",
         description:
           "Assess participants' satisfaction with the course taken. (Can be anonymous)",
-        emptyFormElement: SATISFACTION_LOCKED_ELEMENT,
+        emptySurveyElement: SATISFACTION_LOCKED_ELEMENT,
         sampleElements: SATISFACTION_SURVEY_ELEMENTS,
         defaultValues: SATISFACTION_DEFAULT_VALUES,
         templateCategory: "Satisfaction",
@@ -261,7 +261,7 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
         label: "Effectiveness",
         description:
           "Evaluate whether the course met its goals. (Not anonymous)",
-        emptyFormElement: EFFECTIVENESS_LOCKED_ELEMENT,
+        emptySurveyElement: EFFECTIVENESS_LOCKED_ELEMENT,
         sampleElements: EFFECTIVENESS_SURVEY_ELEMENTS,
         defaultValues: EFFECTIVENESS_DEFAULT_VALUES,
         templateCategory: "Effectiveness",
@@ -271,7 +271,7 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
         label: "Knowledge Test",
         description:
           "Evaluate assessments to improve learning outcomes. (Not anonymous) (Score 50%+ to pass)",
-        emptyFormElement: KNOWLEDGE_TEST_BLANK_ELEMENT,
+        emptySurveyElement: KNOWLEDGE_TEST_BLANK_ELEMENT,
         sampleElements: KNOWLEDGE_TEST_SURVEY_ELEMENTS,
         defaultValues: KNOWLEDGE_TEST_DEFAULT_VALUES,
         templateCategory: "Knowledge Test",

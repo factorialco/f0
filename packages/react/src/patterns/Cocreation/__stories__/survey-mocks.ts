@@ -271,10 +271,10 @@ export const mockEngagementTranscribe = makeMockTranscribe(
 // Training's guided creation flow asks the user to pick a form type up front
 // (Satisfaction / Effectiveness / Knowledge Test) before it ever shows a
 // template. That choice determines a LOCKED first question every survey of
-// that type carries — seeded whether the user starts from "Empty Form" or
+// that type carries — seeded whether the user starts from "Empty Survey" or
 // applies a template. Each `*_LOCKED_ELEMENT` below is that first section;
 // each `*_SURVEY_ELEMENTS` is the locked element plus the type's follow-up
-// questions (what a template preview/apply seeds); "Empty Form" seeds just
+// questions (what a template preview/apply seeds); "Empty Survey" seeds just
 // the locked element on its own.
 // ---------------------------------------------------------------------------
 
@@ -417,7 +417,7 @@ export const EFFECTIVENESS_SURVEY_ELEMENTS: SurveyFormBuilderElement[] = [
 
 // Unlike Satisfaction/Effectiveness, Knowledge Test has no standardized,
 // locked first question — grading is per-course, not comparable across
-// surveys. "Empty Form" for this type seeds a single blank, fully editable
+// surveys. "Empty Survey" for this type seeds a single blank, fully editable
 // question (mirrors `SurveyFormBuilder`'s own default when a question is
 // added: a "select" question with no title and one placeholder option).
 export const KNOWLEDGE_TEST_BLANK_ELEMENT: SurveyFormBuilderElement = {
