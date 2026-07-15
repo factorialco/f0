@@ -114,12 +114,17 @@ const DATA_CELL_MIN_WIDTH = "min-w-[25cqw]"
  * suppressed so the two don't stack.
  */
 const EDITABLE_CELL_RING = cn(
+  // An always-present inset outline that's transparent at rest, so its color
+  // (and the focus shadow) can transition smoothly on hover/focus instead of
+  // snapping in — like the OnePreset / checkbox affordances.
+  "outline outline-1 -outline-offset-1 outline-transparent transition-[outline-color,box-shadow] duration-200",
   // Suppress the inner cell's hover shadow only when NOT focused, so a focused
   // cell keeps its ring even while hovered.
   "[&:not(:focus-within):hover_*]:!shadow-none",
   "focus-within:relative focus-within:z-[9] focus-within:shadow-[inset_0_0_0_1px_hsl(var(--selected-50))]",
-  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-[9]",
-  "[&:not(:focus-within):hover]:outline [&:not(:focus-within):hover]:outline-1 [&:not(:focus-within):hover]:-outline-offset-1 [&:not(:focus-within):hover]:outline-[hsl(var(--neutral-30))]"
+  // Hover brightens the cell border to the shared hover token and lifts the
+  // cell above its neighbours so the outline isn't clipped.
+  "[&:not(:focus-within):hover]:relative [&:not(:focus-within):hover]:z-[9] [&:not(:focus-within):hover]:outline-f1-border-hover"
 )
 
 /**
