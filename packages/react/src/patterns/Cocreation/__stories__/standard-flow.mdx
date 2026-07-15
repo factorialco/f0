@@ -42,12 +42,16 @@ as every later edit. Both are surfaced the same way: an
 [`F0CardHorizontal`](?path=/docs/experimental-cardhorizontal--documentation) confirm/reject card
 that owns its own pending → resolved state, and nothing reaches the canvas until it is decided.
 
-- **The initial draft** — once the clarifying questions are answered, the AI does not write
-  anything. It posts a draft confirmation ("Draft a first set of questions") and waits. The canvas,
-  the resource card, and the questions all stay hidden until the user chooses. **Apply** reveals the
-  survey, runs the [processing overlay](?path=/docs/patterns-co-creation-building-blocks--documentation),
-  and drafts the questions; **Discard** hands over a blank resource instead. Either way the user
-  ends up in control of a resource they said yes to.
+- **The initial draft** — once the clarifying questions are answered, the AI does not write the
+  generated content. It posts a draft confirmation ("Draft a first set of questions") and waits; the
+  drafted questions land only on **Apply**, which runs the
+  [processing overlay](?path=/docs/patterns-co-creation-building-blocks--documentation) and writes
+  them onto the canvas. **Discard** leaves the resource blank. Whether the _empty_ resource is
+  already on screen depends on how the flow started: a blank-resource entry (the Empty Survey card or
+  gallery entry) opens the canvas and docks the chat up front — the empty draft is the user's from
+  the first click, so only the questions wait — while a typed request has nothing to show yet, so the
+  canvas stays hidden until Apply reveals it. Either way, no _generated_ content lands without an
+  explicit yes.
 - **Later edits** — as the conversation continues, each proposed change is the same confirm/reject
   card. Accepting runs the overlay, applies the change, and posts a fresh resource card; rejecting
   leaves the resource untouched.

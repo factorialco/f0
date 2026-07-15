@@ -215,13 +215,17 @@ full-width welcome screens, and are independent of the cards: provide either, bo
 See [Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation) for the
 full cards-vs-suggestions contract.
 
-Clarifying questions narrow the intent before anything is drafted — here, the survey's type,
-audience, and length. When the answers are in, the AI does **not** write anything yet: it posts a
-**draft confirmation** card ("Draft a first set of questions") and waits. The canvas, the resource
-card, and the drafted questions all stay hidden until the user decides. **Apply** opens the survey
-on the canvas, runs the "applying changes" overlay, and fills in the starter questions — moving the
-flow into Split. **Discard** hands over a blank survey instead, still ready to shape by chat. This
-mirrors the accept/reject on every later edit; see
+Clarifying questions narrow the intent — here, the survey's type, audience, and length. When the
+answers are in, the AI does **not** write the questions yet: it posts a **draft confirmation** card
+("Draft a first set of questions") and waits. **Apply** runs the "applying changes" overlay and
+fills in the starter questions; **Discard** leaves the survey blank, still ready to shape by chat.
+
+What is already on screen depends on the entry point. Starting from the **Empty Survey** card, the
+blank survey opens on the canvas and the chat docks beside it up front — it's the user's from the
+first click — so only the drafted questions wait for the confirmation (this is the Split view
+pictured below). Starting from a **typed request**, there's no survey to show yet, so the canvas
+stays hidden until Apply reveals it. Either way, the _generated questions_ are what the confirmation
+gates. This mirrors the accept/reject on every later edit; see
 [Confirm before drafting, confirm before editing](?path=/docs/patterns-co-creation-standard-flow--documentation).
 
 #### Guided Chat
@@ -280,8 +284,9 @@ for the decision.
 
 Because Guided Chat has no welcome screen to fall back to, closing the gallery or preview **before**
 a survey is picked warns the user first ("Leave creation?") — closing there would abandon the
-in-progress creation. In the entry-actions shape, picking "Empty Survey" runs the same clarifying →
-draft-confirmation chain described above.
+in-progress creation. Cancelling the opening question itself is **not** a dead end, though: it hands
+the free-text composer back, so the user can just type their request instead. In the entry-actions
+shape, picking "Empty Survey" runs the same clarifying → draft-confirmation chain described above.
 
 ### Split
 
@@ -293,7 +298,7 @@ draft-confirmation chain described above.
       className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
     />
     <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
-      After choosing Empty survey: the resource canvas fills the center, the
+      After choosing Empty Survey: the resource canvas fills the center, the
       chat docks on the right with the resource card and clarifying questions.
     </figcaption>
   </figure>
