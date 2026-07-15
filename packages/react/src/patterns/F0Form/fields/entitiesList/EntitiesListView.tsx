@@ -1,11 +1,22 @@
 import { format, isValid } from "date-fns"
 import { useMemo } from "react"
 
+import type { IconType } from "@/components/F0Icon"
+
 import { ChevronRight, Delete, Pencil } from "@/icons/app"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
 import type { EntitiesListItem, F0EntitiesListItemDefinition } from "./types"
+
+/** A resolved custom row action for the list overflow menu. */
+export interface EntitiesListViewAction {
+  label: string
+  icon: IconType
+  critical?: boolean
+  disabled?: boolean
+  onClick: () => void
+}
 
 /** Internal row shape: item values plus the stable key used as list identity. */
 type Row = { __key: string } & Record<string, unknown>
@@ -38,6 +49,8 @@ interface EntitiesListViewProps {
   onRowClick?: (rowKey: string) => void
   /** Per-row link — makes the row navigable with a trailing arrow (nav mode). */
   getRowHref?: (rowKey: string) => string | undefined
+  /** Custom per-row actions (archive/unarchive, …), shown in the overflow menu. */
+  getRowActions?: (rowKey: string) => ReadonlyArray<EntitiesListViewAction>
   editLabel: string
   removeLabel: string
   viewLabel: string
@@ -66,6 +79,7 @@ export function EntitiesListView({
   canEditRow,
   onRowClick,
   getRowHref,
+  getRowActions,
   editLabel,
   removeLabel,
   viewLabel,
@@ -83,7 +97,7 @@ export function EntitiesListView({
   // Only attach itemActions when there's at least one — an empty actions
   // function still renders the (hover) actions container, which would cover the
   // navigable row's trailing arrow.
-  const hasActions = !!onEditRow || !!onRemoveRow
+  const hasActions = !!onEditRow || !!onRemoveRow || !!getRowActions
 
   const source = useDataCollectionSource<ListRecord>(
     {
@@ -101,7 +115,8 @@ export function EntitiesListView({
         ? (record: ListRecord) => {
             const id = String(record.id)
             return [
-              // `type: "primary"` renders the action inline (not a dropdown).
+              // Edit is inline (`type: "primary"`) so the pencil stays visible;
+              // custom actions and remove go into the overflow (⋮) menu.
               ...(onEditRow && canEditRow(id)
                 ? [
                     {
@@ -113,13 +128,18 @@ export function EntitiesListView({
                     },
                   ]
                 : []),
+              ...(getRowActions?.(id) ?? []).map((action) => ({
+                label: action.label,
+                icon: action.icon,
+                critical: action.critical,
+                enabled: action.disabled ? false : undefined,
+                onClick: action.onClick,
+              })),
               ...(onRemoveRow
                 ? [
                     {
                       label: removeLabel,
                       icon: Delete,
-                      type: "primary" as const,
-                      hideLabel: true,
                       critical: true,
                       onClick: () => onRemoveRow(id),
                     },
@@ -135,6 +155,7 @@ export function EntitiesListView({
       onEditRow,
       onRemoveRow,
       canEditRow,
+      getRowActions,
       getRowHref,
       onRowClick,
     ]
@@ -156,27 +177,29 @@ export function EntitiesListView({
                 .filter(Boolean),
             avatar: listItem?.avatar?.(record),
           }),
-          // Navigable rows get a trailing arrow; the row's link handles the
-          // click (the icon sits under the full-row link overlay).
-          fields: navigable
-            ? [
-                {
-                  label: "",
-                  render: () => ({
-                    type: "icon" as const,
-                    value: {
-                      icon: ChevronRight,
-                      label: viewLabel,
-                      hideLabel: true,
-                    },
-                  }),
-                },
-              ]
-            : [],
+          // Navigable rows get a trailing arrow — but only when there are no
+          // row actions, since the actions overlay the trailing area (the row
+          // still navigates on click either way).
+          fields:
+            navigable && !hasActions
+              ? [
+                  {
+                    label: "",
+                    render: () => ({
+                      type: "icon" as const,
+                      value: {
+                        icon: ChevronRight,
+                        label: viewLabel,
+                        hideLabel: true,
+                      },
+                    }),
+                  },
+                ]
+              : [],
         },
       },
     ],
-    [listItem, titleField, descriptionFields, navigable, viewLabel]
+    [listItem, titleField, descriptionFields, navigable, hasActions, viewLabel]
   )
 
   // The list visualization wraps itself in full-page gutters (`px-page`) and

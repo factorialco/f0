@@ -1846,7 +1846,8 @@ export const EntitiesListFieldListView: Story = {
     const formSchema = z.object({
       members: f0FormField.entitiesList({
         label: "Team members",
-        helpText: "Items are shown as a list; add and edit happen in a dialog.",
+        helpText:
+          "Add/edit in a dialog; the ⋮ menu holds custom actions and remove.",
         schema: z.object({
           name: f0FormField.text({ label: "Name" }),
           email: f0FormField.email({ label: "Email" }),
@@ -1859,14 +1860,32 @@ export const EntitiesListFieldListView: Story = {
             ],
           }),
           startDate: f0FormField.date({ label: "Start date" }),
+          archived: z.boolean().default(false),
         }),
         config: {
           visualization: "list-view",
+          columns: { archived: { hidden: true } },
           labels: {
             addButton: "Add member",
             addButtonDescription: "Fill in the details of the new team member.",
             editDialogTitle: "Edit member",
           },
+          rowActions: (item) =>
+            item.archived
+              ? [
+                  {
+                    icon: ArchiveOpen,
+                    label: "Unarchive",
+                    onClick: ({ update }) => update({ archived: false }),
+                  },
+                ]
+              : [
+                  {
+                    icon: Archive,
+                    label: "Archive",
+                    onClick: ({ update }) => update({ archived: true }),
+                  },
+                ],
         },
       }),
     })
@@ -1883,6 +1902,7 @@ export const EntitiesListFieldListView: Story = {
             email: "ada@example.com",
             role: "Admin",
             startDate: new Date(2022, 2, 1),
+            archived: false,
           },
           {
             id: "m-2",
@@ -1890,6 +1910,7 @@ export const EntitiesListFieldListView: Story = {
             email: "grace@example.com",
             role: "Editor",
             startDate: new Date(2023, 8, 15),
+            archived: false,
           },
         ],
       },

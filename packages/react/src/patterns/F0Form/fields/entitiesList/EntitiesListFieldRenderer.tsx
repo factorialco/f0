@@ -24,6 +24,8 @@ import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition
 import type { ResolvedField } from "../types"
 import type { F0EntitiesListField, EntitiesListItem } from "./types"
 
+import type { EntitiesListViewAction } from "./EntitiesListView"
+
 import { EntitiesListView } from "./EntitiesListView"
 
 import {
@@ -669,6 +671,36 @@ export function EntitiesListFieldRenderer({
     },
     [findRow, itemHref]
   )
+  // Custom row actions (archive/unarchive, …) resolved by row key for the list
+  // overflow menu, with the same update/remove helpers as the table.
+  const rowActionsByKey = useCallback(
+    (rowKey: string): EntitiesListViewAction[] => {
+      if (!rowActionsFn) return []
+      const index = rows.findIndex((r) => r.__key === rowKey)
+      if (index < 0) return []
+      const { __key: _key, ...item } = rows[index]
+      return rowActionsFn(item, index).map((action) => ({
+        label: action.label,
+        icon: action.icon,
+        critical: action.critical,
+        disabled: action.disabled,
+        onClick: () =>
+          action.onClick({
+            item,
+            index,
+            update: (partial) =>
+              commit(
+                rows.map((r) => (r.__key === rowKey ? { ...r, ...partial } : r))
+              ),
+            remove: () => {
+              commit(rows.filter((r) => r.__key !== rowKey))
+              formField.onBlur()
+            },
+          }),
+      }))
+    },
+    [rowActionsFn, rows, commit, formField]
+  )
 
   if (useListView) {
     // A per-item `href` (only without a split `updateSchema`) makes rows
@@ -693,9 +725,8 @@ export function EntitiesListFieldRenderer({
           canEditRow={canEditRowByKey}
           onEditRow={isNavigable || isDisabled ? undefined : editRowByKey}
           onRowClick={isNavigable || isDisabled ? undefined : editRowByKey}
-          // Navigable rows show only the trailing arrow — no hover actions to
-          // cover it, and the whole row (arrow included) stays clickable.
-          onRemoveRow={isNavigable || isDisabled ? undefined : removeRowByKey}
+          onRemoveRow={isDisabled ? undefined : removeRowByKey}
+          getRowActions={rowActionsFn ? rowActionsByKey : undefined}
           getRowHref={isNavigable ? hrefByKey : undefined}
           editLabel={translations.edit}
           removeLabel={translations.remove}
