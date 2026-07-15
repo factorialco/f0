@@ -564,6 +564,145 @@ export const WithSectionsSidepanel: Story = {
 }
 
 /**
+ * The sidebar highlight tracks scrolling. Clicking a section smoothly scrolls
+ * to it; scrolling manually moves the highlight to whichever section reaches
+ * the top of the form's scroll area. The form is placed in a fixed-height
+ * container so it scrolls internally, exactly as it does inside a dialog or an
+ * AI canvas panel.
+ */
+export const WithSectionsSidepanelScrollSpy: Story = {
+  decorators: [
+    (Story) => (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          height: 460,
+          maxWidth: 760,
+        }}
+      >
+        <Story />
+      </div>
+    ),
+  ],
+  render() {
+    const formSchema = z.object({
+      // Basic Information
+      title: f0FormField.text({
+        label: "Title",
+        section: "basic",
+        placeholder: "Enter a title",
+      }),
+      description: f0FormField.textarea({
+        label: "Description",
+        section: "basic",
+        optional: true,
+        rows: 3,
+      }),
+      // Owner
+      owner: f0FormField.text({
+        label: "Owner",
+        section: "owner",
+        placeholder: "Owner name",
+      }),
+      team: f0FormField.text({
+        label: "Team",
+        section: "owner",
+        optional: true,
+      }),
+      // Schedule
+      startsAt: f0FormField.date({
+        label: "Starts on",
+        section: "schedule",
+        optional: true,
+      }),
+      recurrence: f0FormField.select({
+        label: "Recurrence",
+        section: "schedule",
+        options: [
+          { value: "none", label: "Does not repeat" },
+          { value: "weekly", label: "Weekly" },
+          { value: "monthly", label: "Monthly" },
+        ],
+      }),
+      // Visibility
+      isPublic: f0FormField.boolean({
+        label: "Publicly visible",
+        section: "visibility",
+        optional: true,
+      }),
+      anonymous: f0FormField.boolean({
+        label: "Anonymous answers",
+        section: "visibility",
+        optional: true,
+      }),
+      // Notifications
+      notifyByEmail: f0FormField.boolean({
+        label: "Notify by email",
+        section: "notifications",
+        optional: true,
+      }),
+      digest: f0FormField.select({
+        label: "Digest frequency",
+        section: "notifications",
+        options: [
+          { value: "off", label: "Off" },
+          { value: "daily", label: "Daily" },
+          { value: "weekly", label: "Weekly" },
+        ],
+      }),
+      // Advanced
+      slug: f0FormField.text({
+        label: "Slug",
+        section: "advanced",
+        optional: true,
+      }),
+      retentionDays: f0FormField.number({
+        label: "Retention (days)",
+        section: "advanced",
+        optional: true,
+      }),
+    })
+
+    const sections: Record<string, F0SectionConfig> = {
+      basic: { title: "Basic Information" },
+      owner: { title: "Owner & Team" },
+      schedule: { title: "Schedule" },
+      visibility: { title: "Visibility & Privacy" },
+      notifications: { title: "Notifications" },
+      advanced: { title: "Advanced" },
+    }
+
+    const formDefinition = useF0FormDefinition({
+      name: "scroll-spy-settings",
+      schema: formSchema,
+      sections,
+      defaultValues: {
+        title: "Quarterly planning",
+        recurrence: "none",
+        isPublic: false,
+        anonymous: false,
+        notifyByEmail: false,
+        digest: "off",
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(1000)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return (
+      <F0Form
+        formDefinition={formDefinition}
+        styling={{ showSectionsSidepanel: true }}
+      />
+    )
+  },
+}
+
+/**
  * Form with conditional field rendering based on other field values.
  * Fields can use `renderIf` to conditionally show/hide based on other field values.
  * Supports both condition objects and functions.
