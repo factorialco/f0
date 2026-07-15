@@ -843,14 +843,18 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     if (!isAutosubmit) return
 
     const subscription = form.watch(() => {
-      if (!form.formState.isDirty) return
-      if (form.formState.isSubmitting) return
-
+      // The dirty/submitting guards are checked inside the debounced callback
+      // rather than here: `form.watch` fires synchronously on the change, before
+      // react-hook-form has recomputed `formState.isDirty`. Reading it here would
+      // see a stale value and drop the FIRST change of a pristine form (e.g. a
+      // single switch toggle). By the time the timer fires, the state has settled.
       if (autosubmitTimerRef.current) {
         clearTimeout(autosubmitTimerRef.current)
       }
       autosubmitTimerRef.current = setTimeout(() => {
         autosubmitTimerRef.current = null
+        if (!form.formState.isDirty) return
+        if (form.formState.isSubmitting) return
         snapshotFocus()
         form.handleSubmit((data) =>
           handleSubmitForAutosubmitRef.current(data)

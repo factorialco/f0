@@ -21,6 +21,13 @@ const strictSchema = z.object({
   name: f0FormField(z.string().min(3, "Too short"), { label: "Name" }),
 })
 
+const switchSchema = z.object({
+  anonymous: f0FormField(z.boolean(), {
+    label: "Anonymous",
+    fieldType: "switch",
+  }),
+})
+
 const autosubmitConfig = {
   type: "autosubmit" as const,
 }
@@ -105,6 +112,39 @@ describe("F0Form autosubmit", () => {
     })
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ name: "updated" })
+    )
+  })
+
+  // Regression: a single discrete change on a pristine form (e.g. toggling one
+  // switch) must autosubmit. Previously the dirty guard was read synchronously
+  // inside `form.watch`, before react-hook-form recomputed `isDirty`, so the
+  // first change was dropped and only a second change triggered a submit.
+  it("submits after a single switch toggle on a pristine form", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    render(
+      <F0Form
+        name="autosubmit-single-toggle"
+        schema={switchSchema}
+        defaultValues={{ anonymous: false }}
+        onSubmit={onSubmit}
+        submitConfig={{ ...autosubmitConfig, delay: 800, hideActionBar: true }}
+      />
+    )
+
+    const toggle = screen.getByRole("switch", { name: "Anonymous" })
+    await user.click(toggle)
+
+    act(() => {
+      vi.advanceTimersByTime(800)
+    })
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+    })
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ anonymous: true })
     )
   })
 
