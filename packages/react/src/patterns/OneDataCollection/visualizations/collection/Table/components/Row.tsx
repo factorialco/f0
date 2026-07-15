@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react"
+import { forwardRef, useEffect, useRef } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -68,6 +68,8 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** When true, plays the green "flash on add" background animation once. */
+  isNew?: boolean
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
@@ -142,6 +144,7 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    isNew = false,
     referenceRowType: referenceRowTypeFn,
     cellRenderer: CellRenderer,
     rowWrapper,
@@ -166,6 +169,13 @@ const RowComponentInner = <
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
   const i18n = useI18n()
+
+  // Play the green "flash on add" highlight once, when a newly-added row
+  // mounts. `isNew` is captured at mount (a re-render would otherwise flip it
+  // back to false and cancel the animation early). The CSS animation
+  // (tailwind.config.ts `row-flash`) runs once and stops on its own, so no
+  // timer is needed to remove the class afterwards.
+  const flashing = useRef(isNew).current
 
   const renderCell = (
     item: R,
@@ -256,6 +266,7 @@ const RowComponentInner = <
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
         isSelected && "bg-f1-background-selected-secondary",
+        flashing && "animate-row-flash",
         referenceTypeClasses[referenceRowType]
       )}
     >

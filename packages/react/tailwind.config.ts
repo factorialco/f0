@@ -26,10 +26,16 @@ export default {
           from: { "--gradient-angle": "0deg" },
           to: { "--gradient-angle": "360deg" },
         },
+        // Green "flash on add" highlight for newly-inserted data collection rows.
+        "row-flash": {
+          from: { backgroundColor: "hsl(var(--positive-50) / 0.2)" },
+          to: { backgroundColor: "hsl(var(--positive-50) / 0)" },
+        },
       },
       animation: {
         ...baseConfig.theme?.extend?.animation,
         "rotate-gradient": "rotate-gradient 2s linear infinite",
+        "row-flash": "row-flash 1.5s ease-out",
       },
     },
   },
