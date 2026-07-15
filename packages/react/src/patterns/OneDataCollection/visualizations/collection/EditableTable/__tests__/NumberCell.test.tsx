@@ -27,11 +27,24 @@ describe("NumberCell", () => {
     item: { id: "1", salary: 42000 },
   }
 
-  it("renders with the provided numeric value", () => {
+  it("renders with the provided numeric value with grouping separators", () => {
     render(<NumberCell {...defaultProps} />)
 
     const input = screen.getByRole("textbox")
+    expect(input).toHaveValue("42,000")
+  })
+
+  it("shows the raw value while editing and the grouped value on blur", async () => {
+    const user = userEvent.setup()
+
+    render(<NumberCell {...defaultProps} />)
+
+    const input = screen.getByRole("textbox")
+    await user.click(input)
     expect(input).toHaveValue("42000")
+
+    await user.tab()
+    expect(input).toHaveValue("42,000")
   })
 
   it("renders empty when value is an empty string", () => {
