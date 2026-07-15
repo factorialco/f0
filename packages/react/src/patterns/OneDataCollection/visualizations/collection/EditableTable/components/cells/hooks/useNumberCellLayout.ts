@@ -31,13 +31,16 @@ export function useNumberCellLayout<R extends RecordType>(
 
   const units = resolveUnits(config, item)
   const unitsBefore = units ? config?.unitsPosition === "before" : false
+  // Grouped by default; measure the width with grouping so the grouped resting
+  // display (e.g. `1,234,567`) isn't clipped.
+  const grouping = config?.grouping ?? true
   const formatter = useMemo(
     () =>
       new Intl.NumberFormat(locale, {
         maximumFractionDigits: config?.maxDecimals,
-        useGrouping: false,
+        useGrouping: grouping,
       }),
-    [locale, config?.maxDecimals]
+    [locale, config?.maxDecimals, grouping]
   )
 
   const formatted = numericValue != null ? formatter.format(numericValue) : ""
@@ -50,5 +53,5 @@ export function useNumberCellLayout<R extends RecordType>(
 
   const { ref, width } = useInputTextWidth(fullText)
 
-  return { ref, width, locale, units, unitsBefore }
+  return { ref, width, locale, units, unitsBefore, grouping }
 }

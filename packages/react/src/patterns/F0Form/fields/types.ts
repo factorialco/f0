@@ -123,6 +123,13 @@ export interface F0BaseField {
    * @default false
    */
   resetOnDisable?: boolean
+  /**
+   * When true, a change to this field auto-saves the form (a debounced submit).
+   * Other fields still save on submit. Independent from the form-level
+   * `submitConfig: { type: "autosubmit" }`.
+   * @default false
+   */
+  autoSave?: boolean
   /** Alert displayed below the field (static props or conditional callback) */
   alert?: F0FieldAlert
   /**
@@ -159,6 +166,7 @@ export type FieldType =
   | "richtext"
   | "file"
   | "cardSelect"
+  | "entitiesList"
   | "custom"
 
 // ============================================================================
@@ -215,6 +223,14 @@ export type {
   FileUploadHookReturn,
   UseFileUpload,
 } from "./file/types"
+export type {
+  F0EntitiesListConfig,
+  F0EntitiesListOptions,
+  F0EntitiesListLabels,
+  F0EntitiesListColumnConfig,
+  F0EntitiesListField,
+  EntitiesListItem,
+} from "./entitiesList/types"
 
 import type { F0CardSelectField } from "./cardSelect/types"
 import type { F0CheckboxField } from "./checkbox/types"
@@ -227,6 +243,7 @@ import type { F0NumberField } from "./number/types"
 import type { F0PeriodField } from "./period/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0SelectField } from "./select/types"
+import type { F0EntitiesListField } from "./entitiesList/types"
 import type { F0SwitchField } from "./switch/types"
 // Import for union type
 import type { F0TextField } from "./text/types"
@@ -251,4 +268,5 @@ export type F0Field =
   | F0RichTextField
   | F0FileField
   | F0CardSelectField
+  | F0EntitiesListField
   | F0CustomField

@@ -35,6 +35,7 @@ export type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
   description?: string
   critical?: boolean
   avatar?: AvatarVariant
+  disabled?: boolean
 }
 
 export type DropdownInternalProps = {
@@ -65,6 +66,7 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
     description: _description,
     href,
     critical,
+    disabled,
     ...props
   } = item
 
@@ -74,7 +76,11 @@ const DropdownItem = ({ item }: { item: DropdownItemObject }) => {
   )
 
   return (
-    <DropdownMenuItem asChild className={cn(itemClass, "cursor-pointer")}>
+    <DropdownMenuItem
+      asChild
+      className={cn(itemClass, "cursor-pointer")}
+      disabled={disabled}
+    >
       {href ? (
         <Link
           href={href}

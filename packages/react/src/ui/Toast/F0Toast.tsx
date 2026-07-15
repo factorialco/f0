@@ -20,7 +20,7 @@ import {
 } from "./types"
 
 const toastVariants = cva({
-  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg p-3 shadow-lg bg-f1-foreground overflow-hidden",
+  base: "isolation-isolate pointer-events-auto relative flex w-full flex-col gap-3 rounded-lg p-3 shadow-lg backdrop-blur-sm bg-f1-background-inverse dark:bg-f1-background-tertiary overflow-hidden",
   variants: {
     variant: {
       error: "",
@@ -38,9 +38,9 @@ const titleVariants = cva({
   base: "font-medium text-base",
   variants: {
     variant: {
-      error: "text-f1-icon-critical",
-      warning: "text-f1-icon-warning",
-      success: "text-f1-icon-positive",
+      error: "text-f1-foreground-inverse",
+      warning: "text-f1-foreground-inverse",
+      success: "text-f1-foreground-inverse",
       default: "text-f1-foreground-inverse",
     },
     hasIcon: {
