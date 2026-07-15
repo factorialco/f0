@@ -720,6 +720,17 @@ export const StrikedRowsVisualization: Story = {
                 columns: [
                   { label: "Name", render: (item) => item.name, id: "name" },
                   { label: "Email", render: (item) => item.email, id: "email" },
+                  {
+                    label: "Status",
+                    id: "status",
+                    render: (item) => ({
+                      type: "status",
+                      value: {
+                        status: item.active ? "positive" : "critical",
+                        label: item.active ? "Active" : "Inactive",
+                      },
+                    }),
+                  },
                 ],
               },
             },

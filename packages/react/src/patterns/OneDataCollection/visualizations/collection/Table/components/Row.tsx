@@ -114,7 +114,8 @@ const referenceTypeClasses: Record<ReferenceType, string> = {
   none: "",
   striped:
     "bg-[repeating-linear-gradient(45deg,transparent_0px,transparent_8px,hsl(var(--neutral-20))_8px,hsl(var(--neutral-20))_9px)] [background-size:100%_100px]",
-  striked: "[&_*]:line-through text-f1-foreground-secondary",
+  striked:
+    "[&_*:not([data-no-strike]):not([data-no-strike]_*)]:line-through text-f1-foreground-secondary",
 }
 
 const RowComponentInner = <
