@@ -2574,6 +2574,26 @@ function FlowContent({
     })
   }
 
+  // No credits: arm the next typed message to redirect into the guided-entry
+  // panel with a short "can't do that, but I can still help you create a survey"
+  // note. RE-ARMS itself, so dismissing the panel and typing again redirects
+  // again (rather than falling through to a simulated AI reply). Shared by both
+  // no-credits entries — the "cards" welcome composer and the "guidedEntry"
+  // flow. Picking a panel option overwrites it with that action's own arming
+  // (e.g. `armNoCredits`), so this only governs the "typed instead of picked"
+  // path.
+  const armNoCreditsRedirect = () => {
+    const handler = () => {
+      appendMessages([
+        { role: "assistant", content: NO_CREDITS_REDIRECT_MESSAGE },
+      ])
+      // Re-arm before the panel reopens so a second dismiss + type is caught too.
+      setUserMessageInterceptor(handler)
+      showThinking(() => openGuidedEntryPanel(GUIDED_ENTRY_QUESTION))
+    }
+    setUserMessageInterceptor(handler)
+  }
+
   // "guidedEntry" entry flow (Engagement Guided): the same message-first entry
   // as "guidedType" — post "Let's create a Survey" on the user's behalf, think,
   // then the guided-entry clarifying panel (see `openGuidedEntryPanel`).
@@ -2587,6 +2607,9 @@ function FlowContent({
         { role: "assistant", content: "Sure — how would you like to start?" },
       ])
       openGuidedEntryPanel(config.guidedQuestion)
+      // No credits: if the user dismisses the panel and types, redirect them
+      // back into it instead of a simulated reply.
+      if (noCredits) armNoCreditsRedirect()
     })
   }
 
@@ -2630,16 +2653,12 @@ function FlowContent({
           setPhase("chat")
           if (config.entryMode === "cards") {
             if (noCredits) {
-              // No credits: free-text AI is blocked, so the first typed message
-              // gets a short "can't do that" reply and is redirected into the
+              // No credits: free-text AI is blocked, so any typed message gets a
+              // short "can't do that" reply and is redirected into the
               // credit-free guided-entry panel (Empty Survey / Use a Template /
-              // top templates) — the welcome cards' options, offered inline.
-              setUserMessageInterceptor(() => {
-                appendMessages([
-                  { role: "assistant", content: NO_CREDITS_REDIRECT_MESSAGE },
-                ])
-                showThinking(() => openGuidedEntryPanel(GUIDED_ENTRY_QUESTION))
-              })
+              // top templates) — the welcome cards' options, offered inline. Re-
+              // arms, so dismissing the panel and typing again redirects again.
+              armNoCreditsRedirect()
             } else {
               setUserMessageInterceptor(() => {
                 appendMessages([
