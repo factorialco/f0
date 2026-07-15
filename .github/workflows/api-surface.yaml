@@ -10,9 +10,9 @@ jobs:
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
 
-  # Build the rolled-up type declarations on both the PR head and the base
-  # branch (main) in parallel. Each leg only needs the existing `build` script,
-  # so the base build works even though this workflow does not exist on main.
+  # Build the rolled-up type declarations for both sides of the comparison in
+  # parallel. Each leg only needs the existing `build` script, so the base
+  # build works even though this workflow does not exist on main.
   build-dts:
     needs: detect-changes
     # React source or core (whose types ripple into the React surface) changed.
@@ -33,9 +33,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # base: tip of the target branch (the "old version").
-          # head: the PR branch as-is, so we compare the PR's API against main.
-          ref: ${{ matrix.side == 'base' && github.event.pull_request.base.sha || github.event.pull_request.head.sha }}
+          # Both sides derive from the PR *merge commit* (github.sha for
+          # pull_request events: the PR head merged into the current tip of
+          # main), so the PR is synced with main before the API is snapshotted.
+          # Building the PR branch as-is would falsely flag everything that
+          # landed on main after the branch point as "removed" (breaking).
+          #   head: the merge commit itself (PR + latest main).
+          #   base: the merge commit's first parent — the exact main tip the
+          #         head side was merged with (checked out in the next step).
+          # Depth 2 makes both parents of the merge commit available.
+          fetch-depth: 2
+      - name: Check out base side (first parent of the merge commit)
+        if: matrix.side == 'base'
+        run: git checkout HEAD^1
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
       - uses: ./.github/actions/setup-node-pnpm

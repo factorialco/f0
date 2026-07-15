@@ -1,4 +1,4 @@
-// Survey split-canvas mock for the "Creation with AI" co-creation story — a
+// Survey split-canvas mock for the "Walkthrough" co-creation story — a
 // representative Survey reproduced with the real SurveyAnsweringForm (inline,
 // read-only). Modeled on the SurveyAnsweringForm story's `sampleElements`,
 // themed to the "Employee engagement survey" card.
@@ -250,7 +250,7 @@ const SURVEY_DICTATION_TRANSCRIPTS = [
 ] as const
 
 /**
- * Survey-contextual voice dictation for the "Creation with AI" co-creation flow:
+ * Survey-contextual voice dictation for the "Walkthrough" co-creation flow:
  * streams a spoken-style survey-refinement request (follow-up questions and
  * triggers) into the composer so the user can review it and send. Wired to the
  * chat via the ApplicationFrame `ai.onTranscribe` prop.

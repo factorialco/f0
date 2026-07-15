@@ -206,7 +206,7 @@ export const F0AiChatTextArea = ({
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
   const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
-  const hasDataToSend = inputValue.trim().length > 0
+  const hasDataToSend = inputValue.trim().length > 0 || uploadedFiles.length > 0
 
   // Fire a queued submit once all attachments finish uploading. If an upload
   // failed, do NOT auto-send (the message would go without the file) — surface

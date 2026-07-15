@@ -196,6 +196,8 @@ export const defaultTranslations = {
       settings: {
         showAllColumns: "Show all",
         hideAllColumns: "Hide all",
+        addColumn: "Add column",
+        removeColumn: "Remove column",
       },
     },
     editableTable: {
@@ -811,6 +813,20 @@ export const defaultTranslations = {
     next: "Continue",
     submit: "Submit",
     stepOf: "Step {{current}} of {{total}}",
+  },
+  pdfViewer: {
+    toolbar: "Document toolbar",
+    previousPage: "Previous page",
+    nextPage: "Next page",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    scaleSelector: "Zoom level",
+    pageWidth: "Page width",
+    pageFit: "Page fit",
+    rotate: "Rotate",
+    print: "Print",
+    download: "Download",
+    loading: "Loading document",
   },
 } as const
 

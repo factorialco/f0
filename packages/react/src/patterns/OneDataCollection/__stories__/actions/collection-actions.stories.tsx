@@ -199,6 +199,27 @@ export const BasicActionsExample: Story = {
   },
 }
 
+// Disabled primary action with a tooltip explaining why it is disabled.
+export const DisabledPrimaryActionWithTooltipExample: Story = {
+  render: () => {
+    const dataSource = useDataCollectionSource({
+      dataAdapter: {
+        fetchData: () => Promise.resolve({ records: mockUsers }),
+      },
+      primaryActions: () => ({
+        label: "Process payroll results",
+        icon: Ai,
+        onClick: () => console.log("Processing payroll results"),
+        disabled: true,
+        tooltip: ({ disabled }) =>
+          disabled ? "The results are not available yet" : undefined,
+      }),
+    })
+
+    return <BaseStory dataSource={dataSource} />
+  },
+}
+
 // Upsell button next to the full toolbar: search, settings, and a primary action.
 export const UpsellActionExample: Story = {
   render: () => {

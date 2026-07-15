@@ -15,6 +15,13 @@ export interface GraphNode<T = unknown> {
   data: T
   childrenCount?: number
   childrenLoaded?: boolean
+  /**
+   * For viewport-driven data loading (`loadVisibleNodeData`): set `false` on a
+   * lightweight/skeleton node whose rich `data` hasn't been fetched yet, then
+   * `true` once hydrated. Drives the `dataLoading` flag on the render context.
+   * Leave undefined when not using on-demand data loading.
+   */
+  dataLoaded?: boolean
 }
 
 // Edge between nodes
@@ -50,6 +57,8 @@ export interface TreeNode<T = unknown> {
   depth: number
   childrenCount: number
   childrenLoaded: boolean
+  /** Mirrors `GraphNode.dataLoaded` for viewport-driven data loading. */
+  dataLoaded?: boolean
   /**
    * Present when a node has multiple parents in a DAG. Lists all logical
    * parent IDs. The canonical layout parent (`parentId`) is the first entry.

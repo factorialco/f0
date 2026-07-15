@@ -1,4 +1,4 @@
-// Per-tab configuration for the "Creation with AI" co-creation story — the
+// Per-tab configuration for the "Walkthrough" co-creation story — the
 // resource cards surfaced for the Surveys collection tab. Pure data; the story
 // wires it up via TabConfigProvider.
 

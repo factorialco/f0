@@ -13,6 +13,7 @@ import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { resolveGraphReveal } from "./reveal"
 import { GraphVisualizationOptions } from "./types"
 import { useDataCollectionTreeData } from "./useDataCollectionTreeData"
 
@@ -61,12 +62,19 @@ export const GraphCollection = <
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
+  focusOnEntry,
   loadNodePath,
   getParentId,
+  loadNodeData,
+  liveUpdate,
   zoomPreset,
   minZoom,
   maxZoom,
   showControls,
+  enableNodeWindowing,
+  nodeWindowPadding,
+  loadVisibleNodeData,
+  visibleDataDebounceMs,
   onLoadData,
   onLoadError,
 }: GraphCollectionProps<
@@ -86,6 +94,7 @@ export const GraphCollection = <
     highlightedNodes,
     revealNode,
     clearFocus,
+    loadVisibleNodeData: hydrateVisibleNodeData,
     isInitialLoading,
   } = useDataCollectionTreeData<
     Record,
@@ -107,31 +116,34 @@ export const GraphCollection = <
       defaultExpandDepth,
       loadNodePath,
       getParentId,
+      loadNodeData,
+      liveUpdate,
+      focusOnEntry,
       zoomPreset,
       showControls,
     },
     { onLoadData, onLoadError }
   )
 
-  // Reveal a node selected from the shared Data Collection search — but NEVER on
-  // entry: opening the graph must not auto-focus anyone (a consistent default
-  // view + clean search). We adopt whatever `revealNodeId` exists when the tree
-  // first becomes ready as "already handled", then only react to LATER changes
-  // (a fresh search selection). "Find me" reveals directly via the controls and
-  // is unaffected.
+  // Reveal driver. The graph never auto-focuses on entry via this path: the
+  // initial `revealNodeId` is adopted as "already handled", and only LATER
+  // changes (a fresh search selection) reveal — with the smooth pan. Entry
+  // focus is handled instead by `focusOnEntry`, which the tree-data hook
+  // pre-resolves before first paint so F0Graph opens framed on it (no pan).
+  // The decision lives in the pure `resolveGraphReveal`.
   const lastRevealedRef = useRef<string | undefined>(undefined)
   const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
     if (isInitialLoading) return
-    if (!initialRevealConsumedRef.current) {
-      initialRevealConsumedRef.current = true
-      lastRevealedRef.current = revealNodeId
-      return
-    }
-    if (revealNodeId && revealNodeId !== lastRevealedRef.current) {
-      lastRevealedRef.current = revealNodeId
-      void revealNode(revealNodeId)
-    }
+    const decision = resolveGraphReveal({
+      isInitialLoading,
+      initialConsumed: initialRevealConsumedRef.current,
+      revealNodeId,
+      lastRevealed: lastRevealedRef.current,
+    })
+    if (decision.consumeInitial) initialRevealConsumedRef.current = true
+    lastRevealedRef.current = decision.lastRevealed
+    if (decision.revealId) void revealNode(decision.revealId)
   }, [revealNodeId, revealNode, isInitialLoading])
 
   // Clear the shared header search when ENTERING and LEAVING the graph view, so
@@ -188,12 +200,21 @@ export const GraphCollection = <
           expandedNodes={expandedNodes}
           onExpandedNodesChange={setExpandedNodes}
           focusedNode={focusedNode}
+          // Open framed on the entry target (pre-resolved above) with no
+          // fit-then-pan. Falls back to fit-to-all when it isn't resolvable.
+          initialFocusNodeId={focusOnEntry}
           highlightedNodes={highlightedNodes}
           selectionMode="single"
           showControls={showControls ?? true}
           zoomPreset={zoomPreset}
           minZoom={minZoom}
           maxZoom={maxZoom}
+          enableNodeWindowing={enableNodeWindowing}
+          nodeWindowPadding={nodeWindowPadding}
+          // The hook's own hydration loader (two-phase mode) wins; otherwise
+          // fall back to a loader supplied directly in the visualization options.
+          loadVisibleNodeData={hydrateVisibleNodeData ?? loadVisibleNodeData}
+          visibleDataDebounceMs={visibleDataDebounceMs}
           reserveTagRow={tags !== undefined}
           nodeTagTypes={nodeTagTypes}
           visibleTagTypes={visibleTagTypes}
@@ -209,6 +230,9 @@ export const GraphCollection = <
             return (
               <F0GraphNode
                 {...ctx}
+                // Show the node skeleton while its rich data is being fetched
+                // (two-phase hydration); `ctx.dataLoading` is undefined otherwise.
+                loading={ctx.dataLoading}
                 avatar={avatar?.(node.data)}
                 title={title(node.data)}
                 subtitle={subtitle?.(node.data)}

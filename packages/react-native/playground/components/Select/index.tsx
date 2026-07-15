@@ -1,123 +1,196 @@
-import React, { useState } from "react";
-import { Modal, Pressable, ScrollView, Text } from "react-native";
-import { useCSSVariable } from "uniwind";
-import { AppIcons } from "../../../src/icons";
-import { F0Icon } from "../../../src/components/primitives/F0Icon";
+import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect"
+import { SymbolView } from "expo-symbols"
+import React, { useMemo, useState } from "react"
+import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native"
+import { useCSSVariable } from "uniwind"
 
-export interface SelectOption<T extends string> {
-  value: T;
-  label: string;
+import type { SelectProps } from "./types"
+
+export * from "./types"
+
+const asString = (value: string | number | undefined): string => {
+  if (typeof value === "string") return value
+  if (typeof value === "number") return String(value)
+  return "#000000"
 }
 
-export interface SelectProps<T extends string> {
-  options: SelectOption<T>[];
-  value: T;
-  onChange: (value: T) => void;
-  placeholder?: string;
-  className?: string;
-}
+const isDeprecated = (label: string) =>
+  label.toLowerCase().includes("deprecated")
 
+/**
+ * Native component browser for the playground.
+ *
+ * The trigger is an iOS 26 Liquid Glass pill (expo-glass-effect). Tapping it opens
+ * a native sheet (`Modal presentationStyle="pageSheet"`) with a native search field
+ * and a grouped, scrollable list (Core / Deprecated). SF / Material symbols
+ * (expo-symbols) mark the chrome and the current selection. Same props as before,
+ * so call sites are unchanged.
+ */
 export function Select<T extends string>({
   options,
   value,
   onChange,
-  placeholder = "Select an option",
-  className,
+  placeholder = "Select a component",
 }: SelectProps<T>) {
-  const [isOpen, setIsOpen] = useState(false);
-  
-  const [f0Background, f0Foreground, f0Border, f0BackgroundSecondary] = useCSSVariable([
-    '--color-f0-background',
-    '--color-f0-foreground',
-    '--color-f0-border',
-    '--color-f0-background-secondary',
-  ]);
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
 
-  const asString = (val: string | number | undefined): string => {
-    if (typeof val === 'string') return val;
-    if (typeof val === 'number') return String(val);
-    return '#000000';
-  };
+  const [bg, fg, muted, border, fieldBg, accent] = useCSSVariable([
+    "--color-f0-background",
+    "--color-f0-foreground",
+    "--color-f0-foreground-secondary",
+    "--color-f0-border",
+    "--color-f0-background-secondary",
+    "--color-f0-foreground-info",
+  ])
 
-  const selectedOption = options.find(opt => opt.value === value);
+  const selected = options.find((option) => option.value === value)
+
+  const groups = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    const filtered = q
+      ? options.filter((option) => option.label.toLowerCase().includes(q))
+      : options
+    return [
+      {
+        title: "Core",
+        data: filtered.filter((option) => !isDeprecated(option.label)),
+      },
+      {
+        title: "Deprecated",
+        data: filtered.filter((option) => isDeprecated(option.label)),
+      },
+    ].filter((group) => group.data.length > 0)
+  }, [options, query])
+
+  const close = () => {
+    setOpen(false)
+    setQuery("")
+  }
+  const pick = (next: T) => {
+    onChange(next)
+    close()
+  }
+
+  const trigger = (
+    <View className="flex-row items-center justify-between px-4 py-3">
+      <Text className="text-base font-medium" style={{ color: asString(fg) }}>
+        {selected?.label ?? placeholder}
+      </Text>
+      <SymbolView
+        name={{ ios: "chevron.up.chevron.down", android: "unfold_more" }}
+        size={18}
+        tintColor={asString(muted)}
+      />
+    </View>
+  )
 
   return (
     <>
-      <Pressable
-        onPress={() => setIsOpen(true)}
-        className={`flex-row items-center justify-between px-3 py-2 rounded-lg border ${className || ''}`}
-        style={{
-          backgroundColor: asString(f0Background),
-          borderColor: asString(f0Border),
-        }}
-      >
-        <Text
-          className="text-sm flex-1"
-          style={{ color: asString(f0Foreground) }}
-        >
-          {selectedOption?.label || placeholder}
-        </Text>
-        <F0Icon
-          icon={isOpen ? AppIcons.ChevronUp : AppIcons.ChevronDown}
-          size="sm"
-          className="text-f0-icon"
-        />
+      <Pressable onPress={() => setOpen(true)} accessibilityRole="button">
+        {isLiquidGlassAvailable() ? (
+          <GlassView
+            glassEffectStyle="regular"
+            isInteractive
+            style={{ borderRadius: 14, overflow: "hidden" }}
+          >
+            {trigger}
+          </GlassView>
+        ) : (
+          <View
+            className="rounded-2xl border"
+            style={{ borderColor: asString(border) }}
+          >
+            {trigger}
+          </View>
+        )}
       </Pressable>
 
       <Modal
-        visible={isOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsOpen(false)}
+        visible={open}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={close}
       >
-        <Pressable
-          className="flex-1 justify-center items-center"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-          onPress={() => setIsOpen(false)}
-        >
-          <Pressable
-            className="rounded-lg border w-4/5 max-w-md"
-            style={{
-              backgroundColor: asString(f0Background),
-              borderColor: asString(f0Border),
-              maxHeight: '80%',
-            }}
-            onPress={(e) => e.stopPropagation()}
+        <View style={{ flex: 1, backgroundColor: asString(bg) }}>
+          <View className="flex-row items-center justify-between px-4 pb-2 pt-4">
+            <Text className="text-xl font-bold" style={{ color: asString(fg) }}>
+              Components
+            </Text>
+            <Pressable onPress={close} accessibilityRole="button" hitSlop={10}>
+              <SymbolView
+                name={{ ios: "xmark.circle.fill", android: "close" }}
+                size={26}
+                tintColor={asString(muted)}
+              />
+            </Pressable>
+          </View>
+
+          <View
+            className="mx-4 mb-2 flex-row items-center gap-2 rounded-xl px-3 py-2"
+            style={{ backgroundColor: asString(fieldBg) }}
           >
-            <ScrollView
-              className="p-2"
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true}
-            >
-              {options.map((option) => {
-                const isSelected = option.value === value;
-                return (
-                  <Pressable
-                    key={option.value}
-                    onPress={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                    }}
-                    className={`px-4 py-3 rounded-lg mb-1 ${isSelected ? '' : ''}`}
-                    style={{
-                      backgroundColor: isSelected 
-                        ? asString(f0BackgroundSecondary)
-                        : 'transparent',
-                    }}
-                  >
-                    <Text
-                      className="text-base"
-                      style={{ color: asString(f0Foreground) }}
+            <SymbolView
+              name={{ ios: "magnifyingglass", android: "search" }}
+              size={18}
+              tintColor={asString(muted)}
+            />
+            <TextInput
+              placeholder="Search components"
+              placeholderTextColor={asString(muted)}
+              value={query}
+              onChangeText={setQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={{ flex: 1, fontSize: 16, color: asString(fg) }}
+            />
+          </View>
+
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={{ paddingBottom: 32 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {groups.map((group) => (
+              <View key={group.title} className="mb-2">
+                <Text
+                  className="px-4 py-1 text-xs font-semibold uppercase"
+                  style={{ color: asString(muted) }}
+                >
+                  {group.title}
+                </Text>
+                {group.data.map((option) => {
+                  const active = option.value === value
+                  return (
+                    <Pressable
+                      key={option.value}
+                      onPress={() => pick(option.value)}
+                      className="flex-row items-center justify-between px-4 py-3"
                     >
-                      {option.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-          </Pressable>
-        </Pressable>
+                      <Text
+                        className="text-base"
+                        style={{
+                          color: asString(fg),
+                          fontWeight: active ? "600" : "400",
+                        }}
+                      >
+                        {option.label}
+                      </Text>
+                      {active ? (
+                        <SymbolView
+                          name={{ ios: "checkmark", android: "check" }}
+                          size={18}
+                          tintColor={asString(accent)}
+                        />
+                      ) : null}
+                    </Pressable>
+                  )
+                })}
+              </View>
+            ))}
+          </ScrollView>
+        </View>
       </Modal>
     </>
-  );
+  )
 }

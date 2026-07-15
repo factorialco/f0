@@ -95,7 +95,7 @@ import type { TabConfig } from "./tab-configs"
 import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
 
 /**
- * Co-creation patterns — "Creation with AI".
+ * Co-creation patterns — "Walkthrough".
  *
  * Interactive mockup of the AI-creation flow, built on a single chat-enabled
  * ApplicationFrame so the "One" switch (the F0AiChat trigger) is always in the
@@ -117,7 +117,7 @@ import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
  * template cards).
  */
 const meta = {
-  title: "Co-creation/Creation with AI",
+  title: "Co-creation/Walkthrough",
   // Manual MDX docs live in creation-with-ai.mdx; opt out of the globally
   // enabled autodocs so the section shows a single Documentation page.
   tags: ["!autodocs"],

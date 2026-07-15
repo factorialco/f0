@@ -202,6 +202,7 @@ describe("TableCollection", () => {
 
       const struckRow = screen.getByText(testData[0].name).closest("tr")
       expect(struckRow?.className).toMatch(/line-through/)
+      expect(struckRow?.className).toMatch(/:not\(\[data-no-strike\]/)
 
       const plainRow = screen.getByText(testData[1].name).closest("tr")
       expect(plainRow?.className).not.toMatch(/line-through/)
