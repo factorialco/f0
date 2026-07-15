@@ -179,10 +179,12 @@ export function FieldRenderer({ field, sectionId }: FieldRendererProps) {
   // Check if field should be visible based on renderIf condition
   const isVisible = !field.renderIf || evaluateRenderIf(field.renderIf, values)
 
-  // For checkbox and custom fields, label is handled internally
+  // For checkbox, custom and entitiesList fields, the label is handled
+  // internally (entitiesList renders it in a header row beside its add button).
   const showLabel =
     field.type !== "checkbox" &&
     field.type !== "custom" &&
+    field.type !== "entitiesList" &&
     !(field.type === "cardSelect" && field.hideLabel)
   // Entities list fields surface item-level and array-level errors inline,
   // so suppress the generic outer FormMessage (same as custom fields).

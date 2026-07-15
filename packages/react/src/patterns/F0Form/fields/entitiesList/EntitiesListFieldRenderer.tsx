@@ -35,6 +35,7 @@ import {
   unwrapZodSchema,
 } from "../../f0Schema"
 import { openFormDialog } from "../../openFormDialog"
+import { isFieldRequired } from "../schema"
 import { resolveEntitiesListCell } from "./resolveCell"
 
 /**
@@ -702,6 +703,26 @@ export function EntitiesListFieldRenderer({
     [rowActionsFn, rows, commit, formField]
   )
 
+  // The field renders its own label (FieldRenderer suppresses the default one)
+  // in a header row alongside the add button, pinned to the top-right.
+  const isRequired = field.validation
+    ? isFieldRequired(field.validation, "entitiesList")
+    : false
+  const header = (
+    <div className="flex w-full items-center justify-between gap-3">
+      <label
+        htmlFor={field.id}
+        className="text-base font-medium leading-normal text-f1-foreground-secondary"
+      >
+        {field.label}
+        {isRequired && (
+          <span className="ml-0.5 text-f1-foreground-critical">*</span>
+        )}
+      </label>
+      {addConfig && <AddButton config={addConfig} />}
+    </div>
+  )
+
   if (useListView) {
     // A per-item `href` (only without a split `updateSchema`) makes rows
     // navigable instead of editable: the row links out and shows a trailing
@@ -715,6 +736,7 @@ export function EntitiesListFieldRenderer({
     }))
     return (
       <div className="flex flex-col items-start gap-3">
+        {header}
         <EntitiesListView
           rows={listRows}
           fields={columns.map((column) => ({
@@ -733,8 +755,6 @@ export function EntitiesListFieldRenderer({
           viewLabel={translations.view}
         />
 
-        {addConfig && <AddButton config={addConfig} />}
-
         {rootError && (
           <p className="text-sm font-medium text-f1-foreground-critical">
             {rootError}
@@ -746,6 +766,7 @@ export function EntitiesListFieldRenderer({
 
   return (
     <div className="flex flex-col gap-2">
+      {header}
       <F0FormEditableTable<EntitiesListRow>
         items={rows}
         getRowId={(row) => row.__key}
@@ -778,7 +799,6 @@ export function EntitiesListFieldRenderer({
         }
         canEditRow={isRowEditable}
         rowActions={rowActions}
-        addRow={addConfig}
       />
 
       {rootError && (
