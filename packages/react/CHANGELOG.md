@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.39.1](https://github.com/factorialco/f0/compare/f0-react-v4.39.0...f0-react-v4.39.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **F0Graph:** reliable focus via imperative focusNode/clearSelection ([#4661](https://github.com/factorialco/f0/issues/4661)) ([9e94888](https://github.com/factorialco/f0/commit/9e94888b3943ee8e0c807d633a1cd250b390b7a0))
+
 ## [4.39.0](https://github.com/factorialco/f0/compare/f0-react-v4.38.0...f0-react-v4.39.0) (2026-07-15)
 
 
