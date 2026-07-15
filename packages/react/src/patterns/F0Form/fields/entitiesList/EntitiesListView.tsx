@@ -203,8 +203,9 @@ export function EntitiesListView({
   )
 
   // The list visualization wraps itself in full-page gutters (`px-page`) and
-  // vertical padding meant for a standalone collection page; zero them so the
-  // list sits flush inside the form field.
+  // vertical padding meant for a standalone collection page — plus the scroll
+  // area keeps a bottom gutter (`pb-3`). Zero them so the list sits flush in the
+  // form field and its help text lines up with the editable table's.
   //
   // OneDataCollection's action buttons (edit/remove/…) don't set `type`, so
   // embedded inside the parent `<form>` they default to `type="submit"` and
@@ -217,7 +218,7 @@ export function EntitiesListView({
 
   return (
     <div
-      className="w-full [&_.px-page]:!px-0 [&_.px-page]:!py-0"
+      className="w-full [&_.px-page]:!px-0 [&_.px-page]:!py-0 [&_.overflow-auto]:!pb-0"
       onClickCapture={suppressImplicitSubmit}
     >
       <OneDataCollection
