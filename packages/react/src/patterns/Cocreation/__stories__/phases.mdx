@@ -1,5 +1,7 @@
-import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+import * as Stories from "./phases.stories"
 
 <Meta title="Co-creation/Phases" />
 
@@ -10,6 +12,15 @@ on one chat-enabled [`ApplicationFrame`](?path=/docs/patterns-applicationframe--
 so the AI trigger in the header is available throughout. The whole flow is coordinated by a
 single `phase` value: the chat's open state and visualization follow from it, staying in sync
 as the user toggles the header trigger.
+
+At a glance, the flow runs top to bottom through the three phases, with a human-in-the-loop gate
+before anything the AI generates is written:
+
+<Canvas of={Stories.PhaseFlow} sourceState="none" />
+
+Picking a template instead of describing a survey seeds it directly and skips the draft gate —
+the two entry approaches and that shortcut are covered in the
+[Walkthrough](?path=/docs/patterns-co-creation-walkthrough--documentation).
 
 ## The three phases
 
