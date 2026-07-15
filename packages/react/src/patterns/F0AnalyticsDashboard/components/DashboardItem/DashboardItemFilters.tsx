@@ -1,4 +1,12 @@
-import { useContext, useEffect, useId, useMemo, useState } from "react"
+import {
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
@@ -9,13 +17,13 @@ import { FilterContent } from "@/patterns/OneFilterPicker/components/FilterConte
 import { FilterList } from "@/patterns/OneFilterPicker/components/FilterList"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { getActiveFiltersValue } from "@/patterns/OneFilterPicker/internal/getActiveFiltersValue"
-import type {
-  FiltersDefinition,
-  FiltersState,
-} from "@/patterns/OneFilterPicker/types"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import type { DashboardItemFiltersConfig } from "../../types"
+import type {
+  DashboardItemFiltersConfig,
+  DashboardItemFiltersDefinition,
+  DashboardItemFiltersState,
+} from "../../types"
 
 /**
  * Widget-header filter control: an icon button (with an applied-filter
@@ -28,7 +36,9 @@ import type { DashboardItemFiltersConfig } from "../../types"
  * `onChange` when the user applies; dismissing the popover discards the
  * draft.
  */
-export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
+export function DashboardItemFilters<
+  ItemFilters extends DashboardItemFiltersDefinition,
+>({
   filters,
   value,
   onChange,
@@ -39,12 +49,34 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
 }) {
   const i18n = useI18n()
   const id = useId()
+  const contentRef = useRef<HTMLDivElement>(null)
+  const returnFocusLabelRef = useRef<string | undefined>(undefined)
 
   const [isOpen, setIsOpen] = useState(false)
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof ItemFilters | null
   >(null)
-  const [draftValue, setDraftValue] = useState<FiltersState<ItemFilters>>(value)
+  const [draftValue, setDraftValue] =
+    useState<DashboardItemFiltersState<ItemFilters>>(value)
+
+  const selectedDefinition = selectedFilterKey
+    ? filters[selectedFilterKey]
+    : undefined
+  const activeSelectedFilterKey = selectedDefinition ? selectedFilterKey : null
+  const shownFilters = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(filters).filter(([, filter]) => !filter.hideSelector)
+      ) as ItemFilters,
+    [filters]
+  )
+
+  useEffect(() => {
+    if (selectedFilterKey && !selectedDefinition) {
+      setSelectedFilterKey(null)
+      returnFocusLabelRef.current = undefined
+    }
+  }, [selectedDefinition, selectedFilterKey])
 
   // Keep the draft in sync with the applied value while the popover is
   // closed, so reopening always starts from what is actually applied.
@@ -66,6 +98,42 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
     const count = getActiveFilterKeys(filters, value, i18n).length
     return count === 0 ? undefined : count
   }, [filters, value, i18n])
+
+  const appliedFilterLabel = useMemo(() => {
+    const keys = getActiveFilterKeys(filters, value, i18n)
+    return keys.length > 0
+      ? i18n.t("filters.activeFilters", {
+          filters: keys.map((key) => filters[key].label).join(", "),
+        })
+      : i18n.filters.label
+  }, [filters, value, i18n])
+
+  // The selected list row unmounts when the compact picker drills into its
+  // editor. Move focus into the new pane, then restore it to that row when the
+  // user returns so keyboard navigation never drops to <body>.
+  useLayoutEffect(() => {
+    if (!isOpen) return
+    const content = contentRef.current
+    if (!content) return
+    if (activeSelectedFilterKey) {
+      content.querySelector<HTMLElement>("button")?.focus()
+      return
+    }
+    const label = returnFocusLabelRef.current
+    if (!label) return
+    const row = Array.from(
+      content.querySelectorAll<HTMLElement>("button")
+    ).find((button) => button.textContent?.trim().includes(label))
+    row?.focus()
+    returnFocusLabelRef.current = undefined
+  }, [activeSelectedFilterKey, isOpen])
+
+  const selectFilter = (key: keyof ItemFilters) => {
+    returnFocusLabelRef.current = filters[key].label
+    setSelectedFilterKey(key)
+  }
+
+  if (Object.keys(shownFilters).length === 0) return null
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open)
@@ -90,7 +158,7 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange} modal={false}>
       <PopoverTrigger asChild>
         <ButtonInternal
           label={i18n.filters.label}
@@ -101,20 +169,23 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
           compact
           pressed={isOpen}
           counterValue={appliedCount}
+          aria-label={appliedFilterLabel}
           aria-controls={isOpen ? id : undefined}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
         />
       </PopoverTrigger>
       <PopoverContent
+        ref={contentRef}
+        aria-label={i18n.filters.label}
         className="w-[380px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
         align="end"
         side="bottom"
-        aria-id={id}
+        id={id}
         container={portalContainer}
       >
         <div className="flex h-[420px] flex-col">
           <div className="flex shrink-0 items-center gap-2 py-1.5 pl-1.5 pr-3">
-            {selectedFilterKey ? (
+            {activeSelectedFilterKey ? (
               <>
                 <F0Button
                   label={i18n.filters.availableFilters}
@@ -125,7 +196,7 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
                   onClick={() => setSelectedFilterKey(null)}
                 />
                 <span className="truncate text-base font-medium text-f1-foreground">
-                  {filters[selectedFilterKey].label}
+                  {selectedDefinition?.label}
                 </span>
               </>
             ) : (
@@ -135,11 +206,11 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
             )}
           </div>
           <div className="flex min-h-0 flex-1 flex-col">
-            {selectedFilterKey ? (
+            {activeSelectedFilterKey ? (
               <>
                 <div className="min-h-0 flex-1 overflow-y-auto border-0 border-t border-solid border-f1-border-secondary">
                   <FilterContent
-                    selectedFilterKey={selectedFilterKey}
+                    selectedFilterKey={activeSelectedFilterKey}
                     definition={filters}
                     tempFilters={draftValue}
                     onFilterChange={updateDraftValue}
@@ -155,12 +226,10 @@ export function DashboardItemFilters<ItemFilters extends FiltersDefinition>({
               </>
             ) : (
               <FilterList
-                definition={filters}
+                definition={shownFilters}
                 tempFilters={draftValue}
-                selectedFilterKey={selectedFilterKey}
-                onFilterSelect={(key: keyof ItemFilters) =>
-                  setSelectedFilterKey(key)
-                }
+                selectedFilterKey={activeSelectedFilterKey}
+                onFilterSelect={selectFilter}
                 onClickApplyFilters={handleApply}
                 isCompactMode
               />

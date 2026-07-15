@@ -20,6 +20,7 @@ import {
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -130,9 +131,10 @@ export function DashboardItem({
       !("type" in a) || a.type === "item" || a.type === undefined
   )
   const hasDownloads = downloadActions.length > 0
-  // `value` only ever contains applied filters, so any key means "filtered".
-  const hasAppliedItemFilters =
-    !!itemFilters && Object.keys(itemFilters.value).length > 0
+  const hasAppliedItemFilters = itemFilters
+    ? getActiveFilterKeys(itemFilters.filters, itemFilters.value, translations)
+        .length > 0
+    : false
   const hasDelete = editMode && handleDelete && itemId
   const hasChartTypes = chartTypeOptions && chartTypeOptions.length > 0
   const hasExplanation = !!explanation && explanation.trim().length > 0

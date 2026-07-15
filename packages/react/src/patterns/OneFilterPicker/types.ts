@@ -4,7 +4,6 @@ import {
   FilterValue,
   InFilterDefinition,
   NumberFilterDefinition,
-  OperatorFilterDefinition,
   SearchFilterDefinition,
 } from "./filterTypes"
 export type {
@@ -13,15 +12,8 @@ export type {
   FilterValue,
   InFilterDefinition,
   NumberFilterDefinition,
-  OperatorFilterDefinition,
   SearchFilterDefinition,
 }
-export type {
-  OperatorFilterOperator,
-  OperatorFilterOptions,
-  OperatorFilterValue,
-  OperatorFilterValueMode,
-} from "./filterTypes/OperatorFilter"
 
 /**
  * Extracts the value type for a specific filter key from a FiltersDefinition.

@@ -9,10 +9,21 @@ import type {
 } from "@/kits/F0DataChart"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
+  FilterDefinition,
+  FilterValue,
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
+import type {
+  OperatorFilterCopy,
+  OperatorFilterDefinition,
+  OperatorFilterOperator,
+  OperatorFilterOptions,
+  OperatorFilterValue,
+  OperatorFilterValueMode,
+} from "@/patterns/OneFilterPicker/filterTypes/OperatorFilter"
+import type { RegisteredFiltersState } from "@/patterns/OneFilterPicker/filterTypes"
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -344,15 +355,54 @@ export type DashboardItem<
  * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
  * definition — so dashboard configs remain JSON-compatible.
  */
+/** Filter types supported by the per-widget condition editor. */
+export type DashboardItemFilterDefinition =
+  | FilterDefinition
+  | OperatorFilterDefinition
+
+/**
+ * Definitions accepted by a dashboard item's filter control.
+ *
+ * This opt-in type keeps the operator condition scoped to dashboard widgets;
+ * the default `FiltersDefinition` union used by existing collections remains
+ * unchanged.
+ */
+export type DashboardItemFiltersDefinition<Keys extends string = string> =
+  Record<Keys, DashboardItemFilterDefinition>
+
+/** Value mapping for a dashboard item's opt-in condition definitions. */
+export type DashboardItemFilterValue<
+  Definition extends DashboardItemFilterDefinition,
+> = Definition extends OperatorFilterDefinition
+  ? OperatorFilterValue | undefined
+  : Definition extends FilterDefinition
+    ? FilterValue<Definition>
+    : never
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export type DashboardItemFiltersState<
+  Definitions extends DashboardItemFiltersDefinition,
+> = RegisteredFiltersState<Definitions>
+
+export type {
+  OperatorFilterCopy,
+  OperatorFilterDefinition,
+  OperatorFilterOperator,
+  OperatorFilterOptions,
+  OperatorFilterValue,
+  OperatorFilterValueMode,
+}
+
 export interface DashboardItemFiltersConfig<
-  ItemFilters extends FiltersDefinition = FiltersDefinition,
+  ItemFilters extends DashboardItemFiltersDefinition =
+    DashboardItemFiltersDefinition,
 > {
   /** Filter definitions available for this widget. */
   filters: ItemFilters
   /** Currently applied filter state for this widget. */
-  value: FiltersState<ItemFilters>
+  value: DashboardItemFiltersState<ItemFilters>
   /** Called with the new state when the user applies changes. */
-  onChange: (value: FiltersState<ItemFilters>) => void
+  onChange: (value: DashboardItemFiltersState<ItemFilters>) => void
 }
 
 // ---------------------------------------------------------------------------

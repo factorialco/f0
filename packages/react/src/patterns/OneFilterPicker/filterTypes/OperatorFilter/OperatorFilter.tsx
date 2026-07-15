@@ -1,12 +1,11 @@
 "use client"
 
-import { useEffect, useId, useMemo, useState } from "react"
+import { useEffect, useId, useMemo, useRef, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { Label } from "@/components/F0InputField/components/Label"
 import { InputInternal } from "@/components/F0TextInput/internal"
 import { ChevronDown } from "@/icons/app"
-import { useI18n } from "@/lib/providers/i18n"
 import {
   Select,
   SelectContent,
@@ -46,8 +45,23 @@ export type OperatorFilterOperator = {
   valueMode?: OperatorFilterValueMode
 }
 
+export type OperatorFilterCopy = {
+  operatorLabel: string
+  valueLabel: string
+  valuesLabel: string
+  numberValuePlaceholder: string
+  numberValuesPlaceholder: string
+  valuesHint: string
+  noValueRequired: string
+  fromLabel: string
+  toLabel: string
+  trueLabel: string
+  falseLabel: string
+  emptyOperators: string
+}
+
 export type OperatorFilterOptions = {
-  /** Operators the user can choose from. Must not be empty. */
+  /** Operators the user can choose from. An empty catalog renders a disabled state. */
   operators: OperatorFilterOperator[]
   /**
    * Coercion applied to the raw input before emitting values.
@@ -58,6 +72,12 @@ export type OperatorFilterOptions = {
   valueType?: "string" | "number" | "boolean"
   /** Example values surfaced as input placeholder text. */
   suggestions?: string[]
+  /**
+   * Localizable form copy. Omitted fields use the built-in English defaults.
+   * This copy is scoped to the opt-in condition editor so adding it does not
+   * change F0's shared translation contract for existing consumers.
+   */
+  copy?: Partial<OperatorFilterCopy>
 }
 
 export type OperatorFilterValue = {
@@ -148,8 +168,14 @@ const draftValues = (
       return coerceValues([draft.single], valueType)
     case "multiple":
       return coerceValues(draft.multiple.split(","), valueType)
-    case "range":
-      return coerceValues([draft.from, draft.to], valueType)
+    case "range": {
+      const from = coerceValue(draft.from, valueType)
+      const to = coerceValue(draft.to, valueType)
+      // A range is positional and only meaningful when both endpoints are
+      // valid. Collapsing a missing From would otherwise make To reappear as
+      // From when the controlled form is reopened.
+      return from === undefined || to === undefined ? [] : [from, to]
+    }
   }
 }
 
@@ -157,6 +183,25 @@ const sameValues = (
   a: (string | number | boolean)[],
   b: (string | number | boolean)[]
 ): boolean => a.length === b.length && a.every((entry, i) => entry === b[i])
+
+export const defaultOperatorFilterCopy: OperatorFilterCopy = {
+  operatorLabel: "Condition",
+  valueLabel: "Value",
+  valuesLabel: "Values",
+  numberValuePlaceholder: "e.g. 42",
+  numberValuesPlaceholder: "e.g. 42, 84",
+  valuesHint: "Separate multiple values with commas",
+  noValueRequired: "This condition doesn't need a value",
+  fromLabel: "From",
+  toLabel: "To",
+  trueLabel: "True",
+  falseLabel: "False",
+  emptyOperators: "No conditions available",
+}
+
+export const resolveOperatorFilterCopy = (
+  options: OperatorFilterOptions
+): OperatorFilterCopy => ({ ...defaultOperatorFilterCopy, ...options.copy })
 
 /**
  * A condition-style filter: the user picks an operator (equals, contains,
@@ -171,10 +216,11 @@ export function OperatorFilter({
   value,
   onChange,
 }: OperatorFilterComponentProps) {
-  const i18n = useI18n()
   const fieldId = useId()
+  const selectTriggerRefs = useRef(new Map<string, HTMLButtonElement>())
   const options = schema.options
   const valueType = options.valueType ?? "string"
+  const copy = resolveOperatorFilterCopy(options)
 
   const [draft, setDraft] = useState<DraftInputs>(() =>
     draftFromValue(options, value)
@@ -182,6 +228,16 @@ export function OperatorFilter({
 
   const operator = resolveOperator(options, draft.operator)
   const mode = operatorValueMode(operator)
+  const operatorValue = operator?.value
+
+  // A valueless default is already a complete condition. Seed it as soon as
+  // the form opens so a first/only "Has no value" operator can be applied
+  // without the impossible requirement to switch away and back first.
+  useEffect(() => {
+    if (!value && operatorValue && mode === "none") {
+      onChange({ operator: operatorValue, values: [] })
+    }
+  }, [mode, onChange, operatorValue, value])
 
   // Re-sync the raw inputs when the value is changed from outside the form
   // (e.g. "clear filters", or reopening the popover on another filter).
@@ -229,13 +285,15 @@ export function OperatorFilter({
   const placeholder =
     options.suggestions && options.suggestions.length > 0
       ? options.suggestions.slice(0, 3).join(", ")
-      : mode === "multiple"
-        ? i18n.t("filters.operator.valuesPlaceholder")
-        : i18n.t("filters.operator.valuePlaceholder")
+      : valueType === "number"
+        ? mode === "multiple"
+          ? copy.numberValuesPlaceholder
+          : copy.numberValuePlaceholder
+        : undefined
 
   const booleanOptions = [
-    { value: "true", label: i18n.t("filters.operator.trueLabel") },
-    { value: "false", label: i18n.t("filters.operator.falseLabel") },
+    { value: "true", label: copy.trueLabel },
+    { value: "false", label: copy.falseLabel },
   ]
 
   const renderEnumSelect = (
@@ -250,12 +308,24 @@ export function OperatorFilter({
     return (
       <div className="flex flex-col gap-1.5">
         <Label label={label} htmlFor={id} />
-        <Select value={selectedValue} onValueChange={onSelect}>
-          <SelectTrigger id={id} className={selectTriggerClassName}>
+        <Select value={selectedValue ?? ""} onValueChange={onSelect}>
+          <SelectTrigger
+            ref={(node) => {
+              if (node) selectTriggerRefs.current.set(fieldKey, node)
+              else selectTriggerRefs.current.delete(fieldKey)
+            }}
+            id={id}
+            className={selectTriggerClassName}
+          >
             <SelectValue placeholder={placeholderText} />
             <F0Icon icon={ChevronDown} size="sm" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent
+            focusableViewport={false}
+            onCloseAutoFocus={() => {
+              selectTriggerRefs.current.get(fieldKey)?.focus()
+            }}
+          >
             {selectOptions.map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
@@ -289,40 +359,54 @@ export function OperatorFilter({
       />
     )
 
+  if (options.operators.length === 0) {
+    return (
+      <p
+        role="status"
+        className="m-0 p-2 text-base text-f1-foreground-secondary"
+      >
+        {copy.emptyOperators}
+      </p>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-3 p-2">
       {renderEnumSelect(
         "operator",
-        i18n.t("filters.operator.operatorLabel"),
+        copy.operatorLabel,
         operatorOptions,
         operator?.value,
         (next) => emit({ ...draft, operator: next })
       )}
       {mode === "none" && (
         <p className="m-0 text-base text-f1-foreground-secondary">
-          {i18n.t("filters.operator.noValueRequired")}
+          {copy.noValueRequired}
         </p>
       )}
-      {mode === "single" &&
-        renderSingleInput("single", i18n.t("filters.operator.valueLabel"))}
+      {mode === "single" && renderSingleInput("single", copy.valueLabel)}
       {mode === "multiple" && (
         <div className="flex flex-col gap-1">
           <InputInternal
-            label={i18n.t("filters.operator.valuesLabel")}
+            label={copy.valuesLabel}
             placeholder={placeholder}
             value={draft.multiple}
             onChange={(next: string) => emit({ ...draft, multiple: next })}
+            aria-describedby={`${fieldId}-values-hint`}
             clearable
           />
-          <p className="m-0 text-sm text-f1-foreground-secondary">
-            {i18n.t("filters.operator.valuesHint")}
+          <p
+            id={`${fieldId}-values-hint`}
+            className="m-0 text-sm text-f1-foreground-secondary"
+          >
+            {copy.valuesHint}
           </p>
         </div>
       )}
       {mode === "range" && (
         <div className="flex items-start gap-2 [&>*]:flex-1">
-          {renderSingleInput("from", i18n.t("filters.operator.fromLabel"))}
-          {renderSingleInput("to", i18n.t("filters.operator.toLabel"))}
+          {renderSingleInput("from", copy.fromLabel)}
+          {renderSingleInput("to", copy.toLabel)}
         </div>
       )}
     </div>

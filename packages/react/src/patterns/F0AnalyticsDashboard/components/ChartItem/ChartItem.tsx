@@ -415,10 +415,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
 
   const enabled = item.useDashboardFilters !== false
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, filters, enabled, itemFiltersKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
 
   const CHART_TYPE_OPTIONS = useMemo(

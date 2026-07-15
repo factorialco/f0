@@ -1,4 +1,3 @@
-import { type BaseFilterDefinition } from "../filters"
 import { FilterTypeContext, FilterTypeDefinition } from "../types"
 import {
   OperatorFilter,
@@ -6,9 +5,11 @@ import {
   OperatorFilterValue,
   operatorValueMode,
   resolveOperator,
+  resolveOperatorFilterCopy,
 } from "./OperatorFilter"
 
 export type {
+  OperatorFilterCopy,
   OperatorFilterOperator,
   OperatorFilterOptions,
   OperatorFilterValue,
@@ -49,13 +50,25 @@ export const operatorFilter: FilterTypeDefinition<
     const operator = resolveOperator(context.schema.options, value.operator)
     if (!operator || operator.value !== value.operator) return ""
 
-    const values = value.values.map(String).join(", ")
+    const copy = resolveOperatorFilterCopy(context.schema.options)
+    const values = value.values
+      .map((entry) =>
+        typeof entry === "boolean"
+          ? entry
+            ? copy.trueLabel
+            : copy.falseLabel
+          : String(entry)
+      )
+      .join(", ")
     return values ? `${operator.label} ${values}` : operator.label
   },
 }
 
 export default operatorFilter
 
-export type OperatorFilterDefinition = BaseFilterDefinition<"operator"> & {
+export type OperatorFilterDefinition = {
+  label: string
+  type: "operator"
+  hideSelector?: boolean
   options: OperatorFilterOptions
 }

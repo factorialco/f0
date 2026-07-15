@@ -93,10 +93,11 @@ export function MetricItem<Filters extends FiltersDefinition>({
   handleDelete,
 }: MetricItemProps<Filters>) {
   const enabled = item.useDashboardFilters !== false
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardMetricData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, filters, enabled, itemFiltersKey)
 
   const trend = data ? computeTrend(data.value, data.previousValue) : undefined
 

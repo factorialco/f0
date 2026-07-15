@@ -1,4 +1,6 @@
-import { useMemo, useRef, useState } from "react"
+import isEqual from "lodash/isEqual"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { useDeepCompareMemoize } from "use-deep-compare-effect"
 
 import type {
   FiltersDefinition,
@@ -14,33 +16,6 @@ import type {
   DashboardCollectionItem,
   DashboardItemFiltersConfig,
 } from "../../types"
-
-/**
- * Order-insensitive equality for filter states — `onStateChange` fires for
- * every state facet (search, sortings, …), so filter emissions must be gated
- * on an actual filter change.
- */
-function sameFiltersState(a: unknown, b: unknown): boolean {
-  if (Object.is(a, b)) return true
-  if (
-    typeof a !== "object" ||
-    a === null ||
-    typeof b !== "object" ||
-    b === null
-  )
-    return false
-  const aKeys = Object.keys(a).sort()
-  const bKeys = Object.keys(b).sort()
-  if (aKeys.length !== bKeys.length) return false
-  return aKeys.every(
-    (key, index) =>
-      key === bKeys[index] &&
-      sameFiltersState(
-        (a as Record<string, unknown>)[key],
-        (b as Record<string, unknown>)[key]
-      )
-  )
-}
 
 import { useCollectionDownloadActions } from "../../hooks/useCollectionDownloadActions"
 import { DashboardItem } from "../DashboardItem/DashboardItem"
@@ -87,17 +62,18 @@ export function CollectionItem<Filters extends FiltersDefinition>({
   const itemFiltersRef = useRef(itemFilters)
   itemFiltersRef.current = itemFilters
 
-  // Memoize the source definition to avoid re-creating on every render.
-  // Re-creates when filters change (JSON key). The item-filter key only
-  // covers keys + applied value: a definition change without a key change
-  // always comes with a host-side config change that remounts the dashboard.
+  // Memoize the source definition to avoid re-creating on every render while
+  // still reacting when a catalog refresh changes labels, operators, value
+  // types, or suggestions for an existing field key.
   const filtersKey = JSON.stringify(effectiveFilters)
-  const itemFiltersKey = itemFilters
-    ? JSON.stringify({
-        keys: Object.keys(itemFilters.filters),
-        value: itemFilters.value,
-      })
-    : ""
+  // Preserve function-bearing catalogs (`options`, `getLabel`, `mapOptions`)
+  // in the semantic dependency. JSON serialization would erase those
+  // functions and keep a stale source when a loader changes for the same key.
+  const itemFiltersSnapshot = useDeepCompareMemoize(
+    itemFilters
+      ? { filters: itemFilters.filters, value: itemFilters.value }
+      : undefined
+  )
   const sourceDefinition = useMemo(
     () => {
       const definition = item.createSource(effectiveFilters)
@@ -105,18 +81,35 @@ export function CollectionItem<Filters extends FiltersDefinition>({
       if (!config) return definition
       return {
         ...definition,
-        filters: config.filters,
-        currentFilters: config.value,
+        // Operator conditions are an opt-in dashboard extension. The generic
+        // collection source keeps its stable built-in filter union while the
+        // internal renderer registry understands this additional definition.
+        filters: config.filters as unknown as FiltersDefinition,
+        currentFilters:
+          config.value as unknown as FiltersState<FiltersDefinition>,
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [filtersKey, itemFiltersKey]
+    [filtersKey, itemFiltersSnapshot]
   )
 
   const source = useDataCollectionSource<RecordType>(sourceDefinition, [
     filtersKey,
-    itemFiltersKey,
+    itemFiltersSnapshot,
   ])
+
+  // `onStateChange` also fires for search, sorting, and settings. Remember the
+  // last filter state notified to the host so those unrelated updates cannot
+  // repeatedly emit the same pending change before the controlled value is
+  // reconciled back into the dashboard.
+  const lastNotifiedFiltersRef = useRef<unknown>(itemFilters?.value)
+  useEffect(() => {
+    lastNotifiedFiltersRef.current = itemFilters?.value
+    // The semantic key includes the controlled value and definitions. Depending
+    // on the resolver-created object reference would reset this guard during an
+    // unrelated dashboard render before the host has reconciled the change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemFiltersSnapshot])
 
   // We capture the current table visualization settings (hidden columns +
   // user-chosen order) via OneDataCollection's `onStateChange` callback so
@@ -191,9 +184,13 @@ export function CollectionItem<Filters extends FiltersDefinition>({
         fullHeight
         source={source}
         visualizations={item.visualizations}
-        // Embedded widget: view state lives in the dashboard (Save/Discard),
-        // so OneDataCollection's own "Save view" affordance is disabled.
-        presetsAction="none"
+        // A dashboard can render several filtered tables. OneDataCollection's
+        // URL params are intentionally unscoped and assume a single collection
+        // per page, so opt-in widget filters must never read or overwrite them.
+        // Preserve the existing collection behavior for dashboards that do not
+        // opt into item filters.
+        disableUrlParams={itemFilters ? true : undefined}
+        presetsAction={itemFilters ? "none" : undefined}
         // We deliberately do NOT enable `csvExport` here — the dashboard
         // surface already exposes Excel + CSV downloads from the
         // DashboardItem 3-dot menu (`downloadActions` above) and both
@@ -209,8 +206,9 @@ export function CollectionItem<Filters extends FiltersDefinition>({
           if (
             itemFiltersConfig &&
             state.filters &&
-            !sameFiltersState(state.filters, itemFiltersConfig.value)
+            !isEqual(state.filters, lastNotifiedFiltersRef.current)
           ) {
+            lastNotifiedFiltersRef.current = state.filters
             itemFiltersConfig.onChange(state.filters)
           }
 

@@ -10,10 +10,14 @@ import { Filter } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
-import type { FiltersDefinition, FiltersMode, FiltersState } from "../types"
+import type { FiltersMode } from "../types"
 
 import { ArrowLeft } from "../../../icons/app"
-import { getFilterType } from "../filterTypes"
+import {
+  getFilterType,
+  RegisteredFiltersDefinition,
+  RegisteredFiltersState,
+} from "../filterTypes"
 import { FilterTypeContext, FilterTypeSchema } from "../filterTypes/types"
 import { getClearedFiltersValue } from "../internal/getClearedFiltersValue"
 import { getActiveFilterKeys } from "../internal/getActiveFilterKeys"
@@ -21,7 +25,7 @@ import { getActiveFiltersValue } from "../internal/getActiveFiltersValue"
 import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
-interface FiltersControlsProps<Filters extends FiltersDefinition> {
+interface FiltersControlsProps<Filters extends RegisteredFiltersDefinition> {
   /** The filters shown in the selector list (excludes `hideSelector` filters). */
   filters: Filters
   /**
@@ -31,8 +35,8 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
    * `filters` when omitted.
    */
   allFilters?: Filters
-  value: FiltersState<Filters>
-  onChange: (value: FiltersState<Filters>) => void
+  value: RegisteredFiltersState<Filters>
+  onChange: (value: RegisteredFiltersState<Filters>) => void
   isOpen?: boolean
   onOpenChange?: (open: boolean) => void
   hideLabel?: boolean
@@ -42,7 +46,7 @@ interface FiltersControlsProps<Filters extends FiltersDefinition> {
 
 const DEFAULT_FORM_HEIGHT = 388
 
-export function FiltersControls<Filters extends FiltersDefinition>({
+export function FiltersControls<Filters extends RegisteredFiltersDefinition>({
   filters,
   allFilters,
   value,
@@ -199,6 +203,15 @@ export function FiltersControls<Filters extends FiltersDefinition>({
     if (count === 0) return undefined
     return count
   }, [filters, value, i18n])
+
+  // Existing filter pickers retain their modal focus/scroll behaviour. The
+  // operator condition is the only registered form that opens a body-portaled
+  // static Select from inside this popover, so only that opt-in definition
+  // needs the non-modal path to keep its listbox interactive and exposed to
+  // assistive technology.
+  const hasOperatorFilter = Object.values(filters).some(
+    (filter) => String(filter.type) === "operator"
+  )
 
   const activeFiltersTooltip = useMemo(() => {
     return activeFilters.length > 0
@@ -411,10 +424,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   // Default mode uses FilterPickerInner for the content
   return (
     <div className="flex items-center gap-2">
-      {/* Deliberately non-modal: filter forms can host dropdowns (e.g. the
-          operator filter's condition select) whose popper content collapses
-          on reopen when nested inside a modal popover's scroll/focus lock. */}
-      <Popover open={isOpen} onOpenChange={onOpenChange}>
+      <Popover
+        open={isOpen}
+        onOpenChange={onOpenChange}
+        modal={!hasOperatorFilter}
+      >
         <PopoverTrigger asChild>
           <ButtonInternal
             variant="outline"
@@ -427,10 +441,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
           />
         </PopoverTrigger>
         <PopoverContent
+          aria-label={i18n.filters.label}
           className="w-fit min-w-[600px] rounded-xl border border-solid border-f1-border-secondary p-0 shadow-md"
           align="start"
           side="bottom"
-          aria-id={id}
+          id={id}
           container={portalContainer}
         >
           <FilterPickerInternal
