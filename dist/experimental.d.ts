@@ -1337,6 +1337,11 @@ declare type ButtonDropdownItem<T = string> = {
      * The description of the item.
      */
     description?: string;
+    /**
+     * Whether the item is disabled.
+     * @default false
+     */
+    disabled?: boolean;
 };
 
 declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip" | "fontSize"> & DataAttributes & {
@@ -4159,6 +4164,7 @@ export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> 
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -5305,8 +5311,28 @@ export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 export declare const f0FileItemSizes: readonly ["md", "lg"];
 
-/** Tag types that can be rendered in a node's metadata row. */
-declare type F0GraphNodeTagType = TagVariant["type"];
+/**
+ * A tag rendered in a node's metadata row. Its visual is driven by the
+ * `TagVariant` `type`; its column identity — which toggle/label/default-
+ * visibility bucket it falls into — is `column ?? type`.
+ */
+declare type F0GraphNodeTag = TagVariant & {
+    /**
+     * Optional column identity, decoupling this tag's show/hide toggle, hover-
+     * card label and default visibility from its visual `type`. Defaults to
+     * `type` when omitted. Use it to give two tags of the same `type` (e.g. a
+     * second `raw` pill) their own independent column.
+     */
+    column?: F0GraphNodeTagColumn;
+};
+
+/**
+ * Identifies the show/hide column a tag belongs to. A column defaults to the
+ * tag's visual `type` (`"raw"`, `"status"`, …) but can be any custom string, so
+ * two tags sharing a `type` — e.g. two `raw` pills — can occupy independent
+ * columns with their own toggle, label and default visibility.
+ */
+declare type F0GraphNodeTagColumn = string;
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -6196,19 +6222,24 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     subtitle?: (record: R) => string;
     /** Avatar shown on the leading side of the node pill. */
     avatar?: (record: R) => AvatarVariant;
-    /** Tags rendered in the node metadata row. */
-    tags?: (record: R) => TagVariant[];
     /**
-     * Tag types present on the nodes. When provided, the controls bar gains a
-     * toggle to show/hide each metadata type (like configuring table columns).
+     * Tags rendered in the node metadata row. A tag may set `column` to place it
+     * in its own show/hide column independent of its visual `type` (e.g. a second
+     * `raw` pill that must not merge into the first `raw` column).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
-    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Tag types that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    tags?: (record: R) => F0GraphNodeTag[];
+    /**
+     * Tag columns present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata column (like configuring table columns).
+     * Values are tag `column` keys (or `type` when a tag has no `column`).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Tag columns that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -10788,8 +10819,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -10797,10 +10830,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
