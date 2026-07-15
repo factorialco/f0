@@ -1,5 +1,5 @@
 import { format, isValid } from "date-fns"
-import { useMemo } from "react"
+import { type MouseEvent, useMemo } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 
@@ -205,8 +205,21 @@ export function EntitiesListView({
   // The list visualization wraps itself in full-page gutters (`px-page`) and
   // vertical padding meant for a standalone collection page; zero them so the
   // list sits flush inside the form field.
+  //
+  // OneDataCollection's action buttons (edit/remove/…) don't set `type`, so
+  // embedded inside the parent `<form>` they default to `type="submit"` and
+  // would submit it. Cancel the implicit submit for any such button here, while
+  // leaving row links and real `type="button"` controls untouched.
+  const suppressImplicitSubmit = (e: MouseEvent) => {
+    const button = (e.target as HTMLElement).closest("button")
+    if (button && button.type !== "button") e.preventDefault()
+  }
+
   return (
-    <div className="w-full [&_.px-page]:!px-0 [&_.px-page]:!py-0">
+    <div
+      className="w-full [&_.px-page]:!px-0 [&_.px-page]:!py-0"
+      onClickCapture={suppressImplicitSubmit}
+    >
       <OneDataCollection
         source={source}
         visualizations={visualizations as never}
