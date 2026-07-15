@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.36.1](https://github.com/factorialco/f0/compare/f0-react-v4.36.0...f0-react-v4.36.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** support disabled on primaryActions in dropdown mode ([#4691](https://github.com/factorialco/f0/issues/4691)) ([3b67c38](https://github.com/factorialco/f0/commit/3b67c38240b1224b9c8fd2c8fd064febd27c1046))
+
 ## [4.36.0](https://github.com/factorialco/f0/compare/f0-react-v4.35.3...f0-react-v4.36.0) (2026-07-15)
 
 
