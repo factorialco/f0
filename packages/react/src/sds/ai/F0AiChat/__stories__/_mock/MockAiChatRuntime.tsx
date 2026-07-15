@@ -521,7 +521,10 @@ export const MockAiChatRuntimeProvider = ({
 
   const showThinking = useCallback(
     (onComplete?: () => void) => {
-      const thinkingSteps = pickRandomThinkingSteps(3)
+      // Scripted guided flows chain several of these beats, so keep each one
+      // short — a single reasoning line rather than the 3 the free-form
+      // `streamAssistantResponse` shows — to keep the flow moving.
+      const thinkingSteps = pickRandomThinkingSteps(1)
       const thinkingId = nextId()
 
       setInProgress(true)

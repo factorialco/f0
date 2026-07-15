@@ -608,6 +608,12 @@ const PROPOSED_CHANGE_TEXT = "Add an open-ended comment question"
 const PROPOSED_CHANGE_DESCRIPTION =
   "A new question at the end: “What would most improve your experience?”"
 
+// Label + subtitle for the INITIAL drafting confirmation, shared across its
+// pending/resolved states (see `DraftConfirmationCard`).
+const DRAFT_CONFIRM_TEXT = "Draft a first set of questions"
+const DRAFT_CONFIRM_DESCRIPTION =
+  "I'll write a starter set of questions onto the canvas based on your answers."
+
 /**
  * Human-in-the-loop proposal card posted whenever the user describes a change
  * to an existing survey. Built on `F0CardHorizontal`'s confirm/reject variant:
@@ -712,6 +718,111 @@ function ProposalConfirmationCard({
             },
           ])
           armProposal(surveyId, surveyTitle)
+        },
+      }}
+    />
+  )
+}
+
+/**
+ * Human-in-the-loop confirmation for the AI's INITIAL drafting step — the twin
+ * of `ProposalConfirmationCard`, but for the first draft rather than a later
+ * edit. Posted once the clarifying questions are answered (the blank-survey and
+ * typed "Create" flows), and it GATES everything visual: no canvas and no survey
+ * card appear until the user confirms. Accepting opens the survey on the canvas,
+ * runs the "applying changes" overlay (blur), fills in the drafted questions,
+ * posts the live "created" `SurveyCard`, and arms the proposal loop. Discarding
+ * opens the same survey blank (and arms the loop) so the user can ask for
+ * something else. Owns its own pending → resolved state; posted via `appendCard`.
+ */
+function DraftConfirmationCard({
+  surveyId,
+  surveyName,
+  elements,
+}: {
+  surveyId: string
+  surveyName: string
+  elements: SurveyFormBuilderElement[]
+}) {
+  const [resolution, setResolution] = useState<
+    "pending" | "accepted" | "rejected"
+  >("pending")
+  const { appendMessages, appendCard } = useMockAiChatRuntime()
+  const { openCanvas } = useAiChat()
+  const { draftQuestions, nextCardId, registerLiveCard } = useSurveyStore()
+  const { armProposal } = useProposalFlow()
+  const { config } = useFlowConfig()
+
+  // Open the survey on the canvas and post its live "created" card — the survey
+  // only becomes visible once the user has decided. Shared by both outcomes.
+  const revealSurvey = () => {
+    openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId, surveyName)))
+    const cardId = nextCardId()
+    registerLiveCard(surveyId, cardId)
+    appendCard(() => (
+      <SurveyCard
+        surveyId={surveyId}
+        cardId={cardId}
+        title={surveyName}
+        description={createdDescription(config)}
+      />
+    ))
+  }
+
+  if (resolution === "accepted") {
+    return (
+      <F0CardHorizontal
+        title={DRAFT_CONFIRM_TEXT}
+        description={DRAFT_CONFIRM_DESCRIPTION}
+        status={{ icon: Check, variant: "positive", label: "Applied" }}
+      />
+    )
+  }
+  if (resolution === "rejected") {
+    return (
+      <F0CardHorizontal
+        title={DRAFT_CONFIRM_TEXT}
+        description={DRAFT_CONFIRM_DESCRIPTION}
+        status={{ icon: Cross, variant: "neutral", label: "Dismissed" }}
+      />
+    )
+  }
+
+  return (
+    <F0CardHorizontal
+      title={DRAFT_CONFIRM_TEXT}
+      description={DRAFT_CONFIRM_DESCRIPTION}
+      confirmAction={{
+        label: "Apply",
+        onClick: () => {
+          setResolution("accepted")
+          // Reveal the survey, then blur it while the questions are drafted in.
+          revealSurvey()
+          draftQuestions(surveyId, surveyName, elements, () => {
+            appendMessages([
+              {
+                role: "assistant",
+                content: "Done — I've drafted the questions on the canvas.",
+              },
+            ])
+            armProposal(surveyId, surveyName)
+          })
+        },
+      }}
+      rejectAction={{
+        label: "Discard",
+        onClick: () => {
+          setResolution("rejected")
+          // Still hand over the (blank) survey, just without any drafted questions.
+          revealSurvey()
+          appendMessages([
+            {
+              role: "assistant",
+              content:
+                "No problem — I've left the survey blank. Tell me what you'd like instead.",
+            },
+          ])
+          armProposal(surveyId, surveyName)
         },
       }}
     />
@@ -863,19 +974,19 @@ function useStartBlankSurvey() {
   const { config, noCredits } = useFlowConfig()
   const { appendCard, appendMessages, startClarifying } = useMockAiChatRuntime()
   const { openCanvas } = useAiChat()
-  const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
-    useSurveyStore()
-  const { armProposal, armNoCredits } = useProposalFlow()
+  const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
+  const { armNoCredits } = useProposalFlow()
 
   return useCallback(() => {
     // The "guidedType" flow seeds a type-scoped blank FORM instead — see
     // `useOpenEmptyForm`.
     if (config.entryMode === "guidedType") return
 
-    // Walk type → audience → length as a single consecutive panel, then draft
-    // the questions onto the canvas: echo the picks, post a drafting line, and
-    // (after a processing beat) fill the form + post the live "updated" card
-    // that supersedes the "created" one, arming the proposal loop.
+    // Walk type → audience → length as a single consecutive panel, then hand
+    // off to a confirmation step: echo the picks, and post a
+    // `DraftConfirmationCard`. Nothing lands on the canvas until the user
+    // confirms — on Apply the card opens the survey, runs the processing beat,
+    // fills the form, posts the live "created" card, and arms the proposal loop.
     const askSurveyDetails = (surveyId: string) =>
       startClarifying({
         steps: surveyClarifyingSteps(config),
@@ -883,54 +994,50 @@ function useStartBlankSurvey() {
           appendMessages(
             surveyAnswerMessages(surveyClarifyingSteps(config), answersByStep)
           )
+          const surveyName = surveyNameForType(
+            answersByStep[0]?.[0] ?? "Untitled"
+          )
           appendMessages([
             {
               role: "assistant",
               content:
-                "Great — I'll draft a first set of questions on the canvas for you to review.",
+                "Based on your answers, I've got a first set of questions ready to draft.",
             },
           ])
-          const surveyName = surveyNameForType(
-            answersByStep[0]?.[0] ?? "Untitled"
-          )
-          draftQuestions(surveyId, surveyName, config.sampleElements, () => {
-            const cardId = nextCardId()
-            registerLiveCard(surveyId, cardId)
-            appendCard(() => (
-              <SurveyCard
-                surveyId={surveyId}
-                cardId={cardId}
-                title={surveyName}
-                description={SURVEY_UPDATED_DESCRIPTION}
-              />
-            ))
-            armProposal(surveyId, surveyName)
-          })
+          appendCard(() => (
+            <DraftConfirmationCard
+              surveyId={surveyId}
+              surveyName={surveyName}
+              elements={config.sampleElements}
+            />
+          ))
         },
       })
 
     const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
-    openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
-    // "cards" leads with an intro line; "guidedEntry" already posted its beat
-    // reply ("Let's start with a blank survey.") before running this action.
-    if (config.entryMode === "cards") {
-      appendMessages([
-        { role: "assistant", content: "Let's start with a blank survey." },
-      ])
-    }
-    const cardId = nextCardId()
-    registerLiveCard(surveyId, cardId)
-    appendCard(() => (
-      <SurveyCard
-        surveyId={surveyId}
-        cardId={cardId}
-        title={UNTITLED_SURVEY_NAME}
-        description={createdDescription(config)}
-      />
-    ))
-    // No credits (the "guidedEntry" no-credits story): skip AI drafting and
-    // invite a typed request that gets met with an out-of-credits reply.
-    if (noCredits && config.entryMode === "guidedEntry") {
+
+    // No credits: AI drafting is blocked, so hand over a blank survey right
+    // away — open its canvas, post the created card, and meet any typed request
+    // with an out-of-credits reply. No clarifying questions (nothing to draft).
+    if (noCredits) {
+      openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
+      // "cards" leads with an intro line; "guidedEntry" already posted its beat
+      // reply ("Let's start with a blank survey.") before running this action.
+      if (config.entryMode === "cards") {
+        appendMessages([
+          { role: "assistant", content: "Let's start with a blank survey." },
+        ])
+      }
+      const cardId = nextCardId()
+      registerLiveCard(surveyId, cardId)
+      appendCard(() => (
+        <SurveyCard
+          surveyId={surveyId}
+          cardId={cardId}
+          title={UNTITLED_SURVEY_NAME}
+          description={createdDescription(config)}
+        />
+      ))
       appendMessages([
         {
           role: "assistant",
@@ -939,9 +1046,19 @@ function useStartBlankSurvey() {
         },
       ])
       armNoCredits()
-    } else {
-      askSurveyDetails(surveyId)
+      return
     }
+
+    // Credit-ful: lead with the intro line (cards only; "guidedEntry" already
+    // posted its beat reply), then walk the clarifying panel. The canvas and the
+    // drafted questions only appear once the user confirms — see
+    // `askSurveyDetails` / `DraftConfirmationCard`.
+    if (config.entryMode === "cards") {
+      appendMessages([
+        { role: "assistant", content: "Let's start with a blank survey." },
+      ])
+    }
+    askSurveyDetails(surveyId)
   }, [
     config,
     noCredits,
@@ -950,10 +1067,8 @@ function useStartBlankSurvey() {
     startClarifying,
     openCanvas,
     createSurvey,
-    draftQuestions,
     nextCardId,
     registerLiveCard,
-    armProposal,
     armNoCredits,
   ])
 }
@@ -2235,21 +2350,18 @@ function FlowContent({
     showThinking,
     setComposerHidden,
   } = useMockAiChatRuntime()
-  const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
-    useSurveyStore()
-  const { armProposal, armNoCredits } = useProposalFlow()
+  const { createSurvey } = useSurveyStore()
+  const { armNoCredits } = useProposalFlow()
   const startBlankSurvey = useStartBlankSurvey()
 
   // Typed "Create" flow ("cards" entry — Engagement): the same three
   // clarifying questions as the Empty survey card, walked as a single
-  // consecutive panel — but the canvas stays closed until the end, opening
-  // with the drafted survey once the final question is answered. (The Empty
-  // survey card opens the canvas up front instead.)
+  // consecutive panel. The canvas stays closed throughout; it only opens once
+  // the user confirms the draft on the `DraftConfirmationCard`.
   const runTypedClarifyingChain = () => {
     if (config.entryMode !== "cards") return
-    // Create the blank survey up front — before the clarifying flow — seeded
-    // with its first section/question. The canvas stays closed until the final
-    // answer; the survey is only named, shown, and drafted then.
+    // Create the blank survey up front (state only — nothing visible yet); it's
+    // named, shown, and drafted only when the user confirms the draft.
     const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
     startClarifying({
       steps: surveyClarifyingSteps(config),
@@ -2258,34 +2370,24 @@ function FlowContent({
           surveyAnswerMessages(surveyClarifyingSteps(config), answersByStep)
         )
         const name = surveyNameForType(answersByStep[0]?.[0] ?? "Untitled")
-        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId, name)))
+        // Hand off to the confirmation step — the canvas stays closed and no
+        // card is posted until the user confirms. On Apply the
+        // `DraftConfirmationCard` opens the survey, drafts the questions, and
+        // posts its "created" card.
         appendMessages([
           {
             role: "assistant",
             content:
-              "Great — I'll draft a first set of questions on the canvas for you to review.",
+              "Based on your answers, I've got a first set of questions ready to draft.",
           },
         ])
-        // Unlike the Empty-survey flow, the clarifying questions are answered
-        // BEFORE the canvas opens here, so a "created" → "updated" pair would
-        // land back-to-back with nothing between them. Post a single live card
-        // instead; drafting fills the canvas behind it without superseding.
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
         appendCard(() => (
-          <SurveyCard
+          <DraftConfirmationCard
             surveyId={surveyId}
-            cardId={cardId}
-            title={name}
-            description={createdDescription(config)}
+            surveyName={name}
+            elements={config.sampleElements}
           />
         ))
-        // Once drafting lands, arm the proposal flow so a further typed message
-        // proposes an update — which, on accept, posts an "updated" card that
-        // supersedes this initial "created" one.
-        draftQuestions(surveyId, name, config.sampleElements, () =>
-          armProposal(surveyId, name)
-        )
       },
     })
   }
