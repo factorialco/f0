@@ -34,14 +34,14 @@ import { Add, Delete, Handle, Pencil } from "@/icons/app"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
+import { EditableCellRenderer } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/components/EditableCellRenderer"
+import { EditableRowProvider } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/context/EditableRowContext"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/ui/tooltip"
-import { EditableCellRenderer } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/components/EditableCellRenderer"
-import { EditableRowProvider } from "@/patterns/OneDataCollection/visualizations/collection/EditableTable/context/EditableRowContext"
 
 import type {
   EditableColumn,
@@ -209,7 +209,7 @@ function RowActionButton<R extends RecordType>({
   )
   if (!action.critical) return button
   return (
-    <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold [&:hover_svg]:!text-f1-icon-inverse [&:active_svg]:!text-f1-icon-inverse">
+    <span className="inline-flex [&:active_svg]:!text-f1-icon-inverse [&:hover_svg]:!text-f1-icon-inverse [&_svg]:!text-f1-icon-critical-bold">
       {button}
     </span>
   )
@@ -351,7 +351,7 @@ function RowCells<R extends RecordType>({
               // icon white on mere row hover. Pin it to the critical color and
               // only invert on the button's own hover/active (when it fills
               // red). F0Button strips `className`, so scope it via a wrapper.
-              <span className="inline-flex [&_svg]:!text-f1-icon-critical-bold [&:hover_svg]:!text-f1-icon-inverse [&:active_svg]:!text-f1-icon-inverse">
+              <span className="inline-flex [&:active_svg]:!text-f1-icon-inverse [&:hover_svg]:!text-f1-icon-inverse [&_svg]:!text-f1-icon-critical-bold">
                 <F0Button
                   type="button"
                   variant="critical"
@@ -617,7 +617,12 @@ function F0FormEditableTableBase<R extends RecordType>({
             // container's border — both the row's `::after` and the sticky
             // cells' own separator `::after` (drawn by OneTable under their
             // background).
-            "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent [&_tbody>tr:last-child_td::after]:!bg-transparent"
+            "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent [&_tbody>tr:last-child_td::after]:!bg-transparent",
+          // Round the corner cells to the container's inner radius (14px − 1px
+          // border) so a selected/hovered cell's ring follows the rounded
+          // corner instead of being clipped square by `overflow-hidden`.
+          bordered &&
+            "[&_thead_th:first-child]:rounded-tl-[13px] [&_thead_th:last-child]:rounded-tr-[13px] [&_tbody>tr:last-child_td:first-child]:rounded-bl-[13px] [&_tbody>tr:last-child_td:last-child]:rounded-br-[13px]"
         )}
       >
         {sortableRows ? (
