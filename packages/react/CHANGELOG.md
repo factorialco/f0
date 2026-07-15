@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.39.0](https://github.com/factorialco/f0/compare/f0-react-v4.38.0...f0-react-v4.39.0) (2026-07-15)
+
+
+### Features
+
+* **F0Form:** add entitiesList field backed by F0FormEditableTable ([#4674](https://github.com/factorialco/f0/issues/4674)) ([312dd8b](https://github.com/factorialco/f0/commit/312dd8bf87b53c1e6855ebfc800c4559eab7d076))
+
 ## [4.38.0](https://github.com/factorialco/f0/compare/f0-react-v4.37.1...f0-react-v4.38.0) (2026-07-15)
 
 
