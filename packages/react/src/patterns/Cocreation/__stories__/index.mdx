@@ -8,6 +8,11 @@ import {
   CheckCircle,
   Person,
   Pencil,
+  Menu,
+  Comment,
+  Messages,
+  CreditCard,
+  Wallet,
 } from "@/icons/app"
 
 <Meta title="Co-creation" />
@@ -19,23 +24,57 @@ Instead of filling a form alone, the user describes what they want, the system p
 and drafts it, and the two refine it side by side until the resource is ready — with the
 user approving every change. {/* TODO(creator): confirm the canonical one-line definition. */}
 
-## Try the flow
+## Try the flows
 
 The pattern is demonstrated by an interactive **Walkthrough** — a mock that co-creates a survey
-from a typed intent to a ready-to-publish draft. It runs full screen, so it
-opens in its own canvas rather than cramped into this docs page:
+from intent to a ready-to-publish draft. It ships as several flows that differ in how the
+conversation opens (a welcome screen vs. a guided chat) and in the out-of-credits state of each.
+They run full screen, so each opens in its own canvas rather than cramped into this docs page:
 
 <Unstyled>
-  <a
-    target="_parent"
-    href="/?path=/story/patterns-co-creation-walkthrough--welcome-screen"
-    className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
-  >
-    Open the interactive flow ↗
-  </a>
+  <FeatureGrid
+    features={[
+      {
+        icon: Menu,
+        title: "Welcome Screen",
+        description:
+          "A full-width welcome screen of entry-point cards and starter-prompt suggestions. Uses the Engagement / eNPS data.",
+        href: "/?path=/story/patterns-co-creation-walkthrough--welcome-screen",
+      },
+      {
+        icon: Comment,
+        title: "Guided Chat · Triage",
+        description:
+          "One clarifying question up front that triages the survey type, then a type-scoped template gallery. Uses the Training data.",
+        href: "/?path=/story/patterns-co-creation-walkthrough--guided-chat-triage",
+      },
+      {
+        icon: Messages,
+        title: "Guided Chat · Entry Actions",
+        description:
+          "One clarifying question whose options are entry actions — Empty Survey, Use a Template, or the most-used templates.",
+        href: "/?path=/story/patterns-co-creation-walkthrough--guided-chat-entry-actions",
+      },
+      {
+        icon: CreditCard,
+        title: "Welcome Screen · No Credits",
+        description:
+          "The welcome-screen flow with AI credits exhausted — the soft credit banner and the typed-message redirect into guided entry.",
+        href: "/?path=/story/patterns-co-creation-walkthrough--welcome-screen-no-credits",
+      },
+      {
+        icon: Wallet,
+        title: "Guided Chat · No Credits",
+        description:
+          "The guided-chat flow with credits exhausted. Guided creation (templates, blank survey) still needs no credits, so it keeps working.",
+        href: "/?path=/story/patterns-co-creation-walkthrough--guided-chat-no-credits",
+      },
+    ]}
+  />
 </Unstyled>
 
-For a step-by-step tour of what happens at each phase, see the
+For a step-by-step tour of what happens at each phase — and how the guided flows differ from the
+welcome screen — see the
 [Walkthrough](?path=/docs/patterns-co-creation-walkthrough--documentation).
 
 For open-ended assistance that does not produce a resource, use the chat surface directly
