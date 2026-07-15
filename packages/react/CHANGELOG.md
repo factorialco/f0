@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.36.3](https://github.com/factorialco/f0/compare/f0-react-v4.36.2...f0-react-v4.36.3) (2026-07-15)
+
+
+### Bug Fixes
+
+* **DetailsItem:** remove 320px max-width cap so items fill their container ([#4696](https://github.com/factorialco/f0/issues/4696)) ([9c7375b](https://github.com/factorialco/f0/commit/9c7375b526fc018d68dddc82de5439dccdddfd90))
+
 ## [4.36.2](https://github.com/factorialco/f0/compare/f0-react-v4.36.1...f0-react-v4.36.2) (2026-07-15)
 
 
