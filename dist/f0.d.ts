@@ -3702,6 +3702,13 @@ export declare interface DashboardMetricItem<Filters extends FiltersDefinition =
     format?: MetricFormat;
     /** Number of decimal places. @default 0 */
     decimals?: number;
+    /**
+     * Custom value formatter — takes precedence over `format`/`decimals`.
+     * The built-in presets format with the browser locale; this lets the
+     * consumer control locale and currency, mirroring the chart configs'
+     * `valueFormatter`.
+     */
+    valueFormatter?: (value: number) => string;
     /** Async data fetcher — receives dashboard filters */
     fetchData: (filters: FiltersState<Filters>) => Promise<DashboardMetricData>;
 }
@@ -14387,6 +14394,10 @@ declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "label" | "i
     loading?: boolean;
     onClick?: () => void | Promise<void>;
     disabled?: boolean;
+    tooltip?: (params: {
+        disabled: boolean;
+        loading: boolean;
+    }) => string | undefined;
 };
 
 /**

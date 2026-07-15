@@ -8183,6 +8183,10 @@ export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "labe
     loading?: boolean;
     onClick?: () => void | Promise<void>;
     disabled?: boolean;
+    tooltip?: (params: {
+        disabled: boolean;
+        loading: boolean;
+    }) => string | undefined;
 };
 
 /**
