@@ -9,6 +9,14 @@ type UseSearchPreviewReturn = {
   results: SearchResultItem[]
   loading: boolean
   onSelect: (id: string) => void
+  /**
+   * Increments on every result selection. Consumers derive their own state
+   * from `onSelect` (e.g. a graph `revealNodeId`), but re-picking the same
+   * result leaves that state unchanged — so this monotonic nonce lets a
+   * visualization re-fire its action on a repeat pick (the graph re-centers on
+   * the same node, like "Find me").
+   */
+  selectionNonce: number
 }
 
 /**
@@ -23,6 +31,7 @@ export function useSearchPreview<R extends RecordType>(
 ): UseSearchPreviewReturn {
   const [results, setResults] = useState<SearchResultItem[]>([])
   const [loading, setLoading] = useState(false)
+  const [selectionNonce, setSelectionNonce] = useState(0)
   const recordsRef = useRef<R[]>([])
   const searchPreviewRef = useRef(searchPreview)
   searchPreviewRef.current = searchPreview
@@ -60,8 +69,14 @@ export function useSearchPreview<R extends RecordType>(
     const record = recordsRef.current.find(
       (candidate) => preview.getId(candidate) === id
     )
-    if (record) preview.onSelect(record)
+    if (record) {
+      preview.onSelect(record)
+      // Bump AFTER forwarding, so the consumer's derived state (e.g. a new
+      // `revealNodeId`) and this nonce land in the same React batch — the graph
+      // sees the (possibly unchanged) id and a fresh nonce together.
+      setSelectionNonce((n) => n + 1)
+    }
   }
 
-  return { results, loading, onSelect }
+  return { results, loading, onSelect, selectionNonce }
 }

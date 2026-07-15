@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react"
 
 import {
   GroupingDefinition,
@@ -8,6 +8,7 @@ import {
 import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   F0Graph,
+  type F0GraphHandle,
   F0GraphNode,
   F0GraphSkeleton,
   tagColumn,
@@ -67,6 +68,7 @@ export const GraphCollection = <
   childrenFilters,
   defaultExpandDepth,
   revealNodeId,
+  searchSelectionNonce,
   focusOnEntry,
   loadNodePath,
   getParentId,
@@ -130,13 +132,36 @@ export const GraphCollection = <
     { onLoadData, onLoadError }
   )
 
+  // Imperative handle to the graph, for actions the declarative props can't
+  // express: re-centering on a node that is already the focus target (the
+  // `focusedNode` prop only reacts to value changes), and dropping the click
+  // selection when a reveal marks a node via `highlightedNodes` instead.
+  const graphRef = useRef<F0GraphHandle>(null)
+
+  // Reveal + focus a node: load/expand it (declarative `focusedNode` handles
+  // the first fly, with the right async + settle timing), then imperatively
+  // re-center — so re-searching the SAME node after panning still flies — and
+  // clear the click selection so it doesn't stay marked alongside the reveal
+  // highlight.
+  const revealAndFocus = useCallback(
+    async (nodeId: string): Promise<void> => {
+      await revealNode(nodeId)
+      graphRef.current?.clearSelection()
+      graphRef.current?.focusNode(nodeId)
+    },
+    [revealNode]
+  )
+
   // Reveal driver. The graph never auto-focuses on entry via this path: the
   // initial `revealNodeId` is adopted as "already handled", and only LATER
   // changes (a fresh search selection) reveal — with the smooth pan. Entry
   // focus is handled instead by `focusOnEntry`, which the tree-data hook
   // pre-resolves before first paint so F0Graph opens framed on it (no pan).
   // The decision lives in the pure `resolveGraphReveal`.
+  // `searchSelectionNonce` bumps on every shared-search pick, so re-selecting
+  // the SAME node still re-reveals/re-centers (the id alone wouldn't change).
   const lastRevealedRef = useRef<string | undefined>(undefined)
+  const lastNonceRef = useRef<number | undefined>(undefined)
   const initialRevealConsumedRef = useRef(false)
   useEffect(() => {
     if (isInitialLoading) return
@@ -145,11 +170,14 @@ export const GraphCollection = <
       initialConsumed: initialRevealConsumedRef.current,
       revealNodeId,
       lastRevealed: lastRevealedRef.current,
+      revealNonce: searchSelectionNonce,
+      lastNonce: lastNonceRef.current,
     })
     if (decision.consumeInitial) initialRevealConsumedRef.current = true
     lastRevealedRef.current = decision.lastRevealed
-    if (decision.revealId) void revealNode(decision.revealId)
-  }, [revealNodeId, revealNode, isInitialLoading])
+    lastNonceRef.current = decision.lastNonce
+    if (decision.revealId) void revealAndFocus(decision.revealId)
+  }, [revealNodeId, searchSelectionNonce, revealAndFocus, isInitialLoading])
 
   // Clear the shared header search when ENTERING and LEAVING the graph view, so
   // it never points at a node here (the graph is a tree, not a filtered list).
@@ -202,6 +230,7 @@ export const GraphCollection = <
         <F0GraphSkeleton showTags={tags !== undefined} />
       ) : (
         <F0Graph<Record>
+          ref={graphRef}
           nodes={nodes}
           expandedNodes={expandedNodes}
           onExpandedNodesChange={setExpandedNodes}
@@ -211,6 +240,16 @@ export const GraphCollection = <
           initialFocusNodeId={focusOnEntry}
           highlightedNodes={highlightedNodes}
           selectionMode="single"
+          // Selecting a node marks it via the internal selection ring; drop the
+          // reveal highlight (search / "Find me") so only one node stays marked.
+          // Fires with the new set — a non-empty set means a real selection (an
+          // empty set is a pane click or our own `clearSelection()` on reveal,
+          // which must NOT wipe the highlight we just set). Centering lives on
+          // the node's own click (below) so a click on the empty canvas never
+          // re-centers.
+          onSelectedNodesChange={(next) => {
+            if (next.size > 0) clearFocus()
+          }}
           showControls={showControls ?? true}
           zoomPreset={zoomPreset}
           minZoom={minZoom}
@@ -228,7 +267,11 @@ export const GraphCollection = <
           onFocusUser={
             // Return the reveal promise so the "Find me" button shows a loading
             // spinner while it loads the path, expands and centers the node.
-            currentUserNodeId ? () => revealNode(currentUserNodeId) : undefined
+            // `revealAndFocus` also re-centers on repeat presses and clears any
+            // click selection so it doesn't stay marked alongside the reveal.
+            currentUserNodeId
+              ? () => revealAndFocus(currentUserNodeId)
+              : undefined
           }
           onPaneClick={clearFocus}
           renderNode={(node, ctx) => {
@@ -247,6 +290,9 @@ export const GraphCollection = <
                 hoverCard
                 onClick={() => {
                   ctx.onClick()
+                  // Center on the node the user actually clicked (never fires on
+                  // an empty-canvas click); re-centers even on a repeat click.
+                  graphRef.current?.focusNode(ctx.nodeId)
                   itemOnClick?.()
                 }}
               />
