@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.36.0](https://github.com/factorialco/f0/compare/f0-react-v4.35.3...f0-react-v4.36.0) (2026-07-15)
+
+
+### Features
+
+* **F0Graph:** decouple tag column identity from visual type ([#4688](https://github.com/factorialco/f0/issues/4688)) ([bf7e4fb](https://github.com/factorialco/f0/commit/bf7e4fb5d43b37e0969192e39728d547a5e2dc66))
+
 ## [4.35.3](https://github.com/factorialco/f0/compare/f0-react-v4.35.2...f0-react-v4.35.3) (2026-07-14)
 
 
