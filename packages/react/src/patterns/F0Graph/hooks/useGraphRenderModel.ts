@@ -17,7 +17,7 @@ import {
   COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
 } from "../constants"
 import type { F0GraphNodeRenderContext } from "../F0Graph"
-import type { F0GraphNodeTagType } from "../components/F0GraphNode"
+import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
 import {
   EXPANDER_Y_OFFSET_BY_ZOOM,
   type CollapserNodeData,
@@ -65,8 +65,8 @@ interface UseGraphRenderModelOptions<T> {
     node: GraphNode<unknown>,
     ctx: F0GraphNodeRenderContext
   ) => ReactNode
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  visibleTagTypesSet: Set<F0GraphNodeTagType>
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  visibleTagTypesSet: Set<F0GraphNodeTagColumn>
   reserveTagRow?: boolean
   nodeWidthProp?: number
   nodeHeightProp?: number
