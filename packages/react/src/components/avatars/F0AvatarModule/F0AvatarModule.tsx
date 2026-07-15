@@ -27,7 +27,7 @@ const iconSizeVariants = cva({
   variants: {
     size: {
       "4xs": "h-[7px] w-[7px]",
-      "3xs": "h-2 w-2",
+      "3xs": "h-[9px] w-[9px]",
       "2xs": "h-3 w-3",
       xs: "h-[14px] w-[14px]",
       sm: "h-[18px] w-[18px]",
