@@ -1,5 +1,5 @@
 import type * as echarts from "echarts"
-import { type RefObject, useEffect, useRef } from "react"
+import { useEffect, useRef } from "react"
 
 /**
  * Implements Plotly-style legend interaction:
@@ -12,14 +12,11 @@ import { type RefObject, useEffect, useRef } from "react"
  * Does not need an explicit legend data list — it reads the full selected
  * state from ECharts' `legendselectchanged` event.
  */
-export function useLegendInteraction(
-  chartRef: RefObject<echarts.ECharts | null>
-) {
+export function useLegendInteraction(chart: echarts.ECharts | null) {
   // Track the previous selected state so we know what changed
   const prevSelectedRef = useRef<Record<string, boolean> | null>(null)
 
   useEffect(() => {
-    const chart = chartRef.current
     if (!chart || typeof chart.on !== "function") return
 
     function onLegendSelectChanged(params: {
@@ -77,10 +74,12 @@ export function useLegendInteraction(
     )
 
     return () => {
-      chart.off(
-        "legendselectchanged",
-        onLegendSelectChanged as (...args: unknown[]) => void
-      )
+      if (!chart.isDisposed()) {
+        chart.off(
+          "legendselectchanged",
+          onLegendSelectChanged as (...args: unknown[]) => void
+        )
+      }
     }
-  }, [chartRef])
+  }, [chart])
 }

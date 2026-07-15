@@ -17,9 +17,9 @@ export const HeatmapChart = (props: F0DataChartHeatmapProps) => {
   const { width } = useContainerSize(ref)
   const size = resolveChartSize(width)
   const options = useHeatmapChartOptions(ref, props, size)
-  const chartRef = useEChartsInstance(ref, options)
+  const chart = useEChartsInstance(ref, options)
   const theme = useChartTheme(ref)
-  useAxisLabelTooltip(chartRef, ref, theme)
+  useAxisLabelTooltip(chart, ref, theme)
 
   // The chart container always stays mounted so the ECharts instance has a
   // stable DOM target across breakpoint transitions. At the `sm` breakpoint

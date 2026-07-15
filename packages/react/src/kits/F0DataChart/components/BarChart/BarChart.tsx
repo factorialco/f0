@@ -15,10 +15,10 @@ export const BarChart = (props: F0DataChartBarProps) => {
   const { width } = useContainerSize(ref)
   const size = resolveChartSize(width)
   const options = useBarChartOptions(ref, props, size)
-  const chartRef = useEChartsInstance(ref, options)
+  const chart = useEChartsInstance(ref, options)
   const theme = useChartTheme(ref)
-  useAxisLabelTooltip(chartRef, ref, theme)
-  useLegendInteraction(chartRef)
+  useAxisLabelTooltip(chart, ref, theme)
+  useLegendInteraction(chart)
 
   // See LineChart.tsx for the rationale on the scoped axis-label cursor reset.
   return (

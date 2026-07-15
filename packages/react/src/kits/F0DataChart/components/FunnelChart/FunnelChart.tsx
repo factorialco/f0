@@ -36,8 +36,8 @@ export const FunnelChart = (props: F0DataChartFunnelProps) => {
 
   const ref = useRef<HTMLDivElement>(null)
   const options = useFunnelChartOptions(ref, props)
-  const chartRef = useEChartsInstance(ref, options)
-  useLegendInteraction(chartRef)
+  const chart = useEChartsInstance(ref, options)
+  useLegendInteraction(chart)
 
   const sorted = sortFunnelData(series.data ?? [], sort)
   const firstValue = sorted[0]?.value ?? 0

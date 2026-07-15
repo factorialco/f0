@@ -4,12 +4,17 @@ import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
 
+import { stubChartContainerLayout } from "./stubChartContainerLayout"
+
+stubChartContainerLayout()
+
 // Mock ECharts — canvas rendering is not testable in jsdom
 vi.mock("echarts", () => ({
   init: vi.fn(() => ({
     setOption: vi.fn(),
     resize: vi.fn(),
     dispose: vi.fn(),
+    isDisposed: vi.fn(() => false),
     getDom: vi.fn(() => document.createElement("div")),
   })),
   use: vi.fn(),

@@ -390,8 +390,11 @@ export const TableCollection = <
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <TableWrapper>
+        {/* min-h-0: without it this flex item never shrinks, OneTable's
+            internal scroll never engages and tall tables overflow the card */}
         <div
           className={cn(
+            "min-h-0",
             bordered &&
               "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}
