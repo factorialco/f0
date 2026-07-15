@@ -71,7 +71,6 @@ import { NumberCellValue } from './types/number';
 import { NumberCellValue as NumberCellValue_2 } from './experimental';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
-import { OperatorFilterOptions as OperatorFilterOptions_2 } from './experimental';
 import { PercentageCellValue } from './types/percentage';
 import { PersonCellValue } from './types/person';
 import { PersonCellValue as PersonCellValue_2 } from './experimental';
@@ -3350,19 +3349,6 @@ declare const defaultTranslations: {
             readonly relaxed: "Relaxed";
             readonly strict: "Strict";
         };
-        readonly operator: {
-            readonly operatorLabel: "Condition";
-            readonly valueLabel: "Value";
-            readonly valuesLabel: "Values";
-            readonly valuePlaceholder: "Enter a value";
-            readonly valuesPlaceholder: "Enter one or more values";
-            readonly valuesHint: "Separate multiple values with commas";
-            readonly noValueRequired: "This condition doesn't need a value";
-            readonly fromLabel: "From";
-            readonly toLabel: "To";
-            readonly trueLabel: "True";
-            readonly falseLabel: "False";
-        };
         readonly selectAll: "Select all";
         readonly clear: "Clear";
     };
@@ -5943,7 +5929,6 @@ declare type FilterDefinitionsByType<T = unknown, R extends RecordType = RecordT
     search: SearchFilterDefinition;
     date: DateFilterDefinition;
     number: NumberFilterDefinition;
-    operator: OperatorFilterDefinition;
 };
 
 /**
@@ -6028,7 +6013,6 @@ declare const filterTypes: {
     }, true>;
     readonly date: FilterTypeDefinition<Date | DateRange | undefined, DateFilterOptions>;
     readonly number: FilterTypeDefinition<NumberFilterValue, NumberFilterOptions>;
-    readonly operator: FilterTypeDefinition<OperatorFilterValue | undefined, OperatorFilterOptions_2>;
 };
 
 declare type FilterTypeSchema<Options extends object = never, OptionalOptions extends boolean = false> = OptionalOptions extends true ? FilterTypeSchemaOptionalOptions<Options> : FilterTypeSchemaRequiredOptions<Options>;
@@ -6051,7 +6035,7 @@ declare type FilterTypeSchemaRequiredOptions<Options extends object = never> = {
  * This type is used to ensure type safety when working with filter values.
  * @template T - The filter definition type
  */
-export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : T extends OperatorFilterDefinition ? OperatorFilterValue | undefined : T extends NumberFilterDefinition ? NumberFilterValue | undefined : never;
+export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : T extends NumberFilterDefinition ? NumberFilterValue | undefined : never;
 
 /**
  * Extracts the value type for a specific filter key from a FiltersDefinition.
@@ -7882,41 +7866,6 @@ export declare type OnLoadErrorCallback = (error: DataError) => void;
 export declare type OnSelectItemsCallback<R extends RecordType, Filters extends FiltersDefinition> = (selectedItems: SelectedItemsDetailedStatus<R, Filters> & {
     byLane?: Record<string, SelectedItemsDetailedStatus<R, Filters>>;
 }, clearSelectedItems: () => void, handleSelectAll?: (checked: boolean) => void) => void;
-
-export declare type OperatorFilterDefinition = BaseFilterDefinition<"operator"> & {
-    options: OperatorFilterOptions;
-};
-
-export declare type OperatorFilterOperator = {
-    /** Serializable operator identifier (e.g. "equals", "not_in", "set"). */
-    value: string;
-    /** Human-readable operator label. */
-    label: string;
-    /** How many value inputs this operator needs. @default "single" */
-    valueMode?: OperatorFilterValueMode;
-};
-
-export declare type OperatorFilterOptions = {
-    /** Operators the user can choose from. Must not be empty. */
-    operators: OperatorFilterOperator[];
-    /**
-     * Coercion applied to the raw input before emitting values.
-     * Invalid entries (e.g. non-numeric text for "number") are dropped, which
-     * leaves the filter empty/inactive rather than emitting garbage.
-     * @default "string"
-     */
-    valueType?: "string" | "number" | "boolean";
-    /** Example values surfaced as input placeholder text. */
-    suggestions?: string[];
-};
-
-export declare type OperatorFilterValue = {
-    operator: string;
-    values: (string | number | boolean)[];
-};
-
-/** How many value inputs an operator requires. */
-export declare type OperatorFilterValueMode = "none" | "single" | "multiple" | "range";
 
 declare interface Option_2 {
     title?: string;

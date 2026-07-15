@@ -241,19 +241,6 @@ export declare const defaultTranslations: {
             readonly relaxed: "Relaxed";
             readonly strict: "Strict";
         };
-        readonly operator: {
-            readonly operatorLabel: "Condition";
-            readonly valueLabel: "Value";
-            readonly valuesLabel: "Values";
-            readonly valuePlaceholder: "Enter a value";
-            readonly valuesPlaceholder: "Enter one or more values";
-            readonly valuesHint: "Separate multiple values with commas";
-            readonly noValueRequired: "This condition doesn't need a value";
-            readonly fromLabel: "From";
-            readonly toLabel: "To";
-            readonly trueLabel: "True";
-            readonly falseLabel: "False";
-        };
         readonly selectAll: "Select all";
         readonly clear: "Clear";
     };

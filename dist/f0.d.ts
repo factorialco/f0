@@ -112,7 +112,6 @@ import { NumberCellValue } from './f0';
 import { NumberCellValue as NumberCellValue_2 } from './types/number';
 import { NumberFilterOptions } from './NumberFilter/NumberFilter';
 import { Observable } from 'zen-observable-ts';
-import { OperatorFilterOptions as OperatorFilterOptions_2 } from './f0';
 import { PageLayoutBlockComponent as PageLayoutBlockComponent_2 } from './types';
 import { PageLayoutGroupComponent as PageLayoutGroupComponent_2 } from './f0';
 import { PageProps } from './pages/Page';
@@ -3645,14 +3644,32 @@ export declare interface DashboardItemBase {
  * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
  * definition — so dashboard configs remain JSON-compatible.
  */
-export declare interface DashboardItemFiltersConfig<ItemFilters extends FiltersDefinition = FiltersDefinition> {
+/** Filter types supported by the per-widget condition editor. */
+export declare type DashboardItemFilterDefinition = FilterDefinition | OperatorFilterDefinition;
+
+export declare interface DashboardItemFiltersConfig<ItemFilters extends DashboardItemFiltersDefinition = DashboardItemFiltersDefinition> {
     /** Filter definitions available for this widget. */
     filters: ItemFilters;
     /** Currently applied filter state for this widget. */
-    value: FiltersState<ItemFilters>;
+    value: DashboardItemFiltersState<ItemFilters>;
     /** Called with the new state when the user applies changes. */
-    onChange: (value: FiltersState<ItemFilters>) => void;
+    onChange: (value: DashboardItemFiltersState<ItemFilters>) => void;
 }
+
+/**
+ * Definitions accepted by a dashboard item's filter control.
+ *
+ * This opt-in type keeps the operator condition scoped to dashboard widgets;
+ * the default `FiltersDefinition` union used by existing collections remains
+ * unchanged.
+ */
+export declare type DashboardItemFiltersDefinition<Keys extends string = string> = Record<Keys, DashboardItemFilterDefinition>;
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export declare type DashboardItemFiltersState<Definitions extends DashboardItemFiltersDefinition> = RegisteredFiltersState<Definitions>;
+
+/** Value mapping for a dashboard item's opt-in condition definitions. */
+export declare type DashboardItemFilterValue<Definition extends DashboardItemFilterDefinition> = Definition extends OperatorFilterDefinition ? OperatorFilterValue | undefined : Definition extends FilterDefinition ? FilterValue<Definition> : never;
 
 /**
  * Minimal descriptor of a dashboard item's position and size.
@@ -4574,19 +4591,6 @@ export declare const defaultTranslations: {
         readonly search: {
             readonly relaxed: "Relaxed";
             readonly strict: "Strict";
-        };
-        readonly operator: {
-            readonly operatorLabel: "Condition";
-            readonly valueLabel: "Value";
-            readonly valuesLabel: "Values";
-            readonly valuePlaceholder: "Enter a value";
-            readonly valuesPlaceholder: "Enter one or more values";
-            readonly valuesHint: "Separate multiple values with commas";
-            readonly noValueRequired: "This condition doesn't need a value";
-            readonly fromLabel: "From";
-            readonly toLabel: "To";
-            readonly trueLabel: "True";
-            readonly falseLabel: "False";
         };
         readonly selectAll: "Select all";
         readonly clear: "Clear";
@@ -11596,7 +11600,6 @@ declare type FilterDefinitionsByType<T = unknown, R extends RecordType = RecordT
     search: SearchFilterDefinition;
     date: DateFilterDefinition;
     number: NumberFilterDefinition;
-    operator: OperatorFilterDefinition;
 };
 
 /**
@@ -11691,7 +11694,6 @@ declare const filterTypes: {
     }, true>;
     readonly date: FilterTypeDefinition<Date | DateRange | undefined, DateFilterOptions>;
     readonly number: FilterTypeDefinition<NumberFilterValue, NumberFilterOptions>;
-    readonly operator: FilterTypeDefinition<OperatorFilterValue | undefined, OperatorFilterOptions_2>;
 };
 
 declare type FilterTypeSchema<Options extends object = never, OptionalOptions extends boolean = false> = OptionalOptions extends true ? FilterTypeSchemaOptionalOptions<Options> : FilterTypeSchemaRequiredOptions<Options>;
@@ -11714,7 +11716,7 @@ declare type FilterTypeSchemaRequiredOptions<Options extends object = never> = {
  * This type is used to ensure type safety when working with filter values.
  * @template T - The filter definition type
  */
-export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : T extends OperatorFilterDefinition ? OperatorFilterValue | undefined : T extends NumberFilterDefinition ? NumberFilterValue | undefined : never;
+export declare type FilterValue<T extends FilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : T extends NumberFilterDefinition ? NumberFilterValue | undefined : never;
 
 /**
  * Extracts the value type for a specific filter key from a FiltersDefinition.
@@ -14109,7 +14111,25 @@ export declare type OpenFormWizardResult<T extends F0FormSchema_2 | F0PerSection
     completed: false;
 };
 
-export declare type OperatorFilterDefinition = BaseFilterDefinition<"operator"> & {
+export declare type OperatorFilterCopy = {
+    operatorLabel: string;
+    valueLabel: string;
+    valuesLabel: string;
+    numberValuePlaceholder: string;
+    numberValuesPlaceholder: string;
+    valuesHint: string;
+    noValueRequired: string;
+    fromLabel: string;
+    toLabel: string;
+    trueLabel: string;
+    falseLabel: string;
+    emptyOperators: string;
+};
+
+export declare type OperatorFilterDefinition = {
+    label: string;
+    type: "operator";
+    hideSelector?: boolean;
     options: OperatorFilterOptions;
 };
 
@@ -14123,7 +14143,7 @@ export declare type OperatorFilterOperator = {
 };
 
 export declare type OperatorFilterOptions = {
-    /** Operators the user can choose from. Must not be empty. */
+    /** Operators the user can choose from. An empty catalog renders a disabled state. */
     operators: OperatorFilterOperator[];
     /**
      * Coercion applied to the raw input before emitting values.
@@ -14134,6 +14154,12 @@ export declare type OperatorFilterOptions = {
     valueType?: "string" | "number" | "boolean";
     /** Example values surfaced as input placeholder text. */
     suggestions?: string[];
+    /**
+     * Localizable form copy. Omitted fields use the built-in English defaults.
+     * This copy is scoped to the opt-in condition editor so adding it does not
+     * change F0's shared translation contract for existing consumers.
+     */
+    copy?: Partial<OperatorFilterCopy>;
 };
 
 export declare type OperatorFilterValue = {
@@ -14835,6 +14861,29 @@ declare type RecordPathValue<T, P extends string> = P extends keyof T ? T[P] : P
 export declare type RecordType = Record<string, unknown>;
 
 declare type ReferenceType = "none" | "striped" | "striked";
+
+/** All definitions understood by the internal renderer registry. */
+declare type RegisteredFilterDefinition = RegisteredFilterDefinitionsByType[keyof RegisteredFilterDefinitionsByType];
+
+/**
+ * Filter definitions registered internally with the picker renderer.
+ *
+ * `FilterDefinition` deliberately remains the stable, public built-in union.
+ * Dashboard item filters can opt into the operator definition without widening
+ * the default union used by every existing data-source consumer.
+ */
+declare type RegisteredFilterDefinitionsByType<T = unknown, R extends RecordType = RecordType> = FilterDefinitionsByType<T, R> & {
+    operator: OperatorFilterDefinition;
+};
+
+declare type RegisteredFiltersDefinition = Record<string, RegisteredFilterDefinition>;
+
+declare type RegisteredFiltersState<Definition extends RegisteredFiltersDefinition> = {
+    [K in keyof Definition]?: RegisteredFilterValue<Definition[K]>;
+};
+
+/** Value mapping for definitions understood by the internal renderer. */
+declare type RegisteredFilterValue<T extends RegisteredFilterDefinition> = T extends InFilterDefinition<infer U> ? U[] : T extends SearchFilterDefinition ? string : T extends DateFilterDefinition ? DateRange | Date | undefined : T extends OperatorFilterDefinition ? OperatorFilterValue | undefined : T extends NumberFilterDefinition ? NumberFilterValue | undefined : never;
 
 declare type RegularAction = BaseAction & {
     type: "regular";
