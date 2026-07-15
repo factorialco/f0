@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.37.0](https://github.com/factorialco/f0/compare/f0-react-v4.36.3...f0-react-v4.37.0) (2026-07-15)
+
+
+### Features
+
+* **OneDataCollection:** custom labels for built-in visualizations ([#4675](https://github.com/factorialco/f0/issues/4675)) ([bbf9c6f](https://github.com/factorialco/f0/commit/bbf9c6ff2bce942b61fec785eb05d0e45d205593))
+
 ## [4.36.3](https://github.com/factorialco/f0/compare/f0-react-v4.36.2...f0-react-v4.36.3) (2026-07-15)
 
 
