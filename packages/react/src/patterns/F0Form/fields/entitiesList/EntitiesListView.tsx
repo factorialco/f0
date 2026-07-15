@@ -7,7 +7,11 @@ import { ChevronRight, Delete, Pencil } from "@/icons/app"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
-import type { EntitiesListItem, F0EntitiesListItemDefinition } from "./types"
+import type {
+  EntitiesListItem,
+  F0EntitiesListFieldTag,
+  F0EntitiesListItemDefinition,
+} from "./types"
 
 /** A resolved custom row action for the list overflow menu. */
 export interface EntitiesListViewAction {
@@ -27,6 +31,30 @@ type ListRecord = EntitiesListItem & { id: string }
 export interface EntitiesListViewField {
   id: string
   label: string
+  /**
+   * When set, this field renders as a read-only colored tag on the right side
+   * of the row (instead of a description line). Returns the tag for a row, or
+   * `undefined` to render nothing for that row.
+   */
+  tag?: (item: EntitiesListItem) => F0EntitiesListFieldTag | undefined
+}
+
+/** Maps an entities-list tag to a list-visualization field render result. */
+function renderTag(tag: F0EntitiesListFieldTag) {
+  return tag.type === "status"
+    ? {
+        type: "status" as const,
+        value: {
+          status: tag.status,
+          label: tag.label,
+          icon: tag.icon,
+          tooltip: tag.tooltip,
+        },
+      }
+    : {
+        type: "dotTag" as const,
+        value: { color: tag.color, label: tag.label },
+      }
 }
 
 interface EntitiesListViewProps {
@@ -85,7 +113,10 @@ export function EntitiesListView({
   viewLabel,
 }: EntitiesListViewProps) {
   const titleField = fields[0]
-  const descriptionFields = fields.slice(1)
+  // Fields after the title split into right-side tags and description lines.
+  const restFields = fields.slice(1)
+  const tagFields = restFields.filter((f) => f.tag)
+  const descriptionFields = restFields.filter((f) => !f.tag)
   const navigable = !!getRowHref
 
   // Map rows to collection records, using the stable `__key` as the record id.
@@ -177,11 +208,19 @@ export function EntitiesListView({
                 .filter(Boolean),
             avatar: listItem?.avatar?.(record),
           }),
-          // Navigable rows get a trailing arrow — but only when there are no
-          // row actions, since the actions overlay the trailing area (the row
-          // still navigates on click either way).
-          fields:
-            navigable && !hasActions
+          // Right-side fields: any tag fields first, then a trailing arrow for
+          // navigable rows — but only when there are no row actions, since the
+          // actions overlay the trailing area (the row still navigates on click
+          // either way).
+          fields: [
+            ...tagFields.map((field) => ({
+              label: field.label,
+              render: (record: ListRecord) => {
+                const tag = field.tag?.(record)
+                return tag ? renderTag(tag) : undefined
+              },
+            })),
+            ...(navigable && !hasActions
               ? [
                   {
                     label: "",
@@ -195,11 +234,20 @@ export function EntitiesListView({
                     }),
                   },
                 ]
-              : [],
+              : []),
+          ],
         },
       },
     ],
-    [listItem, titleField, descriptionFields, navigable, hasActions, viewLabel]
+    [
+      listItem,
+      titleField,
+      descriptionFields,
+      tagFields,
+      navigable,
+      hasActions,
+      viewLabel,
+    ]
   )
 
   // The list visualization wraps itself in full-page gutters (`px-page`) and

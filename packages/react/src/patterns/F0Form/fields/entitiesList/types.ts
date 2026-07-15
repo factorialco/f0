@@ -2,6 +2,8 @@ import { z } from "zod"
 
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
+import type { NewColor } from "@/components/tags/F0TagDot"
+import type { StatusVariant } from "@/components/tags/F0TagStatus"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import type {
@@ -36,6 +38,30 @@ export type EntitiesListFieldRenderIf =
 // ============================================================================
 
 /**
+ * A read-only colored tag for a field in `list-view`: either a semantic status
+ * tag or a dot-color tag. Returned per row from a column's `listTag`.
+ */
+export type F0EntitiesListFieldTag =
+  | {
+      type: "status"
+      /** Semantic status color (neutral/info/positive/warning/critical). */
+      status: StatusVariant
+      /** Tag text. */
+      label: string
+      /** Optional leading icon. */
+      icon?: IconType
+      /** Optional hover tooltip. */
+      tooltip?: string
+    }
+  | {
+      type: "dotTag"
+      /** Dot color. */
+      color: NewColor
+      /** Tag text. */
+      label: string
+    }
+
+/**
  * Per-column presentation options, keyed by the item-schema property name.
  */
 export interface F0EntitiesListColumnConfig {
@@ -51,6 +77,17 @@ export interface F0EntitiesListColumnConfig {
    * action) but shouldn't be shown or edited as a cell.
    */
   hidden?: boolean
+  /**
+   * In `list-view`, render this field as a read-only colored tag (a semantic
+   * status tag or a dot-color tag) instead of plain text — e.g. map an enum
+   * value to a color. Returned per row; return `undefined` to fall back to
+   * text. The tag shows on the right side of the row and the field is dropped
+   * from the description lines. Ignored in `editable-table` mode.
+   */
+  listTag?: (
+    value: unknown,
+    item: EntitiesListItem
+  ) => F0EntitiesListFieldTag | undefined
 }
 
 // ============================================================================

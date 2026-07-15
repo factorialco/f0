@@ -1866,7 +1866,22 @@ export const EntitiesListFieldListView: Story = {
         }),
         config: {
           visualization: "list-view",
-          columns: { archived: { hidden: true } },
+          columns: {
+            archived: { hidden: true },
+            // Show the role enum as a read-only dot-color tag on the right.
+            role: {
+              listTag: (value) => ({
+                type: "dotTag",
+                color:
+                  value === "Admin"
+                    ? "barbie"
+                    : value === "Editor"
+                      ? "malibu"
+                      : "smoke",
+                label: String(value),
+              }),
+            },
+          },
           labels: {
             addButton: "Add member",
             create: {

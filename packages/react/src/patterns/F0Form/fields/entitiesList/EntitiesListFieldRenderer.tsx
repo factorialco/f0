@@ -778,10 +778,17 @@ export function EntitiesListFieldRenderer({
         {header}
         <EntitiesListView
           rows={listRows}
-          fields={columns.map((column) => ({
-            id: column.id,
-            label: column.label,
-          }))}
+          fields={columns.map((column) => {
+            const listTag = field.columns?.[column.id]?.listTag
+            return {
+              id: column.id,
+              label: column.label,
+              // A field with a `listTag` renders as a right-side colored tag.
+              tag: listTag
+                ? (item: EntitiesListItem) => listTag(item[column.id], item)
+                : undefined,
+            }
+          })}
           listItem={field.listItem}
           canEditRow={canEditRowByKey}
           onEditRow={isNavigable || isDisabled ? undefined : editRowByKey}
