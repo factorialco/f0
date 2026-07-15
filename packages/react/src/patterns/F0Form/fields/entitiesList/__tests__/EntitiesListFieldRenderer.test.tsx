@@ -180,8 +180,9 @@ describe("EntitiesListFieldRenderer — add / remove", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add FAQ" }))
     expect(screen.getAllByRole("row")).toHaveLength(3) // header + 2 rows
 
-    // Remove the first data row
-    const removeButtons = screen.getAllByRole("button", { name: "Remove row" })
+    // Remove the first data row (the entities list labels its remove action
+    // "Remove", consistent with the list-view and overridable via labels.remove)
+    const removeButtons = screen.getAllByRole("button", { name: "Remove" })
     await userEvent.click(removeButtons[0])
     expect(screen.getAllByRole("row")).toHaveLength(2) // header + 1 row
   })
