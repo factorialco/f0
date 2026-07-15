@@ -456,6 +456,19 @@ config: {
 
 <Canvas of={Stories.EntitiesListFieldListView} />
 
+#### Navigable rows
+
+In list-view, add `config.itemHref` to make each row **navigate** instead of edit: the row links to the returned URL (clicking the row or its trailing arrow) and there's no edit dialog — just add and remove. This is only honored **without** a split `updateSchema`; when `updateSchema` is present the row shows the edit pencil and opens the update dialog on click instead.
+
+```tsx
+config: {
+  visualization: "list-view",
+  itemHref: (item) => `/resources/${item.id}`,
+}
+```
+
+<Canvas of={Stories.EntitiesListFieldNavigable} />
+
 ### Split create / update schemas
 
 Instead of a single `schema`, provide `createSchema` (the reduced set of fields shown when **adding**) and `updateSchema` (the fuller set shown when **editing**). `updateSchema` is the canonical row shape used for columns, display and the field value — so any field only in `updateSchema` should be `optional`, keeping freshly-added rows valid. Split schemas always edit through the dialog.

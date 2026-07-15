@@ -659,8 +659,22 @@ export function EntitiesListFieldRenderer({
     },
     [findRow, isRowEditable]
   )
+  const itemHref = field.itemHref
+  const hrefByKey = useCallback(
+    (rowKey: string) => {
+      const row = findRow(rowKey)
+      if (!row || !itemHref) return undefined
+      const { __key: _key, ...item } = row
+      return itemHref(item)
+    },
+    [findRow, itemHref]
+  )
 
   if (useListView) {
+    // A per-item `href` (only without a split `updateSchema`) makes rows
+    // navigable instead of editable: the row links out and shows a trailing
+    // arrow, with no edit dialog.
+    const isNavigable = !hasSplitSchemas && !!field.itemHref
     // Display rows with dates as `Date` (rows hold ISO strings) so the list
     // formats them; the stable `__key` still maps actions back to the row.
     const listRows = rows.map(({ __key, ...item }) => ({
@@ -677,10 +691,13 @@ export function EntitiesListFieldRenderer({
           }))}
           listItem={field.listItem}
           canEditRow={canEditRowByKey}
-          onEditRow={isDisabled ? undefined : editRowByKey}
+          onEditRow={isNavigable || isDisabled ? undefined : editRowByKey}
+          onRowClick={isNavigable || isDisabled ? undefined : editRowByKey}
           onRemoveRow={isDisabled ? undefined : removeRowByKey}
-          editLabel={field.labels?.editDialogTitle ?? translations.edit}
+          getRowHref={isNavigable ? hrefByKey : undefined}
+          editLabel={translations.edit}
           removeLabel={translations.remove}
+          viewLabel={translations.view}
         />
 
         {addConfig && <AddButton config={addConfig} />}

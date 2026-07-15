@@ -154,6 +154,13 @@ export interface F0EntitiesListOptions {
    * `editable-table` visualization.
    */
   listItem?: F0EntitiesListItemDefinition
+  /**
+   * Per-item link (`list-view` only). When set, each row becomes navigable —
+   * clicking the row (or its trailing arrow) goes to the returned URL. Only
+   * honored when there's no `updateSchema`: with a split schema the row shows
+   * the edit (pencil) action and opens the update dialog on click instead.
+   */
+  itemHref?: (item: EntitiesListItem) => string | undefined
   /** User-facing text (add button, dialog description/title). */
   labels?: F0EntitiesListLabels
   /**
@@ -231,6 +238,8 @@ export type F0EntitiesListField = F0BaseField & {
   visualization?: F0EntitiesListVisualization
   /** Overrides row title/description/avatar in `list-view` mode */
   listItem?: F0EntitiesListItemDefinition
+  /** Per-item link for navigable `list-view` rows (no `updateSchema`) */
+  itemHref?: (item: EntitiesListItem) => string | undefined
   /** User-facing text (add button, dialog description/title) */
   labels?: F0EntitiesListLabels
   /** Ids of the items that can be edited (matched against `item.id`) */

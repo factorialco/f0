@@ -776,6 +776,7 @@ export const defaultTranslations = {
       add: "Add",
       edit: "Edit",
       remove: "Remove",
+      view: "View",
       addBlockedHint:
         "Finish filling out the last item you just added in order to add another one",
     },

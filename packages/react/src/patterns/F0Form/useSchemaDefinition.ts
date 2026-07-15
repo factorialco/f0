@@ -305,6 +305,7 @@ function configToF0Field(
         supportInlineEditing: listOptions?.supportInlineEditing,
         visualization: listOptions?.visualization,
         listItem: listOptions?.listItem,
+        itemHref: listOptions?.itemHref,
         labels: listOptions?.labels,
         editableIds: listOptions?.editableIds,
         maxItems: listOptions?.maxItems,

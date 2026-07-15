@@ -1,7 +1,7 @@
 import { format, isValid } from "date-fns"
 import { useMemo } from "react"
 
-import { Delete, Pencil } from "@/icons/app"
+import { ChevronRight, Delete, Pencil } from "@/icons/app"
 import { OneDataCollection } from "@/patterns/OneDataCollection"
 import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 
@@ -28,14 +28,19 @@ interface EntitiesListViewProps {
   fields: ReadonlyArray<EntitiesListViewField>
   /** Optional overrides for the row title/description/avatar. */
   listItem?: F0EntitiesListItemDefinition
-  /** Opens the edit dialog for a row key (omitted when the field is disabled). */
+  /** Opens the edit dialog for a row key (omitted in navigable/disabled mode). */
   onEditRow?: (rowKey: string) => void
   /** Removes a row by key (omitted when the field is disabled). */
   onRemoveRow?: (rowKey: string) => void
   /** Whether a given row can be edited (drives the edit action's presence). */
   canEditRow: (rowKey: string) => boolean
+  /** Row click handler — opens the edit dialog (editable mode). */
+  onRowClick?: (rowKey: string) => void
+  /** Per-row link — makes the row navigable with a trailing arrow (nav mode). */
+  getRowHref?: (rowKey: string) => string | undefined
   editLabel: string
   removeLabel: string
+  viewLabel: string
 }
 
 /** Renders a value for a description line: dates format, arrays join. */
@@ -59,11 +64,15 @@ export function EntitiesListView({
   onEditRow,
   onRemoveRow,
   canEditRow,
+  onRowClick,
+  getRowHref,
   editLabel,
   removeLabel,
+  viewLabel,
 }: EntitiesListViewProps) {
   const titleField = fields[0]
   const descriptionFields = fields.slice(1)
+  const navigable = !!getRowHref
 
   // Map rows to collection records, using the stable `__key` as the record id.
   const items = useMemo<ListRecord[]>(
@@ -76,14 +85,24 @@ export function EntitiesListView({
       dataAdapter: {
         fetchData: () => ({ records: items }),
       },
+      // Navigable rows link to their href; editable rows open the dialog.
+      itemUrl: getRowHref
+        ? (record: ListRecord) => getRowHref(String(record.id))
+        : undefined,
+      itemOnClick: onRowClick
+        ? (record: ListRecord) => () => onRowClick(String(record.id))
+        : undefined,
       itemActions: (record: ListRecord) => {
         const id = String(record.id)
         return [
+          // `type: "primary"` renders the action inline (not in a dropdown).
           ...(onEditRow && canEditRow(id)
             ? [
                 {
                   label: editLabel,
                   icon: Pencil,
+                  type: "primary" as const,
+                  hideLabel: true,
                   onClick: () => onEditRow(id),
                 },
               ]
@@ -93,6 +112,8 @@ export function EntitiesListView({
                 {
                   label: removeLabel,
                   icon: Delete,
+                  type: "primary" as const,
+                  hideLabel: true,
                   critical: true,
                   onClick: () => onRemoveRow(id),
                 },
@@ -101,7 +122,7 @@ export function EntitiesListView({
         ]
       },
     },
-    [items, onEditRow, onRemoveRow, canEditRow]
+    [items, onEditRow, onRemoveRow, canEditRow, getRowHref, onRowClick]
   )
 
   const visualizations = useMemo(
@@ -120,11 +141,27 @@ export function EntitiesListView({
                 .filter(Boolean),
             avatar: listItem?.avatar?.(record),
           }),
-          fields: [],
+          // Navigable rows get a trailing arrow; the row's link handles the
+          // click (the icon sits under the full-row link overlay).
+          fields: navigable
+            ? [
+                {
+                  label: "",
+                  render: () => ({
+                    type: "icon" as const,
+                    value: {
+                      icon: ChevronRight,
+                      label: viewLabel,
+                      hideLabel: true,
+                    },
+                  }),
+                },
+              ]
+            : [],
         },
       },
     ],
-    [listItem, titleField, descriptionFields]
+    [listItem, titleField, descriptionFields, navigable, viewLabel]
   )
 
   // The list visualization wraps itself in full-page gutters (`px-page`) and

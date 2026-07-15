@@ -1906,6 +1906,60 @@ export const EntitiesListFieldListView: Story = {
 }
 
 /**
+ * Navigable list items. With `config.itemHref` (and no `updateSchema`), each
+ * row links out: clicking the row or its trailing arrow navigates to the URL,
+ * and there's no edit dialog — just add and remove. `itemHref` is ignored when
+ * a split `updateSchema` is present (that shows the edit pencil instead).
+ */
+export const EntitiesListFieldNavigable: Story = {
+  parameters: { docs: { story: { inline: false, height: "480px" } } },
+  render() {
+    const formSchema = z.object({
+      resources: f0FormField.entitiesList({
+        label: "Resources",
+        helpText: "Click a row (or its arrow) to open the link.",
+        schema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          url: f0FormField.url({ label: "URL" }),
+        }),
+        config: {
+          visualization: "list-view",
+          itemHref: (item) => (item.url as string) || undefined,
+          labels: { addButton: "Add resource" },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-navigable",
+      schema: formSchema,
+      defaultValues: {
+        resources: [
+          {
+            id: "r-1",
+            name: "People Handbook",
+            url: "https://example.com/handbook",
+          },
+          {
+            id: "r-2",
+            name: "Expenses policy",
+            url: "https://example.com/expenses",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
  * Split create/update schemas. New members are added with a reduced
  * `createSchema` (just name + email); clicking **Edit** opens the fuller
  * `updateSchema` (adds role + start date). `updateSchema` is the canonical row
