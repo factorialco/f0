@@ -28,7 +28,7 @@ opens in its own canvas rather than cramped into this docs page:
 <Unstyled>
   <a
     target="_parent"
-    href="/?path=/story/patterns-co-creation-walkthrough--engagement-surveys"
+    href="/?path=/story/patterns-co-creation-walkthrough--welcome-screen"
     className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
   >
     Open the interactive flow ↗
@@ -49,16 +49,17 @@ Co-creation sits between the two: conversational input, a real resource as outpu
 ### Definition
 
 Co-creation turns creation into a conversation. A chat-enabled surface lets the user state
-an intent in natural language; the system asks clarifying questions, drafts the resource,
-and surfaces each proposed change as a card the user can accept or reject. The resource
-stays visible and editable throughout, so the user is always co-author rather than reviewer.
+an intent in natural language; the system asks clarifying questions, then surfaces every
+generated change — the first draft and each later edit — as a card the user accepts or rejects
+before it is written. The resource stays visible and editable throughout, so the user is always
+co-author rather than reviewer.
 {/* TODO(creator): confirm definition wording and scope. */}
 
 The pattern holds a few invariants, defined in full on the
 [Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) page: the
 resource is built in a **canvas inside the chat** — never on a separate page the user is routed
-to; the user **approves every change** before it is applied; and **leaving an in-progress
-creation warns** before the draft is lost.
+to; the user **approves every change** before it is applied — the first generated draft as much as
+every later edit; and **leaving an in-progress creation warns** before the draft is lost.
 
 ### Purpose
 

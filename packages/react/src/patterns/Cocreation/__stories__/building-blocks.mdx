@@ -64,7 +64,9 @@ and its dedicated documentation.
         </td>
         <td>
           Structured clarifying questions that narrow the intent before drafting
-          (e.g. resource type, audience, length).
+          (e.g. resource type, audience, length). Also the guided-chat entry
+          surface — the single up-front question that triages the resource type
+          or the entry action.
         </td>
         <td>Chat</td>
         <td>
@@ -81,11 +83,12 @@ and its dedicated documentation.
           <code>F0CardHorizontal</code>
         </td>
         <td>
-          The single card primitive used for both the in-chat resource card
-          (opening it moves the flow into Split and shows the resource in the
-          canvas) and the human-in-the-loop proposal card (a proposed change
-          surfaced as an explicit accept / reject before it is applied). Its
-          active, inactive, and confirm/reject variants drive the card
+          The single card primitive used for the in-chat resource card (opening
+          it moves the flow into Split and shows the resource in the canvas) and
+          for every human-in-the-loop confirmation — both the initial
+          draft-confirmation card and each later proposal card, each a proposed
+          change surfaced as an explicit accept / reject before it is applied.
+          Its active, inactive, and confirm/reject variants drive the card
           lifecycle.
         </td>
         <td>Chat, Split</td>
@@ -142,8 +145,9 @@ and its dedicated documentation.
   Provide either, both, or neither — their counts are unrelated.
 
 - Human-in-the-loop confirmation — the `F0CardHorizontal` confirm/reject card — is the contract
-  that keeps the user in control: no AI-proposed change reaches the resource without an explicit
-  accept.
+  that keeps the user in control: no AI-generated content reaches the resource without an explicit
+  accept, and that includes the **first draft**, not only later edits. See
+  [Confirm before drafting, confirm before editing](?path=/docs/patterns-co-creation-standard-flow--documentation).
 - The resource and proposal cards change state as the AI iterates — active, live, superseded,
   pending, resolved. The
   [Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) page documents

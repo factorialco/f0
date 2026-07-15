@@ -18,12 +18,109 @@ mock itself runs full screen, so open it in its own canvas:
 <Unstyled>
   <a
     target="_parent"
-    href="/?path=/story/patterns-co-creation-walkthrough--engagement-surveys"
+    href="/?path=/story/patterns-co-creation-walkthrough--welcome-screen"
     className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
   >
     Open the interactive flow ↗
   </a>
 </Unstyled>
+
+The mock ships as five stories, all under **Walkthrough**, covering the two ways a flow can open
+the conversation and the out-of-credits state of each:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Story</th>
+        <th className="text-left">Entry approach</th>
+        <th className="text-left">What it shows</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-co-creation-walkthrough--welcome-screen"
+          >
+            Welcome Screen
+          </a>
+        </td>
+        <td>Welcome screen</td>
+        <td>
+          A full-width welcome screen of entry-point cards and starter-prompt
+          suggestions. Uses the Engagement / eNPS data.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-co-creation-walkthrough--guided-chat-triage"
+          >
+            Guided Chat · Triage
+          </a>
+        </td>
+        <td>Guided chat</td>
+        <td>
+          One clarifying question up front that triages the survey type, then a
+          type-scoped template gallery. Uses the Training data.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-co-creation-walkthrough--guided-chat-entry-actions"
+          >
+            Guided Chat · Entry Actions
+          </a>
+        </td>
+        <td>Guided chat</td>
+        <td>
+          One clarifying question up front whose options are entry actions —
+          Empty Survey, Use a Template, and the most-used templates.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-co-creation-walkthrough--welcome-screen-no-credits"
+          >
+            Welcome Screen · No Credits
+          </a>
+        </td>
+        <td>Welcome screen</td>
+        <td>
+          The welcome-screen flow with AI credits exhausted — the soft
+          credit-warning banner and the typed-message redirect into guided
+          entry.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <a
+            target="_parent"
+            href="/?path=/story/patterns-co-creation-walkthrough--guided-chat-no-credits"
+          >
+            Guided Chat · No Credits
+          </a>
+        </td>
+        <td>Guided chat</td>
+        <td>
+          The guided-chat flow with credits exhausted. Guided creation
+          (templates, blank survey) needs no credits, so it still works.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+The phase narrative below follows the **Welcome Screen** story. The
+[Guided Chat](#guided-chat) subsection covers how the guided stories differ at the Chat phase;
+from Split on, every story behaves the same.
 
 ## Flow
 
@@ -66,11 +163,12 @@ each flow — the survey example fills all four:
     <tbody>
       <tr>
         <td>
-          <strong>Empty survey</strong>
+          <strong>Empty Survey</strong>
         </td>
         <td>
-          Creates a blank survey and walks the user through it with clarifying
-          questions.
+          Opens a blank survey and walks the user through it with clarifying
+          questions, then a draft-confirmation card before any questions are
+          written.
         </td>
       </tr>
       <tr>
@@ -118,8 +216,72 @@ See [Building blocks](?path=/docs/patterns-co-creation-building-blocks--document
 full cards-vs-suggestions contract.
 
 Clarifying questions narrow the intent before anything is drafted — here, the survey's type,
-audience, and length. The draft is then surfaced as an in-chat resource card; opening it moves
-the flow into Split.
+audience, and length. When the answers are in, the AI does **not** write anything yet: it posts a
+**draft confirmation** card ("Draft a first set of questions") and waits. The canvas, the resource
+card, and the drafted questions all stay hidden until the user decides. **Apply** opens the survey
+on the canvas, runs the "applying changes" overlay, and fills in the starter questions — moving the
+flow into Split. **Discard** hands over a blank survey instead, still ready to shape by chat. This
+mirrors the accept/reject on every later edit; see
+[Confirm before drafting, confirm before editing](?path=/docs/patterns-co-creation-standard-flow--documentation).
+
+#### Guided Chat
+
+The Welcome Screen above is one way to open the conversation. The **Guided Chat** stories show the
+other: instead of a full-width welcome screen, the flow posts an opening line on the user's behalf
+and immediately asks **one** clarifying question. There is no blank canvas of choices — the
+conversation is already moving.
+
+The single question takes one of two shapes:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Shape</th>
+        <th className="text-left">The question triages…</th>
+        <th className="text-left">What follows</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Triage</strong> (Guided Chat · Triage)
+        </td>
+        <td>
+          The resource <em>type</em> — here Satisfaction, Effectiveness, or
+          Knowledge Test.
+        </td>
+        <td>
+          A template gallery scoped to the chosen type, with "Empty Survey"
+          first.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Entry actions</strong> (Guided Chat · Entry Actions)
+        </td>
+        <td>
+          The <em>action</em> — Empty Survey, Use a Template, or one of the
+          most-used templates.
+        </td>
+        <td>
+          The blank-survey drafting conversation, the full gallery, or a
+          template preview, per the pick.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Prefer Guided Chat when the flow has **one clear first action**: a started conversation beats a
+blank canvas. See
+[When to use Welcome Screen vs Guided Chat](?path=/docs/patterns-co-creation-guidelines--documentation)
+for the decision.
+
+Because Guided Chat has no welcome screen to fall back to, closing the gallery or preview **before**
+a survey is picked warns the user first ("Leave creation?") — closing there would abandon the
+in-progress creation. In the entry-actions shape, picking "Empty Survey" runs the same clarifying →
+draft-confirmation chain described above.
 
 ### Split
 
@@ -179,6 +341,17 @@ The canvas header carries the resource actions — here **Save** and a primary *
 As the conversation continues, the AI proposes changes (for example, adding an open-ended
 comment question). Each proposal appears as a human-in-the-loop confirmation card; the user
 accepts or rejects it, and an overlay covers the canvas while an accepted change is applied.
+
+### Out of credits
+
+The two **· No Credits** stories show the flow when AI credits are exhausted. A soft
+credit-warning banner sits above the composer with a "Get credits" CTA and a dismiss; it only
+ever appears on the text input, never over a clarifying panel. Free-text AI needs credits, but
+**guided creation does not** — templates and blank surveys still work — so a typed message is
+never a dead end: it gets a short "can't do that right now" reply and redirects into the
+credit-free guided-entry panel (Empty Survey / Use a Template / most-used templates). Once a survey
+exists, typed edit requests get an out-of-credits reply with an upgrade nudge instead of a
+proposal.
 
 ## Composed building blocks
 

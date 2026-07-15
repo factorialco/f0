@@ -91,10 +91,12 @@ are defined in full on the
 
 - **Canvas in chat** — the resource is built and edited in a canvas that opens inside the
   chat, never on a separate page you route the user to.
-- **Approve every change** — no AI proposal reaches the resource without an explicit accept;
-  surface each one as a confirm/reject card.
+- **Approve every change** — no AI-generated content reaches the resource without an explicit
+  accept, the **first draft included**; surface the initial draft and every later edit as a
+  confirm/reject card.
 - **Leaving warns** — navigation that would abandon an in-progress creation confirms first;
-  merely collapsing the chat does not.
+  merely collapsing the chat does not. A guided-chat flow has no welcome screen to fall back to, so
+  closing before a resource is picked warns too.
 - **Card lifecycle** — keep only the latest card for a resource interactive (active / live),
   and leave superseded cards in the chat as history.
 
@@ -117,8 +119,12 @@ The conversational machinery is shared; what's specific to your resource is smal
   lost.
 - **Clarifying questions** — the handful that materially improve _your_ first draft (Surveys
   asks type → audience → length).
-- **Welcome cards** — the starting points worth offering on the welcome screen (blank, browse
-  templates, seed a known template).
+- **Entry approach** — how the conversation opens. A **guided chat** posts an opening line and
+  asks one clarifying question up front; a **welcome screen** shows entry-point cards and
+  suggestions. Prefer guided chat when your flow has one clear first action — see
+  [Welcome Screen vs Guided Chat](?path=/docs/patterns-co-creation-guidelines--documentation).
+- **Welcome cards** — if you use a welcome screen, the starting points worth offering (blank,
+  browse templates, seed a known template).
 
 <DoDonts
   do={{
@@ -137,12 +143,14 @@ When standing up a new co-creation flow:
 
 1. Mount it on one chat-enabled `ApplicationFrame` with `F0OneSwitch` in the header.
 2. Model a single `phase`; derive the chat's open / visualization state from it.
-3. Define the welcome cards and the clarifying questions for your resource.
+3. Choose the entry approach — guided chat (one up-front question) or welcome screen — and the
+   clarifying questions for your resource.
 4. Build the canvas preview and editor surfaces; open them **inside** the chat.
-5. Post each AI change as a confirm/reject `F0CardHorizontal`; apply only on accept, behind
-   `F0AiProcessingOverlay`.
+5. Gate the **first draft** behind a confirm/reject `F0CardHorizontal`, and post each later AI
+   change the same way; apply only on accept, behind `F0AiProcessingOverlay`.
 6. Manage the resource/proposal card lifecycle (active, live, superseded, resolved).
-7. Warn before navigation that abandons an in-progress creation.
+7. Warn before navigation that abandons an in-progress creation (including a guided-chat close
+   before anything is picked).
 8. Verify the [Accessibility](?path=/docs/patterns-co-creation-accessibility--documentation)
    contract — keyboard, focus, announcements, reduced motion.
 
