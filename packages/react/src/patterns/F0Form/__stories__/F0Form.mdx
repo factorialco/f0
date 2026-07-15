@@ -201,6 +201,12 @@ return <F0Form formDefinition={formDefinition} />
         <td>file upload (multiple)</td>
         <td>✓</td>
       </tr>
+      <tr>
+        <td>`f0FormField.entitiesList(config)`</td>
+        <td>`z.array(itemSchema)`</td>
+        <td>editable table of objects</td>
+        <td>✓</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -316,6 +322,223 @@ The granularity shown when empty is the first entry in `granularities`; pre-sele
 
 <Canvas of={Stories.PeriodField} />
 
+## Entities list field
+
+`entitiesList` turns an **array of objects** into an editable table — one row per item, one column per item-schema field. Use it when a form needs a small, self-contained collection managed in place (links, options, team members, line items) rather than a separate page or data collection.
+
+You define the row shape with a Zod object (or `f0FormField` shortcuts), and the columns, cell types, add/remove and reordering are derived for you. The field value is a `z.array` of that shape, validated like any other field (including `minItems` / `maxItems`).
+
+```tsx
+links: f0FormField.entitiesList({
+  label: "Links",
+  helpText: "Add links and drag to reorder them.",
+  schema: z.object({
+    title: z.string().min(1),
+    url: z.string().url(),
+    category: z.enum(["People", "Finance", "Legal"]),
+  }),
+  config: {
+    labels: { addButton: "Add link" },
+    maxItems: 8,
+  },
+})
+```
+
+<Canvas of={Stories.EntitiesListField} />
+
+### Which field types become columns
+
+Columns are derived from each item-schema field. A field is shown as a column only when its type has an inline cell; everything else stays on the row (and in the submitted value) but isn't rendered as a column:
+
+<Unstyled>
+  <table>
+    <thead>
+      <tr>
+        <th>Item field</th>
+        <th>Cell</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>`z.string()` / `f0FormField.text`</td>
+        <td>text</td>
+      </tr>
+      <tr>
+        <td>
+          `z.string().email()` / `.url()` (or `f0FormField.email` / `.url`)
+        </td>
+        <td>text with a leading envelope / link icon</td>
+      </tr>
+      <tr>
+        <td>`z.number()` / `f0FormField.number`</td>
+        <td>number</td>
+      </tr>
+      <tr>
+        <td>`f0FormField.percentage`</td>
+        <td>number with a `%` unit</td>
+      </tr>
+      <tr>
+        <td>`f0FormField.money`</td>
+        <td>money (currency symbol)</td>
+      </tr>
+      <tr>
+        <td>`z.enum([...])` / `f0FormField.select`</td>
+        <td>select</td>
+      </tr>
+      <tr>
+        <td>`z.array(z.enum([...]))` / `f0FormField.multiSelect`</td>
+        <td>multi-select</td>
+      </tr>
+      <tr>
+        <td>`z.date()` / `f0FormField.date` (and `datetime`)</td>
+        <td>date (day-granularity picker)</td>
+      </tr>
+      <tr>
+        <td>everything else — `boolean`, `time`, `richText`, `file`, …</td>
+        <td>no column (value kept on the row)</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Because `f0FormField` shortcuts carry their type, authoring the schema with them (e.g. `f0FormField.money({ currency: "EUR" })`) is what lets the table tell a money column from a plain number. Plain Zod works too for the simpler cases.
+
+### Showing only certain columns
+
+To keep a value on each row without rendering it as a column, mark the column `hidden`. This is useful for a value that drives a row action (see below) or is only edited elsewhere:
+
+```tsx
+config: {
+  columns: {
+    archived: { hidden: true },
+    // Per-column presentation for the visible ones:
+    url: { label: "URL", placeholder: "https://…", width: 220 },
+  },
+}
+```
+
+Each visible column accepts `label`, `placeholder` and a fixed `width`.
+
+### Inline vs. dialog editing
+
+With **2 or fewer** item fields the table edits **inline** (type directly in the cells); with more it switches to a **dialog** (the add button and a per-row pencil open a form built from the same schema). Override the heuristic with `supportInlineEditing`:
+
+```tsx
+config: {
+  supportInlineEditing: true
+} // force inline even with many columns
+```
+
+A 2-column list edits inline — type straight into the cells:
+
+<Canvas of={Stories.EntitiesListFieldInline} />
+
+With more than 2 fields it switches to **dialog** mode by default: the cells are read-only, and the add button (plus a per-row pencil) opens a form built from the same schema. No `supportInlineEditing` is set here — the field count alone drives the choice:
+
+<Canvas of={Stories.EntitiesListFieldDialogMode} />
+
+`editableIds` locks editing to items whose `id` is listed — locked rows render as read-only (disabled) cells. Items without an `id` (rows the user just added) always stay editable.
+
+### List-view visualization
+
+When there's no inline editing, set `config.visualization: "list-view"` to render the items as a OneDataCollection **list** instead of a read-only table. Each row shows a title (the first field) and description lines (the rest); **Add** and the per-row **Edit** action open the form dialog, and rows have a **Remove** action. Override the row labelling with `config.listItem` (`title` / `description` / `avatar` functions). Drag-reorder isn't available in list mode.
+
+```tsx
+config: {
+  visualization: "list-view",
+  // optional — defaults to first field as title, the rest as description:
+  listItem: {
+    title: (m) => m.name,
+    description: (m) => [m.email, m.role].filter(Boolean),
+  },
+}
+```
+
+<Canvas of={Stories.EntitiesListFieldListView} />
+
+#### Navigable rows
+
+In list-view, add `config.itemHref` to make each row **navigate** instead of edit: the row links to the returned URL (clicking the row or its trailing arrow) and there's no edit dialog — just add and remove. This is only honored **without** an `updateFormDefinition`; when one is present the row shows the edit pencil and opens the update dialog on click instead.
+
+```tsx
+config: {
+  visualization: "list-view",
+  itemHref: (item) => `/resources/${item.id}`,
+}
+```
+
+<Canvas of={Stories.EntitiesListFieldNavigable} />
+
+### Separate create / update form definitions
+
+Instead of a single `schema` (whose add/edit dialogs share the parent form's submit), pass a `createFormDefinition` and an `updateFormDefinition` — each a `useF0FormDefinition` with its **own** `onSubmit`. Adding runs the create form's submit; editing runs the update form's submit, so the two can persist independently (e.g. `POST` vs `PATCH`). The item is still committed to the field's array value. `updateFormDefinition`'s schema is the canonical row shape (columns, display, value type), so fields only there should be `optional` to keep freshly-added rows valid.
+
+```tsx
+const createFormDefinition = useF0FormDefinition({
+  schema: z.object({ name: z.string(), email: z.string().email() }),
+  onSubmit: async ({ data }) => {
+    await api.create(data)
+    return { success: true }
+  },
+})
+const updateFormDefinition = useF0FormDefinition({
+  schema: z.object({
+    name: z.string(),
+    email: z.string().email(),
+    role: f0FormField.select({ label: "Role", options, optional: true }),
+  }),
+  onSubmit: async ({ data }) => {
+    await api.update(data)
+    return { success: true }
+  },
+})
+
+members: f0FormField.entitiesList({
+  createFormDefinition,
+  updateFormDefinition,
+})
+```
+
+<Canvas of={Stories.EntitiesListFieldFormDefinitions} />
+
+### Custom row actions
+
+`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row:
+
+```tsx
+config: {
+  columns: { archived: { hidden: true } },
+  rowActions: (item) =>
+    item.archived
+      ? [{ icon: ArchiveOpen, label: "Unarchive", onClick: ({ update }) => update({ archived: false }) }]
+      : [{ icon: Archive, label: "Archive", onClick: ({ update }) => update({ archived: true }) }],
+}
+```
+
+<Canvas of={Stories.EntitiesListFieldRowActions} />
+
+### Other options
+
+- `sortable` (default `true`) — drag rows by their handle to reorder.
+- `canAddItems` (default `true`) — show the add button. Adding is blocked while an existing row is still invalid.
+- `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
+- `labels` — `addButton`, `create`/`update` (each `{ title, description }`) and `edit`/`remove` action labels. The create description doubles as the add button's tooltip; the update title as the icon-only edit action's tooltip.
+- `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
+
+### Auto-save
+
+Any field accepts `autoSave: true` — a change to it saves the form (a debounced submit) without waiting for the Save button; other fields still save on submit. It's handy for an entities list so row edits persist as they happen. This is per-field and independent from the form-level `submitConfig: { type: "autosubmit" }` (which auto-saves on _any_ change). Auto-save submits the whole form, so it also persists pending changes elsewhere and validates every field.
+
+```tsx
+links: f0FormField.entitiesList({
+  label: "Links",
+  autoSave: true,
+  schema: z.object({ title: z.string().min(1), url: z.string().url() }),
+})
+```
+
+<Canvas of={Stories.EntitiesListFieldAutoSave} />
+
 ---
 
 # Guidelines
@@ -327,6 +550,7 @@ The granularity shown when empty is the first entry in `granularities`; pre-sele
 - Any create or edit form that requires validation and a submit flow.
 - Multi-step wizards — use `F0WizardForm` / per-section schemas with the same `f0FormField` API.
 - Inline forms inside dialogs or sidepanels.
+- Small, self-contained collections managed within the form — use `f0FormField.entitiesList` (e.g. links, options, line items). For large, filterable, paginated datasets use `OneDataCollection` instead.
 
 ### When NOT to use
 

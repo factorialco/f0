@@ -44,7 +44,15 @@ export function EditableCellRenderer<
   column,
   children,
   isLastColumn,
-}: CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }) {
+  externalError,
+}: CellRendererProps<R, Sortings, Summaries> & {
+  isLastColumn?: boolean
+  /**
+   * Error coming from outside the row's editing state (e.g. schema
+   * validation). Shown when the row has no more recent cell-change error.
+   */
+  externalError?: string
+}) {
   const editableCtx = useEditableRow<R>()
 
   if (!editableCtx) {
@@ -74,7 +82,7 @@ export function EditableCellRenderer<
     cellEditType !== undefined && typingEditTypes.has(cellEditType)
 
   const onChange = (
-    value: string | null,
+    value: string | string[] | null,
     context?: { selectedItem?: RecordType }
   ) => {
     if (editableColumn.id !== undefined) {
@@ -110,9 +118,9 @@ export function EditableCellRenderer<
     const value = getCellValue(localItem, editableColumn)
 
     if (CellComponent) {
-      const error = editableColumn.id
-        ? cellErrors[editableColumn.id]
-        : undefined
+      const error =
+        (editableColumn.id ? cellErrors[editableColumn.id] : undefined) ??
+        externalError
       const loading = editableColumn.id
         ? (cellLoading[editableColumn.id] ?? false)
         : false

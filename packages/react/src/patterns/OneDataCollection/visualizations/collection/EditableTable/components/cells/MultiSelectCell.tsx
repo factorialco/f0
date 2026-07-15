@@ -11,9 +11,21 @@ import { BaseCell } from "./BaseCell"
 
 const warnedColumns = new Set<string>()
 
-export function SelectCell<R extends RecordType>({
+/** Reads the cell's array value from the row (the stringified `value` prop
+ * can't represent an array). */
+function getSelectedValues<R extends RecordType>(
+  item: R,
+  columnId: string | undefined
+): string[] {
+  if (columnId === undefined) return []
+  const raw = item[columnId as keyof R]
+  return Array.isArray(raw)
+    ? raw.filter((v): v is string => typeof v === "string")
+    : []
+}
+
+export function MultiSelectCell<R extends RecordType>({
   editableColumn,
-  value,
   error,
   loading,
   onChange,
@@ -27,7 +39,7 @@ export function SelectCell<R extends RecordType>({
     if (!warnedColumns.has(editableColumn.label)) {
       warnedColumns.add(editableColumn.label)
       console.warn(
-        `SelectCell: column "${editableColumn.label}" has editType "select" but no selectConfig`
+        `MultiSelectCell: column "${editableColumn.label}" has editType "multiselect" but no selectConfig`
       )
     }
     return (
@@ -37,22 +49,18 @@ export function SelectCell<R extends RecordType>({
     )
   }
 
+  const value = getSelectedValues(item, editableColumn.id)
+
   const sharedProps = {
     label: editableColumn.label,
     hideLabel: true as const,
-    value: value || undefined,
-    onChange: (val: string | undefined, originalItem?: RecordType) => {
-      const newVal = val ?? ""
-      if (newVal !== value) {
-        onChange(newVal, { selectedItem: originalItem })
-      }
-    },
+    value,
+    onChange: (val: string[]) => onChange(val),
     loading,
     size: "sm" as const,
     placeholder: config.placeholder ?? i18n.t("common.selectPlaceholder"),
     showSearchBox: config.showSearchBox,
-    defaultItem: config.defaultItem?.(item),
-    multiple: false as const,
+    multiple: true as const,
     onOpenChange: setIsOpen,
   }
 
