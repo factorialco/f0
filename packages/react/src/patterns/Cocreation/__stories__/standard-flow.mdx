@@ -42,6 +42,8 @@ as every later edit. Both are surfaced the same way: an
 [`F0CardHorizontal`](?path=/docs/experimental-cardhorizontal--documentation) confirm/reject card
 that owns its own pending → resolved state, and nothing reaches the canvas until it is decided.
 
+<Canvas of={Stories.DraftConfirmation} sourceState="none" />
+
 - **The initial draft** — once the clarifying questions are answered, the AI does not write the
   generated content. It posts a draft confirmation ("Draft a first set of questions") and waits; the
   drafted questions land only on **Apply**, which runs the

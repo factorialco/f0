@@ -20,12 +20,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-// Both the resource cards and the proposal cards are F0CardHorizontal rows that
-// share this module avatar, so they line up consistently in the chat and keep
-// the status icon / actions aligned on the avatar's centre line (a row with no
-// avatar centres differently). See the canonical states in Components / Card
-// Horizontal.
-const PROPOSAL_AVATAR = { type: "module", module: "engagement" } as const
+// Only the in-chat RESOURCE cards carry a module avatar (matching the real
+// `SurveyCard`). The draft- and proposal-confirmation cards deliberately do NOT
+// — a proposed change isn't attributed to the module, so those rows lead with
+// their text (see `ProposalConfirmationCard`). Keep the doc mocks faithful to
+// that split. See the canonical states in Components / Card Horizontal.
+const RESOURCE_AVATAR = { type: "module", module: "engagement" } as const
 
 // A plain assistant line in the mock conversation.
 function AssistantLine({ children }: { children: ReactNode }) {
@@ -62,7 +62,7 @@ export const ResourceCards: Story = {
       {/* Superseded: faded + non-interactive, no action button. */}
       <div className="pointer-events-none opacity-50">
         <F0CardHorizontal
-          avatar={PROPOSAL_AVATAR}
+          avatar={RESOURCE_AVATAR}
           title="Untitled survey"
           description="Survey created in Engagement / Surveys"
         />
@@ -72,7 +72,7 @@ export const ResourceCards: Story = {
       </AssistantLine>
       {/* Active (open in the canvas): the button reads "Close". */}
       <F0CardHorizontal
-        avatar={PROPOSAL_AVATAR}
+        avatar={RESOURCE_AVATAR}
         title="Untitled survey"
         description="Survey updated with your choices."
         primaryAction={{
@@ -101,7 +101,6 @@ export const HilConversation: Story = {
         Good idea — here's a change I'd suggest. Review it below.
       </AssistantLine>
       <F0CardHorizontal
-        avatar={PROPOSAL_AVATAR}
         title="Add an open-ended comment question"
         description="A new question at the end of the form"
         status={{ icon: Check, variant: "positive", label: "Accepted" }}
@@ -109,7 +108,6 @@ export const HilConversation: Story = {
       <UserLine>Can you drop the demographics section?</UserLine>
       <AssistantLine>Here's that change.</AssistantLine>
       <F0CardHorizontal
-        avatar={PROPOSAL_AVATAR}
         title="Remove the demographics section"
         description="Drops 4 questions"
         status={{ icon: Cross, variant: "critical", label: "Rejected" }}
@@ -118,9 +116,36 @@ export const HilConversation: Story = {
       <UserLine>Add a rating question instead.</UserLine>
       <AssistantLine>Here's the change — apply it?</AssistantLine>
       <F0CardHorizontal
-        avatar={PROPOSAL_AVATAR}
         title="Add a 1–5 satisfaction rating"
         description="A new rating question before the comment"
+        rejectAction={{ label: "Discard", onClick: () => {} }}
+        confirmAction={{ label: "Apply", onClick: () => {} }}
+      />
+    </div>
+  ),
+}
+
+/**
+ * Mock of the INITIAL draft confirmation — the human-in-the-loop gate on the
+ * AI's first generated draft, posted once the clarifying questions are answered.
+ * It is the same confirm/reject `F0CardHorizontal` as a proposal (and avatar-less
+ * for the same reason — the draft isn't attributed to the module), just for the
+ * first draft rather than a later edit: Apply writes the questions onto the
+ * canvas behind the processing overlay; Discard leaves the resource blank.
+ * Mirrors the real `DraftConfirmationCard`. Embedded in the Standard flow docs
+ * via <Canvas>.
+ */
+export const DraftConfirmation: Story = {
+  tags: ["no-sidebar"],
+  render: () => (
+    <div className="mx-auto flex w-full max-w-[520px] flex-col gap-4">
+      <UserLine>Around 10 questions, for the whole company.</UserLine>
+      <AssistantLine>
+        Got it. Want me to draft a first set of questions from your answers?
+      </AssistantLine>
+      <F0CardHorizontal
+        title="Draft a first set of questions"
+        description="I'll write a starter set of questions onto the canvas based on your answers."
         rejectAction={{ label: "Discard", onClick: () => {} }}
         confirmAction={{ label: "Apply", onClick: () => {} }}
       />
