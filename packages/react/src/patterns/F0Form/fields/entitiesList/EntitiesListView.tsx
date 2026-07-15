@@ -80,6 +80,11 @@ export function EntitiesListView({
     [rows]
   )
 
+  // Only attach itemActions when there's at least one — an empty actions
+  // function still renders the (hover) actions container, which would cover the
+  // navigable row's trailing arrow.
+  const hasActions = !!onEditRow || !!onRemoveRow
+
   const source = useDataCollectionSource<ListRecord>(
     {
       dataAdapter: {
@@ -92,37 +97,47 @@ export function EntitiesListView({
       itemOnClick: onRowClick
         ? (record: ListRecord) => () => onRowClick(String(record.id))
         : undefined,
-      itemActions: (record: ListRecord) => {
-        const id = String(record.id)
-        return [
-          // `type: "primary"` renders the action inline (not in a dropdown).
-          ...(onEditRow && canEditRow(id)
-            ? [
-                {
-                  label: editLabel,
-                  icon: Pencil,
-                  type: "primary" as const,
-                  hideLabel: true,
-                  onClick: () => onEditRow(id),
-                },
-              ]
-            : []),
-          ...(onRemoveRow
-            ? [
-                {
-                  label: removeLabel,
-                  icon: Delete,
-                  type: "primary" as const,
-                  hideLabel: true,
-                  critical: true,
-                  onClick: () => onRemoveRow(id),
-                },
-              ]
-            : []),
-        ]
-      },
+      itemActions: hasActions
+        ? (record: ListRecord) => {
+            const id = String(record.id)
+            return [
+              // `type: "primary"` renders the action inline (not a dropdown).
+              ...(onEditRow && canEditRow(id)
+                ? [
+                    {
+                      label: editLabel,
+                      icon: Pencil,
+                      type: "primary" as const,
+                      hideLabel: true,
+                      onClick: () => onEditRow(id),
+                    },
+                  ]
+                : []),
+              ...(onRemoveRow
+                ? [
+                    {
+                      label: removeLabel,
+                      icon: Delete,
+                      type: "primary" as const,
+                      hideLabel: true,
+                      critical: true,
+                      onClick: () => onRemoveRow(id),
+                    },
+                  ]
+                : []),
+            ]
+          }
+        : undefined,
     },
-    [items, onEditRow, onRemoveRow, canEditRow, getRowHref, onRowClick]
+    [
+      items,
+      hasActions,
+      onEditRow,
+      onRemoveRow,
+      canEditRow,
+      getRowHref,
+      onRowClick,
+    ]
   )
 
   const visualizations = useMemo(

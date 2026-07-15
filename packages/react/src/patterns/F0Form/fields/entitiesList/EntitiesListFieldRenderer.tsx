@@ -693,7 +693,9 @@ export function EntitiesListFieldRenderer({
           canEditRow={canEditRowByKey}
           onEditRow={isNavigable || isDisabled ? undefined : editRowByKey}
           onRowClick={isNavigable || isDisabled ? undefined : editRowByKey}
-          onRemoveRow={isDisabled ? undefined : removeRowByKey}
+          // Navigable rows show only the trailing arrow — no hover actions to
+          // cover it, and the whole row (arrow included) stays clickable.
+          onRemoveRow={isNavigable || isDisabled ? undefined : removeRowByKey}
           getRowHref={isNavigable ? hrefByKey : undefined}
           editLabel={translations.edit}
           removeLabel={translations.remove}
