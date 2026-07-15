@@ -2,6 +2,9 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { type ReactNode } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
+import { ChevronDown } from "@/icons/app"
+
 // Illustrative-only story for the AI Cocreation "Phases" docs page. It renders a
 // compact flow diagram (not the full-screen mock) so it can be embedded inline
 // via <Canvas> in phases.mdx. Hidden from the sidebar; the page itself is the
@@ -22,22 +25,9 @@ function Arrow({ caption }: { caption?: string }) {
   return (
     <div className="flex flex-col items-center gap-1 py-1.5 text-f1-foreground-secondary">
       <div className="h-4 w-px bg-f1-border dark:bg-f1-border-secondary" />
-      <svg
-        width="12"
-        height="8"
-        viewBox="0 0 12 8"
-        aria-hidden="true"
-        className="-mt-1"
-      >
-        <path
-          d="M1 1.5 6 6.5 11 1.5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <span aria-hidden="true" className="-mt-2">
+        <F0Icon icon={ChevronDown} size="sm" />
+      </span>
       {caption ? <span className="text-xs italic">{caption}</span> : null}
     </div>
   )

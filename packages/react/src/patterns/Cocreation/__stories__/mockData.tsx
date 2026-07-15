@@ -139,7 +139,7 @@ export type Template = {
 // gallery. Not a real template — selecting it starts a blank survey/form
 // instead of previewing. Shared by the guided-type gallery and the
 // "cards"/"guidedEntry" gallery so both render the same first row.
-export const EMPTY_SURVEY_TEMPLATE_ID = "empty-form"
+export const EMPTY_SURVEY_TEMPLATE_ID = "empty-survey"
 
 export const EMPTY_SURVEY_TEMPLATE: Template = {
   id: EMPTY_SURVEY_TEMPLATE_ID,
@@ -308,28 +308,44 @@ export const cardVisualization = {
   },
 }
 
+// Shared field definitions for the template list visualizations. The synthetic
+// "Empty Survey" row has no category/questions — hide both so it reads as a
+// plain "start from scratch" entry (it only ever appears in the AI Canvas
+// gallery, never the inert browse tab).
+const templateCategoryField = {
+  label: "Category",
+  hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
+  render: (item: Template) => item.category,
+}
+
+const templateQuestionsField = {
+  label: "Questions",
+  hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
+  render: (item: Template) => `${item.questions} questions`,
+  sorting: "questions" as const,
+}
+
+const templateItemDefinition = (item: Template) => ({
+  title: item.name,
+  description: [item.description],
+})
+
 export const listVisualization = {
   type: "list" as const,
   options: {
-    itemDefinition: (item: Template) => ({
-      title: item.name,
-      description: [item.description],
-    }),
-    fields: [
-      {
-        label: "Category",
-        // The synthetic "Empty Survey" row has no category/questions — hide both
-        // so it reads as a plain "start from scratch" entry (it only ever
-        // appears in the AI Canvas gallery, never the inert browse tab).
-        hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
-        render: (item: Template) => item.category,
-      },
-      {
-        label: "Questions",
-        hide: (item: Template) => item.id === EMPTY_SURVEY_TEMPLATE_ID,
-        render: (item: Template) => `${item.questions} questions`,
-        sorting: "questions" as const,
-      },
-    ],
+    itemDefinition: templateItemDefinition,
+    fields: [templateCategoryField, templateQuestionsField],
+  },
+}
+
+// List visualization for the AI Canvas template galleries (both the "cards" and
+// "guidedType" flows): same as `listVisualization` minus the Category property —
+// the gallery's title already frames the scope, so repeating the type per row
+// is redundant.
+export const galleryListVisualization = {
+  type: "list" as const,
+  options: {
+    itemDefinition: templateItemDefinition,
+    fields: [templateQuestionsField],
   },
 }

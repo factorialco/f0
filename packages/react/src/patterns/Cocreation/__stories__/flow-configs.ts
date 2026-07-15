@@ -172,26 +172,39 @@ export type FlowConfig =
   | GuidedTypeFlowConfig
   | GuidedEntryFlowConfig
 
-export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
+// Everything the two Engagement-backed flows ("cards" and "guidedEntry")
+// share: identity/nav labels, data sets, composer copy, the survey-type
+// clarifying options, and the blank-survey drafting content. Each flow spreads
+// this and adds only its entry-mode-specific fields.
+const ENGAGEMENT_SHARED = {
+  pageTitle: "Engagement",
+  navTabLabel: "Surveys",
+  navLabel: "Surveys",
+  moduleName: "Engagement",
+  avatarModule: "engagement",
+  resources: ENGAGEMENT_RESOURCES,
+  templates: ENGAGEMENT_TEMPLATES,
+  templateCategories: ENGAGEMENT_TEMPLATE_CATEGORIES,
+  composerPlaceholder: "Describe the type of survey you want to create",
+  draftedPlaceholder: "Improve the Survey by...",
+  typeOptions: [
+    { id: "engagement", label: "Employee engagement" },
+    { id: "onboarding", label: "Onboarding feedback" },
+    { id: "pulse", label: "Customer pulse check" },
+    { id: "enps", label: "eNPS" },
+  ],
+  sampleElements: ENGAGEMENT_SURVEY_ELEMENTS,
+  defaultValues: ENGAGEMENT_DEFAULT_VALUES,
+  onTranscribe: mockEngagementTranscribe,
+} satisfies Partial<CardsFlowConfig> & Partial<GuidedEntryFlowConfig>
+
+// `satisfies` (not an annotation) so each entry keeps its narrow entry-mode
+// type — e.g. `FLOW_CONFIGS.engagementGuided.guidedQuestion` typechecks.
+export const FLOW_CONFIGS = {
   engagement: {
+    ...ENGAGEMENT_SHARED,
     id: "engagement",
     entryMode: "cards",
-    pageTitle: "Engagement",
-    navTabLabel: "Surveys",
-    navLabel: "Surveys",
-    moduleName: "Engagement",
-    avatarModule: "engagement",
-    resources: ENGAGEMENT_RESOURCES,
-    templates: ENGAGEMENT_TEMPLATES,
-    templateCategories: ENGAGEMENT_TEMPLATE_CATEGORIES,
-    typeOptions: [
-      { id: "engagement", label: "Employee engagement" },
-      { id: "onboarding", label: "Onboarding feedback" },
-      { id: "pulse", label: "Customer pulse check" },
-      { id: "enps", label: "eNPS" },
-    ],
-    sampleElements: ENGAGEMENT_SURVEY_ELEMENTS,
-    defaultValues: ENGAGEMENT_DEFAULT_VALUES,
     presetCard: {
       id: "employee-nps",
       icon: Files,
@@ -208,8 +221,6 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
       title: "Employee Engagement",
       description: "Template",
     },
-    composerPlaceholder: "Describe the type of survey you want to create",
-    draftedPlaceholder: "Improve the Survey by...",
     initialMessage: "What kind of survey do you want to create?",
     suggestionGroupLabel: "Create a survey for...",
     suggestions: [
@@ -229,7 +240,6 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
           "Build a short pulse survey about how the team is experiencing remote work.",
       },
     ],
-    onTranscribe: mockEngagementTranscribe,
   },
   training: {
     id: "training",
@@ -280,34 +290,19 @@ export const FLOW_CONFIGS: Record<FlowConfig["id"], FlowConfig> = {
     onTranscribe: mockTrainingTranscribe,
   },
   engagementGuided: {
+    ...ENGAGEMENT_SHARED,
     id: "engagementGuided",
     entryMode: "guidedEntry",
-    pageTitle: "Engagement",
-    navTabLabel: "Surveys",
-    navLabel: "Surveys",
-    moduleName: "Engagement",
-    avatarModule: "engagement",
-    resources: ENGAGEMENT_RESOURCES,
-    templates: ENGAGEMENT_TEMPLATES,
-    templateCategories: ENGAGEMENT_TEMPLATE_CATEGORIES,
-    composerPlaceholder: "Describe the type of survey you want to create",
-    draftedPlaceholder: "Improve the Survey by...",
     guidedQuestion: "How would you like to start?",
-    typeOptions: [
-      { id: "engagement", label: "Employee engagement" },
-      { id: "onboarding", label: "Onboarding feedback" },
-      { id: "pulse", label: "Customer pulse check" },
-      { id: "enps", label: "eNPS" },
-    ],
-    sampleElements: ENGAGEMENT_SURVEY_ELEMENTS,
-    defaultValues: ENGAGEMENT_DEFAULT_VALUES,
-    onTranscribe: mockEngagementTranscribe,
   },
-}
+} satisfies Record<FlowConfig["id"], FlowConfig>
 
-export const makeResourcesSource = (flow: FlowConfig) =>
-  makeResourcesDataAdapter(flow.resources)
+/** Source pieces for the Collection phase table — one per flow's rows. */
+export const makeResourcesSource = (flow: FlowConfig) => ({
+  dataAdapter: makeResourcesDataAdapter(flow.resources),
+})
 
+/** Source pieces for the Templates browse view — one per flow's list. */
 export const makeTemplatesSource = (flow: FlowConfig) => ({
   dataAdapter: makeTemplatesDataAdapter(flow.templates),
   filters: makeTemplateFilters(flow.templateCategories),

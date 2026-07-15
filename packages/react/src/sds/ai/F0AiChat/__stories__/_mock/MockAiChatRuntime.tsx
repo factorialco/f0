@@ -56,7 +56,12 @@ export type ClarifyingStep = {
  */
 export type ClarifyingConfig = {
   steps: ClarifyingStep[]
-  onConfirm?: (answersByStep: string[][]) => void
+  /** Fired with the picked answers for every step, in order. `answersByStep`
+   * carries display labels (for echoing back into the transcript);
+   * `answerIdsByStep` carries the matching option ids (for routing logic —
+   * never match on labels, they're copy). A custom answer has no option id, so
+   * its trimmed text appears in both arrays at the same position. */
+  onConfirm?: (answersByStep: string[][], answerIdsByStep: string[][]) => void
   /** Fired when the user dismisses the panel (the ✕/Cancel button). The panel
    * stays mounted while this runs, so a flow can put a "Leave creation?"
    * confirmation on top of it without the composer flashing in behind. Return
@@ -640,7 +645,7 @@ export const MockAiChatRuntimeProvider = ({
   // Rebuilt each render so the option-toggle / confirm closures always read the
   // latest selection. The runtime owns the per-step selection state and the
   // current step index; `confirm` advances through the steps and, on the final
-  // one, fires `onConfirm` with the picked labels for every step in order.
+  // one, fires `onConfirm` with the picked labels + ids for every step in order.
   const clarifyingQuestion: ClarifyingQuestionState | null = (() => {
     if (!clarifyingConfig) return null
     const steps = clarifyingConfig.steps
@@ -660,28 +665,40 @@ export const MockAiChatRuntimeProvider = ({
         [stepIndex]: { ...getClarifyingInteraction(prev, stepIndex), ...patch },
       }))
 
-    // Collect the picked labels for every step, in order — single-select steps
-    // fall back to their custom answer when nothing is selected; multi-select
-    // steps append the custom answer when it's active and non-empty.
-    const buildAnswers = (): string[][] =>
-      steps.map((s, i) => {
+    // Collect the picked labels + ids for every step, in order — single-select
+    // steps fall back to their custom answer when nothing is selected;
+    // multi-select steps append the custom answer when it's active and
+    // non-empty. A custom answer has no option id, so its text stands in for
+    // the id too (same position in both arrays).
+    const buildAnswers = (): { labels: string[][]; ids: string[][] } => {
+      const perStep = steps.map((s, i) => {
         const inter = getClarifyingInteraction(clarifyingInteractions, i)
-        const labels = s.options
-          .filter((o) => inter.selectedIds.includes(o.id))
-          .map((o) => o.label)
+        const selected = s.options.filter((o) =>
+          inter.selectedIds.includes(o.id)
+        )
+        const labels = selected.map((o) => o.label)
+        const ids = selected.map((o) => o.id)
         const isSingle = (s.selectionMode ?? "single") === "single"
         const includeCustom = isSingle
           ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
           : inter.isCustomActive && inter.customText.trim().length > 0
-        if (includeCustom) labels.push(inter.customText.trim())
-        return labels
+        if (includeCustom) {
+          labels.push(inter.customText.trim())
+          ids.push(inter.customText.trim())
+        }
+        return { labels, ids }
       })
+      return {
+        labels: perStep.map((s) => s.labels),
+        ids: perStep.map((s) => s.ids),
+      }
+    }
 
     const resolve = () => {
-      const answers = buildAnswers()
+      const { labels, ids } = buildAnswers()
       const onConfirm = clarifyingConfig.onConfirm
       closeClarifying()
-      onConfirm?.(answers)
+      onConfirm?.(labels, ids)
     }
 
     const isFinalStep = stepIndex === steps.length - 1
