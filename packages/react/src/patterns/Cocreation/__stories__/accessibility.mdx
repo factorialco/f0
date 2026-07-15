@@ -38,12 +38,15 @@ order, with a visible focus ring.
       </tr>
       <tr>
         <td>
-          <strong>Proposal cards</strong> (accept / reject)
+          <strong>Confirmation cards</strong> (Apply / Discard) — the initial
+          draft confirmation and every later proposal
         </td>
         <td>
-          The accept (✓) and reject (✗) actions are real buttons with text
-          labels, focusable in reading order. Resolving a proposal must not
-          strand focus (see below).
+          The Apply (✓) and Discard (✗) actions are real buttons with text
+          labels, focusable in reading order. This is where the user approves
+          the AI writing content — the first draft as much as each edit — so the
+          decision must be fully keyboard-operable and must not strand focus
+          once resolved (see below).
         </td>
       </tr>
       <tr>
@@ -75,7 +78,7 @@ order, with a visible focus ring.
       "Give accept / reject buttons real text labels for assistive tech.",
     guidelines: [
       'Label the actions ("Apply" / "Discard"), don\'t rely on the ✓ / ✗ glyph alone',
-      "Keep the whole proposal card decision reachable by keyboard, in reading order",
+      "Keep the whole confirmation-card decision reachable by keyboard, in reading order",
     ],
   }}
   dont={{
@@ -93,12 +96,15 @@ The flow rearranges the screen as it advances — the chat animates in, the canv
 proposal resolves and its card changes. Move focus deliberately at each of these moments so a
 keyboard or screen-reader user is never left on a control that just disappeared.
 
-- **Entering Chat** — move focus to the composer so the user can start typing immediately.
+- **Entering Chat** — move focus to the composer so the user can start typing immediately. In a
+  **guided chat**, the composer is hidden through the scripted intro and a clarifying panel takes
+  its place; land focus on that panel's first option instead, so the user isn't focused on a slot
+  that is momentarily empty.
 - **Opening the canvas (Split)** — move focus into the canvas (or its heading), not back to
   the top of the page.
-- **Resolving a proposal** — when an accepted change posts a new live card and supersedes the
-  old one, land focus on the new card (or the assistant's follow-up), not on the now-inert
-  superseded card.
+- **Resolving a confirmation** — when Apply posts a new live card and supersedes the old one
+  (the initial draft confirmation and every later proposal both do this), land focus on the new
+  card (or the assistant's follow-up), not on the now-inert resolved card.
 - **Closing the canvas** — return focus to the card that opened it.
 
 <DoDonts
@@ -121,8 +127,8 @@ overlay applies a change to the canvas. A screen-reader user needs those moments
   `aria-live="polite"`, so its "Applying changes" label is announced when the overlay appears
   and the canvas is busy.
 - **Streaming replies** — announce that the assistant is responding, and that it has
-  finished, via a polite live region. Announce the arrival of a proposal or a new resource
-  card so the decision isn't missed.
+  finished, via a polite live region. Announce the arrival of a confirmation card — the initial
+  draft confirmation or a later proposal — or a new resource card, so the decision isn't missed.
 
 <DoDonts
   do={{
@@ -137,15 +143,16 @@ overlay applies a change to the canvas. A screen-reader user needs those moments
 
 ## Motion
 
-The chat animating in and the processing overlay are both motion. Honor
-`prefers-reduced-motion`: keep the state changes (so the user still knows what happened) but
-drop or shorten the animation. `F0AiProcessingOverlay` already respects the reduced-motion
-preference.
+The chat animating in, the guided-chat clarifying panel sliding up into the composer slot, and
+the processing overlay are all motion. Honor `prefers-reduced-motion`: keep the state changes (so
+the user still knows what happened) but drop or shorten the animation. `F0AiProcessingOverlay`
+already respects the reduced-motion preference, and the guided clarifying entrance is driven by CSS
+keyframes that no-op under `motion-reduce`.
 
 <DoDonts
   do={{
     description:
-      "Respect prefers-reduced-motion for the chat entrance and the processing overlay.",
+      "Respect prefers-reduced-motion for the chat entrance, the guided clarifying panel, and the processing overlay.",
   }}
   dont={{
     description:
