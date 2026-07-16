@@ -35,6 +35,7 @@ import type {
   DashboardChartConfig,
   DashboardChartData,
   DashboardChartItem,
+  DashboardItemFiltersConfig,
 } from "../../types"
 
 import { useChartDownloadActions } from "../../hooks/useChartDownloadActions"
@@ -387,6 +388,7 @@ interface ChartItemProps<Filters extends FiltersDefinition> {
   item: DashboardChartItem<Filters>
   filters: FiltersState<Filters>
   actions?: DropdownItem[]
+  itemFilters?: DashboardItemFiltersConfig
   editMode?: boolean
   handleDelete?: (itemId: string) => void
   onTransformChart?: (
@@ -402,6 +404,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
   item,
   filters,
   actions,
+  itemFilters,
   editMode,
   handleDelete,
   onTransformChart,
@@ -412,10 +415,11 @@ export function ChartItem<Filters extends FiltersDefinition>({
   const [viewMode, setViewMode] = useState<"chart" | "table">("chart")
 
   const enabled = item.useDashboardFilters !== false
+  const itemFiltersKey = JSON.stringify(itemFilters?.value ?? {})
   const { data, isLoading, error, retry } = useDashboardItemData<
     Filters,
     DashboardChartData
-  >(item.fetchData, filters, enabled)
+  >(item.fetchData, filters, enabled, itemFiltersKey)
   const chartContainerRef = useRef<HTMLDivElement>(null)
 
   const CHART_TYPE_OPTIONS = useMemo(
@@ -510,6 +514,7 @@ export function ChartItem<Filters extends FiltersDefinition>({
       onRetry={retry}
       skeleton={chartSkeleton(item.chart)}
       actions={allActions}
+      itemFilters={itemFilters}
       editMode={editMode}
       handleDelete={handleDelete}
       itemId={item.id}

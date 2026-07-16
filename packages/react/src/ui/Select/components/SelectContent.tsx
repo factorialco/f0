@@ -14,7 +14,7 @@ import {
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
 import { F0DialogContext } from "@/patterns/F0Dialog"
-import { ScrollArea } from "@/ui/scrollarea"
+import { NonFocusableScrollArea, ScrollArea } from "@/ui/scrollarea"
 import { Spinner } from "@/ui/Spinner"
 
 import { VirtualItem } from "../index"
@@ -70,6 +70,8 @@ type SelectContentProps = (
   scrollMargin?: number
   taller?: boolean
   portalContainer?: HTMLElement | null
+  /** Keep false for short static enums whose options own listbox focus. */
+  focusableViewport?: boolean
 }
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
@@ -93,6 +95,7 @@ const SelectContent = forwardRef<
       showLoadingIndicator,
       asChild,
       portalContainer,
+      focusableViewport,
       ...props
     },
     ref
@@ -244,6 +247,8 @@ const SelectContent = forwardRef<
     )
 
     const loadingNewContent = isLoading && !isLoadingMore
+    const SelectScrollArea =
+      focusableViewport === false ? NonFocusableScrollArea : ScrollArea
 
     const content = (
       <SelectPrimitive.Content
@@ -341,7 +346,7 @@ const SelectContent = forwardRef<
                   <Spinner />
                 </div>
               )}
-              <ScrollArea
+              <SelectScrollArea
                 viewportRef={parentRef}
                 className={cn(
                   "flex h-full flex-col",
@@ -368,7 +373,7 @@ const SelectContent = forwardRef<
                     {viewportContent}
                   </SelectPrimitive.Viewport>
                 )}
-              </ScrollArea>
+              </SelectScrollArea>
             </div>
             {props.right}
           </div>

@@ -1,5 +1,8 @@
-import { FilterTypeKey, FilterTypes } from "."
-import { filterTypes } from "."
+import {
+  RegisteredFilterTypeKey,
+  RegisteredFilterTypes,
+  registeredFilterTypes,
+} from "."
 
 /**
  * Returns the filter options with the defaults if the option property is not provided by the filter
@@ -25,10 +28,10 @@ export function getOptionsWithDefaults<T extends object, D extends object>(
  * @param type - The filter type key
  * @returns The filter type definition with default options and render function
  */
-export const getFilterType = <T extends FilterTypeKey>(
+export const getFilterType = <T extends RegisteredFilterTypeKey>(
   type: T
-): FilterTypes[T] => {
-  const filterType = filterTypes[type]
+): RegisteredFilterTypes[T] => {
+  const filterType = registeredFilterTypes[type]
   if (!filterType) {
     throw new Error(`Filter type ${type.toString()} not found`)
   }

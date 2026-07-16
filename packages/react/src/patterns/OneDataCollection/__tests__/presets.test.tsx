@@ -1,5 +1,4 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import "@testing-library/jest-dom/vitest"
 import {
   cleanup,
   screen,
@@ -82,6 +81,7 @@ function Harness({
   id = "presets-test/v1",
   onState,
   urlSync = false,
+  presetsAction,
 }: {
   presets?: PresetsDefinition<typeof filters>
   id?: string
@@ -93,6 +93,7 @@ function Harness({
   }) => void
   /** Opt in to URL syncing (off by default to avoid leaking params across tests). */
   urlSync?: boolean
+  presetsAction?: "auto" | "none"
 }) {
   const source = useDataCollectionSource({
     filters,
@@ -107,6 +108,7 @@ function Harness({
       id={id}
       source={source}
       visualizations={visualizations}
+      presetsAction={presetsAction}
       onStateChange={(state) =>
         onState?.({
           filters: state.filters,
@@ -204,6 +206,18 @@ describe("OneDataCollection - presets", () => {
     expect(
       await screen.findByRole("button", { name: "Save view" })
     ).toBeInTheDocument()
+  })
+
+  it("keeps the save-view action disabled for an embedded collection", async () => {
+    const user = userEvent.setup()
+    renderHarness({ presetsAction: "none" })
+
+    await waitFor(() => expect(screen.getByText("John")).toBeInTheDocument())
+    await sortByName(user)
+
+    expect(
+      screen.queryByRole("button", { name: "Save view" })
+    ).not.toBeInTheDocument()
   })
 
   it("creates a custom preset via the dialog, selecting it and persisting to storage", async () => {

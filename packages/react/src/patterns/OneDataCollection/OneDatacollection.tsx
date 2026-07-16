@@ -31,6 +31,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { useDebounceBoolean } from "@/lib/useDebounceBoolean"
 import { cn } from "@/lib/utils"
 import { OneFilterPicker } from "@/patterns/OneFilterPicker"
+import type { RegisteredFiltersState } from "@/patterns/OneFilterPicker/filterTypes"
 import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { Spinner } from "@/ui/Spinner"
 
@@ -201,6 +202,14 @@ export type OneDataCollectionProps<
     state: DataCollectionStatusComplete<FiltersState<Filters>>
   ) => void
 
+  /**
+   * Whether the "Save view" affordance is offered when the current view
+   * diverges from the baseline. Use "none" for embedded collections (e.g.
+   * dashboard widgets) where saving views doesn't make sense.
+   * @default "auto"
+   */
+  presetsAction?: "auto" | "none"
+
   /** Key for the data collection settings and state, must be unique for each data collection and contain the version e.g. "employees/v1"
    */
   id?: string
@@ -267,6 +276,7 @@ const OneDataCollectionComp = <
   emptyStates,
   fullHeight,
   storage,
+  presetsAction = "auto",
   id,
   disableUrlParams,
   tmpFullWidth,
@@ -828,7 +838,11 @@ const OneDataCollectionComp = <
     // is not a filter, so an empty result with no active filters is "no-data",
     // not "no-results".
     const hasActiveFilters = effectiveFilters
-      ? getActiveFilterKeys(effectiveFilters, filters, i18n).length > 0
+      ? getActiveFilterKeys(
+          effectiveFilters,
+          filters as unknown as RegisteredFiltersState<Filters>,
+          i18n
+        ).length > 0
       : false
     return hasActiveFilters || search ? "no-results" : "no-data"
   }
@@ -1127,6 +1141,9 @@ const OneDataCollectionComp = <
    * baseline, never offers "Save view" — switching views is too transient.
    */
   const presetActionState = useMemo<"save" | "none">(() => {
+    // Consumers can opt out of view-saving entirely (embedded collections).
+    if (presetsAction === "none") return "none"
+
     // Compares everything except the view mode, so a visualization-only change
     // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
@@ -1157,7 +1174,13 @@ const OneDataCollectionComp = <
       return "save"
     }
     return "none"
-  }, [selectedPresetId, mergedPresets, capturedState, sessionBaseline])
+  }, [
+    presetsAction,
+    selectedPresetId,
+    mergedPresets,
+    capturedState,
+    sessionBaseline,
+  ])
 
   const handleSavePreset = useCallback(
     (values: PresetFormValues) => {

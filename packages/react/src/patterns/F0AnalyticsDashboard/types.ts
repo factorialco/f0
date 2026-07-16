@@ -9,10 +9,21 @@ import type {
 } from "@/kits/F0DataChart"
 import type { NavigationFiltersDefinition } from "@/patterns/OneDataCollection/navigationFilters/types"
 import type {
+  FilterDefinition,
+  FilterValue,
   FiltersDefinition,
   FiltersState,
   PresetsDefinition,
 } from "@/patterns/OneFilterPicker/types"
+import type {
+  OperatorFilterCopy,
+  OperatorFilterDefinition,
+  OperatorFilterOperator,
+  OperatorFilterOptions,
+  OperatorFilterValue,
+  OperatorFilterValueMode,
+} from "@/patterns/OneFilterPicker/filterTypes/OperatorFilter"
+import type { RegisteredFiltersState } from "@/patterns/OneFilterPicker/filterTypes"
 
 // ---------------------------------------------------------------------------
 // Chart config — the "visual" half of a chart item (no data)
@@ -328,6 +339,72 @@ export type DashboardItem<
   | DashboardMetricItem<Filters>
   | DashboardCollectionItem<Filters>
 
+/**
+ * Per-widget filter configuration resolved by the host.
+ *
+ * Chart and metric items show a filter icon in their header (next to the
+ * fullscreen and menu buttons) opening a compact anchored popover built on
+ * the OneFilterPicker filter types. Collection items surface the filters as
+ * the table's own toolbar filter picker (next to search/settings) with
+ * applied-filter chips, matching table filtering across the product.
+ *
+ * Either way the picker holds a draft state; `onChange` fires only when the
+ * user applies, with the emitted state containing active filters only
+ * (cleared/incomplete entries are stripped).
+ *
+ * This lives on `F0AnalyticsDashboardProps` — not on the serializable item
+ * definition — so dashboard configs remain JSON-compatible.
+ */
+/** Filter types supported by the per-widget condition editor. */
+export type DashboardItemFilterDefinition =
+  | FilterDefinition
+  | OperatorFilterDefinition
+
+/**
+ * Definitions accepted by a dashboard item's filter control.
+ *
+ * This opt-in type keeps the operator condition scoped to dashboard widgets;
+ * the default `FiltersDefinition` union used by existing collections remains
+ * unchanged.
+ */
+export type DashboardItemFiltersDefinition<Keys extends string = string> =
+  Record<Keys, DashboardItemFilterDefinition>
+
+/** Value mapping for a dashboard item's opt-in condition definitions. */
+export type DashboardItemFilterValue<
+  Definition extends DashboardItemFilterDefinition,
+> = Definition extends OperatorFilterDefinition
+  ? OperatorFilterValue | undefined
+  : Definition extends FilterDefinition
+    ? FilterValue<Definition>
+    : never
+
+/** Controlled state emitted by a dashboard item's filter control. */
+export type DashboardItemFiltersState<
+  Definitions extends DashboardItemFiltersDefinition,
+> = RegisteredFiltersState<Definitions>
+
+export type {
+  OperatorFilterCopy,
+  OperatorFilterDefinition,
+  OperatorFilterOperator,
+  OperatorFilterOptions,
+  OperatorFilterValue,
+  OperatorFilterValueMode,
+}
+
+export interface DashboardItemFiltersConfig<
+  ItemFilters extends DashboardItemFiltersDefinition =
+    DashboardItemFiltersDefinition,
+> {
+  /** Filter definitions available for this widget. */
+  filters: ItemFilters
+  /** Currently applied filter state for this widget. */
+  value: DashboardItemFiltersState<ItemFilters>
+  /** Called with the new state when the user applies changes. */
+  onChange: (value: DashboardItemFiltersState<ItemFilters>) => void
+}
+
 // ---------------------------------------------------------------------------
 // Layout change descriptor — emitted by edit mode callbacks
 // ---------------------------------------------------------------------------
@@ -392,6 +469,16 @@ export interface F0AnalyticsDashboardProps<
    * Each item declares its type, visual config, grid span, and data fetcher.
    */
   items: DashboardItem<Filters>[]
+  /**
+   * Resolve the per-widget filter configuration for each dashboard item.
+   *
+   * Return a config to show a filter icon in that widget's header (next to
+   * the fullscreen and menu buttons) opening a compact filter popover; return
+   * `undefined` to hide the control for that item.
+   */
+  itemFilters?: (
+    item: DashboardItem<Filters>
+  ) => DashboardItemFiltersConfig | undefined
   /**
    * When true, enables drag-and-drop reordering, resize, and delete controls.
    */
