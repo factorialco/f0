@@ -240,6 +240,7 @@ export const TableCollection = <
     selectionMode: "multi",
     selectedState: source.defaultSelectedItems,
     getRenderedSelectableEntries: selectionRegistry.getEntries,
+    renderedSelectableCount: selectionRegistry.ids.length,
   })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
@@ -364,6 +365,12 @@ export const TableCollection = <
     currentPageSelectableIds.length > 0 &&
     currentPageSelectableIds.every((id) => selectedItems.has(id))
 
+  // nested/tree tables: paginationInfo.total counts top-level rows, not selectable children
+  const selectableTotal = Math.max(
+    paginationInfo?.total ?? 0,
+    currentPageSelectableIds.length
+  )
+
   // True when the header checkbox should render as fully-checked: either the
   // Gmail-style "select across all pages" CTA is active, or every selectable
   // row on the current page is selected.
@@ -375,7 +382,7 @@ export const TableCollection = <
     !!source.allPagesSelection &&
     (!allSelectedStatus.checked || allSelectedStatus.indeterminate) &&
     paginationInfo?.total !== undefined &&
-    paginationInfo.total > allSelectedStatus.selectedCount
+    selectableTotal > allSelectedStatus.selectedCount
 
   const selectionHeaderColSpan =
     columns.length + (showItemActions ? actionColCount : 0)
@@ -577,9 +584,7 @@ export const TableCollection = <
                             allSelectedStatus.checked &&
                             !allSelectedStatus.indeterminate
                               ? t("status.selected.allItemsSelected", {
-                                  total:
-                                    paginationInfo?.total ??
-                                    allSelectedStatus.selectedCount,
+                                  total: selectableTotal,
                                 })
                               : allPageRowsSelected
                                 ? t("status.selected.allOnPage", {
@@ -590,8 +595,7 @@ export const TableCollection = <
                           count={
                             allSelectedStatus.checked &&
                             !allSelectedStatus.indeterminate
-                              ? (paginationInfo?.total ??
-                                allSelectedStatus.selectedCount)
+                              ? selectableTotal
                               : allSelectedStatus.selectedCount
                           }
                         />
@@ -599,7 +603,7 @@ export const TableCollection = <
                           <F0Button
                             variant="outline"
                             label={t("status.selected.selectAllItems", {
-                              total: paginationInfo?.total ?? 0,
+                              total: selectableTotal,
                             })}
                             onClick={() => handleSelectAllItems(true)}
                             size="sm"

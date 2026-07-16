@@ -76,6 +76,7 @@ export const CollectionActions = ({
             label: action.label,
             icon: action.icon,
             description: action.description,
+            disabled: action.disabled,
             value: index.toString(),
           }))}
           onClick={(value) => {

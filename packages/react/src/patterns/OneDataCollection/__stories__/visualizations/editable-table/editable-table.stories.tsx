@@ -136,9 +136,11 @@ export const EditableTableWithSelectableRows: Story = {
 
 /**
  * Nested editable table with selection (FCT-56547): non-selectable parent rows
- * whose lazily-loaded children are selectable. Expand a parent, then use the
- * header "Select all" checkbox or the "Select all N items" banner — select-all
- * must select all loaded children without wiping the current selection.
+ * whose lazily-loaded children are selectable. Each group's first child is
+ * intentionally non-selectable (no checkbox) to exercise a mix. Expand a parent,
+ * then use the header "Select all" checkbox or the "Select all N items" banner —
+ * select-all must select all loaded selectable children without wiping the
+ * current selection, and the count must reflect only the selectable rows.
  */
 export const EditableTableWithNestedSelectableRows: Story = {
   render: () => {
@@ -154,10 +156,16 @@ export const EditableTableWithNestedSelectableRows: Story = {
       ): MockUser => ({
         ...parent,
         name: label,
+        // First child of each group is intentionally non-selectable (marked via
+        // an `-locked-` id) so the story exercises a mix of selectable and
+        // non-selectable rows.
         children: childSlice.map((child, i) => ({
           ...child,
-          id: `${parent.id}-child-${i + 1}`,
-          name: `${label} · request ${i + 1}`,
+          id:
+            i === 0
+              ? `${parent.id}-locked-${i + 1}`
+              : `${parent.id}-child-${i + 1}`,
+          name: `${label} · request ${i + 1}${i === 0 ? " (not selectable)" : ""}`,
           children: undefined,
         })),
       })
@@ -180,8 +188,13 @@ export const EditableTableWithNestedSelectableRows: Story = {
 
     return (
       <ExampleComponent
-        // Parents (rows with children) are not selectable; only leaf rows are.
-        selectable={(item) => (item.children?.length ? undefined : item.id)}
+        // Parents (rows with children) and `-locked-` rows are not selectable;
+        // the remaining leaf rows are.
+        selectable={(item) =>
+          item.children?.length || item.id.includes("-locked-")
+            ? undefined
+            : item.id
+        }
         allPagesSelection
         bulkActions={() => ({
           primary: [{ id: "approve", label: "Approve" }],

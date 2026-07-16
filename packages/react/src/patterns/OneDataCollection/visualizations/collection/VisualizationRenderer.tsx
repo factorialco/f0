@@ -50,6 +50,7 @@ export const VisualizationRenderer = <
   onLoadData,
   onLoadError,
   tmpFullWidth,
+  searchSelectionNonce,
 }: {
   visualization: Visualization<
     R,
@@ -74,6 +75,8 @@ export const VisualizationRenderer = <
   onLoadError: OnLoadErrorCallback
   clearSelectedItems?: () => void
   tmpFullWidth?: boolean
+  /** Bumped on every shared-search selection; forwarded to the visualization. */
+  searchSelectionNonce?: number
 }): JSX.Element => {
   if (visualization.type === "custom") {
     return visualization.component({
@@ -110,5 +113,6 @@ export const VisualizationRenderer = <
     onLoadData,
     onLoadError,
     tmpFullWidth,
+    searchSelectionNonce,
   })
 }
