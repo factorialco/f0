@@ -11,7 +11,22 @@ addons.setConfig({
   theme,
   sidebar: {
     showRoots: true,
-    collapsedRoots: ["playground"],
+    // Every top-level section starts collapsed except "Getting Started".
+    // Ids are the sanitized first title segment (the titlePrefix values in
+    // .storybook/main.ts). Roots-only: nested folders can't be pinned here.
+    collapsedRoots: [
+      "foundations",
+      "components",
+      "patterns-layout",
+      "domain-specific",
+      "kits",
+      "library",
+      "experimental",
+      "🔒-internal",
+      "deprecated",
+      "examples",
+      "playground",
+    ],
     filters: {
       internal: (item) => {
         return (
