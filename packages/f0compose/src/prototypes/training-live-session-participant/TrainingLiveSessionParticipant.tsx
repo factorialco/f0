@@ -1673,9 +1673,9 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
                   </F0Box>
                   <F0Box display="flex" flexDirection="column" gap="sm">
                     <F0Text content="Link" variant="label" />
-                    <F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} onClick={() => onJoinSession(session)} /></F0Box>
+                    <F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} disabled={session.liveState === "waiting"} onClick={() => onJoinSession(session)} /></F0Box>
+                    {session.liveState === "waiting" ? <F0Text content="You’ll be able to join once the instructor starts the session." variant="description" /> : null}
                   </F0Box>
-                  {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="Click ‘Join session’ and wait for the instructor to start the session." /> : null}
                   <DetailsItem title="Description" content={{ type: "item", text: course.description }} />
                 </F0Box>
               ) : (
