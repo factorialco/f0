@@ -1,4 +1,7 @@
 export declare const defaultTranslations: {
+    readonly common: {
+        readonly selectPlaceholder: "Select";
+    };
     readonly countries: {
         ad: string;
         ae: string;
@@ -304,6 +307,9 @@ export declare const defaultTranslations: {
                 readonly saveFailed: "Save failed";
             };
             readonly addRow: "Add row";
+            readonly removeRow: "Remove row";
+            readonly editRow: "Edit";
+            readonly reorderRow: "Drag to reorder";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -846,6 +852,15 @@ export declare const defaultTranslations: {
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
             readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
+        readonly entitiesList: {
+            readonly add: "Add";
+            readonly edit: "Edit";
+            readonly remove: "Remove";
+            readonly view: "View";
+            readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
+            readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
+            readonly addBlockedMaxHint: "You've reached the maximum number of items";
+        };
         readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
@@ -981,8 +996,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -990,11 +1008,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

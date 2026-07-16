@@ -101,6 +101,9 @@ const e = {
   jp: "Japan",
   ke: "Kenya"
 }, t = {
+  common: {
+    selectPlaceholder: "Select"
+  },
   countries: e,
   approvals: {
     history: "Approval history",
@@ -303,7 +306,10 @@ const e = {
       errors: {
         saveFailed: "Save failed"
       },
-      addRow: "Add row"
+      addRow: "Add row",
+      removeRow: "Remove row",
+      editRow: "Edit",
+      reorderRow: "Drag to reorder"
     },
     itemsCount: "items",
     emptyStates: {
@@ -857,6 +863,15 @@ const e = {
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
       maxFilesReached: "Maximum {{maxFiles}} files"
+    },
+    entitiesList: {
+      add: "Add",
+      edit: "Edit",
+      remove: "Remove",
+      view: "View",
+      addBlockedHint: "Finish filling out the last item you just added in order to add another one",
+      addBlockedErrorHint: "Fix the errors in the existing items before adding another one",
+      addBlockedMaxHint: "You've reached the maximum number of items"
     },
     moreInformation: "More information",
     validation: {
