@@ -5042,11 +5042,14 @@ function RoomSettingsDialog(props: { isOpen: boolean; onClose: () => void }) {
   return <PrejoinSettingsDialog {...props} />
 }
 
-function LiveSessionChatDrawer() {
+function LiveSessionChatDrawer({ onClose }: { onClose: () => void }) {
   return (
     <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" display="flex" flexDirection="column" height="full" style={{ overflow: "hidden" }}>
-      <F0Box padding="lg">
+      <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" padding="lg" borderBottom="default" borderColor="secondary">
         <F0Heading content="Chat" variant="heading" as="h3" />
+        <F0BoxWithClassName role="button" aria-label="Close" tabIndex={0} onClick={onClose} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 32, height: 32, cursor: "pointer" }}>
+          <F0Icon icon={Cross} size="md" />
+        </F0BoxWithClassName>
       </F0Box>
       <F0Box display="flex" alignItems="center" justifyContent="center" grow padding="lg">
         <F0Text content="No messages yet" variant="description" />
@@ -5427,7 +5430,7 @@ function SessionRoomScreen({
         {activePanel ? (
           activePanel === "chat" ? (
             <F0BoxWithClassName style={activePanelStyle}>
-              <LiveSessionChatDrawer />
+              <LiveSessionChatDrawer onClose={() => setActivePanel(null)} />
             </F0BoxWithClassName>
           ) : activePanel === "participants" ? (
             <F0BoxWithClassName style={activePanelStyle}>
