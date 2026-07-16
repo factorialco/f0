@@ -80,6 +80,21 @@ export const WithoutActions: Story = {
   },
 }
 
+export const WithDate: Story = {
+  args: {
+    size: "lg",
+    file: new File(["test"], "invoice-F001.pdf", { type: "application/pdf" }),
+    date: "09 June, 2026",
+    actions: [
+      {
+        icon: Download,
+        label: "Download file",
+        onClick: fn(),
+      },
+    ],
+  },
+}
+
 export const Disabled: Story = {
   args: {
     ...Default.args,
