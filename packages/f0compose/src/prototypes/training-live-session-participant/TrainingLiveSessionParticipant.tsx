@@ -1679,7 +1679,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
                     <DetailsItem title="Attendance" content={{ type: "status-tag", text: getParticipantAttendance(session).label, variant: getParticipantAttendance(session).status }} />
                   </F0Box>
                   <F0Box display="grid" columns="2" gap="xl">
-                    <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
+                    <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
                     <DetailsItem title="Date" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Hour" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Location" content={{ type: "item", text: "—" }} />
@@ -4845,7 +4845,7 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
           <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionLifecycle(session).label, variant: getSessionLifecycle(session).status }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
-          <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
+          <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
           <DetailsItem title="Modality" content={{ type: "item", text: session.modality }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
