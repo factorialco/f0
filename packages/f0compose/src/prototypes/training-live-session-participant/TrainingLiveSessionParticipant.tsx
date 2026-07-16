@@ -54,6 +54,7 @@ import {
   CheckCircle,
   CheckDouble,
   ChevronDown,
+  ChevronUp,
   Comment,
   Cross,
   Delete,
@@ -1414,7 +1415,7 @@ function ParticipantMyTrainingCourseDetail({ course, groupName, sidepanelSession
     <Page header={<><PageHeader module={myTrainingsModuleInfo} breadcrumbs={[{ id: "overview", label: "Course list", href: `/p/${myTrainingsSlug}` }, { id: course.id, label: course.name }]} /><ResourceHeader title={course.name} status={{ label: "", text: "Started", variant: "warning" }} primaryAction={{ label: "Resume course", icon: AcademicCap, onClick: () => onTabChange("content") }} /><Tabs key={activeTab} tabs={myTrainingDetailTabs.map((tab) => ({ ...tab, onClick: () => onTabChange(tab.id) }))} activeTabId={activeTab} /></>}>
       <StandardLayout>
         <ParticipantMyTrainingTabBody course={course} activeTab={activeTab} onOpenSession={onOpenSession} />
-        <ParticipantSessionSidepanel session={sidepanelSession} course={course} groupName={groupName} onClose={onCloseSession} onJoinSession={setPrejoinSession} />
+        <ParticipantSessionSidepanel session={sidepanelSession} course={course} groupName={groupName} onClose={onCloseSession} onJoinSession={setPrejoinSession} onNavigate={onOpenSession} />
         {prejoinSession ? (
           <SessionPrejoinScreen
             groupName={groupName}
@@ -1597,7 +1598,39 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
   ] } }]} />
 }
 
-function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }: { session: GroupSessionRow | null; course: ExactCourse; groupName: string; onClose: () => void; onJoinSession: (session: GroupSessionRow) => void }) {
+function LiveSessionSidepanelHeader({ session, onClose, onNavigate }: { session: GroupSessionRow; onClose: () => void; onNavigate?: (sessionId: string) => void }) {
+  const index = groupSessions.findIndex((item) => item.id === session.id)
+  const total = groupSessions.length
+  const canPrev = !!onNavigate && index > 0
+  const canNext = !!onNavigate && index >= 0 && index < total - 1
+  return (
+    <F0Box display="flex" flexDirection="column" borderBottom="default" borderColor="secondary">
+      <F0BoxWithClassName display="flex" alignItems="center" justifyContent="between" paddingLeft="lg" paddingRight="lg" style={{ height: 44 }}>
+        <F0Box display="flex" alignItems="center" gap="sm">
+          {onNavigate ? (
+            <>
+              <F0BoxWithClassName role="button" aria-label="Previous session" tabIndex={canPrev ? 0 : -1} onClick={() => { if (canPrev) onNavigate(groupSessions[index - 1].id) }} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 28, height: 28, cursor: canPrev ? "pointer" : "default", opacity: canPrev ? 1 : 0.4 }}>
+                <F0Icon icon={ChevronUp} size="sm" />
+              </F0BoxWithClassName>
+              <F0BoxWithClassName role="button" aria-label="Next session" tabIndex={canNext ? 0 : -1} onClick={() => { if (canNext) onNavigate(groupSessions[index + 1].id) }} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 28, height: 28, cursor: canNext ? "pointer" : "default", opacity: canNext ? 1 : 0.4 }}>
+                <F0Icon icon={ChevronDown} size="sm" />
+              </F0BoxWithClassName>
+              <F0Text content={`${index + 1}/${total}`} variant="description" />
+            </>
+          ) : null}
+        </F0Box>
+        <F0BoxWithClassName role="button" aria-label="Close" tabIndex={0} onClick={onClose} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 32, height: 32, cursor: "pointer" }}>
+          <F0Icon icon={Cross} size="md" />
+        </F0BoxWithClassName>
+      </F0BoxWithClassName>
+      <F0Box paddingLeft="xl" paddingRight="lg" paddingBottom="md">
+        <F0Heading content={session.name} variant="heading" as="h2" />
+      </F0Box>
+    </F0Box>
+  )
+}
+
+function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, onNavigate }: { session: GroupSessionRow | null; course: ExactCourse; groupName: string; onClose: () => void; onJoinSession: (session: GroupSessionRow) => void; onNavigate?: (sessionId: string) => void }) {
   const [tab, setTab] = useState<"details" | "notes">("details")
   if (!session) return null
 
@@ -1620,12 +1653,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
         style={{ right: 12, top: 12, bottom: 12, width: 640, backgroundColor: "var(--f1-background, #fff)" }}
       >
         <F0Box height="full" display="flex" flexDirection="column">
-          <F0BoxWithClassName display="flex" alignItems="center" justifyContent="between" paddingLeft="xl" paddingRight="lg" borderBottom="default" borderColor="secondary" style={{ height: 57 }}>
-            <F0Heading content={session.name} variant="heading" as="h2" />
-            <F0BoxWithClassName role="button" aria-label="Close" tabIndex={0} onClick={onClose} display="flex" alignItems="center" justifyContent="center" border="default" borderColor="secondary" borderRadius="lg" style={{ width: 32, height: 32, cursor: "pointer" }}>
-              <F0Icon icon={Cross} size="md" />
-            </F0BoxWithClassName>
-          </F0BoxWithClassName>
+          <LiveSessionSidepanelHeader session={session} onClose={onClose} onNavigate={onNavigate} />
           <F0BoxWithClassName overflowY="auto" grow>
             <F0BoxWithClassName paddingTop="lg">
               <Tabs key={tab} tabs={tabs} activeTabId={tab} />
@@ -4227,6 +4255,7 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
             onClose={() => setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions" })}
             onTabChange={(tab) => setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions", session: activeSession?.id ?? "session-1", stab: tab })}
             onJoinSession={() => setPrejoinSession(activeSession ?? groupSessions[0])}
+            onNavigate={(sessionId) => setSearchParams({ view: "group-detail", course: course.id, group: groupName, gtab: "sessions", session: sessionId, stab: activeSessionTab })}
           />
           {prejoinSession ? (
             <SessionPrejoinScreen
@@ -4357,6 +4386,7 @@ function SessionSidepanel({
   onClose,
   onTabChange,
   onJoinSession,
+  onNavigate,
 }: {
   session: GroupSessionRow | null
   role: LiveSessionRole
@@ -4365,6 +4395,7 @@ function SessionSidepanel({
   onClose: () => void
   onTabChange: (tab: SessionSidepanelTabId) => void
   onJoinSession: () => void
+  onNavigate?: (sessionId: string) => void
 }) {
   if (!session) return null
 
@@ -4405,33 +4436,7 @@ function SessionSidepanel({
         style={{ right: 12, top: 12, bottom: 12, width: 640, backgroundColor: "var(--f1-background, #fff)" }}
       >
           <F0Box height="full" display="flex" flexDirection="column">
-            <F0BoxWithClassName
-            display="flex"
-            alignItems="center"
-            justifyContent="between"
-            paddingLeft="xl"
-            paddingRight="lg"
-            borderBottom="default"
-            borderColor="secondary"
-            style={{ height: 57 }}
-            >
-              <F0Heading content={session.name} variant="heading" as="h2" />
-              <F0BoxWithClassName
-                role="button"
-                aria-label="Close"
-                tabIndex={0}
-                onClick={onClose}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                border="default"
-                borderColor="secondary"
-                borderRadius="lg"
-                style={{ width: 32, height: 32, cursor: "pointer" }}
-              >
-                <F0Icon icon={Cross} size="md" />
-              </F0BoxWithClassName>
-            </F0BoxWithClassName>
+            <LiveSessionSidepanelHeader session={session} onClose={onClose} onNavigate={onNavigate} />
           <F0BoxWithClassName overflowY="auto" grow>
             <F0BoxWithClassName paddingTop="lg">
               <Tabs
