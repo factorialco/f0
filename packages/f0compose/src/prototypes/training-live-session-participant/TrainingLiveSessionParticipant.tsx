@@ -1014,6 +1014,12 @@ const participantAttendanceById: Record<string, { label: string; status: "neutra
 const getParticipantAttendance = (session: GroupSessionRow): { label: string; status: "neutral" | "info" | "positive" | "warning" | "critical" } =>
   participantAttendanceById[session.id] ?? { label: "Not started", status: "neutral" }
 
+// Factorial only "sees" what happens in its own virtual room. For external-link
+// or on-site sessions it can't know the live state (started/ended) nor who
+// attended, so Status and Attendance show "—" instead of a fabricated value.
+const isSessionInFactorial = (session: GroupSessionRow) =>
+  (session.modality === "Virtual" || session.modality === "Hybrid") && session.host !== "external"
+
 const myTrainingModules: CourseModuleRow[] = [
   { id: "module-1", title: "Introduction and learning objectives", blocks: 3, status: "completed" },
   { id: "module-2", title: "Quality principles in daily operations", blocks: 5, status: "in_progress" },
@@ -1607,8 +1613,8 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
     { id: "date", label: "Date", sorting: "startsAt", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.date }) },
     { id: "location", label: "Location", render: (session: GroupSessionRow) => session.modality === "Virtual" ? "-" : session.modality },
     { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
-    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: getSessionLifecycle(session).label } }) },
-    { id: "attendance", label: "Attendance", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getParticipantAttendance(session) }) },
+    { id: "status", label: "Status", render: (session: GroupSessionRow) => isSessionInFactorial(session) ? ({ type: "tag" as const, value: { label: getSessionLifecycle(session).label } }) : "-" },
+    { id: "attendance", label: "Attendance", render: (session: GroupSessionRow) => isSessionInFactorial(session) ? ({ type: "status" as const, value: getParticipantAttendance(session) }) : "-" },
   ] } }]} />
 }
 
@@ -1676,8 +1682,8 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
               {tab === "details" ? (
                 <F0Box display="flex" flexDirection="column" gap="3xl">
                   <F0Box display="grid" columns="2" gap="xl">
-                    <DetailsItem title="Status" content={{ type: "raw-tag", text: getSessionLifecycle(session).label }} />
-                    <DetailsItem title="Attendance" content={{ type: "status-tag", text: getParticipantAttendance(session).label, variant: getParticipantAttendance(session).status }} />
+                    <DetailsItem title="Status" content={isSessionInFactorial(session) ? { type: "raw-tag", text: getSessionLifecycle(session).label } : { type: "item", text: "—" }} />
+                    <DetailsItem title="Attendance" content={isSessionInFactorial(session) ? { type: "status-tag", text: getParticipantAttendance(session).label, variant: getParticipantAttendance(session).status } : { type: "item", text: "—" }} />
                   </F0Box>
                   <F0Box display="grid" columns="2" gap="xl">
                     <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
@@ -1689,8 +1695,19 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
                   </F0Box>
                   <F0Box display="flex" flexDirection="column" gap="sm">
                     <F0Text content="Link" variant="label" />
-                    <F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} disabled={session.liveState === "waiting"} onClick={() => onJoinSession(session)} /></F0Box>
-                    {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="You’ll be able to join once the instructor starts the session." /> : null}
+                    {isSessionInFactorial(session) ? (
+                      <>
+                        <F0Box display="flex" justifyContent="start"><F0Button label="Join session" icon={VideoRecorder} disabled={session.liveState === "waiting"} onClick={() => onJoinSession(session)} /></F0Box>
+                        {session.liveState === "waiting" ? <F0Alert variant="info" title="Session hasn’t started yet" description="You’ll be able to join once the instructor starts the session." /> : null}
+                      </>
+                    ) : session.host === "external" ? (
+                      <F0BoxWithClassName role="link" aria-label="Open link" tabIndex={0} display="flex" alignItems="center" gap="xs" className="text-f1-foreground-info" style={{ cursor: "pointer", width: "fit-content" }}>
+                        <span className="text-f1-foreground-info underline">Open link</span>
+                        <F0Icon icon={ExternalLink} size="sm" color="info" />
+                      </F0BoxWithClassName>
+                    ) : (
+                      <F0Text content="—" variant="body" />
+                    )}
                   </F0Box>
                   <F0Box display="flex" flexDirection="column" gap="sm">
                     <F0Text content="Description" variant="label" />
@@ -4385,7 +4402,7 @@ function GroupSessionsTab({
                 { id: "name", label: "Session", sorting: "name", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.name }) },
                 { id: "date", label: "Date", sorting: "date", render: (session: GroupSessionRow) => session.date },
                 { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
-                { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: getSessionLifecycle(session).label } }) },
+                { id: "status", label: "Status", render: (session: GroupSessionRow) => isSessionInFactorial(session) ? ({ type: "tag" as const, value: { label: getSessionLifecycle(session).label } }) : "-" },
                 { id: "modality", label: "Modality", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: session.modality, icon: session.modality === "Virtual" ? Desktop : People } }) },
               ],
             },
@@ -4846,7 +4863,7 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 30 }}>
         <F0Box display="grid" columns="2" gap="5xl">
-          <DetailsItem title="Status" content={{ type: "raw-tag", text: getSessionLifecycle(session).label }} />
+          <DetailsItem title="Status" content={inFactorial ? { type: "raw-tag", text: getSessionLifecycle(session).label } : { type: "item", text: "—" }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
@@ -4885,8 +4902,15 @@ function SessionJoinField({ session, role, disabled, isEnded, onJoinSession }: {
   const isExternal = isOnline && session.host === "external"
   const inFactorial = isOnline && session.host !== "external"
 
-  // On-site: physical session, nothing to open or join.
-  if (!inFactorial && !isExternal) return null
+  // On-site: physical session, nothing to open or join — no link, so "—".
+  if (!inFactorial && !isExternal) {
+    return (
+      <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 14 }}>
+        <F0Text content="Link" variant="body" />
+        <F0Text content="—" variant="body" />
+      </F0BoxWithClassName>
+    )
+  }
 
   // External link: it's the instructor's own link, so we just expose it as a
   // plain hyperlink — there's no Factorial room to start or join.
