@@ -1684,7 +1684,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
                     <DetailsItem title="Date" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Hour" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Location" content={{ type: "item", text: "—" }} />
-                    <DetailsItem title="Modality" content={{ type: "item", text: session.modality }} />
+                    <DetailsItem title="Modality" content={{ type: "item", text: session.modality, icon: session.modality === "Virtual" ? Link : People }} />
                     <DetailsItem title="Instructors" content={{ type: "avatar-list", avatarList: { avatars: [{ type: "person", firstName: "Adam", lastName: "Joseph" }], size: "sm", type: "person", max: 3 } }} />
                   </F0Box>
                   <F0Box display="flex" flexDirection="column" gap="sm">
@@ -4850,7 +4850,7 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
-          <DetailsItem title="Modality" content={{ type: "item", text: session.modality }} />
+          <DetailsItem title="Modality" content={{ type: "item", text: session.modality, icon: session.modality === "Virtual" ? Link : People }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Date" content={{ type: "item", text: session.date.split(", ")[0] ?? session.date }} />
