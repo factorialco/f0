@@ -6,7 +6,8 @@ import type { CardMetadata } from "@/components/F0Card/types"
 import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/ui/hover-card"
 
-import type { F0GraphNodeTagLabels } from "./types"
+import type { F0GraphNodeTag, F0GraphNodeTagLabels } from "./types"
+import { tagColumn } from "./types"
 
 type F0GraphNodeHoverCardProps = {
   /** The node element the card is anchored to and opens on hover. */
@@ -15,7 +16,7 @@ type F0GraphNodeHoverCardProps = {
   title?: string
   subtitle?: string
   /** Non-hidden tags — surfaced as native card metadata rows. */
-  tags?: TagVariant[]
+  tags?: F0GraphNodeTag[]
   tagLabels?: F0GraphNodeTagLabels
 }
 
@@ -110,7 +111,7 @@ export function F0GraphNodeHoverCard({
   tagLabels,
 }: F0GraphNodeHoverCardProps) {
   const metadata = tags
-    ?.map((tag) => tagToMetadata(tag, tagLabels?.[tag.type] ?? ""))
+    ?.map((tag) => tagToMetadata(tag, tagLabels?.[tagColumn(tag)] ?? ""))
     .filter((item): item is CardMetadata => item !== null)
 
   return (

@@ -1,23 +1,10 @@
 import { useState, useMemo } from "react"
 
-import statusData from "../component-status-data.json"
-
-type ApiStatus =
-  | "stable"
-  | "experimental"
-  | "deprecated"
-  | "internal"
-  | "unknown"
-
-interface ComponentEntry {
-  name: string
-  zone: string
-  apiStatus: ApiStatus
-  tags: string[]
-  hasUnitTests: boolean
-  hasMdxDocs: boolean
-  storyFile: string
-}
+import {
+  componentStatusData as statusData,
+  type ApiStatus,
+  type ComponentEntry,
+} from "@/component-status"
 
 const STATUS_CONFIG: Record<
   ApiStatus,

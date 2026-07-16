@@ -64,7 +64,6 @@ export function DateCell<R extends RecordType>({
           placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}
           label={editableColumn.label}
           hideLabel
-          showIcon={false}
           transparent
           displayFormat="default"
           value={datePickerValue}

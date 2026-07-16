@@ -12,6 +12,7 @@ import { useNumberCellLayout } from "./hooks/useNumberCellLayout"
 export function NumberCell<R extends RecordType>({
   editableColumn,
   value,
+  inputPlaceholder,
   error,
   loading,
   onChange,
@@ -24,11 +25,8 @@ export function NumberCell<R extends RecordType>({
   const parsed = trimmed !== "" && trimmed != null ? Number(trimmed) : NaN
   const numericValue: number | null = isFinite(parsed) ? parsed : null
 
-  const { ref, width, locale, units, unitsBefore } = useNumberCellLayout(
-    config,
-    numericValue,
-    item
-  )
+  const { ref, width, locale, units, unitsBefore, grouping } =
+    useNumberCellLayout(config, numericValue, item)
 
   const handleChange = (newValue: number | null) => {
     if (newValue == null) {
@@ -85,11 +83,13 @@ export function NumberCell<R extends RecordType>({
             label={editableColumn.label}
             hideLabel
             value={numericValue}
+            placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}
             onChange={handleChange}
             loading={loading}
             transparent
             hint=""
             locale={locale}
+            grouping={grouping}
             min={config?.min}
             max={config?.max}
             step={config?.step}

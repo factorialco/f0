@@ -8,10 +8,12 @@ import {
   type NodeTypes,
 } from "@xyflow/react"
 import {
+  type ForwardedRef,
   type ReactNode,
   memo,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -37,7 +39,11 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
-import type { F0GraphNodeRenderContext, F0GraphProps } from "../../F0Graph"
+import type {
+  F0GraphHandle,
+  F0GraphNodeRenderContext,
+  F0GraphProps,
+} from "../../F0Graph"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
 import { useGraphRenderModel } from "../../hooks/useGraphRenderModel"
@@ -63,7 +69,7 @@ import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
-import type { F0GraphNodeTagType } from "../F0GraphNode"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {
@@ -125,8 +131,11 @@ const customEdgeTypes: EdgeTypes = {
 }
 
 // ─── View (consumes ReactFlow hooks via the provider in the shell) ─────────
-export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
+export function F0GraphView<T = unknown>(
+  props: F0GraphProps<T> & { handleRef?: ForwardedRef<F0GraphHandle> }
+) {
   const {
+    handleRef,
     nodes: nodesProp,
     edges: edgesProp,
     rootNodes,
@@ -188,7 +197,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
   const visibleTagTypesArr =
     controlledVisibleTagTypes ?? defaultVisibleTagTypes ?? nodeTagTypes ?? []
   const visibleTagTypesSet = useMemo(
-    () => new Set<F0GraphNodeTagType>(visibleTagTypesArr),
+    () => new Set<F0GraphNodeTagColumn>(visibleTagTypesArr),
     [visibleTagTypesArr]
   )
 
@@ -498,10 +507,21 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     // store, so center on its layout position instead of an id-based fitView
     // (which silently no-ops for a missing node).
     if (enableNodeWindowing && centerOnNode(id, 300)) return
+    // Frame the node together with its (present) direct children and cap the
+    // zoom, so navigation lands with surrounding context instead of zooming a
+    // single node to `maxZoom` (2×) — same framing as the `initialFocusNodeId`
+    // first frame.
+    const childIds = nodeMap.get(id)?.children.map((c) => c.id) ?? []
+    const framed = resolveInitialFitViewNodes(
+      id,
+      childIds,
+      new Set(renderedNodeIds)
+    )
     reactFlow.fitView({
-      nodes: [{ id }],
+      nodes: framed ?? [{ id }],
       duration: 300,
       padding: FIT_VIEW_PADDING_LOOSE,
+      maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom),
     })
   }
   useEffect(() => {
@@ -516,6 +536,22 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     )
     return () => clearTimeout(timer)
   }, [focusedNode])
+
+  // Imperative API: `focusNode` fires on every call, independent of prop
+  // values, so a consumer's search can re-center on the same node the user
+  // picks twice (the `focusedNode` prop can't — an unchanged value never
+  // re-runs its effect). `clearSelection` lets the consumer drop the click ring
+  // when it marks a node another way (e.g. a search / "Find me" highlight).
+  const clearSelectionRef = useRef<() => void>(() => {})
+  clearSelectionRef.current = clearSelection
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      focusNode: (nodeId: string) => flyToFocusedRef.current(nodeId),
+      clearSelection: () => clearSelectionRef.current(),
+    }),
+    []
+  )
 
   // ── Split context values (wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(

@@ -348,6 +348,27 @@ describe("F0GraphNode", () => {
       expect(screen.queryByText("Active")).not.toBeInTheDocument()
     })
 
+    it("detail: filters tags by `column` so same-`type` columns toggle independently", () => {
+      render(
+        <F0GraphNode
+          variant="detail"
+          avatar={personAvatar}
+          title="Alice"
+          subtitle="Engineer"
+          // Two raw tags; only the "workplace" column is visible.
+          tags={[
+            { type: "raw", text: "Madrid", column: "workplace" },
+            { type: "raw", text: "2020-01-01", column: "hireDate" },
+          ]}
+          visibleTagTypes={new Set(["workplace"])}
+        />
+      )
+
+      expect(screen.getByText("Madrid")).toBeInTheDocument()
+      // Hidden despite sharing the `raw` type with the visible tag.
+      expect(screen.queryByText("2020-01-01")).not.toBeInTheDocument()
+    })
+
     it("does not wrap in a hover card when hoverCard is not set", () => {
       render(
         <F0GraphNode

@@ -1683,6 +1683,7 @@ const OneDataCollectionComp = <
           onLoadData={onLoadData}
           onLoadError={onLoadError}
           tmpFullWidth={tmpFullWidth}
+          searchSelectionNonce={searchPreview.selectionNonce}
         />
       </div>
       {emptyState ? (
