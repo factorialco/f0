@@ -997,19 +997,19 @@ const getSessionCalendarDate = (session: GroupSessionRow) =>
 // Distinct from a participant's Attendance. Values: Upcoming / Live / Ended.
 const getSessionLifecycle = (session: GroupSessionRow) =>
   session.liveState === "completed"
-    ? { label: "Ended", status: "positive" as const }
+    ? { label: "Ended", color: "indigo" as const }
     : session.liveState === "live"
-      ? { label: "Live", status: "warning" as const }
-      : { label: "Upcoming", status: "neutral" as const }
+      ? { label: "Live", color: "yellow" as const }
+      : { label: "Upcoming", color: "smoke" as const }
 
 // A participant's own attendance for a session (per-person) — INDEPENDENT of the
 // session's Status (you can be "Not started" while the session is Live, or
 // "Not attended" once it Ended). Values: Not started / In progress / Attended /
 // Not attended. Illustrative per-session mock data (no real attendance feed).
 const participantAttendanceById: Record<string, { label: string; status: "neutral" | "info" | "positive" | "warning" | "critical" }> = {
-  "session-1": { label: "Not started", status: "neutral" }, // Live now, but you haven't joined yet
+  "session-1": { label: "In progress", status: "info" }, // live and you're in it
   "session-3": { label: "Attended", status: "positive" }, // ended — you attended
-  "session-6": { label: "Not attended", status: "critical" }, // ended — you missed it
+  "session-6": { label: "Didn't attend", status: "critical" }, // ended — you missed it
 }
 const getParticipantAttendance = (session: GroupSessionRow): { label: string; status: "neutral" | "info" | "positive" | "warning" | "critical" } =>
   participantAttendanceById[session.id] ?? { label: "Not started", status: "neutral" }
@@ -1607,7 +1607,7 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
     { id: "date", label: "Date", sorting: "startsAt", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.date }) },
     { id: "location", label: "Location", render: (session: GroupSessionRow) => session.modality === "Virtual" ? "-" : session.modality },
     { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
-    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getSessionLifecycle(session) }) },
+    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color } }) },
     { id: "attendance", label: "Attendance", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getParticipantAttendance(session) }) },
   ] } }]} />
 }
@@ -1676,7 +1676,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
               {tab === "details" ? (
                 <F0Box display="flex" flexDirection="column" gap="3xl">
                   <F0Box display="grid" columns="2" gap="xl">
-                    <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionLifecycle(session).label, variant: getSessionLifecycle(session).status }} />
+                    <DetailsItem title="Status" content={{ type: "dot-tag", text: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color }} />
                     <DetailsItem title="Attendance" content={{ type: "status-tag", text: getParticipantAttendance(session).label, variant: getParticipantAttendance(session).status }} />
                   </F0Box>
                   <F0Box display="grid" columns="2" gap="xl">
@@ -1684,7 +1684,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
                     <DetailsItem title="Date" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Hour" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Location" content={{ type: "item", text: "—" }} />
-                    <DetailsItem title="Modality" content={{ type: "item", text: session.modality, icon: session.modality === "Virtual" ? Link : People }} />
+                    <DetailsItem title="Modality" content={{ type: "item", text: session.modality, icon: session.modality === "Virtual" ? Desktop : People }} />
                     <DetailsItem title="Instructors" content={{ type: "avatar-list", avatarList: { avatars: [{ type: "person", firstName: "Adam", lastName: "Joseph" }], size: "sm", type: "person", max: 3 } }} />
                   </F0Box>
                   <F0Box display="flex" flexDirection="column" gap="sm">
@@ -4385,8 +4385,8 @@ function GroupSessionsTab({
                 { id: "name", label: "Session", sorting: "name", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.name }) },
                 { id: "date", label: "Date", sorting: "date", render: (session: GroupSessionRow) => session.date },
                 { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
-                { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getSessionLifecycle(session) }) },
-                { id: "modality", label: "Modality", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: session.modality, icon: session.modality === "Virtual" ? Link : People } }) },
+                { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color } }) },
+                { id: "modality", label: "Modality", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: session.modality, icon: session.modality === "Virtual" ? Desktop : People } }) },
               ],
             },
           },
@@ -4846,11 +4846,11 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 30 }}>
         <F0Box display="grid" columns="2" gap="5xl">
-          <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionLifecycle(session).label, variant: getSessionLifecycle(session).status }} />
+          <DetailsItem title="Status" content={{ type: "dot-tag", text: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
-          <DetailsItem title="Modality" content={{ type: "item", text: session.modality, icon: session.modality === "Virtual" ? Link : People }} />
+          <DetailsItem title="Modality" content={{ type: "item", text: session.modality, icon: session.modality === "Virtual" ? Desktop : People }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Date" content={{ type: "item", text: session.date.split(", ")[0] ?? session.date }} />
