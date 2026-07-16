@@ -517,7 +517,7 @@ const WelcomeCards = () => {
 }
 
 const meta: Meta<typeof ApplicationFrame> = {
-  title: "ApplicationFrame",
+  title: "App shell/ApplicationFrame",
   component: ApplicationFrame,
   tags: ["autodocs", "experimental"],
   parameters: {
