@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.40.0](https://github.com/factorialco/f0/compare/f0-react-v4.39.1...f0-react-v4.40.0) (2026-07-16)
+
+
+### Features
+
+* **component-status:** add build-time component DoD status API ([#4719](https://github.com/factorialco/f0/issues/4719)) ([8ee5f7a](https://github.com/factorialco/f0/commit/8ee5f7ae6d8248a673b5b7fdc988f99b657d9040))
+
 ## [4.39.1](https://github.com/factorialco/f0/compare/f0-react-v4.39.0...f0-react-v4.39.1) (2026-07-15)
 
 
