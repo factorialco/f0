@@ -1002,16 +1002,17 @@ const getSessionLifecycle = (session: GroupSessionRow) =>
       ? { label: "Live", status: "warning" as const }
       : { label: "Upcoming", status: "neutral" as const }
 
-// A participant's own attendance for a session (per-person). Distinct from the
-// session Status. Values: Not started / In progress / Attended / Not attended.
-// NOTE: the prototype has no real per-participant attendance data, so this is
-// derived from the session state as a proxy ("Not attended" needs real data).
-const getParticipantAttendance = (session: GroupSessionRow) =>
-  session.liveState === "completed"
-    ? { label: "Attended", status: "positive" as const }
-    : session.liveState === "live"
-      ? { label: "In progress", status: "warning" as const }
-      : { label: "Not started", status: "neutral" as const }
+// A participant's own attendance for a session (per-person) — INDEPENDENT of the
+// session's Status (you can be "Not started" while the session is Live, or
+// "Not attended" once it Ended). Values: Not started / In progress / Attended /
+// Not attended. Illustrative per-session mock data (no real attendance feed).
+const participantAttendanceById: Record<string, { label: string; status: "neutral" | "info" | "positive" | "warning" | "critical" }> = {
+  "session-1": { label: "Not started", status: "neutral" }, // Live now, but you haven't joined yet
+  "session-3": { label: "Attended", status: "positive" }, // ended — you attended
+  "session-6": { label: "Not attended", status: "critical" }, // ended — you missed it
+}
+const getParticipantAttendance = (session: GroupSessionRow): { label: string; status: "neutral" | "info" | "positive" | "warning" | "critical" } =>
+  participantAttendanceById[session.id] ?? { label: "Not started", status: "neutral" }
 
 const myTrainingModules: CourseModuleRow[] = [
   { id: "module-1", title: "Introduction and learning objectives", blocks: 3, status: "completed" },
