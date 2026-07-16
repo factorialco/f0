@@ -1847,6 +1847,11 @@ export declare type ButtonDropdownItem<T = string> = {
      * The description of the item.
      */
     description?: string;
+    /**
+     * Whether the item is disabled.
+     * @default false
+     */
+    disabled?: boolean;
 };
 
 export declare type ButtonDropdownMode = (typeof buttonDropdownModes)[number];
@@ -3146,6 +3151,13 @@ declare type CollectionProps<Record extends RecordType, Filters extends FiltersD
     tmpFullWidth?: boolean;
     /** Indicates the source visualization type */
     fromVisualization?: TableVisualizationType;
+    /**
+     * Bumps on every shared-search result selection. Lets a visualization
+     * re-fire its reveal/focus even when the selected record (hence the derived
+     * reveal target) is unchanged — so re-searching the same node re-centers,
+     * like the graph's "Find me". Only the graph view reads it today.
+     */
+    searchSelectionNonce?: number;
 } & VisualizationOptions;
 
 declare type CollectionVisualizations<Record extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<Record>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<Record>> = {
@@ -4350,6 +4362,9 @@ declare type DateValue = {
 declare type DefaultAction = BannerAction;
 
 export declare const defaultTranslations: {
+    readonly common: {
+        readonly selectPlaceholder: "Select";
+    };
     readonly countries: {
         ad: string;
         ae: string;
@@ -4655,6 +4670,9 @@ export declare const defaultTranslations: {
                 readonly saveFailed: "Save failed";
             };
             readonly addRow: "Add row";
+            readonly removeRow: "Remove row";
+            readonly editRow: "Edit";
+            readonly reorderRow: "Drag to reorder";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -5197,6 +5215,15 @@ export declare const defaultTranslations: {
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
             readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
+        readonly entitiesList: {
+            readonly add: "Add";
+            readonly edit: "Edit";
+            readonly remove: "Remove";
+            readonly view: "View";
+            readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
+            readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
+            readonly addBlockedMaxHint: "You've reached the maximum number of items";
+        };
         readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
@@ -5618,6 +5645,7 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -5732,6 +5760,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * function whose return value isn't statically known.
      */
     selectConfig?: SelectCellConfig<R>;
+    /**
+     * Configuration for `"text"` cells. Sets the input type and an optional
+     * leading icon (url/email get one by default).
+     */
+    textConfig?: TextCellConfig;
     /**
      * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
      * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
@@ -5902,6 +5935,17 @@ export declare type enhanceTextParams = {
     customIntent?: string;
     context?: string;
 };
+
+/**
+ * All valid renderIf conditions for entities list fields
+ */
+declare type EntitiesListFieldRenderIf = CommonRenderIfCondition | F0BaseFieldRenderIfFunction;
+
+/**
+ * A single entry in a entities list field. The row shape is defined by the
+ * field's item `schema` (a Zod object), so entries are plain records.
+ */
+declare type EntitiesListItem = Record<string, unknown>;
 
 /**
  * Grouped configuration for entity references in the AI chat.
@@ -7337,6 +7381,14 @@ export declare interface F0BaseConfig {
      * @default false
      */
     resetOnDisable?: boolean;
+    /**
+     * When true, a change to this field auto-saves the form (a debounced submit),
+     * without waiting for the submit button. Other fields still save on submit.
+     * Independent from the form-level `submitConfig: { type: "autosubmit" }`,
+     * which auto-saves on any field change.
+     * @default false
+     */
+    autoSave?: boolean;
     /** Row ID for horizontal grouping with other fields */
     row?: string;
     /**
@@ -7405,6 +7457,13 @@ export declare interface F0BaseField {
      * @default false
      */
     resetOnDisable?: boolean;
+    /**
+     * When true, a change to this field auto-saves the form (a debounced submit).
+     * Other fields still save on submit. Independent from the form-level
+     * `submitConfig: { type: "autosubmit" }`.
+     * @default false
+     */
+    autoSave?: boolean;
     /** Alert displayed below the field (static props or conditional callback) */
     alert?: F0FieldAlert;
     /**
@@ -8735,6 +8794,308 @@ export declare interface F0DurationInputProps {
     size?: DurationInputSize;
 }
 
+/**
+ * Per-column presentation options, keyed by the item-schema property name.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema` so
+ * callbacks like `listTag` receive a fully-typed `item`.
+ */
+declare interface F0EntitiesListColumnConfig<T = EntitiesListItem> {
+    /** Column header (defaults to the capitalized property name) */
+    label?: string;
+    /** Placeholder shown in the cell input */
+    placeholder?: string;
+    /** Fixed column width in pixels */
+    width?: number;
+    /**
+     * For number/money columns, show the locale's thousands separators in the
+     * resting cell display (grouped while blurred, ungrouped while editing).
+     * Defaults to `true`; set `false` for numbers that shouldn't group (years,
+     * IDs, …).
+     */
+    grouping?: boolean;
+    /**
+     * Hides the column while keeping its value in each row. Useful for values
+     * that drive row actions (e.g. an `archived` flag toggled from a custom
+     * action) but shouldn't be shown or edited as a cell.
+     */
+    hidden?: boolean;
+    /**
+     * In `list-view`, render this field as a read-only colored tag (a semantic
+     * status tag or a dot-color tag) instead of plain text — e.g. map an enum
+     * value to a color. Returned per row; return `undefined` to fall back to
+     * text. The tag shows on the right side of the row and the field is dropped
+     * from the description lines. Ignored in `editable-table` mode.
+     */
+    listTag?: (value: unknown, item: T) => F0EntitiesListFieldTag | undefined;
+}
+
+/**
+ * F0 config options specific to entities list fields.
+ *
+ * A entities list renders an editable table for an array of objects whose
+ * shape is defined by `schema`. Columns and cell types are derived from the
+ * schema: `z.string()` → text cell, `z.number()` → number cell,
+ * `z.enum([...])` → select cell. Rows can be reordered by dragging, removed
+ * individually, and appended (when `config.canAddItems` is not false).
+ */
+declare interface F0EntitiesListConfig {
+    /**
+     * Zod object schema describing one row of the list (used for add, edit and
+     * display). Provide this — the add/edit dialogs share the parent form's
+     * submit — or `createFormDefinition` + `updateFormDefinition` for separate
+     * submit handlers.
+     */
+    schema?: z.ZodObject<z.ZodRawShape>;
+    /**
+     * Form definition (own `onSubmit`) for the add dialog. Pair with
+     * `updateFormDefinition`. Its submit runs on add, then the item is committed
+     * to the field value.
+     */
+    createFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>;
+    /**
+     * Form definition (own `onSubmit`) for the edit dialog. Its schema is the
+     * canonical row shape (columns, display, value type). Its submit runs on
+     * edit, then the row is updated in the field value.
+     */
+    updateFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>;
+    /** Behavior options (add button, min/max items, column presentation) */
+    config?: F0EntitiesListOptions;
+}
+
+/** Title and supporting description for one of the add/edit dialogs. */
+declare interface F0EntitiesListDialogLabels {
+    /**
+     * Dialog title. For the edit dialog this is also the tooltip of the per-row
+     * edit action when it's shown icon-only (e.g. in `list-view`).
+     */
+    title?: string;
+    /**
+     * Supporting description shown under the dialog title. For the add (create)
+     * dialog this is also shown as the add button's hover tooltip.
+     */
+    description?: string;
+}
+
+/**
+ * Entities list field with all properties for rendering (runtime type)
+ */
+declare type F0EntitiesListField = F0BaseField & {
+    type: "entitiesList";
+    /** Canonical row schema; columns/display/value are derived from it */
+    itemSchema: z.ZodObject<z.ZodRawShape>;
+    /** User-provided add-dialog form definition (own onSubmit), if any */
+    createFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>;
+    /** User-provided edit-dialog form definition (own onSubmit), if any */
+    updateFormDefinition?: F0FormDefinitionSingleSchema<z.ZodObject<z.ZodRawShape>>;
+    /** Whether rows can be reordered by dragging (defaults to true) */
+    sortable?: boolean;
+    /** Whether the user can append new rows (defaults to true) */
+    canAddItems?: boolean;
+    /** Forces inline cell editing on/off, overriding the column-count heuristic */
+    supportInlineEditing?: boolean;
+    /** How the list is presented in dialog mode (@default "editable-table") */
+    visualization?: F0EntitiesListVisualization;
+    /** Overrides row title/description/avatar in `list-view` mode */
+    listItem?: F0EntitiesListItemDefinition;
+    /** Per-item link for navigable `list-view` rows (no `updateSchema`) */
+    itemHref?: (item: EntitiesListItem) => string | undefined;
+    /** User-facing text (add button, dialog description/title) */
+    labels?: F0EntitiesListLabels;
+    /** Ids of the items that can be edited (matched against `item.id`) */
+    editableIds?: Array<string | number>;
+    /** Maximum number of rows allowed */
+    maxItems?: number;
+    /** Per-column presentation options, keyed by item-schema property name */
+    columns?: Record<string, F0EntitiesListColumnConfig>;
+    /** Custom trailing actions per row (resolved per row) */
+    rowActions?: (item: EntitiesListItem, index: number) => F0EntitiesListRowAction[];
+    /** Conditional rendering based on another field's value */
+    renderIf?: EntitiesListFieldRenderIf;
+};
+
+/**
+ * Config for entities list fields (array of `{ title, url }` objects with
+ * drag-to-reorder and per-row removal).
+ */
+declare type F0EntitiesListFieldConfig = F0BaseConfig & F0EntitiesListConfig & {
+    fieldType: "entitiesList";
+};
+
+/**
+ * A read-only colored tag for a field in `list-view`: either a semantic status
+ * tag or a dot-color tag. Returned per row from a column's `listTag`.
+ */
+declare type F0EntitiesListFieldTag = {
+    type: "status";
+    /** Semantic status color (neutral/info/positive/warning/critical). */
+    status: StatusVariant;
+    /** Tag text. */
+    label: string;
+    /** Optional leading icon. */
+    icon?: IconType;
+    /** Optional hover tooltip. */
+    tooltip?: string;
+} | {
+    type: "dotTag";
+    /** Dot color. */
+    color: NewColor;
+    /** Tag text. */
+    label: string;
+};
+
+/**
+ * Overrides how each row is labelled in `list-view` mode. When omitted, the
+ * first visible field becomes the title and the remaining visible fields
+ * become description lines.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema`.
+ */
+declare interface F0EntitiesListItemDefinition<T = EntitiesListItem> {
+    /** Row title (defaults to the first visible field's value). */
+    title?: (item: T) => string;
+    /** Description lines shown under the title (defaults to the other fields). */
+    description?: (item: T) => string[];
+    /** Optional leading avatar for the row. */
+    avatar?: (item: T) => AvatarVariant | undefined;
+}
+
+/**
+ * User-facing text for a entities list field. All labels are optional and
+ * fall back to sensible i18n defaults.
+ */
+declare interface F0EntitiesListLabels {
+    /** Label for the button that appends a new row (defaults to i18n "Add"). */
+    addButton?: string;
+    /**
+     * Title/description for the add (create) dialog. `title` defaults to
+     * `addButton`; `description` also becomes the add button's hover tooltip.
+     */
+    create?: F0EntitiesListDialogLabels;
+    /**
+     * Title/description for the edit (update) dialog. `title` also becomes the
+     * tooltip of the per-row edit action when it's shown icon-only (list-view).
+     */
+    update?: F0EntitiesListDialogLabels;
+    /**
+     * Label for the per-row edit action. Shown as visible text in the editable
+     * table and as the tooltip on the icon-only edit action in `list-view`
+     * (where it defaults to the `update` dialog title).
+     */
+    edit?: string;
+    /** Label for the per-row remove action (defaults to i18n "Remove"). */
+    remove?: string;
+}
+
+/**
+ * Behavior options for a entities list field.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema` so
+ * `itemHref`, `listItem`, `rowActions` and `columns` receive a typed `item`.
+ */
+declare interface F0EntitiesListOptions<T = EntitiesListItem> {
+    /**
+     * Whether rows can be reordered by dragging their handle.
+     * @default true
+     */
+    sortable?: boolean;
+    /**
+     * Whether the user can append new rows.
+     * @default true
+     */
+    canAddItems?: boolean;
+    /**
+     * Forces inline cell editing on/off, overriding the automatic behavior.
+     * By default, lists with 2 or fewer columns edit inline and larger ones
+     * add/edit through a dialog. Set `true` to edit inline even with 3+ columns,
+     * or `false` to always use the dialog.
+     */
+    supportInlineEditing?: boolean;
+    /**
+     * How the list is presented when there's no inline editing (dialog mode).
+     * @default "editable-table"
+     * @see {@link F0EntitiesListVisualization}
+     */
+    visualization?: F0EntitiesListVisualization;
+    /**
+     * Overrides how each row is labelled in `list-view` mode. Ignored for the
+     * `editable-table` visualization.
+     */
+    listItem?: F0EntitiesListItemDefinition<T>;
+    /**
+     * Per-item link (`list-view` only). When set, each row becomes navigable —
+     * clicking the row (or its trailing arrow) goes to the returned URL. Only
+     * honored when there's no `updateSchema`: with a split schema the row shows
+     * the edit (pencil) action and opens the update dialog on click instead.
+     */
+    itemHref?: (item: T) => string | undefined;
+    /** User-facing text (add button, dialog description/title). */
+    labels?: F0EntitiesListLabels;
+    /**
+     * Restricts which items can be edited, matched against each item's `id`
+     * property. When omitted, every item is editable. Items without an `id`
+     * (e.g. rows just added by the user and not yet persisted) stay editable.
+     *
+     * With 2 or fewer schema properties this enables/disables inline cell
+     * editing per row; with more than 2 it shows/hides the per-row edit
+     * (pencil) action that opens the edit dialog.
+     */
+    editableIds?: Array<string | number>;
+    /** Minimum number of rows required (defaults to 1 unless the field is optional) */
+    minItems?: number;
+    /** Maximum number of rows allowed. When reached the add button is hidden. */
+    maxItems?: number;
+    /** Per-column presentation options, keyed by item-schema property name */
+    columns?: Record<string, F0EntitiesListColumnConfig<T>>;
+    /**
+     * Custom trailing actions per row. Resolved per row, so the actions can
+     * depend on the row's value — e.g. show "Archive" or "Unarchive" based on a
+     * hidden `archived` column. Each action's `onClick` receives helpers to
+     * update or remove the row.
+     */
+    rowActions?: (item: T, index: number) => F0EntitiesListRowAction<T>[];
+}
+
+/**
+ * A custom trailing action for a row.
+ *
+ * @typeParam T - The row value type; inferred from the field `schema`.
+ */
+declare interface F0EntitiesListRowAction<T = EntitiesListItem> {
+    /** Icon shown in the action button. */
+    icon: IconType;
+    /** Accessible label; also shown next to the icon when `showLabel` is set. */
+    label: string;
+    /** Render the label next to the icon. Icon-only by default. */
+    showLabel?: boolean;
+    /** Use the destructive (critical) button styling. */
+    critical?: boolean;
+    /** Disables the button. */
+    disabled?: boolean;
+    /** Called when the action is clicked, with helpers to mutate the row. */
+    onClick: (context: F0EntitiesListRowActionContext<T>) => void;
+}
+
+/** Helpers passed to a row action's `onClick` to mutate that row. */
+declare interface F0EntitiesListRowActionContext<T = EntitiesListItem> {
+    /** The row's current values. */
+    item: T;
+    /** The row's index. */
+    index: number;
+    /** Merge a partial update into this row and commit it to the form value. */
+    update: (partial: Partial<T>) => void;
+    /** Remove this row. */
+    remove: () => void;
+}
+
+/**
+ * How the list is presented when inline cell editing is off (dialog mode).
+ * - `"editable-table"` (default): a read-only editable-style table.
+ * - `"list-view"`: a OneDataCollection list of the items; add/edit still go
+ *   through the form dialog, and each row gets edit/remove actions.
+ */
+declare type F0EntitiesListVisualization = "editable-table" | "list-view";
+
 export declare function F0EventCatcherProvider({ children, onEvent, enabled, catchEvents, }: EventCatcherProviderProps): JSX.Element;
 
 export declare const F0FAQCard: ({ headerIcon, items, defaultExpandedId, expandedId: controlledExpandedId, onExpandedChange, allowMultiple, }: F0FAQCardProps) => JSX_2.Element | null;
@@ -8786,7 +9147,7 @@ export declare interface F0FAQItem {
 /**
  * Union of all F0 field types used for rendering
  */
-export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0RichTextField | F0FileField | F0CardSelectField | F0CustomField;
+export declare type F0Field = F0TextField | F0NumberField | F0DurationField | F0TextareaField | F0SelectField | F0CheckboxField | F0SwitchField | F0DateField | F0TimeField | F0DateTimeField | F0DateRangeField | F0PeriodField | F0RichTextField | F0FileField | F0CardSelectField | F0EntitiesListField | F0CustomField;
 
 /**
  * Alert configuration for a field.
@@ -8821,12 +9182,12 @@ export declare type F0FieldAlertProps = Omit<F0AlertProps, "variant"> & {
  * @typeParam T - The value type for select fields (string or number)
  * @typeParam R - Record type for data source (when using source instead of options)
  */
-export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0PeriodFieldConfig | F0StringCardSelectConfig;
+export declare type F0FieldConfig<T extends string | number = string | number, R extends Record<string, unknown> = Record<string, unknown>> = F0StringConfig<string, undefined, R> | F0NumberFieldConfig<R> | F0BooleanConfig | F0DateFieldConfig | F0TimeFieldConfig | F0DateTimeFieldConfig | F0ArrayConfig<T, R> | F0FileFieldConfig | F0ObjectConfig | F0PeriodFieldConfig | F0StringCardSelectConfig | F0EntitiesListFieldConfig;
 
 /**
  * Field types for rendering
  */
-export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "custom";
+export declare type F0FieldType = "text" | "number" | "percentage" | "money" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare type F0FileAction = {
     icon?: IconType;
@@ -9403,6 +9764,53 @@ export declare namespace f0FormField {
     export function multiSelect<V extends string | number = string, R extends Record<string, unknown> = Record<string, unknown>>(config: MultiSelectConfig<V, R> & {
         optional?: false | undefined;
     }): z.ZodArray<z.ZodString> & F0ZodType<z.ZodArray<z.ZodString>>;
+    /* Excluded from this release type: EntitiesListBaseConfig */
+    /* Excluded from this release type: EntitiesListSingleConfig */
+    /* Excluded from this release type: EntitiesListFormDefsConfig */
+    /* Excluded from this release type: WithRowId */
+    /* Excluded from this release type: EntitiesListArray */
+    /* Excluded from this release type: OptionalEntitiesListArray */
+    /**
+     * Entities list field: an editable table for an array of objects.
+     *
+     * The row shape is defined by `schema` and columns are derived from it
+     * (`z.string()` → text, `z.number()` → number, `z.enum()` → select).
+     *
+     * @example
+     * // Single schema — same fields for add and edit:
+     * links: f0FormField.entitiesList({
+     *   label: "Links",
+     *   schema: z.object({
+     *     title: z.string().min(1),
+     *     url: z.string().url(),
+     *   }),
+     *   config: { labels: { addButton: "Add link" }, maxItems: 8 },
+     * })
+     *
+     * @example
+     * // Split form definitions — add and update persist independently:
+     * const createFormDefinition = useF0FormDefinition({
+     *   schema: z.object({ name: z.string(), email: z.string().email() }),
+     *   onSubmit: async ({ data }) => { await api.create(data); return { success: true } },
+     * })
+     * const updateFormDefinition = useF0FormDefinition({
+     *   schema: z.object({ name: z.string(), email: z.string().email(), role: … }),
+     *   onSubmit: async ({ data }) => { await api.update(data); return { success: true } },
+     * })
+     * members: f0FormField.entitiesList({ createFormDefinition, updateFormDefinition })
+     */
+    export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListSingleConfig<TItem> & {
+        optional: true;
+    }): OptionalEntitiesListArray<TItem> & F0ZodType<z.ZodOptional<z.ZodArray<TItem>>>;
+    export function entitiesList<TItem extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListSingleConfig<TItem> & {
+        optional?: false | undefined;
+    }): EntitiesListArray<TItem> & F0ZodType<z.ZodArray<TItem>>;
+    export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
+        optional: true;
+    }): OptionalEntitiesListArray<TUpdate> & F0ZodType<z.ZodOptional<z.ZodArray<TUpdate>>>;
+    export function entitiesList<TCreate extends z.ZodObject<z.ZodRawShape>, TUpdate extends z.ZodObject<z.ZodRawShape>>(config: EntitiesListFormDefsConfig<TCreate, TUpdate> & {
+        optional?: false | undefined;
+    }): EntitiesListArray<TUpdate> & F0ZodType<z.ZodArray<TUpdate>>;
         {};
 }
 
@@ -9882,8 +10290,28 @@ export declare interface F0FormValidationResult {
     rootError?: string;
 }
 
-/** Tag types that can be rendered in a node's metadata row. */
-declare type F0GraphNodeTagType = TagVariant["type"];
+/**
+ * A tag rendered in a node's metadata row. Its visual is driven by the
+ * `TagVariant` `type`; its column identity — which toggle/label/default-
+ * visibility bucket it falls into — is `column ?? type`.
+ */
+declare type F0GraphNodeTag = TagVariant & {
+    /**
+     * Optional column identity, decoupling this tag's show/hide toggle, hover-
+     * card label and default visibility from its visual `type`. Defaults to
+     * `type` when omitted. Use it to give two tags of the same `type` (e.g. a
+     * second `raw` pill) their own independent column.
+     */
+    column?: F0GraphNodeTagColumn;
+};
+
+/**
+ * Identifies the show/hide column a tag belongs to. A column defaults to the
+ * tag's visual `type` (`"raw"`, `"status"`, …) but can be any custom string, so
+ * two tags sharing a `type` — e.g. two `raw` pills — can occupy independent
+ * columns with their own toggle, label and default visibility.
+ */
+declare type F0GraphNodeTagColumn = string;
 
 export declare const F0GridStack: WithDataTestIdReturnType_7<    {
 ({ options, widgets, onChange, className, static: isStatic, forcePositionSync, }: F0GridStackProps_2): JSX_2.Element;
@@ -11495,7 +11923,7 @@ export declare function fieldsToSeconds(fields: DurationFields): number;
 /**
  * Field types for rendering
  */
-export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "custom";
+export declare type FieldType = "text" | "number" | "duration" | "textarea" | "select" | "checkbox" | "switch" | "date" | "time" | "datetime" | "daterange" | "period" | "richtext" | "file" | "cardSelect" | "entitiesList" | "custom";
 
 export declare const FILE_TYPES: {
     readonly PDF: "pdf";
@@ -12103,19 +12531,24 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     subtitle?: (record: R) => string;
     /** Avatar shown on the leading side of the node pill. */
     avatar?: (record: R) => AvatarVariant;
-    /** Tags rendered in the node metadata row. */
-    tags?: (record: R) => TagVariant[];
     /**
-     * Tag types present on the nodes. When provided, the controls bar gains a
-     * toggle to show/hide each metadata type (like configuring table columns).
+     * Tags rendered in the node metadata row. A tag may set `column` to place it
+     * in its own show/hide column independent of its visual `type` (e.g. a second
+     * `raw` pill that must not merge into the first `raw` column).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
-    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Tag types that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    tags?: (record: R) => F0GraphNodeTag[];
+    /**
+     * Tag columns present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata column (like configuring table columns).
+     * Values are tag `column` keys (or `type` when a tag has no `column`).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Tag columns that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -13331,7 +13764,7 @@ declare type MimeType_2 = "image" | "video" | "audio" | "text" | "application" |
 export { MimeType_2 as MimeType }
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "4xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -13554,6 +13987,12 @@ declare type NumberCellConfig<R extends RecordType = RecordType> = {
     maxDecimals?: number;
     locale?: string;
     /**
+     * Show the locale's thousands separators in the resting display (grouped
+     * while blurred, ungrouped while editing). Defaults to `true`; set `false`
+     * for numbers that shouldn't be grouped (years, IDs, …).
+     */
+    grouping?: boolean;
+    /**
      * Unit label displayed next to the number input.
      * Can be a static string (e.g. `"h"`) or a function that receives the
      * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
@@ -13613,6 +14052,13 @@ declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "re
     min?: number;
     max?: number;
     maxDecimals?: number;
+    /**
+     * Show the locale's thousands separators in the resting display (e.g.
+     * `1,234,567`). While the field is focused the number is shown ungrouped
+     * for easy editing. Off by default — enable it for amounts/quantities, but
+     * leave it off for years, IDs and other non-grouped numbers. @default false
+     */
+    grouping?: boolean;
     onChange?: (value: number | null) => void;
     units?: string;
     extraContent?: ReactNode;
@@ -16109,6 +16555,11 @@ export declare type TagRawProps = {
      * Extra classes merged onto the tag (e.g. to give it a background).
      */
     className?: string;
+    /**
+     * The size of the tag
+     * @default "md"
+     */
+    size?: "md" | "sm";
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -16204,6 +16655,23 @@ declare type TextareaFieldRenderIf = TextRenderIfCondition | CommonRenderIfCondi
  * @removeIn 2.0.0
  */
 export declare type TextareaProps = F0TextAreaInputProps;
+
+declare type TextCellConfig = {
+    /**
+     * Input type passed to the underlying text input. Also selects a default
+     * leading icon (`url` → link, `email` → envelope) matching F0Form's text
+     * fields. Defaults to `"text"`.
+     */
+    inputType?: TextCellInputType;
+    /**
+     * Leading icon. Overrides the default derived from `inputType`; pass to add
+     * an icon to a plain text cell or replace the url/email default.
+     */
+    icon?: IconType;
+};
+
+/** The HTML-ish input type of a text cell. Drives a default leading icon. */
+declare type TextCellInputType = "text" | "email" | "url" | "tel";
 
 /**
  * All valid renderIf conditions for text fields
@@ -17445,7 +17913,7 @@ export declare function useSchemaDefinition(schema: F0FormSchema, sections?: Rec
  * Custom hook to manage selection state for items and groups in a data table
  * Supports single/multi selection, grouped data, pagination, and filtering
  */
-export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
+export declare function useSelectable<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>>({ data, paginationInfo, source, selectionMode, selectedState, onSelectItems, disableSelectAll, isSearchActive, allPagesSelection, resetOnPageChange, preserveSelectionOnDatasetChange, getRenderedSelectableEntries, renderedSelectableCount, }: UseSelectableProps<R, Filters, Sortings, Grouping>): UseSelectableReturn<R, Filters>;
 
 export declare type UseSelectableProps<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Grouping extends GroupingDefinition<R>> = {
     data: Data<R>;
@@ -17500,6 +17968,12 @@ export declare type UseSelectableProps<R extends RecordType, Filters extends Fil
      * reaches rows absent from `data.records`. Falls back to `data.records`.
      */
     getRenderedSelectableEntries?: () => Array<[SelectionId, R]>;
+    /**
+     * Count of currently-rendered selectable rows (incl. nested children). Used
+     * as the item total when it exceeds `paginationInfo.total`, so selection
+     * counts stay correct in nested/tree tables.
+     */
+    renderedSelectableCount?: number;
 };
 
 export declare type UseSelectableReturn<R extends RecordType, Filters extends FiltersDefinition> = {

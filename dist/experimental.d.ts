@@ -1337,6 +1337,11 @@ declare type ButtonDropdownItem<T = string> = {
      * The description of the item.
      */
     description?: string;
+    /**
+     * Whether the item is disabled.
+     * @default false
+     */
+    disabled?: boolean;
 };
 
 declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip" | "fontSize"> & DataAttributes & {
@@ -2357,6 +2362,13 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     tmpFullWidth?: boolean;
     /** Indicates the source visualization type */
     fromVisualization?: TableVisualizationType;
+    /**
+     * Bumps on every shared-search result selection. Lets a visualization
+     * re-fire its reveal/focus even when the selected record (hence the derived
+     * reveal target) is unchanged — so re-searching the same node re-centers,
+     * like the graph's "Find me". Only the graph view reads it today.
+     */
+    searchSelectionNonce?: number;
 } & VisualizationOptions;
 
 /**
@@ -3107,6 +3119,9 @@ declare const daytimePageVariants: (props?: ({
 })) | undefined) => string;
 
 declare const defaultTranslations: {
+    readonly common: {
+        readonly selectPlaceholder: "Select";
+    };
     readonly countries: {
         ad: string;
         ae: string;
@@ -3412,6 +3427,9 @@ declare const defaultTranslations: {
                 readonly saveFailed: "Save failed";
             };
             readonly addRow: "Add row";
+            readonly removeRow: "Remove row";
+            readonly editRow: "Edit";
+            readonly reorderRow: "Drag to reorder";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -3954,6 +3972,15 @@ declare const defaultTranslations: {
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
             readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
+        readonly entitiesList: {
+            readonly add: "Add";
+            readonly edit: "Edit";
+            readonly remove: "Remove";
+            readonly view: "View";
+            readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
+            readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
+            readonly addBlockedMaxHint: "You've reached the maximum number of items";
+        };
         readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
@@ -4159,6 +4186,7 @@ export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> 
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -4177,6 +4205,8 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
+
+/* Excluded from this release type: EditableColumn */
 
 /**
  * Map of the attributes modified in a cell update, keyed by record key.
@@ -4219,6 +4249,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * function whose return value isn't statically known.
      */
     selectConfig?: SelectCellConfig<R>;
+    /**
+     * Configuration for `"text"` cells. Sets the input type and an optional
+     * leading icon (url/email get one by default).
+     */
+    textConfig?: TextCellConfig;
     /**
      * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
      * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
@@ -5305,8 +5340,174 @@ export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 export declare const f0FileItemSizes: readonly ["md", "lg"];
 
-/** Tag types that can be rendered in a node's metadata row. */
-declare type F0GraphNodeTagType = TagVariant["type"];
+/**
+ * F0FormEditableTable is experimental — its API may change without a major bump.
+ */
+export declare const F0FormEditableTable: typeof F0FormEditableTableBase;
+
+/**
+ * A lightweight, fully controlled editable table built on the OneTable
+ * primitives and the editable-table cell components (`text`, `number`,
+ * `money`, `date`, `select`, ...), with optional drag-to-reorder rows,
+ * per-row removal and an add-row action — no data collection required.
+ *
+ * The parent owns the `items` array: cell edits are reported via
+ * `onCellChange`, reorders via `onReorderRows`, removals via `onRemoveRow`,
+ * and additions via `addRow.onClick`.
+ */
+declare function F0FormEditableTableBase<R extends RecordType>({ columns: columnsProp, items, getRowId, onCellChange, sortableRows, onReorderRows, onRemoveRow, onEditRow, canEditRow, rowActions, getCellError, addRow, editLabel: editLabelProp, removeLabel: removeLabelProp, bordered, disabled, }: F0FormEditableTableProps<R>): JSX_2.Element;
+
+/**
+ * Column definition for F0FormEditableTable.
+ *
+ * Reuses the editable-table column contract — same `editType` cell types
+ * (`text`, `number`, `money`, `date`, `select`, `display-only`, `disabled`),
+ * `selectConfig`, `numberConfig`, `dateConfig`, `formula` and `cellHint` —
+ * minus the data-collection-only options (sorting, summaries, column
+ * settings, header groups).
+ */
+export declare type F0FormEditableTableColumn<R extends RecordType> = Omit<EditableColumn<R>, "render" | "sorting" | "summary" | "summaryPlaceholder" | "order" | "hidden" | "noHiding" | "headerGroupId" | "sticky" | "id"> & {
+    /** The record key this column reads from and writes to. */
+    id: string;
+    /**
+     * Optional custom renderer for read-only display (same contract as the
+     * editable table). When omitted, the raw value at `item[id]` is shown.
+     */
+    render?: EditableColumn<R>["render"];
+};
+
+/**
+ * Props for {@link F0FormEditableTable}: a lightweight, fully controlled editable
+ * table built on the OneTable primitives and the editable-table cell
+ * components — no data collection (source, adapters, filters) required.
+ */
+export declare type F0FormEditableTableProps<R extends RecordType> = {
+    /** Column definitions (see {@link F0FormEditableTableColumn}). */
+    columns: ReadonlyArray<F0FormEditableTableColumn<R>>;
+    /**
+     * Rows in display order. The table is controlled: edits, reorders and
+     * removals are reported via callbacks and the parent updates `items`.
+     */
+    items: R[];
+    /**
+     * Stable id per row, used as the React key and the drag identity.
+     * Defaults to `String(item.id)` and falls back to the index.
+     */
+    getRowId?: (item: R, index: number) => string;
+    /**
+     * Called when a cell value changes (same contract as the editableTable
+     * visualization). Resolve with nothing for success, or a
+     * `{ columnId: message }` record to show per-cell errors.
+     */
+    onCellChange: (params: EditableTableOnCellChangeParams<R>) => Promise<void | Record<string, string>>;
+    /** Shows a leading drag handle on each row to reorder by dragging. */
+    sortableRows?: boolean;
+    /** Called after a row is dropped in a new position. */
+    onReorderRows?: (params: {
+        /** All items in their new order. */
+        items: R[];
+        /** Index the row was dragged from. */
+        from: number;
+        /** Index the row was dropped at. */
+        to: number;
+        /** The moved record. */
+        movedItem: R;
+    }) => void;
+    /** When provided, each row gets a trailing remove button. */
+    onRemoveRow?: (item: R, index: number) => void;
+    /**
+     * When provided, each row gets a trailing edit (pencil) button.
+     * Use for row editing flows that happen outside the table (e.g. a dialog).
+     */
+    onEditRow?: (item: R, index: number) => void;
+    /**
+     * Controls per-row visibility of the edit button (only relevant when
+     * `onEditRow` is provided). Defaults to showing it on every row.
+     */
+    canEditRow?: (item: R, index: number) => boolean;
+    /**
+     * Custom trailing actions per row. Return the actions to show for the given
+     * row; because it's resolved per row, the actions can depend on the row's
+     * value (e.g. an "Archive" vs "Unarchive" toggle driven by a hidden column).
+     * Rendered in the trailing actions column, between the edit and remove
+     * buttons when those are also present.
+     */
+    rowActions?: (item: R, index: number) => F0FormEditableTableRowAction<R>[];
+    /**
+     * External validation error for a cell, keyed by the column id. When it
+     * returns a message the cell shows an error border and a tooltip with the
+     * message on hover/focus. Use for errors coming from outside the table
+     * (e.g. schema validation), on top of the errors `onCellChange` can return.
+     */
+    getCellError?: (item: R, columnId: string, index: number) => string | undefined;
+    /** When provided, renders an add-row button under the last row. */
+    addRow?: {
+        /** Button label (defaults to the i18n editable-table "Add row"). */
+        label?: string;
+        onClick: () => void | Promise<void>;
+        /** Disables the add button (e.g. while an existing row is still invalid). */
+        disabled?: boolean;
+        /** Tooltip shown on hover while the add button is `disabled`, explaining why. */
+        disabledTooltip?: string;
+    };
+    /** Label for the per-row edit action (defaults to the i18n "Edit row"). */
+    editLabel?: string;
+    /** Label for the per-row remove action (defaults to the i18n "Remove row"). */
+    removeLabel?: string;
+    /** Wraps the table in a rounded border container. @default true */
+    bordered?: boolean;
+    /**
+     * Disables interaction (dragging, edit/remove/row-action buttons) while
+     * keeping the handle and actions columns in place, so toggling it (e.g. while
+     * a form submits) doesn't shift the layout. Cell editability is controlled
+     * separately via each column's `editType`.
+     */
+    disabled?: boolean;
+};
+
+/**
+ * A custom trailing action button for a row (see
+ * {@link F0FormEditableTableProps.rowActions}).
+ */
+declare type F0FormEditableTableRowAction<R extends RecordType> = {
+    /** Stable key within the row's action list (defaults to the label). */
+    id?: string;
+    /** Icon shown in the button. */
+    icon: IconType;
+    /** Accessible label; also shown next to the icon when `showLabel` is set. */
+    label: string;
+    /** Render the label next to the icon. Icon-only by default. */
+    showLabel?: boolean;
+    /** Use the destructive (critical) button styling. */
+    critical?: boolean;
+    /** Disables the button. */
+    disabled?: boolean;
+    /** Called when the button is clicked. */
+    onClick: (item: R, index: number) => void | Promise<void>;
+};
+
+/**
+ * A tag rendered in a node's metadata row. Its visual is driven by the
+ * `TagVariant` `type`; its column identity — which toggle/label/default-
+ * visibility bucket it falls into — is `column ?? type`.
+ */
+declare type F0GraphNodeTag = TagVariant & {
+    /**
+     * Optional column identity, decoupling this tag's show/hide toggle, hover-
+     * card label and default visibility from its visual `type`. Defaults to
+     * `type` when omitted. Use it to give two tags of the same `type` (e.g. a
+     * second `raw` pill) their own independent column.
+     */
+    column?: F0GraphNodeTagColumn;
+};
+
+/**
+ * Identifies the show/hide column a tag belongs to. A column defaults to the
+ * tag's visual `type` (`"raw"`, `"status"`, …) but can be any custom string, so
+ * two tags sharing a `type` — e.g. two `raw` pills — can occupy independent
+ * columns with their own toggle, label and default visibility.
+ */
+declare type F0GraphNodeTagColumn = string;
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -5770,6 +5971,11 @@ declare type F0TagRawProps = {
      * Extra classes merged onto the tag (e.g. to give it a background).
      */
     className?: string;
+    /**
+     * The size of the tag
+     * @default "md"
+     */
+    size?: "md" | "sm";
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -6196,19 +6402,24 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     subtitle?: (record: R) => string;
     /** Avatar shown on the leading side of the node pill. */
     avatar?: (record: R) => AvatarVariant;
-    /** Tags rendered in the node metadata row. */
-    tags?: (record: R) => TagVariant[];
     /**
-     * Tag types present on the nodes. When provided, the controls bar gains a
-     * toggle to show/hide each metadata type (like configuring table columns).
+     * Tags rendered in the node metadata row. A tag may set `column` to place it
+     * in its own show/hide column independent of its visual `type` (e.g. a second
+     * `raw` pill that must not merge into the first `raw` column).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
-    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Tag types that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    tags?: (record: R) => F0GraphNodeTag[];
+    /**
+     * Tag columns present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata column (like configuring table columns).
+     * Values are tag `column` keys (or `type` when a tag has no `column`).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Tag columns that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -7065,7 +7276,7 @@ declare interface MetricComputation {
 export declare const MobileDropdown: ({ items, children, dataTestId }: DropdownProps) => JSX_2.Element;
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "4xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -7288,6 +7499,12 @@ declare type NumberCellConfig<R extends RecordType = RecordType> = {
     maxDecimals?: number;
     locale?: string;
     /**
+     * Show the locale's thousands separators in the resting display (grouped
+     * while blurred, ungrouped while editing). Defaults to `true`; set `false`
+     * for numbers that shouldn't be grouped (years, IDs, …).
+     */
+    grouping?: boolean;
+    /**
      * Unit label displayed next to the number input.
      * Can be a static string (e.g. `"h"`) or a function that receives the
      * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
@@ -7342,6 +7559,13 @@ declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "re
     min?: number;
     max?: number;
     maxDecimals?: number;
+    /**
+     * Show the locale's thousands separators in the resting display (e.g.
+     * `1,234,567`). While the field is focused the number is shown ungrouped
+     * for easy editing. Off by default — enable it for amounts/quantities, but
+     * leave it off for years, IDs and other non-grouped numbers. @default false
+     */
+    grouping?: boolean;
     onChange?: (value: number | null) => void;
     units?: string;
     extraContent?: ReactNode;
@@ -9705,6 +9929,23 @@ maxHeight?: number;
  */
 export declare type TextareaProps = F0TextAreaInputProps;
 
+declare type TextCellConfig = {
+    /**
+     * Input type passed to the underlying text input. Also selects a default
+     * leading icon (`url` → link, `email` → envelope) matching F0Form's text
+     * fields. Defaults to `"text"`.
+     */
+    inputType?: TextCellInputType;
+    /**
+     * Leading icon. Overrides the default derived from `inputType`; pass to add
+     * an icon to a plain text cell or replace the url/email default.
+     */
+    icon?: IconType;
+};
+
+/** The HTML-ish input type of a text cell. Drives a default leading icon. */
+declare type TextCellInputType = "text" | "email" | "url" | "tel";
+
 /** A button rendered in the footer at the bottom of the table of contents */
 export declare type TOCAction = {
     label: string;
@@ -10380,32 +10621,32 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
     type: "card";
     /** Configuration options for card visualization */
     options: CardVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Kanban-based visualization type */
     type: "kanban";
     /** Configuration options for kanban visualization */
     options: KanbanVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Table-based visualization type */
     type: "table";
     /** Configuration options for table visualization */
     options: TableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Editable table-based visualization type */
     type: "editableTable";
     /** Configuration options for editable table visualization */
     options: EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** List-based visualization type */
     type: "list";
     /** Configuration options for list visualization */
     options: ListVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Graph/org-chart-based visualization type */
     type: "graph";
     /** Configuration options for graph visualization */
     options: GraphVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Human-readable label for the visualization */
     label: string;
     /** Icon to represent the visualization in UI */
@@ -10440,6 +10681,21 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
      *  If not provided, the global source sortings are used. Pass `{}` to hide the
      *  sort selector for views that don't support sorting (e.g. the org chart). */
     sortings?: Partial<Sortings>;
+};
+
+/**
+ * Optional per-visualization label override for built-in visualization types.
+ * When omitted, the localized built-in label from
+ * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
+ *
+ * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
+ * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
+ * comes from the built-in registry for the visualization type.
+ */
+declare type VisualizationLabelOverrides = {
+    /** Custom label shown in the view switcher chip and Settings selector.
+     *  Defaults to the localized built-in label for this visualization type. */
+    label?: string;
 };
 
 /**
