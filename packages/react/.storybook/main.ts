@@ -92,8 +92,11 @@ const config: StorybookConfig = {
     { directory: "../src/hooks/datasource", titlePrefix: "Resources" },
     { directory: "../src/examples", titlePrefix: "Resources/Examples" },
 
-    // ── Deprecated · scheduled for removal, with migration ───────
-    { directory: "../src/deprecated", titlePrefix: "Deprecated" },
+    // ── deprecated/ dissolved: `deprecated` is a badge, not a section.
+    //    Items sit in their category, marked by the deprecated tag/badge. ──
+    { directory: "../src/deprecated/Dialog", titlePrefix: "Components" },
+    { directory: "../src/deprecated/EntitySelect", titlePrefix: "Components" },
+    { directory: "../src/deprecated/ToggleGroup", titlePrefix: "Components" },
 
     // ── ui/ dissolved: "internal" is a badge, not a section. Items go to
     //    their altitude (primitive / component / pattern); privacy is the
