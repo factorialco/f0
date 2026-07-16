@@ -138,7 +138,6 @@ type ViewId =
   | "my-course-detail"
   | "budget-detail"
   | "survey-template-detail"
-  | "session-waiting-room"
   | "session-room"
 type ToastId = "copied" | "draft" | "export" | "template" | "settings" | "free-course" | null
 type CourseActionDialogId =
@@ -1132,7 +1131,6 @@ const VALID_VIEWS = new Set<string>([
   "my-course-detail",
   "budget-detail",
   "survey-template-detail",
-  "session-waiting-room",
   "session-room",
 ])
 
@@ -1244,7 +1242,7 @@ const columns = [
   },
 ]
 
-type MyTrainingsViewId = "overview" | "course-detail" | "session-room" | "session-waiting-room"
+type MyTrainingsViewId = "overview" | "course-detail" | "session-room"
 type MyTrainingDetailTabId = "overview" | "content" | "materials" | "sessions" | "certificates"
 
 const myTrainingsSlug = "training-live-session-participant"
@@ -1268,7 +1266,7 @@ export default function TrainingLiveSessionParticipant() {
 
 function ParticipantMyTrainingsLiveSessions() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const view = getValidParam(searchParams.get("view"), new Set<string>(["overview", "course-detail", "session-room", "session-waiting-room"]), "overview") as MyTrainingsViewId
+  const view = getValidParam(searchParams.get("view"), new Set<string>(["overview", "course-detail", "session-room"]), "overview") as MyTrainingsViewId
   const selectedCourse = exactCourses.find((course) => course.id === searchParams.get("course")) ?? exactCourses[0]
   const selectedSession = groupSessions.find((session) => session.id === searchParams.get("session")) ?? null
   const groupName = searchParams.get("group") ?? selectedCourse.groups[0] ?? "Training group"
@@ -1276,11 +1274,10 @@ function ParticipantMyTrainingsLiveSessions() {
   const goToCourse = (courseId: string, tab: MyTrainingDetailTabId = "overview") => setSearchParams({ view: "course-detail", course: courseId, tab })
   const goToSession = (sessionId: string) => setSearchParams({ view: "course-detail", course: selectedCourse.id, tab: "sessions", group: groupName, session: sessionId })
   const closeSession = () => setSearchParams({ view: "course-detail", course: selectedCourse.id, tab: "sessions", group: groupName })
-  const joinSession = (session: GroupSessionRow) => setSearchParams({ view: session.liveState === "waiting" ? "session-waiting-room" : "session-room", course: selectedCourse.id, group: groupName, session: session.id })
+  const joinSession = (session: GroupSessionRow) => setSearchParams({ view: "session-room", course: selectedCourse.id, group: groupName, session: session.id })
   const backToSession = () => setSearchParams({ view: "course-detail", course: selectedCourse.id, tab: "sessions", group: groupName, session: (selectedSession ?? groupSessions[0]).id })
 
-  if ((view === "session-room" || view === "session-waiting-room") && selectedSession) {
-    if (view === "session-waiting-room") return <SessionWaitingRoomScreen course={selectedCourse} groupName={groupName} session={selectedSession} onExit={backToSession} />
+  if (view === "session-room" && selectedSession) {
     return <SessionRoomScreen course={selectedCourse} groupName={groupName} session={selectedSession} role="participant" onExit={backToSession} />
   }
 
@@ -1828,7 +1825,7 @@ function TrainingLiveSessionsExperience({ role }: { role: LiveSessionRole }) {
     return <TrainingGroupDetail course={selectedCourse} groupName={groupName} role={role} endedSessionIds={endedSessionIds} onBack={() => setSearchParams({ view: "detail", course: selectedCourse.id, dtab: "training-groups" })} onToast={setToast} />
   }
 
-  if ((view === "session-waiting-room" || view === "session-room") && selectedCourse) {
+  if (view === "session-room" && selectedCourse) {
     const groupName = searchParams.get("group") ?? selectedCourse.groups[0] ?? "Training group"
     const session = groupSessions.find((item) => item.id === searchParams.get("session")) ?? groupSessions[0]
     const groupParams = { view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", session: session.id, stab: "details" }
@@ -1837,9 +1834,6 @@ function TrainingLiveSessionsExperience({ role }: { role: LiveSessionRole }) {
       // Leave the live room and land on the session's sidepanel, already open on
       // the Attendance tab (no attendance-review modal anymore).
       setSearchParams({ view: "group-detail", course: selectedCourse.id, group: groupName, gtab: "sessions", session: session.id, stab: "attendance" })
-    }
-    if (view === "session-waiting-room" && role === "participant") {
-      return <SessionWaitingRoomScreen course={selectedCourse} groupName={groupName} session={session} onExit={() => setSearchParams(groupParams)} />
     }
     return <SessionRoomScreen course={selectedCourse} groupName={groupName} session={session} role={role} onExit={() => setSearchParams(groupParams)} onEndSession={role === "instructor" ? endSession : undefined} />
   }
@@ -4264,7 +4258,7 @@ function TrainingGroupDetail({ course, groupName, role, endedSessionIds, onToast
               session={prejoinSession}
               role={role}
               onBack={() => setPrejoinSession(null)}
-              onJoin={() => setSearchParams({ view: prejoinSession.liveState === "waiting" && role === "participant" ? "session-waiting-room" : "session-room", course: course.id, group: groupName, session: prejoinSession.id })}
+              onJoin={() => setSearchParams({ view: "session-room", course: course.id, group: groupName, session: prejoinSession.id })}
             />
           ) : null}
           <EditSessionSidepanel session={editingSession} onClose={() => setEditingSession(null)} onSave={() => setEditingSession(null)} />
@@ -5365,38 +5359,6 @@ function formatCallDuration(seconds: number) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`
 }
 
-function SessionWaitingRoomScreen({
-  course,
-  groupName,
-  session,
-  onExit,
-}: {
-  course: ExactCourse
-  groupName: string
-  session: GroupSessionRow
-  onExit: () => void
-}) {
-  const clock = useGreenRoomClock(session)
-  return (
-    <FullscreenCallSurface>
-      <CallTopBar course={course} groupName={groupName} session={session} clock={clock} />
-      <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minHeight: 0 }}>
-        <F0Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" gap="lg" grow>
-          <F0BoxWithClassName style={{ width: "min(100%, 560px)", height: 315, transform: "translateY(-20px)" }}>
-            <CallParticipantTile displayName="Adam Joseph" initials="AJ" isMuted />
-          </F0BoxWithClassName>
-          <F0Box display="flex" flexDirection="column" alignItems="center" gap="md">
-            <F0Box display="flex" flexDirection="column" alignItems="center" gap="xs">
-              <F0Heading content="Session hasn’t started yet" variant="heading" as="h1" />
-              <F0Text content="You’ll join automatically when the instructor starts the session or admits you." variant="description" />
-            </F0Box>
-            <F0Button label="Exit" variant="outline" onClick={onExit} />
-          </F0Box>
-        </F0Box>
-      </F0BoxWithClassName>
-    </FullscreenCallSurface>
-  )
-}
 
 function SessionRoomScreen({
   course,
