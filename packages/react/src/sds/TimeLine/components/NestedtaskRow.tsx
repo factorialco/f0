@@ -13,6 +13,7 @@ import type {
 
 import { Actions } from "./Actions"
 import { NestedtaskHeader } from "./NestedtaskHeader"
+import { TimelineCollapse } from "./TimelineCollapse"
 import { TimelineRowLayout } from "./TimelineRowLayout"
 
 const NestedItem = ({ props }: { props: F0TimelineRowTaskProps }) => {
@@ -54,7 +55,7 @@ export const NestedtaskRow = ({
   } = props
 
   const contentId = useId()
-  const isExpanded = collapsible ? expanded : true
+  const isExpanded = collapsible ? (expanded ?? false) : true
   const hasMetadata = metadata?.some(Boolean)
   const hasActions =
     primaryAction ||
@@ -71,7 +72,7 @@ export const NestedtaskRow = ({
           <Metadata items={metadata} />
         </div>
       )}
-      {isExpanded && (
+      <TimelineCollapse open={isExpanded}>
         <div id={contentId} role="region" className="flex flex-col gap-0 pl-4">
           {content !== undefined
             ? content
@@ -79,7 +80,7 @@ export const NestedtaskRow = ({
                 <NestedItem key={`${item.title}-${index}`} props={item} />
               ))}
         </div>
-      )}
+      </TimelineCollapse>
       {hasActions && (
         <div className="pl-9">
           <Actions

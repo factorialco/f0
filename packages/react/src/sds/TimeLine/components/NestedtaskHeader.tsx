@@ -1,9 +1,7 @@
 import { F0AvatarIcon } from "@/components/avatars/F0AvatarIcon/F0AvatarIcon"
-import { F0Icon } from "@/components/F0Icon"
 import { F0Text } from "@/components/F0Text"
-import ChevronDown from "@/icons/app/ChevronDown"
-import ChevronUp from "@/icons/app/ChevronUp"
 import { cn, focusRing } from "@/lib/utils"
+import { ChevronToggle } from "@/ui/ChevronToggle/ChevronToggle"
 import { Progress } from "@/ui/progress"
 
 import type { F0TimelineRowNestedtaskProps } from "../types"
@@ -43,7 +41,9 @@ export const NestedtaskHeader = ({
             aria-controls={contentId}
             onClick={onExpandToggle}
             className={cn(
-              "pointer-events-auto flex items-center gap-3 rounded-sm",
+              "pointer-events-auto relative flex items-center gap-3 rounded-sm",
+              // Extend the hit area to a 40px-tall target without shifting layout
+              "after:absolute after:inset-x-0 after:top-1/2 after:h-10 after:-translate-y-1/2 after:content-['']",
               focusRing()
             )}
           >
@@ -58,11 +58,9 @@ export const NestedtaskHeader = ({
             {description && (
               <F0Text content={description} variant="description" as="span" />
             )}
-            <F0Icon
-              icon={expanded ? ChevronUp : ChevronDown}
-              size="xs"
-              color="secondary"
-            />
+            <span className="text-f1-icon-secondary">
+              <ChevronToggle open={expanded} size="xs" />
+            </span>
           </button>
         ) : (
           <div className="flex items-center gap-3">
@@ -93,7 +91,7 @@ export const NestedtaskHeader = ({
               }
               className="h-1.5 w-20"
             />
-            <span className="text-sm font-medium text-f1-foreground whitespace-nowrap">
+            <span className="text-sm font-medium tabular-nums text-f1-foreground whitespace-nowrap">
               {completedCount}/{taskCount}
             </span>
           </div>
