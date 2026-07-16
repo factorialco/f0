@@ -6861,7 +6861,10 @@ export declare interface F0AnalyticsDashboardProps<Filters extends FiltersDefini
     defaultFilters?: FiltersState<Filters>;
     /**
      * Applied dashboard-level filter values.
-     * When provided, filter state is controlled by the consumer.
+     * When provided, filter state is controlled by the consumer: reflect
+     * `onFiltersChange` back into this prop or applied filters will not move.
+     * Decide controlled vs uncontrolled before first render — switching modes
+     * mid-life desyncs state (standard React controlled-input semantics).
      */
     filtersValue?: FiltersState<Filters>;
     /**
@@ -14390,7 +14393,11 @@ export declare const OneFilterPicker: <Definition extends FiltersDefinition>(pro
 declare type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
     /** The definition of available filters and their configurations */
     filters?: Definition;
-    /** Current state of applied filters */
+    /**
+     * Current state of applied filters. Fully controlled: the picker renders
+     * exclusively from this prop, so `onChange` must be reflected back into it
+     * (synchronously) or chips and applied state will not update.
+     */
     value: FiltersState<Definition>;
     /** Optional preset configurations that users can select */
     presets?: PresetsDefinition<Definition>;
