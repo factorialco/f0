@@ -1,4 +1,5 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
+import isEqual from "lodash/isEqual"
 import { AnimatePresence, motion } from "motion/react"
 import { useContext, useEffect, useId, useMemo, useRef, useState } from "react"
 
@@ -111,7 +112,15 @@ export function FiltersControls<Filters extends FiltersDefinition>({
 
   const onOpenChange = handleOpenChange
 
+  // Re-seed the draft only when the committed value's CONTENT changes.
+  // Comparing by identity would wipe an in-progress draft whenever the host
+  // re-renders with a fresh but content-identical `value` object (controlled
+  // hosts commonly rebuild it every render), making the picker impossible to
+  // edit in those apps while working fine in stories with stable state.
+  const previousValueRef = useRef(value)
   useEffect(() => {
+    if (isEqual(previousValueRef.current, value)) return
+    previousValueRef.current = value
     setLocalFiltersValue(value)
   }, [value])
 
