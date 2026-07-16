@@ -1000,6 +1000,15 @@ const getSessionStatus = (session: GroupSessionRow) =>
       ? { label: "Completed", status: "positive" as const }
       : { label: "Not started", status: "neutral" as const }
 
+// Session lifecycle status (the session's own state, same for everyone).
+// Distinct from a participant's Attendance. Values: Upcoming / Live / Ended.
+const getSessionLifecycle = (session: GroupSessionRow) =>
+  session.liveState === "completed"
+    ? { label: "Ended", status: "positive" as const }
+    : session.liveState === "live"
+      ? { label: "Live", status: "warning" as const }
+      : { label: "Upcoming", status: "neutral" as const }
+
 const myTrainingModules: CourseModuleRow[] = [
   { id: "module-1", title: "Introduction and learning objectives", blocks: 3, status: "completed" },
   { id: "module-2", title: "Quality principles in daily operations", blocks: 5, status: "in_progress" },
@@ -4363,6 +4372,7 @@ function GroupSessionsTab({
                 { id: "name", label: "Session", sorting: "name", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.name }) },
                 { id: "date", label: "Date", sorting: "date", render: (session: GroupSessionRow) => session.date },
                 { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
+                { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getSessionLifecycle(session) }) },
                 { id: "modality", label: "Modality", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: session.modality, icon: session.modality === "Virtual" ? Link : People } }) },
               ],
             },
