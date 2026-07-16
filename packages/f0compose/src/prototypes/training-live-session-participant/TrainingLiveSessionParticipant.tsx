@@ -1635,7 +1635,6 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession }
                 <F0Box display="flex" flexDirection="column" gap="3xl">
                   <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionStatus(session).label, variant: getSessionStatus(session).status }} />
                   <F0Box display="grid" columns="2" gap="xl">
-                    <DetailsItem title="Course name" content={{ type: "item", text: course.name }} />
                     <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
                     <DetailsItem title="Date" content={{ type: "item", text: session.scheduleLabel }} />
                     <DetailsItem title="Hour" content={{ type: "item", text: session.scheduleLabel }} />
