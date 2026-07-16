@@ -159,19 +159,25 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Sort stories alphabetically by default, but keep the documented top-level sections
-       * and nested Foundations/CRUD patterns groups in the specific order defined below.
+       * Top-level order mirrors the F0 component lifecycle (PR #4253):
+       * ownership drives the sections (Components/Patterns = Core, Kits,
+       * Domain specific); maturity is a badge, not a section. Everything
+       * not listed here falls back to alphabetical.
        */
       storySort: {
         method: "alphabetical",
         order: [
+          // Get started (lifecycle docs are ordered by PR #4253)
           "Introduction",
           "How to contribute",
+          "Components maturity",
           "AI configuration",
+          "Changelog",
+          // Foundations
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          // Core
           "Components",
-          ["Primitives", "Inputs"],
           "Patterns",
           [
             "Data collection",
@@ -179,32 +185,18 @@ const preview: Preview = {
               "CRUD patterns",
               ["Overview", "By view", "Create", "Read", "Update", "Delete"],
             ],
+            "App shell",
           ],
-          "Graph",
-          ["F0Graph", "F0GraphNode", "F0GraphEdge", "F0GraphControls"],
+          // Kits
           "Kits",
-          "Layouts",
-          "Library",
-          "Experimental",
-          [
-            "CRUD patterns",
-            [
-              "Overview",
-              "Principles",
-              "Action hierarchy",
-              "Containers",
-              "Create & Update",
-              "Read",
-              "Delete & destructive",
-              "Bulk & async",
-              "Decisions",
-              "Quick reference",
-              "Checklist",
-              "New surfaces",
-            ],
-          ],
-          "Examples",
-          "Internal",
+          ["Charts", "AI", "Chat", "Social"],
+          // Domain specific (was "SDS")
+          "Domain specific",
+          ["Time tracking", "Growth", "Home", "Profile", "Inbox", "Surveys"],
+          // Tail
+          "Resources",
+          "Deprecated",
+          "🔒 Internal",
         ],
       },
     },

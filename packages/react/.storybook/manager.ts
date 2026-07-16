@@ -26,11 +26,11 @@ addons.setConfig({
     {
       tags: "experimental",
       badge: {
-        text: "🚧",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Experimental",
+        text: "Experimental",
+        bgColor: "#FBF1DE",
+        fgColor: "#8A5A00",
+        borderColor: "#F0DCB0",
+        tooltip: "Experimental — API may still change",
       },
       display: {
         sidebar: ["component", "docs", "group"],
@@ -54,11 +54,11 @@ addons.setConfig({
     {
       tags: "deprecated",
       badge: {
-        text: "⛔",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Deprecated",
+        text: "Deprecated",
+        bgColor: "#F5E7E7",
+        fgColor: "#9B2C2C",
+        borderColor: "#EBC9C9",
+        tooltip: "Deprecated — scheduled for removal",
       },
       display: {
         sidebar: ["component", "docs", "group"],

@@ -27,7 +27,7 @@ const ExampleComponent = (props: Omit<DatePickerPopupProps, "children">) => {
 }
 
 const meta = {
-  title: "Components/DatePickerPopup",
+  title: "DatePickerPopup",
   component: ExampleComponent,
   parameters: {
     docs: {
