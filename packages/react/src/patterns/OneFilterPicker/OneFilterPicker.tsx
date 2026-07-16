@@ -23,7 +23,11 @@ import { PresetsDefinition } from "./types"
 export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   /** The definition of available filters and their configurations */
   filters?: Definition
-  /** Current state of applied filters */
+  /**
+   * Current state of applied filters. Fully controlled: the picker renders
+   * exclusively from this prop, so `onChange` must be reflected back into it
+   * (synchronously) or chips and applied state will not update.
+   */
   value: FiltersState<Definition>
   /** Optional preset configurations that users can select */
   presets?: PresetsDefinition<Definition>
