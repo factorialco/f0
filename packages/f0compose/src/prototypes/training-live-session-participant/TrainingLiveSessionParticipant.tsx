@@ -4833,6 +4833,9 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 30 }}>
         <F0Box display="grid" columns="2" gap="5xl">
+          <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionLifecycle(session).label, variant: getSessionLifecycle(session).status }} />
+        </F0Box>
+        <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
           <DetailsItem title="Modality" content={{ type: "item", text: session.modality }} />
         </F0Box>
@@ -4851,9 +4854,6 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
         <F0Box display="grid" columns="2" gap="5xl">
           <SessionJoinField session={session} role={role} disabled={isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
         </F0Box>
-        {isEnded ? (
-          <F0Alert variant="positive" title="Session ended" description={inFactorial ? "Attendance and transcript are now available for review." : "Mark attendance for this session in the Attendance tab."} />
-        ) : null}
         {!isEnded && isWaitingInstructor && inFactorial ? (
           <F0Alert variant="info" title="You can enter to set up 5 minutes before" description="Open the room early to check your camera, mic and notes. The class clock and attendance only start at the scheduled time." />
         ) : null}
