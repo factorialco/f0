@@ -1607,7 +1607,7 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
     { id: "date", label: "Date", sorting: "startsAt", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.date }) },
     { id: "location", label: "Location", render: (session: GroupSessionRow) => session.modality === "Virtual" ? "-" : session.modality },
     { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
-    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color } }) },
+    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: getSessionLifecycle(session).label } }) },
     { id: "attendance", label: "Attendance", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getParticipantAttendance(session) }) },
   ] } }]} />
 }
@@ -1676,7 +1676,7 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
               {tab === "details" ? (
                 <F0Box display="flex" flexDirection="column" gap="3xl">
                   <F0Box display="grid" columns="2" gap="xl">
-                    <DetailsItem title="Status" content={{ type: "dot-tag", text: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color }} />
+                    <DetailsItem title="Status" content={{ type: "raw-tag", text: getSessionLifecycle(session).label }} />
                     <DetailsItem title="Attendance" content={{ type: "status-tag", text: getParticipantAttendance(session).label, variant: getParticipantAttendance(session).status }} />
                   </F0Box>
                   <F0Box display="grid" columns="2" gap="xl">
@@ -4385,7 +4385,7 @@ function GroupSessionsTab({
                 { id: "name", label: "Session", sorting: "name", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.name }) },
                 { id: "date", label: "Date", sorting: "date", render: (session: GroupSessionRow) => session.date },
                 { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
-                { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color } }) },
+                { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: getSessionLifecycle(session).label } }) },
                 { id: "modality", label: "Modality", render: (session: GroupSessionRow) => ({ type: "tag" as const, value: { label: session.modality, icon: session.modality === "Virtual" ? Desktop : People } }) },
               ],
             },
@@ -4846,7 +4846,7 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
     <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 32 }}>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 30 }}>
         <F0Box display="grid" columns="2" gap="5xl">
-          <DetailsItem title="Status" content={{ type: "dot-tag", text: getSessionLifecycle(session).label, color: getSessionLifecycle(session).color }} />
+          <DetailsItem title="Status" content={{ type: "raw-tag", text: getSessionLifecycle(session).label }} />
         </F0Box>
         <F0Box display="grid" columns="2" gap="5xl">
           <DetailsItem title="Type" content={{ type: "dot-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" }} />
