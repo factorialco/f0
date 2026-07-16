@@ -1,7 +1,10 @@
-<svg width="280" height="280" viewBox="0 0 280 280" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="280" height="280" rx="80" fill="#191919"/>
-<path d="M116 152H92V200H68V152H44V128H116V152Z" fill="white"/>
-<path d="M212 104C225.255 104 236 114.745 236 128V176C236 189.255 225.255 200 212 200H188C174.745 200 164 189.255 164 176H212V104Z" fill="white"/>
-<path d="M188 80C201.255 80 212 90.7452 212 104H164V176C150.745 176 140 165.255 140 152V104C140 90.7452 150.745 80 164 80H188Z" fill="white"/>
-<path d="M116 104H92V128C78.7452 128 68 117.255 68 104C68 90.7452 78.7452 80 92 80H116V104Z" fill="white"/>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="512" height="512" rx="126" fill="black"/>
+<rect x="91.9999" y="166" width="136" height="40" rx="8" fill="white"/>
+<rect x="91.9999" y="346" width="180" height="40" rx="8" transform="rotate(-90 91.9999 346)" fill="white"/>
+<rect x="420" y="346" width="104" height="40" rx="8" transform="rotate(-180 420 346)" fill="white"/>
+<rect x="420" y="166" width="180" height="40" rx="8" transform="rotate(90 420 166)" fill="white"/>
+<rect x="260" y="166" width="104" height="40" rx="8" fill="white"/>
+<rect x="260" y="346" width="180" height="40" rx="8" transform="rotate(-90 260 346)" fill="white"/>
+<rect x="148" y="262" width="64" height="40" rx="8" fill="white"/>
 </svg>
