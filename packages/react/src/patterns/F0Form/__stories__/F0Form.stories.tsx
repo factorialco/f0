@@ -2000,13 +2000,17 @@ export const EntitiesListFieldNavigable: Story = {
 }
 
 /**
- * Separate create/update form definitions. Instead of a single `schema`, the
- * field takes a `createFormDefinition` (reduced: name + email) and an
- * `updateFormDefinition` (fuller: adds role + start date), each with its **own**
- * `onSubmit` — so adding vs editing can persist independently (watch the
- * console: `CREATE` vs `UPDATE`). The item is still committed to the field
- * value. `updateFormDefinition`'s schema is canonical, so its extra fields are
- * `optional` to keep freshly-added rows valid.
+ * The full persistence trio: **add** → `createFormDefinition`, **edit** →
+ * `updateFormDefinition`, **remove** → `config.onRemove`. Each runs its own
+ * request independently (watch the console: `CREATE` / `UPDATE` / `DELETE`), and
+ * the field value is kept in sync. `createFormDefinition` is reduced (name +
+ * email) and `updateFormDefinition` is canonical (adds role + start date), so
+ * its extra fields are `optional` to keep freshly-added rows valid.
+ *
+ * Removing opens a confirmation first (custom copy via `config.confirmRemove`,
+ * which names the member), and the row is only dropped once `onRemove` resolves
+ * successfully — return `{ success: false }` or throw to keep it and surface an
+ * error.
  */
 export const EntitiesListFieldFormDefinitions: Story = {
   parameters: { docs: { story: { inline: false, height: "560px" } } },
@@ -2058,6 +2062,19 @@ export const EntitiesListFieldFormDefinitions: Story = {
           labels: {
             addButton: "Add member",
             update: { title: "Edit member" },
+          },
+          // Delete counterpart to create/update: confirm first (naming the
+          // member), then persist. The row is dropped only on success.
+          confirmRemove: (item) => ({
+            type: "critical",
+            title: `Remove ${String(item.name)}?`,
+            msg: "They will lose access immediately. This cannot be undone.",
+            confirm: { label: "Remove" },
+          }),
+          onRemove: async (item) => {
+            await sleep(300)
+            console.info(`DELETE member: ${JSON.stringify(item)}`)
+            return { success: true }
           },
         },
       }),

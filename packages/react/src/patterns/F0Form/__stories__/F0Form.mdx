@@ -501,9 +501,38 @@ members: f0FormField.entitiesList({
 
 <Canvas of={Stories.EntitiesListFieldFormDefinitions} />
 
+### Persisting removals
+
+The three row operations persist through a matching trio:
+
+| Operation | How it persists |
+| --------- | --------------- |
+| Add       | `createFormDefinition` (its own `onSubmit`) |
+| Edit      | `updateFormDefinition` (its own `onSubmit`) |
+| Remove    | `config.onRemove` |
+
+`config.onRemove` is the delete counterpart. Removing a row (from the overflow `⋮` menu, per the CRUD "Delete & destructive" doc) now **always confirms first**, then — if `onRemove` is set — runs it with the row item. The row is dropped from the field value only when `onRemove` resolves successfully; returning `{ success: false }` or throwing keeps the row and surfaces an error, and the remove action is disabled while the request is in flight. Without `onRemove`, removal is value-only (the row is spliced out) but the confirmation is still shown.
+
+Use `config.confirmRemove` to **name the resource** in the confirmation (what, how much, whether reversible). When omitted, a generic default confirmation is used.
+
+```tsx
+config: {
+  onRemove: async (item) => {
+    await api.delete(item.id)
+    return { success: true }
+  },
+  confirmRemove: (item) => ({
+    type: "critical",
+    title: `Remove ${item.name}?`,
+    msg: "They will lose access immediately. This cannot be undone.",
+    confirm: { label: "Remove" },
+  }),
+}
+```
+
 ### Custom row actions
 
-`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row:
+`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row. The `remove` helper routes through the same confirm + `onRemove` path as the built-in remove, so custom "Delete" actions also confirm and persist:
 
 ```tsx
 config: {
@@ -523,6 +552,7 @@ config: {
 - `canAddItems` (default `true`) — show the add button. Adding is blocked while an existing row is still invalid.
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
 - `labels` — `addButton`, `create`/`update` (each `{ title, description }`) and `edit`/`remove` action labels. The create description doubles as the add button's tooltip; the update title as the icon-only edit action's tooltip.
+- `onRemove` / `confirmRemove` — persist and confirm removals (see [Persisting removals](#persisting-removals)).
 - `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
 
 ### Auto-save

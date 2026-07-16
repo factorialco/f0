@@ -315,6 +315,8 @@ function configToF0Field(
         maxItems: listOptions?.maxItems,
         columns: listOptions?.columns,
         rowActions: listOptions?.rowActions,
+        onRemove: listOptions?.onRemove,
+        confirmRemove: listOptions?.confirmRemove,
         renderIf: config.renderIf,
       } as F0Field
     }

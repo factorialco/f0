@@ -71,6 +71,11 @@ interface EntitiesListViewProps {
   onEditRow?: (rowKey: string) => void
   /** Removes a row by key (omitted when the field is disabled). */
   onRemoveRow?: (rowKey: string) => void
+  /**
+   * Whether a row's remove is mid-flight (its `onRemove` hook hasn't settled),
+   * so the remove action is disabled until it does.
+   */
+  isRemovePending?: (rowKey: string) => boolean
   /** Whether a given row can be edited (drives the edit action's presence). */
   canEditRow: (rowKey: string) => boolean
   /** Row click handler — opens the edit dialog (editable mode). */
@@ -104,6 +109,7 @@ export function EntitiesListView({
   listItem,
   onEditRow,
   onRemoveRow,
+  isRemovePending,
   canEditRow,
   onRowClick,
   getRowHref,
@@ -166,12 +172,16 @@ export function EntitiesListView({
                 enabled: action.disabled ? false : undefined,
                 onClick: action.onClick,
               })),
-              ...(onRemoveRow
+              // Remove respects `editableIds` (via `canEditRow`), same as edit:
+              // a locked row (e.g. a pinned owner) is neither editable nor
+              // removable.
+              ...(onRemoveRow && canEditRow(id)
                 ? [
                     {
                       label: removeLabel,
                       icon: Delete,
                       critical: true,
+                      enabled: isRemovePending?.(id) ? false : undefined,
                       onClick: () => onRemoveRow(id),
                     },
                   ]
@@ -185,6 +195,7 @@ export function EntitiesListView({
       hasActions,
       onEditRow,
       onRemoveRow,
+      isRemovePending,
       canEditRow,
       getRowActions,
       getRowHref,

@@ -4,6 +4,7 @@ import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { IconType } from "@/components/F0Icon"
 import type { NewColor } from "@/components/tags/F0TagDot"
 import type { StatusVariant } from "@/components/tags/F0TagStatus"
+import type { ConfirmDialogOptions } from "@/lib/providers/dialogs-alike/types"
 import type { F0FormDefinitionSingleSchema } from "@/patterns/F0WizardForm/types"
 
 import type {
@@ -265,6 +266,26 @@ export interface F0EntitiesListOptions<T = EntitiesListItem> {
    * update or remove the row.
    */
   rowActions?: (item: T, index: number) => F0EntitiesListRowAction<T>[]
+  /**
+   * Persistence hook for removing a row — the delete counterpart to
+   * `createFormDefinition` (add) and `updateFormDefinition` (edit). Called with
+   * the row's item **after** the user confirms the destructive action. Return
+   * `{ success: false }` or throw to keep the row and surface an error; return
+   * `{ success: true }` (or nothing) to drop it from the field value.
+   *
+   * When omitted, removal is value-only (the row is spliced from the array with
+   * no network call) — but the confirmation is still shown, per the CRUD
+   * "Delete & destructive" guidance.
+   */
+  onRemove?: (item: T) => Promise<{ success: boolean } | void>
+  /**
+   * Per-item confirmation copy for the remove action, so callers can **name the
+   * resource** and its scope (per the CRUD "Delete & destructive" doc). Receives
+   * the row item and returns the confirmation dialog options
+   * (`title`, `msg`, `type`, `confirm`/`cancel` labels). When omitted, a generic
+   * default confirmation is shown.
+   */
+  confirmRemove?: (item: T) => ConfirmDialogOptions
 }
 
 /**
@@ -344,6 +365,10 @@ export type F0EntitiesListField = F0BaseField & {
     item: EntitiesListItem,
     index: number
   ) => F0EntitiesListRowAction[]
+  /** Persistence hook for removing a row (runs after the user confirms) */
+  onRemove?: (item: EntitiesListItem) => Promise<{ success: boolean } | void>
+  /** Per-item confirmation copy for the remove action */
+  confirmRemove?: (item: EntitiesListItem) => ConfirmDialogOptions
   /** Conditional rendering based on another field's value */
   renderIf?: EntitiesListFieldRenderIf
 }
