@@ -123,6 +123,27 @@ describe("getComponentStatus (name matching)", () => {
     expect(getComponentStatus("Button", dataset)?.zone).toBe("components")
   })
 
+  test("resolves a fully-qualified Storybook title to its exact entry", () => {
+    const withGrouped: ComponentEntry[] = [
+      ...dataset,
+      entry({ name: "Data Collection/Visualizations/Card", zone: "patterns" }),
+      entry({ name: "Card", zone: "components", apiStatus: "stable" }),
+    ]
+    // The exact full title must win over the bare-leaf "Card" in components.
+    expect(
+      getComponentStatus("Data Collection/Visualizations/Card", withGrouped)
+    ).toMatchObject({
+      name: "Data Collection/Visualizations/Card",
+      zone: "patterns",
+    })
+  })
+
+  test("resolves a prefixed title (e.g. Components/F0Alert) by its leaf", () => {
+    expect(getComponentStatus("Components/F0Alert", dataset)?.name).toBe(
+      "Alert"
+    )
+  })
+
   test("returns null for an unknown name", () => {
     expect(getComponentStatus("DoesNotExist", dataset)).toBeNull()
   })

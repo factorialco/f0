@@ -13,6 +13,7 @@ import { F0Alert } from "@/components/F0Alert"
 import { I18nProvider } from "@/lib/providers/i18n/i18n-provider"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 
+import { ComponentStatusPanel } from "./ComponentStatusPanel.tsx"
 import lightTheme, { darkTheme } from "./FactorialOne.ts"
 import { ImportBanner } from "./ImportBanner.tsx"
 
@@ -57,6 +58,7 @@ export const DocsContainer: FC<PropsWithChildren<DocsContainerProps>> = (
           </div>
         )}
         <ImportBanner isDark={isDark} />
+        <ComponentStatusPanel />
         {children}
       </I18nProvider>
     </BaseContainer>

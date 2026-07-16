@@ -227,23 +227,33 @@ export function getComponentStatus(
 ): ComponentStatus | null {
   if (!name) return null
   const target = normalize(name)
+  const targetLeaf = normalize(leaf(name))
 
-  const matches = components.filter((c) => {
-    return (
-      normalize(c.name) === target ||
-      normalize(leaf(c.name)) === target ||
-      normalize(c.name).endsWith(target)
+  // When several entries match, prefer the one in the "components" zone.
+  const pick = (pool: ComponentEntry[]) =>
+    pool.find((c) => c.zone === "components") ?? pool[0]
+
+  // Tier 1 — exact full-name match. Handles fully-qualified Storybook titles
+  // like "Data Collection/Visualizations/Card" resolving to that exact entry.
+  let pool = components.filter((c) => normalize(c.name) === target)
+
+  // Tier 2 — leaf-level match on either side. Handles "F0Card", a bare "Card",
+  // and prefixed titles like "Components/F0Card" all resolving to "Card".
+  if (pool.length === 0) {
+    pool = components.filter(
+      (c) =>
+        normalize(leaf(c.name)) === target ||
+        normalize(c.name) === targetLeaf ||
+        normalize(leaf(c.name)) === targetLeaf
     )
-  })
+  }
 
-  if (matches.length === 0) return null
+  // Tier 3 — suffix fallback (e.g. "AiInsightCard" from "InsightCard").
+  if (pool.length === 0) {
+    pool = components.filter((c) => normalize(c.name).endsWith(target))
+  }
 
-  // Prefer an exact leaf match, then the "components" zone, then first.
-  const exact = matches.filter((c) => normalize(leaf(c.name)) === target)
-  const pool = exact.length > 0 ? exact : matches
-  const best = pool.find((c) => c.zone === "components") ?? pool[0]
-
-  return evaluateComponentStatus(best)
+  return pool.length > 0 ? evaluateComponentStatus(pick(pool)) : null
 }
 
 /**
