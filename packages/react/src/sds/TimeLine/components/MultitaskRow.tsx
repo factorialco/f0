@@ -7,6 +7,7 @@ import type {
 import { MultitaskHeader } from "./MultitaskHeader"
 import { NestedtaskRow } from "./NestedtaskRow"
 import { TaskRow } from "./TaskRow"
+import { TimelineCollapse } from "./TimelineCollapse"
 import { TimelineRowLayout } from "./TimelineRowLayout"
 
 const isNestedtaskItem = (
@@ -28,7 +29,7 @@ export const MultitaskRow = ({
       <div className="flex min-h-8 items-center gap-2">
         <MultitaskHeader props={props} />
       </div>
-      {expanded && (
+      <TimelineCollapse open={expanded}>
         <div className="flex flex-col pl-4">
           {items.map((item, index: number) =>
             isNestedtaskItem(item) ? (
@@ -52,7 +53,7 @@ export const MultitaskRow = ({
             )
           )}
         </div>
-      )}
+      </TimelineCollapse>
     </TimelineRowLayout>
   )
 }
