@@ -993,13 +993,6 @@ const getSessionCalendarDate = (session: GroupSessionRow) =>
     : session.liveState === "live"
       ? new Date(2026, 5, 15, 10)
       : new Date(2026, 5, 15, 11, 30)
-const getSessionStatus = (session: GroupSessionRow) =>
-  session.liveState === "live"
-    ? { label: "Started", status: "warning" as const }
-    : session.liveState === "completed"
-      ? { label: "Completed", status: "positive" as const }
-      : { label: "Not started", status: "neutral" as const }
-
 // Session lifecycle status (the session's own state, same for everyone).
 // Distinct from a participant's Attendance. Values: Upcoming / Live / Ended.
 const getSessionLifecycle = (session: GroupSessionRow) =>
@@ -1008,6 +1001,17 @@ const getSessionLifecycle = (session: GroupSessionRow) =>
     : session.liveState === "live"
       ? { label: "Live", status: "warning" as const }
       : { label: "Upcoming", status: "neutral" as const }
+
+// A participant's own attendance for a session (per-person). Distinct from the
+// session Status. Values: Not started / In progress / Attended / Not attended.
+// NOTE: the prototype has no real per-participant attendance data, so this is
+// derived from the session state as a proxy ("Not attended" needs real data).
+const getParticipantAttendance = (session: GroupSessionRow) =>
+  session.liveState === "completed"
+    ? { label: "Attended", status: "positive" as const }
+    : session.liveState === "live"
+      ? { label: "In progress", status: "warning" as const }
+      : { label: "Not started", status: "neutral" as const }
 
 const myTrainingModules: CourseModuleRow[] = [
   { id: "module-1", title: "Introduction and learning objectives", blocks: 3, status: "completed" },
@@ -1601,7 +1605,9 @@ function ParticipantMyTrainingSessionsTab({ onOpenSession }: { onOpenSession: (s
     { id: "name", label: "Name", sorting: "name", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.name }) },
     { id: "date", label: "Date", sorting: "startsAt", render: (session: GroupSessionRow) => ({ type: "text" as const, value: session.date }) },
     { id: "location", label: "Location", render: (session: GroupSessionRow) => session.modality === "Virtual" ? "-" : session.modality },
-    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getSessionStatus(session) }) },
+    { id: "type", label: "Type", render: (session: GroupSessionRow) => ({ type: "dotTag" as const, value: { label: session.type === "self-paced" ? "Self-paced" : "Scheduled", color: session.type === "self-paced" ? "malibu" : "barbie" } }) },
+    { id: "status", label: "Status", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getSessionLifecycle(session) }) },
+    { id: "attendance", label: "Attendance", render: (session: GroupSessionRow) => ({ type: "status" as const, value: getParticipantAttendance(session) }) },
   ] } }]} />
 }
 
@@ -1668,7 +1674,10 @@ function ParticipantSessionSidepanel({ session, course, onClose, onJoinSession, 
             <F0BoxWithClassName paddingLeft="xl" paddingRight="xl" style={{ paddingTop: 24 }}>
               {tab === "details" ? (
                 <F0Box display="flex" flexDirection="column" gap="3xl">
-                  <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionStatus(session).label, variant: getSessionStatus(session).status }} />
+                  <F0Box display="grid" columns="2" gap="xl">
+                    <DetailsItem title="Status" content={{ type: "status-tag", text: getSessionLifecycle(session).label, variant: getSessionLifecycle(session).status }} />
+                    <DetailsItem title="Attendance" content={{ type: "status-tag", text: getParticipantAttendance(session).label, variant: getParticipantAttendance(session).status }} />
+                  </F0Box>
                   <F0Box display="grid" columns="2" gap="xl">
                     <DetailsItem title="Type" content={{ type: "raw-tag", text: session.type === "self-paced" ? "Self-paced" : "Scheduled" }} />
                     <DetailsItem title="Date" content={{ type: "item", text: session.scheduleLabel }} />
