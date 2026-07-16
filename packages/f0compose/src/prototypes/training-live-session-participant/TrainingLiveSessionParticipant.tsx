@@ -30,6 +30,7 @@ import {
 import {
   CalendarEvent,
   DetailsItem,
+  F1SearchBox,
   OneDataCollection,
   Page,
   PageHeader,
@@ -5105,6 +5106,13 @@ function LiveParticipantRosterRow({ name, team, muted, cameraOff, joined }: { na
 }
 
 function LiveSessionParticipantsDrawer({ attendees, notJoined, onClose }: { attendees: GroupParticipantRow[]; notJoined: GroupParticipantRow[]; onClose: () => void }) {
+  const [query, setQuery] = useState("")
+  const q = query.trim().toLowerCase()
+  const matches = (name: string) => q === "" || name.toLowerCase().includes(q)
+  const inCall = attendees
+    .map((participant, index) => ({ participant, index, name: index === 0 ? "Adam Joseph" : participant.name }))
+    .filter((row) => matches(row.name))
+  const notInCall = notJoined.filter((participant) => matches(participant.name))
   return (
     <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" display="flex" flexDirection="column" height="full" style={{ overflow: "hidden" }}>
       <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" padding="lg" borderBottom="default" borderColor="secondary">
@@ -5113,24 +5121,32 @@ function LiveSessionParticipantsDrawer({ attendees, notJoined, onClose }: { atte
           <F0Icon icon={Cross} size="md" />
         </F0BoxWithClassName>
       </F0Box>
+      <F0Box paddingX="lg" paddingTop="md" paddingBottom="sm">
+        <F1SearchBox value={query} onChange={setQuery} placeholder="Search participants" clearable size="sm" />
+      </F0Box>
       <F0BoxWithClassName grow style={{ overflowY: "auto", minHeight: 0 }}>
-        <F0Box display="flex" flexDirection="column" gap="xs" paddingY="sm">
-          <F0Box paddingX="lg" paddingY="xs">
-            <F0Text content={`In the call · ${attendees.length}`} variant="description" />
+        {inCall.length > 0 ? (
+          <F0Box display="flex" flexDirection="column" gap="xs" paddingY="sm">
+            <F0Box paddingX="lg" paddingY="xs">
+              <F0Text content={`In the call · ${inCall.length}`} variant="description" />
+            </F0Box>
+            {inCall.map(({ participant, index, name }) => (
+              <LiveParticipantRosterRow key={participant.id} name={name} team={participant.team} muted={liveParticipantMuted(index)} cameraOff={liveParticipantCameraOff(index)} joined />
+            ))}
           </F0Box>
-          {attendees.map((participant, index) => (
-            <LiveParticipantRosterRow key={participant.id} name={index === 0 ? "Adam Joseph" : participant.name} team={participant.team} muted={liveParticipantMuted(index)} cameraOff={liveParticipantCameraOff(index)} joined />
-          ))}
-        </F0Box>
-        {notJoined.length > 0 ? (
+        ) : null}
+        {notInCall.length > 0 ? (
           <F0Box display="flex" flexDirection="column" gap="xs" paddingY="sm" borderTop="default" borderColor="secondary">
             <F0Box paddingX="lg" paddingY="xs">
-              <F0Text content={`Not joined · ${notJoined.length}`} variant="description" />
+              <F0Text content={`Not joined · ${notInCall.length}`} variant="description" />
             </F0Box>
-            {notJoined.map((participant) => (
+            {notInCall.map((participant) => (
               <LiveParticipantRosterRow key={participant.id} name={participant.name} team={participant.team} joined={false} />
             ))}
           </F0Box>
+        ) : null}
+        {inCall.length === 0 && notInCall.length === 0 ? (
+          <F0Box paddingX="lg" paddingY="lg"><F0Text content="No participants found" variant="description" /></F0Box>
         ) : null}
       </F0BoxWithClassName>
     </F0BoxWithClassName>
