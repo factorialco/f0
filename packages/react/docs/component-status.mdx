@@ -111,3 +111,19 @@ import { getComponentStatus } from "@/component-status"
 
 `STABLE_REQUIREMENTS` is the single source of truth for the checklist — extend
 it there (e.g. to add an a11y gate) and every consumer updates automatically.
+
+### Rendered panel
+
+All display text (badge label, summary line, checklist labels and hints) is
+part of the status data, so the panel looks identical in Storybook and in any
+consuming app. Drop in the exported `ComponentStability` component with a
+component name:
+
+```tsx
+import { ComponentStability } from "@factorialco/f0-react/dist/component-status"
+
+;<ComponentStability componentName="F0Card" />
+```
+
+It renders nothing when the name doesn't resolve to a tracked component. The
+status block shown on every component docs page above is this exact component.

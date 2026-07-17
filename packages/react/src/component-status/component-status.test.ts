@@ -90,6 +90,75 @@ describe("evaluateComponentStatus", () => {
   })
 })
 
+describe("evaluateComponentStatus (presentation text)", () => {
+  test("exposes a human badge label per maturity level", () => {
+    expect(evaluateComponentStatus(entry({ apiStatus: "stable" })).label).toBe(
+      "Stable"
+    )
+    expect(evaluateComponentStatus(entry({ apiStatus: "unknown" })).label).toBe(
+      "No tag"
+    )
+  })
+
+  test("summary reflects stable + meets bar", () => {
+    expect(
+      evaluateComponentStatus(entry({ apiStatus: "stable", tags: ["stable"] }))
+        .summary
+    ).toMatch(/meets the definition of done/i)
+  })
+
+  test("summary reflects tagged stable but below the bar", () => {
+    expect(
+      evaluateComponentStatus(
+        entry({
+          apiStatus: "stable",
+          tags: ["stable"],
+          hasMdxDocs: false,
+          docQuality: "none",
+        })
+      ).summary
+    ).toMatch(/tagged stable, but the checklist/i)
+  })
+
+  test("summary reflects meets-bar-not-tagged and experimental/unknown states", () => {
+    expect(
+      evaluateComponentStatus(entry({ apiStatus: "experimental" })).summary
+    ).toMatch(/ready to be promoted to stable/i)
+    expect(
+      evaluateComponentStatus(
+        entry({ apiStatus: "experimental", hasUnitTests: false })
+      ).summary
+    ).toMatch(/^experimental/i)
+    expect(
+      evaluateComponentStatus(
+        entry({ apiStatus: "unknown", tags: [], hasUnitTests: false })
+      ).summary
+    ).toMatch(/no maturity tag/i)
+  })
+
+  test("deprecated / internal get their own summary and hide the checklist", () => {
+    const dep = evaluateComponentStatus(
+      entry({ apiStatus: "deprecated", tags: ["deprecated"] })
+    )
+    expect(dep.summary).toMatch(/deprecated/i)
+    expect(dep.showChecklist).toBe(false)
+
+    const int = evaluateComponentStatus(
+      entry({ apiStatus: "internal", tags: ["internal"] })
+    )
+    expect(int.summary).toMatch(/internal/i)
+    expect(int.showChecklist).toBe(false)
+  })
+
+  test("checklist is shown for stable / experimental / unknown", () => {
+    for (const apiStatus of ["stable", "experimental", "unknown"] as const) {
+      expect(evaluateComponentStatus(entry({ apiStatus })).showChecklist).toBe(
+        true
+      )
+    }
+  })
+})
+
 describe("getComponentStatus (name matching)", () => {
   const dataset: ComponentEntry[] = [
     entry({

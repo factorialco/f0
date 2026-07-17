@@ -96,6 +96,12 @@ export interface ComponentStatus extends ComponentEntry {
    *   - null: tag and bar agree
    */
   discrepancy: "tagged-but-below-bar" | "meets-bar-not-tagged" | null
+  /** Human-readable badge label for `apiStatus` (e.g. "Stable", "No tag"). */
+  label: string
+  /** One-line human summary shown above the checklist. */
+  summary: string
+  /** Whether the DoD checklist is meaningful for this maturity level. */
+  showChecklist: boolean
 }
 
 /** The full generated dataset (stats + every tracked component). */
@@ -107,6 +113,52 @@ export const componentStatusData: ComponentStatusData =
  * the purposes of "stable". "acceptable" = required sections + props table.
  */
 export const MIN_DOC_QUALITY: DocQuality = "acceptable"
+
+/** Human-readable badge label per maturity level. */
+export const STATUS_LABELS: Record<ApiStatus, string> = {
+  stable: "Stable",
+  experimental: "Experimental",
+  deprecated: "Deprecated",
+  internal: "Internal",
+  unknown: "No tag",
+}
+
+/** The DoD checklist is only meaningful for components on the road to stable. */
+function checklistApplies(apiStatus: ApiStatus): boolean {
+  return (
+    apiStatus === "stable" ||
+    apiStatus === "experimental" ||
+    apiStatus === "unknown"
+  )
+}
+
+/** One-line human summary shown above the checklist. */
+function summarize(
+  apiStatus: ApiStatus,
+  meetsBar: boolean,
+  taggedStable: boolean,
+  discrepancy: ComponentStatus["discrepancy"]
+): string {
+  if (apiStatus === "deprecated") {
+    return "Deprecated — avoid in new work and migrate to the recommended alternative."
+  }
+  if (apiStatus === "internal") {
+    return "Internal — not part of the public API."
+  }
+  if (meetsBar && taggedStable) {
+    return "Stable and meets the definition of done."
+  }
+  if (discrepancy === "tagged-but-below-bar") {
+    return "Tagged stable, but the checklist below isn't complete yet."
+  }
+  if (discrepancy === "meets-bar-not-tagged") {
+    return "Meets the definition of done — ready to be promoted to stable."
+  }
+  if (apiStatus === "unknown") {
+    return "No maturity tag set. Complete the checklist below to reach stable."
+  }
+  return "Experimental. Complete the checklist below to reach stable."
+}
 
 const DOC_QUALITY_ORDER: DocQuality[] = [
   "none",
@@ -193,6 +245,9 @@ export function evaluateComponentStatus(
     taggedStable,
     stableReady: meetsBar,
     discrepancy,
+    label: STATUS_LABELS[entry.apiStatus],
+    summary: summarize(entry.apiStatus, meetsBar, taggedStable, discrepancy),
+    showChecklist: checklistApplies(entry.apiStatus),
   }
 }
 
