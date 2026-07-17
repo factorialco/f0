@@ -33,7 +33,7 @@ describe("ComponentStability", () => {
   test("renders badge, summary, and checklist from the status data", () => {
     render(<ComponentStability componentName="Card" components={DATASET} />)
 
-    expect(screen.getByText("Status")).toBeInTheDocument()
+    expect(screen.getByText("Maturity level")).toBeInTheDocument()
     expect(screen.getByText("Stable")).toBeInTheDocument()
     expect(
       screen.getByText(/tagged stable, but the checklist/i)
@@ -42,6 +42,11 @@ describe("ComponentStability", () => {
     expect(screen.getByText("Has unit tests")).toBeInTheDocument()
     expect(screen.getByText("Has MDX documentation")).toBeInTheDocument()
     expect(screen.getByText(/add an \.mdx docs page/i)).toBeInTheDocument()
+    // Doc-quality criteria are enumerated, not left abstract.
+    expect(
+      screen.getByText(/at least two of these sections/i)
+    ).toBeInTheDocument()
+    expect(screen.getByText(/a props table/i)).toBeInTheDocument()
   })
 
   test("resolves forgiving names (F0 prefix / prefixed title)", () => {
@@ -51,7 +56,7 @@ describe("ComponentStability", () => {
         components={DATASET}
       />
     )
-    expect(container).toHaveTextContent("Status")
+    expect(container).toHaveTextContent("Maturity level")
     expect(container).toHaveTextContent("Stable")
   })
 

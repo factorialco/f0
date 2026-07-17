@@ -53,6 +53,13 @@ describe("evaluateComponentStatus", () => {
     expect(status.missing).toEqual(['Docs reach "acceptable" quality'])
   })
 
+  test("the docQuality requirement enumerates concrete criteria", () => {
+    const status = evaluateComponentStatus(entry())
+    const docReq = status.requirements.find((r) => r.key === "docQuality")
+    expect(docReq?.criteria?.length).toBeGreaterThanOrEqual(3)
+    expect(docReq?.criteria?.some((c) => /anatomy/i.test(c))).toBe(true)
+  })
+
   test("acceptable is the minimum passing doc tier", () => {
     expect(
       evaluateComponentStatus(entry({ docQuality: "acceptable" })).missing

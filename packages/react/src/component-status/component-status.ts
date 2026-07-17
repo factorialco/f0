@@ -76,6 +76,9 @@ export interface RequirementResult {
   met: boolean
   /** What is missing / how to satisfy it when unmet. */
   detail: string
+  /** Concrete sub-criteria enumerated under `detail`, when the requirement is
+   * made up of several checks (e.g. what "acceptable" docs must contain). */
+  criteria?: string[]
 }
 
 export interface ComponentStatus extends ComponentEntry {
@@ -185,6 +188,7 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
   key: string
   label: string
   detail: string
+  criteria?: string[]
   isMet: (c: ComponentEntry) => boolean
 }> = [
   {
@@ -208,9 +212,12 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
   {
     key: "docQuality",
     label: `Docs reach "${MIN_DOC_QUALITY}" quality`,
-    detail:
-      "Docs must include the required sections (Anatomy, Guidelines, " +
-      "Accessibility) and a props table. See documentation-quality.md.",
+    detail: "To count as documented, the MDX docs must include:",
+    criteria: [
+      "At least two of these sections: Anatomy, Guidelines, Accessibility",
+      "A props table (a Markdown table or a <Controls> block)",
+      "Real written content, not an empty autodocs stub",
+    ],
     isMet: (c) => docQualityAtLeast(c.docQuality, MIN_DOC_QUALITY),
   },
 ]
@@ -227,6 +234,7 @@ export function evaluateComponentStatus(
     label: req.label,
     met: req.isMet(entry),
     detail: req.detail,
+    criteria: req.criteria,
   }))
 
   const missing = requirements.filter((r) => !r.met).map((r) => r.label)
