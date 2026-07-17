@@ -93,10 +93,10 @@ export function ComponentStability({
       {status.showChecklist && (
         <ul className="mt-4 list-none space-y-3 p-0">
           {status.requirements.map((req) => (
-            <li key={req.key} className="flex items-center gap-2">
+            <li key={req.key} className="flex items-start gap-2">
               <span
                 aria-hidden
-                className={`shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
               >
                 {req.met ? "✓" : "✕"}
               </span>
