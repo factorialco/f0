@@ -123,6 +123,192 @@ describe("useChatScroll — conversation switch", () => {
   })
 })
 
+describe("useChatScroll — entry settling", () => {
+  it("flags the entry as settled once the initial positioning completes", () => {
+    const calls: Recorded[] = []
+    const virtualizer = {
+      scrollToIndex: (index: number, o?: { align?: string }) =>
+        calls.push({ index, align: o?.align }),
+      getOffsetForIndex: (i: number) => [i * 40, "start"],
+      getVirtualItemForOffset: () => ({ index: 0 }),
+    }
+    const el = { scrollTop: 0, scrollHeight: 1000, clientHeight: 500 }
+    const ids = ["m1", "m2"]
+    const { result } = renderHook(() =>
+      useChatScroll({
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        viewportRef: { current: el } as never,
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        virtualizer: virtualizer as never,
+        rows: ids.map(messageRow),
+        indexById: new Map(ids.map((id, i) => [id, i])),
+        messages: ids.map((id) => ({ id })),
+        hasMoreOlder: false,
+        loadingOlder: false,
+        onReachTop: () => {},
+        unreadDividerId: null,
+        conversationKey: "chan-a",
+      })
+    )
+    expect(result.current.entrySettled).toBe(true)
+  })
+})
+
+describe("useChatScroll — append behavior", () => {
+  const makeHarness = () => {
+    const calls: Recorded[] = []
+    const virtualizer = {
+      scrollToIndex: (index: number, o?: { align?: string }) =>
+        calls.push({ index, align: o?.align }),
+      getOffsetForIndex: (i: number) => [i * 40, "start"],
+      getVirtualItemForOffset: () => ({ index: 0 }),
+    }
+    const el = { scrollTop: 0, scrollHeight: 1000, clientHeight: 500 }
+    const propsFor = (msgs: { id: string; isMine?: boolean }[]) => ({
+      // eslint-disable-next-line no-type-assertion/no-type-assertion
+      viewportRef: { current: el } as never,
+      // eslint-disable-next-line no-type-assertion/no-type-assertion
+      virtualizer: virtualizer as never,
+      rows: msgs.map((m) => messageRow(m.id)),
+      indexById: new Map(msgs.map((m, i) => [m.id, i])),
+      messages: msgs,
+      hasMoreOlder: false,
+      loadingOlder: false,
+      onReachTop: () => {},
+      unreadDividerId: null,
+      conversationKey: "chan-a",
+    })
+    return { calls, el, propsFor }
+  }
+
+  it("sticks without repositioning when appending near the bottom", () => {
+    const { calls, el, propsFor } = makeHarness()
+    const { result, rerender } = renderHook((props) => useChatScroll(props), {
+      initialProps: propsFor([{ id: "m1" }, { id: "m2" }]),
+    })
+    // The initial settle hard-pins the bottom → nearBottom is true.
+    expect(el.scrollTop).toBe(1000)
+    calls.length = 0
+    rerender(propsFor([{ id: "m1" }, { id: "m2" }, { id: "m3" }]))
+    // No instant scrollToIndex: the container's pin + slide layer own the
+    // motion and need the viewport displacement intact. The hook only asserts
+    // the stick.
+    expect(calls).toHaveLength(0)
+    expect(result.current.atBottom).toBe(true)
+  })
+
+  it("glides (no instant jump) when sending while scrolled far up", () => {
+    const { calls, el, propsFor } = makeHarness()
+    const { result, rerender } = renderHook((props) => useChatScroll(props), {
+      initialProps: propsFor([{ id: "m1" }, { id: "m2" }]),
+    })
+    // Park far from the bottom and sync the flags.
+    el.scrollTop = 100
+    act(() => result.current.handleScroll())
+    calls.length = 0
+    rerender(propsFor([{ id: "m1" }, { id: "m2" }, { id: "m3", isMine: true }]))
+    // No instant scrollToIndex — the rAF glide (frame-capped) hard-pins the
+    // true bottom instead.
+    expect(calls).toHaveLength(0)
+    expect(el.scrollTop).toBe(el.scrollHeight)
+  })
+
+  it("does not move at all for an incoming message while scrolled up", () => {
+    const { calls, el, propsFor } = makeHarness()
+    const { result, rerender } = renderHook((props) => useChatScroll(props), {
+      initialProps: propsFor([{ id: "m1" }, { id: "m2" }]),
+    })
+    el.scrollTop = 100
+    act(() => result.current.handleScroll())
+    calls.length = 0
+    rerender(propsFor([{ id: "m1" }, { id: "m2" }, { id: "m3" }]))
+    expect(calls).toHaveLength(0)
+    expect(el.scrollTop).toBe(100)
+  })
+})
+
+describe("useChatScroll — viewport resize pin", () => {
+  const withResizeObserver = () => {
+    let callback: (() => void) | null = null
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(cb: () => void) {
+          callback = cb
+        }
+        observe() {}
+        disconnect() {}
+      }
+    )
+    return { fire: () => callback?.() }
+  }
+
+  it("re-pins the bottom when the viewport shrinks while near it", () => {
+    const { fire } = withResizeObserver()
+    const el = { scrollTop: 0, scrollHeight: 1000, clientHeight: 500 }
+    const ids = ["m1", "m2"]
+    renderHook(() =>
+      useChatScroll({
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        viewportRef: { current: el } as never,
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        virtualizer: {
+          scrollToIndex: () => {},
+          getOffsetForIndex: (i: number) => [i * 40, "start"],
+          getVirtualItemForOffset: () => ({ index: 0 }),
+          // eslint-disable-next-line no-type-assertion/no-type-assertion
+        } as never,
+        rows: ids.map(messageRow),
+        indexById: new Map(ids.map((id, i) => [id, i])),
+        messages: ids.map((id) => ({ id })),
+        hasMoreOlder: false,
+        loadingOlder: false,
+        onReachTop: () => {},
+        unreadDividerId: null,
+        conversationKey: "chan-a",
+      })
+    )
+    // Entry settle pinned the bottom; the composer then grows (viewport
+    // shrinks) — the resize pin must hold the bottom.
+    el.scrollTop = 900
+    el.clientHeight = 400
+    act(() => fire())
+    expect(el.scrollTop).toBe(1000)
+  })
+
+  it("holds the view steady when scrolled up", () => {
+    const { fire } = withResizeObserver()
+    const el = { scrollTop: 0, scrollHeight: 1000, clientHeight: 500 }
+    const ids = ["m1", "m2"]
+    const { result } = renderHook(() =>
+      useChatScroll({
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        viewportRef: { current: el } as never,
+        // eslint-disable-next-line no-type-assertion/no-type-assertion
+        virtualizer: {
+          scrollToIndex: () => {},
+          getOffsetForIndex: (i: number) => [i * 40, "start"],
+          getVirtualItemForOffset: () => ({ index: 0 }),
+          // eslint-disable-next-line no-type-assertion/no-type-assertion
+        } as never,
+        rows: ids.map(messageRow),
+        indexById: new Map(ids.map((id, i) => [id, i])),
+        messages: ids.map((id) => ({ id })),
+        hasMoreOlder: false,
+        loadingOlder: false,
+        onReachTop: () => {},
+        unreadDividerId: null,
+        conversationKey: "chan-a",
+      })
+    )
+    el.scrollTop = 100
+    act(() => result.current.handleScroll())
+    el.clientHeight = 400
+    act(() => fire())
+    expect(el.scrollTop).toBe(100)
+  })
+})
+
 describe("useChatScroll — settled jump", () => {
   it("centers a settled jump to a loaded message", () => {
     const calls: Recorded[] = []

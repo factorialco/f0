@@ -61,13 +61,18 @@ export const ChatComposer = (): ReactNode => {
     sendMessage,
     editMessage,
     onInputActivity,
+    stopTyping,
     uploadFiles,
     transcribe,
     maxFiles,
     channel,
     searchMembers,
     currentUserId,
+    capabilities,
   } = useF0Chat()
+  // Uploads need both the runtime hook AND the capability (a frozen channel
+  // can forbid attachments even when the transport could upload them).
+  const canUpload = !!uploadFiles && capabilities?.canUpload !== false
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
@@ -158,28 +163,89 @@ export const ChatComposer = (): ReactNode => {
     "device-error": i18n.chat.micError,
     "transcription-failed": i18n.chat.transcriptionError,
   }
+
+  // Voice NOTES (WhatsApp-style): when the runtime can upload, the mic records
+  // audio and sends it as its own message on confirm — no transcription.
+  // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
+  const voiceNotesEnabled = canUpload
+  // While the confirmed recording uploads, the action row swaps for a "sending
+  // voice note" status so the confirm→message gap isn't silent.
+  const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
+  const handleVoiceNote = useCallback(
+    async (audio: Blob, durationMs: number) => {
+      if (!uploadFiles) return
+      // Set before any await so it batches with the recorder's own
+      // setStatus("idle") — the recording row swaps straight to the sending row.
+      setIsSendingVoiceNote(true)
+      const type = audio.type || "audio/webm"
+      const ext = type.includes("mp4")
+        ? "m4a"
+        : type.includes("ogg")
+          ? "ogg"
+          : "webm"
+      const file = new File([audio], `voice-note.${ext}`, { type })
+      try {
+        const [uploaded] = await uploadFiles([file])
+        if (uploaded && "url" in uploaded) {
+          sendMessage({
+            body: "",
+            attachments: [
+              {
+                kind: "voice",
+                url: uploaded.url,
+                durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
+                mimeType: type,
+                name: file.name,
+              },
+            ],
+          })
+        }
+      } catch {
+        showTransientError(i18n.chat.fileUploadError)
+      } finally {
+        setIsSendingVoiceNote(false)
+      }
+    },
+    [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
+  )
+
   const recorder = useAudioRecorder({
     onTranscribe: transcribe,
     onPartial: fillFromTranscript,
     onFinal: fillFromTranscript,
     onError: (error) => showTransientError(recorderErrorMessage[error]),
+    onAudio: voiceNotesEnabled
+      ? (audio, durationMs) => void handleVoiceNote(audio, durationMs)
+      : undefined,
   })
   const isTranscribing = recorder.status === "transcribing"
   const isRecording = recorder.status === "recording"
-  const canRecord = !!transcribe && recorder.isSupported
+  const canRecord = (voiceNotesEnabled || !!transcribe) && recorder.isSupported
 
   const canSend =
     (value.trim().length > 0 || attachments.length > 0) &&
     !isTranscribing &&
-    !isUploading
+    !isUploading &&
+    !isSendingVoiceNote
 
   const handleChange = useCallback(
     (next: string, cursorPos: number) => {
       setValue(next)
       setCursorPosition(cursorPos)
       onInputActivity()
+      // Clearing the text means typing stopped NOW — don't leave the
+      // counterpart's dots hanging until the transport's timeout.
+      if (next.trim().length === 0) void stopTyping?.()
     },
-    [onInputActivity]
+    [onInputActivity, stopTyping]
+  )
+
+  // Leaving the conversation mid-type must also drop the dots immediately.
+  useEffect(
+    () => () => {
+      void stopTyping?.()
+    },
+    [stopTyping]
   )
 
   const updateCursorPosition = useCallback(() => {
@@ -194,7 +260,7 @@ export const ChatComposer = (): ReactNode => {
 
   const handleUpload = useCallback(
     async (files: File[]) => {
-      if (files.length === 0 || !uploadFiles) return
+      if (files.length === 0 || !uploadFiles || !canUpload) return
       // Reject the whole batch when it would exceed the cap — a transient banner
       // is friendlier than silently truncating the user's selection.
       if (
@@ -234,6 +300,7 @@ export const ChatComposer = (): ReactNode => {
     },
     [
       uploadFiles,
+      canUpload,
       maxFiles,
       showTransientError,
       i18n.chat.tooManyFilesError,
@@ -301,6 +368,8 @@ export const ChatComposer = (): ReactNode => {
 
   const handleSend = useCallback(() => {
     if (!canSend) return
+    // Typing stopped by definition — the message is out (or the edit saved).
+    void stopTyping?.()
     const ready = attachments.flatMap((a) =>
       a.status === "ready" ? [a.attachment] : []
     )
@@ -338,6 +407,7 @@ export const ChatComposer = (): ReactNode => {
     replyTo,
     sendMessage,
     setReplyTo,
+    stopTyping,
     value,
     editingMessage,
     editMessage,
@@ -493,7 +563,7 @@ export const ChatComposer = (): ReactNode => {
                       />
                     </div>
                   </div>
-                ) : (
+                ) : att.attachment.kind === "file" ? (
                   <F0FileItem
                     key={att.id}
                     size="md"
@@ -512,7 +582,9 @@ export const ChatComposer = (): ReactNode => {
                       },
                     ]}
                   />
-                )
+                ) : // Locations never sit in the composer (uploads only) — the
+                // narrowing here just satisfies the widened attachment union.
+                null
               )}
             </div>
           )}
@@ -552,7 +624,11 @@ export const ChatComposer = (): ReactNode => {
                   variant="default"
                   size="md"
                   hideLabel
-                  label={i18n.chat.stopRecording}
+                  label={
+                    voiceNotesEnabled
+                      ? i18n.chat.sendVoiceNote
+                      : i18n.chat.stopRecording
+                  }
                   icon={Check}
                   onClick={recorder.stop}
                 />
@@ -578,7 +654,7 @@ export const ChatComposer = (): ReactNode => {
                   label={i18n.chat.attachFile}
                   icon={Paperclip}
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={!uploadFiles || isTranscribing}
+                  disabled={!canUpload || isTranscribing}
                 />
                 {/* Insert emoji into the message (reuses the reactions picker). */}
                 <Picker
@@ -594,10 +670,15 @@ export const ChatComposer = (): ReactNode => {
                     variant="outline"
                     size="md"
                     hideLabel
-                    label={i18n.chat.recordAudio}
+                    label={
+                      isSendingVoiceNote
+                        ? i18n.chat.sendingVoiceNote
+                        : i18n.chat.recordAudio
+                    }
                     icon={Microphone}
                     onClick={startRecording}
-                    loading={isTranscribing}
+                    // Spins while dictation transcribes or a voice note uploads.
+                    loading={isTranscribing || isSendingVoiceNote}
                   />
                 )}
                 <ButtonInternal

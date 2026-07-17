@@ -1,9 +1,10 @@
 import { type IconType } from "@/components/F0Icon"
-import { File, Image, Paperclip } from "@/icons/app"
+import { File, Image, Marker, Microphone, Paperclip } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
 import { type F0ChatAttachment } from "../types"
 import { replyThumbnailUrl, summariseAttachments } from "../utils/reply-preview"
+import { sanitizeDisplayText } from "../utils/sanitize-text"
 
 export type ReplyPreview = {
   /** Leading glyph for a media-only preview (omitted when a caption is shown). */
@@ -29,7 +30,8 @@ export const useReplyPreview = (input: {
   attachments?: F0ChatAttachment[]
 }): ReplyPreview => {
   const i18n = useI18n()
-  const body = input.body?.trim() ?? ""
+  // Untrusted input: strip zalgo stacks / bidi overrides before display.
+  const body = sanitizeDisplayText(input.body?.trim() ?? "")
   const thumbnailUrl = replyThumbnailUrl(input.attachments)
   const summary = summariseAttachments(input.attachments)
 
@@ -51,12 +53,16 @@ export const useReplyPreview = (input: {
               summary.name ??
               i18n.t("chat.fileCount.other", { count: summary.count }),
           }
-        : {
-            icon: Paperclip,
-            label: i18n.t("chat.attachmentCount.other", {
-              count: summary.count,
-            }),
-          }
+        : summary.kind === "location"
+          ? { icon: Marker, label: i18n.chat.location }
+          : summary.kind === "voice"
+            ? { icon: Microphone, label: i18n.chat.voiceNote }
+            : {
+                icon: Paperclip,
+                label: i18n.t("chat.attachmentCount.other", {
+                  count: summary.count,
+                }),
+              }
 
   return { icon: media.icon, label: body || media.label, thumbnailUrl }
 }
