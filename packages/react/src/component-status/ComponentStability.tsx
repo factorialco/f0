@@ -78,7 +78,7 @@ export function ComponentStability({
 
   return (
     <div
-      className={`sb-unstyled rounded-lg border border-f1-border bg-f1-background py-4 ${className ?? ""}`}
+      className={`sb-unstyled rounded-lg border border-f1-border bg-f1-background ${className ?? ""}`}
     >
       <h3 className="m-0 mb-3 text-xl font-semibold text-f1-foreground">
         Maturity level
