@@ -24,66 +24,64 @@ const staggerDelay = (index: number) =>
 /** Ease used across the design system for reveals (e.g. collapsible messages). */
 const REVEAL_EASE = [0.165, 0.84, 0.44, 1] as const
 
+// Precomputed at module scope: the variants are pure of their inputs, so
+// building them once avoids a fresh allocation per animated row per render.
+const expandAnimationVariants = {
+  // All revealed rows fade in at once
+  fade: {
+    hidden: { opacity: 0 },
+    visible: () => ({
+      opacity: 1,
+      transition: { duration: 0.3, ease: REVEAL_EASE },
+    }),
+  },
+
+  // Rows fade in and settle downwards one after another
+  stagger: {
+    hidden: { opacity: 0, y: -10 },
+    visible: (index: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: staggerDelay(index),
+        duration: 0.3,
+        ease: REVEAL_EASE,
+      },
+    }),
+  },
+
+  // Rows slide in from the left with a soft spring, one after another
+  slide: {
+    hidden: { opacity: 0, x: -24 },
+    visible: (index: number) => ({
+      opacity: 1,
+      x: 0,
+      transition: {
+        delay: staggerDelay(index),
+        type: "spring" as const,
+        stiffness: 260,
+        damping: 26,
+      },
+    }),
+  },
+
+  // Rows scale up into place with a springy pop, one after another
+  pop: {
+    hidden: { opacity: 0, scale: 0.94, y: -6 },
+    visible: (index: number) => ({
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        delay: staggerDelay(index),
+        type: "spring" as const,
+        stiffness: 320,
+        damping: 20,
+      },
+    }),
+  },
+} as const
+
 export const getExpandAnimationVariants = (
   animation: Exclude<NestedExpandAnimation, "none">
-) => {
-  switch (animation) {
-    // All revealed rows fade in at once
-    case "fade":
-      return {
-        hidden: { opacity: 0 },
-        visible: () => ({
-          opacity: 1,
-          transition: { duration: 0.3, ease: REVEAL_EASE },
-        }),
-      }
-
-    // Rows fade in and settle downwards one after another
-    case "stagger":
-      return {
-        hidden: { opacity: 0, y: -10 },
-        visible: (index: number) => ({
-          opacity: 1,
-          y: 0,
-          transition: {
-            delay: staggerDelay(index),
-            duration: 0.3,
-            ease: REVEAL_EASE,
-          },
-        }),
-      }
-
-    // Rows slide in from the left with a soft spring, one after another
-    case "slide":
-      return {
-        hidden: { opacity: 0, x: -24 },
-        visible: (index: number) => ({
-          opacity: 1,
-          x: 0,
-          transition: {
-            delay: staggerDelay(index),
-            type: "spring" as const,
-            stiffness: 260,
-            damping: 26,
-          },
-        }),
-      }
-
-    // Rows scale up into place with a springy pop, one after another
-    case "pop":
-      return {
-        hidden: { opacity: 0, scale: 0.94, y: -6 },
-        visible: (index: number) => ({
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          transition: {
-            delay: staggerDelay(index),
-            type: "spring" as const,
-            stiffness: 320,
-            damping: 20,
-          },
-        }),
-      }
-  }
-}
+) => expandAnimationVariants[animation]

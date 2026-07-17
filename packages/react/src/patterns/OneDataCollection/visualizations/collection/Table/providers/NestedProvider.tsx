@@ -393,20 +393,34 @@ export const NestedDataProvider = <R extends RecordType>({
     return internalControl.__bindEngine(engine)
   }, [control, engine])
 
+  // Memoized so parent re-renders with unchanged expansion state don't force
+  // every consuming row to re-render: all callbacks are stable useCallbacks,
+  // so the identity only changes on real state updates.
+  const expandAnimation = nested?.expandAnimation ?? "none"
+  const contextValue = useMemo(
+    () =>
+      ({
+        fetchedData,
+        updateFetchedData,
+        clearFetchedData,
+        setRowExpanded,
+        resolveRowExpansion,
+        registerNestedRow,
+        expandAnimation,
+      }) as NestedDataContextValue<RecordType>,
+    [
+      fetchedData,
+      updateFetchedData,
+      clearFetchedData,
+      setRowExpanded,
+      resolveRowExpansion,
+      registerNestedRow,
+      expandAnimation,
+    ]
+  )
+
   return (
-    <NestedDataContext.Provider
-      value={
-        {
-          fetchedData,
-          updateFetchedData,
-          clearFetchedData,
-          setRowExpanded,
-          resolveRowExpansion,
-          registerNestedRow,
-          expandAnimation: nested?.expandAnimation ?? "none",
-        } as NestedDataContextValue<RecordType>
-      }
-    >
+    <NestedDataContext.Provider value={contextValue}>
       {children}
     </NestedDataContext.Provider>
   )
