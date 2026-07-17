@@ -23,6 +23,7 @@ import {
   WeekStartDay,
   WeekStartsOn,
 } from "./types"
+import { CalendarHeaderDropdowns } from "./components/CalendarHeaderDropdowns"
 import { isActiveDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
@@ -139,6 +140,23 @@ const OneCalendarInternal = ({
 
   // Get header label
   const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
+
+  // The day/week views span a month, so they get both month and year
+  // dropdowns; the month view spans a year, so it gets a year dropdown only.
+  // Every other view keeps its plain label.
+  const headerDropdowns =
+    granularity.calendarView === "day" || granularity.calendarView === "week"
+      ? "month-year"
+      : granularity.calendarView === "month"
+        ? "year"
+        : null
+
+  // Jump straight to a month/year from the dropdowns, animating in the
+  // direction of travel like the prev/next arrows do.
+  const handleHeaderDateChange = (newDate: Date) => {
+    setMotionDirection(newDate.getTime() >= viewDate.getTime() ? 1 : -1)
+    setViewDate(newDate)
+  }
 
   // Handle selection of a date
   const handleSelect = (date: Date | DateRange | null) => {
@@ -304,14 +322,25 @@ const OneCalendarInternal = ({
             compact ? "mx-2 pb-2" : "pb-3"
           )}
         >
-          <div
-            className={cn(
-              "font-medium text-f1-foreground",
-              compact ? "text-md" : "text-lg"
-            )}
-          >
-            {getHeaderLabel()}
-          </div>
+          {headerDropdowns ? (
+            <CalendarHeaderDropdowns
+              viewDate={viewDate}
+              onViewDateChange={handleHeaderDateChange}
+              showMonth={headerDropdowns === "month-year"}
+              locale={l10n.locale}
+              minDate={minDate}
+              maxDate={maxDate}
+            />
+          ) : (
+            <div
+              className={cn(
+                "font-medium text-f1-foreground",
+                compact ? "text-md" : "text-lg"
+              )}
+            >
+              {getHeaderLabel()}
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <F0Button
               onClick={() => navigate(-1)}

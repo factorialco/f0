@@ -1,5 +1,6 @@
+import { fireEvent } from "@testing-library/react"
 import React from "react"
-import { describe, expect, it, vi } from "vitest"
+import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { zeroRender as render, screen, within } from "@/testing/test-utils"
 
@@ -51,6 +52,92 @@ describe("OneCalendar", () => {
     expect(within(grid).getByText("do")).toBeInTheDocument() // Domingo
 
     vi.useRealTimers()
+  })
+
+  describe("header month/year dropdowns", () => {
+    beforeAll(() => {
+      // F0Select relies on ResizeObserver and layout APIs jsdom lacks.
+      global.ResizeObserver = class {
+        observe = vi.fn()
+        unobserve = vi.fn()
+        disconnect = vi.fn()
+      } as unknown as typeof ResizeObserver
+      Element.prototype.scrollIntoView = vi.fn()
+    })
+
+    // A null selection makes OneCalendar snap the view to "today", so pin the
+    // month by passing a concrete selected date.
+    const march2024 = new Date(2024, 2, 15)
+
+    it("shows month and year dropdowns in day view", async () => {
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar mode="single" view="day" defaultSelected={march2024} />
+        </TestWrapper>
+      )
+
+      const comboboxes = screen.getAllByRole("combobox")
+      expect(comboboxes).toHaveLength(2)
+      expect(await screen.findByText("March")).toBeInTheDocument()
+      expect(await screen.findByText("2024")).toBeInTheDocument()
+    })
+
+    it("shows month and year dropdowns in week view", async () => {
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar mode="single" view="week" defaultSelected={march2024} />
+        </TestWrapper>
+      )
+
+      expect(screen.getAllByRole("combobox")).toHaveLength(2)
+      expect(await screen.findByText("March")).toBeInTheDocument()
+    })
+
+    it("shows only a year dropdown in month view", async () => {
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar mode="single" view="month" defaultSelected={march2024} />
+        </TestWrapper>
+      )
+
+      // Exactly one dropdown (year); the month picker is the grid itself.
+      const comboboxes = screen.getAllByRole("combobox")
+      expect(comboboxes).toHaveLength(1)
+      expect(comboboxes[0]).toHaveTextContent("2024")
+    })
+
+    it("keeps the plain label (no dropdowns) in quarter view", () => {
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="quarter"
+            defaultSelected={march2024}
+          />
+        </TestWrapper>
+      )
+
+      // No month/year dropdowns; quarter view keeps its plain label + arrows.
+      expect(screen.queryAllByRole("combobox")).toHaveLength(0)
+      expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument()
+    })
+
+    it("stays in sync with the prev/next arrows", async () => {
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar mode="single" view="day" defaultSelected={march2024} />
+        </TestWrapper>
+      )
+
+      expect(await screen.findByText("March")).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Next" }))
+      expect(await screen.findByText("April")).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Previous" }))
+      fireEvent.click(screen.getByRole("button", { name: "Previous" }))
+      expect(await screen.findByText("February")).toBeInTheDocument()
+    })
   })
 
   describe("selectOnCellOnly", () => {
