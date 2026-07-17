@@ -17,14 +17,7 @@
  */
 
 import { motion } from "motion/react"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -71,12 +64,6 @@ const normalizeAddRowActions = (
     (item): item is PrimaryActionItemDefinition => item !== undefined
   )
 }
-
-/**
- * Safety cap for eager children loading (`children: "all"`): stops fetching
- * further pages even if the adapter keeps reporting `hasMore`.
- */
-const MAX_EAGER_CHILDREN_PAGES = 100
 
 /**
  * Stagger index for row mount animations. Depth contributes to the delay so
@@ -215,15 +202,13 @@ const NestedRowContent = <
    * avoiding retry loops when a fetch errors.
    */
   const autoLoadRequestedRef = useRef(false)
-  const [eagerPagesRequested, setEagerPagesRequested] = useState(0)
 
-  // Re-arm the request guards when the children cache is invalidated (e.g. a
+  // Re-arm the request guard when the children cache is invalidated (e.g. a
   // filters change) so rows kept open by a policy reload their children.
   const previousHasFetchedRef = useRef(hasFetched)
   useEffect(() => {
     if (previousHasFetchedRef.current && !hasFetched) {
       autoLoadRequestedRef.current = false
-      setEagerPagesRequested(0)
     }
     previousHasFetchedRef.current = hasFetched
   }, [hasFetched])
@@ -265,9 +250,10 @@ const NestedRowContent = <
 
   /**
    * Eager pagination (`children: "all"`): keeps fetching pages until the
-   * adapter reports no more. Guarded by `total`, a page cap and the error
-   * flag, so a misbehaving or failing adapter cannot cause a fetch loop —
-   * remaining pages fall back to the "show more" row.
+   * adapter reports no more. The adapter fully drives when to stop — loading
+   * halts on `hasMore: false`, on reaching `total`, or on a fetch error, so a
+   * failing adapter cannot cause a retry loop and remaining pages fall back
+   * to the "show more" row.
    */
   const eagerLoadPending =
     open &&
@@ -276,18 +262,12 @@ const NestedRowContent = <
     !hasError &&
     !!paginationInfo?.hasMore &&
     (paginationInfo.total === undefined ||
-      children.length < paginationInfo.total) &&
-    eagerPagesRequested < MAX_EAGER_CHILDREN_PAGES
+      children.length < paginationInfo.total)
 
   useEffect(() => {
-    if (!open || !eager) {
-      setEagerPagesRequested(0)
-      return
-    }
     if (!eagerLoadPending || isLoading) return
-    setEagerPagesRequested((count) => count + 1)
     loadChildren()
-  }, [open, eager, eagerLoadPending, isLoading, loadChildren])
+  }, [eagerLoadPending, isLoading, loadChildren])
 
   const shouldShowLoading = open && isLoading
   const shouldShowChildren = open
