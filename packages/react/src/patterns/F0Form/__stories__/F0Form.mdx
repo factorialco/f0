@@ -505,11 +505,11 @@ members: f0FormField.entitiesList({
 
 The three row operations persist through a matching trio:
 
-| Operation | How it persists |
-| --------- | --------------- |
+| Operation | How it persists                             |
+| --------- | ------------------------------------------- |
 | Add       | `createFormDefinition` (its own `onSubmit`) |
 | Edit      | `updateFormDefinition` (its own `onSubmit`) |
-| Remove    | `config.onRemove` |
+| Remove    | `config.onRemove`                           |
 
 `config.onRemove` is the delete counterpart. Removing a row (from the overflow `⋮` menu, per the CRUD "Delete & destructive" doc) now **always confirms first**, then — if `onRemove` is set — runs it with the row item. The row is dropped from the field value only when `onRemove` resolves successfully; returning `{ success: false }` or throwing keeps the row and surfaces an error, and the remove action is disabled while the request is in flight. Without `onRemove`, removal is value-only (the row is spliced out) but the confirmation is still shown.
 
