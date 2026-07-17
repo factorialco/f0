@@ -78,30 +78,30 @@ export function ComponentStability({
 
   return (
     <div
-      className={`sb-unstyled rounded-lg border border-f1-border bg-f1-background p-4 ${className ?? ""}`}
+      className={`sb-unstyled rounded-lg border border-f1-border bg-f1-background py-4 ${className ?? ""}`}
     >
-      <div className="mb-2 text-sm font-medium text-f1-foreground-secondary">
+      <div className="mb-2 text-base font-medium text-f1-foreground-secondary">
         Status
       </div>
       <div className="mb-2">
         <StatusBadge status={status} />
       </div>
-      <p className="m-0 text-sm text-f1-foreground-secondary">
+      <p className="m-0 text-base text-f1-foreground-secondary">
         {status.summary}
       </p>
 
       {status.showChecklist && (
         <ul className="mt-4 list-none space-y-3 p-0">
           {status.requirements.map((req) => (
-            <li key={req.key} className="flex gap-2">
+            <li key={req.key} className="flex items-center gap-2">
               <span
                 aria-hidden
-                className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                className={`shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
               >
                 {req.met ? "✓" : "✕"}
               </span>
               <div>
-                <div className="text-sm text-f1-foreground">{req.label}</div>
+                <div className="text-base text-f1-foreground">{req.label}</div>
                 {!req.met && (
                   <div className="mt-0.5 text-xs text-f1-foreground-secondary">
                     {req.detail}
