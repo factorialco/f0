@@ -38,6 +38,18 @@ export type ApiStatus =
 
 export type DocQuality = "none" | "stub" | "acceptable" | "good" | "gold"
 
+/** Granular MDX signals used to score the doc tier and its per-criterion checks. */
+export interface DocSignals {
+  /** How many of Anatomy / Guidelines / Accessibility are present (0–3). */
+  sectionsCount: number
+  hasProps: boolean
+  hasWhenToUse: boolean
+  hasWhenNotToUse: boolean
+  hasDoDonts: boolean
+  /** Number of `<Canvas>` example blocks. */
+  exampleCount: number
+}
+
 /** A raw entry as emitted by the generator. */
 export interface ComponentEntry {
   name: string
@@ -49,6 +61,7 @@ export interface ComponentEntry {
   hasPlayFunction: boolean
   hasMdxDocs: boolean
   docQuality: DocQuality
+  docSignals: DocSignals
   storyFile: string
 }
 
@@ -68,6 +81,12 @@ export interface ComponentStatusData {
   components: ComponentEntry[]
 }
 
+/** A sub-check enumerated under a requirement, with its own pass/fail. */
+export interface CriterionResult {
+  label: string
+  met: boolean
+}
+
 /** One line item in the stable checklist. */
 export interface RequirementResult {
   /** Stable machine key, e.g. "unitTests". */
@@ -77,9 +96,9 @@ export interface RequirementResult {
   met: boolean
   /** What is missing / how to satisfy it when unmet. */
   detail: string
-  /** Concrete sub-criteria enumerated under `detail`, when the requirement is
-   * made up of several checks (e.g. what "acceptable" docs must contain). */
-  criteria?: string[]
+  /** Concrete sub-criteria (each with its own pass/fail) enumerated under
+   * `detail`, when the requirement is made up of several checks. */
+  criteria?: CriterionResult[]
 }
 
 export interface ComponentStatus extends ComponentEntry {
@@ -212,7 +231,7 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
   key: string
   label: string
   detail: string
-  criteria?: string[]
+  criteria?: Array<{ label: string; isMet: (c: ComponentEntry) => boolean }>
   isMet: (c: ComponentEntry) => boolean
 }> = [
   {
@@ -246,10 +265,23 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
     label: `Docs reach "${MIN_DOC_QUALITY}" quality`,
     detail: "Docs at the Good tier build on the Acceptable base and add:",
     criteria: [
-      "Acceptable base: required sections (Anatomy, Guidelines, Accessibility) and a props table",
-      "DoDont examples with realistic Factorial copy",
-      'A "when not to use" section',
-      "At least three named example stories",
+      {
+        label:
+          "Required sections (Anatomy, Guidelines, Accessibility) and a props table",
+        isMet: (c) => c.docSignals.sectionsCount >= 2 && c.docSignals.hasProps,
+      },
+      {
+        label: "DoDont examples with realistic Factorial copy",
+        isMet: (c) => c.docSignals.hasDoDonts,
+      },
+      {
+        label: 'A "when not to use" section',
+        isMet: (c) => c.docSignals.hasWhenNotToUse,
+      },
+      {
+        label: "At least three named example stories",
+        isMet: (c) => c.docSignals.exampleCount >= 3,
+      },
     ],
     isMet: (c) => docQualityAtLeast(c.docQuality, MIN_DOC_QUALITY),
   },
@@ -267,7 +299,10 @@ export function evaluateComponentStatus(
     label: req.label,
     met: req.isMet(entry),
     detail: req.detail,
-    criteria: req.criteria,
+    criteria: req.criteria?.map((cr) => ({
+      label: cr.label,
+      met: cr.isMet(entry),
+    })),
   }))
 
   const missing = requirements.filter((r) => !r.met).map((r) => r.label)

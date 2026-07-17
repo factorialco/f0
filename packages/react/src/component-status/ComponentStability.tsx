@@ -105,10 +105,19 @@ export function ComponentStability({
                 <div className="mt-0.5 text-base text-f1-foreground-secondary">
                   {req.detail}
                   {req.criteria && req.criteria.length > 0 && (
-                    <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                    <ul className="mt-1 list-none space-y-0.5 p-0">
                       {req.criteria.map((criterion) => (
-                        <li key={criterion} className="!text-base">
-                          {criterion}
+                        <li
+                          key={criterion.label}
+                          className="flex items-start gap-2 !text-base"
+                        >
+                          <span
+                            aria-hidden
+                            className={`shrink-0 ${criterion.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                          >
+                            {criterion.met ? "✓" : "✕"}
+                          </span>
+                          <span>{criterion.label}</span>
                         </li>
                       ))}
                     </ul>

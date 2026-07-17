@@ -20,6 +20,14 @@ function entry(overrides: Partial<ComponentEntry> = {}): ComponentEntry {
     hasPlayFunction: true,
     hasMdxDocs: true,
     docQuality: "gold" as DocQuality,
+    docSignals: {
+      sectionsCount: 3,
+      hasProps: true,
+      hasWhenToUse: true,
+      hasWhenNotToUse: true,
+      hasDoDonts: true,
+      exampleCount: 4,
+    },
     storyFile: "components/F0Example/__stories__/F0Example.stories.tsx",
     ...overrides,
   }
@@ -61,11 +69,35 @@ describe("evaluateComponentStatus", () => {
     expect(status.missing).toEqual(['Docs reach "good" quality'])
   })
 
-  test("the docQuality requirement enumerates concrete criteria", () => {
-    const status = evaluateComponentStatus(entry())
-    const docReq = status.requirements.find((r) => r.key === "docQuality")
-    expect(docReq?.criteria?.length).toBeGreaterThanOrEqual(3)
-    expect(docReq?.criteria?.some((c) => /anatomy/i.test(c))).toBe(true)
+  test("the docQuality requirement enumerates concrete criteria with per-criterion checks", () => {
+    // A gold-signal component: every sub-criterion met.
+    const met = evaluateComponentStatus(entry()).requirements.find(
+      (r) => r.key === "docQuality"
+    )
+    expect(met?.criteria?.length).toBeGreaterThanOrEqual(3)
+    expect(met?.criteria?.some((c) => /anatomy/i.test(c.label))).toBe(true)
+    expect(met?.criteria?.every((c) => c.met)).toBe(true)
+
+    // Missing DoDonts + only 1 example → those two sub-criteria fail.
+    const partial = evaluateComponentStatus(
+      entry({
+        docQuality: "acceptable",
+        docSignals: {
+          sectionsCount: 3,
+          hasProps: true,
+          hasWhenToUse: true,
+          hasWhenNotToUse: true,
+          hasDoDonts: false,
+          exampleCount: 1,
+        },
+      })
+    ).requirements.find((r) => r.key === "docQuality")
+    const byLabel = Object.fromEntries(
+      (partial?.criteria ?? []).map((c) => [c.label, c.met])
+    )
+    expect(byLabel["DoDont examples with realistic Factorial copy"]).toBe(false)
+    expect(byLabel["At least three named example stories"]).toBe(false)
+    expect(byLabel['A "when not to use" section']).toBe(true)
   })
 
   test("good is the minimum passing doc tier (acceptable is not enough)", () => {

@@ -89,39 +89,59 @@ function getApiStatus(tags) {
   return "unknown"
 }
 
+const EMPTY_DOC_SIGNALS = {
+  sectionsCount: 0,
+  hasProps: false,
+  hasDoDonts: false,
+  hasWhenToUse: false,
+  hasWhenNotToUse: false,
+  exampleCount: 0,
+}
+
+/**
+ * Extract the granular doc-quality signals from an MDX file's content. These
+ * feed both the tier and the per-criterion checks shown in the UI.
+ */
+function docSignalsOf(content) {
+  if (content == null) return { ...EMPTY_DOC_SIGNALS }
+
+  const hasAnatomy = /#{2,4}\s+anatomy/i.test(content)
+  const hasGuidelines =
+    /#{2,4}\s+guidelines/i.test(content) || /best practices/i.test(content)
+  const hasAccessibility = /#{2,4}\s+accessibility/i.test(content)
+
+  return {
+    sectionsCount: [hasAnatomy, hasGuidelines, hasAccessibility].filter(Boolean)
+      .length,
+    hasProps:
+      /<Controls\b/.test(content) ||
+      /\|\s*prop\s*\|/i.test(content) ||
+      /<table/i.test(content),
+    hasWhenToUse: /when to use/i.test(content),
+    hasWhenNotToUse: /when\s+not\s+to\s+use|when not/i.test(content),
+    hasDoDonts: /DoDonts/.test(content),
+    exampleCount: (content.match(/<Canvas\b/gi) || []).length,
+  }
+}
+
 /**
  * Heuristic doc-quality tier, mirroring the levels in
  * .opencode/skills/f0-docs/references/documentation-quality.md.
  * Returns "none" | "stub" | "acceptable" | "good" | "gold". A coarse signal
  * from the MDX structure, not a substitute for human review.
  */
-function scoreDocQuality(content) {
+function scoreDocQuality(content, signals) {
   if (content == null) return "none"
 
-  const hasAnatomy = /#{2,4}\s+anatomy/i.test(content)
-  const hasGuidelines =
-    /#{2,4}\s+guidelines/i.test(content) || /best practices/i.test(content)
-  const hasAccessibility = /#{2,4}\s+accessibility/i.test(content)
-  const hasProps =
-    /<Controls\b/.test(content) ||
-    /\|\s*prop\s*\|/i.test(content) ||
-    /<table/i.test(content)
-  const hasWhenToUse = /when to use/i.test(content)
-  const hasWhenNotToUse = /when\s+not\s+to\s+use|when not/i.test(content)
-  const hasDoDonts = /DoDonts/.test(content)
-  const canvasCount = (content.match(/<Canvas\b/gi) || []).length
+  const s = signals ?? docSignalsOf(content)
 
-  const requiredSections = [hasAnatomy, hasGuidelines, hasAccessibility].filter(
-    Boolean
-  ).length
+  if (content.trim().length < 200 || s.sectionsCount === 0) return "stub"
 
-  if (content.trim().length < 200 || requiredSections === 0) return "stub"
-
-  const acceptable = requiredSections >= 2 && hasProps
+  const acceptable = s.sectionsCount >= 2 && s.hasProps
   if (!acceptable) return "stub"
 
-  const good = hasDoDonts && hasWhenNotToUse && canvasCount >= 3
-  const gold = good && hasWhenToUse && canvasCount >= 4
+  const good = s.hasDoDonts && s.hasWhenNotToUse && s.exampleCount >= 3
+  const gold = good && s.hasWhenToUse && s.exampleCount >= 4
 
   if (gold) return "gold"
   if (good) return "good"
@@ -209,6 +229,7 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
         mdxContent = null
       }
     }
+    const docSignals = docSignalsOf(mdxContent)
 
     components.push({
       name: storyName,
@@ -221,7 +242,8 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       // `play: (…)` in a story object.
       hasPlayFunction: /\bplay\s*:\s*(async\b|\()/.test(content),
       hasMdxDocs: Boolean(mdxPath),
-      docQuality: scoreDocQuality(mdxContent),
+      docQuality: scoreDocQuality(mdxContent, docSignals),
+      docSignals,
       storyFile: relative,
     })
   }

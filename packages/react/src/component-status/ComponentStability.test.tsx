@@ -16,6 +16,14 @@ const DATASET: ComponentEntry[] = [
     hasPlayFunction: true,
     hasMdxDocs: false,
     docQuality: "none",
+    docSignals: {
+      sectionsCount: 0,
+      hasProps: false,
+      hasWhenToUse: false,
+      hasWhenNotToUse: false,
+      hasDoDonts: false,
+      exampleCount: 0,
+    },
     storyFile: "components/F0Card/__stories__/Card.stories.tsx",
   },
   {
@@ -29,6 +37,14 @@ const DATASET: ComponentEntry[] = [
     hasPlayFunction: true,
     hasMdxDocs: true,
     docQuality: "gold",
+    docSignals: {
+      sectionsCount: 3,
+      hasProps: true,
+      hasWhenToUse: true,
+      hasWhenNotToUse: true,
+      hasDoDonts: true,
+      exampleCount: 4,
+    },
     storyFile: "components/F0Alert/__stories__/F0Alert.stories.tsx",
   },
 ]

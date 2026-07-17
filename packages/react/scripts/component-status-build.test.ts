@@ -146,6 +146,14 @@ describe("computeComponentStatusData (extraction)", () => {
       hasPlayFunction: true,
       hasMdxDocs: true,
       docQuality: "gold",
+      // Granular signals feed the per-criterion checks.
+      docSignals: {
+        sectionsCount: 3,
+        hasProps: true,
+        hasDoDonts: true,
+        hasWhenNotToUse: true,
+        exampleCount: 4,
+      },
     })
     // "autodocs" is filtered out of the reported tags.
     expect(alert?.tags).toEqual(["stable"])
