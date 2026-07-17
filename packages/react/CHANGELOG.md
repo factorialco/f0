@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.42.0](https://github.com/factorialco/f0/compare/f0-react-v4.41.1...f0-react-v4.42.0) (2026-07-17)
+
+
+### Features
+
+* **storybook:** show component status + DoD checklist on docs pages ([#4724](https://github.com/factorialco/f0/issues/4724)) ([f46f4ae](https://github.com/factorialco/f0/commit/f46f4ae2dc15cf73ce15daffd0d9393fb5d5ca1f))
+
 ## [4.41.1](https://github.com/factorialco/f0/compare/f0-react-v4.41.0...f0-react-v4.41.1) (2026-07-17)
 
 
