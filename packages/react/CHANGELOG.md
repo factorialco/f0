@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.41.0](https://github.com/factorialco/f0/compare/f0-react-v4.40.1...f0-react-v4.41.0) (2026-07-17)
+
+
+### Features
+
+* **F0Chat:** link previews, clickable links, shared locations and voice notes ([#4636](https://github.com/factorialco/f0/issues/4636)) ([91c3e46](https://github.com/factorialco/f0/commit/91c3e463a64041f11369a8ef2a8b2561b248176d))
+
 ## [4.40.1](https://github.com/factorialco/f0/compare/f0-react-v4.40.0...f0-react-v4.40.1) (2026-07-17)
 
 
