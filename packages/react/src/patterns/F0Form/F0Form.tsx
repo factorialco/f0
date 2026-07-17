@@ -700,6 +700,9 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
   const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const autosubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const actionBarRef = useRef<F0ActionBarRef | null>(null)
+  // Tracks mount state so the async submit handler doesn't touch React state
+  // (or schedule the success-message timer) after the form has unmounted.
+  const isMountedRef = useRef(true)
 
   /**
    * Snapshot of the focused input element + caret position taken before a
@@ -755,6 +758,12 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
     }
     const result = await onSubmit(cleanedData)
 
+    // The form may have unmounted while `onSubmit` was in flight. Bail out
+    // before any setState / timer scheduling: a timer scheduled here would be
+    // created after the unmount cleanup already ran, so it would never be
+    // cleared and would fire on a torn-down tree.
+    if (!isMountedRef.current) return
+
     if (result.success) {
       form.reset(form.getValues())
       resetErrorNavigation()
@@ -783,6 +792,7 @@ function F0FormSingleSchema<TSchema extends F0FormSchema>(
 
   useEffect(() => {
     return () => {
+      isMountedRef.current = false
       if (successTimerRef.current) {
         clearTimeout(successTimerRef.current)
       }

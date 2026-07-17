@@ -146,6 +146,58 @@ describe("F0Form autosubmit", () => {
     expect(onSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ anonymous: true })
     )
+
+    // Flush the post-submit success flow so its auto-dismiss timer fires and
+    // self-clears while still mounted, instead of leaking past teardown.
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2000)
+    })
+  })
+
+  // Regression: if the form unmounts while an autosubmit is in flight, the
+  // resolved submit must not touch React state or schedule the success-message
+  // timer on the dead component. A timer scheduled after unmount is never
+  // cleared and fires on a torn-down tree ("window is not defined" in tests).
+  it("does not schedule state updates after unmount mid-submit", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    let resolveSubmit: (result: { success: true }) => void = () => {}
+    const onSubmit = vi.fn().mockImplementation(
+      () =>
+        new Promise<{ success: true }>((resolve) => {
+          resolveSubmit = resolve
+        })
+    )
+
+    const { unmount } = render(
+      <F0Form
+        name="autosubmit-unmount-midflight"
+        schema={switchSchema}
+        defaultValues={{ anonymous: false }}
+        onSubmit={onSubmit}
+        submitConfig={{ ...autosubmitConfig, delay: 800, hideActionBar: true }}
+      />
+    )
+
+    await user.click(screen.getByRole("switch", { name: "Anonymous" }))
+
+    act(() => {
+      vi.advanceTimersByTime(800)
+    })
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledTimes(1)
+    })
+
+    // Unmount while onSubmit is still pending, then resolve it. The success
+    // branch must bail out and schedule no new timer.
+    const timersBeforeResolve = vi.getTimerCount()
+    unmount()
+    await act(async () => {
+      resolveSubmit({ success: true })
+      await Promise.resolve()
+    })
+
+    expect(vi.getTimerCount()).toBeLessThanOrEqual(timersBeforeResolve)
   })
 
   it("debounces multiple rapid changes into a single submit", async () => {
