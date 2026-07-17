@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
 import { toastStore } from "./store"
 import { ToastId, ToastProviderItem } from "./types"
 
-const toastContainerPositions = ["bottom-left"] as const
+const toastContainerPositions = ["bottom-center"] as const
 type ToastContainerPosition = (typeof toastContainerPositions)[number]
 
 type ToastProviderProps = {
@@ -27,14 +27,14 @@ type ToastProviderProps = {
 }
 
 const toastContainerPositionClasses: Record<ToastContainerPosition, string> = {
-  "bottom-left": "items-end justify-start",
+  "bottom-center": "items-end justify-center",
 } as const
 
 // The toast layer paints from `#f0-overlay-root` (above the fullscreen AI chat
 // and any dialog), but is positioned to overlay this element's box — the main
-// content region — so it sits in the content's bottom-left corner and never
-// covers the sidebar. Falls back to the full viewport when the element is
-// absent (e.g. outside ApplicationFrame).
+// content region — so it sits centred at the bottom of the content area (the
+// same column as the action bar) and never covers the sidebar. Falls back to the
+// full viewport when the element is absent (e.g. outside ApplicationFrame).
 const toastAnchorSelector = "#content"
 
 // How many toasts are shown fully expanded (not stacked)
@@ -213,7 +213,7 @@ const StackedToasts = ({
 
 const ToastsContainer = ({
   items,
-  position = "bottom-left",
+  position = "bottom-center",
 }: {
   items: ToastProviderItem[]
   position?: ToastContainerPosition
@@ -368,7 +368,7 @@ const ToastsContainer = ({
         {hasItems && (
           <div
             key="toast-panel"
-            className="flex w-full flex-col p-6 sm:w-[350px]"
+            className="flex w-full flex-col p-6 sm:w-96"
           >
             {/* Stacked Toasts at the Top */}
             <div ref={stackedContainerRef}>

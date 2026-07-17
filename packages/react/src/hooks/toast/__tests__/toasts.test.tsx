@@ -242,7 +242,7 @@ describe("toasts API", () => {
       })
       expect(screen.getByText("Temporary")).toBeInTheDocument()
 
-      // Default lifetime is 10s; advance past it.
+      // Default lifetime is 5s (10s with an action); advance past it.
       act(() => {
         vi.advanceTimersByTime(10_100)
       })
