@@ -53,9 +53,9 @@ function StatusBadge({ status }: { status: ComponentStatus }) {
   const colors = BADGE_COLORS[status.apiStatus]
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium ${colors.bg} ${colors.text}`}
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-base font-medium ${colors.bg} ${colors.text}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${colors.dot}`} />
+      <span className={`h-2 w-2 rounded-full ${colors.dot}`} />
       {status.label}
     </span>
   )
