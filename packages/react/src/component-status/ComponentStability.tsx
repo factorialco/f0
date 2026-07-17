@@ -80,12 +80,9 @@ export function ComponentStability({
     <div
       className={`sb-unstyled rounded-lg border border-f1-border bg-f1-background py-4 ${className ?? ""}`}
     >
-      <h2 className="m-0 mb-3 text-xl font-semibold text-f1-foreground">
+      <h3 className="m-0 mb-3 text-xl font-semibold text-f1-foreground">
         Maturity level
-      </h2>
-      <div className="mb-2 text-lg font-medium text-f1-foreground-secondary">
-        Status
-      </div>
+      </h3>
       <div className="mb-2">
         <StatusBadge status={status} />
       </div>
