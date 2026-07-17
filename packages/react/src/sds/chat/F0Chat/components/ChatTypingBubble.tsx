@@ -41,9 +41,17 @@ const Dots = ({ animate }: { animate: boolean }) => (
 export const ChatTypingBubble = ({
   users,
   isGroup,
+  leaving = false,
+  spacingClass,
 }: {
   users: F0ChatUser[]
   isGroup: boolean
+  /** The writer paused: fade the bubble out before its row is removed. Flipping
+   * back to false (typing resumed in the grace window) fades it back — the
+   * bubble never remounts, so the dots don't pop. */
+  leaving?: boolean
+  /** Row spacing (the virtual row's padding), applied on the bubble itself. */
+  spacingClass?: string
 }): ReactNode => {
   const i18n = useI18n()
   const reducedMotion = useReducedMotion()
@@ -64,16 +72,18 @@ export const ChatTypingBubble = ({
   }
 
   return (
-    // Eases in (fade + slight rise, scaling up from the bottom-left like an
-    // incoming bubble) so the dots don't pop. It's always the last row, so the
-    // scale-driven height change can't disturb the messages above.
+    // Fades/scales in from the bottom-left (like an incoming bubble) and back
+    // out while `leaving`. No y-offset: the row's appearance already produces
+    // the transcript slide, and a second translation reads as double motion.
+    // Its height is constant from mount, keeping the virtualizer's
+    // measurements stable.
     <motion.div
       role="status"
       aria-label={label}
-      className="flex w-full items-end gap-2"
+      className={cn("flex w-full items-end gap-2", spacingClass)}
       style={{ transformOrigin: "bottom left" }}
-      initial={reducedMotion ? false : { opacity: 0, y: 6, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={reducedMotion ? false : { opacity: 0, scale: 0.95 }}
+      animate={leaving ? { opacity: 0, scale: 0.95 } : { opacity: 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 500, damping: 34, mass: 0.8 }}
     >
       {isGroup &&
@@ -103,7 +113,7 @@ export const ChatTypingBubble = ({
           </span>
         ))}
       <div className="flex w-fit items-center justify-center rounded-2xl border border-solid border-f1-border-secondary bg-f1-background px-3.5 py-4">
-        <Dots animate={!reducedMotion} />
+        <Dots animate={!reducedMotion && !leaving} />
       </div>
     </motion.div>
   )

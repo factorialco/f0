@@ -2,8 +2,12 @@ import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { mockImage } from "@/testing/mocks/images"
 
 import {
+  isUserMessage,
+  type F0ChatAttachment,
+  type F0ChatItem,
+  type F0ChatLinkPreview,
   type F0ChatMention,
-  type F0ChatMessage,
+  type F0ChatSystemEvent,
   type F0ChatUser,
 } from "../types"
 
@@ -101,7 +105,7 @@ const VIKTOR = person("u_viktor", "Viktor", "Hale", "Staff Engineer")
 // DMs and multi-person groups with topical messages).
 // ---------------------------------------------------------------------------
 
-type Line = {
+type MessageLine = {
   from: F0ChatUser
   body: string
   min: number
@@ -111,7 +115,21 @@ type Line = {
   mentions?: F0ChatMention[]
   /** Whether the line mentions the whole group (`@here`). */
   mentionedEveryone?: boolean
+  /** Open Graph cards for the URLs in the body (link preview demo). */
+  linkPreviews?: F0ChatLinkPreview[]
+  /** Attachments (images, files, shared locations) for the media demos. */
+  attachments?: F0ChatAttachment[]
 }
+
+/** A membership event in the transcript — becomes a centered system row. */
+type SystemLine = {
+  system: { event: F0ChatSystemEvent; members: MockPerson[] }
+  min: number
+}
+
+type Line = MessageLine | SystemLine
+
+const isSystemLine = (line: Line): line is SystemLine => "system" in line
 
 export type Seed = {
   id: string
@@ -131,6 +149,18 @@ export type Seed = {
   alwaysTyping?: boolean
   /** Demo (groups): a random group of >1 people type before each reply. */
   multiTyping?: boolean
+  /** Demo: read-only channel — `capabilities` hide the composer, reactions and
+   * uploads (frozen/announcements channel). */
+  readOnly?: boolean
+  /** Demo: the conversation fails to load (error state + Retry via `reconnect`). */
+  failsToLoad?: boolean
+  /**
+   * Demo: my role in this channel — drives which header actions the mock host
+   * offers, mirroring how a real host derives them from its permissions:
+   * "admin" → pin/mute + Edit group; "member" (default) → pin/mute;
+   * "guest" → nothing beyond the built-in search.
+   */
+  myRole?: "admin" | "member" | "guest"
 }
 
 /** Group avatar: the emoji when one is given, otherwise the company avatar
@@ -204,6 +234,35 @@ export const SEEDS: Seed[] = [
         body: "Just dropped the new mocks in Figma 🙌",
         min: 18 * MIN,
       },
+      // A shared location — renders the map preview card (opens Google Maps).
+      {
+        from: ELEANOR,
+        body: "I'm here, come find me!",
+        min: 12 * MIN,
+        attachments: [
+          {
+            kind: "location",
+            latitude: 41.3894,
+            longitude: 2.1607,
+            name: "Factorial HQ — Barcelona",
+          },
+        ],
+      },
+      // A voice note — renders the audio player with speed control (0.5×–2×).
+      {
+        from: ELEANOR,
+        body: "",
+        min: 10 * MIN,
+        attachments: [
+          {
+            kind: "voice",
+            url: "https://interactive-examples.mdn.mozilla.net/media/cc0-audio/t-rex-roar.mp3",
+            durationSeconds: 3,
+            mimeType: "audio/mpeg",
+            name: "voice-note.mp3",
+          },
+        ],
+      },
     ],
   },
   // DM — online, longer history spanning weeks (responds when messaged).
@@ -241,6 +300,40 @@ export const SEEDS: Seed[] = [
         min: 40 * MIN,
       },
       { from: MARCUS, body: "No rush — before EOD is fine", min: 38 * MIN },
+      // A message with a link — renders the full Open Graph card (with image).
+      {
+        from: MARCUS,
+        body: "Context is in the handbook: https://handbook.example.com/ci/flaky-tests",
+        min: 36 * MIN,
+        linkPreviews: [
+          {
+            url: "https://handbook.example.com/ci/flaky-tests",
+            title: "Dealing with flaky tests — Engineering Handbook",
+            description:
+              "How we detect, quarantine and fix flaky tests across the CI pipeline, including the retry budget policy.",
+            imageUrl: mockImage("card", 2),
+          },
+        ],
+      },
+      // Two links in one message — compact Slack-style unfurls (titles, no images).
+      {
+        from: ME,
+        body: "Comparing both dashboards: https://grafana.example.com/d/ci and https://status.example.com/incidents",
+        min: 30 * MIN,
+        linkPreviews: [
+          {
+            url: "https://grafana.example.com/d/ci",
+            title: "CI pipeline health — Grafana",
+            description: "Build durations, flake rate and queue times.",
+            imageUrl: mockImage("card", 0),
+          },
+          {
+            url: "https://status.example.com/incidents",
+            title: "Status page — incident history",
+            description: "Past incidents and current component status.",
+          },
+        ],
+      },
     ],
   },
   // DM — muted (online): the conversation is silenced (mute icon in the sidebar).
@@ -333,7 +426,9 @@ export const SEEDS: Seed[] = [
     participants: [HARPER],
     lines: [],
   },
-  // GROUP — extensive, months of history, mixed online/offline members.
+  // GROUP — extensive, months of history, mixed online/offline members, with
+  // membership system rows (people added / leaving) woven into the transcript.
+  // I'm the admin here → the demo host offers the Edit group header action.
   {
     id: "grp-product",
     type: "group",
@@ -344,11 +439,18 @@ export const SEEDS: Seed[] = [
     unread: 2,
     olderPages: 3,
     multiTyping: true,
+    myRole: "admin",
     lines: [
       {
         from: MARCUS,
         body: "Kicking off the Q1 planning thread 🧵",
         min: 3 * MONTH,
+      },
+      // The founding batch joins right after the kickoff — a multi-person
+      // "were added" system row at the top of the group's history.
+      {
+        system: { event: "member.added", members: [GRACE, NOAH, SAM] },
+        min: 3 * MONTH - 5,
       },
       {
         from: GRACE,
@@ -370,6 +472,11 @@ export const SEEDS: Seed[] = [
         body: "QA sign-off checklist is updated for the new flow",
         min: 2 * MONTH - 30,
       },
+      // Isla passes through the group: added for the dashboard review…
+      {
+        system: { event: "member.added", members: [ISLA] },
+        min: 6 * DAY,
+      },
       {
         from: GRACE,
         body: "Dashboard adoption is up 18% month over month 📈",
@@ -379,12 +486,17 @@ export const SEEDS: Seed[] = [
         from: ME,
         body: "Love that. Can we slice it by plan tier?",
         min: 5 * DAY - 5,
-        replyToIndex: 5,
+        replyToIndex: 7,
       },
       {
         from: GRACE,
         body: "On it — will share by tomorrow",
         min: 5 * DAY - 10,
+      },
+      // …and leaves once the review wraps.
+      {
+        system: { event: "member.left", members: [ISLA] },
+        min: 3 * DAY,
       },
       {
         from: MARCUS,
@@ -395,7 +507,7 @@ export const SEEDS: Seed[] = [
         from: SAM,
         body: "Merging my PR before the freeze then 🙏",
         min: 2 * DAY - 15,
-        replyToIndex: 8,
+        replyToIndex: 11,
       },
       // A run of consecutive messages from the same author (Noah) — the bubbles
       // chain (tucked-in corners) and, in a group, only the last one shows the
@@ -481,6 +593,12 @@ export const SEEDS: Seed[] = [
         body: "The empty states read much better now",
         min: 12 * DAY - 8,
       },
+      // Viktor joins the critique before weighing in — his first message comes
+      // right after his "was added" system row.
+      {
+        system: { event: "member.added", members: [VIKTOR] },
+        min: 11 * DAY + 60,
+      },
       {
         from: VIKTOR,
         body: "One concern: the CTA contrast on dark mode",
@@ -490,7 +608,7 @@ export const SEEDS: Seed[] = [
         from: ELEANOR,
         body: "Good catch — bumping it to AA",
         min: 11 * DAY - 30,
-        replyToIndex: 2,
+        replyToIndex: 3,
       },
       {
         from: SAM,
@@ -501,10 +619,134 @@ export const SEEDS: Seed[] = [
         from: ME,
         body: "Yes please — keep it under 200ms",
         min: 4 * DAY - 6,
-        replyToIndex: 4,
+        replyToIndex: 5,
+      },
+      // An admin removed Noah from the critique — the "was removed" variant.
+      {
+        system: { event: "member.removed", members: [NOAH] },
+        min: 2 * DAY,
       },
       { from: ISLA, body: "Copy is finalized in the doc 📝", min: 26 * HOUR },
       { from: ELEANOR, body: "Shipping the handoff today ✨", min: 45 * MIN },
+    ],
+  },
+  // GROUP — membership events: centered system rows ("X was added / left /
+  // was removed"), including a 6-person add that demos the "+N" overflow tag.
+  // I'm the admin here → the demo host offers the Edit group header action.
+  {
+    id: "grp-hiring",
+    type: "group",
+    title: "New Joiners — Q3",
+    avatar: groupAvatar("New Joiners — Q3", "👋"),
+    participants: [NADIA, HARPER, GRACE],
+    myRole: "admin",
+    multiTyping: true,
+    lines: [
+      {
+        from: NADIA,
+        body: "Kicking off the Q3 onboarding group — welcome everyone!",
+        min: 6 * DAY,
+      },
+      {
+        system: { event: "member.added", members: [HARPER, GRACE] },
+        min: 6 * DAY - 10,
+      },
+      {
+        from: HARPER,
+        body: "Happy to help with the CS onboarding sessions 🙌",
+        min: 6 * DAY - 20,
+      },
+      {
+        system: {
+          event: "member.added",
+          members: [ELEANOR, MARCUS, PRIYA, THEO, OWEN, SAM],
+        },
+        min: 3 * DAY,
+      },
+      {
+        from: GRACE,
+        body: "Buddy assignments are in the doc, take a look",
+        min: 2 * DAY,
+      },
+      { system: { event: "member.left", members: [THEO] }, min: 26 * HOUR },
+      {
+        system: { event: "member.removed", members: [PRIYA] },
+        min: 4 * HOUR,
+      },
+      {
+        from: NADIA,
+        body: "First onboarding session is tomorrow at 10:00",
+        min: 30 * MIN,
+      },
+    ],
+  },
+  // GROUP — heavy membership churn: big batched adds (beyond the tag list's
+  // visual max → "+N" counter), people leaving in pairs, a removal and a
+  // re-join, interleaved with regular messages. I'm the admin → Edit group.
+  {
+    id: "grp-offsite",
+    type: "group",
+    title: "Summer Offsite 2026",
+    avatar: groupAvatar("Summer Offsite 2026", "🏝️"),
+    participants: [HARPER, OWEN, ISLA],
+    myRole: "admin",
+    multiTyping: true,
+    unread: 1,
+    lines: [
+      {
+        from: OWEN,
+        body: "Planning the summer offsite — adding everyone as travel gets confirmed ✈️",
+        min: 10 * DAY,
+      },
+      {
+        system: { event: "member.added", members: [HARPER, ISLA] },
+        min: 10 * DAY - 5,
+      },
+      // A 7-person batch — more than the tag list shows, so it compacts into
+      // the "+N" counter (hover it to see who's collapsed).
+      {
+        system: {
+          event: "member.added",
+          members: [ELEANOR, MARCUS, PRIYA, THEO, GRACE, SAM, NOAH],
+        },
+        min: 9 * DAY,
+      },
+      {
+        from: HARPER,
+        body: "Hotel block is booked — rooms assigned by Friday 🏨",
+        min: 8 * DAY,
+      },
+      { system: { event: "member.left", members: [THEO] }, min: 7 * DAY },
+      {
+        system: { event: "member.added", members: [VIKTOR, NADIA] },
+        min: 6 * DAY,
+      },
+      {
+        from: ISLA,
+        body: "Agenda draft is up — add your workshop proposals 📝",
+        min: 5 * DAY,
+      },
+      // Two people drop out at once — a coalesced multi-person "left" row.
+      {
+        system: { event: "member.left", members: [PRIYA, GRACE] },
+        min: 4 * DAY,
+      },
+      {
+        from: OWEN,
+        body: "Final headcount goes to the venue tomorrow",
+        min: 3 * DAY,
+      },
+      { system: { event: "member.removed", members: [NOAH] }, min: 2 * DAY },
+      // …and Grace re-joins once her travel is sorted.
+      {
+        system: { event: "member.added", members: [GRACE] },
+        min: 26 * HOUR,
+      },
+      {
+        from: HARPER,
+        body: "Buses leave Monday 8:00 sharp 🚌",
+        min: 40 * MIN,
+      },
     ],
   },
   // GROUP — very few messages, still random multi-typing on reply.
@@ -547,6 +789,60 @@ export const SEEDS: Seed[] = [
     participants: [MARCUS, OWEN],
     lines: [],
   },
+  // GROUP — read-only (capabilities demo): no composer, no reacting, no uploads.
+  // Existing reactions still render (they're real data).
+  {
+    id: "grp-announcements",
+    type: "group",
+    title: "Announcements",
+    avatar: groupAvatar("Announcements", "📣"),
+    participants: [MARCUS, OWEN, GRACE],
+    readOnly: true,
+    // No permissions here: the demo host offers NO header actions — the
+    // ellipsis menu holds only the built-in search.
+    myRole: "guest",
+    lines: [
+      {
+        from: MARCUS,
+        body: "Offices close early this Friday for the summer party 🎉",
+        min: 2 * DAY,
+      },
+      {
+        from: OWEN,
+        body: "Q2 results are out — great quarter everyone, thank you!",
+        min: 5 * HOUR,
+      },
+      {
+        from: MARCUS,
+        body: "@here the new expense policy kicks in on Monday",
+        min: 30 * MIN,
+        mentionedEveryone: true,
+      },
+    ],
+  },
+  // DM — fails to load (connection-state demo): error state with a Retry
+  // button (`reconnect`) that recovers after a short "reconnect".
+  {
+    id: "dm-viktor",
+    type: "dm",
+    title: VIKTOR.name,
+    avatar: VIKTOR.avatar,
+    presence: "offline",
+    participants: [VIKTOR],
+    failsToLoad: true,
+    lines: [
+      {
+        from: VIKTOR,
+        body: "Draft RFC is ready for a first pass",
+        min: 26 * HOUR,
+      },
+      {
+        from: ME,
+        body: "Nice — I'll read it tomorrow morning.",
+        min: 25 * HOUR,
+      },
+    ],
+  },
 ]
 
 export const SEED_BY_ID = new Map(SEEDS.map((s) => [s.id, s]))
@@ -564,7 +860,7 @@ export const REPLIES = [
 // ---------------------------------------------------------------------------
 
 export type ConvState = {
-  messages: F0ChatMessage[]
+  messages: F0ChatItem[]
   lastReadId: string | null
   typingIds: string[]
 }
@@ -572,10 +868,18 @@ export type ConvState = {
 let seq = 0
 export const nextId = (): string => `m-${seq++}`
 
-const buildSeedMessages = (seed: Seed): F0ChatMessage[] => {
-  const built = seed.lines.map((line): F0ChatMessage => {
-    const isMine = line.from.id === ME.id
+const buildSeedMessages = (seed: Seed): F0ChatItem[] => {
+  const built = seed.lines.map((line): F0ChatItem => {
     const sentMs = Date.now() - line.min * 60_000
+    if (isSystemLine(line)) {
+      return {
+        type: "system",
+        id: nextId(),
+        createdAt: new Date(sentMs).toISOString(),
+        system: line.system,
+      }
+    }
+    const isMine = line.from.id === ME.id
     return {
       id: nextId(),
       author: line.from,
@@ -587,15 +891,18 @@ const buildSeedMessages = (seed: Seed): F0ChatMessage[] => {
       readAt: isMine ? new Date(sentMs + 60_000).toISOString() : undefined,
       mentions: line.mentions,
       mentionedEveryone: line.mentionedEveryone,
+      linkPreviews: line.linkPreviews,
+      attachments: line.attachments,
     }
   })
   // Second pass: resolve reply references now that every message has an id.
   seed.lines.forEach((line, i) => {
-    if (line.replyToIndex == null) return
+    if (isSystemLine(line) || line.replyToIndex == null) return
     const target = built[line.replyToIndex]
-    if (target) {
+    const source = built[i]
+    if (target && isUserMessage(target) && isUserMessage(source)) {
       built[i] = {
-        ...built[i],
+        ...source,
         replyTo: {
           id: target.id,
           author: target.author,
@@ -633,7 +940,9 @@ export const unreadCountOf = (state: ConvState): number => {
   const idx = state.lastReadId
     ? state.messages.findIndex((m) => m.id === state.lastReadId)
     : -1
-  return state.messages.slice(idx + 1).filter((m) => !m.isMine).length
+  return state.messages
+    .slice(idx + 1)
+    .filter((m) => isUserMessage(m) && !m.isMine).length
 }
 
 /** Unread messages that mention me (directly or via `@here`) — drives the
@@ -646,6 +955,7 @@ export const unreadMentionCountOf = (state: ConvState): number => {
     .slice(idx + 1)
     .filter(
       (m) =>
+        isUserMessage(m) &&
         !m.isMine &&
         (m.mentionedEveryone ||
           (m.mentions ?? []).some((mention) => mention.id === ME.id))

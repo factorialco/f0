@@ -720,6 +720,17 @@ export const StrikedRowsVisualization: Story = {
                 columns: [
                   { label: "Name", render: (item) => item.name, id: "name" },
                   { label: "Email", render: (item) => item.email, id: "email" },
+                  {
+                    label: "Status",
+                    id: "status",
+                    render: (item) => ({
+                      type: "status",
+                      value: {
+                        status: item.active ? "positive" : "critical",
+                        label: item.active ? "Active" : "Inactive",
+                      },
+                    }),
+                  },
                 ],
               },
             },
@@ -781,6 +792,95 @@ export const BorderedTable: Story = {
                     id: "role",
                   },
                 ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+}
+
+type AddRemoveRow = {
+  id: number
+  name: string
+  email: string
+  role: string
+  department: string
+  location: string
+  manager: string
+}
+
+const addRemoveRecords: AddRemoveRow[] = Array.from({ length: 6 }, (_, i) => ({
+  id: i + 1,
+  name: `Person ${i + 1}`,
+  email: `person${i + 1}@example.com`,
+  role: "Engineer",
+  department: "Product",
+  location: "Madrid",
+  manager: "Alice",
+}))
+
+const addRemoveColumns: {
+  id: string
+  label: string
+  render: (item: AddRemoveRow) => string
+}[] = [
+  { id: "name", label: "Name", render: (item) => item.name },
+  { id: "email", label: "Email", render: (item) => item.email },
+  { id: "role", label: "Role", render: (item) => item.role },
+  { id: "department", label: "Department", render: (item) => item.department },
+  { id: "location", label: "Location", render: (item) => item.location },
+  { id: "manager", label: "Manager", render: (item) => item.manager },
+]
+
+/**
+ * Demonstrates the column add/remove affordances. Open the settings popover
+ * (sliders icon): an "Add column" entry sits on top, and hovering any
+ * non-frozen column reveals a trash button. `onAddColumn` / `onRemoveColumn`
+ * mutate the consumer's `columns` — distinct from the hide toggle, which only
+ * changes visibility.
+ */
+export const WithColumnAddRemove: Story = {
+  render: () => {
+    const [visibleIds, setVisibleIds] = useState<string[]>([
+      "name",
+      "email",
+      "role",
+    ])
+
+    const columns = visibleIds
+      .map((id) => addRemoveColumns.find((column) => column.id === id))
+      .filter((column): column is (typeof addRemoveColumns)[number] =>
+        Boolean(column)
+      )
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records: addRemoveRecords }) },
+    })
+
+    return (
+      <div style={{ maxWidth: 720 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                frozenColumns: 1,
+                allowColumnReordering: true,
+                allowColumnHiding: true,
+                columns,
+                onAddColumn: () => {
+                  const next = addRemoveColumns.find(
+                    (column) => !visibleIds.includes(column.id)
+                  )
+                  if (next) {
+                    setVisibleIds((prev) => [...prev, next.id])
+                  }
+                },
+                onRemoveColumn: (columnId) =>
+                  setVisibleIds((prev) => prev.filter((id) => id !== columnId)),
               },
             },
           ]}

@@ -16,7 +16,7 @@ export const F0AccordionSkeleton = ({
       aria-live="polite"
       className={cn(
         "flex flex-col rounded-md border border-solid border-f1-border-secondary",
-        "overflow-hidden bg-f1-background shadow"
+        "overflow-hidden bg-f1-background"
       )}
     >
       {Array.from({ length: items }).map((_, index) => (

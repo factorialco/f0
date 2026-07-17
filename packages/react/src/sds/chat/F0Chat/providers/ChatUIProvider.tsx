@@ -11,7 +11,11 @@ import {
   type ReactNode,
 } from "react"
 
-import { type F0ChatImageAttachment, type F0ChatMessage } from "../types"
+import {
+  isUserMessage,
+  type F0ChatImageAttachment,
+  type F0ChatMessage,
+} from "../types"
 import { useF0Chat } from "./F0ChatProvider"
 
 /** Debounce before running a search as the user types. */
@@ -250,7 +254,9 @@ export const ChatUIProvider = ({
         apply(
           messagesRef.current
             .filter((m) => {
-              if (m.deleted) return false
+              // System rows aren't searchable content (narrow BEFORE reading
+              // user-message-only fields like `deleted`).
+              if (!isUserMessage(m) || m.deleted) return false
               let lower = cache.get(m)
               if (lower === undefined) {
                 lower = m.body.toLowerCase()

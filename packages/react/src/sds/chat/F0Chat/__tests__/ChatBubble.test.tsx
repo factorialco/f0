@@ -112,6 +112,42 @@ describe("ChatBubble chained corners", () => {
   })
 })
 
+describe("ChatBubble body links", () => {
+  it("renders a URL in the body as a clickable new-tab link", () => {
+    render(
+      <ChatBubble
+        message={makeMessage("docs here https://example.com/guide ok?")}
+        isMine={false}
+      />
+    )
+    const link = screen.getByRole("link")
+    expect(link).toHaveAttribute("href", "https://example.com/guide")
+    expect(link).toHaveAttribute("target", "_blank")
+    // The surrounding text is preserved around the link.
+    expect(screen.getByText(/docs here/)).toBeInTheDocument()
+    expect(screen.getByText(/ok\?/)).toBeInTheDocument()
+  })
+
+  it("renders one link per URL", () => {
+    render(
+      <ChatBubble
+        message={makeMessage("https://a.example.com and https://b.example.com")}
+        isMine={false}
+      />
+    )
+    const links = screen.getAllByRole("link")
+    expect(links.map((l) => l.getAttribute("href"))).toEqual([
+      "https://a.example.com",
+      "https://b.example.com",
+    ])
+  })
+
+  it("renders no link for a body without URLs", () => {
+    render(<ChatBubble message={makeMessage("no links here")} isMine={false} />)
+    expect(screen.queryByRole("link")).not.toBeInTheDocument()
+  })
+})
+
 describe("ChatBubble edited marker", () => {
   it("shows the muted 'edited' label when the message has been edited", () => {
     render(

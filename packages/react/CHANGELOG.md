@@ -1,5 +1,196 @@
 # Changelog
 
+## [4.41.0](https://github.com/factorialco/f0/compare/f0-react-v4.40.1...f0-react-v4.41.0) (2026-07-17)
+
+
+### Features
+
+* **F0Chat:** link previews, clickable links, shared locations and voice notes ([#4636](https://github.com/factorialco/f0/issues/4636)) ([91c3e46](https://github.com/factorialco/f0/commit/91c3e463a64041f11369a8ef2a8b2561b248176d))
+
+## [4.40.1](https://github.com/factorialco/f0/compare/f0-react-v4.40.0...f0-react-v4.40.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **F0Accordion:** remove resting box shadow ([#4729](https://github.com/factorialco/f0/issues/4729)) ([637883a](https://github.com/factorialco/f0/commit/637883a9bff0e25fa590fe3bf19d0d4c04a7173b))
+
+## [4.40.0](https://github.com/factorialco/f0/compare/f0-react-v4.39.1...f0-react-v4.40.0) (2026-07-16)
+
+
+### Features
+
+* **component-status:** add build-time component DoD status API ([#4719](https://github.com/factorialco/f0/issues/4719)) ([8ee5f7a](https://github.com/factorialco/f0/commit/8ee5f7ae6d8248a673b5b7fdc988f99b657d9040))
+
+## [4.39.1](https://github.com/factorialco/f0/compare/f0-react-v4.39.0...f0-react-v4.39.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **F0Graph:** reliable focus via imperative focusNode/clearSelection ([#4661](https://github.com/factorialco/f0/issues/4661)) ([9e94888](https://github.com/factorialco/f0/commit/9e94888b3943ee8e0c807d633a1cd250b390b7a0))
+
+## [4.39.0](https://github.com/factorialco/f0/compare/f0-react-v4.38.0...f0-react-v4.39.0) (2026-07-15)
+
+
+### Features
+
+* **F0Form:** add entitiesList field backed by F0FormEditableTable ([#4674](https://github.com/factorialco/f0/issues/4674)) ([312dd8b](https://github.com/factorialco/f0/commit/312dd8bf87b53c1e6855ebfc800c4559eab7d076))
+
+## [4.38.0](https://github.com/factorialco/f0/compare/f0-react-v4.37.1...f0-react-v4.38.0) (2026-07-15)
+
+
+### Features
+
+* **tags:** add size prop to F0TagRaw (md/sm) ([#4553](https://github.com/factorialco/f0/issues/4553)) ([09c4591](https://github.com/factorialco/f0/commit/09c459124f1cda05d11268236b0fa751f6fe1539))
+
+## [4.37.1](https://github.com/factorialco/f0/compare/f0-react-v4.37.0...f0-react-v4.37.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** count selectable rows in selection banner (FCT-56547) ([#4692](https://github.com/factorialco/f0/issues/4692)) ([83e3b6e](https://github.com/factorialco/f0/commit/83e3b6ecffed369fb4215f0c40814efd0f326d5c))
+
+## [4.37.0](https://github.com/factorialco/f0/compare/f0-react-v4.36.3...f0-react-v4.37.0) (2026-07-15)
+
+
+### Features
+
+* **OneDataCollection:** custom labels for built-in visualizations ([#4675](https://github.com/factorialco/f0/issues/4675)) ([bbf9c6f](https://github.com/factorialco/f0/commit/bbf9c6ff2bce942b61fec785eb05d0e45d205593))
+
+## [4.36.3](https://github.com/factorialco/f0/compare/f0-react-v4.36.2...f0-react-v4.36.3) (2026-07-15)
+
+
+### Bug Fixes
+
+* **DetailsItem:** remove 320px max-width cap so items fill their container ([#4696](https://github.com/factorialco/f0/issues/4696)) ([9c7375b](https://github.com/factorialco/f0/commit/9c7375b526fc018d68dddc82de5439dccdddfd90))
+
+## [4.36.2](https://github.com/factorialco/f0/compare/f0-react-v4.36.1...f0-react-v4.36.2) (2026-07-15)
+
+
+### Bug Fixes
+
+* change the separator condition in InFilterOptionRow from hasChildren to depth === 0, so only root-level items render border-b — internal nested siblings no longer get separated ([95e6804](https://github.com/factorialco/f0/commit/95e6804b54117eac71c3e2758e07fce67c204ed5))
+* **InFilter:** scope nested tree separator to root-level items only ([#4487](https://github.com/factorialco/f0/issues/4487)) ([95e6804](https://github.com/factorialco/f0/commit/95e6804b54117eac71c3e2758e07fce67c204ed5))
+
+## [4.36.1](https://github.com/factorialco/f0/compare/f0-react-v4.36.0...f0-react-v4.36.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** support disabled on primaryActions in dropdown mode ([#4691](https://github.com/factorialco/f0/issues/4691)) ([3b67c38](https://github.com/factorialco/f0/commit/3b67c38240b1224b9c8fd2c8fd064febd27c1046))
+
+## [4.36.0](https://github.com/factorialco/f0/compare/f0-react-v4.35.3...f0-react-v4.36.0) (2026-07-15)
+
+
+### Features
+
+* **F0Graph:** decouple tag column identity from visual type ([#4688](https://github.com/factorialco/f0/issues/4688)) ([bf7e4fb](https://github.com/factorialco/f0/commit/bf7e4fb5d43b37e0969192e39728d547a5e2dc66))
+
+## [4.35.3](https://github.com/factorialco/f0/compare/f0-react-v4.35.2...f0-react-v4.35.3) (2026-07-14)
+
+
+### Bug Fixes
+
+* **OneDataCollection/table:** keep tag text legible in striked rows ([#4687](https://github.com/factorialco/f0/issues/4687)) ([50a7110](https://github.com/factorialco/f0/commit/50a711010252afe4a8ce73271f419caf340b75fe))
+
+## [4.35.2](https://github.com/factorialco/f0/compare/f0-react-v4.35.1...f0-react-v4.35.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* **toast:** always-dark surface (fix dark mode) + neutral titles ([#4657](https://github.com/factorialco/f0/issues/4657)) ([1a9d7bd](https://github.com/factorialco/f0/commit/1a9d7bdd29743233584a2a1c9172530cd6e54c0e))
+
+## [4.35.1](https://github.com/factorialco/f0/compare/f0-react-v4.35.0...f0-react-v4.35.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **dialog-alike:** don't preventDefault inner dialog clicks (unblocks file picker) ([#4683](https://github.com/factorialco/f0/issues/4683)) ([db652a9](https://github.com/factorialco/f0/commit/db652a9a828ccd656b8f8a19bd8cba578184af5a))
+* **F0SegmentedControl:** increase segment text size to label variant ([#4682](https://github.com/factorialco/f0/issues/4682)) ([d9b7165](https://github.com/factorialco/f0/commit/d9b716545213261880dcd024c4af967935a07414))
+
+## [4.35.0](https://github.com/factorialco/f0/compare/f0-react-v4.34.0...f0-react-v4.35.0) (2026-07-14)
+
+
+### Features
+
+* **OneDataCollection:** support tooltip on single primary action ([#4671](https://github.com/factorialco/f0/issues/4671)) ([8a10702](https://github.com/factorialco/f0/commit/8a1070297fc1769bef82f5c909deab1945d53893))
+
+## [4.34.0](https://github.com/factorialco/f0/compare/f0-react-v4.33.0...f0-react-v4.34.0) (2026-07-14)
+
+
+### Features
+
+* **value-display:** support tooltip on status cell ([#4673](https://github.com/factorialco/f0/issues/4673)) ([646107e](https://github.com/factorialco/f0/commit/646107eceb7038ca5b025ce870ee818098864328))
+
+## [4.33.0](https://github.com/factorialco/f0/compare/f0-react-v4.32.0...f0-react-v4.33.0) (2026-07-14)
+
+
+### Features
+
+* **F0AnalyticsDashboard:** add valueFormatter to metric items ([#4678](https://github.com/factorialco/f0/issues/4678)) ([0600ea1](https://github.com/factorialco/f0/commit/0600ea1e2eb7fdcaed86d81316034e0c8f9e13ea))
+
+## [4.32.0](https://github.com/factorialco/f0/compare/f0-react-v4.31.0...f0-react-v4.32.0) (2026-07-13)
+
+
+### Features
+
+* **OneDataCollection:** add liveUpdate to graph visualization ([#4664](https://github.com/factorialco/f0/issues/4664)) ([0608b7f](https://github.com/factorialco/f0/commit/0608b7f69fa7dacf8359099791e97a9796d0411e))
+
+## [4.31.0](https://github.com/factorialco/f0/compare/f0-react-v4.30.2...f0-react-v4.31.0) (2026-07-13)
+
+
+### Features
+
+* **F0Graph:** open centered on a node (first-frame focus) ([#4621](https://github.com/factorialco/f0/issues/4621)) ([11dae57](https://github.com/factorialco/f0/commit/11dae578db75efd82f8d20da30e67088ffd20a37))
+
+## [4.30.2](https://github.com/factorialco/f0/compare/f0-react-v4.30.1...f0-react-v4.30.2) (2026-07-13)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** emit filter-change for object-valued filters ([#4655](https://github.com/factorialco/f0/issues/4655)) ([930f4b0](https://github.com/factorialco/f0/commit/930f4b0666f2c33a175e95a31b55e63761a3c678))
+
+## [4.30.1](https://github.com/factorialco/f0/compare/f0-react-v4.30.0...f0-react-v4.30.1) (2026-07-13)
+
+
+### Bug Fixes
+
+* **OneDataCollection:** disabled cell background fills full cell height ([#4643](https://github.com/factorialco/f0/issues/4643)) ([5b1603c](https://github.com/factorialco/f0/commit/5b1603c2327bb6caf8fed681a9998e9dd3f427bc))
+
+## [4.30.0](https://github.com/factorialco/f0/compare/f0-react-v4.29.4...f0-react-v4.30.0) (2026-07-13)
+
+
+### Features
+
+* **OneDataCollection:** add column add/remove affordances to the table settings popover ([#4587](https://github.com/factorialco/f0/issues/4587)) ([327b913](https://github.com/factorialco/f0/commit/327b9137150ced8c21150b49336568403ea9d260))
+
+## [4.29.4](https://github.com/factorialco/f0/compare/f0-react-v4.29.3...f0-react-v4.29.4) (2026-07-11)
+
+
+### Bug Fixes
+
+* **F0AudioPlayer:** use secondary border token on card ([#4656](https://github.com/factorialco/f0/issues/4656)) ([2db8ce5](https://github.com/factorialco/f0/commit/2db8ce554c8f37e18ab7bda0687afda3276220e3))
+
+## [4.29.3](https://github.com/factorialco/f0/compare/f0-react-v4.29.2...f0-react-v4.29.3) (2026-07-10)
+
+
+### Bug Fixes
+
+* make OneDataCollection column-settings list scrollable ([#4650](https://github.com/factorialco/f0/issues/4650)) ([aef71c7](https://github.com/factorialco/f0/commit/aef71c777ced6e2519070630371a1c043e3adf1b))
+
+## [4.29.2](https://github.com/factorialco/f0/compare/f0-react-v4.29.1...f0-react-v4.29.2) (2026-07-10)
+
+
+### Bug Fixes
+
+* **OneFilterPicker:** apply nested grouped filter selections ([#4654](https://github.com/factorialco/f0/issues/4654)) ([6ced59c](https://github.com/factorialco/f0/commit/6ced59c92b85539ea0e57877738b2dcbb6528935))
+
+## [4.29.1](https://github.com/factorialco/f0/compare/f0-react-v4.29.0...f0-react-v4.29.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* **F0AiChatTextArea:** enable send with attachment-only (no text) ([#4640](https://github.com/factorialco/f0/issues/4640)) ([034a369](https://github.com/factorialco/f0/commit/034a369f8d2e4bda4e53180b0930c3d738954898))
+
 ## [4.29.0](https://github.com/factorialco/f0/compare/f0-react-v4.28.2...f0-react-v4.29.0) (2026-07-09)
 
 

@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url"
 import remarkGfm from "remark-gfm"
 import { Preset } from "storybook/internal/types"
 
+import { componentStatusVitePlugin } from "../scripts/component-status-build.mjs"
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
 
@@ -123,6 +125,20 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       "@": resolve(__dirname, "../src"),
       "~": resolve(__dirname, "../"),
+    }
+
+    // Provide the `virtual:f0-component-status-data` module (component status is
+    // computed from source at build time). Guarded so it is not added twice if
+    // Storybook already merged it from vite.config.ts.
+    config.plugins = config.plugins || []
+    const existing = (config.plugins as unknown[]).flat(Infinity) as Array<{
+      name?: string
+    } | null>
+    const hasComponentStatus = existing.some(
+      (p) => p?.name === "f0-component-status"
+    )
+    if (!hasComponentStatus) {
+      config.plugins.push(componentStatusVitePlugin())
     }
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served

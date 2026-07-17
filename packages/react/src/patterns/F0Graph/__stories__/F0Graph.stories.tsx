@@ -718,6 +718,30 @@ export const LargeTree: Story = {
   },
 }
 
+/**
+ * `initialFocusNodeId`: open already centered on a specific node instead of
+ * fitting the whole tree. The graph mounts framed on a deep, off-center member
+ * (no fit-to-all, no pan) — the "open looking at me" behaviour used by the
+ * org chart. Compare with `LargeTree` (same data) which opens fit-to-all.
+ */
+export const InitialFocus: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Opens framed on `initialFocusNodeId` (a deep, off-center node) on the first paint — no fit-to-all then pan. The node must be present in the initial `nodes` (here `defaultExpandDepth: 2` makes members visible); if it's absent, F0Graph falls back to fit-to-all.",
+      },
+    },
+  },
+  args: {
+    nodes: makeLargeTree(600),
+    renderNode: renderEmployee,
+    showControls: true,
+    defaultExpandDepth: 2,
+    initialFocusNodeId: "dept-4-member-100",
+  },
+}
+
 // ─── Viewport virtualization (A0 harness + A1 windowing) ───────────
 
 /**

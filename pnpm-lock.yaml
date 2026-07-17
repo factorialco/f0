@@ -124,7 +124,7 @@ importers:
     dependencies:
       '@copilotkit/react-core':
         specifier: ^1.54.0
-        version: 1.62.3(@types/mdast@4.0.4)(@types/react-dom@18.3.1)(@types/react@18.3.18)(graphql@16.12.0)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod@3.25.76)
+        version: 1.63.1(@types/mdast@4.0.4)(@types/react-dom@18.3.1)(@types/react@18.3.18)(graphql@16.12.0)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod@3.25.76)
       '@factorialco/f0-core':
         specifier: workspace:*
         version: link:../core
@@ -468,6 +468,9 @@ importers:
       lucide-react:
         specifier: ^0.383.0
         version: 0.383.0(react@18.3.1)
+      maplibre-gl:
+        specifier: ^5.24.0
+        version: 5.24.0
       motion:
         specifier: ^12
         version: 12.17.0(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -813,6 +816,9 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.28.5
         version: 7.28.5(@babel/core@7.28.6)
+      '@expo/ui':
+        specifier: ~56.0.18
+        version: 56.0.18(oan64ab32fs37vdlt54xl3ai7e)
       '@expo/vector-icons':
         specifier: ^15.1.1
         version: 15.1.1(expo-font@56.0.7)(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
@@ -873,6 +879,9 @@ importers:
       expo-font:
         specifier: ~56.0.7
         version: 56.0.7(expo@56.0.12)(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
+      expo-glass-effect:
+        specifier: ~56.0.4
+        version: 56.0.4(expo@56.0.12)(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
       expo-image:
         specifier: ~56.0.11
         version: 56.0.11(expo@56.0.12)(react-native-web@0.21.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react-native@0.85.3(@babel/core@7.28.6)(@react-native/jest-preset@0.85.3(@babel/core@7.28.6)(react@19.2.3))(@react-native/metro-config@0.85.3(@babel/core@7.28.6))(@types/react@18.3.18)(react@19.2.3))(react@19.2.3)
@@ -1967,8 +1976,8 @@ packages:
     peerDependencies:
       react: 18.3.1
 
-  '@copilotkit/a2ui-renderer@1.62.3':
-    resolution: {integrity: sha512-w4IQOm52NU6iU3F+opmB5gVM8JXM7CVP25lT8njX4StIVBMf/8DrzW5vT9DvhcN43jA0RazxwLeXNbVKDiLXiw==}
+  '@copilotkit/a2ui-renderer@1.63.1':
+    resolution: {integrity: sha512-IsFT01Gyf2vwQZ0wvT5PGHS8P2UdIkXsZsedoBBju7HEoE2RJI0HPZB+zUxg41HuTI2NSgbACNsio4g2SxTj4A==}
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
@@ -1978,38 +1987,38 @@ packages:
       react-dom:
         optional: true
 
-  '@copilotkit/core@1.62.3':
-    resolution: {integrity: sha512-Iw0XTJDylh4DTL1qqqoDSvMeL4lXGWfn8UAunnvYtVZ2BF3gs6Lw6K/yOQ0gGQKMqIxeQmgLVclErxwBcaJ8KQ==}
+  '@copilotkit/core@1.63.1':
+    resolution: {integrity: sha512-Js7oHLtylw6sQQja/g7CunvF7l7dfhVq/n+NVNnuRbnvrq/xJxpEJfEsM+UomYxalB2pbtpqC+uxjnaoM5zk3A==}
     engines: {node: '>=18'}
 
   '@copilotkit/license-verifier@0.5.0':
     resolution: {integrity: sha512-vrwKtIpYwF0FT9ZoYASH8owa2cGV0dhDvJGaCRaRMStwDxpc6DRdydKkhx8cWZXyBRxEYcq/Vygv4JvevhQQdQ==}
 
-  '@copilotkit/react-core@1.62.3':
-    resolution: {integrity: sha512-9coG/P5ODdEZlQ5acHCvRg2sMkB4/VlQwWe6zlw9ESItYMQpRwq/lWRBLQYL+JzekUbcFdWjBw3UGae6XnXZhg==}
+  '@copilotkit/react-core@1.63.1':
+    resolution: {integrity: sha512-Zv20Rebsh6VcvO00HDbh9B0Q6XnmEYygv8BKur0+OS4eRb1gR4QmWjff/+sjJgweFpgb645jY1i0FB4MU7j7pg==}
     peerDependencies:
       react: 18.3.1
       react-dom: 18.3.1
       zod: '>=3.0.0'
 
-  '@copilotkit/runtime-client-gql@1.62.3':
-    resolution: {integrity: sha512-dmmEo4ELtIigGTv2KCE249NU9fYAETRAtMJJnAus3kI9ht0TVFtesyvNb54MNV0pfxJ8blcqshSor5Iy1uVufw==}
+  '@copilotkit/runtime-client-gql@1.63.1':
+    resolution: {integrity: sha512-1nsCdQOmcoC9uyolyDPMduCYVNKusrorDvovb73PyedgQVRhRb4yK1QAhBDCJ8snvuMXkWT+hHBjkfvzExNKVA==}
     peerDependencies:
       react: 18.3.1
 
-  '@copilotkit/shared@1.62.3':
-    resolution: {integrity: sha512-dfqaYjfJzTIjMBUMOHGZGoZ+v9pumsBuM1FMi5Sb66WkzxbtIKN0CCbYXXIHd0xsEo1pa8u1vZSN30sBtJuQ7g==}
+  '@copilotkit/shared@1.63.1':
+    resolution: {integrity: sha512-jm7eNDS4AcA+s1lkOnd9U1BKelgGrFLXg64e5T4AVN5BUJyi2GRC67unBjT+9cvMgZGXI2Dj4jrsY5rQyiaXAw==}
     peerDependencies:
       '@ag-ui/core': '>=0.0.48'
 
-  '@copilotkit/web-components@1.62.3':
-    resolution: {integrity: sha512-TkdikGhuWsybKrGl7wha3dbVGt/jVDlkiStqKr7tfDzE4VYiwkxGoBUmv9JJokV6qLDEpWQoQLR2MeFYZ0JnbA==}
+  '@copilotkit/web-components@1.63.1':
+    resolution: {integrity: sha512-tH4ZS29nUAo2snVQ2tryDKbqBnZddUwodsLx2O847tFM6CdYenucr47IJp0Q3w5mDZznsb3fTdNGqg0o0w8Wiw==}
     engines: {node: '>=18'}
     peerDependencies:
       lit: ^3.3.2
 
-  '@copilotkit/web-inspector@1.62.3':
-    resolution: {integrity: sha512-S3m9lDmvdPDaplP0OytHJ+HVvCE2ldNySVEOpS7p8HquF8N2dsJnTMlk2grLGd+hMLG0+KbjbBSUpWLf2pAdNg==}
+  '@copilotkit/web-inspector@1.63.1':
+    resolution: {integrity: sha512-xgqYWNowTnNF3jnbk9ASACsOxYDNmv+JvDtwP6U2z413aMY0APWlYYQl616hJrXdQvBiJCgol+q8xFrjYB5xrg==}
     engines: {node: '>=18'}
 
   '@csstools/color-helpers@5.0.1':
@@ -3099,9 +3108,45 @@ packages:
     resolution: {integrity: sha512-qC72D4+CDdjGqJvkFMMEAtancHUQ7/d/tAiHf64z8MopFDmcrtbcJuerDtFceuAfQJ2pDSfCKCtbqoGBNnwg0w==}
     engines: {node: '>=8'}
 
+  '@mapbox/jsonlint-lines-primitives@2.0.3':
+    resolution: {integrity: sha512-0SElaV0uMxEnxzBhhX9WTuPyUeMsAN/SS0i16tjuba4/mio63MG9khjC1a0JAiPGXAwvwm4UfHJURCN7nyudQg==}
+    engines: {node: '>= 22'}
+
   '@mapbox/node-pre-gyp@1.0.11':
     resolution: {integrity: sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==}
     hasBin: true
+
+  '@mapbox/point-geometry@1.1.0':
+    resolution: {integrity: sha512-YGcBz1cg4ATXDCM/71L9xveh4dynfGmcLDqufR+nQQy3fKwsAZsWd/x4621/6uJaeB9mwOHE6hPeDgXz9uViUQ==}
+
+  '@mapbox/tiny-sdf@2.2.0':
+    resolution: {integrity: sha512-LVL4wgI9YAum5V+LNVQO6QgFBPw7/MIIY4XJPNsPDMrjEwcE+JfKk1LuIl8GnF197ejVdC9QdPaxrx5gfgdGXg==}
+
+  '@mapbox/unitbezier@0.0.1':
+    resolution: {integrity: sha512-nMkuDXFv60aBr9soUG5q+GvZYL+2KZHVvsqFCzqnkGEf46U2fvmytHaEVc1/YZbiLn8X+eR3QzX1+dwDO1lxlw==}
+
+  '@mapbox/unitbezier@1.0.0':
+    resolution: {integrity: sha512-fqd515fjBmANKGGsQ286E2Wvj/XvDFpGzwJxq4CI6jMQue6Oy04uCKp+JWKF00xRTmk6cEu1jPJ9p3xqH8YWqQ==}
+
+  '@mapbox/vector-tile@2.0.5':
+    resolution: {integrity: sha512-pXj8m7KTsqZt+1jsE0xIpGvqTSbblfkuEJL/NJmNePMtEwxO8V3XMDo9WMSfDeqHvCtBI9Lmt4mGcGR10zecmw==}
+
+  '@mapbox/whoots-js@3.1.0':
+    resolution: {integrity: sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==}
+    engines: {node: '>=6.0.0'}
+
+  '@maplibre/geojson-vt@6.1.1':
+    resolution: {integrity: sha512-FVMOcmSP/yqol45t7StApEyTL5/vmqBCuFhH9n+fFuINenhaX+YgHHIt1yJ86S8kln3uJLcMvmEU2cfn6E2eCQ==}
+
+  '@maplibre/maplibre-gl-style-spec@24.10.0':
+    resolution: {integrity: sha512-lichxSiagMEBBrqHF0trtMQH9RKh+9jUlIJl0qW0QHvt2H/tbvUWdE+ZzI2Jd0/pT7j/iavLonlPu7EQ/ixTOw==}
+    hasBin: true
+
+  '@maplibre/mlt@1.1.12':
+    resolution: {integrity: sha512-ZeK5w2TTeHOajcLaEQs1KZXw2V9wIKo1PmThlxlsHoXsQsYlBqLJzPOd6tJHRtGTChUY3DPPmjXRArYVvAbmZw==}
+
+  '@maplibre/vt-pbf@4.3.2':
+    resolution: {integrity: sha512-j6p0AdjvAR19Z3XaCysle7A4ZSo08tYOzxD0Y9NQylwPAkwJJeYub5b2eVucdeDh7erhv69DahoLOevDRERRUw==}
 
   '@mdx-js/react@3.1.1':
     resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
@@ -7212,6 +7257,9 @@ packages:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
 
+  earcut@3.2.3:
+    resolution: {integrity: sha512-vnS4AVwp1KHAF13i1vp1/2D5evWy3k5u/iW/B81QVsUZtV8cv2tU0b2VNFlqvh4kYwrFMDdjPCfAmfyJW9y14Q==}
+
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
@@ -8064,6 +8112,9 @@ packages:
     engines: {node: '>=16'}
     deprecated: This package is no longer maintained. For the JavaScript API, please use @conventional-changelog/git-client instead.
     hasBin: true
+
+  gl-matrix@3.4.4:
+    resolution: {integrity: sha512-latSnyDNt/8zYUB6VIJ6PCh2jBjJX6gnDsoCZ7LyW7GkqrD51EWwa9qCoGixj8YqBtETQK/xY7OmpTF8xz1DdQ==}
 
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -9008,6 +9059,9 @@ packages:
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
 
+  json-stringify-pretty-compact@4.0.0:
+    resolution: {integrity: sha512-3CNZ2DnrpByG9Nqj6Xo8vqbjT4F6N+tb4Gb28ESAZjYZ5yqvmc56J+/kuIwkaAMOyblTQhUW7PxMkUb8Q36N3Q==}
+
   json5@2.2.3:
     resolution: {integrity: sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==}
     engines: {node: '>=6'}
@@ -9034,6 +9088,9 @@ packages:
   katex@0.16.47:
     resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
     hasBin: true
+
+  kdbush@4.1.0:
+    resolution: {integrity: sha512-e9vurzrXJQrFX6ckpHP3bvj5l+9CnYzkxDNnNQ1h2QTqdWsUAJgXiKdGNcOa1EY85dU8KbQ+z/FdQdB7P+9yfQ==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -9530,6 +9587,10 @@ packages:
 
   makeerror@1.0.12:
     resolution: {integrity: sha512-JmqCvUhmt43madlpFzG4BQzG2Z3m6tvQDNKdClZnO3VbIudJYmxsT0FNJMeiB2+JTSlTQTSbU8QdesVmwJcmLg==}
+
+  maplibre-gl@5.24.0:
+    resolution: {integrity: sha512-ALyFxgtd5R+65UqZ/++lOqwWcC0SNho9c27fYSyLmG7AfnAul2o46F05aDJGPbFU57wos9dgcIySHs0Xe6ia3A==}
+    engines: {node: '>=16.14.0', npm: '>=8.1.0'}
 
   markdown-it@14.1.0:
     resolution: {integrity: sha512-a54IwgWPaeBCAAsv13YgmALOF1elABB08FxO9i+r4VFk5Vl4pKokRPeX8u5TCgSsPi6ec1otfLjdOpVcgbpshg==}
@@ -10060,6 +10121,9 @@ packages:
   multitars@1.0.0:
     resolution: {integrity: sha512-H/J4fMLedtudftaYMOg7ajzLYgT3/rwbWVJbqr/iUgB8DQztn38ys5HOqI1CzSxx8QhXXwOOnnBvd4v3jG5+Mg==}
 
+  murmurhash-js@1.0.0:
+    resolution: {integrity: sha512-TvmkNhkv8yct0SVBSy+o8wYzXjE4Zz3PCesbfs8HiCXXdcTuocApFv11UWlNFWKYsP2okqrhb7JNlSm9InBhIw==}
+
   mustache@4.2.0:
     resolution: {integrity: sha512-71ippSywq5Yb7/tVYyGbkBggbU8H3u5Rz56fH60jGFgr8uHwxs+aSKeqmluIVzM0m0kB7xQjKS6qPfd0b2ZoqQ==}
     hasBin: true
@@ -10477,6 +10541,14 @@ packages:
     resolution: {integrity: sha512-//nshmD55c46FuFw26xV/xFAaB5HF9Xdap7HJBBnrKdAd6/GxDBaNA1870O79+9ueg61cZLSVc+OaFlfmObYVQ==}
     engines: {node: '>= 14.16'}
 
+  pbf@4.0.2:
+    resolution: {integrity: sha512-J0ajxARhZfpUEebxYs1vhMGMuLSXtBe1e+fFPDrf2uA2hgo+UshKfNUWOz92HJNz6/NFEXseQPddnHkTreWRqg==}
+    hasBin: true
+
+  pbf@5.1.2:
+    resolution: {integrity: sha512-mnvGdvOrIvJOBGUEdGkrVXjN8E/VkIJCkf2eS1DH2yv82ORUlLttmDt0rWY38yYZmVwciZwBUvHM20qxBZf40w==}
+    hasBin: true
+
   pdfjs-dist@3.11.174:
     resolution: {integrity: sha512-TdTZPf1trZ8/UFu5Cx/GXB7GZM30LT+wWUNfsi6Bq8ePLnb+woNKtDymI2mxZYBpMbonNFqKmiz684DIfnd8dA==}
     engines: {node: '>=18'}
@@ -10642,6 +10714,9 @@ packages:
   postcss@8.5.6:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
+
+  potpack@2.1.0:
+    resolution: {integrity: sha512-pcaShQc1Shq0y+E7GqJqvZj8DTthWV1KeHGdi0Z6IAin2Oi3JnLCOfwnCo84qc+HAp52wT9nK9H7FAJp5a44GQ==}
 
   prelude-ls@1.2.1:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
@@ -10834,6 +10909,9 @@ packages:
   prosemirror-view@1.38.1:
     resolution: {integrity: sha512-4FH/uM1A4PNyrxXbD+RAbAsf0d/mM0D/wAKSVVWK7o0A9Q/oOXJBrw786mBf2Vnrs/Edly6dH6Z2gsb7zWwaUw==}
 
+  protocol-buffers-schema@3.6.1:
+    resolution: {integrity: sha512-VG2K63Igkiv9p76tk1lilczEK1cT+kCjKtkdhw1dQZV3k3IXJbd3o6Ho8b9zJZaHSnT2hKe4I+ObmX9w6m5SmQ==}
+
   proxy-agent@6.5.0:
     resolution: {integrity: sha512-TmatMXdr2KlRiA2CyDu8GqR8EjahTG3aY3nXjdzFyoZbmB8hrBsTyMezhULIXKnC0jpfjlmiZ3+EaCzoInSu/A==}
     engines: {node: '>= 14'}
@@ -10878,6 +10956,9 @@ packages:
 
   queue@6.0.2:
     resolution: {integrity: sha512-iHZWu+q3IdFZFX36ro/lKBkSvfkztY5Y7HMiPlOUjhupPcG2JMfst2KKEpu5XndviX/3UhFbRngUPNKtgvtZiA==}
+
+  quickselect@3.0.0:
+    resolution: {integrity: sha512-XdjUArbK4Bm5fLLvlm5KpTFOiOThgfWWI4axAZDWg4E/0mKdZyI9tNEfds27qCi1ze/vwTR16kvmmGhRra3c2g==}
 
   raf-schd@4.0.3:
     resolution: {integrity: sha512-tQkJl2GRWh83ui2DiPTJz9wEiMN20syf+5oKfB03yYP7ioZcJwsIK8FjrtLwH1m7C7e+Tt2yYBlrOpdT+dyeIQ==}
@@ -11327,6 +11408,9 @@ packages:
 
   resolve-pkg-maps@1.0.0:
     resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+
+  resolve-protobuf-schema@2.1.0:
+    resolution: {integrity: sha512-kI5ffTiZWmJaS/huM8wZfEMer1eRd7oJQhDuxeCLe3t7N7mX3z94CN0xPxBQxFYQTSNz9T0i+v6inKqSdK8xrQ==}
 
   resolve-workspace-root@2.0.1:
     resolution: {integrity: sha512-nR23LHAvaI6aHtMg6RWoaHpdR4D881Nydkzi2CixINyg9T00KgaJdJI6Vwty+Ps8WLxZHuxsS0BseWjxSA4C+w==}
@@ -12018,6 +12102,9 @@ packages:
   tinypool@2.0.0:
     resolution: {integrity: sha512-/RX9RzeH2xU5ADE7n2Ykvmi9ED3FBGPAjw9u3zucrNNaEBIO0HPSYgL0NT7+3p147ojeSdaVu08F6hjpv31HJg==}
     engines: {node: ^20.0.0 || >=22.0.0}
+
+  tinyqueue@3.0.0:
+    resolution: {integrity: sha512-gRa9gwYU3ECmQYv3lslts5hxuIa90veaEcxDYuu3QGOIAEM2mOZkVHp48ANJuu1CURtRdHKUBY5Lm1tHV+sD4g==}
 
   tinyrainbow@2.0.0:
     resolution: {integrity: sha512-op4nsTR47R6p0vMUUoYl/a+ljLFVtlfaXkLQmqfLR1qHma1h/ysYk4hEXZ880bf2CYgTskvTa/e196Vd5dDQXw==}
@@ -14278,7 +14365,7 @@ snapshots:
       csstype: 3.2.3
       react: 18.3.1
 
-  '@copilotkit/a2ui-renderer@1.62.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@copilotkit/a2ui-renderer@1.63.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@a2ui/web_core': 0.9.0
       clsx: 2.1.1
@@ -14289,10 +14376,10 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@copilotkit/core@1.62.3(@ag-ui/core@0.0.57)(zod@3.25.76)':
+  '@copilotkit/core@1.63.1(@ag-ui/core@0.0.57)(zod@3.25.76)':
     dependencies:
       '@ag-ui/client': 0.0.57
-      '@copilotkit/shared': 1.62.3(@ag-ui/core@0.0.57)
+      '@copilotkit/shared': 1.63.1(@ag-ui/core@0.0.57)
       '@tanstack/pacer': 0.20.1
       phoenix: 1.8.9
       rxjs: 7.8.1
@@ -14304,16 +14391,16 @@ snapshots:
 
   '@copilotkit/license-verifier@0.5.0': {}
 
-  '@copilotkit/react-core@1.62.3(@types/mdast@4.0.4)(@types/react-dom@18.3.1)(@types/react@18.3.18)(graphql@16.12.0)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod@3.25.76)':
+  '@copilotkit/react-core@1.63.1(@types/mdast@4.0.4)(@types/react-dom@18.3.1)(@types/react@18.3.18)(graphql@16.12.0)(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(zod@3.25.76)':
     dependencies:
       '@ag-ui/client': 0.0.57
       '@ag-ui/core': 0.0.57
-      '@copilotkit/a2ui-renderer': 1.62.3(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@copilotkit/core': 1.62.3(@ag-ui/core@0.0.57)(zod@3.25.76)
-      '@copilotkit/runtime-client-gql': 1.62.3(@ag-ui/core@0.0.57)(graphql@16.12.0)(react@18.3.1)
-      '@copilotkit/shared': 1.62.3(@ag-ui/core@0.0.57)
-      '@copilotkit/web-components': 1.62.3(lit@3.3.3)
-      '@copilotkit/web-inspector': 1.62.3(@ag-ui/core@0.0.57)(zod@3.25.76)
+      '@copilotkit/a2ui-renderer': 1.63.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@copilotkit/core': 1.63.1(@ag-ui/core@0.0.57)(zod@3.25.76)
+      '@copilotkit/runtime-client-gql': 1.63.1(@ag-ui/core@0.0.57)(graphql@16.12.0)(react@18.3.1)
+      '@copilotkit/shared': 1.63.1(@ag-ui/core@0.0.57)
+      '@copilotkit/web-components': 1.63.1(lit@3.3.3)
+      '@copilotkit/web-inspector': 1.63.1(@ag-ui/core@0.0.57)(zod@3.25.76)
       '@jetbrains/websandbox': 1.3.1
       '@lit-labs/react': 2.1.3(@types/react@18.3.18)
       '@radix-ui/react-dropdown-menu': 2.1.16(@types/react-dom@18.3.1)(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -14347,9 +14434,9 @@ snapshots:
       - micromark-util-types
       - supports-color
 
-  '@copilotkit/runtime-client-gql@1.62.3(@ag-ui/core@0.0.57)(graphql@16.12.0)(react@18.3.1)':
+  '@copilotkit/runtime-client-gql@1.63.1(@ag-ui/core@0.0.57)(graphql@16.12.0)(react@18.3.1)':
     dependencies:
-      '@copilotkit/shared': 1.62.3(@ag-ui/core@0.0.57)
+      '@copilotkit/shared': 1.63.1(@ag-ui/core@0.0.57)
       '@urql/core': 5.2.0(graphql@16.12.0)
       react: 18.3.1
       untruncate-json: 0.0.1
@@ -14359,7 +14446,7 @@ snapshots:
       - encoding
       - graphql
 
-  '@copilotkit/shared@1.62.3(@ag-ui/core@0.0.57)':
+  '@copilotkit/shared@1.63.1(@ag-ui/core@0.0.57)':
     dependencies:
       '@ag-ui/client': 0.0.57
       '@ag-ui/core': 0.0.57
@@ -14375,14 +14462,14 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@copilotkit/web-components@1.62.3(lit@3.3.3)':
+  '@copilotkit/web-components@1.63.1(lit@3.3.3)':
     dependencies:
       lit: 3.3.3
 
-  '@copilotkit/web-inspector@1.62.3(@ag-ui/core@0.0.57)(zod@3.25.76)':
+  '@copilotkit/web-inspector@1.63.1(@ag-ui/core@0.0.57)(zod@3.25.76)':
     dependencies:
       '@ag-ui/client': 0.0.57
-      '@copilotkit/core': 1.62.3(@ag-ui/core@0.0.57)(zod@3.25.76)
+      '@copilotkit/core': 1.63.1(@ag-ui/core@0.0.57)(zod@3.25.76)
       lit: 3.3.3
       lucide: 0.525.0
       marked: 12.0.2
@@ -15619,6 +15706,8 @@ snapshots:
     dependencies:
       '@lukeed/csprng': 1.1.0
 
+  '@mapbox/jsonlint-lines-primitives@2.0.3': {}
+
   '@mapbox/node-pre-gyp@1.0.11':
     dependencies:
       detect-libc: 2.1.2
@@ -15634,6 +15723,45 @@ snapshots:
       - encoding
       - supports-color
     optional: true
+
+  '@mapbox/point-geometry@1.1.0': {}
+
+  '@mapbox/tiny-sdf@2.2.0': {}
+
+  '@mapbox/unitbezier@0.0.1': {}
+
+  '@mapbox/unitbezier@1.0.0': {}
+
+  '@mapbox/vector-tile@2.0.5':
+    dependencies:
+      '@mapbox/point-geometry': 1.1.0
+      '@types/geojson': 7946.0.16
+      pbf: 4.0.2
+
+  '@mapbox/whoots-js@3.1.0': {}
+
+  '@maplibre/geojson-vt@6.1.1':
+    dependencies:
+      kdbush: 4.1.0
+
+  '@maplibre/maplibre-gl-style-spec@24.10.0':
+    dependencies:
+      '@mapbox/jsonlint-lines-primitives': 2.0.3
+      '@mapbox/unitbezier': 1.0.0
+      json-stringify-pretty-compact: 4.0.0
+      minimist: 1.2.8
+      quickselect: 3.0.0
+      tinyqueue: 3.0.0
+
+  '@maplibre/mlt@1.1.12':
+    dependencies:
+      '@mapbox/point-geometry': 1.1.0
+
+  '@maplibre/vt-pbf@4.3.2':
+    dependencies:
+      '@mapbox/point-geometry': 1.1.0
+      '@types/geojson': 7946.0.16
+      pbf: 5.1.2
 
   '@mdx-js/react@3.1.1(@types/react@18.3.18)(react@18.3.1)':
     dependencies:
@@ -17081,7 +17209,7 @@ snapshots:
 
   '@react-navigation/routers@7.5.3':
     dependencies:
-      nanoid: 3.3.15
+      nanoid: 3.3.11
 
   '@reactuses/core@6.1.5(react@18.3.1)':
     dependencies:
@@ -17101,7 +17229,7 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
-      picomatch: 4.0.4
+      picomatch: 4.0.3
     optionalDependencies:
       rollup: 4.53.5
 
@@ -20398,6 +20526,8 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
+  earcut@3.2.3: {}
+
   eastasianwidth@0.2.0: {}
 
   echarts-for-react@3.0.4(echarts@6.0.0)(react@18.3.1):
@@ -21262,10 +21392,6 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.3
 
-  fdir@6.5.0(picomatch@4.0.4):
-    optionalDependencies:
-      picomatch: 4.0.4
-
   fetch-nodeshim@0.4.10: {}
 
   fflate@0.8.2: {}
@@ -21506,6 +21632,8 @@ snapshots:
       dargs: 8.1.0
       meow: 12.1.1
       split2: 4.2.0
+
+  gl-matrix@3.4.4: {}
 
   glob-parent@5.1.2:
     dependencies:
@@ -22644,7 +22772,7 @@ snapshots:
       chalk: 4.1.2
       ci-info: 4.3.1
       graceful-fs: 4.2.11
-      picomatch: 4.0.4
+      picomatch: 4.0.3
 
   jest-validate@29.7.0:
     dependencies:
@@ -22808,6 +22936,8 @@ snapshots:
 
   json-stable-stringify-without-jsonify@1.0.1: {}
 
+  json-stringify-pretty-compact@4.0.0: {}
+
   json5@2.2.3: {}
 
   jsonc-parser@3.3.1: {}
@@ -22836,6 +22966,8 @@ snapshots:
   katex@0.16.47:
     dependencies:
       commander: 8.3.0
+
+  kdbush@4.1.0: {}
 
   keyv@4.5.4:
     dependencies:
@@ -23243,6 +23375,28 @@ snapshots:
   makeerror@1.0.12:
     dependencies:
       tmpl: 1.0.5
+
+  maplibre-gl@5.24.0:
+    dependencies:
+      '@mapbox/jsonlint-lines-primitives': 2.0.3
+      '@mapbox/point-geometry': 1.1.0
+      '@mapbox/tiny-sdf': 2.2.0
+      '@mapbox/unitbezier': 0.0.1
+      '@mapbox/vector-tile': 2.0.5
+      '@mapbox/whoots-js': 3.1.0
+      '@maplibre/geojson-vt': 6.1.1
+      '@maplibre/maplibre-gl-style-spec': 24.10.0
+      '@maplibre/mlt': 1.1.12
+      '@maplibre/vt-pbf': 4.3.2
+      '@types/geojson': 7946.0.16
+      earcut: 3.2.3
+      gl-matrix: 3.4.4
+      kdbush: 4.1.0
+      murmurhash-js: 1.0.0
+      pbf: 4.0.2
+      potpack: 2.1.0
+      quickselect: 3.0.0
+      tinyqueue: 3.0.0
 
   markdown-it@14.1.0:
     dependencies:
@@ -24194,6 +24348,8 @@ snapshots:
 
   multitars@1.0.0: {}
 
+  murmurhash-js@1.0.0: {}
+
   mustache@4.2.0: {}
 
   mute-stream@2.0.0:
@@ -24667,6 +24823,14 @@ snapshots:
 
   pathval@2.0.1: {}
 
+  pbf@4.0.2:
+    dependencies:
+      resolve-protobuf-schema: 2.1.0
+
+  pbf@5.1.2:
+    dependencies:
+      resolve-protobuf-schema: 2.1.0
+
   pdfjs-dist@3.11.174:
     optionalDependencies:
       canvas: 2.11.2
@@ -24806,6 +24970,8 @@ snapshots:
       nanoid: 3.3.11
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  potpack@2.1.0: {}
 
   prelude-ls@1.2.1: {}
 
@@ -24984,6 +25150,8 @@ snapshots:
       prosemirror-state: 1.4.3
       prosemirror-transform: 1.10.3
 
+  protocol-buffers-schema@3.6.1: {}
+
   proxy-agent@6.5.0:
     dependencies:
       agent-base: 7.1.3
@@ -25049,6 +25217,8 @@ snapshots:
   queue@6.0.2:
     dependencies:
       inherits: 2.0.4
+
+  quickselect@3.0.0: {}
 
   raf-schd@4.0.3: {}
 
@@ -25711,6 +25881,10 @@ snapshots:
   resolve-from@5.0.0: {}
 
   resolve-pkg-maps@1.0.0: {}
+
+  resolve-protobuf-schema@2.1.0:
+    dependencies:
+      protocol-buffers-schema: 3.6.1
 
   resolve-workspace-root@2.0.1: {}
 
@@ -26593,6 +26767,8 @@ snapshots:
 
   tinypool@2.0.0: {}
 
+  tinyqueue@3.0.0: {}
+
   tinyrainbow@2.0.0: {}
 
   tinyrainbow@3.0.3: {}
@@ -26950,7 +27126,7 @@ snapshots:
     dependencies:
       '@jridgewell/remapping': 2.3.5
       acorn: 8.16.0
-      picomatch: 4.0.4
+      picomatch: 4.0.3
       webpack-virtual-modules: 0.6.2
 
   unrs-resolver@1.11.1:
@@ -27197,9 +27373,9 @@ snapshots:
   vite@7.3.0(@types/node@22.19.3)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.7.0):
     dependencies:
       esbuild: 0.27.2
-      fdir: 6.5.0(picomatch@4.0.4)
-      picomatch: 4.0.4
-      postcss: 8.5.16
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+      postcss: 8.5.6
       rollup: 4.53.5
       tinyglobby: 0.2.15
     optionalDependencies:

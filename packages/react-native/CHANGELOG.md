@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.58.1](https://github.com/factorialco/f0/compare/f0-react-native-v0.58.0...f0-react-native-v0.58.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **F0Button:** clip press overlay to the button's rounded corners ([#4702](https://github.com/factorialco/f0/issues/4702)) ([2b80c30](https://github.com/factorialco/f0/commit/2b80c30c22fcc77b708b7e50416a7a56b68ad66a))
+
 ## [0.58.0](https://github.com/factorialco/f0/compare/f0-react-native-v0.57.0...f0-react-native-v0.58.0) (2026-07-10)
 
 

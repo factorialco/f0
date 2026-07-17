@@ -1,11 +1,11 @@
 import { ReactFlowProvider } from "@xyflow/react"
-import { type ReactNode } from "react"
+import { forwardRef, type ForwardedRef, type ReactNode, type Ref } from "react"
 
 import "./F0Graph.css"
 import { F0GraphView } from "./components/F0GraphView"
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
-  F0GraphNodeTagType,
+  F0GraphNodeTagColumn,
   GraphNodeState,
   GraphNodeVariant,
 } from "./components/F0GraphNode"
@@ -110,8 +110,25 @@ export interface F0GraphProps<T = unknown> {
   onPaneClick?: () => void
 
   // ---- Navigation ----
+  /**
+   * Id of a node to fly to (center on) when the value **changes**. Because it
+   * only reacts to a value change, re-selecting the **same** node (e.g.
+   * searching the same employee twice after panning away) will NOT re-fly — for
+   * that "always fly on the action" behavior, call the imperative
+   * `focusNode(id)` on the graph ref instead (see {@link F0GraphHandle}).
+   */
   focusedNode?: string
   highlightedNodes?: Set<string>
+  /**
+   * Id of a node to frame on the **first paint**, instead of the default
+   * fit-to-all. The initial viewport opens already centered on this node with
+   * no animation — use it to open "already looking at" a node (e.g. the current
+   * user). The node must exist in the initial `nodes` (expand its ancestors
+   * before mount); if it's absent, this falls back to the normal fit-to-all.
+   * Only affects the initial frame — later `focusedNode` / "Find me" reveals
+   * still animate with the smooth pan.
+   */
+  initialFocusNodeId?: string
 
   // ---- Layout ----
   /** Layout sizing hint passed to the built-in layout engine. Defaults to 256. Override for compact nodes (icons, file rows). */
@@ -167,18 +184,18 @@ export interface F0GraphProps<T = unknown> {
    *
    * Order is preserved in the popover.
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Controlled set of currently visible tag types. When omitted, falls
    * back to `defaultVisibleTagTypes` (or all of `nodeTagTypes`). The
    * visibility UI itself is owned by the consumer.
    */
-  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  visibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Initial visible tag types when `visibleTagTypes` is not controlled.
    * Defaults to all of `nodeTagTypes`.
    */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Whether the layout should reserve vertical room for one tag row beneath
    * each node so the source handle (and outgoing edges) anchors below the
@@ -243,6 +260,30 @@ export interface F0GraphProps<T = unknown> {
   onRenderedNodesChange?: (count: number) => void
 }
 
+// ─── Imperative handle ─────────────────────────────────────────
+/**
+ * Imperative API exposed via a ref on `<F0Graph>`. Use for actions that should
+ * fire every time they're invoked, regardless of whether any prop changed —
+ * the canonical case is a search box that re-centers on a result even when the
+ * user picks the same node twice.
+ */
+export interface F0GraphHandle {
+  /**
+   * Fly to (center on) a node, animating from the current viewport. Always
+   * runs, even if the node is already focused/centered — unlike the
+   * `focusedNode` prop, which only reacts to a value change. Frames the node
+   * with its direct children (capped zoom); safe with node windowing (an
+   * off-screen target is centered via its layout position).
+   */
+  focusNode: (nodeId: string) => void
+  /**
+   * Clear the graph's own node selection (the ring set on click). Use when the
+   * consumer marks a node another way — e.g. `highlightedNodes` for a search /
+   * "Find me" reveal — so the two don't leave two nodes marked at once.
+   */
+  clearSelection: () => void
+}
+
 // ─── Custom Node Type for React Flow ───────────────────────────
 /**
  * Behavior context passed to consumer's `renderNode`. Describes how F0Graph
@@ -271,7 +312,7 @@ export interface F0GraphNodeRenderContext {
    * rendered. Driven by the `visibleTagTypes` / `nodeTagTypes` props and
    * the popover toggle in the controls bar.
    */
-  visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
+  visibleTagTypes?: ReadonlySet<F0GraphNodeTagColumn>
   /**
    * `true` while a deferred payload is still loading and this node
    * may receive additional children once resolved.
@@ -286,12 +327,19 @@ export interface F0GraphNodeRenderContext {
 }
 
 // ─── Public component (wraps the view in a ReactFlowProvider) ──────────────
-export function F0Graph<T = unknown>(props: F0GraphProps<T>) {
+function F0GraphInner<T = unknown>(
+  props: F0GraphProps<T>,
+  ref: ForwardedRef<F0GraphHandle>
+) {
   return (
     <ReactFlowProvider>
-      <F0GraphView {...props} />
+      <F0GraphView {...props} handleRef={ref} />
     </ReactFlowProvider>
   )
 }
 
-F0Graph.displayName = "F0Graph"
+export const F0Graph = forwardRef(F0GraphInner) as <T = unknown>(
+  props: F0GraphProps<T> & { ref?: Ref<F0GraphHandle> }
+) => ReturnType<typeof F0GraphInner>
+
+;(F0Graph as { displayName?: string }).displayName = "F0Graph"

@@ -5,7 +5,7 @@ import { z } from "zod"
 
 import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
-import { ExternalLink, Plus, Settings } from "@/icons/app"
+import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
 
 import type {
@@ -1404,6 +1404,770 @@ export const FileFields: Story = {
     })
 
     return <F0Form formDefinition={formDefinition} useUpload={useMockUpload} />
+  },
+}
+
+/**
+ * Entities list field with **every F0Form field type** in the item schema,
+ * authored with `f0FormField` shortcuts. Columns and cell types are derived
+ * from each field:
+ *
+ * Shown as inline columns (types that have an editable-table cell): `text`,
+ * `email` and `url` (text cells, with the envelope/link leading icon),
+ * `select`, `number`, `percentage` (number with a "%" unit), `money` and
+ * `date` (day-granularity date picker).
+ *
+ * Kept on the row but **not shown as a column** (no inline cell yet):
+ * `boolean`, `checkbox`, `richText` and `time`. They stay in the schema and on
+ * each row's value; they simply aren't rendered as a column.
+ *
+ * `editableIds` locks the "Alan Turing" row (id `m-3`) — its cells render as
+ * disabled (still showing their leading icon and a formatted date).
+ */
+export const EntitiesListField: Story = {
+  parameters: { docs: { story: { inline: false, height: "600px" } } },
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team",
+        helpText:
+          "Every field type lives in the schema; only the ones with an inline cell are shown as columns.",
+        schema: z.object({
+          // Shown as columns
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          website: f0FormField.url({ label: "Website" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: [
+              { value: "Admin", label: "Admin" },
+              { value: "Editor", label: "Editor" },
+              { value: "Viewer", label: "Viewer" },
+            ],
+          }),
+          seniority: f0FormField.number({ label: "Years", min: 0 }),
+          allocation: f0FormField.percentage({
+            label: "Allocation",
+            min: 0,
+            max: 100,
+          }),
+          salary: f0FormField.money({ label: "Salary", currency: "EUR" }),
+          // In the schema + editable via the dialog, but no inline cell
+          startDate: f0FormField.date({ label: "Start date", optional: true }),
+          remote: f0FormField.boolean({ label: "Remote", optional: true }),
+          agreedToTerms: f0FormField.checkbox({
+            label: "Agreed to terms",
+            optional: true,
+          }),
+          bio: f0FormField.richText({ label: "Bio", optional: true }),
+        }),
+        config: {
+          canAddItems: true,
+          supportInlineEditing: true,
+          labels: { addButton: "Add member" },
+          editableIds: ["m-1", "m-2"],
+          maxItems: 8,
+          columns: {
+            name: { placeholder: "e.g. Ada Lovelace", width: 160 },
+            email: { placeholder: "name@example.com", width: 200 },
+            website: { placeholder: "https://…", width: 190 },
+            role: { width: 130 },
+            seniority: { width: 90 },
+            allocation: { width: 120 },
+            salary: { width: 120 },
+            startDate: { width: 150 },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-all-types",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            website: "https://example.com/ada",
+            role: "Admin",
+            seniority: 6,
+            allocation: 100,
+            salary: 62000,
+            startDate: new Date(2022, 2, 1),
+            remote: true,
+            agreedToTerms: true,
+            bio: { value: "Founding engineer." },
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            website: "https://example.com/grace",
+            role: "Editor",
+            seniority: 4,
+            allocation: 80,
+            salary: 54000,
+            startDate: new Date(2023, 8, 15),
+            remote: false,
+            agreedToTerms: true,
+            bio: { value: "Compiler wizard." },
+          },
+          {
+            id: "m-3",
+            name: "Alan Turing",
+            email: "alan@example.com",
+            website: "https://example.com/alan",
+            role: "Viewer",
+            seniority: 2,
+            allocation: 50,
+            salary: 48000,
+            startDate: new Date(2024, 0, 8),
+            remote: true,
+            agreedToTerms: false,
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Entities list field with 2 schema properties: rows are edited inline (no
+ * dialog) and the add button appends an empty row. `editableIds` disables
+ * inline editing per row — the last row (id `faq-3`) is read-only. This list
+ * also sets `sortable: false`, so rows show no drag handle and keep their
+ * order.
+ */
+export const EntitiesListFieldInline: Story = {
+  render() {
+    const formSchema = z.object({
+      faqs: f0FormField.entitiesList({
+        label: "FAQ links",
+        helpText: "Inline editing: 2 columns or fewer.",
+        schema: z.object({
+          title: z.string().min(1),
+          url: z.string().url(),
+        }),
+        config: {
+          sortable: false,
+          labels: { addButton: "Add FAQ" },
+          editableIds: ["faq-1", "faq-2"],
+          columns: {
+            url: { label: "URL", placeholder: "https://…" },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "sortable-list-inline",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        faqs: [
+          {
+            id: "faq-1",
+            title: "How to book time off",
+            url: "https://example.com/pto",
+          },
+          {
+            id: "faq-2",
+            title: "Expenses policy",
+            url: "https://example.com/expenses",
+          },
+          {
+            id: "faq-3",
+            title: "Payroll calendar",
+            url: "https://example.com/payroll",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Inline editing forced on for a list with more than 2 columns via
+ * `config.supportInlineEditing: true`. Exercises inline cell types beyond
+ * text: number (`z.number()`), email (`z.string().email()`), and select
+ * (`z.enum`). Edit any cell directly in the table — no dialog.
+ */
+export const EntitiesListFieldInlineMultiColumn: Story = {
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText:
+          "Inline editing across text, number, email, select and multi-select cells.",
+        schema: z.object({
+          name: z.string().min(1),
+          email: z.string().email(),
+          age: z.number().min(18).max(99),
+          salary: z.number().min(0),
+          role: z.enum(["Admin", "Editor", "Viewer"]),
+          skills: f0FormField.multiSelect({
+            label: "Skills",
+            options: [
+              { value: "js", label: "JavaScript" },
+              { value: "ts", label: "TypeScript" },
+              { value: "go", label: "Go" },
+              { value: "rust", label: "Rust" },
+            ],
+          }),
+        }),
+        config: {
+          supportInlineEditing: true,
+          labels: { addButton: "Add member" },
+          columns: {
+            name: { placeholder: "Full name" },
+            email: { placeholder: "name@example.com" },
+            age: { width: 100, placeholder: "18–99" },
+            salary: { label: "Salary", width: 140, placeholder: "0" },
+            role: { width: 140 },
+            skills: { width: 200 },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-inline-multi",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Dani Smith",
+            email: "dani@example.com",
+            age: 34,
+            salary: 52000,
+            role: "Admin",
+            skills: ["js", "ts"],
+          },
+          {
+            id: "m-2",
+            name: "Eliseo Williams",
+            email: "eliseo@example.com",
+            age: 29,
+            salary: 47000,
+            role: "Editor",
+            skills: ["go"],
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Custom per-row actions via `config.rowActions`. A hidden `archived` column
+ * (`config.columns.archived.hidden`) holds each row's state, and the action
+ * resolved per row toggles between "Archive" and "Unarchive" based on it —
+ * mirroring the archived/unarchived options pattern from the previous design
+ * system. `onClick` receives `update`/`remove` helpers to mutate the row.
+ */
+export const EntitiesListFieldRowActions: Story = {
+  render() {
+    const formSchema = z.object({
+      options: f0FormField.entitiesList({
+        label: "Options",
+        helpText: "Archive an option to keep it without offering it.",
+        schema: z.object({
+          name: z.string().min(1),
+          archived: z.boolean().default(false),
+        }),
+        config: {
+          sortable: true,
+          labels: { addButton: "Add an option" },
+          columns: {
+            name: { label: "Option", placeholder: "Option name" },
+            archived: { hidden: true },
+          },
+          rowActions: (item) =>
+            item.archived
+              ? [
+                  {
+                    icon: ArchiveOpen,
+                    label: "Unarchive",
+                    onClick: ({ update }) => update({ archived: false }),
+                  },
+                ]
+              : [
+                  {
+                    icon: Archive,
+                    label: "Archive",
+                    onClick: ({ update }) => update({ archived: true }),
+                  },
+                ],
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-row-actions",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        options: [
+          { name: "Permanent part-time", archived: false },
+          { name: "Temporary full-time", archived: false },
+          { name: "Ticket restaurant", archived: false },
+          { name: "Permanent full-time", archived: true },
+          { name: "Temporary part-time", archived: true },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Dialog mode — the default for a list whose item schema has more than 2
+ * properties (here: name, email, role, start date). No `supportInlineEditing`
+ * is set, so the field falls back to the dialog behavior: cells are read-only,
+ * the **Add member** button opens a form dialog to create a row, and each row
+ * gets a pencil action that opens the same dialog to edit it. Rows can still be
+ * reordered by dragging and removed inline.
+ */
+export const EntitiesListFieldDialogMode: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText:
+          "With more than two fields, adding and editing happen in a dialog.",
+        schema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: [
+              { value: "Admin", label: "Admin" },
+              { value: "Editor", label: "Editor" },
+              { value: "Viewer", label: "Viewer" },
+            ],
+          }),
+          startDate: f0FormField.date({ label: "Start date" }),
+        }),
+        config: {
+          labels: {
+            addButton: "Add member",
+            create: {
+              description: "Fill in the details of the new team member.",
+            },
+            update: { title: "Edit member" },
+          },
+          columns: {
+            name: { placeholder: "e.g. Ada Lovelace" },
+            email: { placeholder: "name@example.com" },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-dialog-mode",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            role: "Admin",
+            startDate: new Date(2022, 2, 1),
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            role: "Editor",
+            startDate: new Date(2023, 8, 15),
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * List-view visualization (`config.visualization: "list-view"`). When there's
+ * no inline editing, the items render as a OneDataCollection **list** instead
+ * of a read-only table: each row shows a title (first field) and description
+ * lines (the rest), the **Add member** button opens the create dialog, and each
+ * row has edit/remove actions. Drag-reorder isn't available in list mode.
+ */
+export const EntitiesListFieldListView: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  render() {
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText:
+          "Add/edit in a dialog; the ⋮ menu holds custom actions and remove.",
+        schema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          email: f0FormField.email({ label: "Email" }),
+          role: f0FormField.select({
+            label: "Role",
+            options: [
+              { value: "Admin", label: "Admin" },
+              { value: "Editor", label: "Editor" },
+              { value: "Viewer", label: "Viewer" },
+            ],
+          }),
+          startDate: f0FormField.date({ label: "Start date" }),
+          archived: z.boolean().default(false),
+        }),
+        config: {
+          visualization: "list-view",
+          columns: {
+            archived: { hidden: true },
+            // Show the role enum as a read-only dot-color tag on the right.
+            role: {
+              listTag: (value) => ({
+                type: "dotTag",
+                color:
+                  value === "Admin"
+                    ? "barbie"
+                    : value === "Editor"
+                      ? "malibu"
+                      : "smoke",
+                label: String(value),
+              }),
+            },
+          },
+          labels: {
+            addButton: "Add member",
+            create: {
+              description: "Fill in the details of the new team member.",
+            },
+            update: { title: "Edit member" },
+          },
+          rowActions: (item) =>
+            item.archived
+              ? [
+                  {
+                    icon: ArchiveOpen,
+                    label: "Unarchive",
+                    onClick: ({ update }) => update({ archived: false }),
+                  },
+                ]
+              : [
+                  {
+                    icon: Archive,
+                    label: "Archive",
+                    onClick: ({ update }) => update({ archived: true }),
+                  },
+                ],
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-list-view",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            role: "Admin",
+            startDate: new Date(2022, 2, 1),
+            archived: false,
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            role: "Editor",
+            startDate: new Date(2023, 8, 15),
+            archived: false,
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Navigable list items. With `config.itemHref` (and no `updateSchema`), each
+ * row links out: clicking the row or its trailing arrow navigates to the URL,
+ * and there's no edit dialog — just add and remove. `itemHref` is ignored when
+ * a split `updateSchema` is present (that shows the edit pencil instead).
+ */
+export const EntitiesListFieldNavigable: Story = {
+  parameters: { docs: { story: { inline: false, height: "480px" } } },
+  render() {
+    const formSchema = z.object({
+      resources: f0FormField.entitiesList({
+        label: "Resources",
+        helpText: "Click a row (or its arrow) to open the link.",
+        schema: z.object({
+          name: f0FormField.text({ label: "Name" }),
+          url: f0FormField.url({ label: "URL" }),
+        }),
+        config: {
+          visualization: "list-view",
+          itemHref: (item) => (item.url as string) || undefined,
+          labels: { addButton: "Add resource" },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-navigable",
+      schema: formSchema,
+      defaultValues: {
+        resources: [
+          {
+            id: "r-1",
+            name: "People Handbook",
+            url: "https://example.com/handbook",
+          },
+          {
+            id: "r-2",
+            name: "Expenses policy",
+            url: "https://example.com/expenses",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Separate create/update form definitions. Instead of a single `schema`, the
+ * field takes a `createFormDefinition` (reduced: name + email) and an
+ * `updateFormDefinition` (fuller: adds role + start date), each with its **own**
+ * `onSubmit` — so adding vs editing can persist independently (watch the
+ * console: `CREATE` vs `UPDATE`). The item is still committed to the field
+ * value. `updateFormDefinition`'s schema is canonical, so its extra fields are
+ * `optional` to keep freshly-added rows valid.
+ */
+export const EntitiesListFieldFormDefinitions: Story = {
+  parameters: { docs: { story: { inline: false, height: "560px" } } },
+  render() {
+    const roleOptions = [
+      { value: "Admin", label: "Admin" },
+      { value: "Editor", label: "Editor" },
+      { value: "Viewer", label: "Viewer" },
+    ]
+    const createFormDefinition = useF0FormDefinition({
+      name: "member-create",
+      schema: z.object({
+        name: f0FormField.text({ label: "Name" }),
+        email: f0FormField.email({ label: "Email" }),
+      }),
+      onSubmit: async ({ data }) => {
+        await sleep(300)
+        console.info(`CREATE member: ${JSON.stringify(data)}`)
+        return { success: true }
+      },
+    })
+    const updateFormDefinition = useF0FormDefinition({
+      name: "member-update",
+      schema: z.object({
+        name: f0FormField.text({ label: "Name" }),
+        email: f0FormField.email({ label: "Email" }),
+        role: f0FormField.select({
+          label: "Role",
+          options: roleOptions,
+          optional: true,
+        }),
+        startDate: f0FormField.date({ label: "Start date", optional: true }),
+      }),
+      onSubmit: async ({ data }) => {
+        await sleep(300)
+        console.info(`UPDATE member: ${JSON.stringify(data)}`)
+        return { success: true }
+      },
+    })
+    const formSchema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Team members",
+        helpText:
+          "Add and edit run their own submit — see the console (CREATE vs UPDATE).",
+        createFormDefinition,
+        updateFormDefinition,
+        config: {
+          visualization: "list-view",
+          labels: {
+            addButton: "Add member",
+            update: { title: "Edit member" },
+          },
+        },
+      }),
+    })
+
+    const formDefinition = useF0FormDefinition({
+      name: "entities-list-form-defs",
+      schema: formSchema,
+      errorTriggerMode: "on-change",
+      defaultValues: {
+        members: [
+          {
+            id: "m-1",
+            name: "Ada Lovelace",
+            email: "ada@example.com",
+            role: "Admin",
+            startDate: new Date(2022, 2, 1),
+          },
+          {
+            id: "m-2",
+            name: "Grace Hopper",
+            email: "grace@example.com",
+          },
+        ],
+      },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true, message: "Saved" }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return <F0Form formDefinition={formDefinition} />
+  },
+}
+
+/**
+ * Per-field auto-save. Only the entities list opts in with `autoSave: true`, so
+ * editing a link (or adding/removing/reordering rows) saves the form after a
+ * short debounce — no Save click needed. The other fields (`name`, `notes`)
+ * still save only when the user clicks **Save**.
+ *
+ * Auto-save submits the whole form, so it also persists any pending changes to
+ * the other fields and runs their validation. The "Auto-saves" counter below
+ * only increments from an entities change; typing in the text fields doesn't
+ * move it until you press Save.
+ */
+export const EntitiesListFieldAutoSave: Story = {
+  render() {
+    const AutoSaveDemo = () => {
+      const [saves, setSaves] = useState(0)
+
+      const formSchema = z.object({
+        name: f0FormField.text({
+          label: "Collection name",
+          placeholder: "e.g. Company resources",
+          helpText: "Saved when you click Save.",
+        }),
+        notes: f0FormField.textarea({
+          label: "Notes",
+          optional: true,
+          helpText: "Saved when you click Save.",
+        }),
+        links: f0FormField.entitiesList({
+          label: "Links",
+          helpText: "Saved automatically as you edit.",
+          autoSave: true,
+          schema: z.object({
+            title: z.string().min(1),
+            url: z.string().url(),
+          }),
+          config: {
+            sortable: true,
+            labels: { addButton: "Add link" },
+            columns: { url: { label: "URL", placeholder: "https://…" } },
+          },
+        }),
+      })
+
+      const formDefinition = useF0FormDefinition({
+        name: "entities-list-autosave",
+        schema: formSchema,
+        defaultValues: {
+          name: "Company resources",
+          notes: "",
+          links: [
+            { title: "People Handbook", url: "https://example.com/handbook" },
+          ],
+        },
+        onSubmit: async ({ data }) => {
+          await sleep(300)
+          setSaves((count) => count + 1)
+          console.info(`Saved: ${JSON.stringify(data)}`)
+          return { success: true, message: "Saved" }
+        },
+        submitConfig: { label: "Save" },
+      })
+
+      return (
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-f1-foreground-secondary">
+            Auto-saves: <span className="font-semibold">{saves}</span>
+          </p>
+          <F0Form formDefinition={formDefinition} />
+        </div>
+      )
+    }
+
+    return <AutoSaveDemo />
   },
 }
 

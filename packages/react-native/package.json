@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react-native",
-  "version": "0.58.0",
+  "version": "0.58.1",
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
@@ -116,6 +116,7 @@
   "devDependencies": {
     "@babel/core": "^7.28.0",
     "@babel/preset-typescript": "^7.28.5",
+    "@expo/ui": "~56.0.18",
     "@expo/vector-icons": "^15.1.1",
     "@react-native/jest-preset": "0.85.3",
     "@react-navigation/bottom-tabs": "^7.4.0",
@@ -136,6 +137,7 @@
     "expo-clipboard": "~56.0.4",
     "expo-constants": "~56.0.18",
     "expo-font": "~56.0.7",
+    "expo-glass-effect": "~56.0.4",
     "expo-image": "~56.0.11",
     "expo-router": "~56.2.11",
     "expo-splash-screen": "~56.0.10",
