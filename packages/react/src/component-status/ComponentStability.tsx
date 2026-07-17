@@ -103,12 +103,14 @@ export function ComponentStability({
               <div>
                 <div className="text-base text-f1-foreground">{req.label}</div>
                 {!req.met && (
-                  <div className="mt-0.5 text-xs text-f1-foreground-secondary">
+                  <div className="mt-0.5 text-base text-f1-foreground-secondary">
                     {req.detail}
                     {req.criteria && req.criteria.length > 0 && (
                       <ul className="mt-1 list-disc space-y-0.5 pl-4">
                         {req.criteria.map((criterion) => (
-                          <li key={criterion}>{criterion}</li>
+                          <li key={criterion} className="!text-base">
+                            {criterion}
+                          </li>
                         ))}
                       </ul>
                     )}
