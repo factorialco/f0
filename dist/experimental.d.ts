@@ -7880,21 +7880,21 @@ export declare type NestedTableOptions<R extends RecordType> = {
     defaultExpandedChildren?: NestedChildrenDisplayMode;
     /**
      * Declarative, **controlled** expansion criteria (mirrors `revealNodeId`/
-     * `focusOnEntry` on the Graph visualization): while defined, the provider
-     * reactively re-applies it every time its reference changes, clearing any
-     * explicit override left by a user click or a `control` call — the same
-     * way a controlled input value reasserts itself on the next render where
-     * the value prop changes.
+     * `focusOnEntry` on the Graph visualization). While defined it is the
+     * single source of truth for the auto-expansion policy — standard
+     * controlled-prop semantics: `defaultExpanded` is ignored and the policy
+     * side of `expandAll`/`collapseAll` is a no-op. Targeted `control` calls
+     * (`expand`/`collapse`/`toggle`/`expandTo`) still work: they layer per-row
+     * overrides on top of the criteria, and every override is cleared whenever
+     * the criteria changes by reference — the same way a controlled input
+     * value reasserts itself when the prop changes.
      *
-     * Precedence: `expanded` (controlled) > `control` (imperative) >
-     * `defaultExpanded` (uncontrolled, mount-only). Calling `control` while
-     * `expanded` is set still works immediately (it is not blocked), but the
-     * controlled criteria takes over again on the next change of `expanded` —
-     * so mixing both on the same table only makes sense transiently.
+     * Precedence: `expanded` (controlled) > `control` (imperative overrides) >
+     * `defaultExpanded` (uncontrolled, mount-only).
      *
-     * Uses reference equality, like any other prop-driven effect: pass a
+     * Uses reference equality, like any other controlled prop: pass a
      * stable/memoized predicate, or a primitive (`boolean`/`number`), to avoid
-     * re-applying it on every render.
+     * clearing user overrides on every render.
      */
     expanded?: NestedExpansionCriteria<R>;
     /** Controller created with `useNestedTable()` for programmatic control. */
