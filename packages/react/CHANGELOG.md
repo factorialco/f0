@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.41.1](https://github.com/factorialco/f0/compare/f0-react-v4.41.0...f0-react-v4.41.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **OneDateNavigator:** revive persisted string dates before use ([#4733](https://github.com/factorialco/f0/issues/4733)) ([6d6fcbe](https://github.com/factorialco/f0/commit/6d6fcbe2be79f4aefce71c1b8e2e14a3fa1e1075))
+
 ## [4.41.0](https://github.com/factorialco/f0/compare/f0-react-v4.40.1...f0-react-v4.41.0) (2026-07-17)
 
 
