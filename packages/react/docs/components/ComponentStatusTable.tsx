@@ -217,13 +217,11 @@ export function ComponentStatusTable() {
           className="h-8 rounded-md border border-f1-border bg-f1-background px-2 text-sm text-f1-foreground focus:outline-none focus:ring-2 focus:ring-f1-border-selected"
         >
           <option value="all">All statuses</option>
-          {(["stable", "experimental", "deprecated", "internal"] as const).map(
-            (key) => (
-              <option key={key} value={key}>
-                {STATUS_CONFIG[key].label} ({effectiveCounts[key] ?? 0})
-              </option>
-            )
-          )}
+          {(["stable", "experimental", "deprecated"] as const).map((key) => (
+            <option key={key} value={key}>
+              {STATUS_CONFIG[key].label} ({effectiveCounts[key] ?? 0})
+            </option>
+          ))}
         </select>
         <span className="ml-auto text-xs text-f1-foreground-secondary">
           {filtered.length} of {total} components · Generated {generatedDate}
@@ -238,7 +236,6 @@ export function ComponentStatusTable() {
               <th className="px-4 py-3">Component</th>
               <th className="px-4 py-3">Zone</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Declared tag</th>
               {REQ_COLUMNS.map((col) => (
                 <th key={col.key} className="px-4 py-3 text-center">
                   {col.label}
@@ -250,7 +247,7 @@ export function ComponentStatusTable() {
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={4 + REQ_COLUMNS.length}
+                  colSpan={3 + REQ_COLUMNS.length}
                   className="px-4 py-8 text-center text-f1-foreground-secondary"
                 >
                   No components match your filters.
@@ -274,18 +271,6 @@ export function ComponentStatusTable() {
                   </td>
                   <td className="px-4 py-2.5">
                     <StatusBadge status={component.effectiveStatus} />
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span
-                      className="text-xs text-f1-foreground-secondary"
-                      title={
-                        component.discrepancy === "tagged-but-below-bar"
-                          ? "Tagged stable but does not meet the bar"
-                          : undefined
-                      }
-                    >
-                      {STATUS_CONFIG[component.apiStatus].label}
-                    </span>
                   </td>
                   {REQ_COLUMNS.map((col) => (
                     <td key={col.key} className="px-4 py-2.5 text-center">

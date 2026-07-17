@@ -138,7 +138,13 @@ function extractTags(content) {
 }
 
 function extractTitle(content) {
-  const match = content.match(/title:\s*["']([^"']+)["']/)
+  // Extract the title from the story meta only. A story file often defines
+  // sample data / args objects that ALSO have a `title:` property (e.g. AI
+  // cards), so search from the meta declaration onward rather than matching the
+  // first `title:` in the file.
+  const meta = content.match(/(?:const\s+meta\b|export\s+default)[\s\S]*?\{/)
+  const fromMeta = meta ? content.slice(meta.index) : content
+  const match = fromMeta.match(/title:\s*["']([^"']+)["']/)
   return match ? match[1] : null
 }
 
@@ -269,7 +275,9 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
     const relative = filePath.slice(srcDir.length + 1)
     const zone = getZone(relative)
 
-    if (zone === "internal" && !tags.includes("stable")) continue
+    // Internal is not a maturity level (Definition of Done): skip the internal
+    // folders (ui/, lib/) and anything tagged `internal`.
+    if (zone === "internal" || tags.includes("internal")) continue
     if (filePath.includes("/examples/")) continue
     if (tags.includes("no-sidebar") && !tags.includes("stable")) continue
 
