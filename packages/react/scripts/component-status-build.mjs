@@ -33,6 +33,67 @@ const RESOLVED_VIRTUAL_ID = "\0" + VIRTUAL_ID
 const scriptsDir = dirname(fileURLToPath(import.meta.url))
 const SRC_DIR = resolve(scriptsDir, "../src")
 
+const DOC_TIER_ORDER = ["none", "stub", "acceptable", "good", "gold"]
+
+/**
+ * Whether an entry meets the mechanically-checkable stable bar. This mirrors
+ * the requirement predicates in `src/component-status/component-status.ts`
+ * (STABLE_REQUIREMENTS) — a drift test keeps the two in sync. Kept here (plain
+ * JS, no virtual module) so Node contexts like `.storybook/main.ts` can compute
+ * the effective status for the sidebar.
+ */
+export function meetsStableBar(c) {
+  return (
+    c.hasStories &&
+    c.hasUnitTests &&
+    c.hasPlayFunction &&
+    c.hasMdxDocs &&
+    DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good")
+  )
+}
+
+/** The effective maturity level (see component-status.ts effectiveStatusOf). */
+export function effectiveStatusOf(c) {
+  if (c.apiStatus === "deprecated") return "deprecated"
+  if (c.apiStatus === "internal") return "internal"
+  return c.apiStatus === "stable" && meetsStableBar(c)
+    ? "stable"
+    : "experimental"
+}
+
+/** Normalize a component name for matching (drop F0 prefix + punctuation). */
+export function normalizeComponentName(name) {
+  return name
+    .toLowerCase()
+    .replace(/^f0/, "")
+    .replace(/[^a-z0-9]/g, "")
+}
+
+/** Last path segment of a grouped name ("Avatars/Avatar" → "Avatar"). */
+export function leafName(name) {
+  const parts = name.split("/")
+  return parts[parts.length - 1] ?? name
+}
+
+/**
+ * A map of normalized leaf name → effective status, resolving name collisions
+ * by preferring the "components" zone (mirroring getComponentStatus). Used by
+ * the Storybook manager (sidebar), which can only see an entry's leaf name.
+ */
+export function effectiveStatusByLeaf(components) {
+  const byLeaf = {}
+  for (const c of components) {
+    const key = normalizeComponentName(leafName(c.name))
+    const prev = byLeaf[key]
+    if (!prev || (c.zone === "components" && prev.zone !== "components")) {
+      byLeaf[key] = { zone: c.zone, status: effectiveStatusOf(c) }
+    }
+  }
+  const out = {}
+  for (const [key, v] of Object.entries(byLeaf)) out[key] = v.status
+  return out
+}
+
 /** Recursively collect every file path under `dir`. */
 function walk(dir, out = []) {
   let entries

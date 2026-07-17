@@ -1,6 +1,7 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/react-vite"
 
+import { writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
@@ -8,10 +9,29 @@ import { fileURLToPath } from "node:url"
 import remarkGfm from "remark-gfm"
 import { Preset } from "storybook/internal/types"
 
-import { componentStatusVitePlugin } from "../scripts/component-status-build.mjs"
+import {
+  componentStatusVitePlugin,
+  computeComponentStatusData,
+  effectiveStatusByLeaf,
+} from "../scripts/component-status-build.mjs"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
+
+// The Storybook manager is an esbuild bundle that can't run the Vite virtual
+// module or the `@/` alias, so it can't compute component status itself. Compute
+// the set of effectively-experimental components here (Node, at startup) and
+// write it to a generated file the manager imports for its sidebar warning dots.
+{
+  const byLeaf = effectiveStatusByLeaf(computeComponentStatusData().components)
+  const experimentalLeaves = Object.keys(byLeaf).filter(
+    (k) => byLeaf[k] === "experimental"
+  )
+  writeFileSync(
+    resolve(__dirname, "experimental-components.generated.json"),
+    JSON.stringify(experimentalLeaves)
+  )
+}
 
 // We should add the STORYBOOK_ prefix to make sure that the environment variables are in browser mode (for example manager.ts file)
 if (process.env.PUBLIC_BUILD) {

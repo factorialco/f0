@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest"
 
+import { effectiveStatusOf as mjsEffectiveStatusOf } from "../../scripts/component-status-build.mjs"
+
 import {
+  componentStatusData,
   evaluateComponentStatus,
   getAllComponentStatuses,
   getComponentStatus,
@@ -305,6 +308,18 @@ describe("getAllComponentStatuses", () => {
     const all = getAllComponentStatuses()
     expect(Array.isArray(all)).toBe(true)
     expect(all.length).toBeGreaterThan(0)
+  })
+})
+
+describe("effectiveStatus parity (TS policy vs generator helper)", () => {
+  test("the .mjs effectiveStatusOf matches the TS policy for the real dataset", () => {
+    // Guards against drift between the sidebar's Node-side computation and the
+    // panel's TS computation (they must agree on what counts as stable).
+    for (const c of componentStatusData.components) {
+      expect(mjsEffectiveStatusOf(c)).toBe(
+        evaluateComponentStatus(c).effectiveStatus
+      )
+    }
   })
 })
 
