@@ -17,10 +17,12 @@ export type NestedExpansionPolicy<R extends RecordType> = {
 }
 
 /**
- * Expansion state held by the NestedDataProvider.
- * Kept as a single object so imperative operations update it atomically.
+ * Explicit expansion state held by the NestedDataProvider. The active policy
+ * is tracked separately (via `useControllableState`, so the controlled
+ * `nested.expanded` criteria stays the single source of truth); this object
+ * only holds the per-row overrides layered on top of it.
  */
-export type NestedExpansionState<R extends RecordType> = {
+export type NestedExpansionState = {
   /**
    * Explicit per-row overrides (user clicks or controller calls). `false`
    * entries persist so a manual collapse wins over an active policy.
@@ -28,7 +30,6 @@ export type NestedExpansionState<R extends RecordType> = {
   overrides: Record<string, boolean>
   /** Rows whose children must be loaded eagerly (no "show more"). */
   eager: Record<string, boolean>
-  policy: NestedExpansionPolicy<R> | null
 }
 
 /**

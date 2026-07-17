@@ -840,15 +840,16 @@ reports these signals accurately.
 
 #### Controlled expansion: `expanded`
 
-`expanded` accepts the same criteria shape as `defaultExpanded`, but unlike
-it, the provider re-applies it every time its reference changes — a
-controlled counterpart, mirroring `revealNodeId`/`focusOnEntry` on the Graph
-visualization. Precedence is `expanded` (controlled) > `control`
-(imperative) > `defaultExpanded` (uncontrolled, mount-only): calling
-`control` while `expanded` is set still works immediately, but the
-controlled criteria takes over again on the next `expanded` change. Pass a
-stable/memoized predicate (or a primitive) to avoid re-applying it every
-render.
+`expanded` accepts the same criteria shape as `defaultExpanded`, but as a
+**controlled** counterpart — mirroring `revealNodeId`/`focusOnEntry` on the
+Graph visualization. While defined it is the single source of truth for the
+auto-expansion policy: `defaultExpanded` is ignored and the policy side of
+`expandAll`/`collapseAll` is a no-op. Targeted controller calls (`expand`,
+`collapse`, `toggle`, `expandTo`) still layer per-row overrides on top, and
+every override is cleared whenever the criteria changes by reference.
+Precedence is `expanded` (controlled) > `control` (imperative overrides) >
+`defaultExpanded` (uncontrolled, mount-only). Pass a stable/memoized
+predicate (or a primitive) to avoid clearing user overrides every render.
 
 ```tsx
 const [depth, setDepth] = useState(1)
