@@ -26,6 +26,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
   variant = "default",
   type = "default",
   container,
+  fullHeight = false,
 }) => {
   const [localIsOpen, setLocalIsOpen] = useState(isOpen)
 
@@ -86,6 +87,7 @@ export const DialogInternal: FC<DialogInternalProps> = ({
       modal={modal}
       onOpenChange={setLocalIsOpen}
       container={container}
+      fullHeight={fullHeight}
     >
       {_memoizedDialogLayout}
     </DialogWrapper>
