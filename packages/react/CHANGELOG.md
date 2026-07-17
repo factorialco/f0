@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.40.1](https://github.com/factorialco/f0/compare/f0-react-v4.40.0...f0-react-v4.40.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **F0Accordion:** remove resting box shadow ([#4729](https://github.com/factorialco/f0/issues/4729)) ([637883a](https://github.com/factorialco/f0/commit/637883a9bff0e25fa590fe3bf19d0d4c04a7173b))
+
 ## [4.40.0](https://github.com/factorialco/f0/compare/f0-react-v4.39.1...f0-react-v4.40.0) (2026-07-16)
 
 
