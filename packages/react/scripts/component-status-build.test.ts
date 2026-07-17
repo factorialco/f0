@@ -51,10 +51,12 @@ const STUB_MDX = `## Anatomy
 tiny
 `
 
-function story(title: string, tags: string[]): string {
+function story(title: string, tags: string[], extra = ""): string {
   const tagList = tags.map((t) => `"${t}"`).join(", ")
-  return `export default { title: "${title}", tags: [${tagList}] }`
+  return `export default { title: "${title}", tags: [${tagList}] }${extra}`
 }
+
+const PLAY_STORY = `export const Primary = { play: async ({ canvasElement }) => {} }`
 
 let root: string
 
@@ -67,10 +69,10 @@ beforeAll(() => {
     writeFileSync(abs, contents)
   }
 
-  // 1) Stable component: stories in __stories__, unit tests, gold docs.
+  // 1) Stable component: stories in __stories__, unit tests, gold docs, play fn.
   write(
     "components/F0Alert/__stories__/F0Alert.stories.tsx",
-    story("Alert", ["autodocs", "stable"])
+    story("Alert", ["autodocs", "stable"], "\n" + PLAY_STORY)
   )
   write("components/F0Alert/__stories__/F0Alert.mdx", GOLD_MDX)
   write("components/F0Alert/__tests__/F0Alert.test.tsx", "test('x', () => {})")
@@ -99,10 +101,10 @@ beforeAll(() => {
   // 5) Skipped: examples are ignored entirely.
   write("examples/Demo/Demo.stories.tsx", story("Demo", ["stable"]))
 
-  // 6) Skipped: internal (ui/) zone without a stable tag.
+  // 6) Skipped: internal (ui/) zone — internal is not a maturity level.
   write("ui/Private/Private.stories.tsx", story("Private", ["experimental"]))
 
-  // 7) Kept: internal (ui/) zone WITH a stable tag.
+  // 7) Skipped: internal (ui/) zone even WITH a stable tag.
   write(
     "ui/PublicPrimitive/PublicPrimitive.stories.tsx",
     story("PublicPrimitive", ["stable"])
@@ -115,9 +117,19 @@ beforeAll(() => {
   )
 
   // 9) Dedup: a second story file with the same title+zone as F0Alert.
+  // (Also carries a play fn so the deduped entry is deterministic regardless of
+  // which of the two story files the scan visits first.)
   write(
     "components/F0Alert/__stories__/Extra.stories.tsx",
-    story("Alert", ["stable"])
+    story("Alert", ["stable"], "\n" + PLAY_STORY)
+  )
+
+  // 10) The meta title must win over a `title:` in a sample-data/args object
+  // that appears before the meta (e.g. AI cards).
+  write(
+    "components/F0Proposal/__stories__/F0Proposal.stories.tsx",
+    `const sample = { title: "Cannot access payroll documents" }\n` +
+      story("Proposal", ["experimental"])
   )
 })
 
@@ -139,8 +151,17 @@ describe("computeComponentStatusData (extraction)", () => {
       apiStatus: "stable",
       hasStories: true,
       hasUnitTests: true,
+      hasPlayFunction: true,
       hasMdxDocs: true,
       docQuality: "gold",
+      // Granular signals feed the per-criterion checks.
+      docSignals: {
+        sectionsCount: 3,
+        hasProps: true,
+        hasDoDonts: true,
+        hasWhenNotToUse: true,
+        exampleCount: 4,
+      },
     })
     // "autodocs" is filtered out of the reported tags.
     expect(alert?.tags).toEqual(["stable"])
@@ -150,6 +171,7 @@ describe("computeComponentStatusData (extraction)", () => {
     expect(byName("Widget")).toMatchObject({
       apiStatus: "experimental",
       hasUnitTests: false,
+      hasPlayFunction: false,
       hasMdxDocs: false,
       docQuality: "none",
     })
@@ -185,11 +207,15 @@ describe("computeComponentStatusData (extraction)", () => {
     expect(names).not.toContain("Sub")
   })
 
-  test("keeps an internal component when it is tagged stable", () => {
-    expect(byName("PublicPrimitive")).toMatchObject({
-      zone: "internal",
-      apiStatus: "stable",
-    })
+  test("skips internal components even when tagged stable", () => {
+    // Internal is not a maturity level per the Definition of Done.
+    expect(byName("PublicPrimitive")).toBeUndefined()
+  })
+
+  test("uses the meta title, not a title in a preceding data/args object", () => {
+    const names = computeComponentStatusData(root).components.map((c) => c.name)
+    expect(names).toContain("Proposal")
+    expect(names).not.toContain("Cannot access payroll documents")
   })
 
   test("deduplicates multiple story files for the same title+zone", () => {

@@ -33,6 +33,67 @@ const RESOLVED_VIRTUAL_ID = "\0" + VIRTUAL_ID
 const scriptsDir = dirname(fileURLToPath(import.meta.url))
 const SRC_DIR = resolve(scriptsDir, "../src")
 
+const DOC_TIER_ORDER = ["none", "stub", "acceptable", "good", "gold"]
+
+/**
+ * Whether an entry meets the mechanically-checkable stable bar. This mirrors
+ * the requirement predicates in `src/component-status/component-status.ts`
+ * (STABLE_REQUIREMENTS) — a drift test keeps the two in sync. Kept here (plain
+ * JS, no virtual module) so Node contexts like `.storybook/main.ts` can compute
+ * the effective status for the sidebar.
+ */
+export function meetsStableBar(c) {
+  return (
+    c.hasStories &&
+    c.hasUnitTests &&
+    c.hasPlayFunction &&
+    c.hasMdxDocs &&
+    DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good")
+  )
+}
+
+/** The effective maturity level (see component-status.ts effectiveStatusOf). */
+export function effectiveStatusOf(c) {
+  if (c.apiStatus === "deprecated") return "deprecated"
+  if (c.apiStatus === "internal") return "internal"
+  return c.apiStatus === "stable" && meetsStableBar(c)
+    ? "stable"
+    : "experimental"
+}
+
+/** Normalize a component name for matching (drop F0 prefix + punctuation). */
+export function normalizeComponentName(name) {
+  return name
+    .toLowerCase()
+    .replace(/^f0/, "")
+    .replace(/[^a-z0-9]/g, "")
+}
+
+/** Last path segment of a grouped name ("Avatars/Avatar" → "Avatar"). */
+export function leafName(name) {
+  const parts = name.split("/")
+  return parts[parts.length - 1] ?? name
+}
+
+/**
+ * A map of normalized leaf name → effective status, resolving name collisions
+ * by preferring the "components" zone (mirroring getComponentStatus). Used by
+ * the Storybook manager (sidebar), which can only see an entry's leaf name.
+ */
+export function effectiveStatusByLeaf(components) {
+  const byLeaf = {}
+  for (const c of components) {
+    const key = normalizeComponentName(leafName(c.name))
+    const prev = byLeaf[key]
+    if (!prev || (c.zone === "components" && prev.zone !== "components")) {
+      byLeaf[key] = { zone: c.zone, status: effectiveStatusOf(c) }
+    }
+  }
+  const out = {}
+  for (const [key, v] of Object.entries(byLeaf)) out[key] = v.status
+  return out
+}
+
 /** Recursively collect every file path under `dir`. */
 function walk(dir, out = []) {
   let entries
@@ -77,7 +138,13 @@ function extractTags(content) {
 }
 
 function extractTitle(content) {
-  const match = content.match(/title:\s*["']([^"']+)["']/)
+  // Extract the title from the story meta only. A story file often defines
+  // sample data / args objects that ALSO have a `title:` property (e.g. AI
+  // cards), so search from the meta declaration onward rather than matching the
+  // first `title:` in the file.
+  const meta = content.match(/(?:const\s+meta\b|export\s+default)[\s\S]*?\{/)
+  const fromMeta = meta ? content.slice(meta.index) : content
+  const match = fromMeta.match(/title:\s*["']([^"']+)["']/)
   return match ? match[1] : null
 }
 
@@ -89,39 +156,59 @@ function getApiStatus(tags) {
   return "unknown"
 }
 
+const EMPTY_DOC_SIGNALS = {
+  sectionsCount: 0,
+  hasProps: false,
+  hasDoDonts: false,
+  hasWhenToUse: false,
+  hasWhenNotToUse: false,
+  exampleCount: 0,
+}
+
+/**
+ * Extract the granular doc-quality signals from an MDX file's content. These
+ * feed both the tier and the per-criterion checks shown in the UI.
+ */
+function docSignalsOf(content) {
+  if (content == null) return { ...EMPTY_DOC_SIGNALS }
+
+  const hasAnatomy = /#{2,4}\s+anatomy/i.test(content)
+  const hasGuidelines =
+    /#{2,4}\s+guidelines/i.test(content) || /best practices/i.test(content)
+  const hasAccessibility = /#{2,4}\s+accessibility/i.test(content)
+
+  return {
+    sectionsCount: [hasAnatomy, hasGuidelines, hasAccessibility].filter(Boolean)
+      .length,
+    hasProps:
+      /<Controls\b/.test(content) ||
+      /\|\s*prop\s*\|/i.test(content) ||
+      /<table/i.test(content),
+    hasWhenToUse: /when to use/i.test(content),
+    hasWhenNotToUse: /when\s+not\s+to\s+use|when not/i.test(content),
+    hasDoDonts: /DoDonts/.test(content),
+    exampleCount: (content.match(/<Canvas\b/gi) || []).length,
+  }
+}
+
 /**
  * Heuristic doc-quality tier, mirroring the levels in
  * .opencode/skills/f0-docs/references/documentation-quality.md.
  * Returns "none" | "stub" | "acceptable" | "good" | "gold". A coarse signal
  * from the MDX structure, not a substitute for human review.
  */
-function scoreDocQuality(content) {
+function scoreDocQuality(content, signals) {
   if (content == null) return "none"
 
-  const hasAnatomy = /#{2,4}\s+anatomy/i.test(content)
-  const hasGuidelines =
-    /#{2,4}\s+guidelines/i.test(content) || /best practices/i.test(content)
-  const hasAccessibility = /#{2,4}\s+accessibility/i.test(content)
-  const hasProps =
-    /<Controls\b/.test(content) ||
-    /\|\s*prop\s*\|/i.test(content) ||
-    /<table/i.test(content)
-  const hasWhenToUse = /when to use/i.test(content)
-  const hasWhenNotToUse = /when\s+not\s+to\s+use|when not/i.test(content)
-  const hasDoDonts = /DoDonts/.test(content)
-  const canvasCount = (content.match(/<Canvas\b/gi) || []).length
+  const s = signals ?? docSignalsOf(content)
 
-  const requiredSections = [hasAnatomy, hasGuidelines, hasAccessibility].filter(
-    Boolean
-  ).length
+  if (content.trim().length < 200 || s.sectionsCount === 0) return "stub"
 
-  if (content.trim().length < 200 || requiredSections === 0) return "stub"
-
-  const acceptable = requiredSections >= 2 && hasProps
+  const acceptable = s.sectionsCount >= 2 && s.hasProps
   if (!acceptable) return "stub"
 
-  const good = hasDoDonts && hasWhenNotToUse && canvasCount >= 3
-  const gold = good && hasWhenToUse && canvasCount >= 4
+  const good = s.hasDoDonts && s.hasWhenNotToUse && s.exampleCount >= 3
+  const gold = good && s.hasWhenToUse && s.exampleCount >= 4
 
   if (gold) return "gold"
   if (good) return "good"
@@ -188,7 +275,9 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
     const relative = filePath.slice(srcDir.length + 1)
     const zone = getZone(relative)
 
-    if (zone === "internal" && !tags.includes("stable")) continue
+    // Internal is not a maturity level (Definition of Done): skip the internal
+    // folders (ui/, lib/) and anything tagged `internal`.
+    if (zone === "internal" || tags.includes("internal")) continue
     if (filePath.includes("/examples/")) continue
     if (tags.includes("no-sidebar") && !tags.includes("stable")) continue
 
@@ -209,6 +298,7 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
         mdxContent = null
       }
     }
+    const docSignals = docSignalsOf(mdxContent)
 
     components.push({
       name: storyName,
@@ -217,8 +307,12 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       tags: tags.filter((t) => !["autodocs", "no-sidebar", "!dev"].includes(t)),
       hasStories: true,
       hasUnitTests: hasUnitTests(filePath),
+      // A Storybook play function (interaction test) — `play: async (…)` or
+      // `play: (…)` in a story object.
+      hasPlayFunction: /\bplay\s*:\s*(async\b|\()/.test(content),
       hasMdxDocs: Boolean(mdxPath),
-      docQuality: scoreDocQuality(mdxContent),
+      docQuality: scoreDocQuality(mdxContent, docSignals),
+      docSignals,
       storyFile: relative,
     })
   }
