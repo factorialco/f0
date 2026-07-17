@@ -46,6 +46,7 @@ export interface ComponentEntry {
   tags: string[]
   hasStories: boolean
   hasUnitTests: boolean
+  hasPlayFunction: boolean
   hasMdxDocs: boolean
   docQuality: DocQuality
   storyFile: string
@@ -99,7 +100,15 @@ export interface ComponentStatus extends ComponentEntry {
    *   - null: tag and bar agree
    */
   discrepancy: "tagged-but-below-bar" | "meets-bar-not-tagged" | null
-  /** Human-readable badge label for `apiStatus` (e.g. "Stable", "No tag"). */
+  /**
+   * The maturity level the component *actually* has, per the Definition of Done.
+   * A component is only "stable" when it is both tagged stable AND meets the
+   * full checklist; anything else (untagged, below the bar, or meeting the bar
+   * without the tag) is "experimental". `deprecated`/`internal` pass through.
+   * This is what the badge shows — `apiStatus` is the raw declared tag.
+   */
+  effectiveStatus: ApiStatus
+  /** Human-readable badge label for `effectiveStatus`. */
   label: string
   /** One-line human summary shown above the checklist. */
   summary: string
@@ -112,10 +121,11 @@ export const componentStatusData: ComponentStatusData =
   rawStatusData as unknown as ComponentStatusData
 
 /**
- * Minimum doc-quality tier a component must reach to count as documented for
- * the purposes of "stable". "acceptable" = required sections + props table.
+ * Minimum doc-quality tier a stable component must reach. Per the Definition of
+ * Done, promotion to stable requires the "good" tier (Gold encouraged);
+ * "acceptable" is only the experimental Build bar.
  */
-export const MIN_DOC_QUALITY: DocQuality = "acceptable"
+export const MIN_DOC_QUALITY: DocQuality = "good"
 
 /** Human-readable badge label per maturity level. */
 export const STATUS_LABELS: Record<ApiStatus, string> = {
@@ -126,13 +136,25 @@ export const STATUS_LABELS: Record<ApiStatus, string> = {
   unknown: "No tag",
 }
 
+/**
+ * The maturity level a component actually has. "stable" requires both the
+ * stable tag AND meeting the full checklist; every other public component
+ * (untagged, below the bar, or meeting the bar without the tag) is
+ * "experimental". `deprecated`/`internal` pass through unchanged.
+ */
+function effectiveStatusOf(
+  apiStatus: ApiStatus,
+  meetsBar: boolean,
+  taggedStable: boolean
+): ApiStatus {
+  if (apiStatus === "deprecated") return "deprecated"
+  if (apiStatus === "internal") return "internal"
+  return taggedStable && meetsBar ? "stable" : "experimental"
+}
+
 /** The DoD checklist is only meaningful for components on the road to stable. */
-function checklistApplies(apiStatus: ApiStatus): boolean {
-  return (
-    apiStatus === "stable" ||
-    apiStatus === "experimental" ||
-    apiStatus === "unknown"
-  )
+function checklistApplies(effectiveStatus: ApiStatus): boolean {
+  return effectiveStatus === "stable" || effectiveStatus === "experimental"
 }
 
 /** One-line human summary shown above the checklist. */
@@ -149,16 +171,16 @@ function summarize(
     return "Internal — not part of the public API."
   }
   if (meetsBar && taggedStable) {
-    return "Stable and meets the definition of done."
+    return "Stable — meets the full definition of done."
   }
   if (discrepancy === "tagged-but-below-bar") {
-    return "Tagged stable, but the checklist below isn't complete yet."
+    return "Marked stable, but it doesn't meet the definition of done yet — treated as experimental."
   }
   if (discrepancy === "meets-bar-not-tagged") {
-    return "Meets the definition of done — ready to be promoted to stable."
+    return "Meets the definition of done but isn't marked stable yet — still experimental until promoted."
   }
   if (apiStatus === "unknown") {
-    return "No maturity tag set. Complete the checklist below to reach stable."
+    return "No maturity tag set — treated as experimental. Complete the checklist below to reach stable."
   }
   return "Experimental. Complete the checklist below to reach stable."
 }
@@ -176,13 +198,15 @@ function docQualityAtLeast(actual: DocQuality, min: DocQuality): boolean {
 }
 
 /**
- * The Definition of Done for a stable component. Each requirement inspects a
- * raw entry and reports whether it is met.
+ * The Definition of Done for a stable component — the mechanically-checkable
+ * subset of the lifecycle DoD (Lifecycle/Definition of Done). Each requirement
+ * inspects a raw entry and reports whether it is met. `detail` is a neutral
+ * description of the requirement (shown for met and unmet points alike).
  *
- * Scope note: automated a11y verification is intentionally NOT part of this
- * checklist yet — it is not tracked by the generator. Accessibility remains a
- * manual promotion gate (see docs/components-maturity.mdx). Add a requirement
- * here once an a11y signal is emitted into the status data.
+ * Scope note: some DoD items are not statically verifiable and are NOT gated
+ * here — the axe a11y test passing, adoption by ≥3 product teams, no breaking
+ * changes for 60 days, and Foundations approval. Those remain manual promotion
+ * gates (see Lifecycle/Definition of Done).
  */
 export const STABLE_REQUIREMENTS: ReadonlyArray<{
   key: string
@@ -194,29 +218,38 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
   {
     key: "stories",
     label: "Has Storybook stories",
-    detail: "Add a .stories.tsx file with representative stories.",
+    detail: "A .stories.tsx file with representative stories.",
     isMet: (c) => c.hasStories,
   },
   {
     key: "unitTests",
     label: "Has unit tests",
-    detail: "Add a __tests__/ folder with Vitest coverage for the component.",
+    detail:
+      "Vitest unit tests covering the public API (a __tests__/ folder or .test.tsx file).",
     isMet: (c) => c.hasUnitTests,
+  },
+  {
+    key: "playFunction",
+    label: "Has a play function",
+    detail:
+      "A Storybook play function (interaction test) covering the primary user flow.",
+    isMet: (c) => c.hasPlayFunction,
   },
   {
     key: "mdxDocs",
     label: "Has MDX documentation",
-    detail: "Add an .mdx docs page alongside the stories.",
+    detail: "An .mdx documentation page alongside the stories.",
     isMet: (c) => c.hasMdxDocs,
   },
   {
     key: "docQuality",
     label: `Docs reach "${MIN_DOC_QUALITY}" quality`,
-    detail: "To count as documented, the MDX docs must include:",
+    detail: "Docs at the Good tier build on the Acceptable base and add:",
     criteria: [
-      "At least two of these sections: Anatomy, Guidelines, Accessibility",
-      "A props table (a Markdown table or a <Controls> block)",
-      "Real written content, not an empty autodocs stub",
+      "Acceptable base: required sections (Anatomy, Guidelines, Accessibility) and a props table",
+      "DoDont examples with realistic Factorial copy",
+      'A "when not to use" section',
+      "At least three named example stories",
     ],
     isMet: (c) => docQualityAtLeast(c.docQuality, MIN_DOC_QUALITY),
   },
@@ -245,6 +278,12 @@ export function evaluateComponentStatus(
   if (taggedStable && !meetsBar) discrepancy = "tagged-but-below-bar"
   else if (!taggedStable && meetsBar) discrepancy = "meets-bar-not-tagged"
 
+  const effectiveStatus = effectiveStatusOf(
+    entry.apiStatus,
+    meetsBar,
+    taggedStable
+  )
+
   return {
     ...entry,
     requirements,
@@ -253,9 +292,10 @@ export function evaluateComponentStatus(
     taggedStable,
     stableReady: meetsBar,
     discrepancy,
-    label: STATUS_LABELS[entry.apiStatus],
+    effectiveStatus,
+    label: STATUS_LABELS[effectiveStatus],
     summary: summarize(entry.apiStatus, meetsBar, taggedStable, discrepancy),
-    showChecklist: checklistApplies(entry.apiStatus),
+    showChecklist: checklistApplies(effectiveStatus),
   }
 }
 

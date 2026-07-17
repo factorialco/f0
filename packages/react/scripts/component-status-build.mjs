@@ -217,6 +217,9 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       tags: tags.filter((t) => !["autodocs", "no-sidebar", "!dev"].includes(t)),
       hasStories: true,
       hasUnitTests: hasUnitTests(filePath),
+      // A Storybook play function (interaction test) — `play: async (…)` or
+      // `play: (…)` in a story object.
+      hasPlayFunction: /\bplay\s*:\s*(async\b|\()/.test(content),
       hasMdxDocs: Boolean(mdxPath),
       docQuality: scoreDocQuality(mdxContent),
       storyFile: relative,

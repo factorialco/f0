@@ -50,7 +50,7 @@ export interface ComponentStabilityProps {
 }
 
 function StatusBadge({ status }: { status: ComponentStatus }) {
-  const colors = BADGE_COLORS[status.apiStatus]
+  const colors = BADGE_COLORS[status.effectiveStatus]
   return (
     <span
       className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-base font-medium ${colors.bg} ${colors.text}`}
@@ -102,20 +102,18 @@ export function ComponentStability({
               </span>
               <div>
                 <div className="text-base text-f1-foreground">{req.label}</div>
-                {!req.met && (
-                  <div className="mt-0.5 text-base text-f1-foreground-secondary">
-                    {req.detail}
-                    {req.criteria && req.criteria.length > 0 && (
-                      <ul className="mt-1 list-disc space-y-0.5 pl-4">
-                        {req.criteria.map((criterion) => (
-                          <li key={criterion} className="!text-base">
-                            {criterion}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                )}
+                <div className="mt-0.5 text-base text-f1-foreground-secondary">
+                  {req.detail}
+                  {req.criteria && req.criteria.length > 0 && (
+                    <ul className="mt-1 list-disc space-y-0.5 pl-4">
+                      {req.criteria.map((criterion) => (
+                        <li key={criterion} className="!text-base">
+                          {criterion}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
               </div>
             </li>
           ))}
