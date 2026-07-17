@@ -37,16 +37,14 @@ function renderSidebarLabel(item: { name: string; type: string }) {
     "span",
     { style: { display: "inline-flex", alignItems: "center", gap: 6 } },
     item.name,
-    React.createElement("span", {
-      title: "Experimental — does not meet the definition of done",
-      style: {
-        width: 6,
-        height: 6,
-        borderRadius: "50%",
-        backgroundColor: "#e1502f",
-        flex: "none",
+    React.createElement(
+      "span",
+      {
+        title: "Experimental — does not meet the definition of done",
+        style: { fontSize: 11, lineHeight: 1, flex: "none" },
       },
-    })
+      "🚧"
+    )
   )
 }
 
