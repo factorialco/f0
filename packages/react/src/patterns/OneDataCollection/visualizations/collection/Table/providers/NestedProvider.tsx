@@ -66,15 +66,17 @@ const resolveExpansion = <R extends RecordType>(
   context: NestedExpansionContext<R>
 ): ResolvedRowExpansion => {
   const explicit = state.overrides[rowId]
-  const policyMatch =
-    explicit === undefined && policy !== null
-      ? matchesExpansionCriteria(policy.criteria, context)
-      : false
-  const expanded = explicit ?? policyMatch
+  const criteriaMatch =
+    policy !== null && matchesExpansionCriteria(policy.criteria, context)
+  const expanded = explicit ?? criteriaMatch
 
+  // The children load mode is declared by the policy, so its eager fallback
+  // applies to any expanded row matching the criteria — including rows
+  // re-expanded explicitly after a manual collapse. A user click expresses
+  // expand/collapse, never a pagination preference.
   const eager =
     expanded &&
-    (state.eager[rowId] ?? (policyMatch && policy?.children === "all"))
+    (state.eager[rowId] ?? (criteriaMatch && policy?.children === "all"))
 
   return { expanded, eager }
 }
@@ -222,10 +224,17 @@ export const NestedDataProvider = <R extends RecordType>({
     (rowId: string, expanded: boolean) => {
       const current = expansionStateRef.current
       if (current.overrides[rowId] === expanded) return
+      const eager = { ...current.eager }
+      if (expanded) {
+        // Drop a stale collapse marker so the row returns to the load mode
+        // declared by the active policy; an explicit eager opt-in persists.
+        if (eager[rowId] === false) delete eager[rowId]
+      } else {
+        eager[rowId] = false
+      }
       commitExpansionState({
-        ...current,
         overrides: { ...current.overrides, [rowId]: expanded },
-        eager: expanded ? current.eager : { ...current.eager, [rowId]: false },
+        eager,
       })
       emitExpandedChange(rowId, expanded)
     },
@@ -322,9 +331,15 @@ export const NestedDataProvider = <R extends RecordType>({
         )
         const nextExpanded = resolveNext(resolved)
         overrides[match.rowId] = nextExpanded
-        if (nextExpanded && options?.children === "all") {
-          eager[match.rowId] = true
-        } else if (!nextExpanded) {
+        if (nextExpanded) {
+          if (options?.children === "all") {
+            eager[match.rowId] = true
+          } else if (eager[match.rowId] === false) {
+            // Same as setRowExpanded: expanding clears a stale collapse
+            // marker so the policy's declared load mode applies again.
+            delete eager[match.rowId]
+          }
+        } else {
           eager[match.rowId] = false
         }
         if (resolved.expanded !== nextExpanded) {

@@ -765,6 +765,66 @@ describe("Nested table expansion control", () => {
       // further requests despite hasMore staying true.
       expect(fetchChildren).toHaveBeenCalledTimes(1)
     })
+
+    it("restores the policy's eager load mode after a manual collapse and re-expand", async () => {
+      // Deferred fetches so the collapse can happen while page 1 is still in
+      // flight — leaving page 2 pending when the row is re-expanded.
+      const pending: Array<() => void> = []
+      const fetchChildren = vi.fn(
+        ({
+          item,
+          pagination,
+        }: {
+          item: Person
+          pagination?: ChildrenPaginationInfo
+        }) =>
+          new Promise((resolve) => {
+            pending.push(() => {
+              const all = item.children ?? []
+              const currentPage = (pagination?.currentPage ?? 0) + 1
+              const start = (currentPage - 1) * CHILDREN_PER_PAGE
+              resolve({
+                records: all.slice(start, start + CHILDREN_PER_PAGE),
+                paginationInfo: {
+                  total: all.length,
+                  perPage: CHILDREN_PER_PAGE,
+                  currentPage,
+                  pagesCount: Math.ceil(all.length / CHILDREN_PER_PAGE),
+                  hasMore: currentPage * CHILDREN_PER_PAGE < all.length,
+                },
+              })
+            })
+          })
+      )
+      const table = renderNestedTable(
+        {
+          defaultExpanded: (ctx) => ctx.item.id === "p2",
+          defaultExpandedChildren: "all",
+        },
+        { fetchChildren } as unknown as Partial<TestSource>
+      )
+      await waitForRootRows()
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(1))
+
+      // Collapse while page 1 is in flight, then let it land in the cache.
+      act(() => table.control.collapse("p2"))
+      await act(async () => {
+        pending.shift()?.()
+      })
+      expect(screen.queryByText("Child Three")).not.toBeInTheDocument()
+
+      // Re-expanding WITHOUT options must restore the eager mode declared by
+      // the policy (`defaultExpandedChildren: "all"`): the remaining page is
+      // fetched instead of hiding behind the "show more" row.
+      act(() => table.control.expand("p2"))
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(2))
+      await act(async () => {
+        pending.shift()?.()
+      })
+      await waitFor(() => {
+        expect(screen.getByText("Child Six")).toBeInTheDocument()
+      })
+    })
   })
 
   describe("user interaction", () => {
