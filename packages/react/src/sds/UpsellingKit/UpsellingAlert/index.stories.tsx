@@ -6,6 +6,17 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { UpsellingAlert } from "."
 
+/**
+ * Example dismiss handler: persist the dismissal so the alert stays hidden for
+ * a number of days and reappears afterwards.
+ */
+const dismissForDays = () => {
+  const HIDE_FOR_DAYS = 7
+  const hideUntil = Date.now() + HIDE_FOR_DAYS * 24 * 60 * 60 * 1000
+  window.localStorage.setItem("upselling-alert-hidden-until", String(hideUntil))
+  alert(`Dismissed — hidden for ${HIDE_FOR_DAYS} days.`)
+}
+
 const meta: Meta<typeof UpsellingAlert> = {
   title: "UpsellingAlert",
   component: UpsellingAlert,
@@ -20,7 +31,18 @@ const meta: Meta<typeof UpsellingAlert> = {
       mapping: icons,
       options: [undefined, ...Object.keys(icons)],
     },
+    onDismiss: {
+      description:
+        "When enabled, shows a dismiss (close) button to the right of the action button.",
+      control: "boolean",
+    },
   },
+  render: ({ onDismiss, ...args }) => (
+    <UpsellingAlert
+      {...args}
+      onDismiss={onDismiss ? dismissForDays : undefined}
+    />
+  ),
 }
 
 export default meta
@@ -67,6 +89,19 @@ export const WithIcon: Story = {
     icon: Upsell,
     title: "Upgrade to unlock this feature",
     description: "Upsell and grow your business with advanced tools.",
+  },
+}
+
+/**
+ * When `onDismiss` is provided, a close button is rendered to the right of the
+ * upselling action button. The consumer decides what happens on dismiss — here
+ * we persist the dismissal so the alert stays hidden for a number of days and
+ * reappears afterwards. Toggle the `onDismiss` control to show/hide the button.
+ */
+export const Dismissible: Story = {
+  args: {
+    ...WithIcon.args,
+    onDismiss: dismissForDays,
   },
 }
 
