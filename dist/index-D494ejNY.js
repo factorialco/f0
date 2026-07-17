@@ -21439,7 +21439,7 @@ const D_ = (t) => t ? t.indeterminate || t.selectedCount !== void 0 && t.selecte
   "slide",
   "pop"
 ], fG = (t, e) => t === void 0 ? !1 : typeof t == "boolean" ? t : typeof t == "number" ? e.depth < t : t(e), sT = Ot(void 0), qc = (t, e, n, i) => {
-  const r = t.overrides[n], o = r === void 0 && e !== null ? fG(e.criteria, i) : !1, s = r ?? o, a = s && (t.eager[n] ?? (o && e?.children === "all"));
+  const r = t.overrides[n], o = e !== null && fG(e.criteria, i), s = r ?? o, a = s && (t.eager[n] ?? (o && e?.children === "all"));
   return { expanded: s, eager: a };
 }, uG = (t, e, n) => typeof t == "function" ? t({ item: e.item, depth: e.depth, hasActiveFilters: n }) : "id" in e.item && e.item.id === t, hG = (t) => {
   const { depth: e, where: n } = t ?? {};
@@ -21502,11 +21502,12 @@ const D_ = (t) => t ? t.indeterminate || t.selectedCount !== void 0 && t.selecte
   }, []), _ = te(
     (N, O) => {
       const R = f.current;
-      R.overrides[N] !== O && (w({
-        ...R,
+      if (R.overrides[N] === O) return;
+      const L = { ...R.eager };
+      O ? L[N] === !1 && delete L[N] : L[N] = !1, w({
         overrides: { ...R.overrides, [N]: O },
-        eager: O ? R.eager : { ...R.eager, [N]: !1 }
-      }), k(N, O));
+        eager: L
+      }), k(N, O);
     },
     [w, k]
   ), S = te(
@@ -21560,7 +21561,7 @@ const D_ = (t) => t ? t.indeterminate || t.selectedCount !== void 0 && t.selecte
             hasActiveFilters: g.current
           }
         ), K = L(ne);
-        $[q.rowId] = K, K && F?.children === "all" ? H[q.rowId] = !0 : K || (H[q.rowId] = !1), ne.expanded !== K && Y.push({ rowId: q.rowId, expanded: K });
+        $[q.rowId] = K, K ? F?.children === "all" ? H[q.rowId] = !0 : H[q.rowId] === !1 && delete H[q.rowId] : H[q.rowId] = !1, ne.expanded !== K && Y.push({ rowId: q.rowId, expanded: K });
       }
       w({ ...z, overrides: $, eager: H }), Y.forEach(
         ({ rowId: q, expanded: ne }) => k(q, ne)
