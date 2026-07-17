@@ -25,7 +25,7 @@ exports[`F0Button Snapshot - critical variant 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -111,7 +111,7 @@ exports[`F0Button Snapshot - default button 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -197,7 +197,7 @@ exports[`F0Button Snapshot - different sizes 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded-sm"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -283,7 +283,7 @@ exports[`F0Button Snapshot - different sizes 2`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -369,7 +369,7 @@ exports[`F0Button Snapshot - different sizes 3`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded-md"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -455,7 +455,7 @@ exports[`F0Button Snapshot - disabled state 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -541,7 +541,7 @@ exports[`F0Button Snapshot - fullWidth button 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -627,7 +627,7 @@ exports[`F0Button Snapshot - ghost isDark button 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -713,7 +713,7 @@ exports[`F0Button Snapshot - loading state 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -819,7 +819,7 @@ exports[`F0Button Snapshot - outline variant 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -905,7 +905,7 @@ exports[`F0Button Snapshot - round button with hidden label 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -985,7 +985,7 @@ exports[`F0Button Snapshot - with emoji 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1076,7 +1076,7 @@ exports[`F0Button Snapshot - with icon 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}
@@ -1162,7 +1162,7 @@ exports[`F0Button Snapshot - with icon on the right 1`] = `
       }
     }
     accessible={true}
-    className="overflow-hidden"
+    className="overflow-hidden rounded"
     collapsable={false}
     focusable={true}
     onBlur={[Function]}

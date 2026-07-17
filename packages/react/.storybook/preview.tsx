@@ -17,9 +17,26 @@ import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { ThemeProvider } from "@/lib/providers/theme"
 
+import {
+  getAllComponentStatuses,
+  getComponentStatus,
+  getStatusGeneratedAt,
+} from "@/component-status"
+
 import { DocsContainer } from "./DocsContainer.tsx"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
+
+// Public status API — queryable from the Storybook preview console, e.g.
+//   f0ComponentStatus.get("Button")
+//   f0ComponentStatus.get("F0Alert").missing
+if (typeof window !== "undefined") {
+  ;(window as unknown as { f0ComponentStatus: unknown }).f0ComponentStatus = {
+    get: getComponentStatus,
+    getAll: getAllComponentStatuses,
+    generatedAt: getStatusGeneratedAt,
+  }
+}
 
 const channel = addons.getChannel()
 

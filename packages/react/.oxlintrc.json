@@ -96,7 +96,8 @@
         "**/exports.tsx",
         "**/f0.ts",
         "**/experimental.ts",
-        "**/ai.ts"
+        "**/ai.ts",
+        "**/component-status.ts"
       ],
       "rules": {
         "no-restricted-imports": [

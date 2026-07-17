@@ -5,7 +5,7 @@ import { Reaction } from "@/kits/Social/Reactions/reaction"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { useF0Chat } from "../providers/F0ChatProvider"
+import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 
 /**
@@ -21,7 +21,10 @@ export const ChatMessageReactions = ({
   isMine: boolean
 }): ReactNode => {
   const i18n = useI18n()
-  const { toggleReaction } = useF0Chat()
+  const { toggleReaction, capabilities } = useF0ChatStable()
+  // Existing pills stay VISIBLE without the capability (the data is real) —
+  // only adding/toggling is disabled.
+  const canReact = capabilities?.canReact !== false
   if (!message.reactions || message.reactions.length === 0) return null
 
   return (
@@ -40,16 +43,22 @@ export const ChatMessageReactions = ({
           initialCount={reaction.count}
           hasReacted={reaction.reactedByMe}
           users={reaction.users}
-          onInteraction={(emoji) => toggleReaction(message.id, emoji)}
+          onInteraction={
+            canReact
+              ? (emoji) => void toggleReaction(message.id, emoji)
+              : undefined
+          }
           size="sm"
         />
       ))}
-      <Picker
-        size="md"
-        variant="outline"
-        label={i18n.chat.react}
-        onSelect={(emoji) => toggleReaction(message.id, emoji)}
-      />
+      {canReact && (
+        <Picker
+          size="md"
+          variant="outline"
+          label={i18n.chat.react}
+          onSelect={(emoji) => void toggleReaction(message.id, emoji)}
+        />
+      )}
     </div>
   )
 }

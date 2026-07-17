@@ -8,18 +8,27 @@ export type {
   F0ChatAttachment,
   F0ChatImageAttachment,
   F0ChatFileAttachment,
+  F0ChatLocationAttachment,
+  F0ChatVoiceAttachment,
   F0ChatReaction,
+  F0ChatLinkPreview,
   F0ChatMessage,
   F0ChatMessageStatus,
   F0ChatMessageReply,
   F0ChatMention,
+  F0ChatItem,
+  F0ChatSystemMessage,
+  F0ChatSystemPayload,
+  F0ChatSystemEvent,
+  F0ChatHeaderAction,
   F0ChatSendInput,
   F0ChatEditInput,
   F0ChatStatus,
+  F0ChatCapabilities,
   F0ChatSearchResult,
   F0ChatRuntime,
 } from "./types"
-export { LATEST } from "./types"
+export { isSystemMessage, isUserMessage, LATEST } from "./types"
 // Re-exported because `F0ChatRuntime.transcribe` is typed as `TranscribeFn`;
 // a host implementing the runtime needs to name it.
 export type { TranscribeFn } from "@/sds/ai/F0AiChat/types"

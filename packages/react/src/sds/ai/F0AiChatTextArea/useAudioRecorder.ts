@@ -22,6 +22,13 @@ type UseAudioRecorderParams = {
   onFinal: (text: string) => void
   onError: (error: RecorderError) => void
   maxDurationMs?: number
+  /**
+   * Voice-note mode: when provided, the recorded audio is delivered RAW
+   * (blob + duration) instead of being transcribed — `onTranscribe` is not
+   * needed and the "transcribing" status never happens. Used by the F0Chat
+   * composer to send voice notes.
+   */
+  onAudio?: (audio: Blob, durationMs: number) => void
 }
 
 const checkSupport = (): boolean =>
@@ -41,6 +48,7 @@ export function useAudioRecorder({
   onFinal,
   onError,
   maxDurationMs = DEFAULT_MAX_DURATION_MS,
+  onAudio,
 }: UseAudioRecorderParams) {
   const [status, setStatus] = useState<RecorderStatus>("idle")
   const [durationMs, setDurationMs] = useState(0)
@@ -59,8 +67,8 @@ export function useAudioRecorder({
 
   // Keep the latest callbacks in refs so the MediaRecorder.onstop closure
   // (captured at start time) always calls the current ones.
-  const cbRef = useRef({ onTranscribe, onPartial, onFinal, onError })
-  cbRef.current = { onTranscribe, onPartial, onFinal, onError }
+  const cbRef = useRef({ onTranscribe, onPartial, onFinal, onError, onAudio })
+  cbRef.current = { onTranscribe, onPartial, onFinal, onError, onAudio }
 
   const releaseDevice = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop())
@@ -78,17 +86,31 @@ export function useAudioRecorder({
   }, [])
 
   const transcribe = useCallback(async () => {
-    const { onTranscribe, onPartial, onFinal, onError } = cbRef.current
+    const { onTranscribe, onPartial, onFinal, onError, onAudio } = cbRef.current
     const chunks = chunksRef.current
     chunksRef.current = []
 
-    if (chunks.length === 0 || !onTranscribe) {
+    if (chunks.length === 0 || (!onTranscribe && !onAudio)) {
       setStatus("idle")
       setDurationMs(0)
       return
     }
 
     const blob = new Blob(chunks, { type: chunks[0]?.type || "audio/webm" })
+
+    // Voice-note mode: hand the raw audio to the host — no transcription.
+    if (onAudio) {
+      const recordedMs = Date.now() - startedAtRef.current
+      setStatus("idle")
+      setDurationMs(0)
+      onAudio(blob, recordedMs)
+      return
+    }
+    if (!onTranscribe) {
+      setStatus("idle")
+      setDurationMs(0)
+      return
+    }
     const controller = new AbortController()
     abortRef.current = controller
     setStatus("transcribing")
@@ -114,7 +136,7 @@ export function useAudioRecorder({
   }, [])
 
   const start = useCallback(async () => {
-    if (status !== "idle" || !onTranscribe || !isSupported) return
+    if (status !== "idle" || (!onTranscribe && !onAudio) || !isSupported) return
     canceledRef.current = false
     chunksRef.current = []
 
@@ -160,6 +182,7 @@ export function useAudioRecorder({
   }, [
     status,
     onTranscribe,
+    onAudio,
     isSupported,
     onError,
     releaseDevice,

@@ -4,12 +4,12 @@ import { useRef, useState } from "react"
 
 import { F0AvatarPerson } from "@/components/avatars/F0AvatarPerson"
 import { F0Button } from "@/components/F0Button"
-import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import type { F0GraphNodeTag } from "@/patterns/F0Graph"
 
 import { useDataCollectionSource } from "../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../index"
-import { Office } from "@/icons/app"
+import { Calendar, Office } from "@/icons/app"
 
 type Employee = {
   id: string
@@ -335,30 +335,54 @@ const hireDateFor = (id: string): string => {
 const totalReports = (id: string): number =>
   childrenOf(id).reduce((sum, child) => sum + 1 + totalReports(child.id), 0)
 
-// Each metadata uses a distinct tag *type* so it can be toggled independently
-// from the graph controls (like configuring which table columns are visible).
-const tagsFor = (employee: EmployeeNode): TagVariant[] => {
-  const tags: TagVariant[] = [
-    { type: "raw", text: locationFor(employee.id), icon: Office },
-    { type: "company", name: legalEntityFor(employee.id) },
-    { type: "dot", text: hireDateFor(employee.id), customColor: "#6366f1" },
+// Each metadata declares its own `column` key so it toggles independently from
+// the graph controls (like configuring which table columns are visible) — even
+// when several tags share a visual `type`. Location, Hire date and Reports are
+// all `raw` pills, but their distinct `column`s keep them in separate columns.
+const tagsFor = (employee: EmployeeNode): F0GraphNodeTag[] => {
+  const tags: F0GraphNodeTag[] = [
+    {
+      type: "raw",
+      text: locationFor(employee.id),
+      icon: Office,
+      column: "location",
+    },
+    {
+      type: "company",
+      name: legalEntityFor(employee.id),
+      column: "legalEntity",
+    },
+    // Hire date renders as a raw pill with a calendar icon (matching Workplace)
+    // yet lives in its own column, hidden by default.
+    {
+      type: "raw",
+      text: hireDateFor(employee.id),
+      icon: Calendar,
+      column: "hireDate",
+    },
   ]
   if (employee.totalReportsCount > 0) {
     tags.push({
       type: "raw",
       text: `${employee.totalReportsCount} reports`,
+      column: "reports",
     })
   }
   return tags
 }
 
-const NODE_TAG_TYPES = ["raw", "company", "dot", "status"] as const
+const NODE_TAG_TYPES = [
+  "location",
+  "legalEntity",
+  "hireDate",
+  "reports",
+] as const
 
 const NODE_TAG_TYPE_LABELS = {
-  raw: "Location",
-  company: "Legal entity",
-  dot: "Hire date",
-  status: "Reports",
+  location: "Location",
+  legalEntity: "Legal entity",
+  hireDate: "Hire date",
+  reports: "Reports",
 }
 
 /** Root → … → matched node, in root-first order (for search reveal). */
@@ -611,11 +635,11 @@ const graphVisualization = {
     tags: tagsFor,
     nodeTagTypes: NODE_TAG_TYPES,
     nodeTagTypeLabels: NODE_TAG_TYPE_LABELS,
-    // Reports is pinned (always visible); location is on by default. Legal
-    // entity + hire date are toggled on (and reordered) from the Data
-    // Collection settings, exactly like table columns.
-    pinnedTagTypes: ["status"] as const,
-    defaultVisibleTagTypes: ["raw"] as const,
+    // Reports is pinned (always visible). Location + legal entity are on by
+    // default; hire date is hidden by default and can be toggled on (and
+    // reordered) from the Data Collection settings, exactly like table columns.
+    pinnedTagTypes: ["reports"] as const,
+    defaultVisibleTagTypes: ["location", "legalEntity"] as const,
     currentUserNodeId: "cto-a",
     // The backend returns the count, so the expander shows before loading.
     getChildrenCount: (employee: EmployeeNode) => employee.directReportsCount,
@@ -675,9 +699,15 @@ const DetailField = ({ label, value }: { label: string; value: string }) => (
 const OrgChartExample = ({
   defaultExpandDepth,
   focusOnEntry,
+  graphLabel,
+  tableLabel,
 }: {
   defaultExpandDepth: number
   focusOnEntry?: string
+  /** Custom label for the graph chip; falls back to the localized "Graph". */
+  graphLabel?: string
+  /** Custom label for the table chip; falls back to the localized "Table". */
+  tableLabel?: string
 }) => {
   const [selected, setSelected] = useState<EmployeeNode | null>(null)
   const [revealId, setRevealId] = useState<string | undefined>(undefined)
@@ -691,6 +721,7 @@ const OrgChartExample = ({
         visualizations={[
           {
             ...graphVisualization,
+            label: graphLabel,
             options: {
               ...graphVisualization.options,
               defaultExpandDepth,
@@ -698,7 +729,7 @@ const OrgChartExample = ({
               focusOnEntry,
             },
           },
-          tableVisualization,
+          { ...tableVisualization, label: tableLabel },
         ]}
       />
       <F0Dialog
@@ -1054,4 +1085,20 @@ export const LiveUpdate: Story = {
  */
 export const FocusOnRoot: Story = {
   render: () => <OrgChartExample defaultExpandDepth={2} focusOnEntry="ceo-a" />,
+}
+
+/**
+ * The view-switcher chips are renamed per instance with the optional `label` on
+ * each built-in visualization — here "Org chart" instead of the default "Graph"
+ * and "Directory" instead of "Table". Omit `label` to keep the localized
+ * built-in name. Icons are unchanged; only the text is overridden.
+ */
+export const CustomViewLabels: Story = {
+  render: () => (
+    <OrgChartExample
+      defaultExpandDepth={1}
+      graphLabel="Org chart"
+      tableLabel="Directory"
+    />
+  ),
 }

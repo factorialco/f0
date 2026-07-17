@@ -1,10 +1,13 @@
 import type { ReactNode } from "react"
 
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
-import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import type { RecordType } from "@/hooks/datasource"
 import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import type { F0GraphNodeTagType, ZoomPreset } from "@/patterns/F0Graph"
+import type {
+  F0GraphNodeTag,
+  F0GraphNodeTagColumn,
+  ZoomPreset,
+} from "@/patterns/F0Graph"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -29,19 +32,24 @@ export type GraphVisualizationOptions<
   subtitle?: (record: R) => string
   /** Avatar shown on the leading side of the node pill. */
   avatar?: (record: R) => AvatarVariant
-  /** Tags rendered in the node metadata row. */
-  tags?: (record: R) => TagVariant[]
   /**
-   * Tag types present on the nodes. When provided, the controls bar gains a
-   * toggle to show/hide each metadata type (like configuring table columns).
+   * Tags rendered in the node metadata row. A tag may set `column` to place it
+   * in its own show/hide column independent of its visual `type` (e.g. a second
+   * `raw` pill that must not merge into the first `raw` column).
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>
-  /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  /** Tag types that are always visible and cannot be hidden in the settings. */
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  tags?: (record: R) => F0GraphNodeTag[]
+  /**
+   * Tag columns present on the nodes. When provided, the controls bar gains a
+   * toggle to show/hide each metadata column (like configuring table columns).
+   * Values are tag `column` keys (or `type` when a tag has no `column`).
+   */
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>
+  /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  /** Tag columns that are always visible and cannot be hidden in the settings. */
+  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.

@@ -1,6 +1,9 @@
 import { i18nCountries } from "./partials/countries"
 
 export const defaultTranslations = {
+  common: {
+    selectPlaceholder: "Select",
+  },
   countries: i18nCountries,
   approvals: {
     history: "Approval history",
@@ -205,6 +208,9 @@ export const defaultTranslations = {
         saveFailed: "Save failed",
       },
       addRow: "Add row",
+      removeRow: "Remove row",
+      editRow: "Edit",
+      reorderRow: "Drag to reorder",
     },
     itemsCount: "items",
     emptyStates: {
@@ -480,6 +486,8 @@ export const defaultTranslations = {
     noResults: "No chats found",
     backToLatest: "Jump to latest",
     muted: "Muted",
+    mute: "Mute",
+    unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
     recordAudio: "Record audio",
@@ -510,6 +518,17 @@ export const defaultTranslations = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
+    // Shared-location attachments (map preview card + reply quote descriptor).
+    location: "Location",
+    // Voice notes (mic in the composer records + sends audio, no transcript).
+    voiceNote: "Voice note",
+    sendVoiceNote: "Send voice note",
+    sendingVoiceNote: "Sending voice note…",
+    // Delivery-state indicators beside your own bubble (icon labels + the
+    // failed message's reduced actions menu).
+    sending: "Sending…",
+    notSent: "Not sent",
+    retry: "Retry",
     moreActions: "Message actions",
     // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
@@ -557,6 +576,29 @@ export const defaultTranslations = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
+    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
+    // are replaced with React nodes (`@name` hover-card chips) by the component
+    // via token split — NOT through `t(key, args)`, whose interpolation is
+    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
+    // @Raúl" / "…and 5 more") so every language words the conjunction its own
+    // way. Plural shape mirrors `readBy`.
+    system: {
+      memberAdded: {
+        one: "{{members}} was added to the group",
+        other: "{{members}} were added to the group",
+      },
+      memberRemoved: {
+        one: "{{members}} was removed from the group",
+        other: "{{members}} were removed from the group",
+      },
+      memberLeft: {
+        one: "{{members}} left the group",
+        other: "{{members}} left the group",
+      },
+      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
+      membersWithLast: "{{names}} and {{last}}",
+      membersWithMore: "{{names}} and {{count}} more",
+    },
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread",
@@ -765,6 +807,17 @@ export const defaultTranslations = {
       fileTooLarge: "File exceeds {{maxSize}} MB limit",
       invalidFileType: "File type not accepted. Accepted formats: {{types}}",
       maxFilesReached: "Maximum {{maxFiles}} files",
+    },
+    entitiesList: {
+      add: "Add",
+      edit: "Edit",
+      remove: "Remove",
+      view: "View",
+      addBlockedHint:
+        "Finish filling out the last item you just added in order to add another one",
+      addBlockedErrorHint:
+        "Fix the errors in the existing items before adding another one",
+      addBlockedMaxHint: "You've reached the maximum number of items",
     },
     moreInformation: "More information",
     validation: {
