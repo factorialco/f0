@@ -20,16 +20,20 @@ const require = createRequire(import.meta.url)
 
 // The Storybook manager is an esbuild bundle that can't run the Vite virtual
 // module or the `@/` alias, so it can't compute component status itself. Compute
-// the set of effectively-experimental components here (Node, at startup) and
-// write it to a generated file the manager imports for its sidebar warning dots.
+// a leaf-name → effective-status map here (Node, at startup) and write it to a
+// generated file the manager imports for its sidebar status markers. Only the
+// non-stable levels are included (stable needs no marker).
 {
   const byLeaf = effectiveStatusByLeaf(computeComponentStatusData().components)
-  const experimentalLeaves = Object.keys(byLeaf).filter(
-    (k) => byLeaf[k] === "experimental"
-  )
+  const markers: Record<string, string> = {}
+  for (const [leaf, status] of Object.entries(byLeaf)) {
+    if (status === "experimental" || status === "deprecated") {
+      markers[leaf] = status
+    }
+  }
   writeFileSync(
-    resolve(__dirname, "experimental-components.generated.json"),
-    JSON.stringify(experimentalLeaves)
+    resolve(__dirname, "sidebar-status.generated.json"),
+    JSON.stringify(markers)
   )
 }
 

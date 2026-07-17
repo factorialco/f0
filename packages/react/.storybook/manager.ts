@@ -3,11 +3,25 @@ import { addons } from "storybook/manager-api"
 import { create } from "storybook/theming"
 
 // Generated at Storybook startup by `.storybook/main.ts` (the manager is an
-// esbuild bundle that can't compute component status itself). Normalized leaf
-// names of components whose effective status is experimental.
-import experimentalLeaves from "./experimental-components.generated.json"
+// esbuild bundle that can't compute component status itself). Maps a normalized
+// leaf name → effective status for the non-stable levels.
+import sidebarStatus from "./sidebar-status.generated.json"
 
-const experimentalSet = new Set(experimentalLeaves as string[])
+const statusByLeaf = sidebarStatus as Record<
+  string,
+  "experimental" | "deprecated"
+>
+
+const STATUS_MARKER: Record<string, { emoji: string; title: string }> = {
+  experimental: {
+    emoji: "🚧",
+    title: "Experimental — does not meet the definition of done",
+  },
+  deprecated: {
+    emoji: "❌",
+    title: "Deprecated — scheduled for removal",
+  },
+}
 
 /** Must match `normalizeComponentName`/`leafName` in component-status-build.mjs. */
 function normalizeLeaf(name: string) {
@@ -25,13 +39,16 @@ const theme = create({
 })
 
 /**
- * Sidebar label with a warning dot for components whose *effective* status is
- * experimental (untagged, below the bar, or meeting the bar without the stable
- * tag) — see the component-status API. Non-component entries render unchanged.
+ * Sidebar label with a status marker: 🚧 for effectively-experimental
+ * components (untagged, below the bar, or meeting the bar without the stable
+ * tag) and ❌ for deprecated ones. Stable and non-component entries render
+ * unchanged. See the component-status API.
  */
 function renderSidebarLabel(item: { name: string; type: string }) {
   if (item.type !== "component" && item.type !== "docs") return item.name
-  if (!experimentalSet.has(normalizeLeaf(item.name))) return item.name
+  const status = statusByLeaf[normalizeLeaf(item.name)]
+  const marker = status && STATUS_MARKER[status]
+  if (!marker) return item.name
 
   return React.createElement(
     "span",
@@ -40,10 +57,10 @@ function renderSidebarLabel(item: { name: string; type: string }) {
     React.createElement(
       "span",
       {
-        title: "Experimental — does not meet the definition of done",
+        title: marker.title,
         style: { fontSize: 11, lineHeight: 1, flex: "none" },
       },
-      "🚧"
+      marker.emoji
     )
   )
 }

@@ -1,3 +1,3 @@
 
 # Generated at Storybook startup for the sidebar status dots
-.storybook/experimental-components.generated.json
+.storybook/*.generated.json
