@@ -11,7 +11,6 @@ import {
   useRef,
   useState,
 } from "react"
-import { useDebounceCallback } from "usehooks-ts"
 
 import { F0DialogContext } from "@/patterns/F0Dialog"
 import { F0Button } from "@/components/F0Button"
@@ -741,33 +740,48 @@ const F0SelectComponent = forwardRef(function Select<
     source,
   ])
 
-  const debouncedHandleChangeOpenLocal = useDebounceCallback(
-    (open: boolean) => {
-      onOpenChange?.(open)
-      setOpenLocal(open)
-      if (!open) {
-        isApplyingRef.current = false
+  // Debounced open/close via plain setTimeout instead of usehooks-ts'
+  // `useDebounceCallback` (lodash.debounce). lodash decides the trailing edge
+  // by reading `Date.now()`, so under a frozen clock (MockDate in Storybook
+  // stories, mocked dates in tests) the 100ms window never elapses and the
+  // dropdown can never open. setTimeout keeps ticking regardless of the
+  // clock. Semantics match lodash's trailing debounce: rapid calls coalesce
+  // and only the last value is applied.
+  const applyOpenChangeRef = useRef<(open: boolean) => void>(() => {})
+  applyOpenChangeRef.current = (open: boolean) => {
+    onOpenChange?.(open)
+    setOpenLocal(open)
+    if (!open) {
+      isApplyingRef.current = false
+    }
+  }
+  const openChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debouncedHandleChangeOpenLocal = useMemo(() => {
+    const debounced = (open: boolean) => {
+      if (openChangeTimerRef.current !== null) {
+        clearTimeout(openChangeTimerRef.current)
       }
-    },
-    100
-  )
+      openChangeTimerRef.current = setTimeout(() => {
+        openChangeTimerRef.current = null
+        applyOpenChangeRef.current(open)
+      }, 100)
+    }
+    debounced.cancel = () => {
+      if (openChangeTimerRef.current !== null) {
+        clearTimeout(openChangeTimerRef.current)
+        openChangeTimerRef.current = null
+      }
+    }
+    return debounced
+  }, [])
 
-  // Cancel any pending debounced state update on unmount. usehooks-ts'
-  // `useDebounceCallback` has a known bug where its internal unmount cleanup
-  // cancels a different lodash.debounce instance than the one invoked by
-  // callers, so pending trailing-edge timers can fire after the test's jsdom
-  // window is torn down (causing `ReferenceError: window is not defined`
-  // inside react-dom). We track the latest wrapper via a ref and only cancel
-  // on true unmount so we don't drop in-flight timers between renders.
-  const debouncedHandleChangeOpenLocalRef = useRef(
-    debouncedHandleChangeOpenLocal
-  )
-  debouncedHandleChangeOpenLocalRef.current = debouncedHandleChangeOpenLocal
+  // Cancel any pending open/close update on unmount so the trailing timer
+  // can't fire against an unmounted component (or a torn-down jsdom window).
   useEffect(() => {
     return () => {
-      debouncedHandleChangeOpenLocalRef.current.cancel()
+      debouncedHandleChangeOpenLocal.cancel()
     }
-  }, [])
+  }, [debouncedHandleChangeOpenLocal])
 
   const restoreCommittedSelection = useCallback(() => {
     const committedSelection = committedSelectionRef.current

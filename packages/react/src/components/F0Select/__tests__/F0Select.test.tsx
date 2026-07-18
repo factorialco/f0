@@ -135,6 +135,31 @@ describe("Select", () => {
     expect(screen.getByText("Description 1")).toBeInTheDocument()
   })
 
+  it("opens even when Date.now is frozen (MockDate in stories)", async () => {
+    // Regression: the open/close debounce used lodash.debounce, which decides
+    // its trailing edge by reading Date.now(). Stories that freeze the clock
+    // with MockDate (e.g. DatePicker) made the 100ms window never elapse, so
+    // the dropdown could never open. The debounce must ride on setTimeout.
+    const frozenNow = new Date(2025, 6, 30).getTime()
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(frozenNow)
+    try {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      expect(screen.getByText("Option 1")).toBeInTheDocument()
+    } finally {
+      nowSpy.mockRestore()
+    }
+  })
+
   it("should display selected value", async () => {
     render(
       <F0Select {...defaultSelectProps} options={mockOptions} value="option1" />
