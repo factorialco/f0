@@ -134,9 +134,9 @@ export const PdfToolbar = ({
           onClick={onDownload}
           icon={Download}
         />
-        {actions?.map((action) => (
+        {actions?.map((action, index) => (
           <ToolbarButton
-            key={action.label}
+            key={`${action.label}-${index}`}
             label={action.label}
             onClick={action.onClick}
             icon={action.icon}

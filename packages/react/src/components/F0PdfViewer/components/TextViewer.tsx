@@ -47,11 +47,13 @@ const TextViewer = ({
   url,
   name,
   mimeType,
+  withCredentials = true,
   actions,
 }: {
   url: string
   name: string
   mimeType?: string
+  withCredentials?: boolean
   actions?: F0PdfViewerAction[]
 }): ReactNode => {
   const i18n = useI18n()
@@ -61,7 +63,11 @@ const TextViewer = ({
 
   useEffect(() => {
     let cancelled = false
-    fetch(url)
+    // Reset so a url change never shows the previous document (or a previous
+    // failure) while the new one loads.
+    setText(null)
+    setFailed(false)
+    fetch(url, { credentials: withCredentials ? "include" : "same-origin" })
       .then((response) => {
         if (!response.ok) throw new Error(`${response.status}`)
         return response.text()
@@ -75,7 +81,7 @@ const TextViewer = ({
     return () => {
       cancelled = true
     }
-  }, [url])
+  }, [url, withCredentials])
 
   return (
     <div className="flex h-full w-full flex-col bg-f1-background">
@@ -85,6 +91,7 @@ const TextViewer = ({
       <DocumentToolbar
         url={url}
         filename={name}
+        withCredentials={withCredentials}
         actions={actions}
         zoom={zoom}
       />
@@ -93,7 +100,12 @@ const TextViewer = ({
           {i18n.pdfViewer.previewFailed}
         </div>
       ) : text === null ? (
-        <Skeleton className="min-h-0 w-full grow rounded-none" />
+        <Skeleton
+          role="status"
+          aria-busy={true}
+          aria-label={i18n.pdfViewer.loading}
+          className="min-h-0 w-full grow rounded-none"
+        />
       ) : (
         <div className="min-h-0 grow overflow-auto">
           {/* Zoom on an inner wrapper (the flex layout owns the scroll

@@ -24,10 +24,12 @@ const VIEWER_MAX_COLS = 100
 const SheetViewer = ({
   url,
   filename,
+  withCredentials = true,
   actions,
 }: {
   url: string
   filename?: string
+  withCredentials?: boolean
   actions?: F0PdfViewerAction[]
 }): ReactNode => {
   const i18n = useI18n()
@@ -38,7 +40,16 @@ const SheetViewer = ({
 
   useEffect(() => {
     let cancelled = false
-    fetchWorkbook(url, { maxRows: VIEWER_MAX_ROWS, maxCols: VIEWER_MAX_COLS })
+    // Reset so a url change never shows the previous workbook (or a previous
+    // failure) while the new one loads.
+    setSheets(null)
+    setFailed(false)
+    setActiveIndex(0)
+    fetchWorkbook(url, {
+      maxRows: VIEWER_MAX_ROWS,
+      maxCols: VIEWER_MAX_COLS,
+      withCredentials,
+    })
       .then((parsed) => {
         if (cancelled) return
         if (parsed.length === 0) setFailed(true)
@@ -50,7 +61,7 @@ const SheetViewer = ({
     return () => {
       cancelled = true
     }
-  }, [url])
+  }, [url, withCredentials])
 
   const active = sheets
     ? sheets[Math.min(activeIndex, sheets.length - 1)]
@@ -64,6 +75,7 @@ const SheetViewer = ({
       <DocumentToolbar
         url={url}
         filename={filename}
+        withCredentials={withCredentials}
         actions={actions}
         zoom={zoom}
       >
@@ -96,7 +108,12 @@ const SheetViewer = ({
           {i18n.pdfViewer.previewFailed}
         </div>
       ) : !active ? (
-        <Skeleton className="min-h-0 w-full grow rounded-none" />
+        <Skeleton
+          role="status"
+          aria-busy={true}
+          aria-label={i18n.pdfViewer.loading}
+          className="min-h-0 w-full grow rounded-none"
+        />
       ) : (
         <>
           <div className="min-h-0 grow overflow-auto">

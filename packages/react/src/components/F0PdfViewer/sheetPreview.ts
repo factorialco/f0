@@ -47,12 +47,19 @@ export const columnLetters = (rows: string[][]): string[] => {
   return Array.from({ length: count }, (_, i) => XLSX.utils.encode_col(i))
 }
 
-/** Fetches and parses a spreadsheet attachment. Throws on HTTP/parse errors. */
+/** Fetches and parses a spreadsheet attachment. Throws on HTTP/parse errors.
+ * Sends credentials by default, matching the viewer's PDF path. */
 export const fetchWorkbook = async (
   url: string,
-  caps: { maxRows: number; maxCols: number }
+  {
+    maxRows,
+    maxCols,
+    withCredentials = true,
+  }: { maxRows: number; maxCols: number; withCredentials?: boolean }
 ): Promise<SheetGrid[]> => {
-  const response = await fetch(url)
+  const response = await fetch(url, {
+    credentials: withCredentials ? "include" : "same-origin",
+  })
   if (!response.ok) throw new Error(`Failed to fetch sheet: ${response.status}`)
-  return parseWorkbook(await response.arrayBuffer(), caps)
+  return parseWorkbook(await response.arrayBuffer(), { maxRows, maxCols })
 }

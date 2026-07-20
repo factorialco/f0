@@ -41,14 +41,34 @@ export const downloadPdf = async (
   URL.revokeObjectURL(url)
 }
 
-/** Download for the non-PDF kinds: straight from the source URL (there's no
- * in-memory document to serialize, unlike the pdf.js path above). */
-export const downloadFromUrl = (url: string, filename?: string): void => {
+/** Download for the non-PDF kinds. Fetched into a blob first: the anchor
+ * `download` attribute is ignored on cross-origin URLs, so a direct link to a
+ * CDN text/csv file would navigate the app to the raw file instead. */
+export const downloadFromUrl = async (
+  url: string,
+  filename?: string,
+  withCredentials = true
+): Promise<void> => {
+  let href = url
+  let objectUrl: string | undefined
+  try {
+    const response = await fetch(url, {
+      credentials: withCredentials ? "include" : "same-origin",
+    })
+    if (!response.ok) throw new Error(`${response.status}`)
+    objectUrl = URL.createObjectURL(await response.blob())
+    href = objectUrl
+  } catch {
+    // Can't read the file (e.g. CORS) — open it in a new tab instead of
+    // navigating the app away.
+  }
   const anchor = document.createElement("a")
-  anchor.href = url
+  anchor.href = href
   anchor.download = filename ?? ""
   anchor.rel = "noreferrer"
+  if (!objectUrl) anchor.target = "_blank"
   document.body.appendChild(anchor)
   anchor.click()
   anchor.remove()
+  if (objectUrl) URL.revokeObjectURL(objectUrl)
 }

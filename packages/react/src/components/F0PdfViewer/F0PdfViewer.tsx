@@ -58,10 +58,10 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
       url,
       filename,
       actions,
+      withCredentials = true,
       page: _page,
       pagesToDisplay: _pagesToDisplay,
       initialScale: _initialScale,
-      withCredentials: _withCredentials,
       rotatable: _rotatable,
       initialRotation: _initialRotation,
       onRotationChange: _onRotationChange,
@@ -79,16 +79,27 @@ export const F0PdfViewerBase = forwardRef<HTMLDivElement, F0PdfViewerProps>(
           fallback={<Skeleton className="h-full w-full rounded-none" />}
         >
           {kind === "sheet" && (
-            <SheetViewer url={url} filename={filename} actions={actions} />
+            <SheetViewer
+              url={url}
+              filename={filename}
+              withCredentials={withCredentials}
+              actions={actions}
+            />
           )}
           {kind === "docx" && (
-            <DocxViewer url={url} filename={filename} actions={actions} />
+            <DocxViewer
+              url={url}
+              filename={filename}
+              withCredentials={withCredentials}
+              actions={actions}
+            />
           )}
           {kind === "text" && (
             <TextViewer
               url={url}
               name={filename ?? ""}
               mimeType={mimeType}
+              withCredentials={withCredentials}
               actions={actions}
             />
           )}

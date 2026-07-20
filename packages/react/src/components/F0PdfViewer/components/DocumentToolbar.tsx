@@ -51,12 +51,14 @@ export const useDocumentZoom = (): DocumentZoom => {
 export const DocumentToolbar = ({
   url,
   filename,
+  withCredentials,
   actions,
   zoom,
   children,
 }: {
   url: string
   filename?: string
+  withCredentials?: boolean
   actions?: F0PdfViewerAction[]
   /** Wire from {@link useDocumentZoom} to show the zoom controls. */
   zoom?: DocumentZoom
@@ -107,12 +109,12 @@ export const DocumentToolbar = ({
       <div className="flex flex-1 basis-0 flex-row items-center justify-end gap-2">
         <ToolbarButton
           label={pdfViewer.download}
-          onClick={() => downloadFromUrl(url, filename)}
+          onClick={() => void downloadFromUrl(url, filename, withCredentials)}
           icon={Download}
         />
-        {actions?.map((action) => (
+        {actions?.map((action, index) => (
           <ToolbarButton
-            key={action.label}
+            key={`${action.label}-${index}`}
             label={action.label}
             onClick={action.onClick}
             icon={action.icon}

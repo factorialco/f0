@@ -18,10 +18,12 @@ import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 const DocxViewer = ({
   url,
   filename,
+  withCredentials = true,
   actions,
 }: {
   url: string
   filename?: string
+  withCredentials?: boolean
   actions?: F0PdfViewerAction[]
 }): ReactNode => {
   const i18n = useI18n()
@@ -34,7 +36,7 @@ const DocxViewer = ({
     if (!host) return
     let cancelled = false
     setState("loading")
-    fetch(url)
+    fetch(url, { credentials: withCredentials ? "include" : "same-origin" })
       .then((response) => {
         if (!response.ok) throw new Error(`${response.status}`)
         return response.blob()
@@ -56,7 +58,7 @@ const DocxViewer = ({
     return () => {
       cancelled = true
     }
-  }, [url])
+  }, [url, withCredentials])
 
   return (
     <div className="flex h-full w-full flex-col bg-f1-background">
@@ -66,12 +68,18 @@ const DocxViewer = ({
       <DocumentToolbar
         url={url}
         filename={filename}
+        withCredentials={withCredentials}
         actions={actions}
         zoom={zoom}
       />
       <div className="relative min-h-0 grow overflow-auto bg-f1-background-secondary">
         {state === "loading" && (
-          <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
+          <Skeleton
+            role="status"
+            aria-busy={true}
+            aria-label={i18n.pdfViewer.loading}
+            className="absolute inset-0 h-full w-full rounded-none"
+          />
         )}
         {state === "failed" && (
           <div className="flex h-full w-full items-center justify-center bg-f1-background text-f1-foreground-secondary">

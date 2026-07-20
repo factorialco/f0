@@ -3,7 +3,12 @@ import * as XLSX from "xlsx"
 import { beforeAll, describe, expect, it, vi } from "vitest"
 
 import { Cross as CrossIcon } from "@/icons/app"
-import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  fireEvent,
+  zeroRender as render,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
 
 import { F0PdfViewer } from "../index"
 
@@ -55,21 +60,25 @@ const workbookBuffer = (): ArrayBuffer => {
 
 const MD_CONTENT = "# Release notes\n\n- Document previews\n"
 
+// Document fetches by extension; "broken" URLs 404.
+const fetchMock = vi.fn(async (url: string) => {
+  const href = String(url)
+  if (href.includes("broken")) return { ok: false, status: 404 }
+  return {
+    ok: true,
+    arrayBuffer: async () => workbookBuffer(),
+    blob: async () => new Blob(["docx"]),
+    text: async () => MD_CONTENT,
+  }
+})
+
 beforeAll(() => {
-  // Document fetches by extension; "broken" URLs 404.
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async (url: string) => {
-      const href = String(url)
-      if (href.includes("broken")) return { ok: false, status: 404 }
-      return {
-        ok: true,
-        arrayBuffer: async () => workbookBuffer(),
-        blob: async () => new Blob(["docx"]),
-        text: async () => MD_CONTENT,
-      }
-    })
-  )
+  vi.stubGlobal("fetch", fetchMock)
+  // jsdom implements neither object URLs nor anchor navigation.
+  Object.assign(URL, {
+    createObjectURL: vi.fn(() => "blob:mock"),
+    revokeObjectURL: vi.fn(),
+  })
 })
 
 describe("F0PdfViewer document kinds", () => {
@@ -176,5 +185,75 @@ describe("F0PdfViewer document kinds", () => {
     )
     fireEvent.click(await screen.findByRole("button", { name: "Close" }))
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it("recovers from a failed url when a working one arrives", async () => {
+    const { rerender } = render(
+      <F0PdfViewer url="https://cdn.example.com/broken.xlsx" kind="sheet" />
+    )
+    await screen.findByText("Preview isn't available for this file")
+
+    rerender(
+      <F0PdfViewer url="https://cdn.example.com/data.xlsx" kind="sheet" />
+    )
+    expect(await screen.findByText("Ana García")).toBeInTheDocument()
+    expect(
+      screen.queryByText("Preview isn't available for this file")
+    ).not.toBeInTheDocument()
+  })
+
+  it("sends credentials with the document fetch, honoring withCredentials", async () => {
+    fetchMock.mockClear()
+    const { unmount } = render(
+      <F0PdfViewer url="https://cdn.example.com/data.xlsx" kind="sheet" />
+    )
+    await screen.findByText("Ana García")
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://cdn.example.com/data.xlsx",
+      {
+        credentials: "include",
+      }
+    )
+    unmount()
+
+    fetchMock.mockClear()
+    render(
+      <F0PdfViewer
+        url="https://cdn.example.com/data.xlsx"
+        kind="sheet"
+        withCredentials={false}
+      />
+    )
+    await screen.findByText("Ana García")
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://cdn.example.com/data.xlsx",
+      {
+        credentials: "same-origin",
+      }
+    )
+  })
+
+  it("downloads through a blob object URL instead of navigating to the file", async () => {
+    // Capture anchor clicks: a cross-origin href would navigate the app away,
+    // so download must go through an object URL.
+    const clickedHrefs: string[] = []
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        clickedHrefs.push(this.href)
+      })
+
+    render(
+      <F0PdfViewer
+        url="https://cdn.example.com/notes.md"
+        kind="text"
+        filename="notes.md"
+      />
+    )
+    fireEvent.click(await screen.findByRole("button", { name: "Download" }))
+
+    await waitFor(() => expect(clickedHrefs).toEqual(["blob:mock"]))
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock")
+    clickSpy.mockRestore()
   })
 })
