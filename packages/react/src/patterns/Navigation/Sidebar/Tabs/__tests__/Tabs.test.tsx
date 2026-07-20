@@ -57,18 +57,18 @@ describe("SidebarTabs", () => {
       tabs: [tabs[0], { ...tabs[1], badge: 5 }],
       activeTab: "main",
     })
-    // The unread dot uses the critical-bold colour and only shows on an
-    // inactive tab that has unread (the active tab has the sliding pill, also
-    // absolutely positioned, so we target the dot's colour specifically).
+    // The unread dot uses the special-highlight colour and shows on any tab
+    // with unread (the pill is also absolutely positioned, so we target the
+    // dot's colour specifically).
     expect(
       screen
         .getByRole("button", { name: "Messages" })
-        .querySelector(".bg-f1-background-critical-bold")
+        .querySelector(".bg-f1-special-highlight")
     ).not.toBeNull()
     expect(
       screen
         .getByRole("button", { name: "Main" })
-        .querySelector(".bg-f1-background-critical-bold")
+        .querySelector(".bg-f1-special-highlight")
     ).toBeNull()
   })
 
