@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.42.1](https://github.com/factorialco/f0/compare/f0-react-v4.42.0...f0-react-v4.42.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **F0Card:** make whole card clickable except footer ([#4745](https://github.com/factorialco/f0/issues/4745)) ([a23066e](https://github.com/factorialco/f0/commit/a23066e2badb25ba47b10049f123e6373e1c5a1e))
+
 ## [4.42.0](https://github.com/factorialco/f0/compare/f0-react-v4.41.1...f0-react-v4.42.0) (2026-07-17)
 
 
