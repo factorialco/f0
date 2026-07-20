@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ChartLine } from "@/icons/app"
-
 import { F0AiChatHistory } from "../F0AiChatHistory"
 import type { ChatThread } from "../useChatHistory"
 
@@ -112,25 +110,5 @@ export const WithPinned: Story = {
     isLoading: false,
     error: null,
     pinnedIds: new Set(["t1", "t3"]),
-  },
-}
-
-const THREADS_WITH_BADGE: ChatThread[] = SAMPLE_THREADS.map((thread) =>
-  thread.id === "t2"
-    ? {
-        ...thread,
-        title: "Headcount by department",
-        badge: { label: "Analytics", icon: ChartLine },
-      }
-    : thread
-)
-
-export const WithModeBadge: Story = {
-  args: {
-    ...baseArgs,
-    threads: THREADS_WITH_BADGE,
-    isLoading: false,
-    error: null,
-    pinnedIds: new Set(),
   },
 }

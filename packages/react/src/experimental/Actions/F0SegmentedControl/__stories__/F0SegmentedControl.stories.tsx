@@ -7,7 +7,7 @@ import { Calendar, List, Table } from "@/icons/app"
 import { F0SegmentedControl } from "../F0SegmentedControl"
 
 const meta = {
-  title: "Components/F0SegmentedControl",
+  title: "F0SegmentedControl",
   component: F0SegmentedControl,
   tags: ["autodocs", "experimental"],
   args: {

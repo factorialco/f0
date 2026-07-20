@@ -1,7 +1,6 @@
 import { useMemo } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
-import { F0Icon } from "@/components/F0Icon"
 import {
   Dropdown,
   type DropdownItem as DropdownItemType,
@@ -97,9 +96,6 @@ export function ThreadItem({
         className="flex w-full min-w-0 items-center gap-1"
         onClick={() => onSelect(thread.id, thread.title)}
       >
-        {thread.badge?.icon && (
-          <F0Icon icon={thread.badge.icon} color="default" size="sm" />
-        )}
         <OneEllipsis lines={1} className="py-0.5 text-left font-medium">
           {thread.title}
         </OneEllipsis>
@@ -108,45 +104,37 @@ export function ThreadItem({
           {formattedDate}
         </span>
       </div>
-      <div className="flex shrink-0 items-center gap-1.5">
-        {/* Persistent mode marker (e.g. "Analytics"), unlike the hover-only date. */}
-        {thread.badge?.label && (
-          <span className="shrink-0 text-sm font-medium text-f1-foreground-secondary">
-            {thread.badge.label}
-          </span>
-        )}
-        {isPending ? (
-          // While saving, the spinner sits where the actions button is and stays
-          // visible off-hover so the row reads as "working".
-          <div
-            className="flex h-7 w-7 shrink-0 items-center justify-center"
-            aria-label={translations.ai.threadOptions}
-          >
-            <Spinner size="small" />
-          </div>
-        ) : (
-          <div
-            className={cn(
-              // Hidden (not just transparent) off-hover so it takes no space and
-              // the title can use the full row width. Shown on hover / focus /
-              // while its dropdown is open.
-              "hidden items-center",
-              "group-hover:flex group-focus-within:flex",
-              "has-[[aria-expanded=true]]:flex"
-            )}
-          >
-            <Dropdown items={dropdownItems}>
-              <ButtonInternal
-                icon={Ellipsis}
-                variant="ghost"
-                size="sm"
-                label={translations.ai.threadOptions}
-                hideLabel
-              />
-            </Dropdown>
-          </div>
-        )}
-      </div>
+      {isPending ? (
+        // While saving, the spinner sits where the actions button is and stays
+        // visible off-hover so the row reads as "working".
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center"
+          aria-label={translations.ai.threadOptions}
+        >
+          <Spinner size="small" />
+        </div>
+      ) : (
+        <div
+          className={cn(
+            // Hidden (not just transparent) off-hover so it takes no space and
+            // the title can use the full row width. Shown on hover / focus /
+            // while its dropdown is open.
+            "hidden items-center",
+            "group-hover:flex group-focus-within:flex",
+            "has-[[aria-expanded=true]]:flex"
+          )}
+        >
+          <Dropdown items={dropdownItems}>
+            <ButtonInternal
+              icon={Ellipsis}
+              variant="ghost"
+              size="sm"
+              label={translations.ai.threadOptions}
+              hideLabel
+            />
+          </Dropdown>
+        </div>
+      )}
     </div>
   )
 }

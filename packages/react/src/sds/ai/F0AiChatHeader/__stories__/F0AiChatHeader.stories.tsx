@@ -1,7 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { ChartLine } from "@/icons/app"
-
 import { F0AiChatHeader } from "../F0AiChatHeader"
 
 const meta = {
@@ -63,16 +61,6 @@ export const WithHistoryNewConversation: Story = {
   args: {
     historyEnabled: true,
     currentThreadTitle: null,
-    onClose: () => console.log("close"),
-    onOpenHistory: () => console.log("open history"),
-  },
-}
-
-export const WithTitleIcon: Story = {
-  args: {
-    historyEnabled: true,
-    currentThreadTitle: "Headcount by department",
-    titleIcon: ChartLine,
     onClose: () => console.log("close"),
     onOpenHistory: () => console.log("open history"),
   },
