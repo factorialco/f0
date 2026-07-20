@@ -6,12 +6,16 @@ import { zeroRender as render } from "@/testing/test-utils"
 import { DialogWrapperProvider } from "../DialogWrapperProvider"
 import { Content } from "../Content"
 
-const renderContent = (children: React.ReactNode) =>
+const renderContent = (
+  children: React.ReactNode,
+  { fullHeight = false }: { fullHeight?: boolean } = {}
+) =>
   render(
     <DialogWrapperProvider
       isOpen
       onClose={() => {}}
       position="center"
+      fullHeight={fullHeight}
       portalContainer={null}
     >
       <Content>{children}</Content>
@@ -25,6 +29,19 @@ describe("Content", () => {
     const wrapper = container.querySelector(".flex-1.flex-col.overflow-hidden")
     expect(wrapper).not.toBeNull()
     expect(wrapper).toHaveClass("min-h-0")
+  })
+
+  it("gives the ScrollArea a real height when the dialog is fullHeight, not just when position is fullscreen", () => {
+    const { container: withoutFullHeight } = renderContent(<div>Content</div>)
+    const { container: withFullHeight } = renderContent(<div>Content</div>, {
+      fullHeight: true,
+    })
+
+    const viewportWrapper = (container: HTMLElement) =>
+      container.querySelector("[data-scroll-container]")?.parentElement
+
+    expect(viewportWrapper(withoutFullHeight)).not.toHaveClass("h-full")
+    expect(viewportWrapper(withFullHeight)).toHaveClass("h-full")
   })
 
   it("hides the bottom scroll shadow only once the viewport has actually reached the end of the content", async () => {

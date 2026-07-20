@@ -41,7 +41,7 @@ export const Content = ({
   children,
   disableContentPadding = false,
 }: ContentProps) => {
-  const { position } = useF0Dialog()
+  const { position, fullHeight } = useF0Dialog()
   const viewportRef = useRef<HTMLDivElement>(null)
   const [isAtTop, setIsAtTop] = useState(true)
   const [isAtBottom, setIsAtBottom] = useState(true)
@@ -77,7 +77,7 @@ export const Content = ({
           "[*[data-state=visible]_div]:bg-f1-background flex flex-1 flex-col",
           "[&_.resource-header]:p-0 [&_.resource-header]:pr-1",
           !disableContentPadding && "px-4 [&>div]:py-4",
-          position === "fullscreen" &&
+          (position === "fullscreen" || fullHeight) &&
             "h-full [&>div]:h-full [&>div>div]:h-full"
         )}
       >

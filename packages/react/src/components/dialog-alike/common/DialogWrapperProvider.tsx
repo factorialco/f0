@@ -7,6 +7,7 @@ export type DialogWrapperContextType = {
   onClose: () => void
   shownBottomSheet: boolean
   position: Position
+  fullHeight: boolean
   /**
    * The dialog's content container element.
    * Use this as the `portalContainer` prop for components like F0Select
@@ -23,6 +24,7 @@ export type DialogWrapperProviderProps = {
   onClose: () => void
   shownBottomSheet?: boolean
   position: Position
+  fullHeight?: boolean
   children: ReactNode
   portalContainer: HTMLDivElement | null
 }
@@ -31,6 +33,7 @@ export const DialogWrapperContext = createContext<DialogWrapperContextType>({
   open: false,
   onClose: () => {},
   position: "center",
+  fullHeight: false,
   shownBottomSheet: false,
   portalContainer: null,
 })
@@ -40,6 +43,7 @@ export const DialogWrapperProvider = ({
   onClose,
   shownBottomSheet = false,
   position,
+  fullHeight = false,
   children,
   portalContainer,
 }: DialogWrapperProviderProps) => {
@@ -49,6 +53,7 @@ export const DialogWrapperProvider = ({
         open: isOpen,
         onClose,
         position,
+        fullHeight,
         shownBottomSheet,
         portalContainer,
       }}

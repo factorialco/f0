@@ -187,6 +187,7 @@ export const DialogWrapper = ({
       isOpen={isOpen}
       onClose={onClose}
       position={position}
+      fullHeight={fullHeight}
       portalContainer={containerElement ?? null}
       shownBottomSheet
     >
