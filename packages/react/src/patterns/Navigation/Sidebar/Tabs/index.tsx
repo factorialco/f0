@@ -8,8 +8,8 @@ import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 const UnreadDot = () => {
   return (
-    <div className="absolute -right-3.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
-      <span className="h-2.5 w-2.5 rounded-full bg-f1-special-highlight" />
+    <div className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
+      <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
     </div>
   )
 }
@@ -144,7 +144,8 @@ const TabButton = ({
         <span
           className={cn(
             "relative flex items-center text-f1-icon transition-colors",
-            !isActive && "group-hover:text-f1-icon-bold"
+            "group-hover:text-f1-icon-bold",
+            isActive && "text-f1-icon-bold"
           )}
         >
           <F0Icon icon={tab.icon} size="md" color="currentColor" />
@@ -161,13 +162,19 @@ const TabButton = ({
           )}
         >
           <span className="min-w-0 overflow-hidden">
-            <span className="block whitespace-nowrap pl-1 pr-0.5 font-semibold">
+            <span
+              className={cn(
+                "block whitespace-nowrap pl-1 pr-0.5 font-semibold group-hover:text-f1-foreground transition-colors",
+                isActive ? "text-f1-foreground" : "text-f1-foreground-secondary"
+              )}
+            >
               {tab.label}
             </span>
           </span>
         </span>
-        {tab.badge && <UnreadDot />}
       </div>
+
+      {tab.badge && <UnreadDot />}
     </button>
   )
 }
