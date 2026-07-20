@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { zeroRender as render, waitFor } from "@/testing/test-utils"
+
+import { fireEvent, zeroRender as render, waitFor } from "@/testing/test-utils"
+
+import type { DashboardItem } from "../types"
 
 import { DashboardGrid } from "../components/DashboardGrid/DashboardGrid"
-import type { DashboardItem } from "../types"
 
 type ExpenseRecord = {
   employee: string
@@ -149,6 +151,77 @@ describe("DashboardGrid", () => {
 
     await waitFor(() => {
       expect(collectionRow.style.height).toBe("960px")
+    })
+  })
+
+  describe("row resize", () => {
+    function getResizeHandle(container: HTMLElement): HTMLElement {
+      const handle = container.querySelector(".group\\/resize")
+      if (!(handle instanceof HTMLElement)) {
+        throw new Error("Expected a resize handle to be rendered")
+      }
+      return handle
+    }
+
+    function dragResizeHandle(handle: HTMLElement, deltaY: number) {
+      fireEvent.mouseDown(handle, { clientY: 500 })
+      fireEvent.mouseMove(document, { clientY: 500 + deltaY })
+      fireEvent.mouseUp(document, { clientY: 500 + deltaY })
+    }
+
+    it("shrinks a row when dragging the handle up", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      expect(getDashboardRowHeight(container)).toBe("200px")
+
+      dragResizeHandle(getResizeHandle(container), -50)
+
+      expect(getDashboardRowHeight(container)).toBe("150px")
+    })
+
+    it("shrinks a row back after growing it", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(144)} filters={{}} editMode />
+      )
+
+      dragResizeHandle(getResizeHandle(container), 100)
+      expect(getDashboardRowHeight(container)).toBe("244px")
+
+      dragResizeHandle(getResizeHandle(container), -100)
+      expect(getDashboardRowHeight(container)).toBe("144px")
+    })
+
+    it("clamps shrinking to the per-type minimum height", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      // Metric rows have a 120px minimum
+      dragResizeHandle(getResizeHandle(container), -500)
+
+      expect(getDashboardRowHeight(container)).toBe("120px")
+    })
+
+    it("clamps shrinking to overflowing content height", () => {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId === "headcount") return 180
+          return 0
+        }
+      )
+
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      // Content genuinely overflows (scrollHeight 180 > clientHeight 0), so
+      // the row cannot be dragged below 180px even though the metric type
+      // minimum is 120px.
+      dragResizeHandle(getResizeHandle(container), -500)
+
+      expect(getDashboardRowHeight(container)).toBe("180px")
     })
   })
 })
