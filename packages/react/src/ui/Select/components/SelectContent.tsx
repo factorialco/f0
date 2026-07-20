@@ -80,6 +80,11 @@ const SelectContent = forwardRef<
       items = undefined,
       className,
       children,
+      top,
+      bottom,
+      right,
+      value: _value,
+      multiple: _multiple,
       position = "popper",
       taller = false,
       emptyMessage,
@@ -226,7 +231,6 @@ const SelectContent = forwardRef<
               key={virtualItem.key}
               data-index={virtualItem.index}
               ref={virtualizer.measureElement}
-              tabIndex={virtualItem.index === positionIndex ? 0 : -1}
             >
               {isLoadingMore && index === virtualItems.length - 1 ? (
                 <div className="flex w-full items-center justify-center py-4">
@@ -274,6 +278,10 @@ const SelectContent = forwardRef<
           !asList && isVirtual && !virtualReady && "opacity-0",
           className
         )}
+        // In list mode there is no trigger to Tab from, so the listbox itself
+        // is the keyboard entry point (WCAG 2.1.1); its keydown handler moves
+        // focus into the options on ArrowDown/Home/End.
+        tabIndex={asList ? 0 : undefined}
         position={asList ? "item-aligned" : position}
         side={asList ? undefined : "bottom"}
         sideOffset={asList ? undefined : 4}
@@ -321,9 +329,7 @@ const SelectContent = forwardRef<
               : undefined
           }
         >
-          {asList && !props.right && (
-            <div className="flex-shrink-0">{props.top}</div>
-          )}
+          {asList && !right && <div className="flex-shrink-0">{top}</div>}
           <div className="flex min-h-0 flex-1 flex-row overflow-hidden">
             <div
               className={cn(
@@ -331,7 +337,7 @@ const SelectContent = forwardRef<
                 asList && "flex flex-col overflow-hidden flex-1 min-h-0"
               )}
             >
-              {(!asList || props.right) && props.top}
+              {(!asList || right) && top}
               {showLoadingIndicator && loadingNewContent && (
                 <div
                   className="absolute inset-0 flex cursor-progress items-center justify-center"
@@ -343,6 +349,7 @@ const SelectContent = forwardRef<
               )}
               <ScrollArea
                 viewportRef={parentRef}
+                focusableViewport={false}
                 className={cn(
                   "flex h-full flex-col",
                   isEmpty ? "justify-center" : "pb-1",
@@ -370,9 +377,9 @@ const SelectContent = forwardRef<
                 )}
               </ScrollArea>
             </div>
-            {props.right}
+            {right}
           </div>
-          {props.bottom && <div className="shrink-0">{props.bottom}</div>}
+          {bottom && <div className="shrink-0">{bottom}</div>}
         </div>
       </SelectPrimitive.Content>
     )

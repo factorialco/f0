@@ -56,7 +56,8 @@ const meta: Meta = {
   component: F0Select,
   parameters: {
     a11y: {
-      skipCi: true,
+      // Fail CI on any accessibility violation in these stories
+      test: "error",
     },
     docs: {
       description: {
@@ -1104,6 +1105,17 @@ export const MultipleWithApply: Story = {
  * when some but not all are selected.
  */
 export const MultiplePaginatedAsList: Story = {
+  parameters: {
+    a11y: {
+      // Known architectural violations in multiple+asList mode, reported but
+      // not blocking: the search box, select-all and action buttons render
+      // inside the role="listbox" element (aria-required-children), and
+      // multi-select options wrap focusable checkboxes (nested-interactive).
+      // Fixing both requires moving role="listbox" onto the options container
+      // in ui/Select and making option checkboxes presentational.
+      test: "todo",
+    },
+  },
   args: {
     label: "Select Team Members",
     placeholder: "Search employees...",
