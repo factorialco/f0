@@ -23,6 +23,12 @@ type ReadOnlyCellContentProps<R extends RecordType> = Pick<
   iconColor?: F0IconProps["color"]
   /** Extra classes for the content container (background, muted text, ...). */
   className?: string
+  /**
+   * Show the field affordances (leading url/email/date icon and the select
+   * chevron). Disabled cells keep them so the column still reads as its field
+   * type; display-only cells opt out and render just the value as plain text.
+   */
+  showFieldAffordances?: boolean
 }
 
 /**
@@ -37,15 +43,18 @@ export function ReadOnlyCellContent<R extends RecordType>({
   item,
   iconColor = "default",
   className,
+  showFieldAffordances = true,
 }: ReadOnlyCellContentProps<R>) {
   const i18n = useI18n()
 
   // A date column shows the shared calendar icon (same as the editable date
   // cell / F0Form date field); otherwise a text cell's url/email icon.
-  const leadingIcon = editableColumn.dateConfig
-    ? getFieldInputIcon("date")
-    : resolveTextCellIcon(editableColumn.textConfig)
-  const isSelect = !!editableColumn.selectConfig
+  const leadingIcon = showFieldAffordances
+    ? editableColumn.dateConfig
+      ? getFieldInputIcon("date")
+      : resolveTextCellIcon(editableColumn.textConfig)
+    : undefined
+  const isSelect = showFieldAffordances && !!editableColumn.selectConfig
   const alignRight = editableColumn.align === "right"
 
   // Date cells store an ISO string; format it here so a read-only date cell
