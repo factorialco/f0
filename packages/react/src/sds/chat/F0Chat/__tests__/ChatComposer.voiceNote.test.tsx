@@ -11,36 +11,14 @@ import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment, type F0ChatRuntime } from "../types"
 
-// The transcript is virtualized with @tanstack/react-virtual, which windows the
-// DOM based on the scroll viewport's measured size. jsdom has no layout, so the
-// real virtualizer renders nothing — mock it to a pass-through (as in
-// F0Chat.test.tsx).
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 // Minimal MediaRecorder stand-in: stop() emits one chunk then fires onstop
 // (same as the dictation tests).

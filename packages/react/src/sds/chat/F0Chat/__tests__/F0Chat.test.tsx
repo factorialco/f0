@@ -5,42 +5,21 @@ import {
   zeroRender as render,
   screen,
   userEvent,
+  waitFor,
 } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatRuntime } from "../types"
 
-// The transcript is virtualized with @tanstack/react-virtual, which windows the
-// DOM based on the scroll viewport's measured size. jsdom has no layout (every
-// rect is 0), so the real virtualizer renders nothing. Mock it to a pass-through
-// that renders all rows — the windowing itself is exercised in Storybook.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 beforeAll(() => {
   // jsdom doesn't implement scrollIntoView (used by the scroll hook).
@@ -176,6 +155,14 @@ describe("F0Chat", () => {
     expect(
       screen.getByRole("button", { name: /remove quote/i })
     ).toBeInTheDocument()
+    // Removing the quote collapses the chip away (exit resolves instantly
+    // under skipAnimations) — the composer returns to its resting state.
+    await userEvent.click(screen.getByRole("button", { name: /remove quote/i }))
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /remove quote/i })
+      ).not.toBeInTheDocument()
+    )
   })
 
   it("edits my message from its actions menu, prefilling the composer", async () => {
@@ -369,10 +356,12 @@ describe("F0Chat", () => {
             attachments: [
               { kind: "image", url: "blob:img", name: "photo.png" },
               {
+                // Not previewable — documents (pdf/sheet/docx/text) get the
+                // snapshot card instead (ChatPdfAttachment.test).
                 kind: "file",
                 url: "blob:doc",
-                name: "report.pdf",
-                mimeType: "application/pdf",
+                name: "deck.pptx",
+                mimeType: "application/vnd.ms-powerpoint",
               },
             ],
           },
@@ -380,7 +369,7 @@ describe("F0Chat", () => {
       })
     )
     expect(screen.getByRole("img", { name: /photo\.png/i })).toBeInTheDocument()
-    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+    expect(screen.getByText("deck.pptx")).toBeInTheDocument()
   })
 
   it("previews uploaded images as square thumbnails and other files as chips", async () => {
