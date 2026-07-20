@@ -70,7 +70,7 @@ export const Content = ({
   }, [handleScroll])
 
   return (
-    <div className="relative flex flex-1 flex-col overflow-hidden">
+    <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
       <ScrollArea
         viewportRef={viewportRef}
         className={cn(
