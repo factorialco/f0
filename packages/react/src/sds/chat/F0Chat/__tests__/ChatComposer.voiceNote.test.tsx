@@ -120,6 +120,42 @@ const recordVoiceNote = async (user: ReturnType<typeof userEvent.setup>) => {
 }
 
 describe("ChatComposer voice notes", () => {
+  it("can disable voice notes without disabling file uploads", () => {
+    renderChat(
+      makeRuntime({
+        uploadFiles: vi.fn(),
+        capabilities: { canSendVoiceNotes: false },
+      })
+    )
+
+    expect(screen.getByRole("button", { name: "Attach file" })).toBeEnabled()
+    expect(
+      screen.queryByRole("button", { name: "Record audio" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("keeps voice dictation independent from the voice-note capability", async () => {
+    const uploadFiles = vi.fn()
+    const transcribe = vi.fn(async () => "Transcribed message")
+    const user = userEvent.setup()
+    renderChat(
+      makeRuntime({
+        uploadFiles,
+        transcribe,
+        capabilities: { canSendVoiceNotes: false },
+      })
+    )
+
+    await user.click(screen.getByRole("button", { name: "Record audio" }))
+    await user.click(
+      await screen.findByRole("button", { name: "Stop and transcribe" })
+    )
+
+    expect(await screen.findByDisplayValue("Transcribed message")).toBeVisible()
+    expect(transcribe).toHaveBeenCalledTimes(1)
+    expect(uploadFiles).not.toHaveBeenCalled()
+  })
+
   it("shows the mic button loading while the note uploads, then sends it", async () => {
     let resolveUpload!: (attachments: F0ChatAttachment[]) => void
     const uploadFiles = vi.fn(

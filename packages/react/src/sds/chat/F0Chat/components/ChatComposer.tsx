@@ -164,10 +164,11 @@ export const ChatComposer = (): ReactNode => {
     "transcription-failed": i18n.chat.transcriptionError,
   }
 
-  // Voice NOTES (WhatsApp-style): when the runtime can upload, the mic records
-  // audio and sends it as its own message on confirm — no transcription.
-  // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
-  const voiceNotesEnabled = canUpload
+  // Voice NOTES (WhatsApp-style): when the runtime can upload and the channel
+  // allows them, the mic records audio and sends it as its own message on
+  // confirm — no transcription. Dictation (`transcribe`) stays independent.
+  const voiceNotesEnabled =
+    canUpload && capabilities?.canSendVoiceNotes !== false
   // While the confirmed recording uploads, the action row swaps for a "sending
   // voice note" status so the confirm→message gap isn't silent.
   const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
