@@ -542,7 +542,7 @@ const MembershipConversation = (): ReactNode => {
 }
 
 const meta = {
-  title: "SDS/Chat/F0Chat",
+  title: "Chat/F0Chat",
   component: F0Chat,
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof F0Chat>
