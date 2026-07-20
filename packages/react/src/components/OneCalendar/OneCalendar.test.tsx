@@ -203,6 +203,33 @@ describe("OneCalendar", () => {
       expect(onSelect).toHaveBeenCalled()
     })
 
+    it("does not impose a hidden lower bound when only maxDate is set", async () => {
+      // Codex review regression: with only maxDate, the default window's
+      // floor (currentYear - 120) must not disable consumer-allowed dates.
+      // A very old value stays selectable and the dropdown displays its year.
+      const onSelect = vi.fn()
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="day"
+            defaultSelected={new Date(1850, 5, 15)}
+            maxDate={new Date()}
+            onSelect={onSelect}
+          />
+        </TestWrapper>
+      )
+
+      // The year dropdown stretches to display 1850.
+      expect(await screen.findByText("June")).toBeInTheDocument()
+      expect(await screen.findByText("1850")).toBeInTheDocument()
+
+      // Days in 1850 are not disabled and remain selectable.
+      const grid = screen.getAllByRole("grid")[0]
+      fireEvent.click(within(grid).getByText("20"))
+      expect(onSelect).toHaveBeenCalled()
+    })
+
     it("clamps arrow navigation to minDate/maxDate years", async () => {
       render(
         <TestWrapper locale="en-US">

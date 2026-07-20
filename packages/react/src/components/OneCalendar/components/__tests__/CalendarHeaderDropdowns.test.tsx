@@ -75,6 +75,28 @@ describe("getYearBounds", () => {
       getYearBounds(2026, new Date(1995, 0, 1), new Date(1990, 0, 1))
     ).toEqual({ fromYear: 1990, toYear: 1995 })
   })
+
+  it("stretches to include a view year outside the window", () => {
+    // Selection is bounded by the consumer's minDate/maxDate only, so an
+    // allowed value can lie outside the default window (e.g. a very old date
+    // when only maxDate is set). The range must include it so the dropdown
+    // can display it.
+    expect(getYearBounds(2026, undefined, new Date(2026, 0, 1), 1850)).toEqual({
+      fromYear: 1850,
+      toYear: 2026,
+    })
+    expect(getYearBounds(2026, new Date(2020, 0, 1), undefined, 2200)).toEqual({
+      fromYear: 2020,
+      toYear: 2200,
+    })
+  })
+
+  it("does not shrink the window when the view year is inside it", () => {
+    expect(getYearBounds(2026, undefined, undefined, 2026)).toEqual({
+      fromYear: 2026 - DEFAULT_YEARS_RANGE,
+      toYear: 2026 + DEFAULT_YEARS_RANGE,
+    })
+  })
 })
 
 describe("buildMonthOptions", () => {

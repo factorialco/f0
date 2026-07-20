@@ -149,27 +149,17 @@ const OneCalendarInternal = ({
 
   // Views with header dropdowns clamp arrow navigation to the year dropdown's
   // range, so the view can never land on a year the dropdown can't display.
+  // Selection is NOT clamped to this window — it is bounded only by the
+  // consumer's minDate/maxDate. A consumer-allowed value outside the default
+  // window stretches the range (viewYear) so the dropdown can display it.
   const yearBounds = headerDropdowns
-    ? getYearBounds(new Date().getFullYear(), minDate, maxDate)
+    ? getYearBounds(
+        new Date().getFullYear(),
+        minDate,
+        maxDate,
+        viewDate.getFullYear()
+      )
     : null
-
-  // The window also bounds selection: without it, the day grid's adjacent-
-  // month cells (e.g. January days trailing a December view) would let users
-  // select dates outside the selectable years.
-  const { effectiveMinDate, effectiveMaxDate } = useMemo(
-    () => ({
-      effectiveMinDate:
-        minDate ??
-        (yearBounds ? new Date(yearBounds.fromYear, 0, 1) : undefined),
-      effectiveMaxDate:
-        maxDate ??
-        (yearBounds
-          ? new Date(yearBounds.toYear, 11, 31, 23, 59, 59, 999)
-          : undefined),
-    }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- yearBounds is derived from these
-    [minDate, maxDate, headerDropdowns]
-  )
 
   const canNavigate = (direction: -1 | 1) => {
     if (!yearBounds) return true
@@ -226,11 +216,11 @@ const OneCalendarInternal = ({
       }
 
       return isActiveDate(date, granularity, {
-        minDate: effectiveMinDate,
-        maxDate: effectiveMaxDate,
+        minDate,
+        maxDate,
       })
     },
-    [granularity, effectiveMinDate, effectiveMaxDate]
+    [granularity, minDate, maxDate]
   )
 
   const setSelectFromInput = (
@@ -407,8 +397,8 @@ const OneCalendarInternal = ({
           motionDirection,
           setViewDate,
           viewDate,
-          minDate: effectiveMinDate,
-          maxDate: effectiveMaxDate,
+          minDate,
+          maxDate,
           compact,
           weekStartsOn: effectiveWeekStartsOn,
         })}
