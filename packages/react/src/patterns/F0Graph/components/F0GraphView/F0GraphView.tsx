@@ -21,6 +21,19 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import type {
+  F0GraphHandle,
+  F0GraphNodeRenderContext,
+  F0GraphProps,
+} from "../../F0Graph"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+} from "../../types"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
+
 import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,
@@ -39,18 +52,13 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
-import type {
-  F0GraphHandle,
-  F0GraphNodeRenderContext,
-  F0GraphProps,
-} from "../../F0Graph"
+import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
 import { useGraphRenderModel } from "../../hooks/useGraphRenderModel"
 import { useGraphViewport } from "../../hooks/useGraphViewport"
-import { useSelectionFocus } from "../../hooks/useSelectionFocus"
-import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useLazyTree } from "../../hooks/useLazyTree"
+import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
 import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
 import { ClickSpark } from "../../internal/ClickSpark"
@@ -59,17 +67,10 @@ import {
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
 } from "../../internal/ReactFlowAdapters"
-import type {
-  GraphEdge,
-  GraphNode,
-  LayoutDirection,
-  PositionedNode,
-} from "../../types"
 import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
-import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {
@@ -165,6 +166,7 @@ export function F0GraphView<T = unknown>(
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
     canvasActions,
+    canvasFooterActions,
     showControls = false,
     onZoomLevelChange,
     onViewportChange,
@@ -733,6 +735,15 @@ export function F0GraphView<T = unknown>(
                         data-no-spark
                       >
                         {canvasActions}
+                      </div>
+                    )}
+
+                    {canvasFooterActions && (
+                      <div
+                        className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2"
+                        data-no-spark
+                      >
+                        {canvasFooterActions}
                       </div>
                     )}
 
