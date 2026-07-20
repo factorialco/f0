@@ -1,8 +1,11 @@
 import { type ReactNode } from "react"
 
+import { ButtonInternal } from "@/components/F0Button/internal"
 import { OneEmptyState } from "@/components/OneEmptyState"
+import { ArrowCycle } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { useF0Chat } from "../providers/F0ChatProvider"
 import { ChatMessageSkeleton } from "./ChatMessageSkeleton"
 
 const Centered = ({ children }: { children: ReactNode }): ReactNode => (
@@ -21,7 +24,24 @@ export const ChatConnecting = (): ReactNode => (
 
 export const ChatError = (): ReactNode => {
   const i18n = useI18n()
-  return <Centered>{i18n.chat.error}</Centered>
+  const { reconnect } = useF0Chat()
+  return (
+    <Centered>
+      <div className="flex flex-col items-center gap-3">
+        <span>{i18n.chat.error}</span>
+        {/* Recovery action — only when the host can actually retry the load. */}
+        {reconnect && (
+          <ButtonInternal
+            variant="outline"
+            size="sm"
+            label={i18n.chat.retry}
+            icon={ArrowCycle}
+            onClick={() => void reconnect()}
+          />
+        )}
+      </div>
+    </Centered>
+  )
 }
 
 export const ChatEmptyState = (): ReactNode => {

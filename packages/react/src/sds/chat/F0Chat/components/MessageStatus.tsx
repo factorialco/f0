@@ -31,7 +31,11 @@ export const MessageStatus = ({
 
   let label = time
   if (message.isMine) {
-    if (message.status === "failed") label = i18n.chat.error
+    // In-flight: show "Sending…" right away — the footer is text from the
+    // very first frame (same line, same height) and just crossfades to
+    // "Sent hh:mm", instead of an empty beat while the send settles.
+    if (message.status === "sending") label = i18n.chat.sending
+    if (message.status === "failed") label = `${i18n.chat.notSent} · ${time}`
     else if (message.status === "read")
       label =
         isGroup && message.readByCount
@@ -42,6 +46,8 @@ export const MessageStatus = ({
               { count: message.readByCount }
             )
           : `${i18n.chat.read} ${time}`
+    else if (message.status === "delivered")
+      label = `${i18n.chat.delivered} ${time}`
     else if (message.status === "sent") label = `${i18n.chat.sent} ${time}`
   }
 
