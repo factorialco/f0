@@ -248,6 +248,8 @@ export const defaultTranslations = {
     date: "Date",
     custom: "Custom period",
     selectDate: "Select Date",
+    selectMonth: "Select month",
+    selectYear: "Select year",
     compareTo: "Compare to",
     presets: {
       last7Days: "Last 7 days",
