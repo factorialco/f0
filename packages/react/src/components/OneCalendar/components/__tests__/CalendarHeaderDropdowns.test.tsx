@@ -3,25 +3,29 @@ import { describe, expect, it } from "vitest"
 import {
   buildMonthOptions,
   buildYearOptions,
-  DEFAULT_YEARS_BACK,
+  DEFAULT_YEARS_RANGE,
   getYearBounds,
 } from "../CalendarHeaderDropdowns"
 
 describe("buildYearOptions", () => {
-  it("defaults to a wide window ending at the current year, newest first", () => {
+  it("defaults to a wide window centered on the current year, newest first", () => {
     const options = buildYearOptions(2026)
 
-    expect(options).toHaveLength(DEFAULT_YEARS_BACK + 1)
-    expect(options[0]).toEqual({ value: "2026", label: "2026" })
+    expect(options).toHaveLength(DEFAULT_YEARS_RANGE * 2 + 1)
+    expect(options[0]).toEqual({
+      value: String(2026 + DEFAULT_YEARS_RANGE),
+      label: String(2026 + DEFAULT_YEARS_RANGE),
+    })
     expect(options[options.length - 1]).toEqual({
-      value: String(2026 - DEFAULT_YEARS_BACK),
-      label: String(2026 - DEFAULT_YEARS_BACK),
+      value: String(2026 - DEFAULT_YEARS_RANGE),
+      label: String(2026 - DEFAULT_YEARS_RANGE),
     })
   })
 
-  it("reaches far enough back to cover a birthday", () => {
+  it("reaches far enough back for birthdays and forward for deadlines", () => {
     const values = buildYearOptions(2026).map((o) => o.value)
     expect(values).toContain("1985")
+    expect(values).toContain("2076")
   })
 
   it("bounds the list to minDate/maxDate years when provided", () => {
@@ -53,10 +57,10 @@ describe("buildYearOptions", () => {
 })
 
 describe("getYearBounds", () => {
-  it("defaults to the wide window ending at the current year", () => {
+  it("defaults to the wide window centered on the current year", () => {
     expect(getYearBounds(2026)).toEqual({
-      fromYear: 2026 - DEFAULT_YEARS_BACK,
-      toYear: 2026,
+      fromYear: 2026 - DEFAULT_YEARS_RANGE,
+      toYear: 2026 + DEFAULT_YEARS_RANGE,
     })
   })
 

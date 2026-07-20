@@ -123,9 +123,32 @@ describe("OneCalendar", () => {
     })
 
     it("clamps arrow navigation to the year dropdown range", async () => {
-      // The year list ends at the current year; arrowing from December must
-      // not escape into a year the dropdown can't display (regression: the
-      // trigger rendered an ellipsis). The Next arrow is disabled instead.
+      // Arrowing from December of the last selectable year must not escape
+      // into a year the dropdown can't display (regression: the trigger
+      // rendered an ellipsis). The Next arrow is disabled instead.
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="day"
+            defaultSelected={new Date(2024, 11, 15)}
+            minDate={new Date(2020, 0, 1)}
+            maxDate={new Date(2024, 11, 31)}
+          />
+        </TestWrapper>
+      )
+
+      expect(await screen.findByText("December")).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
+
+      fireEvent.click(screen.getByRole("button", { name: "Next" }))
+      expect(await screen.findByText("December")).toBeInTheDocument()
+      expect(await screen.findByText("2024")).toBeInTheDocument()
+    })
+
+    it("navigates freely into future years within the default window", async () => {
+      // Without minDate/maxDate the window spans 120 years in both
+      // directions, so December of the current year is not an edge.
       const currentYear = new Date().getFullYear()
       render(
         <TestWrapper locale="en-US">
@@ -138,24 +161,27 @@ describe("OneCalendar", () => {
       )
 
       expect(await screen.findByText("December")).toBeInTheDocument()
-      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
+      expect(screen.getByRole("button", { name: "Next" })).toBeEnabled()
 
       fireEvent.click(screen.getByRole("button", { name: "Next" }))
-      expect(await screen.findByText("December")).toBeInTheDocument()
-      expect(await screen.findByText(String(currentYear))).toBeInTheDocument()
+      expect(await screen.findByText("January")).toBeInTheDocument()
+      expect(
+        await screen.findByText(String(currentYear + 1))
+      ).toBeInTheDocument()
     })
 
     it("disables adjacent-month day cells that fall outside the year range", async () => {
-      // December's grid shows the first days of next January; those lie
-      // outside the selectable years and must not be selectable.
-      const currentYear = new Date().getFullYear()
+      // December's grid shows the first days of next January; with maxDate
+      // in December those lie outside the window and must not be selectable.
       const onSelect = vi.fn()
       render(
         <TestWrapper locale="en-US">
           <OneCalendar
             mode="single"
             view="day"
-            defaultSelected={new Date(currentYear, 11, 15)}
+            defaultSelected={new Date(2024, 11, 15)}
+            minDate={new Date(2020, 0, 1)}
+            maxDate={new Date(2024, 11, 31)}
             onSelect={onSelect}
           />
         </TestWrapper>

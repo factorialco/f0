@@ -5,10 +5,12 @@ import { F0Select } from "@/components/F0Select"
 import { useI18n } from "@/lib/providers/i18n"
 
 /**
- * How many years back the year dropdown reaches when no `minDate` is given.
- * Wide enough to cover any birthday without rendering an unbounded list.
+ * How many years the year dropdown reaches back (without `minDate`) and
+ * forward (without `maxDate`) from the current year. Wide enough to cover
+ * any birthday or far-future deadline without rendering an unbounded list;
+ * consumers narrow it by setting explicit `minDate`/`maxDate`.
  */
-export const DEFAULT_YEARS_BACK = 120
+export const DEFAULT_YEARS_RANGE = 120
 
 interface SelectOption {
   value: string
@@ -18,9 +20,10 @@ interface SelectOption {
 
 /**
  * Selectable year range for the header dropdowns. Bounds come from
- * `minDate`/`maxDate` when set, otherwise a wide window ending at the current
- * year so distant birthdays are reachable. Arrow navigation is clamped to
- * this same range (see OneCalendar), so the view can never drift outside it.
+ * `minDate`/`maxDate` when set, otherwise a wide window centered on the
+ * current year so both distant birthdays and far-future dates are reachable.
+ * Arrow navigation is clamped to this same range (see OneCalendar), so the
+ * view can never drift outside it.
  */
 export function getYearBounds(
   currentYear: number,
@@ -29,8 +32,10 @@ export function getYearBounds(
 ): { fromYear: number; toYear: number } {
   const fromYear = minDate
     ? minDate.getFullYear()
-    : currentYear - DEFAULT_YEARS_BACK
-  const toYear = maxDate ? maxDate.getFullYear() : currentYear
+    : currentYear - DEFAULT_YEARS_RANGE
+  const toYear = maxDate
+    ? maxDate.getFullYear()
+    : currentYear + DEFAULT_YEARS_RANGE
   return {
     fromYear: Math.min(fromYear, toYear),
     toYear: Math.max(fromYear, toYear),
