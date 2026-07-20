@@ -681,12 +681,6 @@ describe("F0Wizard", () => {
     expect(screen.getByText("Step 2 content")).toBeInTheDocument()
   })
 
-  // ---------------------------------------------------------------------------
-  // scroll regression: step content must fill the dialog's real height
-  // instead of an arbitrary viewport fraction, so it can scroll instead of
-  // clipping when a step has more content than fits (see F0Wizard fix).
-  // ---------------------------------------------------------------------------
-
   it("sizes the step content row to fill the dialog height, not a fixed viewport fraction", () => {
     render(
       <F0Wizard isOpen={true} onClose={() => {}} steps={makeSteps(2)}>
