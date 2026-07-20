@@ -8,8 +8,8 @@ import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 const UnreadDot = () => {
   return (
-    <div className="absolute -right-4 -top-1 flex h-3 w-3 items-center justify-center rounded-full">
-      <span className="h-2 w-2 rounded-full bg-f1-background-critical-bold" />
+    <div className="absolute -right-3.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
+      <span className="h-2.5 w-2.5 rounded-full bg-f1-special-highlight" />
     </div>
   )
 }
