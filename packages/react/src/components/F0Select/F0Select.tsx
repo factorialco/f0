@@ -1069,6 +1069,7 @@ const F0SelectComponent = forwardRef(function Select<
 
   const selectContent = (
     <SelectContent
+      aria-label={label || placeholder}
       items={items}
       taller={!!source?.filters}
       emptyMessage={

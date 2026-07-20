@@ -1242,4 +1242,66 @@ describe("Select", () => {
       expect(callsForOne).toHaveLength(1)
     })
   })
+
+  describe("listbox accessibility", () => {
+    it("names the listbox after the label", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      expect(
+        screen.getByRole("listbox", { name: "Pick an option" })
+      ).toBeInTheDocument()
+    })
+
+    it("falls back to the placeholder as the listbox name when the label is empty", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          label=""
+          placeholder="Choose a value"
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      expect(
+        screen.getByRole("listbox", { name: "Choose a value" })
+      ).toBeInTheDocument()
+    })
+
+    it("keeps the listbox free of stray attributes and focusable wrappers", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={mockOptions}
+          onChange={() => {}}
+        />
+      )
+
+      await openSelect(user)
+
+      const listbox = screen.getByRole("listbox")
+      // ReactNode slot props must not serialize onto the DOM element
+      expect(listbox).not.toHaveAttribute("top")
+      expect(listbox).not.toHaveAttribute("bottom")
+      expect(listbox).not.toHaveAttribute("right")
+      // Virtualized item wrappers are generic containers and must not be
+      // focusable (listbox children may only be options/groups)
+      listbox.querySelectorAll("[data-index]").forEach((wrapper) => {
+        expect(wrapper).not.toHaveAttribute("tabindex")
+      })
+    })
+  })
 })
