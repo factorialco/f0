@@ -843,8 +843,9 @@ reports these signals accurately.
 `expanded` accepts the same criteria shape as `defaultExpanded`, but as a
 **controlled** counterpart — mirroring `revealNodeId`/`focusOnEntry` on the
 Graph visualization. While defined it is the single source of truth for the
-auto-expansion policy: `defaultExpanded` is ignored and the policy side of
-`expandAll`/`collapseAll` is a no-op. Targeted controller calls (`expand`,
+auto-expansion policy: `defaultExpanded` is ignored and
+`expandAll`/`collapseAll` are complete no-ops (they neither replace the
+policy nor touch existing overrides). Targeted controller calls (`expand`,
 `collapse`, `toggle`, `expandTo`) still layer per-row overrides on top, and
 every override is cleared whenever the criteria changes by reference.
 Precedence is `expanded` (controlled) > `control` (imperative overrides) >
@@ -860,6 +861,26 @@ nested: {
 }
 ```
 
+When the criteria is a predicate, memoize it — an inline arrow function gets
+a new identity on every render, and each identity change clears the user's
+manual toggles (a dev-only warning fires if this happens repeatedly):
+
+```tsx
+// ❌ new identity every render: user toggles are cleared constantly
+nested: {
+  expanded: (ctx) => ctx.depth < 1
+}
+
+// ✅ stable identity: primitives, or a memoized predicate
+nested: {
+  expanded: 1
+}
+const criteria = useCallback((ctx) => ctx.item.type === "folder", [])
+nested: {
+  expanded: criteria
+}
+```
+
 <Canvas of={TableStories.TableNestedControlledExpansion} meta={TableStories} />
 
 #### Imperative controller: `useNestedTable`
@@ -869,6 +890,8 @@ Create a controller with `useNestedTable()` and pass it via
 queued and applied once it is ready.
 
 ```tsx
+import { useNestedTable } from "@factorialco/f0-react/experimental"
+
 const nestedTable = useNestedTable<OrgNode>()
 
 nestedTable.expandAll() // whole tree

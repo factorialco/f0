@@ -162,7 +162,13 @@ const NestedRowContent = <
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
-  const rowId = `${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+  // Row identity for the expansion overrides, the children cache and the
+  // controller registry. Prefixed with the parent's rowId (or the group for
+  // root rows) so equal depth/index positions in different branches or
+  // groups can never collide — e.g. the first id-less child of two expanded
+  // parents used to share the same key.
+  const parentKey = props.nestedRowProps?.parentRowId ?? `g${props.groupIndex}`
+  const rowId = `${parentKey}/${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
 
   const {
     setRowExpanded,
@@ -224,14 +230,22 @@ const NestedRowContent = <
   const autoLoadRequestedRef = useRef(false)
 
   // Re-arm the request guard when the children cache is invalidated (e.g. a
-  // filters change) so rows kept open by a policy reload their children.
+  // filters change) so rows kept open by a policy reload their children. A
+  // reset can also cancel an in-flight FIRST fetch — `isLoading` drops back
+  // to `false` with nothing cached and no error — which must re-arm too,
+  // since `hasFetched` never became true in that case.
   const previousHasFetchedRef = useRef(hasFetched)
+  const previousIsLoadingRef = useRef(isLoading)
   useEffect(() => {
-    if (previousHasFetchedRef.current && !hasFetched) {
+    const fetchInvalidated = previousHasFetchedRef.current && !hasFetched
+    const fetchCancelled =
+      previousIsLoadingRef.current && !isLoading && !hasFetched && !hasError
+    previousHasFetchedRef.current = hasFetched
+    previousIsLoadingRef.current = isLoading
+    if (fetchInvalidated || fetchCancelled) {
       autoLoadRequestedRef.current = false
     }
-    previousHasFetchedRef.current = hasFetched
-  }, [hasFetched])
+  }, [hasFetched, isLoading, hasError])
 
   useEffect(() => {
     if (!open) {
@@ -488,6 +502,7 @@ const NestedRowContent = <
                 nestedRowProps={{
                   ...props.nestedRowProps,
                   parentHasChildren: true,
+                  parentRowId: rowId,
                   depth: childDepth,
                   isLastChild: childIsLastInTree,
                   animateMount: animated,

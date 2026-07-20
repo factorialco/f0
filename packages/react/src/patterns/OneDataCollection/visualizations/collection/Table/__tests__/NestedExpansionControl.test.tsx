@@ -973,5 +973,321 @@ describe("Nested table expansion control", () => {
         expect(screen.getByText("Grandchild One")).toBeInTheDocument()
       })
     })
+
+    it("keeps expandAll/collapseAll as complete no-ops while `expanded` is controlled", async () => {
+      let api!: {
+        control: NestedTableController<Person>
+        setExpanded: (
+          value: NestedExpansionCriteria<Person> | undefined
+        ) => void
+      }
+      render(
+        <ControlledExpansionHarness
+          initialExpanded={true}
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+
+      // Manual collapse layers an override on top of the controlled criteria
+      act(() => api.control.collapse("p1"))
+      await waitFor(() => {
+        expect(screen.queryByText("Child One")).not.toBeInTheDocument()
+      })
+
+      // collapseAll must NOT clear the override: the row stays collapsed
+      // instead of snapping back open under the controlled `expanded: true`
+      act(() => api.control.collapseAll())
+      await act(async () => {})
+      expect(screen.queryByText("Child One")).not.toBeInTheDocument()
+
+      // expandAll is equally inert while controlled
+      act(() => api.control.expandAll())
+      await act(async () => {})
+      expect(screen.queryByText("Child One")).not.toBeInTheDocument()
+    })
+
+    it("warns in dev when a controlled `expanded` predicate changes identity repeatedly", async () => {
+      const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {})
+      const inlineCriteria = () =>
+        ((ctx) => ctx.depth < 0) as NestedExpansionCriteria<Person>
+      const { rerender } = render(
+        <NestedTableHarness nested={{ expanded: inlineCriteria() }} />
+      )
+      await waitForRootRows()
+      // Each rerender passes a brand-new predicate identity (the footgun)
+      rerender(<NestedTableHarness nested={{ expanded: inlineCriteria() }} />)
+      rerender(<NestedTableHarness nested={{ expanded: inlineCriteria() }} />)
+      await waitFor(() => {
+        expect(warnSpy).toHaveBeenCalledWith(
+          expect.stringContaining("nested.expanded")
+        )
+      })
+      warnSpy.mockRestore()
+    })
+  })
+
+  describe("row identity (rowId) collision safety", () => {
+    it("keeps expansion state independent between branches of id-less items", async () => {
+      type Node = { name: string; children?: Node[] }
+      const branches: Node[] = [
+        {
+          name: "Branch A",
+          children: [{ name: "A1", children: [{ name: "A1a" }] }],
+        },
+        {
+          name: "Branch B",
+          children: [{ name: "B1", children: [{ name: "B1a" }] }],
+        },
+      ]
+      const table = renderNestedTable(undefined, {
+        dataAdapter: { fetchData: async () => ({ records: branches }) },
+        fetchChildren: ({ item }: { item: Node }) => ({
+          records: item.children ?? [],
+          paginationInfo: {
+            total: item.children?.length ?? 0,
+            perPage: 10,
+            currentPage: 1,
+            pagesCount: 1,
+            hasMore: false,
+          },
+        }),
+      } as unknown as Partial<TestSource>)
+      await waitFor(() => {
+        expect(screen.getByText("Branch A")).toBeInTheDocument()
+        expect(screen.getByText("Branch B")).toBeInTheDocument()
+      })
+
+      // Reveal both intermediate rows, then their children: A1 and B1 both
+      // sit at depth 1, index 0 — the positions that used to collide.
+      act(() => table.control.expand((ctx) => ctx.depth === 0))
+      await waitFor(() => {
+        expect(screen.getByText("A1")).toBeInTheDocument()
+        expect(screen.getByText("B1")).toBeInTheDocument()
+      })
+      act(() => table.control.expand((ctx) => ctx.depth === 1))
+      await waitFor(() => {
+        expect(screen.getByText("A1a")).toBeInTheDocument()
+        expect(screen.getByText("B1a")).toBeInTheDocument()
+      })
+
+      // Collapsing only B1 must not touch A1's subtree
+      act(() =>
+        table.control.collapse(
+          (ctx) => (ctx.item as unknown as Node).name === "B1"
+        )
+      )
+      await waitFor(() => {
+        expect(screen.queryByText("B1a")).not.toBeInTheDocument()
+      })
+      expect(screen.getByText("A1a")).toBeInTheDocument()
+    })
+  })
+
+  describe("stale fetches and misbehaving adapters", () => {
+    it("discards an in-flight children fetch when the search resets the cache", async () => {
+      const pending: Array<() => void> = []
+      const fetchChildren = vi.fn(
+        ({ search }: { search?: string }) =>
+          new Promise((resolve) => {
+            pending.push(() =>
+              resolve({
+                records: [
+                  {
+                    id: `c-${search ?? "initial"}`,
+                    name: `Child ${search ?? "initial"}`,
+                  },
+                ],
+                paginationInfo: {
+                  total: 1,
+                  perPage: 2,
+                  currentPage: 1,
+                  pagesCount: 1,
+                  hasMore: false,
+                },
+              })
+            )
+          })
+      )
+      let api!: {
+        control: NestedTableController<Person>
+        setSearch: (search: string | undefined) => void
+      }
+      render(
+        <SearchOnlyMutableSourceHarness
+          nested={{ defaultExpanded: (ctx) => ctx.item.id === "p1" }}
+          fetchChildren={
+            fetchChildren as unknown as TestSource["fetchChildren"]
+          }
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitForRootRows()
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(1))
+
+      // The search changes while the first fetch is still in flight: the
+      // reset must unsubscribe it so its late resolution cannot repopulate
+      // the cache with children of the previous search.
+      act(() => api.setSearch("Grand"))
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(2))
+      await act(async () => {
+        pending[0]?.()
+      })
+      expect(screen.queryByText("Child initial")).not.toBeInTheDocument()
+
+      // The legitimate re-fetch (with the new search) still lands
+      await act(async () => {
+        pending[1]?.()
+      })
+      await waitFor(() => {
+        expect(screen.getByText("Child Grand")).toBeInTheDocument()
+      })
+    })
+
+    it("stops eager loading when a page adds no records despite hasMore: true", async () => {
+      const fetchChildren = vi.fn(() => ({
+        records: [],
+        paginationInfo: {
+          total: 100,
+          perPage: 2,
+          currentPage: 1,
+          pagesCount: 50,
+          // Misbehaving adapter: empty page but still claims there is more
+          hasMore: true,
+        },
+      }))
+      const table = renderNestedTable(undefined, {
+        fetchChildren,
+      } as unknown as Partial<TestSource>)
+      await waitForRootRows()
+
+      act(() => table.control.expand("p2", { children: "all" }))
+      await act(async () => {})
+
+      // The empty page is treated as the end of pagination: exactly one
+      // request, no infinite fetch loop.
+      expect(fetchChildren).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe("id normalization and controller rebinding", () => {
+    const numericTree = [
+      {
+        id: 1,
+        name: "Uno",
+        children: [
+          { id: 11, name: "Once", children: [{ id: 111, name: "CientoOnce" }] },
+        ],
+      },
+      { id: 2, name: "Dos", children: [{ id: 21, name: "Veintiuno" }] },
+    ]
+
+    it("matches numeric item ids against string targets (and vice versa)", async () => {
+      const table = renderNestedTable(undefined, {
+        dataAdapter: { fetchData: async () => ({ records: numericTree }) },
+        fetchChildren: ({ item }: { item: (typeof numericTree)[number] }) => ({
+          records: item.children ?? [],
+          paginationInfo: {
+            total: item.children?.length ?? 0,
+            perPage: 10,
+            currentPage: 1,
+            pagesCount: 1,
+            hasMore: false,
+          },
+        }),
+      } as unknown as Partial<TestSource>)
+      await waitFor(() => {
+        expect(screen.getByText("Uno")).toBeInTheDocument()
+      })
+
+      // String target (e.g. an id read from a URL param) → numeric item id
+      act(() => table.control.expand("2"))
+      await waitFor(() => {
+        expect(screen.getByText("Veintiuno")).toBeInTheDocument()
+      })
+      expect(table.control.isExpanded(2)).toBe(true)
+      expect(table.control.isExpanded("2")).toBe(true)
+
+      // expandTo with a string path over numeric ids
+      act(() => table.control.expandTo(["1", "11"]))
+      await waitFor(() => {
+        expect(screen.getByText("CientoOnce")).toBeInTheDocument()
+      })
+    })
+
+    it("replays operations queued while the table is unmounted onto the next mount", async () => {
+      const RebindHarness = ({
+        showTable,
+        onControl,
+      }: {
+        showTable: boolean
+        onControl: (control: NestedTableController<Person>) => void
+      }) => {
+        const control = useNestedTable<Person>()
+        onControl(control)
+        const source = useMemo(() => createSource(), [])
+        if (!showTable) return null
+        return (
+          <TableCollection<
+            Person,
+            FiltersDefinition,
+            SortingsDefinition,
+            SummariesDefinition,
+            ItemActionsDefinition<Person>,
+            NavigationFiltersDefinition,
+            GroupingDefinition<Person>
+          >
+            columns={columns}
+            source={source}
+            onSelectItems={vi.fn()}
+            onLoadData={vi.fn()}
+            onLoadError={vi.fn()}
+            nested={{ control }}
+          />
+        )
+      }
+
+      let control!: NestedTableController<Person>
+      const { rerender } = render(
+        <RebindHarness
+          showTable={true}
+          onControl={(c) => {
+            control = c
+          }}
+        />
+      )
+      await waitForRootRows()
+
+      // Unmount the table: the engine unbinds and operations queue again
+      rerender(
+        <RebindHarness
+          showTable={false}
+          onControl={(c) => {
+            control = c
+          }}
+        />
+      )
+      act(() => control.expand("p1"))
+
+      // Remount: the queued operation replays against the new engine
+      rerender(
+        <RebindHarness
+          showTable={true}
+          onControl={(c) => {
+            control = c
+          }}
+        />
+      )
+      await waitForRootRows()
+      await waitFor(() => {
+        expect(screen.getByText("Child One")).toBeInTheDocument()
+      })
+    })
   })
 })

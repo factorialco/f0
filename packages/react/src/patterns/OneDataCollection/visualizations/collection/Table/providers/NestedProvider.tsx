@@ -89,7 +89,9 @@ const matchesTarget = <R extends RecordType>(
   if (typeof target === "function") {
     return target({ item: entry.item, depth: entry.depth, hasActiveFilters })
   }
-  return "id" in entry.item && entry.item.id === target
+  // Normalized comparison (same as the table's own getRowKey) so a string
+  // target — e.g. an id read from a URL param — matches numeric item ids.
+  return "id" in entry.item && String(entry.item.id) === String(target)
 }
 
 const buildExpandAllCriteria = <R extends RecordType>(
@@ -175,11 +177,10 @@ export const NestedDataProvider = <R extends RecordType>({
   /**
    * Item ids requested via `expandTo` whose rows are not rendered yet. They
    * are consumed as rows register, so a deep path expands progressively as
-   * lazy loading reveals each level.
+   * lazy loading reveals each level. Keys are normalized with String() so a
+   * string path (e.g. ids from a URL) matches numeric item ids.
    */
-  const pendingExpandRef = useRef(
-    new Map<string | number, NestedExpandOptions>()
-  )
+  const pendingExpandRef = useRef(new Map<string, NestedExpandOptions>())
 
   const commitExpansionState = useCallback((next: NestedExpansionState) => {
     expansionStateRef.current = next
@@ -249,7 +250,7 @@ export const NestedDataProvider = <R extends RecordType>({
   const applyPendingExpansion = useCallback(
     (rowId: string, item: R, depth: number) => {
       if (!("id" in item)) return
-      const itemId = item.id as string | number
+      const itemId = String(item.id)
       const pendingOptions = pendingExpandRef.current.get(itemId)
       if (pendingOptions === undefined) return
       pendingExpandRef.current.delete(itemId)
@@ -359,6 +360,11 @@ export const NestedDataProvider = <R extends RecordType>({
       toggle: (target, options) =>
         applyToTargets(target, (current) => !current.expanded, options),
       expandAll: (options) => {
+        // While `nested.expanded` is controlled the whole operation is a
+        // no-op — not just the policy write. Clearing the overrides would
+        // silently re-apply the controlled criteria to rows the user
+        // explicitly toggled, contradicting the documented contract.
+        if (controlledPolicyRef.current !== undefined) return
         pendingExpandRef.current.clear()
         commitPolicy({
           criteria: buildExpandAllCriteria(options),
@@ -367,6 +373,8 @@ export const NestedDataProvider = <R extends RecordType>({
         commitExpansionState({ overrides: {}, eager: {} })
       },
       collapseAll: () => {
+        // Full no-op while controlled, same as expandAll (see above).
+        if (controlledPolicyRef.current !== undefined) return
         pendingExpandRef.current.clear()
         commitPolicy(null)
         commitExpansionState({ overrides: {}, eager: {} })
@@ -375,7 +383,7 @@ export const NestedDataProvider = <R extends RecordType>({
         if (path.length === 0) return
         const normalizedOptions = options ?? {}
         path.forEach((id) =>
-          pendingExpandRef.current.set(id, normalizedOptions)
+          pendingExpandRef.current.set(String(id), normalizedOptions)
         )
         // Apply immediately to the rows already rendered; the rest of the
         // path is consumed as lazy loading registers each revealed level.
@@ -431,8 +439,22 @@ export const NestedDataProvider = <R extends RecordType>({
    * precedence note on `NestedTableOptions.expanded`.
    */
   const controlledExpanded = nested?.expanded
+  const controlledPredicateChangesRef = useRef(0)
   useEffect(() => {
     if (controlledExpanded === undefined) return
+    // Dev-only footgun detector: an inline (non-memoized) predicate gets a
+    // new identity on every parent render, and each identity change clears
+    // the user's manual toggles below. Warn once after a few changes —
+    // legitimate controlled updates rarely replace a predicate repeatedly.
+    if (
+      process.env.NODE_ENV !== "production" &&
+      typeof controlledExpanded === "function" &&
+      ++controlledPredicateChangesRef.current === 3
+    ) {
+      console.warn(
+        "OneDataCollection: `nested.expanded` received a new predicate identity on several renders. Every change clears the user's manual expand/collapse overrides — pass a memoized predicate (useCallback/useMemo) or a primitive criteria."
+      )
+    }
     pendingExpandRef.current.clear()
     commitExpansionState({ overrides: {}, eager: {} })
     // Controlled re-application is not an explicit expansion change (same as
