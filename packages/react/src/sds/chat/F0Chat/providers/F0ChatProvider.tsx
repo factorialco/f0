@@ -53,6 +53,7 @@ const useStableCapabilities = (
       previous.canSend === capabilities.canSend &&
       previous.canReact === capabilities.canReact &&
       previous.canUpload === capabilities.canUpload &&
+      previous.canSendVoiceNotes === capabilities.canSendVoiceNotes &&
       previous.canEditMessage === capabilities.canEditMessage &&
       previous.canDeleteMessage === capabilities.canDeleteMessage)
   if (!same) previousRef.current = capabilities
