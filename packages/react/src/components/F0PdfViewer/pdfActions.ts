@@ -40,3 +40,15 @@ export const downloadPdf = async (
   anchor.remove()
   URL.revokeObjectURL(url)
 }
+
+/** Download for the non-PDF kinds: straight from the source URL (there's no
+ * in-memory document to serialize, unlike the pdf.js path above). */
+export const downloadFromUrl = (url: string, filename?: string): void => {
+  const anchor = document.createElement("a")
+  anchor.href = url
+  anchor.download = filename ?? ""
+  anchor.rel = "noreferrer"
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+}

@@ -13,7 +13,7 @@ import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import { cn } from "@/lib/utils"
 import { F0Select } from "@/components/F0Select"
 
-import type { F0PdfScale } from "../types"
+import type { F0PdfScale, F0PdfViewerAction } from "../types"
 import { ToolbarButton } from "./ToolbarButton"
 
 interface ScaleOption {
@@ -37,6 +37,8 @@ interface PdfToolbarProps {
   onRotate: () => void
   onPrint: () => void
   onDownload: () => void
+  /** Host-provided actions appended after the built-in controls. */
+  actions?: F0PdfViewerAction[]
 }
 
 const groupClassName = "flex flex-row items-center gap-2"
@@ -57,6 +59,7 @@ export const PdfToolbar = ({
   onRotate,
   onPrint,
   onDownload,
+  actions,
 }: PdfToolbarProps) => {
   const { pdfViewer } = useI18n()
 
@@ -131,6 +134,14 @@ export const PdfToolbar = ({
           onClick={onDownload}
           icon={Download}
         />
+        {actions?.map((action) => (
+          <ToolbarButton
+            key={action.label}
+            label={action.label}
+            onClick={action.onClick}
+            icon={action.icon}
+          />
+        ))}
       </div>
     </div>
   )

@@ -559,6 +559,9 @@ export const defaultTranslations = {
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
+    // In-chat document preview (the document card + fullscreen viewer).
+    openDocument: "Open document",
+    documentPreview: "Document preview",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
@@ -880,6 +883,13 @@ export const defaultTranslations = {
     print: "Print",
     download: "Download",
     loading: "Loading document",
+    // Non-PDF kinds (sheet/docx/text) of the document viewer.
+    previewFailed: "Preview isn't available for this file",
+    // Spreadsheet grids are capped client-side; shown when rows were cut off.
+    showingFirstRows: {
+      one: "Showing the first row",
+      other: "Showing the first {{count}} rows",
+    },
   },
 } as const
 
