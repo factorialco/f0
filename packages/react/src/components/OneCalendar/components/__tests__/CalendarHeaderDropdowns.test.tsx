@@ -40,6 +40,21 @@ describe("buildYearOptions", () => {
     ])
   })
 
+  it("always includes the year in view, even past the default bounds", () => {
+    // Arrows can navigate beyond the default window (currentYear); the view
+    // year must still be a selectable option or the trigger shows nothing.
+    const options = buildYearOptions(2025, undefined, undefined, 2026)
+    expect(options[0].value).toBe("2026")
+
+    const pastView = buildYearOptions(
+      2025,
+      new Date(2020, 0, 1),
+      new Date(2024, 0, 1),
+      2015
+    )
+    expect(pastView.map((o) => o.value)).toContain("2015")
+  })
+
   it("stays descending even if min/max are passed inverted", () => {
     const options = buildYearOptions(
       2026,

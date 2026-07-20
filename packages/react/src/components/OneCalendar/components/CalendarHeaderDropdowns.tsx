@@ -19,19 +19,22 @@ interface SelectOption {
 /**
  * Descending list of selectable years. Bounds come from `minDate`/`maxDate`
  * when set, otherwise a wide window ending at the current year so distant
- * birthdays are reachable.
+ * birthdays are reachable. The list always includes `viewYear` — the arrows
+ * can navigate past the default bounds, and a view year missing from the
+ * options would leave the select with a value it can't display.
  */
 export function buildYearOptions(
   currentYear: number,
   minDate?: Date,
-  maxDate?: Date
+  maxDate?: Date,
+  viewYear?: number
 ): SelectOption[] {
   const fromYear = minDate
     ? minDate.getFullYear()
     : currentYear - DEFAULT_YEARS_BACK
   const toYear = maxDate ? maxDate.getFullYear() : currentYear
-  const hi = Math.max(fromYear, toYear)
-  const lo = Math.min(fromYear, toYear)
+  const hi = Math.max(fromYear, toYear, viewYear ?? -Infinity)
+  const lo = Math.min(fromYear, toYear, viewYear ?? Infinity)
   const options: SelectOption[] = []
   for (let year = hi; year >= lo; year--) {
     options.push({ value: String(year), label: String(year) })
@@ -94,8 +97,14 @@ export function CalendarHeaderDropdowns({
   const i18n = useI18n()
 
   const yearOptions = useMemo(
-    () => buildYearOptions(new Date().getFullYear(), minDate, maxDate),
-    [minDate, maxDate]
+    () =>
+      buildYearOptions(
+        new Date().getFullYear(),
+        minDate,
+        maxDate,
+        viewDate.getFullYear()
+      ),
+    [minDate, maxDate, viewDate]
   )
 
   const monthOptions = useMemo(

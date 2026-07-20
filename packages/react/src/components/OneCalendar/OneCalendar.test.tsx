@@ -122,6 +122,31 @@ describe("OneCalendar", () => {
       expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument()
     })
 
+    it("keeps showing the year when arrows navigate past the default range", async () => {
+      // The default year list ends at the current year; arrowing from
+      // December into January of the next year must still display that year
+      // in the trigger (regression: it rendered as an ellipsis).
+      const currentYear = new Date().getFullYear()
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="day"
+            defaultSelected={new Date(currentYear, 11, 15)}
+          />
+        </TestWrapper>
+      )
+
+      expect(await screen.findByText(String(currentYear))).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole("button", { name: "Next" }))
+
+      expect(await screen.findByText("January")).toBeInTheDocument()
+      expect(
+        await screen.findByText(String(currentYear + 1))
+      ).toBeInTheDocument()
+    })
+
     it("stays in sync with the prev/next arrows", async () => {
       render(
         <TestWrapper locale="en-US">
