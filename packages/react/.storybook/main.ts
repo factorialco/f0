@@ -49,50 +49,54 @@ const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
-    {
-      directory: "../src/components",
-      titlePrefix: "Components",
-    },
-    {
-      directory: "../src/patterns",
-      titlePrefix: "Patterns",
-    },
-    {
-      directory: "../src/experimental",
-      titlePrefix: "Experimental",
-    },
-    {
-      directory: "../src/kits",
-      titlePrefix: "Kits",
-    },
-    {
-      directory: "../src/layouts",
-      titlePrefix: "Layouts",
-    },
-    {
-      directory: "../src/lib",
-      titlePrefix: "Library",
-    },
-    {
-      directory: "../src/hooks",
-      titlePrefix: "Library",
-    },
-    {
-      directory: "../src/sds",
-      titlePrefix: "SDS",
-    },
-    {
-      directory: "../src/examples",
-      titlePrefix: "Examples",
-    },
-    {
-      directory: "../src/deprecated",
-      titlePrefix: "Deprecated",
-    },
-    {
-      directory: "../src/ui",
-      titlePrefix: "🔒 Internal",
-    },
+    // ── Components · Core primitives ─────────────────────────────
+    // Maturity (experimental / stable) is a story tag surfaced as a
+    // sidebar badge (see manager.ts), NOT a separate top-level section.
+    // The former `experimental/` bucket is dissolved here by function.
+    { directory: "../src/components", titlePrefix: "Components" },
+    { directory: "../src/experimental/Actions", titlePrefix: "Components" },
+    { directory: "../src/experimental/Forms", titlePrefix: "Components" },
+    { directory: "../src/experimental/Lists", titlePrefix: "Components" },
+    { directory: "../src/experimental/Navigation", titlePrefix: "Components" },
+    { directory: "../src/experimental/Overlays", titlePrefix: "Components" },
+    { directory: "../src/experimental/Information", titlePrefix: "Components" },
+    { directory: "../src/experimental/Widgets", titlePrefix: "Components" },
+    { directory: "../src/experimental/Utilities", titlePrefix: "Components" },
+    { directory: "../src/experimental/OneTable", titlePrefix: "Components" },
+    { directory: "../src/experimental/F0CardHorizontal", titlePrefix: "Components" },
+    { directory: "../src/experimental/F0SegmentedBar", titlePrefix: "Components" },
+    { directory: "../src/experimental/F0VersionHistory", titlePrefix: "Components" },
+    { directory: "../src/hooks/toast", titlePrefix: "Components" },
+
+    // ── Patterns · Core compositions (layouts folded in) ─────────
+    { directory: "../src/patterns", titlePrefix: "Patterns" },
+    { directory: "../src/experimental/CrudPatterns", titlePrefix: "Patterns" },
+    { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
+
+    // ── Kits · functional bundles (AI + Chat promoted from sds) ──
+    { directory: "../src/kits", titlePrefix: "Kits" },
+    { directory: "../src/sds/ai", titlePrefix: "Kits" },
+    { directory: "../src/sds/chat", titlePrefix: "Kits" },
+    { directory: "../src/experimental/AiPromotionChat", titlePrefix: "Kits/AI" },
+
+    // ── Domain specific · owned by a single domain (was "SDS") ───
+    { directory: "../src/sds/Home", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/Profile", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/surveys", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/TimeLine", titlePrefix: "Domain specific/Time tracking" },
+    { directory: "../src/sds/UpsellingKit", titlePrefix: "Domain specific/Growth" },
+
+    // ── Resources · hooks, utilities, examples ───────────────────
+    { directory: "../src/lib", titlePrefix: "Resources" },
+    { directory: "../src/hooks/datasource", titlePrefix: "Resources" },
+    { directory: "../src/examples", titlePrefix: "Resources/Examples" },
+
+    // ── Deprecated · scheduled for removal, with migration ───────
+    { directory: "../src/deprecated", titlePrefix: "Deprecated" },
+
+    // ── Internal · primitives not exported from the package ──────
+    { directory: "../src/ui", titlePrefix: "🔒 Internal" },
     ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
   staticDirs: ["../public", "./static"],

@@ -47,7 +47,7 @@ const actions = [
 ]
 
 const meta: Meta<typeof SidebarTabPanel> = {
-  title: "Patterns/Navigation/Sidebar/SidebarTabPanel",
+  title: "Navigation/Sidebar/SidebarTabPanel",
   component: SidebarTabPanel,
   tags: ["autodocs", "experimental"],
   decorators: [
