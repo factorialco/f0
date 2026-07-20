@@ -95,8 +95,36 @@ const config: StorybookConfig = {
     // ── Deprecated · scheduled for removal, with migration ───────
     { directory: "../src/deprecated", titlePrefix: "Deprecated" },
 
-    // ── Internal · primitives not exported from the package ──────
-    { directory: "../src/ui", titlePrefix: "🔒 Internal" },
+    // ── ui/ dissolved: "internal" is a badge, not a section. Items go to
+    //    their altitude (primitive / component / pattern); privacy is the
+    //    `internal` tag/badge and stays visible to contributors. ──────────
+    // Core · internal primitives (chrome that wraps public components)
+    { directory: "../src/ui/Action", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Card", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/ChevronToggle", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Counter", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/DatePickerPopup", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Dialog", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/IconBadge", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/OverflowList", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Select", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Spinner", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Toast", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/VerticalOverflowList", titlePrefix: "Components/Primitives" },
+    // Core · components (the widget itself; no public wrapper)
+    { directory: "../src/ui/ButtonCopy", titlePrefix: "Components" },
+    { directory: "../src/ui/ButtonGroup", titlePrefix: "Components" },
+    { directory: "../src/ui/F0Wizard", titlePrefix: "Components" },
+    { directory: "../src/ui/OnePagination", titlePrefix: "Components" },
+    { directory: "../src/ui/OnePreset", titlePrefix: "Components" },
+    { directory: "../src/ui/Shortcut", titlePrefix: "Components" },
+    { directory: "../src/ui/value-display", titlePrefix: "Components" },
+    { directory: "../src/ui/Omnibutton", titlePrefix: "Components" }, // deprecated (badge)
+    // Patterns
+    { directory: "../src/ui/Kanban", titlePrefix: "Patterns" },
+    { directory: "../src/ui/Lane", titlePrefix: "Patterns" },
+    // Resources
+    { directory: "../src/ui/OneRestrictComponent", titlePrefix: "Resources" },
     ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
   staticDirs: ["../public", "./static"],

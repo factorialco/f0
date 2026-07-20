@@ -72,12 +72,9 @@ addons.setConfig({
     collapsedRoots: ["playground"],
     renderLabel: renderSidebarLabel,
     filters: {
-      internal: (item) => {
-        return (
-          !process.env.STORYBOOK_PUBLIC_BUILD ||
-          !item.tags?.includes("internal")
-        )
-      },
+      // `internal` is no longer hidden: it is an informational badge (see
+      // tagBadges below), so internal primitives stay visible to contributors
+      // in every build. Only `no-sidebar` is filtered out.
       noSidebar: (item) => !item.tags?.includes("no-sidebar"),
     },
   },
