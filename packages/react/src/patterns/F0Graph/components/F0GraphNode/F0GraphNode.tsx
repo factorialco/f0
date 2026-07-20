@@ -14,11 +14,11 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import type { F0GraphNodeProps } from "./types"
-import { tagColumn } from "./types"
 
 import { useF0GraphRenderConfigInternal } from "../../contexts"
 import { F0GraphNodeHoverCard } from "./F0GraphNodeHoverCard"
 import { F0GraphNodeTags } from "./F0GraphNodeTags"
+import { tagColumn } from "./types"
 import { graphNodeContainerVariants } from "./variants"
 
 // Composite-only transitions. Layout-affecting properties (padding,
@@ -182,7 +182,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
             // Dimmed visually applies to the whole wrapper only in dot
             // (matches previous behaviour).
             state === "dimmed" && isDot && "opacity-40",
-            "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0",
+            // Keyboard focus ring on the wrapper for compact/detail (matches the
+            // selection ring above). For dot the wrapper is the invisible ~44px
+            // layout box, so the ring is moved to the scaled avatar below —
+            // otherwise it would frame the hidden box, not the visible dot.
+            !isDot &&
+              "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0",
             "px-2.5 py-2",
             "min-h-11"
           )}
@@ -241,7 +246,12 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 "flex  shrink-0 items-center justify-center overflow-hidden rounded-full",
                 isDot &&
                   (state === "selected" || state === "highlighted") &&
-                  "ring-2 ring-f1-background-selected ring-offset-0"
+                  "ring-2 ring-f1-background-selected ring-offset-0",
+                // In dot the visible node is this scaled avatar, so the keyboard
+                // focus ring lives here (not on the invisible wrapper) so it
+                // wraps the dot and scales with it.
+                isDot &&
+                  "group-focus-visible:ring-2 group-focus-visible:ring-f1-background-selected group-focus-visible:ring-offset-0"
               )}
               style={{
                 transform: `translateZ(0) scale(${isDot ? 96 / 40 : 1})`,
