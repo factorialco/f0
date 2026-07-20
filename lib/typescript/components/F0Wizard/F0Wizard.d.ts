@@ -14,6 +14,13 @@ import type { F0WizardProps } from "./F0Wizard.types";
  * sheet behavior. The consumer is responsible for embedding it inside a
  * `Modal`, bottom sheet, or full-screen layout as appropriate.
  *
+ * The Back/Next footer is pinned to the bottom of the container. Step content
+ * scrolls inside a `ScrollView` by default; to keep a focused input visible
+ * above the keyboard while the footer stays pinned, inject a keyboard-aware
+ * scroll component via `ScrollComponent` (F0Wizard forwards the measured footer
+ * height as `bottomOffset`, so the focused field clears the buttons — no magic
+ * numbers). F0Wizard adds no keyboard dependency of its own.
+ *
  * @example
  * <!-- prettier-ignore -->
  * <F0Wizard
