@@ -634,7 +634,7 @@ export function F0GraphView<T = unknown>(
                     aria-label={controlLabels?.graphCanvas ?? i18n.graph.canvas}
                     onKeyDown={handleCanvasKeyDown}
                     data-zoom-level={zoomLevel}
-                    className="f0-graph relative h-full w-full bg-f1-background-secondary outline-none"
+                    className="f0-graph relative h-full w-full outline-none"
                   >
                     <div
                       ref={containerRef}
