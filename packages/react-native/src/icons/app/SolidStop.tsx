@@ -11,7 +11,7 @@ const SvgSolidStop = (props: SvgProps, ref: Ref<Svg>) => (
   >
     <Path
       fill="currentColor"
-      d="M8 5h8a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V8a3 3 0 0 1 3-3"
+      d="M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3"
     />
   </Svg>
 )

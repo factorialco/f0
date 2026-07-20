@@ -4,7 +4,7 @@ import { ComponentProps, useState } from "react"
 
 import { StandardLayout } from "@/layouts/StandardLayout"
 import { PageHeader } from "@/experimental/Navigation/Header/PageHeader"
-import { ChevronRight, Download, Files, Pencil } from "@/icons/app"
+import { ArrowRight, Download, Files, Pencil } from "@/icons/app"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import ApplicationFrameStoryMeta from "@/patterns/ApplicationFrame/index.stories"
 import { F0Dialog } from "@/patterns/F0Dialog"
@@ -219,7 +219,7 @@ function OpenAsPageScenario({
       },
       {
         label: "Open",
-        icon: ChevronRight,
+        icon: ArrowRight,
         type: "primary",
         hideLabel: true,
         hideInMobileDropdown: true,
@@ -237,6 +237,45 @@ function OpenAsPageScenario({
   return (
     <CrudPatternLayout>
       <OneDataCollection source={source} visualizations={[visualization]} />
+    </CrudPatternLayout>
+  )
+}
+
+function RightDialogScenario({
+  visualization = tableVisualization,
+}: {
+  visualization?: CrudVisualization
+} = {}) {
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(
+    null
+  )
+
+  const source = useDataCollectionSource({
+    dataAdapter: createResourceDataAdapter(initialResources),
+    filters: resourceFilters,
+    itemOnClick: (item) => () => setSelectedResource(item),
+    primaryActions: () => defaultCrudPrimaryAction(() => {}),
+    secondaryActions: defaultCrudSecondaryActions(),
+  })
+
+  return (
+    <CrudPatternLayout>
+      <OneDataCollection source={source} visualizations={[visualization]} />
+      <F0Dialog
+        isOpen={selectedResource !== null}
+        onClose={() => setSelectedResource(null)}
+        title="Resource details"
+        description="Open details in a Right Dialog so the user can read the resource while keeping the collection visible."
+        position="right"
+        width="sm"
+        disableContentPadding
+        secondaryAction={{
+          label: "Close",
+          onClick: () => setSelectedResource(null),
+        }}
+      >
+        {selectedResource && <ResourceDialogPreview />}
+      </F0Dialog>
     </CrudPatternLayout>
   )
 }
@@ -277,12 +316,14 @@ function RightDialogToPageScenario() {
           setSelectedResource(null)
         }}
         title="Resource details"
-        description="Open a reduced view in a right dialog, then continue to the full page when deeper exploration is needed."
+        description="Open a reduced view in a Right Dialog, then continue to the full page when deeper exploration is needed."
         position="right"
-        width="md"
+        width="sm"
         disableContentPadding
         primaryAction={{
           label: "Open Details",
+          icon: ArrowRight,
+          iconPosition: "right",
           onClick: () => setSurface("page"),
         }}
       >
@@ -296,12 +337,20 @@ export const TableReadDialog: Story = {
   render: () => <DefaultDialogScenario />,
 }
 
+export const TableReadRightDialog: Story = {
+  render: () => <RightDialogScenario />,
+}
+
 export const TableReadRightDialogToPage: Story = {
   render: () => <RightDialogToPageScenario />,
 }
 
 export const TableReadPage: Story = {
   render: () => <OpenAsPageScenario />,
+}
+
+export const ListReadRightDialog: Story = {
+  render: () => <RightDialogScenario visualization={listVisualization} />,
 }
 
 export const ListReadPage: Story = {

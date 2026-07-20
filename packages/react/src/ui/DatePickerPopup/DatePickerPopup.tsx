@@ -29,9 +29,8 @@ export type CompareToDef = {
     | ((value: DateRangeComplete) => DateRangeComplete | DateRangeComplete[])
 }
 
-export type DatePickerCompareTo = Record<
-  GranularityDefinitionKey,
-  CompareToDef[]
+export type DatePickerCompareTo = Partial<
+  Record<GranularityDefinitionKey, CompareToDef[]>
 >
 
 export interface DatePickerPopupProps {
@@ -55,6 +54,8 @@ export interface DatePickerPopupProps {
     compareTo: DateRangeComplete | DateRangeComplete[] | undefined
   ) => void
   weekStartsOn?: WeekStartsOn
+  /** When true, switching granularity only changes the view; selection and close happen only on a cell click. Default false. */
+  selectOnCellOnly?: boolean
 }
 
 const PRESET_CUSTOM = "__custom__"
@@ -72,6 +73,7 @@ export function DatePickerPopup({
   value,
   asChild,
   weekStartsOn,
+  selectOnCellOnly = false,
   ...props
 }: DatePickerPopupProps) {
   const i18n = useI18n()
@@ -143,6 +145,13 @@ export function DatePickerPopup({
   const [customRangeMode, setCustomRangeMode] = useState(false)
 
   const handleSelectGranularity = (granularity: GranularityDefinitionKey) => {
+    // View-only: switch granularity without emitting or closing.
+    if (selectOnCellOnly) {
+      setLocalValue((prev) =>
+        prev ? { ...prev, granularity } : { value: undefined, granularity }
+      )
+      return
+    }
     handleSelect({
       value: localValue?.value,
       granularity,
@@ -276,6 +285,7 @@ export function DatePickerPopup({
                 minDate={props.minDate}
                 maxDate={props.maxDate}
                 weekStartsOn={effectiveWeekStartsOn}
+                selectOnCellOnly={selectOnCellOnly}
               />
               {compareToOptions.length > 0 && (
                 <div className="mt-4 flex flex-col gap-2">

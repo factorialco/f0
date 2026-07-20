@@ -89,6 +89,17 @@ export type UseSelectableProps<
    * @default false
    */
   preserveSelectionOnDatasetChange?: boolean
+  /**
+   * Selectable rows currently rendered (incl. nested children), so "select all"
+   * reaches rows absent from `data.records`. Falls back to `data.records`.
+   */
+  getRenderedSelectableEntries?: () => Array<[SelectionId, R]>
+  /**
+   * Count of currently-rendered selectable rows (incl. nested children). Used
+   * as the item total when it exceeds `paginationInfo.total`, so selection
+   * counts stay correct in nested/tree tables.
+   */
+  renderedSelectableCount?: number
 }
 
 export type SelectionMeta<R extends RecordType> = {

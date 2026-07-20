@@ -99,6 +99,15 @@ div[role="dialog"] {
   animation: f0-form-error-shake 0.5s ease-in-out;
 }
 
+/* Editable-table fields contain one input per cell and surface their own
+   per-cell error styling, so skip the shake/glow on every cell input when
+   navigating to the field's error */
+.f0-form-error-navigate
+  [data-f0-editable-table]
+  [data-testid="input-field-wrapper"] {
+  animation: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .f0-form-error-navigate [data-testid="input-field-wrapper"],
   .f0-form-error-navigate .rich-text-editor-container {
@@ -111,6 +120,14 @@ div[role="dialog"] {
       :has(.rich-text-editor-container)
     ) {
     animation: none;
+  }
+
+  /* Editable-table cell inputs keep their own per-cell error styling */
+  .f0-form-error-navigate
+    [data-f0-editable-table]
+    [data-testid="input-field-wrapper"] {
+    border-color: transparent !important;
+    box-shadow: none;
   }
 }
 
@@ -178,7 +195,7 @@ div[role="dialog"] {
 }
 
 .f0-chat-cursor-blink {
-  animation: f0-chat-cursor-blink 0.8s ease-in-out infinite;
+  animation: f0-chat-cursor-blink 0.6s steps(2) infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

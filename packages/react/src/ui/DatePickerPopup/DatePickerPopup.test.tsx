@@ -86,6 +86,50 @@ describe("OneDatePickerPopup", () => {
     expect(screen.getAllByText(/month/i).length).toBeGreaterThan(0)
   })
 
+  it("emits a selection when switching granularity by default", async () => {
+    const user = userEvent.setup()
+    const yearValue = {
+      value: { from: new Date(2026, 0, 1), to: new Date(2026, 11, 31) },
+      granularity: "year" as const,
+    }
+    render(
+      <DatePickerPopup
+        {...defaultProps}
+        granularities={["year", "quarter"]}
+        value={yearValue}
+      />
+    )
+
+    await user.click(screen.getByText("Open Date Picker"))
+    mockOnSelect.mockClear()
+    await user.click(screen.getByRole("option", { name: "Quarter" }))
+
+    expect(mockOnSelect).toHaveBeenCalled()
+  })
+
+  it("does not emit or close when switching granularity with selectOnCellOnly", async () => {
+    const user = userEvent.setup()
+    const yearValue = {
+      value: { from: new Date(2026, 0, 1), to: new Date(2026, 11, 31) },
+      granularity: "year" as const,
+    }
+    render(
+      <DatePickerPopup
+        {...defaultProps}
+        granularities={["year", "quarter"]}
+        value={yearValue}
+        selectOnCellOnly
+      />
+    )
+
+    await user.click(screen.getByText("Open Date Picker"))
+    await user.click(screen.getByRole("option", { name: "Quarter" }))
+
+    // View-only: nothing emitted and the popup stays open.
+    expect(mockOnSelect).not.toHaveBeenCalled()
+    expect(screen.getByRole("dialog")).toBeInTheDocument()
+  })
+
   it("shows custom range mode when custom preset is selected", async () => {
     const user = userEvent.setup()
     render(<DatePickerPopup {...defaultProps} presets={mockPresets} />)

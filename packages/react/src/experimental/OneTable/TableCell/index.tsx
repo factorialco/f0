@@ -46,6 +46,13 @@ interface TableCellProps {
   width?: number | "auto"
 
   /**
+   * Optional minimum width for the cell. When provided, overrides the
+   * minWidth derived from `width`, allowing the cell to shrink no further
+   * than this value.
+   */
+  minWidth?: number | "auto"
+
+  /**
    * When true, the header cell will stick in the specified position when scrolling horizontally
    * @default undefined
    */
@@ -92,6 +99,7 @@ const stickyScrolledBase =
 const stickyScrollClasses: Record<ReferenceType, string> = {
   none: `bg-f1-background ${stickyScrolledBase} before:bg-f1-background group-hover:before:bg-f1-background-hover`,
   striped: `bg-f1-background bg-[${stripedLines}] [background-size:100%_100px] ${stickyScrolledBase} before:bg-[${stripedLines},_var(--f1-background)] before:[background-size:100%_100px,_100%_100%] group-hover:before:bg-[${stripedLines},_var(--f1-background-hover)] group-hover:before:[background-size:100%_100px,_100%_100%]`,
+  striked: `bg-f1-background ${stickyScrolledBase} before:bg-f1-background group-hover:before:bg-f1-background-hover`,
 }
 
 export function TableCell({
@@ -99,6 +107,7 @@ export function TableCell({
   href,
   onClick,
   width = "auto",
+  minWidth,
   firstCell = false,
   sticky,
   colSpan,
@@ -118,6 +127,7 @@ export function TableCell({
   const stickyRight = sticky?.right
 
   const colWidth = getColWidth(width)
+  const colMinWidth = minWidth !== undefined ? getColWidth(minWidth) : colWidth
 
   const linkRef = useRef<HTMLAnchorElement>(null)
   const depth = nestedRowProps?.depth ?? 0
@@ -146,7 +156,7 @@ export function TableCell({
       style={{
         width: colWidth,
         maxWidth: colWidth,
-        minWidth: colWidth,
+        minWidth: colMinWidth,
         left: stickyLeft,
         right: stickyRight,
       }}

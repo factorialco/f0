@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/ui/skeleton"
 
 import { F0ActionItem } from "../F0ActionItem"
-
+import { ActiveFormCard } from "./components/ActiveFormCard"
 import {
   AssistantMessage as F0AssistantMessage,
   type F0AssistantMessageExtraProps,
@@ -50,12 +50,12 @@ export type F0AiMessagesContainerProps = {
   /** Optional React node rendered inline at the end of the list (e.g. CopilotKit interrupt). */
   interrupt?: ReactNode
 
-  /** Greeting shown above the initial message in the welcome screen. */
-  greeting?: string
-  /** Initial message(s) shown in the welcome screen, or a default if omitted. */
+  /** Welcome phrase shown centered when the chat is empty. Falls back to
+   *  `translations.ai.defaultInitialMessage` if omitted. */
   initialMessage?: string | string[]
-  /** Optional click on the One icon (factorial uses it for the pong easter egg). */
-  onWelcomeIconClick?: () => void
+  /** Called when the user clicks the welcome phrase (used by F0AiChat to open
+   *  the pong easter egg). When omitted the phrase is non-interactive. */
+  onWelcomeClick?: () => void
 
   /** Returns a React node for an assistant message's tool call, or null. */
   renderToolCall?: F0AssistantMessageExtraProps["renderToolCall"]
@@ -66,6 +66,10 @@ export type F0AiMessagesContainerProps = {
   onAssistantMessageRendered?: (message: Message) => void
   /** Disables auto-scrollIntoView on new user messages (fullscreen sets false). */
   autoScrollUserIntoView?: boolean
+
+  /** Fullscreen welcome layout: pushes the welcome phrase to the bottom of the
+   *  top half so it meets the composer near the vertical center. */
+  fullscreen?: boolean
 
   /**
    * Renders the markdown content of user/assistant messages. The connected
@@ -102,9 +106,8 @@ const Messages = ({
   turns,
   isLoadingThread = false,
   interrupt,
-  greeting,
   initialMessage,
-  onWelcomeIconClick,
+  onWelcomeClick,
   renderToolCall,
   onReplyQuote,
   onAssistantMessageRendered,
@@ -113,6 +116,7 @@ const Messages = ({
   feedback,
   freezeLayout = false,
   noShadows = false,
+  fullscreen = false,
   children,
   AssistantMessage: AssistantMessageProp,
   UserMessage: UserMessageProp,
@@ -128,20 +132,16 @@ const Messages = ({
   const AssistantMessage = AssistantMessageProp ?? F0AssistantMessage
   const UserMessage = UserMessageProp ?? F0UserMessage
 
-  const initialMessages = useMemo(
-    () => makeInitialMessages(initialMessage),
-    [initialMessage]
-  )
-  const resolvedInitialMessages = useMemo(
-    () =>
-      initialMessages.length > 0
-        ? initialMessages
-        : makeInitialMessages(translations.ai.defaultInitialMessage),
-    [initialMessages, translations.ai.defaultInitialMessage]
-  )
-
+  const welcomeMessages = useMemo(() => {
+    const source = initialMessage ?? translations.ai.defaultInitialMessage
+    const arr = Array.isArray(source) ? source : [source]
+    return arr.filter((s): s is string => typeof s === "string" && s.length > 0)
+  }, [initialMessage, translations.ai.defaultInitialMessage])
+  // Welcome screen is mutually exclusive with the thread-loading skeleton:
+  // when a thread is in-flight we render `MessagesSkeleton` instead of the
+  // welcome, even though `messages` is momentarily empty.
   const showWelcomeBlock =
-    turns.length === 0 && (greeting || resolvedInitialMessages.length > 0)
+    !isLoadingThread && turns.length === 0 && welcomeMessages.length > 0
 
   // Scroll state
   const viewportRef = useRef<HTMLDivElement>(null)
@@ -250,9 +250,7 @@ const Messages = ({
         {turn.endIndicator === "thinking" && (
           <F0ActionItem title={translations.ai.thinking} status="executing" />
         )}
-        {turn.endIndicator === "activity" && (
-          <F0ActionItem title="" status="executing" />
-        )}
+        {turn.endIndicator === "activity" && <F0ActionItem status="writing" />}
         {turn.feedback && (
           <TurnFeedback
             content={turn.feedback.content}
@@ -260,6 +258,7 @@ const Messages = ({
             onCopy={onCopy}
           />
         )}
+        {isLastTurn && <ActiveFormCard />}
       </div>
     )
   }
@@ -284,18 +283,16 @@ const Messages = ({
           >
             <div
               className={cn(
-                showWelcomeBlock && !isLoadingThread
-                  ? "flex flex-1"
-                  : "flex flex-col gap-6",
+                showWelcomeBlock ? "flex flex-1" : "flex flex-col gap-6",
                 "w-full max-w-content"
               )}
             >
               {isLoadingThread && <MessagesSkeleton />}
-              {!isLoadingThread && showWelcomeBlock && (
+              {showWelcomeBlock && (
                 <WelcomeScreen
-                  greeting={greeting}
-                  initialMessages={resolvedInitialMessages}
-                  onIconClick={onWelcomeIconClick}
+                  messages={welcomeMessages}
+                  onClick={onWelcomeClick}
+                  fullscreen={fullscreen}
                 />
               )}
               {!isLoadingThread &&
@@ -365,13 +362,3 @@ const MessagesSkeleton = () => (
     </div>
   </div>
 )
-
-function makeInitialMessages(initial?: string | string[]): Message[] {
-  if (!initial) return []
-  const arr = Array.isArray(initial) ? initial : [initial]
-  return arr.map((message) => ({
-    id: message,
-    role: "assistant",
-    content: message,
-  }))
-}

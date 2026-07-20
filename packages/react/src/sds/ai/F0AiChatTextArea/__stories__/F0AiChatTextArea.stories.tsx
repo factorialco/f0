@@ -4,15 +4,28 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import {
+  ChartVerticalBars,
+  File,
+  Marketplace,
+  Pencil,
+  Search,
+} from "@/icons/app"
+import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+
+import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
 import type {
   AiChatCreditWarning,
   AiChatDisclaimer,
   AiChatFileAttachmentConfig,
+  F0AiChatWelcomeCard,
   PendingContext,
   PendingQuote,
   PersonProfile,
+  TranscribeFn,
   UploadedFile,
+  WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
 
 const ROTATING_PLACEHOLDERS = [
@@ -87,6 +100,83 @@ const CREDIT_WARNING: AiChatCreditWarning = {
   onDismiss: () => console.log("dismiss clicked"),
 }
 
+const WELCOME_CARDS: F0AiChatWelcomeCard[] = [
+  {
+    id: "empty-survey",
+    icon: File,
+    title: "Empty survey",
+    description: "Start from scratch",
+    message: "Create an empty survey.",
+  },
+  {
+    id: "templates",
+    icon: Marketplace,
+    title: "Templates",
+    description: "Browse pre-made surveys",
+    // No message: a templates card triggers a non-prompt behavior, handled by
+    // the host in its `onClick`.
+  },
+]
+
+// Welcome suggestions: grouped outline buttons shown ABOVE the composer. Each
+// group opens a popover of starter prompts; clicking one sends its `prompt`
+// straight to the AI (contrast with welcome cards, which fire a host action).
+const WELCOME_SUGGESTIONS: WelcomeScreenSuggestion[] = [
+  {
+    icon: ChartVerticalBars,
+    label: "Analyze",
+    items: [
+      {
+        title: "April leave and overtime summary",
+        prompt:
+          "Give me a breakdown of leave taken and overtime worked across the company in April, grouped by department.",
+      },
+      {
+        title: "Current gross salary by employee",
+        prompt:
+          "List the current gross salary of every active employee, sorted from highest to lowest.",
+      },
+      {
+        title: "Headcount evolution by department",
+        prompt:
+          "Plot headcount evolution by department over the last twelve months.",
+      },
+    ],
+  },
+  {
+    icon: Search,
+    label: "Find",
+    items: [
+      {
+        title: "Who's out of office this week?",
+        prompt:
+          "List every employee on time-off or sick leave between today and the end of the week.",
+      },
+      {
+        title: "Engineers based in Barcelona",
+        prompt:
+          "Find all employees in Engineering whose office location is Barcelona.",
+      },
+    ],
+  },
+  {
+    icon: Pencil,
+    label: "Create",
+    items: [
+      {
+        title: "Draft a Senior Backend job description",
+        prompt:
+          "Draft a job description for a Senior Backend Engineer focused on distributed systems.",
+      },
+      {
+        title: "Compose an offboarding email template",
+        prompt:
+          "Compose an offboarding email template covering return-of-equipment steps and the HR exit form.",
+      },
+    ],
+  },
+]
+
 const noop = () => {}
 
 const buildClarifyingState = (
@@ -123,6 +213,7 @@ const buildClarifyingState = (
 type WrapperProps = {
   placeholders?: string[]
   fileAttachments?: AiChatFileAttachmentConfig
+  onTranscribe?: TranscribeFn
   searchPersons?: (query: string) => Promise<PersonProfile[]>
   initialPendingContext?: PendingContext | null
   initialPendingQuote?: PendingQuote | null
@@ -130,6 +221,8 @@ type WrapperProps = {
   creditWarning?: AiChatCreditWarning
   disclaimer?: AiChatDisclaimer
   footer?: React.ReactNode
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   isWelcomeScreen?: boolean
   fullscreen?: boolean
   inProgress?: boolean
@@ -138,6 +231,7 @@ type WrapperProps = {
 const Wrapper = ({
   placeholders,
   fileAttachments,
+  onTranscribe,
   searchPersons,
   initialPendingContext = null,
   initialPendingQuote = null,
@@ -145,6 +239,8 @@ const Wrapper = ({
   creditWarning,
   disclaimer,
   footer,
+  welcomeScreenSuggestions,
+  welcomeScreenCards,
   isWelcomeScreen,
   fullscreen,
   inProgress,
@@ -165,6 +261,26 @@ const Wrapper = ({
 
   const composerRef = useRef<HTMLDivElement>(null)
 
+  // Welcome cards now carry their own `onClick`. Branch on each card's data:
+  // message-bearing cards (e.g. "Empty survey") send their prompt; message-less
+  // cards (e.g. "Templates") do something other than send a prompt.
+  const cardsWithBehavior = welcomeScreenCards?.map((card) => {
+    const { id, message } = card
+    return {
+      ...card,
+      onClick: () => {
+        if (message) {
+          setSubmissions((prev) => [
+            ...prev,
+            { text: message, files: [], context: null, quote: null },
+          ])
+        } else {
+          console.log(`card clicked: ${id}`)
+        }
+      },
+    }
+  })
+
   return (
     <div className="flex flex-col gap-4 w-[640px]">
       <F0AiChatTextArea
@@ -174,15 +290,31 @@ const Wrapper = ({
         inProgress={inProgress}
         placeholders={placeholders}
         creditWarning={creditWarning}
-        clarifyingQuestion={clarifyingQuestion}
+        clarifyingUI={
+          clarifyingQuestion ? (
+            <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
+          ) : undefined
+        }
         pendingContext={pendingContext}
         onPendingContextChange={setPendingContext}
         pendingQuote={pendingQuote}
         onPendingQuoteChange={setPendingQuote}
         fileAttachments={fileAttachments}
+        onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
         footer={footer}
+        welcomeScreenSuggestions={welcomeScreenSuggestions}
+        onSuggestionClick={(item) => {
+          // Suggestions always send a prompt (item.prompt, falling back to its
+          // title) — unlike cards, the host doesn't branch on behavior.
+          const text = item.prompt ?? item.title
+          setSubmissions((prev) => [
+            ...prev,
+            { text, files: [], context: null, quote: null },
+          ])
+        }}
+        welcomeScreenCards={cardsWithBehavior}
         isWelcomeScreen={isWelcomeScreen}
         fullscreen={fullscreen}
       />
@@ -212,6 +344,45 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
 
+// Interactive story to inspect the textarea ↔ clarifying panel transition.
+// Click "Trigger clarifying mode" to see the swap animation.
+export const TransitionDemo: Story = {
+  render: () => {
+    const ref = useRef<HTMLDivElement>(null)
+    const [clarifyingQuestion, setClarifyingQuestion] =
+      useState<ClarifyingQuestionState | null>(null)
+
+    const toggle = () => {
+      setClarifyingQuestion((prev) => (prev ? null : buildClarifyingState()))
+    }
+
+    return (
+      <div className="flex flex-col gap-4 w-[640px]">
+        <button
+          onClick={toggle}
+          className="self-start rounded border border-f1-border bg-f1-background px-3 py-1.5 text-sm font-medium text-f1-foreground hover:bg-f1-background-hover transition-colors"
+        >
+          {clarifyingQuestion
+            ? "← Volver al textarea"
+            : "Trigger clarifying mode →"}
+        </button>
+
+        <F0AiChatTextArea
+          ref={ref}
+          onSubmit={() => {}}
+          onStop={() => {}}
+          disclaimer={DISCLAIMER}
+          clarifyingUI={
+            clarifyingQuestion ? (
+              <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
+            ) : undefined
+          }
+        />
+      </div>
+    )
+  },
+}
+
 export const WithRotatingPlaceholders: Story = {
   args: {
     placeholders: ROTATING_PLACEHOLDERS,
@@ -227,6 +398,7 @@ export const WithDisclaimer: Story = {
 export const WithFooter: Story = {
   args: {
     isWelcomeScreen: true,
+    fullscreen: true,
     footer: (
       <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
         Powered by Factorial AI · v0.1.0
@@ -257,6 +429,24 @@ export const FullscreenWelcome: Story = {
         Powered by Factorial AI · v0.1.0
       </p>
     ),
+  },
+}
+
+export const WithWelcomeCards: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenCards: WELCOME_CARDS,
+    disclaimer: DISCLAIMER,
+  },
+}
+
+export const WithWelcomeSuggestions: Story = {
+  args: {
+    isWelcomeScreen: true,
+    fullscreen: true,
+    welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
+    disclaimer: DISCLAIMER,
   },
 }
 
@@ -296,6 +486,13 @@ export const WithMentions: Story = {
   },
 }
 
+export const WithVoiceDictation: Story = {
+  args: {
+    onTranscribe: mockTranscribe,
+    placeholders: ["Tap the mic and start talking…"],
+  },
+}
+
 export const Clarifying: Story = {
   args: {
     clarifyingQuestion: buildClarifyingState(),
@@ -332,6 +529,7 @@ export const Everything: Story = {
   args: {
     placeholders: ROTATING_PLACEHOLDERS,
     fileAttachments: FILE_UPLOAD_CONFIG,
+    onTranscribe: mockTranscribe,
     searchPersons: mockSearchPersons,
     creditWarning: CREDIT_WARNING,
     disclaimer: DISCLAIMER,

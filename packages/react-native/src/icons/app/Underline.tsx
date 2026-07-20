@@ -10,15 +10,8 @@ const SvgUnderline = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M16 6v5a4 4 0 0 1-8 0V6"
-    />
-    <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M7 18h10"
+      fill="currentColor"
+      d="M17 17.1a.9.9 0 0 1 0 1.8H7a.9.9 0 0 1 0-1.8zm-1-12a.9.9 0 0 1 .9.9v5a4.901 4.901 0 0 1-9.8 0V6a.9.9 0 0 1 1.8 0v5a3.1 3.1 0 0 0 6.2 0V6a.9.9 0 0 1 .9-.9"
     />
   </Svg>
 )

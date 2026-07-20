@@ -4,7 +4,7 @@ import type { SummariesDefinition } from "../../../../summary"
 import type { CellRendererProps } from "../../Table/types"
 import type { EditableTableColumnDefinition } from "../types"
 
-import { editableCellMap } from "../consts"
+import { editableCellMap, typingEditTypes } from "../consts"
 import { useEditableRow } from "../context/EditableRowContext"
 import { NonEditableCell } from "./cells/status/NonEditableCell"
 
@@ -44,7 +44,15 @@ export function EditableCellRenderer<
   column,
   children,
   isLastColumn,
-}: CellRendererProps<R, Sortings, Summaries> & { isLastColumn?: boolean }) {
+  externalError,
+}: CellRendererProps<R, Sortings, Summaries> & {
+  isLastColumn?: boolean
+  /**
+   * Error coming from outside the row's editing state (e.g. schema
+   * validation). Shown when the row has no more recent cell-change error.
+   */
+  externalError?: string
+}) {
   const editableCtx = useEditableRow<R>()
 
   if (!editableCtx) {
@@ -68,8 +76,13 @@ export function EditableCellRenderer<
 
   const hasId = editableColumn.id !== undefined
 
+  // Typing cells debounce the parent notification so it fires once when the
+  // user stops typing; discrete cells (select, date...) commit immediately.
+  const debounce =
+    cellEditType !== undefined && typingEditTypes.has(cellEditType)
+
   const onChange = (
-    value: string | null,
+    value: string | string[] | null,
     context?: { selectedItem?: RecordType }
   ) => {
     if (editableColumn.id !== undefined) {
@@ -87,12 +100,15 @@ export function EditableCellRenderer<
           },
         })
 
-        batchCellChanges({
-          [editableColumn.id]: value,
-          ...formulaUpdates,
-        })
+        batchCellChanges(
+          {
+            [editableColumn.id]: value,
+            ...formulaUpdates,
+          },
+          { debounce }
+        )
       } else {
-        handleCellChange(editableColumn.id, value)
+        handleCellChange(editableColumn.id, value, { debounce })
       }
     }
   }
@@ -102,9 +118,9 @@ export function EditableCellRenderer<
     const value = getCellValue(localItem, editableColumn)
 
     if (CellComponent) {
-      const error = editableColumn.id
-        ? cellErrors[editableColumn.id]
-        : undefined
+      const error =
+        (editableColumn.id ? cellErrors[editableColumn.id] : undefined) ??
+        externalError
       const loading = editableColumn.id
         ? (cellLoading[editableColumn.id] ?? false)
         : false

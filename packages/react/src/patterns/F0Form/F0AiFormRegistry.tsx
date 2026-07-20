@@ -266,10 +266,37 @@ function toAvailableFormDefinition(
       | undefined
   }
 
+  // Preserve defaultValuesFn from useF0FormDefinition outputs.
+  // F0AiAvailableFormDefinition.defaultValues supports function values, so we
+  // assign the raw async fn there — downstream virtual-entry creation checks
+  // `typeof def.defaultValues === "function"` to derive defaultValuesFn on the entry.
+  let resolvedDefaultValues: F0AiAvailableFormDefinition["defaultValues"] =
+    flatDefaultValues
+  if (item.defaultValuesFn) {
+    if (item._brand === "per-section") {
+      // Wrap to flatten per-section output { sectionId: { ...fields } } → { ...fields }
+      const perSectionFn = item.defaultValuesFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, Record<string, unknown>>>
+      resolvedDefaultValues = async (params: Record<string, unknown>) => {
+        const result = await perSectionFn(params)
+        const flat: Record<string, unknown> = {}
+        for (const sectionValues of Object.values(result)) {
+          Object.assign(flat, sectionValues)
+        }
+        return flat
+      }
+    } else {
+      resolvedDefaultValues = item.defaultValuesFn as (
+        params: Record<string, unknown>
+      ) => Promise<Record<string, unknown>>
+    }
+  }
+
   return {
     name: item.name,
     schema,
-    defaultValues: flatDefaultValues,
+    defaultValues: resolvedDefaultValues,
     defaultValuesParamsSchema: item.defaultValuesParamsSchema,
     sections: item.sections as Record<string, F0SectionConfig> | undefined,
     onSubmit,
@@ -832,7 +859,10 @@ export function F0AiFormRegistryProvider({
       // using the captured values so AI-filled data is not lost
       const virtualDef = availableFormDefinitions?.find((d) => d.name === name)
       if (virtualDef) {
-        const originalDefaults = resolveDefaultValues(virtualDef.defaultValues)
+        const originalDefaults =
+          typeof virtualDef.defaultValues === "function"
+            ? {}
+            : resolveDefaultValues(virtualDef.defaultValues)
         const mergedDefaults = { ...originalDefaults, ...currentValues }
         const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
           virtualDef.schema,
@@ -1005,9 +1035,18 @@ export function F0AiFormRegistryProvider({
       // Skip if already registered as virtual
       if (existing?.virtual) continue
 
+      // Never invoke function-type defaultValues during virtual registration.
+      // They fire side effects (API calls) for ALL definitions, not just the active one.
+      // Functions are preserved as defDefaultValuesFn and resolved later:
+      // - With params: AI calls defaultValuesFn when the form becomes active
+      // - Without params: useAsyncDefaultValues resolves when the form renders
+      const initialValues =
+        typeof def.defaultValues === "function"
+          ? {}
+          : resolveDefaultValues(def.defaultValues)
       const { ref: virtualRef, dirtyFields } = createVirtualFormRef(
         def.schema,
-        resolveDefaultValues(def.defaultValues),
+        initialValues,
         def.onSubmit
       )
       const defDefaultValuesFn =

@@ -42,8 +42,12 @@ export type TextFieldRenderIf =
  * F0 config options specific to text fields
  */
 export interface F0TextConfig {
-  /** HTML input type (text, email, password, etc.) */
-  inputType?: "text" | "email" | "password" | "tel" | "url"
+  /**
+   * Input type. `"private"` is a non-HTML F0 subtype for sensitive,
+   * non-credential data — masked like a password but with no lock icon, an
+   * eye toggle, and password managers disabled.
+   */
+  inputType?: "text" | "email" | "password" | "tel" | "url" | "private"
 }
 
 /**

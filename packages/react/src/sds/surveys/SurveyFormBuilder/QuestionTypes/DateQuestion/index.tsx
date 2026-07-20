@@ -38,21 +38,19 @@ export const DateQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
-        <F0FormField
-          field={field}
-          value={value ?? undefined}
-          onChange={(v) => {
-            onQuestionChange?.({
-              ...baseQuestionComponentProps,
-              type: "date",
-              value: (v as Date | null) ?? undefined,
-            })
-          }}
-          disabled={disabled}
-          hideLabel
-        />
-      </div>
+      <F0FormField
+        field={field}
+        value={value ?? undefined}
+        onChange={(v) => {
+          onQuestionChange?.({
+            ...baseQuestionComponentProps,
+            type: "date",
+            value: (v as Date | null) ?? undefined,
+          })
+        }}
+        disabled={disabled}
+        hideLabel
+      />
     </BaseQuestion>
   )
 }

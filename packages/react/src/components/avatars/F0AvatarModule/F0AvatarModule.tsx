@@ -1,4 +1,5 @@
 import { cva, type VariantProps } from "cva"
+import { useId } from "react"
 
 import { BaseAvatarProps } from "../internal/BaseAvatar"
 import { ModuleId, modules } from "./modules"
@@ -7,15 +8,17 @@ const moduleAvatarVariants = cva({
   base: "relative flex shrink-0 items-center justify-center",
   variants: {
     size: {
-      sm: "h-5 w-5",
-      md: "h-6 w-6",
-      lg: "h-8 w-8",
-      xs: "h-3 w-3",
-      xxs: "h-2.5 w-2.5",
+      "4xs": "h-2.5 w-2.5",
+      "3xs": "h-3 w-3",
+      "2xs": "h-4 w-4",
+      xs: "h-5 w-5",
+      sm: "h-6 w-6",
+      md: "h-8 w-8",
+      lg: "h-10 w-10",
     },
   },
   defaultVariants: {
-    size: "md",
+    size: "sm",
   },
 })
 
@@ -23,15 +26,17 @@ const iconSizeVariants = cva({
   base: "relative text-f1-foreground-inverse drop-shadow",
   variants: {
     size: {
-      sm: "h-[14px] w-[14px]",
-      md: "h-[18px] w-[18px]",
-      lg: "h-6 w-6",
-      xs: "h-2 w-2",
-      xxs: "h-2 w-2",
+      "4xs": "h-[7px] w-[7px]",
+      "3xs": "h-[9px] w-[9px]",
+      "2xs": "h-3 w-3",
+      xs: "h-[14px] w-[14px]",
+      sm: "h-[18px] w-[18px]",
+      md: "h-6 w-6",
+      lg: "h-7 w-7",
     },
   },
   defaultVariants: {
-    size: "md",
+    size: "sm",
   },
 })
 
@@ -45,11 +50,9 @@ const squirclePath =
 /**
  * Module avatar
  * @description A component that displays a module avatar
- * @experimental
- * @returns
  */
 export function F0AvatarModule({
-  size = "md",
+  size = "sm",
   module,
   ...props
 }: F0AvatarModuleProps) {
@@ -59,9 +62,7 @@ export function F0AvatarModule({
     console.warn(`ModuleAvatar: The module ${module} is not supported.`)
   }
 
-  const code = Math.random().toString(36).substring(2, 15)
-
-  const gradientId = `gradient-${code}`
+  const gradientId = `gradient-${useId().replace(/:/g, "")}`
 
   return (
     <div

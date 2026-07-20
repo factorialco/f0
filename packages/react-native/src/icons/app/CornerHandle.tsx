@@ -10,10 +10,8 @@ const SvgCornerHandle = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16 6 6 16m11-4.5L11.5 17"
+      fill="currentColor"
+      d="M15.864 10.863a.9.9 0 0 1 1.272 1.273l-5 5a.9.9 0 0 1-1.273-1.272zm-.5-5.499a.9.9 0 0 1 1.271 1.272l-10 10a.9.9 0 1 1-1.271-1.272z"
     />
   </Svg>
 )

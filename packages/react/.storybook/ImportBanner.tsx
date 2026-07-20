@@ -96,7 +96,7 @@ export function ImportBanner({ isDark }: ImportBannerProps) {
       </div>
     ) : (
       <div className="sb-unstyled">
-        <h3 className="mb-2 text-xl font-medium text-f1-foreground">
+        <h3 className="mb-2 text-base font-medium text-f1-foreground">
           Importing this component
         </h3>
         <Source

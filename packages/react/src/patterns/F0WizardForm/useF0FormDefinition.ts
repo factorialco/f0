@@ -159,18 +159,19 @@ function isZodSchema(value: unknown): boolean {
 // Internal hook for resolving async defaultValues
 // =============================================================================
 
-function useAsyncDefaultValues<T>(
+export function useAsyncDefaultValues<T>(
   defaultValues:
     | T
     | ((signal: AbortSignal) => Promise<T>)
     | ((params: Record<string, unknown>) => Promise<T>)
     | undefined,
-  hasParamsSchema: boolean
+  defaultValuesParamsSchema?: ZodType
 ): {
   resolved: T | undefined
   isLoading: boolean
 } {
   const isAsync = typeof defaultValues === "function"
+  const hasParamsSchema = !!defaultValuesParamsSchema
 
   const [resolved, setResolved] = useState<T | undefined>(
     isAsync ? undefined : (defaultValues as T | undefined)
@@ -181,17 +182,23 @@ function useAsyncDefaultValues<T>(
   const asyncFnRef = useRef(defaultValues)
   asyncFnRef.current = defaultValues
 
+  const paramsSchemaRef = useRef(defaultValuesParamsSchema)
+  paramsSchemaRef.current = defaultValuesParamsSchema
+
   useEffect(() => {
     if (typeof asyncFnRef.current !== "function") return
 
     const controller = new AbortController()
     setIsLoading(true)
 
-    // When defaultValuesParamsSchema is present, the function is (params) => Promise<T>.
-    // At mount time we call it with empty params.
-    // Otherwise it's the legacy (signal) => Promise<T>.
     const fn = asyncFnRef.current
-    const promise = hasParamsSchema
+
+    // With a params schema, the function expects typed params (from AI
+    // presentForm). None exist at mount, so resolve with empty params ({});
+    // the AI registry later calls the same function with actual params.
+    // The empty object is intentionally NOT validated against the schema —
+    // it typically has required fields the function must handle as absent.
+    const promise = paramsSchemaRef.current
       ? (fn as (params: Record<string, unknown>) => Promise<T>)({})
       : (fn as (signal: AbortSignal) => Promise<T>)(controller.signal)
 
@@ -205,7 +212,7 @@ function useAsyncDefaultValues<T>(
       .catch((err) => {
         if (!controller.signal.aborted) {
           console.warn(
-            "[useF0FormDefinition] Async defaultValues rejected:",
+            "[useAsyncDefaultValues] Async defaultValues rejected:",
             err
           )
           setResolved(undefined)
@@ -289,14 +296,19 @@ export function useF0FormDefinition(
         ) => Promise<Record<string, unknown>>)
       : undefined
 
-  const hasParamsSchema = !!defaultValuesParamsSchema
-  const { resolved: resolvedDefaults, isLoading } = useAsyncDefaultValues(
-    defaultValues,
-    hasParamsSchema
-  )
+  // When defaultValues is an async function (without params schema), store it
+  // as asyncDefaultValues for F0Form to resolve at render time.
+  const asyncDefaultValues =
+    typeof defaultValues === "function" && !defaultValuesParamsSchema
+      ? (defaultValues as (signal: AbortSignal) => Promise<unknown>)
+      : undefined
+
+  // Sync defaultValues: only when it's not a function
+  const syncDefaultValues =
+    typeof defaultValues !== "function" ? defaultValues : undefined
 
   const { resolved: resolvedInitialFiles, isLoading: isLoadingInitialFiles } =
-    useAsyncDefaultValues<InitialFile[]>(initialFiles, false)
+    useAsyncDefaultValues<InitialFile[]>(initialFiles)
 
   return useMemo(() => {
     const brand = isZodSchema(schema) ? "single" : "per-section"
@@ -306,11 +318,12 @@ export function useF0FormDefinition(
       module,
       schema,
       sections,
-      defaultValues: resolvedDefaults,
+      defaultValues: syncDefaultValues,
+      asyncDefaultValues,
       onSubmit,
       submitConfig,
       errorTriggerMode,
-      isLoading: isLoading || isLoadingInitialFiles,
+      isLoading: isLoadingInitialFiles,
       defaultValuesParamsSchema,
       defaultValuesFn,
       initialFiles: resolvedInitialFiles,
@@ -327,11 +340,11 @@ export function useF0FormDefinition(
     module,
     schema,
     sections,
-    resolvedDefaults,
+    syncDefaultValues,
+    asyncDefaultValues,
     onSubmit,
     submitConfig,
     errorTriggerMode,
-    isLoading,
     defaultValuesParamsSchema,
     defaultValuesFn,
     resolvedInitialFiles,

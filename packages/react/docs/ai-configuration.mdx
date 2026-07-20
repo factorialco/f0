@@ -82,9 +82,9 @@ the hierarchy; files lower in the tree **reference** the layer above rather than
         </tr>
         <tr className="bg-f1-background-secondary/40">
           <td className="border border-f1-border px-3 py-2 font-mono text-xs">
-            packages/react/.skills/*/SKILL.md
+            vendor/skills/*/SKILL.md
           </td>
-          <td className="border border-f1-border px-3 py-2">React package</td>
+          <td className="border border-f1-border px-3 py-2">Monorepo root</td>
           <td className="border border-f1-border px-3 py-2">
             Detailed how-to for a specific workflow: code examples, step-by-step
             procedures, decision trees. Loaded on demand.
@@ -95,9 +95,9 @@ the hierarchy; files lower in the tree **reference** the layer above rather than
         </tr>
         <tr>
           <td className="border border-f1-border px-3 py-2 font-mono text-xs">
-            packages/react/.skills/*/references/*.md
+            vendor/skills/*/references/*.md
           </td>
-          <td className="border border-f1-border px-3 py-2">React package</td>
+          <td className="border border-f1-border px-3 py-2">Monorepo root</td>
           <td className="border border-f1-border px-3 py-2">
             In-depth code examples and patterns that would make a SKILL.md too
             long. Linked from SKILL.md, not standalone.
@@ -108,9 +108,9 @@ the hierarchy; files lower in the tree **reference** the layer above rather than
         </tr>
         <tr className="bg-f1-background-secondary/40">
           <td className="border border-f1-border px-3 py-2 font-mono text-xs">
-            packages/react/.agents/skills/a11y/SKILL.md
+            vendor/skills/a11y/SKILL.md
           </td>
-          <td className="border border-f1-border px-3 py-2">React package</td>
+          <td className="border border-f1-border px-3 py-2">Monorepo root</td>
           <td className="border border-f1-border px-3 py-2">
             Universal WCAG 2.1/2.2 AA accessibility patterns (external community
             skill, not F0-authored)
@@ -143,7 +143,7 @@ Component rules (naming, props, styling, testing, i18n, a11y)
                  This skill provides the detailed how."
 
 Code examples / step-by-step patterns
-    └── .skills/*/references/*.md ← owns this
+    └── vendor/skills/*/references/*.md ← owns this
             loaded via the SKILL.md index
 ```
 
@@ -153,7 +153,7 @@ Code examples / step-by-step patterns
 | --------------------------------------------------------- | ------------------------------------------------------------ |
 | Add a new rule about how components must be built         | `packages/react/AGENTS.md`                                   |
 | Add a code example showing how to implement a rule        | The relevant `references/*.md` file inside a skill           |
-| Add a new multi-step workflow (e.g. a new migration type) | Create a new `.skills/<name>/SKILL.md`                       |
+| Add a new multi-step workflow (e.g. a new migration type) | Create a new `vendor/skills/<name>/SKILL.md`                 |
 | Update a rule that already exists                         | Update it in exactly one place; all other files reference it |
 | Check where a rule lives                                  | Run the `f0-ai-config-hygiene` skill audit                   |
 
@@ -181,8 +181,13 @@ the detailed conventions.
 Skills are on-demand instruction packages. They are **not** loaded automatically on every agent request —
 they're loaded explicitly when a task matches their description.
 
+The canonical, committed source is `vendor/skills/` at the monorepo root. On `pnpm install` (or
+`pnpm skills:sync`), `scripts/install-skills.ts` copies them into `.claude/skills/` and
+`.opencode/skills/` — gitignored locations where Claude Code and OpenCode auto-discover them.
+Never edit the synced copies; they are overwritten on every sync.
+
 ```
-.skills/
+vendor/skills/
   f0-quality-gate/
     SKILL.md               — orchestrator: triggers Phase 1 commands + 4 parallel subagents
   f0-component-patterns/
@@ -253,7 +258,7 @@ file inside the matching skill, and link to it from AGENTS.md with "See `f0-<ski
 
 ### Adding a new skill
 
-1. Create `.skills/<name>/SKILL.md` with a frontmatter `name` and `description`.
+1. Create `vendor/skills/<name>/SKILL.md` with a frontmatter `name` and `description`.
 2. Add a `## When to Use` and `## When NOT to Use` section.
 3. Reference `packages/react/AGENTS.md` for rules — don't restate them.
 4. Add the skill to the Skills list in `packages/react/AGENTS.md`.

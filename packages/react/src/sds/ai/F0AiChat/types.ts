@@ -1,6 +1,3 @@
-import { CopilotKitProps } from "@copilotkit/react-core"
-import { type AIMessage, type Message } from "@copilotkit/shared"
-
 import { IconType } from "@/components/F0Icon"
 import { defaultTranslations } from "@/lib/providers/i18n/i18n-provider-defaults"
 
@@ -13,6 +10,43 @@ import type {
   DataDownloadCanvasContent,
   FormCanvasContent,
 } from "../canvas/types"
+
+/**
+ * Loose message shape used inside f0. Mirrors the CopilotKit `Message`
+ * shape so adapters (factorial, mock runtime) can map back and forth
+ * with no field rename, but is owned by f0 — nothing in `src/` imports
+ * from `@copilotkit/*` anymore.
+ */
+export type F0ToolCall = {
+  id: string
+  type?: "function"
+  function: {
+    name: string
+    arguments: string
+  }
+}
+
+export type F0Message = {
+  id: string
+  role: "user" | "assistant" | "system" | "tool"
+  content?: unknown
+  toolCalls?: F0ToolCall[]
+  toolCallId?: string
+  createdAt?: string
+  generativeUI?: () => unknown
+  rawData?: unknown
+  /**
+   * Reply quote text attached to the message by the composer. Rendered
+   * as a block above the user bubble. Adapters (factorial / mock) own
+   * the wire encoding; F0 only reads this structured field.
+   */
+  replyQuote?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any
+}
+
+/** Assistant-flavoured `F0Message`. Same shape — alias kept for clarity. */
+export type F0AIMessage = F0Message
 
 // Re-export canvas content types for backwards-compatible public API
 export type {
@@ -184,6 +218,17 @@ export type AiChatMode = "chat" | "voice"
 export type VisualizationMode = "sidepanel" | "fullscreen" | "canvas"
 
 /**
+ * A single piece of content hosted in the side panel — the same resizable +
+ * fullscreen space the F0.ai chat lives in. Only one is mounted at a time:
+ * the `id` keys the content so switching conversations unmounts the previous
+ * one and mounts the new. `panelContent === null` falls back to the AI chat.
+ */
+export type SidePanelContent = {
+  id: string
+  content: React.ReactNode
+}
+
+/**
  * Tracking options for the AI chat
  */
 export type UploadedFile = {
@@ -202,12 +247,50 @@ export type AiChatFileAttachmentConfig = {
   maxFiles?: number
 }
 
+export type TranscribeOptions = {
+  /**
+   * Primary channel for live dictation: fires with the cumulative transcript
+   * as it streams in, so the composer can fill the textarea while the user
+   * speaks. Implementations that don't stream may call it once at the end.
+   */
+  onPartial: (text: string) => void
+  /** Aborted when the user cancels an in-flight transcription. */
+  signal?: AbortSignal
+}
+
+/**
+ * Transcribes a recorded audio blob to text (voice dictation). The returned
+ * promise resolves with the final transcript; `onPartial` delivers
+ * intermediate results for live textarea fill. When omitted from the chat
+ * config, the microphone button is not rendered.
+ */
+export type TranscribeFn = (
+  audio: Blob,
+  options: TranscribeOptions
+) => Promise<string>
+
+/**
+ * Payload for `tracking.onWelcomeSuggestionClick`. Carries everything an
+ * analytics layer (e.g. Amplitude) needs to attribute the click: the picked
+ * sub-item, its parent group, and the resolved prompt that was actually sent.
+ */
+export type WelcomeSuggestionClickEvent = {
+  item: WelcomeScreenSuggestionItem
+  group: WelcomeScreenSuggestion
+  /** Prompt actually sent to the AI — `item.prompt` falling back to `item.title`. */
+  prompt: string
+}
+
 export type AiChatTrackingOptions = {
   onVisibility?: () => void
   onClose?: () => void
-  onWelcomeSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
+  onWelcomeSuggestionClick?: (event: WelcomeSuggestionClickEvent) => void
   onNewChat?: () => void
-  onMessage?: (message: Message) => void
+  onMessage?: (message: F0Message) => void
+  /** Mic button pressed — fires on intent, even if mic permission is later denied. */
+  onDictationStart?: () => void
+  /** Dictation discarded by the user, while recording or mid-transcription. */
+  onDictationCancel?: () => void
 }
 
 /**
@@ -215,9 +298,39 @@ export type AiChatTrackingOptions = {
  */
 export type AiChatProviderProps = {
   enabled?: boolean
-  greeting?: string
+  /**
+   * Edge the whole side panel docks to (AI chat, hosted content and canvas).
+   * Hosts set "left" for a chat-first experience (e.g. communications).
+   * @default "right"
+   */
+  side?: "left" | "right"
+  /**
+   * Greeting phrase(s) shown by the welcome screen when the chat is empty.
+   * A single string renders once; an array rotates through phrases. Purely
+   * UI config — does not affect runtime behavior.
+   */
   initialMessage?: string | string[]
+  /**
+   * Grouped suggestions rendered as outline buttons above the composer on the
+   * welcome screen. Optional and independent of `welcomeScreenCards` — provide
+   * either, both, or neither, in any counts. No hard limit on the number of
+   * groups yet.
+   */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  /**
+   * Cards rendered below the composer on the fullscreen welcome screen. Each
+   * card carries its own `onClick` — the chat owns the layout; the host owns
+   * the interaction.
+   *
+   * Hosts that must build a card's `onClick` inside the chat provider (e.g.
+   * needing `openCanvas`) can register the cards dynamically via
+   * `setWelcomeScreenCards` from `useAiChat()` instead of passing them here.
+   *
+   * Optional and independent of `welcomeScreenSuggestions` — provide either,
+   * both, or neither, in any counts. At most 4 cards are rendered (the row is a
+   * 2×2 grid); extras are dropped.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
   disclaimer?: AiChatDisclaimer
   /**
    * Enable resizable chat window
@@ -293,33 +406,40 @@ export type AiChatProviderProps = {
    * File attachment configuration. When provided, enables file uploads in the chat.
    */
   fileAttachments?: AiChatFileAttachmentConfig
+  /**
+   * Voice dictation. When provided, a microphone button is shown in the
+   * composer: recorded audio is transcribed and the result fills the textarea
+   * (the user reviews and sends it as a normal text message). When omitted,
+   * the microphone is hidden.
+   */
+  onTranscribe?: TranscribeFn
   onThumbsUp?: (
-    message: AIMessage,
+    message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   onThumbsDown?: (
-    message: AIMessage,
+    message: F0AIMessage,
     { threadId, feedback }: { threadId: string; feedback: string }
   ) => void
   tracking?: AiChatTrackingOptions
   /**
-   * Optional hook called before a user message is sent. Return false to block submission.
+   * Optional name of the AI agent. Forwarded to the host runtime adapter
+   * (mock in stories, CopilotKit in factorial) — f0 itself only stores it.
    */
-  onBeforeSendMessage?: () => boolean | Promise<boolean>
+  agent?: string
   /**
-   * Optional fetch implementation for AI runtime requests owned by F0.
+   * Slot elements rendered inside `<F0AiChat />`. Host apps (factorial in
+   * production, the mock runtime in stories) provide their own connected
+   * wrappers — f0 ships only the shell. Passing slots here makes them
+   * available to any `<F0AiChat />` mounted under this provider (used by
+   * `ApplicationFrame`, which renders the chat itself).
    */
-  runtimeFetch?: typeof fetch
-} & Pick<
-  CopilotKitProps,
-  | "agent"
-  | "credentials"
-  | "children"
-  | "runtimeUrl"
-  | "showDevConsole"
-  | "threadId"
-  | "headers"
->
+  chatHeader?: React.ReactNode
+  chatMessages?: React.ReactNode
+  chatInput?: React.ReactNode
+  /** Children rendered inside the provider. */
+  children?: React.ReactNode
+}
 
 /**
  * A single sub-suggestion shown inside a welcome-screen group's popover.
@@ -334,12 +454,42 @@ export type WelcomeScreenSuggestionItem = {
 
 /**
  * A welcome-screen group rendered as an outline button in the welcome row.
- * Clicking the group opens a popover listing its `items`.
+ * Clicking the group opens a popover listing its `items`. The number of groups
+ * is not capped yet (unlike welcome cards, which top out at 4).
  */
 export type WelcomeScreenSuggestion = {
   icon: IconType
   label: string
   items: WelcomeScreenSuggestionItem[]
+}
+
+/**
+ * A card shown below the composer on the fullscreen welcome screen, rendered
+ * as an `F0CardHorizontal`. Each card owns its behavior via `onClick`, so
+ * different cards can trigger different things (send a prompt, open a dialog,
+ * navigate, …).
+ *
+ * The chat owns the layout; the host owns the interaction. Up to 4 cards are
+ * rendered (a 2×2 grid); extras are dropped.
+ */
+export type F0AiChatWelcomeCard = {
+  /** Stable identifier, also used as the React key. */
+  id: string
+  icon: IconType
+  title: string
+  description?: string
+  /**
+   * Optional prompt the card represents. The card's own `onClick` decides
+   * whether to send it — cards without a `message` (e.g. a "Browse templates"
+   * card) simply do something else.
+   */
+  message?: string
+  /**
+   * Invoked when the card is clicked. The host wires the behavior per card —
+   * send `message` as a prompt, open a dialog, navigate, … A card without an
+   * `onClick` renders as non-interactive.
+   */
+  onClick?: () => void
 }
 
 /**
@@ -349,6 +499,13 @@ export type AiChatDisclaimer = {
   text: string
   link?: string
   linkText?: string
+  /**
+   * Optional click handler on the disclaimer text. When set, the text becomes
+   * keyboard-activatable (Enter / Space) and gets a subtle hover hint. Used by
+   * the host to wire easter eggs (e.g. the pong game) without coupling f0 to
+   * any specific behaviour.
+   */
+  onClick?: () => void
 }
 
 /**

@@ -1,5 +1,5 @@
 import { Ref, forwardRef } from "react"
-import Svg, { Rect, Path } from "react-native-svg"
+import Svg, { Path } from "react-native-svg"
 import type { SvgProps } from "react-native-svg"
 const SvgSuitcase = (props: SvgProps, ref: Ref<Svg>) => (
   <Svg
@@ -9,12 +9,9 @@ const SvgSuitcase = (props: SvgProps, ref: Ref<Svg>) => (
     ref={ref}
     {...props}
   >
-    <Rect width={16} height={12} x={4} y={7.5} stroke="currentColor" rx={3} />
-    <Path stroke="currentColor" d="M9 7.5v-1a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1" />
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      d="M20 12.5H4M11 12.5v1.75c0 .138.112.25.25.25h1.5a.25.25 0 0 0 .25-.25V12.5"
+      fill="currentColor"
+      d="M13 3.6a2.9 2.9 0 0 1 2.9 2.9v.1H17a3.9 3.9 0 0 1 3.9 3.9v6a3.9 3.9 0 0 1-3.9 3.9H7a3.9 3.9 0 0 1-3.9-3.9v-6A3.9 3.9 0 0 1 7 6.6h1.1v-.1A2.9 2.9 0 0 1 11 3.6zM4.9 16.5c0 1.16.94 2.1 2.1 2.1h10a2.1 2.1 0 0 0 2.1-2.1v-3.1h-4.4v1.95a1.15 1.15 0 0 1-1.15 1.15h-3.1a1.15 1.15 0 0 1-1.15-1.15V13.4H4.9zm6.2-1.8h1.8v-1.3h-1.8zM7 8.4a2.1 2.1 0 0 0-2.1 2.1v1.1h14.2v-1.1A2.1 2.1 0 0 0 17 8.4zm4-3a1.1 1.1 0 0 0-1.1 1.1v.1h4.2v-.1A1.1 1.1 0 0 0 13 5.4z"
     />
   </Svg>
 )

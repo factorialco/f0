@@ -10,10 +10,8 @@ const SvgCheckDouble = (props: SvgProps, ref: Ref<Svg>) => (
     {...props}
   >
     <Path
-      stroke="currentColor"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="m12 18 7.5-10M4.5 13l3.178 3.178a1 1 0 0 0 1.512-.114L15.5 7.5"
+      fill="currentColor"
+      d="M18.864 8.364a.9.9 0 0 1 1.272 1.273l-8.5 8.5a.9.9 0 0 1-1.272-1.273zm-3-2.5a.9.9 0 0 1 1.272 1.272l-8.5 8.5a.897.897 0 0 1-1.272 0l-3.5-3.5a.9.9 0 0 1 1.272-1.272L8 13.727z"
     />
   </Svg>
 )

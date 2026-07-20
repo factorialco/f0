@@ -35,6 +35,8 @@ export interface BarSeriesDataPoint {
   secondaryValue?: number
   neutralValue?: number
   neutralFullHeight?: boolean
+  /** Per-point label for the neutral segment. Overrides any chart-level label when set. */
+  neutralLabel?: string
 }
 
 export interface BarSeriesCellValue {

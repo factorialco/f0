@@ -1,6 +1,6 @@
 import { ZodTypeAny } from "zod"
 
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import type { F0FieldAlert } from "../f0Schema"
 
@@ -35,6 +35,7 @@ export type RenderIfCondition =
   | SelectRenderIfCondition
   | DateRenderIfCondition
   | DateRangeRenderIfCondition
+  | PeriodRenderIfCondition
 
 /**
  * Function type for dynamic renderIf evaluation based on form values
@@ -58,6 +59,7 @@ import type { BooleanRenderIfCondition } from "./checkbox/types"
 import type { DateRenderIfCondition } from "./date/types"
 import type { DateRangeRenderIfCondition } from "./daterange/types"
 import type { NumberRenderIfCondition } from "./number/types"
+import type { PeriodRenderIfCondition } from "./period/types"
 import type { SelectRenderIfCondition } from "./select/types"
 import type { TextRenderIfCondition } from "./text/types"
 
@@ -69,6 +71,7 @@ export type {
   SelectRenderIfCondition,
   DateRenderIfCondition,
   DateRangeRenderIfCondition,
+  PeriodRenderIfCondition,
 }
 
 // ============================================================================
@@ -120,6 +123,13 @@ export interface F0BaseField {
    * @default false
    */
   resetOnDisable?: boolean
+  /**
+   * When true, a change to this field auto-saves the form (a debounced submit).
+   * Other fields still save on submit. Independent from the form-level
+   * `submitConfig: { type: "autosubmit" }`.
+   * @default false
+   */
+  autoSave?: boolean
   /** Alert displayed below the field (static props or conditional callback) */
   alert?: F0FieldAlert
   /**
@@ -152,9 +162,11 @@ export type FieldType =
   | "time"
   | "datetime"
   | "daterange"
+  | "period"
   | "richtext"
   | "file"
   | "cardSelect"
+  | "entitiesList"
   | "custom"
 
 // ============================================================================
@@ -184,6 +196,7 @@ export type {
   F0DateRangeField,
   DateRangeValue,
 } from "./daterange/types"
+export type { F0PeriodConfig, F0PeriodField } from "./period/types"
 export type {
   F0RichTextConfig,
   F0RichTextField,
@@ -210,6 +223,14 @@ export type {
   FileUploadHookReturn,
   UseFileUpload,
 } from "./file/types"
+export type {
+  F0EntitiesListConfig,
+  F0EntitiesListOptions,
+  F0EntitiesListLabels,
+  F0EntitiesListColumnConfig,
+  F0EntitiesListField,
+  EntitiesListItem,
+} from "./entitiesList/types"
 
 import type { F0CardSelectField } from "./cardSelect/types"
 import type { F0CheckboxField } from "./checkbox/types"
@@ -219,8 +240,10 @@ import type { F0DateRangeField } from "./daterange/types"
 import type { F0DurationField } from "./duration/types"
 import type { F0FileField } from "./file/types"
 import type { F0NumberField } from "./number/types"
+import type { F0PeriodField } from "./period/types"
 import type { F0RichTextField } from "./richtext/types"
 import type { F0SelectField } from "./select/types"
+import type { F0EntitiesListField } from "./entitiesList/types"
 import type { F0SwitchField } from "./switch/types"
 // Import for union type
 import type { F0TextField } from "./text/types"
@@ -241,7 +264,9 @@ export type F0Field =
   | F0TimeField
   | F0DateTimeField
   | F0DateRangeField
+  | F0PeriodField
   | F0RichTextField
   | F0FileField
   | F0CardSelectField
+  | F0EntitiesListField
   | F0CustomField

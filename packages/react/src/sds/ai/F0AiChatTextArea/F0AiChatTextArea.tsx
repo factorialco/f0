@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "motion/react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { useReducedMotion } from "@/lib/a11y"
@@ -8,31 +8,25 @@ import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
-import { F0ClarifyingPanel } from "../F0ClarifyingPanel"
-
+import { useRevealOnChange } from "../F0AiChat/hooks/useRevealOnChange"
+import { useAiChat } from "../F0AiChat/providers/AiChatStateProvider"
 import { ActionBar } from "./components/ActionBar"
 import { AttachedFilesList } from "./components/AttachedFilesList"
 import { CreditWarningWrapper } from "./components/CreditWarningWrapper"
 import { MentionPopover } from "./components/MentionPopover"
 import { PendingQuoteChip } from "./components/PendingQuoteChip"
 import { TextareaField } from "./components/TextareaField"
+import { WelcomeScreenCardsRow } from "./components/WelcomeScreenCardsRow"
 import { WelcomeScreenSuggestionsRow } from "./components/WelcomeScreenSuggestionsRow"
-import type { WelcomeScreenSuggestionItem } from "../F0AiChat/types"
+import type {
+  WelcomeScreenSuggestion,
+  WelcomeScreenSuggestionItem,
+} from "../F0AiChat/types"
 import { buildHighlightSegments } from "./highlight-utils"
 import { type F0AiChatTextAreaProps } from "./types"
+import { type RecorderError, useAudioRecorder } from "./useAudioRecorder"
 import { useFileAttachments } from "./useFileAttachments"
 import { useMentions } from "./useMentions"
-
-const HTML_ESCAPES: Record<string, string> = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#39;",
-}
-
-/** Escape HTML entities so the quoted selection can't inject markup. */
-const escapeHtml = (s: string) => s.replace(/[&<>"']/g, (c) => HTML_ESCAPES[c])
 
 /** Markdown syntax characters that would otherwise trigger formatting. */
 const MD_SPECIAL = /[\\`*_{}[\]()#+\-.!|~>]/g
@@ -73,12 +67,13 @@ export const F0AiChatTextArea = ({
   onBeforeSubmit,
   placeholders,
   creditWarning,
-  clarifyingQuestion = null,
+  clarifyingUI,
   pendingContext = null,
   onPendingContextChange,
   pendingQuote = null,
   onPendingQuoteChange,
   fileAttachments,
+  onTranscribe,
   searchPersons,
   onProcessFilesRef,
   disclaimer,
@@ -87,21 +82,42 @@ export const F0AiChatTextArea = ({
   fullscreen = false,
   welcomeScreenSuggestions,
   onSuggestionClick,
+  welcomeScreenCards,
   ref,
 }: F0AiChatTextAreaProps) => {
-  const fullscreenWelcome = fullscreen && isWelcomeScreen
   const translation = useI18n()
   const shouldReduceMotion = useReducedMotion()
   const [inputValue, setInputValue] = useState("")
   const [cursorPosition, setCursorPosition] = useState(0)
   const [isPreSending, setIsPreSending] = useState(false)
+  // Set when the user hits send while an attachment is still uploading: the
+  // submit is queued and fired once uploads finish (see effect below), so the
+  // message goes WITH the file instead of being dropped or sent without it.
+  const [pendingSubmit, setPendingSubmit] = useState(false)
   const [hoveredSuggestion, setHoveredSuggestion] =
     useState<WelcomeScreenSuggestionItem | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const highlightRef = useRef<HTMLDivElement>(null)
 
-  const isClarifying = clarifyingQuestion !== null
+  const isClarifying = clarifyingUI != null
+
+  // Fire `tracking.onWelcomeSuggestionClick` from inside the textarea so
+  // hosts only need to wire the `onSuggestionClick` business action.
+  // When the textarea is rendered outside an `F0AiChatProvider` the
+  // tracking ref resolves to a no-op via the provider fallback.
+  const { tracking } = useAiChat()
+  const handleSuggestionClick = useCallback(
+    (item: WelcomeScreenSuggestionItem, group: WelcomeScreenSuggestion) => {
+      tracking?.onWelcomeSuggestionClick?.({
+        item,
+        group,
+        prompt: item.prompt || item.title,
+      })
+      onSuggestionClick?.(item, group)
+    },
+    [tracking, onSuggestionClick]
+  )
 
   const {
     attachedFiles,
@@ -115,6 +131,7 @@ export const F0AiChatTextArea = ({
     handleRemoveFile,
     clearFiles,
     transientError,
+    showTransientError,
   } = useFileAttachments(fileAttachments)
 
   const mentions = useMentions({
@@ -124,6 +141,41 @@ export const F0AiChatTextArea = ({
     searchPersons,
     textareaRef,
   })
+
+  // Voice dictation. Transcripts are written onto whatever was already typed
+  // (captured when recording starts) so dictation appends instead of replacing.
+  const dictationBaseRef = useRef("")
+  const applyDictation = useCallback((text: string) => {
+    const base = dictationBaseRef.current
+    const separator = base && !/\s$/.test(base) ? " " : ""
+    const next = `${base}${separator}${text}`
+    setInputValue(next)
+    setCursorPosition(next.length)
+  }, [])
+  const recorderErrorMessage: Record<RecorderError, string> = {
+    "permission-denied": translation.ai.micPermissionDenied,
+    "device-error": translation.ai.micError,
+    "transcription-failed": translation.ai.transcriptionError,
+  }
+  const recorder = useAudioRecorder({
+    onTranscribe,
+    onPartial: applyDictation,
+    onFinal: (text) => {
+      applyDictation(text)
+      textareaRef.current?.focus()
+    },
+    onError: (error) => showTransientError(recorderErrorMessage[error]),
+  })
+  const canRecord = !!onTranscribe && recorder.isSupported
+  const handleStartRecording = useCallback(() => {
+    tracking?.onDictationStart?.()
+    dictationBaseRef.current = inputValue
+    void recorder.start()
+  }, [inputValue, recorder, tracking])
+  const handleCancelRecording = useCallback(() => {
+    tracking?.onDictationCancel?.()
+    recorder.cancel()
+  }, [recorder, tracking])
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash.length === 0) {
@@ -145,10 +197,36 @@ export const F0AiChatTextArea = ({
     }
   }, [onProcessFilesRef, processFiles])
 
-  const resolvedDefaultPlaceholder = translation.ai.inputPlaceholder
+  // While recording, the placeholder becomes "Listening…" so the empty
+  // textarea signals that dictation is live.
+  const isRecording = recorder.status === "recording"
+  const resolvedDefaultPlaceholder = isRecording
+    ? translation.ai.listening
+    : translation.ai.inputPlaceholder
   const uploadedFiles = attachedFiles.filter((f) => f.status === "uploaded")
   const isUploading = attachedFiles.some((f) => f.status === "uploading")
-  const hasDataToSend = inputValue.trim().length > 0
+  const hasErrorFiles = attachedFiles.some((f) => f.status === "error")
+  const hasDataToSend = inputValue.trim().length > 0 || uploadedFiles.length > 0
+
+  // Fire a queued submit once all attachments finish uploading. If an upload
+  // failed, do NOT auto-send (the message would go without the file) — surface
+  // a transient banner so the user knows the click was acknowledged but the
+  // send was blocked, instead of silently swallowing the event.
+  useEffect(() => {
+    if (!pendingSubmit || isUploading) return
+    setPendingSubmit(false)
+    if (hasErrorFiles) {
+      showTransientError(translation.ai.fileUploadBlockedSubmit)
+      return
+    }
+    formRef.current?.requestSubmit()
+  }, [
+    pendingSubmit,
+    isUploading,
+    hasErrorFiles,
+    showTransientError,
+    translation.ai.fileUploadBlockedSubmit,
+  ])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -159,7 +237,13 @@ export const F0AiChatTextArea = ({
     mentions.close()
     if (inProgress) {
       onStop?.()
-    } else if (hasDataToSend && !isUploading && !isPreSending) {
+    } else if (hasDataToSend && !isPreSending) {
+      // Attachment still uploading: queue the send instead of dropping it.
+      if (isUploading) {
+        setPendingSubmit(true)
+        textareaRef.current?.focus()
+        return
+      }
       if (onBeforeSubmit) {
         setIsPreSending(true)
         try {
@@ -174,29 +258,23 @@ export const F0AiChatTextArea = ({
 
       const transformed = mentions.transformMentions(inputValue.trim())
       // Escape markdown/HTML in the user's own text so `*hola*` stays literal
-      // and only features we control (quote blockquote, @mentions) produce
-      // rich rendering in the bubble.
+      // and only features we control (@mentions) produce rich rendering.
       const safeUserText = escapeUserText(transformed)
-
-      // When replying to a selected fragment, prepend the quote as a
-      // dedicated `<reply-quote>` tag. The renderer strips this tag from
-      // the bubble content and renders the quote above the bubble.
-      const withQuote = pendingQuote
-        ? `<reply-quote>${escapeHtml(pendingQuote.text).replace(/\n/g, "<br/>")}</reply-quote>${safeUserText}`
-        : safeUserText
 
       const files = uploadedFiles.flatMap((f) =>
         f.uploadedFile ? [f.uploadedFile] : []
       )
 
       const consumedContext = pendingContext
+      const consumedQuote = pendingQuote
       if (consumedContext) onPendingContextChange?.(null)
-      if (pendingQuote) onPendingQuoteChange?.(null)
+      if (consumedQuote) onPendingQuoteChange?.(null)
 
       await onSubmit({
-        text: withQuote,
+        text: safeUserText,
         files,
         context: consumedContext,
+        quote: consumedQuote,
       })
 
       setInputValue("")
@@ -233,9 +311,11 @@ export const F0AiChatTextArea = ({
   const previewPlaceholder = hoveredSuggestion
     ? (hoveredSuggestion.prompt ?? hoveredSuggestion.title)
     : null
-  const effectivePlaceholders = previewPlaceholder
-    ? [previewPlaceholder]
-    : (placeholders ?? [])
+  const effectivePlaceholders = isRecording
+    ? [translation.ai.listening]
+    : previewPlaceholder
+      ? [previewPlaceholder]
+      : (placeholders ?? [])
   const multiplePlaceholders = effectivePlaceholders.length > 1
 
   const highlightSegments = useMemo(() => {
@@ -248,28 +328,58 @@ export const F0AiChatTextArea = ({
   const hasOverlay =
     mentions.mentions.length > 0 || mentions.inlineCompletion !== null
 
+  // Welcome suggestions row. On the welcome screen it always sits above the
+  // textarea (both sidepanel and fullscreen); the popover opens upward so it
+  // doesn't cover the composer.
+  const showSuggestions =
+    isWelcomeScreen &&
+    !!welcomeScreenSuggestions &&
+    welcomeScreenSuggestions.length > 0 &&
+    !!onSuggestionClick
+
+  const suggestionsRow = showSuggestions ? (
+    <WelcomeScreenSuggestionsRow
+      suggestions={welcomeScreenSuggestions}
+      onItemClick={handleSuggestionClick}
+      onItemHover={setHoveredSuggestion}
+      side="top"
+    />
+  ) : null
+
+  // Welcome cards sit below the composer on the fullscreen welcome screen
+  // (same gate the footer slot uses). Each card carries its own `onClick`;
+  // the host owns the behavior.
+  const showWelcomeCards =
+    isWelcomeScreen &&
+    fullscreen &&
+    !!welcomeScreenCards &&
+    welcomeScreenCards.length > 0
+
+  const isFullscreenWelcome = fullscreen && isWelcomeScreen
+
+  // Reveal the composer when the welcome screen gives way to the conversation
+  // (sending the first message) — the textarea drops from the centered welcome
+  // position to the bottom. Hide-before-paint + soft fade, same as the
+  // mode-change reveal. Only applied in fullscreen, where the textarea actually
+  // repositions (in sidepanel it already sits at the bottom). Mode toggles are
+  // handled one level up in F0AiChat, so this never double-fires.
+  const { motionProps: composerReveal } = useRevealOnChange(
+    isWelcomeScreen,
+    160,
+    0.5
+  )
+
   return (
-    <div
+    <motion.div
       ref={ref}
       className={cn(
         "flex flex-col items-center gap-2 px-4 pb-3 pt-2",
-        // Only grow to share space with the messages container when we're in
-        // the fullscreen welcome layout — that's where the "stick to the
-        // middle" centering trick relies on the textarea taking its half.
-        fullscreenWelcome && "flex-grow"
+        isFullscreenWelcome && "min-h-0 flex-1 justify-start -mt-20"
       )}
+      {...(fullscreen ? composerReveal : {})}
     >
       <div className="flex w-full max-w-content flex-col gap-2">
-        {isWelcomeScreen &&
-          welcomeScreenSuggestions &&
-          welcomeScreenSuggestions.length > 0 &&
-          onSuggestionClick && (
-            <WelcomeScreenSuggestionsRow
-              suggestions={welcomeScreenSuggestions}
-              onItemClick={onSuggestionClick}
-              onItemHover={setHoveredSuggestion}
-            />
-          )}
+        {suggestionsRow && <div>{suggestionsRow}</div>}
         <CreditWarningWrapper creditWarning={creditWarning}>
           <motion.form
             aria-busy={inProgress}
@@ -323,20 +433,43 @@ export const F0AiChatTextArea = ({
 
             <AnimatePresence initial={false}>
               {isClarifying ? (
-                <F0ClarifyingPanel
+                <motion.div
                   key="clarifying"
-                  clarifyingQuestion={clarifyingQuestion}
-                />
+                  className="overflow-hidden"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.22,
+                      ease: [0.4, 0, 1, 1],
+                    },
+                  }}
+                  transition={{
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
+                >
+                  {clarifyingUI}
+                </motion.div>
               ) : (
                 <motion.div
                   key="input"
                   className="overflow-hidden"
-                  initial={{ height: "auto", opacity: 1 }}
+                  initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
+                  exit={{
+                    height: 0,
+                    opacity: 0,
+                    transition: {
+                      duration: shouldReduceMotion ? 0 : 0.15,
+                      ease: [0.55, 0, 1, 0.45],
+                    },
+                  }}
                   transition={{
-                    duration: shouldReduceMotion ? 0 : 0.3,
-                    ease: "easeOut",
+                    duration: shouldReduceMotion ? 0 : 0.4,
+                    ease: [0.4, 0, 0.2, 1],
                   }}
                 >
                   {pendingQuote && (
@@ -413,8 +546,13 @@ export const F0AiChatTextArea = ({
                     handleFileSelect={handleFileSelect}
                     inProgress={inProgress}
                     hasDataToSend={hasDataToSend}
-                    isUploading={isUploading}
-                    isPreSending={isPreSending}
+                    isPreSending={isPreSending || pendingSubmit}
+                    canRecord={canRecord}
+                    recordingStatus={recorder.status}
+                    recordingStream={recorder.stream}
+                    onStartRecording={handleStartRecording}
+                    onStopRecording={recorder.stop}
+                    onCancelRecording={handleCancelRecording}
                   />
                 </motion.div>
               )}
@@ -422,6 +560,19 @@ export const F0AiChatTextArea = ({
           </motion.form>
         </CreditWarningWrapper>
       </div>
+
+      {showWelcomeCards && (
+        <div className="w-full max-w-content pt-2">
+          <WelcomeScreenCardsRow cards={welcomeScreenCards} />
+        </div>
+      )}
+
+      {footer && isWelcomeScreen && fullscreen && (
+        <div className="w-full py-4 mx-auto flex max-w-content justify-center">
+          {footer}
+        </div>
+      )}
+
       <AnimatePresence mode="wait" initial={false}>
         {isClarifying ? (
           <motion.div
@@ -447,18 +598,44 @@ export const F0AiChatTextArea = ({
           </motion.div>
         ) : (
           disclaimer?.text &&
-          !fullscreenWelcome && (
+          !isFullscreenWelcome && (
             <motion.div
               key="chat-disclaimer"
               className="flex w-full max-w-content flex-row items-center justify-center gap-1"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.3,
+                ease: "easeOut",
+              }}
             >
-              <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
-                {disclaimer.text}
-              </OneEllipsis>
+              {disclaimer.onClick ? (
+                <button
+                  type="button"
+                  onClick={disclaimer.onClick}
+                  className={cn(
+                    "group min-w-0 cursor-pointer bg-transparent p-0 text-inherit",
+                    "transition-transform duration-700 ease-out",
+                    "hover:scale-[1.02] focus-visible:scale-[1.02]",
+                    "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
+                  )}
+                >
+                  <OneEllipsis
+                    className={cn(
+                      "text-sm font-medium text-f1-foreground-tertiary transition-colors duration-700 ease-out",
+                      "group-hover:bg-gradient-to-r group-hover:from-[#E55619] group-hover:to-[#A1ADE5] group-hover:bg-clip-text group-hover:text-transparent",
+                      "group-focus-visible:bg-gradient-to-r group-focus-visible:from-[#E55619] group-focus-visible:to-[#A1ADE5] group-focus-visible:bg-clip-text group-focus-visible:text-transparent"
+                    )}
+                  >
+                    {disclaimer.text}
+                  </OneEllipsis>
+                </button>
+              ) : (
+                <OneEllipsis className="text-sm font-medium text-f1-foreground-tertiary">
+                  {disclaimer.text}
+                </OneEllipsis>
+              )}
 
               {disclaimer.link && disclaimer.linkText && (
                 <Link
@@ -474,23 +651,6 @@ export const F0AiChatTextArea = ({
           )
         )}
       </AnimatePresence>
-      <AnimatePresence>
-        {footer && isWelcomeScreen && (
-          <motion.div
-            key="chat-footer"
-            className={cn(
-              "w-full py-4 mx-auto max-w-content",
-              fullscreen && "flex justify-center"
-            )}
-            initial={{ opacity: 0, height: 0, overflow: "hidden" }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            {footer}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }

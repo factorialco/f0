@@ -120,6 +120,87 @@ describe("SurveyFormBuilder", () => {
     expect(notAllowed.length).toBeGreaterThanOrEqual(2) // section header + question
   })
 
+  it("removes the drag affordance for a locked question but keeps its gutter", () => {
+    // An editable question renders a grabbable drag handle.
+    const editable: SurveyFormBuilderElement[] = [
+      makeQuestion("q1", "Editable"),
+    ]
+    const { container: editableContainer } = render(
+      <SurveyFormBuilder elements={editable} onChange={vi.fn()} />
+    )
+    expect(
+      editableContainer.querySelectorAll("[class*='cursor-grab']").length
+    ).toBeGreaterThan(0)
+
+    const locked: SurveyFormBuilderElement[] = [
+      makeSection(
+        "s1",
+        "Locked Section",
+        [{ id: "q1", title: "Blocked" }],
+        true
+      ),
+    ]
+    const { container: lockedContainer } = render(
+      <SurveyFormBuilder elements={locked} onChange={vi.fn()} />
+    )
+    // No drag affordance on a locked question…
+    expect(
+      lockedContainer.querySelectorAll("[class*='cursor-grab']")
+    ).toHaveLength(0)
+    // …but the handle gutter is preserved so it stays aligned with editable ones.
+    expect(
+      lockedContainer.querySelectorAll("[class*='scale-75']").length
+    ).toBeGreaterThan(0)
+  })
+
+  it("shows a locked question's own note as a title-less tooltip on hover", async () => {
+    const elements: SurveyFormBuilderElement[] = [
+      {
+        type: "section",
+        section: {
+          id: "s1",
+          title: "Predefined section",
+          description: "These questions are predefined.",
+          locked: true,
+          questions: [
+            {
+              id: "q1",
+              title: "Blocked",
+              type: "text",
+              lockedNote: {
+                description: "This is the standard onboarding question.",
+              },
+            },
+          ],
+        },
+      },
+    ]
+
+    render(<SurveyFormBuilder elements={elements} onChange={vi.fn()} />)
+
+    // The note isn't shown inline — it surfaces as a tooltip when hovering the
+    // lock icon (not anywhere on the card).
+    const card = document.getElementById("co-creation-question-q1")
+    expect(card).not.toBeNull()
+    expect(
+      screen.queryByText("This is the standard onboarding question.")
+    ).not.toBeInTheDocument()
+
+    const lockIcon = card!.querySelector('button[aria-label="Locked"]')
+    expect(lockIcon).not.toBeNull()
+    await userEvent.hover(lockIcon!.parentElement!)
+
+    // Shows the question's own note…
+    expect(
+      (await screen.findAllByText("This is the standard onboarding question."))
+        .length
+    ).toBeGreaterThan(0)
+    // …and not the section's Locked-tag copy.
+    expect(
+      screen.queryByText("These questions are predefined.")
+    ).not.toBeInTheDocument()
+  })
+
   it("shows confirmation dialog when moving the last question out of a section", async () => {
     // This test verifies the dialog appears. We cannot simulate real DnD with
     // Reorder.Group in jsdom, so we test the component state by providing

@@ -94,14 +94,14 @@ describe("F0Button", () => {
 
   it("applies w-full wrapper when fullWidth is true", () => {
     const { toJSON } = render(<F0Button {...defaultProps} fullWidth />)
-    const tree = toJSON() as { props: { className: string } }
+    const tree = toJSON() as unknown as { props: { className: string } }
     expect(tree.props.className).toContain("w-full")
     expect(tree.props.className).not.toContain("flex-1")
   })
 
   it("applies items-start wrapper when fullWidth is false", () => {
     const { toJSON } = render(<F0Button {...defaultProps} />)
-    const tree = toJSON() as { props: { className: string } }
+    const tree = toJSON() as unknown as { props: { className: string } }
     expect(tree.props.className).toContain("items-start")
   })
 
@@ -304,7 +304,9 @@ describe("F0Button", () => {
     render(<F0Button {...unsafeProps} />)
 
     const button = screen.getByRole("button")
-    expect(button.props.className).toBe("overflow-hidden")
+    // F0Button always applies its own size-based radius to the pressable; the
+    // user-supplied className is still stripped.
+    expect(button.props.className).toBe("overflow-hidden rounded")
   })
 
   it("ignores style passed via unsafe cast", () => {

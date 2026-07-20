@@ -1,7 +1,12 @@
-/** Interactive tree/graph visualization with zoom levels, expand/collapse, selection, search, and detail panels. */
+/** Interactive tree/graph visualization with zoom levels, expand/collapse, and selection. */
 export { F0Graph } from "./F0Graph"
+/** Loading placeholder mirroring the org-tree shape (root + connecting bus + children). */
+export { F0GraphSkeleton } from "./F0GraphSkeleton"
+export type { F0GraphSkeletonProps } from "./F0GraphSkeleton"
 /** Props for configuring F0Graph — data, rendering, zoom, selection, layout, and customization. */
 export type { F0GraphProps } from "./F0Graph"
+/** Imperative handle (via ref) — exposes `focusNode(id)` to fly to a node on demand, even when re-selecting the same node. */
+export type { F0GraphHandle } from "./F0Graph"
 /** Render context passed to the renderNode callback. */
 export type { F0GraphNodeRenderContext } from "./F0Graph"
 
@@ -23,15 +28,13 @@ export type {
 
 // Sub-components
 /** Zoom/pan/fit controls toolbar. */
-export * from "./F0GraphControls"
+export * from "./components/F0GraphControls"
 /** Edge renderer with variant styles (default, hover, highlighted, dimmed). */
-export * from "./F0GraphEdge"
+export * from "./components/F0GraphEdge"
 /** Collapse/expand pill shown below parent nodes. */
-export * from "./F0GraphExpander"
+export * from "./components/F0GraphExpander"
 /** Card wrapper for nodes with avatar, title, subtitle, metadata, and actions slots. */
-export * from "./F0GraphNode"
-/** Side panel that displays details about the currently selected node. */
-export * from "./F0GraphDetailPanel"
+export * from "./components/F0GraphNode"
 
 // Hooks
 /** Focus context hook for reading/controlling roving tabindex focus within the graph. */

@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest"
-import { screen } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
@@ -172,7 +172,10 @@ describe("EditableCellRenderer", () => {
       await user.clear(input)
       await user.type(input, "Jane")
 
-      expect(onCellChange).toHaveBeenCalled()
+      // Text cells debounce the notification until typing stops
+      await waitFor(() => expect(onCellChange).toHaveBeenCalled(), {
+        timeout: 2000,
+      })
     })
 
     it("triggers column formula and updates other cells via setCellValue", async () => {
@@ -213,12 +216,19 @@ describe("EditableCellRenderer", () => {
       const lastCall = formula.mock.calls[formula.mock.calls.length - 1][0]
       expect(lastCall.value).toBe("Admin")
 
-      // onCellChange should have been called for both the name AND the email columns
-      const emailCall = onCellChange.mock.calls.find(
-        (call: unknown[]) =>
-          (call[0] as TestRecord).email === "admin@example.com"
+      // onCellChange should have been called for both the name AND the email
+      // columns once the typing debounce settles
+      await waitFor(
+        () => {
+          const emailCall = onCellChange.mock.calls.find(
+            (call: unknown[]) =>
+              (call[0] as { updatedItem: TestRecord }).updatedItem.email ===
+              "admin@example.com"
+          )
+          expect(emailCall).toBeDefined()
+        },
+        { timeout: 2000 }
       )
-      expect(emailCall).toBeDefined()
     })
 
     it("stops click propagation to prevent row navigation", async () => {

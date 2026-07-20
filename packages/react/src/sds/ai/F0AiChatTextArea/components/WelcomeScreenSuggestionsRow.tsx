@@ -29,14 +29,28 @@ function pickRandomItems(
 
 export type WelcomeScreenSuggestionsRowProps = {
   suggestions: WelcomeScreenSuggestion[]
-  /** Fired when the user picks a sub-suggestion. */
-  onItemClick: (item: WelcomeScreenSuggestionItem) => void
+  /**
+   * Fired when the user picks a sub-suggestion. Receives the picked `item`
+   * AND its parent `group` so callers (tracking, analytics) can attribute
+   * the click to the full path the user took.
+   */
+  onItemClick: (
+    item: WelcomeScreenSuggestionItem,
+    group: WelcomeScreenSuggestion
+  ) => void
   /**
    * Fires while the user hovers an item (passes the item) and when the
    * hover ends (passes null). Used to preview the item's prompt as the
    * textarea placeholder.
    */
   onItemHover?: (item: WelcomeScreenSuggestionItem | null) => void
+  /**
+   * Side the popover opens towards. Defaults to "top" — the row sits above the
+   * textarea, so the popover opens upward into the empty space rather than
+   * covering the composer. "bottom" remains available for layouts that place
+   * the row below the textarea.
+   */
+  side?: "top" | "bottom"
 }
 
 /**
@@ -48,6 +62,7 @@ export const WelcomeScreenSuggestionsRow = ({
   suggestions,
   onItemClick,
   onItemHover,
+  side = "top",
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const activeGroup = activeIdx !== null ? suggestions[activeIdx] : null
@@ -84,7 +99,7 @@ export const WelcomeScreenSuggestionsRow = ({
       </PopoverAnchor>
       {activeGroup && (
         <PopoverContent
-          side="top"
+          side={side}
           align="start"
           sideOffset={8}
           onOpenAutoFocus={(e) => e.preventDefault()}
@@ -103,7 +118,7 @@ export const WelcomeScreenSuggestionsRow = ({
                 key={index}
                 type="button"
                 onClick={() => {
-                  onItemClick(item)
+                  onItemClick(item, activeGroup)
                   setActiveIdx(null)
                   onItemHover?.(null)
                 }}

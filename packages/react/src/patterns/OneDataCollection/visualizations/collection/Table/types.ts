@@ -35,6 +35,13 @@ export type WithOptionalSorting<
    * The width of the column. If not provided, the width will be "auto"
    */
   width?: number
+
+  /**
+   * Optional minimum width for the column in pixels. When provided, overrides
+   * the minWidth derived from `width`. Useful for columns with no fixed
+   * `width` that should not shrink below a given size.
+   */
+  minWidth?: number
 }
 
 export type ColId = string
@@ -46,7 +53,7 @@ export type TableColumnDefinition<
 > = WithOptionalSorting<R, Sortings> &
   Pick<
     ComponentProps<typeof TableHead>,
-    "hidden" | "info" | "infoIcon" | "sticky" | "width"
+    "hidden" | "info" | "infoIcon" | "sticky" | "width" | "minWidth"
   > & {
     /**
      * Optional summary configuration for this column
@@ -81,6 +88,13 @@ export type TableColumnDefinition<
     noHiding?: boolean
 
     /**
+     * Avoid removing the column by the user. Only relevant when the
+     * visualization sets `onRemoveColumn`; the per-row trash affordance in the
+     * settings popover is hidden for this column. Mirrors `noHiding`.
+     */
+    noRemoving?: boolean
+
+    /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
      * The label for each group is provided via `headerGroupLabels` in
@@ -89,7 +103,7 @@ export type TableColumnDefinition<
     headerGroupId?: string
   }
 
-export type ReferenceType = "none" | "striped"
+export type ReferenceType = "none" | "striped" | "striked"
 
 export type TableVisualizationOptions<
   R extends RecordType,
@@ -123,9 +137,22 @@ export type TableVisualizationOptions<
   allowColumnHiding?: boolean
 
   /**
-   * Marks one or more rows as reference rows.
-   * Reference rows are rendered with a slanted background pattern across the full row.
+   * Called when the user clicks the "Add column" entry at the top of the
+   * column-settings popover. When omitted, the entry is not shown. Open your
+   * own column picker and update `columns` in response.
    */
+  onAddColumn?: () => void
+
+  /**
+   * Called when the user removes a column via the trash affordance revealed on
+   * hovering its row in the column-settings popover. When omitted, no remove
+   * affordance is shown. Removing is distinct from hiding: drop the column from
+   * `columns` in response. Frozen/leading columns and columns flagged
+   * `noRemoving` are never removable.
+   */
+  onRemoveColumn?: (columnId: ColId) => void
+
+  /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
   referenceRowType?: (item: R) => ReferenceType
   /**
    * Labels for header groups. Keys are headerGroupId values used in column

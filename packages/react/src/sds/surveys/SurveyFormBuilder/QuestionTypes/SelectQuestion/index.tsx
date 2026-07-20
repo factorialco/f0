@@ -30,7 +30,7 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
 
   const containingSection = getSectionContainingQuestion(props.id)
 
-  const questionLocked = props.locked || containingSection?.locked
+  const questionLocked = containingSection?.locked || props.locked
 
   const { t } = useI18n()
 

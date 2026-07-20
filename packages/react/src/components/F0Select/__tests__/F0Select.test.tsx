@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import "@testing-library/jest-dom/vitest"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -185,6 +185,163 @@ describe("Select", () => {
     await openSelect(user)
 
     expect(screen.getByText("System")).toBeInTheDocument()
+  })
+
+  it("renders selected status tags as pills in the trigger", async () => {
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+        value="approved"
+      />
+    )
+
+    const combobox = screen.getByRole("combobox")
+    const selectedLabel = within(combobox).getByText("Approved")
+
+    await waitFor(() => {
+      expect(selectedLabel.closest(".bg-f1-background-positive")).toBeTruthy()
+    })
+  })
+
+  it("renders status-only options without duplicating the label", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={[
+          {
+            value: "draft",
+            label: "Draft",
+            tag: {
+              type: "status",
+              text: "Draft",
+              variant: "neutral",
+            },
+          },
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    const approvedOption = screen.getByRole("option", { name: "Approved" })
+
+    expect(within(approvedOption).getAllByText("Approved")).toHaveLength(1)
+    expect(
+      within(approvedOption)
+        .getByText("Approved")
+        .closest(".bg-f1-background-positive")
+    ).toBeTruthy()
+  })
+
+  it("throws when options mix multiple tag types", () => {
+    expect(() =>
+      render(
+        <F0Select
+          {...defaultSelectProps}
+          options={[
+            {
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status",
+                text: "Approved",
+                variant: "positive",
+              },
+            },
+            {
+              value: "isabella",
+              label: "Isabella",
+              tag: { type: "person", name: "Isabella" },
+            },
+          ]}
+          onChange={() => {}}
+        />
+      )
+    ).toThrow(/All options must use the same tag type/)
+  })
+
+  it("forces at least md trigger size when options carry status tags", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="approved"
+        options={[
+          {
+            value: "approved",
+            label: "Approved",
+            tag: {
+              type: "status",
+              text: "Approved",
+              variant: "positive",
+            },
+          },
+        ]}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+  })
+
+  it("forces at least md trigger size for a preselected status pill not yet in the dataset", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="approved"
+        // Dataset hasn't loaded the selected record; the pill comes from defaultItem
+        options={[]}
+        defaultItem={{
+          value: "approved",
+          label: "Approved",
+          tag: {
+            type: "status",
+            text: "Approved",
+            variant: "positive",
+          },
+        }}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[40px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[32px\\]")).toBeFalsy()
+  })
+
+  it("keeps the requested sm trigger size when no status tags are present", () => {
+    const { container } = render(
+      <F0Select
+        {...defaultSelectProps}
+        size="sm"
+        value="option1"
+        options={[{ value: "option1", label: "Option 1" }]}
+      />
+    )
+
+    expect(container.querySelector(".h-\\[32px\\]")).toBeTruthy()
+    expect(container.querySelector(".h-\\[40px\\]")).toBeFalsy()
   })
 
   it("filters options based on search input", async () => {
@@ -429,7 +586,7 @@ describe("Select", () => {
       expect(screen.getByText("Option 1")).toBeInTheDocument()
     })
 
-    // Find the clear button using the same approach as InputField tests
+    // Find the clear button using the same approach as F0InputField tests
     // The clear button should be visible when there's a value
     const clearButton = container.querySelector(
       "button[data-testid='clear-button']"

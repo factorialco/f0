@@ -26,6 +26,16 @@ export type ButtonInternalProps = Pick<
      */
     "aria-label"?: string
     /**
+     * Forwarded to the underlying button. Useful for buttons that toggle an
+     * expandable region (e.g. a tree/graph expander).
+     */
+    "aria-expanded"?: boolean
+    /**
+     * Forwarded to the underlying button. Use `-1` to take the button out of the
+     * tab order (e.g. when a parent manages focus via roving tabindex).
+     */
+    tabIndex?: number
+    /**
      * The variant of the button.
      */
     variant?: ActionButtonVariant
@@ -55,6 +65,10 @@ export type ButtonInternalProps = Pick<
      * Adds an icon to the button, combined with the label for better clarity and recognition.
      */
     icon?: IconType
+    /**
+     * Sets the side of the label the icon is placed on. Defaults to "left".
+     */
+    iconPosition?: "left" | "right"
     /**
      * Adds an emoji to the button, can be used as a special case of icon-only button.
      */
@@ -108,6 +122,12 @@ export type ButtonInternalProps = Pick<
      * The style of the button.
      */
     style?: React.CSSProperties
+
+    /**
+     * @private
+     * If true, the button will stretch to the full width of its container.
+     */
+    block?: boolean
   } & ( // Target can only be used if href is provided
     | {
         /**

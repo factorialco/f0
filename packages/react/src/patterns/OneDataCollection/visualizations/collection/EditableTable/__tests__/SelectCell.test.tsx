@@ -85,6 +85,63 @@ describe("SelectCell", () => {
     expect(within(listbox).getByText("Designer")).toBeInTheDocument()
   })
 
+  it("renders status-tagged select values as a pill picker", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <SelectCell
+        {...defaultProps}
+        value="approved"
+        editableColumn={makeSelectColumn({
+          selectConfig: {
+            options: [
+              {
+                value: "draft",
+                label: "Draft",
+                tag: {
+                  type: "status",
+                  text: "Draft",
+                  variant: "neutral",
+                },
+              },
+              {
+                value: "approved",
+                label: "Approved",
+                tag: {
+                  type: "status",
+                  text: "Approved",
+                  variant: "positive",
+                },
+              },
+            ],
+            defaultItem: () => ({
+              value: "approved",
+              label: "Approved",
+              tag: {
+                type: "status",
+                text: "Approved",
+                variant: "positive",
+              },
+            }),
+          },
+        })}
+      />
+    )
+
+    const combobox = screen.getByRole("combobox")
+    expect(
+      within(combobox)
+        .getByText("Approved")
+        .closest(".bg-f1-background-positive")
+    ).toBeTruthy()
+
+    await openSelect(user)
+
+    const approvedOption = screen.getByRole("option", { name: "Approved" })
+
+    expect(within(approvedOption).getAllByText("Approved")).toHaveLength(1)
+  })
+
   it("renders F0Select with source config", () => {
     const sourceConfig = {
       source: {
@@ -135,6 +192,11 @@ describe("SelectCell", () => {
     await user.click(within(listbox).getByText("Developer"))
 
     expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it("applies pointer cursor", () => {
+    const { container } = render(<SelectCell {...defaultProps} />)
+    expect(container.firstChild).toHaveClass("cursor-pointer")
   })
 
   it("renders non-editable fallback when selectConfig is missing", () => {

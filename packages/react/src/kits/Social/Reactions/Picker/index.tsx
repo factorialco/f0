@@ -1,10 +1,11 @@
 import data from "@emoji-mart/data/sets/15/twitter.json"
-import EmojiPicker from "@emoji-mart/react"
 import { useState } from "react"
 
 import { F0ButtonProps } from "@/components/F0Button"
 import { ButtonInternal } from "@/components/F0Button/internal"
+import { type IconType } from "@/components/F0Icon"
 import { Reaction } from "@/icons/app"
+import { EmojiPicker } from "@/lib/EmojiPicker"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
 import "./index.css"
@@ -20,6 +21,9 @@ interface PickerProps {
   size?: F0ButtonProps["size"]
   variant?: F0ButtonProps["variant"]
   lastEmojiReaction?: string
+  /** Accessible label / tooltip for the trigger button. */
+  label?: string
+  icon?: IconType
 }
 
 export function Picker({
@@ -28,6 +32,8 @@ export function Picker({
   size = "md",
   variant = "outline",
   lastEmojiReaction,
+  label = "Add reaction",
+  icon,
 }: PickerProps) {
   const [isOpen, setIsOpen] = useState(false)
 
@@ -37,9 +43,9 @@ export function Picker({
         <ButtonInternal
           variant={variant}
           compact
-          label="Add reaction"
+          label={label}
           size={size}
-          icon={lastEmojiReaction ? undefined : Reaction}
+          icon={lastEmojiReaction ? undefined : (icon ?? Reaction)}
           emoji={lastEmojiReaction}
           pressed={isOpen}
           onClick={(event) => {

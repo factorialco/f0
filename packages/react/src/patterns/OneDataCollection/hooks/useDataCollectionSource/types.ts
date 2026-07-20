@@ -14,9 +14,12 @@ import {
   SortingsDefinition,
 } from "@/hooks/datasource/types"
 
+import type { AvatarVariant } from "@/components/avatars/F0Avatar"
+
 import {
   PrimaryActionsDefinitionFn,
   SecondaryActionsDefinition,
+  UpsellActionDefinitionFn,
 } from "../../actions"
 import { ItemActionsDefinition } from "../../item-actions"
 import {
@@ -93,6 +96,26 @@ export type Lane<Filters extends FiltersDefinition> = {
   filters: FiltersState<Filters>
 }
 
+/** Data shown for a single row of the search preview dropdown. */
+export type SearchPreviewResultData = {
+  avatar?: AvatarVariant
+  title: string
+  subtitle?: string
+}
+
+/**
+ * Optional rich search preview shown in the shared Data Collection search.
+ * When provided, typing in the header search renders a results dropdown with
+ * avatar + title + subtitle, consistent across every visualization. Selecting a
+ * result calls `onSelect` (e.g. the graph view reveals/centers the node).
+ */
+export type SearchPreview<R extends RecordType> = {
+  search: (query: string) => Promise<R[]>
+  getId: (record: R) => string
+  render: (record: R) => SearchPreviewResultData
+  onSelect: (record: R) => void
+}
+
 /**
  * Data collection source definition
  * Extends the base data source definition with data collection specific elements / features
@@ -131,6 +154,9 @@ export type DataCollectionSourceDefinition<
   primaryActionsLabel?: string
   /** Available secondary actions that can be performed on the collection */
   secondaryActions?: SecondaryActionsDefinition
+  /** Optional upsell button rendered in the collection toolbar. Opt-in per
+   * collection: return a definition to show it, or undefined to hide it. */
+  upsellAction?: UpsellActionDefinitionFn
   /** Available summaries fields. If not provided, summaries is not allowed. */
   summaries?: Summaries & {
     label?: string // Optional label for the summaries row
@@ -150,6 +176,9 @@ export type DataCollectionSourceDefinition<
 
   /** Lanes configuration */
   lanes?: ReadonlyArray<Lane<Filters>>
+
+  /** Rich search preview shown in the shared header search (all visualizations). */
+  searchPreview?: SearchPreview<R>
 }
 
 /**

@@ -30,7 +30,7 @@ export const Thinking = ({
   }, [inProgress, isOpen])
 
   const headerTitle = inProgress
-    ? "Reflection"
+    ? translations.ai.thoughtsGroupTitle
     : (title ?? translations.ai.thoughtsGroupTitle)
   const lastIndex = titles.length - 1
   const itemStatus = (index: number): "executing" | "completed" => {

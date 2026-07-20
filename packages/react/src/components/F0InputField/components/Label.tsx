@@ -1,0 +1,45 @@
+import { F0Icon, type IconType } from "@/components/F0Icon"
+import { OneEllipsis } from "@/lib/OneEllipsis"
+import { cn } from "@/lib/utils"
+
+type LabelProps = {
+  label: string
+  required?: boolean
+  htmlFor: string
+  id?: string
+  className?: string
+  icon?: IconType
+  disabled?: boolean
+}
+const Label = ({
+  label,
+  required,
+  htmlFor,
+  id,
+  className,
+  icon,
+  disabled,
+}: LabelProps) => {
+  return (
+    <label
+      id={id}
+      className={cn(
+        className,
+        "text-md flex max-w-full gap-1 font-medium text-f1-foreground-secondary"
+      )}
+      htmlFor={htmlFor}
+      aria-label={label}
+      aria-disabled={disabled}
+    >
+      {icon && <F0Icon icon={icon} size="sm"></F0Icon>}
+      <OneEllipsis className="shrink-1 min-w-0">{label}</OneEllipsis>
+      {required && (
+        <span className="text-f1-foreground-critical" aria-hidden="true">
+          *
+        </span>
+      )}
+    </label>
+  )
+}
+
+export { Label }

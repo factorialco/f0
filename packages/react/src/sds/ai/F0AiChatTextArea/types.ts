@@ -7,12 +7,12 @@ import type {
   PendingContext,
   PendingQuote,
   PersonProfile,
+  TranscribeFn,
   UploadedFile,
+  F0AiChatWelcomeCard,
   WelcomeScreenSuggestion,
   WelcomeScreenSuggestionItem,
 } from "../F0AiChat/types"
-import type { ClarifyingQuestionState } from "../F0ClarifyingPanel/types"
-
 export type AttachedFile = {
   id: string
   file: File
@@ -32,16 +32,16 @@ export type UserBinaryPart = {
 /**
  * Payload emitted by `F0AiChatTextArea` when the user submits.
  *
- * `text` already contains the inline markup the renderer expects:
- * `<entity-ref>` tags for @mentions, `<reply-quote>` for the quoted
- * fragment, and HTML-escaped user-typed text. The consumer decides how
- * to wrap it (plain string vs multipart message) when forwarding to
- * the agent.
+ * `text` contains HTML-escaped user-typed text with `<entity-ref>` tags
+ * for @mentions only. The reply quote (if any) and pending context
+ * travel as separate structured fields — the adapter (factorial) owns
+ * the wire encoding when forwarding to the agent.
  */
 export type F0AiChatTextAreaSubmitPayload = {
   text: string
   files: UploadedFile[]
   context: PendingContext | null
+  quote: PendingQuote | null
 }
 
 export type F0AiChatTextAreaProps = {
@@ -66,10 +66,13 @@ export type F0AiChatTextAreaProps = {
   creditWarning?: AiChatCreditWarning
 
   /**
-   * Clarifying question to render in place of the input. When non-null the
-   * panel takes over the composer surface and submission is blocked.
+   * Optional ReactNode rendered in place of the input. When present the
+   * composer enters "clarifying" mode: form submission is blocked, the
+   * gradient border activates, and a nav-hint replaces the disclaimer.
+   * The host owns the panel (typically `F0ClarifyingPanel`) and its
+   * state — F0 just renders the slot.
    */
-  clarifyingQuestion?: ClarifyingQuestionState | null
+  clarifyingUI?: ReactNode
 
   /** Pending context shown as a chip; prepended invisibly on submit. */
   pendingContext?: PendingContext | null
@@ -83,6 +86,13 @@ export type F0AiChatTextAreaProps = {
 
   /** File attachment configuration. When omitted, attachments are disabled. */
   fileAttachments?: AiChatFileAttachmentConfig
+
+  /**
+   * Voice dictation. When provided, a microphone button is shown: recorded
+   * audio is transcribed and the transcript fills the textarea (the user
+   * reviews and sends it manually). When omitted, the microphone is hidden.
+   */
+  onTranscribe?: TranscribeFn
 
   /** Async search used by the @-mention popover. When omitted, mentions are disabled. */
   searchPersons?: (query: string) => Promise<PersonProfile[]>
@@ -117,15 +127,33 @@ export type F0AiChatTextAreaProps = {
    * the welcome screen. Clicking a group opens a single popover (above the
    * row, left-aligned, spanning the composer width) with that group's items.
    * Hovering an item previews its prompt in the textarea placeholder.
+   *
+   * Optional and independent of `welcomeScreenCards` — the two can have
+   * different counts. No hard limit on the number of groups yet.
    */
   welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
-  /** Called when the user clicks a sub-suggestion. */
-  onSuggestionClick?: (item: WelcomeScreenSuggestionItem) => void
+  /** Called when the user clicks a sub-suggestion. Receives the picked
+   *  `item` and its parent `group` (the outline-button entry). */
+  onSuggestionClick?: (
+    item: WelcomeScreenSuggestionItem,
+    group: WelcomeScreenSuggestion
+  ) => void
 
   /**
-   * When true, the composer adopts the fullscreen layout: the welcome
-   * footer is pushed to the bottom and the disclaimer is hidden so the
-   * footer is the only thing under the textarea.
+   * Cards rendered as a grid below the composer on the fullscreen welcome
+   * screen. Each card carries its own `onClick`; the host decides the behavior.
+   *
+   * Optional and independent of `welcomeScreenSuggestions` — the two can have
+   * different counts. At most 4 cards are rendered (a 2×2 grid); extras are
+   * dropped.
+   */
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
+
+  /**
+   * When true on the welcome screen, the composer adopts the fullscreen
+   * layout: the input slot grows to claim the bottom half (so the textarea
+   * rises toward the vertical center) and the welcome cards render below it.
+   * The welcome suggestions row sits above the composer in both layouts.
    */
   fullscreen?: boolean
 }

@@ -7,7 +7,7 @@ import {
 } from "@/patterns/OneFilterPicker/types"
 import { PromiseState } from "@/lib/promise-to-observable"
 
-import { DataAdapter } from "./fetch.typings"
+import { DataAdapter, PaginationInfo } from "./fetch.typings"
 import { GroupingDefinition, GroupingState } from "./grouping.typings"
 import { ChildrenPaginationInfo, ChildrenResponse } from "./nested.typings"
 import { RecordType } from "./records.typings"
@@ -59,6 +59,21 @@ export type DataSourceDefinition<
   defaultSortings?: SortingsState<Sortings>
   /** Current state of applied sortings */
   currentSortings?: SortingsState<Sortings>
+  /*******************************************************/
+
+  /***** PAGINATION ***************************************************/
+  /**
+   * Initial page to fetch (1-indexed) for page-based pagination. Applied on the
+   * first load only; the page resets to 1 whenever filters/search/sortings
+   * change (as it always has). Useful for restoring a page from the URL.
+   */
+  currentPage?: number
+  /**
+   * Called whenever the pagination info changes — e.g. the user navigates to a
+   * different page. Lets a consumer observe the current page (to persist it in
+   * the URL, analytics, etc.) without owning the pagination state.
+   */
+  onPaginationChange?: (paginationInfo: PaginationInfo | null) => void
   /*******************************************************/
 
   /** Data adapter responsible for fetching and managing data */

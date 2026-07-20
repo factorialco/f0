@@ -5,7 +5,12 @@ import { OverflowList } from "@/ui/OverflowList"
 
 import { AvatarVariant, F0Avatar } from "../F0Avatar"
 import { MaxCounter } from "./components/MaxCounter"
-import { AvatarListSize, avatarListSizes, F0AvatarListProps } from "./types"
+import {
+  AvatarListSize,
+  avatarListSizes,
+  F0AvatarListExtras,
+  F0AvatarListProps,
+} from "./types"
 import { getAvatarDisplayName } from "./utils"
 
 const CLIP_MASK: Record<"base" | "rounded", Record<AvatarListSize, string>> = {
@@ -28,6 +33,7 @@ export const F0AvatarList = ({
   noTooltip = false,
   remainingCount: initialRemainingCount,
   max,
+  tooltipScroll,
 }: F0AvatarListProps) => {
   // Check legacy size
   if (size && !avatarListSizes.includes(size)) {
@@ -61,18 +67,36 @@ export const F0AvatarList = ({
   return (
     <OverflowList
       max={max}
+      // When `max` is provided, treat it as the exact visible count rather
+      // than a soft cap: setting `min` equal to `max` prevents OverflowList's
+      // container-width heuristics from collapsing avatars below `max` when
+      // the cluster is rendered inside narrow columns (e.g. OneDataCollection
+      // list fields). Without this, a configured `max: 3` could still render
+      // as `1 avatar + "+N"` if the column was tight.
+      min={max}
       items={avatars.map((avatar) => ({ type, ...avatar }) as AvatarVariant)}
       gap={gap}
       itemsWidth={itemWidth}
       className="flex items-center"
       renderListItem={(avatar, index) => {
         const displayName = getAvatarDisplayName(type, avatar)
+        const extras = avatar as Partial<F0AvatarListExtras>
+        const description = extras.tooltipDescription
 
+        const hasBadge = Boolean((avatar as { badge?: unknown }).badge)
+        // Clip the avatar to leave a notch for whatever overlaps it on the
+        // right: the next avatar, or — for the last one — the `+N` counter when
+        // it is forced via `remainingCount`. Without this the forced counter
+        // overlaps an unclipped last avatar and the mask looks broken.
+        const isLast = index === avatars.length - 1
+        const isOverlappedByForcedCounter =
+          isLast && initialRemainingCount !== undefined
+        const shouldClip = (!isLast || isOverlappedByForcedCounter) && !hasBadge
         const clippedAvatar = (
           <div
             className="flex h-fit w-fit shrink-0 items-center justify-center"
             style={
-              index !== avatars.length - 1
+              shouldClip
                 ? {
                     clipPath:
                       CLIP_MASK[type === "person" ? "rounded" : "base"][size],
@@ -92,7 +116,9 @@ export const F0AvatarList = ({
             {noTooltip ? (
               clippedAvatar
             ) : (
-              <Tooltip label={displayName}>{clippedAvatar}</Tooltip>
+              <Tooltip label={displayName} description={description}>
+                {clippedAvatar}
+              </Tooltip>
             )}
           </div>
         )
@@ -109,6 +135,7 @@ export const F0AvatarList = ({
             size={size}
             type={type === "person" ? "rounded" : "base"}
             avatarType={type}
+            tooltipScroll={tooltipScroll}
             list={
               initialRemainingCount
                 ? undefined

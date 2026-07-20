@@ -12,6 +12,7 @@ export const F0SegmentedControl = ({
   onChange,
   disabled = false,
   fullWidth = false,
+  hideLabels = false,
   ariaLabel,
   ariaLabelledBy,
 }: F0SegmentedControlProps) => {
@@ -55,12 +56,16 @@ export const F0SegmentedControl = ({
             "disabled:pointer-events-none disabled:text-f1-foreground-disabled",
             "data-[state=on]:bg-f1-background data-[state=on]:text-f1-foreground data-[state=on]:shadow",
             focusRing(),
-            "h-8 px-3 text-sm",
+            "h-8 px-3 text-base",
             fullWidth && "w-full"
           )}
         >
           {item.icon && <F0Icon icon={item.icon} size="md" />}
-          {item.label}
+          {hideLabels && item.icon ? (
+            <span className="sr-only">{item.label}</span>
+          ) : (
+            item.label
+          )}
         </ToggleGroupItem>
       ))}
     </ToggleGroup>

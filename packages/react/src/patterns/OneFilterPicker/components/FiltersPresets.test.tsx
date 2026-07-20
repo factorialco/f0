@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@testing-library/jest-dom/vitest"
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
 
@@ -385,5 +385,177 @@ describe("FiltersPresets - No Multiple Selection", () => {
     await user.click(getVisibleByText("London Office"))
 
     expect(mockOnPresetsChange).toHaveBeenCalledWith({})
+  })
+})
+
+describe("FiltersPresets - groups, separator and save chip", () => {
+  const mixedPresets: PresetsDefinition<FiltersDefinition> = [
+    { id: "dev-1", label: "Dev One", filter: { department: ["a"] } },
+    { id: "dev-2", label: "Dev Two", filter: { department: ["b"] } },
+    { id: "custom-1", label: "Custom One", filter: { department: ["c"] } },
+  ]
+
+  it("renders a separator between developer and custom presets", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={["custom-1"]}
+      />
+    )
+
+    expect(
+      screen.getAllByTestId("preset-group-separator").length
+    ).toBeGreaterThan(0)
+  })
+
+  it("does not render a separator when there are no custom presets", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={[]}
+      />
+    )
+
+    expect(
+      screen.queryByTestId("preset-group-separator")
+    ).not.toBeInTheDocument()
+  })
+
+  it("shows a 'Save view' chip when presetActionState is 'save' and triggers onPresetAction", async () => {
+    const user = userEvent.setup()
+    const onPresetAction = vi.fn()
+
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={["custom-1"]}
+        presetActionState="save"
+        onPresetAction={onPresetAction}
+      />
+    )
+
+    // The save chip is a list item; in jsdom (0-width) it may land in the
+    // overflow measurement copy, so query by text (incl. aria-hidden).
+    await user.click(getVisibleByText("Save view"))
+    expect(onPresetAction).toHaveBeenCalledTimes(1)
+  })
+
+  it("renders the save chip even when there are no presets", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={[]}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        presetActionState="save"
+        onPresetAction={vi.fn()}
+      />
+    )
+
+    expect(
+      screen.getByRole("button", { name: "Save view" })
+    ).toBeInTheDocument()
+  })
+
+  it("does not show the save chip when presetActionState is 'none'", () => {
+    zeroRender(
+      <FiltersPresets
+        presets={mixedPresets}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        editablePresetIds={["custom-1"]}
+        presetActionState="none"
+        onPresetAction={vi.fn()}
+      />
+    )
+
+    expect(
+      screen.queryByRole("button", { name: "Save view" })
+    ).not.toBeInTheDocument()
+  })
+})
+
+describe("FiltersPresets - Loading transition", () => {
+  // OverflowList commits its visible/overflow split after render, so the
+  // loading→loaded flip produces one render where the new callbacks could see
+  // the numeric skeleton items. Regression for the f0-react 2.50.0 crash:
+  // "Cannot read properties of undefined (reading 'itemsCount')".
+  const CONTAINER_WIDTH = 800
+  const ITEM_WIDTH = 50
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      get() {
+        return CONTAINER_WIDTH
+      },
+    })
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockReturnValue({
+      width: ITEM_WIDTH,
+      height: 32,
+      top: 0,
+      left: 0,
+      bottom: 32,
+      right: ITEM_WIDTH,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    } as DOMRect)
+  })
+
+  afterEach(() => {
+    delete (HTMLElement.prototype as { clientWidth?: number }).clientWidth
+    vi.restoreAllMocks()
+  })
+
+  it("does not crash when presets finish loading after the skeleton phase", () => {
+    const presets: PresetsDefinition<FiltersDefinition> = [
+      {
+        id: "all",
+        label: "All expenses",
+        filter: {},
+        itemsCount: () => 5,
+      },
+      {
+        id: "pending",
+        label: "Pending",
+        filter: { status: ["pending"] },
+        itemsCount: () => 2,
+      },
+    ]
+
+    const { rerender } = zeroRender(
+      <FiltersPresets
+        presets={[]}
+        presetsLoading
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+      />
+    )
+
+    rerender(
+      <FiltersPresets
+        presets={presets}
+        presetsLoading={false}
+        value={{}}
+        onPresetsChange={vi.fn()}
+        onSelectPreset={vi.fn()}
+        selectedPresetId="all"
+      />
+    )
+
+    expect(getVisibleByText("All expenses")).toBeInTheDocument()
+    expect(getVisibleByText("Pending")).toBeInTheDocument()
   })
 })

@@ -1,18 +1,24 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
+import { F0TextInput } from "@/components/F0TextInput"
 import { RecordType } from "@/hooks/datasource/types/records.typings"
 import { cn } from "@/lib/utils"
 
 import { EditableCellProps } from "."
 import { BaseCell } from "./BaseCell"
+import { resolveTextCellIcon } from "./textIcon"
 
 export function TextCell<R extends RecordType>({
   editableColumn,
   value,
+  inputPlaceholder,
   error,
   loading,
   onChange,
   hint,
 }: EditableCellProps<R>) {
+  const config = editableColumn.textConfig
+  const inputType = config?.inputType ?? "text"
+  const icon = resolveTextCellIcon(config)
+
   return (
     <BaseCell error={error} hint={hint}>
       <div
@@ -22,11 +28,13 @@ export function TextCell<R extends RecordType>({
           editableColumn.align === "right" && "[&_input]:text-right"
         )}
       >
-        <Input
-          type="text"
+        <F0TextInput
+          type={inputType}
+          icon={icon}
           label={editableColumn.label}
           hideLabel
           value={value}
+          placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}
           onChange={onChange}
           loading={loading}
           transparent

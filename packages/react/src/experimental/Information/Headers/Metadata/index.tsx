@@ -24,7 +24,7 @@ type MetadataItemValue =
   | { type: "text"; content: string }
   | { type: "avatar"; variant: AvatarVariant; text: string }
   | { type: "status"; label: string; variant: StatusVariant }
-  | ({ type: "list" } & (
+  | ({ type: "list"; max?: number } & (
       | {
           variant: "person"
           avatars: (
@@ -92,6 +92,12 @@ interface MetadataItem {
   hideLabel?: boolean
 
   /**
+   * Optional leading icon shown before the label/value. Useful when the icon itself
+   * conveys the field (e.g. with `hideLabel`), so the item reads as "icon + value".
+   */
+  icon?: IconType
+
+  /**
    * Optional info text. When provided, displays an info icon next to the label
    * that shows this text in a tooltip when hovered.
    */
@@ -99,6 +105,15 @@ interface MetadataItem {
     title: string
     description?: string
   }
+}
+
+export type MetadataRowGap = "none" | "xs" | "sm" | "md"
+
+const metadataRowGapClass: Record<MetadataRowGap, string> = {
+  none: "gap-y-0",
+  xs: "gap-y-1",
+  sm: "gap-y-2",
+  md: "gap-y-3",
 }
 
 export interface MetadataProps {
@@ -112,6 +127,8 @@ export interface MetadataProps {
    * If true and the metadata type is a list, it will be collapsed to the first item
    */
   collapse?: boolean
+
+  rowGap?: MetadataRowGap
 }
 
 function MetadataItem({ item }: { item: MetadataItem }) {
@@ -159,6 +176,11 @@ function MetadataItem({ item }: { item: MetadataItem }) {
 
   return (
     <div className="flex h-8 items-center gap-2">
+      {item.icon && (
+        <span className="flex shrink-0 items-center text-f1-foreground-secondary">
+          <F0Icon icon={item.icon} size="md" />
+        </span>
+      )}
       <div
         className={cn(
           "flex w-28 items-center gap-1 truncate text-f1-foreground-secondary md:w-fit",
@@ -276,10 +298,18 @@ function MetadataItem({ item }: { item: MetadataItem }) {
   )
 }
 
-const _Metadata = memo(function Metadata({ items }: MetadataProps) {
+const _Metadata = memo(function Metadata({
+  items,
+  rowGap = "none",
+}: MetadataProps) {
   const cleanedItems = items.filter((item) => typeof item === "object")
   return (
-    <div className="flex flex-col items-start gap-x-3 gap-y-0 md:flex-row md:flex-wrap md:items-center">
+    <div
+      className={cn(
+        "flex flex-col items-start gap-x-3 md:flex-row md:flex-wrap md:items-center",
+        metadataRowGapClass[rowGap]
+      )}
+    >
       {cleanedItems.map((item, index) => (
         <Fragment key={`metadata-item-${index}`}>
           <MetadataItem item={item} />

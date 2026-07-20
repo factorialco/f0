@@ -1,8 +1,9 @@
 import { ControllerRenderProps, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import { F0Select } from "@/components/F0Select"
+import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import type { ResolvedField } from "../types"
 import type { F0SelectField } from "./types"
@@ -176,7 +177,12 @@ function SelectWithSource({
  * Supports both static options and dynamic data sources
  */
 export function SelectFieldRenderer(props: SelectFieldRendererProps) {
-  const { field } = props
+  const { t } = useI18n()
+  // Selects always show a placeholder; fall back to the shared "Select" copy
+  const field = {
+    ...props.field,
+    placeholder: props.field.placeholder ?? t("common.selectPlaceholder"),
+  }
 
   // Route to appropriate renderer based on field configuration
   if (

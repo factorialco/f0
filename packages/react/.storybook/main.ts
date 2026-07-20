@@ -1,6 +1,7 @@
 // This file has been automatically migrated to valid ESM format by Storybook.
 import type { StorybookConfig } from "@storybook/react-vite"
 
+import { writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { dirname, join, resolve } from "node:path"
 import * as process from "node:process"
@@ -8,8 +9,33 @@ import { fileURLToPath } from "node:url"
 import remarkGfm from "remark-gfm"
 import { Preset } from "storybook/internal/types"
 
+import {
+  componentStatusVitePlugin,
+  computeComponentStatusData,
+  effectiveStatusByLeaf,
+} from "../scripts/component-status-build.mjs"
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const require = createRequire(import.meta.url)
+
+// The Storybook manager is an esbuild bundle that can't run the Vite virtual
+// module or the `@/` alias, so it can't compute component status itself. Compute
+// a leaf-name → effective-status map here (Node, at startup) and write it to a
+// generated file the manager imports for its sidebar status markers. Only the
+// non-stable levels are included (stable needs no marker).
+{
+  const byLeaf = effectiveStatusByLeaf(computeComponentStatusData().components)
+  const markers: Record<string, string> = {}
+  for (const [leaf, status] of Object.entries(byLeaf)) {
+    if (status === "experimental" || status === "deprecated") {
+      markers[leaf] = status
+    }
+  }
+  writeFileSync(
+    resolve(__dirname, "sidebar-status.generated.json"),
+    JSON.stringify(markers)
+  )
+}
 
 // We should add the STORYBOOK_ prefix to make sure that the environment variables are in browser mode (for example manager.ts file)
 if (process.env.PUBLIC_BUILD) {
@@ -124,6 +150,20 @@ const config: StorybookConfig = {
       "@": resolve(__dirname, "../src"),
       "~": resolve(__dirname, "../"),
     }
+
+    // Provide the `virtual:f0-component-status-data` module (component status is
+    // computed from source at build time). Guarded so it is not added twice if
+    // Storybook already merged it from vite.config.ts.
+    config.plugins = config.plugins || []
+    const existing = (config.plugins as unknown[]).flat(Infinity) as Array<{
+      name?: string
+    } | null>
+    const hasComponentStatus = existing.some(
+      (p) => p?.name === "f0-component-status"
+    )
+    if (!hasComponentStatus) {
+      config.plugins.push(componentStatusVitePlugin())
+    }
     // Ensure base is set to '/' to prevent absolute path issues in CI
     // This ensures paths are relative and work correctly when served
     config.base = config.base || "/"
@@ -139,6 +179,8 @@ const config: StorybookConfig = {
       "@copilotkit/react-core",
       "@copilotkit/react-ui",
       "@copilotkit/shared",
+      "@xyflow/react",
+      "@dagrejs/dagre",
     ]
 
     return config

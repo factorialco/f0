@@ -52,6 +52,7 @@ import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
+import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
 export * from "./settings/SettingsRenderer"
 
@@ -222,9 +223,7 @@ export const TableCollection = <
     return `index:${String(index)}`
   }
 
-  /**
-   * Item selection
-   */
+  const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
     selectedItems,
     allSelectedStatus,
@@ -240,6 +239,8 @@ export const TableCollection = <
     onSelectItems,
     selectionMode: "multi",
     selectedState: source.defaultSelectedItems,
+    getRenderedSelectableEntries: selectionRegistry.getEntries,
+    renderedSelectableCount: selectionRegistry.ids.length,
   })
   const summaryData = useMemo(() => {
     // Early return if no summaries configuration or summaries data is available
@@ -353,15 +354,22 @@ export const TableCollection = <
   // allPagesSelection modes — unlike comparing the cross-page selectedCount to
   // data.records.length, which can produce false positives when selections from
   // another page happen to equal the current page size.
-  // Non-selectable rows (source.selectable returns undefined) are filtered out
-  // so pages with mixed selectable/non-selectable rows still report correctly.
-  const currentPageSelectableIds = (data?.records ?? [])
-    .map((record) => source.selectable?.(record))
-    .filter((id): id is SelectionId => id !== undefined)
+  const currentPageSelectableIds =
+    selectionRegistry.ids.length > 0
+      ? selectionRegistry.ids
+      : (data?.records ?? [])
+          .map((record) => source.selectable?.(record))
+          .filter((id): id is SelectionId => id !== undefined)
 
   const allPageRowsSelected =
     currentPageSelectableIds.length > 0 &&
     currentPageSelectableIds.every((id) => selectedItems.has(id))
+
+  // nested/tree tables: paginationInfo.total counts top-level rows, not selectable children
+  const selectableTotal = Math.max(
+    paginationInfo?.total ?? 0,
+    currentPageSelectableIds.length
+  )
 
   // True when the header checkbox should render as fully-checked: either the
   // Gmail-style "select across all pages" CTA is active, or every selectable
@@ -374,7 +382,7 @@ export const TableCollection = <
     !!source.allPagesSelection &&
     (!allSelectedStatus.checked || allSelectedStatus.indeterminate) &&
     paginationInfo?.total !== undefined &&
-    paginationInfo.total > allSelectedStatus.selectedCount
+    selectableTotal > allSelectedStatus.selectedCount
 
   const selectionHeaderColSpan =
     columns.length + (showItemActions ? actionColCount : 0)
@@ -431,6 +439,7 @@ export const TableCollection = <
                         align="right"
                         className={borderClass}
                         width={columns[entry.columnIndices[0]].width}
+                        minWidth={columns[entry.columnIndices[0]].minWidth}
                         key={`header-ungrouped-${entry.columnIndices[0]}`}
                         sticky={getStickyPosition(entry.columnIndices[0])}
                       >
@@ -444,7 +453,6 @@ export const TableCollection = <
                         key="actions"
                         width="fit"
                         sticky={{ right: 0 }}
-                        className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                       >
                         <span className="sr-only">
                           {i18n.collections.actions.actions}
@@ -521,7 +529,7 @@ export const TableCollection = <
                           headerGroups && "[&>div:first-child]:hidden",
                           isLastInGroup && groupBorderClass,
                           fromVisualization === "editableTable" &&
-                            index !== columns.length - 1 &&
+                            (index !== columns.length - 1 || showItemActions) &&
                             "border-0 border-r-[1px] border-solid border-f1-border-secondary"
                         ) || undefined
                       }
@@ -540,12 +548,7 @@ export const TableCollection = <
                 })}
                 {showItemActions &&
                   (isEditableTable ? (
-                    <TableHead
-                      key="actions"
-                      width="fit"
-                      sticky={{ right: 0 }}
-                      className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
-                    >
+                    <TableHead key="actions" width="fit" sticky={{ right: 0 }}>
                       <span className="sr-only">
                         {i18n.collections.actions.actions}
                       </span>
@@ -581,9 +584,7 @@ export const TableCollection = <
                             allSelectedStatus.checked &&
                             !allSelectedStatus.indeterminate
                               ? t("status.selected.allItemsSelected", {
-                                  total:
-                                    paginationInfo?.total ??
-                                    allSelectedStatus.selectedCount,
+                                  total: selectableTotal,
                                 })
                               : allPageRowsSelected
                                 ? t("status.selected.allOnPage", {
@@ -594,8 +595,7 @@ export const TableCollection = <
                           count={
                             allSelectedStatus.checked &&
                             !allSelectedStatus.indeterminate
-                              ? (paginationInfo?.total ??
-                                allSelectedStatus.selectedCount)
+                              ? selectableTotal
                               : allSelectedStatus.selectedCount
                           }
                         />
@@ -603,7 +603,7 @@ export const TableCollection = <
                           <F0Button
                             variant="outline"
                             label={t("status.selected.selectAllItems", {
-                              total: paginationInfo?.total ?? 0,
+                              total: selectableTotal,
                             })}
                             onClick={() => handleSelectAllItems(true)}
                             size="sm"
@@ -704,6 +704,10 @@ export const TableCollection = <
                                 cellRenderer={cellRenderer}
                                 headerGroups={headerGroups}
                                 fromVisualization={fromVisualization}
+                                registerSelectable={selectionRegistry.register}
+                                unregisterSelectable={
+                                  selectionRegistry.unregister
+                                }
                               />
                             )
                             if (RowWrapper) {
@@ -748,6 +752,8 @@ export const TableCollection = <
                       cellRenderer={cellRenderer}
                       fromVisualization={fromVisualization}
                       headerGroups={headerGroups}
+                      registerSelectable={selectionRegistry.register}
+                      unregisterSelectable={selectionRegistry.unregister}
                     />
                   )
                   if (RowWrapper) {
@@ -826,6 +832,12 @@ export const TableCollection = <
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
+                          className={cn(
+                            isEditableTable &&
+                              (cellIndex !== columns.length - 1 ||
+                                showItemActions) &&
+                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                          )}
                         >
                           {cellIndex === 0 &&
                           !source.selectable &&
@@ -887,7 +899,6 @@ export const TableCollection = <
                           <TableCell
                             key="summary-actions"
                             sticky={{ right: 0 }}
-                            className="border-0 border-l-[1px] border-solid border-f1-border-secondary"
                           >
                             {""}
                           </TableCell>

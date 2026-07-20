@@ -52,9 +52,9 @@ How much extra validation it needs is covered below. Foundations responds as ava
 
 ### 3 · Build to the standard — _the PR_
 
-You (with Claude and the F0 skills) build it in `experimental/` to the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs): F0-prefixed named exports, design tokens, i18n, a11y, Storybook story, unit tests, MDX docs. The [`f0-component-contribution`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md) skill drives this end to end.
+You (with Claude and the F0 skills) build it in `experimental/` to the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs): F0-prefixed named exports, design tokens, i18n, a11y, Storybook story, unit tests, MDX docs. The [`f0-component-contribution`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-component-contribution/SKILL.md) skill drives this end to end.
 
-**Every new or changed thing lands as a PR** — that's where code review happens and where it merges. It ships as **experimental** first. Later, once it's adopted and its API has settled, **Foundations promotes it to stable** (see [`f0-component-promotion`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-component-promotion/SKILL.md)).
+**Every new or changed thing lands as a PR** — that's where code review happens and where it merges. It ships as **experimental** first. Later, once it's adopted and its API has settled, **Foundations promotes it to stable** (see [`f0-component-promotion`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-component-promotion/SKILL.md)).
 
 ---
 
@@ -140,8 +140,8 @@ The agent (Claude / OpenCode) is the **entry point** to F0 — it reads the repo
 
 | Task                                | Skill                                                                                                                                                                |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Propose & build a new component     | [`f0-component-contribution`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-component-contribution/SKILL.md)                      |
-| Promote experimental → stable       | [`f0-component-promotion`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-component-promotion/SKILL.md)                            |
+| Propose & build a new component     | [`f0-component-contribution`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-component-contribution/SKILL.md)                      |
+| Promote experimental → stable       | [`f0-component-promotion`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-component-promotion/SKILL.md)                            |
 | Write Storybook stories             | [`f0-storybook-stories`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-storybook-stories/SKILL.md)                                |
 | Write MDX documentation             | [`f0-docs`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-docs/SKILL.md)                                                          |
 | Migrate an experimental component   | [`f0-experimental-component-migration`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-experimental-component-migration/SKILL.md)  |

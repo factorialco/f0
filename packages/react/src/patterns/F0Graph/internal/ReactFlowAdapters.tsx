@@ -12,7 +12,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import type { F0GraphNodeRenderContext } from "../F0Graph"
-import type { GraphNodeState, GraphNodeVariant } from "../F0GraphNode"
+import type {
+  GraphNodeState,
+  GraphNodeVariant,
+} from "../components/F0GraphNode"
 import type { GraphNode, LayoutDirection, ZoomLevel } from "../types"
 
 function handlePositions(direction: LayoutDirection): {
@@ -40,7 +43,7 @@ import {
   useF0GraphFocusInternal,
   useF0GraphRenderConfigInternal,
 } from "../contexts"
-import { F0GraphExpander } from "../F0GraphExpander"
+import { F0GraphExpander } from "../components/F0GraphExpander"
 
 // ─── Shared types ──────────────────────────────────────────────
 
@@ -64,7 +67,12 @@ export interface ExpanderNodeData {
   expanded: boolean
   parentId: string
   parentWidth: number
-  parentName?: string
+  /**
+   * `true` while the parent has been expanded but its children have not arrived
+   * yet (lazy / on-demand loading). The expander stays visible and shows a
+   * spinner so the open action gives immediate feedback instead of a blank gap.
+   */
+  loading?: boolean
 }
 
 export type ExpanderRFNode = RFNode<ExpanderNodeData>
@@ -74,7 +82,6 @@ export interface CollapserNodeData {
   parentId: string
   parentWidth: number
   collapseLabel?: string
-  parentName?: string
 }
 
 export type CollapserRFNode = RFNode<CollapserNodeData>
@@ -87,10 +94,18 @@ const EXPANDER_SIZE: Record<ZoomLevel, number> = {
   dot: 72,
 }
 
+// Vertical lane between a node's bottom and its children's top. Matches
+// `DEFAULT_RANK_SEP` in useLayoutEngine — keep them in sync.
+const NODE_RANK_SEP = 130
+
+// Place the expander/collapser button so it sits exactly in the middle of the
+// lane between a node and its children: the button (anchored at the top of its
+// wrapper box) is pushed down by half the leftover space. Measured from the
+// node's bottom edge.
 export const EXPANDER_Y_OFFSET_BY_ZOOM: Record<ZoomLevel, number> = {
-  detail: 18,
-  compact: 18,
-  dot: 72,
+  detail: (NODE_RANK_SEP - EXPANDER_SIZE.detail) / 2,
+  compact: (NODE_RANK_SEP - EXPANDER_SIZE.compact) / 2,
+  dot: (NODE_RANK_SEP - EXPANDER_SIZE.dot) / 2,
 }
 
 // ─── F0GraphNodeWrapper ────────────────────────────────────────
@@ -163,6 +178,9 @@ function F0GraphNodeWrapperInner({ data, id }: NodeProps<GraphRFNode>) {
     nodeRef: nodeRefCallback,
     visibleTagTypes: renderCfg?.visibleTagTypes,
     deferredLoading: renderCfg?.deferredLoading,
+    dataLoading: renderCfg?.dataLoadingEnabled
+      ? graphNode.dataLoaded === false
+      : undefined,
   }
 
   return (
@@ -218,9 +236,8 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
   const i18n = useI18n()
   if (!zoomCtx || !expandCtx || !actionsCtx) return null
 
-  const { count, parentId, parentWidth, parentName } = data as ExpanderNodeData
+  const { count, parentId, parentWidth, loading } = data as ExpanderNodeData
   const expanded = expandCtx.expandedNodes.has(parentId)
-  const expanderSize = EXPANDER_SIZE[zoomCtx.zoomLevel]
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
   )
@@ -230,14 +247,7 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
     ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
-  const ariaLabel = parentName
-    ? i18n.t(
-        count === 1
-          ? "graph.expander.expandWithParentSingular"
-          : "graph.expander.expandWithParentPlural",
-        { parent: parentName, count }
-      )
-    : i18n.t("graph.expander.expand", { count })
+  const ariaLabel = i18n.t("actions.expand")
 
   return (
     <>
@@ -263,10 +273,9 @@ function F0GraphExpanderWrapperInner({ data, id }: NodeProps<ExpanderRFNode>) {
         <F0GraphExpander
           count={count}
           expanded={expanded}
-          size={expanderSize}
           tabIndex={-1}
           onClick={() => actionsCtx.toggleExpand(parentId)}
-          loading={renderCfg?.deferredLoading}
+          loading={loading || renderCfg?.deferredLoading}
         />
       </div>
       <Handle type="source" position={sourcePos} className="!invisible" />
@@ -285,6 +294,7 @@ export const F0GraphExpanderWrapper = memo(
     if (prevData.parentId !== nextData.parentId) return false
     if (prevData.count !== nextData.count) return false
     if (prevData.parentWidth !== nextData.parentWidth) return false
+    if (prevData.loading !== nextData.loading) return false
     if (prev.positionAbsoluteX !== next.positionAbsoluteX) return false
     if (prev.positionAbsoluteY !== next.positionAbsoluteY) return false
     return true
@@ -303,8 +313,7 @@ function F0GraphCollapserWrapperInner({
   const i18n = useI18n()
   if (!zoomCtx || !actionsCtx) return null
 
-  const { parentId, parentWidth, collapseLabel, parentName } =
-    data as CollapserNodeData
+  const { parentId, parentWidth, collapseLabel } = data as CollapserNodeData
   if (zoomCtx.zoomLevel === "dot") return null
   const { source: sourcePos, target: targetPos } = handlePositions(
     zoomCtx.direction
@@ -315,9 +324,7 @@ function F0GraphCollapserWrapperInner({
     ? (el: HTMLDivElement | null) => focusCtx.registerNodeRef(id, el)
     : undefined
 
-  const ariaLabel = parentName
-    ? i18n.t("graph.expander.collapseWithParent", { parent: parentName })
-    : (collapseLabel ?? i18n.graph.expander.collapseDefault)
+  const ariaLabel = collapseLabel ?? i18n.actions.collapse
 
   return (
     <>

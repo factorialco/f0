@@ -7,6 +7,10 @@ export type PrimaryActionItemDefinition = Pick<
   loading?: boolean
   onClick?: () => void | Promise<void>
   disabled?: boolean
+  tooltip?: (params: {
+    disabled: boolean
+    loading: boolean
+  }) => string | undefined
 }
 
 /**
@@ -146,3 +150,21 @@ export const filterActions = (
       ),
     }
   })
+
+/** Upsell button rendered in the collection toolbar. */
+export type UpsellActionDefinition = {
+  label: string
+  onClick: () => void | Promise<void>
+  /** Show the upsell icon. Defaults to true. */
+  showIcon?: boolean
+  /** Button variant. Defaults to "outlinePromote". */
+  variant?: "promote" | "outlinePromote"
+  disabled?: boolean
+}
+
+/** Returns the upsell action, or undefined to hide it. */
+export type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined
+
+export const getUpsellAction = (
+  upsellAction: UpsellActionDefinitionFn | undefined
+): UpsellActionDefinition | undefined => upsellAction?.()

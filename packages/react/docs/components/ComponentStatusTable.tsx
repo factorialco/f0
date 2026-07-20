@@ -1,23 +1,11 @@
-import { useState, useMemo } from "react"
+import { useMemo, useState } from "react"
 
-import statusData from "../component-status-data.json"
-
-type ApiStatus =
-  | "stable"
-  | "experimental"
-  | "deprecated"
-  | "internal"
-  | "unknown"
-
-interface ComponentEntry {
-  name: string
-  zone: string
-  apiStatus: ApiStatus
-  tags: string[]
-  hasUnitTests: boolean
-  hasMdxDocs: boolean
-  storyFile: string
-}
+import {
+  componentStatusData,
+  getAllComponentStatuses,
+  type ApiStatus,
+  type ComponentStatus,
+} from "@/component-status"
 
 const STATUS_CONFIG: Record<
   ApiStatus,
@@ -68,6 +56,14 @@ const ZONE_ORDER = [
   "other",
 ]
 
+// Requirement columns, keyed to STABLE_REQUIREMENTS.
+const REQ_COLUMNS: { key: string; label: string }[] = [
+  { key: "unitTests", label: "Tests" },
+  { key: "playFunction", label: "Play" },
+  { key: "mdxDocs", label: "MDX" },
+  { key: "docQuality", label: "Good docs" },
+]
+
 function StatusBadge({ status }: { status: ApiStatus }) {
   const config = STATUS_CONFIG[status]
   return (
@@ -80,18 +76,14 @@ function StatusBadge({ status }: { status: ApiStatus }) {
   )
 }
 
-function CheckIcon() {
-  return (
+function Check({ met }: { met: boolean }) {
+  return met ? (
     <span className="text-f1-foreground-positive" title="Yes">
       ✓
     </span>
-  )
-}
-
-function CrossIcon() {
-  return (
+  ) : (
     <span className="text-f1-foreground-disabled" title="No">
-      ✗
+      ✕
     </span>
   )
 }
@@ -121,25 +113,31 @@ export function ComponentStatusTable() {
   const [zoneFilter, setZoneFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
 
-  const { stats, components } = statusData as {
-    generatedAt: string
-    stats: {
-      total: number
-      byStatus: Record<string, number>
-      byZone: Record<string, number>
-      withUnitTests: number
-      withMdxDocs: number
-    }
-    components: ComponentEntry[]
-  }
+  const statuses = useMemo(() => getAllComponentStatuses(), [])
+  const total = statuses.length
 
+  const byZone = componentStatusData.stats.byZone
   const allZones = useMemo(
-    () => ZONE_ORDER.filter((z) => stats.byZone[z] !== undefined),
-    [stats.byZone]
+    () => ZONE_ORDER.filter((z) => byZone[z] !== undefined),
+    [byZone]
+  )
+
+  // Counts by *effective* status (what the badge/sidebar show).
+  const effectiveCounts = useMemo(() => {
+    const m: Record<string, number> = {}
+    for (const c of statuses)
+      m[c.effectiveStatus] = (m[c.effectiveStatus] ?? 0) + 1
+    return m
+  }, [statuses])
+
+  const misclassified = useMemo(
+    () =>
+      statuses.filter((c) => c.discrepancy === "tagged-but-below-bar").length,
+    [statuses]
   )
 
   const filtered = useMemo(() => {
-    return components.filter((c) => {
+    return statuses.filter((c) => {
       if (
         search &&
         !c.name.toLowerCase().includes(search.toLowerCase()) &&
@@ -148,15 +146,23 @@ export function ComponentStatusTable() {
         return false
       }
       if (zoneFilter !== "all" && c.zone !== zoneFilter) return false
-      if (statusFilter !== "all" && c.apiStatus !== statusFilter) return false
+      if (statusFilter !== "all" && c.effectiveStatus !== statusFilter) {
+        return false
+      }
       return true
     })
-  }, [components, search, zoneFilter, statusFilter])
+  }, [statuses, search, zoneFilter, statusFilter])
 
-  const generatedDate = new Date(statusData.generatedAt).toLocaleDateString(
-    "en-US",
-    { year: "numeric", month: "short", day: "numeric" }
-  )
+  const generatedDate = new Date(
+    componentStatusData.generatedAt
+  ).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  })
+
+  const isMet = (c: ComponentStatus, key: string) =>
+    c.requirements.find((r) => r.key === key)?.met ?? false
 
   return (
     <div className="space-y-6">
@@ -164,23 +170,23 @@ export function ComponentStatusTable() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <SummaryCard
           label="Total components"
-          value={stats.total}
-          sub={`across ${Object.keys(stats.byZone).length} zones`}
+          value={total}
+          sub={`across ${Object.keys(byZone).length} zones`}
         />
         <SummaryCard
-          label="Stable"
-          value={stats.byStatus.stable ?? 0}
-          sub={`${Math.round(((stats.byStatus.stable ?? 0) / stats.total) * 100)}% of total`}
+          label="Stable (effective)"
+          value={effectiveCounts.stable ?? 0}
+          sub={`${Math.round(((effectiveCounts.stable ?? 0) / total) * 100)}% meet the full DoD`}
         />
         <SummaryCard
-          label="With unit tests"
-          value={stats.withUnitTests}
-          sub={`${Math.round((stats.withUnitTests / stats.total) * 100)}% coverage`}
+          label="Experimental (effective)"
+          value={effectiveCounts.experimental ?? 0}
+          sub="untagged, below bar, or not promoted"
         />
         <SummaryCard
-          label="With MDX docs"
-          value={stats.withMdxDocs}
-          sub={`${Math.round((stats.withMdxDocs / stats.total) * 100)}% documented`}
+          label="Tagged stable, below bar"
+          value={misclassified}
+          sub="show as experimental"
         />
       </div>
 
@@ -201,7 +207,7 @@ export function ComponentStatusTable() {
           <option value="all">All zones</option>
           {allZones.map((z) => (
             <option key={z} value={z}>
-              {z} ({stats.byZone[z]})
+              {z} ({byZone[z]})
             </option>
           ))}
         </select>
@@ -211,20 +217,14 @@ export function ComponentStatusTable() {
           className="h-8 rounded-md border border-f1-border bg-f1-background px-2 text-sm text-f1-foreground focus:outline-none focus:ring-2 focus:ring-f1-border-selected"
         >
           <option value="all">All statuses</option>
-          {(
-            Object.entries(STATUS_CONFIG) as [
-              ApiStatus,
-              (typeof STATUS_CONFIG)[ApiStatus],
-            ][]
-          ).map(([key, config]) => (
+          {(["stable", "experimental", "deprecated"] as const).map((key) => (
             <option key={key} value={key}>
-              {config.label} ({stats.byStatus[key] ?? 0})
+              {STATUS_CONFIG[key].label} ({effectiveCounts[key] ?? 0})
             </option>
           ))}
         </select>
         <span className="ml-auto text-xs text-f1-foreground-secondary">
-          {filtered.length} of {stats.total} components · Generated{" "}
-          {generatedDate}
+          {filtered.length} of {total} components · Generated {generatedDate}
         </span>
       </div>
 
@@ -235,16 +235,19 @@ export function ComponentStatusTable() {
             <tr className="border-b border-f1-border bg-f1-background-secondary text-left text-xs font-semibold uppercase tracking-wide text-f1-foreground-secondary">
               <th className="px-4 py-3">Component</th>
               <th className="px-4 py-3">Zone</th>
-              <th className="px-4 py-3">API Status</th>
-              <th className="px-4 py-3 text-center">Unit Tests</th>
-              <th className="px-4 py-3 text-center">MDX Docs</th>
+              <th className="px-4 py-3">Status</th>
+              {REQ_COLUMNS.map((col) => (
+                <th key={col.key} className="px-4 py-3 text-center">
+                  {col.label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-f1-border">
             {filtered.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={3 + REQ_COLUMNS.length}
                   className="px-4 py-8 text-center text-f1-foreground-secondary"
                 >
                   No components match your filters.
@@ -267,14 +270,13 @@ export function ComponentStatusTable() {
                     </span>
                   </td>
                   <td className="px-4 py-2.5">
-                    <StatusBadge status={component.apiStatus} />
+                    <StatusBadge status={component.effectiveStatus} />
                   </td>
-                  <td className="px-4 py-2.5 text-center">
-                    {component.hasUnitTests ? <CheckIcon /> : <CrossIcon />}
-                  </td>
-                  <td className="px-4 py-2.5 text-center">
-                    {component.hasMdxDocs ? <CheckIcon /> : <CrossIcon />}
-                  </td>
+                  {REQ_COLUMNS.map((col) => (
+                    <td key={col.key} className="px-4 py-2.5 text-center">
+                      <Check met={isMet(component, col.key)} />
+                    </td>
+                  ))}
                 </tr>
               ))
             )}

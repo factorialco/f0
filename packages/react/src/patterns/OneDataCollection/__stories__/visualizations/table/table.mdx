@@ -93,7 +93,7 @@ type TableVisualizationOptions<T> = {
   allowColumnHiding?: boolean
 
   /**
-   * Marks rows as reference rows. Reference rows are rendered with patterns depending on the type returned.
+   * Maps a row to a visual variant. Supported variants: `"striped"`, `"striked"`, `"none"`.
    */
   referenceRowType?: (item: T) => ReferenceType
 }
@@ -389,6 +389,27 @@ that should be visually distinguished from regular records.
 ```
 
 <Canvas of={TableStories.ReferenceRowsVisualization} meta={TableStories} />
+
+### Striked Rows
+
+`referenceRowType` also accepts `"striked"` to render the row with line-through
+text + muted foreground. Tag cells (status, tag, dot, etc.) opt out of the
+strike so their labels stay legible — see the Status column below.
+
+```tsx
+{
+  type: "table",
+  options: {
+    referenceRowType: (item) => (item.active ? "none" : "striked"),
+    columns: [
+      { label: "Name", render: (item) => item.name },
+      { label: "Email", render: (item) => item.email },
+    ],
+  },
+}
+```
+
+<Canvas of={TableStories.StrikedRowsVisualization} meta={TableStories} />
 
 ## Nested Tables
 

@@ -73,4 +73,6 @@ const _F0Link = forwardRef<HTMLAnchorElement, F0LinkProps>(function Link(
   )
 })
 
+_F0Link.displayName = "F0Link"
+
 export const F0Link = withDataTestId(_F0Link)

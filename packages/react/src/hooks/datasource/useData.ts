@@ -54,6 +54,14 @@ export interface UseDataOptions<
 > {
   filters?: Partial<FiltersState<Filters>>
   /**
+   * When false, suspends all data fetching: the initial fetch effect does not
+   * run until `enabled` becomes true. Useful to delay the first fetch until
+   * async state (e.g. persisted filters) has been applied to the source.
+   * `isInitialLoading` stays true while disabled.
+   * @default true
+   */
+  enabled?: boolean
+  /**
    * A function that is called when an error occurs during data fetching.
    * It is called with the error object.
    * @param error - The error object.
@@ -234,6 +242,7 @@ export function useData<
   source: DataSource<R, Filters, Sortings, Grouping>,
   {
     filters,
+    enabled = true,
     onError,
     fetchParamsProvider = defaultFetchDataAndUpdateOptions,
     onResponse,
@@ -254,6 +263,8 @@ export function useData<
     grouping,
     idProvider = defaultIdProvider,
     itemPreFilter,
+    currentPage,
+    onPaginationChange,
   } = source
 
   const cleanup = useRef<(() => void) | undefined>()
@@ -305,6 +316,16 @@ export function useData<
   const [isLoadingMore, setIsLoadingMore] = useState(false)
 
   const isLoadingMoreRef = useRef(false)
+
+  // The provided `currentPage` only seeds the very first page-based fetch
+  // (e.g. restoring a page from the URL); later fetches reset to page 1 as
+  // before — notably when filters/search/sortings change.
+  const initialPageRef = useRef(currentPage)
+
+  // Surface pagination changes (page navigation, etc.) to the consumer.
+  useEffect(() => {
+    onPaginationChange?.(paginationInfo)
+  }, [paginationInfo, onPaginationChange])
 
   const mergedFilters = useMemo(() => {
     return { ...currentFilters, ...filters }
@@ -735,11 +756,18 @@ export function useData<
 
   useEffect(
     () => {
+      if (!enabled) return
       if (!isLoadingMoreRef.current) {
         setIsLoading(true)
-        // Explicitly pass 0 as the initial position for infinite scroll
+        // Seed the first page-based fetch from `currentPage` (if provided), then
+        // fall back to page 1 for every subsequent fetch (filter/search/sorting
+        // changes still reset to the first page).
+        const seededPage = initialPageRef.current
+        initialPageRef.current = undefined
         const initialPosition =
-          dataAdapter.paginationType === "infinite-scroll" ? 0 : 1
+          dataAdapter.paginationType === "infinite-scroll"
+            ? 0
+            : (seededPage ?? 1)
         fetchDataAndUpdate({
           filters: mergedFilters,
           currentPage: initialPosition,
@@ -753,6 +781,7 @@ export function useData<
       fetchDataAndUpdate,
       mergedFilters,
       setIsLoading,
+      enabled,
       dataAdapter.paginationType,
       searchValue.current,
       // eslint-disable-next-line react-hooks/exhaustive-deps -- deps are handled by the caller
@@ -763,8 +792,10 @@ export function useData<
   useEffect(() => {
     return () => {
       cleanup.current?.()
+      // Reset on unmount so a fetch canceled mid-flight can't leave the shared source's isLoading stuck true.
+      setIsLoading(false)
     }
-  }, [])
+  }, [setIsLoading])
 
   const total = totalItems ? totalItems - filteredItemsCount : 0
 

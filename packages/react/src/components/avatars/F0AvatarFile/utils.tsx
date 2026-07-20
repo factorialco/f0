@@ -67,17 +67,25 @@ const FILE_TYPE_MAP: Record<string, FileTypeInfo> = {
   },
 }
 
+// Order matters: matching is done via `includes`, so OOXML tokens
+// (spreadsheetml/wordprocessingml/presentationml) must come before "xml",
+// otherwise an .xlsx MIME (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
+// would match "xml" first and be reported as XML instead of Excel.
 const MIME_MATCH_MAP: Record<string, keyof typeof FILE_TYPE_MAP> = {
   pdf: "pdf",
   image: "image",
+  spreadsheetml: "excel",
+  wordprocessingml: "doc",
+  presentationml: "ppt",
   word: "doc",
   excel: "excel",
   powerpoint: "ppt",
+  // "csv" must come before "text" so that "text/csv" matches CSV, not TXT.
+  csv: "csv",
   text: "txt",
   video: "video",
   audio: "audio",
   archive: "archive",
-  csv: "csv",
   html: "html",
   markdown: "markdown",
   zip: "archive",

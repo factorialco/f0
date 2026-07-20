@@ -13,7 +13,7 @@ const meta = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[240px] bg-f1-background-tertiary p-3">
+      <div className="w-fit bg-f1-background-tertiary p-3">
         <Story />
       </div>
     ),
@@ -31,7 +31,7 @@ export const Default: Story = {
         id: "1",
         title: "Root",
         items: [
-          { label: "Home", icon: Icons.Home, href: "/", exactMatch: true },
+          { label: "Dashboard", icon: Icons.Hub, href: "/", exactMatch: true },
           {
             label: "Inbox",
             icon: Icons.Envelope,
@@ -43,6 +43,7 @@ export const Default: Story = {
             label: "Discover Factorial",
             icon: Icons.Sparkles,
             href: "/discover",
+            tag: "New",
           },
         ],
         isRoot: true,

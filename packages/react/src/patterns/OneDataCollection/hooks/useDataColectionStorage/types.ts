@@ -7,6 +7,7 @@ import {
   SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource"
+import { PresetsDefinition } from "@/patterns/OneFilterPicker/types"
 
 import {
   NavigationFiltersDefinition,
@@ -29,6 +30,8 @@ export type DataCollectionStatus<
   /** Per-visualization filter states, keyed by visualization index.
    *  Only present when visualizations declare per-view filter overrides. */
   visualizationFilters?: Record<string, CurrentFiltersState>
+  /** User-created custom presets persisted alongside the rest of the state. */
+  customPresets?: PresetsDefinition<FiltersDefinition>
 }
 
 export type DataCollectionStatusComplete<
@@ -103,5 +106,9 @@ export type FeatureProviders<
   visualizationFilters?: {
     value: Record<string, FiltersState<Filters>>
     setValue: (value: Record<string, FiltersState<Filters>>) => void
+  }
+  customPresets?: {
+    value: PresetsDefinition<Filters>
+    setValue: React.Dispatch<React.SetStateAction<PresetsDefinition<Filters>>>
   }
 }

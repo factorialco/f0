@@ -1,6 +1,6 @@
 import { CardAvatarVariant } from "@/components/F0Card/components/CardAvatar"
-import { CardMetadataProperty } from "@/components/F0Card/types"
-import { IconType } from "@/components/F0Icon"
+import { CardMetadata } from "@/components/F0Card/types"
+import { NewColor } from "@/components/tags/F0TagDot"
 import { Variant } from "@/components/tags/F0TagStatus"
 import {
   FiltersDefinition,
@@ -18,6 +18,7 @@ export type KanbanLaneDefinition = {
   id: string
   title: string
   variant?: Variant
+  color?: NewColor
 }
 
 export type KanbanVisualizationOptions<
@@ -29,9 +30,7 @@ export type KanbanVisualizationOptions<
   title?: (record: Record) => string
   description?: (record: Record) => string
   avatar?: (record: Record) => CardAvatarVariant
-  metadata?: (
-    record: Record
-  ) => ReadonlyArray<{ icon: IconType; property: CardMetadataProperty }>
+  metadata?: (record: Record) => ReadonlyArray<CardMetadata>
   onMove?: KanbanOnMove<Record>
   onCreate?: KanbanOnCreate
 }

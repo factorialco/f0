@@ -25,9 +25,11 @@ import {
   InfiniteScrollPaginatedResponse,
   OnSelectItemsCallback,
   PaginatedResponse,
+  PaginationInfo,
   PaginationType,
   RecordType,
   SelectedItemsState,
+  SortingsDefinition,
   SortingsState,
 } from "@/hooks/datasource/types"
 import { SearchOptions } from "@/hooks/datasource/types/search.typings"
@@ -169,6 +171,33 @@ export const nestedFilters = {
 } as const
 
 export type NestedFiltersType = typeof nestedFilters
+
+// A user carrying a workplace assignment (office → space → desk). Used by
+// `SubfiltersExampleComponent` so the nested "Office" filter visibly narrows
+// the list when a group or sub-option is selected.
+export type WorkplaceMockUser = MockUser & {
+  officeId: string
+  spaceId: string
+  deskId?: string
+}
+
+// Deterministically assign each user to a space (and a desk within it, when the
+// space has any) so selections map to a predictable, stable subset of rows.
+export const subfilterMockUsers: WorkplaceMockUser[] = generateMockUsers(
+  24
+).map((user, i) => {
+  const space = SPACES[i % SPACES.length]
+  const desksInSpace = DESKS.filter((d) => d.spaceId === space.id)
+  const desk = desksInSpace.length
+    ? desksInSpace[i % desksInSpace.length]
+    : undefined
+  return {
+    ...user,
+    officeId: String(space.officeId),
+    spaceId: String(space.id),
+    deskId: desk ? String(desk.id) : undefined,
+  }
+})
 
 // Example filter definition
 export const filters = {
@@ -615,12 +644,16 @@ export const getMockVisualizations = (options?: {
         ],
         onCellChange: (() => {
           if (options?.cache) {
-            return async (updatedItem: MockUser) => {
+            return async ({ updatedItem }: { updatedItem: MockUser }) => {
               console.log("cache enabled: cell changed", updatedItem)
               options.cache!.updateItem(updatedItem)
             }
           }
-          return async (_updatedItem: MockUser) => {
+          return async ({
+            updatedItem: _updatedItem,
+          }: {
+            updatedItem: MockUser
+          }) => {
             console.log("cache disabled: cell changed", _updatedItem)
             // No-op handler when cache is not available
           }
@@ -953,6 +986,20 @@ export const getMockVisualizations = (options?: {
               return sourceRecord
             }
           : undefined,
+      },
+    },
+    graph: {
+      type: "graph",
+      options: {
+        title: (u) => u.name,
+        subtitle: (u) => u.role,
+        avatar: (u) => ({
+          type: "person",
+          firstName: u.name.split(" ")[0] ?? "",
+          lastName: u.name.split(" ")[1] ?? "",
+        }),
+        getChildrenCount: () => 0,
+        childrenFilters: () => ({}),
       },
     },
   }) as const
@@ -1291,6 +1338,7 @@ export type FiltersType = typeof filters
 export const ExampleComponent = ({
   useObservable = false,
   usePresets = false,
+  presets: presetsOverride,
   frozenColumns = 0,
   selectable,
   defaultSelectedItems,
@@ -1330,6 +1378,8 @@ export const ExampleComponent = ({
 }: {
   useObservable?: boolean
   usePresets?: boolean
+  /** Override the developer-provided presets used when `usePresets` is true. */
+  presets?: PresetsDefinition<typeof filters>
   frozenColumns?: 0 | 1 | 2
   fullHeight?: boolean
   visualizations?: ReadonlyArray<
@@ -1441,7 +1491,7 @@ export const ExampleComponent = ({
       currentSortings,
       navigationFilters,
       currentNavigationFilters,
-      presets: usePresets ? filterPresets : undefined,
+      presets: usePresets ? (presetsOverride ?? filterPresets) : undefined,
       sortings: noSorting ? undefined : sortings,
       grouping,
       currentGrouping: currentGrouping,
@@ -1575,13 +1625,30 @@ export const SubfiltersExampleComponent = () => {
         const { filters: f, sortings: s, search } = options
         return new Promise<BaseResponse<MockUser>>((resolve) => {
           setTimeout(() => {
-            const filtered = filterUsers(
-              mockUsers,
+            // Reuse the shared helper for search/sort, then narrow by the
+            // nested workplace selections (office/space/desk) it doesn't know
+            // about. `filterUsers` only filters/sorts, so the surviving items
+            // are still the original WorkplaceMockUser objects.
+            const base = filterUsers(
+              subfilterMockUsers,
               f as FiltersState<FiltersType>,
               s,
               undefined,
               search
-            )
+            ) as WorkplaceMockUser[]
+
+            const officeSel = (f.office as string[] | undefined) ?? []
+            const spaceSel = (f.space as string[] | undefined) ?? []
+            const deskSel = (f.desk as string[] | undefined) ?? []
+
+            const filtered = base.filter((u) => {
+              if (officeSel.length && !officeSel.includes(u.officeId))
+                return false
+              if (spaceSel.length && !spaceSel.includes(u.spaceId)) return false
+              if (deskSel.length && (!u.deskId || !deskSel.includes(u.deskId)))
+                return false
+              return true
+            })
             resolve({ records: filtered })
           }, 100)
         })
@@ -1628,6 +1695,24 @@ export const SubfiltersExampleComponent = () => {
     </div>
   )
 }
+
+/**
+ * An `in` filter with many options — stands in for a filter backed by a large /
+ * paginated data source. Selecting all of them produces a big value array, which
+ * is exactly the case the URL-params value cap guards against.
+ */
+export const manyOptionFilters = {
+  assignee: {
+    type: "in" as const,
+    label: "Assignee (60 options)",
+    options: {
+      options: Array.from({ length: 60 }, (_, i) => ({
+        value: `user-${i + 1}`,
+        label: `Teammate ${i + 1}`,
+      })),
+    },
+  },
+} as const
 
 interface DataAdapterOptions<TRecord> {
   data: TRecord[]
@@ -2019,6 +2104,105 @@ export function createDataAdapter<
   }
 
   return adapter
+}
+
+/**
+ * Filters used by the combined URL-params story: the standard set plus an
+ * `assignee` filter with 60 options (to exercise the "select all" URL value
+ * cap).
+ */
+export const paginationFilters = {
+  ...filters,
+  assignee: manyOptionFilters.assignee,
+} as const
+
+export type PaginationFiltersType = typeof paginationFilters
+
+/**
+ * A page-paginated collection (8 per page over 48 records → 6 pages) with
+ * filters (including a 60-option multi-select) and sorting. It exposes the
+ * current page via `onPaginationChange` and the rest of the state via
+ * `onStateChange`, and seeds `currentFilters` / `currentSortings` /
+ * `currentPage` synchronously. The built-in URL sync is disabled and storage is
+ * off, so the consumer (the story) owns reflecting *all* of them in the URL —
+ * which is what lets page + sorting + filters coexist without clobbering.
+ *
+ * Seeding synchronously means the very first fetch already has filters + sorting
+ * + page, so loading a `?dc_page=3&dc_sort=…&dc_department=…` URL lands on the
+ * right page with the right filters/sorting and no reset race.
+ */
+export const PaginationExampleComponent = ({
+  id,
+  currentFilters,
+  currentPage,
+  currentSortings,
+  onPaginationChange,
+  onStateChange,
+}: {
+  id?: string
+  currentFilters?: FiltersState<PaginationFiltersType>
+  currentPage?: number
+  currentSortings?: SortingsState<SortingsDefinition>
+  onPaginationChange?: (paginationInfo: PaginationInfo | null) => void
+  onStateChange?: (
+    state: DataCollectionStatusComplete<FiltersState<PaginationFiltersType>>
+  ) => void
+}) => {
+  const dataAdapter = useMemo(
+    () =>
+      createDataAdapter<
+        MockUser,
+        PaginationFiltersType,
+        NavigationFiltersDefinition
+      >({
+        data: generateMockUsers(48),
+        paginationType: "pages",
+        perPage: 8,
+        delay: 100,
+      }),
+    []
+  )
+
+  const dataSource = useDataCollectionSource(
+    {
+      filters: paginationFilters,
+      currentFilters,
+      sortings,
+      currentSortings: currentSortings as SortingsState<typeof sortings>,
+      currentPage,
+      onPaginationChange,
+      dataAdapter,
+      itemOnClick: (item) => () => console.log(`Clicking ${item.name}`),
+    },
+    []
+  )
+
+  const mockVisualizations = getMockVisualizations({}) as unknown as Record<
+    string,
+    Visualization<
+      MockUser,
+      PaginationFiltersType,
+      typeof sortings,
+      SummariesDefinition,
+      ItemActionsDefinition<MockUser>,
+      NavigationFiltersDefinition,
+      GroupingDefinition<MockUser>
+    >
+  >
+
+  return (
+    <OneDataCollection
+      dataTestId={`one-data-collection-${id ?? "pagination"}`}
+      id={id}
+      // The story manages the params itself; keep the built-in sync and
+      // storage out of the way.
+      disableUrlParams
+      storage={false}
+      source={dataSource}
+      onStateChange={onStateChange}
+      visualizations={[mockVisualizations.table]}
+    />
+  )
 }
 
 // Example of a comprehensive actions definition with various types of actions

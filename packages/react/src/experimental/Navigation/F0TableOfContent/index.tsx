@@ -8,7 +8,7 @@ import {
 } from "react"
 
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
-import { F1SearchBox } from "@/experimental/Forms/Fields/F1SearchBox"
+import { F0SearchInput } from "@/components/F0SearchInput"
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter"
 
 import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
@@ -22,7 +22,8 @@ import { ScrollArea } from "@/ui/scrollarea"
 
 import { Item } from "./Item"
 import { ItemSectionHeader } from "./ItemSectionHeader"
-import { TOCItem, TOCItemAction, TOCProps } from "./types"
+import { TOCFooter } from "./TOCFooter"
+import { TOCAction, TOCItem, TOCItemAction, TOCProps } from "./types"
 import {
   calculateAdjustedIndex,
   convertToIds,
@@ -272,6 +273,7 @@ function TOCContent({
   onReorder,
   hideChildrenCounter = false,
   scrollable = true,
+  actions,
 }: TOCProps) {
   const i18n = useI18n()
 
@@ -900,7 +902,7 @@ function TOCContent({
         <div className="shrink-0 bg-f1-background pb-2 pl-5 pr-4 pt-5">
           {showSearchBox && (
             <div className="mb-4">
-              <F1SearchBox
+              <F0SearchInput
                 placeholder={searchPlaceholder ?? i18n.toc.search}
                 onChange={handleSearchChange}
                 value={searchValue}
@@ -986,6 +988,7 @@ function TOCContent({
           </div>
         )
       })()}
+      <TOCFooter actions={actions} />
     </nav>
   )
 }
@@ -1012,4 +1015,4 @@ export const F0TableOfContent = withDataTestId(
 )
 
 export { Item, ItemSectionHeader }
-export type { TOCItem, TOCItemAction, TOCProps }
+export type { TOCAction, TOCItem, TOCItemAction, TOCProps }

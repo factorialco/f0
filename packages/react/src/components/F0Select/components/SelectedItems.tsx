@@ -1,6 +1,8 @@
 import { forwardRef } from "react"
 
+import { F0Avatar } from "@/components/avatars/F0Avatar"
 import { F0Icon } from "@/components/F0Icon"
+import { F0TagStatus } from "@/components/tags/F0TagStatus"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -115,8 +117,28 @@ export const SelectedItems = forwardRef<HTMLDivElement, SelectValueProps>(
       return null
     }
 
+    if (
+      selectedItem.tag &&
+      typeof selectedItem.tag !== "string" &&
+      selectedItem.tag.type === "status"
+    ) {
+      return (
+        <div className="flex min-w-0 flex-1 justify-start" ref={ref}>
+          <F0TagStatus
+            text={selectedItem.tag.text}
+            variant={selectedItem.tag.variant}
+          />
+        </div>
+      )
+    }
+
     return (
       <div className="flex min-w-0 flex-1 justify-start gap-1.5" ref={ref}>
+        {selectedItem.avatar && (
+          <div className="flex shrink-0 items-center">
+            <F0Avatar avatar={selectedItem.avatar} size="xs" />
+          </div>
+        )}
         {selectedItem.icon && (
           <div className="h-5 shrink-0 text-f1-icon">
             <F0Icon icon={selectedItem.icon} />

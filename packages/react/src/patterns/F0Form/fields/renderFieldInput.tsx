@@ -1,6 +1,6 @@
 import { ControllerRenderProps, FieldError, FieldValues } from "react-hook-form"
 
-import type { InputFieldStatus } from "@/ui/InputField/types"
+import type { InputFieldStatus } from "@/components/F0InputField/types"
 
 import type { InitialFile } from "./file/types"
 import type { F0Field } from "./types"
@@ -13,8 +13,10 @@ import { DateTimeFieldRenderer } from "./date/DateTimeFieldRenderer"
 import { TimeFieldRenderer } from "./date/TimeFieldRenderer"
 import { DateRangeFieldRenderer } from "./daterange/DateRangeFieldRenderer"
 import { DurationFieldRenderer } from "./duration/DurationFieldRenderer"
+import { EntitiesListFieldRenderer } from "./entitiesList/EntitiesListFieldRenderer"
 import { FileFieldRenderer } from "./file/FileFieldRenderer"
 import { NumberFieldRenderer } from "./number/NumberFieldRenderer"
+import { PeriodFieldRenderer } from "./period/PeriodFieldRenderer"
 import { RichTextFieldRenderer } from "./richtext/RichTextFieldRenderer"
 import { SelectFieldRenderer } from "./select/SelectFieldRenderer"
 import { SwitchFieldRenderer } from "./switch/SwitchFieldRenderer"
@@ -186,6 +188,21 @@ export function renderFieldInput({
           status={visualStatus}
         />
       )
+    case "period":
+      return (
+        <PeriodFieldRenderer
+          field={{
+            ...field,
+            disabled: isDisabled,
+            // Evaluate dynamic date constraints
+            minDate: evaluateDateConstraint(field.minDate, values),
+            maxDate: evaluateDateConstraint(field.maxDate, values),
+          }}
+          formField={formField}
+          {...errorAndLoadingProps}
+          status={visualStatus}
+        />
+      )
     case "richtext":
       return (
         <RichTextFieldRenderer
@@ -209,6 +226,14 @@ export function renderFieldInput({
         <CardSelectFieldRenderer
           field={{ ...field, disabled: isDisabled }}
           formField={formField}
+        />
+      )
+    case "entitiesList":
+      return (
+        <EntitiesListFieldRenderer
+          field={{ ...field, disabled: isDisabled }}
+          formField={formField}
+          error={fieldState.error}
         />
       )
     case "custom":

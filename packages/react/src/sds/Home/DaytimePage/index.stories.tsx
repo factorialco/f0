@@ -9,7 +9,7 @@ import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { DaytimePage, DaytimePageProps } from "./index"
 
 const meta: Meta<typeof DaytimePage> = {
-  title: "DaytimePage",
+  title: "Home/DaytimePage",
   component: DaytimePage,
   tags: ["autodocs", "experimental"],
   parameters: {
@@ -20,12 +20,8 @@ const meta: Meta<typeof DaytimePage> = {
       <ApplicationFrame
         sidebar={null}
         ai={{
-          runtimeUrl: "https://mastra.local.factorial.dev/copilotkit",
-          agent: "one-workflow",
-          credentials: "include",
-          showDevConsole: false,
           enabled: true,
-          greeting: "Hello, John",
+          initialMessage: "Ask anything about your company",
         }}
       >
         <Story />

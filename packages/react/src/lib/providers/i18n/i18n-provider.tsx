@@ -2,7 +2,11 @@
 
 import { createContext, ReactNode, useContext } from "react"
 
-import { TranslationKey, TranslationsType } from "./i18n-provider-defaults"
+import {
+  defaultTranslations,
+  TranslationKey,
+  TranslationsType,
+} from "./i18n-provider-defaults"
 
 export type I18nContextType = TranslationsType & {
   t: (key: TranslationKey, args?: Record<string, string | number>) => string
@@ -65,16 +69,30 @@ export function I18nProvider({
   )
 }
 
+// Context backed by the built-in (English) defaults, used as a fallback when
+// `useI18n` is called outside an `I18nProvider`.
+const defaultI18nContext: I18nContextType = {
+  ...defaultTranslations,
+  t: (key: TranslationKey, args: Record<string, string | number> = {}) => {
+    let translation = getKey(key, defaultTranslations)
+    if (translation === undefined) {
+      return key
+    }
+    for (const [argKey, value] of Object.entries(args)) {
+      translation = translation.replace(`{{${argKey}}}`, value.toString())
+    }
+    return translation
+  },
+}
+
 export function useI18n(): TranslationsType & {
   t: (key: TranslationKey, args?: Record<string, string | number>) => string
 } {
-  const context = useContext(I18nContext)
-
-  if (context === null) {
-    throw new Error("useI18n must be used within an I18nProvider")
-  }
-
-  return context
+  // Degrade gracefully to the default (English) translations instead of
+  // throwing, so components that read i18n outside an `I18nProvider` (portaled
+  // content, components rendered standalone or in unit tests without a wrapper)
+  // render with defaults rather than crashing the whole subtree.
+  return useContext(I18nContext) ?? defaultI18nContext
 }
 
 export const buildTranslations = (

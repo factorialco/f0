@@ -23,7 +23,11 @@ import { generateAnchorId, useF0FormContext } from "../context"
 import { isZodType, unwrapZodSchema } from "../f0Schema"
 import { CardSelectDepsContext } from "../fields/cardSelect/CardSelectDepsContext"
 import { FieldRenderer } from "../fields/FieldRenderer"
-import { evaluateDisabled, evaluateRenderIf } from "../fields/utils"
+import {
+  evaluateDisabled,
+  evaluateRenderIf,
+  resolveFieldAlert,
+} from "../fields/utils"
 import { RowRenderer } from "./RowRenderer"
 
 /**
@@ -216,11 +220,11 @@ export function SwitchGroupRenderer({
   const alerts = useMemo(() => {
     const result: { fieldId: string; props: F0FieldAlertProps }[] = []
     for (const field of visibleFields) {
-      if (!field.alert) continue
-      const alertProps =
-        typeof field.alert === "function"
-          ? field.alert({ fieldValue: values[field.id], values })
-          : field.alert
+      const alertProps = resolveFieldAlert(
+        field.alert,
+        values[field.id],
+        values
+      )
       if (alertProps) {
         result.push({ fieldId: field.id, props: alertProps })
       }

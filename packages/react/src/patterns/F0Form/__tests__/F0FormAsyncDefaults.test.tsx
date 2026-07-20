@@ -2,9 +2,14 @@ import React from "react"
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
 import { z } from "zod"
 
-import { zeroRender as render, screen, waitFor } from "@/testing/test-utils"
-
 import { useF0FormDefinition } from "@/patterns/F0WizardForm/useF0FormDefinition"
+import {
+  zeroRender as render,
+  zeroRenderHook,
+  screen,
+  waitFor,
+} from "@/testing/test-utils"
+
 import { F0Form } from "../F0Form"
 import { f0FormField } from "../f0Schema"
 
@@ -70,6 +75,47 @@ function PerSectionForm({
   return <F0Form formDefinition={formDefinition} />
 }
 
+const paramsSchema = z.object({
+  userId: z.string().describe("The ID of the user to edit"),
+})
+
+function SingleSchemaFormWithParams({
+  defaultValues,
+}: {
+  defaultValues: (
+    params: Partial<z.infer<typeof paramsSchema>>
+  ) => Promise<Partial<z.infer<typeof singleSchema>>>
+}) {
+  const formDefinition = useF0FormDefinition({
+    name: "params-test-single",
+    schema: singleSchema,
+    defaultValuesParamsSchema: paramsSchema,
+    defaultValues,
+    onSubmit: async () => ({ success: true }),
+  })
+
+  return <F0Form formDefinition={formDefinition} />
+}
+
+function PerSectionFormWithParams({
+  defaultValues,
+}: {
+  defaultValues: (params: Partial<z.infer<typeof paramsSchema>>) => Promise<{
+    personal?: Partial<{ name: string }>
+    contact?: Partial<{ email: string }>
+  }>
+}) {
+  const formDefinition = useF0FormDefinition({
+    name: "params-test-per-section",
+    schema: perSectionSchema,
+    defaultValuesParamsSchema: paramsSchema,
+    defaultValues,
+    onSubmit: async () => ({ success: true }),
+  })
+
+  return <F0Form formDefinition={formDefinition} />
+}
+
 // =============================================================================
 // Tests
 // =============================================================================
@@ -124,7 +170,7 @@ describe("F0Form async defaultValues (single schema)", () => {
     expect(screen.getByLabelText("Name")).toHaveValue("")
 
     expect(consoleWarn).toHaveBeenCalledWith(
-      "[useF0FormDefinition] Async defaultValues rejected:",
+      "[useAsyncDefaultValues] Async defaultValues rejected:",
       expect.any(Error)
     )
 
@@ -185,5 +231,198 @@ describe("F0Form async defaultValues (per-section)", () => {
     })
 
     expect(screen.getByLabelText("Email")).toHaveValue("alice@test.com")
+  })
+})
+
+describe("F0Form defaultValues fn with defaultValuesParamsSchema (single schema)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("shows loading indicators while the params defaultValues fn is resolving", () => {
+    const fn = () =>
+      new Promise<Partial<z.infer<typeof singleSchema>>>((resolve) => {
+        setTimeout(() => resolve({ name: "Alice", email: "a@b.com" }), 1000)
+      })
+
+    render(<SingleSchemaFormWithParams defaultValues={fn} />)
+
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Name")).toHaveAttribute("aria-busy", "true")
+  })
+
+  it("resolves the fn at mount with empty params and renders the values", async () => {
+    const fn = vi.fn(async (params: Partial<z.infer<typeof paramsSchema>>) => ({
+      name: params.userId ?? "Fallback Alice",
+      email: "alice@test.com",
+    }))
+
+    render(<SingleSchemaFormWithParams defaultValues={fn} />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toHaveValue("Fallback Alice")
+    })
+
+    expect(screen.getByLabelText("Email")).toHaveValue("alice@test.com")
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenCalledWith({})
+  })
+})
+
+describe("F0Form defaultValues fn with defaultValuesParamsSchema (per-section)", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it("shows loading indicators while the params defaultValues fn is resolving", () => {
+    const fn = () =>
+      new Promise<{
+        personal?: Partial<{ name: string }>
+        contact?: Partial<{ email: string }>
+      }>((resolve) => {
+        setTimeout(
+          () =>
+            resolve({
+              personal: { name: "Alice" },
+              contact: { email: "a@b.com" },
+            }),
+          1000
+        )
+      })
+
+    render(<PerSectionFormWithParams defaultValues={fn} />)
+
+    expect(screen.getByLabelText("Name")).toBeInTheDocument()
+    expect(screen.getByLabelText("Name")).toHaveAttribute("aria-busy", "true")
+  })
+
+  it("resolves the fn at mount with empty params and renders the values", async () => {
+    const fn = vi.fn(async (params: Partial<z.infer<typeof paramsSchema>>) => ({
+      personal: { name: params.userId ?? "Fallback Alice" },
+      contact: { email: "alice@test.com" },
+    }))
+
+    render(<PerSectionFormWithParams defaultValues={fn} />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Name")).toHaveValue("Fallback Alice")
+    })
+
+    expect(screen.getByLabelText("Email")).toHaveValue("alice@test.com")
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenCalledWith({})
+  })
+})
+
+describe("useF0FormDefinition does not resolve async defaultValues", () => {
+  it("does not call the async defaultValues function", () => {
+    const asyncFn = vi.fn(
+      (_signal: AbortSignal) =>
+        Promise.resolve({ name: "Alice", email: "a@b.com" }) as Promise<
+          Partial<z.infer<typeof singleSchema>>
+        >
+    )
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "no-resolve-test",
+        schema: singleSchema,
+        defaultValues: asyncFn,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    // The hook should NOT have called the function — resolution is deferred to F0Form
+    expect(asyncFn).not.toHaveBeenCalled()
+
+    // The definition should expose asyncDefaultValues for F0Form to resolve
+    expect(result.current.asyncDefaultValues).toBe(asyncFn)
+
+    // defaultValues should be undefined since the function was not resolved
+    expect(result.current.defaultValues).toBeUndefined()
+
+    // isLoading should only reflect initialFiles, not defaultValues
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it("does not call the async defaultValues function (per-section)", () => {
+    const asyncFn = vi.fn(
+      (_signal: AbortSignal) =>
+        Promise.resolve({
+          personal: { name: "Alice" },
+          contact: { email: "a@b.com" },
+        }) as Promise<{
+          personal?: Partial<{ name: string }>
+          contact?: Partial<{ email: string }>
+        }>
+    )
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "no-resolve-per-section",
+        schema: perSectionSchema,
+        defaultValues: asyncFn,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    expect(asyncFn).not.toHaveBeenCalled()
+    expect(result.current.asyncDefaultValues).toBe(asyncFn)
+    expect(result.current.defaultValues).toBeUndefined()
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it("does not call the fn when defaultValuesParamsSchema is provided", () => {
+    const fn = vi.fn(
+      async (_params: Partial<z.infer<typeof paramsSchema>>) =>
+        ({ name: "Alice", email: "a@b.com" }) as Partial<
+          z.infer<typeof singleSchema>
+        >
+    )
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "no-resolve-params-test",
+        schema: singleSchema,
+        defaultValuesParamsSchema: paramsSchema,
+        defaultValues: fn,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    // The hook must not resolve — that happens when F0Form renders, and the
+    // AI registry calls the same fn with actual params on presentForm.
+    expect(fn).not.toHaveBeenCalled()
+    expect(result.current.defaultValuesFn).toBe(fn)
+    expect(result.current.asyncDefaultValues).toBeUndefined()
+    expect(result.current.defaultValues).toBeUndefined()
+  })
+
+  it("passes sync defaultValues directly without wrapping", () => {
+    const syncValues = { name: "Bob", email: "bob@test.com" }
+
+    const { result } = zeroRenderHook(() =>
+      useF0FormDefinition({
+        name: "sync-test",
+        schema: singleSchema,
+        defaultValues: syncValues,
+        onSubmit: async () => ({ success: true }),
+      })
+    )
+
+    // Sync values go directly to defaultValues
+    expect(result.current.defaultValues).toEqual(syncValues)
+
+    // No async function to resolve
+    expect(result.current.asyncDefaultValues).toBeUndefined()
+    expect(result.current.isLoading).toBe(false)
   })
 })

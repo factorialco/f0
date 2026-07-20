@@ -69,6 +69,49 @@ describe("OneDateNavigator", () => {
     expect(previousButton).toBeNull()
   })
 
+  // Regression: a value restored from persisted OneDataCollection storage has
+  // round-tripped through JSON, so its `from`/`to` are ISO strings rather than
+  // Date objects. The navigator used to call `.getTime()` on them and throw
+  // `TypeError: from.getTime is not a function`. It must revive them instead.
+  it("renders a defaultValue whose dates were serialized to strings", () => {
+    const onSelect = vi.fn()
+    const serializedDefaultValue = {
+      value: {
+        from: new Date(2023, 0, 1).toISOString(),
+        to: new Date(2023, 0, 31).toISOString(),
+      },
+      granularity: "month" as const,
+    } as unknown as Parameters<typeof OneDateNavigator>[0]["defaultValue"]
+
+    expect(() =>
+      render(
+        <OneDateNavigator
+          onSelect={onSelect}
+          defaultValue={serializedDefaultValue}
+        />
+      )
+    ).not.toThrow()
+
+    expect(screen.getByRole("button", { name: "January 2023" })).toBeDefined()
+  })
+
+  it("renders a controlled value whose dates were serialized to strings", () => {
+    const onSelect = vi.fn()
+    const serializedValue = {
+      value: {
+        from: new Date(2023, 0, 1).toISOString(),
+        to: new Date(2023, 0, 31).toISOString(),
+      },
+      granularity: "month" as const,
+    } as unknown as Parameters<typeof OneDateNavigator>[0]["value"]
+
+    expect(() =>
+      render(<OneDateNavigator onSelect={onSelect} value={serializedValue} />)
+    ).not.toThrow()
+
+    expect(screen.getByRole("button", { name: "January 2023" })).toBeDefined()
+  })
+
   it("renders with go to current hidden", () => {
     const onSelect = vi.fn()
 

@@ -49,6 +49,31 @@ describe("F0Form", () => {
     expect(screen.getByText("Submit")).toBeInTheDocument()
   })
 
+  it("renders a private inputType as a masked field with an eye toggle", () => {
+    const formSchema = z.object({
+      ssn: f0FormField(z.string(), {
+        label: "Social security number",
+        inputType: "private",
+      }),
+    })
+
+    render(
+      <F0Form
+        name="schema-private"
+        schema={formSchema}
+        defaultValues={{ ssn: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    const input = screen.getByLabelText("Social security number")
+    expect(input).toBeInTheDocument()
+    // Masked at rest, opted out of password managers, and toggleable.
+    expect(input).toHaveAttribute("type", "password")
+    expect(input).toHaveAttribute("data-1p-ignore")
+    expect(screen.getByRole("button", { name: /show/i })).toBeInTheDocument()
+  })
+
   it("renders form with custom submit label", () => {
     const formSchema = z.object({
       email: f0FormField(z.string().email(), {
@@ -1538,6 +1563,108 @@ describe("createConditionalResolver - null to undefined conversion", () => {
   })
 })
 
+describe("createConditionalResolver - critical alert errors", () => {
+  const resolverOptions = {
+    fields: {},
+    shouldUseNativeValidation: false,
+  }
+
+  it("marks a field as errored when its alert resolves to variant 'critical'", async () => {
+    const schema = z.object({
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        alert: ({ fieldValue }) =>
+          typeof fieldValue === "number" && fieldValue > 100
+            ? {
+                title: "Too high",
+                description: "Exceeds the allowed limit",
+                variant: "critical" as const,
+              }
+            : null,
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ amount: 150 }, undefined, resolverOptions)
+
+    const amountError =
+      "amount" in result.errors ? result.errors.amount : undefined
+    expect(amountError).toBeDefined()
+    expect(amountError?.type).toBe("alertCritical")
+    expect(amountError?.message).toBe("Too high")
+  })
+
+  it("marks a field as errored for a static 'critical' alert", async () => {
+    const schema = z.object({
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        alert: { title: "Always critical", variant: "critical" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ amount: 1 }, undefined, resolverOptions)
+
+    const amountError =
+      "amount" in result.errors ? result.errors.amount : undefined
+    expect(amountError?.type).toBe("alertCritical")
+    expect(amountError?.message).toBe("Always critical")
+  })
+
+  it("does not mark a field as errored for non-critical alert variants", async () => {
+    const schema = z.object({
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        alert: { title: "Heads up", variant: "warning" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ amount: 1 }, undefined, resolverOptions)
+
+    expect(result.errors).toEqual({})
+  })
+
+  it("does not mark a hidden field (renderIf false) as errored", async () => {
+    const schema = z.object({
+      toggle: f0FormField(z.boolean(), {
+        label: "Toggle",
+        fieldType: "switch",
+      }),
+      amount: f0FormField(z.number(), {
+        label: "Amount",
+        renderIf: { fieldId: "toggle", equalsTo: true },
+        alert: { title: "Critical", variant: "critical" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver(
+      { toggle: false, amount: 1 },
+      undefined,
+      resolverOptions
+    )
+
+    expect(result.errors).toEqual({})
+  })
+
+  it("does not overwrite an existing validation error with the critical alert", async () => {
+    const schema = z.object({
+      name: f0FormField(z.string().min(3, "Too short"), {
+        label: "Name",
+        alert: { title: "Critical alert", variant: "critical" as const },
+      }),
+    })
+
+    const resolver = createConditionalResolver(schema)
+    const result = await resolver({ name: "ab" }, undefined, resolverOptions)
+
+    const nameError = "name" in result.errors ? result.errors.name : undefined
+    expect(nameError?.message).toBe("Too short")
+    expect(nameError?.type).not.toBe("alertCritical")
+  })
+})
+
 describe("F0Form clearing optional fields with default values", () => {
   it("clears optional text field to empty instead of default value", async () => {
     const user = userEvent.setup()
@@ -2634,6 +2761,119 @@ describe("F0Form alert feature", () => {
     expect(screen.getByText("Group alert title")).toBeInTheDocument()
     expect(screen.getByText("Group alert description")).toBeInTheDocument()
   })
+
+  it("marks the field as errored and blocks submit when the alert resolves to 'critical'", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      code: f0FormField(z.string(), {
+        label: "Code",
+        alert: ({ fieldValue }) =>
+          fieldValue === "bad"
+            ? {
+                title: "Invalid code",
+                description: "This code is not allowed",
+                variant: "critical" as const,
+              }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-critical-error"
+        schema={formSchema}
+        defaultValues={{ code: "bad" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    // The critical alert is rendered below the field
+    expect(screen.getByText("Invalid code")).toBeInTheDocument()
+
+    const submitButton = screen.getByText("Submit").closest("button")!
+    await user.click(submitButton)
+
+    // The field is marked as errored, so submission is blocked
+    await waitFor(() => {
+      expect(submitButton).toBeDisabled()
+    })
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it("clears the error and allows submit once the alert is no longer 'critical'", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      code: f0FormField(z.string(), {
+        label: "Code",
+        alert: ({ fieldValue }) =>
+          fieldValue === "bad"
+            ? { title: "Invalid code", variant: "critical" as const }
+            : null,
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-critical-recover"
+        schema={formSchema}
+        defaultValues={{ code: "bad" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    const submitButton = screen.getByText("Submit").closest("button")!
+    await user.click(submitButton)
+    await waitFor(() => {
+      expect(submitButton).toBeDisabled()
+    })
+    expect(onSubmit).not.toHaveBeenCalled()
+
+    // Fix the value so the alert no longer resolves to critical
+    const input = screen.getByRole("textbox")
+    await user.clear(input)
+    await user.type(input, "good")
+
+    // The critical alert clears, re-enabling submission
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled()
+    })
+    await user.click(submitButton)
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ code: "good" })
+    })
+  })
+
+  it("does not block submit for non-critical alert variants", async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn().mockResolvedValue({ success: true })
+
+    const formSchema = z.object({
+      code: f0FormField(z.string(), {
+        label: "Code",
+        alert: { title: "Just a warning", variant: "warning" as const },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="alert-warning-no-block"
+        schema={formSchema}
+        defaultValues={{ code: "anything" }}
+        onSubmit={onSubmit}
+      />
+    )
+
+    expect(screen.getByText("Just a warning")).toBeInTheDocument()
+
+    await user.click(screen.getByText("Submit"))
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({ code: "anything" })
+    })
+  })
 })
 
 describe("F0Form moreInfoLink feature", () => {
@@ -3447,6 +3687,72 @@ describe("F0Form sections sidepanel scroll", () => {
     expect(stickyElement).toBeInTheDocument()
     expect(stickyElement).toHaveClass("top-0")
   })
+
+  it("keeps the default content padding (p-4) when noPadding is not set", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="padding-default"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    expect(container.querySelector(".justify-center.p-4")).toBeInTheDocument()
+  })
+
+  it("removes the content padding when styling.noPadding is true (single schema)", () => {
+    const formSchema = z.object({
+      name: f0FormField(z.string(), { label: "Name" }),
+    })
+
+    const { container } = render(
+      <F0Form
+        name="padding-single-no-padding"
+        schema={formSchema}
+        defaultValues={{ name: "" }}
+        onSubmit={async () => ({ success: true })}
+        styling={{ noPadding: true }}
+      />
+    )
+
+    // The centered wrapper is still there, just without the p-4 padding.
+    expect(
+      container.querySelector(".justify-center.p-4")
+    ).not.toBeInTheDocument()
+    expect(container.querySelector(".justify-center")).toBeInTheDocument()
+  })
+
+  it("removes the content padding when styling.noPadding is true (per-section schema)", () => {
+    const formSchema = {
+      personal: z.object({
+        name: f0FormField(z.string(), { label: "Name" }),
+      }),
+    }
+
+    const sections: Record<string, F0SectionConfig> = {
+      personal: { title: "Personal" },
+    }
+
+    const { container } = render(
+      <F0Form
+        name="padding-per-section-no-padding"
+        schema={formSchema}
+        defaultValues={{ personal: { name: "" } }}
+        onSubmit={async () => ({ success: true })}
+        sections={sections}
+        styling={{ noPadding: true }}
+      />
+    )
+
+    expect(
+      container.querySelector(".justify-center.p-4")
+    ).not.toBeInTheDocument()
+  })
 })
 
 describe("F0Form renderIf hidden field layout", () => {
@@ -3513,5 +3819,53 @@ describe("F0Form renderIf hidden field layout", () => {
 
     // The conditional field should be visible when condition is met
     expect(screen.getByLabelText("Conditional Field")).toBeInTheDocument()
+  })
+})
+
+describe("F0Form clearing optional values", () => {
+  it("keeps the cleared input empty after submit when the parent owns the value", async () => {
+    const user = userEvent.setup()
+
+    const formSchema = z.object({
+      budget: f0FormField.money({
+        label: "Budget",
+        currency: "EUR",
+        optional: true,
+      }),
+    })
+
+    const submissions: Array<number | undefined> = []
+
+    const Harness = () => {
+      const [budget, setBudget] = React.useState<number | undefined>(50)
+      return (
+        <F0Form
+          name="controlled-optional-money-regression"
+          schema={formSchema}
+          defaultValues={{ budget }}
+          onSubmit={async (data) => {
+            submissions.push(data.budget)
+            setBudget(data.budget)
+            return { success: true }
+          }}
+        />
+      )
+    }
+
+    render(<Harness />)
+
+    const input = screen.getByLabelText("Budget") as HTMLInputElement
+    expect(input.value).toBe("50")
+
+    await user.clear(input)
+    expect(input.value).toBe("")
+
+    await user.click(screen.getByText("Submit"))
+
+    await waitFor(() => {
+      expect(submissions).toEqual([undefined])
+    })
+
+    expect(input.value).toBe("")
   })
 })

@@ -4,6 +4,7 @@ import type {
   RenderIfCondition,
 } from "./types"
 import type { F0DateConstraintProp } from "./date/types"
+import type { F0FieldAlert, F0FieldAlertProps } from "../f0Schema"
 
 /**
  * Evaluate a renderIf condition object against the current form values
@@ -120,6 +121,26 @@ export function evaluateRenderIf(
     return renderIf({ values })
   }
   return evaluateRenderIfCondition(renderIf, values)
+}
+
+/**
+ * Resolve a field's `alert` config against the current values.
+ *
+ * The alert can be static props (always shown) or a callback evaluated against
+ * the field value and all form values. Returns the resolved alert props, or
+ * `null` when no alert should be shown.
+ */
+export function resolveFieldAlert(
+  alert: F0FieldAlert | undefined,
+  fieldValue: unknown,
+  values: Record<string, unknown>
+): F0FieldAlertProps | null {
+  if (!alert) {
+    return null
+  }
+  const alertProps =
+    typeof alert === "function" ? alert({ fieldValue, values }) : alert
+  return alertProps ?? null
 }
 
 /**

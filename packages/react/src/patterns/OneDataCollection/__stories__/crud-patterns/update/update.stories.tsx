@@ -4,8 +4,8 @@ import { useState } from "react"
 
 import { F0Text } from "@/components/F0Text"
 import { Pencil, Save } from "@/icons/app"
-import { useF0Form } from "@/patterns/F0Form"
 import { F0Dialog } from "@/patterns/F0Dialog"
+import { useF0Form } from "@/patterns/F0Form"
 
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
 import { OneDataCollection } from "../../../index"
@@ -79,7 +79,7 @@ function RightPositionDialogScenario({
         isOpen={previewedResource !== null}
         onClose={() => setPreviewedResource(null)}
         title="Resource details"
-        description="Open a reduced view in a right dialog while keeping update as an explicit action."
+        description="Open a reduced view in a Right Dialog while keeping update as an explicit action."
         position="right"
         width="md"
         disableContentPadding
@@ -113,7 +113,7 @@ function RightPositionDialogScenario({
         isOpen={selectedResource !== null}
         onClose={() => setSelectedResource(null)}
         title="Update resource"
-        description="Right-position dialogs are an accepted Table/List variation when context should stay visible."
+        description="Right Dialog is an accepted Table/List variation when context should stay visible."
         position="right"
         width="md"
         primaryAction={{
@@ -127,6 +127,7 @@ function RightPositionDialogScenario({
           label: "Close",
           onClick: () => setSelectedResource(null),
         }}
+        disableContentPadding
       >
         {selectedResource && (
           <ResourceFormF0
@@ -221,6 +222,7 @@ function UpdateWithSameFormScenario() {
           label: "Cancel",
           onClick: () => setSelectedResource(null),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key={selectedResource?.id}
@@ -375,6 +377,7 @@ function CardActionsUpdateScenario() {
           label: "Cancel",
           onClick: () => setSelectedResource(null),
         }}
+        disableContentPadding
       >
         <ResourceFormF0
           key={selectedResource?.id}
@@ -481,7 +484,7 @@ function EditableTableInlineUpdateScenario() {
             ...editableTableVisualization,
             options: {
               ...editableTableVisualization.options,
-              onCellChange: async (updatedResource) => {
+              onCellChange: async ({ updatedItem: updatedResource }) => {
                 setResources((currentResources) =>
                   currentResources.map((resource) =>
                     resource.id === updatedResource.id

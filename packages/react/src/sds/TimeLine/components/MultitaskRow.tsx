@@ -12,7 +12,9 @@ import { TimelineRowLayout } from "./TimelineRowLayout"
 const isNestedtaskItem = (
   item: F0TimelineRowMultitaskItemProps
 ): item is F0TimelineRowNestedtaskProps =>
-  "items" in item && "icon" in item && item.icon !== undefined
+  "icon" in item &&
+  item.icon !== undefined &&
+  ("items" in item || "content" in item)
 
 export const MultitaskRow = ({
   props,

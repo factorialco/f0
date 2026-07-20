@@ -39,7 +39,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
   if (!renderer) {
     return (
       <div className="flex h-8 items-center gap-1.5">
-        {"icon" in metadata && (
+        {"icon" in metadata && metadata.icon && (
           <F0Icon icon={metadata.icon} color="default" size="md" />
         )}
         <span>Unsupported property type: {type}</span>
@@ -54,7 +54,7 @@ export function CardMetadata({ metadata }: CardMetadataProps) {
 
   return (
     <div className="flex h-8 items-center gap-1.5">
-      {"icon" in metadata && (
+      {"icon" in metadata && metadata.icon && (
         <div className="pointer-events-auto flex items-center">
           <Tooltip label={metadata.property.label}>
             <F0Icon icon={metadata.icon} color="default" size="md" />

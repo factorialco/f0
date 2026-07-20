@@ -9,6 +9,7 @@ export type * from "./types"
 // For backwards compatibility
 export * from "@/hooks/datasource/types"
 export * from "./hooks/useDataCollectionData"
+export * from "./hooks/useDataCollectionItemNavigation"
 export * from "./hooks/useDataCollectionSource"
 export * from "./hooks/useInfiniteScrollPagination"
 export { useExportAction } from "./hooks/useExportAction"

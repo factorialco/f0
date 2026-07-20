@@ -252,6 +252,11 @@ export interface F0FormStylingConfig {
    * @default false
    */
   showSectionsSidepanel?: boolean
+  /**
+   * Removes the default padding around the form content.
+   * @default false
+   */
+  noPadding?: boolean
 }
 
 /**

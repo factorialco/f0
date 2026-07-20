@@ -67,7 +67,7 @@ describe("WelcomeScreenSuggestionsRow", () => {
     ).toBeInTheDocument()
   })
 
-  it("calls onItemClick with the item and closes the popover", async () => {
+  it("calls onItemClick with the item and its parent group, and closes the popover", async () => {
     const user = userEvent.setup()
     const onItemClick = vi.fn()
     zeroRender(
@@ -84,9 +84,10 @@ describe("WelcomeScreenSuggestionsRow", () => {
     await user.click(item)
 
     expect(onItemClick).toHaveBeenCalledTimes(1)
-    expect(onItemClick).toHaveBeenCalledWith({
-      title: "April leave and overtime summary",
-    })
+    expect(onItemClick).toHaveBeenCalledWith(
+      { title: "April leave and overtime summary" },
+      groups[0]
+    )
 
     expect(
       screen.queryByRole("button", { name: /april leave and overtime/i })
@@ -116,6 +117,39 @@ describe("WelcomeScreenSuggestionsRow", () => {
 
     await user.unhover(item)
     expect(onItemHover).toHaveBeenLastCalledWith(null)
+  })
+
+  it("opens the popover above the trigger by default", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    const item = await screen.findByRole("button", {
+      name: /april leave and overtime/i,
+    })
+    expect(item.closest("[data-side]")).toHaveAttribute("data-side", "top")
+  })
+
+  it("opens the popover below the trigger when side is bottom", async () => {
+    const user = userEvent.setup()
+    zeroRender(
+      <WelcomeScreenSuggestionsRow
+        suggestions={groups}
+        onItemClick={() => {}}
+        side="bottom"
+      />
+    )
+
+    await user.click(screen.getByRole("button", { name: /analyze/i }))
+    const item = await screen.findByRole("button", {
+      name: /april leave and overtime/i,
+    })
+    expect(item.closest("[data-side]")).toHaveAttribute("data-side", "bottom")
   })
 
   it("switches popover content when another group is opened", async () => {

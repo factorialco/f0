@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react"
-import { ScrollView, View } from "react-native"
+import { ScrollView, View, type LayoutChangeEvent } from "react-native"
 
 import { F0Button } from "../F0Button"
 import { F0Step } from "../F0Step"
@@ -30,6 +30,13 @@ import type { F0WizardProps } from "./F0Wizard.types"
  * sheet behavior. The consumer is responsible for embedding it inside a
  * `Modal`, bottom sheet, or full-screen layout as appropriate.
  *
+ * The Back/Next footer is pinned to the bottom of the container. Step content
+ * scrolls inside a `ScrollView` by default; to keep a focused input visible
+ * above the keyboard while the footer stays pinned, inject a keyboard-aware
+ * scroll component via `ScrollComponent` (F0Wizard forwards the measured footer
+ * height as `bottomOffset`, so the focused field clears the buttons — no magic
+ * numbers). F0Wizard adds no keyboard dependency of its own.
+ *
  * @example
  * <!-- prettier-ignore -->
  * <F0Wizard
@@ -59,6 +66,7 @@ const F0Wizard = React.memo(function F0Wizard({
   stepLabel,
   onStepChanged,
   onSubmit,
+  ScrollComponent = ScrollView,
   accessibilityLabel,
   testID,
 }: F0WizardProps) {
@@ -66,6 +74,12 @@ const F0Wizard = React.memo(function F0Wizard({
     Math.min(Math.max(0, defaultStepIndex), steps.length - 1)
   )
   const [isAdvancing, setIsAdvancing] = useState(false)
+
+  const [footerHeight, setFooterHeight] = useState(0)
+  const handleFooterLayout = useCallback((event: LayoutChangeEvent) => {
+    const { height } = event.nativeEvent.layout
+    setFooterHeight((prev) => (prev === height ? prev : height))
+  }, [])
 
   const step = steps[currentStep]
   const isFirstStep = currentStep === 0
@@ -144,13 +158,14 @@ const F0Wizard = React.memo(function F0Wizard({
 
       {/* Scrollable content area */}
       <View className={wizardContentVariants()}>
-        <ScrollView
+        <ScrollComponent
           contentContainerStyle={wizardScrollContentStyle}
           keyboardShouldPersistTaps="handled"
+          bottomOffset={footerHeight}
           testID={testID ? `${testID}-content` : undefined}
         >
           {step?.renderContent({ stepIndex: currentStep })}
-        </ScrollView>
+        </ScrollComponent>
       </View>
 
       {/* Footer: Back + Next/Submit buttons.
@@ -158,7 +173,11 @@ const F0Wizard = React.memo(function F0Wizard({
           className="flex flex-1" internally (Uniwind + Tailwind), which collapses to 32px
           inside a flex-row container without an explicit height. The View wrapper
           provides the correct stretch behavior. */}
-      <View className={wizardFooterVariants()}>
+      <View
+        className={wizardFooterVariants()}
+        onLayout={handleFooterLayout}
+        testID={testID ? `${testID}-footer` : undefined}
+      >
         <View className={wizardFooterButtonVariants()}>
           <F0Button
             label={backButtonLabel}

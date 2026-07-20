@@ -1,164 +1,120 @@
-import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useEffect, useState, type KeyboardEvent } from "react"
 
-import { F0OneIcon } from "../../F0OneIcon"
+import { cn } from "@/lib/utils"
 
-import { PongBall } from "../../F0AiPong"
-import { type Message } from "../types"
+const CHAR_IN_MS = 35
+const CHAR_OUT_MS = 22
+const START_DELAY_MS = 400
+const HOLD_MS = 2500
+const END_DELAY_MS = 220
 
-// Streaming text effect — reveals chars in cascade so the greeting feels typed.
-const STREAM_CHAR_DURATION = 0.025
-const GREETING_START_DELAY = 0.4
-const STREAM_GAP = 0.15
+type Phase = "starting" | "writing" | "holding" | "erasing"
 
-const streamCharVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.2 } },
-}
-
-type StreamedTextProps = {
-  text: string
-  startDelay: number
-  className?: string
-}
-
-const StreamedText = ({ text, startDelay, className }: StreamedTextProps) => {
-  const containerVariants = useMemo(
-    () => ({
-      hidden: {},
-      visible: {
-        transition: {
-          staggerChildren: STREAM_CHAR_DURATION,
-          delayChildren: startDelay,
-        },
-      },
-    }),
-    [startDelay]
-  )
-
-  return (
-    <motion.p
-      className={className}
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      aria-label={text}
-    >
-      {[...text].map((char, index) => (
-        <motion.span key={index} variants={streamCharVariants} aria-hidden>
-          {char}
-        </motion.span>
-      ))}
-    </motion.p>
-  )
-}
-
-export type WelcomeScreenProps = {
-  greeting?: string
-  // todo make it string
-  initialMessages?: Message[]
-  /** Optional click on the One icon (factorial uses it for the pong easter egg). */
-  onIconClick?: () => void
+export interface WelcomeScreenProps {
+  /** One or more phrases. With more than one, they rotate in an infinite loop. */
+  messages: string[]
+  /**
+   * Optional click handler on the phrase itself. When set, the phrase becomes
+   * keyboard-activatable (Enter / Space) and gets a subtle hover hint. Used by
+   * `F0AiChat` to wire the pong easter egg.
+   */
+  onClick?: () => void
+  /**
+   * Fullscreen welcome layout: the phrase is pushed to the bottom of the top
+   * half (instead of vertically centered) so it meets the composer — which
+   * rises to the top of the bottom half — around the vertical center.
+   */
+  fullscreen?: boolean
 }
 
 export const WelcomeScreen = ({
-  greeting,
-  initialMessages = [],
-  onIconClick,
+  messages,
+  onClick,
+  fullscreen = false,
 }: WelcomeScreenProps) => {
-  const [isHovered, setIsHovered] = useState(false)
-  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [index, setIndex] = useState(0)
+  const [chars, setChars] = useState(0)
+  const [phase, setPhase] = useState<Phase>("starting")
+  const current = messages[index] ?? ""
 
-  const handleMouseEnter = useCallback(() => {
-    hoverTimeout.current = setTimeout(() => setIsHovered(true), 80)
-  }, [])
+  // Recover from external mutations of `messages` (e.g. host swapping in a
+  // shorter array). Without this, an out-of-range `index` would render a
+  // blank phrase for one full cycle and `(i + 1) % 0` would yield NaN.
+  useEffect(() => {
+    if (messages.length > 0 && index >= messages.length) {
+      setIndex(0)
+      setChars(0)
+      setPhase("starting")
+    }
+  }, [messages.length, index])
 
-  const handleMouseLeave = useCallback(() => {
-    if (hoverTimeout.current) clearTimeout(hoverTimeout.current)
-    setIsHovered(false)
-  }, [])
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+
+    if (phase === "starting") {
+      timer = setTimeout(() => setPhase("writing"), START_DELAY_MS)
+    } else if (phase === "writing") {
+      if (chars < current.length) {
+        timer = setTimeout(() => setChars((c) => c + 1), CHAR_IN_MS)
+      } else {
+        setPhase("holding")
+      }
+    } else if (phase === "holding") {
+      if (messages.length <= 1) return
+      timer = setTimeout(() => setPhase("erasing"), HOLD_MS)
+    } else if (phase === "erasing") {
+      if (chars > 0) {
+        timer = setTimeout(() => setChars((c) => c - 1), CHAR_OUT_MS)
+      } else {
+        timer = setTimeout(() => {
+          setIndex((i) => (i + 1) % messages.length)
+          setPhase("starting")
+        }, END_DELAY_MS)
+      }
+    }
+
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
+  }, [phase, chars, current.length, messages.length])
+
+  const interactive = !!onClick
+  const handleKeyDown = interactive
+    ? (e: KeyboardEvent<HTMLParagraphElement>) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick?.()
+        }
+      }
+    : undefined
 
   return (
-    <AnimatePresence mode="popLayout">
-      <motion.div
-        key="welcome"
-        className="flex w-full flex-1 flex-col justify-end gap-6 sm:gap-4"
-        initial={{ opacity: 1 }}
-      >
-        <div className="px-1">
-          <motion.div
-            className="flex w-fit justify-center"
-            initial={{ opacity: 0, scale: 0.8, filter: "blur(6px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            transition={{
-              duration: 0.3,
-              ease: "easeOut",
-              delay: 0.4,
-            }}
-          >
-            <div
-              className={onIconClick ? "relative cursor-pointer" : "relative"}
-              onClick={onIconClick}
-              onMouseEnter={onIconClick ? handleMouseEnter : undefined}
-              onMouseLeave={onIconClick ? handleMouseLeave : undefined}
-            >
-              <motion.div
-                animate={{
-                  opacity: isHovered ? 0 : 1,
-                  scale: isHovered ? 0.6 : 1,
-                }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                <F0OneIcon spin size="lg" className="my-4" />
-              </motion.div>
-              <motion.div
-                className="absolute inset-0 flex items-center justify-center"
-                initial={{ opacity: 0, scale: 0.4 }}
-                animate={{
-                  opacity: isHovered ? 1 : 0,
-                  scale: isHovered ? 1 : 0.4,
-                }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
-                <PongBall size={40} className="shadow-lg" />
-              </motion.div>
-            </div>
-          </motion.div>
-          {greeting && (
-            <StreamedText
-              text={greeting}
-              startDelay={GREETING_START_DELAY}
-              className="text-2xl font-semibold leading-[28px] text-f1-foreground-tertiary"
-            />
-          )}
-          {initialMessages.map((message, msgIdx) => {
-            const content =
-              typeof message.content === "string" ? message.content : ""
-            const priorChars =
-              (greeting?.length ?? 0) +
-              initialMessages
-                .slice(0, msgIdx)
-                .reduce(
-                  (sum, m) =>
-                    sum +
-                    (typeof m.content === "string" ? m.content.length : 0),
-                  0
-                )
-            const startDelay =
-              GREETING_START_DELAY +
-              priorChars * STREAM_CHAR_DURATION +
-              STREAM_GAP * (msgIdx + (greeting ? 1 : 0))
-            return (
-              <StreamedText
-                key={message.id}
-                text={content}
-                startDelay={startDelay}
-                className="text-2xl font-semibold leading-[28px] text-f1-foreground"
-              />
+    <div
+      className={cn(
+        "flex w-full flex-1 justify-center px-4",
+        fullscreen ? "items-end pb-24" : "items-center"
+      )}
+    >
+      <p
+        key={index}
+        role={interactive ? "button" : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        onClick={onClick}
+        onKeyDown={handleKeyDown}
+        className={cn(
+          "bg-gradient-to-r from-[#E55619] via-[#E51943] to-[#A1ADE5] bg-clip-text text-center text-2xl font-semibold leading-[28px] text-transparent",
+          interactive &&
+            cn(
+              "cursor-pointer transition-transform duration-200",
+              "hover:scale-[1.02] focus-visible:scale-[1.02]",
+              "motion-reduce:transition-none motion-reduce:hover:scale-100 motion-reduce:focus-visible:scale-100"
             )
-          })}
-        </div>
-      </motion.div>
-    </AnimatePresence>
+        )}
+        style={{ minHeight: 28 }}
+        aria-label={current}
+      >
+        {current.slice(0, chars)}
+      </p>
+    </div>
   )
 }

@@ -1,5 +1,5 @@
-import { Input } from "@/experimental/Forms/Fields/Input"
-import { NumberInput } from "@/experimental/Forms/Fields/NumberInput"
+import { F0TextInput } from "@/components/F0TextInput"
+import { F0NumberInput } from "@/components/F0NumberInput"
 import { Numbers } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 
@@ -42,34 +42,32 @@ export const NumericQuestion = ({
 
   return (
     <BaseQuestion {...baseQuestionComponentProps}>
-      <div className="px-0.5">
-        {answering ? (
-          <NumberInput
-            locale="en-US"
-            size="md"
-            value={value}
-            onChange={handleChangeText}
-            disabled={disabled}
-            label={t("surveyFormBuilder.answer.label")}
-            hideLabel={true}
-            required={baseQuestionComponentProps.required}
-            maxDecimals={0}
-            placeholder={placeholder}
-            icon={Numbers}
-          />
-        ) : (
-          <Input
-            type="text"
-            size="md"
-            value={placeholder}
-            onChange={() => {}}
-            disabled
-            label={t("surveyFormBuilder.answer.label")}
-            hideLabel={true}
-            icon={Numbers}
-          />
-        )}
-      </div>
+      {answering ? (
+        <F0NumberInput
+          locale="en-US"
+          size="md"
+          value={value}
+          onChange={handleChangeText}
+          disabled={disabled}
+          label={t("surveyFormBuilder.answer.label")}
+          hideLabel={true}
+          required={baseQuestionComponentProps.required}
+          maxDecimals={0}
+          placeholder={placeholder}
+          icon={Numbers}
+        />
+      ) : (
+        <F0TextInput
+          type="text"
+          size="md"
+          value={placeholder}
+          onChange={() => {}}
+          disabled
+          label={t("surveyFormBuilder.answer.label")}
+          hideLabel={true}
+          icon={Numbers}
+        />
+      )}
     </BaseQuestion>
   )
 }

@@ -17,6 +17,9 @@ type Props = {} & Pick<
   | "metadata"
   | "status"
   | "deactivated"
+  | "metadataRowGap"
+  | "showBottomBorder"
+  | "onClose"
 >
 
 const _ResourceHeader = ({
@@ -29,6 +32,9 @@ const _ResourceHeader = ({
   status,
   metadata,
   deactivated,
+  metadataRowGap,
+  showBottomBorder,
+  onClose,
 }: Props) => {
   return (
     <BaseHeader
@@ -41,6 +47,9 @@ const _ResourceHeader = ({
       status={status}
       metadata={metadata}
       deactivated={deactivated}
+      metadataRowGap={metadataRowGap}
+      showBottomBorder={showBottomBorder}
+      onClose={onClose}
     />
   )
 }

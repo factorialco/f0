@@ -49,7 +49,7 @@ export function SelectCell<R extends RecordType>({
     },
     loading,
     size: "sm" as const,
-    placeholder: config.placeholder,
+    placeholder: config.placeholder ?? i18n.t("common.selectPlaceholder"),
     showSearchBox: config.showSearchBox,
     defaultItem: config.defaultItem?.(item),
     multiple: false as const,
@@ -61,7 +61,7 @@ export function SelectCell<R extends RecordType>({
     : ({} as const)
 
   return (
-    <BaseCell error={error} isActive={isOpen} hint={hint}>
+    <BaseCell error={error} isActive={isOpen} hint={hint} cursor="pointer">
       <div
         className={cn(
           "flex w-full min-w-0 h-full",

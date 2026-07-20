@@ -38,8 +38,6 @@ export const SectionHeaderItem = ({
     setDraggedItemId(null)
   }
 
-  const dragEnabled = !disabled && !answering && !item.section.locked
-
   return (
     <Reorder.Item
       value={item}
@@ -56,25 +54,32 @@ export const SectionHeaderItem = ({
           <div
             className={cn(
               "flex flex-row items-start gap-1 w-full",
+              // Mirror the drag-and-drop gutter (handle w-6 + gap-1 ≈ 28px) on
+              // the right so the header aligns with the cards' width.
+              !disabled && !answering && "pr-7",
               isDragging && "cursor-grabbing"
             )}
           >
-            {!disabled && !answering && (
-              <div
-                className={cn(
-                  "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/element:opacity-40",
-                  !isDragging && "cursor-grab",
-                  !dragEnabled && "cursor-not-allowed"
-                )}
-                onPointerDown={(e) => {
-                  if (dragEnabled) {
+            {!disabled &&
+              !answering &&
+              (item.section.locked ? (
+                // Blocked section: drop the drag affordance but keep the
+                // handle's gutter so the header stays aligned with the
+                // editable rows around it.
+                <div className="mt-2 aspect-square w-6 scale-75" aria-hidden />
+              ) : (
+                <div
+                  className={cn(
+                    "mt-2 flex aspect-square w-6 scale-75 items-center opacity-0 hover:opacity-40 group-hover/element:opacity-40",
+                    !isDragging && "cursor-grab"
+                  )}
+                  onPointerDown={(e) => {
                     dragControls.start(e)
-                  }
-                }}
-              >
-                <F0Icon icon={Handle} size="sm" />
-              </div>
-            )}
+                  }}
+                >
+                  <F0Icon icon={Handle} size="sm" />
+                </div>
+              ))}
             <SectionComponent {...item.section} hideQuestions />
           </div>
 

@@ -35,9 +35,9 @@ import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
 import { GroupHeader } from "@/ui/GroupHeader/index"
-import { InputField } from "@/ui/InputField"
-import { InputMessages } from "@/ui/InputField/components/InputMessages"
-import { Label } from "@/ui/InputField/components/Label"
+import { F0InputField } from "@/components/F0InputField"
+import { InputMessages } from "@/components/F0InputField/components/InputMessages"
+import { Label } from "@/components/F0InputField/components/Label"
 import {
   SelectContent,
   Select as SelectPrimitive,
@@ -71,6 +71,26 @@ const defaultSearchFn = (
     !search ||
     option.label.toLowerCase().includes(search.toLowerCase())
   )
+}
+
+/**
+ * Returns the discriminator for an option's *typed* tag (dot/person/icon/status),
+ * or undefined when the option has no tag or a plain string tag. String tags are
+ * intentionally excluded: they coexist with typed tags in existing usages (e.g. a
+ * `"Disabled"` string tag alongside `dot`/`person` options), so they must not trip
+ * the single-tag-type enforcement below.
+ */
+const getTagType = <T extends string, R>(
+  option: F0SelectItemProps<T, R>
+): string | undefined => {
+  if (
+    option.type === "separator" ||
+    option.tag === undefined ||
+    typeof option.tag === "string"
+  ) {
+    return undefined
+  }
+  return option.tag.type
 }
 
 const asListContainerVariants = cva({
@@ -112,6 +132,7 @@ const F0SelectComponent = forwardRef(function Select<
     size = "sm",
     actions,
     onCreate,
+    onFiltersChange,
     source,
     label,
     icon,
@@ -461,6 +482,26 @@ const F0SelectComponent = forwardRef(function Select<
     return result
   }, [localValue, itemsByValue, defaultItems])
 
+  /**
+   * Status tags render as pills, which need more vertical room than the "sm"
+   * trigger gives them — the selected pill looks cramped. Force the trigger to
+   * at least "md" when a status tag is in play, whether it comes from a loaded
+   * option or from the currently displayed selection (which resolves through
+   * the cache and `defaultItem`). Covering the displayed selection keeps the
+   * height correct for a preselected status pill even before its record loads,
+   * avoiding a layout shift.
+   */
+  const hasStatusTag = useMemo(() => {
+    const inOptions = data.records.some(
+      (record) => getTagType(optionMapper(record)) === "status"
+    )
+    return (
+      inOptions ||
+      getDisplayItemsForSelection.some((item) => getTagType(item) === "status")
+    )
+  }, [data.records, optionMapper, getDisplayItemsForSelection])
+  const effectiveSize = hasStatusTag ? "md" : size
+
   const onSearchChangeLocal = (value: string) => {
     setCurrentSearch(value)
     onSearchChange?.(value)
@@ -520,9 +561,17 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   // Mark user interaction when select all is used
+  // Tracks whether a "select all" is the current selection. Once the user
+  // clicks select-all, the selection is scoped to the query it was made under,
+  // so from that moment the component behaves as if
+  // `preserveSelectionOnDatasetChange` were false — any filter/search/sort
+  // change drops it. Survives the dataset-change clear (unlike reading the live
+  // `allSelected`, which may have already flipped by the time the effect runs).
+  const selectAllActiveRef = useRef(false)
   const handleSelectAllWithTracking = useCallback(
     (checked: boolean) => {
       hasUserInteracted.current = true
+      selectAllActiveRef.current = checked
       handleSelectAllItems(checked)
     },
     [handleSelectAllItems]
@@ -794,21 +843,42 @@ const F0SelectComponent = forwardRef(function Select<
   // Track when filters panel is open to hide bottom actions
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
 
-  // Clear selection cache and local value when filters change
-  const previousFiltersRef = useRef(localSource.currentFilters)
+  // Clear the selection cache and local value when the dataset identity changes
+  // (filters/sortings/search). `preserveSelectionOnDatasetChange` keeps MANUAL
+  // selections across the change, but a "select all" is scoped to the query it
+  // was made under and is always dropped (mirrors useSelectable) — so clear the
+  // local value too. Otherwise the stale select-all re-seeds through the
+  // `selectedState` prop and the badge balloons to the new query's count (e.g.
+  // "All selected (25)"). We read `selectAllActiveRef` rather than the live
+  // `allSelected` because useSelectable may have already flipped it by now, and
+  // we key off the debounced search to stay in sync with useSelectable's clear.
+  const previousDatasetKeyRef = useRef<string | null>(null)
   useEffect(() => {
-    const prev = JSON.stringify(previousFiltersRef.current)
-    const curr = JSON.stringify(localSource.currentFilters)
-    if (prev !== curr) {
-      previousFiltersRef.current = localSource.currentFilters
-      if (!disableSelectAll && !preserveSelectionOnDatasetChange) {
+    const key = JSON.stringify([
+      localSource.currentFilters,
+      localSource.currentSortings,
+      localSource.debouncedCurrentSearch,
+    ])
+    if (previousDatasetKeyRef.current === null) {
+      previousDatasetKeyRef.current = key
+      return
+    }
+    if (previousDatasetKeyRef.current !== key) {
+      previousDatasetKeyRef.current = key
+      if (
+        !disableSelectAll &&
+        (!preserveSelectionOnDatasetChange || selectAllActiveRef.current)
+      ) {
         selectedItemsCache.current.clear()
         setLocalValue([])
         hasUserInteracted.current = true
+        selectAllActiveRef.current = false
       }
     }
   }, [
     localSource.currentFilters,
+    localSource.currentSortings,
+    localSource.debouncedCurrentSearch,
     disableSelectAll,
     preserveSelectionOnDatasetChange,
   ])
@@ -822,10 +892,24 @@ const F0SelectComponent = forwardRef(function Select<
 
   const getItems = useCallback(
     (
-      records: WithGroupId<ActualRecordType>[] | ActualRecordType[]
+      records: WithGroupId<ActualRecordType>[] | ActualRecordType[],
+      seenTagTypes: Set<string>
     ): VirtualItem[] => {
-      return records.map((option, index) => {
-        const mappedOption = optionMapper(option)
+      return records.map((record, index) => {
+        const mappedOption = optionMapper(record)
+        const tagType = getTagType(mappedOption)
+        if (tagType !== undefined) {
+          seenTagTypes.add(tagType)
+          if (seenTagTypes.size > 1) {
+            throw new Error(
+              `[F0Select] All options must use the same tag type, but multiple were provided: ${Array.from(
+                seenTagTypes
+              )
+                .map((type) => `"${type}"`)
+                .join(", ")}.`
+            )
+          }
+        }
         return mappedOption.type === "separator"
           ? {
               height: 1,
@@ -858,6 +942,8 @@ const F0SelectComponent = forwardRef(function Select<
   )
 
   const items: VirtualItem[] = useMemo(() => {
+    const seenTagTypes = new Set<string>()
+
     if (data.type === "grouped") {
       const items: VirtualItem[] = []
       data.groups.map((group) => {
@@ -881,7 +967,7 @@ const F0SelectComponent = forwardRef(function Select<
         })
         if (!collapsible || openGroups[group.key]) {
           items.push(
-            ...getItems(group.records).map((vi) => ({
+            ...getItems(group.records, seenTagTypes).map((vi) => ({
               ...vi,
               key: `${group.key}:${vi.key}`,
               item: collapsible ? (
@@ -895,7 +981,7 @@ const F0SelectComponent = forwardRef(function Select<
       })
       return items
     }
-    return getItems(data.records)
+    return getItems(data.records, seenTagTypes)
   }, [
     data.records,
     data.type,
@@ -1015,7 +1101,10 @@ const F0SelectComponent = forwardRef(function Select<
             onGroupingChange={localSource.setCurrentGrouping}
             filters={localSource.filters}
             currentFilters={localSource.currentFilters}
-            onFiltersChange={localSource.setCurrentFilters}
+            onFiltersChange={(filters) => {
+              localSource.setCurrentFilters(filters)
+              onFiltersChange?.(filters)
+            }}
             asList={asList}
             onFiltersOpenChange={setIsFiltersOpen}
             showPreview={showPreview}
@@ -1112,7 +1201,7 @@ const F0SelectComponent = forwardRef(function Select<
               {children}
             </div>
           ) : (
-            <InputField
+            <F0InputField
               label={label}
               error={error}
               required={required}
@@ -1150,7 +1239,7 @@ const F0SelectComponent = forwardRef(function Select<
               placeholder={placeholder || ""}
               disabled={disabled}
               clearable={clearable}
-              size={size}
+              size={effectiveSize}
               loadingIndicator={{
                 asOverlay: true,
                 offset: 34,
@@ -1161,7 +1250,11 @@ const F0SelectComponent = forwardRef(function Select<
                 handleChangeOpenLocal(!openLocal)
               }}
               append={
-                <Arrow open={openLocal} disabled={disabled} size={size} />
+                <Arrow
+                  open={openLocal}
+                  disabled={disabled}
+                  size={effectiveSize}
+                />
               }
             >
               <button
@@ -1192,7 +1285,7 @@ const F0SelectComponent = forwardRef(function Select<
                   />
                 )}
               </button>
-            </InputField>
+            </F0InputField>
           )}
         </SelectTrigger>
         {openLocal && selectContent}

@@ -9,6 +9,7 @@ export {
   useF0Dialog,
 } from "./components/F0DialogProvider"
 export type {
+  DialogControls,
   DialogPosition,
   DialogWidth,
   F0DialogActionsProps,

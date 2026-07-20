@@ -34,7 +34,19 @@ export function InFilterFlatOption<T extends string>({
         <span className="min-w-0 flex-1">
           <OneEllipsis>{option.label}</OneEllipsis>
         </span>
-        <div className="shrink-0">
+        {/* The presentational checkbox is purely visual — the row handles the
+            click via onToggle. `pointer-events-none` lets a real click on the
+            checkbox fall through to the row's onToggle (in and out of a <form>).
+            Inside a <form> Radix also renders a hidden BubbleInput whose sync
+            effect dispatches a synthetic click on each `checked` change; that
+            click (target = the hidden <input>) bubbles here and would re-trigger
+            onToggle in an infinite select/deselect loop, so stop just that one. */}
+        <div
+          className="pointer-events-none shrink-0"
+          onClick={(e) => {
+            if (e.target instanceof HTMLInputElement) e.stopPropagation()
+          }}
+        >
           <F0Checkbox
             id={optionId}
             title={option.label}
