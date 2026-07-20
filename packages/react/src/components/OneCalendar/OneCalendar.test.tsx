@@ -6,7 +6,7 @@ import { zeroRender as render, screen, within } from "@/testing/test-utils"
 
 import { defaultTranslations, I18nProvider } from "../../lib/providers/i18n"
 import { L10nProvider } from "../../lib/providers/l10n"
-import { OneCalendar } from "./OneCalendar"
+import { OneCalendar, OneCalendarInternal } from "./OneCalendar"
 import { WeekStartDay } from "./types"
 
 const TestWrapper = ({
@@ -201,6 +201,26 @@ describe("OneCalendar", () => {
       // An in-range day still selects fine.
       fireEvent.click(within(grid).getByText("20"))
       expect(onSelect).toHaveBeenCalled()
+    })
+
+    it("uses short month names in the compact header", async () => {
+      // Compact calendars (filter-picker date filter) have a ~240px header
+      // budget; short month labels + narrower triggers keep the dropdowns
+      // and arrows from overflowing it.
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendarInternal
+            mode="single"
+            view="day"
+            defaultSelected={new Date(2024, 8, 15)}
+            compact
+          />
+        </TestWrapper>
+      )
+
+      expect(await screen.findByText("Sep")).toBeInTheDocument()
+      expect(screen.queryByText("September")).not.toBeInTheDocument()
+      expect(await screen.findByText("2024")).toBeInTheDocument()
     })
 
     it("does not impose a hidden lower bound when only maxDate is set", async () => {

@@ -114,6 +114,26 @@ describe("buildMonthOptions", () => {
     expect(options[0].label.toLowerCase()).toBe("enero")
   })
 
+  it("returns localized short month names for compact headers", () => {
+    const english = buildMonthOptions(
+      2026,
+      "en-US",
+      undefined,
+      undefined,
+      "short"
+    )
+    expect(english[8].label).toBe("Sep")
+
+    const spanish = buildMonthOptions(
+      2026,
+      "es-ES",
+      undefined,
+      undefined,
+      "short"
+    )
+    expect(spanish[0].label.toLowerCase()).toContain("ene")
+  })
+
   it("disables months that fall entirely outside min/max", () => {
     // Range is only June–August 2026.
     const options = buildMonthOptions(

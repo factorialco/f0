@@ -354,6 +354,7 @@ const OneCalendarInternal = ({
               locale={l10n.locale}
               minDate={minDate}
               maxDate={maxDate}
+              compact={compact}
             />
           ) : (
             <div
@@ -365,7 +366,7 @@ const OneCalendarInternal = ({
               {getHeaderLabel()}
             </div>
           )}
-          <div className="flex items-center gap-2">
+          <div className={cn("flex items-center", compact ? "gap-1" : "gap-2")}>
             <F0Button
               onClick={() => navigate(-1)}
               variant="outline"
