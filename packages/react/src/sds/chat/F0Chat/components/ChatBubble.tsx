@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
 import { senderNameColorClass } from "../utils/sender-color"
+import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
 
@@ -22,7 +23,9 @@ export const bubbleCornerClass = (
   isLastOfRun: boolean
 ): string =>
   cn(
-    "rounded-2xl",
+    // The radius transitions because extending a run flips the previous
+    // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
+    "rounded-2xl transition-[border-radius] duration-150",
     !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
     !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
   )
@@ -87,10 +90,12 @@ const ChatBubbleImpl = ({
   )
 
   // Parse the body (twemoji + mention chips) once per content change — not on
-  // every scroll-driven re-render.
+  // every scroll-driven re-render. Link previews feed it so an inline URL
+  // reads as its scraped page title instead of the raw address.
   const renderedBody = useMemo(
-    () => renderBodyWithMentions(message.body, mentionTokens),
-    [message.body, mentionTokens]
+    () =>
+      renderBodyWithMentions(message.body, mentionTokens, message.linkPreviews),
+    [message.body, mentionTokens, message.linkPreviews]
   )
 
   const corners = bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun)
@@ -129,6 +134,15 @@ const ChatBubbleImpl = ({
             reply={message.replyTo}
             isMine={isMine}
             isFirstOfRun={isFirstOfRun}
+          />
+        )}
+        {message.linkPreviews && message.linkPreviews.length > 0 && (
+          <ChatLinkPreview
+            previews={message.linkPreviews}
+            isMine={isMine}
+            // Below a reply quote the card no longer touches the bubble's top —
+            // keep it fully rounded there.
+            isFirstOfRun={message.replyTo ? true : isFirstOfRun}
           />
         )}
         <div className="px-3.5 py-2.5">

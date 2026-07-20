@@ -110,6 +110,36 @@ describe("F0Chat", () => {
     expect(screen.getByText("Hi back")).toBeInTheDocument()
   })
 
+  it("renders a system item as a centered row with person tags and no delivery footer", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          ...messages,
+          {
+            type: "system",
+            id: "s1",
+            createdAt: now,
+            system: {
+              event: "member.added",
+              members: [{ id: "ana", name: "Ana García" }],
+            },
+          },
+        ],
+      })
+    )
+    // The sentence renders with the @name chip splitting the text nodes…
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === "SPAN" &&
+          element.textContent === "@Ana García was added to the group"
+      )
+    ).toBeInTheDocument()
+    // …and the delivery footer is gone: a trailing system row means the last
+    // ITEM isn't a user message.
+    expect(screen.queryByText(/^Read/)).not.toBeInTheDocument()
+  })
+
   it("shows the read status under the last message (mine)", () => {
     renderChat(makeRuntime())
     expect(screen.getByText(/^Read/)).toBeInTheDocument()
