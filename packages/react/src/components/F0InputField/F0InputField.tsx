@@ -476,6 +476,7 @@ const F0InputField = forwardRef<HTMLDivElement, InputFieldProps<string>>(
           >
             {(icon || avatar) && (
               <div
+                data-slot="icon"
                 className={cn(
                   "pointer-events-none absolute left-2 top-[5px] my-auto h-5 w-5 shrink-0",
                   size === "md" && "left-3 top-[9px]"
