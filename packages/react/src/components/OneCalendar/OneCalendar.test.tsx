@@ -145,6 +145,38 @@ describe("OneCalendar", () => {
       expect(await screen.findByText(String(currentYear))).toBeInTheDocument()
     })
 
+    it("disables adjacent-month day cells that fall outside the year range", async () => {
+      // December's grid shows the first days of next January; those lie
+      // outside the selectable years and must not be selectable.
+      const currentYear = new Date().getFullYear()
+      const onSelect = vi.fn()
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="day"
+            defaultSelected={new Date(currentYear, 11, 15)}
+            onSelect={onSelect}
+          />
+        </TestWrapper>
+      )
+
+      expect(await screen.findByText("December")).toBeInTheDocument()
+      onSelect.mockClear()
+
+      // The trailing "1" in December's grid is January 1 of the next year.
+      const grid = screen.getAllByRole("grid")[0]
+      const dayOnes = within(grid).getAllByText("1")
+      const trailingJanuaryFirst = dayOnes[dayOnes.length - 1]
+
+      fireEvent.click(trailingJanuaryFirst)
+      expect(onSelect).not.toHaveBeenCalled()
+
+      // An in-range day still selects fine.
+      fireEvent.click(within(grid).getByText("20"))
+      expect(onSelect).toHaveBeenCalled()
+    })
+
     it("clamps arrow navigation to minDate/maxDate years", async () => {
       render(
         <TestWrapper locale="en-US">

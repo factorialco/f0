@@ -153,6 +153,24 @@ const OneCalendarInternal = ({
     ? getYearBounds(new Date().getFullYear(), minDate, maxDate)
     : null
 
+  // The window also bounds selection: without it, the day grid's adjacent-
+  // month cells (e.g. January days trailing a December view) would let users
+  // select dates outside the selectable years.
+  const { effectiveMinDate, effectiveMaxDate } = useMemo(
+    () => ({
+      effectiveMinDate:
+        minDate ??
+        (yearBounds ? new Date(yearBounds.fromYear, 0, 1) : undefined),
+      effectiveMaxDate:
+        maxDate ??
+        (yearBounds
+          ? new Date(yearBounds.toYear, 11, 31, 23, 59, 59, 999)
+          : undefined),
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- yearBounds is derived from these
+    [minDate, maxDate, headerDropdowns]
+  )
+
   const canNavigate = (direction: -1 | 1) => {
     if (!yearBounds) return true
     const year = granularity.navigateUIView(viewDate, direction).getFullYear()
@@ -208,11 +226,11 @@ const OneCalendarInternal = ({
       }
 
       return isActiveDate(date, granularity, {
-        minDate,
-        maxDate,
+        minDate: effectiveMinDate,
+        maxDate: effectiveMaxDate,
       })
     },
-    [granularity, minDate, maxDate]
+    [granularity, effectiveMinDate, effectiveMaxDate]
   )
 
   const setSelectFromInput = (
@@ -389,8 +407,8 @@ const OneCalendarInternal = ({
           motionDirection,
           setViewDate,
           viewDate,
-          minDate,
-          maxDate,
+          minDate: effectiveMinDate,
+          maxDate: effectiveMaxDate,
           compact,
           weekStartsOn: effectiveWeekStartsOn,
         })}
