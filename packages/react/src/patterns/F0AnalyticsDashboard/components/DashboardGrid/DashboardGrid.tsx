@@ -437,6 +437,18 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       {displayRows.map((row, ri) => {
         const isDropRow =
           dragId && dropTarget?.type === "into-row" && dropTarget.rowIdx === ri
+        // Collections (tables) render their full page of rows — if the row
+        // box is shorter than that content, the overflow would paint over the
+        // next row. `overflow-y: clip` makes that structurally impossible no
+        // matter what height was persisted or measured (auto-grow normally
+        // resizes the row first; the clip is the guarantee for when it
+        // can't). A CSS intrinsic floor (`min-height: fit-content`) does NOT
+        // work here: the card's inner `flex-1` (basis-0) chains contribute
+        // zero intrinsic height. Scoped to collection rows; chart canvases
+        // and metrics never overflow their row.
+        const hasCollection = row.ids.some(
+          (id) => itemMap.get(id)?.type === "collection"
+        )
 
         return (
           <div key={ri} className="relative">
@@ -457,6 +469,15 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
               style={{
                 gap: GAP,
                 height: row.height,
+                // `visible` x-overflow keeps the floating drag handle
+                // (offset past the row's left edge) from being cut off —
+                // `clip`, unlike `hidden`, allows the combination.
+                ...(hasCollection
+                  ? {
+                      overflowY: "clip" as const,
+                      overflowX: "visible" as const,
+                    }
+                  : {}),
               }}
               onDragOver={canDrag ? (e) => handleRowDragOver(e, ri) : undefined}
               onDrop={canDrag ? () => {} : undefined}
@@ -511,11 +532,27 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     e.currentTarget.parentElement?.querySelector<HTMLElement>(
                       "[data-dashboard-row]"
                     )
+                  // Start from the RENDERED height, not `row.height` state:
+                  // the fit-content floor can hold the row taller than state
+                  // (e.g. a persisted height smaller than the loaded table),
+                  // and starting from the smaller state value would make the
+                  // handle feel detached from the cursor.
+                  const renderedHeight = Math.max(
+                    rowEl?.getBoundingClientRect().height ?? 0,
+                    row.height
+                  )
+                  // Charts are excluded from content measurement: their
+                  // canvas is sized FROM the row, so measuring them reads
+                  // back the current height and would make the row
+                  // unshrinkable.
+                  const measurableCardIds = new Set(
+                    row.ids.filter((id) => itemMap.get(id)?.type !== "chart")
+                  )
                   startResize(
                     ri,
                     e.clientY,
-                    row.height,
-                    getRowContentMinHeight(rowEl)
+                    renderedHeight,
+                    getRowContentMinHeight(rowEl, measurableCardIds)
                   )
                 }}
               >
@@ -569,35 +606,34 @@ function RowItem({
     const el = itemRef.current
     if (!el) return
 
-    let frame: number | undefined
-    const requestFrame =
-      typeof requestAnimationFrame === "function"
-        ? requestAnimationFrame
-        : (callback: FrameRequestCallback) => window.setTimeout(callback, 0)
-    const cancelFrame =
-      typeof cancelAnimationFrame === "function"
-        ? cancelAnimationFrame
-        : window.clearTimeout
+    // Deliberately NOT rAF-scheduled: rAF never fires in hidden/background
+    // tabs, and a re-rendering parent can re-run this effect (cancelling the
+    // pending frame) faster than rAF fires — both starve the measurement
+    // entirely and let a too-short row keep its overflowing table. A
+    // microtask always drains, in every tab state, on every commit.
+    let disposed = false
+    let queued = false
 
-    const scheduleMeasure = () => {
-      if (frame !== undefined) {
-        cancelFrame(frame)
-      }
-
-      frame = requestFrame(() => {
-        frame = undefined
-        // Report only genuine overflow: the wrapper is flex-stretched to the
-        // row height, so its own height always equals the row's — a useless
-        // (and ratcheting) signal. `scrollHeight` exceeds `clientHeight` only
-        // when content truly needs more space; report 0 otherwise so the grid
-        // leaves the user-controlled row height alone.
-        const requiredHeight =
-          el.scrollHeight > el.clientHeight + 1 ? el.scrollHeight : 0
-        onContentHeightChange(id, requiredHeight)
-      })
+    const measure = () => {
+      queued = false
+      if (disposed) return
+      // Report only genuine overflow: the wrapper is flex-stretched to the
+      // row height, so its own height always equals the row's — a useless
+      // (and ratcheting) signal. `scrollHeight` exceeds `clientHeight` only
+      // when content truly needs more space; report 0 otherwise so the grid
+      // leaves the user-controlled row height alone.
+      const requiredHeight =
+        el.scrollHeight > el.clientHeight + 1 ? el.scrollHeight : 0
+      onContentHeightChange(id, requiredHeight)
     }
 
-    scheduleMeasure()
+    const scheduleMeasure = () => {
+      if (queued) return
+      queued = true
+      queueMicrotask(measure)
+    }
+
+    measure()
 
     const resizeObserver = new ResizeObserver(scheduleMeasure)
     resizeObserver.observe(el)
@@ -610,9 +646,7 @@ function RowItem({
     })
 
     return () => {
-      if (frame !== undefined) {
-        cancelFrame(frame)
-      }
+      disposed = true
       resizeObserver.disconnect()
       mutationObserver.disconnect()
     }
@@ -826,21 +860,38 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
 }
 
 /**
- * Minimum height the row's rendered content currently requires, measured from
- * the live DOM at resize start. Only items whose content genuinely overflows
- * their wrapper contribute; items that fit report nothing, so a row with
- * fitting content can be shrunk freely down to its type minimum.
+ * Minimum height the row's content requires, measured from the live DOM at
+ * resize start. Only the given cards are measured — callers pass every
+ * non-chart card: collection/metric content has an intrinsic height (rows of
+ * data, text) that must stay fully visible, while a chart canvas is sized
+ * FROM the row, so measuring it would read back the current row height and
+ * re-create the grow-only ratchet this replaced.
+ *
+ * The row is momentarily collapsed (height/min-height 0) so each card's
+ * `scrollHeight` reports pure content height instead of the flex-stretched
+ * wrapper height. Styles are restored synchronously in the same task, so
+ * nothing paints in between.
  */
-function getRowContentMinHeight(rowEl: HTMLElement | null | undefined): number {
-  if (!rowEl) return 0
+function getRowContentMinHeight(
+  rowEl: HTMLElement | null | undefined,
+  measurableCardIds: ReadonlySet<string>
+): number {
+  if (!rowEl || measurableCardIds.size === 0) return 0
+  const prevHeight = rowEl.style.height
+  const prevMinHeight = rowEl.style.minHeight
+  rowEl.style.height = "0px"
+  rowEl.style.minHeight = "0px"
   let min = 0
   for (const card of Array.from(
     rowEl.querySelectorAll<HTMLElement>("[data-card-id]")
   )) {
-    if (card.scrollHeight > card.clientHeight + 1) {
+    const id = card.dataset.cardId
+    if (id && measurableCardIds.has(id)) {
       min = Math.max(min, card.scrollHeight)
     }
   }
+  rowEl.style.height = prevHeight
+  rowEl.style.minHeight = prevMinHeight
   return min
 }
 

@@ -223,5 +223,87 @@ describe("DashboardGrid", () => {
 
       expect(getDashboardRowHeight(container)).toBe("180px")
     })
+
+    it("clamps shrinking a collection row to its table content height", () => {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId === "expenses") return 460
+          return 0
+        }
+      )
+
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+
+      // The table's content needs 460px — dragging far up must stop there,
+      // not at the 300px collection type minimum.
+      dragResizeHandle(getResizeHandle(container), -400)
+
+      const collectionCard = container.querySelector(
+        '[data-card-id="expenses"]'
+      )
+      const collectionRow = collectionCard?.parentElement
+      if (!(collectionRow instanceof HTMLElement)) {
+        throw new Error("Expected collection row to be rendered")
+      }
+      expect(collectionRow.style.height).toBe("460px")
+    })
+  })
+
+  describe("content overflow containment", () => {
+    it("clips vertical overflow on collection rows so a too-short row can never paint over the next one", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+      )
+
+      const collectionCard = container.querySelector(
+        '[data-card-id="expenses"]'
+      )
+      const collectionRow = collectionCard?.parentElement
+      if (!(collectionRow instanceof HTMLElement)) {
+        throw new Error("Expected collection row to be rendered")
+      }
+      expect(collectionRow.style.overflowY).toBe("clip")
+    })
+
+    it("does not clip rows without collections", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(144)} filters={{}} />
+      )
+
+      const metricCard = container.querySelector('[data-card-id="headcount"]')
+      const metricRow = metricCard?.parentElement
+      if (!(metricRow instanceof HTMLElement)) {
+        throw new Error("Expected metric row to be rendered")
+      }
+      expect(metricRow.style.overflowY).toBe("")
+    })
+
+    it("measures and grows without requestAnimationFrame (hidden tabs, effect churn)", async () => {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId === "expenses") return 960
+          return 0
+        }
+      )
+      // Simulate an environment where rAF never fires (backgrounded tab).
+      vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0)
+
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+      )
+
+      const collectionCard = container.querySelector(
+        '[data-card-id="expenses"]'
+      )
+      const collectionRow = collectionCard?.parentElement
+      if (!(collectionRow instanceof HTMLElement)) {
+        throw new Error("Expected collection row to be rendered")
+      }
+      await waitFor(() => {
+        expect(collectionRow.style.height).toBe("960px")
+      })
+    })
   })
 })
