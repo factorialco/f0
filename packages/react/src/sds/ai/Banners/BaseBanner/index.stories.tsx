@@ -7,7 +7,7 @@ import { Download, Upsell } from "@/icons/app"
 import { BaseBanner } from "./index"
 
 const meta = {
-  title: "UpsellingKit/BaseBanner",
+  title: "AI/BaseBanner",
   component: BaseBanner,
   parameters: {
     layout: "padded",
