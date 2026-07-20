@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.43.0](https://github.com/factorialco/f0/compare/f0-react-v4.42.1...f0-react-v4.43.0) (2026-07-20)
+
+
+### Features
+
+* **OneCalendar:** month and year dropdowns in the DatePicker calendar header ([#4736](https://github.com/factorialco/f0/issues/4736)) ([24d6a64](https://github.com/factorialco/f0/commit/24d6a64c88a8abc7cde598b54d13193f094d895f))
+
 ## [4.42.1](https://github.com/factorialco/f0/compare/f0-react-v4.42.0...f0-react-v4.42.1) (2026-07-20)
 
 
