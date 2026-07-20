@@ -7882,8 +7882,9 @@ export declare type NestedTableOptions<R extends RecordType> = {
      * Declarative, **controlled** expansion criteria (mirrors `revealNodeId`/
      * `focusOnEntry` on the Graph visualization). While defined it is the
      * single source of truth for the auto-expansion policy — standard
-     * controlled-prop semantics: `defaultExpanded` is ignored and the policy
-     * side of `expandAll`/`collapseAll` is a no-op. Targeted `control` calls
+     * controlled-prop semantics: `defaultExpanded` is ignored and
+     * `expandAll`/`collapseAll` are complete no-ops (they neither replace the
+     * policy nor touch existing overrides). Targeted `control` calls
      * (`expand`/`collapse`/`toggle`/`expandTo`) still work: they layer per-row
      * overrides on top of the criteria, and every override is cleared whenever
      * the criteria changes by reference — the same way a controlled input
@@ -11514,8 +11515,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -11523,11 +11527,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
