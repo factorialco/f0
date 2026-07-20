@@ -8,7 +8,7 @@ import { ProductBlankslate } from "."
 import { UpsellingButton } from "../UpsellingButton"
 
 const meta: Meta<typeof ProductBlankslate> = {
-  title: "UpsellingKit/ProductBlankslate",
+  title: "ProductBlankslate",
   component: ProductBlankslate,
   parameters: {
     layout: "centered",
