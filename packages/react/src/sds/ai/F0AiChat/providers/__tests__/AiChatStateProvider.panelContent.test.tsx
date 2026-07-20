@@ -99,4 +99,35 @@ describe("AiChatStateProvider panel content", () => {
 
     expect(result.current.panelSide).toBe("left")
   })
+
+  it("panelContentSide follows `side` when not set", () => {
+    const leftWrapper = ({ children }: { children: ReactNode }) => (
+      <TestProviders>
+        <AiChatStateProvider enabled side="left">
+          {children}
+        </AiChatStateProvider>
+      </TestProviders>
+    )
+    const { result } = renderHook(() => useAiChat(), { wrapper: leftWrapper })
+    expect(result.current.panelSide).toBe("left")
+    expect(result.current.panelContentSide).toBe("left")
+  })
+
+  it("panelContentSide can dock hosted content opposite the chat", () => {
+    const splitWrapper = ({ children }: { children: ReactNode }) => (
+      <TestProviders>
+        <AiChatStateProvider enabled panelContentSide="left">
+          {children}
+        </AiChatStateProvider>
+      </TestProviders>
+    )
+    const { result } = renderHook(() => useAiChat(), { wrapper: splitWrapper })
+    expect(result.current.panelSide).toBe("right")
+    expect(result.current.panelContentSide).toBe("left")
+
+    act(() => {
+      result.current.setPanelContentSide("right")
+    })
+    expect(result.current.panelContentSide).toBe("right")
+  })
 })

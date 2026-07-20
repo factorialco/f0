@@ -31,6 +31,8 @@ export interface AiChatState {
   enabled: boolean
   /** Initial edge the panel docks to. @default "right" */
   side?: "left" | "right"
+  /** Initial edge hosted panel content docks to. Defaults to `side`. */
+  panelContentSide?: "left" | "right"
   agent?: string
   initialMessage?: string | string[]
   chatHeader?: React.ReactNode
@@ -205,6 +207,14 @@ export type AiChatProviderReturnValue = {
   panelSide: "left" | "right"
   /** Set which edge the side panel docks to. */
   setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>
+  /**
+   * Edge hosted panel content (`setPanelContent`) docks to. Defaults to
+   * `panelSide`; when it differs, the AI chat and hosted content render in
+   * separate windows, one per edge, still mutually exclusive.
+   */
+  panelContentSide: "left" | "right"
+  /** Set which edge hosted panel content docks to. */
+  setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>
 } & Pick<
   AiChatState,
   | "agent"

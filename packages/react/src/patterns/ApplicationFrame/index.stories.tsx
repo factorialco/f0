@@ -796,10 +796,50 @@ export const Default: Story = {
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <ApplicationFrame
-          // Communications mode: the sidebar owns chat navigation (history, new
-          // chat) and the credits/settings popover, so the in-chat history is
-          // off and the header stays compact (expand + close only). The page
-          // header's One switch is hidden too — One is reached from the sidebar.
+          // Transitional communications layout: conversations dock LEFT
+          // (panelContentSide) while the AI chat keeps its classic right-side
+          // panel, full header and history, toggled from the page header's One
+          // switch. Opening one swaps the other out — only the main content
+          // moves, uncovering the incoming panel in place.
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={<ConversationsSidebar withOneTab={false} />}
+        >
+          {/* Real-world main content: the home "daytime" page. The One switch
+              stays visible — it's how the AI chat opens (the sidebar only has
+              Home + Chat tabs here). */}
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The previous communications layout, kept as the configurable alternative:
+ * ONE panel docked left shared by conversations and the AI chat (`side:
+ * "left"`, no `panelContentSide`), a third "One" sidebar tab instead of the
+ * page-header switch, and the compact in-panel chat header.
+ */
+export const CommunicationsPanelLeft: Story = {
+  name: "Communications — everything left",
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
           ai={{
             ...withMockChatSlots(args.ai),
             side: "left",
@@ -809,8 +849,6 @@ export const Default: Story = {
           aiPromotion={args.aiPromotion}
           sidebar={<ConversationsSidebar />}
         >
-          {/* Real-world main content: the home "daytime" page. `hideOneSwitch`
-              because One is reached from the sidebar tab in communications mode. */}
           <DaytimePage
             period="morning"
             hideOneSwitch
@@ -1261,12 +1299,16 @@ const ConversationsSidebarInner = ({
   initialTab = "home",
   autoOpenConvId,
   forceEmpty = false,
+  withOneTab = true,
 }: {
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
   autoOpenConvId?: string
   /** Demo-only: render both lists (Messages + One) empty to show the blank states. */
   forceEmpty?: boolean
+  /** Show the "One" tab. Off when the AI chat is reached from the page
+   * header's One switch instead (the split-panel layout). */
+  withOneTab?: boolean
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
@@ -1327,7 +1369,16 @@ const ConversationsSidebarInner = ({
                 icon: Comment,
                 badge: unreadChatsCount || undefined,
               },
-              { id: "one", label: "One", icon: One, variant: "ai" },
+              ...(withOneTab
+                ? [
+                    {
+                      id: "one",
+                      label: "One",
+                      icon: One,
+                      variant: "ai" as const,
+                    },
+                  ]
+                : []),
             ]}
             activeTab={tab}
             onTabChange={setTab}
@@ -1370,10 +1421,12 @@ const ConversationsSidebar = ({
   initialTab,
   autoOpenConvId,
   forceEmpty,
+  withOneTab,
 }: {
   initialTab?: string
   autoOpenConvId?: string
   forceEmpty?: boolean
+  withOneTab?: boolean
 } = {}) => {
   return (
     <SidebarChatProvider>
@@ -1381,6 +1434,7 @@ const ConversationsSidebar = ({
         initialTab={initialTab}
         autoOpenConvId={autoOpenConvId}
         forceEmpty={forceEmpty}
+        withOneTab={withOneTab}
       />
     </SidebarChatProvider>
   )

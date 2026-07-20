@@ -54,6 +54,7 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   children,
   enabled,
   side = "right",
+  panelContentSide: initialPanelContentSide,
   agent: initialAgent,
   initialMessage: initialInitialMessage,
   chatHeader,
@@ -266,6 +267,13 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // it at runtime via `setPanelSide` for a chat-first experience.
   const [panelSide, setPanelSide] = useState<"left" | "right">(side)
 
+  // Edge hosted panel content docks to. Defaults to the chat's side (single
+  // panel); when it differs, ApplicationFrame renders it in its own window on
+  // that edge, still exclusive with the AI chat.
+  const [panelContentSide, setPanelContentSide] = useState<"left" | "right">(
+    initialPanelContentSide ?? side
+  )
+
   return (
     <AiChatStateContext.Provider
       value={{
@@ -334,6 +342,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         clearPanelContent,
         panelSide,
         setPanelSide,
+        panelContentSide,
+        setPanelContentSide,
       }}
     >
       {children}
@@ -393,6 +403,7 @@ const UNDEFINED_KEYS = new Set<ProviderKey>([
 const REAL_VALUES: Partial<AiChatProviderReturnValue> = {
   chatWidth: DEFAULT_CHAT_WIDTH,
   panelSide: "right",
+  panelContentSide: "right",
   visualizationMode: "sidepanel",
   mode: "chat",
   shouldPlayEntranceAnimation: true,
