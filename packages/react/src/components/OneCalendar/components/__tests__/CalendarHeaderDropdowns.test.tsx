@@ -4,6 +4,7 @@ import {
   buildMonthOptions,
   buildYearOptions,
   DEFAULT_YEARS_BACK,
+  getYearBounds,
 } from "../CalendarHeaderDropdowns"
 
 describe("buildYearOptions", () => {
@@ -40,21 +41,6 @@ describe("buildYearOptions", () => {
     ])
   })
 
-  it("always includes the year in view, even past the default bounds", () => {
-    // Arrows can navigate beyond the default window (currentYear); the view
-    // year must still be a selectable option or the trigger shows nothing.
-    const options = buildYearOptions(2025, undefined, undefined, 2026)
-    expect(options[0].value).toBe("2026")
-
-    const pastView = buildYearOptions(
-      2025,
-      new Date(2020, 0, 1),
-      new Date(2024, 0, 1),
-      2015
-    )
-    expect(pastView.map((o) => o.value)).toContain("2015")
-  })
-
   it("stays descending even if min/max are passed inverted", () => {
     const options = buildYearOptions(
       2026,
@@ -63,6 +49,27 @@ describe("buildYearOptions", () => {
     )
     expect(options[0].value).toBe("1995")
     expect(options[options.length - 1].value).toBe("1990")
+  })
+})
+
+describe("getYearBounds", () => {
+  it("defaults to the wide window ending at the current year", () => {
+    expect(getYearBounds(2026)).toEqual({
+      fromYear: 2026 - DEFAULT_YEARS_BACK,
+      toYear: 2026,
+    })
+  })
+
+  it("uses minDate/maxDate years when provided", () => {
+    expect(
+      getYearBounds(2026, new Date(1990, 0, 1), new Date(1995, 11, 31))
+    ).toEqual({ fromYear: 1990, toYear: 1995 })
+  })
+
+  it("normalizes inverted bounds", () => {
+    expect(
+      getYearBounds(2026, new Date(1995, 0, 1), new Date(1990, 0, 1))
+    ).toEqual({ fromYear: 1990, toYear: 1995 })
   })
 })
 

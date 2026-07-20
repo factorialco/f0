@@ -23,7 +23,10 @@ import {
   WeekStartDay,
   WeekStartsOn,
 } from "./types"
-import { CalendarHeaderDropdowns } from "./components/CalendarHeaderDropdowns"
+import {
+  CalendarHeaderDropdowns,
+  getYearBounds,
+} from "./components/CalendarHeaderDropdowns"
 import { isActiveDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
@@ -131,13 +134,6 @@ const OneCalendarInternal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be run when the defaultSelected changes
   }, [defaultSelected])
 
-  // Handle ui view navigation
-  const navigate = (direction: -1 | 1) => {
-    const newDate = granularity.navigateUIView(viewDate, direction)
-    setMotionDirection(direction)
-    setViewDate(newDate)
-  }
-
   // Get header label
   const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
 
@@ -150,6 +146,26 @@ const OneCalendarInternal = ({
       : granularity.calendarView === "month"
         ? "year"
         : null
+
+  // Views with header dropdowns clamp arrow navigation to the year dropdown's
+  // range, so the view can never land on a year the dropdown can't display.
+  const yearBounds = headerDropdowns
+    ? getYearBounds(new Date().getFullYear(), minDate, maxDate)
+    : null
+
+  const canNavigate = (direction: -1 | 1) => {
+    if (!yearBounds) return true
+    const year = granularity.navigateUIView(viewDate, direction).getFullYear()
+    return year >= yearBounds.fromYear && year <= yearBounds.toYear
+  }
+
+  // Handle ui view navigation
+  const navigate = (direction: -1 | 1) => {
+    if (!canNavigate(direction)) return
+    const newDate = granularity.navigateUIView(viewDate, direction)
+    setMotionDirection(direction)
+    setViewDate(newDate)
+  }
 
   // Jump straight to a month/year from the dropdowns, animating in the
   // direction of travel like the prev/next arrows do.
@@ -349,6 +365,7 @@ const OneCalendarInternal = ({
               hideLabel
               icon={ChevronLeft}
               size="sm"
+              disabled={!canNavigate(-1)}
             />
             <F0Button
               onClick={() => navigate(1)}
@@ -357,6 +374,7 @@ const OneCalendarInternal = ({
               hideLabel
               icon={ChevronRight}
               size="sm"
+              disabled={!canNavigate(1)}
             />
           </div>
         </div>

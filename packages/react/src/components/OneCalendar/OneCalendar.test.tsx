@@ -122,10 +122,10 @@ describe("OneCalendar", () => {
       expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument()
     })
 
-    it("keeps showing the year when arrows navigate past the default range", async () => {
-      // The default year list ends at the current year; arrowing from
-      // December into January of the next year must still display that year
-      // in the trigger (regression: it rendered as an ellipsis).
+    it("clamps arrow navigation to the year dropdown range", async () => {
+      // The year list ends at the current year; arrowing from December must
+      // not escape into a year the dropdown can't display (regression: the
+      // trigger rendered an ellipsis). The Next arrow is disabled instead.
       const currentYear = new Date().getFullYear()
       render(
         <TestWrapper locale="en-US">
@@ -137,14 +137,31 @@ describe("OneCalendar", () => {
         </TestWrapper>
       )
 
-      expect(await screen.findByText(String(currentYear))).toBeInTheDocument()
+      expect(await screen.findByText("December")).toBeInTheDocument()
+      expect(screen.getByRole("button", { name: "Next" })).toBeDisabled()
 
       fireEvent.click(screen.getByRole("button", { name: "Next" }))
+      expect(await screen.findByText("December")).toBeInTheDocument()
+      expect(await screen.findByText(String(currentYear))).toBeInTheDocument()
+    })
+
+    it("clamps arrow navigation to minDate/maxDate years", async () => {
+      render(
+        <TestWrapper locale="en-US">
+          <OneCalendar
+            mode="single"
+            view="day"
+            defaultSelected={new Date(1990, 0, 15)}
+            minDate={new Date(1990, 0, 1)}
+            maxDate={new Date(1995, 11, 31)}
+          />
+        </TestWrapper>
+      )
 
       expect(await screen.findByText("January")).toBeInTheDocument()
-      expect(
-        await screen.findByText(String(currentYear + 1))
-      ).toBeInTheDocument()
+      // January 1990: going back would leave the 1990-1995 window.
+      expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled()
+      expect(screen.getByRole("button", { name: "Next" })).toBeEnabled()
     })
 
     it("stays in sync with the prev/next arrows", async () => {

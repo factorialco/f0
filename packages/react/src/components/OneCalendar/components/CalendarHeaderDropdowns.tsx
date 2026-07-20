@@ -17,26 +17,37 @@ interface SelectOption {
 }
 
 /**
- * Descending list of selectable years. Bounds come from `minDate`/`maxDate`
- * when set, otherwise a wide window ending at the current year so distant
- * birthdays are reachable. The list always includes `viewYear` — the arrows
- * can navigate past the default bounds, and a view year missing from the
- * options would leave the select with a value it can't display.
+ * Selectable year range for the header dropdowns. Bounds come from
+ * `minDate`/`maxDate` when set, otherwise a wide window ending at the current
+ * year so distant birthdays are reachable. Arrow navigation is clamped to
+ * this same range (see OneCalendar), so the view can never drift outside it.
  */
-export function buildYearOptions(
+export function getYearBounds(
   currentYear: number,
   minDate?: Date,
-  maxDate?: Date,
-  viewYear?: number
-): SelectOption[] {
+  maxDate?: Date
+): { fromYear: number; toYear: number } {
   const fromYear = minDate
     ? minDate.getFullYear()
     : currentYear - DEFAULT_YEARS_BACK
   const toYear = maxDate ? maxDate.getFullYear() : currentYear
-  const hi = Math.max(fromYear, toYear, viewYear ?? -Infinity)
-  const lo = Math.min(fromYear, toYear, viewYear ?? Infinity)
+  return {
+    fromYear: Math.min(fromYear, toYear),
+    toYear: Math.max(fromYear, toYear),
+  }
+}
+
+/**
+ * Descending list of selectable years, spanning `getYearBounds`.
+ */
+export function buildYearOptions(
+  currentYear: number,
+  minDate?: Date,
+  maxDate?: Date
+): SelectOption[] {
+  const { fromYear, toYear } = getYearBounds(currentYear, minDate, maxDate)
   const options: SelectOption[] = []
-  for (let year = hi; year >= lo; year--) {
+  for (let year = toYear; year >= fromYear; year--) {
     options.push({ value: String(year), label: String(year) })
   }
   return options
@@ -97,14 +108,8 @@ export function CalendarHeaderDropdowns({
   const i18n = useI18n()
 
   const yearOptions = useMemo(
-    () =>
-      buildYearOptions(
-        new Date().getFullYear(),
-        minDate,
-        maxDate,
-        viewDate.getFullYear()
-      ),
-    [minDate, maxDate, viewDate]
+    () => buildYearOptions(new Date().getFullYear(), minDate, maxDate),
+    [minDate, maxDate]
   )
 
   const monthOptions = useMemo(
