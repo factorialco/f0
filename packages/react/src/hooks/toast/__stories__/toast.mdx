@@ -1,0 +1,244 @@
+import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import * as StatesStories from "./toast.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import { F0Toast } from "@/ui/Toast/F0Toast"
+import { I18nProvider, defaultTranslations } from "@/lib/providers/i18n"
+
+<Meta of={StatesStories} />
+
+# Toast
+
+A toast is **brief, transient feedback for an action the user just took while present**. It floats above the content on a dark surface at the bottom-centre of the content area, and disappears on its own. Anything that must be read in full, can arrive while the user isn't looking, or is persistent context is **not** a toast.
+
+Toasts are opened imperatively — from anywhere, no hook — as long as the app is wrapped in `<F0Provider>`:
+
+```tsx
+import { toasts } from "@factorialco/f0-react"
+
+toasts.open({ title: "Profile updated" })
+```
+
+## Anatomy
+
+<Canvas of={StatesStories.Anatomy} sourceState="none" />
+
+A toast is a single row:
+
+- **Icon** — a status avatar (`F0AvatarAlert`) that reflects the variant, or a spinner while loading.
+- **Title** — the outcome, in one line (two at most).
+- **Description** _(optional)_ — a short second line of context.
+- **Actions** _(optional)_ — up to one **button** (primary, on the trailing edge) and one **link** (navigation, to the button's left), inline.
+- **Close (✕)** — the alternative to an action: shown **only when there's no action**, so the two are never adjacent.
+
+Icon and controls are vertically centred for a single line and **align to the top** when there's a description.
+
+### Variants
+
+Five variants communicate intent. Without a `variant`, the neutral **`default`** (no icon) is used.
+
+<Canvas of={StatesStories.States} sourceState="none" />
+
+| Variant   | When to use                            | Call                                         |
+| --------- | -------------------------------------- | -------------------------------------------- |
+| `default` | Neutral confirmation or info — no icon | `toasts.open({ title })`                     |
+| `success` | An action completed                    | `toasts.open({ variant: "success", title })` |
+| `warning` | Heads-up; something may need attention | `toasts.open({ variant: "warning", title })` |
+| `error`   | An action failed                       | `toasts.open({ variant: "error", title })`   |
+| `loading` | Async in progress — resolve in place   | `toasts.open({ variant: "loading", title })` |
+
+## Guidelines
+
+### When to use
+
+- Confirming a direct action ("Link copied", "3 people archived")
+- Offering a quick reversal of that action (Undo)
+- Reporting the result of a short async action the user is waiting for (loading → success/error)
+
+### When not to use
+
+- The message must be **read in full** or is long → use an inline **`F0Alert`** (banner) or a dialog
+- The result can arrive **while the user isn't looking** (an export that finishes tomorrow, a background job) → use the **notification** system (bell / email)
+- The information is **persistent context** tied to a region of the page → `F0Alert`
+- It reflects a **persistent condition** (offline, session expired) that lasts until it's resolved → `F0Alert` / banner, not a toast that lingers in the corner
+
+If a toast's text is long enough to truncate, that's the signal it shouldn't be a toast.
+
+**At a glance:**
+
+| Pattern                          | Use it for                                                              |
+| -------------------------------- | ----------------------------------------------------------------------- |
+| **Toast**                        | brief feedback for an action you just took, while you're on the page    |
+| **`F0Alert` / banner**           | persistent context or must-read information tied to a region of the page |
+| **Notification** (bell / email)  | something that can arrive while you're not looking, or later            |
+
+### Do's and don'ts
+
+<DoDonts
+  do={{
+    description:
+      "Keep the message short and glanceable, with an optional single action.",
+    guidelines: [
+      "One line when possible; two at most",
+      "Verb-first action label (Undo, Retry)",
+      "Let a loading toast resolve in place",
+    ],
+    children: (
+      <Unstyled>
+        <I18nProvider translations={defaultTranslations}>
+          <div style={{ width: 360 }}>
+            <F0Toast
+              variant="success"
+              title="3 people archived"
+              actions={{ type: "button", label: "Undo", onClick: () => {} }}
+            />
+          </div>
+        </I18nProvider>
+      </Unstyled>
+    ),
+  }}
+  dont={{
+    description: "Don't cram long or must-read copy into a toast.",
+    guidelines: [
+      "Don't write text that needs full reading — use an alert or notification",
+      "Don't open a new toast to confirm an action — update the same one",
+    ],
+    children: (
+      <Unstyled>
+        <I18nProvider translations={defaultTranslations}>
+          <div style={{ width: 360 }}>
+            <F0Toast
+              variant="warning"
+              title="We couldn't sync the team calendar with the external provider"
+              description="We'll retry automatically in a few minutes; the sync covers events from the last 90 days across every connected workspace and may take a while."
+              onClose={() => {}}
+            />
+          </div>
+        </I18nProvider>
+      </Unstyled>
+    ),
+  }}
+/>
+
+### Content
+
+- **Title** — sentence case, no period; state the outcome ("Changes saved")
+- **Description** — one short sentence of context, only if it adds something
+- **Action label** — verb-first, no articles ("Undo", "Retry", "View report")
+
+### Behaviour
+
+- **Position** — bottom-centre of the content area (the same column as the action bar); never covers the sidebar.
+- **Width** — a fixed **384px** on desktop. Height is variable; keep the text to one or two lines.
+- **Responsive** — from the `sm` breakpoint (**640px**) upward the toast is 384px. **Below it** (mobile) it switches to **full-width**, filling the content column with a small margin so the message stays readable on a narrow screen. It never stretches wider than 384px on desktop. _Try it in the **Responsive** story and resize the viewport._
+- **Close** — shown only when there's no action, so the action and the dismiss control can't be mis-clicked for each other.
+- **Duration** — 5s by default, 10s with an action (time to reach Undo/Retry). Auto-dismissing toasts **pause on hover and focus**.
+- **Persistence** — a toast is transient and auto-dismisses. Only a **loading** toast stays open (until it resolves in place); pass `persistent: true` for the rare case that must wait. A persistent _condition_ (offline, session expired) is **not a toast** — use an `F0Alert` / banner.
+- **Async** — resolve a toast by re-opening with the same `id`; it updates in place. An action resolves **its own** toast (closes it or updates it in place) — never opens a new one while the current is leaving.
+- **Stacking** — several toasts stack at the same corner: up to **3 are shown at once** (**2** on mobile), and any extra collapse behind them and expand when you hover the stack. Toasts are **not** deduplicated automatically — reuse a stable `id` (see API) to update one in place instead of stacking a duplicate.
+- **Navigation** — toasts live above the app, so an open toast **persists across route changes** until it dismisses (a full page reload clears them). One fired as the user moves between screens still appears on the next one — so don't use a toast to confirm something the user will no longer see the context for.
+- **Motion** — toasts slide and fade in, and out on dismiss; the stack animates as it grows or shrinks and expands on hover. Motion is owned by the toast engine and kept subtle so it never delays the feedback.
+
+### Usage examples
+
+**Undo** — a reversible action; no close, auto-dismisses.
+
+<Canvas of={StatesStories.InlineAction} sourceState="none" />
+
+```tsx
+toasts.open({
+  title: "3 people archived",
+  actions: { type: "button", label: "Undo", onClick: () => restore() },
+})
+```
+
+**Retry, resolved in place** — the error becomes loading, then success, in the same toast.
+
+<Canvas of={StatesStories.WithDescription} sourceState="none" />
+
+```tsx
+const id = toasts.open({
+  variant: "error",
+  title: "Couldn't send",
+  description: "The mail server isn't responding.",
+  actions: {
+    type: "button",
+    label: "Retry",
+    keepOpen: true,
+    onClick: async () => {
+      toasts.open({ id, variant: "loading", title: "Retrying…" })
+      try {
+        await send()
+        toasts.open({ id, variant: "success", title: "Sent" })
+      } catch {
+        toasts.open({ id, variant: "error", title: "Still failing" })
+      }
+    },
+  },
+})
+```
+
+**Try it** — click a button; the toast fires below with its real behaviour: bottom-centre position, timing, the inline action and in-place resolution.
+
+<Canvas of={StatesStories.Examples} sourceState="none" />
+
+## Accessibility
+
+- Errors and warnings use `role="alert"` / `aria-live="assertive"`; other variants use `role="status"` / `aria-live="polite"`.
+- Toasts auto-dismiss by default and **pause on hover** (WCAG 2.2.1, _Timing Adjustable_) — what matters isn't a fixed number of seconds but that the user can pause the timer. More important toasts get more time (those with an action last longer), and loading toasts stay until they resolve.
+- **Keyboard & focus** — a toast is non-modal and **never steals focus**; the page keeps whatever focus it had. Its close (✕) and any action are in the tab order and activate with Enter/Space.
+- A toast carries at most one button and one link — keep interactive content minimal, since it's non-modal and auto-dismisses. The close (✕) is the dismissal affordance, and only when there's no action.
+
+## API
+
+Opened imperatively via the `toasts` object — no hook required.
+
+```tsx
+import { toasts } from "@factorialco/f0-react"
+
+const id = toasts.open(options) // show a toast, returns its id
+toasts.close(id) // dismiss one
+toasts.closeAll() // dismiss all
+```
+
+### ToastOptions
+
+| Option        | Type                        | Description                                                         |
+| ------------- | --------------------------- | ------------------------------------------------------------------ |
+| `title`       | `string`                    | The message (required in practice).                                |
+| `description` | `string`                    | Optional short second line.                                        |
+| `variant`     | `F0ToastVariant`            | `default` · `success` · `warning` · `error` · `loading`.           |
+| `actions`     | `button` \| `link` \| both  | Up to one button and one link. `keepOpen` stops auto-close.        |
+| `id`          | `string`                    | Reuse to update a toast in place (async resolution).               |
+| `duration`    | `number`                    | Override auto-dismiss (ms). Defaults to 5000, 10000 with an action.|
+| `persistent`  | `true`                      | Escape hatch — keep open until closed (excludes `duration`). Rare: a lasting condition belongs in an `F0Alert`, not a toast. |
+
+### F0ToastAction
+
+```ts
+type ToastActionButton = {
+  type: "button"
+  label: string
+  onClick: () => void
+  icon?: IconType
+  keepOpen?: boolean // keep the toast open on click (e.g. Retry, resolved in place)
+}
+
+type ToastActionLink = {
+  type: "link"
+  label: string
+  href: string
+  keepOpen?: boolean
+}
+
+type F0ToastAction = ToastActionButton | ToastActionLink
+```
+
+### Stable ids — avoiding duplicates
+
+Pass your own `id` to keep a single toast per resource: re-opening with the same `id` updates it in place instead of stacking a duplicate.
+
+```tsx
+toasts.open({ id: "sync-status", variant: "loading", title: "Syncing…" })
+// …later, the same id replaces it — no duplicate
+toasts.open({ id: "sync-status", variant: "success", title: "Sync complete" })
+```

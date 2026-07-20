@@ -392,7 +392,11 @@ const ToastsContainer = ({
                   return (
                     <motion.div
                       key={item.id}
-                      layout
+                      // `layout="position"` (not full `layout`): glide when
+                      // stacking neighbours move, but DON'T scale-animate size
+                      // changes — a scale FLIP distorts the text when a toast
+                      // updates in place (e.g. error → loading).
+                      layout="position"
                       // Promoted: start from stacked position (negative Y) and slide down
                       // New: slide in from the left
                       initial={

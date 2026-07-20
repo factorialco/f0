@@ -23,8 +23,13 @@ const open = (options: ToastOptions): ToastId => {
   warnIfNoProvider("toasts.open()")
 
   const hasAction = options.actions != null
+  // A toast is transient: it auto-dismisses. Only a loading toast stays open
+  // (until it's resolved in place), plus anything the caller marks `persistent`.
+  // A persistent CONDITION (offline, session expired) is not a toast — use an
+  // F0Alert / banner instead. Toasts with an action get a longer window.
+  const persist = options.persistent === true || options.variant === "loading"
   toastStore.addItem({
-    duration: options.persistent ? undefined : hasAction ? ACTION_DURATION : DEFAULT_DURATION,
+    duration: persist ? undefined : hasAction ? ACTION_DURATION : DEFAULT_DURATION,
     ...options,
     id,
     onClose: () => toastStore.removeItem(id),
