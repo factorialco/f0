@@ -334,6 +334,17 @@ export function F0GraphView<T = unknown>(
     getNodePosition: getNodePositionStable,
   })
 
+  // Windowing only actually drives the render once the first viewport has settled
+  // (before then the mount-time fit needs every node — see the gate on the render
+  // model below). Computed once and reused for BOTH the render model AND React
+  // Flow's own `onlyRenderVisibleElements`: when F0 is windowing it already hands
+  // React Flow just the nodes near the viewport (grown by `nodeWindowPadding`), so
+  // React Flow must render ALL of them. Letting React Flow run its own viewport
+  // culling on top re-drops that padding band — nodes pop in at the viewport edge,
+  // and edges whose (windowed-in) endpoint sits just outside the exact viewport are
+  // dropped entirely, so connecting lines vanish while panning a large/deep tree.
+  const nodeWindowingActive = (enableNodeWindowing ?? false) && viewportReady
+
   // ── Selection + roving-tabindex focus ──
   const {
     selectedNodes,
@@ -405,7 +416,7 @@ export function F0GraphView<T = unknown>(
     hoveredEdgeId,
     // Gate windowing on the first settled viewport so the mount-time `fitView`
     // frames the whole graph before the camera decides which nodes to keep.
-    enableNodeWindowing: (enableNodeWindowing ?? false) && viewportReady,
+    enableNodeWindowing: nodeWindowingActive,
     nodeWindowPadding,
   })
 
@@ -660,7 +671,14 @@ export function F0GraphView<T = unknown>(
                         edges={rfEdges}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
-                        onlyRenderVisibleElements
+                        // With F0 node windowing active, F0 already limits the
+                        // node array to the padded viewport, so React Flow must
+                        // render everything it is handed — a second, tighter
+                        // viewport cull here would drop the padding band and the
+                        // edges crossing the viewport edge (vanishing nodes/lines
+                        // on pan). Keep React Flow's own culling only when F0 is
+                        // NOT windowing (the original large-graph safeguard).
+                        onlyRenderVisibleElements={!nodeWindowingActive}
                         minZoom={minZoom}
                         maxZoom={maxZoom}
                         defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
