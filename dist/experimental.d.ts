@@ -7817,7 +7817,11 @@ declare type NestedResponseWithType<R extends RecordType> = {
 
 /**
  * Identifies the row(s) an imperative operation applies to.
- * - `string | number`: matched against the item's `id` property
+ * - `string | number`: matched against the item's identity —
+ *   `source.idProvider(item)` when the source defines one (same convention
+ *   as the Kanban visualization and item navigation), otherwise the item's
+ *   `id` property. The comparison is string-normalized, so `42` and `"42"`
+ *   are equivalent. Identities must be unique among sibling rows.
  * - predicate: matched against every currently rendered expandable row
  *
  * Only rows that are currently rendered can be targeted — a row hidden under
@@ -11515,11 +11519,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -11527,8 +11528,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
