@@ -67,6 +67,13 @@ export interface NestedTableControllerInternal<
 export type NestedRowRegistryEntry<R extends RecordType> = {
   item: R
   depth: number
+  /**
+   * Resolved data identity — `source.idProvider(item)` when the source
+   * defines one (same convention as Kanban and item navigation), otherwise
+   * the item's `id`. Controller targets match against it. `undefined` for
+   * id-less items, which key by position and cannot be targeted by id.
+   */
+  itemKey?: string
 }
 
 /**

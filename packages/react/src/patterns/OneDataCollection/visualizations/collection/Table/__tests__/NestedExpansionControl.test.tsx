@@ -1086,6 +1086,95 @@ describe("Nested table expansion control", () => {
       })
       expect(screen.getByText("A1a")).toBeInTheDocument()
     })
+
+    it("keeps a row expanded when its siblings are reordered by a refetch", async () => {
+      // Stable filter/navigation references: swapping the dataAdapter below
+      // must NOT look like a filters change (which resets overrides by
+      // design) — only the data order changes.
+      const stableSourceBits = {
+        currentFilters: {},
+        currentNavigationFilters: {},
+      } as unknown as Partial<TestSource>
+      let api!: {
+        control: NestedTableController<Person>
+        setOverrides: (overrides: Partial<TestSource>) => void
+      }
+      render(
+        <MutableSourceHarness
+          initialOverrides={stableSourceBits}
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitForRootRows()
+
+      act(() => api.control.expand("p2"))
+      await waitFor(() => {
+        expect(screen.getByText("Child Three")).toBeInTheDocument()
+      })
+
+      // A refetch returns the same items in reverse order (no filters or
+      // sortings change, so no expansion reset is involved): the row keys
+      // by identity, not by position, so p2 must stay expanded.
+      act(() =>
+        api.setOverrides({
+          dataAdapter: {
+            fetchData: async () => ({ records: [...tree].reverse() }),
+          },
+        } as unknown as Partial<TestSource>)
+      )
+      await waitFor(() => {
+        const parents = screen.getAllByText(/^Parent/)
+        expect(parents[0]).toHaveTextContent("Parent Two")
+      })
+      expect(screen.getByText("Child Three")).toBeInTheDocument()
+    })
+
+    it("targets rows through source.idProvider when the items have no id", async () => {
+      type PersonByEmail = {
+        name: string
+        email: string
+        children?: PersonByEmail[]
+      }
+      const people: PersonByEmail[] = [
+        {
+          name: "Alice",
+          email: "alice@corp.com",
+          children: [{ name: "Alice Jr", email: "alice.jr@corp.com" }],
+        },
+        {
+          name: "Bob",
+          email: "bob@corp.com",
+          children: [{ name: "Bob Jr", email: "bob.jr@corp.com" }],
+        },
+      ]
+      const table = renderNestedTable(undefined, {
+        idProvider: (item: PersonByEmail) => item.email,
+        dataAdapter: { fetchData: async () => ({ records: people }) },
+        fetchChildren: ({ item }: { item: PersonByEmail }) => ({
+          records: item.children ?? [],
+          paginationInfo: {
+            total: item.children?.length ?? 0,
+            perPage: 10,
+            currentPage: 1,
+            pagesCount: 1,
+            hasMore: false,
+          },
+        }),
+      } as unknown as Partial<TestSource>)
+      await waitFor(() => {
+        expect(screen.getByText("Bob")).toBeInTheDocument()
+      })
+
+      // The univocal column designated by idProvider is the target identity
+      act(() => table.control.expand("bob@corp.com"))
+      await waitFor(() => {
+        expect(screen.getByText("Bob Jr")).toBeInTheDocument()
+      })
+      expect(screen.queryByText("Alice Jr")).not.toBeInTheDocument()
+      expect(table.control.isExpanded("bob@corp.com")).toBe(true)
+    })
   })
 
   describe("stale fetches and misbehaving adapters", () => {
