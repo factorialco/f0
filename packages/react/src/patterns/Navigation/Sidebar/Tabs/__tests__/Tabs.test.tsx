@@ -71,4 +71,43 @@ describe("SidebarTabs", () => {
         .querySelector(".bg-f1-background-critical-bold")
     ).toBeNull()
   })
+
+  // The label wrapper is a grid column animating 0fr (collapsed) ↔ 1fr
+  // (revealed) — assert through it.
+  const labelState = (name: string) =>
+    screen
+      .getByRole("button", { name })
+      .querySelector(".grid")
+      ?.className.includes("grid-cols-[1fr]")
+      ? "revealed"
+      : "collapsed"
+
+  it("reveals inactive labels when every label fits in the row", () => {
+    // jsdom reports zero widths, so the probe (0) always "fits" the group (0).
+    renderTabs({ activeTab: "main" })
+    expect(labelState("Main")).toBe("revealed")
+    expect(labelState("Messages")).toBe("revealed")
+  })
+
+  it("collapses inactive labels to icon-only when they don't fit", () => {
+    const { container, rerender } = renderTabs({ activeTab: "main" })
+
+    // Make the probe wider than the group, then change a label so the measure
+    // effect re-runs with these dimensions.
+    const probe = container.querySelector(".invisible") as HTMLElement
+    const group = screen.getByRole("group", { name: "Sidebar sections" })
+    Object.defineProperty(probe, "scrollWidth", { value: 500 })
+    Object.defineProperty(group, "clientWidth", { value: 200 })
+    rerender(
+      <SidebarTabs
+        tabs={[tabs[0], { ...tabs[1], label: "Messages!" }]}
+        activeTab="main"
+        onTabChange={vi.fn()}
+      />
+    )
+
+    // The active tab keeps its label; the inactive one falls back to the icon.
+    expect(labelState("Main")).toBe("revealed")
+    expect(labelState("Messages!")).toBe("collapsed")
+  })
 })
