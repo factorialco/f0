@@ -114,26 +114,34 @@ export function CalendarHeaderDropdowns({
   return (
     <div className="flex items-center gap-1">
       {showMonth && (
+        // Fixed width so the trigger (and the popover around it) doesn't
+        // resize when switching between short and long month names.
+        <div className="w-[8.5rem]">
+          <F0Select
+            size="sm"
+            label={i18n.date.selectMonth}
+            hideLabel
+            placeholder={i18n.date.selectMonth}
+            options={monthOptions}
+            value={String(viewDate.getMonth())}
+            onChange={handleMonthChange}
+            fitContentWidth
+          />
+        </div>
+      )}
+      <div className="w-[6rem]">
         <F0Select
           size="sm"
-          label={i18n.date.selectMonth}
+          label={i18n.date.selectYear}
           hideLabel
-          placeholder={i18n.date.selectMonth}
-          options={monthOptions}
-          value={String(viewDate.getMonth())}
-          onChange={handleMonthChange}
+          placeholder={i18n.date.selectYear}
+          showSearchBox
+          options={yearOptions}
+          value={String(viewDate.getFullYear())}
+          onChange={handleYearChange}
+          fitContentWidth
         />
-      )}
-      <F0Select
-        size="sm"
-        label={i18n.date.selectYear}
-        hideLabel
-        placeholder={i18n.date.selectYear}
-        showSearchBox
-        options={yearOptions}
-        value={String(viewDate.getFullYear())}
-        onChange={handleYearChange}
-      />
+      </div>
     </div>
   )
 }

@@ -160,6 +160,39 @@ describe("Select", () => {
     }
   })
 
+  it("sizes the dropdown to its content when fitContentWidth is set", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+        fitContentWidth
+      />
+    )
+
+    await openSelect(user)
+
+    const listbox = screen.getByRole("listbox")
+    expect(listbox.className).toContain("w-max")
+    expect(listbox.className).not.toContain("min-w-80")
+  })
+
+  it("keeps the default 20rem dropdown minimum without fitContentWidth", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0Select
+        {...defaultSelectProps}
+        options={mockOptions}
+        onChange={() => {}}
+      />
+    )
+
+    await openSelect(user)
+
+    expect(screen.getByRole("listbox").className).toContain("min-w-80")
+  })
+
   it("should display selected value", async () => {
     render(
       <F0Select {...defaultSelectProps} options={mockOptions} value="option1" />

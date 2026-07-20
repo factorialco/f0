@@ -148,6 +148,7 @@ const F0SelectComponent = forwardRef(function Select<
     asList = false,
     showPreview = false,
     preserveSelectionOnDatasetChange = true,
+    fitContentWidth = false,
     dataTestId,
     ...props
   }: F0SelectProps<T, R>,
@@ -1084,6 +1085,7 @@ const F0SelectComponent = forwardRef(function Select<
   const selectContent = (
     <SelectContent
       items={items}
+      fitContentWidth={fitContentWidth}
       taller={!!source?.filters}
       emptyMessage={
         searchEmptyMessage ??
