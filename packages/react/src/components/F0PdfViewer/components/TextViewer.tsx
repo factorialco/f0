@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 import { type F0PdfViewerAction } from "../types"
-import { DocumentToolbar } from "./DocumentToolbar"
+import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 
 /** Matches the chat's text-preview size cap — hosts shouldn't offer a preview
  * beyond this, so the viewer only guards against lying sizes. */
@@ -55,6 +55,7 @@ const TextViewer = ({
   actions?: F0PdfViewerAction[]
 }): ReactNode => {
   const i18n = useI18n()
+  const zoom = useDocumentZoom()
   const [text, setText] = useState<string | null>(null)
   const [failed, setFailed] = useState(false)
 
@@ -81,7 +82,12 @@ const TextViewer = ({
       {/* The toolbar renders in every state so download (and the host's
           actions, e.g. Close) stay reachable even when the preview fails.
           No title in it — same as the PDF toolbar. */}
-      <DocumentToolbar url={url} filename={name} actions={actions} />
+      <DocumentToolbar
+        url={url}
+        filename={name}
+        actions={actions}
+        zoom={zoom}
+      />
       {failed ? (
         <div className="flex min-h-0 grow items-center justify-center text-f1-foreground-secondary">
           {i18n.pdfViewer.previewFailed}
@@ -90,17 +96,23 @@ const TextViewer = ({
         <Skeleton className="min-h-0 w-full grow rounded-none" />
       ) : (
         <div className="min-h-0 grow overflow-auto">
-          {isMarkdown(name, mimeType) ? (
-            <div
-              className={`mx-auto max-w-3xl px-6 py-4 text-base text-f1-foreground ${MARKDOWN_STYLES}`}
-              // Sanitized by DOMPurify inside parseMarkdownDocument.
-              dangerouslySetInnerHTML={{ __html: parseMarkdownDocument(text) }}
-            />
-          ) : (
-            <pre className="m-0 whitespace-pre-wrap break-words px-6 py-4 font-mono text-sm text-f1-foreground">
-              {text}
-            </pre>
-          )}
+          {/* Zoom on an inner wrapper (the flex layout owns the scroll
+              container's size). CSS zoom reflows, so scrolling tracks it. */}
+          <div style={{ zoom: zoom.scale }}>
+            {isMarkdown(name, mimeType) ? (
+              <div
+                className={`mx-auto max-w-3xl px-6 py-4 text-base text-f1-foreground ${MARKDOWN_STYLES}`}
+                // Sanitized by DOMPurify inside parseMarkdownDocument.
+                dangerouslySetInnerHTML={{
+                  __html: parseMarkdownDocument(text),
+                }}
+              />
+            ) : (
+              <pre className="m-0 whitespace-pre-wrap break-words px-6 py-4 font-mono text-sm text-f1-foreground">
+                {text}
+              </pre>
+            )}
+          </div>
         </div>
       )}
     </div>

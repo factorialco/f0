@@ -62,9 +62,9 @@ Every kind has a toolbar with its own peculiarities:
 | Kind            | Content                                                                                        | Toolbar                                                          |
 | --------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
 | `pdf` (default) | Continuous pages via pdf.js                                                                    | Page nav, zoom, scale selector, optional rotate, print, download |
-| `sheet`         | Excel-style grid (letter columns, numbered rows), capped at 1000×100 with a truncation note    | Sheet switcher (ToggleGroup, one toggle per sheet), download     |
-| `docx`          | Word page layout via [`docx-preview`](https://github.com/VolodymyrBaydalka/docxjs)             | Download                                                         |
-| `text`          | `.md` renders as a sanitized document (GFM tables included); txt/log/json as monospaced source | Download                                                         |
+| `sheet`         | Excel-style grid (letter columns, numbered rows), capped at 1000×100 with a truncation note    | Sheet switcher (ToggleGroup), zoom, download                     |
+| `docx`          | Word page layout via [`docx-preview`](https://github.com/VolodymyrBaydalka/docxjs)             | Zoom, download                                                   |
+| `text`          | `.md` renders as a sanitized document (GFM tables included); txt/log/json as monospaced source | Zoom, download                                                   |
 
 No kind shows a title in the toolbar — same as the PDF toolbar.
 
@@ -130,7 +130,9 @@ configurePdfWorker("/static/pdf.worker.min.js")
 
 `initialScale` accepts `"page-width"` (default), `"page-fit"`, or a fixed zoom
 (`"0.5"` … `"4"`). The toolbar exposes the same options plus zoom in/out steps.
-PDF only.
+The non-PDF kinds carry the same zoom controls with the fixed steps (no
+page-width/page-fit — there's no page geometry to fit to); `initialScale`
+itself is PDF only.
 
 <Canvas of={Stories.PageFit} />
 

@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { Skeleton } from "@/ui/skeleton"
 
 import { type F0PdfViewerAction } from "../types"
-import { DocumentToolbar } from "./DocumentToolbar"
+import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 
 /**
  * Word pane for F0PdfViewer's kind="docx": docx-preview renders the document
@@ -25,6 +25,7 @@ const DocxViewer = ({
   actions?: F0PdfViewerAction[]
 }): ReactNode => {
   const i18n = useI18n()
+  const zoom = useDocumentZoom()
   const hostRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useState<"loading" | "ready" | "failed">("loading")
 
@@ -62,7 +63,12 @@ const DocxViewer = ({
       {/* The toolbar renders in every state so download (and the host's
           actions, e.g. Close) stay reachable even when the preview fails.
           No title in it — same as the PDF toolbar. */}
-      <DocumentToolbar url={url} filename={filename} actions={actions} />
+      <DocumentToolbar
+        url={url}
+        filename={filename}
+        actions={actions}
+        zoom={zoom}
+      />
       <div className="relative min-h-0 grow overflow-auto bg-f1-background-secondary">
         {state === "loading" && (
           <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
@@ -72,10 +78,12 @@ const DocxViewer = ({
             {i18n.pdfViewer.previewFailed}
           </div>
         )}
-        {/* Always mounted: the render effect writes into it across url changes. */}
+        {/* Always mounted: the render effect writes into it across url changes.
+            CSS zoom reflows, so the scroll container tracks the zoomed pages. */}
         <div
           ref={hostRef}
           className={state === "failed" ? "hidden" : undefined}
+          style={{ zoom: zoom.scale }}
         />
       </div>
     </div>

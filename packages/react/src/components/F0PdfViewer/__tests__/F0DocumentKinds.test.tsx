@@ -149,6 +149,22 @@ describe("F0PdfViewer document kinds", () => {
     }
   })
 
+  it("zooms the non-PDF content through the toolbar controls", async () => {
+    const { container } = render(
+      <F0PdfViewer url="https://cdn.example.com/data.xlsx" kind="sheet" />
+    )
+    await screen.findByText("Ana García")
+    const table = container.querySelector("table")!
+    expect(table.style.zoom).toBe("1")
+
+    fireEvent.click(screen.getByRole("button", { name: "Zoom in" }))
+    expect(table.style.zoom).toBe("1.25")
+
+    fireEvent.click(screen.getByRole("button", { name: "Zoom out" }))
+    fireEvent.click(screen.getByRole("button", { name: "Zoom out" }))
+    expect(table.style.zoom).toBe("0.75")
+  })
+
   it("appends host actions to the toolbar and fires them", async () => {
     const onClose = vi.fn()
     render(

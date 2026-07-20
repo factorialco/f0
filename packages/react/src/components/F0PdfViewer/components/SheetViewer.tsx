@@ -6,7 +6,7 @@ import { Skeleton } from "@/ui/skeleton"
 
 import { columnLetters, fetchWorkbook, type SheetGrid } from "../sheetPreview"
 import { type F0PdfViewerAction } from "../types"
-import { DocumentToolbar } from "./DocumentToolbar"
+import { DocumentToolbar, useDocumentZoom } from "./DocumentToolbar"
 
 // Grid caps applied at parse time (see sheetPreview): enough for any preview
 // while keeping a million-row export from freezing the tab. Truncation is
@@ -31,6 +31,7 @@ const SheetViewer = ({
   actions?: F0PdfViewerAction[]
 }): ReactNode => {
   const i18n = useI18n()
+  const zoom = useDocumentZoom()
   const [sheets, setSheets] = useState<SheetGrid[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -60,7 +61,12 @@ const SheetViewer = ({
     <div className="flex h-full w-full flex-col bg-f1-background">
       {/* The toolbar renders in every state so download (and the host's
           actions, e.g. Close) stay reachable even when the preview fails. */}
-      <DocumentToolbar url={url} filename={filename} actions={actions}>
+      <DocumentToolbar
+        url={url}
+        filename={filename}
+        actions={actions}
+        zoom={zoom}
+      >
         {/* Sheet switcher — one toggle per workbook sheet. Radix single-type
             toggles emit "" when re-clicking the active one; keep it selected. */}
         {sheets && sheets.length > 1 && (
@@ -94,7 +100,12 @@ const SheetViewer = ({
       ) : (
         <>
           <div className="min-h-0 grow overflow-auto">
-            <table className="border-collapse text-sm">
+            {/* CSS zoom reflows (unlike transform), so the scroll area and the
+                sticky header row track the zoomed size correctly. */}
+            <table
+              className="border-collapse text-sm"
+              style={{ zoom: zoom.scale }}
+            >
               <thead>
                 <tr>
                   {/* Corner cell over the row numbers. */}
