@@ -9,7 +9,7 @@ import { Delete } from "@/icons/app"
 import { Dialog } from "./index"
 
 const meta = {
-  title: "Dialog",
+  title: "Dialog (deprecated)",
   component: Dialog,
   parameters: {
     layout: "fullscreen",
@@ -38,7 +38,7 @@ const meta = {
     },
     open: true,
   },
-  tags: ["autodocs", "experimental"],
+  tags: ["autodocs", "deprecated"],
   decorators: [
     (Story, { args }) => {
       const [isOpen, setIsOpen] = useState(true)

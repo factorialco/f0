@@ -46,20 +46,27 @@ docs.
 
 ## Definition of Done (stable)
 
-A component is considered **stable** only when it clears every item below. Being
-tagged `stable` is _not_ sufficient on its own — the checklist is the bar.
+The **effective status** is what matters: a component counts as **stable** only
+when it is both tagged `stable` **and** clears every item below. Anything else —
+untagged, tagged stable but below the bar, or meeting the bar without the tag —
+is treated as **experimental**. This mirrors the
+[Lifecycle Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).
 
-| Requirement                     | How it's checked                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------------ |
-| Has Storybook stories           | A `.stories.tsx` file exists                                                         |
-| Has unit tests                  | A `__tests__/` folder or `.test.tsx` file exists near the component                  |
-| Has MDX documentation           | An `.mdx` docs page exists alongside the stories                                     |
-| Docs reach `acceptable` quality | MDX has the required sections (Anatomy, Guidelines, Accessibility) and a props table |
+| Requirement                | How it's checked                                                     |
+| -------------------------- | ------------------------------------------------------------------- |
+| Has Storybook stories      | A `.stories.tsx` file exists                                         |
+| Has unit tests             | A `__tests__/` folder or `.test.tsx` file exists near the component  |
+| Has a play function        | The story defines a `play:` interaction test                        |
+| Has MDX documentation      | An `.mdx` docs page exists alongside the stories                     |
+| Docs reach `good` quality  | MDX adds DoDonts, a "when not to use" section, and 3+ named examples on top of the Acceptable base (sections + props table) |
 
-> Accessibility (AA) is a manual promotion gate and is **not** yet part of this
-> automated checklist — see the [Maturity Model](/?path=/docs/components-maturity--docs).
-> The doc-quality tier (`none` → `stub` → `acceptable` → `good` → `gold`) is a
-> coarse structural heuristic, not a review of the prose.
+> The doc bar is the **Good** tier — Promotion to stable requires it (Acceptable
+> is only the experimental Build bar). Tier heuristic: `none` → `stub` →
+> `acceptable` → `good` → `gold` (a coarse structural check, not a prose review).
+>
+> Not automated here (still manual promotion gates): the axe **a11y** test
+> passing, adoption by **≥3 product teams**, **no breaking changes for 60 days**,
+> and Foundations approval.
 
 ## Programmatic API
 
@@ -111,3 +118,19 @@ import { getComponentStatus } from "@/component-status"
 
 `STABLE_REQUIREMENTS` is the single source of truth for the checklist — extend
 it there (e.g. to add an a11y gate) and every consumer updates automatically.
+
+### Rendered panel
+
+All display text (badge label, summary line, checklist labels and hints) is
+part of the status data, so the panel looks identical in Storybook and in any
+consuming app. Drop in the exported `ComponentStability` component with a
+component name:
+
+```tsx
+import { ComponentStability } from "@factorialco/f0-react/dist/component-status"
+
+;<ComponentStability componentName="F0Card" />
+```
+
+It renders nothing when the name doesn't resolve to a tracked component. The
+status block shown on every component docs page above is this exact component.

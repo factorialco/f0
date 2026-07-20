@@ -10,7 +10,7 @@ import { ChevronDown } from "../../icons/app"
 import { OverflowList } from "./index"
 
 const meta = {
-  title: "Components/OverflowList",
+  title: "OverflowList",
   component: OverflowList,
   tags: ["autodocs", "internal"],
   argTypes: {

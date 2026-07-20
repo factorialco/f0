@@ -38,6 +38,18 @@ export type ApiStatus =
 
 export type DocQuality = "none" | "stub" | "acceptable" | "good" | "gold"
 
+/** Granular MDX signals used to score the doc tier and its per-criterion checks. */
+export interface DocSignals {
+  /** How many of Anatomy / Guidelines / Accessibility are present (0–3). */
+  sectionsCount: number
+  hasProps: boolean
+  hasWhenToUse: boolean
+  hasWhenNotToUse: boolean
+  hasDoDonts: boolean
+  /** Number of `<Canvas>` example blocks. */
+  exampleCount: number
+}
+
 /** A raw entry as emitted by the generator. */
 export interface ComponentEntry {
   name: string
@@ -46,8 +58,10 @@ export interface ComponentEntry {
   tags: string[]
   hasStories: boolean
   hasUnitTests: boolean
+  hasPlayFunction: boolean
   hasMdxDocs: boolean
   docQuality: DocQuality
+  docSignals: DocSignals
   storyFile: string
 }
 
@@ -67,6 +81,12 @@ export interface ComponentStatusData {
   components: ComponentEntry[]
 }
 
+/** A sub-check enumerated under a requirement, with its own pass/fail. */
+export interface CriterionResult {
+  label: string
+  met: boolean
+}
+
 /** One line item in the stable checklist. */
 export interface RequirementResult {
   /** Stable machine key, e.g. "unitTests". */
@@ -76,6 +96,9 @@ export interface RequirementResult {
   met: boolean
   /** What is missing / how to satisfy it when unmet. */
   detail: string
+  /** Concrete sub-criteria (each with its own pass/fail) enumerated under
+   * `detail`, when the requirement is made up of several checks. */
+  criteria?: CriterionResult[]
 }
 
 export interface ComponentStatus extends ComponentEntry {
@@ -96,6 +119,20 @@ export interface ComponentStatus extends ComponentEntry {
    *   - null: tag and bar agree
    */
   discrepancy: "tagged-but-below-bar" | "meets-bar-not-tagged" | null
+  /**
+   * The maturity level the component *actually* has, per the Definition of Done.
+   * A component is only "stable" when it is both tagged stable AND meets the
+   * full checklist; anything else (untagged, below the bar, or meeting the bar
+   * without the tag) is "experimental". `deprecated`/`internal` pass through.
+   * This is what the badge shows — `apiStatus` is the raw declared tag.
+   */
+  effectiveStatus: ApiStatus
+  /** Human-readable badge label for `effectiveStatus`. */
+  label: string
+  /** One-line human summary shown above the checklist. */
+  summary: string
+  /** Whether the DoD checklist is meaningful for this maturity level. */
+  showChecklist: boolean
 }
 
 /** The full generated dataset (stats + every tracked component). */
@@ -103,10 +140,69 @@ export const componentStatusData: ComponentStatusData =
   rawStatusData as unknown as ComponentStatusData
 
 /**
- * Minimum doc-quality tier a component must reach to count as documented for
- * the purposes of "stable". "acceptable" = required sections + props table.
+ * Minimum doc-quality tier a stable component must reach. Per the Definition of
+ * Done, promotion to stable requires the "good" tier (Gold encouraged);
+ * "acceptable" is only the experimental Build bar.
  */
-export const MIN_DOC_QUALITY: DocQuality = "acceptable"
+export const MIN_DOC_QUALITY: DocQuality = "good"
+
+/** Human-readable badge label per maturity level. */
+export const STATUS_LABELS: Record<ApiStatus, string> = {
+  stable: "Stable",
+  experimental: "Experimental",
+  deprecated: "Deprecated",
+  internal: "Internal",
+  unknown: "No tag",
+}
+
+/**
+ * The maturity level a component actually has. "stable" requires both the
+ * stable tag AND meeting the full checklist; every other public component
+ * (untagged, below the bar, or meeting the bar without the tag) is
+ * "experimental". `deprecated`/`internal` pass through unchanged.
+ */
+function effectiveStatusOf(
+  apiStatus: ApiStatus,
+  meetsBar: boolean,
+  taggedStable: boolean
+): ApiStatus {
+  if (apiStatus === "deprecated") return "deprecated"
+  if (apiStatus === "internal") return "internal"
+  return taggedStable && meetsBar ? "stable" : "experimental"
+}
+
+/** The DoD checklist is only meaningful for components on the road to stable. */
+function checklistApplies(effectiveStatus: ApiStatus): boolean {
+  return effectiveStatus === "stable" || effectiveStatus === "experimental"
+}
+
+/** One-line human summary shown above the checklist. */
+function summarize(
+  apiStatus: ApiStatus,
+  meetsBar: boolean,
+  taggedStable: boolean,
+  discrepancy: ComponentStatus["discrepancy"]
+): string {
+  if (apiStatus === "deprecated") {
+    return "Deprecated — avoid in new work and migrate to the recommended alternative."
+  }
+  if (apiStatus === "internal") {
+    return "Internal — not part of the public API."
+  }
+  if (meetsBar && taggedStable) {
+    return "Stable — meets the full definition of done."
+  }
+  if (discrepancy === "tagged-but-below-bar") {
+    return "Marked stable, but it doesn't meet the definition of done yet — treated as experimental."
+  }
+  if (discrepancy === "meets-bar-not-tagged") {
+    return "Meets the definition of done but isn't marked stable yet — still experimental until promoted."
+  }
+  if (apiStatus === "unknown") {
+    return "No maturity tag set — treated as experimental. Complete the checklist below to reach stable."
+  }
+  return "Experimental. Complete the checklist below to reach stable."
+}
 
 const DOC_QUALITY_ORDER: DocQuality[] = [
   "none",
@@ -121,44 +217,72 @@ function docQualityAtLeast(actual: DocQuality, min: DocQuality): boolean {
 }
 
 /**
- * The Definition of Done for a stable component. Each requirement inspects a
- * raw entry and reports whether it is met.
+ * The Definition of Done for a stable component — the mechanically-checkable
+ * subset of the lifecycle DoD (Lifecycle/Definition of Done). Each requirement
+ * inspects a raw entry and reports whether it is met. `detail` is a neutral
+ * description of the requirement (shown for met and unmet points alike).
  *
- * Scope note: automated a11y verification is intentionally NOT part of this
- * checklist yet — it is not tracked by the generator. Accessibility remains a
- * manual promotion gate (see docs/components-maturity.mdx). Add a requirement
- * here once an a11y signal is emitted into the status data.
+ * Scope note: some DoD items are not statically verifiable and are NOT gated
+ * here — the axe a11y test passing, adoption by ≥3 product teams, no breaking
+ * changes for 60 days, and Foundations approval. Those remain manual promotion
+ * gates (see Lifecycle/Definition of Done).
  */
 export const STABLE_REQUIREMENTS: ReadonlyArray<{
   key: string
   label: string
   detail: string
+  criteria?: Array<{ label: string; isMet: (c: ComponentEntry) => boolean }>
   isMet: (c: ComponentEntry) => boolean
 }> = [
   {
     key: "stories",
     label: "Has Storybook stories",
-    detail: "Add a .stories.tsx file with representative stories.",
+    detail: "A .stories.tsx file with representative stories.",
     isMet: (c) => c.hasStories,
   },
   {
     key: "unitTests",
     label: "Has unit tests",
-    detail: "Add a __tests__/ folder with Vitest coverage for the component.",
+    detail:
+      "Vitest unit tests covering the public API (a __tests__/ folder or .test.tsx file).",
     isMet: (c) => c.hasUnitTests,
+  },
+  {
+    key: "playFunction",
+    label: "Has a play function",
+    detail:
+      "A Storybook play function (interaction test) covering the primary user flow.",
+    isMet: (c) => c.hasPlayFunction,
   },
   {
     key: "mdxDocs",
     label: "Has MDX documentation",
-    detail: "Add an .mdx docs page alongside the stories.",
+    detail: "An .mdx documentation page alongside the stories.",
     isMet: (c) => c.hasMdxDocs,
   },
   {
     key: "docQuality",
     label: `Docs reach "${MIN_DOC_QUALITY}" quality`,
-    detail:
-      "Docs must include the required sections (Anatomy, Guidelines, " +
-      "Accessibility) and a props table. See documentation-quality.md.",
+    detail: "Docs at the Good tier build on the Acceptable base and add:",
+    criteria: [
+      {
+        label:
+          "Required sections (Anatomy, Guidelines, Accessibility) and a props table",
+        isMet: (c) => c.docSignals.sectionsCount >= 2 && c.docSignals.hasProps,
+      },
+      {
+        label: "DoDont examples with realistic Factorial copy",
+        isMet: (c) => c.docSignals.hasDoDonts,
+      },
+      {
+        label: 'A "when not to use" section',
+        isMet: (c) => c.docSignals.hasWhenNotToUse,
+      },
+      {
+        label: "At least three named example stories",
+        isMet: (c) => c.docSignals.exampleCount >= 3,
+      },
+    ],
     isMet: (c) => docQualityAtLeast(c.docQuality, MIN_DOC_QUALITY),
   },
 ]
@@ -175,6 +299,10 @@ export function evaluateComponentStatus(
     label: req.label,
     met: req.isMet(entry),
     detail: req.detail,
+    criteria: req.criteria?.map((cr) => ({
+      label: cr.label,
+      met: cr.isMet(entry),
+    })),
   }))
 
   const missing = requirements.filter((r) => !r.met).map((r) => r.label)
@@ -185,6 +313,12 @@ export function evaluateComponentStatus(
   if (taggedStable && !meetsBar) discrepancy = "tagged-but-below-bar"
   else if (!taggedStable && meetsBar) discrepancy = "meets-bar-not-tagged"
 
+  const effectiveStatus = effectiveStatusOf(
+    entry.apiStatus,
+    meetsBar,
+    taggedStable
+  )
+
   return {
     ...entry,
     requirements,
@@ -193,6 +327,10 @@ export function evaluateComponentStatus(
     taggedStable,
     stableReady: meetsBar,
     discrepancy,
+    effectiveStatus,
+    label: STATUS_LABELS[effectiveStatus],
+    summary: summarize(entry.apiStatus, meetsBar, taggedStable, discrepancy),
+    showChecklist: checklistApplies(effectiveStatus),
   }
 }
 
@@ -227,23 +365,33 @@ export function getComponentStatus(
 ): ComponentStatus | null {
   if (!name) return null
   const target = normalize(name)
+  const targetLeaf = normalize(leaf(name))
 
-  const matches = components.filter((c) => {
-    return (
-      normalize(c.name) === target ||
-      normalize(leaf(c.name)) === target ||
-      normalize(c.name).endsWith(target)
+  // When several entries match, prefer the one in the "components" zone.
+  const pick = (pool: ComponentEntry[]) =>
+    pool.find((c) => c.zone === "components") ?? pool[0]
+
+  // Tier 1 — exact full-name match. Handles fully-qualified Storybook titles
+  // like "Data Collection/Visualizations/Card" resolving to that exact entry.
+  let pool = components.filter((c) => normalize(c.name) === target)
+
+  // Tier 2 — leaf-level match on either side. Handles "F0Card", a bare "Card",
+  // and prefixed titles like "Components/F0Card" all resolving to "Card".
+  if (pool.length === 0) {
+    pool = components.filter(
+      (c) =>
+        normalize(leaf(c.name)) === target ||
+        normalize(c.name) === targetLeaf ||
+        normalize(leaf(c.name)) === targetLeaf
     )
-  })
+  }
 
-  if (matches.length === 0) return null
+  // Tier 3 — suffix fallback (e.g. "AiInsightCard" from "InsightCard").
+  if (pool.length === 0) {
+    pool = components.filter((c) => normalize(c.name).endsWith(target))
+  }
 
-  // Prefer an exact leaf match, then the "components" zone, then first.
-  const exact = matches.filter((c) => normalize(leaf(c.name)) === target)
-  const pool = exact.length > 0 ? exact : matches
-  const best = pool.find((c) => c.zone === "components") ?? pool[0]
-
-  return evaluateComponentStatus(best)
+  return pool.length > 0 ? evaluateComponentStatus(pick(pool)) : null
 }
 
 /**
