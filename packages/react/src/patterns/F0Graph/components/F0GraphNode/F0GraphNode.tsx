@@ -372,6 +372,10 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
             }
             className="max-w-[256px]"
+            // Tags are informational: clicking a tag must not select/open the
+            // node (which is what the node-level `onClick` above does). Swallow
+            // the click here so selection only fires on the node body itself.
+            onClick={(e) => e.stopPropagation()}
           >
             <F0GraphNodeTags tags={filteredTags!} />
           </motion.div>

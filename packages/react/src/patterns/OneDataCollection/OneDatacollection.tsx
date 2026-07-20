@@ -244,6 +244,11 @@ export type OneDataCollectionProps<
    */
   csvExport?: boolean | { filename?: string }
 
+  /** Hide the dashed "Save view" chip (preset save action). Opt-in for
+   * collections where saving views doesn't apply (e.g. the org-chart graph).
+   * Defaults to `false` — behavior unchanged for every existing consumer. */
+  savingViewsDisabled?: boolean
+
   /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
   initialVisualization?: number
 }
@@ -271,6 +276,7 @@ const OneDataCollectionComp = <
   disableUrlParams,
   tmpFullWidth,
   csvExport,
+  savingViewsDisabled,
   initialVisualization = 0,
 }: OneDataCollectionProps<
   R,
@@ -1127,6 +1133,9 @@ const OneDataCollectionComp = <
    * baseline, never offers "Save view" — switching views is too transient.
    */
   const presetActionState = useMemo<"save" | "none">(() => {
+    // Consumer opted out of saving views (e.g. the org-chart graph): never show
+    // the "Save view" chip regardless of how the view diverges from the baseline.
+    if (savingViewsDisabled) return "none"
     // Compares everything except the view mode, so a visualization-only change
     // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
@@ -1157,7 +1166,13 @@ const OneDataCollectionComp = <
       return "save"
     }
     return "none"
-  }, [selectedPresetId, mergedPresets, capturedState, sessionBaseline])
+  }, [
+    savingViewsDisabled,
+    selectedPresetId,
+    mergedPresets,
+    capturedState,
+    sessionBaseline,
+  ])
 
   const handleSavePreset = useCallback(
     (values: PresetFormValues) => {
