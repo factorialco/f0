@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.44.0](https://github.com/factorialco/f0/compare/f0-react-v4.43.0...f0-react-v4.44.0) (2026-07-20)
+
+
+### Features
+
+* **F0PdfViewer:** document viewer kinds (sheet, docx, text) with toolbar actions ([#4741](https://github.com/factorialco/f0/issues/4741)) ([ddbeb67](https://github.com/factorialco/f0/commit/ddbeb67fa5b0157479d77251dee8c0d2534f112c))
+
 ## [4.43.0](https://github.com/factorialco/f0/compare/f0-react-v4.42.1...f0-react-v4.43.0) (2026-07-20)
 
 
