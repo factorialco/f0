@@ -24,9 +24,10 @@ type ReadOnlyCellContentProps<R extends RecordType> = Pick<
   /** Extra classes for the content container (background, muted text, ...). */
   className?: string
   /**
-   * Show the field affordances (leading url/email/date icon and the select
-   * chevron). Disabled cells keep them so the column still reads as its field
-   * type; display-only cells opt out and render just the value as plain text.
+   * Show the field affordances (leading url/email/date icon, the select
+   * chevron and number/money/percentage units). Disabled cells keep them so
+   * the column still reads as its field type; display-only cells opt out and
+   * render just the value as plain text.
    */
   showFieldAffordances?: boolean
 }
@@ -100,8 +101,11 @@ export function ReadOnlyCellContent<R extends RecordType>({
     : undefined
 
   // Number/money/percentage cells show a unit next to the value (e.g. "%",
-  // "€"); mirror it here so read-only cells match the editable ones.
-  const units = resolveUnits(editableColumn.numberConfig, item)
+  // "€"); mirror it here so read-only cells match the editable ones. Treated as
+  // a field affordance, so display-only cells opt out of it too.
+  const units = showFieldAffordances
+    ? resolveUnits(editableColumn.numberConfig, item)
+    : undefined
   const unitsBefore = editableColumn.numberConfig?.unitsPosition === "before"
   const unit = units ? (
     <span className="shrink-0 select-none pt-px text-sm">{units}</span>
