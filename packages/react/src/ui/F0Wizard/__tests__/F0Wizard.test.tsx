@@ -681,6 +681,25 @@ describe("F0Wizard", () => {
     expect(screen.getByText("Step 2 content")).toBeInTheDocument()
   })
 
+  // ---------------------------------------------------------------------------
+  // scroll regression: step content must fill the dialog's real height
+  // instead of an arbitrary viewport fraction, so it can scroll instead of
+  // clipping when a step has more content than fits (see F0Wizard fix).
+  // ---------------------------------------------------------------------------
+
+  it("sizes the step content row to fill the dialog height, not a fixed viewport fraction", () => {
+    render(
+      <F0Wizard isOpen={true} onClose={() => {}} steps={makeSteps(2)}>
+        {() => <div>Content</div>}
+      </F0Wizard>
+    )
+
+    const stepRow = document.querySelector(".flex.flex-1.flex-row")
+    expect(stepRow).not.toBeNull()
+    expect(stepRow).toHaveClass("h-full")
+    expect(stepRow?.className).not.toMatch(/h-\[/)
+  })
+
   it("does not skip steps when autoSkipCompletedSteps is disabled", () => {
     render(
       <F0Wizard

@@ -68,6 +68,26 @@ describe("DialogWrapper portal target", () => {
     }
   )
 
+  // fullHeight regression: this prop used to be accepted by DialogWrapper but
+  // never threaded through from DialogInternal/F0Dialog's public props, so
+  // consumers like F0Wizard had no way to request a real fixed dialog height
+  // and fell back to hardcoding a viewport fraction, which clipped content
+  // instead of scrolling it.
+  it("applies h-full to DialogContent when fullHeight is set", () => {
+    render(<DialogWrapper {...baseProps} position="center" fullHeight />)
+
+    expect(dialogContentSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ className: expect.stringContaining("h-full") })
+    )
+  })
+
+  it("does not apply h-full to DialogContent when fullHeight is unset", () => {
+    render(<DialogWrapper {...baseProps} position="center" />)
+
+    const { className } = dialogContentSpy.mock.calls[0][0]
+    expect(className).not.toMatch(/(^|\s)h-full(\s|$)/)
+  })
+
   it("forwards an explicit container override to DialogContent", () => {
     const container = document.createElement("div")
 
