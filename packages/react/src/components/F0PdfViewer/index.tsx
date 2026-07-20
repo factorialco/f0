@@ -5,7 +5,12 @@ import { withSkeleton } from "@/lib/skeleton"
 import { F0PdfViewerBase } from "./F0PdfViewer"
 import { F0PdfViewerSkeleton } from "./F0PdfViewerSkeleton"
 
-export type { F0PdfViewerProps, F0PdfScale } from "./types"
+export type {
+  F0DocumentKind,
+  F0PdfScale,
+  F0PdfViewerAction,
+  F0PdfViewerProps,
+} from "./types"
 export { pdfScales } from "./types"
 export { configurePdfWorker } from "./pdfWorker"
 
