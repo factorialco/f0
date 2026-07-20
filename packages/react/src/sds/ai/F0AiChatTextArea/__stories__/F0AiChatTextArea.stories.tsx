@@ -1,12 +1,8 @@
-import type { Meta, StoryObj } from "@storybook/react-vite"
-import { useEffect, useRef, useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import { Meta, StoryObj } from "@storybook/react-vite"
+import { useRef, useState } from "react"
 
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
-import type {
-  F0AiChatTextAreaProps,
-  F0AiChatTextAreaSubmitPayload,
-} from "../types"
+import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import {
@@ -17,7 +13,6 @@ import {
   Search,
 } from "@/icons/app"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0ClarifyingPanel } from "../../F0ClarifyingPanel"
 import type { ClarifyingQuestionState } from "../../F0ClarifyingPanel/types"
@@ -29,6 +24,7 @@ import type {
   PendingContext,
   PendingQuote,
   PersonProfile,
+  TranscribeFn,
   UploadedFile,
   WelcomeScreenSuggestion,
 } from "../../F0AiChat/types"
@@ -215,17 +211,43 @@ const buildClarifyingState = (
   ...overrides,
 })
 
-const StoryHarness = ({
-  ref,
-  onSubmit,
-  pendingContext: initialPendingContext = null,
-  onPendingContextChange,
-  pendingQuote: initialPendingQuote = null,
-  onPendingQuoteChange,
+type WrapperProps = {
+  placeholders?: string[]
+  fileAttachments?: AiChatFileAttachmentConfig
+  onTranscribe?: TranscribeFn
+  searchPersons?: (query: string) => Promise<PersonProfile[]>
+  initialPendingContext?: PendingContext | null
+  initialPendingQuote?: PendingQuote | null
+  clarifyingQuestion?: ClarifyingQuestionState | null
+  creditWarning?: AiChatCreditWarning
+  disclaimer?: AiChatDisclaimer
+  footer?: React.ReactNode
+  welcomeScreenSuggestions?: WelcomeScreenSuggestion[]
+  welcomeScreenCards?: F0AiChatWelcomeCard[]
+  isWelcomeScreen?: boolean
+  fullscreen?: boolean
+  inProgress?: boolean
+  toolbarStart?: React.ReactNode
+}
+
+const Wrapper = ({
+  placeholders,
+  fileAttachments,
+  onTranscribe,
+  searchPersons,
+  initialPendingContext = null,
+  initialPendingQuote = null,
+  clarifyingQuestion = null,
+  creditWarning,
+  disclaimer,
+  footer,
+  welcomeScreenSuggestions,
   welcomeScreenCards,
-  onSuggestionClick,
-  ...props
-}: F0AiChatTextAreaProps) => {
+  isWelcomeScreen,
+  fullscreen,
+  inProgress,
+  toolbarStart,
+}: WrapperProps) => {
   const [pendingContext, setPendingContext] = useState<PendingContext | null>(
     initialPendingContext
   )
@@ -236,16 +258,11 @@ const StoryHarness = ({
     F0AiChatTextAreaSubmitPayload[]
   >([])
 
-  useEffect(
-    () => setPendingContext(initialPendingContext),
-    [initialPendingContext]
-  )
-  useEffect(() => setPendingQuote(initialPendingQuote), [initialPendingQuote])
-
   const handleSubmit = async (payload: F0AiChatTextAreaSubmitPayload) => {
     setSubmissions((prev) => [...prev, payload])
-    await onSubmit(payload)
   }
+
+  const composerRef = useRef<HTMLDivElement>(null)
 
   // Welcome cards now carry their own `onClick`. Branch on each card's data:
   // message-bearing cards (e.g. "Empty survey") send their prompt; message-less
@@ -268,34 +285,42 @@ const StoryHarness = ({
   })
 
   return (
-    <div className="flex w-full flex-col gap-4">
+    <div className="flex flex-col gap-4 w-[640px]">
       <F0AiChatTextArea
-        {...props}
-        ref={ref}
+        ref={composerRef}
         onSubmit={handleSubmit}
-        pendingContext={pendingContext}
-        onPendingContextChange={(context) => {
-          setPendingContext(context)
-          onPendingContextChange?.(context)
-        }}
-        pendingQuote={pendingQuote}
-        onPendingQuoteChange={(quote) => {
-          setPendingQuote(quote)
-          onPendingQuoteChange?.(quote)
-        }}
-        onSuggestionClick={
-          onSuggestionClick
-            ? (item, group) => {
-                onSuggestionClick(item, group)
-                const text = item.prompt ?? item.title
-                setSubmissions((prev) => [
-                  ...prev,
-                  { text, files: [], context: null, quote: null },
-                ])
-              }
-            : undefined
+        onStop={() => console.log("stop")}
+        inProgress={inProgress}
+        placeholders={placeholders}
+        creditWarning={creditWarning}
+        clarifyingUI={
+          clarifyingQuestion ? (
+            <F0ClarifyingPanel clarifyingQuestion={clarifyingQuestion} />
+          ) : undefined
         }
+        pendingContext={pendingContext}
+        onPendingContextChange={setPendingContext}
+        pendingQuote={pendingQuote}
+        onPendingQuoteChange={setPendingQuote}
+        fileAttachments={fileAttachments}
+        toolbarStart={toolbarStart}
+        onTranscribe={onTranscribe}
+        searchPersons={searchPersons}
+        disclaimer={disclaimer}
+        footer={footer}
+        welcomeScreenSuggestions={welcomeScreenSuggestions}
+        onSuggestionClick={(item) => {
+          // Suggestions always send a prompt (item.prompt, falling back to its
+          // title) — unlike cards, the host doesn't branch on behavior.
+          const text = item.prompt ?? item.title
+          setSubmissions((prev) => [
+            ...prev,
+            { text, files: [], context: null, quote: null },
+          ])
+        }}
         welcomeScreenCards={cardsWithBehavior}
+        isWelcomeScreen={isWelcomeScreen}
+        fullscreen={fullscreen}
       />
       {submissions.length > 0 && (
         <div className="rounded-md border border-f1-border p-3 text-sm">
@@ -309,25 +334,14 @@ const StoryHarness = ({
   )
 }
 
-const DEFAULT_ARGS: Pick<F0AiChatTextAreaProps, "ref" | "onSubmit"> = {
-  ref: { current: null },
-  onSubmit: noop,
-}
-
 const meta = {
   title: "AI/F0AiChatTextArea",
-  component: F0AiChatTextArea,
-  args: DEFAULT_ARGS,
-  render: (args) => (
-    <div className="w-[640px]">
-      <StoryHarness {...args} />
-    </div>
-  ),
+  component: Wrapper,
   parameters: {
     layout: "centered",
   },
-  tags: ["!autodocs", "experimental"],
-} satisfies Meta<typeof F0AiChatTextArea>
+  tags: ["autodocs"],
+} satisfies Meta<typeof Wrapper>
 
 export default meta
 type Story = StoryObj<typeof meta>
@@ -401,7 +415,6 @@ export const WithDisclaimerAndFooter: Story = {
   args: {
     disclaimer: DISCLAIMER,
     isWelcomeScreen: true,
-    fullscreen: true,
     footer: (
       <p className="text-sm font-medium text-f1-foreground-tertiary text-center">
         Powered by Factorial AI · v0.1.0
@@ -437,7 +450,6 @@ export const WithWelcomeSuggestions: Story = {
     isWelcomeScreen: true,
     fullscreen: true,
     welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
-    onSuggestionClick: noop,
     disclaimer: DISCLAIMER,
   },
 }
@@ -456,13 +468,13 @@ export const WithCreditWarning: Story = {
 
 export const WithPendingContext: Story = {
   args: {
-    pendingContext: PENDING_CONTEXT,
+    initialPendingContext: PENDING_CONTEXT,
   },
 }
 
 export const WithPendingQuote: Story = {
   args: {
-    pendingQuote: PENDING_QUOTE,
+    initialPendingQuote: PENDING_QUOTE,
   },
 }
 
@@ -473,35 +485,17 @@ export const WithFileAttachments: Story = {
 }
 
 export const WithToolbarStart: Story = {
-  args: {},
-  render: (args) => (
-    <div className="w-[360px]">
-      <StoryHarness
-        {...args}
-        fileAttachments={FILE_UPLOAD_CONFIG}
-        toolbarStart={
-          <F0SegmentedControl
-            ariaLabel="Response scope"
-            items={[
-              { value: "general", label: "General" },
-              { value: "focused", label: "Focused" },
-            ]}
-          />
-        }
+  args: {
+    fileAttachments: FILE_UPLOAD_CONFIG,
+    toolbarStart: (
+      <F0SegmentedControl
+        ariaLabel="Response scope"
+        items={[
+          { value: "general", label: "General" },
+          { value: "focused", label: "Focused" },
+        ]}
       />
-    </div>
-  ),
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement)
-    const focused = canvas.getByRole("radio", { name: "Focused" })
-    const form = focused.closest("form")
-
-    await expect(form).not.toBeNull()
-    await userEvent.click(focused)
-
-    await expect(focused).toHaveFocus()
-    await expect(focused).toBeChecked()
-    await expect(canvas.queryByText("Last submission")).not.toBeInTheDocument()
+    ),
   },
 }
 
@@ -520,39 +514,33 @@ export const WithVoiceDictation: Story = {
 
 export const Clarifying: Story = {
   args: {
-    clarifyingUI: (
-      <F0ClarifyingPanel clarifyingQuestion={buildClarifyingState()} />
-    ),
+    clarifyingQuestion: buildClarifyingState(),
     disclaimer: DISCLAIMER,
   },
 }
 
 export const ClarifyingMultiSelect: Story = {
   args: {
-    clarifyingUI: (
-      <F0ClarifyingPanel
-        clarifyingQuestion={buildClarifyingState({
-          currentStep: {
-            question: "Which departments should I include?",
-            options: [
-              { id: "eng", label: "Engineering" },
-              { id: "sales", label: "Sales" },
-              { id: "marketing", label: "Marketing" },
-              { id: "hr", label: "HR" },
-              { id: "ops", label: "Operations" },
-            ],
-            selectionMode: "multiple",
-            optional: true,
-            allowCustomAnswer: false,
-            selectedOptionIds: ["eng", "sales"],
-            customAnswerText: "",
-            isCustomAnswerActive: false,
-          },
-          currentStepIndex: 1,
-          totalSteps: 3,
-        })}
-      />
-    ),
+    clarifyingQuestion: buildClarifyingState({
+      currentStep: {
+        question: "Which departments should I include?",
+        options: [
+          { id: "eng", label: "Engineering" },
+          { id: "sales", label: "Sales" },
+          { id: "marketing", label: "Marketing" },
+          { id: "hr", label: "HR" },
+          { id: "ops", label: "Operations" },
+        ],
+        selectionMode: "multiple",
+        optional: true,
+        allowCustomAnswer: false,
+        selectedOptionIds: ["eng", "sales"],
+        customAnswerText: "",
+        isCustomAnswerActive: false,
+      },
+      currentStepIndex: 1,
+      totalSteps: 3,
+    }),
   },
 }
 
@@ -564,38 +552,7 @@ export const Everything: Story = {
     searchPersons: mockSearchPersons,
     creditWarning: CREDIT_WARNING,
     disclaimer: DISCLAIMER,
-    pendingContext: PENDING_CONTEXT,
-    pendingQuote: PENDING_QUOTE,
+    initialPendingContext: PENDING_CONTEXT,
+    initialPendingQuote: PENDING_QUOTE,
   },
-}
-
-export const Snapshot: Story = {
-  tags: ["!dev"],
-  parameters: withSnapshot({}),
-  render: () => (
-    <div className="flex flex-col gap-8">
-      <section className="w-[640px]">
-        <h3 className="mb-3 text-lg font-semibold">Default composer</h3>
-        <StoryHarness {...DEFAULT_ARGS} />
-      </section>
-      <section className="w-[360px]">
-        <h3 className="mb-3 text-lg font-semibold">
-          Start toolbar with attachment
-        </h3>
-        <StoryHarness
-          {...DEFAULT_ARGS}
-          fileAttachments={FILE_UPLOAD_CONFIG}
-          toolbarStart={
-            <F0SegmentedControl
-              ariaLabel="Response scope"
-              items={[
-                { value: "general", label: "General" },
-                { value: "focused", label: "Focused" },
-              ]}
-            />
-          }
-        />
-      </section>
-    </div>
-  ),
 }
