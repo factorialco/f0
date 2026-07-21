@@ -19,33 +19,14 @@ import {
   type F0ChatUser,
 } from "../types"
 
-// Pass-through virtualizer (jsdom has no layout) — same as F0Chat.test.tsx.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn()

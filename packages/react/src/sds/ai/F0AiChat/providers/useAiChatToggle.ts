@@ -18,10 +18,19 @@ export function useAiChatToggle(): {
   open: boolean
   setOpen: (open: boolean) => void
 } {
-  const { enabled, open, setOpen, panelContent, clearPanelContent } =
-    useAiChat()
+  const {
+    enabled,
+    open,
+    setOpen,
+    panelContent,
+    clearPanelContent,
+    restoringPanelContentId,
+  } = useAiChat()
 
-  const aiChatOpen = open && !panelContent
+  // A pending restore counts as content too — the panel is reserved for the
+  // conversation being restored, so the chat reads off. Turning the switch on
+  // cancels it (clearPanelContent drops the pending id as well).
+  const aiChatOpen = open && !panelContent && !restoringPanelContentId
 
   const setAiChatOpen = useCallback(
     (next: boolean) => {

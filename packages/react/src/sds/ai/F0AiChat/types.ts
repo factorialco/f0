@@ -305,6 +305,15 @@ export type AiChatProviderProps = {
    */
   side?: "left" | "right"
   /**
+   * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+   * `side`, keeping everything in one panel. Set it to the opposite edge to
+   * split them — e.g. communications: conversations dock left while the AI
+   * chat keeps its right-side panel and toggle. The two are still exclusive
+   * (opening one swaps the other out); only the main content moves during
+   * the swap, uncovering the incoming panel in place.
+   */
+  panelContentSide?: "left" | "right"
+  /**
    * Greeting phrase(s) shown by the welcome screen when the chat is empty.
    * A single string renders once; an array rotates through phrases. Purely
    * UI config — does not affect runtime behavior.

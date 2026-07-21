@@ -8,11 +8,13 @@ import {
   vi,
 } from "vitest"
 
+import { getEmojiLabel } from "@/lib/emojis"
 import {
   act,
   fireEvent,
   zeroRender as render,
   screen,
+  waitFor,
 } from "@/testing/test-utils"
 
 import { F0Chat } from "../F0Chat"
@@ -24,33 +26,14 @@ import {
   type F0ChatRuntime,
 } from "../types"
 
-// Pass-through virtualizer (jsdom has no layout) — same as F0Chat.test.tsx.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => {
-    const ROW = 40
-    const items = Array.from({ length: count }, (_, index) => ({
-      index,
-      key: index,
-      start: index * ROW,
-      size: ROW,
-      end: index * ROW + ROW,
-    }))
-    return {
-      getVirtualItems: () => items,
-      getTotalSize: () => count * ROW,
-      measureElement: () => {},
-      scrollToIndex: () => {},
-      scrollToOffset: () => {},
-      getOffsetForIndex: (index: number) => [index * ROW, "start"],
-      getVirtualItemForOffset: (offset: number) =>
-        items[
-          Math.min(items.length - 1, Math.max(0, Math.floor(offset / ROW)))
-        ],
-      scrollOffset: 0,
-      measure: () => {},
-    }
-  },
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = vi.fn()
@@ -229,5 +212,123 @@ describe("failed message", () => {
       screen.queryByText("Couldn't load this conversation")
     ).not.toBeInTheDocument()
     expect(screen.queryByText(/^Sent/)).not.toBeInTheDocument()
+  })
+
+  it("dims the bubble and surfaces the alert on a LIVE sending→failed flip", () => {
+    // The flip drives the animated transition (bubble dim + alert pop) — this
+    // asserts the end state; motion resolves instantly under skipAnimations.
+    const { rerender } = renderChat(
+      makeRuntime({ messages: [mine("sending")] })
+    )
+    expect(screen.queryByRole("button", { name: notSent })).toBeNull()
+    rerender(
+      <F0ChatProvider runtime={makeRuntime({ messages: [mine("failed")] })}>
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(screen.getByRole("button", { name: notSent })).toBeInTheDocument()
+    expect(screen.getByText("My message").closest(".opacity-60")).not.toBeNull()
+  })
+})
+
+describe("live content transitions", () => {
+  const reaction = (emoji: string, count = 1) => ({
+    emoji,
+    count,
+    reactedByMe: false,
+    users: [],
+  })
+  const withReactions = (
+    reactions: F0ChatMessage["reactions"]
+  ): F0ChatMessage => ({ ...mine("sent"), reactions })
+
+  it("adds and removes reaction pills as reactions change", async () => {
+    const { rerender } = renderChat(
+      makeRuntime({ messages: [withReactions([reaction("👍")])] })
+    )
+    expect(
+      screen.getByRole("button", { name: getEmojiLabel("👍") })
+    ).toBeInTheDocument()
+
+    // A second emoji pops in next to the first.
+    rerender(
+      <F0ChatProvider
+        runtime={makeRuntime({
+          messages: [withReactions([reaction("👍"), reaction("❤️")])],
+        })}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(
+      screen.getByRole("button", { name: getEmojiLabel("❤️") })
+    ).toBeInTheDocument()
+
+    // Removing one leaves the other (the exit resolves instantly in tests).
+    rerender(
+      <F0ChatProvider
+        runtime={makeRuntime({ messages: [withReactions([reaction("❤️")])] })}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: getEmojiLabel("👍") })
+      ).not.toBeInTheDocument()
+    )
+    expect(
+      screen.getByRole("button", { name: getEmojiLabel("❤️") })
+    ).toBeInTheDocument()
+  })
+
+  it("crossfades a live delete into the tombstone", () => {
+    const { rerender } = renderChat(makeRuntime())
+    expect(screen.getByText("My message")).toBeInTheDocument()
+    rerender(
+      <F0ChatProvider
+        runtime={makeRuntime({
+          messages: [{ ...mine("sent"), deleted: true }],
+        })}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(screen.getByText("Message deleted")).toBeInTheDocument()
+    expect(screen.queryByText("My message")).not.toBeInTheDocument()
+  })
+
+  it("renders a freshly appended system row (animated entry branch)", () => {
+    const base = makeRuntime()
+    const { rerender } = renderChat(base)
+    rerender(
+      <F0ChatProvider
+        runtime={{
+          ...base,
+          messages: [
+            ...base.messages,
+            {
+              type: "system",
+              id: "s1",
+              createdAt: new Date().toISOString(),
+              body: "María José left the group",
+            },
+          ],
+        }}
+      >
+        <F0Chat />
+      </F0ChatProvider>
+    )
+    expect(screen.getByText("María José left the group")).toBeInTheDocument()
+  })
+})
+
+describe("typing dots", () => {
+  it("waves the three dots with the typing keyframe", () => {
+    renderChat(
+      makeRuntime({ typingUsers: [{ id: "other", name: "María José" }] })
+    )
+    const bubble = screen.getByRole("status")
+    expect(bubble.querySelectorAll(".animate-typing-dot")).toHaveLength(3)
   })
 })

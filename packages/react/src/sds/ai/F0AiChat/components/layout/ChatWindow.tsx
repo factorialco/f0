@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 
 import { breakpoints } from "@factorialco/f0-core"
 import { AnimatePresence, motion } from "motion/react"
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
@@ -13,7 +13,26 @@ import { useAiChat } from "../../providers/AiChatStateProvider"
 import { MAX_CHAT_WIDTH, MIN_CHAT_WIDTH } from "../../utils/constants"
 import { ResizeHandle } from "./ResizeHandle"
 
-export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
+export const SidebarWindow = ({
+  children,
+  visible,
+  side,
+  exitStyle = "shrink",
+}: {
+  children?: ReactNode
+  /** Overrides the context `open` as the mount condition — lets the frame
+   * drive per-window visibility when chat and hosted content split edges. */
+  visible?: boolean
+  /** Edge this window docks to. Defaults to the context `panelSide`. */
+  side?: "left" | "right"
+  /**
+   * Exit animation. "shrink" is the regular close (width + fade). "hold"
+   * keeps the window still while the main content slides over it — used for
+   * the swap between the AI chat and hosted content on opposite edges, so
+   * the panels feel like they were always there.
+   */
+  exitStyle?: "shrink" | "hold"
+}) => {
   const {
     open,
     visualizationMode,
@@ -34,7 +53,17 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
   const isCanvasMode = visualizationMode === "canvas"
   // Hosts dock the whole panel left for a chat-first experience (communications);
   // the default is right. The AI chat follows the panel side too.
-  const isLeft = panelSide === "left"
+  const isLeft = (side ?? panelSide) === "left"
+  const isVisible = visible ?? open
+
+  // Was the panel already open on the previous committed render? A window
+  // mounting while it was (a swap between the chat and hosted content on
+  // opposite edges) must appear in place — the main content slides to reveal
+  // it — instead of playing the entrance animation.
+  const prevOpenRef = useRef(false)
+  useEffect(() => {
+    prevOpenRef.current = open
+  })
 
   const dragCounterRef = useRef(0)
   const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
@@ -104,7 +133,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
 
   return (
     <AnimatePresence>
-      {open && (
+      {isVisible && (
         <motion.div
           key="chat-wrapper"
           className={cn(
@@ -116,13 +145,21 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
             fullscreen ? "md:pr-1" : isLeft ? "mr-auto" : "ml-auto md:pr-1"
           )}
           initial={
-            shouldPlayEntranceAnimation ? { opacity: 0, width: 0 } : false
+            shouldPlayEntranceAnimation && !prevOpenRef.current
+              ? { opacity: 0, width: 0 }
+              : false
           }
           animate={{
             opacity: 1,
             width: "100%",
           }}
-          exit={{ opacity: 0, width: 0 }}
+          exit={
+            exitStyle === "hold"
+              ? // Swap: stay put while the main content slides over (300ms),
+                // then a blink of fade right before unmounting.
+                { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
+              : { opacity: 0, width: 0 }
+          }
           transition={wrapperTransition}
           style={{ transformOrigin: isLeft ? "left center" : "right center" }}
           onAnimationComplete={() => {
@@ -144,7 +181,7 @@ export const SidebarWindow = ({ children }: { children?: ReactNode }) => {
             />
           )}
           <div
-            aria-hidden={!open}
+            aria-hidden={!isVisible}
             className={cn(
               "relative flex h-full w-full flex-col overflow-hidden bg-f1-special-page border border-solid border-f1-border-secondary",
               // In canvas mode the chat sits flush against the canvas with
