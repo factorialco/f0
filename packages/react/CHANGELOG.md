@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.46.2](https://github.com/factorialco/f0/compare/f0-react-v4.46.1...f0-react-v4.46.2) (2026-07-21)
+
+
+### Bug Fixes
+
+* relax react-virtuoso to ^4.18.10 ([#4762](https://github.com/factorialco/f0/issues/4762)) ([5332b2f](https://github.com/factorialco/f0/commit/5332b2fdde71f8eab94b98ec6375c96f3287c9ff))
+
 ## [4.46.1](https://github.com/factorialco/f0/compare/f0-react-v4.46.0...f0-react-v4.46.1) (2026-07-21)
 
 
