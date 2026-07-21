@@ -35,9 +35,15 @@ const AiChatStateContext = createContext<AiChatProviderReturnValue | null>(null)
 const CHAT_WIDTH_STORAGE_KEY = "ONE-ai-chat-width"
 const CHAT_OPEN_STORAGE_KEY = "ONE-ai-chat-open"
 const CHAT_VISUALIZATION_MODE_STORAGE_KEY = "ONE-ai-chat-visualization-mode"
+const CHAT_PANEL_CONTENT_ID_STORAGE_KEY = "ONE-ai-chat-panel-content-id"
 
 const CHAT_WIDTH_MIN = 300
 const CHAT_WIDTH_MAX = 712
+
+/** How long a pending panel-content restore may wait for the host before
+ * falling back to the AI chat — a host that never resolves (the conversation
+ * is gone, or it isn't restore-aware) must not block the panel forever. */
+const PANEL_RESTORE_TIMEOUT_MS = 5000
 
 const isPersistableVisualizationMode = (value: VisualizationMode): boolean =>
   value === "sidepanel" || value === "fullscreen"
@@ -251,16 +257,69 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // `openCanvas`. Only one content at a time: a single state slot.
   const [panelContent, setPanelContentState] =
     useState<SidePanelContent | null>(null)
+
+  // The content itself is a host-provided ReactNode and can't be serialized —
+  // persist only its id so a reload can reopen WHAT was showing, not just that
+  // the panel was open. The host re-mounts the content when it's loaded.
+  const [persistedPanelContentId, setPersistedPanelContentId] =
+    usePersistedState<string | null>(
+      CHAT_PANEL_CONTENT_ID_STORAGE_KEY,
+      null,
+      (v): v is string | null => v === null || typeof v === "string"
+    )
+
+  // Pending restore: the panel reopened (persisted `open`) while hosted
+  // content was up on the last session. Until the host re-mounts it (via
+  // `setPanelContent`) the panel shows a skeleton instead of flashing the AI
+  // chat. Cleared by the host (restore or cancel), by opening the AI chat
+  // (`clearPanelContent`), by closing the panel, or by the safety timeout.
+  const [restoringPanelContentId, setRestoringPanelContentId] = useState<
+    string | null
+  >(() => (open ? persistedPanelContentId : null))
+
   const setPanelContent = useCallback(
     (content: SidePanelContent | null) => {
       setPanelContentState(content)
+      setRestoringPanelContentId(null)
       if (content && !open) {
         setOpen(true)
       }
     },
     [open, setOpen]
   )
-  const clearPanelContent = useCallback(() => setPanelContentState(null), [])
+  const clearPanelContent = useCallback(() => {
+    setPanelContentState(null)
+    setRestoringPanelContentId(null)
+  }, [])
+  const cancelPanelContentRestore = useCallback(
+    () => setRestoringPanelContentId(null),
+    []
+  )
+
+  // Keep the persisted id in sync with what's actually showing. Skipped while
+  // a restore is pending — panelContent is still null then and writing would
+  // wipe the very id being restored (breaking a reload mid-restore).
+  useEffect(() => {
+    if (restoringPanelContentId) return
+    setPersistedPanelContentId(panelContent?.id ?? null)
+  }, [panelContent, restoringPanelContentId, setPersistedPanelContentId])
+
+  // A restore only makes sense while the panel is open; closing it drops the
+  // pending id (the AI chat comes back normally on the next open).
+  useEffect(() => {
+    if (!open) setRestoringPanelContentId(null)
+  }, [open])
+
+  // Safety net: a host that never resolves the restore must not block the
+  // panel — fall back to the AI chat.
+  useEffect(() => {
+    if (!restoringPanelContentId) return
+    const timer = setTimeout(
+      () => setRestoringPanelContentId(null),
+      PANEL_RESTORE_TIMEOUT_MS
+    )
+    return () => clearTimeout(timer)
+  }, [restoringPanelContentId])
 
   // Which edge the whole panel docks to (AI chat, hosted content and canvas).
   // Initialised from the `side` prop ("right" by default); hosts can also flip
@@ -340,6 +399,8 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
         panelContent,
         setPanelContent,
         clearPanelContent,
+        restoringPanelContentId,
+        cancelPanelContentRestore,
         panelSide,
         setPanelSide,
         panelContentSide,
@@ -376,6 +437,7 @@ const NULL_KEYS = new Set<ProviderKey>([
   "pendingQuote",
   "activeGame",
   "panelContent",
+  "restoringPanelContentId",
 ])
 
 const UNDEFINED_KEYS = new Set<ProviderKey>([

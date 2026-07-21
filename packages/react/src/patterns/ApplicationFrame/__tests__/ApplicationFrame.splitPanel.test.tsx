@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
 
 import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
@@ -98,5 +99,41 @@ describe("ApplicationFrame split panel (conversations left, AI chat right)", () 
     // docked right (the default side).
     const conversation = screen.getByText("CONVERSATION")
     expect(conversation.closest(".right-0")).not.toBeNull()
+  })
+
+  it("restores the last conversation on reload without flashing the AI chat", async () => {
+    // The previous session had the conversation showing when it unloaded.
+    localStorage.setItem("ONE-ai-chat-open", "true")
+    localStorage.setItem("ONE-ai-chat-panel-content-id", '"conv"')
+
+    // Restore-aware host: re-mounts the persisted conversation (the way the
+    // sidebar does in the stories / CommunicationsPanelBridge in factorial).
+    const RestoreHost = () => {
+      const { restoringPanelContentId, setPanelContent } = useAiChat()
+      useEffect(() => {
+        if (restoringPanelContentId === "conv") {
+          setPanelContent({ id: "conv", content: <div>CONVERSATION</div> })
+        }
+      }, [restoringPanelContentId, setPanelContent])
+      return null
+    }
+
+    render(
+      <ApplicationFrame
+        ai={{
+          enabled: true,
+          panelContentSide: "left",
+          chatMessages: <div>AI CHAT</div>,
+        }}
+        sidebar={<div>SIDEBAR</div>}
+      >
+        <RestoreHost />
+      </ApplicationFrame>
+    )
+
+    // The conversation is back on the left; the AI chat never flashed in.
+    const conversation = await screen.findByText("CONVERSATION")
+    expect(conversation.closest(".left-0")).not.toBeNull()
+    expect(screen.queryByText("AI CHAT")).not.toBeInTheDocument()
   })
 })

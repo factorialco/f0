@@ -86,4 +86,21 @@ describe("useAiChatToggle", () => {
     expect(result.current.chat.open).toBe(false)
     expect(result.current.toggle.open).toBe(false)
   })
+
+  it("reads unchecked during a pending restore and turning it on cancels it", () => {
+    // A reload with a conversation showing: open persisted + its id pending.
+    localStorage.setItem("ONE-ai-chat-open", "true")
+    localStorage.setItem("ONE-ai-chat-panel-content-id", '"conv"')
+    const { result } = renderHook(useToggleAndChat, { wrapper })
+
+    expect(result.current.chat.restoringPanelContentId).toBe("conv")
+    expect(result.current.toggle.open).toBe(false)
+
+    act(() => {
+      result.current.toggle.setOpen(true)
+    })
+
+    expect(result.current.chat.restoringPanelContentId).toBeNull()
+    expect(result.current.toggle.open).toBe(true)
+  })
 })

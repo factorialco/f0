@@ -806,7 +806,13 @@ export const Default: Story = {
             panelContentSide: "left",
           }}
           aiPromotion={args.aiPromotion}
-          sidebar={<ConversationsSidebar withOneTab={false} />}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              // State parity across reloads, like the panel content restore.
+              tabsPersistKey="communications-demo"
+            />
+          }
         >
           {/* Real-world main content: the home "daytime" page. The One switch
               stays visible — it's how the AI chat opens (the sidebar only has
@@ -1300,6 +1306,7 @@ const ConversationsSidebarInner = ({
   autoOpenConvId,
   forceEmpty = false,
   withOneTab = true,
+  tabsPersistKey,
 }: {
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
@@ -1309,12 +1316,20 @@ const ConversationsSidebarInner = ({
   /** Show the "One" tab. Off when the AI chat is reached from the page
    * header's One switch instead (the split-panel layout). */
   withOneTab?: boolean
+  /** Remember the active tab across reloads (SidebarTabs `persistKey`). */
+  tabsPersistKey?: string
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
-  const { setPanelContent, open, panelContent } = useAiChat()
+  const {
+    setPanelContent,
+    open,
+    panelContent,
+    restoringPanelContentId,
+    cancelPanelContentRestore,
+  } = useAiChat()
 
   // Clicking a conversation mounts it in the side panel (one at a time).
   const onSelect = useCallback(
@@ -1336,6 +1351,21 @@ const ConversationsSidebarInner = ({
       onSelect(autoOpenConvId)
     }
   }, [autoOpenConvId, onSelect])
+
+  // Reload restore: the panel persisted that a conversation was showing —
+  // re-mount it if it's still accessible (here: exists in the seeds, which
+  // load synchronously; a real host would wait for its channel list), or give
+  // up so the panel falls back to the AI chat.
+  const restored = useRef(false)
+  useEffect(() => {
+    if (!restoringPanelContentId || restored.current) return
+    restored.current = true
+    if (SEED_BY_ID.has(restoringPanelContentId)) {
+      onSelect(restoringPanelContentId)
+    } else {
+      cancelPanelContentRestore()
+    }
+  }, [restoringPanelContentId, onSelect, cancelPanelContentRestore])
 
   // Groups come from the shared mock store, so unread badges / presence / mute
   // are live and clear as conversations are read.
@@ -1361,8 +1391,9 @@ const ConversationsSidebarInner = ({
             onChange={setCompany}
           />
           <SidebarTabs
+            persistKey={tabsPersistKey}
             tabs={[
-              { id: "home", label: "Home", icon: Home },
+              { id: "home", label: "Menu", icon: Home },
               {
                 id: "messages",
                 label: "Chat",
@@ -1422,11 +1453,13 @@ const ConversationsSidebar = ({
   autoOpenConvId,
   forceEmpty,
   withOneTab,
+  tabsPersistKey,
 }: {
   initialTab?: string
   autoOpenConvId?: string
   forceEmpty?: boolean
   withOneTab?: boolean
+  tabsPersistKey?: string
 } = {}) => {
   return (
     <SidebarChatProvider>
@@ -1435,6 +1468,7 @@ const ConversationsSidebar = ({
         autoOpenConvId={autoOpenConvId}
         forceEmpty={forceEmpty}
         withOneTab={withOneTab}
+        tabsPersistKey={tabsPersistKey}
       />
     </SidebarChatProvider>
   )

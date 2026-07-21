@@ -168,4 +168,22 @@ describe("F0AiChat split panel (panelContentSide opposite the chat)", () => {
       expect(container.querySelector(".mr-auto")).not.toBeNull()
     )
   })
+
+  it("holds a skeleton while restoring the last conversation — no chat flash", async () => {
+    // A reload with a conversation showing: open persisted + its id pending.
+    localStorage.setItem("ONE-ai-chat-open", "true")
+    localStorage.setItem("ONE-ai-chat-panel-content-id", '"a"')
+    renderSplit()
+
+    // The hosted window shows a skeleton; the AI chat never flashes in.
+    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.queryByText("CHAT MESSAGES")).not.toBeInTheDocument()
+
+    // The host re-mounts the conversation → it fades in over the skeleton.
+    await userEvent.click(screen.getByText("show-a"))
+    expect(screen.getByText("FAKE A")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    )
+  })
 })

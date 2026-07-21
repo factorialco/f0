@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { TestProviders } from "@/testing/test-utils"
 
@@ -129,5 +129,104 @@ describe("AiChatStateProvider panel content", () => {
       result.current.setPanelContentSide("right")
     })
     expect(result.current.panelContentSide).toBe("right")
+  })
+})
+
+describe("AiChatStateProvider panel content restore", () => {
+  const ID_KEY = "ONE-ai-chat-panel-content-id"
+  const OPEN_KEY = "ONE-ai-chat-open"
+
+  beforeEach(() => {
+    localStorage.clear()
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  const seedReload = (id: string | null, open = true) => {
+    localStorage.setItem(OPEN_KEY, JSON.stringify(open))
+    localStorage.setItem(ID_KEY, JSON.stringify(id))
+  }
+
+  it("persists the hosted content id (and clears it with the content)", () => {
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    act(() => {
+      result.current.setPanelContent({ id: "conv", content: <div>Conv</div> })
+    })
+    expect(JSON.parse(localStorage.getItem(ID_KEY) ?? "null")).toBe("conv")
+
+    act(() => {
+      result.current.clearPanelContent()
+    })
+    expect(JSON.parse(localStorage.getItem(ID_KEY) ?? "null")).toBeNull()
+  })
+
+  it("reopening with persisted content id marks it as pending restore", () => {
+    seedReload("conv")
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    expect(result.current.open).toBe(true)
+    expect(result.current.panelContent).toBeNull()
+    expect(result.current.restoringPanelContentId).toBe("conv")
+    // The pending id survives the sync effect — a reload mid-restore would
+    // still know what to restore.
+    expect(JSON.parse(localStorage.getItem(ID_KEY) ?? "null")).toBe("conv")
+  })
+
+  it("does not restore when the panel was closed", () => {
+    seedReload("conv", false)
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+    expect(result.current.restoringPanelContentId).toBeNull()
+  })
+
+  it("setPanelContent completes the restore", () => {
+    seedReload("conv")
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    act(() => {
+      result.current.setPanelContent({ id: "conv", content: <div>Conv</div> })
+    })
+
+    expect(result.current.restoringPanelContentId).toBeNull()
+    expect(result.current.panelContent?.id).toBe("conv")
+  })
+
+  it("cancelPanelContentRestore falls back to the AI chat", () => {
+    seedReload("conv")
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    act(() => {
+      result.current.cancelPanelContentRestore()
+    })
+
+    expect(result.current.restoringPanelContentId).toBeNull()
+    expect(result.current.panelContent).toBeNull()
+    // The stale id is wiped so the next reload opens the chat directly.
+    expect(JSON.parse(localStorage.getItem(ID_KEY) ?? "null")).toBeNull()
+  })
+
+  it("closing the panel drops the pending restore", () => {
+    seedReload("conv")
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+
+    act(() => {
+      result.current.setOpen(false)
+    })
+
+    expect(result.current.restoringPanelContentId).toBeNull()
+  })
+
+  it("times out to the AI chat when the host never resolves", () => {
+    vi.useFakeTimers()
+    seedReload("conv")
+    const { result } = renderHook(() => useAiChat(), { wrapper })
+    expect(result.current.restoringPanelContentId).toBe("conv")
+
+    act(() => {
+      vi.advanceTimersByTime(5000)
+    })
+
+    expect(result.current.restoringPanelContentId).toBeNull()
   })
 })

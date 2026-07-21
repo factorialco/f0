@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useRef } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
+import { Skeleton } from "@/ui/skeleton"
 
 import { useAiChat } from "../../providers/AiChatStateProvider"
 import { SidebarWindow } from "./ChatWindow"
@@ -14,7 +15,8 @@ import { SidebarWindow } from "./ChatWindow"
  * window and uncovers the other in place.
  */
 export const HostedPanelWindow = () => {
-  const { open, panelContent, panelContentSide } = useAiChat()
+  const { open, panelContent, panelContentSide, restoringPanelContentId } =
+    useAiChat()
   const reducedMotion = useReducedMotion()
 
   // Keep the last content mounted through the swap-out: `panelContent` clears
@@ -22,11 +24,27 @@ export const HostedPanelWindow = () => {
   // content slides over it — an empty window would flash otherwise.
   const lastContentRef = useRef(panelContent)
   if (panelContent) lastContentRef.current = panelContent
-  const content = panelContent ?? lastContentRef.current
+  // While a reload's restore is pending, the window is already up showing a
+  // skeleton keyed to the restored id — the crossfade below then fades the
+  // real conversation in when the host re-mounts it.
+  const restoring =
+    !panelContent && restoringPanelContentId
+      ? {
+          id: restoringPanelContentId,
+          content: (
+            <Skeleton
+              role="status"
+              aria-busy={true}
+              className="h-full w-full rounded-none"
+            />
+          ),
+        }
+      : null
+  const content = panelContent ?? restoring ?? lastContentRef.current
 
   return (
     <SidebarWindow
-      visible={open && panelContent !== null}
+      visible={open && (panelContent !== null || restoring !== null)}
       side={panelContentSide}
       exitStyle={open ? "hold" : "shrink"}
     >

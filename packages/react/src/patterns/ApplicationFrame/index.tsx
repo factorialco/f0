@@ -192,6 +192,7 @@ function ApplicationFrameContent({
     panelSide,
     panelContent,
     panelContentSide,
+    restoringPanelContentId,
   } = useAiChat()
   const isAiChatFullscreen = visualizationMode === "fullscreen"
   const isCanvasMode = visualizationMode === "canvas"
@@ -203,8 +204,12 @@ function ApplicationFrameContent({
   // When hosted content docks to the other edge, each content gets its own
   // window and the layout follows whichever is up. With a single side (the
   // default) `activeSide` always equals `panelSide` and nothing changes.
+  // A pending reload-restore counts as content: the panel already shows its
+  // skeleton on the content side, so the layout reserves that edge from the
+  // first paint.
   const isSplitPanel = panelContentSide !== panelSide
-  const activeSide = panelContent ? panelContentSide : panelSide
+  const hasPanelContent = Boolean(panelContent || restoringPanelContentId)
+  const activeSide = hasPanelContent ? panelContentSide : panelSide
   const isActiveLeft = activeSide === "left"
 
   // Track fullscreen transitions for smooth exit animation
@@ -469,13 +474,13 @@ function ApplicationFrameContent({
                     <>
                       {panelContainer(
                         panelSide,
-                        !isSplitPanel || !panelContent,
+                        !isSplitPanel || !hasPanelContent,
                         <F0AiChat />
                       )}
                       {isSplitPanel &&
                         panelContainer(
                           panelContentSide,
-                          Boolean(panelContent),
+                          hasPanelContent,
                           <HostedPanelWindow />
                         )}
                     </>

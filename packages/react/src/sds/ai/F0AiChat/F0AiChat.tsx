@@ -7,6 +7,8 @@ import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { Skeleton } from "@/ui/skeleton"
+
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
@@ -116,6 +118,7 @@ const F0AiChatComponent = ({
     panelContent,
     panelSide,
     panelContentSide,
+    restoringPanelContentId,
   } = useAiChat()
   const translations = useI18n()
 
@@ -158,6 +161,17 @@ const F0AiChatComponent = ({
   if (panelContent && !splitPanel) {
     viewKey = `panel:${panelContent.id}`
     viewContent = panelContent.content
+  } else if (restoringPanelContentId && !splitPanel) {
+    // The panel reopened with hosted content pending restoration — hold a
+    // skeleton instead of flashing the AI chat while the host re-mounts it.
+    viewKey = `restoring:${restoringPanelContentId}`
+    viewContent = (
+      <Skeleton
+        role="status"
+        aria-busy={true}
+        className="h-full w-full rounded-none"
+      />
+    )
   } else if (mode === "voice" && VoiceMode) {
     viewKey = "voice"
     viewContent = (
@@ -198,7 +212,11 @@ const F0AiChatComponent = ({
     // main content covers it (exitStyle "hold" — `open` is still true), and a
     // real close (open false) keeps today's shrink exit.
     <SidebarWindow
-      visible={splitPanel ? open && !panelContent : undefined}
+      visible={
+        splitPanel
+          ? open && !panelContent && !restoringPanelContentId
+          : undefined
+      }
       exitStyle={splitPanel && open ? "hold" : "shrink"}
     >
       {/* Simultaneous crossfade: the outgoing view fades out while the next
