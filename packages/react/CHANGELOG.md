@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.46.0](https://github.com/factorialco/f0/compare/f0-react-v4.45.0...f0-react-v4.46.0) (2026-07-21)
+
+
+### Features
+
+* **F0Chat:** document previews, virtuoso transcript rewrite and optimistic status footer ([#4743](https://github.com/factorialco/f0/issues/4743)) ([3aaa5b2](https://github.com/factorialco/f0/commit/3aaa5b2f4bcb30a9f64541b7e094cb19de8e1074))
+
 ## [4.45.0](https://github.com/factorialco/f0/compare/f0-react-v4.44.0...f0-react-v4.45.0) (2026-07-21)
 
 
