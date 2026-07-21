@@ -13,39 +13,39 @@ describe("F0FileItem", () => {
     expect(screen.getByText("invoice-F001.pdf")).toBeInTheDocument()
   })
 
-  it("renders the date under the file name when provided", () => {
-    render(<F0FileItem file={file} date="09 June, 2026" />)
+  it("renders the subtitle under the file name when provided", () => {
+    render(<F0FileItem file={file} subtitle="09 June, 2026" />)
 
     expect(screen.getByText("09 June, 2026")).toBeInTheDocument()
   })
 
-  it("does not render a date node when the date is omitted", () => {
+  it("does not render a subtitle node when the subtitle is omitted", () => {
     render(<F0FileItem file={file} />)
 
     expect(screen.queryByText("09 June, 2026")).not.toBeInTheDocument()
   })
 
-  it("doubles the padding on both axes when a date is present (md)", () => {
-    const { container: withoutDate } = render(<F0FileItem file={file} />)
-    expect(withoutDate.firstChild).toHaveClass("py-0.5", "pl-0.5", "pr-1.5")
+  it("doubles the padding on both axes when a subtitle is present (md)", () => {
+    const { container: withoutSubtitle } = render(<F0FileItem file={file} />)
+    expect(withoutSubtitle.firstChild).toHaveClass("py-0.5", "pl-0.5", "pr-1.5")
 
-    const { container: withDate } = render(
-      <F0FileItem file={file} date="09 June, 2026" />
+    const { container: withSubtitle } = render(
+      <F0FileItem file={file} subtitle="09 June, 2026" />
     )
-    expect(withDate.firstChild).toHaveClass("py-1", "pl-1", "pr-3")
-    expect(withDate.firstChild).not.toHaveClass("py-0.5")
+    expect(withSubtitle.firstChild).toHaveClass("py-1", "pl-1", "pr-3")
+    expect(withSubtitle.firstChild).not.toHaveClass("py-0.5")
   })
 
-  it("doubles the padding on both axes when a date is present (lg)", () => {
-    const { container: withoutDate } = render(
+  it("doubles the padding on both axes when a subtitle is present (lg)", () => {
+    const { container: withoutSubtitle } = render(
       <F0FileItem file={file} size="lg" />
     )
-    expect(withoutDate.firstChild).toHaveClass("p-1")
+    expect(withoutSubtitle.firstChild).toHaveClass("p-1")
 
-    const { container: withDate } = render(
-      <F0FileItem file={file} size="lg" date="09 June, 2026" />
+    const { container: withSubtitle } = render(
+      <F0FileItem file={file} size="lg" subtitle="09 June, 2026" />
     )
-    expect(withDate.firstChild).toHaveClass("p-2")
-    expect(withDate.firstChild).not.toHaveClass("p-1")
+    expect(withSubtitle.firstChild).toHaveClass("p-2")
+    expect(withSubtitle.firstChild).not.toHaveClass("p-1")
   })
 })
