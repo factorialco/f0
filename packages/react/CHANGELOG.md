@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.46.3](https://github.com/factorialco/f0/compare/f0-react-v4.46.2...f0-react-v4.46.3) (2026-07-21)
+
+
+### Bug Fixes
+
+* **EditableTable:** render display-only cells without field icons ([#4739](https://github.com/factorialco/f0/issues/4739)) ([c3ca518](https://github.com/factorialco/f0/commit/c3ca518a5b385b77eea5403b9bd9b828eb7b6cf8))
+
 ## [4.46.2](https://github.com/factorialco/f0/compare/f0-react-v4.46.1...f0-react-v4.46.2) (2026-07-21)
 
 
