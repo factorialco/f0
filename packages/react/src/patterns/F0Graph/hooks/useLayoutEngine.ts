@@ -202,9 +202,11 @@ function computeTreeLayout(
 
     let cursor = crossStart
     let firstCenter = 0
+    let lastCenter = 0
     children.forEach((childId, idx) => {
       const result = layoutSubtree(childId, cursor, depth + 1)
       if (idx === 0) firstCenter = result.centerCross
+      lastCenter = result.centerCross
       // Use larger gap after branch children (their kids are "siblings of different parents")
       const isBranch = (childrenMap.get(childId)?.length ?? 0) > 0
       cursor = result.crossEnd + (isBranch ? subtreeGap : nodeSep)
@@ -213,15 +215,7 @@ function computeTreeLayout(
     const lastIsBranch = (childrenMap.get(lastChild)?.length ?? 0) > 0
     const subtreeEnd = cursor - (lastIsBranch ? subtreeGap : nodeSep)
 
-    // Parent-anchored layout: place the parent over its FIRST child, not over the
-    // midpoint of first/last child. This makes a node's cross position depend only
-    // on its left context (ancestors + left-siblings' widths), never on how many
-    // descendants it has. So expanding/collapsing a node keeps the node itself AND
-    // all its ancestors fixed — only its right-siblings shift to make room — which
-    // is the org-chart UX we want (the top of the tree stays put; expansion pushes
-    // peers aside). Trade-off: for a node with several children the parent sits
-    // above the leftmost child rather than centered over the whole fan.
-    let center = firstCenter
+    let center = (firstCenter + lastCenter) / 2
 
     // Guarantee the parent doesn't visually overflow its subtree.
     // If the children span is narrower than the parent itself (single
