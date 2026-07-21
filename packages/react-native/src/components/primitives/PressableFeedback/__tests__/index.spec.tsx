@@ -1,6 +1,7 @@
 import { render, fireEvent, screen } from "@testing-library/react-native"
 import React from "react"
 import { View, Text } from "react-native"
+import type { ReactTestRendererJSON } from "react-test-renderer"
 
 import { PressableFeedback } from "../"
 
@@ -263,7 +264,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
       expect(tree?.children?.length).toBeGreaterThan(1)
     })
@@ -275,7 +276,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
     })
 
@@ -286,7 +287,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
       expect(tree?.children?.length).toBeGreaterThan(1)
     })
@@ -298,7 +299,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
       expect(tree?.children?.length).toBe(1)
     })
@@ -312,7 +313,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
     })
 
@@ -326,7 +327,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
     })
 
@@ -340,7 +341,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
     })
 
@@ -351,7 +352,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
       expect(tree?.children?.length).toBe(1)
     })
@@ -392,7 +393,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
     })
 
@@ -404,7 +405,7 @@ describe("PressableFeedback", () => {
         </PressableFeedback>
       )
 
-      const tree = toJSON()
+      const tree = toJSON() as ReactTestRendererJSON | null
       expect(tree).toBeDefined()
     })
   })

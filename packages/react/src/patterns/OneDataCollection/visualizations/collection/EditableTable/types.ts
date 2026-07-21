@@ -60,12 +60,35 @@ export type DateCellConfig = {
   maxDate?: Date
 }
 
+/** The HTML-ish input type of a text cell. Drives a default leading icon. */
+export type TextCellInputType = "text" | "email" | "url" | "tel"
+
+export type TextCellConfig = {
+  /**
+   * Input type passed to the underlying text input. Also selects a default
+   * leading icon (`url` → link, `email` → envelope) matching F0Form's text
+   * fields. Defaults to `"text"`.
+   */
+  inputType?: TextCellInputType
+  /**
+   * Leading icon. Overrides the default derived from `inputType`; pass to add
+   * an icon to a plain text cell or replace the url/email default.
+   */
+  icon?: IconType
+}
+
 export type NumberCellConfig<R extends RecordType = RecordType> = {
   min?: number
   max?: number
   step?: number
   maxDecimals?: number
   locale?: string
+  /**
+   * Show the locale's thousands separators in the resting display (grouped
+   * while blurred, ungrouped while editing). Defaults to `true`; set `false`
+   * for numbers that shouldn't be grouped (years, IDs, …).
+   */
+  grouping?: boolean
   /**
    * Unit label displayed next to the number input.
    * Can be a static string (e.g. `"h"`) or a function that receives the
@@ -147,6 +170,11 @@ export type EditableTableColumnDefinition<
    * function whose return value isn't statically known.
    */
   selectConfig?: SelectCellConfig<R>
+  /**
+   * Configuration for `"text"` cells. Sets the input type and an optional
+   * leading icon (url/email get one by default).
+   */
+  textConfig?: TextCellConfig
   /**
    * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
    * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.

@@ -27,7 +27,7 @@ const F0AudioPlayerCardBase = forwardRef<
     actions,
     className,
     src,
-    preload = "metadata",
+    preload,
     autoPlay = false,
     disabled = false,
     ariaLabel,
@@ -65,15 +65,15 @@ const F0AudioPlayerCardBase = forwardRef<
       role="group"
       aria-label={ariaLabel ?? title}
       className={cn(
-        "flex flex-col gap-2.5 rounded-2xl border border-solid border-f1-border bg-f1-background p-3",
+        "flex flex-col gap-2.5 rounded-2xl border border-solid border-f1-border-secondary bg-f1-background p-3",
         className
       )}
       {...dataAttributes}
     >
       <audio
         ref={controller.audioRef}
-        src={src}
-        preload={preload}
+        src={controller.currentSrc}
+        preload={preload ?? (typeof src === "function" ? "none" : "metadata")}
         autoPlay={autoPlay}
       />
 

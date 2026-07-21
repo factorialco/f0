@@ -31,6 +31,11 @@ export type ButtonDropdownItem<T = string> = {
    * The description of the item.
    */
   description?: string
+  /**
+   * Whether the item is disabled.
+   * @default false
+   */
+  disabled?: boolean
 }
 
 export type ButtonDropdownGroup<T = string> = {

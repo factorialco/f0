@@ -244,3 +244,55 @@ export const LongLabels: Story = {
     ],
   },
 }
+
+/**
+ * Items flagged `removable` reveal a trash button on hover (alongside the
+ * visibility switch) when an `onRemove` handler is provided. Removing is
+ * distinct from hiding — it asks the caller to drop the column entirely. The
+ * locked first column is not removable.
+ */
+export const WithRemovableItems: Story = {
+  args: {
+    allowSorting: true,
+    allowHiding: true,
+    // eslint-disable-next-line no-console -- story action
+    onRemove: (item) => console.log("remove", item.id),
+    items: [
+      {
+        id: "name",
+        label: "Name",
+        sortable: false,
+        canHide: false,
+        visible: true,
+        order: 1,
+      },
+      {
+        id: "email",
+        label: "Email",
+        sortable: true,
+        canHide: true,
+        visible: true,
+        removable: true,
+        order: 2,
+      },
+      {
+        id: "role",
+        label: "Role",
+        sortable: true,
+        canHide: true,
+        visible: true,
+        removable: true,
+        order: 3,
+      },
+      {
+        id: "department",
+        label: "Department",
+        sortable: true,
+        canHide: true,
+        visible: false,
+        removable: true,
+        order: 4,
+      },
+    ],
+  },
+}

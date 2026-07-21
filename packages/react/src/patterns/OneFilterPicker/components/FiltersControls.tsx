@@ -22,13 +22,13 @@ import { FilterContent } from "./FilterContent"
 import { FilterList } from "./FilterList"
 
 interface FiltersControlsProps<Filters extends FiltersDefinition> {
-  /** Filters shown in the picker list (excludes `hideSelector` filters). */
+  /** The filters shown in the selector list (excludes `hideSelector` filters). */
   filters: Filters
   /**
-   * Full filters definition, including `hideSelector` filters — the target
-   * keys of nested subfilters. Values applied/cleared are resolved against
-   * this definition so nested selections survive Apply. Falls back to
-   * `filters` when not provided.
+   * The complete filter definition, including `hideSelector` filters (e.g. the
+   * sibling keys that hold nested/grouped child selections). Used when computing
+   * the value to apply so nested selections aren't dropped. Falls back to
+   * `filters` when omitted.
    */
   allFilters?: Filters
   value: FiltersState<Filters>
@@ -53,9 +53,11 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   mode = "default",
   displayCounter = false,
 }: FiltersControlsProps<Filters>) {
-  // Applied/cleared values must be resolved against the full definition, or
-  // nested-subfilter selections (stored under hidden filter keys) get dropped.
-  const applicableFilters = allFilters ?? filters
+  // The value to emit must consider every filter — including `hideSelector`
+  // siblings that store nested/grouped selections — otherwise those selections
+  // are dropped when applying. Display concerns (list, counter, tooltip) stay on
+  // the visible `filters` set.
+  const filtersForValue = allFilters ?? filters
   const firstFilterKey = (Object.keys(filters)[0] as keyof Filters) ?? null
   const [selectedFilterKey, setSelectedFilterKey] = useState<
     keyof Filters | null
@@ -122,21 +124,19 @@ export function FiltersControls<Filters extends FiltersDefinition>({
   const handleApplyFilters = () => {
     // Emit only active filters so a cleared set is applied as `{}` (unfiltered),
     // not `{ key: emptyValue }` which could make the data source return nothing.
-    onChange(getActiveFiltersValue(applicableFilters, localFiltersValue, i18n))
+    onChange(getActiveFiltersValue(filtersForValue, localFiltersValue, i18n))
     onOpenChange(false)
   }
 
   const handleClearFilters = () => {
-    setLocalFiltersValue(getClearedFiltersValue(applicableFilters))
+    setLocalFiltersValue(getClearedFiltersValue(filtersForValue))
   }
 
   const handleGoBack = () => {
     if (selectedFilterKey) {
       setSelectedFilterKey(null)
     } else {
-      onChange(
-        getActiveFiltersValue(applicableFilters, localFiltersValue, i18n)
-      )
+      onChange(getActiveFiltersValue(filtersForValue, localFiltersValue, i18n))
       onOpenChange(false)
     }
   }

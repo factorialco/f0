@@ -3,23 +3,42 @@ import type { ReactNode } from "react"
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
 import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 
-/** Tag types that can be rendered in a node's metadata row. */
+/** The built-in tag visual types that can be rendered in a node's metadata row. */
 export type F0GraphNodeTagType = TagVariant["type"]
 
 /**
- * Optional human-readable label per `TagVariant` `type`. Used as the metadata
- * row label inside the node's hover card (see [[F0GraphNodeHoverCard]]).
+ * Identifies the show/hide column a tag belongs to. A column defaults to the
+ * tag's visual `type` (`"raw"`, `"status"`, …) but can be any custom string, so
+ * two tags sharing a `type` — e.g. two `raw` pills — can occupy independent
+ * columns with their own toggle, label and default visibility.
  */
-export interface F0GraphNodeTagLabels {
-  person?: string
-  team?: string
-  company?: string
-  status?: string
-  alert?: string
-  balance?: string
-  dot?: string
-  raw?: string
+export type F0GraphNodeTagColumn = string
+
+/**
+ * A tag rendered in a node's metadata row. Its visual is driven by the
+ * `TagVariant` `type`; its column identity — which toggle/label/default-
+ * visibility bucket it falls into — is `column ?? type`.
+ */
+export type F0GraphNodeTag = TagVariant & {
+  /**
+   * Optional column identity, decoupling this tag's show/hide toggle, hover-
+   * card label and default visibility from its visual `type`. Defaults to
+   * `type` when omitted. Use it to give two tags of the same `type` (e.g. a
+   * second `raw` pill) their own independent column.
+   */
+  column?: F0GraphNodeTagColumn
 }
+
+/** The column a tag belongs to: its explicit `column`, else its visual `type`. */
+export const tagColumn = (tag: F0GraphNodeTag): F0GraphNodeTagColumn =>
+  tag.column ?? tag.type
+
+/**
+ * Optional human-readable label per tag column. Used as the metadata row label
+ * inside the node's hover card (see [[F0GraphNodeHoverCard]]). Keyed by the
+ * built-in tag types plus any custom `column` keys (see [[F0GraphNodeTag]]).
+ */
+export type F0GraphNodeTagLabels = Partial<Record<F0GraphNodeTagColumn, string>>
 
 export const graphNodeVariants = ["detail", "compact", "dot"] as const
 export type GraphNodeVariant = (typeof graphNodeVariants)[number]
@@ -68,14 +87,15 @@ export interface F0GraphNodeProps {
    * only). Every tag is rendered individually — tags are never grouped or
    * collapsed, even when several share the same `type`.
    */
-  tags?: TagVariant[]
+  tags?: F0GraphNodeTag[]
   /**
-   * Set of tag types that should be rendered. When provided, tags whose
-   * `type` is not in the set are filtered out. When omitted, all tags are
-   * rendered. Used by the parent `<F0Graph>` per-type visibility toggles.
+   * Set of tag columns that should be rendered. When provided, tags whose
+   * column (`column ?? type`) is not in the set are filtered out. When
+   * omitted, all tags are rendered. Used by the parent `<F0Graph>` per-column
+   * visibility toggles.
    */
-  visibleTagTypes?: ReadonlySet<F0GraphNodeTagType>
-  /** Optional per-type labels, used as metadata row labels in the hover card. */
+  visibleTagTypes?: ReadonlySet<F0GraphNodeTagColumn>
+  /** Optional per-column labels, used as metadata row labels in the hover card. */
   tagLabels?: F0GraphNodeTagLabels
   /**
    * Floating toolbar shown above the node when it is selected (detail

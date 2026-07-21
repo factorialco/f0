@@ -116,7 +116,11 @@ const InputInternal = ({
       {...props}
       {...(type === "private" ? passwordManagerAvoidance : {})}
       type={localType}
-      onChange={(value) => props.onChange?.(value)}
+      // Email addresses are case-insensitive, so normalise to lowercase as the
+      // user types (lowercasing preserves length, so the caret doesn't jump).
+      onChange={(value) =>
+        props.onChange?.(type === "email" ? value.toLowerCase() : value)
+      }
       onKeyDown={(event) => {
         if (event.key === "Enter") {
           onPressEnter?.()

@@ -281,10 +281,19 @@ export const WithActions: Story = {
 export const WithActionsAndLink: Story = {
   args: {
     ...WithActions.args,
+    link: "/",
     secondaryActions: {
       label: "View more",
       href: "/",
       target: "_blank",
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "The whole card navigates via `link`, except the footer — clicking around the footer actions never triggers card navigation.",
+      },
     },
   },
 }

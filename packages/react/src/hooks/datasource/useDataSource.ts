@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from "react"
 
 import { useDeepCompareEffect } from "@reactuses/core"
 import { useEffect, useMemo, useState } from "react"
-import { useDebounceValue } from "usehooks-ts"
+import { useDebouncedState } from "../useDebouncedState"
 
 import {
   DataSource,
@@ -156,7 +156,9 @@ export function useDataSource<
 
   const [currentSearch, setCurrentSearch] = useState<string | undefined>()
 
-  const [debouncedCurrentSearch, setDebouncedCurrentSearch] = useDebounceValue<
+  // setTimeout-based debounce: usehooks-ts' useDebounceValue (lodash) stalls
+  // under frozen clocks and can fire its trailing timer after unmount.
+  const [debouncedCurrentSearch, setDebouncedCurrentSearch] = useDebouncedState<
     string | undefined
   >(currentSearch, 200)
 

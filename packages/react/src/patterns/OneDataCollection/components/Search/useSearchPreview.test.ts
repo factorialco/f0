@@ -61,6 +61,39 @@ describe("useSearchPreview", () => {
     expect(onSelect).toHaveBeenCalledWith(people[1])
   })
 
+  it("bumps selectionNonce on every pick, including a repeat of the same record", async () => {
+    const preview = buildPreview(vi.fn())
+    const { result, rerender } = renderHook(
+      ({ query }) => useSearchPreview(preview, query),
+      { initialProps: { query: "" as string | undefined } }
+    )
+
+    rerender({ query: "alan" })
+    await waitFor(() => expect(result.current.results).toHaveLength(1))
+
+    expect(result.current.selectionNonce).toBe(0)
+    act(() => result.current.onSelect("2"))
+    expect(result.current.selectionNonce).toBe(1)
+    // Re-picking the same record still advances the nonce, so a consumer can
+    // re-fire (e.g. re-center the graph) even though its derived id is unchanged.
+    act(() => result.current.onSelect("2"))
+    expect(result.current.selectionNonce).toBe(2)
+  })
+
+  it("does not bump selectionNonce when the id matches no loaded record", async () => {
+    const preview = buildPreview(vi.fn())
+    const { result, rerender } = renderHook(
+      ({ query }) => useSearchPreview(preview, query),
+      { initialProps: { query: "" as string | undefined } }
+    )
+
+    rerender({ query: "alan" })
+    await waitFor(() => expect(result.current.results).toHaveLength(1))
+
+    act(() => result.current.onSelect("does-not-exist"))
+    expect(result.current.selectionNonce).toBe(0)
+  })
+
   it("clears results when the query is empty", async () => {
     const preview = buildPreview(vi.fn())
     const { result, rerender } = renderHook(

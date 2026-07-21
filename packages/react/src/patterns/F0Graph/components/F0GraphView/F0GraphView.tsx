@@ -8,9 +8,12 @@ import {
   type NodeTypes,
 } from "@xyflow/react"
 import {
+  type ForwardedRef,
   type ReactNode,
   memo,
+  useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -23,6 +26,7 @@ import {
   EMPTY_HIGHLIGHTED_NODES,
   FIT_VIEW_PADDING_LOOSE,
   FOCUS_SETTLE_DELAY_MS,
+  INITIAL_FOCUS_MAX_ZOOM,
   LARGE_GRAPH_SNAP_THRESHOLD,
   NODE_CLICK_DISTANCE_SQ,
 } from "../../constants"
@@ -35,7 +39,11 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
-import type { F0GraphNodeRenderContext, F0GraphProps } from "../../F0Graph"
+import type {
+  F0GraphHandle,
+  F0GraphNodeRenderContext,
+  F0GraphProps,
+} from "../../F0Graph"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
 import { useGraphRenderModel } from "../../hooks/useGraphRenderModel"
@@ -44,17 +52,24 @@ import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useLazyTree } from "../../hooks/useLazyTree"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
+import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
 import { ClickSpark } from "../../internal/ClickSpark"
 import {
   F0GraphCollapserWrapper,
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
 } from "../../internal/ReactFlowAdapters"
-import type { GraphEdge, GraphNode, LayoutDirection } from "../../types"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+} from "../../types"
+import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
-import type { F0GraphNodeTagType } from "../F0GraphNode"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {
@@ -116,8 +131,11 @@ const customEdgeTypes: EdgeTypes = {
 }
 
 // ─── View (consumes ReactFlow hooks via the provider in the shell) ─────────
-export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
+export function F0GraphView<T = unknown>(
+  props: F0GraphProps<T> & { handleRef?: ForwardedRef<F0GraphHandle> }
+) {
   const {
+    handleRef,
     nodes: nodesProp,
     edges: edgesProp,
     rootNodes,
@@ -142,6 +160,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onSelectedNodesChange,
     onPaneClick: onPaneClickProp,
     focusedNode,
+    initialFocusNodeId,
     highlightedNodes: highlightedProp,
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
@@ -155,6 +174,11 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     defaultVisibleTagTypes,
     reserveTagRow,
     onVisibleNodesChange,
+    onRenderedNodesChange,
+    enableNodeWindowing,
+    nodeWindowPadding,
+    loadVisibleNodeData,
+    visibleDataDebounceMs,
     layoutEngine: layoutEngineProp,
     controlLabels,
     currentUserNodeId,
@@ -173,7 +197,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
   const visibleTagTypesArr =
     controlledVisibleTagTypes ?? defaultVisibleTagTypes ?? nodeTagTypes ?? []
   const visibleTagTypesSet = useMemo(
-    () => new Set<F0GraphNodeTagType>(visibleTagTypesArr),
+    () => new Set<F0GraphNodeTagColumn>(visibleTagTypesArr),
     [visibleTagTypesArr]
   )
 
@@ -269,15 +293,35 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onExpandedNodesChange,
   })
 
+  // Full-layout accessors for windowing-aware navigation. Populated from the
+  // render model below; read through refs so `useGraphViewport` (called first,
+  // to break the zoomLevel⇄bounds cycle) always sees the latest values.
+  const contentBoundsRef = useRef<{
+    x: number
+    y: number
+    width: number
+    height: number
+  } | null>(null)
+  const getNodePositionRef = useRef<(id: string) => PositionedNode | undefined>(
+    () => undefined
+  )
+  const getContentBounds = useMemo(() => () => contentBoundsRef.current, [])
+  const getNodePositionStable = useMemo(
+    () => (id: string) => getNodePositionRef.current(id),
+    []
+  )
+
   // ── Viewport zoom + control handlers ──
   const {
     currentZoom,
     zoomLevel,
+    viewportReady,
     handleViewportChange,
     handleZoomIn,
     handleZoomOut,
     handleFitView,
     handleFocusUser,
+    centerOnNode,
   } = useGraphViewport({
     defaultZoom,
     zoomPreset,
@@ -285,6 +329,9 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     currentUserNodeId,
     onZoomLevelChange,
     onViewportChange,
+    nodeWindowingActive: enableNodeWindowing ?? false,
+    getContentBounds,
+    getNodePosition: getNodePositionStable,
   })
 
   // ── Selection + roving-tabindex focus ──
@@ -310,6 +357,23 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
 
   const highlightedNodes = highlightedProp ?? EMPTY_HIGHLIGHTED_NODES
 
+  // Keep the toggled node visually fixed on collapse/expand: when the layout
+  // repositions the anchor, pan the camera by the same delta (in screen px)
+  // rather than offsetting node positions — no snap-back, and reveal/fit keep
+  // reading raw positions. Runs before paint (React Flow's `setViewport` is
+  // synchronous), so there is no flicker.
+  const handleAnchorReflow = useCallback(
+    (dx: number, dy: number) => {
+      const vp = reactFlow.getViewport()
+      reactFlow.setViewport({
+        x: vp.x + dx * vp.zoom,
+        y: vp.y + dy * vp.zoom,
+        zoom: vp.zoom,
+      })
+    },
+    [reactFlow]
+  )
+
   // ── React Flow render model (layout + anchor + rf nodes/edges) ──
   const {
     visibleTreeNodes,
@@ -317,11 +381,16 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     rfEdges,
     reservedTagHeight,
     tagsAffectLayout,
+    renderedNodeCount,
+    renderedNodeIds,
+    contentBounds,
+    getNodePosition,
   } = useGraphRenderModel<T>({
     roots,
     nodeMap,
     expandedNodes,
     anchorNodeRef,
+    onAnchorReflow: handleAnchorReflow,
     resolvedEdgesProp,
     stableRenderNode,
     nodeTagTypes,
@@ -334,7 +403,15 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     direction,
     controlLabels,
     hoveredEdgeId,
+    // Gate windowing on the first settled viewport so the mount-time `fitView`
+    // frames the whole graph before the camera decides which nodes to keep.
+    enableNodeWindowing: (enableNodeWindowing ?? false) && viewportReady,
+    nodeWindowPadding,
   })
+
+  // Expose the full layout to the windowing-aware navigation handlers above.
+  contentBoundsRef.current = contentBounds
+  getNodePositionRef.current = getNodePosition
 
   // Empty-canvas click: clear our own selection/focus and let the consumer
   // clear any controlled highlight/focus (e.g. a search/"find me" reveal).
@@ -364,20 +441,117 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
     onVisibleNodesChange?.(visibleTreeNodes.length)
   }, [visibleTreeNodes.length, onVisibleNodesChange])
 
-  // ── Fly to the consumer-controlled focused node ──
+  // Notify parent of the count actually handed to React Flow (post-windowing)
   useEffect(() => {
-    if (focusedNode) {
-      // Slight delay to allow layout to settle
-      const timer = setTimeout(() => {
-        reactFlow.fitView({
-          nodes: [{ id: focusedNode }],
-          duration: 300,
-          padding: FIT_VIEW_PADDING_LOOSE,
-        })
-      }, FOCUS_SETTLE_DELAY_MS)
-      return () => clearTimeout(timer)
-    }
-  }, [focusedNode, reactFlow])
+    onRenderedNodesChange?.(renderedNodeCount)
+  }, [renderedNodeCount, onRenderedNodesChange])
+
+  // Viewport-driven data loading: request rich data for on-screen nodes.
+  // With windowing, hold off until the viewport has settled — before then
+  // `renderedNodeIds` is the full (un-windowed) set, and flushing it would
+  // request the whole tree on mount instead of just what's on screen.
+  useViewportDataLoader({
+    nodeIds: renderedNodeIds,
+    loadVisibleNodeData,
+    debounceMs: visibleDataDebounceMs,
+    enabled: !enableNodeWindowing || viewportReady,
+  })
+
+  // Initial frame: when `initialFocusNodeId` is set, open framed on that node
+  // AND its direct children (capped zoom) so the first level is visible —
+  // instead of fit-to-all, and without zooming in on the single node. Frozen at
+  // the first render with nodes present so the fit reads a stable value; falls
+  // back to fit-all when the target isn't present.
+  const initialFitRef = useRef<
+    { nodes: Array<{ id: string }>; maxZoom: number } | undefined
+  >(undefined)
+  const initialFitResolvedRef = useRef(false)
+  if (!initialFitResolvedRef.current && renderedNodeIds.length > 0) {
+    initialFitResolvedRef.current = true
+    const childIds = initialFocusNodeId
+      ? (nodeMap.get(initialFocusNodeId)?.children.map((c) => c.id) ?? [])
+      : []
+    const nodes = resolveInitialFitViewNodes(
+      initialFocusNodeId,
+      childIds,
+      new Set(renderedNodeIds)
+    )
+    initialFitRef.current = nodes
+      ? { nodes, maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom) }
+      : undefined
+  }
+  const initialFitViewOptions = initialFitRef.current
+
+  // Apply the initial frame exactly once, imperatively — never via React Flow's
+  // `fitView` prop. That prop queues a fit deferred until the container/nodes
+  // are measured, and once it fires it clears `fitViewOptions`; a later layout
+  // change (the first collapse/expand) then re-fires it as a fit-all, snapping
+  // the focused node away. Fitting ourselves, guarded by a ref, guarantees a
+  // single fit framed on `initialFitViewOptions` and no re-fit on any later
+  // layout change. Consumer-driven reveals still fly via the effect below.
+  const didInitialFitRef = useRef(false)
+  useEffect(() => {
+    if (didInitialFitRef.current || renderedNodeIds.length === 0) return
+    didInitialFitRef.current = true
+    reactFlow.fitView(initialFitViewOptions)
+  }, [renderedNodeIds.length, initialFitViewOptions, reactFlow])
+
+  // ── Fly to the consumer-controlled focused node ──
+  // Latest fly-to logic, read via a ref so the effect below depends ONLY on
+  // `focusedNode`. Otherwise the effect would re-run on every layout-affecting
+  // change (collapse/expand recomputes `centerOnNode`'s identity) and re-center
+  // on the same node even though the focus never changed.
+  const flyToFocusedRef = useRef<(id: string) => void>(() => {})
+  flyToFocusedRef.current = (id: string) => {
+    // Windowing: the target may be off-screen and absent from React Flow's
+    // store, so center on its layout position instead of an id-based fitView
+    // (which silently no-ops for a missing node).
+    if (enableNodeWindowing && centerOnNode(id, 300)) return
+    // Frame the node together with its (present) direct children and cap the
+    // zoom, so navigation lands with surrounding context instead of zooming a
+    // single node to `maxZoom` (2×) — same framing as the `initialFocusNodeId`
+    // first frame.
+    const childIds = nodeMap.get(id)?.children.map((c) => c.id) ?? []
+    const framed = resolveInitialFitViewNodes(
+      id,
+      childIds,
+      new Set(renderedNodeIds)
+    )
+    reactFlow.fitView({
+      nodes: framed ?? [{ id }],
+      duration: 300,
+      padding: FIT_VIEW_PADDING_LOOSE,
+      maxZoom: Math.min(INITIAL_FOCUS_MAX_ZOOM, maxZoom),
+    })
+  }
+  useEffect(() => {
+    if (!focusedNode) return
+    // Fires only when `focusedNode` transitions to a new value (entry,
+    // search-select, "Find me") — never on layout re-renders while it's
+    // unchanged. Slight delay so the layout settles before flying.
+    const target = focusedNode
+    const timer = setTimeout(
+      () => flyToFocusedRef.current(target),
+      FOCUS_SETTLE_DELAY_MS
+    )
+    return () => clearTimeout(timer)
+  }, [focusedNode])
+
+  // Imperative API: `focusNode` fires on every call, independent of prop
+  // values, so a consumer's search can re-center on the same node the user
+  // picks twice (the `focusedNode` prop can't — an unchanged value never
+  // re-runs its effect). `clearSelection` lets the consumer drop the click ring
+  // when it marks a node another way (e.g. a search / "Find me" highlight).
+  const clearSelectionRef = useRef<() => void>(() => {})
+  clearSelectionRef.current = clearSelection
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      focusNode: (nodeId: string) => flyToFocusedRef.current(nodeId),
+      clearSelection: () => clearSelectionRef.current(),
+    }),
+    []
+  )
 
   // ── Split context values (wrappers subscribe to only what they need) ──
   const zoomContextValue = useMemo(
@@ -408,6 +582,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       // Only publish a Set when the consumer opted in via `nodeTagTypes`.
       visibleTagTypes: nodeTagTypes ? visibleTagTypesSet : undefined,
       deferredLoading: isDeferredLoading || undefined,
+      dataLoadingEnabled: loadVisibleNodeData !== undefined || undefined,
       tagRowHeight: reservedTagHeight,
       largeGraph: visibleTreeNodes.length > LARGE_GRAPH_SNAP_THRESHOLD,
     }),
@@ -416,6 +591,7 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
       nodeTagTypes,
       visibleTagTypesSet,
       isDeferredLoading,
+      loadVisibleNodeData,
       visibleTreeNodes.length,
       tagsAffectLayout,
       reservedTagHeight,
@@ -512,7 +688,9 @@ export function F0GraphView<T = unknown>(props: F0GraphProps<T>) {
                           ge?.onEdgeClick?.(ge)
                         }}
                         proOptions={{ hideAttribution: true }}
-                        fitView
+                        // No `fitView` prop: the initial frame is applied once,
+                        // imperatively (see `didInitialFitRef` above), so a later
+                        // layout change can never re-fire React Flow's queued fit.
                         nodesDraggable={false}
                         nodesConnectable={false}
                         elementsSelectable={false}

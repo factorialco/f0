@@ -1,4 +1,4 @@
-// Mock data for the "Creation with AI" co-creation story — the collection
+// Mock data for the "Walkthrough" co-creation story — the collection
 // records, filters, sortings, data adapter, and visualization backing the
 // Surveys tab. Pure data; consumed by FlowContent's OneDataCollection source.
 

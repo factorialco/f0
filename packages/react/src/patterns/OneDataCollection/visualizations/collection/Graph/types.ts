@@ -1,10 +1,13 @@
 import type { ReactNode } from "react"
 
 import type { AvatarVariant } from "@/components/avatars/F0Avatar"
-import type { TagVariant } from "@/components/tags/F0Tag/F0Tag"
 import type { RecordType } from "@/hooks/datasource"
 import type { SortingsDefinition } from "@/hooks/datasource/types/sortings.typings"
-import type { F0GraphNodeTagType, ZoomPreset } from "@/patterns/F0Graph"
+import type {
+  F0GraphNodeTag,
+  F0GraphNodeTagColumn,
+  ZoomPreset,
+} from "@/patterns/F0Graph"
 import type {
   FiltersDefinition,
   FiltersState,
@@ -29,19 +32,24 @@ export type GraphVisualizationOptions<
   subtitle?: (record: R) => string
   /** Avatar shown on the leading side of the node pill. */
   avatar?: (record: R) => AvatarVariant
-  /** Tags rendered in the node metadata row. */
-  tags?: (record: R) => TagVariant[]
   /**
-   * Tag types present on the nodes. When provided, the controls bar gains a
-   * toggle to show/hide each metadata type (like configuring table columns).
+   * Tags rendered in the node metadata row. A tag may set `column` to place it
+   * in its own show/hide column independent of its visual `type` (e.g. a second
+   * `raw` pill that must not merge into the first `raw` column).
    */
-  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>
-  /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>
-  /** Tag types that are always visible and cannot be hidden in the settings. */
-  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>
+  tags?: (record: R) => F0GraphNodeTag[]
+  /**
+   * Tag columns present on the nodes. When provided, the controls bar gains a
+   * toggle to show/hide each metadata column (like configuring table columns).
+   * Values are tag `column` keys (or `type` when a tag has no `column`).
+   */
+  nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+  nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>
+  /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+  defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
+  /** Tag columns that are always visible and cannot be hidden in the settings. */
+  pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>
   /**
    * Floating toolbar shown above a node while it is selected. Provide the
    * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -70,6 +78,16 @@ export type GraphVisualizationOptions<
    */
   revealNodeId?: string
   /**
+   * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+   * root of their branch): when the tree first becomes ready, its ancestor
+   * path is loaded/expanded and the viewport centers on it. Unlike
+   * `revealNodeId` (which is ignored on entry so search stays clean), this is
+   * the opt-in "open the org chart already looking at me" behaviour. Requires
+   * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+   * the default entry view (roots expanded to `defaultExpandDepth`).
+   */
+  focusOnEntry?: string
+  /**
    * Resolves the ancestor path (root → … → matched node) for a node so it can
    * be revealed, returning the records in root-first order. Required for
    * revealing nodes in branches that have not been expanded yet.
@@ -77,6 +95,47 @@ export type GraphVisualizationOptions<
   loadNodePath?: (nodeId: string) => Promise<R[]>
   /** Optional parent accessor used when linking the revealed ancestor path. */
   getParentId?: (record: R) => string | null
+  /**
+   * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+   * built from whatever lightweight records `childrenFilters`/`fetchData`
+   * return, and the full record is fetched — batched, once per node — only for
+   * the nodes that enter the viewport, via this loader. The returned records
+   * replace each node's `data` (matched by node id) and clear its loading
+   * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+   * eager behavior (structure and data fetched together per expansion).
+   *
+   * The "lightness" of the initial records is entirely the source's choice and
+   * transparent to the hook — no special adapter mode is required.
+   */
+  loadNodeData?: (ids: string[]) => Promise<R[]>
+  /**
+   * Apply targeted updates to the already-loaded tree **in place**, without the
+   * full reset (and collapse to `defaultExpandDepth`) that a filter change
+   * triggers. Use it to reflect real-time / collaborative changes while keeping
+   * the user's current expansion and viewport.
+   *
+   * Bump `version` to apply a batch **once** (the number dedups against React
+   * re-renders — reuse the same object identity freely):
+   * - `upsert` records are matched by node id: an existing node has its `data`,
+   *   `childrenCount` and parent refreshed (re-parenting if `getParentId`
+   *   returns a new parent); an unknown record is inserted when it is attachable
+   *   (a root, or its parent is already in the tree — a child of a not-yet-loaded
+   *   parent will appear when that parent is expanded).
+   * - `remove` ids are dropped together with their descendants, and pruned from
+   *   the expanded set.
+   *
+   * Applying a batch never re-fetches and never collapses; it reconciles the
+   * nodes already in memory. The parents whose child set the batch touches (the
+   * old and new parent of a move, the parent of a removal) have their
+   * `childrenCount`/`childrenLoaded` reconciled locally from the in-memory tree
+   * — send only the records that changed; upserting the affected parents too is
+   * allowed but not required.
+   */
+  liveUpdate?: {
+    version: number
+    upsert?: R[]
+    remove?: string[]
+  }
   /**
    * Id of the node representing the current user. When set, a "Find me" button
    * is shown in the controls that centers the viewport on that node.
@@ -94,4 +153,20 @@ export type GraphVisualizationOptions<
   maxZoom?: number
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
+  /**
+   * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+   * the viewport are handed to React Flow — for very large trees (thousands of
+   * expand-visible nodes). Off by default; non-breaking.
+   */
+  enableNodeWindowing?: boolean
+  /** Flow-space px kept materialized around the viewport (pass-through). */
+  nodeWindowPadding?: number
+  /**
+   * Viewport-driven data loading (pass-through). Called (debounced + batched)
+   * with the ids of nodes that entered the viewport, so the consumer can
+   * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+   */
+  loadVisibleNodeData?: (ids: string[]) => void
+  /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+  visibleDataDebounceMs?: number
 }

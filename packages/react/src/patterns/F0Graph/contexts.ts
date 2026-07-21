@@ -145,13 +145,20 @@ export interface F0GraphRenderConfigContextValue {
    * `visibleTagTypes` props and the controls popover.
    */
   visibleTagTypes?: ReadonlySet<
-    import("./components/F0GraphNode").F0GraphNodeTagType
+    import("./components/F0GraphNode").F0GraphNodeTagColumn
   >
   /**
    * `true` while a deferred payload is still loading. Used by
    * F0GraphNodeWrapper to set `deferredLoading` on the render context.
    */
   deferredLoading?: boolean
+
+  /**
+   * `true` when viewport-driven data loading is active (`loadVisibleNodeData`
+   * provided). The node wrapper combines this with each node's `dataLoaded`
+   * flag to set `dataLoading` on the render context.
+   */
+  dataLoadingEnabled?: boolean
 
   /**
    * Height of the tag row reserved in the node rect by the layout engine.

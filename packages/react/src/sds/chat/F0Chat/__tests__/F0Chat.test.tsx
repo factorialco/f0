@@ -110,6 +110,36 @@ describe("F0Chat", () => {
     expect(screen.getByText("Hi back")).toBeInTheDocument()
   })
 
+  it("renders a system item as a centered row with person tags and no delivery footer", () => {
+    renderChat(
+      makeRuntime({
+        messages: [
+          ...messages,
+          {
+            type: "system",
+            id: "s1",
+            createdAt: now,
+            system: {
+              event: "member.added",
+              members: [{ id: "ana", name: "Ana García" }],
+            },
+          },
+        ],
+      })
+    )
+    // The sentence renders with the @name chip splitting the text nodes…
+    expect(
+      screen.getByText(
+        (_, element) =>
+          element?.tagName === "SPAN" &&
+          element.textContent === "@Ana García was added to the group"
+      )
+    ).toBeInTheDocument()
+    // …and the delivery footer is gone: a trailing system row means the last
+    // ITEM isn't a user message.
+    expect(screen.queryByText(/^Read/)).not.toBeInTheDocument()
+  })
+
   it("shows the read status under the last message (mine)", () => {
     renderChat(makeRuntime())
     expect(screen.getByText(/^Read/)).toBeInTheDocument()
@@ -350,6 +380,46 @@ describe("F0Chat", () => {
       })
     )
     expect(screen.getByRole("img", { name: /photo\.png/i })).toBeInTheDocument()
+    expect(screen.getByText("report.pdf")).toBeInTheDocument()
+  })
+
+  it("previews uploaded images as square thumbnails and other files as chips", async () => {
+    // The pdf uploads first — images must still render grouped at the front.
+    const uploadFiles = vi.fn().mockResolvedValue([
+      {
+        kind: "file",
+        url: "blob:doc",
+        name: "report.pdf",
+        mimeType: "application/pdf",
+      },
+      { kind: "image", url: "blob:img", name: "photo.png" },
+    ])
+    const { container } = renderChat(makeRuntime({ uploadFiles }))
+    const fileInput =
+      container.querySelector<HTMLInputElement>("input[type=file]")!
+    fireEvent.change(fileInput, {
+      target: {
+        files: [
+          new File(["doc"], "report.pdf", { type: "application/pdf" }),
+          new File(["img"], "photo.png", { type: "image/png" }),
+        ],
+      },
+    })
+    // The image resolves to an inline square preview, the pdf to a file chip.
+    const preview = await screen.findByRole("img", { name: /photo\.png/i })
+    expect(preview).toHaveAttribute("src", "blob:img")
+    const chip = screen.getByText("report.pdf")
+    // The image preview comes before the file chip despite uploading second.
+    expect(
+      preview.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+    // Each pending attachment carries its own remove action.
+    const removeButtons = screen.getAllByRole("button", { name: /^remove$/i })
+    expect(removeButtons).toHaveLength(2)
+    await userEvent.click(removeButtons[0])
+    expect(
+      screen.queryByRole("img", { name: /photo\.png/i })
+    ).not.toBeInTheDocument()
     expect(screen.getByText("report.pdf")).toBeInTheDocument()
   })
 

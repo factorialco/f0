@@ -44,11 +44,14 @@ import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
 
-/** A pending composer attachment: a skeleton while it uploads, an F0FileItem
- * chip once the runtime resolves it (same pattern as the AI chat composer). */
+/** A pending composer attachment: a skeleton while it uploads, then a square
+ * image preview or an F0FileItem chip once the runtime resolves it. */
 type PendingAttachment =
-  | { id: string; status: "uploading"; name: string }
+  | { id: string; status: "uploading"; name: string; isImage: boolean }
   | { id: string; status: "ready"; attachment: F0ChatAttachment }
+
+const isImagePending = (att: PendingAttachment): boolean =>
+  att.status === "uploading" ? att.isImage : att.attachment.kind === "image"
 
 /** Composer: auto-growing textarea (no aura), attach, voice dictation, send.
  * Drag & drop is owned by the whole panel (F0Chat) and bridged here. */
@@ -58,13 +61,18 @@ export const ChatComposer = (): ReactNode => {
     sendMessage,
     editMessage,
     onInputActivity,
+    stopTyping,
     uploadFiles,
     transcribe,
     maxFiles,
     channel,
     searchMembers,
     currentUserId,
+    capabilities,
   } = useF0Chat()
+  // Uploads need both the runtime hook AND the capability (a frozen channel
+  // can forbid attachments even when the transport could upload them).
+  const canUpload = !!uploadFiles && capabilities?.canUpload !== false
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
@@ -118,6 +126,16 @@ export const ChatComposer = (): ReactNode => {
 
   const isUploading = attachments.some((a) => a.status === "uploading")
 
+  // Images render grouped first: mixing thumbnails and file chips in arrival
+  // order makes the row jump in height at every boundary between the two.
+  const orderedAttachments = useMemo(
+    () => [
+      ...attachments.filter(isImagePending),
+      ...attachments.filter((att) => !isImagePending(att)),
+    ],
+    [attachments]
+  )
+
   // Transient error flashed in the textarea (too many files, upload/voice
   // failure), auto-cleared after a few seconds — same pattern as the AI chat.
   const { error: transientError, show: showTransientError } =
@@ -145,28 +163,89 @@ export const ChatComposer = (): ReactNode => {
     "device-error": i18n.chat.micError,
     "transcription-failed": i18n.chat.transcriptionError,
   }
+
+  // Voice NOTES (WhatsApp-style): when the runtime can upload, the mic records
+  // audio and sends it as its own message on confirm — no transcription.
+  // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
+  const voiceNotesEnabled = canUpload
+  // While the confirmed recording uploads, the action row swaps for a "sending
+  // voice note" status so the confirm→message gap isn't silent.
+  const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
+  const handleVoiceNote = useCallback(
+    async (audio: Blob, durationMs: number) => {
+      if (!uploadFiles) return
+      // Set before any await so it batches with the recorder's own
+      // setStatus("idle") — the recording row swaps straight to the sending row.
+      setIsSendingVoiceNote(true)
+      const type = audio.type || "audio/webm"
+      const ext = type.includes("mp4")
+        ? "m4a"
+        : type.includes("ogg")
+          ? "ogg"
+          : "webm"
+      const file = new File([audio], `voice-note.${ext}`, { type })
+      try {
+        const [uploaded] = await uploadFiles([file])
+        if (uploaded && "url" in uploaded) {
+          sendMessage({
+            body: "",
+            attachments: [
+              {
+                kind: "voice",
+                url: uploaded.url,
+                durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
+                mimeType: type,
+                name: file.name,
+              },
+            ],
+          })
+        }
+      } catch {
+        showTransientError(i18n.chat.fileUploadError)
+      } finally {
+        setIsSendingVoiceNote(false)
+      }
+    },
+    [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
+  )
+
   const recorder = useAudioRecorder({
     onTranscribe: transcribe,
     onPartial: fillFromTranscript,
     onFinal: fillFromTranscript,
     onError: (error) => showTransientError(recorderErrorMessage[error]),
+    onAudio: voiceNotesEnabled
+      ? (audio, durationMs) => void handleVoiceNote(audio, durationMs)
+      : undefined,
   })
   const isTranscribing = recorder.status === "transcribing"
   const isRecording = recorder.status === "recording"
-  const canRecord = !!transcribe && recorder.isSupported
+  const canRecord = (voiceNotesEnabled || !!transcribe) && recorder.isSupported
 
   const canSend =
     (value.trim().length > 0 || attachments.length > 0) &&
     !isTranscribing &&
-    !isUploading
+    !isUploading &&
+    !isSendingVoiceNote
 
   const handleChange = useCallback(
     (next: string, cursorPos: number) => {
       setValue(next)
       setCursorPosition(cursorPos)
       onInputActivity()
+      // Clearing the text means typing stopped NOW — don't leave the
+      // counterpart's dots hanging until the transport's timeout.
+      if (next.trim().length === 0) void stopTyping?.()
     },
-    [onInputActivity]
+    [onInputActivity, stopTyping]
+  )
+
+  // Leaving the conversation mid-type must also drop the dots immediately.
+  useEffect(
+    () => () => {
+      void stopTyping?.()
+    },
+    [stopTyping]
   )
 
   const updateCursorPosition = useCallback(() => {
@@ -181,7 +260,7 @@ export const ChatComposer = (): ReactNode => {
 
   const handleUpload = useCallback(
     async (files: File[]) => {
-      if (files.length === 0 || !uploadFiles) return
+      if (files.length === 0 || !uploadFiles || !canUpload) return
       // Reject the whole batch when it would exceed the cap — a transient banner
       // is friendlier than silently truncating the user's selection.
       if (
@@ -199,6 +278,7 @@ export const ChatComposer = (): ReactNode => {
         id: `att-${attachmentSeq.current++}`,
         status: "uploading" as const,
         name: file.name,
+        isImage: file.type.startsWith("image/"),
       }))
       setAttachments((prev) => [...prev, ...pending])
       const pendingIds = new Set(pending.map((p) => p.id))
@@ -220,6 +300,7 @@ export const ChatComposer = (): ReactNode => {
     },
     [
       uploadFiles,
+      canUpload,
       maxFiles,
       showTransientError,
       i18n.chat.tooManyFilesError,
@@ -287,6 +368,8 @@ export const ChatComposer = (): ReactNode => {
 
   const handleSend = useCallback(() => {
     if (!canSend) return
+    // Typing stopped by definition — the message is out (or the edit saved).
+    void stopTyping?.()
     const ready = attachments.flatMap((a) =>
       a.status === "ready" ? [a.attachment] : []
     )
@@ -324,6 +407,7 @@ export const ChatComposer = (): ReactNode => {
     replyTo,
     sendMessage,
     setReplyTo,
+    stopTyping,
     value,
     editingMessage,
     editMessage,
@@ -438,26 +522,54 @@ export const ChatComposer = (): ReactNode => {
             )}
           </AnimatePresence>
 
-          {/* Pending attachments — a skeleton while uploading, then an
-              F0FileItem chip with a remove action (same as the AI chat). */}
+          {/* Pending attachments — a skeleton while uploading, then a square
+              image preview (matching the message thumbnails) or an F0FileItem
+              chip, each with a remove action. */}
           {attachments.length > 0 && (
             <div
               aria-live="polite"
               aria-busy={isUploading}
-              className="flex flex-wrap gap-1 px-1 pt-1"
+              className="flex flex-wrap items-end gap-1 px-1 pt-1"
             >
-              {attachments.map((att) =>
+              {orderedAttachments.map((att) =>
                 att.status === "uploading" ? (
-                  <Skeleton key={att.id} className="h-9 w-36 rounded-[10px]" />
-                ) : (
+                  <Skeleton
+                    key={att.id}
+                    className={cn(
+                      att.isImage ? "h-16 w-16 rounded-lg" : "h-9 w-36 rounded"
+                    )}
+                  />
+                ) : att.attachment.kind === "image" ? (
+                  <div key={att.id} className="group/attachment relative flex">
+                    <img
+                      src={att.attachment.thumbnailUrl ?? att.attachment.url}
+                      alt={att.attachment.name}
+                      className="h-16 w-16 rounded-lg border border-solid border-f1-border-secondary object-cover"
+                    />
+                    {/* Remove is hidden until hover; focus also reveals it so
+                        it stays reachable by keyboard. */}
+                    <div className="absolute right-1 top-1 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+                      <ButtonInternal
+                        variant="outline"
+                        size="sm"
+                        hideLabel
+                        label={i18n.chat.removeFile}
+                        icon={Cross}
+                        onClick={() =>
+                          setAttachments((prev) =>
+                            prev.filter((a) => a.id !== att.id)
+                          )
+                        }
+                      />
+                    </div>
+                  </div>
+                ) : att.attachment.kind === "file" ? (
                   <F0FileItem
                     key={att.id}
                     size="md"
                     file={{
                       name: att.attachment.name,
-                      type:
-                        att.attachment.mimeType ??
-                        (att.attachment.kind === "image" ? "image/png" : ""),
+                      type: att.attachment.mimeType ?? "",
                     }}
                     actions={[
                       {
@@ -470,7 +582,9 @@ export const ChatComposer = (): ReactNode => {
                       },
                     ]}
                   />
-                )
+                ) : // Locations never sit in the composer (uploads only) — the
+                // narrowing here just satisfies the widened attachment union.
+                null
               )}
             </div>
           )}
@@ -510,7 +624,11 @@ export const ChatComposer = (): ReactNode => {
                   variant="default"
                   size="md"
                   hideLabel
-                  label={i18n.chat.stopRecording}
+                  label={
+                    voiceNotesEnabled
+                      ? i18n.chat.sendVoiceNote
+                      : i18n.chat.stopRecording
+                  }
                   icon={Check}
                   onClick={recorder.stop}
                 />
@@ -536,7 +654,7 @@ export const ChatComposer = (): ReactNode => {
                   label={i18n.chat.attachFile}
                   icon={Paperclip}
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={!uploadFiles || isTranscribing}
+                  disabled={!canUpload || isTranscribing}
                 />
                 {/* Insert emoji into the message (reuses the reactions picker). */}
                 <Picker
@@ -552,10 +670,15 @@ export const ChatComposer = (): ReactNode => {
                     variant="outline"
                     size="md"
                     hideLabel
-                    label={i18n.chat.recordAudio}
+                    label={
+                      isSendingVoiceNote
+                        ? i18n.chat.sendingVoiceNote
+                        : i18n.chat.recordAudio
+                    }
                     icon={Microphone}
                     onClick={startRecording}
-                    loading={isTranscribing}
+                    // Spins while dictation transcribes or a voice note uploads.
+                    loading={isTranscribing || isSendingVoiceNote}
                   />
                 )}
                 <ButtonInternal

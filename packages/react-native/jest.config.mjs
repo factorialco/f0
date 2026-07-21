@@ -1,5 +1,5 @@
 export default {
-  preset: "react-native",
+  preset: "@react-native/jest-preset",
   setupFiles: ["<rootDir>/jest.setup.js"],
   transform: {
     // Use custom transformer for ViewConfigIgnore.js - match any path containing ViewConfigIgnore.js
