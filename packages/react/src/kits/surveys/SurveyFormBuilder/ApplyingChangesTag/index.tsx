@@ -41,7 +41,7 @@ const ApplyingChangesTag = () => {
           },
         }}
       />
-      <span className="font-medium">
+      <span className="font-medium text-f1-foreground">
         {i18n.t("surveyFormBuilder.labels.applyingChanges")}
       </span>
     </div>
