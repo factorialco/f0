@@ -7,6 +7,8 @@ import { useReducedMotion } from "@/lib/a11y"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
 
+import { Skeleton } from "@/ui/skeleton"
+
 import { SidebarWindow } from "./components/layout/ChatWindow"
 import { useRevealOnChange } from "./hooks/useRevealOnChange"
 import { AiChatStateProvider, useAiChat } from "./providers/AiChatStateProvider"
@@ -33,6 +35,7 @@ export interface F0AiChatProps {
 const F0AiChatProviderComponent = ({
   enabled = false,
   side,
+  panelContentSide,
   initialMessage,
   chatHeader,
   chatMessages,
@@ -64,6 +67,7 @@ const F0AiChatProviderComponent = ({
     <AiChatStateProvider
       enabled={enabled}
       side={side}
+      panelContentSide={panelContentSide}
       onThumbsUp={onThumbsUp}
       onThumbsDown={onThumbsDown}
       agent={agent}
@@ -102,6 +106,7 @@ const F0AiChatComponent = ({
 }: F0AiChatProps) => {
   const {
     enabled,
+    open,
     setOpen,
     mode,
     visualizationMode,
@@ -111,8 +116,16 @@ const F0AiChatComponent = ({
     chatMessages,
     chatInput,
     panelContent,
+    panelSide,
+    panelContentSide,
+    restoringPanelContentId,
   } = useAiChat()
   const translations = useI18n()
+
+  // When hosted content docks to the other edge, it renders in its own window
+  // (ApplicationFrame's HostedPanelWindow) — this window then only ever shows
+  // the chat/voice views and hides while the content is up.
+  const splitPanel = panelContentSide !== panelSide
 
   // Mode-change reveal: only fullscreen transitions change the layout enough to
   // warrant a re-fade. Sidepanel + canvas are treated as one "docked" state, so
@@ -145,9 +158,20 @@ const F0AiChatComponent = ({
   // content out and the next one in, while the window stays put.
   let viewKey: string
   let viewContent: ReactNode
-  if (panelContent) {
+  if (panelContent && !splitPanel) {
     viewKey = `panel:${panelContent.id}`
     viewContent = panelContent.content
+  } else if (restoringPanelContentId && !splitPanel) {
+    // The panel reopened with hosted content pending restoration — hold a
+    // skeleton instead of flashing the AI chat while the host re-mounts it.
+    viewKey = `restoring:${restoringPanelContentId}`
+    viewContent = (
+      <Skeleton
+        role="status"
+        aria-busy={true}
+        className="h-full w-full rounded-none"
+      />
+    )
   } else if (mode === "voice" && VoiceMode) {
     viewKey = "voice"
     viewContent = (
@@ -183,7 +207,18 @@ const F0AiChatComponent = ({
   }
 
   return (
-    <SidebarWindow>
+    // In split mode this window hides while hosted content is up on the other
+    // edge. The swap is a reveal: the outgoing window holds still while the
+    // main content covers it (exitStyle "hold" — `open` is still true), and a
+    // real close (open false) keeps today's shrink exit.
+    <SidebarWindow
+      visible={
+        splitPanel
+          ? open && !panelContent && !restoringPanelContentId
+          : undefined
+      }
+      exitStyle={splitPanel && open ? "hold" : "shrink"}
+    >
       {/* Simultaneous crossfade: the outgoing view fades out while the next
           fades in (both briefly mounted, stacked via `absolute inset-0` over the
           SidebarWindow's relative content box). Switching conversations starts

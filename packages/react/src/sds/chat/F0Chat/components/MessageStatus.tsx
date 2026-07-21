@@ -11,8 +11,11 @@ import { formatStatusTime } from "../utils/natural-time"
 
 /**
  * Footer under the conversation's last message: its time, plus — when the
- * message is mine — the delivery state (Sent / Read, or "Read by N" in groups).
- * iMessage-style: only the latest message carries this line.
+ * message is mine and READ — the read state ("Read hh:mm", or "Read by N" in
+ * groups). iMessage-style: only the latest message carries this line.
+ * Optimistic on purpose (WhatsApp): sending/sent/delivered all show the bare
+ * time — success isn't announced, a slow send is the SendingClock's job
+ * (500ms) and a failure is the loud one ("Not sent" + retry alert).
  */
 export const MessageStatus = ({
   message,
@@ -31,10 +34,8 @@ export const MessageStatus = ({
 
   let label = time
   if (message.isMine) {
-    // In-flight: show "Sending…" right away — the footer is text from the
-    // very first frame (same line, same height) and just crossfades to
-    // "Sent hh:mm", instead of an empty beat while the send settles.
-    if (message.status === "sending") label = i18n.chat.sending
+    // sending/sent/delivered fall through to the bare time: the label never
+    // changes when the ack lands (same string, same key below) — zero flicker.
     if (message.status === "failed") label = `${i18n.chat.notSent} · ${time}`
     else if (message.status === "read")
       label =
@@ -46,9 +47,6 @@ export const MessageStatus = ({
               { count: message.readByCount }
             )
           : `${i18n.chat.read} ${time}`
-    else if (message.status === "delivered")
-      label = `${i18n.chat.delivered} ${time}`
-    else if (message.status === "sent") label = `${i18n.chat.sent} ${time}`
   }
 
   return (

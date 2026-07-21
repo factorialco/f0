@@ -822,6 +822,11 @@ export const defaultTranslations = {
       addBlockedErrorHint:
         "Fix the errors in the existing items before adding another one",
       addBlockedMaxHint: "You've reached the maximum number of items",
+      removeConfirmTitle: "Remove item?",
+      removeConfirmMessage:
+        "This item will be removed. This action cannot be undone.",
+      removeError: "Couldn't remove the item. Please try again.",
+      removeErrorTitle: "Remove failed",
     },
     moreInformation: "More information",
     validation: {

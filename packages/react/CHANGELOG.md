@@ -1,5 +1,40 @@
 # Changelog
 
+## [4.46.3](https://github.com/factorialco/f0/compare/f0-react-v4.46.2...f0-react-v4.46.3) (2026-07-21)
+
+
+### Bug Fixes
+
+* **EditableTable:** render display-only cells without field icons ([#4739](https://github.com/factorialco/f0/issues/4739)) ([c3ca518](https://github.com/factorialco/f0/commit/c3ca518a5b385b77eea5403b9bd9b828eb7b6cf8))
+
+## [4.46.2](https://github.com/factorialco/f0/compare/f0-react-v4.46.1...f0-react-v4.46.2) (2026-07-21)
+
+
+### Bug Fixes
+
+* relax react-virtuoso to ^4.18.10 ([#4762](https://github.com/factorialco/f0/issues/4762)) ([5332b2f](https://github.com/factorialco/f0/commit/5332b2fdde71f8eab94b98ec6375c96f3287c9ff))
+
+## [4.46.1](https://github.com/factorialco/f0/compare/f0-react-v4.46.0...f0-react-v4.46.1) (2026-07-21)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** debounce the collection→URL sync (fixes per-keystroke Sentry session churn) ([#4759](https://github.com/factorialco/f0/issues/4759)) ([5d67bb4](https://github.com/factorialco/f0/commit/5d67bb4fc8b1fa1d21223ee2505254d3b580091b))
+
+## [4.46.0](https://github.com/factorialco/f0/compare/f0-react-v4.45.0...f0-react-v4.46.0) (2026-07-21)
+
+
+### Features
+
+* **F0Chat:** document previews, virtuoso transcript rewrite and optimistic status footer ([#4743](https://github.com/factorialco/f0/issues/4743)) ([3aaa5b2](https://github.com/factorialco/f0/commit/3aaa5b2f4bcb30a9f64541b7e094cb19de8e1074))
+
+## [4.45.0](https://github.com/factorialco/f0/compare/f0-react-v4.44.0...f0-react-v4.45.0) (2026-07-21)
+
+
+### Features
+
+* **F0Form:** add delete persistence + confirmation to entitiesList ([#4728](https://github.com/factorialco/f0/issues/4728)) ([afc4237](https://github.com/factorialco/f0/commit/afc4237209357c6a2c548c6c6b5d38d33d937b57))
+
 ## [4.44.0](https://github.com/factorialco/f0/compare/f0-react-v4.43.0...f0-react-v4.44.0) (2026-07-20)
 
 
