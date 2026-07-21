@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.45.0](https://github.com/factorialco/f0/compare/f0-react-v4.44.0...f0-react-v4.45.0) (2026-07-21)
+
+
+### Features
+
+* **F0Form:** add delete persistence + confirmation to entitiesList ([#4728](https://github.com/factorialco/f0/issues/4728)) ([afc4237](https://github.com/factorialco/f0/commit/afc4237209357c6a2c548c6c6b5d38d33d937b57))
+
 ## [4.44.0](https://github.com/factorialco/f0/compare/f0-react-v4.43.0...f0-react-v4.44.0) (2026-07-20)
 
 
