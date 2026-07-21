@@ -2,8 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-
 import { SurveyFormBuilder } from "."
 import { mockDatasets } from "../../__stories__/mocks"
 import { SurveyFormBuilderElement } from "../types"
@@ -12,6 +10,7 @@ const meta: Meta<typeof SurveyFormBuilder> = {
   title: "Surveys/SurveyFormBuilder",
   component: SurveyFormBuilder,
   tags: ["autodocs"],
+  parameters: { a11y: { test: "error" } },
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>(
       args.elements
@@ -98,8 +97,6 @@ export const ApplyingChanges: Story = {
 }
 
 export const WithQuestionWithDuplicateOptions: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     elements: [
       {

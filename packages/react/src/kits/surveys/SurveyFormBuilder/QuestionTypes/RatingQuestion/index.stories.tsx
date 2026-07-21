@@ -2,8 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useState } from "react"
 
-import { withSkipA11y } from "@/lib/storybook-utils/parameters"
-
 import { RatingQuestion } from "."
 import { SurveyFormBuilderProvider } from "../../Context"
 import { SurveyFormBuilderElement, QuestionElement } from "../../types"
@@ -12,6 +10,7 @@ const meta: Meta<typeof RatingQuestion> = {
   title: "Surveys/SurveyFormBuilder/RatingQuestion",
   component: RatingQuestion,
   tags: ["autodocs", "experimental"],
+  parameters: { a11y: { test: "error" } },
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args as QuestionElement },
@@ -34,8 +33,6 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-1",
     title: "Rate your experience",
@@ -53,8 +50,6 @@ export const Default: Story = {
 }
 
 export const WithSelectedValue: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-2",
     title: "How would you rate this?",
@@ -76,8 +71,6 @@ export const WithSelectedValue: Story = {
 }
 
 export const SmallRange: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-3",
     title: "Satisfaction level",
@@ -92,8 +85,6 @@ export const SmallRange: Story = {
 }
 
 export const WithEmojiOptions: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   args: {
     id: "question-4",
     title: "Satisfaction level",
@@ -110,8 +101,6 @@ export const WithEmojiOptions: Story = {
 }
 
 export const WithEmojiOptionsDisabled: Story = {
-  // TODO: Fix a11y issues
-  parameters: withSkipA11y({}),
   render: (args) => {
     const [elements, setElements] = useState<SurveyFormBuilderElement[]>([
       { type: "question" as const, question: args as QuestionElement },
