@@ -340,9 +340,6 @@ export type F0ChatStatus =
  *   pickers and disables toggling existing reaction pills.
  * - `canUpload` (default: whether `uploadFiles` exists): false disables the
  *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
- * - `canSendVoiceNotes` (default: whether uploads are available): false hides
- *   the voice-note recorder without disabling file uploads. Voice dictation is
- *   controlled independently by {@link F0ChatRuntime.transcribe}.
  * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
  *   overrides the edit policy per message. Structural gates still apply (the
  *   host must provide `editMessage`; deleted messages and voice notes are
@@ -355,7 +352,6 @@ export type F0ChatCapabilities = {
   canSend?: boolean
   canReact?: boolean
   canUpload?: boolean
-  canSendVoiceNotes?: boolean
   canEditMessage?: (message: F0ChatMessage) => boolean
   canDeleteMessage?: (message: F0ChatMessage) => boolean
 }
