@@ -470,6 +470,21 @@ export function EntitiesListFieldRenderer({
     [field.editableIds]
   )
 
+  /**
+   * Whether an item can be removed: independent of {@link isRowEditable}.
+   * Every item when `removableIds` is omitted; otherwise items whose `id` is
+   * listed. Items without an `id` (rows just added locally) stay removable.
+   */
+  const isRowRemovable = useCallback(
+    (row: EntitiesListRow): boolean => {
+      if (!field.removableIds) return true
+      const id = row.id
+      if (id === undefined || id === null) return true
+      return field.removableIds.includes(id as string | number)
+    },
+    [field.removableIds]
+  )
+
   // --- Dialog editing (dialog mode, or a split create/update schema) --------
 
   /**
@@ -791,6 +806,13 @@ export function EntitiesListFieldRenderer({
     },
     [findRow, isRowEditable]
   )
+  const canRemoveRowByKey = useCallback(
+    (rowKey: string) => {
+      const row = findRow(rowKey)
+      return row ? isRowRemovable(row) : true
+    },
+    [findRow, isRowRemovable]
+  )
   const itemHref = field.itemHref
   const hrefByKey = useCallback(
     (rowKey: string) => {
@@ -880,6 +902,7 @@ export function EntitiesListFieldRenderer({
           })}
           listItem={field.listItem}
           canEditRow={canEditRowByKey}
+          canRemoveRow={canRemoveRowByKey}
           onEditRow={isNavigable || isDisabled ? undefined : editRowByKey}
           onRowClick={isNavigable || isDisabled ? undefined : editRowByKey}
           onRemoveRow={isDisabled ? undefined : removeRowByKey}
@@ -927,6 +950,7 @@ export function EntitiesListFieldRenderer({
           useDialogMode ? (row) => openItemDialog("edit", row) : undefined
         }
         canEditRow={isRowEditable}
+        canRemoveRow={isRowRemovable}
         rowActions={rowActions}
         editLabel={editLabel}
         removeLabel={removeLabel}

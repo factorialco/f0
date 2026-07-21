@@ -312,6 +312,7 @@ function configToF0Field(
         itemHref: listOptions?.itemHref,
         labels: listOptions?.labels,
         editableIds: listOptions?.editableIds,
+        removableIds: listOptions?.removableIds,
         maxItems: listOptions?.maxItems,
         columns: listOptions?.columns,
         rowActions: listOptions?.rowActions,

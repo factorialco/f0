@@ -439,6 +439,8 @@ With more than 2 fields it switches to **dialog** mode by default: the cells are
 
 `editableIds` locks editing to items whose `id` is listed — locked rows render as read-only (disabled) cells. Items without an `id` (rows the user just added) always stay editable.
 
+`removableIds` is the independent counterpart for removal: it locks the remove action to items whose `id` is listed, so a row can be editable but not removable (or vice versa). Omitted → every row is removable, matching `editableIds`. Use it to pin a row (e.g. a resource owner) that must not be deleted while still allowing edits.
+
 ### List-view visualization
 
 When there's no inline editing, set `config.visualization: "list-view"` to render the items as a OneDataCollection **list** instead of a read-only table. Each row shows a title (the first field) and description lines (the rest); **Add** and the per-row **Edit** action open the form dialog, and rows have a **Remove** action. Override the row labelling with `config.listItem` (`title` / `description` / `avatar` functions). Drag-reorder isn't available in list mode.
@@ -553,6 +555,7 @@ config: {
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
 - `labels` — `addButton`, `create`/`update` (each `{ title, description }`) and `edit`/`remove` action labels. The create description doubles as the add button's tooltip; the update title as the icon-only edit action's tooltip.
 - `onRemove` / `confirmRemove` — persist and confirm removals (see [Persisting removals](#persisting-removals)).
+- `editableIds` / `removableIds` — independently lock editing / removal to the listed `id`s (see above).
 - `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
 
 ### Auto-save

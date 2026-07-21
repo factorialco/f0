@@ -253,6 +253,16 @@ export interface F0EntitiesListOptions<T = EntitiesListItem> {
    * (pencil) action that opens the edit dialog.
    */
   editableIds?: Array<string | number>
+  /**
+   * Restricts which items can be removed, matched against each item's `id`
+   * property. The remove counterpart to {@link editableIds}, and independent
+   * of it — a row can be editable but not removable, or vice versa. When
+   * omitted, every item is removable. Items without an `id` (e.g. rows just
+   * added by the user and not yet persisted) stay removable. A row hidden from
+   * this list shows no remove action (`list-view`) / no remove button
+   * (`editable-table`).
+   */
+  removableIds?: Array<string | number>
   /** Minimum number of rows required (defaults to 1 unless the field is optional) */
   minItems?: number
   /** Maximum number of rows allowed. When reached the add button is hidden. */
@@ -356,6 +366,8 @@ export type F0EntitiesListField = F0BaseField & {
   labels?: F0EntitiesListLabels
   /** Ids of the items that can be edited (matched against `item.id`) */
   editableIds?: Array<string | number>
+  /** Ids of the items that can be removed (matched against `item.id`) */
+  removableIds?: Array<string | number>
   /** Maximum number of rows allowed */
   maxItems?: number
   /** Per-column presentation options, keyed by item-schema property name */

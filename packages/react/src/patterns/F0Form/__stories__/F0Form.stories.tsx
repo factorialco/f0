@@ -2010,7 +2010,8 @@ export const EntitiesListFieldNavigable: Story = {
  * Removing opens a confirmation first (custom copy via `config.confirmRemove`,
  * which names the member), and the row is only dropped once `onRemove` resolves
  * successfully — return `{ success: false }` or throw to keep it and surface an
- * error.
+ * error. `config.removableIds` pins the first member (editable, but no remove
+ * action) to show that edit and remove gate independently.
  */
 export const EntitiesListFieldFormDefinitions: Story = {
   parameters: { docs: { story: { inline: false, height: "560px" } } },
@@ -2063,6 +2064,10 @@ export const EntitiesListFieldFormDefinitions: Story = {
             addButton: "Add member",
             update: { title: "Edit member" },
           },
+          // `removableIds` is independent of editing: the owner (m-1) stays
+          // editable but has no remove action, while everyone else is
+          // removable. Newly-added rows (no id) stay removable.
+          removableIds: ["m-2"],
           // Delete counterpart to create/update: confirm first (naming the
           // member), then persist. The row is dropped only on success.
           confirmRemove: (item) => ({

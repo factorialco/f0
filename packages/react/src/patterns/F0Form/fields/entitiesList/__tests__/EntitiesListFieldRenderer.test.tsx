@@ -346,6 +346,44 @@ describe("EntitiesListFieldRenderer — editableIds", () => {
   })
 })
 
+describe("EntitiesListFieldRenderer — removableIds (editable-table)", () => {
+  it("shows the remove button only for rows inside removableIds", () => {
+    const schema = z.object({
+      faqs: f0FormField.entitiesList({
+        label: "FAQs",
+        schema: z.object({ title: z.string().min(1) }),
+        // Independent of editing: "a" is removable, "b" is not.
+        config: { removableIds: ["a"] },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="removable-table"
+        schema={schema}
+        defaultValues={{
+          faqs: [
+            { id: "a", title: "Removable" },
+            { id: "b", title: "Pinned" },
+          ],
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // The removable row has a Remove button; the pinned row has none.
+    // (Cells are editable inputs, so match on the input value, not text.)
+    const removableRow = screen.getByDisplayValue("Removable").closest("tr")!
+    const pinnedRow = screen.getByDisplayValue("Pinned").closest("tr")!
+    expect(
+      within(removableRow).getByRole("button", { name: "Remove" })
+    ).toBeInTheDocument()
+    expect(
+      within(pinnedRow).queryByRole("button", { name: "Remove" })
+    ).toBeNull()
+  })
+})
+
 describe("EntitiesListFieldRenderer — delete persistence + confirmation", () => {
   afterEach(() => {
     vi.restoreAllMocks()
@@ -525,7 +563,7 @@ describe("EntitiesListFieldRenderer — delete persistence + confirmation", () =
   })
 })
 
-describe("EntitiesListFieldRenderer — list-view remove gating (editableIds)", () => {
+describe("EntitiesListFieldRenderer — list-view remove gating (removableIds)", () => {
   afterEach(() => {
     vi.restoreAllMocks()
   })
@@ -544,10 +582,16 @@ describe("EntitiesListFieldRenderer — list-view remove gating (editableIds)", 
     return el
   }
 
-  /** A pinned-owner + members list, with an optional `editableIds` gate. */
+  /**
+   * A pinned-owner + members list, with independent `editableIds` /
+   * `removableIds` gates (each omitted → all rows).
+   */
   function renderMembers(
-    editableIds?: Array<string | number>,
-    onRemove?: () => Promise<{ success: boolean } | void>
+    opts: {
+      editableIds?: Array<string | number>
+      removableIds?: Array<string | number>
+      onRemove?: () => Promise<{ success: boolean } | void>
+    } = {}
   ) {
     const schema = z.object({
       members: f0FormField.entitiesList({
@@ -558,8 +602,9 @@ describe("EntitiesListFieldRenderer — list-view remove gating (editableIds)", 
         }),
         config: {
           visualization: "list-view",
-          ...(editableIds ? { editableIds } : {}),
-          ...(onRemove ? { onRemove } : {}),
+          ...(opts.editableIds ? { editableIds: opts.editableIds } : {}),
+          ...(opts.removableIds ? { removableIds: opts.removableIds } : {}),
+          ...(opts.onRemove ? { onRemove: opts.onRemove } : {}),
         },
       }),
     })
@@ -579,38 +624,34 @@ describe("EntitiesListFieldRenderer — list-view remove gating (editableIds)", 
     )
   }
 
-  it("locks both edit and remove for a row outside editableIds (pinned owner)", async () => {
-    // Everyone editable except the pinned owner.
-    renderMembers(["m1", "m2"])
+  it("hides remove for a row outside removableIds (pinned owner)", async () => {
+    // Everyone removable except the pinned owner; editing left ungated.
+    renderMembers({ removableIds: ["m1", "m2"] })
 
-    // Locked owner row: no edit action and no overflow trigger at all, so the
-    // remove action (which lives in the overflow menu) is unreachable.
+    // The owner is still editable (editableIds omitted), but not removable:
+    // remove is its only overflow item, so with it gated out there's no ⋮ menu.
     const owner = rowOf("Ada")
-    expect(within(owner).queryByRole("button", { name: "Edit" })).toBeNull()
+    expect(
+      within(owner).getByRole("button", { name: "Edit" })
+    ).toBeInTheDocument()
     expect(within(owner).queryByRole("button", { name: "Actions" })).toBeNull()
 
-    // Editable member row: has the edit action and an overflow menu that
-    // contains Remove.
-    const member = rowOf("Bob")
-    expect(
-      within(member).getByRole("button", { name: "Edit" })
-    ).toBeInTheDocument()
+    // A removable member has the overflow menu with Remove.
     await userEvent.click(
-      within(member).getByRole("button", { name: "Actions" })
+      within(rowOf("Bob")).getByRole("button", { name: "Actions" })
     )
     expect(
       await screen.findByRole("menuitem", { name: "Remove" })
     ).toBeInTheDocument()
   })
 
-  it("keeps every row editable and removable when editableIds is omitted (back-compat)", async () => {
+  it("keeps every row removable when removableIds is omitted (back-compat)", async () => {
     renderMembers()
 
-    // With no gate, every row exposes the edit action and an overflow trigger.
+    // With no gate every row exposes edit and an overflow trigger, and the
+    // pinned owner is removable too.
     expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(3)
     expect(screen.getAllByRole("button", { name: "Actions" })).toHaveLength(3)
-
-    // The pinned owner is now removable too — its overflow menu has Remove.
     await userEvent.click(
       within(rowOf("Ada")).getByRole("button", { name: "Actions" })
     )
@@ -619,12 +660,37 @@ describe("EntitiesListFieldRenderer — list-view remove gating (editableIds)", 
     ).toBeInTheDocument()
   })
 
-  it("removes an editable row from the overflow menu (confirm + onRemove)", async () => {
+  it("gates edit and remove independently (removable but not editable)", async () => {
+    // Owner is removable but NOT editable; the axes don't track each other.
+    renderMembers({ editableIds: ["m1", "m2"], removableIds: ["owner"] })
+
+    // Check the member first: opening a row's overflow menu marks the rest of
+    // the page inert (Radix focus-trap), so assert the un-opened rows before
+    // clicking into the owner's menu below.
+    // A member is editable but not removable: pencil, no ⋮ menu.
+    const member = rowOf("Bob")
+    expect(
+      within(member).getByRole("button", { name: "Edit" })
+    ).toBeInTheDocument()
+    expect(within(member).queryByRole("button", { name: "Actions" })).toBeNull()
+
+    // The owner is not editable (no pencil) but is removable (⋮ → Remove).
+    const owner = rowOf("Ada")
+    expect(within(owner).queryByRole("button", { name: "Edit" })).toBeNull()
+    await userEvent.click(
+      within(owner).getByRole("button", { name: "Actions" })
+    )
+    expect(
+      await screen.findByRole("menuitem", { name: "Remove" })
+    ).toBeInTheDocument()
+  })
+
+  it("removes a removable row from the overflow menu (confirm + onRemove)", async () => {
     const confirmation = vi
       .spyOn(dialogs, "confirmation")
       .mockResolvedValue(true)
     const onRemove = vi.fn(async () => ({ success: true }))
-    renderMembers(["m1", "m2"], onRemove)
+    renderMembers({ removableIds: ["m1", "m2"], onRemove })
 
     await userEvent.click(
       within(rowOf("Bob")).getByRole("button", { name: "Actions" })
