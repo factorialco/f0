@@ -12,18 +12,8 @@ import {
   useRef,
 } from "react"
 
-import {
-  BACKGROUND_DOT_GAP,
-  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
-} from "../constants"
-import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type { F0GraphNodeTagColumn } from "../components/F0GraphNode"
-import {
-  EXPANDER_Y_OFFSET_BY_ZOOM,
-  type CollapserNodeData,
-  type ExpanderNodeData,
-  type GraphNodeData,
-} from "../internal/ReactFlowAdapters"
+import type { F0GraphNodeRenderContext } from "../F0Graph"
 import type {
   GraphEdge,
   GraphNode,
@@ -33,6 +23,17 @@ import type {
   TreeNode,
   ZoomLevel,
 } from "../types"
+
+import {
+  BACKGROUND_DOT_GAP,
+  COLLAPSER_OFFSET_ADJUSTMENT_BY_ZOOM,
+} from "../constants"
+import {
+  EXPANDER_Y_OFFSET_BY_ZOOM,
+  type CollapserNodeData,
+  type ExpanderNodeData,
+  type GraphNodeData,
+} from "../internal/ReactFlowAdapters"
 import {
   collectVisibleNodes,
   computeLayoutBounds,
@@ -446,6 +447,15 @@ export function useGraphRenderModel<T>({
     const BASE_W = nodeWidthProp ?? 256
     const BASE_H = effectiveNodeHeight
     const yStretch = 1
+    // The node currently being expanded/collapsed. It is kept visually fixed by
+    // a synchronous viewport pan (see the anchor layout-effect above), so its
+    // position must jump — not transition — in lockstep with that pan, or it
+    // drifts during the reflow. Tagging it turns the node-transform transition
+    // off for this node only (see `.f0-graph-node-reflow-anchor` in F0Graph.css)
+    // while every other node slides to its new position. Read from the ref (not
+    // a dep) — the memo already recomputes on the layout/expansion changes that
+    // accompany a reflow, and the ref is cleared once the expand settles.
+    const anchorId = anchorNodeRef.current
     // Collapsers aren't in `layout.nodes`; they sit adjacent to their parent
     // (well within the window padding), so they follow the parent's membership.
     const inWindow = (id: string): boolean =>
@@ -503,6 +513,9 @@ export function useGraphRenderModel<T>({
           y: (pos?.y ?? 0) * yStretch,
         },
         width: BASE_W,
+        // Exempt the toggled node from the reflow slide (see anchorId above).
+        className:
+          treeNode.id === anchorId ? "f0-graph-node-reflow-anchor" : undefined,
         sourcePosition: sourcePos,
         targetPosition: targetPos,
         data: {
@@ -606,6 +619,7 @@ export function useGraphRenderModel<T>({
     direction,
     ariaTreeInfo,
     controlLabels?.collapseChildren,
+    anchorNodeRef,
   ])
 
   // Ids of the graphNodes actually handed to React Flow (post-windowing) — feeds
