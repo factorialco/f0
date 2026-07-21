@@ -1,5 +1,5 @@
 import { userEvent } from "@testing-library/user-event"
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { Menu, Messages } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
@@ -109,5 +109,48 @@ describe("SidebarTabs", () => {
     // The active tab keeps its label; the inactive one falls back to the icon.
     expect(labelState("Main")).toBe("revealed")
     expect(labelState("Messages!")).toBe("collapsed")
+  })
+})
+
+describe("SidebarTabs persistence", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it("stores the active tab under the persist key", () => {
+    const { rerender } = renderTabs({ persistKey: "demo" })
+    expect(localStorage.getItem("f0-sidebar-tab:demo")).toBe("main")
+
+    // The owner switches tab (controlled) — the stored value follows.
+    rerender(
+      <SidebarTabs
+        tabs={tabs}
+        activeTab="messages"
+        onTabChange={vi.fn()}
+        persistKey="demo"
+      />
+    )
+    expect(localStorage.getItem("f0-sidebar-tab:demo")).toBe("messages")
+  })
+
+  it("restores the stored tab on mount", () => {
+    localStorage.setItem("f0-sidebar-tab:demo", "messages")
+    const onTabChange = vi.fn()
+    renderTabs({ persistKey: "demo", onTabChange })
+    expect(onTabChange).toHaveBeenCalledWith("messages")
+  })
+
+  it("ignores a stored tab that no longer exists in the tab set", () => {
+    localStorage.setItem("f0-sidebar-tab:demo", "one")
+    const onTabChange = vi.fn()
+    renderTabs({ persistKey: "demo", onTabChange })
+    expect(onTabChange).not.toHaveBeenCalled()
+  })
+
+  it("does nothing without a persist key", () => {
+    const onTabChange = vi.fn()
+    renderTabs({ onTabChange })
+    expect(onTabChange).not.toHaveBeenCalled()
+    expect(localStorage.length).toBe(0)
   })
 })
