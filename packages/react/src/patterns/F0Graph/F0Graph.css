@@ -32,24 +32,8 @@
   @apply cursor-pointer;
 }
 
-/* Slide nodes to their new positions on an expand/collapse reflow instead of
- * teleporting. A node's `transform` (its flow-space position) only changes on
- * re-layout — panning and zooming move the viewport, not individual nodes — so
- * this animates the reflow without touching pan/zoom, and a freshly mounted
- * (windowed-in) node has no prior transform to animate from. The anchored
- * (toggled) node is exempted below: its position jumps in lockstep with the
- * synchronous viewport pan that keeps it visually fixed, so animating it would
- * make it drift away from the cursor during the reflow. */
-.f0-graph .react-flow__node {
-  transition: transform 300ms ease;
-}
-.f0-graph .react-flow__node.f0-graph-node-reflow-anchor {
-  transition: none;
-}
-
 /* Respect OS reduced-motion preference — disable CSS transitions */
 @media (prefers-reduced-motion: reduce) {
-  .f0-graph .react-flow__node,
   .f0-graph [data-zoom-level],
   .f0-graph [data-zoom-level] * {
     transition-duration: 0s !important;
