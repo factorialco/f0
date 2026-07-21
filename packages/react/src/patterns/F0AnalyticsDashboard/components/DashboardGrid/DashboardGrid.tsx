@@ -638,11 +638,17 @@ function RowItem({
     const resizeObserver = new ResizeObserver(scheduleMeasure)
     resizeObserver.observe(el)
 
+    // `attributes: true` matters: nested collections re-layout themselves
+    // asynchronously after a container resize by writing style attributes.
+    // That can push content into overflow without changing the wrapper's
+    // size (no ResizeObserver event) and without adding/removing nodes (no
+    // childList event) — attribute mutations are the only visible signal.
     const mutationObserver = new MutationObserver(scheduleMeasure)
     mutationObserver.observe(el, {
       childList: true,
       subtree: true,
       characterData: true,
+      attributes: true,
     })
 
     return () => {
@@ -869,8 +875,10 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
  *
  * The row is momentarily collapsed (height/min-height 0) so each card's
  * `scrollHeight` reports pure content height instead of the flex-stretched
- * wrapper height. Styles are restored synchronously in the same task, so
- * nothing paints in between.
+ * wrapper height. Content height can itself depend on the container height
+ * (horizontal scrollbars appear, toolbars wrap), so a second pass re-reads
+ * at the height found by the first pass and keeps the larger value. Styles
+ * are restored synchronously in the same task, so nothing paints in between.
  */
 function getRowContentMinHeight(
   rowEl: HTMLElement | null | undefined,
@@ -879,20 +887,29 @@ function getRowContentMinHeight(
   if (!rowEl || measurableCardIds.size === 0) return 0
   const prevHeight = rowEl.style.height
   const prevMinHeight = rowEl.style.minHeight
-  rowEl.style.height = "0px"
-  rowEl.style.minHeight = "0px"
-  let min = 0
-  for (const card of Array.from(
-    rowEl.querySelectorAll<HTMLElement>("[data-card-id]")
-  )) {
-    const id = card.dataset.cardId
-    if (id && measurableCardIds.has(id)) {
-      min = Math.max(min, card.scrollHeight)
+
+  const measure = () => {
+    let min = 0
+    for (const card of Array.from(
+      rowEl.querySelectorAll<HTMLElement>("[data-card-id]")
+    )) {
+      const id = card.dataset.cardId
+      if (id && measurableCardIds.has(id)) {
+        min = Math.max(min, card.scrollHeight)
+      }
     }
+    return min
   }
+
+  rowEl.style.minHeight = "0px"
+  rowEl.style.height = "0px"
+  const collapsed = measure()
+  rowEl.style.height = `${collapsed}px`
+  const settled = Math.max(collapsed, measure())
+
   rowEl.style.height = prevHeight
   rowEl.style.minHeight = prevMinHeight
-  return min
+  return settled
 }
 
 function getSlotWeight<Filters extends FiltersDefinition>(
