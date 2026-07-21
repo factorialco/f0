@@ -12,6 +12,8 @@ import type { F0FormEditableTableColumn } from "@/experimental/F0FormEditableTab
 import { F0Button } from "@/components/F0Button"
 import { F0FormEditableTable } from "@/experimental/F0FormEditableTable"
 import { Add } from "@/icons/app"
+import { dialogs } from "@/lib/providers/dialogs-alike"
+import type { ConfirmDialogOptions } from "@/lib/providers/dialogs-alike/types"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 import {
   Tooltip,
@@ -319,6 +321,14 @@ export function EntitiesListFieldRenderer({
     makeRows(formField.value)
   )
 
+  // Keys of rows whose `onRemove` persistence hook is currently in flight, so
+  // the row's remove action can be disabled until it settles.
+  const [removingKeys, setRemovingKeys] = useState<Set<string>>(() => new Set())
+  const isRemovePending = useCallback(
+    (rowKey: string) => removingKeys.has(rowKey),
+    [removingKeys]
+  )
+
   // Track the last value we pushed to the form so the sync effect below can
   // tell our own updates apart from external ones (e.g. a form reset).
   const lastCommittedRef = useRef<string>(
@@ -345,6 +355,81 @@ export function EntitiesListFieldRenderer({
       formField.onChange(value)
     },
     [formField, rowItemToForm]
+  )
+
+  const onRemove = field.onRemove
+  const confirmRemove = field.confirmRemove
+  /**
+   * Confirmation-gated, persistence-aware row removal — the delete counterpart
+   * to the add/edit dialogs. Shared by the editable table, the list-view remove
+   * action and the `rowActions` `remove()` helper, so every removal path:
+   *
+   * 1. Confirms first (custom copy via `confirmRemove`, else a generic default),
+   *    per the CRUD "Delete & destructive" doc. Cancelling leaves the row.
+   * 2. Runs `onRemove` (if provided) with the item; a thrown error or a
+   *    `{ success: false }` result keeps the row and shows an error, and the
+   *    action is disabled while the hook is in flight.
+   * 3. Only splices the row from the field value on success.
+   */
+  const performRemove = useCallback(
+    async (row: EntitiesListRow) => {
+      const { __key, ...rawItem } = row
+      // Hand callbacks the item in its form shape (ISO date strings → `Date`),
+      // matching the row value type the schema declares.
+      const item = rowItemToForm(rawItem)
+
+      const confirmOptions: ConfirmDialogOptions = confirmRemove
+        ? confirmRemove(item)
+        : {
+            type: "critical",
+            title: translations.removeConfirmTitle,
+            msg: translations.removeConfirmMessage,
+            confirm: { label: removeLabel },
+          }
+      const confirmed = await dialogs.confirmation(confirmOptions)
+      if (!confirmed) return
+
+      if (onRemove) {
+        setRemovingKeys((prev) => new Set(prev).add(__key))
+        try {
+          const result = await onRemove(item)
+          if (result && result.success === false) {
+            await dialogs.alert({
+              type: "critical",
+              title: translations.removeErrorTitle,
+              msg: translations.removeError,
+            })
+            return
+          }
+        } catch {
+          await dialogs.alert({
+            type: "critical",
+            title: translations.removeErrorTitle,
+            msg: translations.removeError,
+          })
+          return
+        } finally {
+          setRemovingKeys((prev) => {
+            const next = new Set(prev)
+            next.delete(__key)
+            return next
+          })
+        }
+      }
+
+      commit(rows.filter((r) => r.__key !== __key))
+      formField.onBlur()
+    },
+    [
+      rows,
+      commit,
+      formField,
+      onRemove,
+      confirmRemove,
+      rowItemToForm,
+      translations,
+      removeLabel,
+    ]
   )
 
   /**
@@ -383,6 +468,21 @@ export function EntitiesListFieldRenderer({
       return field.editableIds.includes(id as string | number)
     },
     [field.editableIds]
+  )
+
+  /**
+   * Whether an item can be removed: independent of {@link isRowEditable}.
+   * Every item when `removableIds` is omitted; otherwise items whose `id` is
+   * listed. Items without an `id` (rows just added locally) stay removable.
+   */
+  const isRowRemovable = useCallback(
+    (row: EntitiesListRow): boolean => {
+      if (!field.removableIds) return true
+      const id = row.id
+      if (id === undefined || id === null) return true
+      return field.removableIds.includes(id as string | number)
+    },
+    [field.removableIds]
   )
 
   // --- Dialog editing (dialog mode, or a split create/update schema) --------
@@ -626,10 +726,9 @@ export function EntitiesListFieldRenderer({
                     r.__key === row.__key ? { ...r, ...partial } : r
                   )
                 ),
-              remove: () => {
-                commit(rows.filter((r) => r.__key !== row.__key))
-                formField.onBlur()
-              },
+              // Route through the confirm + persist path so custom actions that
+              // call remove() also confirm and hit onRemove.
+              remove: () => void performRemove(row),
             }),
         }))
       }
@@ -695,10 +794,10 @@ export function EntitiesListFieldRenderer({
   )
   const removeRowByKey = useCallback(
     (rowKey: string) => {
-      commit(rows.filter((r) => r.__key !== rowKey))
-      formField.onBlur()
+      const row = findRow(rowKey)
+      if (row) void performRemove(row)
     },
-    [rows, commit, formField]
+    [findRow, performRemove]
   )
   const canEditRowByKey = useCallback(
     (rowKey: string) => {
@@ -706,6 +805,13 @@ export function EntitiesListFieldRenderer({
       return row ? isRowEditable(row) : true
     },
     [findRow, isRowEditable]
+  )
+  const canRemoveRowByKey = useCallback(
+    (rowKey: string) => {
+      const row = findRow(rowKey)
+      return row ? isRowRemovable(row) : true
+    },
+    [findRow, isRowRemovable]
   )
   const itemHref = field.itemHref
   const hrefByKey = useCallback(
@@ -738,14 +844,13 @@ export function EntitiesListFieldRenderer({
               commit(
                 rows.map((r) => (r.__key === rowKey ? { ...r, ...partial } : r))
               ),
-            remove: () => {
-              commit(rows.filter((r) => r.__key !== rowKey))
-              formField.onBlur()
-            },
+            // Route through the confirm + persist path so custom actions that
+            // call remove() also confirm and hit onRemove.
+            remove: () => void performRemove(rows[index]),
           }),
       }))
     },
-    [rowActionsFn, rows, commit, formField]
+    [rowActionsFn, rows, commit, formField, performRemove]
   )
 
   // The field renders its own label (FieldRenderer suppresses the default one)
@@ -797,9 +902,11 @@ export function EntitiesListFieldRenderer({
           })}
           listItem={field.listItem}
           canEditRow={canEditRowByKey}
+          canRemoveRow={canRemoveRowByKey}
           onEditRow={isNavigable || isDisabled ? undefined : editRowByKey}
           onRowClick={isNavigable || isDisabled ? undefined : editRowByKey}
           onRemoveRow={isDisabled ? undefined : removeRowByKey}
+          isRemovePending={isRemovePending}
           getRowActions={rowActionsFn ? rowActionsByKey : undefined}
           getRowHref={isNavigable ? hrefByKey : undefined}
           editLabel={editTooltipLabel}
@@ -838,18 +945,18 @@ export function EntitiesListFieldRenderer({
         // disabled via `disabled` below) so submitting doesn't shift the layout.
         sortableRows={field.sortable !== false}
         onReorderRows={({ items }) => commit(items)}
-        onRemoveRow={(row) => {
-          commit(rows.filter((r) => r.__key !== row.__key))
-          formField.onBlur()
-        }}
+        onRemoveRow={(row) => void performRemove(row)}
         onEditRow={
           useDialogMode ? (row) => openItemDialog("edit", row) : undefined
         }
         canEditRow={isRowEditable}
+        canRemoveRow={isRowRemovable}
         rowActions={rowActions}
         editLabel={editLabel}
         removeLabel={removeLabel}
-        disabled={isDisabled}
+        // The editable table disables the remove control table-wide (there's no
+        // per-row remove disable), so freeze it while any onRemove is in flight.
+        disabled={isDisabled || removingKeys.size > 0}
       />
 
       {rootError && (

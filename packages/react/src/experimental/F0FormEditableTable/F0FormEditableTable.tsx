@@ -222,6 +222,7 @@ type RowCellsProps<R extends RecordType> = {
   onRemoveRow?: (item: R, index: number) => void
   onEditRow?: (item: R, index: number) => void
   canEditRow?: (item: R, index: number) => boolean
+  canRemoveRow?: (item: R, index: number) => boolean
   rowActions?: (item: R, index: number) => F0FormEditableTableRowAction<R>[]
   getCellError?: (
     item: R,
@@ -249,6 +250,7 @@ function RowCells<R extends RecordType>({
   onRemoveRow,
   onEditRow,
   canEditRow,
+  canRemoveRow,
   rowActions,
   getCellError,
   hasActionsColumn,
@@ -259,6 +261,7 @@ function RowCells<R extends RecordType>({
   dragHandle,
 }: RowCellsProps<R>) {
   const showEdit = !!onEditRow && (canEditRow?.(item, index) ?? true)
+  const showRemove = !!onRemoveRow && (canRemoveRow?.(item, index) ?? true)
   const customActions = rowActions?.(item, index) ?? []
   return (
     <>
@@ -345,7 +348,7 @@ function RowCells<R extends RecordType>({
                 disabled={disabled}
               />
             ))}
-            {onRemoveRow && (
+            {showRemove && (
               // The critical variant inverts its icon on `group-hover`, which
               // the surrounding `.group` table row also triggers — turning the
               // icon white on mere row hover. Pin it to the critical color and
@@ -454,6 +457,7 @@ function F0FormEditableTableBase<R extends RecordType>({
   onRemoveRow,
   onEditRow,
   canEditRow,
+  canRemoveRow,
   rowActions,
   getCellError,
   addRow,
@@ -520,6 +524,7 @@ function F0FormEditableTableBase<R extends RecordType>({
       onRemoveRow,
       onEditRow,
       canEditRow,
+      canRemoveRow,
       rowActions,
       getCellError,
       hasActionsColumn,
