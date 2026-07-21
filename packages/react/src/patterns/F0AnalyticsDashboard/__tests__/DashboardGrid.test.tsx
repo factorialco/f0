@@ -306,4 +306,34 @@ describe("DashboardGrid", () => {
       })
     })
   })
+
+  describe("drag source", () => {
+    it("makes the grip the drag source, not the card (so the whole grip drags and the canvas body doesn't)", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+
+      const card = container.querySelector('[data-card-id="expenses"]')
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(card instanceof HTMLElement) || !(grip instanceof HTMLElement)) {
+        throw new Error("Expected card and grip to be rendered")
+      }
+
+      // The card is no longer the drag source — clicking its body (a chart
+      // canvas in the wild) must never start a drag.
+      expect(card.getAttribute("draggable")).toBeNull()
+      // The grip is the sole drag source, so every pixel of it drags —
+      // including the sliver that overflows the card's left edge.
+      expect(grip.getAttribute("draggable")).toBe("true")
+    })
+
+    it("renders no drag source when not in edit mode", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
+      )
+      expect(
+        container.querySelector('[aria-label="Drag to reorder"]')
+      ).toBeNull()
+    })
+  })
 })

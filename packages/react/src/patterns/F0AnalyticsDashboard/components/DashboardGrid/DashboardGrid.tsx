@@ -598,8 +598,6 @@ function RowItem({
   onContentHeightChange: (id: string, height: number) => void
   children: React.ReactNode
 }) {
-  // Track whether the drag started from the handle. If not, cancel it.
-  const fromHandleRef = useRef(false)
   const itemRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -664,42 +662,38 @@ function RowItem({
       <div
         ref={itemRef}
         data-card-id={id}
-        draggable={canDrag}
-        onDragStart={
-          canDrag
-            ? (e) => {
-                if (!fromHandleRef.current) {
-                  e.preventDefault()
-                  return
-                }
-                e.dataTransfer.effectAllowed = "move"
-                e.dataTransfer.setData("text/plain", id)
-                onDragStart(id)
-              }
-            : undefined
-        }
-        onDragEnd={
-          canDrag
-            ? () => {
-                fromHandleRef.current = false
-                onDragEnd()
-              }
-            : undefined
-        }
         className={cn(
           "group/rowitem relative min-w-0 flex-1 transition-opacity duration-150",
           isDragging && "opacity-40 scale-[0.97]"
         )}
       >
         {canDrag && (
+          // The grip itself is the drag source (not the card). Making the card
+          // draggable failed in two ways: the card body is an ECharts canvas
+          // that swallowed the gesture, and the grip — positioned `-left-3`,
+          // half outside the card's border box — could only arm a native drag
+          // from the sliver that overlapped the box, so its outer half (and
+          // full-width charts, where the grip reads as margin) never dragged.
+          // A `draggable` grip arms from anywhere on itself; `setDragImage`
+          // makes the ghost the whole card so it tracks the cursor.
           <div
+            draggable
+            onDragStart={(e) => {
+              e.dataTransfer.effectAllowed = "move"
+              e.dataTransfer.setData("text/plain", id)
+              const card = itemRef.current
+              if (card) {
+                const rect = card.getBoundingClientRect()
+                e.dataTransfer.setDragImage(
+                  card,
+                  e.clientX - rect.left,
+                  e.clientY - rect.top
+                )
+              }
+              onDragStart(id)
+            }}
+            onDragEnd={onDragEnd}
             className="shadow-sm absolute -left-3 top-2.5 z-20 flex cursor-grab items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100"
-            onMouseDown={() => {
-              fromHandleRef.current = true
-            }}
-            onMouseUp={() => {
-              fromHandleRef.current = false
-            }}
             aria-label="Drag to reorder"
           >
             <F0Icon icon={Handle} size="xs" />
