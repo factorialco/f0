@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.46.1](https://github.com/factorialco/f0/compare/f0-react-v4.46.0...f0-react-v4.46.1) (2026-07-21)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** debounce the collection→URL sync (fixes per-keystroke Sentry session churn) ([#4759](https://github.com/factorialco/f0/issues/4759)) ([5d67bb4](https://github.com/factorialco/f0/commit/5d67bb4fc8b1fa1d21223ee2505254d3b580091b))
+
 ## [4.46.0](https://github.com/factorialco/f0/compare/f0-react-v4.45.0...f0-react-v4.46.0) (2026-07-21)
 
 
