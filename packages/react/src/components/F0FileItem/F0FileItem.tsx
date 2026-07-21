@@ -1,5 +1,10 @@
+import type { HTMLAttributes } from "react"
+
 import { cva } from "cva"
 import { forwardRef } from "react"
+
+import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
+import type { IconType } from "@/components/F0Icon"
 
 import { F0AvatarFile } from "@/components/avatars/F0AvatarFile"
 import { F0Button } from "@/components/F0Button"
@@ -12,10 +17,6 @@ import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn } from "@/lib/utils"
-
-import type { FileDef } from "@/components/avatars/F0AvatarFile/types"
-import type { IconType } from "@/components/F0Icon"
-import type { HTMLAttributes } from "react"
 
 // Declared next to the component (not in a sibling types.ts) so api-extractor
 // rolls them into the bundled d.ts instead of emitting a broken relative import.
@@ -35,11 +36,11 @@ export interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> {
   disabled?: boolean
   size?: F0FileItemSize
   /**
-   * Pre-formatted date rendered under the file name (e.g. an upload date).
-   * The consumer owns locale and formatting. When set, the item grows to two
-   * lines and its vertical padding is doubled.
+   * Secondary line rendered under the file name (e.g. an upload date or file
+   * size). The consumer owns any formatting. When set, the item grows to two
+   * lines and its padding is doubled.
    */
-  date?: string
+  subtitle?: string
 }
 
 /** @deprecated Use F0FileAction */
@@ -56,22 +57,22 @@ const fileItemVariants = cva({
       md: "max-w-48 gap-2",
       lg: "max-w-56 gap-2.5",
     },
-    // A date adds a second line, so the padding is doubled (both axes) to keep
-    // the block visually balanced.
-    withDate: {
+    // A subtitle adds a second line, so the padding is doubled (both axes) to
+    // keep the block visually balanced.
+    withSubtitle: {
       true: "",
       false: "",
     },
   },
   compoundVariants: [
-    { size: "md", withDate: false, class: "py-0.5 pl-0.5 pr-1.5" },
-    { size: "md", withDate: true, class: "py-1 pl-1 pr-3" },
-    { size: "lg", withDate: false, class: "p-1" },
-    { size: "lg", withDate: true, class: "p-2" },
+    { size: "md", withSubtitle: false, class: "py-0.5 pl-0.5 pr-1.5" },
+    { size: "md", withSubtitle: true, class: "py-1 pl-1 pr-3" },
+    { size: "lg", withSubtitle: false, class: "p-1" },
+    { size: "lg", withSubtitle: true, class: "p-2" },
   ],
   defaultVariants: {
     size: "md",
-    withDate: false,
+    withSubtitle: false,
   },
 })
 
@@ -92,7 +93,7 @@ const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
       actions = [],
       disabled = false,
       size = "md",
-      date,
+      subtitle,
       className,
       ...props
     },
@@ -111,7 +112,10 @@ const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
     return (
       <div
         ref={ref}
-        className={cn(fileItemVariants({ size, withDate: !!date }), className)}
+        className={cn(
+          fileItemVariants({ size, withSubtitle: !!subtitle }),
+          className
+        )}
         {...props}
       >
         <F0AvatarFile file={file} size={avatarSizeMap[size]} />
@@ -121,9 +125,9 @@ const _F0FileItem = forwardRef<HTMLDivElement, F0FileItemProps>(
           <OneEllipsis className="text-neutral-1000 text-sm font-medium">
             {file.name}
           </OneEllipsis>
-          {date && (
-            <span className="text-f1-foreground-secondary truncate text-xs">
-              {date}
+          {subtitle && (
+            <span className="truncate text-xs text-f1-foreground-secondary">
+              {subtitle}
             </span>
           )}
         </div>
