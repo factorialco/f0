@@ -297,7 +297,7 @@ declare type ActionProps_3 = {
      * @default "default"
      * @optional
      */
-    variant?: "default" | "outline" | "promote";
+    variant?: "default" | "outline" | "neutral" | "promote";
     /**
      * The icon of the action
      * @optional
@@ -1337,6 +1337,11 @@ declare type ButtonDropdownItem<T = string> = {
      * The description of the item.
      */
     description?: string;
+    /**
+     * Whether the item is disabled.
+     * @default false
+     */
+    disabled?: boolean;
 };
 
 declare type ButtonInternalProps = Pick<ActionProps, "size" | "disabled" | "className" | "pressed" | "compact" | "tooltip" | "fontSize"> & DataAttributes & {
@@ -1733,6 +1738,18 @@ declare const cardImageFits: readonly ["contain", "cover", "fit-width", "fit-hei
 declare type CardImageSize = (typeof cardImageSizes)[number];
 
 declare const cardImageSizes: readonly ["xs", "sm", "md", "lg", "xl"];
+
+declare type CardMetadata = {
+    /** Leading icon. Optional — when omitted the row renders just the value. */
+    icon?: IconType;
+    property: Exclude<CardMetadataProperty, {
+        type: "file";
+    }>;
+} | {
+    property: Extract<CardMetadataProperty, {
+        type: "file";
+    }>;
+};
 
 /**
  * Card metadata property renderers.
@@ -2345,6 +2362,13 @@ export declare type CollectionProps<Record extends RecordType, Filters extends F
     tmpFullWidth?: boolean;
     /** Indicates the source visualization type */
     fromVisualization?: TableVisualizationType;
+    /**
+     * Bumps on every shared-search result selection. Lets a visualization
+     * re-fire its reveal/focus even when the selected record (hence the derived
+     * reveal target) is unchanged — so re-searching the same node re-centers,
+     * like the graph's "Find me". Only the graph view reads it today.
+     */
+    searchSelectionNonce?: number;
 } & VisualizationOptions;
 
 /**
@@ -3095,6 +3119,9 @@ declare const daytimePageVariants: (props?: ({
 })) | undefined) => string;
 
 declare const defaultTranslations: {
+    readonly common: {
+        readonly selectPlaceholder: "Select";
+    };
     readonly countries: {
         ad: string;
         ae: string;
@@ -3391,6 +3418,8 @@ declare const defaultTranslations: {
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
+                readonly addColumn: "Add column";
+                readonly removeColumn: "Remove column";
             };
         };
         readonly editableTable: {
@@ -3398,6 +3427,9 @@ declare const defaultTranslations: {
                 readonly saveFailed: "Save failed";
             };
             readonly addRow: "Add row";
+            readonly removeRow: "Remove row";
+            readonly editRow: "Edit";
+            readonly reorderRow: "Drag to reorder";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -3435,6 +3467,8 @@ declare const defaultTranslations: {
         readonly date: "Date";
         readonly custom: "Custom period";
         readonly selectDate: "Select Date";
+        readonly selectMonth: "Select month";
+        readonly selectYear: "Select year";
         readonly compareTo: "Compare to";
         readonly presets: {
             readonly last7Days: "Last 7 days";
@@ -3670,6 +3704,8 @@ declare const defaultTranslations: {
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
         readonly recordAudio: "Record audio";
@@ -3696,6 +3732,13 @@ declare const defaultTranslations: {
         readonly twoTyping: "{{first}} and {{second}} are writing…";
         readonly severalTyping: "Several people are writing…";
         readonly deletedMessage: "Message deleted";
+        readonly location: "Location";
+        readonly voiceNote: "Voice note";
+        readonly sendVoiceNote: "Send voice note";
+        readonly sendingVoiceNote: "Sending voice note…";
+        readonly sending: "Sending…";
+        readonly notSent: "Not sent";
+        readonly retry: "Retry";
         readonly moreActions: "Message actions";
         readonly options: "Options";
         readonly pin: "Pin";
@@ -3719,6 +3762,8 @@ declare const defaultTranslations: {
         readonly closePreview: "Close";
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
+        readonly openDocument: "Open document";
+        readonly documentPreview: "Document preview";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -3734,6 +3779,22 @@ declare const defaultTranslations: {
         };
         readonly scrollToBottom: "Scroll to bottom";
         readonly newMessages: "New messages";
+        readonly system: {
+            readonly memberAdded: {
+                readonly one: "{{members}} was added to the group";
+                readonly other: "{{members}} were added to the group";
+            };
+            readonly memberRemoved: {
+                readonly one: "{{members}} was removed from the group";
+                readonly other: "{{members}} were removed from the group";
+            };
+            readonly memberLeft: {
+                readonly one: "{{members}} left the group";
+                readonly other: "{{members}} left the group";
+            };
+            readonly membersWithLast: "{{names}} and {{last}}";
+            readonly membersWithMore: "{{names}} and {{count}} more";
+        };
         readonly unreadCount: {
             readonly one: "{{count}} unread";
             readonly other: "{{count}} unread";
@@ -3940,6 +4001,19 @@ declare const defaultTranslations: {
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
             readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
+        readonly entitiesList: {
+            readonly add: "Add";
+            readonly edit: "Edit";
+            readonly remove: "Remove";
+            readonly view: "View";
+            readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
+            readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
+            readonly addBlockedMaxHint: "You've reached the maximum number of items";
+            readonly removeConfirmTitle: "Remove item?";
+            readonly removeConfirmMessage: "This item will be removed. This action cannot be undone.";
+            readonly removeError: "Couldn't remove the item. Please try again.";
+            readonly removeErrorTitle: "Remove failed";
+        };
         readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
@@ -3987,6 +4061,25 @@ declare const defaultTranslations: {
         readonly next: "Continue";
         readonly submit: "Submit";
         readonly stepOf: "Step {{current}} of {{total}}";
+    };
+    readonly pdfViewer: {
+        readonly toolbar: "Document toolbar";
+        readonly previousPage: "Previous page";
+        readonly nextPage: "Next page";
+        readonly zoomIn: "Zoom in";
+        readonly zoomOut: "Zoom out";
+        readonly scaleSelector: "Zoom level";
+        readonly pageWidth: "Page width";
+        readonly pageFit: "Page fit";
+        readonly rotate: "Rotate";
+        readonly print: "Print";
+        readonly download: "Download";
+        readonly loading: "Loading document";
+        readonly previewFailed: "Preview isn't available for this file";
+        readonly showingFirstRows: {
+            readonly one: "Showing the first row";
+            readonly other: "Showing the first {{count}} rows";
+        };
     };
 };
 
@@ -4131,6 +4224,7 @@ export declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> 
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -4149,6 +4243,8 @@ declare type DropdownProps = Omit<DropdownInternalProps, (typeof privateProps_5)
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 } & WithDataTestIdProps;
+
+/* Excluded from this release type: EditableColumn */
 
 /**
  * Map of the attributes modified in a cell update, keyed by record key.
@@ -4191,6 +4287,11 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
      * function whose return value isn't statically known.
      */
     selectConfig?: SelectCellConfig<R>;
+    /**
+     * Configuration for `"text"` cells. Sets the input type and an optional
+     * leading icon (url/email get one by default).
+     */
+    textConfig?: TextCellConfig;
     /**
      * Configuration for `"number"` cells. Accepts constraints (`min`, `max`),
      * stepping (`step`), formatting (`maxDecimals`, `locale`), and units.
@@ -4957,7 +5058,32 @@ export declare interface F0CardHorizontalProps {
  */
 export declare const F0Chat: (props: F0ChatProps) => ReactNode;
 
-export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment;
+export declare type F0ChatAttachment = F0ChatImageAttachment | F0ChatFileAttachment | F0ChatLocationAttachment | F0ChatVoiceAttachment;
+
+/**
+ * Per-channel permissions. Everything is optional and defaults to today's
+ * behavior, so hosts only express what their transport restricts (frozen /
+ * read-only channels, moderation roles…):
+ * - `canSend` (default true): false hides the composer entirely.
+ * - `canReact` (default true): false hides the quick-reaction row, the emoji
+ *   pickers and disables toggling existing reaction pills.
+ * - `canUpload` (default: whether `uploadFiles` exists): false disables the
+ *   attach button, drag & drop and voice notes even when `uploadFiles` exists.
+ * - `canEditMessage` (default: own message within {@link F0ChatRuntime.editWindowMs}):
+ *   overrides the edit policy per message. Structural gates still apply (the
+ *   host must provide `editMessage`; deleted messages and voice notes are
+ *   never editable).
+ * - `canDeleteMessage` (default: own message): overrides the delete policy per
+ *   message (e.g. moderators deleting others' messages). Failed local echoes
+ *   are always discardable — they don't exist server-side.
+ */
+export declare type F0ChatCapabilities = {
+    canSend?: boolean;
+    canReact?: boolean;
+    canUpload?: boolean;
+    canEditMessage?: (message: F0ChatMessage) => boolean;
+    canDeleteMessage?: (message: F0ChatMessage) => boolean;
+};
 
 /** The conversation currently shown in the panel (header + behaviour differs by type). */
 export declare type F0ChatChannel = {
@@ -5019,6 +5145,30 @@ export declare type F0ChatFileAttachment = {
     progress?: number;
 };
 
+/**
+ * A host-provided header action (the only built-in one is Search). Pin/mute,
+ * edit-group, leave… are all expressed through this, so each channel can offer
+ * exactly the actions the current user's PERMISSIONS allow — pass different
+ * arrays per channel (or the function form of `headerActions`), and `[]` for a
+ * channel where the user can do nothing but search.
+ */
+export declare type F0ChatHeaderAction = {
+    id: string;
+    /** Already-localized label. For toggles (mute/unmute) the host rebuilds the
+     * array per render with the current label — labels are plain strings. */
+    label: string;
+    icon?: IconType;
+    /** The host decides what happens: call a runtime method (togglePin,
+     * toggleMute), open its own modal, navigate… */
+    onClick: (channel: F0ChatChannel) => void;
+    /** Where the action renders: inside the ellipsis overflow menu (default) or
+     * as its own icon button next to it. Inline requires `icon` — an inline
+     * action without one falls back to the menu. */
+    placement?: "menu" | "inline";
+    /** Restrict the action to a channel type. Omit for both. */
+    channelTypes?: F0ChatChannelType[];
+};
+
 export declare type F0ChatImageAttachment = {
     kind: "image";
     url: string;
@@ -5027,6 +5177,36 @@ export declare type F0ChatImageAttachment = {
     mimeType?: string;
     width?: number;
     height?: number;
+};
+
+/** Anything that can appear in the transcript, oldest → newest. */
+export declare type F0ChatItem = F0ChatMessage | F0ChatSystemMessage;
+
+/**
+ * Open Graph preview of a URL in the body (WhatsApp-style card above the text).
+ * The host provides scraped metadata — F0 never fetches the URL itself
+ * (factorial → Stream's URL enrichment attachments, `og_scrape_url`).
+ */
+export declare type F0ChatLinkPreview = {
+    /** The link the card opens (the scraped page). */
+    url: string;
+    title?: string;
+    description?: string;
+    /** Preview image (Open Graph `og:image`). */
+    imageUrl?: string;
+};
+
+/**
+ * A shared (static) location. Rendered as a map preview card that opens the
+ * point in Google Maps; the host maps it to its transport's shape (factorial →
+ * a Stream custom attachment `{ type: "location", latitude, longitude }`).
+ */
+export declare type F0ChatLocationAttachment = {
+    kind: "location";
+    latitude: number;
+    longitude: number;
+    /** Optional place label shown under the map. */
+    name?: string;
 };
 
 /**
@@ -5047,6 +5227,11 @@ export declare type F0ChatMention = {
 };
 
 export declare type F0ChatMessage = {
+    /**
+     * Discriminant against {@link F0ChatSystemMessage}. Optional — an absent
+     * `type` means "message", so existing literals keep compiling.
+     */
+    type?: "message";
     id: string;
     author: F0ChatUser;
     body: string;
@@ -5055,6 +5240,12 @@ export declare type F0ChatMessage = {
     isMine: boolean;
     status?: F0ChatMessageStatus;
     /**
+     * Why the send failed (host-provided, human-readable — e.g. "Message too
+     * long"). Shown alongside the failed indicator's tooltip so the user knows
+     * whether a retry can help. Only meaningful with `status: "failed"`.
+     */
+    failureReason?: string;
+    /**
      * When the message was read (DM read receipt), ISO. Approximated from the
      * counterpart's per-channel last-read pointer — Stream has no per-message
      * read time — so it's "read at or before this", not an exact per-message stamp.
@@ -5062,6 +5253,13 @@ export declare type F0ChatMessage = {
     readAt?: string;
     reactions?: F0ChatReaction[];
     attachments?: F0ChatAttachment[];
+    /**
+     * Preview cards for the URLs in the body (host-scraped metadata only; when
+     * omitted, links render as plain auto-linked text). A single preview shows a
+     * full card with its image; several stack as compact title/host rows
+     * (Slack-style unfurls).
+     */
+    linkPreviews?: F0ChatLinkPreview[];
     replyTo?: F0ChatMessageReply;
     /**
      * People mentioned in this message (groups only). Drives the `@name` chip
@@ -5103,8 +5301,16 @@ export declare type F0ChatMessageReply = {
     attachments?: F0ChatAttachment[];
 };
 
-/** iMessage-style delivery state — only meaningful for messages I sent. */
-export declare type F0ChatMessageStatus = "sending" | "sent" | "read" | "failed";
+/**
+ * iMessage-style delivery state — only meaningful for messages I sent.
+ * `sending` renders a delayed clock beside the bubble (only if the send takes
+ * >500ms, so healthy networks never flash it); `failed` dims the bubble and
+ * shows a tappable critical alert whose menu is reduced to Retry / Delete.
+ * `delivered` (reached the counterpart's device, not read yet) is for backends
+ * that distinguish it — Stream doesn't, so the factorial adapter never emits it
+ * and those messages go straight from `sent` to `read`.
+ */
+export declare type F0ChatMessageStatus = "sending" | "sent" | "delivered" | "read" | "failed";
 
 export declare type F0ChatProps = {
     /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
@@ -5113,6 +5319,14 @@ export declare type F0ChatProps = {
     onToggleFullscreen?: () => void;
     /** Close the hosting panel. Hidden when omitted. */
     onClose?: () => void;
+    /**
+     * Host-provided header actions (pin, mute, edit group…). Search is the only
+     * built-in one. The function form receives the current channel so each
+     * channel offers exactly what the user's PERMISSIONS allow — return `[]`
+     * where they can do nothing but search. For toggles (mute/unmute) rebuild
+     * the array per render with the current label/icon.
+     */
+    headerActions?: F0ChatHeaderAction[] | ((channel: F0ChatChannel) => F0ChatHeaderAction[]);
 };
 
 /**
@@ -5140,8 +5354,8 @@ export declare type F0ChatRuntime = {
     currentUserId: string;
     channel: F0ChatChannel;
     status: F0ChatStatus;
-    /** Oldest → newest. */
-    messages: F0ChatMessage[];
+    /** Oldest → newest. May interleave system items (membership events). */
+    messages: F0ChatItem[];
     /** Users currently typing (excluding me). */
     typingUsers: F0ChatUser[];
     hasMoreOlder: boolean;
@@ -5160,17 +5374,57 @@ export declare type F0ChatRuntime = {
     unreadCount: number;
     /** Id of the first unread message — where the "new messages" divider goes. */
     firstUnreadId: string | null;
-    sendMessage: (input: F0ChatSendInput) => void;
-    retryMessage: (id: string) => void;
+    /**
+     * Send a message. F0 fires-and-forgets; the OPTIMISTIC LIFECYCLE is the
+     * host's contract (this is what makes any backend feel instant):
+     *
+     * 1. Generate the message id CLIENT-SIDE and synchronously insert a local
+     *    echo into `messages` with `status: "sending"` — the bubble must appear
+     *    in the same render, not after the server acks.
+     * 2. Reconcile by id: when the server echo arrives, replace the local one
+     *    (same id → same bubble, no flicker) and advance `status`.
+     * 3. On failure, flip the echo to `status: "failed"` (optionally with
+     *    `failureReason`) and keep it in `messages` — F0 renders the retry /
+     *    discard affordances.
+     * 4. `retryMessage` re-sends with the SAME id so the server can dedupe when
+     *    the original send actually landed (timeouts lie on bad networks).
+     *
+     * factorial → Stream: `channel.state.addMessageSorted` + client-generated
+     * UUID + id-idempotent `sendMessage`.
+     */
+    sendMessage: (input: F0ChatSendInput) => void | Promise<void>;
+    /**
+     * Re-send a message whose `status` is `"failed"`, reusing the SAME message
+     * id so the transport can dedupe if the original send actually reached the
+     * server (factorial → Stream is idempotent on client-generated message ids).
+     * Flips the message back to `"sending"`.
+     */
+    retryMessage: (id: string) => void | Promise<void>;
     loadOlder: () => void;
-    toggleReaction: (messageId: string, emoji: string) => void;
-    deleteMessage: (id: string) => void;
+    toggleReaction: (messageId: string, emoji: string) => void | Promise<void>;
+    /**
+     * Delete a message that exists server-side (soft delete → tombstone, or hard
+     * delete → removed from `messages`).
+     *
+     * When `deleteFailedMessage` is not provided this is ALSO called for failed
+     * local echoes, and the host must special-case them: discard the local echo
+     * only — no server call, the message doesn't exist server-side (factorial →
+     * `channel.state.removeMessage`). Prefer providing `deleteFailedMessage` so
+     * the two semantics stay explicit.
+     */
+    deleteMessage: (id: string) => void | Promise<void>;
+    /**
+     * Discard a `"failed"` local echo (never delivered — a purely local
+     * operation, no server call). When omitted, F0 falls back to
+     * `deleteMessage`, which then must handle the failed case itself.
+     */
+    deleteFailedMessage?: (id: string) => void | Promise<void>;
     /**
      * Edit an existing message (text, mentions, attachments). Omit to disable
      * editing — the "Edit" action then never shows. factorial →
      * `client.partialUpdateMessage`.
      */
-    editMessage?: (id: string, input: F0ChatEditInput) => void;
+    editMessage?: (id: string, input: F0ChatEditInput) => void | Promise<void>;
     /**
      * How long after sending a message stays editable (ms). The "Edit" action is
      * hidden once a message is older than this. Omit for no limit (editable
@@ -5179,6 +5433,15 @@ export declare type F0ChatRuntime = {
     editWindowMs?: number;
     /** Called as the user types so the runtime can emit typing.start/stop. */
     onInputActivity: () => void;
+    /**
+     * Emit typing.stop immediately — the composer calls it on send, when the
+     * text is cleared and on unmount, so the counterpart's dots drop the very
+     * moment typing actually stopped. Hosts whose transport auto-expires typing
+     * (Stream's `keystroke()` does after a few seconds) can omit it and rely on
+     * the timeout; transports without auto-expiry need it (factorial →
+     * `channel.stopTyping()`).
+     */
+    stopTyping?: () => void | Promise<void>;
     uploadFiles?: (files: File[]) => Promise<F0ChatAttachment[]>;
     /**
      * Max files attachable at once. When a selection/drop would exceed it, the
@@ -5192,7 +5455,24 @@ export declare type F0ChatRuntime = {
      * (the Stream adapter omits it, so the mic button stays hidden there).
      */
     transcribe?: TranscribeFn;
-    markRead?: () => void;
+    /**
+     * Mark the conversation read. `untilMessageId` supports partial reads
+     * ("read up to this message") for backends that track them; F0 currently
+     * always calls it without arguments (read everything), so simple hosts can
+     * ignore the parameter.
+     */
+    markRead?: (untilMessageId?: string) => void | Promise<void>;
+    /**
+     * Per-channel permissions (frozen / read-only channels, moderation…). Omit
+     * for the default policy — see {@link F0ChatCapabilities}.
+     */
+    capabilities?: F0ChatCapabilities;
+    /**
+     * Retry after a load failure — wired to the Retry button in the error state.
+     * Omit to render the error message without an action (previous behavior).
+     * factorial → re-run `channel.watch()`.
+     */
+    reconnect?: () => void | Promise<void>;
     /**
      * Search the conversation's members for the `@`-mention popover, returning
      * matches for `query` (empty string → the full member list). Provide it
@@ -5204,10 +5484,20 @@ export declare type F0ChatRuntime = {
     searchMembers?: (query: string) => Promise<F0ChatUser[]>;
     /**
      * Toggle the conversation's pinned (favourite) state for the current user.
-     * Drives the header "Pin / Unpin" action; omit to hide it. factorial →
+     * Transport capability only — the header no longer auto-renders a Pin
+     * action; the host surfaces one via {@link F0ChatHeaderAction} (`onClick:
+     * () => runtime.togglePin()`) where its permissions allow. factorial →
      * `channel.pin()` / `channel.unpin()`.
      */
-    togglePin?: () => void;
+    togglePin?: () => void | Promise<void>;
+    /**
+     * Toggle the conversation's muted state for the current user. Transport
+     * capability only — the header no longer auto-renders a Mute action; the
+     * host surfaces one via {@link F0ChatHeaderAction} (the header still shows
+     * the `channel.muted` status icon either way). factorial →
+     * `channel.mute()` / `channel.unmute()`.
+     */
+    toggleMute?: () => void | Promise<void>;
     /**
      * Full-text search within this conversation, returning matches oldest→newest.
      * Omit to fall back to a client-side substring search over the loaded
@@ -5241,7 +5531,61 @@ export declare type F0ChatSendInput = {
     mentionedEveryone?: boolean;
 };
 
-export declare type F0ChatStatus = "connecting" | "ready" | "error";
+/**
+ * Conversation lifecycle as the host reports it. `connecting` (first load)
+ * shows the skeleton and `error` the error state (with a Retry button when
+ * {@link F0ChatRuntime.reconnect} is provided). `reconnecting` / `offline` are
+ * for hosts with a live/cached transport: F0 renders the transcript exactly
+ * like `ready` — deliberately NO banner (per-message sending/failed states
+ * already communicate connectivity, WhatsApp-style) — falling back to the
+ * skeleton only when there are no messages to show yet. Hosts with a simple
+ * request/response lifecycle can keep using the original three states.
+ */
+export declare type F0ChatStatus = "connecting" | "ready" | "reconnecting" | "offline" | "error";
+
+/**
+ * Membership / lifecycle events rendered as a centered system row. Closed
+ * union — the host maps unknown transport event kinds to a body-only system
+ * message (the plain-text fallback). Room to grow: "channel.renamed", ….
+ */
+export declare type F0ChatSystemEvent = "member.added" | "member.removed" | "member.left";
+
+/**
+ * A transcript item that is ABOUT the conversation, not from a person: no
+ * author, no isMine, no reactions/replies/status — by construction. Rendered
+ * as a centered row (like the date separator). factorial → a Stream message
+ * with `type: "system"`; `system` comes from its custom fields, `body` from
+ * its free-form `text`.
+ */
+export declare type F0ChatSystemMessage = {
+    type: "system";
+    id: string;
+    /** ISO timestamp — participates in day separators and ordering. */
+    createdAt: string;
+    /** Structured payload → avatar-tag sentence. Omit to render `body` as-is. */
+    system?: F0ChatSystemPayload;
+    /** Plain-text fallback (e.g. GetStream's free-form system `text`), shown
+     * centered when `system` is absent or the event kind is unknown. */
+    body?: string;
+};
+
+/** Structured system payload → rendered as a sentence with inline person tags. */
+export declare type F0ChatSystemPayload = {
+    event: F0ChatSystemEvent;
+    /**
+     * The people the event is about. One message can carry several — the host /
+     * adapter coalesces bursts into one item (Slack-style "Ana, Luis and 2
+     * more") by REPLACING the previous item with an updated `members` array
+     * (same id); coalescing never happens in the view layer.
+     */
+    members: F0ChatUser[];
+    /** How many more people beyond `members` (host truncation) — added to the
+     * "+N" overflow tag on top of the visual max. */
+    remainingCount?: number;
+    /** Who performed the action (the admin who added/removed), when known.
+     * Not rendered today; reserved for "added by X" templates. */
+    actor?: F0ChatUser;
+};
 
 /** A participant in a conversation. */
 export declare type F0ChatUser = {
@@ -5252,6 +5596,20 @@ export declare type F0ChatUser = {
     subtitle?: string;
     /** Link to the person's profile, shown as "View profile" in the hover card. */
     profileHref?: string;
+};
+
+/**
+ * A voice note: recorded in the composer (mic button) and rendered as an audio
+ * player with playback-speed control. factorial → a Stream attachment
+ * `{ type: "voice_recording", asset_url, duration }`.
+ */
+export declare type F0ChatVoiceAttachment = {
+    kind: "voice";
+    url: string;
+    /** Recording length in seconds (shown before playback starts). */
+    durationSeconds?: number;
+    mimeType?: string;
+    name?: string;
 };
 
 export declare type F0FileAction = {
@@ -5277,8 +5635,180 @@ export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
 
 export declare const f0FileItemSizes: readonly ["md", "lg"];
 
-/** Tag types that can be rendered in a node's metadata row. */
-declare type F0GraphNodeTagType = TagVariant["type"];
+/**
+ * F0FormEditableTable is experimental — its API may change without a major bump.
+ */
+export declare const F0FormEditableTable: typeof F0FormEditableTableBase;
+
+/**
+ * A lightweight, fully controlled editable table built on the OneTable
+ * primitives and the editable-table cell components (`text`, `number`,
+ * `money`, `date`, `select`, ...), with optional drag-to-reorder rows,
+ * per-row removal and an add-row action — no data collection required.
+ *
+ * The parent owns the `items` array: cell edits are reported via
+ * `onCellChange`, reorders via `onReorderRows`, removals via `onRemoveRow`,
+ * and additions via `addRow.onClick`.
+ */
+declare function F0FormEditableTableBase<R extends RecordType>({ columns: columnsProp, items, getRowId, onCellChange, sortableRows, onReorderRows, onRemoveRow, onEditRow, canEditRow, canRemoveRow, rowActions, getCellError, addRow, editLabel: editLabelProp, removeLabel: removeLabelProp, bordered, disabled, }: F0FormEditableTableProps<R>): JSX_2.Element;
+
+/**
+ * Column definition for F0FormEditableTable.
+ *
+ * Reuses the editable-table column contract — same `editType` cell types
+ * (`text`, `number`, `money`, `date`, `select`, `display-only`, `disabled`),
+ * `selectConfig`, `numberConfig`, `dateConfig`, `formula` and `cellHint` —
+ * minus the data-collection-only options (sorting, summaries, column
+ * settings, header groups).
+ */
+export declare type F0FormEditableTableColumn<R extends RecordType> = Omit<EditableColumn<R>, "render" | "sorting" | "summary" | "summaryPlaceholder" | "order" | "hidden" | "noHiding" | "headerGroupId" | "sticky" | "id"> & {
+    /** The record key this column reads from and writes to. */
+    id: string;
+    /**
+     * Optional custom renderer for read-only display (same contract as the
+     * editable table). When omitted, the raw value at `item[id]` is shown.
+     */
+    render?: EditableColumn<R>["render"];
+};
+
+/**
+ * Props for {@link F0FormEditableTable}: a lightweight, fully controlled editable
+ * table built on the OneTable primitives and the editable-table cell
+ * components — no data collection (source, adapters, filters) required.
+ */
+export declare type F0FormEditableTableProps<R extends RecordType> = {
+    /** Column definitions (see {@link F0FormEditableTableColumn}). */
+    columns: ReadonlyArray<F0FormEditableTableColumn<R>>;
+    /**
+     * Rows in display order. The table is controlled: edits, reorders and
+     * removals are reported via callbacks and the parent updates `items`.
+     */
+    items: R[];
+    /**
+     * Stable id per row, used as the React key and the drag identity.
+     * Defaults to `String(item.id)` and falls back to the index.
+     */
+    getRowId?: (item: R, index: number) => string;
+    /**
+     * Called when a cell value changes (same contract as the editableTable
+     * visualization). Resolve with nothing for success, or a
+     * `{ columnId: message }` record to show per-cell errors.
+     */
+    onCellChange: (params: EditableTableOnCellChangeParams<R>) => Promise<void | Record<string, string>>;
+    /** Shows a leading drag handle on each row to reorder by dragging. */
+    sortableRows?: boolean;
+    /** Called after a row is dropped in a new position. */
+    onReorderRows?: (params: {
+        /** All items in their new order. */
+        items: R[];
+        /** Index the row was dragged from. */
+        from: number;
+        /** Index the row was dropped at. */
+        to: number;
+        /** The moved record. */
+        movedItem: R;
+    }) => void;
+    /** When provided, each row gets a trailing remove button. */
+    onRemoveRow?: (item: R, index: number) => void;
+    /**
+     * When provided, each row gets a trailing edit (pencil) button.
+     * Use for row editing flows that happen outside the table (e.g. a dialog).
+     */
+    onEditRow?: (item: R, index: number) => void;
+    /**
+     * Controls per-row visibility of the edit button (only relevant when
+     * `onEditRow` is provided). Defaults to showing it on every row.
+     */
+    canEditRow?: (item: R, index: number) => boolean;
+    /**
+     * Controls per-row visibility of the remove button (only relevant when
+     * `onRemoveRow` is provided). Independent of `canEditRow`. Defaults to
+     * showing it on every row.
+     */
+    canRemoveRow?: (item: R, index: number) => boolean;
+    /**
+     * Custom trailing actions per row. Return the actions to show for the given
+     * row; because it's resolved per row, the actions can depend on the row's
+     * value (e.g. an "Archive" vs "Unarchive" toggle driven by a hidden column).
+     * Rendered in the trailing actions column, between the edit and remove
+     * buttons when those are also present.
+     */
+    rowActions?: (item: R, index: number) => F0FormEditableTableRowAction<R>[];
+    /**
+     * External validation error for a cell, keyed by the column id. When it
+     * returns a message the cell shows an error border and a tooltip with the
+     * message on hover/focus. Use for errors coming from outside the table
+     * (e.g. schema validation), on top of the errors `onCellChange` can return.
+     */
+    getCellError?: (item: R, columnId: string, index: number) => string | undefined;
+    /** When provided, renders an add-row button under the last row. */
+    addRow?: {
+        /** Button label (defaults to the i18n editable-table "Add row"). */
+        label?: string;
+        onClick: () => void | Promise<void>;
+        /** Disables the add button (e.g. while an existing row is still invalid). */
+        disabled?: boolean;
+        /** Tooltip shown on hover while the add button is `disabled`, explaining why. */
+        disabledTooltip?: string;
+    };
+    /** Label for the per-row edit action (defaults to the i18n "Edit row"). */
+    editLabel?: string;
+    /** Label for the per-row remove action (defaults to the i18n "Remove row"). */
+    removeLabel?: string;
+    /** Wraps the table in a rounded border container. @default true */
+    bordered?: boolean;
+    /**
+     * Disables interaction (dragging, edit/remove/row-action buttons) while
+     * keeping the handle and actions columns in place, so toggling it (e.g. while
+     * a form submits) doesn't shift the layout. Cell editability is controlled
+     * separately via each column's `editType`.
+     */
+    disabled?: boolean;
+};
+
+/**
+ * A custom trailing action button for a row (see
+ * {@link F0FormEditableTableProps.rowActions}).
+ */
+declare type F0FormEditableTableRowAction<R extends RecordType> = {
+    /** Stable key within the row's action list (defaults to the label). */
+    id?: string;
+    /** Icon shown in the button. */
+    icon: IconType;
+    /** Accessible label; also shown next to the icon when `showLabel` is set. */
+    label: string;
+    /** Render the label next to the icon. Icon-only by default. */
+    showLabel?: boolean;
+    /** Use the destructive (critical) button styling. */
+    critical?: boolean;
+    /** Disables the button. */
+    disabled?: boolean;
+    /** Called when the button is clicked. */
+    onClick: (item: R, index: number) => void | Promise<void>;
+};
+
+/**
+ * A tag rendered in a node's metadata row. Its visual is driven by the
+ * `TagVariant` `type`; its column identity — which toggle/label/default-
+ * visibility bucket it falls into — is `column ?? type`.
+ */
+declare type F0GraphNodeTag = TagVariant & {
+    /**
+     * Optional column identity, decoupling this tag's show/hide toggle, hover-
+     * card label and default visibility from its visual `type`. Defaults to
+     * `type` when omitted. Use it to give two tags of the same `type` (e.g. a
+     * second `raw` pill) their own independent column.
+     */
+    column?: F0GraphNodeTagColumn;
+};
+
+/**
+ * Identifies the show/hide column a tag belongs to. A column defaults to the
+ * tag's visual `type` (`"raw"`, `"status"`, …) but can be any custom string, so
+ * two tags sharing a `type` — e.g. two `raw` pills — can occupy independent
+ * columns with their own toggle, label and default visibility.
+ */
+declare type F0GraphNodeTagColumn = string;
 
 declare interface F0IconProps extends SVGProps<SVGSVGElement>, VariantProps<typeof iconVariants> {
     icon: IconType;
@@ -5560,6 +6090,14 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default true
      */
     preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false
+     */
+    fitContentWidth?: boolean;
 } & WithDataTestIdProps;
 
 declare type F0SelectItemObject<T, R = unknown> = {
@@ -5742,6 +6280,11 @@ declare type F0TagRawProps = {
      * Extra classes merged onto the tag (e.g. to give it a background).
      */
     className?: string;
+    /**
+     * The size of the tag
+     * @default "md"
+     */
+    size?: "md" | "sm";
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -5753,6 +6296,7 @@ declare type F0TagRawProps = {
 declare interface F0TagStatusProps {
     text: string;
     variant: Variant;
+    icon?: IconType;
     /**
      * Sometimes you need to clarify the status for screen reader users
      * E.g., when showing a tooltip for sighted user, provide the tootip text to this prop because tooltips aren't accessible
@@ -6167,19 +6711,24 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     subtitle?: (record: R) => string;
     /** Avatar shown on the leading side of the node pill. */
     avatar?: (record: R) => AvatarVariant;
-    /** Tags rendered in the node metadata row. */
-    tags?: (record: R) => TagVariant[];
     /**
-     * Tag types present on the nodes. When provided, the controls bar gains a
-     * toggle to show/hide each metadata type (like configuring table columns).
+     * Tags rendered in the node metadata row. A tag may set `column` to place it
+     * in its own show/hide column independent of its visual `type` (e.g. a second
+     * `raw` pill that must not merge into the first `raw` column).
      */
-    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Friendly labels per tag type, shown in the metadata visibility toggle. */
-    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagType, string>>;
-    /** Tag types visible by default. Defaults to all of `nodeTagTypes`. */
-    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
-    /** Tag types that are always visible and cannot be hidden in the settings. */
-    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagType>;
+    tags?: (record: R) => F0GraphNodeTag[];
+    /**
+     * Tag columns present on the nodes. When provided, the controls bar gains a
+     * toggle to show/hide each metadata column (like configuring table columns).
+     * Values are tag `column` keys (or `type` when a tag has no `column`).
+     */
+    nodeTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Friendly labels per tag column, shown in the metadata visibility toggle. */
+    nodeTagTypeLabels?: Partial<Record<F0GraphNodeTagColumn, string>>;
+    /** Tag columns visible by default. Defaults to all of `nodeTagTypes`. */
+    defaultVisibleTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
+    /** Tag columns that are always visible and cannot be hidden in the settings. */
+    pinnedTagTypes?: ReadonlyArray<F0GraphNodeTagColumn>;
     /**
      * Floating toolbar shown above a node while it is selected. Provide the
      * action buttons (e.g. `<F0Button size="sm" … />`) for the given record.
@@ -6208,6 +6757,16 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
      */
     revealNodeId?: string;
     /**
+     * Id of a node to reveal **once, on entry** (e.g. the current user, or the
+     * root of their branch): when the tree first becomes ready, its ancestor
+     * path is loaded/expanded and the viewport centers on it. Unlike
+     * `revealNodeId` (which is ignored on entry so search stays clean), this is
+     * the opt-in "open the org chart already looking at me" behaviour. Requires
+     * `loadNodePath` to reveal nodes in not-yet-expanded branches. Omit to keep
+     * the default entry view (roots expanded to `defaultExpandDepth`).
+     */
+    focusOnEntry?: string;
+    /**
      * Resolves the ancestor path (root → … → matched node) for a node so it can
      * be revealed, returning the records in root-first order. Required for
      * revealing nodes in branches that have not been expanded yet.
@@ -6215,6 +6774,47 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     loadNodePath?: (nodeId: string) => Promise<R[]>;
     /** Optional parent accessor used when linking the revealed ancestor path. */
     getParentId?: (record: R) => string | null;
+    /**
+     * Opt into two-phase (viewport-driven) hydration. When provided, the tree is
+     * built from whatever lightweight records `childrenFilters`/`fetchData`
+     * return, and the full record is fetched — batched, once per node — only for
+     * the nodes that enter the viewport, via this loader. The returned records
+     * replace each node's `data` (matched by node id) and clear its loading
+     * placeholder. Best paired with `enableNodeWindowing`. Omit for the current
+     * eager behavior (structure and data fetched together per expansion).
+     *
+     * The "lightness" of the initial records is entirely the source's choice and
+     * transparent to the hook — no special adapter mode is required.
+     */
+    loadNodeData?: (ids: string[]) => Promise<R[]>;
+    /**
+     * Apply targeted updates to the already-loaded tree **in place**, without the
+     * full reset (and collapse to `defaultExpandDepth`) that a filter change
+     * triggers. Use it to reflect real-time / collaborative changes while keeping
+     * the user's current expansion and viewport.
+     *
+     * Bump `version` to apply a batch **once** (the number dedups against React
+     * re-renders — reuse the same object identity freely):
+     * - `upsert` records are matched by node id: an existing node has its `data`,
+     *   `childrenCount` and parent refreshed (re-parenting if `getParentId`
+     *   returns a new parent); an unknown record is inserted when it is attachable
+     *   (a root, or its parent is already in the tree — a child of a not-yet-loaded
+     *   parent will appear when that parent is expanded).
+     * - `remove` ids are dropped together with their descendants, and pruned from
+     *   the expanded set.
+     *
+     * Applying a batch never re-fetches and never collapses; it reconciles the
+     * nodes already in memory. The parents whose child set the batch touches (the
+     * old and new parent of a move, the parent of a removal) have their
+     * `childrenCount`/`childrenLoaded` reconciled locally from the in-memory tree
+     * — send only the records that changed; upserting the affected parents too is
+     * allowed but not required.
+     */
+    liveUpdate?: {
+        version: number;
+        upsert?: R[];
+        remove?: string[];
+    };
     /**
      * Id of the node representing the current user. When set, a "Find me" button
      * is shown in the controls that centers the viewport on that node.
@@ -6232,6 +6832,22 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     maxZoom?: number;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
+     * the viewport are handed to React Flow — for very large trees (thousands of
+     * expand-visible nodes). Off by default; non-breaking.
+     */
+    enableNodeWindowing?: boolean;
+    /** Flow-space px kept materialized around the viewport (pass-through). */
+    nodeWindowPadding?: number;
+    /**
+     * Viewport-driven data loading (pass-through). Called (debounced + batched)
+     * with the ids of nodes that entered the viewport, so the consumer can
+     * hydrate rich data on demand. Best paired with `enableNodeWindowing`.
+     */
+    loadVisibleNodeData?: (ids: string[]) => void;
+    /** Debounce (ms) before flushing a batch of newly-visible ids (pass-through). */
+    visibleDataDebounceMs?: number;
 };
 
 declare type GraphVisualizationSettings = {
@@ -6676,6 +7292,10 @@ declare const internalAvatarSizes: readonly ["xsmall", "small", "medium", "large
 
 declare const internalAvatarTypes: readonly ["base", "rounded"];
 
+export declare const isSystemMessage: (item: F0ChatItem) => item is F0ChatSystemMessage;
+
+export declare const isUserMessage: (item: F0ChatItem) => item is F0ChatMessage;
+
 export declare function Item({ item, counter, isActive, collapsible, isExpanded, onToggleExpanded, sortable, children, onDragOver, onDragLeave, onDrop, canDropInside, currentParentId, justDropped, }: TOCItemProps): JSX_2.Element;
 
 export declare type ItemActionsDefinition<T extends RecordType> = (item: T) => ActionDefinition[] | undefined;
@@ -6758,10 +7378,7 @@ declare type KanbanVisualizationOptions<Record extends RecordType, _Filters exte
     title?: (record: Record) => string;
     description?: (record: Record) => string;
     avatar?: (record: Record) => CardAvatarVariant;
-    metadata?: (record: Record) => ReadonlyArray<{
-        icon: IconType;
-        property: CardMetadataProperty;
-    }>;
+    metadata?: (record: Record) => ReadonlyArray<CardMetadata>;
     onMove?: KanbanOnMove<Record>;
     onCreate?: KanbanOnCreate;
 };
@@ -6972,7 +7589,7 @@ declare interface MetricComputation {
 export declare const MobileDropdown: ({ items, children, dataTestId }: DropdownProps) => JSX_2.Element;
 
 declare const moduleAvatarVariants: (props?: ({
-    size?: "lg" | "md" | "sm" | "xs" | "3xs" | "2xs" | undefined;
+    size?: "lg" | "md" | "sm" | "xs" | "4xs" | "3xs" | "2xs" | undefined;
 } & ({
     class?: ClassValue;
     className?: never;
@@ -7195,6 +7812,12 @@ declare type NumberCellConfig<R extends RecordType = RecordType> = {
     maxDecimals?: number;
     locale?: string;
     /**
+     * Show the locale's thousands separators in the resting display (grouped
+     * while blurred, ungrouped while editing). Defaults to `true`; set `false`
+     * for numbers that shouldn't be grouped (years, IDs, …).
+     */
+    grouping?: boolean;
+    /**
      * Unit label displayed next to the number input.
      * Can be a static string (e.g. `"h"`) or a function that receives the
      * current row item to return a per-row unit (e.g. `(item) => item.type === "role" ? "h" : "u"`).
@@ -7249,6 +7872,13 @@ declare type NumberInputInternalProps = Pick<ComponentProps<typeof Input_2>, "re
     min?: number;
     max?: number;
     maxDecimals?: number;
+    /**
+     * Show the locale's thousands separators in the resting display (e.g.
+     * `1,234,567`). While the field is focused the number is shown ungrouped
+     * for easy editing. Off by default — enable it for amounts/quantities, but
+     * leave it off for years, IDs and other non-grouped numbers. @default false
+     */
+    grouping?: boolean;
     onChange?: (value: number | null) => void;
     units?: string;
     extraContent?: ReactNode;
@@ -8090,6 +8720,10 @@ export declare type PrimaryActionItemDefinition = Pick<DropdownItemObject, "labe
     loading?: boolean;
     onClick?: () => void | Promise<void>;
     disabled?: boolean;
+    tooltip?: (params: {
+        disabled: boolean;
+        loading: boolean;
+    }) => string | undefined;
 };
 
 /**
@@ -9324,6 +9958,12 @@ declare type TableColumnDefinition<R extends RecordType, Sortings extends Sortin
      */
     noHiding?: boolean;
     /**
+     * Avoid removing the column by the user. Only relevant when the
+     * visualization sets `onRemoveColumn`; the per-row trash affordance in the
+     * settings popover is hidden for this column. Mirrors `noHiding`.
+     */
+    noRemoving?: boolean;
+    /**
      * Assigns this column to a header group. Columns with the same
      * headerGroupId are visually grouped under a shared spanning header.
      * The label for each group is provided via `headerGroupLabels` in
@@ -9438,6 +10078,20 @@ declare type TableVisualizationOptions<R extends RecordType, _Filters extends Fi
      * Allow users to hide columns (you can define especifcally non hiddable columns in col props, also frozen columns are not hiddable)
      */
     allowColumnHiding?: boolean;
+    /**
+     * Called when the user clicks the "Add column" entry at the top of the
+     * column-settings popover. When omitted, the entry is not shown. Open your
+     * own column picker and update `columns` in response.
+     */
+    onAddColumn?: () => void;
+    /**
+     * Called when the user removes a column via the trash affordance revealed on
+     * hovering its row in the column-settings popover. When omitted, no remove
+     * affordance is shown. Removing is distinct from hiding: drop the column from
+     * `columns` in response. Frozen/leading columns and columns flagged
+     * `noRemoving` are never removable.
+     */
+    onRemoveColumn?: (columnId: ColId) => void;
     /** Maps a row to a visual variant: `"striped"`, `"striked"`, or `"none"`. */
     referenceRowType?: (item: R) => ReferenceType;
     /**
@@ -9580,6 +10234,23 @@ maxHeight?: number;
  * @removeIn 2.0.0
  */
 export declare type TextareaProps = F0TextAreaInputProps;
+
+declare type TextCellConfig = {
+    /**
+     * Input type passed to the underlying text input. Also selects a default
+     * leading icon (`url` → link, `email` → envelope) matching F0Form's text
+     * fields. Defaults to `"text"`.
+     */
+    inputType?: TextCellInputType;
+    /**
+     * Leading icon. Overrides the default derived from `inputType`; pass to add
+     * an icon to a plain text cell or replace the url/email default.
+     */
+    icon?: IconType;
+};
+
+/** The HTML-ish input type of a text cell. Drives a default leading icon. */
+declare type TextCellInputType = "text" | "email" | "url" | "tel";
 
 /** A button rendered in the footer at the bottom of the table of contents */
 export declare type TOCAction = {
@@ -10256,32 +10927,32 @@ declare type Visualization<R extends RecordType, Filters extends FiltersDefiniti
     type: "card";
     /** Configuration options for card visualization */
     options: CardVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Kanban-based visualization type */
     type: "kanban";
     /** Configuration options for kanban visualization */
     options: KanbanVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Table-based visualization type */
     type: "table";
     /** Configuration options for table visualization */
     options: TableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Editable table-based visualization type */
     type: "editableTable";
     /** Configuration options for editable table visualization */
     options: EditableTableVisualizationOptions<R, Filters, Sortings, Summaries>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** List-based visualization type */
     type: "list";
     /** Configuration options for list visualization */
     options: ListVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Graph/org-chart-based visualization type */
     type: "graph";
     /** Configuration options for graph visualization */
     options: GraphVisualizationOptions<R, Filters, Sortings>;
-} & VisualizationFilterOverrides<Filters, Sortings>) | ({
+} & VisualizationFilterOverrides<Filters, Sortings> & VisualizationLabelOverrides) | ({
     /** Human-readable label for the visualization */
     label: string;
     /** Icon to represent the visualization in UI */
@@ -10316,6 +10987,21 @@ export declare type VisualizationFilterOverrides<Filters extends FiltersDefiniti
      *  If not provided, the global source sortings are used. Pass `{}` to hide the
      *  sort selector for views that don't support sorting (e.g. the org chart). */
     sortings?: Partial<Sortings>;
+};
+
+/**
+ * Optional per-visualization label override for built-in visualization types.
+ * When omitted, the localized built-in label from
+ * `i18n.collections.visualizations[type]` (e.g. "Table", "Graph") is used.
+ *
+ * Lets consumers rename the view switcher chip per instance, e.g. show "Org chart"
+ * instead of "Graph" for employees, or "Teams" instead of "Table". The icon still
+ * comes from the built-in registry for the visualization type.
+ */
+declare type VisualizationLabelOverrides = {
+    /** Custom label shown in the view switcher chip and Settings selector.
+     *  Defaults to the localized built-in label for this visualization type. */
+    label?: string;
 };
 
 /**
@@ -10671,10 +11357,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -10682,8 +11366,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
