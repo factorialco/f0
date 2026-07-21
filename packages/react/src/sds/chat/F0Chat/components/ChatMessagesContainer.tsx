@@ -2,6 +2,7 @@ import {
   forwardRef,
   type HTMLAttributes,
   type ReactNode,
+  type RefObject,
   useCallback,
   useEffect,
   useMemo,
@@ -52,6 +53,12 @@ const dateForRow = (rows: ChatRow[], from: number): string | null => {
   return null
 }
 
+/** Passed to the custom Virtuoso components via the `context` prop. */
+type ChatScrollerContext = {
+  /** The scrollbar measure strip — see ChatVirtuosoScroller. */
+  measureStripRef: RefObject<HTMLDivElement>
+}
+
 /** Virtuoso's scroll container, backed by Radix ScrollArea so the scrollbar is
  * an OVERLAY (absolute in the Root) that consumes zero client width — the
  * message column centers on the exact same width as the composer, scrollbar or
@@ -63,8 +70,11 @@ const dateForRow = (rows: ChatRow[], from: number): string | null => {
  * defaults, so the overrides are guaranteed (verified in the package). */
 const ChatVirtuosoScroller = forwardRef<
   HTMLDivElement,
-  HTMLAttributes<HTMLDivElement>
->(function ChatVirtuosoScroller({ style, children, className, ...props }, ref) {
+  HTMLAttributes<HTMLDivElement> & { context: ChatScrollerContext }
+>(function ChatVirtuosoScroller(
+  { style, children, className, context, ...props },
+  ref
+) {
   return (
     <ScrollAreaPrimitive.Root
       // `className` carries Virtuoso's className prop (sizing + reveal fade).
@@ -79,6 +89,17 @@ const ChatVirtuosoScroller = forwardRef<
         className="size-full [&>div]:!block"
         {...props}
       >
+        {/* Scrollbar measure strip. Radix sizes the thumb only when the
+            ResizeObserver on its content wrapper fires — but Virtuoso's inner
+            viewport is ABSOLUTE, so the wrapper never resizes on its own and
+            the thumb would stay frozen with the sizes measured at mount
+            (wrong size/position and broken drag as older pages prepend).
+            The strip is the wrapper's only in-flow child: it mirrors
+            Virtuoso's total list height (set imperatively from
+            totalListHeightChanged), so every virtual height change resizes
+            the wrapper and Radix re-measures. Zero width — no visual
+            footprint, and scrollHeight already equals that total. */}
+        <div ref={context.measureStripRef} aria-hidden="true" className="w-0" />
         {children}
       </ScrollAreaPrimitive.Viewport>
       <ScrollBar orientation="vertical" />
@@ -352,6 +373,20 @@ export const ChatMessagesContainer = (): ReactNode => {
     reducedMotion,
   })
 
+  // Scrollbar measure strip (see ChatVirtuosoScroller): mirror Virtuoso's
+  // total list height into it — imperatively, so the frequent height
+  // notifications never re-render the transcript.
+  const measureStripRef = useRef<HTMLDivElement>(null)
+  const scrollerContext = useMemo(() => ({ measureStripRef }), [])
+  const handleListHeightChanged = useCallback(
+    (height: number) => {
+      const strip = measureStripRef.current
+      if (strip) strip.style.height = `${height}px`
+      handleTotalListHeightChanged(height)
+    },
+    [handleTotalListHeightChanged]
+  )
+
   // Jump targeting (reply quotes, search hits). A jump may land on a message
   // that isn't loaded yet (a far-back search hit pulled in by
   // `loadMessageContext`): the hook parks it and resolves once its window lands.
@@ -398,7 +433,7 @@ export const ChatMessagesContainer = (): ReactNode => {
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
     >
-      <Virtuoso<ChatRow>
+      <Virtuoso<ChatRow, ChatScrollerContext>
         key={listKey}
         ref={virtuosoRef}
         scrollerRef={handleScrollerRef}
@@ -431,9 +466,10 @@ export const ChatMessagesContainer = (): ReactNode => {
         startReached={handleStartReached}
         endReached={handleEndReached}
         itemsRendered={handleItemsRendered}
-        totalListHeightChanged={handleTotalListHeightChanged}
+        totalListHeightChanged={handleListHeightChanged}
         increaseViewportBy={{ top: 400, bottom: 200 }}
         defaultItemHeight={48}
+        context={scrollerContext}
         components={{
           Scroller: ChatVirtuosoScroller,
           List: ChatVirtuosoList,
