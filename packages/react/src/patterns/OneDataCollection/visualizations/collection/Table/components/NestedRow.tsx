@@ -249,13 +249,21 @@ const NestedRowContent = <
   // since `hasFetched` never became true in that case.
   const previousHasFetchedRef = useRef(hasFetched)
   const previousIsLoadingRef = useRef(isLoading)
+  const previousHasErrorRef = useRef(hasError)
   useEffect(() => {
     const fetchInvalidated = previousHasFetchedRef.current && !hasFetched
     const fetchCancelled =
       previousIsLoadingRef.current && !isLoading && !hasFetched && !hasError
+    // A filters/search reset also clears a settled error (hasError drops to
+    // false with nothing fetched and nothing in flight — a new fetch clears
+    // it too, but with isLoading true): re-arm so a row kept open by a
+    // policy retries with the new context instead of staying empty forever.
+    const errorCleared =
+      previousHasErrorRef.current && !hasError && !hasFetched && !isLoading
     previousHasFetchedRef.current = hasFetched
     previousIsLoadingRef.current = isLoading
-    if (fetchInvalidated || fetchCancelled) {
+    previousHasErrorRef.current = hasError
+    if (fetchInvalidated || fetchCancelled || errorCleared) {
       autoLoadRequestedRef.current = false
     }
   }, [hasFetched, isLoading, hasError])

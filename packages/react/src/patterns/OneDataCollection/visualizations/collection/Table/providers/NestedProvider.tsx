@@ -270,10 +270,17 @@ export const NestedDataProvider = <R extends RecordType>({
       const eager = pendingOptions.children === "all"
       if (resolved.expanded && (!eager || resolved.eager)) return
 
+      // Same as setRowExpanded/applyToTargets: expanding clears a stale
+      // collapse marker so the policy's declared load mode applies again.
+      const nextEager = { ...current.eager }
+      if (eager) {
+        nextEager[rowId] = true
+      } else if (nextEager[rowId] === false) {
+        delete nextEager[rowId]
+      }
       commitExpansionState({
-        ...current,
         overrides: { ...current.overrides, [rowId]: true },
-        eager: eager ? { ...current.eager, [rowId]: true } : current.eager,
+        eager: nextEager,
       })
       if (!resolved.expanded) emitExpandedChange(rowId, true)
     },

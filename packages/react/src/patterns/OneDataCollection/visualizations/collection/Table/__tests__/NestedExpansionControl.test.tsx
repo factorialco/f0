@@ -825,6 +825,63 @@ describe("Nested table expansion control", () => {
         expect(screen.getByText("Child Six")).toBeInTheDocument()
       })
     })
+
+    it("restores the policy's eager load mode when re-expanding via expandTo", async () => {
+      const pending: Array<() => void> = []
+      const fetchChildren = vi.fn(
+        ({
+          item,
+          pagination,
+        }: {
+          item: Person
+          pagination?: ChildrenPaginationInfo
+        }) =>
+          new Promise((resolve) => {
+            pending.push(() => {
+              const all = item.children ?? []
+              const currentPage = (pagination?.currentPage ?? 0) + 1
+              const start = (currentPage - 1) * CHILDREN_PER_PAGE
+              resolve({
+                records: all.slice(start, start + CHILDREN_PER_PAGE),
+                paginationInfo: {
+                  total: all.length,
+                  perPage: CHILDREN_PER_PAGE,
+                  currentPage,
+                  pagesCount: Math.ceil(all.length / CHILDREN_PER_PAGE),
+                  hasMore: currentPage * CHILDREN_PER_PAGE < all.length,
+                },
+              })
+            })
+          })
+      )
+      const table = renderNestedTable(
+        {
+          defaultExpanded: (ctx) => ctx.item.id === "p2",
+          defaultExpandedChildren: "all",
+        },
+        { fetchChildren } as unknown as Partial<TestSource>
+      )
+      await waitForRootRows()
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(1))
+
+      // Collapse while page 1 is in flight, then let it land in the cache.
+      act(() => table.control.collapse("p2"))
+      await act(async () => {
+        pending.shift()?.()
+      })
+
+      // Re-expanding via expandTo WITHOUT options must also clear the stale
+      // collapse marker and restore the policy's eager mode (parity with
+      // expand/toggle): the remaining page loads instead of "show more".
+      act(() => table.control.expandTo(["p2"]))
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(2))
+      await act(async () => {
+        pending.shift()?.()
+      })
+      await waitFor(() => {
+        expect(screen.getByText("Child Six")).toBeInTheDocument()
+      })
+    })
   })
 
   describe("user interaction", () => {
@@ -1237,6 +1294,57 @@ describe("Nested table expansion control", () => {
       await waitFor(() => {
         expect(screen.getByText("Child Grand")).toBeInTheDocument()
       })
+    })
+
+    it("retries a failed children fetch when the search changes", async () => {
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {})
+      const fetchChildren = vi.fn(({ search }: { search?: string }) => {
+        if (search === undefined) return Promise.reject(new Error("boom"))
+        return Promise.resolve({
+          records: [{ id: `c-${search}`, name: `Child ${search}` }],
+          paginationInfo: {
+            total: 1,
+            perPage: 2,
+            currentPage: 1,
+            pagesCount: 1,
+            hasMore: false,
+          },
+        })
+      })
+      let api!: {
+        control: NestedTableController<Person>
+        setSearch: (search: string | undefined) => void
+      }
+      render(
+        <SearchOnlyMutableSourceHarness
+          nested={{ defaultExpanded: (ctx) => ctx.item.id === "p1" }}
+          fetchChildren={
+            fetchChildren as unknown as TestSource["fetchChildren"]
+          }
+          onApi={(a) => {
+            api = a
+          }}
+        />
+      )
+      await waitForRootRows()
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(1))
+      // Let the rejection settle into hasError (no retry loop: still 1 call)
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+      })
+      expect(fetchChildren).toHaveBeenCalledTimes(1)
+
+      // The search change clears the settled error and must re-arm the
+      // auto-load guard: the policy-open row retries with the new term
+      // instead of staying open and empty forever.
+      act(() => api.setSearch("Grand"))
+      await waitFor(() => expect(fetchChildren).toHaveBeenCalledTimes(2))
+      await waitFor(() => {
+        expect(screen.getByText("Child Grand")).toBeInTheDocument()
+      })
+      consoleError.mockRestore()
     })
 
     it("stops eager loading when a page adds no records despite hasMore: true", async () => {
