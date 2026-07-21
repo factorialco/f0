@@ -147,9 +147,9 @@ const CardLink = React.forwardRef<
 >(({ className, title, icon = ChevronRight, href, ...rest }, ref) => {
   const sharedClassName = cn(
     "group inline-flex aspect-square h-6 items-center justify-center gap-1", //layout
-    "rounded-sm border border-solid border-f1-border bg-f1-background-inverse-secondary dark:bg-f1-background-tertiary", //appearance
+    "rounded-sm border border-solid border-transparent bg-transparent", //appearance
     "whitespace-nowrap px-0 text-base font-medium text-f1-foreground", //typography
-    "cursor-pointer transition-colors hover:border-f1-border-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1", //interaction
+    "cursor-pointer transition-colors hover:bg-f1-background-secondary-hover focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-f1-special-ring focus-visible:ring-offset-1", //interaction
     className
   )
   const iconElement = (
