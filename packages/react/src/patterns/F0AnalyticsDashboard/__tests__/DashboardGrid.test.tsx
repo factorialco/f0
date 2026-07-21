@@ -307,27 +307,70 @@ describe("DashboardGrid", () => {
     })
   })
 
-  describe("drag source", () => {
-    it("makes the grip the drag source, not the card (so the whole grip drags and the canvas body doesn't)", () => {
+  describe("pointer drag", () => {
+    function rowOrder(container: HTMLElement): string[] {
+      return Array.from(
+        container.querySelectorAll<HTMLElement>("[data-dashboard-row]")
+      ).map((row) =>
+        Array.from(row.querySelectorAll<HTMLElement>("[data-card-id]"))
+          .map((c) => c.dataset.cardId)
+          .join("+")
+      )
+    }
+
+    it("uses a plain (non-native-draggable) grip so the gesture never depends on native HTML5 drag", () => {
       const { container } = render(
         <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
       )
-
       const card = container.querySelector('[data-card-id="expenses"]')
       const grip = container.querySelector('[aria-label="Drag to reorder"]')
       if (!(card instanceof HTMLElement) || !(grip instanceof HTMLElement)) {
         throw new Error("Expected card and grip to be rendered")
       }
-
-      // The card is no longer the drag source — clicking its body (a chart
-      // canvas in the wild) must never start a drag.
+      // Nothing relies on native drag: neither the card nor the grip is
+      // `draggable`. The grip drives a pointer gesture instead.
       expect(card.getAttribute("draggable")).toBeNull()
-      // The grip is the sole drag source, so every pixel of it drags —
-      // including the sliver that overflows the card's left edge.
-      expect(grip.getAttribute("draggable")).toBe("true")
+      expect(grip.getAttribute("draggable")).toBeNull()
     })
 
-    it("renders no drag source when not in edit mode", () => {
+    it("reorders a widget via a pointerdown-on-grip → move → up gesture (no native drag)", () => {
+      const { container } = render(
+        <DashboardGrid items={makeCollectionItems(480)} filters={{}} editMode />
+      )
+      expect(rowOrder(container)).toEqual(["expenses", "category-totals"])
+
+      const grip = container.querySelector('[aria-label="Drag to reorder"]')
+      if (!(grip instanceof HTMLElement)) {
+        throw new Error("Expected a grip to be rendered")
+      }
+
+      // Grab the first widget's grip, then drive the document-level gesture.
+      // jsdom's synthetic PointerEvent drops clientX/Y, so dispatch native
+      // MouseEvents (which carry them) for the move/up. jsdom rects are all
+      // 0, so any clientY > 0 lands in the bottom third of the last row →
+      // "insert after the last row".
+      fireEvent.pointerDown(grip, { button: 0 })
+      fireEvent(
+        document,
+        new MouseEvent("pointermove", {
+          clientX: 0,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+      fireEvent(
+        document,
+        new MouseEvent("pointerup", {
+          clientX: 0,
+          clientY: 100,
+          bubbles: true,
+        })
+      )
+
+      expect(rowOrder(container)).toEqual(["category-totals", "expenses"])
+    })
+
+    it("renders no grip when not in edit mode", () => {
       const { container } = render(
         <DashboardGrid items={makeCollectionItems(480)} filters={{}} />
       )
