@@ -651,8 +651,9 @@ const DocumentConversation = (): ReactNode => {
 }
 
 const meta = {
-  title: "Chat/F0Chat",
+  title: "F0Chat",
   component: F0Chat,
+  tags: ["experimental"],
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof F0Chat>
 
