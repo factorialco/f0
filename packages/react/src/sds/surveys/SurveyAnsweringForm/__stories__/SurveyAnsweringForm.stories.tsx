@@ -265,6 +265,43 @@ const quizElements: SurveyFormBuilderElement[] = [
   },
 ]
 
+const longLabelRatingElements: SurveyFormBuilderElement[] = [
+  {
+    type: "question",
+    question: {
+      id: "q-health",
+      title: "En général, diriez-vous que votre santé est :",
+      description: "Sélectionnez l'option qui correspond le mieux.",
+      type: "rating" as const,
+      options: [
+        { value: 1, label: "Excellente/Très bonne" },
+        { value: 2, label: "Bonne" },
+        { value: 3, label: "Assez bonne" },
+        { value: 4, label: "Plutôt mauvaise" },
+        { value: 5, label: "Mauvaise" },
+      ],
+      required: true,
+    },
+  },
+  {
+    type: "question",
+    question: {
+      id: "q-stress",
+      title: "À quelle fréquence avez-vous été stressé(e) ?",
+      description: "Sur une période récente, selon votre ressenti.",
+      type: "rating" as const,
+      options: [
+        { value: 1, label: "Tout le temps" },
+        { value: 2, label: "Très souvent" },
+        { value: 3, label: "Parfois" },
+        { value: 4, label: "Très peu souvent" },
+        { value: 5, label: "Jamais" },
+      ],
+      required: true,
+    },
+  },
+]
+
 type DistributiveOmit<T, K extends PropertyKey> = T extends unknown
   ? Omit<T, K>
   : never
@@ -480,6 +517,17 @@ export const RightSideMixedCorrectAnswers: Story = {
       },
       "q-next-review": { type: "date", value: new Date("2026-03-20") },
     },
+  },
+}
+
+export const RatingLongLabels: Story = {
+  args: {
+    mode: "all-questions",
+    position: "fullscreen",
+    title: "Questionnaire santé",
+    description:
+      "Rating options with long text labels must wrap instead of clipping.",
+    elements: longLabelRatingElements,
   },
 }
 
