@@ -92,6 +92,7 @@ const Item = ({
 
   return item.sortable ? (
     <Reorder.Item
+      className="first:pt-1 last:pb-1"
       value={item}
       drag="y"
       dragElastic={0.1}
@@ -104,7 +105,7 @@ const Item = ({
       {content}
     </Reorder.Item>
   ) : (
-    <li>{content}</li>
+    <li className="first:pt-1 last:pb-1">{content}</li>
   )
 }
 
