@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { useMemo, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { Circle, Desktop } from "../../../icons/app"
 import {
@@ -91,11 +92,11 @@ const SelectWithHooks = ({
         {...props}
         onValueChange={handleValueChange}
       >
-        <SelectTrigger>
+        <SelectTrigger aria-label={placeholder}>
           {localValue}
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent items={items} />
+        <SelectContent items={items} aria-label={placeholder} />
       </RenderSelect>
       <div className="mt-20">Selected: {JSON.stringify(localValue)}</div>
     </>
@@ -107,7 +108,7 @@ const meta = {
   component: SelectWithHooks,
   parameters: {
     a11y: {
-      skipCi: true, // Todo add aria labels
+      test: "error",
     },
     //layout: "centered",
     docs: {
@@ -141,7 +142,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // The trigger must expose an accessible name to screen readers
+    const trigger = canvas.getByRole("combobox", { name: "Select an option" })
+    await expect(trigger).toBeInTheDocument()
+  },
+}
 
 export const AsList: Story = {
   args: {
@@ -167,10 +175,10 @@ export const Multiple: Story = {
 
     return (
       <Select value={value} onValueChange={setValue} multiple>
-        <SelectTrigger>
+        <SelectTrigger aria-label={placeholder}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent aria-label={placeholder}>
           {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               {option.label}
@@ -188,10 +196,11 @@ export const WithTopContent: Story = {
 
     return (
       <Select value={value} onValueChange={setValue}>
-        <SelectTrigger>
+        <SelectTrigger aria-label={placeholder}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent
+          aria-label={placeholder}
           top={<div className="border-b border-f1-border p-3">Top Content</div>}
         >
           {options?.map((option) => (
@@ -211,10 +220,11 @@ export const WithBottomContent: Story = {
 
     return (
       <Select value={value} onValueChange={setValue}>
-        <SelectTrigger>
+        <SelectTrigger aria-label={placeholder}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent
+          aria-label={placeholder}
           bottom={
             <div className="border-t border-f1-border p-3">Bottom Content</div>
           }
@@ -236,10 +246,11 @@ export const WithBothTopAndBottom: Story = {
 
     return (
       <Select value={value} onValueChange={setValue}>
-        <SelectTrigger>
+        <SelectTrigger aria-label={placeholder}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent
+          aria-label={placeholder}
           top={
             <div className="border-b border-f1-border p-3">
               Search or Filter
@@ -284,13 +295,13 @@ export const WithCustomTrigger: Story = {
 
     return (
       <Select value={value} onValueChange={setValue}>
-        <SelectTrigger asChild>
+        <SelectTrigger asChild aria-label="Select theme">
           <button className="flex h-10 w-full items-center justify-between rounded-md border border-f1-border bg-f1-background px-3 text-f1-foreground">
             <span>{value || "Select theme..."}</span>
             <Circle className="h-4 w-4" />
           </button>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent aria-label="Theme options">
           {options?.map((option) => (
             <SelectItem key={option.value} value={option.value}>
               <div className="flex items-center gap-2">
