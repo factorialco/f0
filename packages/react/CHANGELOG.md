@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.46.4](https://github.com/factorialco/f0/compare/f0-react-v4.46.3...f0-react-v4.46.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* **F0Graph:** don't let React Flow double-cull the windowed node array ([#4742](https://github.com/factorialco/f0/issues/4742)) ([95809bf](https://github.com/factorialco/f0/commit/95809bfc55e87f556828895b59b637c2ca37fb0f))
+
 ## [4.46.3](https://github.com/factorialco/f0/compare/f0-react-v4.46.2...f0-react-v4.46.3) (2026-07-21)
 
 
