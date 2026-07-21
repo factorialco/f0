@@ -162,6 +162,68 @@ describe("useLayoutEngine", () => {
     }
   })
 
+  it("places a parent over its FIRST child, not the midpoint (parent-anchored)", () => {
+    const { result } = renderLayoutEngine()
+
+    const child1 = makeTree("2", [], 1)
+    const child2 = makeTree("3", [], 1)
+    const root = makeTree("1", [child1, child2])
+    const edges: GraphEdge[] = [
+      { id: "e1-2", source: "1", target: "2" },
+      { id: "e1-3", source: "1", target: "3" },
+    ]
+
+    const layout = result.current.computeLayout(
+      [root, child1, child2],
+      edges,
+      "TB"
+    )
+    const cx = (id: string) => {
+      const n = layout.nodes.find((node) => node.id === id)!
+      return n.x + n.width / 2
+    }
+
+    // Parent sits over its first child, not over the (2,3) midpoint.
+    expect(cx("1")).toBe(cx("2"))
+    expect(cx("1")).not.toBe((cx("2") + cx("3")) / 2)
+  })
+
+  it("keeps a node and its ancestors fixed when it expands; right-siblings shift", () => {
+    const { result } = renderLayoutEngine()
+    const compute = (expandTwo: boolean) => {
+      const grandchildren = expandTwo
+        ? [makeTree("2a", [], 2), makeTree("2b", [], 2), makeTree("2c", [], 2)]
+        : []
+      const two = makeTree("2", grandchildren, 1)
+      const three = makeTree("3", [], 1)
+      const five = makeTree("5", [], 1)
+      const root = makeTree("1", [two, three, five])
+      const nodes = [root, two, ...grandchildren, three, five]
+      const edges: GraphEdge[] = [
+        { id: "e1-2", source: "1", target: "2" },
+        { id: "e1-3", source: "1", target: "3" },
+        { id: "e1-5", source: "1", target: "5" },
+        ...grandchildren.map((g) => ({
+          id: `e2-${g.id}`,
+          source: "2",
+          target: g.id,
+        })),
+      ]
+      return result.current.computeLayout(nodes, edges, "TB")
+    }
+    const x = (layout: ReturnType<typeof compute>, id: string) =>
+      layout.nodes.find((n) => n.id === id)!.x
+
+    const before = compute(false)
+    const after = compute(true)
+
+    // The expanded node and its ancestor stay put; the right-siblings move over.
+    expect(x(after, "1")).toBe(x(before, "1"))
+    expect(x(after, "2")).toBe(x(before, "2"))
+    expect(x(after, "3")).toBeGreaterThan(x(before, "3"))
+    expect(x(after, "5")).toBeGreaterThan(x(before, "5"))
+  })
+
   it("rounds to whole pixels when no grid is given", () => {
     const { result } = renderLayoutEngine({ snapGrid: 0 })
 
