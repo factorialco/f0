@@ -660,6 +660,12 @@ export function F0GraphView<T = unknown>(
                         const dy = e.clientY - start.y
                         if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
                         const target = e.target as HTMLElement | null
+                        // Opt-out affordances inside a node (e.g. the tag row)
+                        // are marked `data-no-node-select`: a pointerup on one
+                        // must not select the node. Checked before the node
+                        // lookup because this fires regardless of any inner
+                        // `onClick` stopPropagation.
+                        if (target?.closest("[data-no-node-select]")) return
                         const nodeEl =
                           target?.closest<HTMLElement>(".react-flow__node")
                         if (!nodeEl) return

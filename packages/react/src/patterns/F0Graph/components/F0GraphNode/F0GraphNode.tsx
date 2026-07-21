@@ -382,9 +382,13 @@ const F0GraphNodeBase = forwardRef<HTMLDivElement, F0GraphNodeProps>(
                 : { duration: 0.12, ease: [0.23, 1, 0.32, 1] }
             }
             className="max-w-[256px]"
-            // Tags are informational: clicking a tag must not select/open the
-            // node (which is what the node-level `onClick` above does). Swallow
-            // the click here so selection only fires on the node body itself.
+            // Tags are informational: clicking a tag must not select/center the
+            // node. Two paths select a node: the node-level `onClick` (centering
+            // + itemOnClick) — swallowed here via stopPropagation — and the
+            // canvas `onPointerUp` handler, which fires on pointerup regardless
+            // of this click handler. `data-no-node-select` tells that handler to
+            // skip selection when the pointer went down on a tag.
+            data-no-node-select
             onClick={(e) => e.stopPropagation()}
           >
             <F0GraphNodeTags tags={filteredTags!} />
