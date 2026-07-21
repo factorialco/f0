@@ -65,6 +65,7 @@ export * from "./F0PdfViewer"
 export * from "./F0Select"
 export * from "./F0Slider"
 export * from "./F0Text"
+export * from "./F0VideoPlayer"
 export * from "../sds/TimeLine"
 /**
  * @deprecated OneFilterPicker has moved to @/patterns/OneFilterPicker. Import from there instead.
