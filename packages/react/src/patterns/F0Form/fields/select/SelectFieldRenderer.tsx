@@ -6,7 +6,7 @@ import { F0Select } from "@/components/F0Select"
 import { useI18n } from "@/lib/providers/i18n/i18n-provider"
 
 import type { ResolvedField } from "../types"
-import type { F0SelectField } from "./types"
+import type { F0SelectField, F0SelectSearchFn } from "./types"
 
 import { FORM_SIZE } from "../../constants"
 
@@ -30,6 +30,9 @@ function SelectWithOptions({
 }: SelectFieldRendererProps & {
   field: ResolvedField<F0SelectField> & {
     options: NonNullable<F0SelectField["options"]>
+    // searchFn is options-only; add it to the cast since F0SelectField is a
+    // union and searchFn does not exist on the source/customFieldName members.
+    searchFn?: F0SelectSearchFn
   }
 }) {
   const baseProps = {
@@ -39,13 +42,18 @@ function SelectWithOptions({
     options: field.options,
     showSearchBox: field.showSearchBox,
     searchBoxPlaceholder: field.searchBoxPlaceholder,
+    searchEmptyMessage: field.searchEmptyMessage,
+    searchFn: field.searchFn,
     icon: field.icon,
     onCreate: field.onCreate,
+    onOpenChange: field.onOpenChange,
     name: formField.name,
     onBlur: formField.onBlur,
     error,
     status,
-    loading,
+    // Merge form-level loading (async defaultValues) with field-level loading
+    // (e.g. lazy-fetch-on-open). Either being true shows the loading state.
+    loading: loading || field.loading,
     size: FORM_SIZE,
     hideLabel: true as const,
   }
@@ -117,13 +125,17 @@ function SelectWithSource({
     mapOptions: field.mapOptions,
     showSearchBox: field.showSearchBox,
     searchBoxPlaceholder: field.searchBoxPlaceholder,
+    searchEmptyMessage: field.searchEmptyMessage,
+    // No searchFn here: the component forbids searchFn together with source.
     icon: field.icon,
     onCreate: field.onCreate,
+    onOpenChange: field.onOpenChange,
     name: formField.name,
     onBlur: formField.onBlur,
     error,
     status,
-    loading,
+    // Merge form-level loading with field-level loading.
+    loading: loading || field.loading,
     size: FORM_SIZE,
     hideLabel: true as const,
   }

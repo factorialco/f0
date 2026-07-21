@@ -7,6 +7,7 @@ import { F0Button } from "@/components/F0Button"
 import { createDataSourceDefinition } from "@/hooks/datasource"
 import { Archive, ArchiveOpen, ExternalLink, Plus, Settings } from "@/icons/app"
 import { useF0FormDefinition } from "@/patterns/F0WizardForm"
+import { forms } from "@/patterns/forms"
 
 import type {
   FileUploadHookReturn,
@@ -14,8 +15,6 @@ import type {
   FileUploadStatus,
 } from "../fields/types"
 import type { RenderCustomFieldSelectConfig } from "../types"
-
-import { forms } from "@/patterns/forms"
 
 import {
   f0FormField,
@@ -2612,6 +2611,92 @@ export const SelectWithCustomFieldName: Story = {
 }
 
 /**
+ * Lazy-fetch-on-first-open select.
+ *
+ * The select starts with **no** options. Opening the dropdown for the first
+ * time (`onOpenChange`) kicks off a simulated async fetch: `loading` shows a
+ * spinner inside the input while pending, then the resolved `options` populate
+ * the list. Subsequent opens reuse the already-fetched options. The field is
+ * searchable via `showSearchBox`, and a custom `searchEmptyMessage` is shown
+ * while there is nothing to match yet.
+ *
+ * Everything is declared purely in the Zod schema — no imperative wiring in the
+ * component tree beyond the two state flips.
+ */
+export const SelectLazyFetchOnOpen: Story = {
+  render() {
+    const [hasOpened, setHasOpened] = useState(false)
+    const [loading, setLoading] = useState(false)
+    const [options, setOptions] = useState<
+      Array<{ value: string; label: string }>
+    >([])
+
+    const handleOpenChange = useCallback(
+      (open: boolean) => {
+        // Fetch once, on the first open.
+        if (open && !hasOpened) {
+          setHasOpened(true)
+          setLoading(true)
+          // Simulated network request — no real fetch.
+          setTimeout(() => {
+            setOptions([
+              { value: "engineering", label: "Engineering" },
+              { value: "design", label: "Design" },
+              { value: "product", label: "Product" },
+              { value: "marketing", label: "Marketing" },
+              { value: "sales", label: "Sales" },
+            ])
+            setLoading(false)
+          }, 1200)
+        }
+      },
+      [hasOpened]
+    )
+
+    // Rebuild the schema when the fetched options / loading state change so the
+    // select reflects them. Keeps the definition in sync with async state.
+    const formSchema = useMemo(
+      () =>
+        z.object({
+          team: f0FormField.select({
+            label: "Team",
+            placeholder: "Select a team...",
+            helpText:
+              "Options are fetched the first time you open the dropdown",
+            optional: true,
+            options,
+            loading,
+            showSearchBox: true,
+            searchEmptyMessage: loading
+              ? "Loading teams..."
+              : "No teams available yet",
+            onOpenChange: handleOpenChange,
+          }),
+        }),
+      [options, loading, handleOpenChange]
+    )
+
+    const formDefinition = useF0FormDefinition({
+      name: "select-lazy-fetch-on-open",
+      schema: formSchema,
+      defaultValues: { team: undefined },
+      onSubmit: async ({ data }) => {
+        await sleep(500)
+        console.info(`Form submitted: ${JSON.stringify(data, null, 2)}`)
+        return { success: true }
+      },
+      submitConfig: { label: "Save" },
+    })
+
+    return (
+      <div className="max-w-lg">
+        <F0Form formDefinition={formDefinition} />
+      </div>
+    )
+  },
+}
+
+/**
  * Form with server-side validation errors.
  */
 export const ServerValidation: Story = {
@@ -3329,7 +3414,7 @@ export const FormInDialog: Story = {
       <div className="flex flex-col items-start gap-3">
         <F0Button label="Add Team Member" icon={Plus} onClick={handleAdd} />
         {lastResult && (
-          <p className="text-f1-foreground-secondary text-sm">{lastResult}</p>
+          <p className="text-sm text-f1-foreground-secondary">{lastResult}</p>
         )}
       </div>
     )

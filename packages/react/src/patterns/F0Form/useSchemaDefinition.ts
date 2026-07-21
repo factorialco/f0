@@ -150,6 +150,8 @@ function configToF0Field(
             }
           : {
               options: "options" in config ? config.options : [],
+              // searchFn is options-only (mutually exclusive with source)
+              searchFn: "searchFn" in config ? config.searchFn : undefined,
             }),
         multiple: "multiple" in config ? config.multiple : undefined,
         clearable,
@@ -158,6 +160,15 @@ function configToF0Field(
         searchBoxPlaceholder:
           "searchBoxPlaceholder" in config
             ? config.searchBoxPlaceholder
+            : undefined,
+        icon: "icon" in config ? config.icon : undefined,
+        onCreate: "onCreate" in config ? config.onCreate : undefined,
+        onOpenChange:
+          "onOpenChange" in config ? config.onOpenChange : undefined,
+        loading: "loading" in config ? config.loading : undefined,
+        searchEmptyMessage:
+          "searchEmptyMessage" in config
+            ? config.searchEmptyMessage
             : undefined,
         renderIf: config.renderIf,
       } as F0Field

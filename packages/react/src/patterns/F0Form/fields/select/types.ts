@@ -55,6 +55,16 @@ export type SelectFieldRenderIf =
 export type SelectValueType = string | number
 
 /**
+ * Predicate used to filter static options against the current search text.
+ * Mirrors the `F0Select` component's `searchFn` signature.
+ * @typeParam T - The value type (string or number)
+ */
+export type F0SelectSearchFn<T extends SelectValueType = string> = (
+  option: F0SelectItemProps<T, unknown>,
+  search?: string
+) => boolean | undefined
+
+/**
  * Base config options shared by all select field variants
  */
 interface F0SelectConfigBase {
@@ -68,6 +78,12 @@ interface F0SelectConfigBase {
   icon?: IconType
   /** Callback to create a new item from the search text. Shows a "+ Create" button in the empty state of the dropdown. */
   onCreate?: (value: string) => Promise<void> | void
+  /** Called when the dropdown opens or closes. Enables lazy-fetch-on-first-open flows. */
+  onOpenChange?: (open: boolean) => void
+  /** Shows a loading indicator inside the select input (e.g. while options are being fetched). */
+  loading?: boolean
+  /** Message shown when the search yields no results. */
+  searchEmptyMessage?: string
 }
 
 /**
@@ -79,6 +95,11 @@ interface F0SelectConfigWithOptions<
 > extends F0SelectConfigBase {
   /** Options for the select dropdown */
   options: F0SelectItemProps<T, unknown>[]
+  /**
+   * Custom predicate to filter static options against the search text.
+   * Only valid in options mode — mutually exclusive with `source`.
+   */
+  searchFn?: F0SelectSearchFn<T>
   source?: never
   mapOptions?: never
 }
@@ -102,6 +123,8 @@ interface F0SelectConfigWithSource<
   /** Function to map data source items to select options */
   mapOptions: (item: R) => F0SelectItemProps<T, R>
   options?: never
+  /** `searchFn` is options-only — invalid alongside `source`. */
+  searchFn?: never
 }
 
 /**
@@ -112,6 +135,8 @@ interface F0SelectConfigWithCustomFieldName extends F0SelectConfigBase {
   options?: never
   source?: never
   mapOptions?: never
+  /** `searchFn` is options-only — invalid with a runtime-provided field. */
+  searchFn?: never
   /** Required: identifies the custom field provider */
   customFieldName: string
 }
