@@ -208,12 +208,14 @@ export const SelectQuestion = ({ options, ...props }: SelectQuestionProps) => {
           </Reorder.Group>
         </DragProvider>
         {!disabled && !answering && !questionLocked && (
-          <F0Button
-            label={t("surveyFormBuilder.selectQuestion.addOption")}
-            variant="ghost"
-            icon={Add}
-            onClick={handleAddOption}
-          />
+          <div className="opacity-70">
+            <F0Button
+              label={t("surveyFormBuilder.selectQuestion.addOption")}
+              variant="ghost"
+              icon={Add}
+              onClick={handleAddOption}
+            />
+          </div>
         )}
       </div>
     </BaseQuestion>
