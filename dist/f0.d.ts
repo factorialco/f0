@@ -9217,11 +9217,11 @@ export declare interface F0FileItemProps extends HTMLAttributes<HTMLDivElement> 
     disabled?: boolean;
     size?: F0FileItemSize;
     /**
-     * Pre-formatted date rendered under the file name (e.g. an upload date).
-     * The consumer owns locale and formatting. When set, the item grows to two
-     * lines and its vertical padding is doubled.
+     * Secondary line rendered under the file name (e.g. an upload date or file
+     * size). The consumer owns any formatting. When set, the item grows to two
+     * lines and its padding is doubled.
      */
-    date?: string;
+    subtitle?: string;
 }
 
 export declare type F0FileItemSize = (typeof f0FileItemSizes)[number];
