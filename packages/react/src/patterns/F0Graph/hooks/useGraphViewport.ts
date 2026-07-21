@@ -126,17 +126,22 @@ export function useGraphViewport({
   // Fly to a node by its full-layout position (works even when windowing has
   // dropped it from React Flow's store). Returns false when the position is
   // unknown so callers can fall back to an id-based fitView.
+  //
+  // Resets the zoom to `defaultZoom` (the graph's initial zoom) rather than
+  // keeping whatever the user had panned/zoomed to: navigating to a person
+  // ("Find me" / search reveal) should land on the initial org-chart zoom state,
+  // not stay stuck at an arbitrary deep zoom.
   const centerOnNode = useCallback(
     (nodeId: string, duration: number): boolean => {
       const pos = getNodePosition?.(nodeId)
       if (!pos) return false
       reactFlow.setCenter(pos.x + pos.width / 2, pos.y + pos.height / 2, {
         duration,
-        zoom: reactFlow.getZoom(),
+        zoom: defaultZoom,
       })
       return true
     },
-    [reactFlow, getNodePosition]
+    [reactFlow, getNodePosition, defaultZoom]
   )
 
   const handleFocusUser = useCallback(() => {
