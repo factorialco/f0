@@ -1,3 +1,5 @@
+import { default as default_2 } from 'react';
+
 /**
  * Component Status API
  * ====================
@@ -36,9 +38,29 @@ export declare interface ComponentEntry {
     tags: string[];
     hasStories: boolean;
     hasUnitTests: boolean;
+    hasPlayFunction: boolean;
     hasMdxDocs: boolean;
     docQuality: DocQuality;
+    docSignals: DocSignals;
     storyFile: string;
+}
+
+/**
+ * Renders a component's maturity status and Definition-of-Done checklist. All
+ * text (badge label, summary, checklist labels and hints) comes from the
+ * `component-status` data so Storybook and any consuming app stay identical.
+ *
+ * Renders nothing when the name doesn't resolve to a tracked component.
+ */
+export declare function ComponentStability({ componentName, components, className, }: ComponentStabilityProps): default_2.JSX.Element | null;
+
+export declare interface ComponentStabilityProps {
+    /** Component name to look up (e.g. "Card", "F0Alert", "Components/Card"). */
+    componentName: string;
+    /** Optional dataset override; defaults to the build-time data. */
+    components?: ComponentEntry[];
+    /** Extra classes for the outer container (e.g. spacing). */
+    className?: string;
 }
 
 export declare interface ComponentStatus extends ComponentEntry {
@@ -59,6 +81,20 @@ export declare interface ComponentStatus extends ComponentEntry {
      *   - null: tag and bar agree
      */
     discrepancy: "tagged-but-below-bar" | "meets-bar-not-tagged" | null;
+    /**
+     * The maturity level the component *actually* has, per the Definition of Done.
+     * A component is only "stable" when it is both tagged stable AND meets the
+     * full checklist; anything else (untagged, below the bar, or meeting the bar
+     * without the tag) is "experimental". `deprecated`/`internal` pass through.
+     * This is what the badge shows — `apiStatus` is the raw declared tag.
+     */
+    effectiveStatus: ApiStatus;
+    /** Human-readable badge label for `effectiveStatus`. */
+    label: string;
+    /** One-line human summary shown above the checklist. */
+    summary: string;
+    /** Whether the DoD checklist is meaningful for this maturity level. */
+    showChecklist: boolean;
 }
 
 /** The full generated dataset. */
@@ -80,7 +116,25 @@ export declare interface ComponentStatusStats {
     withMdxDocs: number;
 }
 
+/** A sub-check enumerated under a requirement, with its own pass/fail. */
+export declare interface CriterionResult {
+    label: string;
+    met: boolean;
+}
+
 export declare type DocQuality = "none" | "stub" | "acceptable" | "good" | "gold";
+
+/** Granular MDX signals used to score the doc tier and its per-criterion checks. */
+export declare interface DocSignals {
+    /** How many of Anatomy / Guidelines / Accessibility are present (0–3). */
+    sectionsCount: number;
+    hasProps: boolean;
+    hasWhenToUse: boolean;
+    hasWhenNotToUse: boolean;
+    hasDoDonts: boolean;
+    /** Number of `<Canvas>` example blocks. */
+    exampleCount: number;
+}
 
 /**
  * Evaluate a single raw component entry against the stable checklist. Pure —
@@ -113,8 +167,9 @@ export declare function getComponentStatus(name: string, components?: ComponentE
 export declare function getStatusGeneratedAt(): string;
 
 /**
- * Minimum doc-quality tier a component must reach to count as documented for
- * the purposes of "stable". "acceptable" = required sections + props table.
+ * Minimum doc-quality tier a stable component must reach. Per the Definition of
+ * Done, promotion to stable requires the "good" tier (Gold encouraged);
+ * "acceptable" is only the experimental Build bar.
  */
 export declare const MIN_DOC_QUALITY: DocQuality;
 
@@ -127,23 +182,35 @@ export declare interface RequirementResult {
     met: boolean;
     /** What is missing / how to satisfy it when unmet. */
     detail: string;
+    /** Concrete sub-criteria (each with its own pass/fail) enumerated under
+     * `detail`, when the requirement is made up of several checks. */
+    criteria?: CriterionResult[];
 }
 
 /**
- * The Definition of Done for a stable component. Each requirement inspects a
- * raw entry and reports whether it is met.
+ * The Definition of Done for a stable component — the mechanically-checkable
+ * subset of the lifecycle DoD (Lifecycle/Definition of Done). Each requirement
+ * inspects a raw entry and reports whether it is met. `detail` is a neutral
+ * description of the requirement (shown for met and unmet points alike).
  *
- * Scope note: automated a11y verification is intentionally NOT part of this
- * checklist yet — it is not tracked by the generator. Accessibility remains a
- * manual promotion gate (see docs/components-maturity.mdx). Add a requirement
- * here once an a11y signal is emitted into the status data.
+ * Scope note: some DoD items are not statically verifiable and are NOT gated
+ * here — the axe a11y test passing, adoption by ≥3 product teams, no breaking
+ * changes for 60 days, and Foundations approval. Those remain manual promotion
+ * gates (see Lifecycle/Definition of Done).
  */
 export declare const STABLE_REQUIREMENTS: ReadonlyArray<{
     key: string;
     label: string;
     detail: string;
+    criteria?: Array<{
+        label: string;
+        isMet: (c: ComponentEntry) => boolean;
+    }>;
     isMet: (c: ComponentEntry) => boolean;
 }>;
+
+/** Human-readable badge label per maturity level. */
+export declare const STATUS_LABELS: Record<ApiStatus, string>;
 
 export { }
 
@@ -202,8 +269,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -211,11 +281,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

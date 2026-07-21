@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "4.41.1",
+  "version": "4.44.0",
   "private": false,
   "files": [
     "assets",
@@ -117,6 +117,7 @@
     "aria-hidden": "^1.2.6",
     "colord": "^2.9.3",
     "cva": "1.0.0-beta.3",
+    "docx-preview": "^0.4.0",
     "dompurify": "^3.2.6",
     "echarts": "6",
     "echarts-for-react": "3.0.4",
@@ -129,6 +130,7 @@
     "prosemirror-view": "^1.38.1",
     "react-remove-scroll": "^2.7.1",
     "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "unified": "^11.0.5",
@@ -207,7 +209,6 @@
     "postcss-import": "^16.1.0",
     "react-pdf": "^8.0.2",
     "react-syntax-highlighter": "^15.6.1",
-    "remark-gfm": "^4.0.1",
     "rollup-plugin-jsx-remove-attributes": "^3.1.1",
     "size-limit": "^11.2.0",
     "storybook": "^10.3.3",

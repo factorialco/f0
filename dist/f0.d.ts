@@ -4669,6 +4669,8 @@ export declare const defaultTranslations: {
         readonly date: "Date";
         readonly custom: "Custom period";
         readonly selectDate: "Select Date";
+        readonly selectMonth: "Select month";
+        readonly selectYear: "Select year";
         readonly compareTo: "Compare to";
         readonly presets: {
             readonly last7Days: "Last 7 days";
@@ -4962,6 +4964,8 @@ export declare const defaultTranslations: {
         readonly closePreview: "Close";
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
+        readonly openDocument: "Open document";
+        readonly documentPreview: "Document preview";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -5269,6 +5273,11 @@ export declare const defaultTranslations: {
         readonly print: "Print";
         readonly download: "Download";
         readonly loading: "Loading document";
+        readonly previewFailed: "Preview isn't available for this file";
+        readonly showingFirstRows: {
+            readonly one: "Showing the first row";
+            readonly other: "Showing the first {{count}} rows";
+        };
     };
 };
 
@@ -8702,6 +8711,15 @@ export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
 declare type F0DialogSize = (typeof dialogSizes)[number];
 
 /**
+ * Document families the viewer can render. "pdf" is the default and keeps the
+ * full toolbar (paging, zoom, print, download); the other kinds render a
+ * lazy-loaded, read-only preview: "sheet" (xlsx/xls/csv) as an Excel-style
+ * grid with one tab per sheet, "docx" through docx-preview with page layout,
+ * and "text" as a rendered markdown document (`.md`) or monospaced source.
+ */
+export declare type F0DocumentKind = "pdf" | "sheet" | "docx" | "text";
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0Drawer: {
@@ -10635,11 +10653,34 @@ export declare const F0PdfViewer: WithDataTestIdReturnType_3<ForwardRefExoticCom
 Skeleton: () => JSX_2.Element;
 }>;
 
+/**
+ * Host-provided toolbar action, appended after the built-in controls in every
+ * kind — e.g. a Close button when the viewer lives inside a fullscreen overlay.
+ */
+export declare type F0PdfViewerAction = {
+    icon: IconType;
+    label: string;
+    onClick: () => void;
+};
+
 export declare interface F0PdfViewerProps extends WithDataTestIdProps, DataAttributes_2 {
-    /** Source URL of the PDF document. */
+    /** Source URL of the document. */
     url: string;
     /** File name used when downloading the document. Defaults to "document.pdf". */
     filename?: string;
+    /**
+     * Document family to render. Defaults to "pdf" (unchanged behavior). For the
+     * other kinds the PDF-only props below (page, scale, rotation, print…) are
+     * ignored.
+     */
+    kind?: F0DocumentKind;
+    /** MIME type of the document — used by kind "text" to detect markdown. */
+    mimeType?: string;
+    /**
+     * Custom actions appended to the toolbar (after the built-in controls), in
+     * every kind — e.g. a Close button when the viewer fills an overlay.
+     */
+    actions?: F0PdfViewerAction[];
     /** Zero-based page index to scroll to initially (and on change). */
     page?: number;
     /** Restrict rendering to a subset of pages (zero-based indexes). */
@@ -11098,6 +11139,14 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default true
      */
     preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false
+     */
+    fitContentWidth?: boolean;
 } & WithDataTestIdProps;
 
 /**
@@ -18425,8 +18474,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -18434,11 +18486,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
