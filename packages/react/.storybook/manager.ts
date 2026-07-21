@@ -72,68 +72,11 @@ addons.setConfig({
     collapsedRoots: ["playground"],
     renderLabel: renderSidebarLabel,
     filters: {
-      // `internal` is no longer hidden: it is an informational badge (see
-      // tagBadges below), so internal primitives stay visible to contributors
-      // in every build. Only `no-sidebar` is filtered out.
+      // `internal` is no longer hidden — internal primitives stay visible to
+      // contributors in every build. Maturity markers (🚧 / ❌) come from
+      // `renderLabel` above (component-status); there is no separate badge
+      // config. Only `no-sidebar` is filtered out.
       noSidebar: (item) => !item.tags?.includes("no-sidebar"),
     },
   },
-  tagBadges: [
-    {
-      tags: "experimental",
-      badge: {
-        text: "Experimental",
-        bgColor: "#FBF1DE",
-        fgColor: "#8A5A00",
-        borderColor: "#F0DCB0",
-        tooltip: "Experimental — API may still change",
-      },
-      display: {
-        sidebar: ["component", "docs", "group"],
-        toolbar: true,
-      },
-    },
-    {
-      tags: "stable",
-      badge: {
-        text: "✅",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Stable",
-      },
-      display: {
-        sidebar: false,
-        toolbar: true,
-      },
-    },
-    {
-      tags: "deprecated",
-      badge: {
-        text: "Deprecated",
-        bgColor: "#F5E7E7",
-        fgColor: "#9B2C2C",
-        borderColor: "#EBC9C9",
-        tooltip: "Deprecated — scheduled for removal",
-      },
-      display: {
-        sidebar: ["component", "docs", "group"],
-        toolbar: true,
-      },
-    },
-    {
-      tags: "internal",
-      badge: {
-        text: "🔒",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Internal",
-      },
-      display: {
-        sidebar: ["component", "docs", "group"],
-        toolbar: true,
-      },
-    },
-  ],
 })
