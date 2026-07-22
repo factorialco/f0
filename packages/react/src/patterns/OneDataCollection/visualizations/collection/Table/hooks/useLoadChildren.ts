@@ -106,6 +106,8 @@ export const useLoadChildren = <
     getChildrenType(nestedFetchedData?.[rowId])
   )
 
+  const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()
+
   const previousFiltersRef = useRef(source.currentFilters)
   const previousSortingsRef = useRef(source.currentSortings)
   const previousNavigationFiltersRef = useRef(source.currentNavigationFilters)
@@ -128,6 +130,13 @@ export const useLoadChildren = <
       navigationFiltersChanged ||
       searchChanged
     ) {
+      // Cancel any fetch still in flight: its callbacks closed over the
+      // pre-reset state and would repopulate the cache with children of the
+      // previous filters/search when they resolve. Its completion callbacks
+      // will never fire, so the loading flag is reset here too.
+      subscriptionRef.current?.unsubscribe()
+      subscriptionRef.current = undefined
+      setIsLoading(false)
       setChildren([])
       setPaginationInfo(undefined)
       setChildrenType("basic")
@@ -149,23 +158,31 @@ export const useLoadChildren = <
     clearFetchedData,
   ])
 
-  const subscriptionRef = useRef<ZenObservable.Subscription | undefined>()
-
   const processChildrenData = useCallback(
     (data: ChildrenResponse<R> | undefined) => {
       const loadedChildren = getChildren(data)
       const updatedChildren = [...children, ...loadedChildren]
       setChildren(updatedChildren)
 
+      // A resolved page that adds no records cannot make progress: treat it
+      // as the end of pagination even if the adapter still reports
+      // `hasMore`, so a misbehaving adapter cannot trap eager loading (or
+      // "show more" clicks) in a request loop.
+      const reportedPagination = data?.paginationInfo
+      const paginationInfo =
+        reportedPagination?.hasMore && loadedChildren.length === 0
+          ? { ...reportedPagination, hasMore: false }
+          : reportedPagination
+
       const updatedData: ChildrenResponse<R> = {
         records: updatedChildren,
         type: data?.type,
-        paginationInfo: data?.paginationInfo,
+        paginationInfo,
       }
 
       updateFetchedData(rowId, updatedData)
       setChildrenType(getChildrenType(data))
-      setPaginationInfo(data?.paginationInfo)
+      setPaginationInfo(paginationInfo)
 
       return loadedChildren
     },

@@ -840,15 +840,17 @@ reports these signals accurately.
 
 #### Controlled expansion: `expanded`
 
-`expanded` accepts the same criteria shape as `defaultExpanded`, but unlike
-it, the provider re-applies it every time its reference changes — a
-controlled counterpart, mirroring `revealNodeId`/`focusOnEntry` on the Graph
-visualization. Precedence is `expanded` (controlled) > `control`
-(imperative) > `defaultExpanded` (uncontrolled, mount-only): calling
-`control` while `expanded` is set still works immediately, but the
-controlled criteria takes over again on the next `expanded` change. Pass a
-stable/memoized predicate (or a primitive) to avoid re-applying it every
-render.
+`expanded` accepts the same criteria shape as `defaultExpanded`, but as a
+**controlled** counterpart — mirroring `revealNodeId`/`focusOnEntry` on the
+Graph visualization. While defined it is the single source of truth for the
+auto-expansion policy: `defaultExpanded` is ignored and
+`expandAll`/`collapseAll` are complete no-ops (they neither replace the
+policy nor touch existing overrides). Targeted controller calls (`expand`,
+`collapse`, `toggle`, `expandTo`) still layer per-row overrides on top, and
+every override is cleared whenever the criteria changes by reference.
+Precedence is `expanded` (controlled) > `control` (imperative overrides) >
+`defaultExpanded` (uncontrolled, mount-only). Pass a stable/memoized
+predicate (or a primitive) to avoid clearing user overrides every render.
 
 ```tsx
 const [depth, setDepth] = useState(1)
@@ -856,6 +858,26 @@ const [depth, setDepth] = useState(1)
 nested: {
   expanded: depth, // re-applied whenever `depth` changes
   control: nestedTable, // still usable, but overridden on the next `expanded` change
+}
+```
+
+When the criteria is a predicate, memoize it — an inline arrow function gets
+a new identity on every render, and each identity change clears the user's
+manual toggles (a dev-only warning fires if this happens repeatedly):
+
+```tsx
+// ❌ new identity every render: user toggles are cleared constantly
+nested: {
+  expanded: (ctx) => ctx.depth < 1
+}
+
+// ✅ stable identity: primitives, or a memoized predicate
+nested: {
+  expanded: 1
+}
+const criteria = useCallback((ctx) => ctx.item.type === "folder", [])
+nested: {
+  expanded: criteria
 }
 ```
 
@@ -868,6 +890,8 @@ Create a controller with `useNestedTable()` and pass it via
 queued and applied once it is ready.
 
 ```tsx
+import { useNestedTable } from "@factorialco/f0-react/experimental"
+
 const nestedTable = useNestedTable<OrgNode>()
 
 nestedTable.expandAll() // whole tree

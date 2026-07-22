@@ -1,3 +1,4 @@
+import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import {
   createContext,
   ReactNode,
@@ -14,6 +15,7 @@ import { ChildrenResponse } from "@/hooks/datasource/types/nested.typings"
 
 import {
   NestedExpansionEngine,
+  NestedExpansionPolicy,
   NestedExpansionState,
   NestedRowRegistryEntry,
   NestedTableControllerInternal,
@@ -58,20 +60,23 @@ const NestedDataContext = createContext<
 >(undefined)
 
 const resolveExpansion = <R extends RecordType>(
-  state: NestedExpansionState<R>,
+  state: NestedExpansionState,
+  policy: NestedExpansionPolicy<R> | null,
   rowId: string,
   context: NestedExpansionContext<R>
 ): ResolvedRowExpansion => {
   const explicit = state.overrides[rowId]
-  const policyMatch =
-    explicit === undefined && state.policy !== null
-      ? matchesExpansionCriteria(state.policy.criteria, context)
-      : false
-  const expanded = explicit ?? policyMatch
+  const criteriaMatch =
+    policy !== null && matchesExpansionCriteria(policy.criteria, context)
+  const expanded = explicit ?? criteriaMatch
 
+  // The children load mode is declared by the policy, so its eager fallback
+  // applies to any expanded row matching the criteria — including rows
+  // re-expanded explicitly after a manual collapse. A user click expresses
+  // expand/collapse, never a pagination preference.
   const eager =
     expanded &&
-    (state.eager[rowId] ?? (policyMatch && state.policy?.children === "all"))
+    (state.eager[rowId] ?? (criteriaMatch && policy?.children === "all"))
 
   return { expanded, eager }
 }
@@ -84,7 +89,9 @@ const matchesTarget = <R extends RecordType>(
   if (typeof target === "function") {
     return target({ item: entry.item, depth: entry.depth, hasActiveFilters })
   }
-  return "id" in entry.item && entry.item.id === target
+  // Normalized comparison (same as the table's own getRowKey) so a string
+  // target — e.g. an id read from a URL param — matches numeric item ids.
+  return "id" in entry.item && String(entry.item.id) === String(target)
 }
 
 const buildExpandAllCriteria = <R extends RecordType>(
@@ -120,11 +127,32 @@ export const NestedDataProvider = <R extends RecordType>({
     []
   )
 
-  const [expansionState, setExpansionState] = useState<NestedExpansionState<R>>(
-    () => ({
-      overrides: {},
-      eager: {},
-      policy:
+  const [expansionState, setExpansionState] = useState<NestedExpansionState>({
+    overrides: {},
+    eager: {},
+  })
+
+  /**
+   * Active auto-expansion policy, controllable per the standard F0 pattern:
+   * while `nested.expanded` is defined the derived controlled policy is the
+   * single source of truth (imperative `expandAll`/`collapseAll` cannot
+   * replace it — `setPolicy` is a no-op while controlled); otherwise the
+   * uncontrolled value seeds from `defaultExpanded` and follows engine calls.
+   */
+  const controlledPolicy = useMemo<NestedExpansionPolicy<R> | undefined>(
+    () =>
+      nested?.expanded !== undefined
+        ? {
+            criteria: nested.expanded,
+            children: nested.defaultExpandedChildren ?? "paginated",
+          }
+        : undefined,
+    [nested?.expanded, nested?.defaultExpandedChildren]
+  )
+  const [policy = null, setPolicy] =
+    useControllableState<NestedExpansionPolicy<R> | null>({
+      prop: controlledPolicy,
+      defaultProp:
         nested?.defaultExpanded !== undefined
           ? {
               criteria: nested.defaultExpanded,
@@ -132,11 +160,14 @@ export const NestedDataProvider = <R extends RecordType>({
             }
           : null,
     })
-  )
 
   // Latest-value refs so the engine callbacks stay stable while reading fresh
   // state synchronously (controller calls can happen back-to-back in one tick).
   const expansionStateRef = useRef(expansionState)
+  const policyRef = useRef(policy)
+  policyRef.current = policy
+  const controlledPolicyRef = useRef(controlledPolicy)
+  controlledPolicyRef.current = controlledPolicy
   const nestedOptionsRef = useRef(nested)
   nestedOptionsRef.current = nested
   const hasActiveFiltersRef = useRef(hasActiveFilters)
@@ -146,16 +177,29 @@ export const NestedDataProvider = <R extends RecordType>({
   /**
    * Item ids requested via `expandTo` whose rows are not rendered yet. They
    * are consumed as rows register, so a deep path expands progressively as
-   * lazy loading reveals each level.
+   * lazy loading reveals each level. Keys are normalized with String() so a
+   * string path (e.g. ids from a URL) matches numeric item ids.
    */
-  const pendingExpandRef = useRef(
-    new Map<string | number, NestedExpandOptions>()
-  )
+  const pendingExpandRef = useRef(new Map<string, NestedExpandOptions>())
 
-  const commitExpansionState = useCallback((next: NestedExpansionState<R>) => {
+  const commitExpansionState = useCallback((next: NestedExpansionState) => {
     expansionStateRef.current = next
     setExpansionState(next)
   }, [])
+
+  /**
+   * Engine-side policy writes. While controlled (`nested.expanded` defined)
+   * the prop is the source of truth: `setPolicy` becomes a no-op and the sync
+   * ref must keep reflecting the controlled value, so it is only advanced for
+   * the uncontrolled case.
+   */
+  const commitPolicy = useCallback(
+    (next: NestedExpansionPolicy<R> | null) => {
+      if (controlledPolicyRef.current === undefined) policyRef.current = next
+      setPolicy(next)
+    },
+    [setPolicy]
+  )
 
   const clearFetchedData = useCallback(() => {
     setFetchedData({})
@@ -163,11 +207,7 @@ export const NestedDataProvider = <R extends RecordType>({
     // trusted after a refetch; the declarative policy still applies. Pending
     // expandTo paths are dropped too, as the new data may not contain them.
     pendingExpandRef.current.clear()
-    commitExpansionState({
-      ...expansionStateRef.current,
-      overrides: {},
-      eager: {},
-    })
+    commitExpansionState({ overrides: {}, eager: {} })
   }, [commitExpansionState])
 
   const emitExpandedChange = useCallback((rowId: string, expanded: boolean) => {
@@ -185,10 +225,17 @@ export const NestedDataProvider = <R extends RecordType>({
     (rowId: string, expanded: boolean) => {
       const current = expansionStateRef.current
       if (current.overrides[rowId] === expanded) return
+      const eager = { ...current.eager }
+      if (expanded) {
+        // Drop a stale collapse marker so the row returns to the load mode
+        // declared by the active policy; an explicit eager opt-in persists.
+        if (eager[rowId] === false) delete eager[rowId]
+      } else {
+        eager[rowId] = false
+      }
       commitExpansionState({
-        ...current,
         overrides: { ...current.overrides, [rowId]: expanded },
-        eager: expanded ? current.eager : { ...current.eager, [rowId]: false },
+        eager,
       })
       emitExpandedChange(rowId, expanded)
     },
@@ -203,13 +250,13 @@ export const NestedDataProvider = <R extends RecordType>({
   const applyPendingExpansion = useCallback(
     (rowId: string, item: R, depth: number) => {
       if (!("id" in item)) return
-      const itemId = item.id as string | number
+      const itemId = String(item.id)
       const pendingOptions = pendingExpandRef.current.get(itemId)
       if (pendingOptions === undefined) return
       pendingExpandRef.current.delete(itemId)
 
       const current = expansionStateRef.current
-      const resolved = resolveExpansion(current, rowId, {
+      const resolved = resolveExpansion(current, policyRef.current, rowId, {
         item,
         depth,
         hasActiveFilters: hasActiveFiltersRef.current,
@@ -240,12 +287,12 @@ export const NestedDataProvider = <R extends RecordType>({
 
   const resolveRowExpansion = useCallback(
     (rowId: string, item: R, depth: number) =>
-      resolveExpansion(expansionState, rowId, {
+      resolveExpansion(expansionState, policy, rowId, {
         item,
         depth,
         hasActiveFilters,
       }),
-    [expansionState, hasActiveFilters]
+    [expansionState, policy, hasActiveFilters]
   )
 
   const engine = useMemo<NestedExpansionEngine<R>>(() => {
@@ -273,16 +320,27 @@ export const NestedDataProvider = <R extends RecordType>({
       const changes: Array<{ rowId: string; expanded: boolean }> = []
 
       for (const match of matches) {
-        const resolved = resolveExpansion(current, match.rowId, {
-          item: match.item,
-          depth: match.depth,
-          hasActiveFilters: hasActiveFiltersRef.current,
-        })
+        const resolved = resolveExpansion(
+          current,
+          policyRef.current,
+          match.rowId,
+          {
+            item: match.item,
+            depth: match.depth,
+            hasActiveFilters: hasActiveFiltersRef.current,
+          }
+        )
         const nextExpanded = resolveNext(resolved)
         overrides[match.rowId] = nextExpanded
-        if (nextExpanded && options?.children === "all") {
-          eager[match.rowId] = true
-        } else if (!nextExpanded) {
+        if (nextExpanded) {
+          if (options?.children === "all") {
+            eager[match.rowId] = true
+          } else if (eager[match.rowId] === false) {
+            // Same as setRowExpanded: expanding clears a stale collapse
+            // marker so the policy's declared load mode applies again.
+            delete eager[match.rowId]
+          }
+        } else {
           eager[match.rowId] = false
         }
         if (resolved.expanded !== nextExpanded) {
@@ -302,25 +360,30 @@ export const NestedDataProvider = <R extends RecordType>({
       toggle: (target, options) =>
         applyToTargets(target, (current) => !current.expanded, options),
       expandAll: (options) => {
+        // While `nested.expanded` is controlled the whole operation is a
+        // no-op — not just the policy write. Clearing the overrides would
+        // silently re-apply the controlled criteria to rows the user
+        // explicitly toggled, contradicting the documented contract.
+        if (controlledPolicyRef.current !== undefined) return
         pendingExpandRef.current.clear()
-        commitExpansionState({
-          overrides: {},
-          eager: {},
-          policy: {
-            criteria: buildExpandAllCriteria(options),
-            children: options?.children ?? "paginated",
-          },
+        commitPolicy({
+          criteria: buildExpandAllCriteria(options),
+          children: options?.children ?? "paginated",
         })
+        commitExpansionState({ overrides: {}, eager: {} })
       },
       collapseAll: () => {
+        // Full no-op while controlled, same as expandAll (see above).
+        if (controlledPolicyRef.current !== undefined) return
         pendingExpandRef.current.clear()
-        commitExpansionState({ overrides: {}, eager: {}, policy: null })
+        commitPolicy(null)
+        commitExpansionState({ overrides: {}, eager: {} })
       },
       expandTo: (path, options) => {
         if (path.length === 0) return
         const normalizedOptions = options ?? {}
         path.forEach((id) =>
-          pendingExpandRef.current.set(id, normalizedOptions)
+          pendingExpandRef.current.set(String(id), normalizedOptions)
         )
         // Apply immediately to the rows already rendered; the rest of the
         // path is consumed as lazy loading registers each revealed level.
@@ -331,17 +394,23 @@ export const NestedDataProvider = <R extends RecordType>({
       isExpanded: (target) => {
         const [first] = resolveTargets(target)
         if (!first) return false
-        return resolveExpansion(expansionStateRef.current, first.rowId, {
-          item: first.item,
-          depth: first.depth,
-          hasActiveFilters: hasActiveFiltersRef.current,
-        }).expanded
+        return resolveExpansion(
+          expansionStateRef.current,
+          policyRef.current,
+          first.rowId,
+          {
+            item: first.item,
+            depth: first.depth,
+            hasActiveFilters: hasActiveFiltersRef.current,
+          }
+        ).expanded
       },
       getExpandedItems: () => {
         const items: R[] = []
         registryRef.current.forEach((entry, rowId) => {
           const { expanded } = resolveExpansion(
             expansionStateRef.current,
+            policyRef.current,
             rowId,
             {
               item: entry.item,
@@ -354,31 +423,40 @@ export const NestedDataProvider = <R extends RecordType>({
         return items
       },
     }
-  }, [applyPendingExpansion, commitExpansionState, emitExpandedChange])
+  }, [
+    applyPendingExpansion,
+    commitExpansionState,
+    commitPolicy,
+    emitExpandedChange,
+  ])
 
   /**
-   * Controlled expansion (`nested.expanded`): reactively re-applies the
-   * criteria every time its reference changes, taking over from whatever
-   * explicit overrides a user click or a `control` call may have set in the
-   * meantime — see the precedence note on `NestedTableOptions.expanded`.
-   * Unlike `defaultExpanded` (read once, at mount, via the initial state
-   * above), this runs on every `expanded` reference change, including the
-   * first one, so it also covers the initial render when `expanded` is
-   * defined from the start.
+   * Controlled expansion (`nested.expanded`): the policy itself is derived
+   * by `useControllableState` above (no state syncing) — this effect only
+   * handles the reset side effect: when the controlled criteria changes by
+   * reference, explicit overrides left by user clicks or `control` calls are
+   * cleared so the new criteria fully describes the expansion. See the
+   * precedence note on `NestedTableOptions.expanded`.
    */
   const controlledExpanded = nested?.expanded
+  const controlledPredicateChangesRef = useRef(0)
   useEffect(() => {
     if (controlledExpanded === undefined) return
+    // Dev-only footgun detector: an inline (non-memoized) predicate gets a
+    // new identity on every parent render, and each identity change clears
+    // the user's manual toggles below. Warn once after a few changes —
+    // legitimate controlled updates rarely replace a predicate repeatedly.
+    if (
+      process.env.NODE_ENV !== "production" &&
+      typeof controlledExpanded === "function" &&
+      ++controlledPredicateChangesRef.current === 3
+    ) {
+      console.warn(
+        "OneDataCollection: `nested.expanded` received a new predicate identity on several renders. Every change clears the user's manual expand/collapse overrides — pass a memoized predicate (useCallback/useMemo) or a primitive criteria."
+      )
+    }
     pendingExpandRef.current.clear()
-    commitExpansionState({
-      overrides: {},
-      eager: {},
-      policy: {
-        criteria: controlledExpanded,
-        children:
-          nestedOptionsRef.current?.defaultExpandedChildren ?? "paginated",
-      },
-    })
+    commitExpansionState({ overrides: {}, eager: {} })
     // Controlled re-application is not an explicit expansion change (same as
     // defaultExpanded/expandAll), so onExpandedChange is intentionally not
     // fired here.

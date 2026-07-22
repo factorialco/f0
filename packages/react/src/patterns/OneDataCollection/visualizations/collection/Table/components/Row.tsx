@@ -99,6 +99,8 @@ export type OnAddRowConfig = {
 export type NestedRowProps = {
   connectorHeight?: number
   depth?: number
+  /** rowId of the parent expandable row; namespaces this row's own rowId so positions in different branches never collide. */
+  parentRowId?: string
   expanded?: boolean
   hasLoadedChildren?: boolean
   isLastChild?: boolean
