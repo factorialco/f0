@@ -16,15 +16,8 @@
  *
  */
 
-import { motion } from "motion/react"
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
+import { motion, MotionProps } from "motion/react"
+import { forwardRef, useCallback, useEffect, useRef } from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -73,18 +66,33 @@ const normalizeAddRowActions = (
 }
 
 /**
- * Safety cap for eager children loading (`children: "all"`): stops fetching
- * further pages even if the adapter keeps reporting `hasMore`.
- */
-const MAX_EAGER_CHILDREN_PAGES = 100
-
-/**
  * Stagger index for row mount animations. Depth contributes to the delay so
  * that when a whole cached subtree mounts in a single commit (re-expansion
  * without network waterfalls), the reveal still cascades level by level
  * instead of appearing all at once.
  */
 const mountStaggerIndex = (index: number, depth: number) => index + depth * 2
+
+/**
+ * Motion-wrapped Row shared by every animated nested row, created lazily on
+ * first use. motion's proxy does not cache custom components, so creating
+ * this inside the row component would allocate one distinct wrapper type per
+ * rendered row. Generics are type-level only, so a single runtime wrapper
+ * serves every table; prop safety is preserved by the parallel plain-`Row`
+ * branch at each call site, which receives the same props fully typed.
+ */
+type SharedMotionRow = React.ForwardRefExoticComponent<
+  MotionProps &
+    Record<string, unknown> &
+    React.RefAttributes<HTMLTableRowElement>
+>
+let sharedMotionRow: SharedMotionRow | undefined
+const getMotionRow = (): SharedMotionRow => {
+  sharedMotionRow ??= motion.create(
+    Row as unknown as React.ComponentType<Record<string, unknown>>
+  ) as unknown as SharedMotionRow
+  return sharedMotionRow
+}
 
 export type RowProps<
   R extends RecordType,
@@ -177,14 +185,13 @@ const NestedRowContent = <
   )
 
   // Register so imperative controller operations can target this row.
-  // Keyed by `rowId` (stable per row) rather than `props.item` identity —
-  // data sources commonly recreate item objects on every render/refetch, and
-  // `rowId` already embeds the item's id, so this avoids an unregister +
-  // re-register cycle on every render.
+  // `props.item` is included so the registry entry stays fresh after a
+  // refetch recreates item objects: controller predicates, getExpandedItems
+  // and onExpandedChange must see current field values, not the first-render
+  // snapshot. Re-registering on item identity change is two cheap Map ops.
   useEffect(
     () => registerNestedRow(rowId, props.item, depth),
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed by rowId, not props.item identity (see comment above)
-    [registerNestedRow, rowId, depth]
+    [registerNestedRow, rowId, props.item, depth]
   )
 
   /**
@@ -215,15 +222,13 @@ const NestedRowContent = <
    * avoiding retry loops when a fetch errors.
    */
   const autoLoadRequestedRef = useRef(false)
-  const [eagerPagesRequested, setEagerPagesRequested] = useState(0)
 
-  // Re-arm the request guards when the children cache is invalidated (e.g. a
+  // Re-arm the request guard when the children cache is invalidated (e.g. a
   // filters change) so rows kept open by a policy reload their children.
   const previousHasFetchedRef = useRef(hasFetched)
   useEffect(() => {
     if (previousHasFetchedRef.current && !hasFetched) {
       autoLoadRequestedRef.current = false
-      setEagerPagesRequested(0)
     }
     previousHasFetchedRef.current = hasFetched
   }, [hasFetched])
@@ -245,9 +250,12 @@ const NestedRowContent = <
    * legitimate empty result from ever being retried. Only refetch on a fresh
    * collapsed→expanded transition (tracked via `previousOpenRef`), not on
    * every render while the row stays open, so a genuinely empty result
-   * cannot cause a fetch loop.
+   * cannot cause a fetch loop. The ref starts as `false` so a row that
+   * remounts already-open (e.g. revealed by re-expanding a collapsed
+   * ancestor) with cached empty children also counts as a transition and
+   * retries once, matching the behavior of toggling the row itself.
    */
-  const previousOpenRef = useRef(open)
+  const previousOpenRef = useRef(false)
   useEffect(() => {
     const wasOpen = previousOpenRef.current
     previousOpenRef.current = open
@@ -265,9 +273,10 @@ const NestedRowContent = <
 
   /**
    * Eager pagination (`children: "all"`): keeps fetching pages until the
-   * adapter reports no more. Guarded by `total`, a page cap and the error
-   * flag, so a misbehaving or failing adapter cannot cause a fetch loop —
-   * remaining pages fall back to the "show more" row.
+   * adapter reports no more. The adapter fully drives when to stop — loading
+   * halts on `hasMore: false`, on reaching `total`, or on a fetch error, so a
+   * failing adapter cannot cause a retry loop and remaining pages fall back
+   * to the "show more" row.
    */
   const eagerLoadPending =
     open &&
@@ -276,18 +285,12 @@ const NestedRowContent = <
     !hasError &&
     !!paginationInfo?.hasMore &&
     (paginationInfo.total === undefined ||
-      children.length < paginationInfo.total) &&
-    eagerPagesRequested < MAX_EAGER_CHILDREN_PAGES
+      children.length < paginationInfo.total)
 
   useEffect(() => {
-    if (!open || !eager) {
-      setEagerPagesRequested(0)
-      return
-    }
     if (!eagerLoadPending || isLoading) return
-    setEagerPagesRequested((count) => count + 1)
     loadChildren()
-  }, [open, eager, eagerLoadPending, isLoading, loadChildren])
+  }, [eagerLoadPending, isLoading, loadChildren])
 
   const shouldShowLoading = open && isLoading
   const shouldShowChildren = open
@@ -360,40 +363,19 @@ const NestedRowContent = <
    * `nested/animations.ts` for the variants); collapsing stays instant.
    */
   const shouldReduceMotion = useReducedMotion()
-  const animated = expandAnimation !== "none" && !shouldReduceMotion
-  // Lazy: only pay for a motion-wrapped component when an animation is
-  // actually configured — rows using the default "none" animation render the
-  // plain `Row` instead (see usages below). Keyed by whether animation is
-  // enabled (not by the specific mode) so switching between animated modes
-  // at runtime reuses the same wrapped component, while flipping from
-  // "none" to an animated mode still creates it on demand.
   const hasAnimation = expandAnimation !== "none"
-  const MotionRow = useMemo(
-    () =>
-      hasAnimation
-        ? motion.create(
-            Row<
-              R,
-              Filters,
-              Sortings,
-              Summaries,
-              ItemActions,
-              NavigationFilters,
-              Grouping
-            >
-          )
-        : undefined,
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by hasAnimation only, see comment above
-    [hasAnimation]
-  )
-  const mountAnimationProps =
-    expandAnimation !== "none"
-      ? {
-          variants: getExpandAnimationVariants(expandAnimation),
-          initial: "hidden" as const,
-          animate: "visible" as const,
-        }
-      : {}
+  const animated = hasAnimation && !shouldReduceMotion
+  // Lazy: only pay for the motion-wrapped component when an animation is
+  // actually configured — rows using the default "none" animation render the
+  // plain `Row` instead (see usages below).
+  const MotionRow = hasAnimation ? getMotionRow() : undefined
+  const mountAnimationProps = hasAnimation
+    ? {
+        variants: getExpandAnimationVariants(expandAnimation),
+        initial: "hidden" as const,
+        animate: "visible" as const,
+      }
+    : {}
 
   const isTableVisualization = props.fromVisualization === "table"
 

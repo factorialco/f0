@@ -1271,6 +1271,58 @@ export const TableNestedProgrammaticControl: Story = {
 }
 
 /**
+ * Controlled declarative expansion via `nested.expanded` (mirrors
+ * `revealNodeId`/`focusOnEntry` on the Graph visualization): unlike
+ * `defaultExpanded` (read once at mount), the criteria passed here is
+ * re-applied every time its reference changes, taking over from whatever the
+ * imperative controller may have done in between — a click on "Toggle
+ * Platform team" collapses/expands it immediately, but the next depth change
+ * below reimposes the controlled criteria over the whole tree.
+ */
+export const TableNestedControlledExpansion: Story = {
+  render: function Render() {
+    const nestedTable = useNestedTable<OrgNode>()
+    const [depth, setDepth] = useState(1)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <NestedDemoSection title="Controlled depth (nested.expanded)">
+          {[0, 1, 2].map((value) => (
+            <F0Button
+              key={value}
+              size="sm"
+              variant={depth === value ? "default" : "outline"}
+              label={`Depth ${value}`}
+              onClick={() => setDepth(value)}
+            />
+          ))}
+        </NestedDemoSection>
+        <NestedDemoSection title="Imperative controller (overridden on next depth change)">
+          <F0Button
+            size="sm"
+            variant="outline"
+            label="Toggle Platform team"
+            onClick={() => nestedTable.toggle("engineering.platform")}
+          />
+        </NestedDemoSection>
+        <OrgNestedTable
+          nested={{
+            control: nestedTable,
+            expanded: depth,
+          }}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    // depth: 1 expands root rows only
+    await canvas.findByText("Platform")
+    expect(canvas.queryByText("Core Squad")).toBeNull()
+  },
+}
+
+/**
  * Declarative auto-expansion: `defaultExpanded: 1` opens every root row on
  * mount (2 visible levels). Children keep their "show more" pagination.
  */

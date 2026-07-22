@@ -29,6 +29,7 @@ import {
 import { Add } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { getActiveFilterKeys } from "@/patterns/OneFilterPicker/internal/getActiveFilterKeys"
 import { PagesPagination } from "@/patterns/OneDataCollection/components/PagesPagination"
 import { useDataCollectionSettings } from "@/patterns/OneDataCollection/Settings/SettingsProvider"
 import { GroupHeader } from "@/ui/GroupHeader/index"
@@ -128,7 +129,8 @@ export const TableCollection = <
   TableVisualizationOptions<R, Filters, Sortings, Summaries>
 > &
   TableCustomizationProps<R, Sortings, Summaries>) => {
-  const { t, ...i18n } = useI18n()
+  const i18nContext = useI18n()
+  const { t, ...i18n } = i18nContext
   const addRow = useAddRow()
   // Created a motion component for the row
   const [MotionRow] = useState(() =>
@@ -342,12 +344,23 @@ export const TableCollection = <
     // keystroke would flip `hasActiveFilters` ~200ms before the nested-rows
     // cache is actually invalidated.
     if (normalizeSearch(source.debouncedCurrentSearch)) return true
-    return Object.values(source.currentFilters ?? {}).some((value) =>
-      Array.isArray(value)
-        ? value.length > 0
-        : value !== undefined && value !== null
+    // Delegate to the per-filter-type `isEmpty` semantics (same check the
+    // collection itself uses), so a cleared filter left at its empty value
+    // (e.g. a search filter set to "") does not count as active.
+    if (!source.filters) return false
+    return (
+      getActiveFilterKeys(
+        source.filters,
+        source.currentFilters ?? {},
+        i18nContext
+      ).length > 0
     )
-  }, [source.debouncedCurrentSearch, source.currentFilters])
+  }, [
+    source.debouncedCurrentSearch,
+    source.filters,
+    source.currentFilters,
+    i18nContext,
+  ])
 
   /*
    * Initial loading

@@ -356,6 +356,34 @@ export const NestedDataProvider = <R extends RecordType>({
     }
   }, [applyPendingExpansion, commitExpansionState, emitExpandedChange])
 
+  /**
+   * Controlled expansion (`nested.expanded`): reactively re-applies the
+   * criteria every time its reference changes, taking over from whatever
+   * explicit overrides a user click or a `control` call may have set in the
+   * meantime — see the precedence note on `NestedTableOptions.expanded`.
+   * Unlike `defaultExpanded` (read once, at mount, via the initial state
+   * above), this runs on every `expanded` reference change, including the
+   * first one, so it also covers the initial render when `expanded` is
+   * defined from the start.
+   */
+  const controlledExpanded = nested?.expanded
+  useEffect(() => {
+    if (controlledExpanded === undefined) return
+    pendingExpandRef.current.clear()
+    commitExpansionState({
+      overrides: {},
+      eager: {},
+      policy: {
+        criteria: controlledExpanded,
+        children:
+          nestedOptionsRef.current?.defaultExpandedChildren ?? "paginated",
+      },
+    })
+    // Controlled re-application is not an explicit expansion change (same as
+    // defaultExpanded/expandAll), so onExpandedChange is intentionally not
+    // fired here.
+  }, [controlledExpanded, commitExpansionState])
+
   const control = nested?.control
   useEffect(() => {
     const internalControl = control as
@@ -365,20 +393,34 @@ export const NestedDataProvider = <R extends RecordType>({
     return internalControl.__bindEngine(engine)
   }, [control, engine])
 
+  // Memoized so parent re-renders with unchanged expansion state don't force
+  // every consuming row to re-render: all callbacks are stable useCallbacks,
+  // so the identity only changes on real state updates.
+  const expandAnimation = nested?.expandAnimation ?? "none"
+  const contextValue = useMemo(
+    () =>
+      ({
+        fetchedData,
+        updateFetchedData,
+        clearFetchedData,
+        setRowExpanded,
+        resolveRowExpansion,
+        registerNestedRow,
+        expandAnimation,
+      }) as NestedDataContextValue<RecordType>,
+    [
+      fetchedData,
+      updateFetchedData,
+      clearFetchedData,
+      setRowExpanded,
+      resolveRowExpansion,
+      registerNestedRow,
+      expandAnimation,
+    ]
+  )
+
   return (
-    <NestedDataContext.Provider
-      value={
-        {
-          fetchedData,
-          updateFetchedData,
-          clearFetchedData,
-          setRowExpanded,
-          resolveRowExpansion,
-          registerNestedRow,
-          expandAnimation: nested?.expandAnimation ?? "none",
-        } as NestedDataContextValue<RecordType>
-      }
-    >
+    <NestedDataContext.Provider value={contextValue}>
       {children}
     </NestedDataContext.Provider>
   )
