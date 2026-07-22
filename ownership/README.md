@@ -11,7 +11,10 @@ It is inspired by the `ownership/` system in `factorialco/factorial`.
 
 Evaluated on every PR by the `Review policy` workflow
 ([review-policy.ts](review-policy.ts)), which posts an explanatory comment and
-acts as a required status check. Rules, in order of precedence:
+publishes a `Review policy` commit status — `pending` while approvals are
+missing, `success` once satisfied (the workflow job itself only fails on real
+errors). Make that status context a required check in branch protection to
+enforce the policy. Rules, in order of precedence:
 
 1. **SDS/Kits modules** — every changed file belongs to an owned module: the
    module owners are the only required reviewers (enforced natively by GitHub

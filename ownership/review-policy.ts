@@ -13,10 +13,12 @@
  * The `needs-design-review` label adds @factorialco/f0-designers to the
  * requirements of any PR (opt-in by any reviewer or the author).
  *
- * The script posts/updates an explanatory PR comment and exits non-zero
- * while required approvals are missing, so the job acts as a required
- * status check. Run it with: GITHUB_TOKEN, GITHUB_REPOSITORY and PR_NUMBER
- * set (DRY_RUN=1 skips the comment and review requests).
+ * The script posts/updates an explanatory PR comment and publishes a
+ * "Review policy" commit status: `pending` while required approvals are
+ * missing, `success` once they are in place. Use that status context as the
+ * required check in branch protection — the workflow job itself only fails
+ * on real errors. Run it with: GITHUB_TOKEN, GITHUB_REPOSITORY and
+ * PR_NUMBER set (DRY_RUN=1 skips the comment, status and review requests).
  */
 import fs from "node:fs"
 import path from "node:path"
@@ -160,6 +162,7 @@ const pr = await api<{
   user: { login: string }
   labels: { name: string }[]
   requested_teams: { slug: string }[]
+  head: { sha: string }
 }>(prPath)
 const files = await paginate<{ filename: string }>(`${prPath}/files`)
 const reviews = await paginate<{ user: { login: string }; state: string }>(`${prPath}/reviews`)
@@ -272,16 +275,45 @@ if (DRY_RUN) {
   }
 }
 
-// --- Status check verdict ---------------------------------------------------
+// --- "Review policy" commit status -------------------------------------------
+// The policy verdict is published as a commit status (pending/success) instead
+// of failing the job: "waiting for approvals" is not a CI failure. Branch
+// protection should require the "Review policy" status context.
+
+const state = pending.length > 0 ? "pending" : "success"
+const statusDescription = (
+  pending.length > 0
+    ? `${name}: missing approval from ${pending.map((r) => r.team).join(", ")}`
+    : evaluated.length > 0
+      ? `${name}: all required approvals are in place`
+      : `${name}: owners enforced via CODEOWNERS, nothing else required`
+).slice(0, 140)
+
+const { GITHUB_SERVER_URL, GITHUB_RUN_ID } = process.env
+const targetUrl =
+  GITHUB_RUN_ID && `${GITHUB_SERVER_URL ?? "https://github.com"}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}`
+
+if (DRY_RUN) {
+  console.log(`\nDRY RUN: would set commit status "${state}" — ${statusDescription}`)
+} else {
+  await api(`/repos/${owner}/${repo}/statuses/${pr.head.sha}`, {
+    method: "POST",
+    body: JSON.stringify({
+      state,
+      context: "Review policy",
+      description: statusDescription,
+      ...(targetUrl ? { target_url: targetUrl } : {}),
+    }),
+  })
+}
 
 console.log(`\nClassification: ${name}`)
 for (const requirement of evaluated) {
   const icon = requirement.satisfied ? "✅" : "⏳"
   console.log(`${icon} @factorialco/${requirement.team} — ${requirement.reason}`)
 }
-
-if (pending.length > 0) {
-  console.log(`\nMissing ${pending.length} required approval(s). See the PR comment for details.`)
-  process.exit(1)
-}
-console.log("\nAll required approvals are in place (module owners are enforced by GitHub natively).")
+console.log(
+  pending.length > 0
+    ? `\nCommit status set to pending: ${pending.length} required approval(s) missing. See the PR comment.`
+    : "\nCommit status set to success: all requirements satisfied."
+)
