@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { expect, userEvent, waitFor, within } from "storybook/test"
+
 import { z } from "zod"
 
 import {
@@ -23,7 +25,6 @@ import {
   Delete,
   ExternalLink,
   File,
-  Files,
   LayersFront,
   Marketplace,
   Pencil,
@@ -31,10 +32,10 @@ import {
   SolidPlay,
 } from "@/icons/app"
 import { F0Alert } from "@/components/F0Alert"
-import { ButtonInternal } from "@/components/F0Button/internal"
+import { F0Button } from "@/components/F0Button"
 import { F0Heading } from "@/components/F0Heading"
 import { dialogs } from "@/lib/providers/dialogs-alike"
-import { ButtonGroup } from "@/ui/ButtonGroup"
+import { ButtonGroup, ButtonGroupSeparator } from "@/ui/ButtonGroup"
 import { ApplicationFrame } from "@/patterns/ApplicationFrame"
 import { Page as NavigationPage } from "@/patterns/Navigation/Page"
 import { Tabs } from "@/patterns/Navigation/Tabs"
@@ -69,13 +70,14 @@ import type { SurveyFormBuilderElement } from "@/sds/surveys/SurveyFormBuilder/t
 import { mockDatasets } from "@/sds/surveys/__stories__/mocks"
 
 import {
-  cardVisualization,
-  filledDataAdapter,
+  EMPTY_SURVEY_TEMPLATE,
+  EMPTY_SURVEY_TEMPLATE_ID,
+  galleryListVisualization,
+  listVisualization,
+  makeTemplatesDataAdapter,
   resourceFilters,
   resourceSortings,
   tableVisualization,
-  templateFilters,
-  templatesDataAdapter,
   templateSortings,
 } from "./mockData"
 import type { Template } from "./mockData"
@@ -83,19 +85,23 @@ import type { Template } from "./mockData"
 // https://github.com/factorialco/f0/pull/3493 merges, then remove this import.
 import { toasts } from "@/hooks/toast"
 import { useI18n } from "@/lib/providers/i18n"
+import { makeInitialSurveyElements } from "./survey-mocks"
 import {
-  makeInitialSurveyElements,
-  mockSurveyTranscribe,
-  NPS_SURVEY_ELEMENTS,
-  SURVEY_DEFAULT_VALUES,
-  SURVEY_ELEMENTS,
-} from "./survey-mocks"
-import { TAB_CONFIGS } from "./tab-configs"
-import type { TabConfig } from "./tab-configs"
+  FLOW_CONFIGS,
+  guidedTemplatesTitle,
+  makeResourcesSource,
+  makeTemplatesSource,
+  templatesForGuidedType,
+} from "./flow-configs"
+import type {
+  CardsFlowConfig,
+  FlowConfig,
+  GuidedEntryFlowConfig,
+} from "./flow-configs"
 import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
 
 /**
- * Co-creation patterns — "Walkthrough".
+ * AI Cocreation patterns — "Walkthrough".
  *
  * Interactive mockup of the AI-creation flow, built on a single chat-enabled
  * ApplicationFrame so the "One" switch (the F0AiChat trigger) is always in the
@@ -117,7 +123,7 @@ import type { F0AiChatWelcomeCard } from "@/sds/ai/F0AiChat"
  * template cards).
  */
 const meta = {
-  title: "Co-creation/Walkthrough",
+  title: "AI Cocreation/Walkthrough",
   // Manual MDX docs live in creation-with-ai.mdx; opt out of the globally
   // enabled autodocs so the section shows a single Documentation page.
   tags: ["!autodocs"],
@@ -129,13 +135,10 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-type Phase = "collection" | "chat" | "split"
-
-const COCREATION_MODULE = {
-  id: "ats" as const,
-  name: "Co-creation",
-  href: "/cocreation",
-}
+// The Split experience (canvas + docked chat) is realized INSIDE the chat via
+// `openCanvas`, not as a page-level phase — so the page only distinguishes
+// "chat open" from "chat closed".
+type Phase = "collection" | "chat"
 
 // `AiChatStateProvider` persists the chat's open/visualization-mode state to
 // localStorage. We reset those keys once on mount so the chat always starts
@@ -153,43 +156,45 @@ const resetAiChatPersistence = () => {
 }
 
 // ---------------------------------------------------------------------------
-// Tab-config context — exposes the live active tab (and its config) to
-// `FlowContent`, which reads it to drive the collection tab strip, the chat's
-// opening intent message, and the resource canvas shown in the split view.
+// Flow-config context — exposes which coexisting example is running
+// (Engagement Surveys, Training Surveys, ...) and its data (`FlowConfig`) to
+// every component below, which read it to theme cards, toasts, clarifying
+// questions, and the collection/templates data sources.
 // ---------------------------------------------------------------------------
 
-type TabConfigContextValue = {
-  activeTabId: string
-  setActiveTabId: (id: string) => void
-  tabConfig: TabConfig
+type FlowConfigContextValue = {
+  flowId: FlowConfig["id"]
+  config: FlowConfig
+  /** The user has no AI credits: post-creation AI editing is blocked (see the
+   * "No Credits" story). Stable for the session — unlike the dismissable
+   * credit-warning banner. */
+  noCredits: boolean
 }
 
-const TabConfigContext = createContext<TabConfigContextValue | null>(null)
+const FlowConfigContext = createContext<FlowConfigContextValue | null>(null)
 
-function useTabConfig(): TabConfigContextValue {
-  const ctx = useContext(TabConfigContext)
+function useFlowConfig(): FlowConfigContextValue {
+  const ctx = useContext(FlowConfigContext)
   if (!ctx) {
-    throw new Error("useTabConfig must be used inside <TabConfigProvider>")
+    throw new Error("useFlowConfig must be used inside <FlowConfigProvider>")
   }
   return ctx
 }
 
-function TabConfigProvider({
-  initialTabId = "surveys",
+function FlowConfigProvider({
+  flowId,
+  noCredits = false,
   children,
 }: {
-  initialTabId?: string
+  flowId: FlowConfig["id"]
+  noCredits?: boolean
   children: ReactNode
 }) {
-  const [activeTabId, setActiveTabId] = useState(initialTabId)
-  const tabConfig = TAB_CONFIGS[activeTabId] ?? TAB_CONFIGS.surveys
-
+  const config = FLOW_CONFIGS[flowId]
   return (
-    <TabConfigContext.Provider
-      value={{ activeTabId, setActiveTabId, tabConfig }}
-    >
+    <FlowConfigContext.Provider value={{ flowId, config, noCredits }}>
       {children}
-    </TabConfigContext.Provider>
+    </FlowConfigContext.Provider>
   )
 }
 
@@ -318,24 +323,78 @@ function SurveySettingsForm() {
  */
 function TemplatesCollection({
   onSelect,
+  onEmpty,
+  fillHeight = true,
+  visualization = listVisualization,
+  templates,
 }: {
   onSelect?: (item: Template) => void
+  /**
+   * When set, prepend a synthetic "Empty Survey" row as the first item;
+   * selecting it runs this instead of `onSelect` (it starts a blank survey
+   * rather than previewing a template — mirrors the guided-type gallery).
+   * Omitted for the inert browse tab, which shows real templates only.
+   */
+  onEmpty?: () => void
+  /**
+   * When true (default, the browse tab) the collection fills its container and
+   * scrolls its list body internally. Pass false in the AI Canvas gallery so
+   * the collection sizes to its content and the panel body scrolls as one
+   * (toolbar + list together) instead of scrolling inside the data collection.
+   */
+  fillHeight?: boolean
+  /**
+   * List visualization to render. Defaults to the full `listVisualization`
+   * (with the Category property) for the browse tab; the AI Canvas gallery
+   * passes the category-less `galleryListVisualization` instead.
+   */
+  visualization?: typeof listVisualization
+  /**
+   * Template list to show instead of the flow's full set — the "guidedType"
+   * gallery passes the picked type's templates. Defaults to
+   * `config.templates`. Also drops the category filter toolbar, which only
+   * makes sense over the full multi-category list.
+   */
+  templates?: Template[]
 } = {}) {
-  const source = useDataCollectionSource({
-    dataAdapter: templatesDataAdapter,
-    filters: templateFilters,
-    sortings: templateSortings,
-    search: { enabled: true, sync: true },
-    // No card CTAs — actions live on the preview surface. The card-body click
-    // is omitted entirely when no handler is supplied so the browse-tab cards
-    // stay inert (no pointer, no action); in the AI Canvas it opens the preview.
-    itemOnClick: onSelect ? (item) => () => onSelect(item) : undefined,
-  })
+  const { config } = useFlowConfig()
+  const templatesSource = makeTemplatesSource(config)
+  const items = templates ?? config.templates
+  const source = useDataCollectionSource(
+    {
+      // A scoped `templates` list is already one category, so its gallery
+      // carries no category filter; the flow-wide views keep it.
+      ...(templates ? {} : { filters: templatesSource.filters }),
+      // With `onEmpty` (the AI Canvas gallery) lead with the synthetic "Empty
+      // Survey" row; without it (the browse tab) show real templates only.
+      dataAdapter: makeTemplatesDataAdapter(
+        onEmpty ? [EMPTY_SURVEY_TEMPLATE, ...items] : items
+      ),
+      sortings: templateSortings,
+      search: { enabled: true, sync: true },
+      // No card CTAs — actions live on the preview surface. The card-body click
+      // is omitted entirely when neither handler is supplied so the browse-tab
+      // rows stay inert (no pointer, no action); in the AI Canvas it opens the
+      // preview, or starts a blank survey for the "Empty Survey" row.
+      itemOnClick:
+        onSelect || onEmpty
+          ? (item) => () => {
+              if (onEmpty && item.id === EMPTY_SURVEY_TEMPLATE_ID) onEmpty()
+              else onSelect?.(item)
+            }
+          : undefined,
+    },
+    // The source captures its first render's config otherwise — re-key it if
+    // the flow or the template scope ever changes under a mounted collection.
+    // Key the scope by ids (not array identity — callers rebuild the array
+    // each render).
+    [config.id, templates?.map((t) => t.id).join(",")]
+  )
   return (
     <OneDataCollection
       source={source}
-      visualizations={[cardVisualization]}
-      fullHeight
+      visualizations={[visualization]}
+      fullHeight={fillHeight}
     />
   )
 }
@@ -344,10 +403,22 @@ function TemplatesCollection({
 // SDS union (dashboard | form | dataDownload); "templates" is story-specific, so
 // we keep a local content type and cast at the `openCanvas` call site — the
 // canvas registry/panel match on the `type` string at runtime.
-type TemplatesCanvasContent = CanvasContentBase & { type: "templates" }
+type TemplatesCanvasContent = CanvasContentBase & {
+  type: "templates"
+  /**
+   * Set only by the "guidedType" entry flow (Training): scopes this canvas to
+   * one guided type's templates (+ a synthetic "Empty Survey" entry first)
+   * instead of the flow's full template list. Absent for the "cards" entry
+   * flow (Engagement), which always shows the full list.
+   */
+  guidedTypeId?: string
+}
+// Flow-wide gallery content — every survey template. The title is what the
+// canvas header renders; the "guidedType" flow builds its own content with a
+// type-scoped title instead (see `guidedTemplatesTitle`).
 const TEMPLATES_CANVAS_CONTENT: TemplatesCanvasContent = {
   type: "templates",
-  title: "Templates",
+  title: "Survey Templates",
 }
 
 const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
@@ -358,9 +429,17 @@ const templatesCanvasEntity: CanvasEntityDefinition<TemplatesCanvasContent> = {
   // first step of cocreation rather than just dismissing the canvas (see
   // `TemplatesCanvasHeader`); the framework `onClose` is intentionally dropped.
   renderHeader: ({ content }) => <TemplatesCanvasHeader content={content} />,
-  renderContent: () => (
-    <div className="h-full w-full px-4 py-3">
-      <TemplatesCanvasBody />
+  // No horizontal padding on the wrapper: the data collection provides its own
+  // `px-page` (the design-system default), which aligns with the header's
+  // `px-page` — so header, filters, and list all sit at the standard 24px inset.
+  // Only vertical padding here (`py-3`, matching the other canvas bodies).
+  renderContent: ({ content }) => (
+    <div className="h-full w-full overflow-y-auto py-3">
+      {content.guidedTypeId ? (
+        <GuidedTemplatesCanvasBody guidedTypeId={content.guidedTypeId} />
+      ) : (
+        <TemplatesCanvasBody />
+      )}
     </div>
   ),
   overflowHidden: true,
@@ -387,6 +466,21 @@ type SurveyCanvasContent = CanvasContentBase & {
   description?: string
   /** Blank "start from scratch" survey — the editable builder, seeded empty. */
   empty?: boolean
+  /**
+   * Set only by the "guidedType" entry flow (Training) when previewing one of
+   * its templates: identifies which guided type this preview belongs to, so
+   * "Use this template" seeds that type's sample elements and "Back to
+   * templates" reopens the same type-scoped gallery.
+   */
+  guidedTypeId?: string
+  /**
+   * Set only by the "cards" entry flow (Engagement) when previewing its preset
+   * welcome-card template (e.g. "Employee NPS"): identifies which preset this
+   * preview belongs to, so the preview renders that preset's own questions and
+   * "Use this template" seeds them (plus the preset's created-card subtitle and
+   * intro message) instead of the flow's generic sample set.
+   */
+  presetCardId?: string
 }
 
 // Bridge the story-local canvas types to the SDS API. `CanvasContent` /
@@ -415,9 +509,6 @@ const asSurveyCanvasContent = (
 // Default name for a blank "start from scratch" survey, shown until the guided
 // flow resolves a real name.
 const UNTITLED_SURVEY_NAME = "Untitled survey"
-
-// Name of the survey seeded by the "Employee NPS" welcome card.
-const EMPLOYEE_NPS_SURVEY_NAME = "Employee NPS"
 
 // Build the canvas content for a blank survey opened by the "Empty survey"
 // welcome card (or the typed "Create" flow). Reuses the survey canvas entity
@@ -459,6 +550,7 @@ function SurveyCard({
 }) {
   const { canvasContent, openCanvas, setVisualizationMode } = useAiChat()
   const { isLiveCard } = useSurveyStore()
+  const { config } = useFlowConfig()
   const live = isLiveCard(surveyId, cardId)
   // `canvasContent` is the closed SDS union (dashboard | form | dataDownload);
   // the story-local "survey" type is matched at runtime, so widen to read it.
@@ -493,7 +585,7 @@ function SurveyCard({
   return (
     <div className={live ? undefined : "pointer-events-none opacity-50"}>
       <F0CardHorizontal
-        avatar={{ type: "module", module: "engagement" }}
+        avatar={{ type: "module", module: config.avatarModule }}
         title={title}
         description={description}
         primaryAction={
@@ -510,13 +602,17 @@ function SurveyCard({
   )
 }
 
-// Subtitle shown on a survey's "created" card (blank or from a template).
-const SURVEY_CREATED_DESCRIPTION = "Created in Engagement / Surveys"
+// Subtitle shown on a survey's "created" card (blank or from a template),
+// e.g. "Created in Engagement / Surveys" or "Created in Learning / Training
+// surveys" — themed to whichever flow is running.
+const createdDescription = (flow: FlowConfig) =>
+  `Created in ${flow.moduleName} / ${flow.navLabel}`
 // Subtitle shown on the "updated" card posted once the AI drafts the questions.
 const SURVEY_UPDATED_DESCRIPTION = "Survey updated with your choices."
 
 // Toast titles reused across the survey resource-header actions and autosave.
-const SURVEY_SAVED_TOAST = "Survey saved in Engagement / Surveys"
+const savedToast = (flow: FlowConfig) =>
+  `Survey saved in ${flow.moduleName} / ${flow.navLabel}`
 const SURVEY_PUBLISHED_TOAST = "Survey published"
 const SURVEY_DUPLICATED_TOAST = "Survey duplicated"
 const SURVEY_DELETED_TOAST = "Survey deleted"
@@ -538,6 +634,12 @@ const PROPOSED_QUESTION_ELEMENT = {
 const PROPOSED_CHANGE_TEXT = "Add an open-ended comment question"
 const PROPOSED_CHANGE_DESCRIPTION =
   "A new question at the end: “What would most improve your experience?”"
+
+// Label + subtitle for the INITIAL drafting confirmation, shared across its
+// pending/resolved states (see `DraftConfirmationCard`).
+const DRAFT_CONFIRM_TEXT = "Draft a first set of questions"
+const DRAFT_CONFIRM_DESCRIPTION =
+  "I'll write a starter set of questions onto the canvas based on your answers."
 
 /**
  * Human-in-the-loop proposal card posted whenever the user describes a change
@@ -650,6 +752,132 @@ function ProposalConfirmationCard({
 }
 
 /**
+ * Human-in-the-loop confirmation for the AI's INITIAL drafting step — the twin
+ * of `ProposalConfirmationCard`, but for the first draft rather than a later
+ * edit. Posted once the clarifying questions are answered; Apply runs the
+ * "applying changes" overlay (blur) and fills in the drafted questions, then
+ * arms the proposal loop. Discard leaves the survey blank (and still arms it).
+ * Owns its own pending → resolved state; posted via `appendCard`.
+ *
+ * Two entry shapes:
+ * - Empty-survey entries (`alreadyOpen`): the blank survey is opened + docked and
+ *   its "created" card posted up front (the survey is the user's immediately), so
+ *   here we only draft and supersede that card with an "updated" one.
+ * - Typed "Create": the canvas stays hidden until the user decides, so Apply (or
+ *   Discard) reveals the survey — opens it on the canvas and posts its first card.
+ */
+function DraftConfirmationCard({
+  surveyId,
+  surveyName,
+  elements,
+  alreadyOpen = false,
+}: {
+  surveyId: string
+  surveyName: string
+  elements: SurveyFormBuilderElement[]
+  alreadyOpen?: boolean
+}) {
+  const [resolution, setResolution] = useState<
+    "pending" | "accepted" | "rejected"
+  >("pending")
+  const { appendMessages, appendCard } = useMockAiChatRuntime()
+  const { openCanvas } = useAiChat()
+  const { draftQuestions, nextCardId, registerLiveCard } = useSurveyStore()
+  const { armProposal } = useProposalFlow()
+  const { config } = useFlowConfig()
+
+  // Post a fresh live `SurveyCard`, superseding any prior card for this survey.
+  const postSurveyCard = (description: string) => {
+    const cardId = nextCardId()
+    registerLiveCard(surveyId, cardId)
+    appendCard(() => (
+      <SurveyCard
+        surveyId={surveyId}
+        cardId={cardId}
+        title={surveyName}
+        description={description}
+      />
+    ))
+  }
+
+  if (resolution === "accepted") {
+    return (
+      <F0CardHorizontal
+        title={DRAFT_CONFIRM_TEXT}
+        description={DRAFT_CONFIRM_DESCRIPTION}
+        status={{ icon: Check, variant: "positive", label: "Applied" }}
+      />
+    )
+  }
+  if (resolution === "rejected") {
+    return (
+      <F0CardHorizontal
+        title={DRAFT_CONFIRM_TEXT}
+        description={DRAFT_CONFIRM_DESCRIPTION}
+        status={{ icon: Cross, variant: "neutral", label: "Dismissed" }}
+      />
+    )
+  }
+
+  return (
+    <F0CardHorizontal
+      title={DRAFT_CONFIRM_TEXT}
+      description={DRAFT_CONFIRM_DESCRIPTION}
+      confirmAction={{
+        label: "Apply",
+        onClick: () => {
+          setResolution("accepted")
+          // Typed "Create" reveals the survey here; empty entries already have it
+          // open. Either way, blur it while the questions are drafted in, then
+          // post the resulting card.
+          if (!alreadyOpen) {
+            openCanvas(
+              toCanvasContent(makeEmptySurveyContent(surveyId, surveyName))
+            )
+          }
+          draftQuestions(surveyId, surveyName, elements, () => {
+            postSurveyCard(
+              alreadyOpen
+                ? SURVEY_UPDATED_DESCRIPTION
+                : createdDescription(config)
+            )
+            appendMessages([
+              {
+                role: "assistant",
+                content: "Done — I've drafted the questions on the canvas.",
+              },
+            ])
+            armProposal(surveyId, surveyName)
+          })
+        },
+      }}
+      rejectAction={{
+        label: "Discard",
+        onClick: () => {
+          setResolution("rejected")
+          // Typed "Create" still hands over the (blank) survey on discard; empty
+          // entries already have it open, so there's nothing to reveal.
+          if (!alreadyOpen) {
+            openCanvas(
+              toCanvasContent(makeEmptySurveyContent(surveyId, surveyName))
+            )
+            postSurveyCard(createdDescription(config))
+          }
+          appendMessages([
+            {
+              role: "assistant",
+              content:
+                "No problem — I've left the survey blank. Tell me what you'd like instead.",
+            },
+          ])
+          armProposal(surveyId, surveyName)
+        },
+      }}
+    />
+  )
+}
+
+/**
  * Arms the next typed message to propose a change to an existing survey: the
  * assistant posts a proposal line and a human-in-the-loop
  * `ProposalConfirmationCard`. Shared by every entry point (Empty survey, typed
@@ -681,20 +909,258 @@ function useProposalFlow() {
     },
     [appendMessages, appendCard, setUserMessageInterceptor]
   )
-  return { armProposal }
+  // No-credits variant of `armProposal`: instead of proposing a change, every
+  // typed message is met with an "out of credits" reply (and re-arms, so each
+  // further message gets the same answer). Used once a survey is created in the
+  // credit-exhausted flow, where AI edits are blocked.
+  const armNoCredits = useCallback(() => {
+    const handler = () => {
+      appendMessages([{ role: "assistant", content: NO_CREDITS_MESSAGE }])
+      setUserMessageInterceptor(handler)
+    }
+    setUserMessageInterceptor(handler)
+  }, [appendMessages, setUserMessageInterceptor])
+  return { armProposal, armNoCredits }
 }
 
-// Survey-type options offered as a clarifying question right after a blank
-// survey is created (mirrors the examples the assistant used to list inline).
-const SURVEY_TYPE_OPTIONS: ClarifyingOption[] = [
-  { id: "engagement", label: "Employee engagement" },
-  { id: "onboarding", label: "Onboarding feedback" },
-  { id: "pulse", label: "Customer pulse check" },
-  { id: "enps", label: "eNPS" },
-]
+// Assistant reply when the user tries to refine a survey with no AI credits
+// left (the "No Credits" demo). Ends the AI editing loop with an upgrade nudge.
+const NO_CREDITS_MESSAGE =
+  "You're out of AI credits, so I can't make changes right now. Upgrade your plan to keep editing with AI."
+
+// Assistant reply when the user types on the no-credits WELCOME screen. Free-text
+// AI needs credits, but guided creation (templates / blank survey) doesn't — so
+// instead of a dead end we redirect into the guided-entry panel.
+const NO_CREDITS_REDIRECT_MESSAGE =
+  "I can't help with that because you're out of AI credits — but I can still help you create a survey."
+
+// Question shown on that redirected guided-entry panel. The "cards" config
+// (which the No Credits story uses) has no `guidedQuestion` field, so borrow
+// the guidedEntry flow's — one source of truth for the copy.
+const GUIDED_ENTRY_QUESTION = FLOW_CONFIGS.engagementGuided.guidedQuestion
+
+/**
+ * Opens a blank "Empty Survey" for a Training guided type: seeds a survey with
+ * just that type's locked question, opens its editor canvas, posts the
+ * "created" card, and arms the proposal flow. Used both by the "Empty Survey"
+ * gallery entry and by the "guidedType" flow's close-equals-empty overrides
+ * (the templates-list canvas' Close, and the template-preview canvas' Close).
+ */
+function useOpenEmptySurvey() {
+  const { openCanvas } = useAiChat()
+  const { config } = useFlowConfig()
+  const { appendCard, appendMessages } = useMockAiChatRuntime()
+  const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
+  const { armProposal } = useProposalFlow()
+
+  return useCallback(
+    (guidedTypeId: string) => {
+      if (config.entryMode !== "guidedType") return
+      const guidedType = config.guidedTypes.find((t) => t.id === guidedTypeId)
+      if (!guidedType) return
+      const title = `${guidedType.label} form`
+      const surveyId = createSurvey(title, {
+        elements: [guidedType.emptySurveyElement],
+      })
+      openCanvas(
+        toCanvasContent({
+          type: "survey",
+          title,
+          mode: "edit",
+          templateName: title,
+          surveyId,
+          description: createdDescription(config),
+          guidedTypeId,
+        })
+      )
+      const cardId = nextCardId()
+      registerLiveCard(surveyId, cardId)
+      appendCard(() => (
+        <SurveyCard
+          surveyId={surveyId}
+          cardId={cardId}
+          title={title}
+          description={createdDescription(config)}
+        />
+      ))
+      appendMessages([
+        {
+          role: "assistant",
+          content: `Let's build your ${guidedType.label.toLowerCase()} form from scratch. What would you like to change?`,
+        },
+      ])
+      armProposal(surveyId, title)
+    },
+    [
+      config,
+      openCanvas,
+      createSurvey,
+      nextCardId,
+      registerLiveCard,
+      appendCard,
+      appendMessages,
+      armProposal,
+    ]
+  )
+}
+
+/**
+ * Blank-survey entry for the non-"guidedType" flows — the twin of
+ * `useOpenEmptySurvey` (which serves the "guidedType" flow's type-seeded blank
+ * form). Creates + opens a blank survey on the canvas, posts the "created"
+ * card, then either walks the drafting conversation (type → audience → length)
+ * or, with no credits, invites a typed request met by an out-of-credits reply.
+ *
+ * Single source of truth for three surfaces: the "cards" flow's "Empty survey"
+ * welcome card, the "guidedEntry" flow's "Empty Survey" action, and the
+ * templates-canvas header's "Start with a Blank Survey" CTA. Behavior matches
+ * each flow's prior inline copy exactly — the "cards" flow leads with an intro
+ * line (the "guidedEntry" flow's beat copy already posted one before running
+ * the action), and only "guidedEntry" gates the drafting step behind credits.
+ */
+function useStartBlankSurvey() {
+  const { config, noCredits } = useFlowConfig()
+  const { appendCard, appendMessages, startClarifying } = useMockAiChatRuntime()
+  const { openCanvas } = useAiChat()
+  const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
+  const { armNoCredits } = useProposalFlow()
+
+  return useCallback(() => {
+    // The "guidedType" flow seeds a type-scoped blank survey instead — see
+    // `useOpenEmptySurvey`.
+    if (config.entryMode === "guidedType") return
+
+    // Walk type → audience → length as a single consecutive panel, then hand
+    // off to a confirmation step: echo the picks, and post a
+    // `DraftConfirmationCard`. The blank survey is already open on the canvas
+    // (see below), so `alreadyOpen` — on Apply the card only drafts the
+    // questions (blur) into it, then arms the proposal loop.
+    const askSurveyDetails = (surveyId: string) =>
+      startClarifying({
+        steps: surveyClarifyingSteps(config),
+        onConfirm: (answersByStep) => {
+          appendMessages(
+            surveyAnswerMessages(surveyClarifyingSteps(config), answersByStep)
+          )
+          const surveyName = surveyNameForType(
+            answersByStep[0]?.[0] ?? "Untitled"
+          )
+          appendMessages([
+            {
+              role: "assistant",
+              content:
+                "Based on your answers, I've got a first set of questions ready to draft.",
+            },
+          ])
+          appendCard(() => (
+            <DraftConfirmationCard
+              surveyId={surveyId}
+              surveyName={surveyName}
+              elements={config.sampleElements}
+              alreadyOpen
+            />
+          ))
+        },
+      })
+
+    const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
+
+    // The blank survey is the user's immediately: open it on the canvas, dock
+    // the chat beside it, and post its "created" card up front (the exception to
+    // the "confirm before showing" rule — only the DRAFTED questions wait for
+    // confirmation). "cards" leads with an intro line; "guidedEntry" already
+    // posted its beat reply ("Let's start with a blank survey.") before running.
+    openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
+    if (config.entryMode === "cards") {
+      appendMessages([
+        { role: "assistant", content: "Let's start with a blank survey." },
+      ])
+    }
+    const cardId = nextCardId()
+    registerLiveCard(surveyId, cardId)
+    appendCard(() => (
+      <SurveyCard
+        surveyId={surveyId}
+        cardId={cardId}
+        title={UNTITLED_SURVEY_NAME}
+        description={createdDescription(config)}
+      />
+    ))
+
+    // No credits: AI drafting is blocked, so skip the clarifying questions and
+    // meet any typed request with an out-of-credits reply.
+    if (noCredits) {
+      appendMessages([
+        {
+          role: "assistant",
+          content:
+            "Your blank survey is ready. Tell me what you'd like to add.",
+        },
+      ])
+      armNoCredits()
+      return
+    }
+
+    // Credit-ful: ask the clarifying questions, then the draft confirmation.
+    askSurveyDetails(surveyId)
+  }, [
+    config,
+    noCredits,
+    appendCard,
+    appendMessages,
+    startClarifying,
+    openCanvas,
+    createSurvey,
+    nextCardId,
+    registerLiveCard,
+    armNoCredits,
+  ])
+}
+
+/**
+ * Leaves the "guidedType" flow (Training) without creating a survey: posts an
+ * assistant message acknowledging the departure (so re-opening the chat shows
+ * why the flow ended), then closes the chat entirely — which the phase-sync
+ * effect in `FlowContent` tears down to the starting collection page. Used by
+ * the templates-list and template-preview Close buttons once the user confirms
+ * the leave-creation warning.
+ */
+function useLeaveGuidedFlow() {
+  const { setOpen } = useAiChat()
+  const { appendMessages } = useMockAiChatRuntime()
+
+  return useCallback(() => {
+    appendMessages([
+      {
+        role: "assistant",
+        content:
+          "No problem — I've closed the survey creation without creating anything. You can start again anytime from Create.",
+      },
+    ])
+    setOpen(false)
+  }, [appendMessages, setOpen])
+}
+
+/**
+ * Shared "Leave creation?" gate for the guided / no-credits flows: shows the
+ * confirmation and, on confirm, leaves (posts the exit note + closes the chat
+ * via `leaveGuidedFlow`). Used by the templates-gallery Close button; the chat's
+ * own ✕ is gated separately (before it animates) via `setBeforeClose` in
+ * `FlowContent`.
+ */
+function useConfirmLeaveCreation() {
+  const { config } = useFlowConfig()
+  const leaveGuidedFlow = useLeaveGuidedFlow()
+  return useCallback(() => {
+    void confirmLeaveGuidedCreation(config).then((leave) => {
+      if (leave) leaveGuidedFlow()
+    })
+  }, [config, leaveGuidedFlow])
+}
 
 // Follow-up clarifying questions walked after the survey type (audience, then
-// length) before the AI "drafts" the questions onto the canvas.
+// length) before the AI "drafts" the questions onto the canvas. Shared by
+// every flow — only the survey "type" question (`flow.typeOptions`) varies.
 const SURVEY_AUDIENCE_OPTIONS: ClarifyingOption[] = [
   { id: "all", label: "All employees" },
   { id: "department", label: "A specific department" },
@@ -712,10 +1178,12 @@ const SURVEY_LENGTH_OPTIONS: ClarifyingOption[] = [
 // next question (the header shows a "X of Y" counter and a back arrow) and the
 // final question submits. Shared by both the "Empty survey" card and the typed
 // "Create" flow, which differ only in when the canvas opens.
-const SURVEY_CLARIFYING_STEPS: ClarifyingStep[] = [
+const surveyClarifyingSteps = (
+  flow: CardsFlowConfig | GuidedEntryFlowConfig
+): ClarifyingStep[] => [
   {
     question: "What kind of survey are you working on?",
-    options: SURVEY_TYPE_OPTIONS,
+    options: flow.typeOptions,
     selectionMode: "single",
   },
   {
@@ -735,17 +1203,20 @@ const SURVEY_CLARIFYING_STEPS: ClarifyingStep[] = [
 // answer on the line beneath it (mirrors the real product, which consolidates
 // the clarifying answers into one reply instead of one bubble per step).
 const surveyAnswerMessages = (
+  steps: ClarifyingStep[],
   answersByStep: string[][]
 ): { role: "user"; content: string }[] => {
-  // answersByStep is index-aligned with SURVEY_CLARIFYING_STEPS (buildAnswers in
+  // answersByStep is index-aligned with `steps` (buildAnswers in
   // MockAiChatRuntime maps over every step, in order).
-  const blocks = SURVEY_CLARIFYING_STEPS.map((step, i) => {
-    const answer = (answersByStep[i] ?? []).join(", ").trim()
-    if (!answer) return null
-    // Trailing backslash = CommonMark hard line break, so the answer renders
-    // directly UNDER the bold question (a plain "\n" is only a soft break/space).
-    return `**${step.question}**\\\n${answer}`
-  }).filter((block): block is string => block !== null)
+  const blocks = steps
+    .map((step, i) => {
+      const answer = (answersByStep[i] ?? []).join(", ").trim()
+      if (!answer) return null
+      // Trailing backslash = CommonMark hard line break, so the answer renders
+      // directly UNDER the bold question (a plain "\n" is only a soft break/space).
+      return `**${step.question}**\\\n${answer}`
+    })
+    .filter((block): block is string => block !== null)
 
   if (blocks.length === 0) return []
   // Blank line between pairs → separate <p> blocks, spaced by the bubble's gap.
@@ -763,10 +1234,10 @@ const surveyNameForType = (typeLabel: string): string => `${typeLabel} survey`
 
 // Shared "leave creation" confirmation — opened by the preview header's "Edit
 // Template" action and the in-canvas alert's "Templates" link.
-const confirmLeaveCreation = () =>
+const confirmLeaveCreation = (flow: FlowConfig) =>
   dialogs.confirmation({
     title: "Leave creation?",
-    msg: "Editing this template opens it in Surveys / Templates. Are you sure you want to leave the current creation flow?",
+    msg: `Editing this template opens it in ${flow.navLabel} / Templates. Are you sure you want to leave the current creation flow?`,
     confirm: { label: "Go to Edit Template" },
     cancel: { label: "Cancel" },
   })
@@ -786,11 +1257,11 @@ const confirmPublish = () =>
 // save the changes then close, close without saving, or cancel and stay.
 // Resolves the picked action's value ("save" | "discard" | "cancel"); dismissing
 // the dialog (backdrop / Esc) resolves `undefined`, also treated as "stay".
-const confirmCloseUnsaved = () =>
+const confirmCloseUnsaved = (flow: FlowConfig) =>
   dialogs.notification({
     type: "warning",
     title: "Unsaved changes",
-    msg: "You have unsaved changes. Save them to Surveys before closing the canvas?",
+    msg: `You have unsaved changes. Save them to ${flow.navLabel} before closing the canvas?`,
     actions: {
       primary: { label: "Save and close", value: "save" },
       secondary: [
@@ -800,6 +1271,21 @@ const confirmCloseUnsaved = () =>
     },
   })
 
+// "Leave creation" confirmation shown when the "guidedType" flow (Training)
+// template gallery or preview is closed BEFORE the user has picked a template
+// or an Empty Survey. That flow has no welcome screen to fall back to, so closing
+// abandons the in-progress creation entirely — warn first instead of silently
+// bailing out. Resolves `true` when the user confirms leaving; dismissing the
+// dialog (backdrop / Esc) resolves `undefined`, treated as "stay".
+const confirmLeaveGuidedCreation = (flow: FlowConfig) =>
+  dialogs.confirmation({
+    type: "warning",
+    title: "Leave creation?",
+    msg: `You haven't picked a template or an empty survey yet. Closing now leaves the ${flow.navLabel} creation flow without creating a survey.`,
+    confirm: { label: "Leave" },
+    cancel: { label: "Keep creating" },
+  })
+
 /**
  * The non-dismissable info banner shown atop a template preview. The "Templates"
  * link doesn't navigate (this is a mock); it opens the same leave-creation
@@ -807,20 +1293,21 @@ const confirmCloseUnsaved = () =>
  * href-only, so the click is intercepted on capture.
  */
 function TemplatePreviewAlert() {
+  const { config } = useFlowConfig()
   return (
     <div
       onClickCapture={(e) => {
         if ((e.target as HTMLElement).closest("a")) {
           e.preventDefault()
           e.stopPropagation()
-          void confirmLeaveCreation()
+          void confirmLeaveCreation(config)
         }
       }}
     >
       <F0Alert
         variant="info"
         title="You're viewing a template."
-        description="To modify or create templates, go to Surveys / Templates."
+        description={`To modify or create templates, go to ${config.navLabel} / Templates.`}
         link={{ label: "Templates", href: "#" }}
       />
     </div>
@@ -828,25 +1315,66 @@ function TemplatePreviewAlert() {
 }
 
 /**
- * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits:
- * "Back to templates" (left) re-opens the templates list, and "Close" (right)
- * returns to the starting point of the flow — the fullscreen welcome screen —
- * the same behaviour as the templates-list canvas' close. The framework
- * `onClose` is intentionally ignored in favour of these. "Use this template"
+ * Header for the template-PREVIEW survey canvas (mode "preview"). Two exits,
+ * both stepping back to the gallery this preview was opened from (never out of
+ * creation): "Back to templates" (left) and "Close" (right) both re-open the
+ * template selection screen — the type-scoped gallery for the "guidedType"
+ * flow, the flow-wide gallery otherwise. Leaving creation from a preview instead
+ * happens by closing the chat panel itself, which the guided/no-credits flows
+ * gate with the "Leave creation?" warning (see `FlowContent`'s `setBeforeClose`).
+ * The framework `onClose` is intentionally ignored in favour of these. "Use this template"
  * swaps in the editable resource view (mode "edit"), carrying the template's
  * name and description so its `ResourceHeader` is populated. Defined as a
  * component so it can read `openCanvas` / `setVisualizationMode` from context.
  */
 function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
-  const { openCanvas, setVisualizationMode } = useAiChat()
+  const { openCanvas } = useAiChat()
   const { appendCard, appendMessages } = useMockAiChatRuntime()
   const { createSurvey, nextCardId, registerLiveCard } = useSurveyStore()
-  const { armProposal } = useProposalFlow()
+  const { armProposal, armNoCredits } = useProposalFlow()
+  const { config, noCredits } = useFlowConfig()
+
+  // Both the "Back to templates" arrow and the Close ✕ return to the template
+  // selection screen this preview was opened from — the type-scoped gallery for
+  // the "guidedType" flow, the flow-wide gallery otherwise. Closing a preview
+  // steps back to the list, never out of creation.
+  const backToTemplates = () =>
+    openCanvas(
+      toCanvasContent(
+        content.guidedTypeId && config.entryMode === "guidedType"
+          ? {
+              type: "templates",
+              title: guidedTemplatesTitle(config, content.guidedTypeId),
+              guidedTypeId: content.guidedTypeId,
+            }
+          : TEMPLATES_CANVAS_CONTENT
+      )
+    )
 
   const useThisTemplate = () => {
-    // A template copy is created already populated, so seed the sample questions
-    // (empty: false). No AI drafting follows, so this single card stays live.
-    const surveyId = createSurvey(content.templateName, { empty: false })
+    // A template copy is created already populated, so seed the flow's sample
+    // questions — for the "guidedType" entry flow (Training), that's the
+    // chosen type's locked question + follow-ups (every template under that
+    // type shares this content); for the "cards" preset welcome card
+    // (Engagement, `content.presetCardId`), that preset's own questions; for
+    // any other "cards" template, the flow's single sample set. No AI drafting
+    // follows, so this single card stays live.
+    const preset =
+      config.entryMode === "cards" &&
+      content.presetCardId === config.presetCard.id
+        ? config.presetCard
+        : undefined
+    const elements = preset
+      ? preset.elements
+      : config.entryMode === "guidedType"
+        ? config.guidedTypes.find((t) => t.id === content.guidedTypeId)
+            ?.sampleElements
+        : config.sampleElements
+    if (!elements) return
+    // The preset carries its own created-card subtitle / resource-header
+    // description; other templates fall back to the flow's "Created in …" copy.
+    const description = preset ? preset.createdDescription : content.description
+    const surveyId = createSurvey(content.templateName, { elements })
     openCanvas(
       toCanvasContent({
         type: "survey",
@@ -854,7 +1382,7 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         mode: "edit",
         templateName: content.templateName,
         surveyId,
-        description: content.description,
+        description,
       })
     )
     // Acknowledge the survey created from this template — an openable canvas card
@@ -866,40 +1394,52 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
         surveyId={surveyId}
         cardId={cardId}
         title={content.templateName}
-        description={SURVEY_CREATED_DESCRIPTION}
+        description={
+          preset ? preset.createdDescription : createdDescription(config)
+        }
       />
     ))
     appendMessages([
       {
         role: "assistant",
-        content:
-          "I have created the survey using the template. What would you like to customize or change?",
+        content: preset
+          ? preset.introMessage
+          : "I have created the survey using the template. What would you like to customize or change?",
       },
     ])
-    // Arm the next typed message: the user describes a change, the assistant
-    // proposes one, and a human-in-the-loop confirmation card lets them accept
-    // (apply + supersede the card) or reject it — then re-arms for the next.
-    armProposal(surveyId, content.templateName)
+    // Arm the next typed message. Normally the user describes a change, the
+    // assistant proposes one, and a confirmation card lets them accept/reject
+    // (then re-arms). With no credits, AI edits are blocked — every typed
+    // message gets an "out of credits" reply instead.
+    if (noCredits) {
+      armNoCredits()
+    } else {
+      armProposal(surveyId, content.templateName)
+    }
   }
 
   return (
-    <div className="flex flex-row items-center gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
-      <ButtonInternal
+    <div className="px-page flex flex-row items-center gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary py-3">
+      <F0Button
         variant="outline"
         hideLabel
         label="Back to templates"
         icon={ArrowLeft}
-        onClick={() => openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))}
+        onClick={backToTemplates}
       />
-      <div className="min-w-0 flex-shrink truncate">
-        <F0Heading content={`Template · ${content.templateName}`} as="h2" />
+      <div className="min-w-0 flex-1">
+        <F0Heading
+          content={`Template · ${content.templateName}`}
+          as="h2"
+          ellipsis
+        />
       </div>
-      {/* ButtonGroup owns the responsive collapse: when the row is wide both
-          actions show; when the title grows or the canvas narrows, the
-          secondary "Edit Template" sheds into the "⋯" menu while the primary
-          "Use this template" stays pinned. */}
+      {/* `flex-1` WITHOUT `min-w-0` keeps the group's min-content floor, so the
+          primary "Use this template" never squeezes — the title (flex-1 min-w-0)
+          truncates instead. "Edit Template" sheds into the "⋯" menu under
+          pressure. Mirrors the F0CardHorizontal actions recipe. */}
       <ButtonGroup
-        className="min-w-0 flex-1"
+        className="flex-1"
         align="end"
         primaryAction={{
           id: "use-template",
@@ -910,18 +1450,22 @@ function SurveyCanvasHeader({ content }: { content: SurveyCanvasContent }) {
           {
             id: "edit-template",
             label: "Edit Template",
-            onClick: () => void confirmLeaveCreation(),
+            onClick: () => void confirmLeaveCreation(config),
           },
         ]}
       />
-      {/* Close returns to the starting point of the flow (fullscreen welcome),
-          mirroring the templates-list canvas' close. */}
-      <ButtonInternal
+      {/* Divide the template actions from Close with the shared ButtonGroup
+          hairline (same one ButtonGroup draws between its own action clusters). */}
+      <ButtonGroupSeparator />
+      {/* Close steps back to the template selection screen (same as the Back
+          arrow) rather than closing the canvas — a preview is a sub-view of the
+          gallery, so dismissing it returns to the list, not out of creation. */}
+      <F0Button
         variant="outline"
         hideLabel
         label="Close"
         icon={Cross}
-        onClick={() => setVisualizationMode("fullscreen")}
+        onClick={backToTemplates}
       />
     </div>
   )
@@ -954,13 +1498,13 @@ type SurveyEntry = {
 type SurveyStoreValue = {
   /**
    * Register + seed a new survey, returning its stable id. Pass `elements` to
-   * seed an explicit question set (e.g. the "Employee NPS" welcome card). Else
-   * `empty` starts blank (the AI drafts questions in later); otherwise it seeds
-   * the sample questions (a "Use this template" copy).
+   * seed an explicit question set (a flow's preset card, or a "Use this
+   * template" copy seeded with the flow's sample questions); omit it to start
+   * blank (the AI drafts questions in later).
    */
   createSurvey: (
     name: string,
-    opts?: { empty?: boolean; elements?: SurveyFormBuilderElement[] }
+    opts?: { elements?: SurveyFormBuilderElement[] }
   ) => string
   /** Read a survey entry (undefined before creation, e.g. a template preview). */
   getSurvey: (surveyId?: string) => SurveyEntry | undefined
@@ -974,6 +1518,7 @@ type SurveyStoreValue = {
   draftQuestions: (
     surveyId: string,
     name: string,
+    elements: SurveyFormBuilderElement[],
     onComplete?: () => void
   ) => void
   /**
@@ -1031,13 +1576,11 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
       setSurveys((prev) => ({
         ...prev,
         [surveyId]: {
-          // A blank "empty" survey is seeded with its first section/question
-          // (the same starting point the form builder would auto-add) so that
-          // state is durable in the store instead of appearing only as a
-          // render-time side effect.
-          elements:
-            opts?.elements ??
-            (opts?.empty ? makeInitialSurveyElements() : SURVEY_ELEMENTS),
+          // A blank survey (no `elements` passed) is seeded with its first
+          // section/question (the same starting point the form builder would
+          // auto-add) so that state is durable in the store instead of
+          // appearing only as a render-time side effect.
+          elements: opts?.elements ?? makeInitialSurveyElements(),
           name,
           processing: false,
         },
@@ -1064,7 +1607,7 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
   )
 
   const draftQuestions = useCallback<SurveyStoreValue["draftQuestions"]>(
-    (surveyId, name, onComplete) => {
+    (surveyId, name, elements, onComplete) => {
       setSurveys((prev) =>
         prev[surveyId]
           ? {
@@ -1080,7 +1623,7 @@ function SurveyStoreProvider({ children }: { children: ReactNode }) {
                 ...prev,
                 [surveyId]: {
                   ...prev[surveyId],
-                  elements: SURVEY_ELEMENTS,
+                  elements,
                   processing: false,
                 },
               }
@@ -1263,6 +1806,7 @@ function SurveyEditorCanvasHeader({
   onClose: () => void
 }) {
   const { tabId, setTabId, elements, name } = useSurveyEditorCanvas()
+  const { config } = useFlowConfig()
   const i18n = useI18n()
   return (
     <>
@@ -1283,12 +1827,12 @@ function SurveyEditorCanvasHeader({
             }),
         }}
         onClose={() =>
-          void confirmCloseUnsaved().then((action) => {
+          void confirmCloseUnsaved(config).then((action) => {
             // Cancel or dismissed → stay on the canvas.
             if (action === "cancel" || action === undefined) return
             if (action === "save")
               toasts.open({
-                title: SURVEY_SAVED_TOAST,
+                title: savedToast(config),
                 variant: "success",
               })
             onClose()
@@ -1299,7 +1843,7 @@ function SurveyEditorCanvasHeader({
             label: i18n.actions.save,
             onClick: () =>
               toasts.open({
-                title: SURVEY_SAVED_TOAST,
+                title: savedToast(config),
                 variant: "success",
               }),
           },
@@ -1355,6 +1899,7 @@ function SurveyEditorCanvasHeader({
 function SurveyEditorCanvasBody() {
   const { tabId, elements, setElements, processing, surveyId } =
     useSurveyEditorCanvas()
+  const { config } = useFlowConfig()
   // This flow's resource carries a Draft status, so creating it persists a draft
   // to its domain the moment its canvas first opens — the resource's first
   // creation (not autosave), fired once per survey across every creation path
@@ -1367,17 +1912,17 @@ function SurveyEditorCanvasBody() {
     const t = setTimeout(() => {
       createdSurveyIds.add(surveyId)
       toasts.open({
-        title: SURVEY_SAVED_TOAST,
+        title: savedToast(config),
         variant: "success",
       })
     }, 600)
     return () => clearTimeout(t)
-  }, [surveyId])
+  }, [surveyId, config])
   return (
     // While the AI is "drafting" questions, blur + lock the builder behind the
     // "applying changes" overlay.
     <F0AiProcessingOverlay active={processing} className="h-full w-full">
-      <div className="h-full w-full overflow-auto px-4 py-3">
+      <div className="px-page h-full w-full overflow-auto py-3">
         {tabId === "settings" ? (
           <SurveySettingsForm />
         ) : (
@@ -1413,20 +1958,58 @@ const surveyCanvasEntity: CanvasEntityDefinition<SurveyCanvasContent> = {
     ),
   renderContent: ({ content }) =>
     content.mode === "preview" ? (
-      <div className="flex h-full w-full flex-col gap-3 px-4 py-3">
-        <TemplatePreviewAlert />
-        <SurveyAnsweringForm
-          inline
-          hideResourceHeader
-          title={content.templateName}
-          elements={SURVEY_ELEMENTS}
-          datasets={mockDatasets}
-          defaultValues={SURVEY_DEFAULT_VALUES}
-        />
-      </div>
+      <SurveyTemplatePreviewBody content={content} />
     ) : (
       <SurveyEditorCanvasBody />
     ),
+}
+
+/**
+ * Read-only template preview: the flow's sample questions. For the
+ * "guidedType" entry flow (Training), that's the chosen type's locked
+ * question + follow-ups (`content.guidedTypeId`); for "cards" (Engagement),
+ * the flow's single sample set.
+ */
+function SurveyTemplatePreviewBody({
+  content,
+}: {
+  content: SurveyCanvasContent
+}) {
+  const { config } = useFlowConfig()
+  // The "cards" preset welcome card previews its OWN questions (NPS's locked
+  // eNPS question + follow-ups), not the flow's generic sample set.
+  const preset =
+    config.entryMode === "cards" &&
+    content.presetCardId === config.presetCard.id
+      ? config.presetCard
+      : undefined
+  const guidedType =
+    config.entryMode === "guidedType"
+      ? config.guidedTypes.find((t) => t.id === content.guidedTypeId)
+      : undefined
+  const elements = preset
+    ? preset.elements
+    : config.entryMode === "guidedType"
+      ? (guidedType?.sampleElements ?? [])
+      : config.sampleElements
+  const defaultValues = preset
+    ? {}
+    : config.entryMode === "guidedType"
+      ? (guidedType?.defaultValues ?? {})
+      : config.defaultValues
+  return (
+    <div className="px-page flex h-full w-full flex-col gap-3 py-3">
+      <TemplatePreviewAlert />
+      <SurveyAnsweringForm
+        inline
+        hideResourceHeader
+        title={content.templateName}
+        elements={elements}
+        datasets={mockDatasets}
+        defaultValues={defaultValues}
+      />
+    </div>
+  )
 }
 
 /**
@@ -1438,6 +2021,7 @@ const surveyCanvasEntity: CanvasEntityDefinition<SurveyCanvasContent> = {
  */
 function TemplatesCanvasBody() {
   const { openCanvas } = useAiChat()
+  const startBlankSurvey = useStartBlankSurvey()
   const openPreview = (item: Template) =>
     openCanvas(
       toCanvasContent({
@@ -1448,20 +2032,73 @@ function TemplatesCanvasBody() {
         description: item.description,
       })
     )
-  return <TemplatesCollection onSelect={openPreview} />
+  return (
+    <TemplatesCollection
+      onSelect={openPreview}
+      onEmpty={startBlankSurvey}
+      fillHeight={false}
+      visualization={galleryListVisualization}
+    />
+  )
+}
+
+/**
+ * Templates gallery for the "guidedType" entry flow (Training), scoped to one
+ * guided type: the type's own templates, with a synthetic "Empty Survey" entry
+ * first (per spec — the first element on the templates is an empty survey).
+ * A thin wrapper over `TemplatesCollection` (same list, empty-row, and click
+ * wiring as the "cards" flow's `TemplatesCanvasBody`), differing only in the
+ * template scope and in carrying `guidedTypeId` into the preview content.
+ */
+function GuidedTemplatesCanvasBody({ guidedTypeId }: { guidedTypeId: string }) {
+  const { openCanvas } = useAiChat()
+  const { config } = useFlowConfig()
+  const openEmptySurvey = useOpenEmptySurvey()
+
+  const templates =
+    config.entryMode === "guidedType"
+      ? templatesForGuidedType(config, guidedTypeId)
+      : []
+
+  const openPreview = (item: Template) =>
+    openCanvas(
+      toCanvasContent({
+        type: "survey",
+        title: item.name,
+        mode: "preview",
+        templateName: item.name,
+        description: item.description,
+        guidedTypeId,
+      })
+    )
+
+  return (
+    <TemplatesCollection
+      templates={templates}
+      onSelect={openPreview}
+      onEmpty={() => openEmptySurvey(guidedTypeId)}
+      fillHeight={false}
+      visualization={galleryListVisualization}
+    />
+  )
 }
 
 /**
  * Header for the templates browse canvas. Defined as a component (like
  * `SurveyCanvasHeader`) so it can read context and run a custom close instead of
- * the framework `onClose`: closing the templates list returns to the FIRST step
- * of cocreation — the fullscreen welcome screen (suggestions + welcome cards).
+ * the framework `onClose`. For the "cards" entry flow (Engagement), closing
+ * the templates list returns to the FIRST step of cocreation — the fullscreen
+ * welcome screen (suggestions + welcome cards). For "guidedType" (Training),
+ * there's no welcome screen to return to and no template has been picked yet,
+ * so closing would abandon the creation flow — it's gated behind a
+ * leave-creation confirmation, and once confirmed closes the chat back to the
+ * starting collection page (see `useLeaveGuidedFlow`).
  *
- * Switching to "fullscreen" both closes the canvas (the provider drops canvas
- * content on any canvas → non-canvas transition) and reopens the chat full
- * width. We force fullscreen rather than letting `closeCanvas` restore the
- * pre-canvas mode, since templates may be opened from a side-panel welcome
- * screen and the first step is always the fullscreen chat.
+ * For the "cards" flow, switching to "fullscreen" both closes the canvas (the
+ * provider drops canvas content on any canvas → non-canvas transition) and
+ * reopens the chat full width. We force fullscreen rather than letting
+ * `closeCanvas` restore the pre-canvas mode, since templates may be opened from
+ * a side-panel welcome screen and the first step is always the fullscreen chat.
  */
 function TemplatesCanvasHeader({
   content,
@@ -1469,23 +2106,79 @@ function TemplatesCanvasHeader({
   content: TemplatesCanvasContent
 }) {
   const { setVisualizationMode } = useAiChat()
+  const { config, noCredits } = useFlowConfig()
+  const confirmLeave = useConfirmLeaveCreation()
+  const openEmptySurvey = useOpenEmptySurvey()
+  const startBlankSurvey = useStartBlankSurvey()
+  const { guidedTypeId } = content
 
+  // The plain "cards" flow has a welcome screen to fall back to, so Close just
+  // collapses the canvas. The guided flows and the no-credits flows have no
+  // fallback, so closing abandons creation — confirm first (then leave).
   const handleClose = () => {
+    if (config.entryMode !== "cards" || noCredits) {
+      confirmLeave()
+      return
+    }
     setVisualizationMode("fullscreen")
   }
 
+  // Every flow's templates header carries the same "Start with a Blank Survey"
+  // CTA — the header twin of the gallery's empty-survey entry. The action
+  // differs by entry mode: "guidedType" (Training) seeds the picked type's
+  // blank survey (`useOpenEmptySurvey`), while the "cards"/"guidedEntry"
+  // (Engagement) flows kick off the blank-survey drafting conversation
+  // (`useStartBlankSurvey`).
+  const startBlank = () =>
+    guidedTypeId ? openEmptySurvey(guidedTypeId) : startBlankSurvey()
+
+  // The content carries the right title for either scope: the type-scoped
+  // gallery's (e.g. "Satisfaction Survey Templates") or the flow-wide
+  // `TEMPLATES_CANVAS_CONTENT`'s "Survey Templates".
   return (
-    <div className="flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary px-4 py-3">
+    <div className="px-page flex flex-row items-center justify-between gap-3 border border-x-0 border-b border-t-0 border-solid border-f1-border-secondary py-3">
       <F0Heading content={content.title} as="h2" />
-      <ButtonInternal
-        variant="outline"
-        hideLabel
-        label="Close"
-        icon={Cross}
-        onClick={handleClose}
-      />
+      <div className="flex flex-row items-center gap-3">
+        {/* Skip the gallery and start from a blank survey. Divided from Close by
+            the shared ButtonGroup hairline. */}
+        <F0Button
+          variant="outline"
+          label="Start with a Blank Survey"
+          onClick={startBlank}
+        />
+        <ButtonGroupSeparator />
+        <F0Button
+          variant="outline"
+          hideLabel
+          label="Close"
+          icon={Cross}
+          onClick={handleClose}
+        />
+      </div>
     </div>
   )
+}
+
+/**
+ * Switches the composer placeholder based on whether a survey draft exists
+ * yet, for either entry flow. Mounted unconditionally (unlike
+ * `SurveyWelcomeCardsRegistrar`, which is "cards"-only) since both flows want
+ * this behavior. Renders nothing.
+ */
+function ComposerPlaceholderRegistrar() {
+  const { setPlaceholders } = useAiChat()
+  const { hasDraftedSurvey } = useSurveyStore()
+  const { config } = useFlowConfig()
+
+  useEffect(() => {
+    setPlaceholders(
+      hasDraftedSurvey
+        ? [config.draftedPlaceholder]
+        : [config.composerPlaceholder]
+    )
+  }, [hasDraftedSurvey, setPlaceholders, config])
+
+  return null
 }
 
 /**
@@ -1495,126 +2188,73 @@ function TemplatesCanvasHeader({
  * opens a blank survey + kicks off a scripted guided conversation; "Templates"
  * opens the templates card collection. Renders nothing — it only feeds card
  * data into the provider so `F0AiChatTextArea` owns the layout.
+ *
+ * "cards"-entry-flow only (Engagement) — mounted conditionally by
+ * `CreationWithAIFlow`. The "guidedType" flow (Training) has no welcome
+ * cards; its entry point is a clarifying question triggered directly from
+ * the "Create" button (see `FlowContent`).
  */
 function SurveyWelcomeCardsRegistrar() {
-  const { appendCard, appendMessages, startClarifying } = useMockAiChatRuntime()
-  const { openCanvas, setWelcomeScreenCards, setPlaceholders } = useAiChat()
-  const {
-    createSurvey,
-    draftQuestions,
-    nextCardId,
-    registerLiveCard,
-    hasDraftedSurvey,
-  } = useSurveyStore()
-  const { armProposal } = useProposalFlow()
+  const { config } = useFlowConfig()
+  const { openCanvas, setWelcomeScreenCards } = useAiChat()
+  const startBlankSurvey = useStartBlankSurvey()
 
-  // Switch the input placeholder based on whether a survey draft exists.
-  useEffect(() => {
-    setPlaceholders(
-      hasDraftedSurvey
-        ? ["Improve the Survey by..."]
-        : ["Describe the type of survey you want to create"]
-    )
-  }, [hasDraftedSurvey, setPlaceholders])
+  // Narrow to the "cards" config once; every hook above/below still runs
+  // unconditionally (Rules of Hooks). The parent only mounts this component in
+  // the "cards" flow, so this is always set in practice — the fallback just
+  // registers no cards.
+  const cardsConfig = config.entryMode === "cards" ? config : null
 
-  // The blank-survey conversation walks three clarifying questions — type →
-  // audience → length — as a single consecutive panel, then "drafts" the
-  // questions onto the canvas: echo the picks back into the transcript, post a
-  // drafting line, and (after a brief processing beat) fill the form with mock
-  // questions plus an "updated" card that supersedes the "created" one.
-  const askSurveyDetails = (surveyId: string) =>
-    startClarifying({
-      steps: SURVEY_CLARIFYING_STEPS,
-      onConfirm: (answersByStep) => {
-        appendMessages(surveyAnswerMessages(answersByStep))
-        appendMessages([
-          {
-            role: "assistant",
-            content:
-              "Great — I'll draft a first set of questions on the canvas for you to review.",
-          },
-        ])
-        const surveyName = surveyNameForType(
-          answersByStep[0]?.[0] ?? "Untitled"
-        )
-        // Once the form is drafted (questions land), post a new openable card
-        // and mark it live — which disables Open/Close on the "created" card —
-        // then arm the proposal flow so further typing keeps refining the
-        // survey (each accepted change supersedes the prior card in turn).
-        draftQuestions(surveyId, surveyName, () => {
-          const cardId = nextCardId()
-          registerLiveCard(surveyId, cardId)
-          appendCard(() => (
-            <SurveyCard
-              surveyId={surveyId}
-              cardId={cardId}
-              title={surveyName}
-              description={SURVEY_UPDATED_DESCRIPTION}
-            />
-          ))
-          armProposal(surveyId, surveyName)
-        })
-      },
-    })
-
-  const cards: F0AiChatWelcomeCard[] = [
-    {
-      id: "empty-survey",
-      icon: File,
-      title: "Empty survey",
-      description: "Start from scratch",
-      onClick: () => handleCardSelectRef.current("empty-survey"),
-    },
-    {
-      id: "templates",
-      icon: Marketplace,
-      title: "Templates",
-      description: "Browse pre-made surveys",
-      onClick: () => handleCardSelectRef.current("templates"),
-    },
-    {
-      id: "employee-nps",
-      icon: Files,
-      title: "Employee NPS",
-      description: "Template",
-      onClick: () => handleCardSelectRef.current("employee-nps"),
-    },
-    // Visual-only template card — its `onClick` hits no branch below, so
-    // clicking is inert (mock placeholder, no behavior wired yet).
-    {
-      id: "employee-engagement",
-      icon: Files,
-      title: "Employee Engagement",
-      description: "Template",
-      onClick: () => handleCardSelectRef.current("employee-engagement"),
-    },
-  ]
+  const cards: F0AiChatWelcomeCard[] = cardsConfig
+    ? [
+        {
+          id: "empty-survey",
+          icon: File,
+          title: "Empty Survey",
+          description: "Start from scratch",
+          onClick: () => handleCardSelectRef.current("empty-survey"),
+        },
+        {
+          id: "templates",
+          icon: Marketplace,
+          title: "Templates",
+          description: "Browse pre-made surveys",
+          onClick: () => handleCardSelectRef.current("templates"),
+        },
+        {
+          id: cardsConfig.presetCard.id,
+          icon: cardsConfig.presetCard.icon,
+          title: cardsConfig.presetCard.title,
+          description: cardsConfig.presetCard.description,
+          onClick: () => handleCardSelectRef.current(cardsConfig.presetCard.id),
+        },
+        // Second template card — opens the flow's sample survey (employee
+        // engagement) in the same read-only preview as the preset card.
+        {
+          id: cardsConfig.placeholderCard.id,
+          icon: cardsConfig.placeholderCard.icon,
+          title: cardsConfig.placeholderCard.title,
+          description: cardsConfig.placeholderCard.description,
+          onClick: () =>
+            handleCardSelectRef.current(cardsConfig.placeholderCard.id),
+        },
+      ]
+    : []
   // Welcome-card behavior, keyed by card `id`. Each card's `onClick` (above)
   // routes here through `handleCardSelectRef`; each branch opens the AI Canvas
-  // and seeds the matching guided flow.
+  // and seeds the matching guided flow. The preset card's id/content come from
+  // `config.presetCard` (Employee NPS for Engagement, Compliance training for
+  // Training), so this switch reads the same for every flow.
   const handleCardSelect = (id: string) => {
+    if (!cardsConfig) return
     switch (id) {
       case "empty-survey": {
         // Blank-survey flow: create + seed the survey, open its canvas, then
         // post the guided sequence — an intro line, the "created" canvas card
         // (live/openable), and the first clarifying question (the chain walks
-        // the rest).
-        const surveyId = createSurvey(UNTITLED_SURVEY_NAME, { empty: true })
-        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId)))
-        appendMessages([
-          { role: "assistant", content: "Let's start with a blank survey." },
-        ])
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
-        appendCard(() => (
-          <SurveyCard
-            surveyId={surveyId}
-            cardId={cardId}
-            title={UNTITLED_SURVEY_NAME}
-            description={SURVEY_CREATED_DESCRIPTION}
-          />
-        ))
-        askSurveyDetails(surveyId)
+        // the rest). Shared with the templates-header CTA (see
+        // `useStartBlankSurvey`).
+        startBlankSurvey()
         break
       }
       case "templates": {
@@ -1625,45 +2265,44 @@ function SurveyWelcomeCardsRegistrar() {
         openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
         break
       }
-      case "employee-nps": {
-        // Predefined-template flow: open a ready-made NPS survey on the canvas
-        // (mirrors "Use this template" — seeded with questions, no AI
-        // drafting). Its first question is a blocked eNPS question (locked +
-        // in-card warning); the rest stay editable.
-        const surveyId = createSurvey(EMPLOYEE_NPS_SURVEY_NAME, {
-          elements: NPS_SURVEY_ELEMENTS,
-        })
+      case cardsConfig.presetCard.id: {
+        // Predefined-template card: open the template in the read-only preview
+        // framing FIRST (same as the guided flows and the "Templates" browse) —
+        // the survey isn't created until "Use this template" on the preview
+        // header. `presetCardId` tells the preview + that button to seed this
+        // preset's own questions (its locked first question + follow-ups) and
+        // intro copy instead of the flow's generic sample set.
+        const { presetCard } = cardsConfig
         openCanvas(
           toCanvasContent({
             type: "survey",
-            title: EMPLOYEE_NPS_SURVEY_NAME,
-            mode: "edit",
-            templateName: EMPLOYEE_NPS_SURVEY_NAME,
-            surveyId,
-            description: SURVEY_CREATED_DESCRIPTION,
+            title: presetCard.title,
+            mode: "preview",
+            templateName: presetCard.title,
+            description: presetCard.description,
+            presetCardId: presetCard.id,
           })
         )
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
-        appendCard(() => (
-          <SurveyCard
-            surveyId={surveyId}
-            cardId={cardId}
-            title={EMPLOYEE_NPS_SURVEY_NAME}
-            description={SURVEY_CREATED_DESCRIPTION}
-          />
-        ))
-        appendMessages([
-          {
-            role: "assistant",
-            content:
-              "I've set up an Employee NPS survey. The eNPS question at the top is fixed so your scores stay comparable — the rest is yours to edit. What would you like to change?",
-          },
-        ])
-        armProposal(surveyId, EMPLOYEE_NPS_SURVEY_NAME)
         break
       }
-      // "employee-engagement" is a visual-only placeholder — no behavior yet.
+      case cardsConfig.placeholderCard.id: {
+        // Second template card: it has no preset questions of its own, so
+        // preview the flow's generic sample survey (employee engagement). Like
+        // every template card it opens the read-only preview FIRST; "Use this
+        // template" then seeds `config.sampleElements` (no `presetCardId`, so
+        // `useThisTemplate` takes its non-preset "cards" branch).
+        const { placeholderCard } = cardsConfig
+        openCanvas(
+          toCanvasContent({
+            type: "survey",
+            title: placeholderCard.title,
+            mode: "preview",
+            templateName: placeholderCard.title,
+            description: placeholderCard.description,
+          })
+        )
+        break
+      }
     }
   }
 
@@ -1681,6 +2320,11 @@ function SurveyWelcomeCardsRegistrar() {
       setWelcomeScreenCards([])
     }
   }, [setWelcomeScreenCards])
+
+  // No-credits welcome screen: the cards stay fully interactive (they don't
+  // need AI generation). Typed messages are handled by the "Create" flow's
+  // interceptor, which redirects them into the guided-entry panel (see
+  // `FlowContent`) — so nothing extra is armed here.
 
   return null
 }
@@ -1712,70 +2356,308 @@ function FlowContent({
   phase: Phase
   setPhase: (phase: Phase) => void
 }) {
-  const { activeTabId, setActiveTabId, tabConfig } = useTabConfig()
-  const i18n = useI18n()
-  // Primary (module-level) navigation. In production this would be a single
-  // "Survey" item; "Tasks" is a second item added purely so the nav renders as
-  // a real tab strip (a single-tab `Tabs` collapses to a plain heading).
-  const [topNavId, setTopNavId] = useState("survey")
-  // The Surveys resource view has its own tab strip (Editor / Settings); the
-  // survey questions show under "Editor", which is the default focused tab in
-  // the co-creation flow.
-  const [surveyTabId, setSurveyTabId] = useState("editor")
-  const { open, setOpen, visualizationMode, setVisualizationMode, openCanvas } =
-    useAiChat()
+  const { config, noCredits } = useFlowConfig()
+  // Single-level primary nav: the flow's own collection (id === config.id,
+  // e.g. "engagement"/"training") vs the Templates browse view (id
+  // "templates"). Starts on the flow's own collection.
+  const [activeTabId, setActiveTabId] = useState<string>(config.id)
   const {
-    inProgress,
+    open,
+    setOpen,
+    visualizationMode,
+    setVisualizationMode,
+    openCanvas,
+    canvasContent,
+  } = useAiChat()
+  const {
     appendMessages,
     appendCard,
     startClarifying,
     setUserMessageInterceptor,
+    sendMessageWithThinkingOnly,
+    showThinking,
+    setComposerHidden,
+    clarifyingQuestion,
+    setBeforeClose,
+    clear,
   } = useMockAiChatRuntime()
-  const { createSurvey, draftQuestions, nextCardId, registerLiveCard } =
-    useSurveyStore()
-  const { armProposal } = useProposalFlow()
+  const { createSurvey } = useSurveyStore()
+  const { armNoCredits } = useProposalFlow()
+  const startBlankSurvey = useStartBlankSurvey()
+  const leaveGuidedFlow = useLeaveGuidedFlow()
 
-  // Typed "Create" flow: the same three clarifying questions as the Empty survey
-  // card, walked as a single consecutive panel — but the canvas stays closed
-  // until the end, opening with the drafted survey once the final question is
-  // answered. (The Empty survey card opens the canvas up front instead.)
+  // Typed "Create" flow ("cards" entry — Engagement): the same three
+  // clarifying questions as the Empty survey card, walked as a single
+  // consecutive panel. The canvas stays closed throughout; it only opens once
+  // the user confirms the draft on the `DraftConfirmationCard`.
   const runTypedClarifyingChain = () => {
-    // Create the blank survey up front — before the clarifying flow — seeded
-    // with its first section/question. The canvas stays closed until the final
-    // answer; the survey is only named, shown, and drafted then.
-    const surveyId = createSurvey(UNTITLED_SURVEY_NAME, { empty: true })
+    if (config.entryMode !== "cards") return
+    // Create the blank survey up front (state only — nothing visible yet); it's
+    // named, shown, and drafted only when the user confirms the draft.
+    const surveyId = createSurvey(UNTITLED_SURVEY_NAME)
     startClarifying({
-      steps: SURVEY_CLARIFYING_STEPS,
+      steps: surveyClarifyingSteps(config),
       onConfirm: (answersByStep) => {
-        appendMessages(surveyAnswerMessages(answersByStep))
+        appendMessages(
+          surveyAnswerMessages(surveyClarifyingSteps(config), answersByStep)
+        )
         const name = surveyNameForType(answersByStep[0]?.[0] ?? "Untitled")
-        openCanvas(toCanvasContent(makeEmptySurveyContent(surveyId, name)))
+        // Hand off to the confirmation step — the canvas stays closed and no
+        // card is posted until the user confirms. On Apply the
+        // `DraftConfirmationCard` opens the survey, drafts the questions, and
+        // posts its "created" card.
         appendMessages([
           {
             role: "assistant",
             content:
-              "Great — I'll draft a first set of questions on the canvas for you to review.",
+              "Based on your answers, I've got a first set of questions ready to draft.",
           },
         ])
-        // Unlike the Empty-survey flow, the clarifying questions are answered
-        // BEFORE the canvas opens here, so a "created" → "updated" pair would
-        // land back-to-back with nothing between them. Post a single live card
-        // instead; drafting fills the canvas behind it without superseding.
-        const cardId = nextCardId()
-        registerLiveCard(surveyId, cardId)
         appendCard(() => (
-          <SurveyCard
+          <DraftConfirmationCard
             surveyId={surveyId}
-            cardId={cardId}
-            title={name}
-            description={SURVEY_CREATED_DESCRIPTION}
+            surveyName={name}
+            elements={config.sampleElements}
           />
         ))
-        // Once drafting lands, arm the proposal flow so a further typed message
-        // proposes an update — which, on accept, posts an "updated" card that
-        // supersedes this initial "created" one.
-        draftQuestions(surveyId, name, () => armProposal(surveyId, name))
       },
+    })
+  }
+
+  // Arms typed messages to RESTART the guided flow by reopening its clarifying
+  // panel, instead of falling through to a simulated AI reply. With no credits
+  // it first posts the "can't do that, but I can still help you create a
+  // survey" note. Self-re-arming (like `armNoCredits`): interceptors are
+  // one-shot, so the handler re-registers itself — typing again after leaving
+  // the panel (or after leaving creation and reopening the chat via the One
+  // switch) redirects again rather than getting a simulated AI reply. Picking a
+  // panel option overwrites this with that action's own follow-up interceptor.
+  const armGuidedRestart = (reopenPanel: () => void) => {
+    const handler = () => {
+      if (noCredits) {
+        appendMessages([
+          { role: "assistant", content: NO_CREDITS_REDIRECT_MESSAGE },
+        ])
+      }
+      showThinking(() => reopenPanel())
+      setUserMessageInterceptor(handler)
+    }
+    setUserMessageInterceptor(handler)
+  }
+
+  // Dismissing a guided clarifying panel (its ✕/Cancel) means the user wants out
+  // of creation — but these flows have no welcome screen to fall back to, so
+  // confirm first with the "Leave creation?" modal. Returns whether the panel
+  // should close (the runtime keeps it mounted until this resolves): "Leave"
+  // tears the flow down and closes; "Keep creating" resolves `false`, so the
+  // SAME panel stays open — no reopen, and no composer flashing in behind the
+  // dialog.
+  const confirmExitOrStay = (): Promise<boolean> =>
+    confirmLeaveGuidedCreation(config).then((confirmed) => {
+      const leave = confirmed === true
+      if (leave) leaveGuidedFlow()
+      return leave
+    })
+
+  // Opens the "guidedType" clarifying panel — the core of the flow. The full
+  // type descriptions are posted as assistant text by `startGuidedTypeFlow`
+  // first (options only render a short label), so reopening this on "Keep
+  // creating" doesn't repeat them. Once a type is picked, the canvas opens
+  // straight to that type's template gallery (no survey is created yet — see
+  // `GuidedTemplatesCanvasBody` / `useOpenEmptySurvey`). Dismissing the panel
+  // asks to confirm leaving creation.
+  const openGuidedTypeClarifying = () => {
+    if (config.entryMode !== "guidedType") return
+    startClarifying({
+      steps: [
+        {
+          question: config.guidedQuestion,
+          options: config.guidedTypes.map((t) => ({
+            id: t.id,
+            label: t.label,
+          })),
+          selectionMode: "single",
+        },
+      ],
+      onConfirm: (answersByStep, answerIdsByStep) => {
+        // Answered — hand the composer back (the guided intro is over).
+        setComposerHidden(false)
+        // Route on the option ID (labels are display copy); the label is only
+        // echoed back into the transcript. The panel can't confirm without a
+        // selection, so a missing id would be a wiring bug — bail loudly
+        // (nothing happens) rather than silently picking a type.
+        const type = config.guidedTypes.find(
+          (t) => t.id === answerIdsByStep[0]?.[0]
+        )
+        if (!type) return
+        const label = answersByStep[0]?.[0] ?? type.label
+        // Play the steps one at a time so the user can follow each action
+        // instead of everything landing at once: echo their answer and think
+        // (composer disabled), reply, think again, and only THEN open the
+        // templates canvas so its entrance animation reads as its own beat.
+        sendMessageWithThinkingOnly(
+          `**${config.guidedQuestion}**\\\n${label}`,
+          () => {
+            appendMessages([
+              {
+                role: "assistant",
+                content: "Great — here are some templates to start from.",
+              },
+            ])
+            showThinking(() => {
+              openCanvas(
+                toCanvasContent({
+                  type: "templates",
+                  title: guidedTemplatesTitle(config, type.id),
+                  guidedTypeId: type.id,
+                })
+              )
+            })
+          }
+        )
+      },
+      // Dismissed — confirm leaving creation; "Keep creating" keeps the panel.
+      onCancel: confirmExitOrStay,
+    })
+  }
+
+  // "guidedType" entry flow (Training): unlike "cards", no welcome screen and
+  // no waiting for a typed message. On "Create" we post the opening user
+  // message on their behalf ("Let's create a Survey"), then let the AI "think"
+  // — the composer stays disabled for that beat (`inProgress`, via
+  // `sendMessageWithThinkingOnly`) — before writing out the form-type options
+  // and opening the clarifying panel.
+  const startGuidedTypeFlow = () => {
+    if (config.entryMode !== "guidedType") return
+    // Keep the composer out of view through the scripted intro; it reappears
+    // (as the clarifying panel, fading in) once the thinking beat resolves.
+    setComposerHidden(true)
+    sendMessageWithThinkingOnly("Let's create a Survey", () => {
+      appendMessages([
+        {
+          role: "assistant",
+          content: [
+            config.guidedQuestion,
+            "",
+            ...config.guidedTypes.map(
+              (t) => `- **${t.label}** — ${t.description}`
+            ),
+          ].join("\n"),
+        },
+      ])
+      openGuidedTypeClarifying()
+    })
+  }
+
+  // Opens the guided-entry clarifying panel: entry ACTIONS as options — Empty
+  // Survey, Use a Template, and the (up to) three most-used templates — and runs
+  // the picked action through its "echo answer → think → reply → think → act"
+  // beats. `templates` is a base `FlowConfig` field, so this works for any entry
+  // mode; the calling `question` varies. Reused by the guidedEntry "Create"
+  // intro (`startGuidedEntryFlow`) and the cards no-credits redirect.
+  const openGuidedEntryPanel = (question: string) => {
+    // "Most used" isn't tracked in the mock, so take the first few templates.
+    const topTemplates = config.templates.slice(0, 3)
+    const EMPTY_OPTION_ID = "empty-survey"
+    const TEMPLATES_OPTION_ID = "use-template"
+    const options: ClarifyingOption[] = [
+      { id: EMPTY_OPTION_ID, label: "Empty Survey" },
+      { id: TEMPLATES_OPTION_ID, label: "Use a Template" },
+      ...topTemplates.map((t) => ({ id: `template:${t.id}`, label: t.name })),
+    ]
+
+    // Runs the picked entry action after its "reply + think" beat.
+    const runGuidedEntryAction = (optionId: string) => {
+      if (optionId === EMPTY_OPTION_ID) {
+        // Blank survey: open its canvas + "created" card up front, then walk the
+        // drafting conversation — or, with no credits, invite a typed request
+        // met by an out-of-credits reply. Shared with the "cards" flow's Empty
+        // survey card and the templates-header CTA (see `useStartBlankSurvey`).
+        startBlankSurvey()
+        return
+      }
+      if (optionId === TEMPLATES_OPTION_ID) {
+        // Browse: open the full templates gallery in the canvas. With no
+        // credits, the composer stays live while browsing, so arm the
+        // out-of-credits reply — otherwise a typed message falls through to a
+        // simulated AI answer (see `armNoCredits` / the mock's default reply).
+        openCanvas(toCanvasContent(TEMPLATES_CANVAS_CONTENT))
+        if (noCredits) armNoCredits()
+        return
+      }
+      // A specific template: open it in the read-only preview framing (the
+      // "Use this template" / "Edit Template" actions live on its header).
+      const templateId = optionId.slice("template:".length)
+      const template = config.templates.find((t) => t.id === templateId)
+      if (!template) return
+      openCanvas(
+        toCanvasContent({
+          type: "survey",
+          title: template.name,
+          mode: "preview",
+          templateName: template.name,
+          description: template.description,
+        })
+      )
+      // As above: keep the no-credits reply armed while previewing so typing
+      // never triggers a fake AI reply. `useThisTemplate` re-arms it once the
+      // template is actually used.
+      if (noCredits) armNoCredits()
+    }
+
+    // Copy for the assistant reply that precedes each action's canvas beat.
+    const replyForOption = (optionId: string): string => {
+      if (optionId === EMPTY_OPTION_ID)
+        return "Let's start with a blank survey."
+      if (optionId === TEMPLATES_OPTION_ID)
+        return "Sure — here are the templates to choose from."
+      return "Great — opening that template for you."
+    }
+
+    startClarifying({
+      steps: [
+        {
+          question,
+          options,
+          selectionMode: "single",
+        },
+      ],
+      onConfirm: (answersByStep, answerIdsByStep) => {
+        // Answered — hand the composer back (the guided intro is over).
+        setComposerHidden(false)
+        // Route on the option ID (labels are display copy); the label is only
+        // echoed back into the transcript. A missing id would be a wiring bug —
+        // bail rather than silently running the first action.
+        const picked = options.find((o) => o.id === answerIdsByStep[0]?.[0])
+        if (!picked) return
+        const label = answersByStep[0]?.[0] ?? picked.label
+        sendMessageWithThinkingOnly(`**${question}**\\\n${label}`, () => {
+          appendMessages([
+            { role: "assistant", content: replyForOption(picked.id) },
+          ])
+          showThinking(() => runGuidedEntryAction(picked.id))
+        })
+      },
+      // Dismissed — confirm leaving creation; "Keep creating" keeps the panel.
+      onCancel: confirmExitOrStay,
+    })
+  }
+
+  // "guidedEntry" entry flow (Engagement Guided): the same message-first entry
+  // as "guidedType" — post "Let's create a Survey" on the user's behalf, think,
+  // then the guided-entry clarifying panel (see `openGuidedEntryPanel`).
+  // Dismissing the panel restarts the flow on the next typed message via the
+  // panel's `onCancel`.
+  const startGuidedEntryFlow = () => {
+    if (config.entryMode !== "guidedEntry") return
+    // Keep the composer out of view through the scripted intro; it reappears
+    // (as the clarifying panel, fading in) once the thinking beat resolves.
+    setComposerHidden(true)
+    sendMessageWithThinkingOnly("Let's create a Survey", () => {
+      appendMessages([
+        { role: "assistant", content: "Sure — how would you like to start?" },
+      ])
+      openGuidedEntryPanel(config.guidedQuestion)
     })
   }
 
@@ -1789,33 +2671,62 @@ function FlowContent({
     primaryActions: () => [
       {
         // The single primary "Create" button launches the chat FULL WIDTH
-        // (fullscreen). It arms the chat so the user's first typed message kicks
-        // off the guided clarifying flow; the canvas opens with the drafted
-        // survey at the end.
+        // (fullscreen). "cards" (Engagement) arms the chat so the user's
+        // first typed message kicks off the guided clarifying flow;
+        // "guidedType" (Training) shows its type clarifying question
+        // immediately, with no typing required first.
         label: "Create",
         icon: Add,
         onClick: () => {
+          // Always start the flow from a clean slate: if the user closed or
+          // interrupted a previous run, its transcript (and any half-walked
+          // clarifying/interceptor state) is still in the runtime. Wipe it so
+          // "Create" restarts the flow AND the conversation from the beginning,
+          // before the entry starters below re-arm composer/interceptor state.
+          clear()
           setVisualizationMode("fullscreen")
           setPhase("chat")
-          setUserMessageInterceptor(() => {
-            appendMessages([
-              {
-                role: "assistant",
-                content:
-                  "Sure — let's set up your survey. A few quick questions first.",
-              },
-            ])
-            runTypedClarifyingChain()
-          })
+          if (config.entryMode === "cards") {
+            if (noCredits) {
+              // No credits: free-text AI is blocked, so any typed message gets a
+              // short "can't do that" reply and is redirected into the
+              // credit-free guided-entry panel (Empty Survey / Use a Template /
+              // top templates) — the welcome cards' options, offered inline.
+              // Self-re-arming, so it keeps redirecting until a picked option
+              // arms its own follow-up.
+              armGuidedRestart(() =>
+                openGuidedEntryPanel(GUIDED_ENTRY_QUESTION)
+              )
+            } else {
+              setUserMessageInterceptor(() => {
+                appendMessages([
+                  {
+                    role: "assistant",
+                    content:
+                      "Sure — let's set up your survey. A few quick questions first.",
+                  },
+                ])
+                runTypedClarifyingChain()
+              })
+            }
+          } else if (config.entryMode === "guidedType") {
+            startGuidedTypeFlow()
+          } else {
+            startGuidedEntryFlow()
+          }
         },
       },
     ],
   }
 
-  const sourceTable = useDataCollectionSource({
-    dataAdapter: filledDataAdapter,
-    ...sharedSourceOptions,
-  })
+  const sourceTable = useDataCollectionSource(
+    {
+      ...makeResourcesSource(config),
+      ...sharedSourceOptions,
+    },
+    // The source captures its first render's config — re-key it per flow.
+    [config.id]
+  )
 
   // phase → chat open state. Opening from "collection" flips `open` false→true
   // while the chat is closed (so `shouldPlayEntranceAnimation` is true), which
@@ -1823,18 +2734,43 @@ function FlowContent({
   // header One switch opens a side panel (the chat's default), while the
   // "Create" button sets fullscreen before entering this phase.
   useEffect(() => {
-    if (phase === "collection") {
-      setOpen(false)
-    } else if (phase === "split") {
-      setVisualizationMode("sidepanel")
-      setOpen(true)
-    } else {
-      setOpen(true)
-    }
-  }, [phase, setOpen, setVisualizationMode])
+    setOpen(phase !== "collection")
+  }, [phase, setOpen])
 
-  // Keep `phase` in sync when the user toggles the chat via the header One
-  // switch (or the chat's own close button). Guarded on an actual `open`
+  // Closing the chat should confirm "Leave creation?" first — but only in the
+  // guided flows and the no-credits flows (the plain "cards" flow has a welcome
+  // screen to fall back to), and only mid-SELECTION: answering clarifying
+  // questions or browsing/previewing templates, before anything is created.
+  const canvas = canvasContent as unknown as {
+    type?: string
+    mode?: string
+  } | null
+  const selectionInProgress =
+    clarifyingQuestion != null ||
+    canvas?.type === "templates" ||
+    (canvas?.type === "survey" && canvas.mode === "preview")
+  const confirmOnClose =
+    (config.entryMode !== "cards" || noCredits) && selectionInProgress
+  const confirmOnCloseRef = useRef(confirmOnClose)
+  confirmOnCloseRef.current = confirmOnClose
+
+  // Gate the chat's own close (its ✕) BEFORE it animates: if a survey is being
+  // selected, confirm leaving first and abort the close (return false) so no
+  // docking animation runs. "Leave" tears the flow down via `leaveGuidedFlow`.
+  useEffect(() => {
+    setBeforeClose(async () => {
+      if (!confirmOnCloseRef.current) return true
+      const leave = await confirmLeaveGuidedCreation(config)
+      if (leave) leaveGuidedFlow()
+      // Either we've closed via `leaveGuidedFlow`, or the user stayed — the
+      // header shouldn't run its own close/animation in either case.
+      return false
+    })
+    return () => setBeforeClose(null)
+  }, [setBeforeClose, config, leaveGuidedFlow])
+
+  // Keep `phase` in sync when the chat opens/closes (the header One switch, the
+  // chat's own close, or `leaveGuidedFlow`). Guarded on an actual `open`
   // transition so it never fights the phase→open effect above.
   const prevOpenRef = useRef(open)
   useEffect(() => {
@@ -1844,7 +2780,6 @@ function FlowContent({
     if (open && phase === "collection") {
       setPhase("chat")
     } else if (!open && phase !== "collection") {
-      // The user closed the chat mid-creation — tear the flow down directly.
       setPhase("collection")
     }
   }, [open, phase, setPhase])
@@ -1854,149 +2789,27 @@ function FlowContent({
       header={
         <>
           <PageHeader
-            module={COCREATION_MODULE}
-            breadcrumbs={
-              phase === "split" ? [{ id: "draft", label: "Draft" }] : undefined
-            }
+            module={{
+              id: config.avatarModule,
+              name: config.pageTitle,
+              href: "/cocreation",
+            }}
           />
-          {phase === "split" ? (
-            // The Surveys canvas mirrors a real Survey resource view: a
-            // page-level ResourceHeader (the single header — the inline survey
-            // form's own header is suppressed) plus an Editor/Settings tab
-            // strip.
-            <>
-              <ResourceHeader
-                title={tabConfig.cards[0].title}
-                description={tabConfig.cards[0].description}
-                status={{
-                  label: "Status",
-                  text: "Draft",
-                  variant: "neutral",
-                }}
-                primaryAction={{
-                  label: "Publish",
-                  icon: SolidPlay,
-                  onClick: () =>
-                    void confirmPublish().then((ok) => {
-                      if (ok)
-                        toasts.open({
-                          title: SURVEY_PUBLISHED_TOAST,
-                          variant: "success",
-                        })
-                    }),
-                }}
-                onClose={() => setPhase("chat")}
-                secondaryActions={[
-                  {
-                    label: i18n.actions.save,
-                    onClick: () =>
-                      toasts.open({
-                        title: SURVEY_SAVED_TOAST,
-                        variant: "success",
-                      }),
-                  },
-                ]}
-                otherActions={[
-                  {
-                    label: "Duplicate",
-                    icon: LayersFront,
-                    onClick: () =>
-                      toasts.open({ title: SURVEY_DUPLICATED_TOAST }),
-                  },
-                  { type: "separator" },
-                  {
-                    label: "Delete",
-                    icon: Delete,
-                    critical: true,
-                    onClick: () =>
-                      toasts.open({
-                        title: SURVEY_DELETED_TOAST,
-                        variant: "error",
-                      }),
-                  },
-                ]}
-                metadata={[
-                  { label: "Owner", value: { type: "text", content: "You" } },
-                  {
-                    label: "Recurrence",
-                    value: { type: "text", content: "Does not repeat" },
-                  },
-                  {
-                    label: "Finishes on",
-                    value: { type: "text", content: "—" },
-                  },
-                  {
-                    label: "Questions",
-                    value: { type: "text", content: "10" },
-                  },
-                ]}
-              />
-              <ClickableTabs
-                tabs={[
-                  { label: "Questions", id: "editor" },
-                  { label: "Settings", id: "settings" },
-                ]}
-                activeTabId={surveyTabId}
-                setActiveTabId={setSurveyTabId}
-              />
-            </>
-          ) : (
-            visualizationMode !== "fullscreen" && (
-              <>
-                <ClickableTabs
-                  tabs={[
-                    { label: "Survey", id: "survey" },
-                    { label: "Tasks", id: "tasks" },
-                  ]}
-                  activeTabId={topNavId}
-                  setActiveTabId={setTopNavId}
-                />
-                {topNavId === "survey" && (
-                  <ClickableTabs
-                    secondary
-                    tabs={[
-                      { label: "Surveys", id: "surveys" },
-                      { label: "Templates", id: "templates" },
-                    ]}
-                    activeTabId={activeTabId}
-                    setActiveTabId={setActiveTabId}
-                  />
-                )}
-              </>
-            )
+          {visualizationMode !== "fullscreen" && (
+            <ClickableTabs
+              tabs={[
+                { label: config.navTabLabel, id: config.id },
+                { label: "Templates", id: "templates" },
+              ]}
+              activeTabId={activeTabId}
+              setActiveTabId={setActiveTabId}
+            />
           )}
         </>
       }
     >
       <StandardLayout>
-        {phase === "split" ? (
-          // The left panel hosts the resource being co-created. While the AI is
-          // thinking/updating the form we blur + lock it (with the "Applying
-          // changes" pill) so the user can't edit content that's about to change.
-          <F0AiProcessingOverlay active={inProgress} className="h-full w-full">
-            {surveyTabId === "editor" ? (
-              <SurveyAnsweringForm
-                inline
-                hideResourceHeader
-                title={tabConfig.cards[0].title}
-                description={tabConfig.cards[0].description}
-                elements={SURVEY_ELEMENTS}
-                datasets={mockDatasets}
-                defaultValues={SURVEY_DEFAULT_VALUES}
-              />
-            ) : surveyTabId === "settings" ? (
-              <SurveySettingsForm />
-            ) : (
-              <></>
-            )}
-          </F0AiProcessingOverlay>
-        ) : topNavId === "tasks" ? (
-          // "Tasks" is a placeholder second item for the primary nav — no real
-          // content, just enough to show the navigation switching.
-          <div className="flex h-full w-full items-center justify-center text-f1-foreground-secondary">
-            No tasks yet.
-          </div>
-        ) : activeTabId === "templates" ? (
+        {activeTabId === "templates" ? (
           <TemplatesCollection />
         ) : (
           <OneDataCollection
@@ -2010,7 +2823,15 @@ function FlowContent({
   )
 }
 
-function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
+function CreationWithAIFlow({
+  flowId,
+  noCredits = false,
+}: {
+  flowId: FlowConfig["id"]
+  /** Demo the credit-exhausted state: shows the soft credit-warning banner
+   * above the composer (see `creditWarning` below). */
+  noCredits?: boolean
+}) {
   // Reset persisted chat state once, before the provider reads it, so the chat
   // starts closed in the collection view.
   const didResetRef = useRef(false)
@@ -2019,7 +2840,11 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
     didResetRef.current = true
   }
 
+  const config = FLOW_CONFIGS[flowId]
   const [phase, setPhase] = useState<Phase>("collection")
+  // The credit warning is dismissable — hide it once dismissed (rebuilding
+  // `ai.creditWarning` as undefined re-renders the composer without the banner).
+  const [creditWarningDismissed, setCreditWarningDismissed] = useState(false)
 
   const ai: ComponentProps<typeof ApplicationFrame>["ai"] = {
     enabled: true,
@@ -2031,36 +2856,34 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
     chatInput: <MockConnectedChatInput />,
     // Voice dictation: a mic button in the composer streams a spoken-style
     // survey-refinement request (follow-up questions + triggers) into the
-    // textarea for the user to review and send — see `mockSurveyTranscribe`.
-    onTranscribe: mockSurveyTranscribe,
+    // textarea for the user to review and send — see `config.onTranscribe`.
+    onTranscribe: config.onTranscribe,
     // Single phrase → the colorful heading types in once and stays (a
-    // multi-element array would loop: type → hold → erase → next).
-    initialMessage: ["What kind of survey do you want to create?"],
+    // multi-element array would loop: type → hold → erase → next). The
+    // "guidedType" flow (Training) jumps straight into its clarifying
+    // question on "Create" (see `startGuidedTypeFlow`), so this heading is
+    // only ever briefly visible, if at all — reuse the guided question text.
+    initialMessage: [
+      config.entryMode === "cards"
+        ? config.initialMessage
+        : config.guidedQuestion,
+    ],
     // Prompt actions rendered as outline buttons at the top of the text area
     // on the welcome screen. Each group opens a popover of starter prompts.
-    welcomeScreenSuggestions: [
-      {
-        icon: Pencil,
-        label: "Create a survey for...",
-        items: [
-          {
-            title: "Employee satisfaction survey",
-            prompt:
-              "Create an employee satisfaction survey covering workload, management, and work-life balance.",
-          },
-          {
-            title: "Onboarding feedback survey",
-            prompt:
-              "Draft a survey to collect feedback from new hires about their first 90 days.",
-          },
-          {
-            title: "Remote work pulse check",
-            prompt:
-              "Build a short pulse survey about how the team is experiencing remote work.",
-          },
-        ],
-      },
-    ],
+    // "guidedType" (Training) has none — no suggestions, no welcome cards;
+    // its entry point is the immediate type clarifying question instead. With
+    // no credits, the prompts are dropped too: free-text AI is blocked, so the
+    // welcome cards are the only working entry point.
+    welcomeScreenSuggestions:
+      config.entryMode === "cards" && !noCredits
+        ? [
+            {
+              icon: Pencil,
+              label: config.suggestionGroupLabel,
+              items: config.suggestions,
+            },
+          ]
+        : undefined,
     // The "Templates" welcome card opens this entity in the AI Canvas; picking
     // a template swaps in the "survey" entity in the same canvas panel.
     // Story-local content types ("templates"/"survey") aren't part of the
@@ -2070,6 +2893,21 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
       templates: toCanvasEntity(templatesCanvasEntity),
       survey: toCanvasEntity(surveyCanvasEntity),
     },
+    // No-credits demo: a soft warning banner above the composer with a "Get
+    // credits" CTA and a dismiss. `MockConnectedChatInput` suppresses it while
+    // a clarifying panel is up, so it only ever sits on the actual text input.
+    creditWarning:
+      noCredits && !creditWarningDismissed
+        ? {
+            level: "soft",
+            onGetCredits: () =>
+              toasts.open({
+                title: "Redirecting you to billing to top up credits…",
+                variant: "default",
+              }),
+            onDismiss: () => setCreditWarningDismissed(true),
+          }
+        : undefined,
     resizable: true,
     // Start closed in sidepanel mode so the chat plays its entrance animation
     // when opened from the collection view.
@@ -2078,23 +2916,123 @@ function CreationWithAIFlow({ initialTabId }: { initialTabId?: string }) {
 
   return (
     <MockAiChatRuntimeProvider>
-      <TabConfigProvider initialTabId={initialTabId}>
+      <FlowConfigProvider flowId={flowId} noCredits={noCredits}>
         <SurveyStoreProvider>
           <ApplicationFrame
             ai={ai}
             sidebar={<Sidebar {...SidebarStories.default.args} />}
           >
+            <ComposerPlaceholderRegistrar />
             {/* Feeds the survey welcome cards into the chat via
-                `welcomeScreenCards`; renders nothing itself. */}
-            <SurveyWelcomeCardsRegistrar />
+                `welcomeScreenCards`; renders nothing itself. "cards" entry
+                flow (Engagement) only — "guidedType" (Training) has none. */}
+            {config.entryMode === "cards" && <SurveyWelcomeCardsRegistrar />}
             <FlowContent phase={phase} setPhase={setPhase} />
           </ApplicationFrame>
         </SurveyStoreProvider>
-      </TabConfigProvider>
+      </FlowConfigProvider>
     </MockAiChatRuntimeProvider>
   )
 }
 
-export const Surveys: Story = {
-  render: () => <CreationWithAIFlow initialTabId="surveys" />,
+// "Welcome Screen" — entry via a welcome screen of entry-point cards
+// (`cards` mode). Uses the engagement/eNPS survey data.
+export const WelcomeScreen: Story = {
+  name: "Welcome Screen",
+  render: () => <CreationWithAIFlow flowId="engagement" />,
+}
+
+// "Welcome Screen · No Credits" — the same welcome-screen flow with AI
+// credits exhausted. The soft credit-warning banner sits on the composer and the
+// starter-prompt buttons above the input are dropped. Free-text AI needs credits,
+// so a typed message gets a short "can't do that" reply and is redirected into
+// the credit-free guided-entry panel (Empty Survey / Use a Template / top
+// templates). The welcome cards stay fully interactive as in the normal flow.
+export const WelcomeScreenNoCredits: Story = {
+  name: "Welcome Screen · No Credits",
+  render: () => <CreationWithAIFlow flowId="engagement" noCredits />,
+}
+
+// "Guided Chat · Triage" — the message-first guided-chat flow (`guidedType`),
+// example A: the clarifying question triages the survey TYPE, then opens a
+// type-scoped template gallery. Uses the training/compliance survey data.
+export const GuidedChatTriage: Story = {
+  name: "Guided Chat · Triage",
+  render: () => <CreationWithAIFlow flowId="training" />,
+}
+
+// "Guided Chat · Entry Actions" — the same message-first guided-chat flow
+// (`guidedEntry`), example B: the clarifying options are entry ACTIONS — Empty
+// Survey, Use a Template, and the most-used templates. Picking a template opens
+// its preview; "Use a Template" opens the full gallery; "Empty Survey" runs the
+// blank-survey drafting conversation. Reuses the engagement data.
+export const GuidedChatEntryActions: Story = {
+  name: "Guided Chat · Entry Actions",
+  render: () => <CreationWithAIFlow flowId="engagementGuided" />,
+}
+
+// "Guided Chat · No Credits" — the guided-chat entry-actions flow with AI
+// credits exhausted. A soft credit-warning banner sits above the composer (with
+// a "Get credits" CTA). The banner only shows on the text input — it's
+// suppressed whenever a clarifying panel occupies the composer.
+export const GuidedChatNoCredits: Story = {
+  name: "Guided Chat · No Credits",
+  render: () => <CreationWithAIFlow flowId="engagementGuided" noCredits />,
+}
+
+// Interaction test for the guided flow's "Leave creation?" gate: dismissing the
+// opening clarifying panel raises the confirmation; "Keep creating" keeps the
+// SAME panel open (no reopen, no composer flash); dismissing again and choosing
+// "Leave" tears the flow down to the starting collection page. Hidden from the
+// sidebar — it exists for `pnpm test-storybook`, not for browsing.
+export const GuidedChatLeaveCreationGate: Story = {
+  name: "Guided Chat · Leave-creation gate (test)",
+  tags: ["no-sidebar"],
+  render: () => <CreationWithAIFlow flowId="training" />,
+  play: async ({ canvasElement, step }) => {
+    // The confirmation dialog and the chat both portal outside the story
+    // canvas, so query the whole document body.
+    const page = within(canvasElement.closest("body")!)
+    // The scripted intro plays thinking beats on real timers, so waits along
+    // the way need generous timeouts.
+    const BEAT = { timeout: 15_000 }
+
+    await step("Create opens the guided clarifying panel", async () => {
+      await userEvent.click(
+        await page.findByRole("button", { name: "Create" }, BEAT)
+      )
+      // The panel is up once its Cancel (✕) control renders.
+      await page.findByRole("button", { name: "Cancel" }, BEAT)
+    })
+
+    await step("Dismissing the panel asks to confirm leaving", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Cancel" }))
+      await page.findByText("Leave creation?", undefined, BEAT)
+    })
+
+    await step("Keep creating keeps the same panel open", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Keep creating" }))
+      await waitFor(() =>
+        expect(page.queryByText("Leave creation?")).not.toBeInTheDocument()
+      )
+      // The panel never unmounted — its Cancel control is still there.
+      await expect(
+        page.getByRole("button", { name: "Cancel" })
+      ).toBeInTheDocument()
+    })
+
+    await step("Leave closes the chat back to the collection", async () => {
+      await userEvent.click(page.getByRole("button", { name: "Cancel" }))
+      await page.findByText("Leave creation?", undefined, BEAT)
+      await userEvent.click(page.getByRole("button", { name: "Leave" }))
+      // The flow tears down: the confirmation and the clarifying panel are
+      // gone, and the exit note is posted into the (now closed) transcript.
+      await waitFor(() => {
+        expect(page.queryByText("Leave creation?")).not.toBeInTheDocument()
+        expect(
+          page.queryByRole("button", { name: "Cancel" })
+        ).not.toBeInTheDocument()
+      }, BEAT)
+    })
+  },
 }

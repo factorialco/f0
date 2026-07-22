@@ -1,15 +1,26 @@
-import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { Canvas, Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-<Meta title="Co-creation/Phases" />
+import * as Stories from "./phases.stories"
+
+<Meta title="AI Cocreation/Phases" />
 
 # Phases
 
-Every co-creation flow moves through three phases — **Collection → Chat → Split**. They run
+Every cocreation flow moves through three phases — **Collection → Chat → Split**. They run
 on one chat-enabled [`ApplicationFrame`](?path=/docs/patterns-applicationframe--documentation),
 so the AI trigger in the header is available throughout. The whole flow is coordinated by a
 single `phase` value: the chat's open state and visualization follow from it, staying in sync
 as the user toggles the header trigger.
+
+At a glance, the flow runs top to bottom through the three phases, with a human-in-the-loop gate
+before anything the AI generates is written:
+
+<Canvas of={Stories.PhaseFlow} sourceState="none" />
+
+Picking a template instead of describing a survey seeds it directly and skips the draft gate —
+the two entry approaches and that shortcut are covered in the
+[Walkthrough](?path=/docs/patterns-ai-cocreation-walkthrough--documentation).
 
 ## The three phases
 
@@ -29,7 +40,7 @@ as the user toggles the header trigger.
         </td>
         <td>
           The starting surface — a data collection, page, or list. The user
-          works as usual; co-creation is one trigger away.
+          works as usual; cocreation is one trigger away.
         </td>
         <td>
           Enters from the surface itself. Exits to Chat when the user opens the
@@ -42,15 +53,18 @@ as the user toggles the header trigger.
           <strong>Chat</strong>
         </td>
         <td>
-          The chat animates in so the user can describe what they want — by
-          typing, tapping a quick-start suggestion, or picking a starting-point
-          card. Clarifying questions narrow the intent before anything is
-          drafted.
+          The chat animates in so the user can describe what they want. It opens
+          one of two ways: a <strong>welcome screen</strong> of entry-point
+          cards and suggestions, or a <strong>guided chat</strong> that posts an
+          opening line and asks one clarifying question straight away.
+          Clarifying questions narrow the intent, then a draft-confirmation card
+          gates the generated questions before they are written.
         </td>
         <td>
           Enters from Collection. Opens full width via the Create button, or as
-          a side panel via the One switch. Exits to Split once there is a
-          resource to show.
+          a side panel via the One switch. Exits to Split when there is a
+          resource to show — the canvas opens on a blank survey, a chosen
+          template, or the accepted draft.
         </td>
       </tr>
       <tr>
@@ -73,15 +87,16 @@ as the user toggles the header trigger.
 </Unstyled>
 
 The interactive mock begins in **Collection**; opening the AI from the header moves it through
-Chat and Split. It runs full screen, so open it in its own canvas:
+Chat and Split. Each flow runs full screen in its own canvas — open any of them from the
+Walkthrough:
 
 <Unstyled>
   <a
     target="_parent"
-    href="/?path=/story/patterns-co-creation-walkthrough--surveys"
+    href="/?path=/docs/patterns-ai-cocreation-walkthrough--documentation"
     className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
   >
-    Open the interactive flow ↗
+    Explore the flows in the Walkthrough ↗
   </a>
 </Unstyled>
 
@@ -94,7 +109,7 @@ Chat and Split. It runs full screen, so open it in its own canvas:
   the user can open, collapse, or return to the conversation at any point.
 - In Split, the resource lives in a canvas **inside the chat** — the flow never navigates to a
   separate resource page. See the
-  [Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) for this and
+  [Standard flow](?path=/docs/patterns-ai-cocreation-standard-flow--documentation) for this and
   the other rules that hold across the phases.
 
 ## Guidelines

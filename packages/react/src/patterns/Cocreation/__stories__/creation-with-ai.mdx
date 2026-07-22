@@ -1,29 +1,32 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { FeatureGrid } from "~/docs/components/FeatureGrid"
+import { WALKTHROUGH_FLOW_FEATURES } from "./walkthrough-flows"
 
 import chatFullscreen from "./assets/chat-fullscreen.png"
 import splitEmpty from "./assets/split-empty.png"
 
-<Meta title="Co-creation/Walkthrough" />
+<Meta title="AI Cocreation/Walkthrough" />
 
 # Walkthrough
 
 This is an end-to-end walkthrough of the
-[Co-creation](?path=/docs/patterns-co-creation--documentation) pattern — the abstract flow
+[AI Cocreation](?path=/docs/patterns-ai-cocreation--documentation) pattern — the abstract flow
 grounded in one real resource. The resource here is a survey, but the structure is the
 pattern's, not the survey's: the user starts on a collection (Collection), describes what they
 want in a chat (Chat), then refines the resulting draft on a canvas while the conversation
-continues (Split). Each phase below maps to what the survey example shows; the
-mock itself runs full screen, so open it in its own canvas:
+continues (Split). Each phase below maps to what the survey example shows.
+
+The mock runs full screen, so each flow opens in its own canvas. It ships as five stories under
+**Walkthrough** — the two ways a flow can open the conversation, and the out-of-credits state of
+each. Open any of them:
 
 <Unstyled>
-  <a
-    target="_parent"
-    href="/?path=/story/patterns-co-creation-walkthrough--surveys"
-    className="mb-8 inline-flex items-center gap-2 rounded-lg border border-solid border-f1-border bg-f1-background px-5 py-4 font-medium text-f1-foreground no-underline transition-all hover:shadow dark:border-f1-border-secondary dark:text-f1-foreground-inverse dark:hover:border-f1-border"
-  >
-    Open the interactive flow ↗
-  </a>
+  <FeatureGrid features={WALKTHROUGH_FLOW_FEATURES} />
 </Unstyled>
+
+The phase narrative below follows the **Welcome Screen** story. The
+[Guided Chat](#guided-chat) subsection covers how the guided stories differ at the Chat phase;
+from Split on, every story behaves the same.
 
 ## Flow
 
@@ -66,11 +69,12 @@ each flow — the survey example fills all four:
     <tbody>
       <tr>
         <td>
-          <strong>Empty survey</strong>
+          <strong>Empty Survey</strong>
         </td>
         <td>
-          Creates a blank survey and walks the user through it with clarifying
-          questions.
+          Opens a blank survey and walks the user through it with clarifying
+          questions, then a draft-confirmation card before any questions are
+          written.
         </td>
       </tr>
       <tr>
@@ -86,15 +90,19 @@ each flow — the survey example fills all four:
           <strong>Employee NPS</strong>
         </td>
         <td>
-          Seeds a ready-made eNPS survey; the eNPS question is locked so scores
-          stay comparable, the rest is editable.
+          Opens the eNPS template in a read-only preview; "Use this template"
+          then seeds the survey with the eNPS question locked so scores stay
+          comparable, the rest editable.
         </td>
       </tr>
       <tr>
         <td>
           <strong>Employee Engagement</strong>
         </td>
-        <td>Seeds a ready-made employee-engagement survey to edit.</td>
+        <td>
+          Opens the employee-engagement template in a read-only preview to
+          review before "Use this template" seeds it for editing.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -110,12 +118,83 @@ blank-composer cost. When a flow includes them, populate them with prompts tied 
 resource being created — the survey example offers "Employee satisfaction survey," "Onboarding
 feedback survey," and "Remote work pulse check." They render on both the side-panel and
 full-width welcome screens, and are independent of the cards: provide either, both, or neither.
-See [Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation) for the
+See [Building blocks](?path=/docs/patterns-ai-cocreation-building-blocks--documentation) for the
 full cards-vs-suggestions contract.
 
-Clarifying questions narrow the intent before anything is drafted — here, the survey's type,
-audience, and length. The draft is then surfaced as an in-chat resource card; opening it moves
-the flow into Split.
+Clarifying questions narrow the intent — here, the survey's type, audience, and length. When the
+answers are in, the AI does **not** write the questions yet: it posts a **draft confirmation** card
+("Draft a first set of questions") and waits. **Apply** runs the "applying changes" overlay and
+fills in the starter questions; **Discard** leaves the survey blank, still ready to shape by chat.
+
+What is already on screen depends on the entry point. Starting from the **Empty Survey** card, the
+blank survey opens on the canvas and the chat docks beside it up front — it's the user's from the
+first click — so only the drafted questions wait for the confirmation (this is the Split view
+pictured below). Starting from a **typed request**, there's no survey to show yet, so the canvas
+stays hidden until Apply reveals it. Either way, the _generated questions_ are what the confirmation
+gates. This mirrors the accept/reject on every later edit; see
+[Confirm before drafting, confirm before editing](?path=/docs/patterns-ai-cocreation-standard-flow--documentation).
+
+#### Guided Chat
+
+The Welcome Screen above is one way to open the conversation. The **Guided Chat** stories show the
+other: instead of a full-width welcome screen, the flow posts an opening line on the user's behalf
+and immediately asks **one** clarifying question. There is no blank canvas of choices — the
+conversation is already moving.
+
+The single question takes one of two shapes:
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Shape</th>
+        <th className="text-left">The question triages…</th>
+        <th className="text-left">What follows</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Triage</strong> (Guided Chat · Triage)
+        </td>
+        <td>
+          The resource <em>type</em> — here Satisfaction, Effectiveness, or
+          Knowledge Test.
+        </td>
+        <td>
+          A template gallery scoped to the chosen type, with "Empty Survey"
+          first.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Entry actions</strong> (Guided Chat · Entry Actions)
+        </td>
+        <td>
+          The <em>action</em> — Empty Survey, Use a Template, or one of the
+          most-used templates.
+        </td>
+        <td>
+          The blank-survey drafting conversation, the full gallery, or a
+          template preview, per the pick.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+Prefer Guided Chat when the flow has **one clear first action**: a started conversation beats a
+blank canvas. See
+[When to use Welcome Screen vs Guided Chat](?path=/docs/patterns-ai-cocreation-guidelines--documentation)
+for the decision.
+
+Because Guided Chat has no welcome screen to fall back to, backing out **before** a survey is picked
+is treated as leaving creation and warns first ("Leave creation?") — whether the user dismisses the
+opening clarifying panel, closes the template gallery, or closes the chat panel itself while a survey
+is still being chosen. **Keep creating** leaves the flow where it was; **Leave** closes the chat and
+notes that nothing was created. Closing a template preview is a step back to the gallery it was
+opened from, not an exit, so it doesn't warn. In the entry-actions shape, picking "Empty Survey" runs
+the same clarifying → draft-confirmation chain described above.
 
 ### Split
 
@@ -127,7 +206,7 @@ the flow into Split.
       className="block w-full rounded-lg border border-solid border-f1-border dark:border-f1-border-secondary"
     />
     <figcaption className="mt-2 text-sm text-f1-foreground-secondary">
-      After choosing Empty survey: the resource canvas fills the center, the
+      After choosing Empty Survey: the resource canvas fills the center, the
       chat docks on the right with the resource card and clarifying questions.
     </figcaption>
   </figure>
@@ -176,12 +255,24 @@ As the conversation continues, the AI proposes changes (for example, adding an o
 comment question). Each proposal appears as a human-in-the-loop confirmation card; the user
 accepts or rejects it, and an overlay covers the canvas while an accepted change is applied.
 
+### Out of credits
+
+The two **· No Credits** stories show the flow when AI credits are exhausted. A soft
+credit-warning banner sits above the composer with a "Get credits" CTA and a dismiss; it only
+ever appears on the text input, never over a clarifying panel. Free-text AI needs credits, but
+**guided creation does not** — templates and blank surveys still work — so a typed message is
+never a dead end: it gets a short "can't do that right now" reply and redirects into the
+credit-free guided-entry panel (Empty Survey / Use a Template / most-used templates). Once a survey
+exists, typed edit requests get an out-of-credits reply with an upgrade nudge instead of a
+proposal.
+
 ## Composed building blocks
 
 This flow assembles the blocks documented in
-[Building blocks](?path=/docs/patterns-co-creation-building-blocks--documentation):
+[Building blocks](?path=/docs/patterns-ai-cocreation-building-blocks--documentation):
 `F0OneSwitch`, `F0AiChat` (including its data-driven welcome cards and voice dictation),
-`F0ClarifyingPanel`, `F0CardHorizontal` (the in-chat resource and proposal cards), and
+`F0ClarifyingPanel` (both the clarifying questions and the guided-chat entry question),
+`F0CardHorizontal` (the in-chat resource card plus the draft-confirmation and proposal cards), and
 `F0AiProcessingOverlay`. Only the surfaces specific to this example — the survey's answering
 form and builder — come from the
 [Surveys](?path=/docs/sds-surveys-surveyformbuilder--documentation) SDS.

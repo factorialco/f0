@@ -1,11 +1,11 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
-<Meta title="Co-creation/Guidelines" />
+<Meta title="AI Cocreation/Guidelines" />
 
 # Guidelines
 
-When to reach for co-creation, when to use something else, and the principles that keep the
+When to reach for cocreation, when to use something else, and the principles that keep the
 human in control of what the AI produces.
 
 ## When to use
@@ -15,7 +15,7 @@ human in control of what the AI produces.
     <thead>
       <tr>
         <th className="text-left">Situation</th>
-        <th className="text-left">Use co-creation when</th>
+        <th className="text-left">Use cocreation when</th>
       </tr>
     </thead>
     <tbody>
@@ -116,7 +116,71 @@ human in control of what the AI produces.
   </table>
 </Unstyled>
 
-{/* TODO(creator): confirm the exact anti-patterns and where co-creation appears / what triggers it in Factorial. */}
+{/* TODO(creator): confirm the exact anti-patterns and where cocreation appears / what triggers it in Factorial. */}
+
+## Welcome Screen vs Guided Chat
+
+A cocreation flow can open the conversation two ways. Both land in the same Chat → Split
+machinery; they differ only in how the first turn is framed. See both running in the
+[Walkthrough](?path=/docs/patterns-ai-cocreation-walkthrough--documentation).
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Entry</th>
+        <th className="text-left">What the user sees first</th>
+        <th className="text-left">Reach for it when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <strong>Welcome Screen</strong>
+        </td>
+        <td>
+          A full-width welcome screen — a grid of entry-point cards below the
+          composer and starter-prompt suggestions above it. The user chooses a
+          direction.
+        </td>
+        <td>
+          There are several equally likely starting points and no single obvious
+          first move, so the value is in showing the menu.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Guided Chat</strong>
+        </td>
+        <td>
+          An opening line posted on the user's behalf and one clarifying
+          question — triaging the resource type, or the entry action — with the
+          composer hidden until it's answered.
+        </td>
+        <td>
+          There is one clear first action. The flow already knows what to ask,
+          so it asks it.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Prefer Guided Chat when there is one clear initial action.** A started conversation beats a
+blank canvas: a single question the user just answers is lower-cost than a screen of options they
+have to read and choose between. Reserve the Welcome Screen for flows where the starting points are
+genuinely varied and worth presenting as a menu.
+
+<DoDonts
+  do={{
+    description:
+      "Open with Guided Chat — one clarifying question — when the flow has a single obvious first move.",
+  }}
+  dont={{
+    description:
+      "Don't drop the user onto a blank welcome screen of choices when the flow already knows what to ask first.",
+  }}
+/>
 
 ## Principles
 
@@ -124,13 +188,15 @@ human in control of what the AI produces.
   do={{
     description: "Keep the human in the loop — confirm before applying.",
     guidelines: [
+      "Confirm the first draft too, not only later edits — the initial generation is an accept / reject card as well",
       "Surface every AI-proposed change as an explicit accept / reject card",
       "Let the user edit the draft directly, not only through the chat",
     ],
   }}
   dont={{
-    description: "Don't let the AI write changes into the resource silently.",
+    description: "Don't let the AI write content into the resource silently.",
     guidelines: [
+      "Don't draft onto the canvas before the user has accepted the draft",
       "Don't auto-apply proposals the user has not seen",
       "Don't auto-commit destructive changes",
     ],
@@ -199,7 +265,7 @@ human in control of what the AI produces.
   }}
   dont={{
     description:
-      "Don't discard unsaved co-creation work silently, and don't add the same warning to merely collapsing the chat panel.",
+      "Don't discard unsaved cocreation work silently, and don't add the same warning to merely collapsing the chat panel.",
   }}
 />
 
@@ -214,5 +280,5 @@ human in control of what the AI produces.
   }}
 />
 
-The [Standard flow](?path=/docs/patterns-co-creation-standard-flow--documentation) page defines
+The [Standard flow](?path=/docs/patterns-ai-cocreation-standard-flow--documentation) page defines
 these rules in full, including the resource-card lifecycle.

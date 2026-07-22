@@ -56,7 +56,18 @@ export type ClarifyingStep = {
  */
 export type ClarifyingConfig = {
   steps: ClarifyingStep[]
-  onConfirm?: (answersByStep: string[][]) => void
+  /** Fired with the picked answers for every step, in order. `answersByStep`
+   * carries display labels (for echoing back into the transcript);
+   * `answerIdsByStep` carries the matching option ids (for routing logic —
+   * never match on labels, they're copy). A custom answer has no option id, so
+   * its trimmed text appears in both arrays at the same position. */
+  onConfirm?: (answersByStep: string[][], answerIdsByStep: string[][]) => void
+  /** Fired when the user dismisses the panel (the ✕/Cancel button). The panel
+   * stays mounted while this runs, so a flow can put a "Leave creation?"
+   * confirmation on top of it without the composer flashing in behind. Return
+   * `false` (or a promise resolving to `false`) to KEEP the panel open — e.g.
+   * the user chose "Keep creating"; any other result (void/true) closes it. */
+  onCancel?: () => boolean | void | Promise<boolean | void>
 }
 
 /** Per-step interaction state tracked while a clarifying flow is open. */
@@ -81,8 +92,29 @@ export type MockAiChatRuntime = {
   messages: F0Message[]
   inProgress: boolean
   sendMessage: (text: string, options?: { replyQuote?: string }) => void
-  /** Sends a user message and shows thinking steps, but emits no text response. */
-  sendMessageWithThinkingOnly: (text: string) => void
+  /**
+   * Sends a user message and shows thinking steps, but emits no text response.
+   * `inProgress` stays true for the thinking beat (so the composer stays
+   * disabled), then flips false and the optional `onComplete` fires — the hook
+   * a caller uses to post its own scripted follow-up (a message, a clarifying
+   * panel, …) once the "thinking" has visibly finished.
+   */
+  sendMessageWithThinkingOnly: (text: string, onComplete?: () => void) => void
+  /**
+   * Plays a "thinking" beat with NO message on either side: `inProgress` goes
+   * true (composer disabled), thinking steps stream, then it flips false and
+   * `onComplete` fires. Used to space out scripted steps so the user can follow
+   * one action at a time (e.g. reply → think → open canvas).
+   */
+  showThinking: (onComplete?: () => void) => void
+  /**
+   * When true, the connected chat input renders nothing. The guided flows set
+   * it during their scripted intro (the "Let's create a Survey" + thinking
+   * beat) so no composer shows until the first clarifying panel is ready, then
+   * clear it. Only affects flows that opt in — default false.
+   */
+  composerHidden: boolean
+  setComposerHidden: (hidden: boolean) => void
   appendMessages: (
     messages: { role: "user" | "assistant"; content: string }[],
     options?: { persist?: boolean }
@@ -102,6 +134,16 @@ export type MockAiChatRuntime = {
   setUserMessageInterceptor: (
     interceptor: ((text: string) => void) | null
   ) => void
+  /**
+   * Registers a guard run BEFORE the chat closes (its ✕, via the connected
+   * header). Returning `false` — or a promise resolving to `false` — aborts the
+   * close, so no docking animation runs until the user confirms (e.g. a
+   * "Leave creation?" dialog). Pass `null` to clear.
+   */
+  setBeforeClose: (guard: (() => boolean | Promise<boolean>) | null) => void
+  /** Runs the registered `beforeClose` guard (resolves `true` if none is set).
+   * The connected header awaits this before closing the chat. */
+  runBeforeClose: () => boolean | Promise<boolean>
   clear: () => void
 
   // ── Clarifying question ─────────────────────────────────────────
@@ -330,6 +372,7 @@ export const MockAiChatRuntimeProvider = ({
 }: MockAiChatRuntimeProviderProps) => {
   const [messages, setMessages] = useState<F0Message[]>(seedMessages ?? [])
   const [inProgress, setInProgress] = useState(false)
+  const [composerHidden, setComposerHidden] = useState(false)
   const [threads, setThreads] = useState<ChatThread[]>(
     seedThreads ?? DEFAULT_MOCK_THREADS
   )
@@ -352,6 +395,7 @@ export const MockAiChatRuntimeProvider = ({
     Record<number, ClarifyingInteraction>
   >({})
   const interceptorRef = useRef<((text: string) => void) | null>(null)
+  const beforeCloseRef = useRef<(() => boolean | Promise<boolean>) | null>(null)
 
   // Allow late-arriving seed messages (story decorators that prefill async).
   useEffect(() => {
@@ -497,16 +541,12 @@ export const MockAiChatRuntimeProvider = ({
     [streamAssistantResponse]
   )
 
-  const sendMessageWithThinkingOnly = useCallback(
-    (text: string) => {
-      const trimmed = text.trim()
-      if (!trimmed) return
-      setMessages((prev) => [
-        ...prev,
-        { id: nextId(), role: "user", content: trimmed },
-      ])
-
-      const thinkingSteps = pickRandomThinkingSteps(3)
+  const showThinking = useCallback(
+    (onComplete?: () => void) => {
+      // Scripted guided flows chain several of these beats, so keep each one
+      // short — a single reasoning line rather than the 3 the free-form
+      // `streamAssistantResponse` shows — to keep the flow moving.
+      const thinkingSteps = pickRandomThinkingSteps(1)
       const thinkingId = nextId()
 
       setInProgress(true)
@@ -515,6 +555,7 @@ export const MockAiChatRuntimeProvider = ({
         const totalThinkingMs = emitThinkingSteps(thinkingSteps, thinkingId)
         const done = setTimeout(() => {
           setInProgress(false)
+          onComplete?.()
         }, totalThinkingMs)
         timersRef.current.push(done)
       }, THINKING_DELAY_MS)
@@ -522,6 +563,19 @@ export const MockAiChatRuntimeProvider = ({
       timersRef.current.push(startThinking)
     },
     [emitThinkingSteps]
+  )
+
+  const sendMessageWithThinkingOnly = useCallback(
+    (text: string, onComplete?: () => void) => {
+      const trimmed = text.trim()
+      if (!trimmed) return
+      setMessages((prev) => [
+        ...prev,
+        { id: nextId(), role: "user", content: trimmed },
+      ])
+      showThinking(onComplete)
+    },
+    [showThinking]
   )
 
   const appendMessages = useCallback<MockAiChatRuntime["appendMessages"]>(
@@ -556,6 +610,17 @@ export const MockAiChatRuntimeProvider = ({
     interceptorRef.current = interceptor
   }, [])
 
+  const setBeforeClose = useCallback<MockAiChatRuntime["setBeforeClose"]>(
+    (guard) => {
+      beforeCloseRef.current = guard
+    },
+    []
+  )
+
+  const runBeforeClose = useCallback((): boolean | Promise<boolean> => {
+    return beforeCloseRef.current?.() ?? true
+  }, [])
+
   const startClarifying = useCallback<MockAiChatRuntime["startClarifying"]>(
     (config) => {
       setClarifyingStepIndex(0)
@@ -569,12 +634,18 @@ export const MockAiChatRuntimeProvider = ({
     setClarifyingConfig(null)
     setClarifyingStepIndex(0)
     setClarifyingInteractions({})
+    // The composer is hidden only while a guided flow's scripted intro runs into
+    // its first clarifying panel. Whenever that panel closes — answered OR
+    // cancelled — hand the composer back; otherwise cancelling strands the user
+    // with an empty input slot (MockConnectedChatInput renders nothing when
+    // `composerHidden && !clarifyingQuestion`).
+    setComposerHidden(false)
   }, [])
 
   // Rebuilt each render so the option-toggle / confirm closures always read the
   // latest selection. The runtime owns the per-step selection state and the
   // current step index; `confirm` advances through the steps and, on the final
-  // one, fires `onConfirm` with the picked labels for every step in order.
+  // one, fires `onConfirm` with the picked labels + ids for every step in order.
   const clarifyingQuestion: ClarifyingQuestionState | null = (() => {
     if (!clarifyingConfig) return null
     const steps = clarifyingConfig.steps
@@ -594,28 +665,40 @@ export const MockAiChatRuntimeProvider = ({
         [stepIndex]: { ...getClarifyingInteraction(prev, stepIndex), ...patch },
       }))
 
-    // Collect the picked labels for every step, in order — single-select steps
-    // fall back to their custom answer when nothing is selected; multi-select
-    // steps append the custom answer when it's active and non-empty.
-    const buildAnswers = (): string[][] =>
-      steps.map((s, i) => {
+    // Collect the picked labels + ids for every step, in order — single-select
+    // steps fall back to their custom answer when nothing is selected;
+    // multi-select steps append the custom answer when it's active and
+    // non-empty. A custom answer has no option id, so its text stands in for
+    // the id too (same position in both arrays).
+    const buildAnswers = (): { labels: string[][]; ids: string[][] } => {
+      const perStep = steps.map((s, i) => {
         const inter = getClarifyingInteraction(clarifyingInteractions, i)
-        const labels = s.options
-          .filter((o) => inter.selectedIds.includes(o.id))
-          .map((o) => o.label)
+        const selected = s.options.filter((o) =>
+          inter.selectedIds.includes(o.id)
+        )
+        const labels = selected.map((o) => o.label)
+        const ids = selected.map((o) => o.id)
         const isSingle = (s.selectionMode ?? "single") === "single"
         const includeCustom = isSingle
           ? inter.selectedIds.length === 0 && inter.customText.trim().length > 0
           : inter.isCustomActive && inter.customText.trim().length > 0
-        if (includeCustom) labels.push(inter.customText.trim())
-        return labels
+        if (includeCustom) {
+          labels.push(inter.customText.trim())
+          ids.push(inter.customText.trim())
+        }
+        return { labels, ids }
       })
+      return {
+        labels: perStep.map((s) => s.labels),
+        ids: perStep.map((s) => s.ids),
+      }
+    }
 
     const resolve = () => {
-      const answers = buildAnswers()
+      const { labels, ids } = buildAnswers()
       const onConfirm = clarifyingConfig.onConfirm
       closeClarifying()
-      onConfirm?.(answers)
+      onConfirm?.(labels, ids)
     }
 
     const isFinalStep = stepIndex === steps.length - 1
@@ -670,7 +753,20 @@ export const MockAiChatRuntimeProvider = ({
           resolve()
         }
       },
-      cancel: closeClarifying,
+      cancel: () => {
+        const onCancel = clarifyingConfig.onCancel
+        if (!onCancel) {
+          closeClarifying()
+          return
+        }
+        // Keep the panel mounted while `onCancel` runs — it may raise a
+        // "Leave creation?" confirmation, and closing eagerly would reveal the
+        // composer behind the dialog (the "weird in-between state"). Close only
+        // once `onCancel` resolves to anything other than `false`.
+        void Promise.resolve(onCancel()).then((result) => {
+          if (result !== false) closeClarifying()
+        })
+      },
       back: () => setClarifyingStepIndex((i) => Math.max(0, i - 1)),
       setCustomAnswerText: (text) => updateInteraction({ customText: text }),
       setCustomAnswerActive: (active) =>
@@ -687,6 +783,7 @@ export const MockAiChatRuntimeProvider = ({
     clearTimers()
     setMessages([])
     setInProgress(false)
+    setComposerHidden(false)
     setCurrentThreadTitle(null)
     setCurrentThreadId(null)
     setIsLoadingThread(false)
@@ -770,10 +867,15 @@ export const MockAiChatRuntimeProvider = ({
         inProgress,
         sendMessage,
         sendMessageWithThinkingOnly,
+        showThinking,
+        composerHidden,
+        setComposerHidden,
         appendMessages,
         appendCard,
         setScript,
         setUserMessageInterceptor,
+        setBeforeClose,
+        runBeforeClose,
         clear,
         clarifyingQuestion,
         startClarifying,
