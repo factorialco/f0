@@ -85,6 +85,13 @@ Renders body copy, descriptions, code snippets, and labels across the interface.
           toasts)
         </td>
       </tr>
+      <tr>
+        <td>
+          <code>ai</code>
+        </td>
+        <td>AI gradient fill</td>
+        <td>Hints and messaging produced by or referring to AI features</td>
+      </tr>
     </tbody>
   </table>
 </Unstyled>
@@ -103,6 +110,7 @@ Renders body copy, descriptions, code snippets, and labels across the interface.
 - Use `code` for technical strings, identifiers, or short inline snippets
 - Use `label` for any UI label: form fields, stat labels, filter labels, column headers in compact layouts
 - Use `inverse` only when text appears on a dark or strongly colored background
+- Use `ai` for short AI-related hints or messaging — the gradient is a brand accent, not a reading style for long copy
 
 #### When NOT to use
 
@@ -124,6 +132,7 @@ Renders body copy, descriptions, code snippets, and labels across the interface.
 
 - The `label` variant should use `as="label"` when associated with a form input — wrap the input inside the label for correct HTML semantics, since `F0Text` does not accept a `htmlFor` prop
 - The `inverse` variant does not change contrast automatically — ensure the background provides sufficient contrast (WCAG AA: 4.5:1 for normal text)
+- The `ai` variant renders text as a gradient fill — use it on light backgrounds and keep it to short strings; parts of the gradient have lower contrast than solid foreground colors
 - Use `ellipsis` only when the full text is accessible through another means (tooltip, expanded view) — truncated text without a disclosure is an accessibility gap
 
 ---

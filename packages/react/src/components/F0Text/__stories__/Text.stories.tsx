@@ -13,7 +13,15 @@ const meta = {
   tags: ["!autodocs", "experimental"],
   argTypes: {
     variant: {
-      options: ["body", "description", "small", "inverse", "code", "label"],
+      options: [
+        "body",
+        "description",
+        "small",
+        "inverse",
+        "code",
+        "label",
+        "ai",
+      ],
       control: "select",
       description: "The variant of the text",
       table: {
@@ -96,6 +104,7 @@ export const Variants: Story = {
       <F0Text variant="small" content="This is a small text." />
       <F0Text variant="code" content="const example = 'code text';" />
       <F0Text variant="label" content="Label text" />
+      <F0Text variant="ai" content="This is an AI gradient text." />
       <div className="rounded bg-f1-background-inverse p-2">
         <F0Text variant="inverse" content="Inverse text on dark background" />
       </div>
@@ -184,6 +193,7 @@ export const Snapshot: Story = {
           <F0Text variant="small" content="Small variant text" />
           <F0Text variant="code" content="const code = 'Code variant text';" />
           <F0Text variant="label" content="Label variant text" />
+          <F0Text variant="ai" content="Ai variant text" />
           <F0Text variant="inverse" content="Inverse variant text" />
         </div>
       </section>

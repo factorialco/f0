@@ -10,6 +10,7 @@ const _allowedVariants = [
   "inverse",
   "code",
   "label",
+  "ai",
 ] as const
 
 export type F0TextProps = Omit<TextProps, "className" | "variant" | "as"> & {

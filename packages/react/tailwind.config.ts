@@ -20,6 +20,11 @@ export default {
         ...baseConfig.theme?.extend?.maxWidth,
         content: "712px",
       },
+      backgroundImage: {
+        ...baseConfig.theme?.extend?.backgroundImage,
+        "ai-text-gradient":
+          "linear-gradient(270deg, #E55619 0%, #E51943 50%, #A1ADE5 100%)",
+      },
       keyframes: {
         ...baseConfig.theme?.extend?.keyframes,
         "rotate-gradient": {
