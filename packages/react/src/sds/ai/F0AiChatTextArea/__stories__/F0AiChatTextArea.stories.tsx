@@ -489,10 +489,10 @@ export const WithToolbarStart: Story = {
     fileAttachments: FILE_UPLOAD_CONFIG,
     toolbarStart: (
       <F0SegmentedControl
-        ariaLabel="Response scope"
+        ariaLabel="Analytics mode"
         items={[
-          { value: "general", label: "General" },
-          { value: "focused", label: "Focused" },
+          { value: "chat", label: "Chat" },
+          { value: "analytics", label: "Analytics" },
         ]}
       />
     ),
