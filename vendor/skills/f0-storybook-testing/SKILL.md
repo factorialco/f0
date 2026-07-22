@@ -32,27 +32,22 @@ For story file structure and snapshot patterns, see the `f0-storybook-stories` s
 
 - axe runs on **every story** automatically after render (WCAG 2.x AA)
 - Default behaviour on violation: test **fails** (`"error"` mode)
-- To suppress failures on known violations, configure per-story:
+- Skipping axe is **not allowed for new stories**: `a11y: { skipCi: true }` (and the deprecated `withSkipA11y()` helper, which sets it) fail CI unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.json` — a burndown list of file → allowed call-site count that only shrinks (adding a skip even to a grandfathered file fails the unit tests). `test: "off"` is rejected too.
+- **When you remove a `skipCi` or `withSkipA11y` usage** (a11y burndown), you MUST update `.storybook/a11y-skip-allowlist.json` in the same change: lower that file's count by the number of call-sites removed, and delete the entry entirely when it reaches zero. Verify with `pnpm --filter @factorialco/f0-react exec vitest run src/lib/storybook-utils/a11ySkipAllowlist.test.ts` — it fails on any mismatch.
+- For known violations, downgrade instead of skipping:
 
 ```tsx
-// Skip a11y entirely in CI (use sparingly)
-parameters: {
-  a11y: {
-    skipCi: true
-  }
-}
-
-// Downgrade to warning (test passes, violation logged)
-parameters: {
-  a11y: {
-    test: "warning"
-  }
-}
-
-// Downgrade to todo (test passes, violation logged)
+// Known a11y debt — test passes, violation logged (tracked for burndown)
 parameters: {
   a11y: {
     test: "todo"
+  }
+}
+
+// Intentional violation (e.g. disabled-state contrast) — test passes, logged
+parameters: {
+  a11y: {
+    test: "warning"
   }
 }
 
@@ -66,7 +61,7 @@ parameters: {
 }
 ```
 
-- `withSkipA11y()` from `@/lib/storybook-utils/parameters` is for **Chromatic snapshot** skips, not for axe — use `parameters.a11y` directly for axe control
+- The contract: `test: "error"` = enforced (default), `test: "todo"` = known debt to fix, `test: "warning"` = intentional. axe always runs.
 
 ## Commands
 
