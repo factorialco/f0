@@ -1,0 +1,3103 @@
+{
+  "Introduction": {
+    "category": "",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "introduction--documentation"
+  },
+  "Add a new icon": {
+    "category": "Foundations/Icons",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-icons-add-a-new-icon--documentation"
+  },
+  "Borders": {
+    "category": "Foundations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-borders--documentation"
+  },
+  "Colors": {
+    "category": "Foundations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-colors--documentation"
+  },
+  "Icons": {
+    "category": "Foundations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-icons--documentation"
+  },
+  "Shadows": {
+    "category": "Foundations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-shadows--documentation"
+  },
+  "Spacing": {
+    "category": "Foundations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-spacing--documentation"
+  },
+  "Typography": {
+    "category": "Foundations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "foundations-typography--documentation"
+  },
+  "withDataTestId": {
+    "category": "Library/Lib",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "play-fn",
+      "attached-mdx"
+    ],
+    "storyId": "library-lib-withdatatestid--documentation"
+  },
+  "Numeric": {
+    "category": "Library",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "library-numeric--documentation"
+  },
+  "Examples": {
+    "category": "Hooks/Datasource",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "hooks-datasource-examples--documentation"
+  },
+  "Datasource": {
+    "category": "Hooks",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "hooks-datasource--documentation"
+  },
+  "useData": {
+    "category": "Hooks/Datasource",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "hooks-datasource-usedata--documentation"
+  },
+  "useDataSource": {
+    "category": "Hooks/Datasource",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "hooks-datasource-usedatasource--documentation"
+  },
+  "useGroups": {
+    "category": "Hooks/Datasource",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "hooks-datasource-usegroups--documentation"
+  },
+  "useSelectable": {
+    "category": "Hooks/Datasource",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "hooks-datasource-useselectable--documentation"
+  },
+  "Badge": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-badge--documentation"
+  },
+  "Action": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "🔒-internal-components-action--documentation"
+  },
+  "ButtonCopy": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal",
+      "play-fn"
+    ],
+    "storyId": "🔒-internal-components-buttoncopy--documentation"
+  },
+  "Card": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "🔒-internal-components-card--documentation"
+  },
+  "ChevronToggle": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "🔒-internal-components-chevrontoggle--documentation"
+  },
+  "DatePickerPopup": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "🔒-internal-components-datepickerpopup--documentation"
+  },
+  "Dialog": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "🔒-internal-components-dialog--documentation"
+  },
+  "InputField": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "🔒-internal-components-inputfield--documentation"
+  },
+  "OverflowList": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-components-overflowlist--documentation"
+  },
+  "Select": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "🔒-internal-components-select--documentation"
+  },
+  "VerticalOverflowList": {
+    "category": "🔒 Internal/Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "🔒-internal-components-verticaloverflowlist--documentation"
+  },
+  "Counter": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-counter--documentation"
+  },
+  "F0Wizard": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "🔒-internal-f0wizard--documentation"
+  },
+  "IconBadge": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "🔒-internal-iconbadge--documentation"
+  },
+  "Kanban": {
+    "category": "🔒 Internal/Kanban",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-kanban-kanban--documentation"
+  },
+  "KanbanLane": {
+    "category": "🔒 Internal/Kanban",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-kanban-kanbanlane--documentation"
+  },
+  "Lane": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-lane--documentation"
+  },
+  "Omnibutton": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "deprecated"
+    ],
+    "storyId": "🔒-internal-omnibutton--documentation"
+  },
+  "OneRestrictComponent": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "🔒-internal-onerestrictcomponent--documentation"
+  },
+  "Pagination": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-pagination--documentation"
+  },
+  "Preset": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-preset--documentation"
+  },
+  "Shortcut": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-shortcut--documentation"
+  },
+  "Spinner": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "🔒-internal-spinner--documentation"
+  },
+  "Value Display": {
+    "category": "🔒 Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display--documentation"
+  },
+  "Alert Tag": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-alert-tag--documentation"
+  },
+  "Amount": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-amount--documentation"
+  },
+  "Avatar List": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-avatar-list--documentation"
+  },
+  "BarSeries": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-barseries--documentation"
+  },
+  "Company": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-company--documentation"
+  },
+  "Country": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-country--documentation"
+  },
+  "Date": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-date--documentation"
+  },
+  "Delta": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-delta--documentation"
+  },
+  "Dot Tag": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-dot-tag--documentation"
+  },
+  "File": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-file--documentation"
+  },
+  "Folder": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-folder--documentation"
+  },
+  "HourDistribution": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-hourdistribution--documentation"
+  },
+  "Icon": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-icon--documentation"
+  },
+  "Long Text": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-long-text--documentation"
+  },
+  "Number": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-number--documentation"
+  },
+  "Percentage": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-percentage--documentation"
+  },
+  "Person": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-person--documentation"
+  },
+  "ProgressBar": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-progressbar--documentation"
+  },
+  "Status": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-status--documentation"
+  },
+  "Tag": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-tag--documentation"
+  },
+  "Tag List": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-tag-list--documentation"
+  },
+  "Team": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-team--documentation"
+  },
+  "Text": {
+    "category": "🔒 Internal/Value Display",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "🔒-internal-value-display-text--documentation"
+  },
+  "AI Configuration": {
+    "category": "",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "ai-configuration--documentation"
+  },
+  "Changelog": {
+    "category": "",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "changelog--documentation"
+  },
+  "Components maturity": {
+    "category": "",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-maturity--documentation"
+  },
+  "ActionBar": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-actionbar--documentation"
+  },
+  "Alert": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable"
+    ],
+    "storyId": "components-alert--documentation"
+  },
+  "ApplicationFrame": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "play-fn"
+    ],
+    "storyId": "components-applicationframe--documentation"
+  },
+  "Avatar": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "play-fn"
+    ],
+    "storyId": "components-avatars-avatar--documentation"
+  },
+  "AvatarAlert": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avataralert--documentation"
+  },
+  "AvatarCompany": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarcompany--documentation"
+  },
+  "AvatarDate": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatardate--documentation"
+  },
+  "AvatarEmoji": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avataremoji--documentation"
+  },
+  "AvatarFile": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarfile--documentation"
+  },
+  "AvatarFlag": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarflag--documentation"
+  },
+  "AvatarIcon": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avataricon--documentation"
+  },
+  "AvatarList": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarlist--documentation"
+  },
+  "AvatarModule": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarmodule--documentation"
+  },
+  "AvatarPerson": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarperson--documentation"
+  },
+  "AvatarPulse": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarpulse--documentation"
+  },
+  "AvatarTeam": {
+    "category": "Components/Avatars",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-avatars-avatarteam--documentation"
+  },
+  "Await": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable"
+    ],
+    "storyId": "components-await--documentation"
+  },
+  "BigNumber": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-bignumber--documentation"
+  },
+  "Controls": {
+    "category": "Components/BigNumber",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar",
+      "unattached-mdx"
+    ],
+    "storyId": "components-bignumber-controls--documentation"
+  },
+  "Box": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable"
+    ],
+    "storyId": "components-box--documentation"
+  },
+  "Button": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable",
+      "play-fn"
+    ],
+    "storyId": "components-button--documentation"
+  },
+  "ButtonDropdown": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-buttondropdown--documentation"
+  },
+  "ButtonToggle": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "components-buttontoggle--documentation"
+  },
+  "Internal": {
+    "category": "Components/ButtonToggle",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "components-buttontoggle-internal--documentation"
+  },
+  "ButtonToggleGroup": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-buttontogglegroup--documentation"
+  },
+  "Calendar": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-calendar--documentation"
+  },
+  "Carousel": {
+    "category": "Components/Carousel",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-carousel-carousel--documentation"
+  },
+  "DynamicCarousel": {
+    "category": "Components/Carousel",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-carousel-dynamiccarousel--documentation"
+  },
+  "AreaChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-areachart--documentation"
+  },
+  "BarChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-barchart--documentation"
+  },
+  "CategoryBarChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-categorybarchart--documentation"
+  },
+  "ComboChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-combochart--documentation"
+  },
+  "F0Chart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart--documentation"
+  },
+  "Area": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-area--documentation"
+  },
+  "Bar": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-bar--documentation"
+  },
+  "Bar Horizontal": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-bar-horizontal--documentation"
+  },
+  "Funnel": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-funnel--documentation"
+  },
+  "Line": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-line--documentation"
+  },
+  "Pie": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-pie--documentation"
+  },
+  "Radar": {
+    "category": "Components/Charts/F0Chart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-f0chart-radar--documentation"
+  },
+  "LineChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-linechart--documentation"
+  },
+  "PieChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-piechart--documentation"
+  },
+  "ProgressBarDuo": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-progressbarduo--documentation"
+  },
+  "ProgressChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-progresschart--documentation"
+  },
+  "RadarChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-charts-radarchart--documentation"
+  },
+  "RadialProgressChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-radialprogresschart--documentation"
+  },
+  "VerticalBarChart": {
+    "category": "Components/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-charts-verticalbarchart--documentation"
+  },
+  "Checkbox": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "play-fn",
+      "attached-mdx"
+    ],
+    "storyId": "components-checkbox--documentation"
+  },
+  "Chip": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-chip--documentation"
+  },
+  "ChipList": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-chiplist--documentation"
+  },
+  "Data collection": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection--documentation"
+  },
+  "Actions": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-actions--documentation"
+  },
+  "Callbacks": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-callbacks--documentation"
+  },
+  "Collection Actions": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "components-data-collection-collection-actions--documentation"
+  },
+  "Empty State": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-empty-state--documentation"
+  },
+  "Filters": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-filters--documentation"
+  },
+  "Per Visualization": {
+    "category": "Components/Data Collection/Filters",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "internal"
+    ],
+    "storyId": "components-data-collection-filters-per-visualization--documentation"
+  },
+  "Full height": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-full-height--documentation"
+  },
+  "Grouping": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-grouping--documentation"
+  },
+  "SortAndHideList": {
+    "category": "Components/Data Collection/Internal",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal",
+      "attached-mdx"
+    ],
+    "storyId": "components-data-collection-internal-sortandhidelist--documentation"
+  },
+  "Item Actions": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar",
+      "internal"
+    ],
+    "storyId": "components-data-collection-item-actions--documentation"
+  },
+  "Loading": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-loading--documentation"
+  },
+  "Miscellaneous": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "internal"
+    ],
+    "storyId": "components-data-collection-miscellaneous--documentation"
+  },
+  "Navigation filters": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-navigation-filters--documentation"
+  },
+  "Navigation Filters": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-data-collection-navigation-filters--default"
+  },
+  "Selectable and bulk actions": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-selectable-and-bulk-actions--documentation"
+  },
+  "Sorting": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-sorting--documentation"
+  },
+  "Status Persistence": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-status-persistence--documentation"
+  },
+  "Summary": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-data-collection-summary--documentation"
+  },
+  "Temporary or Deprecated features": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-data-collection-temporary-or-deprecated-features--documentation"
+  },
+  "Top Header": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-top-header--documentation"
+  },
+  "Total Items Summary": {
+    "category": "Components/Data Collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-data-collection-total-items-summary--documentation"
+  },
+  "Visualizations": {
+    "category": "Components/Data collection",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-visualizations--documentation"
+  },
+  "Editable Table": {
+    "category": "Components/Data Collection/Visualizations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "attached-mdx"
+    ],
+    "storyId": "components-data-collection-visualizations-editable-table--documentation"
+  },
+  "List": {
+    "category": "Components/Data Collection/Visualizations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-visualizations-list--documentation"
+  },
+  "Table": {
+    "category": "Components/Data Collection/Visualizations",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-data-collection-visualizations-table--documentation"
+  },
+  "DateNavigator": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-datenavigator--documentation"
+  },
+  "Compare To": {
+    "category": "Components/DateNavigator",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-datenavigator-compare-to--documentation"
+  },
+  "Presets": {
+    "category": "Components/DateNavigator",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-datenavigator-presets--documentation"
+  },
+  "DatePicker": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-datepicker--documentation"
+  },
+  "Dropdown": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-dropdown--documentation"
+  },
+  "DurationInput": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable"
+    ],
+    "storyId": "components-durationinput--documentation"
+  },
+  "Ellipsis": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-ellipsis--documentation"
+  },
+  "EmptyState": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-emptystate--documentation"
+  },
+  "EmployeeSelector": {
+    "category": "Components/EntitySelect",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-entityselect-employeeselector--documentation"
+  },
+  "EntitySelect": {
+    "category": "Components/EntitySelect",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "play-fn",
+      "attached-mdx"
+    ],
+    "storyId": "components-entityselect-entityselect--documentation"
+  },
+  "ListItem": {
+    "category": "Components/EntitySelect",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-entityselect-listitem--documentation"
+  },
+  "ListTag": {
+    "category": "Components/EntitySelect",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-entityselect-listtag--documentation"
+  },
+  "Trigger": {
+    "category": "Components/EntitySelect",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-entityselect-trigger--documentation"
+  },
+  "F0ActionBar": {
+    "category": "Components/Experimental",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-experimental-f0actionbar--documentation"
+  },
+  "ValidationIssues": {
+    "category": "Components/Experimental/F0Form",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-experimental-f0form-validationissues--documentation"
+  },
+  "F0VersionHistory": {
+    "category": "Components/Experimental",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-experimental-f0versionhistory--documentation"
+  },
+  "CardSelectable": {
+    "category": "Components/Experimental/Forms",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "play-fn"
+    ],
+    "storyId": "components-experimental-forms-cardselectable--documentation"
+  },
+  "F0AnalyticsDashboard": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-f0analyticsdashboard--documentation"
+  },
+  "Gauge": {
+    "category": "Components/F0DataChart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-f0datachart-gauge--documentation"
+  },
+  "Heatmap": {
+    "category": "Components/F0DataChart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-f0datachart-heatmap--documentation"
+  },
+  "Overview": {
+    "category": "Components/F0DataChart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-f0datachart-overview--documentation"
+  },
+  "Skeletons": {
+    "category": "Components/F0DataChart",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-f0datachart-skeletons--documentation"
+  },
+  "FilterPicker": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-filterpicker--documentation"
+  },
+  "InFilter": {
+    "category": "Components/FilterPicker/Filters",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-filterpicker-filters-infilter--documentation"
+  },
+  "NumberFilter": {
+    "category": "Components/FilterPicker/Filters",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-filterpicker-filters-numberfilter--documentation"
+  },
+  "SearchFilter": {
+    "category": "Components/FilterPicker/Filters",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-filterpicker-filters-searchfilter--documentation"
+  },
+  "FilterPickerContent": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-filterpickercontent--documentation"
+  },
+  "F0Form": {
+    "category": "Components/Forms",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-forms-f0form--documentation"
+  },
+  "F0FormField": {
+    "category": "Components/Forms",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-forms-f0formfield--documentation"
+  },
+  "F0WizardForm": {
+    "category": "Components/Forms",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-forms-f0wizardform--documentation"
+  },
+  "Heading": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-heading--documentation"
+  },
+  "Image": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable",
+      "no-sidebar"
+    ],
+    "storyId": "components-image--documentation"
+  },
+  "Search": {
+    "category": "Components/Input",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-input-search--documentation"
+  },
+  "TextArea": {
+    "category": "Components/Input",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-input-textarea--documentation"
+  },
+  "AutoGrid": {
+    "category": "Components/Layout/Blocks",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-layout-blocks-autogrid--documentation"
+  },
+  "Split": {
+    "category": "Components/Layout/Blocks",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-layout-blocks-split--documentation"
+  },
+  "Stack": {
+    "category": "Components/Layout/Blocks",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-layout-blocks-stack--documentation"
+  },
+  "Link": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "stable",
+      "play-fn",
+      "attached-mdx"
+    ],
+    "storyId": "components-link--documentation"
+  },
+  "DataList": {
+    "category": "Components/List",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-list-datalist--documentation"
+  },
+  "DetailsItem": {
+    "category": "Components/List",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-list-detailsitem--documentation"
+  },
+  "DetailsItemsList": {
+    "category": "Components/List",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-list-detailsitemslist--documentation"
+  },
+  "OnePersonListItem": {
+    "category": "Components/List",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-list-onepersonlistitem--documentation"
+  },
+  "Breadcrumbs": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-navigation-breadcrumbs--documentation"
+  },
+  "BreadcrumbSelect": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "components-navigation-breadcrumbselect--documentation"
+  },
+  "DaytimePage": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-navigation-daytimepage--documentation"
+  },
+  "Page": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-navigation-page--documentation"
+  },
+  "PageHeader": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-navigation-pageheader--documentation"
+  },
+  "Sidebar": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "internal"
+    ],
+    "storyId": "components-navigation-sidebar--documentation"
+  },
+  "TableOfContent": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-navigation-tableofcontent--documentation"
+  },
+  "TableOfContentPopover": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-navigation-tableofcontentpopover--documentation"
+  },
+  "Tabs": {
+    "category": "Components/Navigation",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "play-fn"
+    ],
+    "storyId": "components-navigation-tabs--documentation"
+  },
+  "Reactions": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-reactions--documentation"
+  },
+  "Resource header": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-resource-header--documentation"
+  },
+  "Metadata": {
+    "category": "Components/Resource header",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar",
+      "internal"
+    ],
+    "storyId": "components-resource-header-metadata--documentation"
+  },
+  "FileItem": {
+    "category": "Components/Rich text",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-rich-text-fileitem--documentation"
+  },
+  "NotesTextEditor": {
+    "category": "Components/Rich text",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-rich-text-notestexteditor--documentation"
+  },
+  "RichTextDisplay": {
+    "category": "Components/Rich text",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-rich-text-richtextdisplay--documentation"
+  },
+  "RichTextEditor": {
+    "category": "Components/Rich text",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-rich-text-richtexteditor--documentation"
+  },
+  "ScrollArea": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "no-sidebar"
+    ],
+    "storyId": "components-scrollarea--documentation"
+  },
+  "Section header": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-section-header--documentation"
+  },
+  "CompanySelector": {
+    "category": "Components/Sidebar",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "no-sidebar"
+    ],
+    "storyId": "components-sidebar-companyselector--documentation"
+  },
+  "Header": {
+    "category": "Components/Sidebar",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "no-sidebar"
+    ],
+    "storyId": "components-sidebar-header--documentation"
+  },
+  "Menu": {
+    "category": "Components/Sidebar",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "no-sidebar",
+      "play-fn"
+    ],
+    "storyId": "components-sidebar-menu--documentation"
+  },
+  "SearchBar": {
+    "category": "Components/Sidebar",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "no-sidebar"
+    ],
+    "storyId": "components-sidebar-searchbar--documentation"
+  },
+  "SidebarFooter": {
+    "category": "Components/Sidebar",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-sidebar-sidebarfooter--documentation"
+  },
+  "Switch": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "play-fn"
+    ],
+    "storyId": "components-switch--documentation"
+  },
+  "Tag (Router)": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-tags-tag-router--documentation"
+  },
+  "TagAlert": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagalert--documentation"
+  },
+  "TagBalance": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagbalance--documentation"
+  },
+  "TagCompany": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagcompany--documentation"
+  },
+  "TagDot": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagdot--documentation"
+  },
+  "TagList": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-taglist--documentation"
+  },
+  "TagPerson": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagperson--documentation"
+  },
+  "TagRaw": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagraw--documentation"
+  },
+  "TagStatus": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagstatus--documentation"
+  },
+  "TagTeam": {
+    "category": "Components/Tags",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "components-tags-tagteam--documentation"
+  },
+  "ToggleGroup": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-togglegroup--documentation"
+  },
+  "Tooltip": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-tooltip--documentation"
+  },
+  "GridStack": {
+    "category": "Components/Utilities",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "components-utilities-gridstack--documentation"
+  },
+  "VirtualList": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-virtuallist--documentation"
+  },
+  "Widget": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widget--documentation"
+  },
+  "Widgets": {
+    "category": "Components",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "components-widgets--documentation"
+  },
+  "AreaChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-areachartwidget--documentation"
+  },
+  "BarChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-barchartwidget--documentation"
+  },
+  "LineChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-linechartwidget--documentation"
+  },
+  "PieChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-piechartwidget--documentation"
+  },
+  "RadialProgressWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-radialprogresswidget--documentation"
+  },
+  "SummariesWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-summarieswidget--documentation"
+  },
+  "VerticalBarChartWidget": {
+    "category": "Components/Widgets/Charts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-charts-verticalbarchartwidget--documentation"
+  },
+  "CalendarEvent": {
+    "category": "Components/Widgets/Content",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-content-calendarevent--documentation"
+  },
+  "CalendarEventList": {
+    "category": "Components/Widgets/Content",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-content-calendareventlist--documentation"
+  },
+  "IndicatorsList": {
+    "category": "Components/Widgets/Content",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-content-indicatorslist--documentation"
+  },
+  "TwoColumnsList": {
+    "category": "Components/Widgets/Content",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-content-twocolumnslist--documentation"
+  },
+  "Weekdays": {
+    "category": "Components/Widgets/Content",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-content-weekdays--documentation"
+  },
+  "Dashboard": {
+    "category": "Components/Widgets/Layout",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-layout-dashboard--documentation"
+  },
+  "WidgetStrip": {
+    "category": "Components/Widgets/Layout",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-layout-widgetstrip--documentation"
+  },
+  "Skeleton": {
+    "category": "Components/Widgets/Widget",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widget-skeleton--documentation"
+  },
+  "WidgetAvatarsListItem": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetavatarslistitem--documentation"
+  },
+  "WidgetEmptyState": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetemptystate--documentation"
+  },
+  "WidgetHighlightButton": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgethighlightbutton--documentation"
+  },
+  "WidgetInboxList": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetinboxlist--documentation"
+  },
+  "WidgetInboxListItem": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetinboxlistitem--documentation"
+  },
+  "WidgetSection": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetsection--documentation"
+  },
+  "WidgetSimpleList": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetsimplelist--documentation"
+  },
+  "WidgetSimpleListItem": {
+    "category": "Components/Widgets",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "components-widgets-widgetsimplelistitem--documentation"
+  },
+  "Data Test ID": {
+    "category": "",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "data-test-id--documentation"
+  },
+  "How to contribute?": {
+    "category": "",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "how-to-contribute--documentation"
+  },
+  "HomeLayout": {
+    "category": "Layouts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "layouts-homelayout--documentation"
+  },
+  "Layout": {
+    "category": "Layouts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "unattached-mdx"
+    ],
+    "storyId": "layouts-layout--documentation"
+  },
+  "Layout System": {
+    "category": "Layouts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "layouts-layout-system--documentation"
+  },
+  "StandardLayout": {
+    "category": "Layouts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "layouts-standardlayout--documentation"
+  },
+  "TwoColumnLayout": {
+    "category": "Layouts",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "internal"
+    ],
+    "storyId": "layouts-twocolumnlayout--documentation"
+  },
+  "F0ActionItem": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0actionitem--documentation"
+  },
+  "ChatSpinner": {
+    "category": "SDS/AI/F0ActionItem",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar"
+    ],
+    "storyId": "sds-ai-f0actionitem-chatspinner--documentation"
+  },
+  "F0AiChat": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0aichat--documentation"
+  },
+  "AssistantMessage": {
+    "category": "SDS/AI/F0AiChat",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0aichat-assistantmessage--documentation"
+  },
+  "ChatTextarea (with context)": {
+    "category": "SDS/AI/F0AiChat",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0aichat-chattextarea-with-context--documentation"
+  },
+  "F0AiChatTextArea": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0aichattextarea--documentation"
+  },
+  "F0AiCollapsibleMessage": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0aicollapsiblemessage--documentation"
+  },
+  "F0AiMask": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0aimask--documentation"
+  },
+  "F0AuraVoiceAnimation": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0auravoiceanimation--documentation"
+  },
+  "F0ChatDashboard": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0chatdashboard--documentation"
+  },
+  "F0ChatReportCard": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0chatreportcard--documentation"
+  },
+  "F0DataDownload": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0datadownload--documentation"
+  },
+  "F0HILActionConfirmation": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0hilactionconfirmation--documentation"
+  },
+  "F0MarkdownRenderers": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0markdownrenderers--documentation"
+  },
+  "F0MessageSources": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0messagesources--documentation"
+  },
+  "F0OneIcon": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0oneicon--documentation"
+  },
+  "F0OneSwitch": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0oneswitch--documentation"
+  },
+  "F0Thinking": {
+    "category": "SDS/AI",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-f0thinking--documentation"
+  },
+  "F0BookAMeetingCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-widgets-upsellkit-f0bookameetingcard--documentation"
+  },
+  "F0DemoCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-widgets-upsellkit-f0democard--documentation"
+  },
+  "F0FAQCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-widgets-upsellkit-f0faqcard--documentation"
+  },
+  "F0ModuleCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-widgets-upsellkit-f0modulecard--documentation"
+  },
+  "F0QuestionCard": {
+    "category": "SDS/AI/Widgets/UpsellKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-ai-widgets-upsellkit-f0questioncard--documentation"
+  },
+  "AIButton": {
+    "category": "SDS",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-aibutton--documentation"
+  },
+  "AiBanner": {
+    "category": "SDS/Banners",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-banners-aibanner--documentation"
+  },
+  "Callout": {
+    "category": "SDS/Banners",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-banners-callout--documentation"
+  },
+  "BaseBanner": {
+    "category": "SDS/Experimental/Banners",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-experimental-banners-basebanner--documentation"
+  },
+  "ClockInControls": {
+    "category": "SDS/Home",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-clockincontrols--documentation"
+  },
+  "ClockInGraph": {
+    "category": "SDS/Home",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-clockingraph--documentation"
+  },
+  "Celebration": {
+    "category": "SDS/Home/Communities",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-communities-celebration--documentation"
+  },
+  "HighlightBanner": {
+    "category": "SDS/Home/Communities",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-communities-highlightbanner--documentation"
+  },
+  "CommunityPost": {
+    "category": "SDS/Home/Communities/Post",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-communities-post-communitypost--documentation"
+  },
+  "PostDescription": {
+    "category": "SDS/Home/Communities/Post",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-communities-post-postdescription--documentation"
+  },
+  "PostEvent": {
+    "category": "SDS/Home/Communities/Post",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-home-communities-post-postevent--documentation"
+  },
+  "ActivityItemList": {
+    "category": "SDS/Inbox/Activity",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental",
+      "internal"
+    ],
+    "storyId": "sds-inbox-activity-activityitemlist--documentation"
+  },
+  "ActivityItem": {
+    "category": "SDS/Inbox",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-inbox-activityitem--documentation"
+  },
+  "ApprovalHistory": {
+    "category": "SDS/Inbox",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-inbox-approvalhistory--documentation"
+  },
+  "CategoryBarSection": {
+    "category": "SDS/Profile",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-profile-categorybarsection--documentation"
+  },
+  "PrivateBox": {
+    "category": "SDS/Profile",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-profile-privatebox--documentation"
+  },
+  "TaskItem": {
+    "category": "SDS/Profile",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-profile-taskitem--documentation"
+  },
+  "TasksList": {
+    "category": "SDS/Profile",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-profile-taskslist--documentation"
+  },
+  "SurveyAnsweringForm": {
+    "category": "SDS/Surveys",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyansweringform--documentation"
+  },
+  "SurveyFormBuilder": {
+    "category": "SDS/Surveys",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder--documentation"
+  },
+  "BaseQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-basequestion--documentation"
+  },
+  "DateQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-datequestion--documentation"
+  },
+  "DropdownSingleQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-dropdownsinglequestion--documentation"
+  },
+  "LinkQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-linkquestion--documentation"
+  },
+  "NumericQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-numericquestion--documentation"
+  },
+  "RatingQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-ratingquestion--documentation"
+  },
+  "Section": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-section--documentation"
+  },
+  "SelectQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-selectquestion--documentation"
+  },
+  "TextQuestion": {
+    "category": "SDS/Surveys/SurveyFormBuilder",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "experimental"
+    ],
+    "storyId": "sds-surveys-surveyformbuilder-textquestion--documentation"
+  },
+  "ProductBlankslate": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-upsellingkit-productblankslate--documentation"
+  },
+  "ProductCard": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar",
+      "experimental",
+      "attached-mdx"
+    ],
+    "storyId": "sds-upsellingkit-productcard--documentation"
+  },
+  "ProductModal": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar"
+    ],
+    "storyId": "sds-upsellingkit-productmodal--documentation"
+  },
+  "ProductWidget": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar"
+    ],
+    "storyId": "sds-upsellingkit-productwidget--documentation"
+  },
+  "UpsellingBanner": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar"
+    ],
+    "storyId": "sds-upsellingkit-upsellingbanner--documentation"
+  },
+  "UpsellingButton": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs"
+    ],
+    "storyId": "sds-upsellingkit-upsellingbutton--documentation"
+  },
+  "UpsellingPopover": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar"
+    ],
+    "storyId": "sds-upsellingkit-upsellingpopover--documentation"
+  },
+  "UpsellRequestResponseDialog": {
+    "category": "SDS/UpsellingKit",
+    "tags": [
+      "dev",
+      "test",
+      "autodocs",
+      "no-sidebar"
+    ],
+    "storyId": "sds-upsellingkit-upsellrequestresponsedialog--documentation"
+  }
+}

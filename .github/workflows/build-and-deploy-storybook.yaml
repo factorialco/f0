@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -19,6 +19,36 @@ jobs:
   # Detect which projects have changed
   detect-changes:
     uses: ./.github/workflows/_check-workspaces-changes.yaml
+
+  notify-storybook-changes:
+    needs: deploy
+    name: "[📚 STORYBOOK] Notify component changes via GitHub Issue"
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.deploy.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run Storybook diff and open GitHub Issue
+        run: |
+          node scripts/storybook-diff.mjs \
+            --storybook-url https://ds.factorial.dev \
+            --snapshot scripts/storybook-snapshot.json \
+            --github-token "${{ secrets.GITHUB_TOKEN }}" \
+            --github-repo "${{ github.repository }}" \
+            --commit-sha "${{ github.sha }}"
+
+      - name: Commit updated snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/storybook-snapshot.json
+          git diff --staged --quiet || git commit -m "chore: update storybook component snapshot [skip ci]"
+          git push
 
   deploy:
     needs: detect-changes
