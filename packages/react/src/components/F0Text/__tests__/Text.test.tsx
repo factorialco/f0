@@ -35,6 +35,12 @@ describe("F0Text Component", () => {
       render(<F0Text variant="label" content="Label" />)
       expect(screen.getByText("Label")).toBeInTheDocument()
     })
+
+    it("renders ai variant", () => {
+      render(<F0Text variant="ai" content="Ai" />)
+      expect(screen.getByText("Ai")).toBeInTheDocument()
+      expect(screen.getByText("Ai")).toHaveClass("bg-ai-text-gradient")
+    })
   })
 
   describe("Allowed HTML Tags", () => {

@@ -28,6 +28,7 @@ export const textVariants = cva({
       "label-input": "font-medium text-f1-foreground-secondary",
 
       // Semantic text
+      ai: "bg-ai-text-gradient bg-clip-text text-transparent",
       selected: "font-medium text-f1-foreground-selected",
       warning: "text-f1-foreground-warning",
       critical: "text-f1-foreground-critical",
@@ -61,6 +62,7 @@ export const defaultTag: Record<TextVariant, AsAllowedList> = {
   label: "p",
   "label-input": "label",
   small: "p",
+  ai: "p",
   selected: "p",
   inverse: "p",
   warning: "p",
