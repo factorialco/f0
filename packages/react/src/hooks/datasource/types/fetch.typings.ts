@@ -232,8 +232,12 @@ export type PaginatedDataAdapter<
 > = {
   /** Indicates this adapter uses page-based pagination */
   paginationType: PaginationType
-  /** Default number of records per page */
-  perPage?: number
+  /**
+   * Default number of records per page. Pass `"auto"` (page-based pagination
+   * inside a `fullHeight` collection only) to derive the page size from the
+   * available vertical space, clamped between 10 and 30 items.
+   */
+  perPage?: number | "auto"
   /**
    * Function to fetch paginated data based on filter and pagination options
    * @param options - The filter and pagination options to apply when fetching data

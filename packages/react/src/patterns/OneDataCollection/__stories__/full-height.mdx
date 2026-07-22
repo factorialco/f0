@@ -26,6 +26,25 @@ maximum height possible.
 > to limit the height of the data collection you must set the correct height to
 > the parent container.
 
+### When to use it
+
+**Reach for `fullHeight` whenever the data collection is the main thing users
+consume on the page** — list pages, index pages, and any surface fully focused
+on CRUD over one collection. There, keeping the toolbar and pagination pinned
+in view while only the rows scroll is almost always the right experience: users
+never lose the filters or the page controls, and the collection uses all the
+vertical space it has instead of leaving it empty or pushing the pagination
+below the fold.
+
+Keep the default (content-height) mode for collections that are one section
+among many on a page — a small table inside a detail view, a preview embedded in
+a dashboard card — where the collection should grow with its content and the
+page as a whole scrolls.
+
+When you do use `fullHeight` with page-based pagination, pair it with
+[`perPage: "auto"`](#auto-page-size) so the page size matches the available
+height instead of a hardcoded guess.
+
 ### Example
 
 ```tsx
@@ -52,3 +71,87 @@ OneDataCollection component will use the 100% of that wrapper.
 #### With pagination
 
 <Canvas of={FullHeightStories.WithPagination} />
+
+## Auto page size
+
+With page-based pagination, a fixed `perPage` rarely matches the space the
+collection actually has: on tall screens rows stop short of the pagination
+footer, and on short ones the page scrolls internally. Setting
+`perPage: "auto"` on the data adapter derives the page size from the measured
+content so a page shows **exactly the rows that fit** — never a partial,
+overflowing row — up to a maximum of **30** items.
+
+```tsx
+const dataAdapter = {
+  paginationType: "pages",
+  perPage: "auto",
+  fetchData: ...,
+}
+```
+
+Requirements and behavior:
+
+- Requires `fullHeight` (the container must be height-bounded — otherwise its
+  height would derive from the content itself and there is nothing to measure).
+  Without it, the collection warns in development and falls back to the default
+  page size.
+- The height is measured **once on mount** and kept stable afterwards, so
+  resizing the window doesn't shift items between pages or trigger refetches.
+- Each collection measures its own container, so multiple collections on the
+  same page resolve their page sizes independently.
+
+> **Reserve room for the minimum page.** When other collections could squeeze
+> an auto-sized one down to nothing, give its flex slot a `min-height` equal to
+> the minimum page height so it stays visible and the page scrolls instead. Use
+> the exported `getAutoPerPageMinHeight()` helper for the value:
+>
+> ```tsx
+> import { getAutoPerPageMinHeight } from "@factorialco/f0-react"
+>
+> <div className="flex-1" style={{ minHeight: getAutoPerPageMinHeight() }}>
+>   <OneDataCollection source={autoSource} visualizations={...} fullHeight />
+> </div>
+> ```
+>
+> Keep `flex-1` (not `min-h-0 flex-1`) so the slot floors at the minimum page
+> height while the collection still scrolls internally above it.
+
+#### With content on top
+
+Other content above the collection (here a horizontal `F0Box` with summary
+cards) takes its natural height; the collection sizes its page to the space
+that remains below it.
+
+<Canvas of={FullHeightStories.AutoPageSizeWithContentOnTop} />
+
+#### With content below
+
+The collection fills the space above the other content, which keeps its natural
+height at the bottom.
+
+<Canvas of={FullHeightStories.AutoPageSizeWithContentBelow} />
+
+#### Collections around other content
+
+An auto-sized collection on top, other content in the middle, and another
+auto-sized collection at the bottom. Each collection measures its own slot, so
+they split the remaining space independently.
+
+<Canvas of={FullHeightStories.AutoPageSizeAroundContent} />
+
+#### Auto page size next to a fixed one
+
+<Canvas of={FullHeightStories.AutoPageSizeWithFixedSibling} />
+
+#### Two auto-sized collections splitting the viewport
+
+<Canvas of={FullHeightStories.AutoPageSizeBoth} />
+
+#### Squeezed: reserving the minimum height
+
+When the auto-sized collection has (almost) no vertical space left, its flex
+slot still reserves the minimum height (see the note above), so it stays
+visible showing the rows that fit that reserved space while the page scrolls —
+it never disappears.
+
+<Canvas of={FullHeightStories.AutoPageSizeWithNoSpaceLeft} />
