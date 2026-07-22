@@ -519,6 +519,15 @@ declare type AiChatProviderProps = {
      */
     side?: "left" | "right";
     /**
+     * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+     * `side`, keeping everything in one panel. Set it to the opposite edge to
+     * split them — e.g. communications: conversations dock left while the AI
+     * chat keeps its right-side panel and toggle. The two are still exclusive
+     * (opening one swaps the other out); only the main content moves during
+     * the swap, uncovering the incoming panel in place.
+     */
+    panelContentSide?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -6833,6 +6842,14 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
     /**
+     * Optional action(s) rendered at the bottom-right of the graph canvas
+     * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+     * so it tracks the graph's visible area and reflows when a side panel shrinks
+     * it — clear of the controls (bottom-left). Use for a persistent affordance
+     * like a "Give feedback" button.
+     */
+    canvasFooterActions?: ReactNode;
+    /**
      * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
      * the viewport are handed to React Flow — for very large trees (thousands of
      * expand-visible nodes). Off by default; non-breaking.
@@ -8198,6 +8215,10 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     csvExport?: boolean | {
         filename?: string;
     };
+    /** Hide the dashed "Save view" chip (preset save action). Opt-in for
+     * collections where saving views doesn't apply (e.g. the org-chart graph).
+     * Defaults to `false` — behavior unchanged for every existing consumer. */
+    savingViewsDisabled?: boolean;
     /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
     initialVisualization?: number;
 };
@@ -9694,18 +9715,26 @@ export declare type SidebarTabPanelProps = {
 
 /**
  * Tab switcher that replaces the `SearchBar` row when the Sidebar gains tabs.
- * The active tab shows icon + label (animated in); inactive tabs are
- * icon-only. Search becomes an icon button on the right.
+ * The active tab always shows icon + label (animated in); inactive tabs show
+ * theirs too when every label fits in the row, and fall back to icon-only
+ * when space is tight. Search becomes an icon button on the right.
  *
  * When no tabs are needed, keep composing the Sidebar header with `SearchBar`
  * instead — that path is unchanged.
  */
-export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, }: SidebarTabsProps) => JSX_2.Element;
+export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, persistKey, }: SidebarTabsProps) => JSX_2.Element;
 
 export declare type SidebarTabsProps = {
     tabs: SidebarTab[];
     activeTab: string;
     onTabChange: (id: string) => void;
+    /**
+     * Remember the active tab across reloads under this key (namespaced as
+     * `f0-sidebar-tab:<persistKey>` in localStorage). On mount, a stored tab
+     * that still exists in `tabs` is restored via `onTabChange`; unknown ids
+     * (e.g. a tab that no longer ships) are ignored. Omit for session-only tabs.
+     */
+    persistKey?: string;
 };
 
 /**
@@ -11336,8 +11365,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -11345,11 +11377,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

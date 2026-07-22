@@ -549,6 +549,15 @@ export declare type AiChatProviderProps = {
      */
     side?: "left" | "right";
     /**
+     * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+     * `side`, keeping everything in one panel. Set it to the opposite edge to
+     * split them — e.g. communications: conversations dock left while the AI
+     * chat keeps its right-side panel and toggle. The two are still exclusive
+     * (opening one swaps the other out); only the main content moves during
+     * the swap, uncovering the incoming panel in place.
+     */
+    panelContentSide?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -808,6 +817,16 @@ declare type AiChatProviderReturnValue = {
     /** Clear the custom panel content and fall back to the F0.ai chat. */
     clearPanelContent: () => void;
     /**
+     * Id of the hosted content that was showing when the page last unloaded,
+     * pending restoration. The panel holds a skeleton (no AI-chat flash) until
+     * the host re-mounts it via `setPanelContent`, cancels via
+     * `cancelPanelContentRestore` (content no longer accessible), or a safety
+     * timeout falls back to the AI chat.
+     */
+    restoringPanelContentId: string | null;
+    /** Give up on restoring the persisted panel content — show the AI chat. */
+    cancelPanelContentRestore: () => void;
+    /**
      * Edge the whole side panel docks to — the AI chat, hosted content and the
      * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
      * chat-first experience (e.g. communications), where left is comfier to
@@ -816,6 +835,14 @@ declare type AiChatProviderReturnValue = {
     panelSide: "left" | "right";
     /** Set which edge the side panel docks to. */
     setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /**
+     * Edge hosted panel content (`setPanelContent`) docks to. Defaults to
+     * `panelSide`; when it differs, the AI chat and hosted content render in
+     * separate windows, one per edge, still mutually exclusive.
+     */
+    panelContentSide: "left" | "right";
+    /** Set which edge hosted panel content docks to. */
+    setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
 } & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -840,6 +867,8 @@ declare interface AiChatState {
     enabled: boolean;
     /** Initial edge the panel docks to. @default "right" */
     side?: "left" | "right";
+    /** Initial edge hosted panel content docks to. Defaults to `side`. */
+    panelContentSide?: "left" | "right";
     agent?: string;
     initialMessage?: string | string[];
     chatHeader?: React.ReactNode;
@@ -6316,7 +6345,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -6327,7 +6356,7 @@ export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHea
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -6365,6 +6394,13 @@ export declare type F0AiChatTextAreaProps = {
     onPendingQuoteChange?: (quote: PendingQuote | null) => void;
     /** File attachment configuration. When omitted, attachments are disabled. */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Host-owned compact controls rendered after the attachment action in the
+     * normal action row. Controls render inside the chat form, so buttons must
+     * use `type="button"` unless they intentionally submit it. Hidden while the
+     * composer is clarifying or recording.
+     */
+    toolbarStart?: ReactNode;
     /**
      * Voice dictation. When provided, a microphone button is shown: recorded
      * audio is transcribed and the transcript fills the textarea (the user
@@ -12720,6 +12756,14 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
     /**
+     * Optional action(s) rendered at the bottom-right of the graph canvas
+     * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+     * so it tracks the graph's visible area and reflows when a side panel shrinks
+     * it — clear of the controls (bottom-left). Use for a persistent affordance
+     * like a "Give feedback" button.
+     */
+    canvasFooterActions?: ReactNode;
+    /**
      * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
      * the viewport are handed to React Flow — for very large trees (thousands of
      * expand-visible nodes). Off by default; non-breaking.
@@ -18335,8 +18379,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -18344,11 +18391,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

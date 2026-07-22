@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react",
-  "version": "4.45.0",
+  "version": "4.47.1",
   "private": false,
   "files": [
     "assets",
@@ -129,6 +129,7 @@
     "prosemirror-state": "^1.4.3",
     "prosemirror-view": "^1.38.1",
     "react-remove-scroll": "^2.7.1",
+    "react-virtuoso": "^4.18.10",
     "rehype-stringify": "^10.0.1",
     "remark-gfm": "^4.0.1",
     "remark-parse": "^11.0.0",
