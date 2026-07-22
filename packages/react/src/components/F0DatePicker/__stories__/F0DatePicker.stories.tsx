@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { subDays } from "date-fns"
+import { addMonths, subDays } from "date-fns"
 import MockDate from "mockdate"
 import { useState } from "react"
-import { expect, fn, within } from "storybook/test"
+import { expect, fn, screen, within } from "storybook/test"
 
 import { Placeholder } from "@/icons/app"
 import { dataTestIdArgs } from "@/lib/data-testid/__stories__/args"
@@ -76,6 +76,16 @@ const meta = {
         type: {
           summary:
             "(value: DatePickerValue | undefined, stringValue: string | undefined) => void",
+        },
+      },
+    },
+    defaultMonth: {
+      description:
+        "The date whose month the calendar opens on when there is no selection. Only controls the initial view; it does not preselect a value. Defaults to today.",
+      control: "date",
+      table: {
+        type: {
+          summary: "Date",
         },
       },
     },
@@ -245,6 +255,26 @@ export const WithMinMaxDates: Story = {
     granularities: ["day", "week", "month"],
     minDate: subDays(today, 30), // Can't select dates before 30 days ago
     maxDate: today, // Can't select dates after today
+  },
+}
+
+export const WithDefaultMonth: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "With no value selected, the calendar opens on the month of `defaultMonth` instead of today. Useful for an end-date picker that should open on the already-selected start date.",
+      },
+    },
+  },
+  args: {
+    label: "Date",
+    placeholder: "Select a date",
+    defaultMonth: addMonths(today, 2),
+    open: true,
+  },
+  play: async () => {
+    await expect(await screen.findByText("September 2025")).toBeInTheDocument()
   },
 }
 

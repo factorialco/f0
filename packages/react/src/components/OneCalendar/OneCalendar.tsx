@@ -118,15 +118,15 @@ const OneCalendarInternal = ({
       setInputValue(granularity.toRangeString(date, i18n))
 
       const newViewDate = granularity.getViewDateFromDate(
-        date instanceof Date ? date : date?.from || date?.to || new Date()
+        date instanceof Date ? date : date?.from || date?.to || defaultMonth
       )
 
       if (newViewDate !== granularity.getViewDateFromDate(viewDate)) {
         setViewDate(newViewDate)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the granularity changes
-    [granularity]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the granularity or defaultMonth changes
+    [granularity, defaultMonth]
   )
 
   useEffect(() => {

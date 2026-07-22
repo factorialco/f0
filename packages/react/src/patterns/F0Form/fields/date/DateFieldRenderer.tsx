@@ -83,6 +83,7 @@ export function DateFieldRenderer({
       granularities={field.granularities}
       minDate={field.minDate}
       maxDate={field.maxDate}
+      defaultMonth={field.defaultMonth}
       presets={field.presets}
       clearable={field.clearable}
       value={pickerValue}

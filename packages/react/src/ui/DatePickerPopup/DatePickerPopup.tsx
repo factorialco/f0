@@ -41,6 +41,7 @@ export interface DatePickerPopupProps {
   granularities?: GranularityDefinitionKey[]
   minDate?: Date
   maxDate?: Date
+  defaultMonth?: Date
   disabled?: boolean
   hideGoToCurrent?: boolean
   children: React.ReactNode
@@ -282,6 +283,7 @@ export function DatePickerPopup({
                 view={calendarView}
                 onSelect={handleSelectDate}
                 defaultSelected={localValue?.value}
+                defaultMonth={props.defaultMonth}
                 minDate={props.minDate}
                 maxDate={props.maxDate}
                 weekStartsOn={effectiveWeekStartsOn}
