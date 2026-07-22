@@ -4,7 +4,8 @@
  *
  *   1. PR only touching owned modules (sds/kits) -> module owners only,
  *      enforced natively by GitHub code owners. Nothing else required.
- *   2. Remaining changes are documentation only (*.md, *.mdx, *.stories.tsx)
+ *   2. Remaining changes are documentation only (*.md, *.mdx, *.stories.tsx
+ *      or any file inside a __stories__/ folder)
  *      -> 1 approval from @factorialco/f0-general.
  *   3. Feature (conventional `feat:` title) -> 1 approval from
  *      @factorialco/f0-devs AND 1 from @factorialco/f0-designers.
@@ -26,6 +27,7 @@ import { parse } from "yaml"
 import { TEAMS_FILE, getManifestFiles, loadManifest } from "./lib.ts"
 
 const DOCS_PATTERN = /(\.mdx?|\.stories\.tsx?)$/
+const isDoc = (file: string) => DOCS_PATTERN.test(file) || file.includes("/__stories__/")
 const FEAT_PATTERN = /^feat(\([^)]*\))?!?:/
 const DESIGN_LABEL = "needs-design-review"
 const COMMENT_MARKER = "<!-- comment-type: review-policy -->"
@@ -108,12 +110,12 @@ function classify(params: {
       "Every changed file belongs to a module with a dedicated owner. " +
       "Module owners are the only required reviewers (rule 1) — their approval " +
       "is enforced natively by GitHub through CODEOWNERS."
-  } else if (remainder.every((file) => DOCS_PATTERN.test(file))) {
+  } else if (remainder.every(isDoc)) {
     name = "Documentation"
     description =
       "All changes outside owned modules are documentation " +
-      "(`*.md`, `*.mdx`, `*.stories.tsx`), so one approval from anyone in " +
-      "f0-general is enough (rule 2)."
+      "(`*.md`, `*.mdx`, `*.stories.tsx` or files inside `__stories__/`), " +
+      "so one approval from anyone in f0-general is enough (rule 2)."
     requirements.push({
       team: "f0-general",
       reason: "Documentation-only changes need one approval from f0-general",
@@ -225,7 +227,7 @@ lines.push(
   "<details><summary>How this was decided</summary>",
   "",
   "- PRs touching only `sds/`/`kits/` modules require their owners and nothing else.",
-  "- Otherwise, docs-only changes (`*.md`, `*.mdx`, `*.stories.tsx`) → one f0-general approval.",
+  "- Otherwise, docs-only changes (`*.md`, `*.mdx`, `*.stories.tsx`, anything in `__stories__/`) → one f0-general approval.",
   "- Otherwise, `feat:` titles → one f0-devs **and** one f0-designers approval. Not a feature? Fix the title prefix.",
   "- Anything else → one f0-devs approval.",
   `- Add the \`${DESIGN_LABEL}\` label to also request a design approval on any PR.`,

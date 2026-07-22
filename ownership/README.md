@@ -20,7 +20,8 @@ enforce the policy. Rules, in order of precedence:
    module owners are the only required reviewers (enforced natively by GitHub
    through CODEOWNERS). Nothing else is required.
 2. **Documentation** — all other changes are docs (`*.md`, `*.mdx`,
-   `*.stories.tsx`): one approval from `@factorialco/f0-general`.
+   `*.stories.tsx` or any file inside a `__stories__/` folder): one approval
+   from `@factorialco/f0-general`.
 3. **Feature** — the PR title starts with `feat`: one approval from
    `@factorialco/f0-devs` **and** one from `@factorialco/f0-designers`.
 4. **Anything else** — one approval from `@factorialco/f0-devs`.
