@@ -2,9 +2,32 @@
 
 This folder contains the data and tooling that assign a **mandatory owner team**
 to every module in `packages/react/src/sds/` and `packages/react/src/kits/`,
-and generate the root `CODEOWNERS` file from those declarations.
+generate the root `CODEOWNERS` file from those declarations, and enforce the
+**PR review policy** (which teams must approve each kind of PR).
 
 It is inspired by the `ownership/` system in `factorialco/factorial`.
+
+## Review policy
+
+Evaluated on every PR by the `Review policy` workflow
+([review-policy.ts](review-policy.ts)), which posts an explanatory comment and
+acts as a required status check. Rules, in order of precedence:
+
+1. **SDS/Kits modules** — every changed file belongs to an owned module: the
+   module owners are the only required reviewers (enforced natively by GitHub
+   through CODEOWNERS). Nothing else is required.
+2. **Documentation** — all other changes are docs (`*.md`, `*.mdx`,
+   `*.stories.tsx`): one approval from `@factorialco/f0-general`.
+3. **Feature** — the PR title starts with `feat`: one approval from
+   `@factorialco/f0-devs` **and** one from `@factorialco/f0-designers`.
+4. **Anything else** — one approval from `@factorialco/f0-devs`.
+
+Adding the `needs-design-review` label to any PR also requires an
+`@factorialco/f0-designers` approval (opt-in by anyone).
+
+Membership of the three policy teams is mirrored in [`teams.yml`](teams.yml)
+(`policy_teams`) because the default Actions token cannot read org team
+membership. Keep it in sync with the GitHub org teams.
 
 ## How it works
 

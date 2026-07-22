@@ -1,0 +1,33 @@
+name: Review policy
+on:
+  pull_request:
+    # edited: title changes affect the feat classification
+    # labeled/unlabeled: the needs-design-review label changes requirements
+    types: [opened, reopened, synchronize, edited, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted, dismissed]
+concurrency:
+  group: review-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  review-policy:
+    name: "🔍 Review policy"
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: pnpm
+      # Only the ownership package is needed — skips the full monorepo install
+      - name: Install ownership dependencies
+        run: pnpm install --filter @factorialco/f0-ownership --ignore-scripts
+      - name: Evaluate review policy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: pnpm --filter @factorialco/f0-ownership run review-policy
