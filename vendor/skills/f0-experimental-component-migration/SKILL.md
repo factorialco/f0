@@ -13,6 +13,8 @@ This skill guides the migration of components from `src/experimental/` to stable
 - Moving a component from `experimental/` to `components/`, `sds/`, or `ui/`.
 - Deprecating experimental exports in favor of new stable paths.
 
+> **This skill is invoked from `f0-component-promotion` (Step 5.2).** It assumes Phase 4 of the lifecycle (≥3 product teams in production, 60-day no-breaking-changes window, zero critical bugs, Foundations approval) has already been validated. If you haven't validated Phase 4, start with `f0-component-promotion` instead.
+
 ## Prerequisites
 
 - **ts-exported-info**: Use this tool to ensure no exports are dropped during migration.

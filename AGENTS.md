@@ -17,6 +17,7 @@ F0 is Factorial's design system. It provides modular, reusable UI components for
 - TypeScript strict — `any` is never acceptable
 - All code and comments in English
 - Use `pnpm` as the package manager
+- **Every new component follows the [F0 component lifecycle](packages/react/docs/definition-of-done.mdx)** — propose, design, build in `experimental/`, validate real-world use, then promote to stable.
 
 ### Accessibility skip ratchet (Path to AA)
 

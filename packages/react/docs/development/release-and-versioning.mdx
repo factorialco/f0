@@ -1,0 +1,193 @@
+import { Meta } from "@storybook/addon-docs/blocks"
+import { Callout } from "../_lifecycle-visuals"
+
+<Meta title="Lifecycle/Release and Versioning" />
+
+# Versioning
+
+This project is following the [Semantic Versioning](https://semver.org/)
+specification with automatic version bumping based in
+[convention commits](https://www.conventionalcommits.org/en/v1.0.0/).
+
+## Release process
+
+### Stable versions
+
+When a PR is merged into the `main` branch, the CI will automatically will check
+the commit messages, bump the version, update the changelog file, and create a
+release in github with the new version.
+
+Any new release (automatic or manual) triggers a workflow that will publish it
+to the github package registry.
+
+### Experimental (alpha) versions
+
+When a PR is created any commit into the PR will trigger the build and publish
+process, but the version will be marked as `alpha` and the version will be
+`x.y.z-alpha.pr-<pr-number>-<date>-<commit-sha>`. Where the `pr-number` is the
+number of the PR and the commit sha is the sha of the commit that triggered the
+build.
+
+Those versions are not meant to be used in production, but to be tested and
+reviewed by the team.
+
+**Those versions are ephemeral** :
+
+- We will delete all the alpha version of a PR once the PR is closed (merged or
+  not)
+- We will only keep the last 3 versions of each PR
+- We will delete any alpha version older than 1 day
+
+## Conventional Commits
+
+The Conventional Commits specification is a lightweight convention on top of
+commit messages. This convention dovetails with SemVer, by describing the
+features, fixes, and breaking changes made in commit messages.
+
+The commit message should be structured as follows:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+The commit contains the following structural elements, to communicate intent to
+the consumers of your library:
+
+- **fix**: a commit of the type fix patches a bug in your codebase (this
+  correlates with PATCH in Semantic Versioning).
+- **feat**: a commit of the type feat introduces a new feature to the codebase
+  (this correlates with MINOR in Semantic Versioning).
+- **BREAKING CHANGE**: a commit that has a footer BREAKING CHANGE:, or appends a
+  ! after the type/scope, introduces a breaking API change (correlating with
+  MAJOR in Semantic Versioning). A BREAKING CHANGE can be part of commits of any
+  type.
+- types other than fix: and feat: are allowed, for example build:, chore:, ci:,
+  docs:, style:, refactor:, perf:, test:, and others. will not trigger a new
+  version.
+
+[Read more about Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/#examples)
+
+## Using the package
+
+The package is published in the npmjs package registry so you can use it in your
+project as a regular package.
+
+```bash
+pnpm add @factorialco/f0@latest
+```
+
+Or to install an specific version go to
+https://www.npmjs.com/package/@factorialco/f0?activeTab=versions and check the
+version you want to install and execute:
+
+```bash
+pnpm add @factorialco/f0@[VERSION]
+```
+
+### Alpha versions
+
+Alpha version are published in a release branch in the f0 repo, those branches
+are named `npm/alpha-pr-<pr-number>` and are ephemeral branches that will be
+deleted after 5 days or after merge the PR to main.
+
+Use the following command to install an alpha version:
+
+```bash
+pnpm i github:factorialco/f0#npm/alpha-pr-[PR_NUMBER]
+```
+
+or if you want to install an specific commit:
+
+```bash
+pnpm i github:factorialco/f0#COMMIT_SHA
+```
+
+Visit https://github.com/factorialco/f0/branches/all?query=npm%2Falpha to get
+the list of the alpha branches and the commits
+
+---
+
+## Changing something already in use
+
+Adding something new rarely breaks anyone. Changing something consumers already depend on — a **stable** component's API, or a **token**, **icon**, or **pattern** in use — can. This is the highest-impact kind of change, so it follows a defined path and consumers are never surprised.
+
+<Callout title="Not the same as promotion">
+Moving a component from experimental/ to its stable home is handled by the f0-experimental-component-migration skill, which preserves every export via deprecated re-exports — so it breaks nobody and needs no migration guide. This section is for the other case: a change to an in-use surface that consumers must react to.
+</Callout>
+
+### 1. Prefer a non-breaking change
+
+Most "changes" don't have to break anything:
+
+- **Add, don't replace** — introduce the new prop / variant / token alongside the old one.
+- **Deprecate the old surface** with the three JSDoc tags (policy below). Consumers get an IDE warning and a migration link, but nothing breaks yet. If the change is a component moving path, the [`f0-experimental-component-migration`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-experimental-component-migration/SKILL.md) skill does exactly this — deprecated re-exports that keep the old import working.
+- Ship it as a normal `feat:` (minor bump).
+
+A hard break is the exception, not the default. Reach for it only when additive-plus-deprecation genuinely can't express the change.
+
+### 2. If a real break is unavoidable
+
+Because it's high impact, **align it in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) first** (design + Foundations), then:
+
+1. **Write a migration guide** — copy [`docs/migrations/TEMPLATE.md`](https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/TEMPLATE.md) to `docs/migrations/f0-<old>-to-<new>.md`, and link it from the `@migration` tag. Model it on the shipped `factorial-migrations/references/f0-forms-mapping.md` — precise find-patterns and before→after mapping tables are what let the migration be automated.
+2. **Deprecate the old surface** with `@deprecated` / `@removeIn` / `@migration` (policy below). The removal target is a future major version, ≥90 days out.
+3. **Bump correctly** — a breaking change is a **major** bump: use a `BREAKING CHANGE:` footer or `!` after the type (`feat(F0X)!: …`). See Conventional Commits above.
+4. **Announce it** — post in `#f0-support` with the guide link, what breaks, and the removal version. The IDE `@deprecated` warning carries the same message for anyone who missed the post.
+5. **Provide a codemod** when the change is mechanical (renames, prop moves) so consumers migrate with one command. When it needs human judgment, say so in the guide and rely on the step-by-step.
+
+### Who reviews
+
+- The **component owner** approves the change to their component.
+- **Foundations** reviews the API / visual change (design review) and owns any token, icon, or Core pattern change.
+- The PR goes through normal code review + `f0-quality-gate`.
+
+### How consumers migrate
+
+Consumers migrate any time between deprecation and the `@removeIn` version. For anything beyond a couple of call sites, they don't do it by hand — they run the **`factorial-migrations`** skill with your guide as the plan: it discovers every usage, groups files that share a backend resource, and dispatches parallel migration units. Nothing is removed until the `@removeIn` version ships, no earlier than 90 days after deprecation.
+
+---
+
+## Deprecation & Removal policy
+
+Components and props in F0 are removed in two stages: **deprecation** (mark as obsolete, keep working) and **removal** (delete the code). This policy makes the timeline predictable for consumers.
+
+### Deprecating a component or prop
+
+Add three JSDoc tags above the export. **All three are required.**
+
+```ts
+/**
+ * @deprecated Use F0NewComponent instead.
+ * @removeIn 2.0.0
+ * @migration https://github.com/factorialco/f0/blob/main/packages/react/docs/migrations/f0-old-to-new.md
+ */
+export const F0OldComponent = ...
+```
+
+| Tag           | Purpose                                                                              |
+| ------------- | ------------------------------------------------------------------------------------ |
+| `@deprecated` | One-line replacement guidance. Triggers IDE warnings for consumers.                  |
+| `@removeIn`   | Target version when the code will be deleted. Use a future major version.            |
+| `@migration`  | Link to a migration guide explaining how to switch. Required even for trivial cases. |
+
+For deprecated components, also update the story tag to `deprecated`:
+
+```ts
+tags: ["autodocs", "deprecated"]
+```
+
+### Removal SLA
+
+- **Minimum 1 quarter (≥90 days)** between deprecation and removal.
+- Removal happens in the version declared in `@removeIn`.
+- Foundations runs a **quarterly cleanup** to delete components whose `@removeIn` version has shipped.
+
+### Why this policy
+
+F0 currently has 60+ accumulated `@deprecated` markers with no removal policy, because the project never bumps the major version. This policy commits Foundations to either bump the major version on schedule or extend `@removeIn` explicitly — never silent perpetual deprecation.
+
+For the full lifecycle (proposal → stable → deprecated → removed), see the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).
