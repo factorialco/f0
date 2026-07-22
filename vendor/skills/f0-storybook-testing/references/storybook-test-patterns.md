@@ -83,7 +83,14 @@ Default on violation: **test fails**.
 
 ### Configuring a11y behaviour per story
 
-Skipping axe is **not allowed for new stories**. `a11y: { skipCi: true }` — whether written directly or via the deprecated `withSkipA11y()` helper — makes the test-runner **fail CI** unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.json` (a Path-to-AA burndown list mapping file → allowed skip call-site count; counts may only shrink — lower the count when you remove skips, delete the entry at zero, and adding a skip even to a grandfathered file fails `a11ySkipAllowlist.test.ts`). `test: "off"` is rejected the same way.
+Skipping axe is **not allowed for new stories**. `a11y: { skipCi: true }` — whether written directly or via the deprecated `withSkipA11y()` helper — makes the test-runner **fail CI** unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.json` (a Path-to-AA burndown list mapping file → allowed skip call-site count; counts may only shrink, and adding a skip even to a grandfathered file fails `a11ySkipAllowlist.test.ts`). `test: "off"` is rejected the same way.
+
+**Removing a skip (a11y burndown)?** Always do both in the same change:
+
+1. Remove the `skipCi: true` / `withSkipA11y(...)` usage from the story file (and fix the violations it was hiding, moving the stories to `test: "error"`).
+2. Lower that file's count in `.storybook/a11y-skip-allowlist.json` by the number of call-sites removed — delete the entry when it reaches zero.
+
+The sync unit test fails on any mismatch (`pnpm --filter @factorialco/f0-react exec vitest run src/lib/storybook-utils/a11ySkipAllowlist.test.ts`).
 
 Downgrade instead of skipping — axe always runs:
 

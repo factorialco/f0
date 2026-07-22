@@ -33,6 +33,7 @@ For story file structure and snapshot patterns, see the `f0-storybook-stories` s
 - axe runs on **every story** automatically after render (WCAG 2.x AA)
 - Default behaviour on violation: test **fails** (`"error"` mode)
 - Skipping axe is **not allowed for new stories**: `a11y: { skipCi: true }` (and the deprecated `withSkipA11y()` helper, which sets it) fail CI unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.json` — a burndown list of file → allowed call-site count that only shrinks (adding a skip even to a grandfathered file fails the unit tests). `test: "off"` is rejected too.
+- **When you remove a `skipCi` or `withSkipA11y` usage** (a11y burndown), you MUST update `.storybook/a11y-skip-allowlist.json` in the same change: lower that file's count by the number of call-sites removed, and delete the entry entirely when it reaches zero. Verify with `pnpm --filter @factorialco/f0-react exec vitest run src/lib/storybook-utils/a11ySkipAllowlist.test.ts` — it fails on any mismatch.
 - For known violations, downgrade instead of skipping:
 
 ```tsx
