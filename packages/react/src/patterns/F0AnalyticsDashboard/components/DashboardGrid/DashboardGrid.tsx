@@ -890,7 +890,9 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
  * wrapper height. Content height can itself depend on the container height
  * (horizontal scrollbars appear, toolbars wrap), so a second pass re-reads
  * at the height found by the first pass and keeps the larger value. Styles
- * are restored synchronously in the same task, so nothing paints in between.
+ * are restored synchronously in the same task, so nothing paints in between —
+ * and scrollable ancestors are snapshotted/restored around the collapse so the
+ * transient shrink can't leave their scroll offset clamped (see below).
  */
 function getRowContentMinHeight(
   rowEl: HTMLElement | null | undefined,
@@ -913,6 +915,16 @@ function getRowContentMinHeight(
     return min
   }
 
+  // Collapsing the row to 0 shrinks the scrollable content. `measure()` reads
+  // `scrollHeight`, forcing a synchronous layout while the row is collapsed —
+  // and any scrollable ancestor whose `scrollTop` now exceeds its reduced
+  // scroll range gets clamped by the browser *at that layout*. Restoring the
+  // height afterwards does NOT un-clamp it (the clamp already happened, and it
+  // is a scroll mutation, not a paint), so grabbing a resize handle would jump
+  // the dashboard's scroll position. Snapshot every scrollable ancestor's
+  // offsets and restore them in the same task so the clamp is never observed.
+  const scrollSnapshot = snapshotScrollAncestors(rowEl)
+
   rowEl.style.minHeight = "0px"
   rowEl.style.height = "0px"
   const collapsed = measure()
@@ -921,7 +933,42 @@ function getRowContentMinHeight(
 
   rowEl.style.height = prevHeight
   rowEl.style.minHeight = prevMinHeight
+  restoreScrollAncestors(scrollSnapshot)
   return settled
+}
+
+/**
+ * Record the scroll offsets of every scrollable ancestor of `el` (plus the
+ * document scrolling element). Used to restore them after a synchronous
+ * layout measurement that temporarily shrinks scrollable content — see
+ * `getRowContentMinHeight`.
+ */
+function snapshotScrollAncestors(
+  el: HTMLElement
+): Array<{ el: Element; top: number; left: number }> {
+  const snapshot: Array<{ el: Element; top: number; left: number }> = []
+  let node: HTMLElement | null = el.parentElement
+  while (node) {
+    if (
+      node.scrollHeight > node.clientHeight ||
+      node.scrollWidth > node.clientWidth
+    ) {
+      snapshot.push({ el: node, top: node.scrollTop, left: node.scrollLeft })
+    }
+    node = node.parentElement
+  }
+  const doc = typeof document !== "undefined" ? document.scrollingElement : null
+  if (doc) snapshot.push({ el: doc, top: doc.scrollTop, left: doc.scrollLeft })
+  return snapshot
+}
+
+function restoreScrollAncestors(
+  snapshot: Array<{ el: Element; top: number; left: number }>
+): void {
+  for (const { el, top, left } of snapshot) {
+    if (el.scrollTop !== top) el.scrollTop = top
+    if (el.scrollLeft !== left) el.scrollLeft = left
+  }
 }
 
 function getSlotWeight<Filters extends FiltersDefinition>(
