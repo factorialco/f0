@@ -67,3 +67,15 @@ export type NestedRowRegistryEntry<R extends RecordType> = {
   item: R
   depth: number
 }
+
+/**
+ * Normalizes a search term so `""` and `undefined` are treated as
+ * equivalent ("no active search"). Without this, a consumer calling
+ * `setSearch("")` on mount (e.g. to initialize a controlled search input)
+ * produces an `undefined → ""` transition that would otherwise be read as a
+ * real search change by the nested-rows cache invalidation and
+ * `hasActiveFilters` computation.
+ */
+export const normalizeSearch = (
+  search: string | undefined
+): string | undefined => search || undefined

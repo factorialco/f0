@@ -17,7 +17,14 @@
  */
 
 import { motion } from "motion/react"
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
 
@@ -170,9 +177,14 @@ const NestedRowContent = <
   )
 
   // Register so imperative controller operations can target this row.
+  // Keyed by `rowId` (stable per row) rather than `props.item` identity —
+  // data sources commonly recreate item objects on every render/refetch, and
+  // `rowId` already embeds the item's id, so this avoids an unregister +
+  // re-register cycle on every render.
   useEffect(
     () => registerNestedRow(rowId, props.item, depth),
-    [registerNestedRow, rowId, props.item, depth]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed by rowId, not props.item identity (see comment above)
+    [registerNestedRow, rowId, depth]
   )
 
   /**
@@ -225,6 +237,31 @@ const NestedRowContent = <
     autoLoadRequestedRef.current = true
     loadChildren()
   }, [open, isLoading, hasFetched, loadChildren])
+
+  /**
+   * Restores the pre-`hasFetched` behavior for rows whose cached children
+   * are empty: re-expanding used to refetch (the old guard was
+   * `!children.length`), but the `hasFetched` guard above now also blocks a
+   * legitimate empty result from ever being retried. Only refetch on a fresh
+   * collapsed→expanded transition (tracked via `previousOpenRef`), not on
+   * every render while the row stays open, so a genuinely empty result
+   * cannot cause a fetch loop.
+   */
+  const previousOpenRef = useRef(open)
+  useEffect(() => {
+    const wasOpen = previousOpenRef.current
+    previousOpenRef.current = open
+    if (
+      open &&
+      !wasOpen &&
+      hasFetched &&
+      !isLoading &&
+      !hasError &&
+      children.length === 0
+    ) {
+      loadChildren()
+    }
+  }, [open, hasFetched, isLoading, hasError, children.length, loadChildren])
 
   /**
    * Eager pagination (`children: "all"`): keeps fetching pages until the
@@ -324,18 +361,30 @@ const NestedRowContent = <
    */
   const shouldReduceMotion = useReducedMotion()
   const animated = expandAnimation !== "none" && !shouldReduceMotion
-  const [MotionRow] = useState(() =>
-    motion.create(
-      Row<
-        R,
-        Filters,
-        Sortings,
-        Summaries,
-        ItemActions,
-        NavigationFilters,
-        Grouping
-      >
-    )
+  // Lazy: only pay for a motion-wrapped component when an animation is
+  // actually configured — rows using the default "none" animation render the
+  // plain `Row` instead (see usages below). Keyed by whether animation is
+  // enabled (not by the specific mode) so switching between animated modes
+  // at runtime reuses the same wrapped component, while flipping from
+  // "none" to an animated mode still creates it on demand.
+  const hasAnimation = expandAnimation !== "none"
+  const MotionRow = useMemo(
+    () =>
+      hasAnimation
+        ? motion.create(
+            Row<
+              R,
+              Filters,
+              Sortings,
+              Summaries,
+              ItemActions,
+              NavigationFilters,
+              Grouping
+            >
+          )
+        : undefined,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed by hasAnimation only, see comment above
+    [hasAnimation]
   )
   const mountAnimationProps =
     expandAnimation !== "none"
@@ -379,7 +428,7 @@ const NestedRowContent = <
 
   return (
     <>
-      {animated && props.nestedRowProps?.animateMount ? (
+      {animated && props.nestedRowProps?.animateMount && MotionRow ? (
         <MotionRow
           {...selfRowProps}
           {...mountAnimationProps}
@@ -504,21 +553,22 @@ const NestedRowContent = <
               tableWithChildren: props.tableWithChildren,
             }
 
-            const leafChild = animated ? (
-              <MotionRow
-                {...leafRowProps}
-                {...mountAnimationProps}
-                custom={mountStaggerIndex(childIndex, childDepth)}
-                key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
-                ref={getChildRef()}
-              />
-            ) : (
-              <Row
-                {...leafRowProps}
-                key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
-                ref={getChildRef()}
-              />
-            )
+            const leafChild =
+              animated && MotionRow ? (
+                <MotionRow
+                  {...leafRowProps}
+                  {...mountAnimationProps}
+                  custom={mountStaggerIndex(childIndex, childDepth)}
+                  key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
+                  ref={getChildRef()}
+                />
+              ) : (
+                <Row
+                  {...leafRowProps}
+                  key={`row-${props.groupIndex}-${props.index}-${childIndex}`}
+                  ref={getChildRef()}
+                />
+              )
 
             if (RowWrapper) {
               return (

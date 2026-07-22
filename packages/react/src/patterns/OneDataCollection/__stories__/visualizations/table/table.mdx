@@ -523,6 +523,9 @@ method that controls how hierarchical data is loaded.
   these filters to also filter child items
 - `pagination`: (Optional) Pagination information for loading more children
   incrementally
+- `sortings`: (Optional) Current sorting state applied in the table
+- `search`: (Optional) Active search term (debounced), aligned with the main
+  collection fetch — use it to filter child items by the same search
 
 **Returns:** `Promise<ChildrenResponse<R>>`
 
@@ -879,6 +882,34 @@ Expand the first level on mount, keeping children paginated:
 Expand a branch matching a criteria, loading all its pages eagerly:
 
 <Canvas of={TableStories.TableNestedAutoExpandCriteria} meta={TableStories} />
+
+#### Search & filters alignment
+
+Nested rows stay aligned with the collection's search and filters:
+
+- `fetchChildren` receives the active (debounced) `search` term, together
+  with `filters` and `sortings`, so every level can apply the same criteria
+  as the main fetch.
+- The children cache and the explicit expansion overrides reset whenever the
+  search, filters, sortings or navigation filters change; any active
+  auto-expansion policy re-applies to the fresh data.
+- Expansion criteria receive `hasActiveFilters` in their context — `true`
+  while the collection has a search term or any applied filter — so a policy
+  can align expansion with filtering:
+
+```tsx
+nested: {
+  // Auto-expand matching branches while the user searches/filters,
+  // collapse back to the initial state when cleared
+  defaultExpanded: (ctx) => ctx.hasActiveFilters,
+  defaultExpandedChildren: "all",
+}
+```
+
+<Canvas
+  of={TableStories.TableNestedSearchAlignedExpansion}
+  meta={TableStories}
+/>
 
 #### Expand animations
 

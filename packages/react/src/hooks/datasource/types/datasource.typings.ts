@@ -109,11 +109,14 @@ export type DataSourceDefinition<
     filters,
     pagination,
     sortings,
+    search,
   }: {
     item: R
     filters?: FiltersState<Filters>
     pagination?: ChildrenPaginationInfo
     sortings?: SortingsState<Sortings>
+    /** Active search term (debounced), aligned with the main collection fetch */
+    search?: string
   }) =>
     | ChildrenResponse<R>
     | Promise<ChildrenResponse<R>>

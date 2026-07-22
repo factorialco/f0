@@ -78,10 +78,11 @@ const resolveExpansion = <R extends RecordType>(
 
 const matchesTarget = <R extends RecordType>(
   target: NestedRowTarget<R>,
-  entry: NestedRowRegistryEntry<R>
+  entry: NestedRowRegistryEntry<R>,
+  hasActiveFilters: boolean
 ): boolean => {
   if (typeof target === "function") {
-    return target({ item: entry.item, depth: entry.depth })
+    return target({ item: entry.item, depth: entry.depth, hasActiveFilters })
   }
   return "id" in entry.item && entry.item.id === target
 }
@@ -98,9 +99,12 @@ const buildExpandAllCriteria = <R extends RecordType>(
 export const NestedDataProvider = <R extends RecordType>({
   children,
   nested,
+  hasActiveFilters = false,
 }: {
   children: ReactNode
   nested?: NestedTableOptions<R>
+  /** Whether the collection has an active search term or any applied filter. */
+  hasActiveFilters?: boolean
 }) => {
   const [fetchedData, setFetchedData] = useState<
     Record<string, ChildrenResponse<R>>
@@ -135,6 +139,8 @@ export const NestedDataProvider = <R extends RecordType>({
   const expansionStateRef = useRef(expansionState)
   const nestedOptionsRef = useRef(nested)
   nestedOptionsRef.current = nested
+  const hasActiveFiltersRef = useRef(hasActiveFilters)
+  hasActiveFiltersRef.current = hasActiveFilters
   const registryRef = useRef(new Map<string, NestedRowRegistryEntry<R>>())
 
   /**
@@ -170,6 +176,7 @@ export const NestedDataProvider = <R extends RecordType>({
     nestedOptionsRef.current?.onExpandedChange?.({
       item: entry.item,
       depth: entry.depth,
+      hasActiveFilters: hasActiveFiltersRef.current,
       expanded,
     })
   }, [])
@@ -202,7 +209,11 @@ export const NestedDataProvider = <R extends RecordType>({
       pendingExpandRef.current.delete(itemId)
 
       const current = expansionStateRef.current
-      const resolved = resolveExpansion(current, rowId, { item, depth })
+      const resolved = resolveExpansion(current, rowId, {
+        item,
+        depth,
+        hasActiveFilters: hasActiveFiltersRef.current,
+      })
       const eager = pendingOptions.children === "all"
       if (resolved.expanded && (!eager || resolved.eager)) return
 
@@ -229,15 +240,21 @@ export const NestedDataProvider = <R extends RecordType>({
 
   const resolveRowExpansion = useCallback(
     (rowId: string, item: R, depth: number) =>
-      resolveExpansion(expansionState, rowId, { item, depth }),
-    [expansionState]
+      resolveExpansion(expansionState, rowId, {
+        item,
+        depth,
+        hasActiveFilters,
+      }),
+    [expansionState, hasActiveFilters]
   )
 
   const engine = useMemo<NestedExpansionEngine<R>>(() => {
     const resolveTargets = (target: NestedRowTarget<R>) => {
       const matches: Array<{ rowId: string } & NestedRowRegistryEntry<R>> = []
       registryRef.current.forEach((entry, rowId) => {
-        if (matchesTarget(target, entry)) matches.push({ rowId, ...entry })
+        if (matchesTarget(target, entry, hasActiveFiltersRef.current)) {
+          matches.push({ rowId, ...entry })
+        }
       })
       return matches
     }
@@ -259,6 +276,7 @@ export const NestedDataProvider = <R extends RecordType>({
         const resolved = resolveExpansion(current, match.rowId, {
           item: match.item,
           depth: match.depth,
+          hasActiveFilters: hasActiveFiltersRef.current,
         })
         const nextExpanded = resolveNext(resolved)
         overrides[match.rowId] = nextExpanded
@@ -316,6 +334,7 @@ export const NestedDataProvider = <R extends RecordType>({
         return resolveExpansion(expansionStateRef.current, first.rowId, {
           item: first.item,
           depth: first.depth,
+          hasActiveFilters: hasActiveFiltersRef.current,
         }).expanded
       },
       getExpandedItems: () => {
@@ -324,7 +343,11 @@ export const NestedDataProvider = <R extends RecordType>({
           const { expanded } = resolveExpansion(
             expansionStateRef.current,
             rowId,
-            { item: entry.item, depth: entry.depth }
+            {
+              item: entry.item,
+              depth: entry.depth,
+              hasActiveFilters: hasActiveFiltersRef.current,
+            }
           )
           if (expanded) items.push(entry.item)
         })

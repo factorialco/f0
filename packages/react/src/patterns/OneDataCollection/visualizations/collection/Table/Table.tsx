@@ -51,6 +51,7 @@ import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
+import { normalizeSearch } from "./nested/internal-types"
 import { NestedDataProvider } from "./providers/NestedProvider"
 import { useCreateSelectionRegistry } from "./providers/SelectionRegistryProvider"
 import { useSticky } from "./useSticky"
@@ -329,6 +330,25 @@ export const TableCollection = <
     source.itemsWithChildren?.(item)
   )
 
+  /**
+   * Whether the collection has an active search term or any applied filter.
+   * Exposed to nested-expansion criteria (`NestedExpansionContext`) so
+   * expansion policies can align with filtering.
+   */
+  const hasActiveFilters = useMemo(() => {
+    // Use the debounced + normalized search exclusively (not `currentSearch`)
+    // so this stays in sync with the cache-invalidation check in
+    // `useLoadChildren`: falling back to the un-debounced value on the first
+    // keystroke would flip `hasActiveFilters` ~200ms before the nested-rows
+    // cache is actually invalidated.
+    if (normalizeSearch(source.debouncedCurrentSearch)) return true
+    return Object.values(source.currentFilters ?? {}).some((value) =>
+      Array.isArray(value)
+        ? value.length > 0
+        : value !== undefined && value !== null
+    )
+  }, [source.debouncedCurrentSearch, source.currentFilters])
+
   /*
    * Initial loading
    */
@@ -395,7 +415,7 @@ export const TableCollection = <
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
-      <NestedDataProvider nested={nested}>
+      <NestedDataProvider nested={nested} hasActiveFilters={hasActiveFilters}>
         <div
           className={cn(
             bordered &&

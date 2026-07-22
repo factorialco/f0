@@ -1034,22 +1034,37 @@ const countOrgDescendants = (node: OrgNode): number =>
 
 const ORG_CHILDREN_PER_PAGE = 3
 
-const useOrgTreeSource = () =>
+const orgSubtreeMatches = (node: OrgNode, term: string): boolean =>
+  node.name.toLowerCase().includes(term.toLowerCase()) ||
+  (node.children?.some((child) => orgSubtreeMatches(child, term)) ?? false)
+
+const useOrgTreeSource = ({ searchable = false } = {}) =>
   useDataCollectionSource({
+    search: searchable ? { enabled: true, sync: true } : undefined,
     dataAdapter: {
-      fetchData: async () => ({ records: orgTree }),
+      fetchData: async ({ search }: { search?: string }) => ({
+        records: search
+          ? orgTree.filter((node) => orgSubtreeMatches(node, search))
+          : orgTree,
+      }),
     },
     itemsWithChildren: (item: OrgNode) => !!item.children?.length,
     childrenCount: ({ item }: { item: OrgNode }) => item.children?.length,
     fetchChildren: async ({
       item,
       pagination,
+      search,
     }: {
       item: OrgNode
       pagination?: ChildrenPaginationInfo
+      search?: string
     }) => {
       await new Promise((resolve) => setTimeout(resolve, 400))
-      const all = item.children ?? []
+      // Children fetches receive the active search term, aligned with the
+      // main collection fetch — keep only branches matching it.
+      const all = (item.children ?? []).filter(
+        (child) => !search || orgSubtreeMatches(child, search)
+      )
       const currentPage = (pagination?.currentPage ?? 0) + 1
       const start = (currentPage - 1) * ORG_CHILDREN_PER_PAGE
       return {
@@ -1085,10 +1100,12 @@ const orgColumns = [
 
 const OrgNestedTable = ({
   nested,
+  searchable = false,
 }: {
   nested?: NestedTableOptions<OrgNode>
+  searchable?: boolean
 }) => {
-  const source = useOrgTreeSource()
+  const source = useOrgTreeSource({ searchable })
 
   return (
     <OneDataCollection
@@ -1296,6 +1313,46 @@ export const TableNestedAutoExpandCriteria: Story = {
             defaultExpanded: (ctx) =>
               ctx.depth === 0 || ctx.item.id.startsWith("engineering"),
             defaultExpandedChildren: "all",
+          }}
+        />
+      </div>
+    )
+  },
+}
+
+/**
+ * Search-aligned expansion: the expansion context exposes
+ * `hasActiveFilters` (true while the collection has a search term or any
+ * filter applied), so a policy can react to it — here the tree auto-expands
+ * with all children pages loaded while the user searches, and collapses
+ * back when the search is cleared. `fetchChildren` receives the active
+ * search term, so each level only shows matching branches, and the children
+ * cache resets automatically whenever the search or filters change.
+ */
+export const TableNestedSearchAlignedExpansion: Story = {
+  render: function Render() {
+    const [resetKey, setResetKey] = useState(0)
+
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-f1-foreground-secondary">
+            Try searching “Web”, “Growth” or “Ana”
+          </span>
+          <F0Button
+            size="sm"
+            variant="outline"
+            label="Reset to initial state"
+            onClick={() => setResetKey((key) => key + 1)}
+          />
+        </div>
+        <OrgNestedTable
+          key={resetKey}
+          searchable
+          nested={{
+            defaultExpanded: (ctx) => ctx.hasActiveFilters,
+            defaultExpandedChildren: "all",
+            expandAnimation: "stagger",
           }}
         />
       </div>
