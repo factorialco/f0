@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.46.5](https://github.com/factorialco/f0/compare/f0-react-v4.46.4...f0-react-v4.46.5) (2026-07-22)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** dashboard rows can't be shrunk + chart tooltips vanish on hover pause ([#4740](https://github.com/factorialco/f0/issues/4740)) ([8c6ea20](https://github.com/factorialco/f0/commit/8c6ea20785dc90396ff5fc264fef5c7d26ffff48))
+
 ## [4.46.4](https://github.com/factorialco/f0/compare/f0-react-v4.46.3...f0-react-v4.46.4) (2026-07-21)
 
 
