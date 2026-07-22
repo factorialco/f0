@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.47.2](https://github.com/factorialco/f0/compare/f0-react-v4.47.1...f0-react-v4.47.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* **SectionHeader:** use 1px dashed separator aligned with border tokens ([#4792](https://github.com/factorialco/f0/issues/4792)) ([2d91aec](https://github.com/factorialco/f0/commit/2d91aec078a61794851da96ebf6040d818c1c6b2))
+
 ## [4.47.1](https://github.com/factorialco/f0/compare/f0-react-v4.47.0...f0-react-v4.47.1) (2026-07-22)
 
 
