@@ -27,19 +27,21 @@ export function RatingQuestionField({
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3 md:grid-cols-5">
+    <div className="flex flex-wrap gap-3">
       {options.map((option) => (
         <div
           key={option.value}
           className={cn(
-            "flex h-10 min-w-20 items-center justify-center rounded-md border border-solid border-f1-border text-center font-medium",
+            "flex min-h-10 min-w-20 grow basis-auto items-center justify-center rounded-md border border-solid border-f1-border px-3 py-1.5 text-center font-medium",
             disabled ? "cursor-not-allowed" : "cursor-pointer",
             value === option.value &&
               "border-f1-border-selected bg-f1-background-selected-secondary"
           )}
           onClick={() => handleClick(option.value)}
         >
-          <span className="text-base font-medium">{option.label}</span>
+          <span className="text-base font-medium leading-tight">
+            {option.label}
+          </span>
         </div>
       ))}
     </div>
