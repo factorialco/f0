@@ -1,0 +1,14 @@
+{
+  "name": "@factorialco/f0-ownership",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "tsx generate.ts",
+    "check": "tsx check.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.8.1",
+    "yaml": "^2.7.0"
+  }
+}

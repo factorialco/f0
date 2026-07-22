@@ -1,0 +1,17 @@
+# Teams that can be used as `owner` or reviewer in a module's package.yml.
+# They must exist in the GitHub org (https://github.com/orgs/factorialco/teams)
+# and have at least write access to this repository to act as code owners.
+teams:
+  - "@factorialco/f0"
+  - "@factorialco/f0-devs"
+  - "@factorialco/f0-designers"
+  - "@factorialco/f0-general"
+  - "@factorialco/dev"
+  - "@factorialco/mobile"
+  - "@factorialco/foundations"
+  - "@factorialco/organizations"
+  - "@factorialco/time-tracking"
+  - "@factorialco/growth-product"
+  - "@factorialco/platform-ai-building-blocks"
+  - "@factorialco/talent-engagement"
+  - "@factorialco/talent-spaces"

@@ -1,0 +1,6 @@
+# Global rules, maintained by hand. Module-level ownership (sds/, kits/)
+# is declared in each module's package.yml — do not add those paths here.
+* @factorialco/f0-devs
+/packages/react-native/ @factorialco/mobile
+/packages/react/src/experimental/ @factorialco/dev
+/packages/react/src/ai/ @factorialco/platform-ai-building-blocks
