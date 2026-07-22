@@ -11,7 +11,7 @@
 /packages/react/src/ai/ @factorialco/platform-ai-building-blocks
 
 # --- Module ownership (generated from package.yml manifests) ---
-/packages/react/src/kits/Charts/ @factorialco/f0
+/packages/react/src/kits/Charts/ @factorialco/f0-general
 /packages/react/src/kits/F0DataChart/ @factorialco/platform-ai-building-blocks
 /packages/react/src/kits/Social/ @factorialco/talent-spaces
 /packages/react/src/sds/ai/ @factorialco/platform-ai-building-blocks
