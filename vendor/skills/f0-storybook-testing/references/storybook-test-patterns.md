@@ -83,7 +83,7 @@ Default on violation: **test fails**.
 
 ### Configuring a11y behaviour per story
 
-Skipping axe is **not allowed for new stories**. `a11y: { skipCi: true }` — whether written directly or via the deprecated `withSkipA11y()` helper — makes the test-runner **fail CI** unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.ts` (a Path-to-AA burndown list that may only shrink; when you remove the last skip from a file, delete its allowlist entry). `test: "off"` is rejected the same way.
+Skipping axe is **not allowed for new stories**. `a11y: { skipCi: true }` — whether written directly or via the deprecated `withSkipA11y()` helper — makes the test-runner **fail CI** unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.json` (a Path-to-AA burndown list mapping file → allowed skip call-site count; counts may only shrink — lower the count when you remove skips, delete the entry at zero, and adding a skip even to a grandfathered file fails `a11ySkipAllowlist.test.ts`). `test: "off"` is rejected the same way.
 
 Downgrade instead of skipping — axe always runs:
 
