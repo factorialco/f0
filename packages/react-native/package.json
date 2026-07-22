@@ -114,7 +114,7 @@
     "tailwind-variants": "^3.2.2"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
+    "@babel/core": "^7.29.6",
     "@babel/preset-typescript": "^7.28.5",
     "@expo/ui": "~56.0.18",
     "@expo/vector-icons": "^15.1.1",
