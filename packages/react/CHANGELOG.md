@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.47.0](https://github.com/factorialco/f0/compare/f0-react-v4.46.5...f0-react-v4.47.0) (2026-07-22)
+
+
+### Features
+
+* **ai:** toolbarStart slot in the chat composer action row ([#4713](https://github.com/factorialco/f0/issues/4713)) ([8e21ef3](https://github.com/factorialco/f0/commit/8e21ef325703b0db35bcb63b234cdeef5b0b98a7))
+
 ## [4.46.5](https://github.com/factorialco/f0/compare/f0-react-v4.46.4...f0-react-v4.46.5) (2026-07-22)
 
 
