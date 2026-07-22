@@ -4,23 +4,27 @@ import { describe, expect, it } from "vitest"
 
 const packageRoot = join(__dirname, "../../..")
 
-const allowlist: string[] = JSON.parse(
+const allowlist: Record<string, number> = JSON.parse(
   readFileSync(
     join(packageRoot, ".storybook/a11y-skip-allowlist.json"),
     "utf-8"
   )
 ).files
 
-const findStoryFilesWithSkip = (dir: string): string[] => {
-  const results: string[] = []
+const countSkipCallSites = (content: string): number =>
+  (content.match(/skipCi\s*:/g) || []).length +
+  (content.match(/withSkipA11y\s*\(/g) || []).length
+
+const findStoryFilesWithSkip = (dir: string): Record<string, number> => {
+  const results: Record<string, number> = {}
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const fullPath = join(dir, entry.name)
     if (entry.isDirectory()) {
-      results.push(...findStoryFilesWithSkip(fullPath))
+      Object.assign(results, findStoryFilesWithSkip(fullPath))
     } else if (entry.name.endsWith(".stories.tsx")) {
-      const content = readFileSync(fullPath, "utf-8")
-      if (/skipCi\s*:/.test(content) || /withSkipA11y\s*\(/.test(content)) {
-        results.push(relative(packageRoot, fullPath))
+      const count = countSkipCallSites(readFileSync(fullPath, "utf-8"))
+      if (count > 0) {
+        results[relative(packageRoot, fullPath)] = count
       }
     }
   }
@@ -28,10 +32,10 @@ const findStoryFilesWithSkip = (dir: string): string[] => {
 }
 
 describe("a11y skip allowlist (.storybook/a11y-skip-allowlist.json)", () => {
-  const actual = findStoryFilesWithSkip(join(packageRoot, "src")).sort()
+  const actual = findStoryFilesWithSkip(join(packageRoot, "src"))
 
   it("no new story file skips axe (use a11y: { test: 'todo' } instead)", () => {
-    const unlisted = actual.filter((file) => !allowlist.includes(file))
+    const unlisted = Object.keys(actual).filter((file) => !(file in allowlist))
     expect(
       unlisted,
       `These story files use a11y skipCi/withSkipA11y but are not in the ` +
@@ -42,12 +46,32 @@ describe("a11y skip allowlist (.storybook/a11y-skip-allowlist.json)", () => {
     ).toEqual([])
   })
 
-  it("has no stale entries (Path to AA burndown — the list may only shrink)", () => {
-    const stale = allowlist.filter((file) => !actual.includes(file))
+  it("no grandfathered file gains skip call-sites (counts may only shrink)", () => {
+    const grown = Object.keys(actual)
+      .filter((file) => file in allowlist && actual[file] > allowlist[file])
+      .map(
+        (file) => `${file}: allowed ${allowlist[file]}, found ${actual[file]}`
+      )
+    expect(
+      grown,
+      `These grandfathered files have MORE skipCi/withSkipA11y call-sites ` +
+        `than their allowlisted count — adding new skips is not allowed, even ` +
+        `in grandfathered files. Use a11y: { test: "todo" } for the new story ` +
+        `instead.`
+    ).toEqual([])
+  })
+
+  it("has no stale entries (Path to AA burndown — counts may only shrink)", () => {
+    const stale = Object.keys(allowlist)
+      .filter((file) => (actual[file] ?? 0) < allowlist[file])
+      .map(
+        (file) =>
+          `${file}: allowed ${allowlist[file]}, found ${actual[file] ?? 0}`
+      )
     expect(
       stale,
-      `These allowlist entries no longer match a story file using ` +
-        `skipCi/withSkipA11y. If you removed the skip: delete the entry from ` +
+      `These allowlist entries exceed the skips actually present. If you ` +
+        `removed skips: lower the count — or delete the entry at zero — in ` +
         `.storybook/a11y-skip-allowlist.json (that diff is the burndown ` +
         `metric 🎉). If you moved the file: update the entry's path.`
     ).toEqual([])

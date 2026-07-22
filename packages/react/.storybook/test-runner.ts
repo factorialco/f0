@@ -10,14 +10,18 @@ import type Reporter from "axe-playwright/dist/types"
 import { appendFileSync, readFileSync } from "fs"
 
 // Story files grandfathered to skip axe while their violations are burned
-// down (Path to AA). The list may only shrink — see the JSON file.
+// down (Path to AA). Maps file → number of allowed skip call-sites; counts
+// may only shrink. Enforced per-count by a11ySkipAllowlist.test.ts; here we
+// only need the file names.
 const a11ySkipAllowlist: Set<string> = new Set(
-  JSON.parse(
-    readFileSync(
-      new URL("./a11y-skip-allowlist.json", import.meta.url),
-      "utf-8"
-    )
-  ).files
+  Object.keys(
+    JSON.parse(
+      readFileSync(
+        new URL("./a11y-skip-allowlist.json", import.meta.url),
+        "utf-8"
+      )
+    ).files
+  )
 )
 
 const A11Y_TEST_MODES = ["error", "todo", "warning"] as const

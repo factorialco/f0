@@ -322,7 +322,7 @@ export const Snapshot: Story = {
 
 ### Snapshot stories with known a11y violations
 
-Skipping axe (`withSkipA11y` / `a11y: { skipCi: true }`) is deprecated and **fails CI for new stories** (only files grandfathered in `.storybook/a11y-skip-allowlist.ts` may keep it). When the snapshot story contains states that intentionally fail a11y checks (e.g., disabled states), downgrade instead — axe still runs, non-blocking:
+Skipping axe (`withSkipA11y` / `a11y: { skipCi: true }`) is deprecated and **fails CI for new stories** (only files grandfathered in `.storybook/a11y-skip-allowlist.json` may keep it, up to their recorded call-site count). When the snapshot story contains states that intentionally fail a11y checks (e.g., disabled states), downgrade instead — axe still runs, non-blocking:
 
 ```tsx
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
