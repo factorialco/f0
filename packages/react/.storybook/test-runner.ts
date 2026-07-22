@@ -77,7 +77,17 @@ const config: TestRunnerConfig = {
       const violations = await getViolations(page, "#storybook-root", {
         runOnly: {
           type: "tag",
-          values: ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"],
+          // WCAG 2.0, 2.1 and 2.2 at levels A and AA — matches the Plexus
+          // audit scope (UNE-EN 301549 + WCAG 2.1/2.2). AAA and axe's
+          // non-normative best-practice rules are intentionally excluded.
+          values: [
+            "wcag2a",
+            "wcag2aa",
+            "wcag21a",
+            "wcag21aa",
+            "wcag22a",
+            "wcag22aa",
+          ],
         },
       })
 
