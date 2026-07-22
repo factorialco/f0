@@ -378,6 +378,12 @@ export const defaultTranslations = {
         reason: "Reason",
         status: "Status",
       },
+      jobPosting: {
+        vacancies: "Vacancies",
+        vacanciesProgress: "{{filled}} of {{total}} vacancies filled",
+        published: "Published",
+        status: "Status",
+      },
     },
     credits: {
       title: "Credits",
