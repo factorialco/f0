@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.47.1](https://github.com/factorialco/f0/compare/f0-react-v4.47.0...f0-react-v4.47.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* **react:** wrap survey rating options so long labels don't clip ([#4769](https://github.com/factorialco/f0/issues/4769)) ([8fb8b14](https://github.com/factorialco/f0/commit/8fb8b1414404935c2930f6bf37b89d60b311f9ca))
+
 ## [4.47.0](https://github.com/factorialco/f0/compare/f0-react-v4.46.5...f0-react-v4.47.0) (2026-07-22)
 
 
