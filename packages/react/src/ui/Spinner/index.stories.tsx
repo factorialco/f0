@@ -33,3 +33,11 @@ export const WithDataTestId: Story = {
     await expect(canvas.getByTestId("spinner-test-id")).toBeInTheDocument()
   },
 }
+
+// THROWAWAY: deliberate ratchet violation to prove CI rejects a new skip.
+// This must fail both the Unit Tests (unlisted file) and Storybook Tests
+// (runtime guard) jobs. Not for merge.
+export const RatchetDemoDoNotMerge: Story = {
+  render: () => <Spinner size="medium" />,
+  parameters: { a11y: { skipCi: true } },
+}
