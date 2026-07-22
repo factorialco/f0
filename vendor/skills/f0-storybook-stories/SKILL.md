@@ -59,6 +59,8 @@ export const Snapshot: Story = {
 // With known a11y debt (axe still runs, non-blocking):
 //   withSnapshot({ a11y: { test: "todo" } })
 // Never skip axe (withSkipA11y / a11y.skipCi are deprecated and fail CI for new stories).
+// If you REMOVE an existing skipCi/withSkipA11y usage, also lower that file's count in
+// .storybook/a11y-skip-allowlist.json (delete the entry at zero) — a unit test enforces this.
 ```
 
 ### Tags
