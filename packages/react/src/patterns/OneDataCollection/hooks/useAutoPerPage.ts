@@ -1,6 +1,26 @@
 import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 /**
+ * Whether a collection should derive its page size from the available height.
+ *
+ * It applies to page-based, `fullHeight` collections that either opt in
+ * explicitly with `perPage: "auto"` or simply leave `perPage` unset — in a
+ * full-height layout an unspecified page size means "fill the height", so it
+ * defaults to auto instead of a hardcoded fallback. A numeric `perPage` is
+ * always respected as-is, and without `fullHeight` there is no bounded height
+ * to measure so it never applies.
+ */
+export function shouldAutoSizePerPage(
+  dataAdapter: { paginationType?: string; perPage?: number | "auto" },
+  fullHeight: boolean | undefined
+): boolean {
+  if (!fullHeight) return false
+  if (dataAdapter.paginationType !== "pages") return false
+  const perPage = dataAdapter.perPage
+  return perPage === "auto" || perPage === undefined
+}
+
+/**
  * Upper bound for the resolved page size, so a very tall container never
  * fetches an unreasonably large page.
  */

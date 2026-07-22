@@ -74,6 +74,7 @@ import { DataCollectionSource } from "./hooks/useDataCollectionSource"
 import {
   ESTIMATED_LIST_ROW_HEIGHT,
   ESTIMATED_ROW_HEIGHT,
+  shouldAutoSizePerPage,
   useAutoPerPage,
 } from "./hooks/useAutoPerPage"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
@@ -390,11 +391,20 @@ const OneDataCollectionComp = <
   // Flips true once the first page of data has rendered, so the auto page size
   // can measure the real content (see useAutoPerPage). Set from onLoadData.
   const [firstDataLoaded, setFirstDataLoaded] = useState(false)
-  const autoPerPageRequested =
+  // Auto page size is on when a page-based full-height collection either asks
+  // for `perPage: "auto"` or leaves `perPage` unset (in a full-height layout an
+  // unspecified page size means "fill the height").
+  const autoPerPageEnabled = shouldAutoSizePerPage(
+    source.dataAdapter,
+    fullHeight
+  )
+  // Explicit `perPage: "auto"` without fullHeight is a misconfiguration worth
+  // warning about; an unset perPage without fullHeight just uses the default.
+  const autoPerPageMisconfigured =
     "perPage" in source.dataAdapter &&
     source.dataAdapter.perPage === "auto" &&
-    source.dataAdapter.paginationType === "pages"
-  const autoPerPageEnabled = autoPerPageRequested && !!fullHeight
+    source.dataAdapter.paginationType === "pages" &&
+    !fullHeight
   // The auto page size seeds the first page with a per-visualization row-height
   // estimate, then measures the real content. The estimate must be a LOWER
   // bound of the real row height so the seed over-fetches (or matches) and the
@@ -426,26 +436,23 @@ const OneDataCollectionComp = <
   }, [currentVisualization])
 
   useEffect(() => {
-    if (autoPerPageRequested && !fullHeight) {
+    if (autoPerPageMisconfigured) {
       console.warn(
         '[OneDataCollection] perPage: "auto" requires the fullHeight prop — falling back to the default page size.'
       )
     }
-  }, [autoPerPageRequested, fullHeight])
+  }, [autoPerPageMisconfigured])
 
   // Resolve `perPage: "auto"` to the measured page size. Memoized narrowly on
   // the source adapter and the resolved size so its reference only changes when
   // one of those changes — otherwise a fresh adapter object on every render of
   // effectiveSource would retrigger useData's fetch in an infinite loop.
   const resolvedDataAdapter = useMemo(() => {
-    if (
-      "perPage" in source.dataAdapter &&
-      source.dataAdapter.perPage === "auto"
-    ) {
+    if (autoPerPageEnabled) {
       return { ...source.dataAdapter, perPage: autoPerPage }
     }
     return source.dataAdapter
-  }, [source.dataAdapter, autoPerPage])
+  }, [source.dataAdapter, autoPerPageEnabled, autoPerPage])
 
   // Patched source with per-viz currentFilters to avoid stale filters during
   // transitions, and with `perPage: "auto"` resolved to the measured value

@@ -76,15 +76,18 @@ OneDataCollection component will use the 100% of that wrapper.
 
 With page-based pagination, a fixed `perPage` rarely matches the space the
 collection actually has: on tall screens rows stop short of the pagination
-footer, and on short ones the page scrolls internally. Setting
-`perPage: "auto"` on the data adapter derives the page size from the measured
-content so a page shows **exactly the rows that fit** — never a partial,
-overflowing row — up to a maximum of **30** items.
+footer, and on short ones the page scrolls internally. Deriving the page size
+from the measured content instead makes a page show **exactly the rows that
+fit** — never a partial, overflowing row — up to a maximum of **30** items.
+
+In a `fullHeight` collection this is the **default**: just leave `perPage`
+unset and the page fills the height. Set `perPage: "auto"` explicitly if you
+prefer to be verbose, or a number to force a fixed page size.
 
 ```tsx
+// full-height + page-based → auto by default (no perPage needed)
 const dataAdapter = {
   paginationType: "pages",
-  perPage: "auto",
   fetchData: ...,
 }
 ```
