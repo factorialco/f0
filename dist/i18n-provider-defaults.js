@@ -347,6 +347,8 @@ const e = {
     date: "Date",
     custom: "Custom period",
     selectDate: "Select Date",
+    selectMonth: "Select month",
+    selectYear: "Select year",
     compareTo: "Compare to",
     presets: {
       last7Days: "Last 7 days",
@@ -654,6 +656,8 @@ const e = {
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
+    openDocument: "Open document",
+    documentPreview: "Document preview",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
@@ -907,7 +911,11 @@ const e = {
       view: "View",
       addBlockedHint: "Finish filling out the last item you just added in order to add another one",
       addBlockedErrorHint: "Fix the errors in the existing items before adding another one",
-      addBlockedMaxHint: "You've reached the maximum number of items"
+      addBlockedMaxHint: "You've reached the maximum number of items",
+      removeConfirmTitle: "Remove item?",
+      removeConfirmMessage: "This item will be removed. This action cannot be undone.",
+      removeError: "Couldn't remove the item. Please try again.",
+      removeErrorTitle: "Remove failed"
     },
     moreInformation: "More information",
     validation: {
@@ -969,7 +977,12 @@ const e = {
     rotate: "Rotate",
     print: "Print",
     download: "Download",
-    loading: "Loading document"
+    loading: "Loading document",
+    previewFailed: "Preview isn't available for this file",
+    showingFirstRows: {
+      one: "Showing the first row",
+      other: "Showing the first {{count}} rows"
+    }
   }
 };
 export {

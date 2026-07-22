@@ -549,6 +549,15 @@ export declare type AiChatProviderProps = {
      */
     side?: "left" | "right";
     /**
+     * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+     * `side`, keeping everything in one panel. Set it to the opposite edge to
+     * split them — e.g. communications: conversations dock left while the AI
+     * chat keeps its right-side panel and toggle. The two are still exclusive
+     * (opening one swaps the other out); only the main content moves during
+     * the swap, uncovering the incoming panel in place.
+     */
+    panelContentSide?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -808,6 +817,16 @@ declare type AiChatProviderReturnValue = {
     /** Clear the custom panel content and fall back to the F0.ai chat. */
     clearPanelContent: () => void;
     /**
+     * Id of the hosted content that was showing when the page last unloaded,
+     * pending restoration. The panel holds a skeleton (no AI-chat flash) until
+     * the host re-mounts it via `setPanelContent`, cancels via
+     * `cancelPanelContentRestore` (content no longer accessible), or a safety
+     * timeout falls back to the AI chat.
+     */
+    restoringPanelContentId: string | null;
+    /** Give up on restoring the persisted panel content — show the AI chat. */
+    cancelPanelContentRestore: () => void;
+    /**
      * Edge the whole side panel docks to — the AI chat, hosted content and the
      * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
      * chat-first experience (e.g. communications), where left is comfier to
@@ -816,6 +835,14 @@ declare type AiChatProviderReturnValue = {
     panelSide: "left" | "right";
     /** Set which edge the side panel docks to. */
     setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /**
+     * Edge hosted panel content (`setPanelContent`) docks to. Defaults to
+     * `panelSide`; when it differs, the AI chat and hosted content render in
+     * separate windows, one per edge, still mutually exclusive.
+     */
+    panelContentSide: "left" | "right";
+    /** Set which edge hosted panel content docks to. */
+    setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
 } & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -840,6 +867,8 @@ declare interface AiChatState {
     enabled: boolean;
     /** Initial edge the panel docks to. @default "right" */
     side?: "left" | "right";
+    /** Initial edge hosted panel content docks to. Defaults to `side`. */
+    panelContentSide?: "left" | "right";
     agent?: string;
     initialMessage?: string | string[];
     chatHeader?: React.ReactNode;
@@ -4667,6 +4696,8 @@ export declare const defaultTranslations: {
         readonly date: "Date";
         readonly custom: "Custom period";
         readonly selectDate: "Select Date";
+        readonly selectMonth: "Select month";
+        readonly selectYear: "Select year";
         readonly compareTo: "Compare to";
         readonly presets: {
             readonly last7Days: "Last 7 days";
@@ -4960,6 +4991,8 @@ export declare const defaultTranslations: {
         readonly closePreview: "Close";
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
+        readonly openDocument: "Open document";
+        readonly documentPreview: "Document preview";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -5205,6 +5238,10 @@ export declare const defaultTranslations: {
             readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
             readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
             readonly addBlockedMaxHint: "You've reached the maximum number of items";
+            readonly removeConfirmTitle: "Remove item?";
+            readonly removeConfirmMessage: "This item will be removed. This action cannot be undone.";
+            readonly removeError: "Couldn't remove the item. Please try again.";
+            readonly removeErrorTitle: "Remove failed";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -5267,6 +5304,11 @@ export declare const defaultTranslations: {
         readonly print: "Print";
         readonly download: "Download";
         readonly loading: "Loading document";
+        readonly previewFailed: "Preview isn't available for this file";
+        readonly showingFirstRows: {
+            readonly one: "Showing the first row";
+            readonly other: "Showing the first {{count}} rows";
+        };
     };
 };
 
@@ -6303,7 +6345,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -6314,7 +6356,7 @@ export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHea
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -6352,6 +6394,13 @@ export declare type F0AiChatTextAreaProps = {
     onPendingQuoteChange?: (quote: PendingQuote | null) => void;
     /** File attachment configuration. When omitted, attachments are disabled. */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Host-owned compact controls rendered after the attachment action in the
+     * normal action row. Controls render inside the chat form, so buttons must
+     * use `type="button"` unless they intentionally submit it. Hidden while the
+     * composer is clarifying or recording.
+     */
+    toolbarStart?: ReactNode;
     /**
      * Voice dictation. When provided, a microphone button is shown: recorded
      * audio is transcribed and the transcript fills the textarea (the user
@@ -8700,6 +8749,15 @@ export declare type F0DialogSecondaryActionItem = F0DialogActionItem;
 declare type F0DialogSize = (typeof dialogSizes)[number];
 
 /**
+ * Document families the viewer can render. "pdf" is the default and keeps the
+ * full toolbar (paging, zoom, print, download); the other kinds render a
+ * lazy-loaded, read-only preview: "sheet" (xlsx/xls/csv) as an Excel-style
+ * grid with one tab per sheet, "docx" through docx-preview with page layout,
+ * and "text" as a rendered markdown document (`.md`) or monospaced source.
+ */
+export declare type F0DocumentKind = "pdf" | "sheet" | "docx" | "text";
+
+/**
  * @experimental This is an experimental component use it at your own risk
  */
 export declare const F0Drawer: {
@@ -8878,12 +8936,20 @@ declare type F0EntitiesListField = F0BaseField & {
     labels?: F0EntitiesListLabels;
     /** Ids of the items that can be edited (matched against `item.id`) */
     editableIds?: Array<string | number>;
+    /** Ids of the items that can be removed (matched against `item.id`) */
+    removableIds?: Array<string | number>;
     /** Maximum number of rows allowed */
     maxItems?: number;
     /** Per-column presentation options, keyed by item-schema property name */
     columns?: Record<string, F0EntitiesListColumnConfig>;
     /** Custom trailing actions per row (resolved per row) */
     rowActions?: (item: EntitiesListItem, index: number) => F0EntitiesListRowAction[];
+    /** Persistence hook for removing a row (runs after the user confirms) */
+    onRemove?: (item: EntitiesListItem) => Promise<{
+        success: boolean;
+    } | void>;
+    /** Per-item confirmation copy for the remove action */
+    confirmRemove?: (item: EntitiesListItem) => ConfirmDialogOptions;
     /** Conditional rendering based on another field's value */
     renderIf?: EntitiesListFieldRenderIf;
 };
@@ -9015,6 +9081,16 @@ declare interface F0EntitiesListOptions<T = EntitiesListItem> {
      * (pencil) action that opens the edit dialog.
      */
     editableIds?: Array<string | number>;
+    /**
+     * Restricts which items can be removed, matched against each item's `id`
+     * property. The remove counterpart to {@link editableIds}, and independent
+     * of it — a row can be editable but not removable, or vice versa. When
+     * omitted, every item is removable. Items without an `id` (e.g. rows just
+     * added by the user and not yet persisted) stay removable. A row hidden from
+     * this list shows no remove action (`list-view`) / no remove button
+     * (`editable-table`).
+     */
+    removableIds?: Array<string | number>;
     /** Minimum number of rows required (defaults to 1 unless the field is optional) */
     minItems?: number;
     /** Maximum number of rows allowed. When reached the add button is hidden. */
@@ -9028,6 +9104,28 @@ declare interface F0EntitiesListOptions<T = EntitiesListItem> {
      * update or remove the row.
      */
     rowActions?: (item: T, index: number) => F0EntitiesListRowAction<T>[];
+    /**
+     * Persistence hook for removing a row — the delete counterpart to
+     * `createFormDefinition` (add) and `updateFormDefinition` (edit). Called with
+     * the row's item **after** the user confirms the destructive action. Return
+     * `{ success: false }` or throw to keep the row and surface an error; return
+     * `{ success: true }` (or nothing) to drop it from the field value.
+     *
+     * When omitted, removal is value-only (the row is spliced from the array with
+     * no network call) — but the confirmation is still shown, per the CRUD
+     * "Delete & destructive" guidance.
+     */
+    onRemove?: (item: T) => Promise<{
+        success: boolean;
+    } | void>;
+    /**
+     * Per-item confirmation copy for the remove action, so callers can **name the
+     * resource** and its scope (per the CRUD "Delete & destructive" doc). Receives
+     * the row item and returns the confirmation dialog options
+     * (`title`, `msg`, `type`, `confirm`/`cancel` labels). When omitted, a generic
+     * default confirmation is shown.
+     */
+    confirmRemove?: (item: T) => ConfirmDialogOptions;
 }
 
 /**
@@ -10633,11 +10731,34 @@ export declare const F0PdfViewer: WithDataTestIdReturnType_3<ForwardRefExoticCom
 Skeleton: () => JSX_2.Element;
 }>;
 
+/**
+ * Host-provided toolbar action, appended after the built-in controls in every
+ * kind — e.g. a Close button when the viewer lives inside a fullscreen overlay.
+ */
+export declare type F0PdfViewerAction = {
+    icon: IconType;
+    label: string;
+    onClick: () => void;
+};
+
 export declare interface F0PdfViewerProps extends WithDataTestIdProps, DataAttributes_2 {
-    /** Source URL of the PDF document. */
+    /** Source URL of the document. */
     url: string;
     /** File name used when downloading the document. Defaults to "document.pdf". */
     filename?: string;
+    /**
+     * Document family to render. Defaults to "pdf" (unchanged behavior). For the
+     * other kinds the PDF-only props below (page, scale, rotation, print…) are
+     * ignored.
+     */
+    kind?: F0DocumentKind;
+    /** MIME type of the document — used by kind "text" to detect markdown. */
+    mimeType?: string;
+    /**
+     * Custom actions appended to the toolbar (after the built-in controls), in
+     * every kind — e.g. a Close button when the viewer fills an overlay.
+     */
+    actions?: F0PdfViewerAction[];
     /** Zero-based page index to scroll to initially (and on change). */
     page?: number;
     /** Restrict rendering to a subset of pages (zero-based indexes). */
@@ -11096,6 +11217,14 @@ declare type F0SelectBaseProps<T extends string, R = unknown> = {
      * @default true
      */
     preserveSelectionOnDatasetChange?: boolean;
+    /**
+     * When true, the dropdown sizes to its widest option (never narrower than
+     * the trigger) instead of the default 20rem minimum. Useful for compact
+     * value pickers like month/year selectors.
+     *
+     * @default false
+     */
+    fitContentWidth?: boolean;
 } & WithDataTestIdProps;
 
 /**
@@ -12626,6 +12755,14 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     maxZoom?: number;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Optional action(s) rendered at the bottom-right of the graph canvas
+     * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+     * so it tracks the graph's visible area and reflows when a side panel shrinks
+     * it — clear of the controls (bottom-left). Use for a persistent affordance
+     * like a "Give feedback" button.
+     */
+    canvasFooterActions?: ReactNode;
     /**
      * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
      * the viewport are handed to React Flow — for very large trees (thousands of
