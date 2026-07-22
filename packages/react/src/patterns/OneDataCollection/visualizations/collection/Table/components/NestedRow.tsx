@@ -162,13 +162,26 @@ const NestedRowContent = <
   const sentinelRef = useRef<HTMLTableCellElement | null>(null)
   const addRow = useAddRow()
 
+  // Data identity resolved the same way as the rest of the collection
+  // (Kanban's getKey, item navigation): `source.idProvider` when the source
+  // defines one, otherwise the item's `id`. Undefined for id-less items,
+  // which key by position and cannot be targeted by id from the controller.
+  const itemKey = props.source.idProvider
+    ? String(props.source.idProvider(props.item, props.index))
+    : "id" in props.item &&
+        props.item.id !== undefined &&
+        props.item.id !== null
+      ? String(props.item.id)
+      : undefined
+
   // Row identity for the expansion overrides, the children cache and the
-  // controller registry. Prefixed with the parent's rowId (or the group for
-  // root rows) so equal depth/index positions in different branches or
-  // groups can never collide — e.g. the first id-less child of two expanded
-  // parents used to share the same key.
+  // controller registry: the parent row's id (or the group for roots)
+  // namespaces the item's own identity, so equal positions in different
+  // branches or groups can never collide and — unlike a positional key —
+  // the expansion survives sibling reorders. Identities must be unique
+  // among siblings; id-less items fall back to their position.
   const parentKey = props.nestedRowProps?.parentRowId ?? `g${props.groupIndex}`
-  const rowId = `${parentKey}/${props.nestedRowProps?.depth ?? 0}-${"id" in props.item ? props.item.id + "-" + props.index : props.index}`
+  const rowId = `${parentKey}/${itemKey ?? `i${props.index}`}`
 
   const {
     setRowExpanded,
@@ -196,8 +209,8 @@ const NestedRowContent = <
   // and onExpandedChange must see current field values, not the first-render
   // snapshot. Re-registering on item identity change is two cheap Map ops.
   useEffect(
-    () => registerNestedRow(rowId, props.item, depth),
-    [registerNestedRow, rowId, props.item, depth]
+    () => registerNestedRow(rowId, props.item, depth, itemKey),
+    [registerNestedRow, rowId, props.item, depth, itemKey]
   )
 
   /**
@@ -236,13 +249,21 @@ const NestedRowContent = <
   // since `hasFetched` never became true in that case.
   const previousHasFetchedRef = useRef(hasFetched)
   const previousIsLoadingRef = useRef(isLoading)
+  const previousHasErrorRef = useRef(hasError)
   useEffect(() => {
     const fetchInvalidated = previousHasFetchedRef.current && !hasFetched
     const fetchCancelled =
       previousIsLoadingRef.current && !isLoading && !hasFetched && !hasError
+    // A filters/search reset also clears a settled error (hasError drops to
+    // false with nothing fetched and nothing in flight — a new fetch clears
+    // it too, but with isLoading true): re-arm so a row kept open by a
+    // policy retries with the new context instead of staying empty forever.
+    const errorCleared =
+      previousHasErrorRef.current && !hasError && !hasFetched && !isLoading
     previousHasFetchedRef.current = hasFetched
     previousIsLoadingRef.current = isLoading
-    if (fetchInvalidated || fetchCancelled) {
+    previousHasErrorRef.current = hasError
+    if (fetchInvalidated || fetchCancelled || errorCleared) {
       autoLoadRequestedRef.current = false
     }
   }, [hasFetched, isLoading, hasError])

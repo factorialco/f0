@@ -909,10 +909,13 @@ nestedTable.isExpanded("node-42")
 nestedTable.getExpandedItems()
 ```
 
-`expand`, `collapse` and `toggle` target rows by item `id` or with a
-predicate, and apply to the rows currently rendered. `expandAll` installs a
-policy that also applies to rows revealed later, and an explicit `collapse`
-always wins over an active policy.
+`expand`, `collapse` and `toggle` target rows by their identity or with a
+predicate, and apply to the rows currently rendered. The identity is
+resolved like everywhere else in the collection: `source.idProvider(item)`
+when the source defines one, otherwise the item's `id` (string-normalized,
+so `42` and `"42"` are equivalent; identities must be unique among sibling
+rows). `expandAll` installs a policy that also applies to rows revealed
+later, and an explicit `collapse` always wins over an active policy.
 
 `expandTo` expands a specific path of item ids (ancestor → descendant)
 without touching the rest of the tree. Ids not rendered yet stay pending and

@@ -51,7 +51,12 @@ interface NestedDataContextValue<R extends RecordType> {
     depth: number
   ) => ResolvedRowExpansion
   /** Registers a rendered expandable row so imperative operations can target it. Returns an unregister cleanup. */
-  registerNestedRow: (rowId: string, item: R, depth: number) => () => void
+  registerNestedRow: (
+    rowId: string,
+    item: R,
+    depth: number,
+    itemKey?: string
+  ) => () => void
   expandAnimation: NestedExpandAnimation
 }
 
@@ -89,9 +94,10 @@ const matchesTarget = <R extends RecordType>(
   if (typeof target === "function") {
     return target({ item: entry.item, depth: entry.depth, hasActiveFilters })
   }
-  // Normalized comparison (same as the table's own getRowKey) so a string
-  // target — e.g. an id read from a URL param — matches numeric item ids.
-  return "id" in entry.item && String(entry.item.id) === String(target)
+  // Matched against the row's resolved data identity (source.idProvider or
+  // item.id, stringified) so a string target — e.g. an id read from a URL
+  // param — matches numeric item ids too.
+  return entry.itemKey !== undefined && entry.itemKey === String(target)
 }
 
 const buildExpandAllCriteria = <R extends RecordType>(
@@ -203,9 +209,10 @@ export const NestedDataProvider = <R extends RecordType>({
 
   const clearFetchedData = useCallback(() => {
     setFetchedData({})
-    // Explicit overrides are positional (depth-id-index) so they cannot be
-    // trusted after a refetch; the declarative policy still applies. Pending
-    // expandTo paths are dropped too, as the new data may not contain them.
+    // A filters/search change can reshape the dataset entirely, so explicit
+    // overrides are dropped and the declarative policy re-applies (documented
+    // behavior). Pending expandTo paths are dropped too, as the new data may
+    // not contain them.
     pendingExpandRef.current.clear()
     commitExpansionState({ overrides: {}, eager: {} })
   }, [commitExpansionState])
@@ -244,16 +251,15 @@ export const NestedDataProvider = <R extends RecordType>({
 
   /**
    * Consumes a pending `expandTo` entry for the given row, expanding it (and
-   * flagging eager loading when requested). No-op when the row's item id has
-   * no pending request.
+   * flagging eager loading when requested). No-op when the row's identity
+   * has no pending request (or the item has no identity at all).
    */
   const applyPendingExpansion = useCallback(
-    (rowId: string, item: R, depth: number) => {
-      if (!("id" in item)) return
-      const itemId = String(item.id)
-      const pendingOptions = pendingExpandRef.current.get(itemId)
+    (rowId: string, item: R, depth: number, itemKey?: string) => {
+      if (itemKey === undefined) return
+      const pendingOptions = pendingExpandRef.current.get(itemKey)
       if (pendingOptions === undefined) return
-      pendingExpandRef.current.delete(itemId)
+      pendingExpandRef.current.delete(itemKey)
 
       const current = expansionStateRef.current
       const resolved = resolveExpansion(current, policyRef.current, rowId, {
@@ -264,10 +270,17 @@ export const NestedDataProvider = <R extends RecordType>({
       const eager = pendingOptions.children === "all"
       if (resolved.expanded && (!eager || resolved.eager)) return
 
+      // Same as setRowExpanded/applyToTargets: expanding clears a stale
+      // collapse marker so the policy's declared load mode applies again.
+      const nextEager = { ...current.eager }
+      if (eager) {
+        nextEager[rowId] = true
+      } else if (nextEager[rowId] === false) {
+        delete nextEager[rowId]
+      }
       commitExpansionState({
-        ...current,
         overrides: { ...current.overrides, [rowId]: true },
-        eager: eager ? { ...current.eager, [rowId]: true } : current.eager,
+        eager: nextEager,
       })
       if (!resolved.expanded) emitExpandedChange(rowId, true)
     },
@@ -275,9 +288,9 @@ export const NestedDataProvider = <R extends RecordType>({
   )
 
   const registerNestedRow = useCallback(
-    (rowId: string, item: R, depth: number) => {
-      registryRef.current.set(rowId, { item, depth })
-      applyPendingExpansion(rowId, item, depth)
+    (rowId: string, item: R, depth: number, itemKey?: string) => {
+      registryRef.current.set(rowId, { item, depth, itemKey })
+      applyPendingExpansion(rowId, item, depth, itemKey)
       return () => {
         registryRef.current.delete(rowId)
       }
@@ -388,7 +401,7 @@ export const NestedDataProvider = <R extends RecordType>({
         // Apply immediately to the rows already rendered; the rest of the
         // path is consumed as lazy loading registers each revealed level.
         registryRef.current.forEach((entry, rowId) =>
-          applyPendingExpansion(rowId, entry.item, entry.depth)
+          applyPendingExpansion(rowId, entry.item, entry.depth, entry.itemKey)
         )
       },
       isExpanded: (target) => {
