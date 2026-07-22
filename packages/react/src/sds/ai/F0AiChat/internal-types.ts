@@ -31,6 +31,8 @@ export interface AiChatState {
   enabled: boolean
   /** Initial edge the panel docks to. @default "right" */
   side?: "left" | "right"
+  /** Initial edge hosted panel content docks to. Defaults to `side`. */
+  panelContentSide?: "left" | "right"
   agent?: string
   initialMessage?: string | string[]
   chatHeader?: React.ReactNode
@@ -197,6 +199,16 @@ export type AiChatProviderReturnValue = {
   /** Clear the custom panel content and fall back to the F0.ai chat. */
   clearPanelContent: () => void
   /**
+   * Id of the hosted content that was showing when the page last unloaded,
+   * pending restoration. The panel holds a skeleton (no AI-chat flash) until
+   * the host re-mounts it via `setPanelContent`, cancels via
+   * `cancelPanelContentRestore` (content no longer accessible), or a safety
+   * timeout falls back to the AI chat.
+   */
+  restoringPanelContentId: string | null
+  /** Give up on restoring the persisted panel content — show the AI chat. */
+  cancelPanelContentRestore: () => void
+  /**
    * Edge the whole side panel docks to — the AI chat, hosted content and the
    * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
    * chat-first experience (e.g. communications), where left is comfier to
@@ -205,6 +217,14 @@ export type AiChatProviderReturnValue = {
   panelSide: "left" | "right"
   /** Set which edge the side panel docks to. */
   setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>
+  /**
+   * Edge hosted panel content (`setPanelContent`) docks to. Defaults to
+   * `panelSide`; when it differs, the AI chat and hosted content render in
+   * separate windows, one per edge, still mutually exclusive.
+   */
+  panelContentSide: "left" | "right"
+  /** Set which edge hosted panel content docks to. */
+  setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>
 } & Pick<
   AiChatState,
   | "agent"

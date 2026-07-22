@@ -49,50 +49,94 @@ const config: StorybookConfig = {
   stories: [
     "../docs/Introduction.mdx",
     "../docs/**/*.mdx",
-    {
-      directory: "../src/components",
-      titlePrefix: "Components",
-    },
-    {
-      directory: "../src/patterns",
-      titlePrefix: "Patterns",
-    },
-    {
-      directory: "../src/experimental",
-      titlePrefix: "Experimental",
-    },
-    {
-      directory: "../src/kits",
-      titlePrefix: "Kits",
-    },
-    {
-      directory: "../src/layouts",
-      titlePrefix: "Layouts",
-    },
-    {
-      directory: "../src/lib",
-      titlePrefix: "Library",
-    },
-    {
-      directory: "../src/hooks",
-      titlePrefix: "Library",
-    },
-    {
-      directory: "../src/sds",
-      titlePrefix: "SDS",
-    },
-    {
-      directory: "../src/examples",
-      titlePrefix: "Examples",
-    },
-    {
-      directory: "../src/deprecated",
-      titlePrefix: "Deprecated",
-    },
-    {
-      directory: "../src/ui",
-      titlePrefix: "UI Wrappers",
-    },
+    // ── Components · Core primitives ─────────────────────────────
+    // Maturity (experimental / stable) is a story tag surfaced as a
+    // sidebar badge (see manager.ts), NOT a separate top-level section.
+    // The former `experimental/` bucket is dissolved here by function.
+    { directory: "../src/components", titlePrefix: "Components" },
+    { directory: "../src/experimental/Actions", titlePrefix: "Components" },
+    { directory: "../src/experimental/Forms", titlePrefix: "Components" },
+    { directory: "../src/experimental/Lists", titlePrefix: "Components" },
+    { directory: "../src/experimental/Navigation", titlePrefix: "Components" },
+    { directory: "../src/experimental/Overlays", titlePrefix: "Components" },
+    { directory: "../src/experimental/Information", titlePrefix: "Components" },
+    { directory: "../src/experimental/Widgets", titlePrefix: "Components" },
+    { directory: "../src/experimental/Utilities", titlePrefix: "Components" },
+    { directory: "../src/experimental/OneTable", titlePrefix: "Components" },
+    { directory: "../src/experimental/F0CardHorizontal", titlePrefix: "Components" },
+    { directory: "../src/experimental/F0SegmentedBar", titlePrefix: "Components" },
+    { directory: "../src/experimental/F0VersionHistory", titlePrefix: "Components" },
+    { directory: "../src/hooks/toast", titlePrefix: "Components" },
+
+    // ── Patterns · Core compositions (layouts folded in) ─────────
+    { directory: "../src/patterns", titlePrefix: "Patterns" },
+    { directory: "../src/experimental/CrudPatterns", titlePrefix: "Patterns" },
+    { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
+
+    // ── Kits · functional bundles (AI + Chat promoted from sds) ──
+    { directory: "../src/kits/Charts", titlePrefix: "Kits" },
+    { directory: "../src/kits/F0DataChart", titlePrefix: "Kits" },
+    { directory: "../src/kits/Social", titlePrefix: "Components" }, // Reactions is a generic component
+    { directory: "../src/sds/ai", titlePrefix: "Kits" },
+    { directory: "../src/sds/chat", titlePrefix: "Kits" },
+    { directory: "../src/experimental/AiPromotionChat", titlePrefix: "Kits/AI" },
+
+    // ── Domain specific · owned by a single domain (was "SDS") ───
+    { directory: "../src/sds/Home", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/Profile", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/surveys", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/TimeLine", titlePrefix: "Domain specific/Time tracking" },
+    { directory: "../src/sds/UpsellingKit", titlePrefix: "Domain specific/Growth" },
+
+    // ── Resources · hooks, utilities, examples ───────────────────
+    { directory: "../src/lib/F0Box", titlePrefix: "Components" }, // layout primitive → Components
+    { directory: "../src/lib/Await", titlePrefix: "Resources" },
+    { directory: "../src/lib/F0GridStack", titlePrefix: "Resources" },
+    { directory: "../src/lib/OneEllipsis", titlePrefix: "Resources" },
+    { directory: "../src/lib/VirtualList", titlePrefix: "Resources" },
+    { directory: "../src/lib/data-testid", titlePrefix: "Resources" },
+    { directory: "../src/lib/numeric", titlePrefix: "Resources" },
+    { directory: "../src/lib/providers", titlePrefix: "Resources" },
+    { directory: "../src/hooks/datasource", titlePrefix: "Resources" },
+    { directory: "../src/examples", titlePrefix: "Resources/Examples" },
+
+    // ── deprecated/ dissolved: `deprecated` is a badge, not a section.
+    //    Items sit in their category, marked by the deprecated tag/badge. ──
+    { directory: "../src/deprecated/Dialog", titlePrefix: "Components" },
+    { directory: "../src/deprecated/EntitySelect", titlePrefix: "Components" },
+    { directory: "../src/deprecated/ToggleGroup", titlePrefix: "Components" },
+
+    // ── ui/ dissolved: "internal" is a badge, not a section. Items go to
+    //    their altitude (primitive / component / pattern); privacy is the
+    //    `internal` tag/badge and stays visible to contributors. ──────────
+    // Core · internal primitives (chrome that wraps public components)
+    { directory: "../src/ui/Action", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Card", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/ChevronToggle", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Counter", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/DatePickerPopup", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Dialog", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/IconBadge", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/OverflowList", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Select", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Spinner", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/Toast", titlePrefix: "Components/Primitives" },
+    { directory: "../src/ui/VerticalOverflowList", titlePrefix: "Components/Primitives" },
+    // Core · components (the widget itself; no public wrapper)
+    { directory: "../src/ui/ButtonCopy", titlePrefix: "Components" },
+    { directory: "../src/ui/ButtonGroup", titlePrefix: "Components" },
+    { directory: "../src/ui/F0Wizard", titlePrefix: "Components" },
+    { directory: "../src/ui/OnePagination", titlePrefix: "Components" },
+    { directory: "../src/ui/OnePreset", titlePrefix: "Components" },
+    { directory: "../src/ui/Shortcut", titlePrefix: "Components" },
+    { directory: "../src/ui/value-display", titlePrefix: "Components" },
+    { directory: "../src/ui/Omnibutton", titlePrefix: "Components" }, // deprecated (badge)
+    // Patterns
+    { directory: "../src/ui/Kanban", titlePrefix: "Patterns" },
+    { directory: "../src/ui/Lane", titlePrefix: "Patterns" },
+    // Resources
+    { directory: "../src/ui/OneRestrictComponent", titlePrefix: "Resources" },
     ...(process.env.STORYBOOK_PUBLIC_BUILD ? [] : []),
   ],
   staticDirs: ["../public", "./static"],

@@ -184,6 +184,7 @@ const preview: Preview = {
       storySort: {
         method: "alphabetical",
         order: [
+          // Get started (lifecycle docs are ordered by PR #4253)
           "Introduction",
           "Lifecycle",
           [
@@ -194,10 +195,12 @@ const preview: Preview = {
             "Release and versioning",
           ],
           "AI configuration",
+          "Changelog",
+          // Foundations
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          // Core
           "Components",
-          ["Primitives", "Inputs"],
           "Patterns",
           [
             "Data collection",
@@ -205,32 +208,18 @@ const preview: Preview = {
               "CRUD patterns",
               ["Overview", "By view", "Create", "Read", "Update", "Delete"],
             ],
+            "App shell",
           ],
-          "Graph",
-          ["F0Graph", "F0GraphNode", "F0GraphEdge", "F0GraphControls"],
+          // Kits
           "Kits",
-          "Layouts",
-          "Library",
-          "Experimental",
-          [
-            "CRUD patterns",
-            [
-              "Overview",
-              "Principles",
-              "Action hierarchy",
-              "Containers",
-              "Create & Update",
-              "Read",
-              "Delete & destructive",
-              "Bulk & async",
-              "Decisions",
-              "Quick reference",
-              "Checklist",
-              "New surfaces",
-            ],
-          ],
-          "Examples",
-          "Internal",
+          ["Charts", "AI", "Chat", "Social"],
+          // Domain specific (was "SDS")
+          "Domain specific",
+          ["Time tracking", "Growth", "Home", "Profile", "Inbox", "Surveys"],
+          // Tail
+          "Resources",
+          "Deprecated",
+          "🔒 Internal",
         ],
       },
     },

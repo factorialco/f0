@@ -193,42 +193,6 @@ the `itemActions` prop to the `useDataCollectionSource` hook.
 The action type will make the action to be displayed in the list dropdown menu
 (other and secondary type), or in in a button (primary type).
 
-## Title actions
-
-In addition to row-level `itemActions`, each item can expose declarative
-actions rendered immediately next to its title via `itemDefinition.titleActions`.
-This is useful for affordances that target the title's underlying resource
-(e.g. an "open in new tab" link).
-
-- A single action renders as an icon-only ghost button.
-- Multiple actions collapse into an overflow dropdown menu.
-
-```tsx
-<OneDataCollection
-  source={dataSource}
-  visualizations={[
-    {
-      type: "list",
-      options: {
-        itemDefinition: (item) => ({
-          title: item.name,
-          description: [item.email, item.role],
-          titleActions: [
-            {
-              icon: ExternalLink,
-              label: "Open",
-              href: `/users/${item.id}`,
-              target: "_blank",
-            },
-          ],
-        }),
-        fields: [...],
-      },
-    },
-  ]}
-/>
-```
-
 ## Examples
 
 ### List with grouping
@@ -246,11 +210,3 @@ This is useful for affordances that target the title's underlying resource
 <Canvas
   of={ListStories.ListVisualizationWithGroupingAndAllGroupsOpenByDefault}
 />
-
-### List with a single title action
-
-<Canvas of={ListStories.ListVisualizationWithSingleTitleAction} />
-
-### List with multiple title actions (overflow menu)
-
-<Canvas of={ListStories.ListVisualizationWithMultipleTitleActions} />

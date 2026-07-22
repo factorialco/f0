@@ -1,5 +1,5 @@
 import { LayoutGroup, motion } from "motion/react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 import { F0Icon, IconType } from "@/components/F0Icon"
 import { useReducedMotion } from "@/lib/a11y"
@@ -8,8 +8,8 @@ import { cn, focusRing } from "@/lib/utils"
 import { actionVariants, buttonSizeVariants } from "@/ui/Action/variants"
 const UnreadDot = () => {
   return (
-    <div className="absolute -right-2 -top-1 flex h-3 w-3 items-center justify-center rounded-full">
-      <span className="h-2 w-2 rounded-full bg-f1-background-critical-bold" />
+    <div className="absolute -right-0.5 -top-0.5 flex h-3 w-3 items-center justify-center rounded-full">
+      <span className="h-2 w-2 rounded-full bg-f1-special-highlight" />
     </div>
   )
 }
@@ -32,6 +32,13 @@ export type SidebarTabsProps = {
   tabs: SidebarTab[]
   activeTab: string
   onTabChange: (id: string) => void
+  /**
+   * Remember the active tab across reloads under this key (namespaced as
+   * `f0-sidebar-tab:<persistKey>` in localStorage). On mount, a stored tab
+   * that still exists in `tabs` is restored via `onTabChange`; unknown ids
+   * (e.g. a tab that no longer ships) are ignored. Omit for session-only tabs.
+   */
+  persistKey?: string
 }
 
 /**
@@ -44,11 +51,22 @@ export type SidebarTabsProps = {
 const TabButton = ({
   tab,
   isActive,
+  showLabel,
+  grow = true,
+  probe = false,
   onClick,
 }: {
   tab: SidebarTab
   isActive: boolean
-  onClick: () => void
+  /** Reveal the label. Always true for the active tab; inactive tabs get it
+   * when every label fits in the row (measured by `SidebarTabs`). */
+  showLabel: boolean
+  /** Share the row's space (`flex-1`) instead of hugging the content. */
+  grow?: boolean
+  /** Measurement-only twin rendered inside the invisible probe: hugs its
+   * natural width and is inert (disabled, unfocusable). */
+  probe?: boolean
+  onClick?: () => void
 }) => {
   const reduceMotion = useReducedMotion()
   // `bounce: 0` → a critically-damped spring that eases to a stop with no
@@ -80,10 +98,15 @@ const TabButton = ({
       aria-label={tab.label}
       aria-pressed={isActive}
       onClick={onClick}
+      disabled={probe}
+      tabIndex={probe ? -1 : undefined}
       className={cn(
-        // The active tab hugs its content and never shrinks (label always
-        // visible); inactive tabs share the remaining space.
-        isActive ? "shrink-0" : "flex-1",
+        // With every label revealed all tabs share the space, so switching
+        // never resizes them — the pill slide is the only motion. When labels
+        // are collapsed, the active tab hugs its content (label always
+        // visible) and the icon-only tabs share the rest. The probe twin
+        // always hugs its natural width.
+        grow && !probe ? "flex-1" : "shrink-0",
         actionVariants({ variant: "ghost" }),
         buttonSizeVariants({ size: "md" }),
         focusRing(),
@@ -128,13 +151,13 @@ const TabButton = ({
         <span
           className={cn(
             "relative flex items-center text-f1-icon transition-colors",
-            !isActive && "group-hover:text-f1-icon-bold"
+            "group-hover:text-f1-icon-bold",
+            isActive && "text-f1-icon-bold"
           )}
         >
           <F0Icon icon={tab.icon} size="md" color="currentColor" />
           {/* The unread dot shows on an inactive tab (hover only darkens the
               icon now, so the dot no longer needs to hide). */}
-          {tab.badge && !isActive && <UnreadDot />}
         </span>
         {/* The label reveals via an animated grid column (0fr → 1fr). Unlike a
             width:auto tween it interpolates cleanly and never resets at the
@@ -142,24 +165,32 @@ const TabButton = ({
         <span
           className={cn(
             "grid transition-[grid-template-columns] duration-300 ease-out motion-reduce:transition-none",
-            isActive ? "grid-cols-[1fr]" : "grid-cols-[0fr]"
+            showLabel ? "grid-cols-[1fr]" : "grid-cols-[0fr]"
           )}
         >
           <span className="min-w-0 overflow-hidden">
-            <span className="block whitespace-nowrap pl-1 pr-0.5 font-semibold">
+            <span
+              className={cn(
+                "block whitespace-nowrap pl-1 pr-0.5 font-semibold group-hover:text-f1-foreground transition-colors",
+                isActive ? "text-f1-foreground" : "text-f1-foreground-secondary"
+              )}
+            >
               {tab.label}
             </span>
           </span>
         </span>
       </div>
+
+      {tab.badge && <UnreadDot />}
     </button>
   )
 }
 
 /**
  * Tab switcher that replaces the `SearchBar` row when the Sidebar gains tabs.
- * The active tab shows icon + label (animated in); inactive tabs are
- * icon-only. Search becomes an icon button on the right.
+ * The active tab always shows icon + label (animated in); inactive tabs show
+ * theirs too when every label fits in the row, and fall back to icon-only
+ * when space is tight. Search becomes an icon button on the right.
  *
  * When no tabs are needed, keep composing the Sidebar header with `SearchBar`
  * instead — that path is unchanged.
@@ -168,22 +199,103 @@ export const SidebarTabs = ({
   tabs,
   activeTab,
   onTabChange,
+  persistKey,
 }: SidebarTabsProps) => {
   const i18n = useI18n()
+  const groupRef = useRef<HTMLDivElement>(null)
+  const probeRef = useRef<HTMLDivElement>(null)
+  const [labelsFit, setLabelsFit] = useState(false)
+
+  // Tab persistence (opt-in). The component is controlled, so restoring is a
+  // one-shot mount nudge through `onTabChange`; the owner's state stays the
+  // single source of truth. This effect is declared BEFORE the write effect
+  // below so the stored tab is read before the current one overwrites it.
+  const storageKey = persistKey ? `f0-sidebar-tab:${persistKey}` : null
+  const restoredRef = useRef(false)
+  useEffect(() => {
+    if (!storageKey || restoredRef.current) return
+    restoredRef.current = true
+    let stored: string | null = null
+    try {
+      stored = localStorage.getItem(storageKey)
+    } catch {
+      // localStorage unavailable — skip restoring.
+    }
+    if (stored && stored !== activeTab && tabs.some((t) => t.id === stored)) {
+      onTabChange(stored)
+    }
+    // Mount-only (guarded by restoredRef): later tab/activeTab changes are
+    // user-driven and must not re-trigger a restore.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey])
+
+  useEffect(() => {
+    if (!storageKey) return
+    try {
+      localStorage.setItem(storageKey, activeTab)
+    } catch {
+      // localStorage full or unavailable — silently ignore.
+    }
+  }, [storageKey, activeTab])
+
+  // The tabs array is usually rebuilt inline each render — key the measure
+  // effect on what actually affects widths (count + labels).
+  const tabsKey = tabs.map((tab) => `${tab.id}:${tab.label}`).join("|")
+
+  // All-or-nothing: inactive labels show only when EVERY tab fits with its
+  // label revealed. Measured against an invisible probe row (all tabs at full
+  // width) so toggling the real labels can't feed back into the measurement.
+  useEffect(() => {
+    const group = groupRef.current
+    const probe = probeRef.current
+    if (!group || !probe) return
+    const measure = () => {
+      setLabelsFit(probe.scrollWidth <= group.clientWidth)
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(group)
+    return () => observer.disconnect()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabsKey])
 
   return (
     <div className="mb-4 flex items-stretch justify-between px-3">
       <div
         role="group"
+        ref={groupRef}
         aria-label={i18n.navigation.sidebar.tabs.label}
-        className="flex w-full flex-row justify-between gap-0 rounded bg-f1-background-secondary p-0"
+        className="relative flex w-full flex-row justify-between gap-0 rounded bg-f1-background-secondary p-0"
       >
+        {/* Measurement probe: the real TabButton rendered inert at its
+            expanded (icon + label) width, so the measure always matches the
+            actual paddings/typography. Invisible and absolute, it never
+            affects layout. */}
+        <div
+          ref={probeRef}
+          aria-hidden="true"
+          className="pointer-events-none invisible absolute left-0 top-0 flex flex-row"
+        >
+          {tabs.map((tab) => (
+            <TabButton
+              key={tab.id}
+              tab={tab}
+              isActive={false}
+              showLabel
+              probe
+            />
+          ))}
+        </div>
         <LayoutGroup>
           {tabs.map((tab) => (
             <TabButton
               key={tab.id}
               tab={tab}
               isActive={tab.id === activeTab}
+              showLabel={tab.id === activeTab || labelsFit}
+              // With labels revealed everywhere, keep the active tab fluid
+              // too — constant widths make the pill slide the whole motion.
+              grow={labelsFit || tab.id !== activeTab}
               onClick={() => onTabChange(tab.id)}
             />
           ))}

@@ -75,7 +75,10 @@ function Calendar({
             "[&:has([aria-selected].day-range-middle)]:bg-f1-background-selected-bold [&:has([aria-selected].day-range-start)]:bg-f1-background-selected-bold [&:has([aria-selected].day-range-end)]:bg-f1-background-selected-bold hover:before:bg-f1-background-selected-bold"
         ),
         day: cn(
-          "rounded-[inherit] p-0 aria-selected:opacity-100 z-20 relative",
+          // Explicit text color: buttons don't inherit `color` from the cell
+          // (UA default is black), which made day numbers unreadable in dark
+          // mode. Modifier classes (outside/disabled/selected) override it.
+          "rounded-[inherit] p-0 text-f1-foreground aria-selected:opacity-100 z-20 relative",
           compact
             ? props.showWeekNumber
               ? "h-7 w-[30px] text-sm"

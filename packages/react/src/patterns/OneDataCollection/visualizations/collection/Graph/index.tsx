@@ -5,7 +5,6 @@ import {
   RecordType,
   SortingsDefinition,
 } from "@/hooks/datasource"
-import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import {
   F0Graph,
   type F0GraphHandle,
@@ -13,10 +12,11 @@ import {
   F0GraphSkeleton,
   tagColumn,
 } from "@/patterns/F0Graph"
+import { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 
-import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { ItemActionsDefinition } from "../../../item-actions"
 import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
+import { useDataCollectionSettings } from "../../../Settings/SettingsProvider"
 import { SummariesDefinition } from "../../../summary"
 import { CollectionProps } from "../../../types"
 import { resolveGraphReveal } from "./reveal"
@@ -78,6 +78,7 @@ export const GraphCollection = <
   minZoom,
   maxZoom,
   showControls,
+  canvasFooterActions,
   enableNodeWindowing,
   nodeWindowPadding,
   loadVisibleNodeData,
@@ -225,7 +226,7 @@ export const GraphCollection = <
   // tree at once instead of re-fitting as nodes stream in.
 
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col border-solid border-t border-0 border-f1-border-secondary bg-[hsl(var(--neutral-3))]">
+    <div className="flex h-full min-h-0 flex-1 flex-col border-0 border-t border-solid border-f1-border-secondary bg-[hsl(var(--neutral-3))]">
       {isInitialLoading ? (
         <F0GraphSkeleton showTags={tags !== undefined} />
       ) : (
@@ -251,6 +252,7 @@ export const GraphCollection = <
             if (next.size > 0) clearFocus()
           }}
           showControls={showControls ?? true}
+          canvasFooterActions={canvasFooterActions}
           zoomPreset={zoomPreset}
           minZoom={minZoom}
           maxZoom={maxZoom}

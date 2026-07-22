@@ -439,6 +439,8 @@ With more than 2 fields it switches to **dialog** mode by default: the cells are
 
 `editableIds` locks editing to items whose `id` is listed — locked rows render as read-only (disabled) cells. Items without an `id` (rows the user just added) always stay editable.
 
+`removableIds` is the independent counterpart for removal: it locks the remove action to items whose `id` is listed, so a row can be editable but not removable (or vice versa). Omitted → every row is removable, matching `editableIds`. Use it to pin a row (e.g. a resource owner) that must not be deleted while still allowing edits.
+
 ### List-view visualization
 
 When there's no inline editing, set `config.visualization: "list-view"` to render the items as a OneDataCollection **list** instead of a read-only table. Each row shows a title (the first field) and description lines (the rest); **Add** and the per-row **Edit** action open the form dialog, and rows have a **Remove** action. Override the row labelling with `config.listItem` (`title` / `description` / `avatar` functions). Drag-reorder isn't available in list mode.
@@ -501,9 +503,38 @@ members: f0FormField.entitiesList({
 
 <Canvas of={Stories.EntitiesListFieldFormDefinitions} />
 
+### Persisting removals
+
+The three row operations persist through a matching trio:
+
+| Operation | How it persists                             |
+| --------- | ------------------------------------------- |
+| Add       | `createFormDefinition` (its own `onSubmit`) |
+| Edit      | `updateFormDefinition` (its own `onSubmit`) |
+| Remove    | `config.onRemove`                           |
+
+`config.onRemove` is the delete counterpart. Removing a row (from the overflow `⋮` menu, per the CRUD "Delete & destructive" doc) now **always confirms first**, then — if `onRemove` is set — runs it with the row item. The row is dropped from the field value only when `onRemove` resolves successfully; returning `{ success: false }` or throwing keeps the row and surfaces an error, and the remove action is disabled while the request is in flight. Without `onRemove`, removal is value-only (the row is spliced out) but the confirmation is still shown.
+
+Use `config.confirmRemove` to **name the resource** in the confirmation (what, how much, whether reversible). When omitted, a generic default confirmation is used.
+
+```tsx
+config: {
+  onRemove: async (item) => {
+    await api.delete(item.id)
+    return { success: true }
+  },
+  confirmRemove: (item) => ({
+    type: "critical",
+    title: `Remove ${item.name}?`,
+    msg: "They will lose access immediately. This cannot be undone.",
+    confirm: { label: "Remove" },
+  }),
+}
+```
+
 ### Custom row actions
 
-`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row:
+`config.rowActions` adds trailing action buttons per row. It's resolved per row, so the actions can depend on the row's value — e.g. an Archive / Unarchive toggle driven by a hidden `archived` column. Each action's `onClick` receives `update` / `remove` helpers to mutate that row. The `remove` helper routes through the same confirm + `onRemove` path as the built-in remove, so custom "Delete" actions also confirm and persist:
 
 ```tsx
 config: {
@@ -523,6 +554,8 @@ config: {
 - `canAddItems` (default `true`) — show the add button. Adding is blocked while an existing row is still invalid.
 - `minItems` / `maxItems` — array-length validation; the add button hides at `maxItems`.
 - `labels` — `addButton`, `create`/`update` (each `{ title, description }`) and `edit`/`remove` action labels. The create description doubles as the add button's tooltip; the update title as the icon-only edit action's tooltip.
+- `onRemove` / `confirmRemove` — persist and confirm removals (see [Persisting removals](#persisting-removals)).
+- `editableIds` / `removableIds` — independently lock editing / removal to the listed `id`s (see above).
 - `visualization` — `"editable-table"` (default) or `"list-view"` (see above).
 
 ### Auto-save

@@ -21,7 +21,7 @@ Creates `.stories.tsx` files for F0 components. For MDX docs (the Docs tab), use
 ```tsx
 import type { Meta, StoryObj } from "@storybook/react-vite"
 import { fn, expect, within } from "storybook/test"
-import { withSnapshot, withSkipA11y } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 // Icons: "@/icons/app" | "@/icons/modules" | "@/icons/ai"
 ```
 
@@ -56,7 +56,10 @@ across multiple stories; consolidate all variants into the `Snapshot` story.
 export const Snapshot: Story = {
   parameters: withSnapshot({}), // opt in
 }
-// With a11y skip: withSkipA11y(withSnapshot({}))
+// With known a11y debt (axe still runs, non-blocking):
+//   withSnapshot({ a11y: { test: "todo" } })
+// Never skip axe (withSkipA11y / a11y.skipCi are deprecated and fail CI for new stories;
+// skip-removal rules live in AGENTS.md and the f0-storybook-testing skill).
 ```
 
 ### Tags

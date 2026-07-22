@@ -154,6 +154,14 @@ export type GraphVisualizationOptions<
   /** Whether to render the zoom/fit controls. Defaults to `true`. */
   showControls?: boolean
   /**
+   * Optional action(s) rendered at the bottom-right of the graph canvas
+   * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+   * so it tracks the graph's visible area and reflows when a side panel shrinks
+   * it — clear of the controls (bottom-left). Use for a persistent affordance
+   * like a "Give feedback" button.
+   */
+  canvasFooterActions?: ReactNode
+  /**
    * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
    * the viewport are handed to React Flow — for very large trees (thousands of
    * expand-visible nodes). Off by default; non-breaking.

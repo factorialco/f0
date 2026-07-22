@@ -1,4 +1,4 @@
-import { type RefObject } from "react"
+import { type ReactNode, type RefObject } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import {
@@ -16,6 +16,7 @@ import { RecordingWaveform } from "./RecordingWaveform"
 
 interface ActionBarProps {
   onUploadFiles: ((files: File[]) => Promise<unknown>) | undefined
+  toolbarStart?: ReactNode
   isAtMaxFiles: boolean
   maxFiles: number | undefined
   acceptValue: string | undefined
@@ -35,6 +36,7 @@ interface ActionBarProps {
 
 export const ActionBar = ({
   onUploadFiles,
+  toolbarStart,
   isAtMaxFiles,
   maxFiles,
   acceptValue,
@@ -88,7 +90,7 @@ export const ActionBar = ({
 
   return (
     <div className="flex shrink-0 items-center justify-between p-3">
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         {onUploadFiles && (
           <>
             <ButtonInternal
@@ -117,8 +119,18 @@ export const ActionBar = ({
             />
           </>
         )}
+        {toolbarStart && (
+          // Host controls keep their own focus instead of bubbling to the
+          // form's click handler, which intentionally focuses the textarea.
+          <div
+            className="min-w-0 cursor-default"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {toolbarStart}
+          </div>
+        )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         {canRecord && (
           <ButtonInternal
             label={translation.ai.recordAudio}

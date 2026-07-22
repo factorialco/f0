@@ -541,8 +541,117 @@ const MembershipConversation = (): ReactNode => {
   )
 }
 
+/**
+ * Previewable documents (PDF, Excel/CSV, Word, text/markdown) render as a
+ * Slack-style card: a content snapshot (lazy — each parser only loads when a
+ * card scrolls into view) under a header with the type badge, name and a quick
+ * download. Clicking the snapshot opens the fullscreen viewer for that kind.
+ * Non-previewable files (PowerPoint, binary .doc…) keep the plain chip.
+ */
+const DocumentConversation = (): ReactNode => {
+  const runtime = useMockChatRuntime({
+    channel: dmChannel,
+    me,
+    others: [ana],
+    initialCount: 4,
+    olderPages: 0,
+    ambientEveryMs: 0,
+    extraMessages: [
+      {
+        id: "doc-1",
+        author: ana,
+        body: "Here's the quarterly report 📄",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-pdf-viewer-sample.pdf",
+            name: "quarterly-report.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+      },
+      {
+        id: "doc-2",
+        author: me,
+        body: "Thanks! Sending the raw data too",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        status: "read",
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.xlsx",
+            name: "raw-data.xlsx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.csv",
+            name: "offices.csv",
+            mimeType: "text/csv",
+          },
+        ],
+      },
+      {
+        id: "doc-3",
+        author: ana,
+        body: "And the offer draft + release notes",
+        createdAt: new Date().toISOString(),
+        isMine: false,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.docx",
+            name: "offer-letter.docx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.md",
+            name: "RELEASE-NOTES.md",
+            mimeType: "text/markdown",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.txt",
+            name: "worker.log",
+            mimeType: "text/plain",
+          },
+        ],
+      },
+      {
+        id: "doc-4",
+        author: me,
+        body: "The deck stays as a chip (no client-side preview for ppt)",
+        createdAt: new Date().toISOString(),
+        isMine: true,
+        status: "read",
+        attachments: [
+          {
+            kind: "file",
+            url: "#",
+            name: "kickoff-deck.pptx",
+            mimeType: "application/vnd.ms-powerpoint",
+          },
+        ],
+      },
+    ],
+  })
+  return (
+    <Frame>
+      <F0ChatProvider runtime={runtime}>
+        <F0Chat />
+      </F0ChatProvider>
+    </Frame>
+  )
+}
+
 const meta = {
-  title: "SDS/Chat/F0Chat",
+  title: "Chat/F0Chat",
   component: F0Chat,
   parameters: { layout: "fullscreen" },
 } satisfies Meta<typeof F0Chat>
@@ -552,6 +661,17 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
   render: () => <Conversation initialCount={40} />,
+}
+
+/** Composer micro-interaction QA. Try, in order: hover a message → Reply (the
+ * chip unfolds, and collapses on remove) · attach a couple of files (chips pop
+ * in, the skeleton crossfades to the preview; removing one slides the
+ * neighbours into the gap) · type the first character (send button activation
+ * pop) · start a recording (the action row crossfades to the waveform) · send
+ * (the attachment row folds away). */
+export const ComposerMotion: Story = {
+  name: "Composer micro-interactions",
+  render: () => <Conversation initialCount={8} />,
 }
 
 /** Group chat with functional `@`-mentions (`@here` for everyone + members). */
@@ -566,6 +686,14 @@ export const Group: Story = {
 export const GroupMembershipEvents: Story = {
   name: "Group membership events",
   render: () => <MembershipConversation />,
+}
+
+/** Document attachments: Slack-style snapshot cards for PDF, Excel/CSV, Word
+ * and text/markdown — click to open the fullscreen viewer for each kind.
+ * Non-previewable files (ppt) keep the plain chip. */
+export const WithDocumentAttachments: Story = {
+  name: "Document attachments",
+  render: () => <DocumentConversation />,
 }
 
 /** Resilient sending under a bad connection: instant bubble, delayed sending

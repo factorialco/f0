@@ -72,71 +72,11 @@ addons.setConfig({
     collapsedRoots: ["playground"],
     renderLabel: renderSidebarLabel,
     filters: {
-      internal: (item) => {
-        return (
-          !process.env.STORYBOOK_PUBLIC_BUILD ||
-          !item.tags?.includes("internal")
-        )
-      },
+      // `internal` is no longer hidden — internal primitives stay visible to
+      // contributors in every build. Maturity markers (🚧 / ❌) come from
+      // `renderLabel` above (component-status); there is no separate badge
+      // config. Only `no-sidebar` is filtered out.
       noSidebar: (item) => !item.tags?.includes("no-sidebar"),
     },
   },
-  tagBadges: [
-    {
-      tags: "experimental",
-      badge: {
-        text: "🚧",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Experimental",
-      },
-      display: {
-        sidebar: ["component", "docs", "group"],
-        toolbar: true,
-      },
-    },
-    {
-      tags: "stable",
-      badge: {
-        text: "✅",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Stable",
-      },
-      display: {
-        sidebar: false,
-        toolbar: true,
-      },
-    },
-    {
-      tags: "deprecated",
-      badge: {
-        text: "⛔",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Deprecated",
-      },
-      display: {
-        sidebar: ["component", "docs", "group"],
-        toolbar: true,
-      },
-    },
-    {
-      tags: "internal",
-      badge: {
-        text: "🔒",
-        bgColor: "transparent",
-        fgColor: "#000000",
-        borderColor: "transparent",
-        tooltip: "Internal",
-      },
-      display: {
-        sidebar: ["component", "docs", "group"],
-        toolbar: true,
-      },
-    },
-  ],
 })

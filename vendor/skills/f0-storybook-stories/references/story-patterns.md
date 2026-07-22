@@ -287,7 +287,7 @@ export const Snapshot: Story = {
 import { buttonToggleVariants, buttonToggleSizes } from "../F0ButtonToggle"
 
 export const Snapshot: Story = {
-  parameters: withSkipA11y(withSnapshot({})),
+  parameters: withSnapshot({ a11y: { test: "todo" } }),
   render: () => (
     <div className="flex flex-col gap-2">
       {buttonToggleVariants.map((variant) => (
@@ -320,14 +320,14 @@ export const Snapshot: Story = {
 }
 ```
 
-### Skipping a11y on the Snapshot
+### Snapshot stories with known a11y violations
 
-When the snapshot story contains states that intentionally fail a11y checks (e.g., disabled states):
+Skipping axe (`withSkipA11y` / `a11y: { skipCi: true }`) is deprecated and **fails CI for new stories** (only files grandfathered in `.storybook/a11y-skip-allowlist.json` may keep it, up to their recorded call-site count). When the snapshot story contains states that intentionally fail a11y checks (e.g., disabled states), downgrade instead — axe still runs, non-blocking:
 
 ```tsx
-import { withSnapshot, withSkipA11y } from "@/lib/storybook-utils/parameters"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
-parameters: withSkipA11y(withSnapshot({}))
+parameters: withSnapshot({ a11y: { test: "todo" } }) // or test: "warning" for intentional/accepted
 ```
 
 ### Adding a story description alongside snapshot

@@ -81,6 +81,36 @@ describe("useViewportDataLoader", () => {
     expect(load).toHaveBeenCalledWith(["a", "b", "c"])
   })
 
+  it("drops fly-over ids that left the viewport before the flush", () => {
+    const load = vi.fn()
+    const { rerender } = renderHook(
+      ({ ids }) =>
+        useViewportDataLoader({
+          nodeIds: ids,
+          loadVisibleNodeData: load,
+          debounceMs: 200,
+        }),
+      { initialProps: { ids: ["a"] } }
+    )
+    // Camera sweeps across the tree during an automatic navigation: "a" then
+    // "b" enter and leave within the debounce window; "c" is where it settles.
+    act(() => vi.advanceTimersByTime(100))
+    rerender({ ids: ["b"] })
+    act(() => vi.advanceTimersByTime(100))
+    rerender({ ids: ["c"] })
+    act(() => vi.advanceTimersByTime(200))
+    // Only the final resting node is hydrated — "a"/"b" were flown over.
+    expect(load).toHaveBeenCalledTimes(1)
+    expect(load).toHaveBeenCalledWith(["c"])
+
+    // Dropped fly-over ids are not marked requested, so navigating to "a" later
+    // still hydrates it.
+    rerender({ ids: ["a"] })
+    act(() => vi.advanceTimersByTime(200))
+    expect(load).toHaveBeenCalledTimes(2)
+    expect(load).toHaveBeenLastCalledWith(["a"])
+  })
+
   it("still flushes the initial batch under StrictMode (mount→unmount→mount)", () => {
     const load = vi.fn()
     renderHook(

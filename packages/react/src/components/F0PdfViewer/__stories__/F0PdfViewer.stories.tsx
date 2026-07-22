@@ -1,5 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
+import { fn } from "storybook/test"
+
+import { Cross } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import { F0PdfViewer, pdfScales } from ".."
@@ -61,6 +64,83 @@ export const Rotatable: Story = {
         filename="sample.pdf"
         rotatable
         withCredentials={false}
+      />
+    </div>
+  ),
+}
+
+/** kind="sheet": Excel-style grid (letter columns, numbered rows) with one
+ * tab per sheet. PDF-only props (scale, rotation, print…) are ignored. */
+export const SpreadsheetKind: Story = {
+  name: "Kind: sheet (xlsx/csv)",
+  render: () => (
+    <div className="h-full w-full">
+      <F0PdfViewer
+        url="/f0-document-sample.xlsx"
+        kind="sheet"
+        filename="raw-data.xlsx"
+      />
+    </div>
+  ),
+}
+
+/** kind="docx": Word documents rendered with page layout via docx-preview. */
+export const WordKind: Story = {
+  name: "Kind: docx (Word)",
+  render: () => (
+    <div className="h-full w-full">
+      <F0PdfViewer
+        url="/f0-document-sample.docx"
+        kind="docx"
+        filename="offer-letter.docx"
+      />
+    </div>
+  ),
+}
+
+/** kind="text": `.md` renders as a document; txt/log/json as monospaced source. */
+export const MarkdownKind: Story = {
+  name: "Kind: text (markdown)",
+  render: () => (
+    <div className="h-full w-full">
+      <F0PdfViewer
+        url="/f0-document-sample.md"
+        kind="text"
+        filename="RELEASE-NOTES.md"
+        mimeType="text/markdown"
+      />
+    </div>
+  ),
+}
+
+/** kind="text" with plain text: monospaced source, no markdown rendering. */
+export const PlainTextKind: Story = {
+  name: "Kind: text (plain)",
+  tags: ["!dev"],
+  render: () => (
+    <div className="h-full w-full">
+      <F0PdfViewer
+        url="/f0-document-sample.txt"
+        kind="text"
+        filename="worker.log"
+        mimeType="text/plain"
+      />
+    </div>
+  ),
+}
+
+/** Host actions land at the right end of the toolbar in EVERY kind — the
+ * typical case is a Close button when the viewer fills an overlay (this is
+ * exactly how the chat mounts it). */
+export const WithCustomActions: Story = {
+  name: "Custom toolbar actions",
+  render: () => (
+    <div className="h-full w-full">
+      <F0PdfViewer
+        url="/f0-document-sample.xlsx"
+        kind="sheet"
+        filename="raw-data.xlsx"
+        actions={[{ icon: Cross, label: "Close", onClick: fn() }]}
       />
     </div>
   ),

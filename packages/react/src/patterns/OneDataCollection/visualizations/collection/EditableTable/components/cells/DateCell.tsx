@@ -56,9 +56,17 @@ export function DateCell<R extends RecordType>({
         <F0DatePicker
           className={cn(
             "[&_input]:!py-0",
+            // The cell is taller (48px) than a standalone input, so the icon's
+            // fixed top offset no longer centers it — pin it to the full height
+            // and let its auto margins center it vertically.
+            "[&_[data-slot='icon']]:!inset-y-0",
             "[&_[data-slot='placeholder']]:!flex",
             "[&_[data-slot='placeholder']]:!items-center",
             "[&_[data-slot='placeholder']]:!py-0",
+            // The placeholder is absolutely positioned with no right edge, so
+            // bound it to the cell width; only then does truncate clip the
+            // text instead of letting it spill past the column.
+            "[&_[data-slot='placeholder']]:!right-0",
             "[&_[data-slot='placeholder']]:!truncate"
           )}
           placeholder={inputPlaceholder ?? editableColumn.inputPlaceholder}

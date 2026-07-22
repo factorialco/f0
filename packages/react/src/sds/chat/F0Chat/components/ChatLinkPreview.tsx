@@ -4,6 +4,7 @@ import { OneEllipsis } from "@/lib/OneEllipsis/OneEllipsis"
 import { cn } from "@/lib/utils"
 
 import { type F0ChatLinkPreview } from "../types"
+import { FadeInImage } from "./FadeInImage"
 
 const hostOf = (url: string): string => {
   try {
@@ -99,7 +100,7 @@ export const ChatLinkPreview = ({
           )}
         >
           {!compact && preview.imageUrl && (
-            <img
+            <FadeInImage
               src={preview.imageUrl}
               alt=""
               // Fixed height (not max-h): the box is reserved before the OG

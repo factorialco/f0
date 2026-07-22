@@ -1,17 +1,10 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type DragEvent,
-} from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
+import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 import type {
   FiltersDefinition,
   FiltersState,
 } from "@/patterns/OneFilterPicker/types"
-import type { DropdownItem as DropdownItemType } from "@/experimental/Navigation/Dropdown"
 
 import { F0Icon } from "@/components/F0Icon"
 import Handle from "@/icons/app/Handle"
@@ -114,9 +107,6 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
 
   // ─── Rows state ─────────────────────────────────────────────
   const [rows, setRows] = useState<Row[]>(() => buildInitialRows(items))
-  const [measuredItemHeights, setMeasuredItemHeights] = useState<
-    Map<string, number>
-  >(new Map())
 
   // Sync rows when externally-owned item layout changes.
   const prevItemLayoutSignatureRef = useRef(buildItemLayoutSignature(items))
@@ -136,24 +126,6 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       setRows(buildInitialRows(items))
     }
   }, [resetKey, items])
-
-  useEffect(() => {
-    const itemIds = new Set(items.map((item) => item.id))
-    setMeasuredItemHeights((prev) => {
-      let changed = false
-      const next = new Map<string, number>()
-
-      for (const [id, height] of prev) {
-        if (itemIds.has(id)) {
-          next.set(id, height)
-        } else {
-          changed = true
-        }
-      }
-
-      return changed ? next : prev
-    })
-  }, [items])
 
   // ─── Narrow detection ───────────────────────────────────────
   useEffect(() => {
@@ -200,29 +172,29 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     [onLayoutChange]
   )
 
+  /**
+   * Auto-grow: when an item's loaded content genuinely needs more vertical
+   * space than its row provides (`requiredHeight` > 0, reported by `RowItem`
+   * only on real overflow), grow that row to fit. The row height is only ever
+   * raised here — never lowered — so the user's manual resize stays intact.
+   * Measuring the flex-stretched wrapper itself would always return the
+   * current row height and turn the resize handle into a grow-only ratchet.
+   */
   const handleItemContentHeightChange = useCallback(
-    (itemId: string, contentHeight: number) => {
-      const item = itemMap.get(itemId)
-      const minHeight = item
-        ? (MIN_ROW_HEIGHTS[item.type] ?? DEFAULT_MIN_ROW_HEIGHT)
-        : DEFAULT_MIN_ROW_HEIGHT
-      const nextHeight = Math.max(minHeight, Math.ceil(contentHeight))
+    (itemId: string, requiredHeight: number) => {
+      if (requiredHeight <= 0) return
+      const needed = Math.ceil(requiredHeight)
 
-      setMeasuredItemHeights((prev) => {
-        const currentHeight = prev.get(itemId)
-        if (
-          currentHeight !== undefined &&
-          Math.abs(currentHeight - nextHeight) < 1
-        ) {
-          return prev
-        }
+      setRows((prev) => {
+        const rowIdx = prev.findIndex((row) => row.ids.includes(itemId))
+        if (rowIdx === -1 || prev[rowIdx].height >= needed) return prev
 
-        const next = new Map(prev)
-        next.set(itemId, nextHeight)
+        const next = [...prev]
+        next[rowIdx] = { ...next[rowIdx], height: needed }
         return next
       })
     },
-    [itemMap]
+    []
   )
 
   // ─── Delete ─────────────────────────────────────────────────
@@ -250,112 +222,169 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
     | null
   >(null)
 
-  const handleDragStart = useCallback((id: string) => {
-    setDragId(id)
-  }, [])
+  // Refs let the document-level pointer handlers read the latest layout
+  // without being re-bound mid-drag (and dodge stale-closure reorders).
+  const rowsRef = useRef(rows)
+  rowsRef.current = rows
+  const itemMapRef = useRef(itemMap)
+  itemMapRef.current = itemMap
+  const dragIdRef = useRef<string | null>(null)
+  const dropTargetRef = useRef<typeof dropTarget>(null)
+  dropTargetRef.current = dropTarget
+  const ghostRef = useRef<HTMLDivElement | null>(null)
 
-  const handleDragEnd = useCallback(() => {
-    if (dragId && dropTarget) {
+  const commitDrop = useCallback(
+    (draggedId: string, target: NonNullable<typeof dropTarget>) => {
       setRows((prev) => {
-        // Remove from source
         let next = prev.map((row) => ({
           ...row,
-          ids: row.ids.filter((id) => id !== dragId),
+          ids: row.ids.filter((rowItemId) => rowItemId !== draggedId),
         }))
 
-        const item = itemMap.get(dragId)
+        const item = itemMapRef.current.get(draggedId)
         const newRowHeight = item ? resolveItemHeight(item) : DEFAULT_ROW_HEIGHT
 
-        if (dropTarget.type === "new-row") {
-          // Insert a new row after afterRowIdx
-          const insertAt = dropTarget.afterRowIdx + 1
-          next.splice(insertAt, 0, {
-            ids: [dragId],
+        if (target.type === "new-row") {
+          next.splice(target.afterRowIdx + 1, 0, {
+            ids: [draggedId],
             height: newRowHeight,
           })
-        } else if (dropTarget.rowIdx >= next.length) {
-          // Drop at the very end
-          next.push({ ids: [dragId], height: newRowHeight })
+        } else if (target.rowIdx >= next.length) {
+          next.push({ ids: [draggedId], height: newRowHeight })
         } else {
-          // Insert into existing row
           const adjPos = Math.min(
-            dropTarget.position,
-            next[dropTarget.rowIdx].ids.length
+            target.position,
+            next[target.rowIdx].ids.length
           )
-          next[dropTarget.rowIdx].ids.splice(adjPos, 0, dragId)
-
-          // Expand row height if the new item needs more space
-          const minHeight = getMinRowHeight(next[dropTarget.rowIdx], itemMap)
-          if (next[dropTarget.rowIdx].height < minHeight) {
-            next[dropTarget.rowIdx] = {
-              ...next[dropTarget.rowIdx],
-              height: minHeight,
-            }
+          next[target.rowIdx].ids.splice(adjPos, 0, draggedId)
+          const minHeight = getMinRowHeight(
+            next[target.rowIdx],
+            itemMapRef.current
+          )
+          if (next[target.rowIdx].height < minHeight) {
+            next[target.rowIdx] = { ...next[target.rowIdx], height: minHeight }
           }
         }
 
-        // Remove empty rows
         next = next.filter((row) => row.ids.length > 0)
         emitLayout(next)
         return next
       })
-    }
+    },
+    [emitLayout]
+  )
 
-    setDragId(null)
-    setDropTarget(null)
-  }, [dragId, dropTarget, emitLayout, itemMap])
+  // Resolve the drop target geometrically from the cursor position instead
+  // of relying on native `dragover` hitting a specific element. Top third of
+  // a row → insert above it, bottom third → below, middle → merge into it
+  // (side by side) when there's room. Every widget is now reorderable by
+  // dragging over any other — no thin between-row strip to hit, and it works
+  // over a chart canvas or a full-width row all the same.
+  const resolveDropTarget = useCallback(
+    (clientX: number, clientY: number): typeof dropTarget => {
+      const rowEls = containerRef.current
+        ? Array.from(
+            containerRef.current.querySelectorAll<HTMLElement>(
+              "[data-dashboard-row]"
+            )
+          )
+        : []
+      const cur = rowsRef.current
+      if (rowEls.length === 0 || rowEls.length !== cur.length) return null
 
-  const handleRowDragOver = useCallback(
-    (e: DragEvent, rowIdx: number) => {
-      e.preventDefault()
-      e.dataTransfer.dropEffect = "move"
-
-      if (rowIdx >= rows.length) {
-        setDropTarget({ type: "new-row", afterRowIdx: rows.length - 1 })
-        return
-      }
-
-      const row = rows[rowIdx]
-      const isFromThisRow = dragId ? row.ids.includes(dragId) : false
-      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow) return
-
-      // If dragging the only item in this row over itself, don't set
-      // a drop target here — let the gap drop zones handle it instead.
-      if (isFromThisRow && row.ids.length === 1) {
-        setDropTarget(null)
-        return
-      }
-
-      // Find insert position based on mouse x
-      const rowEl = e.currentTarget as HTMLElement
-      const cards = rowEl.querySelectorAll("[data-card-id]")
-      let insertPos = row.ids.length
-      for (let i = 0; i < cards.length; i++) {
-        const rect = cards[i].getBoundingClientRect()
-        if (e.clientX < rect.left + rect.width / 2) {
-          insertPos = i
+      const rects = rowEls.map((el) => el.getBoundingClientRect())
+      // Nearest row band, splitting the gap between rows at its midpoint.
+      let i = rects.length - 1
+      for (let k = 0; k < rects.length - 1; k++) {
+        if (clientY < (rects[k].bottom + rects[k + 1].top) / 2) {
+          i = k
           break
         }
       }
 
-      setDropTarget({ type: "into-row", rowIdx, position: insertPos })
+      const rect = rects[i]
+      const row = cur[i]
+      const draggedId = dragIdRef.current
+      const isFromThisRow = draggedId ? row.ids.includes(draggedId) : false
+      const third = rect.height / 3
+
+      if (clientY < rect.top + third)
+        return { type: "new-row", afterRowIdx: i - 1 }
+      if (clientY > rect.bottom - third)
+        return { type: "new-row", afterRowIdx: i }
+
+      // Middle third → merge into the row.
+      if (isFromThisRow && row.ids.length === 1) return null
+      if (row.ids.length >= MAX_PER_ROW && !isFromThisRow)
+        return { type: "new-row", afterRowIdx: i }
+
+      const cards = rowEls[i].querySelectorAll("[data-card-id]")
+      let position = row.ids.length
+      for (let c = 0; c < cards.length; c++) {
+        const cr = cards[c].getBoundingClientRect()
+        if (clientX < cr.left + cr.width / 2) {
+          position = c
+          break
+        }
+      }
+      return { type: "into-row", rowIdx: i, position }
     },
-    [rows, dragId]
+    []
   )
 
-  /** Handle drag over the gap between rows — creates a new row */
-  const handleGapDragOver = useCallback((e: DragEvent, afterRowIdx: number) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = "move"
-    setDropTarget({ type: "new-row", afterRowIdx })
-  }, [])
+  const handleGripPointerDown = useCallback(
+    (id: string, e: React.PointerEvent) => {
+      // Only the primary (left) button drags. `typeof` guard: in real
+      // browsers `button` is always a number (0 for left), but keep going
+      // when it's absent so the gesture isn't wrongly suppressed.
+      if (typeof e.button === "number" && e.button !== 0) return
+      e.preventDefault()
+      e.stopPropagation()
+
+      dragIdRef.current = id
+      dropTargetRef.current = null
+      setDragId(id)
+      setDropTarget(null)
+
+      const move = (ev: PointerEvent) => {
+        const ghost = ghostRef.current
+        if (ghost) {
+          ghost.style.transform = `translate(${ev.clientX + 12}px, ${ev.clientY + 16}px)`
+        }
+        const next = resolveDropTarget(ev.clientX, ev.clientY)
+        if (JSON.stringify(next) !== JSON.stringify(dropTargetRef.current)) {
+          dropTargetRef.current = next
+          setDropTarget(next)
+        }
+      }
+      const up = () => {
+        document.removeEventListener("pointermove", move)
+        document.removeEventListener("pointerup", up)
+        const draggedId = dragIdRef.current
+        const target = dropTargetRef.current
+        if (draggedId && target) commitDrop(draggedId, target)
+        dragIdRef.current = null
+        dropTargetRef.current = null
+        setDragId(null)
+        setDropTarget(null)
+      }
+      document.addEventListener("pointermove", move)
+      document.addEventListener("pointerup", up)
+    },
+    [commitDrop, resolveDropTarget]
+  )
 
   // ─── Row resize ─────────────────────────────────────────────
   const startResize = useCallback(
-    (rowIdx: number, startY: number, startHeight: number) => {
+    (
+      rowIdx: number,
+      startY: number,
+      startHeight: number,
+      contentMinHeight: number
+    ) => {
       const minHeight = Math.max(
         getMinRowHeight(rows[rowIdx], itemMap),
-        getMeasuredRowHeight(rows[rowIdx], measuredItemHeights)
+        contentMinHeight
       )
       const onMove = (e: MouseEvent) => {
         const newHeight = Math.max(minHeight, startHeight + e.clientY - startY)
@@ -376,7 +405,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       document.addEventListener("mousemove", onMove)
       document.addEventListener("mouseup", onUp)
     },
-    [rows, emitLayout, itemMap, measuredItemHeights]
+    [rows, emitLayout, itemMap]
   )
 
   // ─── Render ─────────────────────────────────────────────────
@@ -453,28 +482,43 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
       {displayRows.map((row, ri) => {
         const isDropRow =
           dragId && dropTarget?.type === "into-row" && dropTarget.rowIdx === ri
+        // Collections (tables) render their full page of rows — if the row
+        // box is shorter than that content, the overflow would paint over the
+        // next row. `overflow-y: clip` makes that structurally impossible no
+        // matter what height was persisted or measured (auto-grow normally
+        // resizes the row first; the clip is the guarantee for when it
+        // can't). A CSS intrinsic floor (`min-height: fit-content`) does NOT
+        // work here: the card's inner `flex-1` (basis-0) chains contribute
+        // zero intrinsic height. Scoped to collection rows; chart canvases
+        // and metrics never overflow their row.
+        const hasCollection = row.ids.some(
+          (id) => itemMap.get(id)?.type === "collection"
+        )
 
         return (
           <div key={ri} className="relative">
-            {/* Gap drop zone BEFORE this row (between rows) */}
-            {canDrag && ri > 0 && (
-              <RowGapDropZone
-                active={!!isNewRowTarget(ri - 1)}
-                isDragging={!!dragId}
-                onDragOver={(e) => handleGapDragOver(e, ri - 1)}
-              />
-            )}
+            {/* Drop line before this row. The first row also gets one so an
+                item can be reordered to the very top (afterRowIdx -1). */}
+            {canDrag && <RowGapDropZone active={!!isNewRowTarget(ri - 1)} />}
             <div
+              data-dashboard-row=""
               className={cn(
                 "flex rounded-lg transition-colors duration-200",
                 isDropRow && "bg-f1-background-hover"
               )}
               style={{
                 gap: GAP,
-                height: getRenderableRowHeight(row, measuredItemHeights),
+                height: row.height,
+                // `visible` x-overflow keeps the floating drag handle
+                // (offset past the row's left edge) from being cut off —
+                // `clip`, unlike `hidden`, allows the combination.
+                ...(hasCollection
+                  ? {
+                      overflowY: "clip" as const,
+                      overflowX: "visible" as const,
+                    }
+                  : {}),
               }}
-              onDragOver={canDrag ? (e) => handleRowDragOver(e, ri) : undefined}
-              onDrop={canDrag ? () => {} : undefined}
             >
               {row.ids.map((id, ci) => {
                 const item = itemMap.get(id)
@@ -498,8 +542,7 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                     showIndicatorBefore={!!showIndicatorBefore}
                     showIndicatorAfter={!!showIndicatorAfter}
                     draggable={canDrag}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
+                    onGripPointerDown={handleGripPointerDown}
                     onContentHeightChange={handleItemContentHeightChange}
                   >
                     <DashboardGridItem
@@ -522,10 +565,31 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
                 className="group/resize absolute -bottom-3.5 mx-auto flex h-3 w-full items-center justify-center hover:cursor-ns-resize"
                 onMouseDown={(e) => {
                   e.preventDefault()
+                  const rowEl =
+                    e.currentTarget.parentElement?.querySelector<HTMLElement>(
+                      "[data-dashboard-row]"
+                    )
+                  // Start from the RENDERED height, not `row.height` state:
+                  // the fit-content floor can hold the row taller than state
+                  // (e.g. a persisted height smaller than the loaded table),
+                  // and starting from the smaller state value would make the
+                  // handle feel detached from the cursor.
+                  const renderedHeight = Math.max(
+                    rowEl?.getBoundingClientRect().height ?? 0,
+                    row.height
+                  )
+                  // Charts are excluded from content measurement: their
+                  // canvas is sized FROM the row, so measuring them reads
+                  // back the current height and would make the row
+                  // unshrinkable.
+                  const measurableCardIds = new Set(
+                    row.ids.filter((id) => itemMap.get(id)?.type !== "chart")
+                  )
                   startResize(
                     ri,
                     e.clientY,
-                    getRenderableRowHeight(row, measuredItemHeights)
+                    renderedHeight,
+                    getRowContentMinHeight(rowEl, measurableCardIds)
                   )
                 }}
               >
@@ -536,13 +600,22 @@ export function DashboardGrid<Filters extends FiltersDefinition>({
         )
       })}
 
-      {/* Drop zone after last row — creates a new row at the end */}
+      {/* Drop line after the last row — reorder to the very bottom */}
       {canDrag && (
-        <RowGapDropZone
-          active={!!isNewRowTarget(displayRows.length - 1)}
-          isDragging={!!dragId}
-          onDragOver={(e) => handleGapDragOver(e, displayRows.length - 1)}
-        />
+        <RowGapDropZone active={!!isNewRowTarget(displayRows.length - 1)} />
+      )}
+
+      {/* Floating ghost that tracks the cursor during a pointer drag. Its
+          position is written imperatively in the pointermove handler so the
+          grid doesn't re-render on every mouse move. */}
+      {dragId && (
+        <div
+          ref={ghostRef}
+          className="pointer-events-none fixed left-0 top-0 z-50 max-w-xs truncate rounded-lg border border-solid border-f1-border-secondary bg-f1-background px-3 py-2 text-sm font-medium text-f1-foreground shadow-lg"
+          style={{ transform: "translate(-9999px, -9999px)" }}
+        >
+          {itemMap.get(dragId)?.title ?? ""}
+        </div>
       )}
     </div>
   )
@@ -556,8 +629,7 @@ function RowItem({
   showIndicatorBefore,
   showIndicatorAfter,
   draggable: canDrag,
-  onDragStart,
-  onDragEnd,
+  onGripPointerDown,
   onContentHeightChange,
   children,
 }: {
@@ -566,60 +638,63 @@ function RowItem({
   showIndicatorBefore: boolean
   showIndicatorAfter: boolean
   draggable: boolean
-  onDragStart: (id: string) => void
-  onDragEnd: () => void
+  onGripPointerDown: (id: string, e: React.PointerEvent) => void
   onContentHeightChange: (id: string, height: number) => void
   children: React.ReactNode
 }) {
-  // Track whether the drag started from the handle. If not, cancel it.
-  const fromHandleRef = useRef(false)
   const itemRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const el = itemRef.current
     if (!el) return
 
-    let frame: number | undefined
-    const requestFrame =
-      typeof requestAnimationFrame === "function"
-        ? requestAnimationFrame
-        : (callback: FrameRequestCallback) => window.setTimeout(callback, 0)
-    const cancelFrame =
-      typeof cancelAnimationFrame === "function"
-        ? cancelAnimationFrame
-        : window.clearTimeout
+    // Deliberately NOT rAF-scheduled: rAF never fires in hidden/background
+    // tabs, and a re-rendering parent can re-run this effect (cancelling the
+    // pending frame) faster than rAF fires — both starve the measurement
+    // entirely and let a too-short row keep its overflowing table. A
+    // microtask always drains, in every tab state, on every commit.
+    let disposed = false
+    let queued = false
 
-    const scheduleMeasure = () => {
-      if (frame !== undefined) {
-        cancelFrame(frame)
-      }
-
-      frame = requestFrame(() => {
-        frame = undefined
-        const height = Math.max(
-          el.scrollHeight,
-          el.getBoundingClientRect().height
-        )
-        onContentHeightChange(id, height)
-      })
+    const measure = () => {
+      queued = false
+      if (disposed) return
+      // Report only genuine overflow: the wrapper is flex-stretched to the
+      // row height, so its own height always equals the row's — a useless
+      // (and ratcheting) signal. `scrollHeight` exceeds `clientHeight` only
+      // when content truly needs more space; report 0 otherwise so the grid
+      // leaves the user-controlled row height alone.
+      const requiredHeight =
+        el.scrollHeight > el.clientHeight + 1 ? el.scrollHeight : 0
+      onContentHeightChange(id, requiredHeight)
     }
 
-    scheduleMeasure()
+    const scheduleMeasure = () => {
+      if (queued) return
+      queued = true
+      queueMicrotask(measure)
+    }
+
+    measure()
 
     const resizeObserver = new ResizeObserver(scheduleMeasure)
     resizeObserver.observe(el)
 
+    // `attributes: true` matters: nested collections re-layout themselves
+    // asynchronously after a container resize by writing style attributes.
+    // That can push content into overflow without changing the wrapper's
+    // size (no ResizeObserver event) and without adding/removing nodes (no
+    // childList event) — attribute mutations are the only visible signal.
     const mutationObserver = new MutationObserver(scheduleMeasure)
     mutationObserver.observe(el, {
       childList: true,
       subtree: true,
       characterData: true,
+      attributes: true,
     })
 
     return () => {
-      if (frame !== undefined) {
-        cancelFrame(frame)
-      }
+      disposed = true
       resizeObserver.disconnect()
       mutationObserver.disconnect()
     }
@@ -631,42 +706,21 @@ function RowItem({
       <div
         ref={itemRef}
         data-card-id={id}
-        draggable={canDrag}
-        onDragStart={
-          canDrag
-            ? (e) => {
-                if (!fromHandleRef.current) {
-                  e.preventDefault()
-                  return
-                }
-                e.dataTransfer.effectAllowed = "move"
-                e.dataTransfer.setData("text/plain", id)
-                onDragStart(id)
-              }
-            : undefined
-        }
-        onDragEnd={
-          canDrag
-            ? () => {
-                fromHandleRef.current = false
-                onDragEnd()
-              }
-            : undefined
-        }
         className={cn(
           "group/rowitem relative min-w-0 flex-1 transition-opacity duration-150",
           isDragging && "opacity-40 scale-[0.97]"
         )}
       >
         {canDrag && (
+          // Pointer-based drag (not native HTML5 DnD): a `pointerdown` on the
+          // grip starts a document-tracked gesture. Native drag was unusable
+          // here — its ghost never tracked the cursor over a chart canvas, and
+          // arming depended on the grip sitting inside the draggable card's
+          // box, so the grip's outer half and full-width charts never dragged.
+          // `touch-none` stops touch scrolling from stealing the gesture.
           <div
-            className="shadow-sm absolute -left-3 top-2.5 z-20 flex cursor-grab items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100"
-            onMouseDown={() => {
-              fromHandleRef.current = true
-            }}
-            onMouseUp={() => {
-              fromHandleRef.current = false
-            }}
+            onPointerDown={(e) => onGripPointerDown(id, e)}
+            className="shadow-sm absolute -left-3 top-2.5 z-20 flex cursor-grab touch-none items-center justify-center rounded bg-f1-background p-2 opacity-0 transition-opacity hover:bg-f1-background-hover active:cursor-grabbing group-hover/rowitem:opacity-100"
             aria-label="Drag to reorder"
           >
             <F0Icon icon={Handle} size="xs" />
@@ -687,26 +741,17 @@ function DropIndicator() {
   )
 }
 
-/** Horizontal drop zone between rows — expands when dragging to make it easy to target. */
-function RowGapDropZone({
-  active,
-  isDragging,
-  onDragOver,
-}: {
-  active: boolean
-  /** Whether any drag is in progress (expands the hit area) */
-  isDragging: boolean
-  onDragOver: (e: DragEvent<HTMLDivElement>) => void
-}) {
+/**
+ * Purely-visual drop line between rows. The pointer-drag resolves its target
+ * geometrically from the cursor, so this no longer needs to be a hit target —
+ * it only renders the highlighted line at the active boundary. It reserves a
+ * little height while active so the line has room to show between rows.
+ */
+function RowGapDropZone({ active }: { active: boolean }) {
   return (
     <div
-      className={cn(
-        "relative flex items-center justify-center transition-all",
-        isDragging ? "py-4" : ""
-      )}
-      style={{ minHeight: isDragging ? 32 : 0 }}
-      onDragOver={onDragOver}
-      onDrop={(e) => e.preventDefault()}
+      className="pointer-events-none relative flex items-center justify-center transition-all"
+      style={{ minHeight: active ? 12 : 0 }}
     >
       <div
         className={cn(
@@ -832,23 +877,51 @@ function getMinRowHeight<Filters extends FiltersDefinition>(
   return min
 }
 
-function getMeasuredRowHeight(
-  row: Row,
-  measuredItemHeights: Map<string, number>
+/**
+ * Minimum height the row's content requires, measured from the live DOM at
+ * resize start. Only the given cards are measured — callers pass every
+ * non-chart card: collection/metric content has an intrinsic height (rows of
+ * data, text) that must stay fully visible, while a chart canvas is sized
+ * FROM the row, so measuring it would read back the current row height and
+ * re-create the grow-only ratchet this replaced.
+ *
+ * The row is momentarily collapsed (height/min-height 0) so each card's
+ * `scrollHeight` reports pure content height instead of the flex-stretched
+ * wrapper height. Content height can itself depend on the container height
+ * (horizontal scrollbars appear, toolbars wrap), so a second pass re-reads
+ * at the height found by the first pass and keeps the larger value. Styles
+ * are restored synchronously in the same task, so nothing paints in between.
+ */
+function getRowContentMinHeight(
+  rowEl: HTMLElement | null | undefined,
+  measurableCardIds: ReadonlySet<string>
 ): number {
-  let measuredHeight = 0
-  for (const id of row.ids) {
-    const itemHeight = measuredItemHeights.get(id) ?? 0
-    if (itemHeight > measuredHeight) measuredHeight = itemHeight
-  }
-  return measuredHeight
-}
+  if (!rowEl || measurableCardIds.size === 0) return 0
+  const prevHeight = rowEl.style.height
+  const prevMinHeight = rowEl.style.minHeight
 
-function getRenderableRowHeight(
-  row: Row,
-  measuredItemHeights: Map<string, number>
-): number {
-  return Math.max(row.height, getMeasuredRowHeight(row, measuredItemHeights))
+  const measure = () => {
+    let min = 0
+    for (const card of Array.from(
+      rowEl.querySelectorAll<HTMLElement>("[data-card-id]")
+    )) {
+      const id = card.dataset.cardId
+      if (id && measurableCardIds.has(id)) {
+        min = Math.max(min, card.scrollHeight)
+      }
+    }
+    return min
+  }
+
+  rowEl.style.minHeight = "0px"
+  rowEl.style.height = "0px"
+  const collapsed = measure()
+  rowEl.style.height = `${collapsed}px`
+  const settled = Math.max(collapsed, measure())
+
+  rowEl.style.height = prevHeight
+  rowEl.style.minHeight = prevMinHeight
+  return settled
 }
 
 function getSlotWeight<Filters extends FiltersDefinition>(

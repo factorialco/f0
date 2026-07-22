@@ -73,6 +73,7 @@ export const F0AiChatTextArea = ({
   pendingQuote = null,
   onPendingQuoteChange,
   fileAttachments,
+  toolbarStart,
   onTranscribe,
   searchPersons,
   onProcessFilesRef,
@@ -539,6 +540,7 @@ export const F0AiChatTextArea = ({
 
                   <ActionBar
                     onUploadFiles={onUploadFiles}
+                    toolbarStart={toolbarStart}
                     isAtMaxFiles={isAtMaxFiles}
                     maxFiles={maxFiles}
                     acceptValue={acceptValue}

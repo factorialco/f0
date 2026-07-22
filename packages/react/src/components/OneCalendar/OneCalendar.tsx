@@ -23,6 +23,10 @@ import {
   WeekStartDay,
   WeekStartsOn,
 } from "./types"
+import {
+  CalendarHeaderDropdowns,
+  getYearBounds,
+} from "./components/CalendarHeaderDropdowns"
 import { isActiveDate, toDateRange } from "./utils"
 
 const privateProps = ["compact"] as const
@@ -130,15 +134,53 @@ const OneCalendarInternal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be run when the defaultSelected changes
   }, [defaultSelected])
 
+  // Get header label
+  const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
+
+  // The day/week views span a month, so they get both month and year
+  // dropdowns; the month view spans a year, so it gets a year dropdown only.
+  // Every other view keeps its plain label.
+  const headerDropdowns =
+    granularity.calendarView === "day" || granularity.calendarView === "week"
+      ? "month-year"
+      : granularity.calendarView === "month"
+        ? "year"
+        : null
+
+  // Views with header dropdowns clamp arrow navigation to the year dropdown's
+  // range, so the view can never land on a year the dropdown can't display.
+  // Selection is NOT clamped to this window — it is bounded only by the
+  // consumer's minDate/maxDate. A consumer-allowed value outside the default
+  // window stretches the range (viewYear) so the dropdown can display it.
+  const yearBounds = headerDropdowns
+    ? getYearBounds(
+        new Date().getFullYear(),
+        minDate,
+        maxDate,
+        viewDate.getFullYear()
+      )
+    : null
+
+  const canNavigate = (direction: -1 | 1) => {
+    if (!yearBounds) return true
+    const year = granularity.navigateUIView(viewDate, direction).getFullYear()
+    return year >= yearBounds.fromYear && year <= yearBounds.toYear
+  }
+
   // Handle ui view navigation
   const navigate = (direction: -1 | 1) => {
+    if (!canNavigate(direction)) return
     const newDate = granularity.navigateUIView(viewDate, direction)
     setMotionDirection(direction)
     setViewDate(newDate)
   }
 
-  // Get header label
-  const getHeaderLabel = () => granularity.label(viewDate, i18n, l10n.locale)
+  // Jump straight to a month/year from the dropdowns, animating in the
+  // direction of travel like the prev/next arrows do.
+  const handleHeaderDateChange = (newDate: Date) => {
+    setMotionDirection(newDate.getTime() >= viewDate.getTime() ? 1 : -1)
+    setViewDate(newDate)
+  }
 
   // Handle selection of a date
   const handleSelect = (date: Date | DateRange | null) => {
@@ -304,15 +346,27 @@ const OneCalendarInternal = ({
             compact ? "mx-2 pb-2" : "pb-3"
           )}
         >
-          <div
-            className={cn(
-              "font-medium text-f1-foreground",
-              compact ? "text-md" : "text-lg"
-            )}
-          >
-            {getHeaderLabel()}
-          </div>
-          <div className="flex items-center gap-2">
+          {headerDropdowns ? (
+            <CalendarHeaderDropdowns
+              viewDate={viewDate}
+              onViewDateChange={handleHeaderDateChange}
+              showMonth={headerDropdowns === "month-year"}
+              locale={l10n.locale}
+              minDate={minDate}
+              maxDate={maxDate}
+              compact={compact}
+            />
+          ) : (
+            <div
+              className={cn(
+                "font-medium text-f1-foreground",
+                compact ? "text-md" : "text-lg"
+              )}
+            >
+              {getHeaderLabel()}
+            </div>
+          )}
+          <div className={cn("flex items-center", compact ? "gap-1" : "gap-2")}>
             <F0Button
               onClick={() => navigate(-1)}
               variant="outline"
@@ -320,6 +374,7 @@ const OneCalendarInternal = ({
               hideLabel
               icon={ChevronLeft}
               size="sm"
+              disabled={!canNavigate(-1)}
             />
             <F0Button
               onClick={() => navigate(1)}
@@ -328,6 +383,7 @@ const OneCalendarInternal = ({
               hideLabel
               icon={ChevronRight}
               size="sm"
+              disabled={!canNavigate(1)}
             />
           </div>
         </div>

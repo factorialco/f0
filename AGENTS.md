@@ -19,6 +19,13 @@ F0 is Factorial's design system. It provides modular, reusable UI components for
 - Use `pnpm` as the package manager
 - **Every new component follows the [F0 component lifecycle](packages/react/docs/definition-of-done.mdx)** — propose, design, build in `experimental/`, validate real-world use, then promote to stable.
 
+### Accessibility skip ratchet (Path to AA)
+
+Skipping axe in stories is not allowed for new code, and existing skips are tracked in `packages/react/.storybook/a11y-skip-allowlist.json` — a map of story file → allowed `skipCi`/`withSkipA11y` call-site count that may **only shrink**. Two rules when touching stories:
+
+- **Removing a skip** (`a11y: { skipCi: true }` or a `withSkipA11y(...)` call): you MUST also lower that file's count in the allowlist — delete the entry when it reaches zero. The `a11ySkipAllowlist.test.ts` unit test fails otherwise ("stale entries").
+- **Never add a skip** — not in new files, not in grandfathered ones. Use `a11y: { test: "todo" }` for known-failing stories instead. Any added skip fails the unit test and the Storybook test-runner.
+
 ### Formatting
 
 The project uses `oxfmt` configured via `.oxfmtrc.json` at the repo root. Key rules that affect code generation:

@@ -29,7 +29,7 @@ import {
 } from "../shared"
 
 const meta = {
-  title: "Data collection/CRUD patterns/Create",
+  title: "Data Collection/CRUD patterns/Create",
   parameters: {
     layout: "fullscreen",
   },

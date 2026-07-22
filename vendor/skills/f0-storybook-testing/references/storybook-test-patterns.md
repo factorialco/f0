@@ -83,25 +83,30 @@ Default on violation: **test fails**.
 
 ### Configuring a11y behaviour per story
 
+Skipping axe is **not allowed for new stories**. `a11y: { skipCi: true }` — whether written directly or via the deprecated `withSkipA11y()` helper — makes the test-runner **fail CI** unless the story file is grandfathered in `.storybook/a11y-skip-allowlist.json` (a Path-to-AA burndown list mapping file → allowed skip call-site count; counts may only shrink, and adding a skip even to a grandfathered file fails `a11ySkipAllowlist.test.ts`). `test: "off"` is rejected the same way.
+
+**Removing a skip (a11y burndown)?** Always do both in the same change:
+
+1. Remove the `skipCi: true` / `withSkipA11y(...)` usage from the story file (and fix the violations it was hiding, moving the stories to `test: "error"`).
+2. Lower that file's count in `.storybook/a11y-skip-allowlist.json` by the number of call-sites removed — delete the entry when it reaches zero.
+
+The sync unit test fails on any mismatch (`pnpm --filter @factorialco/f0-react exec vitest run src/lib/storybook-utils/a11ySkipAllowlist.test.ts`).
+
+Downgrade instead of skipping — axe always runs:
+
 ```tsx
-// Skip axe entirely in CI (use sparingly, document why)
-parameters: {
-  a11y: {
-    skipCi: true
-  }
-}
-
-// Downgrade to warning — test passes, violation is logged
-parameters: {
-  a11y: {
-    test: "warning"
-  }
-}
-
-// Downgrade to todo — test passes, violation is logged
+// Known a11y debt — test passes, violation is logged and listed in the
+// GitHub job summary (tracked for burndown; fix and move to "error")
 parameters: {
   a11y: {
     test: "todo"
+  }
+}
+
+// Intentional violation — test passes, violation is logged
+parameters: {
+  a11y: {
+    test: "warning"
   }
 }
 
@@ -115,23 +120,18 @@ parameters: {
 }
 ```
 
-### withSkipA11y() vs a11y parameters
+The contract: `test: "error"` = enforced (the default), `test: "todo"` = known debt to fix, `test: "warning"` = intentional/accepted.
 
-These are **different things**:
+### withSkipA11y() (deprecated) vs withSnapshot()
 
-|                                          | What it does                                                |
-| ---------------------------------------- | ----------------------------------------------------------- |
-| `withSkipA11y(withSnapshot({}))`         | Skips **Chromatic visual snapshot** a11y check              |
-| `parameters: { a11y: { skipCi: true } }` | Skips **axe-playwright** a11y test in `pnpm test-storybook` |
+- `withSkipA11y(params)` (deprecated) sets `a11y: { skipCi: true }` — the **axe skip** that is now blocked for new stories. Do not use it.
+- `withSnapshot(params)` enables the **Chromatic visual snapshot** — unrelated to axe. Keep using it.
 
-Use both when a story has intentional a11y violations AND needs a snapshot:
+For a snapshot story with a known violation, compose the parameters directly:
 
 ```tsx
 export const Snapshot: Story = {
-  parameters: {
-    ...withSkipA11y(withSnapshot({})),
-    a11y: { test: "warning" },
-  },
+  parameters: withSnapshot({ a11y: { test: "todo" } }),
 }
 ```
 
