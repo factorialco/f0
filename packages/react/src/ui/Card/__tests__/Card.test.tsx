@@ -162,6 +162,14 @@ describe("Card Components", () => {
       const el = screen.getByLabelText("Navigate")
       expect(el.tagName).not.toBe("BUTTON")
     })
+
+    it("uses a ghost appearance by default (transparent, no border, fills on hover)", () => {
+      renderWithWrapper(<CardLink title="Ghost" icon={ChevronRight} />)
+      const el = screen.getByLabelText("Ghost")
+      expect(el).toHaveClass("bg-transparent", "border-transparent")
+      expect(el).toHaveClass("hover:bg-f1-background-secondary-hover")
+      expect(el).not.toHaveClass("bg-f1-background-inverse-secondary")
+    })
   })
 
   describe("CardComment", () => {
