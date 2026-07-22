@@ -1,4 +1,6 @@
 import { fileURLToPath } from "node:url"
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin"
+import { playwright } from "@vitest/browser-playwright"
 import path from "path"
 import { defineConfig } from "vitest/config"
 import viteConfig from "./vite.config"
@@ -48,6 +50,21 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
+        },
+      },
+      {
+        extends: true,
+        plugins: [
+          storybookTest({ configDir: path.join(dirname, ".storybook") }),
+        ],
+        test: {
+          name: "storybook",
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright(),
+            instances: [{ browser: "chromium" }],
+          },
         },
       },
     ],
