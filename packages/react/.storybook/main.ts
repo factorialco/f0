@@ -74,7 +74,9 @@ const config: StorybookConfig = {
     { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
 
     // ── Kits · functional bundles (AI + Chat promoted from sds) ──
-    { directory: "../src/kits", titlePrefix: "Kits" },
+    { directory: "../src/kits/Charts", titlePrefix: "Kits" },
+    { directory: "../src/kits/F0DataChart", titlePrefix: "Kits" },
+    { directory: "../src/kits/Social", titlePrefix: "Components" }, // Reactions is a generic component
     { directory: "../src/sds/ai", titlePrefix: "Kits" },
     { directory: "../src/sds/chat", titlePrefix: "Kits" },
     { directory: "../src/experimental/AiPromotionChat", titlePrefix: "Kits/AI" },
@@ -88,7 +90,14 @@ const config: StorybookConfig = {
     { directory: "../src/sds/UpsellingKit", titlePrefix: "Domain specific/Growth" },
 
     // ── Resources · hooks, utilities, examples ───────────────────
-    { directory: "../src/lib", titlePrefix: "Resources" },
+    { directory: "../src/lib/F0Box", titlePrefix: "Components" }, // layout primitive → Components
+    { directory: "../src/lib/Await", titlePrefix: "Resources" },
+    { directory: "../src/lib/F0GridStack", titlePrefix: "Resources" },
+    { directory: "../src/lib/OneEllipsis", titlePrefix: "Resources" },
+    { directory: "../src/lib/VirtualList", titlePrefix: "Resources" },
+    { directory: "../src/lib/data-testid", titlePrefix: "Resources" },
+    { directory: "../src/lib/numeric", titlePrefix: "Resources" },
+    { directory: "../src/lib/providers", titlePrefix: "Resources" },
     { directory: "../src/hooks/datasource", titlePrefix: "Resources" },
     { directory: "../src/examples", titlePrefix: "Resources/Examples" },
 

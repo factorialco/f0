@@ -4,6 +4,7 @@ import { useRef, useState } from "react"
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
 
+import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import {
   ChartVerticalBars,
   File,
@@ -226,6 +227,7 @@ type WrapperProps = {
   isWelcomeScreen?: boolean
   fullscreen?: boolean
   inProgress?: boolean
+  toolbarStart?: React.ReactNode
 }
 
 const Wrapper = ({
@@ -244,6 +246,7 @@ const Wrapper = ({
   isWelcomeScreen,
   fullscreen,
   inProgress,
+  toolbarStart,
 }: WrapperProps) => {
   const [pendingContext, setPendingContext] = useState<PendingContext | null>(
     initialPendingContext
@@ -300,6 +303,7 @@ const Wrapper = ({
         pendingQuote={pendingQuote}
         onPendingQuoteChange={setPendingQuote}
         fileAttachments={fileAttachments}
+        toolbarStart={toolbarStart}
         onTranscribe={onTranscribe}
         searchPersons={searchPersons}
         disclaimer={disclaimer}
@@ -477,6 +481,21 @@ export const WithPendingQuote: Story = {
 export const WithFileAttachments: Story = {
   args: {
     fileAttachments: FILE_UPLOAD_CONFIG,
+  },
+}
+
+export const WithToolbarStart: Story = {
+  args: {
+    fileAttachments: FILE_UPLOAD_CONFIG,
+    toolbarStart: (
+      <F0SegmentedControl
+        ariaLabel="Analytics mode"
+        items={[
+          { value: "chat", label: "Chat" },
+          { value: "analytics", label: "Analytics" },
+        ]}
+      />
+    ),
   },
 }
 

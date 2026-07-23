@@ -88,6 +88,14 @@ export type F0AiChatTextAreaProps = {
   fileAttachments?: AiChatFileAttachmentConfig
 
   /**
+   * Host-owned compact controls rendered after the attachment action in the
+   * normal action row. Controls render inside the chat form, so buttons must
+   * use `type="button"` unless they intentionally submit it. Hidden while the
+   * composer is clarifying or recording.
+   */
+  toolbarStart?: ReactNode
+
+  /**
    * Voice dictation. When provided, a microphone button is shown: recorded
    * audio is transcribed and the transcript fills the textarea (the user
    * reviews and sends it manually). When omitted, the microphone is hidden.

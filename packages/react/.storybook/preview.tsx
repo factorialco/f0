@@ -176,18 +176,24 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Top-level order mirrors the F0 component lifecycle (PR #4253):
-       * ownership drives the sections (Components/Patterns = Core, Kits,
-       * Domain specific); maturity is a badge, not a section. Everything
-       * not listed here falls back to alphabetical.
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns/Lifecycle groups in the specific order defined below.
+       * Inside `Lifecycle/`, the order follows the actual workflow
+       * (contribute → DoD → maturity → review → release).
        */
       storySort: {
         method: "alphabetical",
         order: [
           // Get started (lifecycle docs are ordered by PR #4253)
           "Introduction",
-          "How to contribute",
-          "Components maturity",
+          "Lifecycle",
+          [
+            "How to contribute",
+            "Definition of done",
+            "Components maturity",
+            "Design review",
+            "Release and versioning",
+          ],
           "AI configuration",
           "Changelog",
           // Foundations

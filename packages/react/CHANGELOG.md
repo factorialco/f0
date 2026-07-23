@@ -1,5 +1,26 @@
 # Changelog
 
+## [4.47.2](https://github.com/factorialco/f0/compare/f0-react-v4.47.1...f0-react-v4.47.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* **SectionHeader:** use 1px dashed separator aligned with border tokens ([#4792](https://github.com/factorialco/f0/issues/4792)) ([2d91aec](https://github.com/factorialco/f0/commit/2d91aec078a61794851da96ebf6040d818c1c6b2))
+
+## [4.47.1](https://github.com/factorialco/f0/compare/f0-react-v4.47.0...f0-react-v4.47.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* **react:** wrap survey rating options so long labels don't clip ([#4769](https://github.com/factorialco/f0/issues/4769)) ([8fb8b14](https://github.com/factorialco/f0/commit/8fb8b1414404935c2930f6bf37b89d60b311f9ca))
+
+## [4.47.0](https://github.com/factorialco/f0/compare/f0-react-v4.46.5...f0-react-v4.47.0) (2026-07-22)
+
+
+### Features
+
+* **ai:** toolbarStart slot in the chat composer action row ([#4713](https://github.com/factorialco/f0/issues/4713)) ([8e21ef3](https://github.com/factorialco/f0/commit/8e21ef325703b0db35bcb63b234cdeef5b0b98a7))
+
 ## [4.46.5](https://github.com/factorialco/f0/compare/f0-react-v4.46.4...f0-react-v4.46.5) (2026-07-22)
 
 
