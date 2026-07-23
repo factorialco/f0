@@ -78,7 +78,6 @@ const config: StorybookConfig = {
     { directory: "../src/kits/F0DataChart", titlePrefix: "Kits" },
     { directory: "../src/kits/Social", titlePrefix: "Components" }, // Reactions is a generic component
     { directory: "../src/sds/ai", titlePrefix: "Kits" },
-    { directory: "../src/sds/chat", titlePrefix: "Kits" },
     { directory: "../src/experimental/AiPromotionChat", titlePrefix: "Kits/AI" },
 
     // ── Domain specific · owned by a single domain (was "SDS") ───
@@ -86,6 +85,7 @@ const config: StorybookConfig = {
     { directory: "../src/sds/Profile", titlePrefix: "Domain specific" },
     { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
     { directory: "../src/sds/surveys", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/chat", titlePrefix: "Domain specific/Communications" }, // unvalidated chat — holding area until recurrent use is proven, then promote
     { directory: "../src/sds/TimeLine", titlePrefix: "Domain specific/Time tracking" },
     { directory: "../src/sds/UpsellingKit", titlePrefix: "Domain specific/Growth" },
 
