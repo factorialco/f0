@@ -842,3 +842,49 @@ export function HeatmapChartSkeleton() {
     </div>
   )
 }
+
+// ---------------------------------------------------------------------------
+// CategoryBarChartSkeleton
+// ---------------------------------------------------------------------------
+
+/**
+ * Skeleton for category bar content area.
+ *
+ * Renders a single horizontal bar split into proportional segments plus an
+ * optional legend row, matching the real DOM-rendered component layout.
+ */
+export function CategoryBarChartSkeleton({
+  showLegend = true,
+}: {
+  showLegend?: boolean
+} = {}) {
+  // Pre-defined widths to simulate a proportional distribution
+  const segmentWidths = [34, 26, 18, 12, 10]
+
+  return (
+    <div className="flex h-full animate-pulse flex-col justify-center px-4 py-3">
+      {/* Segmented bar */}
+      <div className="flex h-2 gap-1 overflow-hidden">
+        {segmentWidths.map((width, i) => (
+          <Skeleton
+            key={i}
+            className="h-full rounded-2xs"
+            style={{ width: `${width}%` }}
+          />
+        ))}
+      </div>
+
+      {/* Legend placeholder */}
+      {showLegend && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-0.5">
+          {segmentWidths.map((_, i) => (
+            <div key={i} className="flex items-center gap-1.5">
+              <Skeleton className="h-2 w-2 rounded-full" />
+              <Skeleton className="h-2.5 w-12 rounded-sm" />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

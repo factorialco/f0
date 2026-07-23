@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import {
   BarChartSkeleton,
+  CategoryBarChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,
@@ -85,4 +86,8 @@ export const Gauge: StoryObj = {
 
 export const Heatmap: StoryObj = {
   render: () => <HeatmapChartSkeleton />,
+}
+
+export const CategoryBar: StoryObj = {
+  render: () => <CategoryBarChartSkeleton />,
 }
