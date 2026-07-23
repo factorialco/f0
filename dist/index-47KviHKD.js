@@ -22229,14 +22229,21 @@ const AG = (t, e) => /* @__PURE__ */ m(
           },
           `table-cell-${c}-${l}-actions`
         ) : /* @__PURE__ */ P(Pe, { children: [
-          /* @__PURE__ */ m("td", { className: "sticky right-0 top-0 z-10 hidden md:table-cell", children: /* @__PURE__ */ m(gT, { dropDownOpen: $, children: /* @__PURE__ */ m(
-            S0,
+          /* @__PURE__ */ m("td", { className: "sticky right-0 top-0 z-10 hidden md:table-cell", children: /* @__PURE__ */ m(
+            gT,
             {
-              primaryItemActions: R,
-              dropdownItemActions: F,
-              handleDropDownOpenChange: B
+              dropDownOpen: $,
+              className: "pl-8",
+              children: /* @__PURE__ */ m(
+                S0,
+                {
+                  primaryItemActions: R,
+                  dropdownItemActions: F,
+                  handleDropDownOpenChange: B
+                }
+              )
             }
-          ) }) }),
+          ) }),
           O && /* @__PURE__ */ m(
             Cn,
             {
