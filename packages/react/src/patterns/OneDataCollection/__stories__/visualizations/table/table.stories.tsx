@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { expect, within } from "storybook/test"
+import { expect, userEvent, within } from "storybook/test"
 import { useState, useMemo } from "react"
 
 import { F0Button } from "@/components/F0Button"
@@ -10,6 +10,7 @@ import {
 
 import { ExampleComponent, getMockVisualizations } from "../../mockData"
 import { useDataCollectionSource } from "../../../hooks/useDataCollectionSource"
+import { ItemActionsDefinition } from "../../../item-actions"
 import { OneDataCollection } from "../../../index"
 
 const meta = {
@@ -887,5 +888,102 @@ export const WithColumnAddRemove: Story = {
         />
       </div>
     )
+  },
+}
+
+/**
+ * The hover "⋮" row-actions overlay must not swallow the last column's content.
+ * Here the trailing column is a `tagList` whose "+N" pill sits under the overlay's
+ * fade area. The overlay is transparent to pointer events (only the buttons are
+ * clickable), so hovering the "+N" still opens its popover.
+ *
+ * Mirrors Factorial's Job Catalog nested table (Competencies / Devices columns).
+ */
+export const RowActionsKeepTagListHoverable: Story = {
+  render: () => {
+    const records = [
+      {
+        id: 1,
+        name: "Field Technician",
+        devices: ["Ruggedized Handheld Scanner", "Thermal Printer", "Tablet"],
+      },
+      {
+        id: 2,
+        name: "Warehouse Operator",
+        devices: ["Forklift Terminal", "Barcode Gun", "Label Printer"],
+      },
+    ]
+
+    const itemActions: ItemActionsDefinition<(typeof records)[number]> = (
+      item
+    ) => [
+      { label: "Edit", onClick: () => console.log(`Edit ${item.name}`) },
+      {
+        label: "Delete",
+        critical: true,
+        onClick: () => console.log(`Delete ${item.name}`),
+      },
+    ]
+
+    const source = useDataCollectionSource({
+      dataAdapter: { fetchData: async () => ({ records }) },
+      itemActions,
+    })
+
+    return (
+      <div style={{ maxWidth: 560 }}>
+        <OneDataCollection
+          source={source}
+          visualizations={[
+            {
+              type: "table",
+              options: {
+                columns: [
+                  { label: "Role", render: (item) => item.name },
+                  {
+                    label: "Devices",
+                    render: (item) => ({
+                      type: "tagList",
+                      value: {
+                        type: "raw",
+                        tags: item.devices.map((text) => ({
+                          text,
+                          description: text,
+                        })),
+                        max: 1,
+                      },
+                    }),
+                  },
+                ],
+              },
+            },
+          ]}
+        />
+      </div>
+    )
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+
+    const roleCell = await canvas.findByText("Field Technician")
+    const row = roleCell.closest("tr")!
+
+    // The actions overlay does not intercept pointer events on the content
+    // beneath it (only the buttons do).
+    const overlay = row.querySelector("aside")
+    expect(overlay).not.toBeNull()
+    expect(getComputedStyle(overlay!).pointerEvents).toBe("none")
+
+    // Hovering the "+N" overflow pill still opens its popover, listing the
+    // hidden device names in full.
+    const plus = await within(row).findByText(/^\+\d+$/)
+    await userEvent.hover(plus)
+
+    const popover = await within(document.body).findByText(
+      "Thermal Printer",
+      undefined,
+      { timeout: 2000 }
+    )
+    expect(popover).toBeInTheDocument()
   },
 }
