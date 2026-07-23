@@ -141,7 +141,7 @@ export function A11yRow({
       : "not enforced yet"
 
   return (
-    <li className="flex items-start gap-2">
+    <div role="listitem" className="flex items-start gap-2">
       <span aria-hidden className={`mt-0.5 shrink-0 ${glyphColor}`}>
         {glyph}
       </span>
@@ -199,11 +199,12 @@ export function A11yRow({
                 </p>
               )}
               {audit.status === "done" && audit.criteria.length > 0 && (
-                <ul className="m-0 list-none space-y-1 p-0">
+                <div role="list" className="space-y-1">
                   {audit.criteria.map((c) => (
-                    <li
+                    <div
                       key={c.ruleId}
-                      className="flex items-start gap-2 !text-base"
+                      role="listitem"
+                      className="flex items-start gap-2 text-base"
                     >
                       <span
                         aria-hidden
@@ -225,9 +226,9 @@ export function A11yRow({
                           {c.nodes === 1 ? "element" : "elements"}
                         </span>
                       </span>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
               {(audit.status === "done" || audit.status === "unavailable") && (
                 <p className="mt-2 text-sm text-f1-foreground-secondary">
@@ -240,6 +241,6 @@ export function A11yRow({
           </details>
         </div>
       </div>
-    </li>
+    </div>
   )
 }

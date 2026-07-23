@@ -92,7 +92,11 @@ export function ComponentStability({
       </p>
 
       {status.showChecklist && (
-        <ul className="mt-4 list-none space-y-3 p-0">
+        // role="list" divs (not <ul>/<li>): Storybook docs injects a global
+        // `#storybook-docs ul { margin-bottom: 24px !important }` that .sb-unstyled
+        // doesn't neutralize and no utility class can outrank, so semantic-role
+        // divs keep the spacing under our control while preserving list semantics.
+        <div role="list" className="mt-4 space-y-3">
           {status.requirements.map((req) =>
             req.key === "a11y" ? (
               <A11yRow
@@ -102,7 +106,11 @@ export function ComponentStability({
                 skipped={status.a11ySkipped}
               />
             ) : (
-              <li key={req.key} className="flex items-start gap-2">
+              <div
+                key={req.key}
+                role="listitem"
+                className="flex items-start gap-2"
+              >
                 <span
                   aria-hidden
                   className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
@@ -116,11 +124,12 @@ export function ComponentStability({
                   <div className="mt-0.5 text-base text-f1-foreground-secondary">
                     {req.detail}
                     {req.criteria && req.criteria.length > 0 && (
-                      <ul className="mt-1 list-none space-y-0.5 p-0">
+                      <div role="list" className="mt-1 space-y-0.5">
                         {req.criteria.map((criterion) => (
-                          <li
+                          <div
                             key={criterion.label}
-                            className="flex items-start gap-2 !text-base"
+                            role="listitem"
+                            className="flex items-start gap-2 text-base"
                           >
                             <span
                               aria-hidden
@@ -129,16 +138,16 @@ export function ComponentStability({
                               {criterion.met ? "✓" : "✕"}
                             </span>
                             <span>{criterion.label}</span>
-                          </li>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     )}
                   </div>
                 </div>
-              </li>
+              </div>
             )
           )}
-        </ul>
+        </div>
       )}
     </div>
   )

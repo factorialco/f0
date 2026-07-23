@@ -294,7 +294,7 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
     key: "a11y",
     label: "Accessibility enforced",
     detail:
-      'Every story runs axe in blocking mode (a11y: { test: "error" }) — none skipped or downgraded to "todo". On a green main this means the component is axe-clean (WCAG 2.0/2.1/2.2, A & AA).',
+      'Every story runs axe blocking (test: "error"), never skipped or "todo" — on a green main, axe-clean (WCAG 2.0–2.2, A/AA).',
     isMet: (c) => c.a11yEnforced,
   },
 ]
