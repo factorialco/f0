@@ -1105,6 +1105,8 @@ declare interface BaseHeaderProps_2 {
     onClose?: () => void;
 }
 
+declare type BaseMapMarkerColor = (typeof markerColors)[number];
+
 declare type BaseMapMarkerLabelPlacement = (typeof markerLabelPlacements)[number];
 
 declare type BaseMapMarkerSize = (typeof markerSizes)[number];
@@ -5833,6 +5835,20 @@ declare type F0LinkProps = Omit<ActionLinkProps, "variant" | "href"> & {
 
 export declare const F0Map: ForwardRefExoticComponent<F0MapProps & RefAttributes<F0MapHandle>>;
 
+/**
+ * An arc: a curved connection between two coordinates (the flight-path /
+ * connection look). `F0Map` computes the curve; you give the endpoints.
+ */
+export declare interface F0MapArc extends F0MapLineStyle {
+    id: string;
+    /** `[lng, lat]` origin. */
+    from: [number, number];
+    /** `[lng, lat]` destination. */
+    to: [number, number];
+    /** Bow height as a fraction of the endpoint distance. Defaults to `0.3`. */
+    curvature?: number;
+}
+
 export declare type F0MapControlLabels = {
     zoomIn?: string;
     zoomOut?: string;
@@ -5878,6 +5894,26 @@ export declare interface F0MapHandle {
     fitToMarkers: () => void;
     /** Clear the current selection. */
     clearSelection: () => void;
+}
+
+/**
+ * Palette hue for a drawn line (route or arc). Reuses the marker categorical
+ * palette so lines and pins share one set of on-brand colors.
+ */
+export declare type F0MapLineColor = BaseMapMarkerColor;
+
+/** Styling shared by both line kinds (routes and arcs). */
+export declare interface F0MapLineStyle {
+    /** Palette hue. Defaults to `radical`. Ignored when `color` is set. */
+    variant?: F0MapLineColor;
+    /** Escape-hatch CSS color string; overrides `variant`. */
+    color?: string;
+    /** Line width in px. Defaults to `3`. */
+    width?: number;
+    /** Render as a dashed line. Defaults to `false`. */
+    dashed?: boolean;
+    /** Line opacity, `0`-`1`. Defaults to `1`. */
+    opacity?: number;
 }
 
 /**
@@ -5948,6 +5984,8 @@ export declare type F0MapMarkerVariant = (typeof f0MapMarkerVariants)[number];
  *  - `workplace`: a building glyph on a fixed brand hue (all sites match).
  *  - `employee` / `company`: an avatar whose color is its own identity color
  *    (grey when a photo replaces the colored chip).
+ *  - `stop`: a route stop - a single letter (A, B, C...) on the same fixed
+ *    hue as the route/arc lines it punctuates.
  */
 export declare type F0MapMarkerVariantProps = {
     variant: "default";
@@ -5962,6 +6000,9 @@ export declare type F0MapMarkerVariantProps = {
     variant: "company";
     name: string;
     src?: string;
+} | {
+    variant: "stop";
+    letter: string;
 };
 
 /**
@@ -5970,7 +6011,7 @@ export declare type F0MapMarkerVariantProps = {
  * so a given concept looks and behaves the same everywhere on the map. Callers
  * pick a variant and pass only its data.
  */
-export declare const f0MapMarkerVariants: readonly ["default", "workplace", "employee", "company"];
+export declare const f0MapMarkerVariants: readonly ["default", "workplace", "employee", "company", "stop"];
 
 /**
  * A point on the map: its coordinate plus the semantic marker variant and its
@@ -5985,6 +6026,12 @@ export declare type F0MapPoint = {
     label?: string;
 } & F0MapMarkerVariantProps;
 
+/**
+ * Map projection. `"globe"` renders the world as a 3D sphere (adaptive: it
+ * eases into a flat mercator view as you zoom in).
+ */
+export declare type F0MapProjection = "mercator" | "globe";
+
 export declare interface F0MapProps extends WithDataTestIdProps {
     /**
      * Points to render as markers. Pass a referentially stable array (memoize
@@ -5993,6 +6040,21 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      * (~200); beyond that pan/zoom degrades and a warning is logged.
      */
     markers?: F0MapPoint[];
+    /**
+     * Polylines drawn through their given coordinates, exactly as provided (no
+     * routing is computed - pass server-side / routing-engine output). Rendered
+     * as GL lines beneath the markers.
+     */
+    routes?: F0MapRoute[];
+    /**
+     * Curved connections between two coordinates (the flight-path look). `F0Map`
+     * computes the curve from each arc's `from` / `to`.
+     */
+    arcs?: F0MapArc[];
+    /** Fired when a route line is clicked. Providing it enables hover + click. */
+    onRouteClick?: (id: string) => void;
+    /** Fired when an arc line is clicked. Providing it enables hover + click. */
+    onArcClick?: (id: string) => void;
     /** Controlled selected marker id. */
     selectedMarkerId?: string | null;
     /** Uncontrolled initial selection. */
@@ -6006,14 +6068,6 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      * grown pin) stays driven by `selectedMarkerId`.
      */
     highlightedId?: string | null;
-    /**
-     * Group nearby markers into a clamped pile of their marker heads that expands
-     * on click / zoom-in. `true` uses the default radius; pass `{ radius }` (px)
-     * to tune density.
-     */
-    cluster?: boolean | {
-        radius?: number;
-    };
     /**
      * Frame all markers on load. Defaults to `true` when no `initialViewport` is
      * given, `false` otherwise (an explicit viewport wins).
@@ -6066,12 +6120,29 @@ export declare interface F0MapProps extends WithDataTestIdProps {
      * inset 24px.
      */
     fullScreen?: boolean;
+    /**
+     * Map projection. `"mercator"` (default) is the flat web map; `"globe"`
+     * renders the world as a 3D sphere at low zoom and eases into mercator as you
+     * zoom in - best for a world-scale view. Changing it re-projects live.
+     */
+    projection?: F0MapProjection;
     /** Show the skeleton instead of the map. */
     loading?: boolean;
     /** Accessible label for the map region. */
     ariaLabel?: string;
     /** @private */
     className?: string;
+}
+
+/**
+ * A route: a polyline drawn through the given coordinates exactly as provided.
+ * `F0Map` renders the path; it does not compute routing - fetch that
+ * server-side (or from a routing engine) and pass the resulting vertices.
+ */
+export declare interface F0MapRoute extends F0MapLineStyle {
+    id: string;
+    /** Ordered `[lng, lat]` vertices the line passes through. */
+    coordinates: [number, number][];
 }
 
 /**
@@ -7723,6 +7794,8 @@ declare type ListVisualizationOptions<R extends RecordType, _Filters extends Fil
 declare interface LoadingStateProps {
     label: string;
 }
+
+declare const markerColors: readonly ["neutral", "grey", "radical", "malibu", "viridian", "flubber", "grass", "camel", "indigo", "lilac", "orange", "purple", "yellow", "red", "army", "smoke", "barbie"];
 
 declare const markerLabelPlacements: readonly ["right", "bottom", "left", "top"];
 
@@ -11652,10 +11725,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
@@ -11663,8 +11734,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
