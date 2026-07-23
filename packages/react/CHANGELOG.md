@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.49.3](https://github.com/factorialco/f0/compare/f0-react-v4.49.2...f0-react-v4.49.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** serve remote MCP at /mcp via Azure SWA rewrite ([#4814](https://github.com/factorialco/f0/issues/4814)) ([ad6eb44](https://github.com/factorialco/f0/commit/ad6eb44802e8e6525ef6b099c85b283b4711dc58))
+
 ## [4.49.2](https://github.com/factorialco/f0/compare/f0-react-v4.49.1...f0-react-v4.49.2) (2026-07-23)
 
 
