@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.49.2](https://github.com/factorialco/f0/compare/f0-react-v4.49.1...f0-react-v4.49.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **Table:** don't animate rows when paginating ([#4809](https://github.com/factorialco/f0/issues/4809)) ([63e76f9](https://github.com/factorialco/f0/commit/63e76f9ec00d984e189d9cc3d01947a4d9cf79c8))
+
 ## [4.49.1](https://github.com/factorialco/f0/compare/f0-react-v4.49.0...f0-react-v4.49.1) (2026-07-23)
 
 
