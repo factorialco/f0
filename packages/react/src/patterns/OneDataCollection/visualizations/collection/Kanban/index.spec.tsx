@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { Observable } from "zen-observable-ts"
 
@@ -250,5 +250,281 @@ describe("KanbanCollection - lane loading", () => {
     await waitFor(() => {
       expect(screen.queryAllByTestId("skeleton")).toHaveLength(0)
     })
+  })
+})
+
+describe("KanbanCollection - grouping", () => {
+  type GroupPerson = RecordType & {
+    id: number
+    name: string
+    group: string
+    lane: string
+  }
+
+  const createGroupedSource = (
+    data: GroupPerson[]
+  ): DataCollectionSource<
+    GroupPerson,
+    TestFilters,
+    SortingsDefinition,
+    SummariesDefinition,
+    ItemActionsDefinition<GroupPerson>,
+    TestNavigationFilters,
+    GroupingDefinition<GroupPerson>
+  > => ({
+    currentFilters: {},
+    setCurrentFilters: vi.fn(),
+    currentSortings: null,
+    setCurrentSortings: vi.fn(),
+    currentNavigationFilters: {},
+    setCurrentNavigationFilters: vi.fn(),
+    navigationFilters: undefined,
+    currentSearch: undefined,
+    debouncedCurrentSearch: undefined,
+    setCurrentSearch: vi.fn(),
+    isLoading: false,
+    setIsLoading: vi.fn(),
+    currentGrouping: { field: "group", order: "asc" },
+    setCurrentGrouping: vi.fn(),
+    grouping: {
+      collapsible: true,
+      defaultOpenGroups: true,
+      groupBy: {
+        group: {
+          name: "Group",
+          label: (groupId) => `Group ${String(groupId)}`,
+        },
+      },
+    },
+    dataAdapter: {
+      fetchData: async (
+        options: import("@/hooks/datasource").PaginatedFetchOptions<TestFilters>
+      ) => {
+        const laneFilter = (options.filters as { lane?: string[] } | undefined)
+          ?.lane
+        const records = laneFilter
+          ? data.filter((p) => laneFilter.includes(p.lane))
+          : data
+        return {
+          records,
+          total: records.length,
+          perPage: records.length,
+          type: "infinite-scroll" as const,
+          cursor: null,
+          hasMore: false,
+        }
+      },
+      paginationType: "infinite-scroll",
+      perPage: data.length,
+    },
+    idProvider: (item: GroupPerson) => item.id,
+  })
+
+  it("pivots grouped data into one board per group showing all lanes", async () => {
+    // John(A/todo), Jane(A/doing), Bob(B/doing): group B has no todo item, but
+    // the todo lane still renders (empty) so every group keeps the same columns.
+    const people: GroupPerson[] = [
+      { id: 1, name: "John", group: "A", lane: "todo" },
+      { id: 2, name: "Jane", group: "A", lane: "doing" },
+      { id: 3, name: "Bob", group: "B", lane: "doing" },
+    ]
+
+    const source = {
+      ...createGroupedSource(people),
+      lanes: [
+        { id: "todo", filters: { lane: ["todo"] } },
+        { id: "doing", filters: { lane: ["doing"] } },
+      ],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        GroupPerson,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<GroupPerson>,
+        TestNavigationFilters,
+        GroupingDefinition<GroupPerson>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    const groupA = await screen.findByTestId("kanban-group-A")
+    const groupB = await screen.findByTestId("kanban-group-B")
+
+    expect(within(groupA).getByText("Group A")).toBeInTheDocument()
+    expect(within(groupB).getByText("Group B")).toBeInTheDocument()
+
+    // Boards render in grouping order (first appearance across lanes: A, B)
+    expect(
+      screen
+        .getAllByTestId(/^kanban-group-/)
+        .map((b) => b.getAttribute("data-testid"))
+    ).toEqual(["kanban-group-A", "kanban-group-B"])
+
+    // Group A: both lanes populated (John in Todo, Jane in Doing)
+    await waitFor(() => {
+      expect(within(groupA).getAllByTestId("card")).toHaveLength(2)
+    })
+    expect(within(groupA).getByText("Todo")).toBeInTheDocument()
+    expect(within(groupA).getByText("Doing")).toBeInTheDocument()
+
+    // Group B: only Bob (in Doing), but both lanes still render — the empty
+    // Todo lane is kept, not hidden
+    await waitFor(() => {
+      expect(within(groupB).getAllByTestId("card")).toHaveLength(1)
+    })
+    expect(within(groupB).getByText("Doing")).toBeInTheDocument()
+    expect(within(groupB).getByText("Todo")).toBeInTheDocument()
+  })
+
+  it("collapses and expands a group when its header is toggled", async () => {
+    const user = userEvent.setup()
+    const people: GroupPerson[] = [
+      { id: 1, name: "John", group: "A", lane: "todo" },
+      { id: 2, name: "Jane", group: "A", lane: "doing" },
+      { id: 3, name: "Bob", group: "B", lane: "doing" },
+    ]
+
+    const source = {
+      ...createGroupedSource(people),
+      lanes: [
+        { id: "todo", filters: { lane: ["todo"] } },
+        { id: "doing", filters: { lane: ["doing"] } },
+      ],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        GroupPerson,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<GroupPerson>,
+        TestNavigationFilters,
+        GroupingDefinition<GroupPerson>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    const groupA = await screen.findByTestId("kanban-group-A")
+    await waitFor(() => {
+      expect(within(groupA).getAllByTestId("card")).toHaveLength(2)
+    })
+
+    // Collapse group A via its header → its board content is hidden
+    await user.click(within(groupA).getByTestId("group-header-chevron"))
+    await waitFor(() => {
+      expect(within(groupA).queryAllByTestId("card")).toHaveLength(0)
+    })
+
+    // Expand again → the cards come back
+    await user.click(within(groupA).getByTestId("group-header-chevron"))
+    await waitFor(() => {
+      expect(within(groupA).getAllByTestId("card")).toHaveLength(2)
+    })
+  })
+
+  // Onboarding case: each version renders its own phases; a version with no
+  // people is simply not shown (standard data-driven grouping).
+  it("renders each shown version with its own columns and omits empty versions", async () => {
+    // v2 and v1 have people (different phases each); v3 has none → must not appear.
+    const people: GroupPerson[] = [
+      { id: 1, name: "Alice", group: "v2", lane: "p_start" },
+      { id: 2, name: "Bob", group: "v2", lane: "p_6mo" },
+      { id: 3, name: "Carla", group: "v1", lane: "p_month" },
+    ]
+
+    const source = {
+      ...createGroupedSource(people),
+      // Global union of every version's phases — the fetch runs over this.
+      lanes: [
+        { id: "p_start", filters: { lane: ["p_start"] } },
+        { id: "p_month", filters: { lane: ["p_month"] } },
+        { id: "p_prob", filters: { lane: ["p_prob"] } },
+        { id: "p_6mo", filters: { lane: ["p_6mo"] } },
+      ],
+    }
+
+    const lanesByVersion: Record<string, { id: string; title: string }[]> = {
+      v2: [
+        { id: "p_start", title: "Start" },
+        { id: "p_6mo", title: "6 months" },
+      ],
+      v1: [
+        { id: "p_month", title: "Month" },
+        { id: "p_prob", title: "Prob" },
+      ],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        GroupPerson,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<GroupPerson>,
+        TestNavigationFilters,
+        GroupingDefinition<GroupPerson>
+      >
+        lanes={[
+          { id: "p_start", title: "Start" },
+          { id: "p_month", title: "Month" },
+          { id: "p_prob", title: "Prob" },
+          { id: "p_6mo", title: "6 months" },
+        ]}
+        getLanesForGroup={(key) => lanesByVersion[key] ?? []}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    // v2 shows ONLY its 2 phases (Start, 6 months) with its people
+    const v2 = await screen.findByTestId("kanban-group-v2")
+    await waitFor(() => {
+      expect(within(v2).getAllByTestId("card")).toHaveLength(2)
+    })
+    expect(within(v2).getByText("Start")).toBeInTheDocument()
+    expect(within(v2).getByText("6 months")).toBeInTheDocument()
+    expect(within(v2).queryByText("Month")).not.toBeInTheDocument()
+    expect(within(v2).queryByText("Prob")).not.toBeInTheDocument()
+
+    // v1 shows ONLY its own 2 phases (Month, Prob), different from v2's
+    const v1 = await screen.findByTestId("kanban-group-v1")
+    expect(within(v1).getByText("Month")).toBeInTheDocument()
+    expect(within(v1).getByText("Prob")).toBeInTheDocument()
+    expect(within(v1).queryByText("Start")).not.toBeInTheDocument()
+    expect(within(v1).queryByText("6 months")).not.toBeInTheDocument()
+
+    // v3 has no people → it is NOT rendered at all
+    expect(screen.queryByTestId("kanban-group-v3")).not.toBeInTheDocument()
   })
 })

@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useMemo, useRef, useState } from "react"
-import { fn } from "storybook/test"
+import { expect, fn, within } from "storybook/test"
 
 import { granularityDefinitions } from "@/components/OneCalendar/granularities"
 import { Delete, Pencil, Plus } from "@/icons/app"
@@ -203,5 +203,77 @@ export const KanbanWithCreateActions: Story = {
         searchBar
       />
     )
+  },
+}
+
+export const KanbanWithGrouping: Story = {
+  parameters: {
+    chromatic: { disableSnapshot: true },
+    docs: {
+      description: {
+        story:
+          "Kanban with collapsible grouping. Each group renders its own board " +
+          "showing the full set of lanes (empty lanes render empty). The toolbar " +
+          "(search, counter, actions) sits above all groups and applies to every group.",
+      },
+    },
+  },
+  render: () => {
+    const [items] = useState<MockUser[]>(() => generateMockUsers(60))
+    const mockVisualizations = getMockVisualizations({})
+
+    const dataAdapter = useMemo(
+      () =>
+        createDataAdapter({
+          data: items,
+          paginationType: "infinite-scroll",
+          perPage: 20,
+        }),
+      [items]
+    )
+
+    return (
+      <ExampleComponent
+        visualizations={[mockVisualizations.kanban, mockVisualizations.table]}
+        dataAdapter={dataAdapter}
+        currentGrouping={{ field: "role", order: "asc" }}
+        grouping={{
+          collapsible: true,
+          defaultOpenGroups: true,
+          groupBy: {
+            role: {
+              name: "Role",
+              label: (groupId) => String(groupId),
+            },
+          },
+        }}
+        totalItemSummary={(total) => `Total items: ${total}`}
+        primaryActions={() => ({
+          label: "New",
+          icon: Plus,
+          onClick: () => console.log("Adding item"),
+        })}
+        secondaryActions={() => [
+          {
+            label: "Export all",
+            icon: Pencil,
+            onClick: () => console.log("Exporting"),
+          },
+        ]}
+        fullHeight
+        searchBar
+      />
+    )
+  },
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+    await step("renders one board per group", async () => {
+      const groups = await canvas.findAllByTestId(/^kanban-group-/)
+      expect(groups.length).toBeGreaterThan(1)
+    })
+    await step("each populated group shows its cards", async () => {
+      const cards = await canvas.findAllByTestId("card")
+      expect(cards.length).toBeGreaterThan(0)
+    })
   },
 }
