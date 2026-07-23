@@ -13,6 +13,9 @@ import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
 
+/** Default value-label font size (px) — slightly smaller than axis labels. */
+const DEFAULT_LABEL_FONT_SIZE = 11
+
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartBarDataPoint): number {
   return typeof point === "number" ? point : point.value
@@ -59,7 +62,9 @@ function buildSeriesEntries(
   showLabels: boolean,
   stacked: boolean,
   isLastSeries: boolean,
-  labelColor: string
+  labelColor: string,
+  labelFontSize: number,
+  valueFormatter?: (value: number) => string
 ): echarts.BarSeriesOption[] {
   const color = resolveColor(series, index)
   const hasTargetData = hasTargets(series)
@@ -110,11 +115,20 @@ function buildSeriesEntries(
     },
     label: {
       show: showLabels,
-      position: isVertical ? "top" : "right",
-      color: labelColor,
+      // Stacked bars are segmented, so center the value inside its own segment;
+      // single/grouped bars keep the value just outside the bar (above / beside).
+      position: stacked ? "inside" : isVertical ? "top" : "right",
+      // Inside a coloured segment the value is white at 85% opacity; outside
+      // (on the chart background) it uses the secondary foreground colour.
+      color: stacked ? "rgba(255, 255, 255, 0.85)" : labelColor,
       fontWeight: "bold",
+      fontSize: labelFontSize,
       overflow: "truncate",
       ellipsis: "...",
+      // Labels use the same value formatter as the axis/tooltip (e.g. "100K").
+      formatter: valueFormatter
+        ? (params) => valueFormatter(Number(params.value))
+        : undefined,
     },
     emphasis: {
       itemStyle: {
@@ -122,6 +136,12 @@ function buildSeriesEntries(
         shadowOffsetX: 0,
         shadowColor: "transparent",
       },
+      // When labels are shown, stacked ones render at 85% white; lift them to
+      // full white on hover. With labels off, add nothing here — otherwise
+      // hovering a stacked bar would reveal numbers that are meant to stay off.
+      ...(stacked && showLabels
+        ? { label: { show: true, color: "#ffffff" } }
+        : {}),
     },
   }
 
@@ -230,6 +250,7 @@ export function useBarChartOptions(
     showLabels = false,
     valueFormatter,
     categoryFormatter,
+    labelFontSize,
     valueAxisSplitNumber = 2,
     echartsOptions,
   }: F0DataChartBarProps,
@@ -241,6 +262,7 @@ export function useBarChartOptions(
 
   return useMemo(() => {
     const isVertical = orientation === "vertical"
+    const resolvedLabelFontSize = labelFontSize ?? DEFAULT_LABEL_FONT_SIZE
 
     const responsive = resolveResponsiveDisplay(size)
     // The user-provided `showLegend` prop can still force the legend off,
@@ -257,7 +279,9 @@ export function useBarChartOptions(
         showLabels,
         stacked,
         i === series.length - 1,
-        theme.colors.foregroundSecondary
+        theme.colors.foregroundSecondary,
+        resolvedLabelFontSize,
+        valueFormatter
       )
     )
 
@@ -355,6 +379,7 @@ export function useBarChartOptions(
     showLabels,
     valueFormatter,
     categoryFormatter,
+    labelFontSize,
     valueAxisSplitNumber,
     echartsOptions,
     theme,

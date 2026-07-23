@@ -49,6 +49,19 @@ function getLatestOption() {
   }
 }
 
+function getMainSeries() {
+  const call = setOptionMock.mock.calls.at(-1)
+  if (!call) throw new Error("setOption was never called")
+  return (
+    call[0] as {
+      series: {
+        label?: { position?: string; color?: string }
+        emphasis?: { label?: { color?: string; show?: boolean } }
+      }[]
+    }
+  ).series
+}
+
 beforeEach(() => {
   setOptionMock.mockClear()
   containerSize.width = 800
@@ -103,5 +116,60 @@ describe("BarChart — responsive breakpoints", () => {
     // Horizontal bars: X = value axis (shown at md), Y = category axis (hidden at md)
     expect(option.xAxis.axisLabel.show).toBe(true)
     expect(option.yAxis.axisLabel.show).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Label placement — stacked bars center the value inside each segment (white);
+// single/grouped bars keep it outside the bar in the neutral colour.
+// ---------------------------------------------------------------------------
+
+describe("BarChart — label placement", () => {
+  const base = {
+    type: "bar" as const,
+    categories: ["A", "B"],
+    showLabels: true,
+  }
+
+  it("centers labels inside the segment and paints them white when stacked", () => {
+    render(
+      <F0DataChart
+        {...base}
+        stacked
+        series={[
+          { name: "X", data: [1, 2] },
+          { name: "Y", data: [3, 4] },
+        ]}
+      />
+    )
+    const series = getMainSeries()[0]
+    expect(series?.label?.position).toBe("inside")
+    expect(series?.label?.color).toBe("rgba(255, 255, 255, 0.85)")
+    // Full white on hover.
+    expect(series?.emphasis?.label?.color).toBe("#ffffff")
+  })
+
+  it("places labels above the bar in the neutral colour when not stacked", () => {
+    render(<F0DataChart {...base} series={[{ name: "X", data: [1, 2] }]} />)
+    const label = getMainSeries()[0]?.label
+    expect(label?.position).toBe("top")
+    expect(label?.color).not.toBe("rgba(255, 255, 255, 0.85)")
+  })
+
+  it("does not reveal labels on hover for stacked bars when showLabels is off", () => {
+    // showLabels defaults to false — the emphasis (hover) state must not turn
+    // labels on, otherwise numbers would flash in on hover.
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A", "B"]}
+        stacked
+        series={[
+          { name: "X", data: [1, 2] },
+          { name: "Y", data: [3, 4] },
+        ]}
+      />
+    )
+    expect(getMainSeries()[0]?.emphasis?.label?.show).not.toBe(true)
   })
 })

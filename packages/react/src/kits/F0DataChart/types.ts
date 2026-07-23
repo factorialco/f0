@@ -151,6 +151,10 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2
    */
   valueAxisSplitNumber?: number
+  /**
+   * Font size in pixels for the value labels. @default 11
+   */
+  labelFontSize?: number
 }
 
 // ---------------------------------------------------------------------------
