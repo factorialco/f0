@@ -230,7 +230,16 @@ export const TableCollection = <
     data?.type === "flat"
       ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
       : []
-  const addedRowKeys = useAddedRowKeys(flatRowKeys)
+  // Identity of the current pagination position. When it changes the row set is
+  // swapped by navigation (paging / loading more), not by an insert, so the
+  // flash must be suppressed for that render.
+  const paginationResetKey =
+    paginationInfo?.type === "pages"
+      ? paginationInfo.currentPage
+      : paginationInfo?.type === "infinite-scroll"
+        ? paginationInfo.cursor
+        : undefined
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
