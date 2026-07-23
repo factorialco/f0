@@ -30,6 +30,7 @@ export default {
         "row-flash": {
           from: { backgroundColor: "hsl(var(--positive-50) / 0.2)" },
           to: { backgroundColor: "hsl(var(--positive-50) / 0)" },
+        },
         // Chat typing indicator: a soft rise-and-dim wave with a rest phase
         // (WhatsApp-style), instead of `bounce`'s hard ball-drop curve.
         "typing-dot": {
