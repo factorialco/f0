@@ -70,6 +70,12 @@ type SelectContentProps = (
   scrollMargin?: number
   taller?: boolean
   portalContainer?: HTMLElement | null
+  /**
+   * When true, the dropdown sizes to its widest option (never narrower than
+   * the trigger) instead of the default 20rem minimum. Useful for compact
+   * value pickers like month/year selectors.
+   */
+  fitContentWidth?: boolean
 }
 const SelectContent = forwardRef<
   ElementRef<typeof SelectPrimitive.Content>,
@@ -90,6 +96,7 @@ const SelectContent = forwardRef<
       isLoading,
       scrollMargin,
       forceMinHeight,
+      fitContentWidth = false,
       showLoadingIndicator,
       asChild,
       portalContainer,
@@ -263,7 +270,9 @@ const SelectContent = forwardRef<
           !asList &&
             position === "popper" &&
             !forceMinHeight &&
-            "min-w-80 w-[var(--radix-select-trigger-width)]",
+            (fitContentWidth
+              ? "w-max min-w-[var(--radix-select-trigger-width)]"
+              : "min-w-80 w-[var(--radix-select-trigger-width)]"),
           !asList &&
             position === "popper" &&
             forceMinHeight &&

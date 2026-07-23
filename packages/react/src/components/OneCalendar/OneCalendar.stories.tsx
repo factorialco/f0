@@ -615,6 +615,27 @@ export const WithMinAndMaxYear: Story = {
   },
 }
 
+// Day view opened far in the past: the month/year dropdowns let you jump
+// straight to a birthday instead of clicking the arrows hundreds of times.
+export const BirthdayDistantPast: Story = {
+  args: {
+    mode: "single",
+    view: "day",
+    defaultMonth: new Date(1985, 2, 1),
+    defaultSelected: new Date(1985, 2, 15),
+  },
+}
+
+// Year dropdown bounded by minDate/maxDate.
+export const DayWithBoundedYears: Story = {
+  args: {
+    mode: "single",
+    view: "day",
+    minDate: new Date(2020, 0, 1),
+    maxDate: new Date(2027, 11, 31),
+  },
+}
+
 // Compact versions
 export const CompactMonthSingle: OneCalendarInternalStory = {
   args: {

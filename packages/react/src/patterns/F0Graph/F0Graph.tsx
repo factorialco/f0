@@ -1,8 +1,7 @@
 import { ReactFlowProvider } from "@xyflow/react"
-import { type ReactNode } from "react"
+import { forwardRef, type ForwardedRef, type ReactNode, type Ref } from "react"
 
 import "./F0Graph.css"
-import { F0GraphView } from "./components/F0GraphView"
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
   F0GraphNodeTagColumn,
@@ -18,6 +17,8 @@ import type {
   ZoomPreset,
   ZoomThresholds,
 } from "./types"
+
+import { F0GraphView } from "./components/F0GraphView"
 
 // ─── Props ─────────────────────────────────────────────────────
 export interface F0GraphProps<T = unknown> {
@@ -110,6 +111,13 @@ export interface F0GraphProps<T = unknown> {
   onPaneClick?: () => void
 
   // ---- Navigation ----
+  /**
+   * Id of a node to fly to (center on) when the value **changes**. Because it
+   * only reacts to a value change, re-selecting the **same** node (e.g.
+   * searching the same employee twice after panning away) will NOT re-fly — for
+   * that "always fly on the action" behavior, call the imperative
+   * `focusNode(id)` on the graph ref instead (see {@link F0GraphHandle}).
+   */
   focusedNode?: string
   highlightedNodes?: Set<string>
   /**
@@ -138,6 +146,15 @@ export interface F0GraphProps<T = unknown> {
    * navigation controls).
    */
   canvasActions?: ReactNode
+
+  /**
+   * Optional action(s) rendered at the bottom-right of the canvas. Anchored to
+   * the canvas (not the viewport), so it tracks the graph's visible area and
+   * reflows when a side panel shrinks it. Symmetric to `canvasActions`
+   * (top-left) and clear of the controls (bottom-left). Consumers provide their
+   * own `<F0Button>` elements (use `size="md"` to match the navigation controls).
+   */
+  canvasFooterActions?: ReactNode
 
   // ---- Controls ----
   showControls?: boolean
@@ -253,6 +270,30 @@ export interface F0GraphProps<T = unknown> {
   onRenderedNodesChange?: (count: number) => void
 }
 
+// ─── Imperative handle ─────────────────────────────────────────
+/**
+ * Imperative API exposed via a ref on `<F0Graph>`. Use for actions that should
+ * fire every time they're invoked, regardless of whether any prop changed —
+ * the canonical case is a search box that re-centers on a result even when the
+ * user picks the same node twice.
+ */
+export interface F0GraphHandle {
+  /**
+   * Fly to (center on) a node, animating from the current viewport. Always
+   * runs, even if the node is already focused/centered — unlike the
+   * `focusedNode` prop, which only reacts to a value change. Frames the node
+   * with its direct children (capped zoom); safe with node windowing (an
+   * off-screen target is centered via its layout position).
+   */
+  focusNode: (nodeId: string) => void
+  /**
+   * Clear the graph's own node selection (the ring set on click). Use when the
+   * consumer marks a node another way — e.g. `highlightedNodes` for a search /
+   * "Find me" reveal — so the two don't leave two nodes marked at once.
+   */
+  clearSelection: () => void
+}
+
 // ─── Custom Node Type for React Flow ───────────────────────────
 /**
  * Behavior context passed to consumer's `renderNode`. Describes how F0Graph
@@ -296,12 +337,19 @@ export interface F0GraphNodeRenderContext {
 }
 
 // ─── Public component (wraps the view in a ReactFlowProvider) ──────────────
-export function F0Graph<T = unknown>(props: F0GraphProps<T>) {
+function F0GraphInner<T = unknown>(
+  props: F0GraphProps<T>,
+  ref: ForwardedRef<F0GraphHandle>
+) {
   return (
     <ReactFlowProvider>
-      <F0GraphView {...props} />
+      <F0GraphView {...props} handleRef={ref} />
     </ReactFlowProvider>
   )
 }
 
-F0Graph.displayName = "F0Graph"
+export const F0Graph = forwardRef(F0GraphInner) as <T = unknown>(
+  props: F0GraphProps<T> & { ref?: Ref<F0GraphHandle> }
+) => ReturnType<typeof F0GraphInner>
+
+;(F0Graph as { displayName?: string }).displayName = "F0Graph"

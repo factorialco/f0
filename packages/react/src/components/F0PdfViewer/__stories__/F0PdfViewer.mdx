@@ -5,10 +5,12 @@ import * as Stories from "./F0PdfViewer.stories"
 
 # F0PdfViewer
 
-An experimental, read-only PDF viewer built on
-[`react-pdf`](https://github.com/wojtekmaj/react-pdf) (which wraps `pdf.js`).
-It renders the document as a continuous, scrollable list of pages with a toolbar
-for page navigation, zooming, printing, and downloading.
+An experimental, read-only document viewer. Its default (and namesake) mode
+renders PDFs through [`react-pdf`](https://github.com/wojtekmaj/react-pdf)
+(which wraps `pdf.js`) as a continuous, scrollable list of pages. Via the
+`kind` prop it also previews **spreadsheets** (xlsx/xls/csv), **Word**
+documents (docx) and **text/markdown** files — every kind carries a toolbar
+with its own controls, and hosts can append custom actions to it.
 
 <Canvas of={Stories.Default} />
 <Controls of={Stories.Default} />
@@ -43,6 +45,74 @@ defined height, otherwise it collapses.
 </div>
 ```
 
+## Document kinds
+
+`kind` selects the document family. It defaults to `"pdf"`, which keeps the
+full pdf.js viewer unchanged. The other kinds render read-only previews, each
+lazy-loaded in its own chunk (SheetJS, docx-preview and the markdown pipeline
+never load until a document of that kind renders). PDF-only props (`page`,
+`initialScale`, `rotatable`, print…) are ignored for them.
+
+```tsx
+<F0PdfViewer url="/report.xlsx" kind="sheet" filename="report.xlsx" />
+```
+
+Every kind has a toolbar with its own peculiarities:
+
+| Kind            | Content                                                                                        | Toolbar                                                          |
+| --------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `pdf` (default) | Continuous pages via pdf.js                                                                    | Page nav, zoom, scale selector, optional rotate, print, download |
+| `sheet`         | Excel-style grid (letter columns, numbered rows), capped at 1000×100 with a truncation note    | Sheet switcher (ToggleGroup), zoom, download                     |
+| `docx`          | Word page layout via [`docx-preview`](https://github.com/VolodymyrBaydalka/docxjs)             | Zoom, download                                                   |
+| `text`          | `.md` renders as a sanitized document (GFM tables included); txt/log/json as monospaced source | Zoom, download                                                   |
+
+No kind shows a title in the toolbar — same as the PDF toolbar.
+
+If a document can't load, the pane shows a failure message but the toolbar
+stays — download (and any custom action) remains reachable.
+
+### Spreadsheets (`kind="sheet"`)
+
+Parses xlsx, legacy xls and csv. The toolbar carries a ToggleGroup with one
+toggle per sheet of the workbook to switch between them.
+
+<Canvas of={Stories.SpreadsheetKind} />
+
+### Word (`kind="docx"`)
+
+Faithful page layout (breaks, tables, images) rendered client-side. Binary
+`.doc` is not supported.
+
+<Canvas of={Stories.WordKind} />
+
+### Text and markdown (`kind="text"`)
+
+Markdown files render as a document — headings, lists, GFM tables, code —
+sanitized with DOMPurify (scripts, event handlers and images are stripped).
+Anything else shows as monospaced source. Pass `mimeType` so markdown detection
+doesn't rely on the filename alone.
+
+<Canvas of={Stories.MarkdownKind} />
+<Canvas of={Stories.PlainTextKind} />
+
+## Custom toolbar actions
+
+`actions` appends host-provided buttons after the built-in controls, in every
+kind. The typical case is a Close button when the viewer fills a fullscreen
+overlay — this is exactly how the F0Chat document preview mounts it.
+
+```tsx
+import { Cross } from "@factorialco/f0-react/icons/app"
+;<F0PdfViewer
+  url={url}
+  kind="sheet"
+  filename="report.xlsx"
+  actions={[{ icon: Cross, label: "Close", onClick: onClose }]}
+/>
+```
+
+<Canvas of={Stories.WithCustomActions} />
+
 ## Worker setup
 
 `pdf.js` renders in a Web Worker. F0 configures the worker automatically,
@@ -60,16 +130,19 @@ configurePdfWorker("/static/pdf.worker.min.js")
 
 `initialScale` accepts `"page-width"` (default), `"page-fit"`, or a fixed zoom
 (`"0.5"` … `"4"`). The toolbar exposes the same options plus zoom in/out steps.
+The non-PDF kinds carry the same zoom controls with the fixed steps (no
+page-width/page-fit — there's no page geometry to fit to); `initialScale`
+itself is PDF only.
 
 <Canvas of={Stories.PageFit} />
 
 ## Rotation
 
 Set `rotatable` to add a toolbar control that rotates the document in 90°
-steps. Rotation is uncontrolled: the viewer keeps its own state, but you can
-seed it with `initialRotation` and react to changes via `onRotationChange` (for
-example, to persist it per file). Persistence is left to the consumer so the
-component stays free of storage concerns.
+steps (PDF only). Rotation is uncontrolled: the viewer keeps its own state, but
+you can seed it with `initialRotation` and react to changes via
+`onRotationChange` (for example, to persist it per file). Persistence is left
+to the consumer so the component stays free of storage concerns.
 
 ```tsx
 <F0PdfViewer
@@ -110,7 +183,21 @@ viewer shows a status region announced to assistive tech.
         <code>string</code>
       </td>
       <td>—</td>
-      <td>Source URL of the PDF document (required)</td>
+      <td>Source URL of the document (required)</td>
+    </tr>
+    <tr>
+      <td>
+        <code>kind</code>
+      </td>
+      <td>
+        <code>"pdf" | "sheet" | "docx" | "text"</code>
+      </td>
+      <td>
+        <code>"pdf"</code>
+      </td>
+      <td>
+        Document family to render. Non-PDF kinds ignore the PDF-only props below
+      </td>
     </tr>
     <tr>
       <td>
@@ -126,6 +213,32 @@ viewer shows a status region announced to assistive tech.
     </tr>
     <tr>
       <td>
+        <code>mimeType</code>
+      </td>
+      <td>
+        <code>string</code>
+      </td>
+      <td>—</td>
+      <td>
+        MIME type of the document — used by <code>kind="text"</code> to detect
+        markdown
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <code>actions</code>
+      </td>
+      <td>
+        <code>{"{ icon, label, onClick }[]"}</code>
+      </td>
+      <td>—</td>
+      <td>
+        Custom actions appended to the toolbar (after the built-in controls), in
+        every kind
+      </td>
+    </tr>
+    <tr>
+      <td>
         <code>page</code>
       </td>
       <td>
@@ -134,7 +247,9 @@ viewer shows a status region announced to assistive tech.
       <td>
         <code>0</code>
       </td>
-      <td>Zero-based page index to scroll to initially and on change</td>
+      <td>
+        Zero-based page index to scroll to initially and on change (PDF only)
+      </td>
     </tr>
     <tr>
       <td>
@@ -144,7 +259,9 @@ viewer shows a status region announced to assistive tech.
         <code>number[]</code>
       </td>
       <td>—</td>
-      <td>Restrict rendering to a subset of pages (zero-based indexes)</td>
+      <td>
+        Restrict rendering to a subset of pages, zero-based indexes (PDF only)
+      </td>
     </tr>
     <tr>
       <td>
@@ -156,7 +273,7 @@ viewer shows a status region announced to assistive tech.
       <td>
         <code>"page-width"</code>
       </td>
-      <td>Initial zoom level</td>
+      <td>Initial zoom level (PDF only)</td>
     </tr>
     <tr>
       <td>
@@ -168,7 +285,7 @@ viewer shows a status region announced to assistive tech.
       <td>
         <code>true</code>
       </td>
-      <td>Send credentials with the document request</td>
+      <td>Send credentials with the document request, in every kind</td>
     </tr>
     <tr>
       <td>
@@ -180,7 +297,9 @@ viewer shows a status region announced to assistive tech.
       <td>
         <code>false</code>
       </td>
-      <td>Show a toolbar control to rotate the document in 90° steps</td>
+      <td>
+        Show a toolbar control to rotate the document in 90° steps (PDF only)
+      </td>
     </tr>
     <tr>
       <td>
@@ -192,7 +311,7 @@ viewer shows a status region announced to assistive tech.
       <td>
         <code>0</code>
       </td>
-      <td>Initial rotation in degrees</td>
+      <td>Initial rotation in degrees (PDF only)</td>
     </tr>
     <tr>
       <td>
@@ -212,7 +331,7 @@ viewer shows a status region announced to assistive tech.
         <code>(pdf: PDFDocumentProxy) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Called once the document has loaded</td>
+      <td>Called once the document has loaded (PDF only)</td>
     </tr>
     <tr>
       <td>
@@ -222,19 +341,24 @@ viewer shows a status region announced to assistive tech.
         <code>(page: number) =&gt; void</code>
       </td>
       <td>—</td>
-      <td>Called with the 1-based page number when the visible page changes</td>
+      <td>
+        Called with the 1-based page number when the visible page changes (PDF
+        only)
+      </td>
     </tr>
   </tbody>
 </table>
 
 ## Accessibility
 
-- The toolbar uses <code>role="toolbar"</code>; every control is an icon-only
-  button with an accessible label (previous/next page, zoom in/out, print,
-  download).
+- Every kind renders a <code>role="toolbar"</code> where each control is an
+  icon-only button with an accessible label (page nav, zoom, print, download,
+  custom actions). The sheet switcher is a single-select ToggleGroup — its
+  toggles expose <code>role="radio"</code> semantics.
 - The current page indicator (<code>page X / Y</code>) is announced via an
-  <code>aria-live="polite"</code> region.
-- Links inside the document open in a new tab with
-  <code>rel="noopener noreferrer"</code>.
+  <code>aria-live="polite"</code> region (PDF).
+- Links inside PDF documents open in a new tab with
+  <code>rel="noopener noreferrer"</code>; markdown HTML is sanitized with
+  DOMPurify before rendering.
 - The loading and skeleton states expose <code>role="status"</code> with
   <code>aria-busy</code> / <code>aria-live</code>.

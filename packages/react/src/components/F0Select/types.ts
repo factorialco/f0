@@ -74,6 +74,14 @@ type F0SelectBaseProps<T extends string, R = unknown> = {
    * @default true
    */
   preserveSelectionOnDatasetChange?: boolean
+  /**
+   * When true, the dropdown sizes to its widest option (never narrower than
+   * the trigger) instead of the default 20rem minimum. Useful for compact
+   * value pickers like month/year selectors.
+   *
+   * @default false
+   */
+  fitContentWidth?: boolean
 } & WithDataTestIdProps
 
 /**

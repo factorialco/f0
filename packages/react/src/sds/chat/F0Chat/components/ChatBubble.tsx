@@ -1,11 +1,15 @@
-import { memo, type ReactNode, useMemo } from "react"
+import { memo, type ReactNode, useMemo, useRef } from "react"
 
+import { motion } from "motion/react"
+
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { type F0ChatMessage, type F0ChatUser } from "../types"
 import { type MentionToken, renderBodyWithMentions } from "../utils/render-body"
 import { senderNameColorClass } from "../utils/sender-color"
+import { ChatLinkPreview } from "./ChatLinkPreview"
 import { ChatUserHoverCard } from "./ChatUserHoverCard"
 import { ReplyQuote } from "./ReplyQuote"
 
@@ -22,7 +26,9 @@ export const bubbleCornerClass = (
   isLastOfRun: boolean
 ): string =>
   cn(
-    "rounded-2xl",
+    // The radius transitions because extending a run flips the previous
+    // bubble's tail corner (2xl → sm) — animated, not a dry class swap.
+    "rounded-2xl transition-[border-radius] duration-150",
     !isFirstOfRun && (isMine ? "rounded-tr-sm" : "rounded-tl-sm"),
     !isLastOfRun && (isMine ? "rounded-br-sm" : "rounded-bl-sm")
   )
@@ -55,6 +61,11 @@ const ChatBubbleImpl = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
+  const reducedMotion = useReducedMotion()
+  // Whether the message was ALREADY deleted when this row mounted (history, or
+  // a tombstone scrolled back into the window): render it in place. Only a
+  // live delete fades the tombstone in.
+  const wasDeletedAtMountRef = useRef(message.deleted)
 
   const mentionTokens = useMemo<MentionToken[]>(
     () => [
@@ -87,17 +98,26 @@ const ChatBubbleImpl = ({
   )
 
   // Parse the body (twemoji + mention chips) once per content change — not on
-  // every scroll-driven re-render.
+  // every scroll-driven re-render. Link previews feed it so an inline URL
+  // reads as its scraped page title instead of the raw address.
   const renderedBody = useMemo(
-    () => renderBodyWithMentions(message.body, mentionTokens),
-    [message.body, mentionTokens]
+    () =>
+      renderBodyWithMentions(message.body, mentionTokens, message.linkPreviews),
+    [message.body, mentionTokens, message.linkPreviews]
   )
 
   const corners = bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun)
 
   if (message.deleted) {
+    // The branch switch remounts this root, so `initial` applies on a live
+    // delete — the tombstone fades in instead of hard-swapping the body.
     return (
-      <div
+      <motion.div
+        initial={
+          wasDeletedAtMountRef.current || reducedMotion ? false : { opacity: 0 }
+        }
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.15 }}
         className={cn(
           corners,
           "w-fit max-w-full px-3.5 py-2.5",
@@ -107,7 +127,7 @@ const ChatBubbleImpl = ({
         )}
       >
         {i18n.chat.deletedMessage}
-      </div>
+      </motion.div>
     )
   }
 
@@ -116,6 +136,9 @@ const ChatBubbleImpl = ({
       <div
         className={cn(
           corners,
+          // One property list (tailwind-merge collapses `transition-*`): the
+          // run-corner animation from `corners` plus the dim when a send fails.
+          "transition-[border-radius,opacity] duration-150",
           "flex w-fit max-w-full flex-col l text-f1-foreground font-normal",
           "whitespace-pre-wrap break-words",
           "border border-solid border-f1-border-secondary",
@@ -129,6 +152,15 @@ const ChatBubbleImpl = ({
             reply={message.replyTo}
             isMine={isMine}
             isFirstOfRun={isFirstOfRun}
+          />
+        )}
+        {message.linkPreviews && message.linkPreviews.length > 0 && (
+          <ChatLinkPreview
+            previews={message.linkPreviews}
+            isMine={isMine}
+            // Below a reply quote the card no longer touches the bubble's top —
+            // keep it fully rounded there.
+            isFirstOfRun={message.replyTo ? true : isFirstOfRun}
           />
         )}
         <div className="px-3.5 py-2.5">

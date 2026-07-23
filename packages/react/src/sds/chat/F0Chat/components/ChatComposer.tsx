@@ -39,10 +39,17 @@ import {
 } from "../providers/ChatUIProvider"
 import { useF0Chat } from "../providers/F0ChatProvider"
 import { type F0ChatAttachment } from "../types"
+import {
+  EASE_OUT_SWIFT,
+  layoutTransition,
+  microEnterTransition,
+  microExitTransition,
+} from "../utils/chat-motion"
 import { ChatEditChip } from "./ChatEditChip"
 import { ChatMentionPopover } from "./ChatMentionPopover"
 import { ChatReplyChip } from "./ChatReplyChip"
 import { ChatTextareaField } from "./ChatTextareaField"
+import { FadeInImage } from "./FadeInImage"
 
 /** A pending composer attachment: a skeleton while it uploads, then a square
  * image preview or an F0FileItem chip once the runtime resolves it. */
@@ -61,13 +68,18 @@ export const ChatComposer = (): ReactNode => {
     sendMessage,
     editMessage,
     onInputActivity,
+    stopTyping,
     uploadFiles,
     transcribe,
     maxFiles,
     channel,
     searchMembers,
     currentUserId,
+    capabilities,
   } = useF0Chat()
+  // Uploads need both the runtime hook AND the capability (a frozen channel
+  // can forbid attachments even when the transport could upload them).
+  const canUpload = !!uploadFiles && capabilities?.canUpload !== false
   const { replyTo, setReplyTo } = useChatReply()
   const { editingMessage, setEditingMessage } = useChatEdit()
   const { registerFileDropHandler } = useChatDrop()
@@ -158,28 +170,99 @@ export const ChatComposer = (): ReactNode => {
     "device-error": i18n.chat.micError,
     "transcription-failed": i18n.chat.transcriptionError,
   }
+
+  // Voice NOTES (WhatsApp-style): when the runtime can upload, the mic records
+  // audio and sends it as its own message on confirm — no transcription.
+  // Dictation (`transcribe`) remains the fallback when there's no uploadFiles.
+  const voiceNotesEnabled = canUpload
+  // While the confirmed recording uploads, the action row swaps for a "sending
+  // voice note" status so the confirm→message gap isn't silent.
+  const [isSendingVoiceNote, setIsSendingVoiceNote] = useState(false)
+  const handleVoiceNote = useCallback(
+    async (audio: Blob, durationMs: number) => {
+      if (!uploadFiles) return
+      // Set before any await so it batches with the recorder's own
+      // setStatus("idle") — the recording row swaps straight to the sending row.
+      setIsSendingVoiceNote(true)
+      const type = audio.type || "audio/webm"
+      const ext = type.includes("mp4")
+        ? "m4a"
+        : type.includes("ogg")
+          ? "ogg"
+          : "webm"
+      const file = new File([audio], `voice-note.${ext}`, { type })
+      try {
+        const [uploaded] = await uploadFiles([file])
+        if (uploaded && "url" in uploaded) {
+          sendMessage({
+            body: "",
+            attachments: [
+              {
+                kind: "voice",
+                url: uploaded.url,
+                durationSeconds: Math.max(1, Math.round(durationMs / 1000)),
+                mimeType: type,
+                name: file.name,
+              },
+            ],
+          })
+        }
+      } catch {
+        showTransientError(i18n.chat.fileUploadError)
+      } finally {
+        setIsSendingVoiceNote(false)
+      }
+    },
+    [uploadFiles, sendMessage, showTransientError, i18n.chat.fileUploadError]
+  )
+
   const recorder = useAudioRecorder({
     onTranscribe: transcribe,
     onPartial: fillFromTranscript,
     onFinal: fillFromTranscript,
     onError: (error) => showTransientError(recorderErrorMessage[error]),
+    onAudio: voiceNotesEnabled
+      ? (audio, durationMs) => void handleVoiceNote(audio, durationMs)
+      : undefined,
   })
   const isTranscribing = recorder.status === "transcribing"
   const isRecording = recorder.status === "recording"
-  const canRecord = !!transcribe && recorder.isSupported
+  const canRecord = (voiceNotesEnabled || !!transcribe) && recorder.isSupported
 
   const canSend =
     (value.trim().length > 0 || attachments.length > 0) &&
     !isTranscribing &&
-    !isUploading
+    !isUploading &&
+    !isSendingVoiceNote
+
+  // Activation pop for the send button: bump only on the false→true boundary
+  // (state-from-props adjustment during render), so the remount-driven pop
+  // fires once per activation — never per keystroke, never on deactivation.
+  const [sendActivationEpoch, setSendActivationEpoch] = useState(0)
+  const prevCanSendRef = useRef(canSend)
+  if (prevCanSendRef.current !== canSend) {
+    prevCanSendRef.current = canSend
+    if (canSend) setSendActivationEpoch((epoch) => epoch + 1)
+  }
 
   const handleChange = useCallback(
     (next: string, cursorPos: number) => {
       setValue(next)
       setCursorPosition(cursorPos)
       onInputActivity()
+      // Clearing the text means typing stopped NOW — don't leave the
+      // counterpart's dots hanging until the transport's timeout.
+      if (next.trim().length === 0) void stopTyping?.()
     },
-    [onInputActivity]
+    [onInputActivity, stopTyping]
+  )
+
+  // Leaving the conversation mid-type must also drop the dots immediately.
+  useEffect(
+    () => () => {
+      void stopTyping?.()
+    },
+    [stopTyping]
   )
 
   const updateCursorPosition = useCallback(() => {
@@ -194,7 +277,7 @@ export const ChatComposer = (): ReactNode => {
 
   const handleUpload = useCallback(
     async (files: File[]) => {
-      if (files.length === 0 || !uploadFiles) return
+      if (files.length === 0 || !uploadFiles || !canUpload) return
       // Reject the whole batch when it would exceed the cap — a transient banner
       // is friendlier than silently truncating the user's selection.
       if (
@@ -234,6 +317,7 @@ export const ChatComposer = (): ReactNode => {
     },
     [
       uploadFiles,
+      canUpload,
       maxFiles,
       showTransientError,
       i18n.chat.tooManyFilesError,
@@ -301,6 +385,8 @@ export const ChatComposer = (): ReactNode => {
 
   const handleSend = useCallback(() => {
     if (!canSend) return
+    // Typing stopped by definition — the message is out (or the edit saved).
+    void stopTyping?.()
     const ready = attachments.flatMap((a) =>
       a.status === "ready" ? [a.attachment] : []
     )
@@ -338,6 +424,7 @@ export const ChatComposer = (): ReactNode => {
     replyTo,
     sendMessage,
     setReplyTo,
+    stopTyping,
     value,
     editingMessage,
     editMessage,
@@ -406,17 +493,44 @@ export const ChatComposer = (): ReactNode => {
             everyoneDescription={i18n.chat.mentionEveryoneDescription}
           />
           {/* Editing and replying are mutually exclusive — the edit chip takes
-              the reply chip's slot while you're editing a message. */}
-          {isEditing && editingMessage ? (
-            <ChatEditChip message={editingMessage} onRemove={cancelEdit} />
-          ) : (
-            replyTo && (
-              <ChatReplyChip
-                message={replyTo}
-                onRemove={() => setReplyTo(null)}
-              />
-            )
-          )}
+              the reply chip's slot while you're editing a message. The chip
+              unfolds/collapses (height + fade); the transcript follows the
+              composer edge continuously via its ResizeObserver re-pin.
+              popLayout runs a reply→edit swap's exit and enter concurrently. */}
+          <AnimatePresence initial={false} mode="popLayout">
+            {isEditing && editingMessage ? (
+              <motion.div
+                key="edit-chip"
+                className="overflow-hidden"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.18,
+                  ease: EASE_OUT_SWIFT,
+                }}
+              >
+                <ChatEditChip message={editingMessage} onRemove={cancelEdit} />
+              </motion.div>
+            ) : replyTo ? (
+              <motion.div
+                key="reply-chip"
+                className="overflow-hidden"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.18,
+                  ease: EASE_OUT_SWIFT,
+                }}
+              >
+                <ChatReplyChip
+                  message={replyTo}
+                  onRemove={() => setReplyTo(null)}
+                />
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
 
           {/* Transient error (too many files, upload/voice failure) — flashed
               briefly, then fades out. Same pattern as the AI chat. */}
@@ -454,68 +568,128 @@ export const ChatComposer = (): ReactNode => {
 
           {/* Pending attachments — a skeleton while uploading, then a square
               image preview (matching the message thumbnails) or an F0FileItem
-              chip, each with a remove action. */}
-          {attachments.length > 0 && (
-            <div
-              aria-live="polite"
-              aria-busy={isUploading}
-              className="flex flex-wrap items-end gap-1 px-1 pt-1"
-            >
-              {orderedAttachments.map((att) =>
-                att.status === "uploading" ? (
-                  <Skeleton
-                    key={att.id}
-                    className={cn(
-                      att.isImage ? "h-16 w-16 rounded-lg" : "h-9 w-36 rounded"
-                    )}
-                  />
-                ) : att.attachment.kind === "image" ? (
-                  <div key={att.id} className="group/attachment relative flex">
-                    <img
-                      src={att.attachment.thumbnailUrl ?? att.attachment.url}
-                      alt={att.attachment.name}
-                      className="h-16 w-16 rounded-lg border border-solid border-f1-border-secondary object-cover"
-                    />
-                    {/* Remove is hidden until hover; focus also reveals it so
-                        it stays reachable by keyboard. */}
-                    <div className="absolute right-1 top-1 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
-                      <ButtonInternal
-                        variant="outline"
-                        size="sm"
-                        hideLabel
-                        label={i18n.chat.removeFile}
-                        icon={Cross}
-                        onClick={() =>
-                          setAttachments((prev) =>
-                            prev.filter((a) => a.id !== att.id)
-                          )
+              chip, each with a remove action. Each chip fades in and shrinks
+              out (`layout` slides the neighbours into the gap); the whole row
+              collapses when the last one goes (or the message sends). The
+              skeleton→ready swap crossfades inside the chip's stable key. */}
+          <AnimatePresence initial={false}>
+            {attachments.length > 0 && (
+              <motion.div
+                key="attachments-row"
+                className="overflow-hidden"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{
+                  duration: shouldReduceMotion ? 0 : 0.18,
+                  ease: EASE_OUT_SWIFT,
+                }}
+              >
+                <div
+                  aria-live="polite"
+                  aria-busy={isUploading}
+                  className="flex flex-wrap items-end gap-1 px-1 pt-1"
+                >
+                  <AnimatePresence initial={false} mode="popLayout">
+                    {orderedAttachments.map((att) => (
+                      <motion.div
+                        key={att.id}
+                        layout="position"
+                        className="flex"
+                        initial={
+                          shouldReduceMotion
+                            ? false
+                            : { opacity: 0, scale: 0.95 }
                         }
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <F0FileItem
-                    key={att.id}
-                    size="md"
-                    file={{
-                      name: att.attachment.name,
-                      type: att.attachment.mimeType ?? "",
-                    }}
-                    actions={[
-                      {
-                        label: i18n.chat.removeFile,
-                        icon: Cross,
-                        onClick: () =>
-                          setAttachments((prev) =>
-                            prev.filter((a) => a.id !== att.id)
-                          ),
-                      },
-                    ]}
-                  />
-                )
-              )}
-            </div>
-          )}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={
+                          shouldReduceMotion
+                            ? undefined
+                            : {
+                                opacity: 0,
+                                scale: 0.95,
+                                transition: microExitTransition,
+                              }
+                        }
+                        // Explicit `layout` key: the default transform
+                        // transition is an underdamped spring (bounces).
+                        transition={{
+                          ...microEnterTransition,
+                          layout: layoutTransition,
+                        }}
+                      >
+                        <motion.div
+                          key={att.status}
+                          className="flex"
+                          initial={shouldReduceMotion ? false : { opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.15 }}
+                        >
+                          {att.status === "uploading" ? (
+                            <Skeleton
+                              className={cn(
+                                att.isImage
+                                  ? "h-16 w-16 rounded-lg"
+                                  : "h-9 w-36 rounded"
+                              )}
+                            />
+                          ) : att.attachment.kind === "image" ? (
+                            <div className="group/attachment relative flex">
+                              <FadeInImage
+                                src={
+                                  att.attachment.thumbnailUrl ??
+                                  att.attachment.url
+                                }
+                                alt={att.attachment.name}
+                                className="h-16 w-16 rounded-lg border border-solid border-f1-border-secondary object-cover"
+                              />
+                              {/* Remove is hidden until hover; focus also
+                                  reveals it so it stays reachable by keyboard. */}
+                              <div className="absolute right-1 top-1 flex rounded bg-f1-background opacity-0 transition-opacity focus-within:opacity-100 group-hover/attachment:opacity-100">
+                                <ButtonInternal
+                                  variant="outline"
+                                  size="sm"
+                                  hideLabel
+                                  label={i18n.chat.removeFile}
+                                  icon={Cross}
+                                  onClick={() =>
+                                    setAttachments((prev) =>
+                                      prev.filter((a) => a.id !== att.id)
+                                    )
+                                  }
+                                />
+                              </div>
+                            </div>
+                          ) : att.attachment.kind === "file" ? (
+                            <F0FileItem
+                              size="md"
+                              file={{
+                                name: att.attachment.name,
+                                type: att.attachment.mimeType ?? "",
+                              }}
+                              actions={[
+                                {
+                                  label: i18n.chat.removeFile,
+                                  icon: Cross,
+                                  onClick: () =>
+                                    setAttachments((prev) =>
+                                      prev.filter((a) => a.id !== att.id)
+                                    ),
+                                },
+                              ]}
+                            />
+                          ) : // Locations never sit in the composer (uploads
+                          // only) — the narrowing here just satisfies the
+                          // widened attachment union.
+                          null}
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* The textarea stays during recording: it shows "Listening…" and
               fills with the live transcript — only the action row swaps. */}
@@ -532,86 +706,140 @@ export const ChatComposer = (): ReactNode => {
             hasOverlay={hasOverlay}
           />
 
-          {isRecording ? (
-            // Recording: amplitude timeline + cancel / confirm, matching the AI chat.
-            <div className="flex items-center gap-3 p-3">
-              <RecordingWaveform
-                stream={recorder.stream}
-                className="min-w-0 flex-1"
-              />
-              <div className="flex shrink-0 items-center gap-2">
-                <ButtonInternal
-                  variant="outline"
-                  size="md"
-                  hideLabel
-                  label={i18n.chat.cancelRecording}
-                  icon={Cross}
-                  onClick={recorder.cancel}
-                />
-                <ButtonInternal
-                  variant="default"
-                  size="md"
-                  hideLabel
-                  label={i18n.chat.stopRecording}
-                  icon={Check}
-                  onClick={recorder.stop}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-between p-3">
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={(e) => {
-                  void handleUpload(Array.from(e.target.files ?? []))
-                  e.target.value = ""
-                }}
-              />
-              <div className="flex items-center gap-1">
-                <ButtonInternal
-                  variant="outline"
-                  size="md"
-                  hideLabel
-                  label={i18n.chat.attachFile}
-                  icon={Paperclip}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={!uploadFiles || isTranscribing}
-                />
-                {/* Insert emoji into the message (reuses the reactions picker). */}
-                <Picker
-                  variant="outline"
-                  size="md"
-                  label={i18n.chat.addEmoji}
-                  onSelect={insertEmoji}
-                />
-              </div>
-              <div className="flex items-center gap-1">
-                {canRecord && (
-                  <ButtonInternal
-                    variant="outline"
-                    size="md"
-                    hideLabel
-                    label={i18n.chat.recordAudio}
-                    icon={Microphone}
-                    onClick={startRecording}
-                    loading={isTranscribing}
+          {/* Recording row ↔ action row: both stacked in the same grid cell
+              (equal height — p-3 + md buttons), crossfaded so starting/stopping
+              a recording never hard-swaps the composer's bottom edge. */}
+          <div className="grid">
+            <AnimatePresence initial={false}>
+              {isRecording ? (
+                // Recording: amplitude timeline + cancel / confirm, matching the AI chat.
+                <motion.div
+                  key="recording-row"
+                  className="flex items-center gap-3 p-3 [grid-area:1/1]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+                >
+                  <RecordingWaveform
+                    stream={recorder.stream}
+                    className="min-w-0 flex-1"
                   />
-                )}
-                <ButtonInternal
-                  variant="default"
-                  size="md"
-                  hideLabel
-                  label={isEditing ? i18n.chat.saveEdit : i18n.actions.send}
-                  icon={isEditing ? Check : ArrowUp}
-                  onClick={handleSend}
-                  disabled={!canSend}
-                />
-              </div>
-            </div>
-          )}
+                  <div className="flex shrink-0 items-center gap-2">
+                    <ButtonInternal
+                      variant="outline"
+                      size="md"
+                      hideLabel
+                      label={i18n.chat.cancelRecording}
+                      icon={Cross}
+                      onClick={recorder.cancel}
+                    />
+                    <ButtonInternal
+                      variant="default"
+                      size="md"
+                      hideLabel
+                      label={
+                        voiceNotesEnabled
+                          ? i18n.chat.sendVoiceNote
+                          : i18n.chat.stopRecording
+                      }
+                      icon={Check}
+                      onClick={recorder.stop}
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="actions-row"
+                  className="flex items-center justify-between p-3 [grid-area:1/1]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      void handleUpload(Array.from(e.target.files ?? []))
+                      e.target.value = ""
+                    }}
+                  />
+                  <div className="flex items-center gap-1">
+                    <ButtonInternal
+                      variant="outline"
+                      size="md"
+                      hideLabel
+                      label={i18n.chat.attachFile}
+                      icon={Paperclip}
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={!canUpload || isTranscribing}
+                    />
+                    {/* Insert emoji into the message (reuses the reactions picker). */}
+                    <Picker
+                      variant="outline"
+                      size="md"
+                      label={i18n.chat.addEmoji}
+                      onSelect={insertEmoji}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {canRecord && (
+                      <ButtonInternal
+                        variant="outline"
+                        size="md"
+                        hideLabel
+                        label={
+                          isSendingVoiceNote
+                            ? i18n.chat.sendingVoiceNote
+                            : i18n.chat.recordAudio
+                        }
+                        icon={Microphone}
+                        onClick={startRecording}
+                        // Spins while dictation transcribes or a voice note uploads.
+                        loading={isTranscribing || isSendingVoiceNote}
+                      />
+                    )}
+                    {/* The send button fades on ACTIVATION (boundary flip of
+                        canSend — first character, attachment ready) and on the
+                        edit-mode icon swap; never per keystroke. */}
+                    <AnimatePresence initial={false} mode="popLayout">
+                      <motion.div
+                        key={`${isEditing ? "save" : "send"}-${sendActivationEpoch}`}
+                        className="flex"
+                        initial={
+                          shouldReduceMotion
+                            ? false
+                            : { opacity: 0, scale: 0.95 }
+                        }
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={
+                          shouldReduceMotion
+                            ? undefined
+                            : { opacity: 0, transition: { duration: 0.1 } }
+                        }
+                        transition={{ duration: 0.15, ease: EASE_OUT_SWIFT }}
+                      >
+                        <ButtonInternal
+                          variant="default"
+                          size="md"
+                          hideLabel
+                          label={
+                            isEditing ? i18n.chat.saveEdit : i18n.actions.send
+                          }
+                          icon={isEditing ? Check : ArrowUp}
+                          onClick={handleSend}
+                          disabled={!canSend}
+                        />
+                      </motion.div>
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { zeroRender as render, screen, userEvent } from "@/testing/test-utils"
+import {
+  zeroRender as render,
+  screen,
+  userEvent,
+  waitFor,
+} from "@/testing/test-utils"
 
+import { HostedPanelWindow } from "../components/layout/HostedPanelWindow"
 import { F0AiChat } from "../F0AiChat"
 import {
   AiChatStateProvider,
@@ -96,5 +102,88 @@ describe("F0AiChat side-panel content", () => {
     // Left-docked: pushed left with mr-auto.
     expect(container.querySelector(".mr-auto")).not.toBeNull()
     expect(container.querySelector(".ml-auto")).toBeNull()
+  })
+})
+
+describe("F0AiChat split panel (panelContentSide opposite the chat)", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  const renderSplit = () =>
+    render(
+      <AiChatStateProvider
+        enabled
+        chatMessages={<div>CHAT MESSAGES</div>}
+        panelContentSide="left"
+      >
+        <Controls />
+        <F0AiChat />
+        <HostedPanelWindow />
+      </AiChatStateProvider>
+    )
+
+  it("hosted content renders in its own window, never inside the chat", async () => {
+    render(
+      <AiChatStateProvider
+        enabled
+        chatMessages={<div>CHAT MESSAGES</div>}
+        panelContentSide="left"
+      >
+        <Controls />
+        <F0AiChat />
+      </AiChatStateProvider>
+    )
+    // Without a HostedPanelWindow mounted, the content shows nowhere — the
+    // chat window skips it in split mode.
+    await userEvent.click(screen.getByText("show-a"))
+    expect(screen.queryByText("FAKE A")).not.toBeInTheDocument()
+  })
+
+  it("swaps between the chat and hosted content, one visible at a time", async () => {
+    renderSplit()
+    await userEvent.click(screen.getByText("open"))
+    expect(screen.getByText("CHAT MESSAGES")).toBeInTheDocument()
+
+    // Conversation up → chat window hides (it holds briefly for the swap).
+    await userEvent.click(screen.getByText("show-a"))
+    expect(screen.getByText("FAKE A")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByText("CHAT MESSAGES")).not.toBeInTheDocument()
+    )
+
+    // Back to the chat (the One switch path: clear + stay open).
+    await userEvent.click(screen.getByText("clear"))
+    expect(screen.getByText("CHAT MESSAGES")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByText("FAKE A")).not.toBeInTheDocument()
+    )
+  })
+
+  it("docks the hosted window on panelContentSide (left)", async () => {
+    const { container } = renderSplit()
+    await userEvent.click(screen.getByText("show-a"))
+    // The hosted window is left-docked (mr-auto pushes it left).
+    await waitFor(() =>
+      expect(container.querySelector(".mr-auto")).not.toBeNull()
+    )
+  })
+
+  it("holds a skeleton while restoring the last conversation — no chat flash", async () => {
+    // A reload with a conversation showing: open persisted + its id pending.
+    localStorage.setItem("ONE-ai-chat-open", "true")
+    localStorage.setItem("ONE-ai-chat-panel-content-id", '"a"')
+    renderSplit()
+
+    // The hosted window shows a skeleton; the AI chat never flashes in.
+    expect(screen.getByRole("status")).toBeInTheDocument()
+    expect(screen.queryByText("CHAT MESSAGES")).not.toBeInTheDocument()
+
+    // The host re-mounts the conversation → it fades in over the skeleton.
+    await userEvent.click(screen.getByText("show-a"))
+    expect(screen.getByText("FAKE A")).toBeInTheDocument()
+    await waitFor(() =>
+      expect(screen.queryByRole("status")).not.toBeInTheDocument()
+    )
   })
 })

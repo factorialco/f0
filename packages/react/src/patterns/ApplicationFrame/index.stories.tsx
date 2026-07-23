@@ -77,6 +77,8 @@ import {
   useConversationRuntime,
   useMockChatGroups,
 } from "@/sds/chat/F0Chat/mocks/MockChatApp"
+import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
+import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { Action } from "@/ui/Action"
 
 import { ApplicationFrame } from "./index"
@@ -515,7 +517,7 @@ const WelcomeCards = () => {
 }
 
 const meta: Meta<typeof ApplicationFrame> = {
-  title: "ApplicationFrame",
+  title: "App shell/ApplicationFrame",
   component: ApplicationFrame,
   tags: ["autodocs", "experimental"],
   parameters: {
@@ -794,10 +796,56 @@ export const Default: Story = {
     <MockAiChatRuntimeProvider>
       <MockChatAppProvider>
         <ApplicationFrame
-          // Communications mode: the sidebar owns chat navigation (history, new
-          // chat) and the credits/settings popover, so the in-chat history is
-          // off and the header stays compact (expand + close only). The page
-          // header's One switch is hidden too — One is reached from the sidebar.
+          // Transitional communications layout: conversations dock LEFT
+          // (panelContentSide) while the AI chat keeps its classic right-side
+          // panel, full header and history, toggled from the page header's One
+          // switch. Opening one swaps the other out — only the main content
+          // moves, uncovering the incoming panel in place.
+          ai={{
+            ...withMockChatSlots(args.ai),
+            panelContentSide: "left",
+          }}
+          aiPromotion={args.aiPromotion}
+          sidebar={
+            <ConversationsSidebar
+              withOneTab={false}
+              // State parity across reloads, like the panel content restore.
+              tabsPersistKey="communications-demo"
+            />
+          }
+        >
+          {/* Real-world main content: the home "daytime" page. The One switch
+              stays visible — it's how the AI chat opens (the sidebar only has
+              Home + Chat tabs here). */}
+          <DaytimePage
+            period="morning"
+            header={{
+              employeeFirstName: "Jordan",
+              employeeLastName: "Avery",
+              title: "Good morning, Jordan!",
+              employeeAvatar: "/avatars/person05.jpg",
+            }}
+          >
+            <HomeLayout {...HomeLayoutStories.Default.args} />
+          </DaytimePage>
+        </ApplicationFrame>
+      </MockChatAppProvider>
+    </MockAiChatRuntimeProvider>
+  ),
+}
+
+/**
+ * The previous communications layout, kept as the configurable alternative:
+ * ONE panel docked left shared by conversations and the AI chat (`side:
+ * "left"`, no `panelContentSide`), a third "One" sidebar tab instead of the
+ * page-header switch, and the compact in-panel chat header.
+ */
+export const CommunicationsPanelLeft: Story = {
+  name: "Communications — everything left",
+  render: (args) => (
+    <MockAiChatRuntimeProvider>
+      <MockChatAppProvider>
+        <ApplicationFrame
           ai={{
             ...withMockChatSlots(args.ai),
             side: "left",
@@ -807,8 +855,6 @@ export const Default: Story = {
           aiPromotion={args.aiPromotion}
           sidebar={<ConversationsSidebar />}
         >
-          {/* Real-world main content: the home "daytime" page. `hideOneSwitch`
-              because One is reached from the sidebar tab in communications mode. */}
           <DaytimePage
             period="morning"
             hideOneSwitch
@@ -919,6 +965,16 @@ export const WithAiAssistant: Story = {
  */
 const MockChatPanel = ({ convId }: { convId: string }) => {
   const runtime = useConversationRuntime(convId)
+  // Header actions are PER CHANNEL, derived from my role there (what a real
+  // host derives from its permission system): admin channels get Edit group
+  // (an F0Dialog owned by the host, prefilled with the group name + member
+  // tags), guests get nothing beyond the built-in search.
+  const seed = SEED_BY_ID.get(convId)
+  const { headerActions, editDialog } = useDemoHeaderActions(
+    runtime,
+    seed?.myRole,
+    { members: seed?.participants }
+  )
   const {
     visualizationMode,
     setVisualizationMode,
@@ -938,7 +994,10 @@ const MockChatPanel = ({ convId }: { convId: string }) => {
           clearPanelContent()
           setOpen(false)
         }}
+        headerActions={headerActions}
       />
+      {/* The Edit action's dialog is the HOST's — rendered outside F0Chat. */}
+      {editDialog}
     </F0ChatProvider>
   )
 }
@@ -1246,18 +1305,31 @@ const ConversationsSidebarInner = ({
   initialTab = "home",
   autoOpenConvId,
   forceEmpty = false,
+  withOneTab = true,
+  tabsPersistKey,
 }: {
   initialTab?: string
   /** Mount this conversation in the side panel on first render (demo only). */
   autoOpenConvId?: string
   /** Demo-only: render both lists (Messages + One) empty to show the blank states. */
   forceEmpty?: boolean
+  /** Show the "One" tab. Off when the AI chat is reached from the page
+   * header's One switch instead (the split-panel layout). */
+  withOneTab?: boolean
+  /** Remember the active tab across reloads (SidebarTabs `persistKey`). */
+  tabsPersistKey?: string
 } = {}) => {
   const [company, setCompany] = useState("1")
   const [tab, setTab] = useState(initialTab)
   const { unreadChatsCount } = useSidebarChats()
   const { setGroups, setActiveChat } = useSidebarChatActions()
-  const { setPanelContent, open, panelContent } = useAiChat()
+  const {
+    setPanelContent,
+    open,
+    panelContent,
+    restoringPanelContentId,
+    cancelPanelContentRestore,
+  } = useAiChat()
 
   // Clicking a conversation mounts it in the side panel (one at a time).
   const onSelect = useCallback(
@@ -1279,6 +1351,21 @@ const ConversationsSidebarInner = ({
       onSelect(autoOpenConvId)
     }
   }, [autoOpenConvId, onSelect])
+
+  // Reload restore: the panel persisted that a conversation was showing —
+  // re-mount it if it's still accessible (here: exists in the seeds, which
+  // load synchronously; a real host would wait for its channel list), or give
+  // up so the panel falls back to the AI chat.
+  const restored = useRef(false)
+  useEffect(() => {
+    if (!restoringPanelContentId || restored.current) return
+    restored.current = true
+    if (SEED_BY_ID.has(restoringPanelContentId)) {
+      onSelect(restoringPanelContentId)
+    } else {
+      cancelPanelContentRestore()
+    }
+  }, [restoringPanelContentId, onSelect, cancelPanelContentRestore])
 
   // Groups come from the shared mock store, so unread badges / presence / mute
   // are live and clear as conversations are read.
@@ -1304,15 +1391,25 @@ const ConversationsSidebarInner = ({
             onChange={setCompany}
           />
           <SidebarTabs
+            persistKey={tabsPersistKey}
             tabs={[
-              { id: "home", label: "Home", icon: Home },
+              { id: "home", label: "Menu", icon: Home },
               {
                 id: "messages",
                 label: "Chat",
                 icon: Comment,
                 badge: unreadChatsCount || undefined,
               },
-              { id: "one", label: "One", icon: One, variant: "ai" },
+              ...(withOneTab
+                ? [
+                    {
+                      id: "one",
+                      label: "One",
+                      icon: One,
+                      variant: "ai" as const,
+                    },
+                  ]
+                : []),
             ]}
             activeTab={tab}
             onTabChange={setTab}
@@ -1355,10 +1452,14 @@ const ConversationsSidebar = ({
   initialTab,
   autoOpenConvId,
   forceEmpty,
+  withOneTab,
+  tabsPersistKey,
 }: {
   initialTab?: string
   autoOpenConvId?: string
   forceEmpty?: boolean
+  withOneTab?: boolean
+  tabsPersistKey?: string
 } = {}) => {
   return (
     <SidebarChatProvider>
@@ -1366,6 +1467,8 @@ const ConversationsSidebar = ({
         initialTab={initialTab}
         autoOpenConvId={autoOpenConvId}
         forceEmpty={forceEmpty}
+        withOneTab={withOneTab}
+        tabsPersistKey={tabsPersistKey}
       />
     </SidebarChatProvider>
   )

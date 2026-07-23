@@ -1,5 +1,138 @@
 # Changelog
 
+## [4.47.2](https://github.com/factorialco/f0/compare/f0-react-v4.47.1...f0-react-v4.47.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* **SectionHeader:** use 1px dashed separator aligned with border tokens ([#4792](https://github.com/factorialco/f0/issues/4792)) ([2d91aec](https://github.com/factorialco/f0/commit/2d91aec078a61794851da96ebf6040d818c1c6b2))
+
+## [4.47.1](https://github.com/factorialco/f0/compare/f0-react-v4.47.0...f0-react-v4.47.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* **react:** wrap survey rating options so long labels don't clip ([#4769](https://github.com/factorialco/f0/issues/4769)) ([8fb8b14](https://github.com/factorialco/f0/commit/8fb8b1414404935c2930f6bf37b89d60b311f9ca))
+
+## [4.47.0](https://github.com/factorialco/f0/compare/f0-react-v4.46.5...f0-react-v4.47.0) (2026-07-22)
+
+
+### Features
+
+* **ai:** toolbarStart slot in the chat composer action row ([#4713](https://github.com/factorialco/f0/issues/4713)) ([8e21ef3](https://github.com/factorialco/f0/commit/8e21ef325703b0db35bcb63b234cdeef5b0b98a7))
+
+## [4.46.5](https://github.com/factorialco/f0/compare/f0-react-v4.46.4...f0-react-v4.46.5) (2026-07-22)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** dashboard rows can't be shrunk + chart tooltips vanish on hover pause ([#4740](https://github.com/factorialco/f0/issues/4740)) ([8c6ea20](https://github.com/factorialco/f0/commit/8c6ea20785dc90396ff5fc264fef5c7d26ffff48))
+
+## [4.46.4](https://github.com/factorialco/f0/compare/f0-react-v4.46.3...f0-react-v4.46.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* **F0Graph:** don't let React Flow double-cull the windowed node array ([#4742](https://github.com/factorialco/f0/issues/4742)) ([95809bf](https://github.com/factorialco/f0/commit/95809bfc55e87f556828895b59b637c2ca37fb0f))
+
+## [4.46.3](https://github.com/factorialco/f0/compare/f0-react-v4.46.2...f0-react-v4.46.3) (2026-07-21)
+
+
+### Bug Fixes
+
+* **EditableTable:** render display-only cells without field icons ([#4739](https://github.com/factorialco/f0/issues/4739)) ([c3ca518](https://github.com/factorialco/f0/commit/c3ca518a5b385b77eea5403b9bd9b828eb7b6cf8))
+
+## [4.46.2](https://github.com/factorialco/f0/compare/f0-react-v4.46.1...f0-react-v4.46.2) (2026-07-21)
+
+
+### Bug Fixes
+
+* relax react-virtuoso to ^4.18.10 ([#4762](https://github.com/factorialco/f0/issues/4762)) ([5332b2f](https://github.com/factorialco/f0/commit/5332b2fdde71f8eab94b98ec6375c96f3287c9ff))
+
+## [4.46.1](https://github.com/factorialco/f0/compare/f0-react-v4.46.0...f0-react-v4.46.1) (2026-07-21)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** debounce the collection→URL sync (fixes per-keystroke Sentry session churn) ([#4759](https://github.com/factorialco/f0/issues/4759)) ([5d67bb4](https://github.com/factorialco/f0/commit/5d67bb4fc8b1fa1d21223ee2505254d3b580091b))
+
+## [4.46.0](https://github.com/factorialco/f0/compare/f0-react-v4.45.0...f0-react-v4.46.0) (2026-07-21)
+
+
+### Features
+
+* **F0Chat:** document previews, virtuoso transcript rewrite and optimistic status footer ([#4743](https://github.com/factorialco/f0/issues/4743)) ([3aaa5b2](https://github.com/factorialco/f0/commit/3aaa5b2f4bcb30a9f64541b7e094cb19de8e1074))
+
+## [4.45.0](https://github.com/factorialco/f0/compare/f0-react-v4.44.0...f0-react-v4.45.0) (2026-07-21)
+
+
+### Features
+
+* **F0Form:** add delete persistence + confirmation to entitiesList ([#4728](https://github.com/factorialco/f0/issues/4728)) ([afc4237](https://github.com/factorialco/f0/commit/afc4237209357c6a2c548c6c6b5d38d33d937b57))
+
+## [4.44.0](https://github.com/factorialco/f0/compare/f0-react-v4.43.0...f0-react-v4.44.0) (2026-07-20)
+
+
+### Features
+
+* **F0PdfViewer:** document viewer kinds (sheet, docx, text) with toolbar actions ([#4741](https://github.com/factorialco/f0/issues/4741)) ([ddbeb67](https://github.com/factorialco/f0/commit/ddbeb67fa5b0157479d77251dee8c0d2534f112c))
+
+## [4.43.0](https://github.com/factorialco/f0/compare/f0-react-v4.42.1...f0-react-v4.43.0) (2026-07-20)
+
+
+### Features
+
+* **OneCalendar:** month and year dropdowns in the DatePicker calendar header ([#4736](https://github.com/factorialco/f0/issues/4736)) ([24d6a64](https://github.com/factorialco/f0/commit/24d6a64c88a8abc7cde598b54d13193f094d895f))
+
+## [4.42.1](https://github.com/factorialco/f0/compare/f0-react-v4.42.0...f0-react-v4.42.1) (2026-07-20)
+
+
+### Bug Fixes
+
+* **F0Card:** make whole card clickable except footer ([#4745](https://github.com/factorialco/f0/issues/4745)) ([a23066e](https://github.com/factorialco/f0/commit/a23066e2badb25ba47b10049f123e6373e1c5a1e))
+
+## [4.42.0](https://github.com/factorialco/f0/compare/f0-react-v4.41.1...f0-react-v4.42.0) (2026-07-17)
+
+
+### Features
+
+* **storybook:** show component status + DoD checklist on docs pages ([#4724](https://github.com/factorialco/f0/issues/4724)) ([f46f4ae](https://github.com/factorialco/f0/commit/f46f4ae2dc15cf73ce15daffd0d9393fb5d5ca1f))
+
+## [4.41.1](https://github.com/factorialco/f0/compare/f0-react-v4.41.0...f0-react-v4.41.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **OneDateNavigator:** revive persisted string dates before use ([#4733](https://github.com/factorialco/f0/issues/4733)) ([6d6fcbe](https://github.com/factorialco/f0/commit/6d6fcbe2be79f4aefce71c1b8e2e14a3fa1e1075))
+
+## [4.41.0](https://github.com/factorialco/f0/compare/f0-react-v4.40.1...f0-react-v4.41.0) (2026-07-17)
+
+
+### Features
+
+* **F0Chat:** link previews, clickable links, shared locations and voice notes ([#4636](https://github.com/factorialco/f0/issues/4636)) ([91c3e46](https://github.com/factorialco/f0/commit/91c3e463a64041f11369a8ef2a8b2561b248176d))
+
+## [4.40.1](https://github.com/factorialco/f0/compare/f0-react-v4.40.0...f0-react-v4.40.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **F0Accordion:** remove resting box shadow ([#4729](https://github.com/factorialco/f0/issues/4729)) ([637883a](https://github.com/factorialco/f0/commit/637883a9bff0e25fa590fe3bf19d0d4c04a7173b))
+
+## [4.40.0](https://github.com/factorialco/f0/compare/f0-react-v4.39.1...f0-react-v4.40.0) (2026-07-16)
+
+
+### Features
+
+* **component-status:** add build-time component DoD status API ([#4719](https://github.com/factorialco/f0/issues/4719)) ([8ee5f7a](https://github.com/factorialco/f0/commit/8ee5f7ae6d8248a673b5b7fdc988f99b657d9040))
+
+## [4.39.1](https://github.com/factorialco/f0/compare/f0-react-v4.39.0...f0-react-v4.39.1) (2026-07-15)
+
+
+### Bug Fixes
+
+* **F0Graph:** reliable focus via imperative focusNode/clearSelection ([#4661](https://github.com/factorialco/f0/issues/4661)) ([9e94888](https://github.com/factorialco/f0/commit/9e94888b3943ee8e0c807d633a1cd250b390b7a0))
+
 ## [4.39.0](https://github.com/factorialco/f0/compare/f0-react-v4.38.0...f0-react-v4.39.0) (2026-07-15)
 
 

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 
 import type {
   FiltersDefinition,
@@ -149,17 +149,29 @@ export function useDashboardExport<Filters extends FiltersDefinition>({
 }: UseDashboardExportOptions<Filters>): UseDashboardExportResult {
   const [isExporting, setIsExporting] = useState(false)
 
+  // The export callback must keep a STABLE identity across renders. It is
+  // handed to consumers via `onExportReady`, which typically stores it in
+  // state — if its identity followed `items`/`filters` (rebuilt by many
+  // consumers on every render), that store-on-change would re-render the
+  // consumer and loop forever. Latest values are read through refs instead.
+  const itemsRef = useRef(items)
+  itemsRef.current = items
+  const filtersRef = useRef(filters)
+  filtersRef.current = filters
+  const filenameRef = useRef(filename)
+  filenameRef.current = filename
+
   const exportAsExcel = useCallback(async () => {
     setIsExporting(true)
     try {
-      const sheets = await buildAllSheets(items, filters)
+      const sheets = await buildAllSheets(itemsRef.current, filtersRef.current)
       if (sheets.length > 0) {
-        downloadMultiSheetExcel(sheets, filename)
+        downloadMultiSheetExcel(sheets, filenameRef.current)
       }
     } finally {
       setIsExporting(false)
     }
-  }, [items, filters, filename])
+  }, [])
 
   return { exportAsExcel, isExporting }
 }

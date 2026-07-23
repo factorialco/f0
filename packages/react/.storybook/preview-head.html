@@ -420,3 +420,44 @@
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/react-render-tracker"></script>
+<script>
+  // Recover from stale lazy-loaded chunks after a redeploy.
+  //
+  // f0.factorial.dev is a static Storybook build: each story is a
+  // content-hashed chunk loaded on demand via dynamic import(). When main is
+  // merged the site is rebuilt and every hash changes, so a tab left open
+  // still references chunk names that no longer exist on the server. The next
+  // navigation to a not-yet-loaded story then 404s with "Failed to fetch
+  // dynamically imported module". Vite dispatches `vite:preloadError` for
+  // exactly this — reload once to pull the fresh index and current hashes.
+  ;(function () {
+    var KEY = "sb:chunk-reload-at"
+    function recover() {
+      var now = Date.now()
+      var last = Number(sessionStorage.getItem(KEY) || 0)
+      // If we reloaded seconds ago the chunk is genuinely gone (broken
+      // deploy), not just stale — stop, so we never loop forever.
+      if (now - last < 10000) return
+      sessionStorage.setItem(KEY, String(now))
+      window.location.reload()
+    }
+    window.addEventListener("vite:preloadError", function (event) {
+      event.preventDefault()
+      recover()
+    })
+    // Belt-and-suspenders for imports that don't route through Vite's
+    // preload helper: match the rejection message directly.
+    window.addEventListener("unhandledrejection", function (event) {
+      var reason = event && event.reason
+      var msg = reason && (reason.message || String(reason))
+      if (
+        typeof msg === "string" &&
+        /Failed to fetch dynamically imported module|error loading dynamically imported module|Importing a module script failed/i.test(
+          msg
+        )
+      ) {
+        recover()
+      }
+    })
+  })()
+</script>

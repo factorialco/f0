@@ -248,6 +248,8 @@ export const defaultTranslations = {
     date: "Date",
     custom: "Custom period",
     selectDate: "Select Date",
+    selectMonth: "Select month",
+    selectYear: "Select year",
     compareTo: "Compare to",
     presets: {
       last7Days: "Last 7 days",
@@ -486,6 +488,8 @@ export const defaultTranslations = {
     noResults: "No chats found",
     backToLatest: "Jump to latest",
     muted: "Muted",
+    mute: "Mute",
+    unmute: "Unmute",
     attachFile: "Attach file",
     addEmoji: "Add emoji",
     recordAudio: "Record audio",
@@ -516,6 +520,17 @@ export const defaultTranslations = {
     twoTyping: "{{first}} and {{second}} are writing…",
     severalTyping: "Several people are writing…",
     deletedMessage: "Message deleted",
+    // Shared-location attachments (map preview card + reply quote descriptor).
+    location: "Location",
+    // Voice notes (mic in the composer records + sends audio, no transcript).
+    voiceNote: "Voice note",
+    sendVoiceNote: "Send voice note",
+    sendingVoiceNote: "Sending voice note…",
+    // Delivery-state indicators beside your own bubble (icon labels + the
+    // failed message's reduced actions menu).
+    sending: "Sending…",
+    notSent: "Not sent",
+    retry: "Retry",
     moreActions: "Message actions",
     // Header overflow menu (the ellipsis dropdown) + its pin/favourite action.
     options: "Options",
@@ -546,6 +561,8 @@ export const defaultTranslations = {
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
+    openDocument: "Open document",
+    documentPreview: "Document preview",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
@@ -563,6 +580,29 @@ export const defaultTranslations = {
     },
     scrollToBottom: "Scroll to bottom",
     newMessages: "New messages",
+    // Centered membership system rows. `{{members}}` / `{{names}}` / `{{last}}`
+    // are replaced with React nodes (`@name` hover-card chips) by the component
+    // via token split — NOT through `t(key, args)`, whose interpolation is
+    // string-only. The fragment keys compose the name list ("@Pedro, @Juan and
+    // @Raúl" / "…and 5 more") so every language words the conjunction its own
+    // way. Plural shape mirrors `readBy`.
+    system: {
+      memberAdded: {
+        one: "{{members}} was added to the group",
+        other: "{{members}} were added to the group",
+      },
+      memberRemoved: {
+        one: "{{members}} was removed from the group",
+        other: "{{members}} were removed from the group",
+      },
+      memberLeft: {
+        one: "{{members}} left the group",
+        other: "{{members}} left the group",
+      },
+      // Name-list fragments: "Ana, Luis and Carla" / "Ana, Luis, Carla and 5 more".
+      membersWithLast: "{{names}} and {{last}}",
+      membersWithMore: "{{names}} and {{count}} more",
+    },
     unreadCount: {
       one: "{{count}} unread",
       other: "{{count}} unread",
@@ -782,6 +822,11 @@ export const defaultTranslations = {
       addBlockedErrorHint:
         "Fix the errors in the existing items before adding another one",
       addBlockedMaxHint: "You've reached the maximum number of items",
+      removeConfirmTitle: "Remove item?",
+      removeConfirmMessage:
+        "This item will be removed. This action cannot be undone.",
+      removeError: "Couldn't remove the item. Please try again.",
+      removeErrorTitle: "Remove failed",
     },
     moreInformation: "More information",
     validation: {
@@ -844,6 +889,11 @@ export const defaultTranslations = {
     print: "Print",
     download: "Download",
     loading: "Loading document",
+    previewFailed: "Preview isn't available for this file",
+    showingFirstRows: {
+      one: "Showing the first row",
+      other: "Showing the first {{count}} rows",
+    },
   },
 } as const
 
