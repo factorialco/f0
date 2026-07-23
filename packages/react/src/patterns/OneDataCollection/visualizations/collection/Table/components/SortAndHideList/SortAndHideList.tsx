@@ -16,6 +16,8 @@ type ItemProps = {
   onRemove?: (item: SortAndHideListItem) => void
   allowSorting: boolean
   allowHiding: boolean
+  isFirst: boolean
+  isLast: boolean
 }
 
 const Item = ({
@@ -24,9 +26,18 @@ const Item = ({
   onRemove,
   allowSorting,
   allowHiding,
+  isFirst,
+  isLast,
 }: ItemProps) => {
   const i18n = useI18n()
-  const classes = "group flex items-center gap-2 text-medium text-sm pr-4"
+  // Edge padding lives on the inner content div because motion/react writes
+  // inline padding styles on the outer list items (and the group), which would
+  // otherwise override Tailwind's first:/last: utilities.
+  const classes = cn(
+    "group flex items-center gap-2 text-medium text-sm pr-4",
+    isFirst && "pt-1",
+    isLast && "pb-1"
+  )
   const controls = useDragControls()
   const showRemove = !!item.removable && !!onRemove
 
@@ -144,7 +155,7 @@ export const SortAndHideList = ({
       axis="y"
       layoutScroll
     >
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Item
           item={item}
           key={item.id}
@@ -152,6 +163,8 @@ export const SortAndHideList = ({
           onRemove={onRemove}
           allowSorting={allowSorting}
           allowHiding={allowHiding}
+          isFirst={index === 0}
+          isLast={index === items.length - 1}
         />
       ))}
     </Reorder.Group>
