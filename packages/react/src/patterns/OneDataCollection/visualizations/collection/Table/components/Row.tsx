@@ -392,7 +392,12 @@ const RowComponentInner = <
           <>
             {/** Desktop item actions adds a sticky column to the table to not overflow when the table is scrolled horizontally*/}
             <td className="sticky right-0 top-0 z-10 hidden md:table-cell">
-              <ItemActionsRowContainer dropDownOpen={dropDownOpen}>
+              {/* Narrower fade gutter (pl-8) for tables so the overlay covers
+                  less of the last column's content than the default pl-20. */}
+              <ItemActionsRowContainer
+                dropDownOpen={dropDownOpen}
+                className="pl-8"
+              >
                 <ItemActionsRow
                   primaryItemActions={primaryItemActions}
                   dropdownItemActions={dropdownItemActions}
