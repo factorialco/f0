@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ComponentProps, useState } from "react"
 import { expect, within } from "storybook/test"
 
-import { Comment, Home } from "@/icons/app"
+import { Comment, Home, Sparkles } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
 
 import {
@@ -93,6 +93,47 @@ export const Default: Story = {
         </div>
       )
     },
+  ],
+}
+
+export const WithTag: Story = {
+  args: {
+    header: <Header defaultSelected="1" />,
+    body: (
+      <Menu
+        tree={[
+          {
+            id: "1",
+            title: "Company",
+            items: [
+              { label: "Home", icon: Home, href: "/", exactMatch: true },
+              {
+                label: "Messages",
+                icon: Comment,
+                href: "/messages",
+                tag: "New",
+              },
+              {
+                label: "Analytics",
+                icon: Sparkles,
+                href: "/analytics",
+                tag: { text: "-25%", variant: "warning" },
+              },
+            ],
+            isRoot: true,
+            isSortable: false,
+          },
+        ]}
+      />
+    ),
+    footer: <SidebarFooter {...SidebarFooterStories.Default.args} />,
+  },
+  decorators: [
+    (Story) => (
+      <div className="relative h-[500px] w-[240px] rounded border border-solid border-f1-border-secondary bg-f1-background-tertiary">
+        <Story />
+      </div>
+    ),
   ],
 }
 
