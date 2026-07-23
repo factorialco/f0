@@ -234,7 +234,6 @@ const NestedRowContent = <
     <>
       <Row
         {...props}
-        disableHover={!props.source.itemOnClick}
         noBorder={shouldHideBorder}
         ref={combinedRowRef}
         nestedRowProps={{
