@@ -49,6 +49,7 @@ import { CollectionProps } from "../../../types"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
+import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
@@ -222,6 +223,14 @@ export const TableCollection = <
     }
     return `index:${String(index)}`
   }
+
+  // Flash newly-added rows: track which flat row keys appeared since the last
+  // render so a freshly-inserted row can play the green "flash on add" effect.
+  const flatRowKeys =
+    data?.type === "flat"
+      ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
+      : []
+  const addedRowKeys = useAddedRowKeys(flatRowKeys)
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
@@ -728,44 +737,54 @@ export const TableCollection = <
                     </Fragment>
                   )
                 })}
-              {data?.type === "flat" &&
-                data.records.map((item, index) => {
-                  const rowKey = `row-${getRowKey(item, index)}`
-                  const row = (
-                    <Row
-                      key={rowKey}
-                      groupIndex={0}
-                      source={effectiveSource}
-                      item={item}
-                      index={index}
-                      onItemCheckedChange={handleSelectItemChange}
-                      onCheckedChange={(checked) =>
-                        handleSelectItemChange(item, checked)
-                      }
-                      selectedItems={selectedItems}
-                      columns={columns}
-                      frozenColumnsLeft={frozenColumnsLeft}
-                      checkColumnWidth={checkColumnWidth}
-                      tableWithChildren={tableWithChildren}
-                      referenceRowType={referenceRowType}
-                      rowWrapper={RowWrapper}
-                      cellRenderer={cellRenderer}
-                      fromVisualization={fromVisualization}
-                      headerGroups={headerGroups}
-                      registerSelectable={selectionRegistry.register}
-                      unregisterSelectable={selectionRegistry.unregister}
-                    />
-                  )
-                  if (RowWrapper) {
-                    return (
-                      <RowWrapper key={rowKey} item={item} index={index}>
-                        {row}
-                      </RowWrapper>
+              {data?.type === "flat" && (
+                <AnimatePresence initial={false}>
+                  {data.records.map((item, index) => {
+                    const rowKey = `row-${getRowKey(item, index)}`
+                    const motionRow = (
+                      <MotionRow
+                        variants={getAnimationVariants()}
+                        initial="hidden"
+                        animate="visible"
+                        exit="hidden"
+                        custom={index}
+                        key={rowKey}
+                        layout
+                        isNew={addedRowKeys.has(rowKey)}
+                        groupIndex={0}
+                        source={effectiveSource}
+                        item={item}
+                        index={index}
+                        onItemCheckedChange={handleSelectItemChange}
+                        onCheckedChange={(checked) =>
+                          handleSelectItemChange(item, checked)
+                        }
+                        selectedItems={selectedItems}
+                        columns={columns}
+                        frozenColumnsLeft={frozenColumnsLeft}
+                        checkColumnWidth={checkColumnWidth}
+                        tableWithChildren={tableWithChildren}
+                        referenceRowType={referenceRowType}
+                        rowWrapper={RowWrapper}
+                        cellRenderer={cellRenderer}
+                        fromVisualization={fromVisualization}
+                        headerGroups={headerGroups}
+                        registerSelectable={selectionRegistry.register}
+                        unregisterSelectable={selectionRegistry.unregister}
+                      />
                     )
-                  }
+                    if (RowWrapper) {
+                      return (
+                        <RowWrapper key={rowKey} item={item} index={index}>
+                          {motionRow}
+                        </RowWrapper>
+                      )
+                    }
 
-                  return row
-                })}
+                    return motionRow
+                  })}
+                </AnimatePresence>
+              )}
               {paginationInfo?.type === "infinite-scroll" &&
                 isLoadingMore &&
                 Array.from({ length: 5 }).map((_, rowIndex) => (
