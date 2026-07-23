@@ -33,7 +33,7 @@ const markers = [
 ]
 
 export function Example() {
-  return <F0Map markers={markers} cluster />
+  return <F0Map markers={markers} />
 }
 ```
 
@@ -48,6 +48,9 @@ export function Example() {
 | `WorldClusters`   | Clustering at world scale                             |
 | `CurrentLocation` | The "you are here" dot + the locate control           |
 | `Terrain`         | Low-zoom land / water styling                         |
+| `Routes`          | A polyline drawn through given coordinates            |
+| `Arcs`            | Curved hub-and-spoke connections (flight paths)       |
+| `Globe`           | The 3D globe projection at world scale                |
 | `Loading`         | The skeleton placeholder                              |
 
 ---
@@ -102,11 +105,13 @@ fold to a dot until it's deselected.
 
 ### Clustering
 
-Set `cluster` (or `cluster={{ radius }}`) to gather nearby markers. Lone markers
-only merge when nearly touching; once a cluster forms it absorbs its neighbors,
-so dense pockets collapse into one pile instead of a ring of stray pins.
-Clicking a cluster flies to its bounds (every member stays in view). See the
-`WithClusters` and `WorldClusters` stories.
+Clustering is **automatic** - it's how the map behaves, not something you turn
+on. Nearby markers gather as you zoom out and separate as you zoom in; there is
+no `cluster` prop to think about. Lone markers only merge when nearly touching,
+but once a cluster forms it absorbs its neighbors, so dense pockets collapse
+into one pile instead of a ring of stray pins. Clicking a cluster flies to its
+bounds (every member stays in view). See the `WithClusters` and `WorldClusters`
+stories.
 
 ### Selection & highlight
 
@@ -121,6 +126,22 @@ search / reveal** (search lives outside the map, as in F0Graph).
 location; the locate control requests permission on demand and drops the dot.
 See the `CurrentLocation` story.
 
+### Routes & arcs
+
+`routes` and `arcs` draw lines on the map as GL layers beneath the markers.
+
+- **`routes`** take a `coordinates` array and draw a polyline through it exactly
+  as given. `F0Map` renders the path; it does **not** compute routing - fetch
+  that from your own engine/server (e.g. OSRM) and pass the vertices. See the
+  `Routes` story.
+- **`arcs`** take a `from` / `to` pair and `F0Map` computes the curved
+  connection between them (the flight-path look). See the `Arcs` story.
+
+Both share styling: a palette `variant` (or an escape-hatch `color`), `width`,
+`opacity`, and `dashed`. Providing `onRouteClick` / `onArcClick` enables hover
+highlight (the line widens) and click. Lines are folded into the auto-fit, so
+`fitToMarkers` and the Fit control frame them alongside the markers.
+
 ### Fit, framing & gestures
 
 The camera auto-fits the markers on load (unless an `initialViewport` is given).
@@ -134,6 +155,10 @@ page scroll. Use `"greedy"` for a dedicated/full-screen map.
 subtle border, controls inset 16px. `fullScreen` drops the frame for an
 edge-to-edge map. Theme follows the nearest `.dark` ancestor unless `theme` is
 forced.
+
+`projection="globe"` renders the world as a 3D sphere at low zoom and eases
+into a flat mercator view as you zoom in - best for a world-scale view (drag to
+spin). It re-projects live if the prop changes. See the `Globe` story.
 
 ### Loading
 
@@ -161,7 +186,7 @@ forced.
       "A single fixed location would read better as a static preview image",
       "The data has no coordinates - geocoding is out of scope (done server-side)",
       "A list or table conveys the same information with less interaction cost",
-      "You need turn-by-turn routing, drawing, or heatmaps - out of scope",
+      "You need routing computed for you, freehand drawing, or heatmaps - out of scope (you can pass a pre-computed route to draw)",
     ],
   }}
 />
@@ -173,8 +198,8 @@ forced.
   zoom.
 - **Use the right variant.** `workplace` for sites, `employee`/`company` for
   people/orgs - the fixed colors keep categories readable.
-- **Let clustering work.** Pass `cluster` for more than a handful of nearby
-  points rather than fighting overlap by hand.
+- **Let clustering work.** Dense areas gather into piles on their own; pass the
+  full marker set and let the map manage overlap rather than fighting it by hand.
 - **Tolerate missing coordinates.** Skip position-less records; the map never
   assumes every record is mappable.
 
@@ -205,9 +230,13 @@ All public props on `<F0Map>`, grouped by behavior.
 
 ### Data
 
-| Prop      | Type           | Default | Description                       |
-| --------- | -------------- | ------- | --------------------------------- |
-| `markers` | `F0MapPoint[]` | `[]`    | Points to render, one per record. |
+| Prop           | Type                   | Default | Description                                      |
+| -------------- | ---------------------- | ------- | ------------------------------------------------ |
+| `markers`      | `F0MapPoint[]`         | `[]`    | Points to render, one per record.                |
+| `routes`       | `F0MapRoute[]`         | `[]`    | Polylines drawn through their coordinates as-is. |
+| `arcs`         | `F0MapArc[]`           | `[]`    | Curved connections between two coordinates.      |
+| `onRouteClick` | `(id: string) => void` | —       | Route click; presence enables hover + click.     |
+| `onArcClick`   | `(id: string) => void` | —       | Arc click; presence enables hover + click.       |
 
 ### Selection
 
@@ -218,15 +247,16 @@ All public props on `<F0Map>`, grouped by behavior.
 | `onMarkerSelect`          | `(id: string \| null) => void` | —       | Fired on marker click or background click.        |
 | `highlightedId`           | `string \| null`               | `null`  | Emphasise + fly to a marker without selecting it. |
 
-### Clustering & viewport
+### Viewport
 
-| Prop              | Type                             | Default             | Description                                |
-| ----------------- | -------------------------------- | ------------------- | ------------------------------------------ |
-| `cluster`         | `boolean \| { radius?: number }` | `false`             | Gather nearby markers; optional px radius. |
-| `fitToMarkers`    | `boolean`                        | `true` w/o viewport | Frame all markers on load.                 |
-| `initialViewport` | `F0MapViewport`                  | city-level          | Initial `{ center, zoom }`, read once.     |
-| `minZoom`         | `number`                         | fitted              | Farthest zoom out.                         |
-| `maxZoom`         | `number`                         | `18`                | Closest zoom in.                           |
+Clustering is automatic (no prop) - see [Clustering](#clustering).
+
+| Prop              | Type            | Default             | Description                            |
+| ----------------- | --------------- | ------------------- | -------------------------------------- |
+| `fitToMarkers`    | `boolean`       | `true` w/o viewport | Frame all markers on load.             |
+| `initialViewport` | `F0MapViewport` | city-level          | Initial `{ center, zoom }`, read once. |
+| `minZoom`         | `number`        | fitted              | Farthest zoom out.                     |
+| `maxZoom`         | `number`        | `18`                | Closest zoom in.                       |
 
 ### Presentation & interaction
 
@@ -237,6 +267,7 @@ All public props on `<F0Map>`, grouped by behavior.
 | `interactive`         | `boolean`                     | `true`          | Allow pan/zoom.                                             |
 | `gestureHandling`     | `"cooperative" \| "greedy"`   | `"cooperative"` | Cooperative requires Ctrl/⌘ + wheel to zoom (embed-safe).   |
 | `fullScreen`          | `boolean`                     | `false`         | `false` frames as a card; `true` is edge-to-edge.           |
+| `projection`          | `"mercator" \| "globe"`       | `"mercator"`    | `"globe"` renders the world as a 3D sphere.                 |
 | `showControls`        | `boolean`                     | `true`          | Show the locate / fit / zoom toolbar (when interactive).    |
 | `showCurrentLocation` | `boolean`                     | `false`         | Show the "you are here" dot when location is granted.       |
 | `loading`             | `boolean`                     | `false`         | Show the skeleton instead of the map.                       |

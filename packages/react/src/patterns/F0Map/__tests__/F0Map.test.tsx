@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fireEvent, screen, zeroRender as render } from "@/testing/test-utils"
 
 import { F0Map, type F0MapHandle } from "../F0Map"
-import type { F0MapPoint } from "../types"
+import type { F0MapArc, F0MapPoint, F0MapRoute } from "../types"
 
 // maplibre-gl needs WebGL (absent in jsdom). Stub the classes F0Map touches,
 // recording camera calls so behaviour is observable. `throwOnCreate` simulates
@@ -22,18 +22,31 @@ const mock = vi.hoisted(() => {
       jumpTo: [] as Array<Record<string, unknown>>,
       fitBounds: [] as unknown[],
       setStyle: [] as unknown[],
+      setProjection: [] as unknown[],
       zoomIn: 0,
       zoomOut: 0,
     }
     scrollZoom = { setWheelZoomRate() {}, setZoomRate() {} }
+    // GL source/layer registry, so the vector-line layer is observable.
+    sources: Record<string, { data: unknown; setData(d: unknown): void }> = {}
+    layers = new Set<string>()
+    // A live map exposes its Style instance; the GL layers use its presence as
+    // the "map not yet destroyed" guard, so the mock must carry one.
+    style = {}
 
     constructor(opts: Record<string, unknown>) {
       if (state.throwOnCreate) throw new Error("WebGL not supported")
       this.opts = opts
       instances.push(this)
     }
-    on(type: string, cb: (e?: unknown) => void) {
-      ;(this.handlers[type] ??= []).push(cb)
+    // Accepts both `on(type, cb)` and the layer-scoped `on(type, layerId, cb)`.
+    on(
+      type: string,
+      a: string | ((e?: unknown) => void),
+      b?: (e?: unknown) => void
+    ) {
+      const cb = typeof a === "function" ? a : b
+      if (cb) (this.handlers[type] ??= []).push(cb)
       return this
     }
     once(type: string, cb: (e?: unknown) => void) {
@@ -51,6 +64,9 @@ const mock = vi.hoisted(() => {
     resize() {}
     setStyle(s: unknown) {
       this.calls.setStyle.push(s)
+    }
+    setProjection(p: unknown) {
+      this.calls.setProjection.push(p)
     }
     easeTo(o: Record<string, unknown>) {
       this.calls.easeTo.push(o)
@@ -91,6 +107,30 @@ const mock = vi.hoisted(() => {
     isStyleLoaded() {
       return true
     }
+    addSource(id: string, spec: { data?: unknown }) {
+      this.sources[id] = {
+        data: spec?.data,
+        setData: (d: unknown) => {
+          this.sources[id].data = d
+        },
+      }
+    }
+    getSource(id: string) {
+      return this.sources[id]
+    }
+    removeSource(id: string) {
+      delete this.sources[id]
+    }
+    addLayer(spec: { id: string }) {
+      this.layers.add(spec.id)
+    }
+    getLayer(id: string) {
+      return this.layers.has(id) ? { id } : undefined
+    }
+    removeLayer(id: string) {
+      this.layers.delete(id)
+    }
+    setFeatureState() {}
     getCenter() {
       return { lng: 0, lat: 0, toArray: () => [0, 0] }
     }
@@ -142,6 +182,22 @@ const POINTS: F0MapPoint[] = [
     label: "Office",
   },
 ]
+
+const ROUTES: F0MapRoute[] = [
+  {
+    id: "commute",
+    coordinates: [
+      [2.19, 41.4],
+      [2.17, 41.39],
+      [2.15, 41.41],
+    ],
+    variant: "malibu",
+  },
+]
+const ARCS: F0MapArc[] = [
+  { id: "bcn-par", from: [2.19, 41.4], to: [2.35, 48.86], dashed: true },
+]
+const LINE_LAYERS = ["f0-map-lines-solid", "f0-map-lines-dashed"]
 
 describe("F0Map", () => {
   beforeEach(() => {
@@ -231,6 +287,54 @@ describe("F0Map", () => {
       const list = screen.getByRole("navigation", { name: "Locations" })
       expect(list).not.toHaveClass("sr-only")
       expect(screen.getByRole("button", { name: "HQ" })).toBeInTheDocument()
+    })
+  })
+
+  describe("routes & arcs", () => {
+    it("draws them as a GL line source with solid/dashed layers", () => {
+      render(<F0Map markers={POINTS} routes={ROUTES} arcs={ARCS} />)
+      const map = mock.instances[0]
+      expect(map.sources["f0-map-lines"]).toBeDefined()
+      expect([...map.layers]).toEqual(expect.arrayContaining(LINE_LAYERS))
+    })
+
+    it("re-adds the line layers after a style swap wipes them", () => {
+      render(<F0Map markers={POINTS} routes={ROUTES} />)
+      const map = mock.instances[0]
+      // Simulate `setStyle` clearing every custom source and layer.
+      delete map.sources["f0-map-lines"]
+      map.layers.clear()
+      // `styledata` fires once the swapped style has loaded.
+      map.handlers["styledata"]?.forEach((cb) => cb())
+      expect(map.sources["f0-map-lines"]).toBeDefined()
+      expect([...map.layers]).toEqual(expect.arrayContaining(LINE_LAYERS))
+    })
+
+    it("fits the camera over line coordinates even without markers", () => {
+      const ref = createRef<F0MapHandle>()
+      render(<F0Map ref={ref} routes={ROUTES} />)
+      ref.current?.fitToMarkers()
+      expect(mock.instances[0].calls.fitBounds.length).toBeGreaterThan(0)
+    })
+
+    it("fires onRouteClick when a route line is clicked", () => {
+      const onRouteClick = vi.fn()
+      render(
+        <F0Map markers={POINTS} routes={ROUTES} onRouteClick={onRouteClick} />
+      )
+      mock.instances[0].handlers["click"]?.forEach((cb) =>
+        cb({ features: [{ properties: { id: "commute", kind: "route" } }] })
+      )
+      expect(onRouteClick).toHaveBeenCalledWith("commute")
+    })
+  })
+
+  describe("projection", () => {
+    it("applies the globe projection when requested", () => {
+      render(<F0Map markers={POINTS} projection="globe" />)
+      expect(mock.instances[0].calls.setProjection).toContainEqual({
+        type: "globe",
+      })
     })
   })
 

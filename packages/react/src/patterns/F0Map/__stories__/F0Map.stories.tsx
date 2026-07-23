@@ -66,6 +66,7 @@ const meta = {
   ],
   argTypes: {
     theme: { control: "inline-radio", options: ["auto", "light", "dark"] },
+    projection: { control: "inline-radio", options: ["mercator", "globe"] },
     interactive: { control: "boolean" },
     loading: { control: "boolean" },
     ariaLabel: { control: "text" },
@@ -73,6 +74,10 @@ const meta = {
     mapStyle: { table: { disable: true } },
     dataTestId: { table: { disable: true } },
     markers: { table: { disable: true } },
+    routes: { table: { disable: true } },
+    arcs: { table: { disable: true } },
+    onRouteClick: { table: { disable: true } },
+    onArcClick: { table: { disable: true } },
     selectedMarkerId: { table: { disable: true } },
     defaultSelectedMarkerId: { table: { disable: true } },
     onMarkerSelect: { table: { disable: true } },
@@ -139,7 +144,7 @@ const DENSE: F0MapPoint[] = Array.from({ length: 40 }, (_, i) => ({
  * (zoom into the cluster's bounds) and split apart as you zoom in.
  */
 export const WithClusters: Story = {
-  args: { theme: "light", markers: DENSE, cluster: true },
+  args: { theme: "light", markers: DENSE },
 }
 
 // Clusters of different sizes scattered across the world, so every per-count
@@ -210,7 +215,6 @@ export const WorldClusters: Story = {
   args: {
     theme: "light",
     markers: WORLD,
-    cluster: true,
     initialViewport: { center: [10, 25], zoom: 1.4 },
   },
 }
@@ -222,6 +226,111 @@ export const WorldClusters: Story = {
  */
 export const CurrentLocation: Story = {
   args: { theme: "light", markers: BARCELONA, showCurrentLocation: true },
+}
+
+// A route: an ordered path drawn through its points exactly as given (F0Map
+// renders it; the routing itself comes from your own engine/server).
+const ROUTE_PATH: [number, number][] = [
+  [2.1899, 41.3969],
+  [2.1774, 41.3887],
+  [2.1686, 41.3809],
+  [2.1601, 41.3853],
+  [2.1536, 41.3686],
+]
+// Route stops: single-letter markers on the line's own hue (A -> B).
+const ROUTE_ENDS: F0MapPoint[] = [
+  {
+    id: "start",
+    coordinates: ROUTE_PATH[0],
+    variant: "stop",
+    letter: "A",
+    label: "Office",
+  },
+  {
+    id: "end",
+    coordinates: ROUTE_PATH[ROUTE_PATH.length - 1],
+    variant: "stop",
+    letter: "B",
+    label: "Destination",
+  },
+]
+
+/**
+ * Routes: a polyline drawn through the given coordinates. Hover to highlight,
+ * click to fire `onRouteClick`. The line auto-fits into view with the markers.
+ */
+export const Routes: Story = {
+  args: {
+    theme: "light",
+    markers: ROUTE_ENDS,
+    routes: [{ id: "commute", coordinates: ROUTE_PATH, width: 4 }],
+    onRouteClick: () => {},
+  },
+}
+
+// Arcs: curved connections from a hub to several spokes (the flight-path look).
+const HUB: [number, number] = [2.15, 41.39] // Barcelona
+const ARC_TARGETS: { id: string; at: [number, number]; label: string }[] = [
+  { id: "mad", at: [-3.7, 40.42], label: "Madrid" },
+  { id: "par", at: [2.35, 48.86], label: "Paris" },
+  { id: "lon", at: [-0.12, 51.51], label: "London" },
+  { id: "ber", at: [13.4, 52.52], label: "Berlin" },
+  { id: "rom", at: [12.5, 41.9], label: "Rome" },
+]
+// Arc endpoints are route stops: the hub is A, each destination follows (B,
+// C, ...) - the same letters a directions list would use.
+const ARC_MARKERS: F0MapPoint[] = [
+  {
+    id: "bcn",
+    coordinates: HUB,
+    variant: "stop",
+    letter: "A",
+    label: "Barcelona",
+  },
+  ...ARC_TARGETS.map(
+    (t, i): F0MapPoint => ({
+      id: t.id,
+      coordinates: t.at,
+      variant: "stop",
+      letter: String.fromCharCode(66 + i), // B, C, D...
+      label: t.label,
+    })
+  ),
+]
+
+/**
+ * Arcs: curved connections between two coordinates - hub-and-spoke flight
+ * paths here. Hover to highlight, click to fire `onArcClick`. `dashed` and a
+ * palette `variant` style each line.
+ */
+export const Arcs: Story = {
+  args: {
+    theme: "light",
+    markers: ARC_MARKERS,
+    arcs: ARC_TARGETS.map((t) => ({
+      id: `bcn-${t.id}`,
+      from: HUB,
+      to: t.at,
+      width: 2.5,
+      dashed: true,
+    })),
+    initialViewport: { center: [6, 46], zoom: 3.4 },
+    onArcClick: () => {},
+  },
+}
+
+/**
+ * Globe projection: the world renders as a 3D sphere at low zoom and eases into
+ * a flat mercator view as you zoom in. Best for a world-scale view; drag to
+ * spin the globe.
+ */
+export const Globe: Story = {
+  args: {
+    theme: "light",
+    markers: WORLD,
+    projection: "globe",
+    initialViewport: { center: [10, 25], zoom: 1.4 },
+  },
 }
 
 /** Loading placeholder. */

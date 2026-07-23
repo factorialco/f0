@@ -21,13 +21,15 @@ import { FLY_OPTS, RECOMMENDED_MAX_MARKERS } from "./constants"
 import { useCurrentLocation } from "./hooks/useCurrentLocation"
 import { useIsDarkContext } from "./hooks/useIsDarkContext"
 import { f0MapStyles, type F0MapStylePair } from "./styles"
-import type { F0MapPoint, F0MapViewport } from "./types"
+import type { F0MapArc, F0MapPoint, F0MapRoute, F0MapViewport } from "./types"
 import {
   F0MapControls,
   type F0MapControlLabels,
 } from "./components/F0MapControls"
 import { F0MapList } from "./components/F0MapList"
 import { F0MapMarkersLayer } from "./components/F0MapMarkersLayer"
+import { F0MapVectorLayer } from "./components/F0MapVectorLayer"
+import { CurrentLocationLayer } from "./components/internal/CurrentLocationLayer"
 import { F0MapSkeleton } from "./F0MapSkeleton"
 
 /** City-level default view (Barcelona) used when no `initialViewport` is given. */
@@ -35,6 +37,12 @@ const DEFAULT_VIEWPORT: Required<F0MapViewport> = {
   center: [2.154, 41.39],
   zoom: 11,
 }
+
+/**
+ * Map projection. `"globe"` renders the world as a 3D sphere (adaptive: it
+ * eases into a flat mercator view as you zoom in).
+ */
+export type F0MapProjection = "mercator" | "globe"
 
 /** Imperative handle exposed via `ref`. */
 export interface F0MapHandle {
@@ -56,6 +64,21 @@ export interface F0MapProps extends WithDataTestIdProps {
    * (~200); beyond that pan/zoom degrades and a warning is logged.
    */
   markers?: F0MapPoint[]
+  /**
+   * Polylines drawn through their given coordinates, exactly as provided (no
+   * routing is computed - pass server-side / routing-engine output). Rendered
+   * as GL lines beneath the markers.
+   */
+  routes?: F0MapRoute[]
+  /**
+   * Curved connections between two coordinates (the flight-path look). `F0Map`
+   * computes the curve from each arc's `from` / `to`.
+   */
+  arcs?: F0MapArc[]
+  /** Fired when a route line is clicked. Providing it enables hover + click. */
+  onRouteClick?: (id: string) => void
+  /** Fired when an arc line is clicked. Providing it enables hover + click. */
+  onArcClick?: (id: string) => void
   /** Controlled selected marker id. */
   selectedMarkerId?: string | null
   /** Uncontrolled initial selection. */
@@ -69,12 +92,6 @@ export interface F0MapProps extends WithDataTestIdProps {
    * grown pin) stays driven by `selectedMarkerId`.
    */
   highlightedId?: string | null
-  /**
-   * Group nearby markers into a clamped pile of their marker heads that expands
-   * on click / zoom-in. `true` uses the default radius; pass `{ radius }` (px)
-   * to tune density.
-   */
-  cluster?: boolean | { radius?: number }
   /**
    * Frame all markers on load. Defaults to `true` when no `initialViewport` is
    * given, `false` otherwise (an explicit viewport wins).
@@ -127,6 +144,12 @@ export interface F0MapProps extends WithDataTestIdProps {
    * inset 24px.
    */
   fullScreen?: boolean
+  /**
+   * Map projection. `"mercator"` (default) is the flat web map; `"globe"`
+   * renders the world as a 3D sphere at low zoom and eases into mercator as you
+   * zoom in - best for a world-scale view. Changing it re-projects live.
+   */
+  projection?: F0MapProjection
   /** Show the skeleton instead of the map. */
   loading?: boolean
   /** Accessible label for the map region. */
@@ -135,21 +158,36 @@ export interface F0MapProps extends WithDataTestIdProps {
   className?: string
 }
 
+/** Every coordinate the camera should frame: marker points plus line vertices. */
+const framedCoords = (
+  points: F0MapPoint[],
+  routes: F0MapRoute[],
+  arcs: F0MapArc[]
+): [number, number][] => [
+  ...points.map((p) => p.coordinates),
+  ...routes.flatMap((r) => r.coordinates),
+  ...arcs.flatMap((a) => [a.from, a.to]),
+]
+
 const fitToPoints = (
   map: maplibregl.Map,
   points: F0MapPoint[],
-  animate: boolean
+  animate: boolean,
+  routes: F0MapRoute[] = [],
+  arcs: F0MapArc[] = [],
+  padding = 64
 ) => {
-  if (points.length === 0) return
-  if (points.length === 1) {
-    const opts = { center: points[0].coordinates, zoom: 14 }
+  const coords = framedCoords(points, routes, arcs)
+  if (coords.length === 0) return
+  if (coords.length === 1) {
+    const opts = { center: coords[0], zoom: 14 }
     if (animate) map.easeTo(opts)
     else map.jumpTo(opts)
     return
   }
   const bounds = new maplibregl.LngLatBounds()
-  points.forEach((p) => bounds.extend(p.coordinates))
-  map.fitBounds(bounds, { padding: 64, maxZoom: 15, animate })
+  coords.forEach((c) => bounds.extend(c))
+  map.fitBounds(bounds, { padding, maxZoom: 15, animate })
 }
 
 /** Center on a single point, zooming in when the camera isn't already close. */
@@ -168,11 +206,14 @@ const focusPoint = (
 const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   {
     markers = [],
+    routes = [],
+    arcs = [],
+    onRouteClick,
+    onArcClick,
     selectedMarkerId,
     defaultSelectedMarkerId = null,
     onMarkerSelect,
     highlightedId = null,
-    cluster = false,
     fitToMarkers,
     initialViewport,
     mapStyle = f0MapStyles,
@@ -185,6 +226,7 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     controlLabels,
     showCurrentLocation = false,
     fullScreen = false,
+    projection = "mercator",
     loading = false,
     ariaLabel,
     dataTestId,
@@ -235,6 +277,12 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   // Latest values read by map event handlers without re-binding.
   const markersRef = useRef(markers)
   markersRef.current = markers
+  const routesRef = useRef(routes)
+  routesRef.current = routes
+  const arcsRef = useRef(arcs)
+  arcsRef.current = arcs
+  const projectionRef = useRef(projection)
+  projectionRef.current = projection
   const selectRef = useRef(selectMarker)
   selectRef.current = selectMarker
   const shouldFit = fitToMarkers ?? initialViewport === undefined
@@ -263,7 +311,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
   const handleZoomOut = useCallback(() => mapRef.current?.zoomOut(), [])
   const handleFit = useCallback(() => {
     if (mapRef.current)
-      fitToPoints(mapRef.current, markersRef.current, !reduceMotion)
+      fitToPoints(
+        mapRef.current,
+        markersRef.current,
+        !reduceMotion,
+        routesRef.current,
+        arcsRef.current
+      )
   }, [reduceMotion])
   const handleLocate = useCallback(() => {
     requestLocation((c) =>
@@ -301,7 +355,13 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       },
       fitToMarkers: () => {
         if (mapRef.current)
-          fitToPoints(mapRef.current, markersRef.current, !reduceMotion)
+          fitToPoints(
+            mapRef.current,
+            markersRef.current,
+            !reduceMotion,
+            routesRef.current,
+            arcsRef.current
+          )
       },
       clearSelection: () => selectRef.current(null),
     }),
@@ -364,7 +424,15 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
       loaded = true
       setTileError(false)
       map.resize()
-      if (shouldFit) fitToPoints(map, markersRef.current, false)
+      if (shouldFit)
+        fitToPoints(
+          map,
+          markersRef.current,
+          false,
+          routesRef.current,
+          arcsRef.current
+        )
+      map.setProjection({ type: projectionRef.current })
     })
     const handleError = () => {
       if (!loaded) setTileError(true)
@@ -382,13 +450,36 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     }
   }, [loading, interactive, gestureHandling, minZoom, maxZoom, shouldFit])
 
-  // Theme swap: a full setStyle, kept separate from the creation effect.
+  // Theme swap: a full setStyle, kept separate from the creation effect. A
+  // setStyle can reset the projection to the new style's default, so re-apply
+  // it once the swapped style has loaded. `style.load` (not `styledata`, which
+  // fires as soon as the new style STARTS loading) is the done signal -
+  // setProjection hard-throws on a style that is still loading.
   useEffect(() => {
     const map = mapRef.current
     if (!map || appliedStyleRef.current === style) return
     appliedStyleRef.current = style
     map.setStyle(style)
+    map.once("style.load", () =>
+      map.setProjection({ type: projectionRef.current })
+    )
   }, [style])
+
+  // Re-project live when the `projection` prop changes. The initial application
+  // is left to the creation effect's load handler; this only matters for
+  // post-mount changes. `isStyleLoaded()` can report true while the style is
+  // still finalising (and setProjection then throws anyway), so the guard is
+  // the try - a mid-load failure is safely dropped because the pending load /
+  // style.load handlers re-apply `projectionRef` when the style is ready.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    try {
+      map.setProjection({ type: projection })
+    } catch {
+      // Style mid-load; the load handler applies the projection.
+    }
+  }, [projection])
 
   // Reveal: fly to a newly highlighted marker (external search selecting a
   // result). Only fires when the id changes to a real marker.
@@ -398,6 +489,8 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
     const point = markersRef.current.find((p) => p.id === highlightedId)
     if (map && point) focusPoint(map, point, !reduceMotion)
   }, [highlightedId, reduceMotion])
+
+  const hasLines = routes.length > 0 || arcs.length > 0
 
   return (
     <DataTestIdWrapper dataTestId={dataTestId}>
@@ -410,6 +503,12 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
           aria-label={ariaLabel ?? i18n.map.region}
           className={cn(
             "f0-map relative h-full w-full overflow-hidden",
+            // The resolved theme cascades to every DOM overlay (controls,
+            // markers, list, banners): forcing `theme="dark"` outside a dark
+            // island must swap their tokens along with the tiles, so the two
+            // can never disagree. Harmless when a `.dark` ancestor already set
+            // it (auto mode).
+            isDark && "dark",
             !fullScreen &&
               "rounded-2xl border border-solid border-f1-border-secondary",
             className
@@ -430,30 +529,48 @@ const F0MapBase = forwardRef<F0MapHandle, F0MapProps>(function F0Map(
             }`}
           </div>
 
-          {!webglFailed &&
-            mapInstance &&
-            (markers.length > 0 || currentLocation) && (
-              <F0MapMarkersLayer
+          {/* Bottom of the overlay stack: a GL circle under the lines and under
+              every DOM marker. The sr-only span keeps the announcement the
+              canvas can't provide. */}
+          {!webglFailed && mapInstance && currentLocation && (
+            <>
+              <CurrentLocationLayer
                 map={mapInstance}
-                points={markers}
-                selectedId={selectedId}
-                highlightedId={highlightedId}
-                onSelect={selectMarker}
-                cluster={cluster}
-                currentLocation={currentLocation}
+                coords={currentLocation}
               />
-            )}
+              <span className="sr-only">{i18n.map.currentLocation}</span>
+            </>
+          )}
+          {!webglFailed && mapInstance && hasLines && (
+            <F0MapVectorLayer
+              map={mapInstance}
+              routes={routes}
+              arcs={arcs}
+              isDark={isDark}
+              onRouteClick={onRouteClick}
+              onArcClick={onArcClick}
+            />
+          )}
+          {!webglFailed && mapInstance && markers.length > 0 && (
+            <F0MapMarkersLayer
+              map={mapInstance}
+              points={markers}
+              selectedId={selectedId}
+              highlightedId={highlightedId}
+              onSelect={selectMarker}
+            />
+          )}
           {!webglFailed && mapInstance && showControls && interactive && (
             <div
               className={cn(
                 "absolute z-10",
-                fullScreen ? "bottom-6 left-6" : "bottom-4 left-4"
+                fullScreen ? "bottom-6 left-6" : "bottom-2 left-2"
               )}
             >
               <F0MapControls
                 onZoomIn={handleZoomIn}
                 onZoomOut={handleZoomOut}
-                onFit={markers.length > 0 ? handleFit : undefined}
+                onFit={markers.length > 0 || hasLines ? handleFit : undefined}
                 onLocate={handleLocate}
                 labels={controlLabels}
               />
