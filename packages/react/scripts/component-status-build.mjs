@@ -228,6 +228,25 @@ function componentDirOf(storyFilePath) {
 }
 
 /**
+ * Accessibility posture of a story file (heuristic, mirrors the axe ratchet in
+ * .storybook/test-runner.ts). Ordered skipped < todo < enforced:
+ *  - "skipped":  at least one story opts out of axe (skipCi/withSkipA11y).
+ *  - "enforced": opts into blocking axe (`test: "error"`) with no skips and no
+ *    todo/warning downgrades — on a green main, implies axe-clean.
+ *  - "todo":     everything else (axe runs non-blocking).
+ * Limitation: a file mixing `error` with a per-story `todo` reads as "todo".
+ */
+export function a11yTierOf(content) {
+  const skipped =
+    /\bskipCi\b/.test(content) || /\bwithSkipA11y\s*\(/.test(content)
+  if (skipped) return "skipped"
+  const enforced =
+    /\btest\s*:\s*["']error["']/.test(content) &&
+    !/\btest\s*:\s*["'](todo|warning)["']/.test(content)
+  return enforced ? "enforced" : "todo"
+}
+
+/**
  * Scan `srcDir` and build the full component-status dataset. Pure filesystem
  * work — no committed artifact, no subprocesses. `srcDir` defaults to this
  * package's `src/`; tests pass a fixture tree.
@@ -301,24 +320,7 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
     }
     const docSignals = docSignalsOf(mdxContent)
 
-    // Accessibility posture (heuristic, mirrors the axe ratchet in
-    // .storybook/test-runner.ts). Ordered skipped < todo < enforced:
-    //  - "skipped":  at least one story opts out of axe (skipCi/withSkipA11y).
-    //  - "enforced": opts into blocking axe (`test: "error"`) with no skips and
-    //    no todo/warning downgrades — on a green main, implies axe-clean.
-    //  - "todo":     everything else (axe runs non-blocking).
-    // Limitation: a file mixing `error` with a per-story `todo` reads as "todo".
-    const a11ySkipped =
-      /\bskipCi\b/.test(content) || /\bwithSkipA11y\s*\(/.test(content)
-    const a11yEnforced =
-      /\btest\s*:\s*["']error["']/.test(content) &&
-      !a11ySkipped &&
-      !/\btest\s*:\s*["'](todo|warning)["']/.test(content)
-    const a11yTier = a11ySkipped
-      ? "skipped"
-      : a11yEnforced
-        ? "enforced"
-        : "todo"
+    const a11yTier = a11yTierOf(content)
 
     components.push({
       name: storyName,
