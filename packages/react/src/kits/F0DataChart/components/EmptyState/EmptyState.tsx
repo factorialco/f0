@@ -6,6 +6,7 @@ import type { F0DataChartProps } from "../../types"
 
 import {
   BarChartSkeleton,
+  CategoryBarChartSkeleton,
   FunnelChartSkeleton,
   GaugeChartSkeleton,
   HeatmapChartSkeleton,
@@ -31,6 +32,7 @@ const skeletonByType: Record<F0DataChartProps["type"], () => ReactNode> = {
   radar: () => <RadarChartSkeleton showLegend={false} />,
   gauge: () => <GaugeChartSkeleton />,
   heatmap: () => <HeatmapChartSkeleton />,
+  categoryBar: () => <CategoryBarChartSkeleton showLegend={false} />,
 }
 
 /**

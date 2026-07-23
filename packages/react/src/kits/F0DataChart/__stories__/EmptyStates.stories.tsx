@@ -64,6 +64,13 @@ export const EmptyHeatmap: Story = {
   },
 }
 
+export const EmptyCategoryBar: Story = {
+  args: {
+    type: "categoryBar",
+    data: [],
+  },
+}
+
 // ---------------------------------------------------------------------------
 // Behavior showcases
 // ---------------------------------------------------------------------------
@@ -137,6 +144,13 @@ const SNAPSHOT_VARIANTS: { label: string; props: F0DataChartProps }[] = [
       type: "heatmap",
       xCategories: [],
       yCategories: [],
+      data: [],
+    },
+  },
+  {
+    label: "Category bar",
+    props: {
+      type: "categoryBar",
       data: [],
     },
   },

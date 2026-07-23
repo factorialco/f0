@@ -415,6 +415,47 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
 }
 
 // ---------------------------------------------------------------------------
+// Category bar data types
+// ---------------------------------------------------------------------------
+
+/**
+ * A single segment of a category bar.
+ */
+export interface F0DataChartCategoryBarDataPoint {
+  /** Segment label — shown in tooltip and legend */
+  name: string
+  /** Numeric value. Segment width is proportional to the total. */
+  value: number
+  /** Override color for this segment. Must be an F0 design token name. */
+  color?: ChartColorToken
+}
+
+// ---------------------------------------------------------------------------
+// Discriminated union: categoryBar variant
+// ---------------------------------------------------------------------------
+
+/**
+ * Category bar variant props.
+ *
+ * A single horizontal bar split into proportional segments — a compact way
+ * to show how a total distributes across categories. DOM-rendered (no
+ * canvas): segment names come from the data points themselves, so this
+ * interface is separate from `F0DataChartBaseProps`.
+ */
+export interface F0DataChartCategoryBarProps extends F0DataChartCommonProps {
+  /** Chart type */
+  type: "categoryBar"
+  /** The segments to render, in order */
+  data: F0DataChartCategoryBarDataPoint[]
+  /** Show the legend below the bar. @default true */
+  showLegend?: boolean
+  /** Show a tooltip with name, value and percentage on segment hover. @default true */
+  showTooltip?: boolean
+  /** Format the value displayed in the tooltip */
+  valueFormatter?: (value: number) => string
+}
+
+// ---------------------------------------------------------------------------
 // Union
 // ---------------------------------------------------------------------------
 
@@ -422,7 +463,8 @@ export interface F0DataChartHeatmapProps extends F0DataChartCommonProps {
  * Props for the F0DataChart component.
  *
  * A unified chart component that supports bar, line, funnel, pie, radar,
- * gauge, and heatmap chart types via a discriminated `type` prop.
+ * gauge, heatmap, and categoryBar chart types via a discriminated `type`
+ * prop.
  */
 export type F0DataChartProps =
   | F0DataChartBarProps
@@ -432,3 +474,4 @@ export type F0DataChartProps =
   | F0DataChartRadarProps
   | F0DataChartGaugeProps
   | F0DataChartHeatmapProps
+  | F0DataChartCategoryBarProps

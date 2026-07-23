@@ -43,6 +43,13 @@ export function isDataChartEmpty(props: F0DataChartProps): boolean {
       const data = props.data
       return !Array.isArray(data) || data.length === 0
     }
+    case "categoryBar": {
+      // All-zero segments render nothing (every width collapses to 0%),
+      // so unlike other variants an all-zero dataset IS empty here.
+      const data = props.data
+      if (!Array.isArray(data) || data.length === 0) return true
+      return data.every((segment) => !segment || !(segment.value > 0))
+    }
     default:
       return true
   }
