@@ -102,8 +102,7 @@ export function ComponentStability({
               <A11yRow
                 key={req.key}
                 detail={req.detail}
-                enforced={status.a11yEnforced}
-                skipped={status.a11ySkipped}
+                tier={status.a11yTier}
               />
             ) : (
               <div

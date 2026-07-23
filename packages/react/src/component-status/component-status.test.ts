@@ -31,8 +31,7 @@ function entry(overrides: Partial<ComponentEntry> = {}): ComponentEntry {
       hasDoDonts: true,
       exampleCount: 4,
     },
-    a11yEnforced: true,
-    a11ySkipped: false,
+    a11yTier: "enforced",
     storyFile: "components/F0Example/__stories__/F0Example.stories.tsx",
     ...overrides,
   }
@@ -337,12 +336,15 @@ describe("STABLE_REQUIREMENTS", () => {
     ])
   })
 
-  test("a component clean on everything but a11y is not stable", () => {
-    const status = evaluateComponentStatus(
-      entry({ apiStatus: "stable", tags: ["stable"], a11yEnforced: false })
-    )
-    expect(status.meetsBar).toBe(false)
-    expect(status.missing).toEqual(["Accessibility enforced"])
-    expect(status.effectiveStatus).toBe("experimental")
-  })
+  test.each(["skipped", "todo"] as const)(
+    "a component clean on everything but a11y (%s) is not stable",
+    (a11yTier) => {
+      const status = evaluateComponentStatus(
+        entry({ apiStatus: "stable", tags: ["stable"], a11yTier })
+      )
+      expect(status.meetsBar).toBe(false)
+      expect(status.missing).toEqual(["Accessibility enforced"])
+      expect(status.effectiveStatus).toBe("experimental")
+    }
+  )
 })

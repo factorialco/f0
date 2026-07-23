@@ -103,12 +103,10 @@ async function runAudit(): Promise<Criterion[]> {
 
 export function A11yRow({
   detail,
-  enforced,
-  skipped,
+  tier,
 }: {
   detail: string
-  enforced: boolean
-  skipped: boolean
+  tier: "skipped" | "todo" | "enforced"
 }) {
   const [audit, setAudit] = useState<AuditState>({ status: "idle" })
   const started = useRef(false)
@@ -130,15 +128,17 @@ export function A11yRow({
     []
   )
 
+  const enforced = tier === "enforced"
   const glyph = enforced ? "✓" : "✕"
   const glyphColor = enforced
     ? "text-f1-foreground-positive"
     : "text-f1-foreground-secondary"
-  const posture = enforced
-    ? "enforced"
-    : skipped
-      ? "axe skipped"
-      : "not enforced yet"
+  const posture =
+    tier === "enforced"
+      ? "enforced"
+      : tier === "skipped"
+        ? "axe skipped"
+        : "not enforced yet"
 
   return (
     <div role="listitem" className="flex items-start gap-2">

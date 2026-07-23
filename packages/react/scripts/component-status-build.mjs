@@ -49,7 +49,7 @@ export function meetsStableBar(c) {
     c.hasPlayFunction &&
     c.hasMdxDocs &&
     DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good") &&
-    c.a11yEnforced
+    c.a11yTier === "enforced"
   )
 }
 
@@ -302,16 +302,23 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
     const docSignals = docSignalsOf(mdxContent)
 
     // Accessibility posture (heuristic, mirrors the axe ratchet in
-    // .storybook/test-runner.ts). "enforced" means the file opts its stories
-    // into blocking axe (`test: "error"`) with no skips and no todo/warning
-    // downgrades — which, on a green main, implies the stories are axe-clean.
-    // Limitation: a file mixing `error` with a per-story `todo` reads as debt.
+    // .storybook/test-runner.ts). Ordered skipped < todo < enforced:
+    //  - "skipped":  at least one story opts out of axe (skipCi/withSkipA11y).
+    //  - "enforced": opts into blocking axe (`test: "error"`) with no skips and
+    //    no todo/warning downgrades — on a green main, implies axe-clean.
+    //  - "todo":     everything else (axe runs non-blocking).
+    // Limitation: a file mixing `error` with a per-story `todo` reads as "todo".
     const a11ySkipped =
       /\bskipCi\b/.test(content) || /\bwithSkipA11y\s*\(/.test(content)
     const a11yEnforced =
       /\btest\s*:\s*["']error["']/.test(content) &&
       !a11ySkipped &&
       !/\btest\s*:\s*["'](todo|warning)["']/.test(content)
+    const a11yTier = a11ySkipped
+      ? "skipped"
+      : a11yEnforced
+        ? "enforced"
+        : "todo"
 
     components.push({
       name: storyName,
@@ -326,9 +333,8 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       hasMdxDocs: Boolean(mdxPath),
       docQuality: scoreDocQuality(mdxContent, docSignals),
       docSignals,
-      // Accessibility: enforced = axe blocks on this component's stories.
-      a11yEnforced,
-      a11ySkipped,
+      // Accessibility posture: "skipped" | "todo" | "enforced".
+      a11yTier,
       storyFile: relative,
     })
   }
