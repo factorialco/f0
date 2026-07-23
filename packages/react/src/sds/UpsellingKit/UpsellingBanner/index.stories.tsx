@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { UpsellingBanner } from "."
 
 const meta: Meta<typeof UpsellingBanner> = {
-  title: "UpsellingKit/UpsellingBanner",
+  title: "UpsellingBanner",
   component: UpsellingBanner,
   parameters: {
     layout: "padded",

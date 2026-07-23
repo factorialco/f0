@@ -7,7 +7,7 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { UpsellingAlert } from "."
 
 const meta: Meta<typeof UpsellingAlert> = {
-  title: "UpsellingKit/UpsellingAlert",
+  title: "UpsellingAlert",
   component: UpsellingAlert,
   parameters: {
     layout: "padded",

@@ -72,6 +72,7 @@ const config: StorybookConfig = {
     { directory: "../src/patterns", titlePrefix: "Patterns" },
     { directory: "../src/experimental/CrudPatterns", titlePrefix: "Patterns" },
     { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
+    { directory: "../src/sds/TimeLine", titlePrefix: "Patterns/Timeline" }, // composed timeline pattern (lives in sds/ but it's Core)
 
     // ── Kits · functional bundles (AI + Chat promoted from sds) ──
     { directory: "../src/kits/Charts", titlePrefix: "Kits" },
@@ -86,7 +87,6 @@ const config: StorybookConfig = {
     { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
     { directory: "../src/sds/surveys", titlePrefix: "Domain specific" },
     { directory: "../src/sds/chat", titlePrefix: "Domain specific/Communications" }, // unvalidated chat — holding area until recurrent use is proven, then promote
-    { directory: "../src/sds/TimeLine", titlePrefix: "Domain specific/Time tracking" },
     { directory: "../src/sds/UpsellingKit", titlePrefix: "Domain specific/Growth" },
 
     // ── Resources · hooks, utilities, examples ───────────────────

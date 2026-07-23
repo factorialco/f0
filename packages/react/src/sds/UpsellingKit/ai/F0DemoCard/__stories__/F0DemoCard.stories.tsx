@@ -18,7 +18,7 @@ const PreviewPlaceholder = () => (
 )
 
 const meta = {
-  title: "AI/Widgets/UpsellKit/F0DemoCard",
+  title: "F0DemoCard",
   component: F0DemoCard,
   decorators: [
     (Story) => (
