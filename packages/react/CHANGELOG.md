@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.49.0](https://github.com/factorialco/f0/compare/f0-react-v4.48.0...f0-react-v4.49.0) (2026-07-23)
+
+
+### Features
+
+* **OneDataCollection:** auto page size for full-height collections ([#4795](https://github.com/factorialco/f0/issues/4795)) ([227209f](https://github.com/factorialco/f0/commit/227209fb13377cf0350b645c4f241bd91e700134))
+
 ## [4.48.0](https://github.com/factorialco/f0/compare/f0-react-v4.47.3...f0-react-v4.48.0) (2026-07-23)
 
 
