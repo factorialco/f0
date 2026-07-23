@@ -7,6 +7,11 @@
 
 * **Table:** flash newly-added rows on insert ([#4709](https://github.com/factorialco/f0/issues/4709)) ([4f632af](https://github.com/factorialco/f0/commit/4f632af8e482481a99d0d23e4471af1e6639fa76))
 
+
+### Bug Fixes
+
+* **F0Form:** validate typed date on blur after value commits ([#4790](https://github.com/factorialco/f0/issues/4790)) ([d8b5979](https://github.com/factorialco/f0/commit/d8b5979910b96e6acd4df7ec0431abee54ea5b8c))
+
 ## [4.47.3](https://github.com/factorialco/f0/compare/f0-react-v4.47.2...f0-react-v4.47.3) (2026-07-23)
 
 
