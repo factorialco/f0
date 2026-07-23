@@ -457,7 +457,12 @@ export const WithWelcomeSuggestions: Story = {
     const page = within(canvasElement.closest("body")!)
 
     await step("Open the first suggestion group", async () => {
-      await userEvent.click(page.getByRole("button", { name: "Analyze" }))
+      const analyzeTrigger = page.getByRole("button", { name: "Analyze" })
+      await userEvent.click(analyzeTrigger)
+      const dialog = page.getByRole("dialog", { name: "Analyze" })
+
+      await expect(analyzeTrigger).toHaveAttribute("aria-expanded", "true")
+      await expect(analyzeTrigger).toHaveAttribute("aria-controls", dialog.id)
       await expect(
         page.getByRole("button", {
           name: "April leave and overtime summary",
@@ -466,7 +471,12 @@ export const WithWelcomeSuggestions: Story = {
     })
 
     await step("Switch to the third suggestion group", async () => {
-      await userEvent.click(page.getByRole("button", { name: "Create" }))
+      const createTrigger = page.getByRole("button", { name: "Create" })
+      await userEvent.click(createTrigger)
+      const dialog = page.getByRole("dialog", { name: "Create" })
+
+      await expect(createTrigger).toHaveAttribute("aria-expanded", "true")
+      await expect(createTrigger).toHaveAttribute("aria-controls", dialog.id)
       await expect(
         page.getByRole("button", {
           name: "Draft a Senior Backend job description",
