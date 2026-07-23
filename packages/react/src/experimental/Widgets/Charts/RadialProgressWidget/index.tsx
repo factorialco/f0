@@ -2,11 +2,10 @@ import { forwardRef } from "react"
 
 import { experimentalComponent } from "@/lib/experimental"
 
-import {
-  RadialProgressChart,
-  RadialProgressProps,
-} from "@/kits/Charts/RadialProgressChart"
+import type { RadialProgressProps } from "@/kits/Charts/RadialProgressChart"
+import { F0DataChart } from "@/kits/F0DataChart"
 import { withSkeleton } from "../../../../lib/skeleton"
+import { toChartColorToken } from "../adapters"
 import { Widget } from "../../Widget"
 
 export type RadialProgressWidgetProps = {
@@ -25,7 +24,19 @@ const _RadialProgressWidget = withSkeleton(
       return (
         <Widget ref={ref} header={header}>
           <div className="flex h-40 items-center justify-center">
-            <RadialProgressChart {...chart} />
+            <F0DataChart
+              type="gauge"
+              value={chart.value}
+              max={chart.max}
+              color={toChartColorToken(chart.color)}
+              name={chart.overview?.label}
+              showValue={Boolean(chart.overview)}
+              valueFormatter={
+                chart.overview
+                  ? () => String(chart.overview!.number)
+                  : undefined
+              }
+            />
           </div>
         </Widget>
       )

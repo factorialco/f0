@@ -1,4 +1,4 @@
-import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
+import { getCategoricalColor, getColor } from "@/lib/chart-colors"
 import {
   Tooltip,
   TooltipContent,

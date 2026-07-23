@@ -1,13 +1,15 @@
-import {
-  CategoryBarChart,
-  CategoryBarProps,
-} from "@/kits/Charts/CategoryBarChart"
+import { F0DataChart } from "@/kits/F0DataChart"
+import { legacyChartColorToToken } from "@/lib/chart-colors"
 import { cn } from "@/lib/utils"
 
 interface CategoryBarSectionProps {
   title: string
   subtitle: string
-  data: CategoryBarProps["data"]
+  data: {
+    name: string
+    value: number
+    color?: string
+  }[]
   helpText?: string
   legend?: boolean
   hideTooltip?: boolean
@@ -28,10 +30,20 @@ export function CategoryBarSection({
         <span className="text-xl text-f1-foreground-secondary">{subtitle}</span>
       </div>
       <div className="mt-2">
-        <CategoryBarChart
-          data={data}
-          legend={legend}
-          hideTooltip={hideTooltip}
+        <F0DataChart
+          type="categoryBar"
+          data={data.map((segment) => ({
+            name: segment.name,
+            value: segment.value,
+            // Legacy colors were free-form strings; non-categorical values
+            // (raw CSS) have no token equivalent and fall back to "smoke"
+            // as a muted remainder tone.
+            color: segment.color
+              ? (legacyChartColorToToken(segment.color) ?? "smoke")
+              : undefined,
+          }))}
+          showLegend={legend}
+          showTooltip={!hideTooltip}
         />
       </div>
       {!!helpText && (
