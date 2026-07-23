@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.49.1](https://github.com/factorialco/f0/compare/f0-react-v4.49.0...f0-react-v4.49.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **tailwind:** close the unterminated row-flash keyframe ([#4804](https://github.com/factorialco/f0/issues/4804)) ([b52cada](https://github.com/factorialco/f0/commit/b52cada74b11521cb974a6b7fae7cb668861d7f7))
+
 ## [4.49.0](https://github.com/factorialco/f0/compare/f0-react-v4.48.0...f0-react-v4.49.0) (2026-07-23)
 
 
