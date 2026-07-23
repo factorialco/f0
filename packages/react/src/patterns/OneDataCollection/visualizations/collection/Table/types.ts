@@ -14,6 +14,7 @@ import { NavigationFiltersDefinition } from "../../../navigationFilters/types"
 import { PropertyDefinition } from "../../../property-render"
 import { SummariesDefinition, SummaryKey } from "../../../summary"
 import { CollectionProps } from "../../../types"
+import { NestedTableOptions } from "./nested/types"
 
 export type TableVisualizationSettings = {
   order?: ColId[]
@@ -165,6 +166,13 @@ export type TableVisualizationOptions<
    * Useful for embedding the table inside panels or detail views.
    */
   bordered?: boolean
+
+  /**
+   * Behavior of nested rows (sources with `fetchChildren`): default expansion
+   * criteria, programmatic control via `useNestedTable()`, children load mode
+   * and expand animation.
+   */
+  nested?: NestedTableOptions<R>
 }
 
 export type TableCollectionProps<

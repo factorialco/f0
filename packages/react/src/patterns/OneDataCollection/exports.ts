@@ -18,6 +18,7 @@ export {
   getAutoPerPageMinHeight,
 } from "./hooks/useAutoPerPage"
 export { useExportAction } from "./hooks/useExportAction"
+export * from "./visualizations/collection/Table/nested"
 export { downloadAsCSV, generateCSVContent } from "./utils/csvExport"
 export type { CSVExportOptions } from "./utils/csvExport"
 export type {
