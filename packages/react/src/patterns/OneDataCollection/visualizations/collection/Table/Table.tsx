@@ -241,6 +241,14 @@ export const TableCollection = <
         : undefined
   const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
 
+  // Remount the flat row presence group on page-based page changes so the
+  // outgoing page doesn't animate out. Infinite scroll keeps a stable key: its
+  // rows are appended, not swapped, so they must not be torn down on load-more.
+  const flatPresenceKey =
+    paginationInfo?.type === "pages"
+      ? `flat-page-${paginationInfo.currentPage}`
+      : "flat"
+
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
     selectedItems,
@@ -748,19 +756,27 @@ export const TableCollection = <
                   )
                 })}
               {data?.type === "flat" && (
-                <AnimatePresence initial={false}>
+                // Keying the presence group by page makes a page change remount
+                // the whole group, so the outgoing page's rows are dropped
+                // instantly instead of playing their exit animation. Inserts and
+                // deletes within a page (same key) still animate.
+                <AnimatePresence initial={false} key={flatPresenceKey}>
                   {data.records.map((item, index) => {
                     const rowKey = `row-${getRowKey(item, index)}`
+                    const isNew = addedRowKeys.has(rowKey)
                     const motionRow = (
                       <MotionRow
                         variants={getAnimationVariants()}
-                        initial="hidden"
+                        // Only a genuinely-inserted row plays the enter
+                        // animation; rows arriving via pagination or the initial
+                        // load appear in place, without movement.
+                        initial={isNew ? "hidden" : false}
                         animate="visible"
                         exit="hidden"
                         custom={index}
                         key={rowKey}
                         layout
-                        isNew={addedRowKeys.has(rowKey)}
+                        isNew={isNew}
                         groupIndex={0}
                         source={effectiveSource}
                         item={item}
