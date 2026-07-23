@@ -13,6 +13,12 @@ interface CategoryAxisOptions {
   /** Axis length in pixels — used to auto-compute label interval */
   axisLength?: number
   /**
+   * Minimum pixels each label needs along the axis before labels start being
+   * skipped. Defaults to a horizontal-text width; horizontal charts (stacked
+   * labels on the Y axis) should pass a line-height instead.
+   */
+  minLabelSpace?: number
+  /**
    * Whether to leave space at the edges of the category axis.
    * - `true` (default for ECharts) — centres categories with padding at edges.
    *   Appropriate for bar charts where bars need centering space.
@@ -63,13 +69,16 @@ const LABEL_GAP = 8
  */
 export function computeLabelInterval(
   categoryCount: number,
-  containerWidth: number | undefined
+  axisLength: number | undefined,
+  // Space each label needs along the axis. For a horizontal axis this is the
+  // label width; for a vertical axis (horizontal charts) it's the line-height.
+  minSpace: number = MIN_LABEL_WIDTH
 ): number | undefined {
-  if (!containerWidth || categoryCount <= 1) return undefined
-  const spacePerLabel = containerWidth / categoryCount
-  if (spacePerLabel >= MIN_LABEL_WIDTH) return undefined
+  if (!axisLength || categoryCount <= 1) return undefined
+  const spacePerLabel = axisLength / categoryCount
+  if (spacePerLabel >= minSpace) return undefined
   // How many labels fit comfortably
-  const fitCount = Math.max(1, Math.floor(containerWidth / MIN_LABEL_WIDTH))
+  const fitCount = Math.max(1, Math.floor(axisLength / minSpace))
   // interval = skip every N labels so that only fitCount labels are shown
   return Math.max(0, Math.ceil(categoryCount / fitCount) - 1)
 }
@@ -136,6 +145,7 @@ export function buildCategoryAxis({
   theme,
   formatter,
   axisLength,
+  minLabelSpace,
   boundaryGap,
   maxLabelWidth,
   show = true,
@@ -151,7 +161,8 @@ export function buildCategoryAxis({
       : undefined
 
   const interval =
-    layout?.interval ?? computeLabelInterval(data.length, axisLength)
+    layout?.interval ??
+    computeLabelInterval(data.length, axisLength, minLabelSpace)
 
   // Resolved truncation width: smart layout takes precedence; otherwise the
   // explicit `maxLabelWidth` override is used as before.
@@ -544,11 +555,19 @@ export function buildAxes({
     ? Math.max(0, containerWidth - Y_AXIS_RESERVED)
     : undefined
 
+  // On a horizontal chart the category labels stack vertically on the Y axis,
+  // so each needs a line-height of room — not the horizontal-text width used
+  // for the X axis. Using the width constant there dropped labels far too
+  // eagerly (reserving ~60px of height for a ~17px-tall label).
+  const verticalLabelSpace =
+    Math.round(theme.textStyle.fontSize * 1.4) + LABEL_GAP
+
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
     axisLength: isVertical ? xPlotLength : containerHeight,
+    minLabelSpace: isVertical ? undefined : verticalLabelSpace,
     boundaryGap,
     show: showCategoryAxis,
     // Vertical charts get the smart layout (truncate-then-skip). Horizontal
