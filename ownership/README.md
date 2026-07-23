@@ -1,9 +1,10 @@
 # Ownership
 
 This folder contains the data and tooling that assign a **mandatory owner team**
-to every module in `packages/react/src/sds/` and `packages/react/src/kits/`,
-generate the root `CODEOWNERS` file from those declarations, and enforce the
-**PR review policy** (which teams must approve each kind of PR).
+to every module in `packages/react/src/sds/`, generate the root `CODEOWNERS`
+file from those declarations, and enforce the **PR review policy** (which teams
+must approve each kind of PR). Everything else — including `kits/` — follows
+the regular component rules (no manifest).
 
 It is inspired by the `ownership/` system in `factorialco/factorial`.
 
@@ -16,7 +17,7 @@ missing, `success` once satisfied (the workflow job itself only fails on real
 errors). Make that status context a required check in branch protection to
 enforce the policy. Rules, in order of precedence:
 
-1. **SDS/Kits modules** — every changed file belongs to an owned module: the
+1. **SDS modules** — every changed file belongs to an owned module: the
    module owners are the only required reviewers (enforced natively by GitHub
    through CODEOWNERS). Nothing else is required.
 2. **Documentation** — all other changes are docs (`*.md`, `*.mdx`,
@@ -29,13 +30,17 @@ enforce the policy. Rules, in order of precedence:
 Adding the `needs-design-review` label to any PR also requires an
 `@factorialco/f0-designers` approval (opt-in by anyone).
 
+Creating a **new sds module** (a PR that adds a `package.yml` under `sds/`)
+additionally requires an `@factorialco/f0-general` approval, on top of
+whatever the classification requires.
+
 Membership of the three policy teams is mirrored in [`teams.yml`](teams.yml)
 (`policy_teams`) because the default Actions token cannot read org team
 membership. Keep it in sync with the GitHub org teams.
 
 ## How it works
 
-- Every direct child of `sds/` and `kits/` must have a `package.yml` manifest:
+- Every direct child of `sds/` must have a `package.yml` manifest:
 
   ```yml
   metadata:
@@ -63,7 +68,7 @@ From the repo root:
 
 - `pnpm ownership` — regenerate `CODEOWNERS` from the manifests.
 - `pnpm ownership:check` — validate everything (run in CI on every PR):
-  1. every sds/kits module has a manifest
+  1. every sds module has a manifest
   2. every manifest declares a valid `metadata.owner` (mandatory)
   3. all teams are in `teams.yml`
   4. reviewer `include` paths exist
@@ -71,9 +76,10 @@ From the repo root:
 
 ## Adding a new module
 
-1. Create the module folder under `sds/` or `kits/`.
+1. Create the module folder under `sds/`.
 2. Add a `package.yml` with the owning team (CI fails without it).
 3. Run `pnpm ownership` and commit the regenerated `CODEOWNERS`.
+4. The PR will require an `@factorialco/f0-general` approval (new-module rule).
 
 ## Changing ownership
 

@@ -2,7 +2,7 @@
  * PR review policy evaluator. Classifies the PR and enforces the approval
  * matrix agreed for this repo:
  *
- *   1. PR only touching owned modules (sds/kits) -> module owners only,
+ *   1. PR only touching owned sds modules -> module owners only,
  *      enforced natively by GitHub code owners. Nothing else required.
  *   2. Remaining changes are documentation only (*.md, *.mdx, *.stories.tsx
  *      or any file inside a __stories__/ folder)
@@ -13,6 +13,10 @@
  *
  * The `needs-design-review` label adds @factorialco/f0-designers to the
  * requirements of any PR (opt-in by any reviewer or the author).
+ *
+ * Creating a new sds module (a PR that adds a package.yml under sds/)
+ * additionally requires 1 approval from @factorialco/f0-general, on top of
+ * whatever the classification requires.
  *
  * The script posts/updates an explanatory PR comment and publishes a
  * "Review policy" commit status: `pending` while required approvals are
@@ -76,8 +80,11 @@ interface Requirement {
   reason: string
 }
 
+const NEW_MODULE_PATTERN = /^packages\/react\/src\/sds\/.+\/package\.yml$/
+
 function classify(params: {
   files: string[]
+  addedFiles: string[]
   title: string
   labels: string[]
 }): { name: string; description: string; requirements: Requirement[]; ownedByModule: Map<string, string[]> } {
@@ -105,7 +112,7 @@ function classify(params: {
   let description: string
 
   if (remainder.length === 0) {
-    name = "SDS/Kits modules"
+    name = "SDS modules"
     description =
       "Every changed file belongs to a module with a dedicated owner. " +
       "Module owners are the only required reviewers (rule 1) — their approval " +
@@ -142,6 +149,16 @@ function classify(params: {
     })
   }
 
+  const newModules = params.addedFiles
+    .filter((file) => NEW_MODULE_PATTERN.test(file))
+    .map((file) => path.dirname(file).replace("packages/react/src/", ""))
+  if (newModules.length > 0 && !requirements.some((r) => r.team === "f0-general")) {
+    requirements.push({
+      team: "f0-general",
+      reason: `New sds module (\`${newModules.join("`, `")}\`) — creating a module needs f0-general sign-off`,
+    })
+  }
+
   return { name, description, requirements, ownedByModule }
 }
 
@@ -166,13 +183,14 @@ const pr = await api<{
   requested_teams: { slug: string }[]
   head: { sha: string }
 }>(prPath)
-const files = await paginate<{ filename: string }>(`${prPath}/files`)
+const files = await paginate<{ filename: string; status: string }>(`${prPath}/files`)
 const reviews = await paginate<{ user: { login: string }; state: string }>(`${prPath}/reviews`)
 
 const approvers = approversFrom(reviews, pr.user.login)
 const policyTeams = getPolicyTeams()
 const { name, description, requirements, ownedByModule } = classify({
   files: files.map((f) => f.filename),
+  addedFiles: files.filter((f) => f.status === "added").map((f) => f.filename),
   title: pr.title,
   labels: pr.labels.map((l) => l.name),
 })
@@ -226,11 +244,12 @@ if (evaluated.length > 0) {
 lines.push(
   "<details><summary>How this was decided</summary>",
   "",
-  "- PRs touching only `sds/`/`kits/` modules require their owners and nothing else.",
+  "- PRs touching only `sds/` modules require their owners and nothing else.",
   "- Otherwise, docs-only changes (`*.md`, `*.mdx`, `*.stories.tsx`, anything in `__stories__/`) → one f0-general approval.",
   "- Otherwise, `feat:` titles → one f0-devs **and** one f0-designers approval. Not a feature? Fix the title prefix.",
   "- Anything else → one f0-devs approval.",
   `- Add the \`${DESIGN_LABEL}\` label to also request a design approval on any PR.`,
+  "- Creating a new `sds/` module (new `package.yml`) additionally requires an f0-general approval.",
   "",
   `Policy source: [\`ownership/review-policy.ts\`](https://github.com/${GITHUB_REPOSITORY}/blob/main/ownership/review-policy.ts) · Team members: [\`ownership/teams.yml\`](https://github.com/${GITHUB_REPOSITORY}/blob/main/ownership/teams.yml)`,
   "",
