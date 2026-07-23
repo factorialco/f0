@@ -1,4 +1,11 @@
 {
+  "routes": [
+    {
+      "route": "/mcp",
+      "rewrite": "/api/mcp",
+      "methods": ["GET", "POST", "OPTIONS"]
+    }
+  ],
   "globalHeaders": {
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET, POST, OPTIONS",
