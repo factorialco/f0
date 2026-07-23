@@ -146,6 +146,28 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
   /**
+   * When {@link F0DataChartBaseProps.showLabels} is on, hide a category's value
+   * labels if the widest value in that category doesn't fit the bar. The whole
+   * category drops together (all-or-nothing), so a tight chart never shows a
+   * ragged, half-labelled set instead of overlapping numbers. @default true
+   */
+  hideOverflowingLabels?: boolean
+  /**
+   * Per-side clearance in pixels the widest value must have before
+   * {@link F0DataChartBarProps.hideOverflowingLabels} counts it as fitting.
+   * Overrides the default, which is placement-based: **12** for stacked (inside)
+   * labels, **0** for labels outside the bar.
+   */
+  labelFitPadding?: number
+  /**
+   * With {@link F0DataChartBarProps.hideOverflowingLabels} on, escalate a
+   * horizontal overflow to the whole chart: if ANY value is too wide for its
+   * bar, hide every label instead of just that category's (which reads as
+   * ragged). A value that's only too tall for a thin segment still hides on its
+   * own — this escalation is horizontal-only. @default true
+   */
+  hideAllLabelsOnOverflow?: boolean
+  /**
    * Suggested number of segments on the value axis — lower values draw fewer
    * grid lines. Applies to whichever axis is the value axis (Y for vertical
    * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2

@@ -16,6 +16,30 @@ import { useContainerSize } from "../../utils/useContainerSize"
 /** Default value-label font size (px) — slightly smaller than axis labels. */
 const DEFAULT_LABEL_FONT_SIZE = 11
 
+/**
+ * Per-side clearance (px) a label needs to count as "fitting". Stacked labels
+ * sit inside a segment and want breathing room; labels outside the bar (above /
+ * beside) sit in open space and need none.
+ */
+const STACKED_LABEL_FIT_PADDING = 12
+const OUTSIDE_LABEL_FIT_PADDING = 0
+
+/** Lazily-created canvas 2D context reused for measuring label text width. */
+let measureContext: CanvasRenderingContext2D | null | undefined
+
+/** Measure the pixel width of `text` at `font` (canvas), with a rough fallback. */
+function measureTextWidth(text: string, font: string): number {
+  if (measureContext === undefined) {
+    measureContext =
+      typeof document !== "undefined"
+        ? document.createElement("canvas").getContext("2d")
+        : null
+  }
+  if (!measureContext) return text.length * 8
+  measureContext.font = font
+  return measureContext.measureText(text).width
+}
+
 /** Extract the numeric value from a data point */
 function getValue(point: F0DataChartBarDataPoint): number {
   return typeof point === "number" ? point : point.value
@@ -64,6 +88,7 @@ function buildSeriesEntries(
   isLastSeries: boolean,
   labelColor: string,
   labelFontSize: number,
+  labelLayout?: echarts.BarSeriesOption["labelLayout"],
   valueFormatter?: (value: number) => string
 ): echarts.BarSeriesOption[] {
   const color = resolveColor(series, index)
@@ -130,6 +155,7 @@ function buildSeriesEntries(
         ? (params) => valueFormatter(Number(params.value))
         : undefined,
     },
+    labelLayout,
     emphasis: {
       itemStyle: {
         shadowBlur: 0,
@@ -248,6 +274,9 @@ export function useBarChartOptions(
     showLegend = true,
     showGrid = true,
     showLabels = false,
+    hideOverflowingLabels = true,
+    labelFitPadding,
+    hideAllLabelsOnOverflow = true,
     valueFormatter,
     categoryFormatter,
     labelFontSize,
@@ -270,6 +299,69 @@ export function useBarChartOptions(
     const effectiveShowLegend = responsive.showLegend && showLegend
     const { showCategoryAxis, showValueAxis } = responsive
 
+    // Fit-aware labels: hide a category's value labels when the widest value
+    // won't fit the bar. `labelLayout` runs after layout, so `params.rect` (the
+    // bar) is in real pixels. Only computed when active, so charts without it
+    // never touch the canvas measurer.
+    let labelLayout: echarts.BarSeriesOption["labelLayout"] | undefined
+    if (hideOverflowingLabels && showLabels) {
+      // Bar value labels render bold (see mainSeries.label), so measure at 700.
+      const labelFont = `700 ${resolvedLabelFontSize}px ${theme.textStyle.fontFamily}`
+      const columnWidestLabel = categories.map((_, categoryIndex) => {
+        let widest = 0
+        for (const s of series) {
+          const point = s.data[categoryIndex]
+          if (point === undefined) continue
+          const value = getValue(point)
+          const text = valueFormatter ? valueFormatter(value) : String(value)
+          widest = Math.max(widest, measureTextWidth(text, labelFont))
+        }
+        return widest
+      })
+      // Widest label anywhere in the chart — used when a horizontal overflow
+      // should hide every label, not just the offending category's.
+      const globalWidestLabel = columnWidestLabel.length
+        ? Math.max(...columnWidestLabel)
+        : 0
+
+      labelLayout = (params) => {
+        // Default padding depends on placement: stacked labels sit inside a
+        // segment (12px breathing room), outside labels sit in open space (0).
+        const fitPadding =
+          labelFitPadding ??
+          (stacked ? STACKED_LABEL_FIT_PADDING : OUTSIDE_LABEL_FIT_PADDING)
+        const pad = 2 * fitPadding
+        const box = params.rect // the bar / segment, in px
+        const own = params.labelRect // this label's own box, in px
+        // A label's height must always fit the bar/segment thickness.
+        const heightFits = own.height <= box.height - pad
+
+        let fits: boolean
+        if (isVertical) {
+          // Every bar in a column shares one width, so compare the column's
+          // widest label (or the chart-wide widest when escalating) → the
+          // column hides all-or-nothing rather than raggedly.
+          const widthReference = hideAllLabelsOnOverflow
+            ? globalWidestLabel
+            : (columnWidestLabel[params.dataIndex ?? 0] ?? 0)
+          const widthFits = widthReference <= box.width - pad
+          // Stacked labels sit inside the segment → also bounded by its height.
+          fits = stacked ? widthFits && heightFits : widthFits
+        } else if (stacked) {
+          // Horizontal stacked: each segment has its OWN width, so measure this
+          // label against its own segment (per-segment), not the whole row.
+          fits = own.width <= box.width - pad && heightFits
+        } else {
+          // Horizontal grouped/single: label sits beside the bar, bounded only
+          // by the row thickness.
+          fits = heightFits
+        }
+        // NOTE: labelLayout ignores `{ hide: true }` on echarts 6 — a label is
+        // dropped by returning `{ fontSize: 0 }`.
+        return fits ? {} : { fontSize: 0 }
+      }
+    }
+
     // Build all ECharts series (including target ghost bars)
     const echartsSeries = series.flatMap((s, i) =>
       buildSeriesEntries(
@@ -281,6 +373,7 @@ export function useBarChartOptions(
         i === series.length - 1,
         theme.colors.foregroundSecondary,
         resolvedLabelFontSize,
+        labelLayout,
         valueFormatter
       )
     )
@@ -377,6 +470,9 @@ export function useBarChartOptions(
     showLegend,
     showGrid,
     showLabels,
+    hideOverflowingLabels,
+    labelFitPadding,
+    hideAllLabelsOnOverflow,
     valueFormatter,
     categoryFormatter,
     labelFontSize,
