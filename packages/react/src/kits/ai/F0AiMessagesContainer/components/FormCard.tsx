@@ -5,7 +5,7 @@ import type { DetailsItemContent } from "@/experimental/Lists/DetailsItem"
 
 import { secondsToFields } from "@/components/F0DurationInput/utils"
 import { DetailsItemsList } from "@/experimental/Lists/DetailsItemsList"
-import { F0CanvasCard } from "@/sds/ai/canvas/F0CanvasCard"
+import { F0CanvasCard } from "@/kits/ai/canvas/F0CanvasCard"
 
 import { useAiChat } from "../../F0AiChat/providers/AiChatStateProvider"
 import { useFormCardValueFormatter } from "../../F0AiChat/providers/FormCardValueFormatterProvider"

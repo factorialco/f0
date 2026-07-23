@@ -28,10 +28,8 @@ const MAIN_ENTRY_PREFIXES = [
   "src/kits/",
   "src/patterns/",
   "src/layouts/",
-  "src/sds/surveys/",
   "src/sds/TimeLine/",
   "src/sds/UpsellingKit/",
-  "src/sds/ai/",
 ]
 
 /**
