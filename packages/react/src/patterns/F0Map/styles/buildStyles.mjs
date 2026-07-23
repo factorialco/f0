@@ -244,10 +244,14 @@ const flavor = (theme) => {
 // the reference look, so every flavor color gets +30% saturation.
 const saturatedFlavor = (theme) => {
   const f = flavor(theme)
-  // Lift the palette with a vibrance curve (muted colours gain the most life,
-  // vivid ones are protected) instead of a flat +30% saturation. The warm
-  // urban / arid fabric is left untouched so it stays a neutral whitish tan
-  // rather than a boosted yellow; `path` keeps its soft mustard.
+  // Lift only the *nature* colours (water, park, wood, land…) with a vibrance
+  // curve - muted colours gain the most life, vivid ones are protected. The
+  // warm urban / arid fabric is left untouched so it stays a neutral whitish
+  // tan rather than a boosted yellow; `path` keeps its soft mustard; and the
+  // neutral ramp roles (labels, roads, buildings, boundaries) are excluded
+  // entirely - they must stay neutral. Boosting them amplified the faint blue
+  // the dark neutral ramp carries (it composites over the navy `grey.100`),
+  // which is what turned dark town / state labels a saturated blue.
   const KEEP_MUTED = new Set([
     "residential",
     "commercial",
@@ -257,6 +261,16 @@ const saturatedFlavor = (theme) => {
     "farmland",
     "rock",
     "path",
+    "labelText",
+    "labelSecondary",
+    "labelHalo",
+    "building",
+    "buildingLine",
+    "roadMajor",
+    "roadMinor",
+    "roadCasing",
+    "boundary",
+    "industrial",
   ])
   const out = Object.fromEntries(
     Object.entries(f).map(([k, v]) => [
@@ -267,6 +281,47 @@ const saturatedFlavor = (theme) => {
   // Grassy parks (e.g. Montjuïc) still read a touch too vivid after the lift;
   // ease that green back ~25%. Forest (`wood`) keeps its lifted saturation.
   out.park = saturate(out.park, 0.75)
+
+  // Dark mode, modelled on dark basemaps (Carto Dark Matter, Google / Mapbox
+  // dark): every land surface stays dark and nearly uniform - terrain type is
+  // barely distinguishable - so the map doesn't read as patches of light grey.
+  // Contrast lives on the linework (roads, boundaries) and labels, which
+  // already ride the light end of the neutral ramp and are left untouched.
+  // Basemap-only; markers, routes and arcs keep their palette hues.
+  if (theme === "dark") {
+    // All area fills collapse onto one dark step just above the background.
+    const fill = neutral("dark", 5)
+    for (const k of [
+      "land",
+      "worldLand",
+      "park",
+      "wood",
+      "residential",
+      "commercial",
+      "school",
+      "industrial",
+      "sand",
+      "farmland",
+      "rock",
+      "hospital",
+    ]) {
+      out[k] = fill
+    }
+    // Buildings a touch lighter so footprints still separate from the land.
+    out.building = neutral("dark", 10)
+    out.buildingLine = neutral("dark", 20)
+    out.glacier = neutral("dark", 10)
+    // Paths lose the mustard - a mid-grey line reads without colour.
+    out.path = neutral("dark", 20)
+    // Secondary place labels (towns, villages, states) use the exact
+    // foreground-secondary token (neutral-solid-40) so they match the app's
+    // text-secondary rather than the lighter map step.
+    out.labelSecondary = neutral("dark", "solid40")
+    // Water: not blue in dark - the page base lifted by a whisper of white
+    // (a very light overlay), so the sea reads as a subtly lighter surface.
+    out.water = tint("dark", "white.100", 0.06, neutral("dark", 0))
+    out.waterLabel = saturate(hex(rgbOf("malibu.50")), 0.6)
+  }
   return out
 }
 
