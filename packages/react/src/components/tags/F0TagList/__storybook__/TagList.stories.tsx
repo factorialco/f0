@@ -5,6 +5,20 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { F0TagList, TagType } from "../"
 import { mockTags } from "./mockData"
 
+const longLabelDotTags = [
+  { text: "Strategic Workforce Planning", color: "viridian" as const },
+  {
+    text: "Cross-functional Stakeholder Management",
+    color: "malibu" as const,
+  },
+  { text: "Advanced Data Analysis & Reporting", color: "yellow" as const },
+  {
+    text: "Ruggedized Industrial Handheld Barcode Scanner (Model XR-9000)",
+    color: "purple" as const,
+  },
+  { text: "Change Management", color: "lilac" as const },
+]
+
 /**
  * The TagList component displays a collection of tags of a single type.
  *
@@ -43,6 +57,22 @@ export const WithRemainingCount: Story = {
     type: "dot",
     tags: mockTags.dot.slice(0, 2),
     remainingCount: 10,
+  },
+}
+
+/**
+ * Hover the `+N` counter to open the overflow popover. Each hidden tag's label is
+ * shown in full and the popover adapts its width to the longest label, without a
+ * horizontal scrollbar. Very long labels are capped (`max-w-72`) and ellipsized.
+ *
+ * This is the scenario used by the Job Catalog nested table (Competencies / Devices
+ * columns), where long names must stay fully readable in the popover.
+ */
+export const OverflowPopoverLongLabels: Story = {
+  args: {
+    type: "dot",
+    max: 1,
+    tags: longLabelDotTags,
   },
 }
 
