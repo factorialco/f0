@@ -48,9 +48,16 @@ export const Three: Story = {
   args: { count: 3, members: MEMBERS.slice(0, 3) },
 }
 
-/** Four: three heads plus a "+1" counter in the bottom-right slot. */
-export const WithCounter: Story = {
+/** Four: all four heads in the 2x2 grid - no counter (a "+1" would be
+ * pointless when the face itself fits). */
+export const Four: Story = {
   args: { count: 4, members: MEMBERS.slice(0, 4) },
+}
+
+/** Five: the first count that overflows - three heads plus a "+2" counter in
+ * the bottom-right slot. */
+export const WithCounter: Story = {
+  args: { count: 5, members: MEMBERS.slice(0, 5) },
 }
 
 /** Bigger cluster: three heads plus the running "+N" counter. */

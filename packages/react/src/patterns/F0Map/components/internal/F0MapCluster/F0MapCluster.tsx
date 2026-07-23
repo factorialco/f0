@@ -6,9 +6,11 @@ import { cn } from "@/lib/utils"
 
 import { F0MapMarker, type F0MapMarkerVariantProps } from "../../F0MapMarker"
 
-// Show at most this many member heads; anything beyond collapses into the
-// trailing "+N" counter (f0's avatar-list overflow style).
-const MAX_AVATARS = 3
+// The 2x2 grid fits four items. Up to four members every head is shown (a
+// "+1" instead of the fourth face would be pointless); from five on, three
+// heads plus a "+N" counter in the last slot (f0's avatar-list overflow style).
+const GRID_CAPACITY = 4
+const MAX_AVATARS_WITH_COUNTER = 3
 // Hover pushes the items apart and grows them, along the easing curve.
 const HOVER_SPREAD = 1.3
 const HOVER_SCALE = 1.08
@@ -41,7 +43,10 @@ const LAYOUTS: Record<number, ReadonlyArray<readonly [number, number]>> = {
 export interface F0MapClusterProps extends WithDataTestIdProps {
   /** Total number of points in the cluster. */
   count: number
-  /** The members' marker configs; up to three heads are shown, then a `+N`. */
+  /**
+   * The members' marker configs. Up to four heads are shown; from five
+   * members on, three heads plus a `+N` counter.
+   */
   members: F0MapMarkerVariantProps[]
   onClick?: () => void
   ariaLabel?: string
@@ -56,7 +61,10 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
   ) {
     const i18n = useI18n()
     const [active, setActive] = useState(false)
-    const heads = members.slice(0, MAX_AVATARS)
+    const heads = members.slice(
+      0,
+      count <= GRID_CAPACITY ? GRID_CAPACITY : MAX_AVATARS_WITH_COUNTER
+    )
     const overflow = Math.max(0, count - heads.length)
     const hasCounter = overflow > 0
     const overflowLabel = overflow > 99 ? "+99" : `+${overflow}`
@@ -130,11 +138,12 @@ const F0MapClusterBase = forwardRef<HTMLDivElement, F0MapClusterProps>(
                 <span
                   className={cn(
                     "absolute left-0 top-0 flex h-6 min-w-6 items-center justify-center overflow-hidden rounded-full px-1.5",
+                    "border border-solid border-f1-border-secondary",
                     // White-90 base with the translucent hover layer on top.
                     "text-f1-foreground-secondary text-sm font-medium leading-none"
                   )}
                   style={{
-                    zIndex: MAX_AVATARS,
+                    zIndex: MAX_AVATARS_WITH_COUNTER,
                     backgroundColor: "hsl(var(--white-90))",
                     transform: `translate(${cx * spread}px, ${cy * spread}px) translate(-50%, -50%) scale(${scale})`,
                     transition: `transform 240ms ${EASE}`,
