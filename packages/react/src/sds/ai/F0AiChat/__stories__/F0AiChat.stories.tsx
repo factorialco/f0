@@ -106,7 +106,19 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return <div className="flex h-[700px] flex-1">{children}</div>
+  // The chat shell has no intrinsic size, so the story frame must supply one:
+  //  - `w-[720px]` (≈ MAX_CHAT_WIDTH): the meta decorator centres the story
+  //    (`layout: "centered"`), so its container shrink-wraps to content. Without
+  //    a fixed width the whole tree collapses to the chat border (~4px) — an
+  //    empty sliver — in both the Canvas and the Docs page.
+  //  - `[&>div]:flex-1`: SidebarWindow animates its width from 0 to "100%" on
+  //    open. That entrance tween never resolves the percentage in Storybook's
+  //    static render, leaving an inline `width: 0` behind. Making the chat a
+  //    growing flex item (flex-basis: 0) ignores that inline width and fills
+  //    the 720px frame.
+  return (
+    <div className="flex h-[700px] w-[720px] [&>div]:flex-1">{children}</div>
+  )
 }
 
 const meta = {
