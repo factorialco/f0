@@ -142,6 +142,40 @@ describe("CategoryBarChartCell", () => {
     })
   })
 
+  it("renders a skeleton instead of the dash while loading", () => {
+    const args: CategoryBarChartCellValue = { dataPoints: [], loading: true }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    expect(screen.getByTestId("skeleton")).toBeInTheDocument()
+    expect(screen.queryByText("–")).not.toBeInTheDocument()
+    expect(
+      container.querySelector('[data-cell-type="categoryBarChart"]')
+    ).toHaveAttribute("aria-busy", "true")
+  })
+
+  it("keeps the skeleton the same size as the loaded bar (h-2 w-full)", () => {
+    const args: CategoryBarChartCellValue = { dataPoints: [], loading: true }
+
+    render(CategoryBarChartCell(args, defaultMeta))
+
+    expect(screen.getByTestId("skeleton")).toHaveClass("h-2", "w-full")
+  })
+
+  it("prioritises loading over available data points", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [{ name: "Office", value: 15 }],
+      loading: true,
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    expect(screen.getByTestId("skeleton")).toBeInTheDocument()
+    expect(
+      container.querySelector('[role="img"][aria-label*="%"]')
+    ).not.toBeInTheDocument()
+  })
+
   it("handles duplicate names with unique keys", () => {
     const args: CategoryBarChartCellValue = {
       dataPoints: [
