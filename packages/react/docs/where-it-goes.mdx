@@ -1,149 +1,66 @@
 import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
-import { Cards, Table, Steps } from "./_lifecycle-visuals"
+import { Callout } from "./_lifecycle-visuals"
 
-<Meta title="Lifecycle/Where it goes" />
+<Meta title="About F0/Where it goes" />
 
 # Where it goes
 
-> Canonical placement rules for any new artifact in F0. If you are adding a component, pattern, layout, hook, primitive, kit or domain-specific component — this page tells you where it goes and why.
+Placement in F0 comes down to **one decision**: which of the three homes an artifact belongs to. Everything else — how it's named, tagged, and graduated — is the same across all three.
 
-This is the **single source of truth** for placement decisions. AGENTS files link to this page rather than duplicating the rules.
+## Which home?
 
-<Unstyled>
-  <Cards items={[
-    { name: "Core", color: "#4f8fe0", desc: "Generic building blocks any product uses. Built & owned by Foundations.", meta: "components/ · patterns/ · ui/ · layouts/ · hooks/" },
-    { name: "Kit", color: "#9b7ff0", desc: "A set of components for one functional area. Imports Core, never another kit.", meta: "kits/<area>/" },
-    { name: "Domain specific", color: "#d99a3c", desc: "Owned by one domain's team, reused only within it. Same F0 tokens — it's ownership, not looks.", meta: "sds/<area>/" },
-  ]} />
-</Unstyled>
+Adding something **new**? Ask, in order:
 
----
+1. **Specific to one domain, owned by that team?** → **Domain specific** — `src/sds/<area>/`
+2. **A set of pieces used together for one job, reusable across products?** → **Kit** — `src/kits/<kit>/`
+3. **Generic, useful in two or more product areas?** → **Core** — `src/components/` (or `patterns/`, `ui/`, `layouts/`, `hooks/`)
+4. **None of these?** → it's not F0 — build it in your product.
 
-## The routing table
-
-<Unstyled>
-  <Table
-    head={["You have…", "Born in (experimental)", "Promotes to", "Naming", "Exported", "Initial tag"]}
-    rows={[
-      ["A new component (atomic, generic)", "src/experimental/components/F0X/", "src/components/F0X/", "F0X", "yes", "experimental"],
-      ["A new composition of public F0 components", "src/experimental/patterns/F0X/", "src/patterns/F0X/", "F0X", "yes", "experimental"],
-      ["A new page-level layout", "src/experimental/layouts/F0X/", "src/layouts/F0X/", "F0X", "yes", "experimental"],
-      ["A new generic hook", "src/experimental/hooks/useX/", "src/hooks/useX.ts", "useX", "yes", "experimental"],
-      ["Shared chrome used by ≥2 public F0 components", "src/experimental/_primitives/F0X/", "src/components/_primitives/F0X/", "F0X", "no", "experimental"],
-      ["A grouping of components for a general functional area", "src/experimental/kits/<area>/", "src/kits/<area>/", "F0X", "yes", "experimental"],
-      ["A component specific to one domain, owned by that team", "src/sds/<area>/", "stays in src/sds/<area>/", "F0X", "yes", "experimental"],
-      ["A direct wrapper over a third-party primitive", "src/ui/x.tsx (no lifecycle)", "stays in src/ui/", "lowercase", "no", "internal"],
-      ["A legacy One* component being phased out", "src/deprecated/<Name>/ when touched", "n/a", "as is", "yes (@deprecated)", "deprecated"],
-    ]}
-  />
-</Unstyled>
-
-Rules that apply to every row:
-
-- Core/Kit artifacts are **born in `experimental/`** — there is no "this looks ready, I'll put it straight into `components/`". **Domain specific** components are the exception: they're born in their `sds/<area>/` folder, tagged `experimental`.
-- Only the **Foundations team** can promote a Core/Kit artifact from `experimental/` to a final location. Domain specific components are promoted **in place** (tag change only) and stay owned by their domain team.
-- Promotion (Core/Kit) = `git mv` + tag change + remove `experimentalComponent()` wrapper. Promotion (Domain specific) = tag change + remove wrapper, no move.
+**Extending** something that already exists stays **where that component already lives** — you don't pick a new home.
 
 ---
 
-## What is a **Primitive**?
+## Core
 
-A DS primitive is shared chrome reused by **two or more public F0 components**.
+_The shared building blocks every product uses._
 
-- Lives in `src/components/_primitives/F0X/`.
-- Has a Storybook page under `Components/Primitives/<Name>` so DS contributors can find and reuse it.
-- Is **not** re-exported from `src/f0.ts` — only reachable via `@/components/_primitives/F0X`.
-- Carries JSDoc `@internal` with the list of public consumers.
-- MDX opens with: *"Internal primitive. Part of the F0 design system, not part of the public API."*
-- Follows the same maturity model as any other component (`experimental` / `stable` / `deprecated`).
+Generic components and patterns — buttons, inputs, modals, forms. **Built and owned by Foundations.**
 
-**Creation rule:** only add a primitive when used by **≥2 public consumers** and its chrome is non-trivial. Otherwise inline the styles into the single consumer.
+- **When:** the thing you need is generic and useful in **two or more** product areas.
+- **Lives in:** `src/components/`, `src/patterns/`, `src/ui/`, `src/layouts/`, `src/hooks/`
+- Only Foundations marks a component **stable**; stable means the API is settled. You can add a prop or variant to a stable one (it gets reviewed first). Docs and tests are always required.
+- **Examples:** `F0Button`, `F0Checkbox`, `F0DatePicker`, `F0Alert` · patterns `F0Form`, `F0WizardForm`, `F0Modal`
 
-**Naming exception:** primitives use the `F0` prefix even though they are not public API. The prefix signals "owned by F0", regardless of export status. What marks them as primitives is their location, their JSDoc `@internal`, and the MDX callout — not the name.
+<Callout title="Patterns are part of Core">
+A pattern is several Core pieces combined into one reusable whole — like a form or a modal. It's still Core, with the same rules. If teams keep rebuilding the same combination, it can become a Core pattern. (`F0Form`, `F0WizardForm`, `F0Modal`, `ApplicationFrame`, `Header`, `Menu`.)
+</Callout>
 
----
+## Kits
 
-## What is a **Kit**?
+_A ready-made set of pieces for one job._
 
-A kit is a **grouping of components for a general functional area** (charts, social, dates, files…). It uses the core F0 tokens — no own visual identity.
+A handful of components that go together for one purpose — like charts or chat — shipped as a **single import**.
 
-**Admission criteria** — **all** must be true:
+- **When:** several pieces are always used together, so they're easy to find and Claude knows they belong as a set.
+- **Lives in:** `src/kits/<kit>/` · **Owner:** Foundations, open to contributions.
+- A Kit can use Core. **🔴 A Kit can't use another Kit** — that's how circular dependencies start.
+- **Examples:** Charts (`BarChart`, `LineChart`, `PieChart`), Reactions.
 
-1. Uses the core F0 tokens (no own visual identity).
-2. Reusable by **≥2 different products** (not only by the team that proposed it).
-3. Groups components around a **general functional domain**, not around a single product.
-4. A kit **cannot contain new atomic components**. If a kit needs a new atomic component, that component goes to `components/` (generic). The kit only composes / groups existing components.
+## Domain specific
 
-If an entry does not meet the criteria, it belongs in `components/`, in `sds/<name>/`, or in the product monolith.
+_Components that only make sense in one product area._
 
----
+Pieces tied to a single domain — clocking in, surveys, payroll. **The domain's own team builds and maintains them.**
 
-## What is a **Domain specific** component?
+- **When:** the component only matters inside one domain and other areas won't reuse it.
+- **Lives in:** `src/sds/<area>/` · **Owner:** the domain's team — not Foundations.
+- Uses the same F0 tokens (no separate visual identity), shipped as its own import, and it stays in its domain — no need to push it into Core.
+- **Examples:** Time tracking (`ClockInControls`, `ClockInGraph`), Surveys (`BaseQuestion`, `SurveyAnsweringForm`).
 
-A Domain specific component is a component that **only makes sense inside one product domain** (Time tracking, Surveys, Payroll, Upselling…) and is **owned and maintained by that domain's team**. It lives next to core F0 in `src/sds/<area>/`, is visible to everyone, but is not Foundations-owned.
-
-> A Domain specific component uses the **core F0 tokens** like everything else — what makes it Domain specific is **who owns it and how narrowly it's reused**, not how it looks.
-
-**Admission criteria** — **all** must be true:
-
-1. It's tied to **one domain** — other product areas won't reuse it.
-2. It has an **owner team** that builds and maintains it (not Foundations).
-3. It's a real, reusable component **within that domain's surfaces** (not a one-off assembly for a single screen — that stays in the product).
-
-It's kept out of core F0 so the shared catalogue doesn't fill with domain noise. If a Domain specific composition ends up being rebuilt by several domains, that's the signal to promote it **up** into a Core pattern.
-
-Today's examples: `sds/home/` (Time tracking — `ClockInControls`), surveys (`…Question`), `sds/upselling/` (Growth), `sds/one/` (Factorial One).
-
-If an entry doesn't meet the criteria, it belongs in `components/`, in `kits/<area>/`, or in the product monolith.
+> Domain-owned is not a shortcut: creating a `sds/` area is still reviewed (Foundations confirms it's genuinely systemic and belongs in F0, not the product), built to the [Definition of Done](/docs/about-f0-definition-of-done--documentation) and documented. The difference is only **ownership** — the creating team keeps it.
 
 ---
 
-## Domain specific vs Kit vs Core — quick decision
+## How it becomes stable
 
-| Question                                                                        | If yes…               | If no…        |
-| ------------------------------------------------------------------------------- | --------------------- | ------------- |
-| Is it specific to one domain and owned by that team?                            | **Domain specific**   | keep going    |
-| Does it group components for a general functional area (charts, social, AI…)?   | **Kit** candidate     | not a kit     |
-| Is it generic and reused across ≥2 domains?                                     | **Core**              | not in F0     |
-
-If none fit — the artifact doesn't belong in F0. Put it in the product monolith.
-
----
-
-## Gatekeeping
-
-To keep the system honest:
-
-- **Foundations team is the only approver** for new entries under `sds/` or `kits/`. An experimental cannot promote into them autonomously.
-- **You justify it at alignment**: *"why can't this live in your product?"* is asked in `#f0-support` before anything lands — no justification, no contribution.
-- **Inventories** (`src/sds/INVENTORY.md`, `src/kits/INVENTORY.md`, `src/ui/INVENTORY.md`, `src/experimental/INVENTORY.md`) record every entry's classification. Anything `MISCATEGORIZED` is a candidate for cleanup.
-
----
-
-## Naming
-
-- Public components: `F0<Name>` (e.g., `F0Button`).
-- Primitives: `F0<Name>` (even though not exported — see Primitives section above).
-- Hooks: `use<Name>`.
-- UI Wrappers (`src/ui/`): lowercase or as inherited from the wrapped library.
-- Legacy `F1` / `One` / unprefixed names: rename when touched, unless the rename would break an in-flight stabilization PR (defer to promotion time).
-- Subcomponents and private internals (inside a component folder): naming is free.
-
----
-
-## How a component is born
-
-<Unstyled>
-  <Steps items={[
-    "You have an idea or a need.",
-    "Find this page. Pick the row that matches.",
-    "Create the folder under src/experimental/<bucket>/.",
-    "Tag the story experimental.",
-    "Wrap the export with experimentalComponent().",
-    "Build, test, document.",
-    "Wait for real-world adoption.",
-    "Foundations promotes: git mv, tag → stable, drop wrapper.",
-  ]} />
-</Unstyled>
-
-If a step does not apply to your case, you are probably in the wrong row. Reread the table.
+New Core & Kit are born in `experimental/`; Domain specific is born in `src/sds/`. Both turn **stable** once they meet the [Definition of Done](/docs/about-f0-definition-of-done--documentation) and are adopted — see [Components Maturity](/docs/about-f0-components-maturity--documentation).

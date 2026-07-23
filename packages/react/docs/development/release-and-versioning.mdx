@@ -1,7 +1,7 @@
 import { Meta } from "@storybook/addon-docs/blocks"
 import { Callout } from "../_lifecycle-visuals"
 
-<Meta title="Lifecycle/Release and Versioning" />
+<Meta title="About F0/Release and Versioning" />
 
 # Versioning
 
@@ -13,7 +13,7 @@ specification with automatic version bumping based in
 
 ### Stable versions
 
-When a PR is merged into the `main` branch, the CI will automatically will check
+When a PR is merged into the `main` branch, the CI will automatically check
 the commit messages, bump the version, update the changelog file, and create a
 release in github with the new version.
 
@@ -124,7 +124,7 @@ Moving a component from experimental/ to its stable home is handled by the f0-ex
 Most "changes" don't have to break anything:
 
 - **Add, don't replace** — introduce the new prop / variant / token alongside the old one.
-- **Deprecate the old surface** with the three JSDoc tags (policy below). Consumers get an IDE warning and a migration link, but nothing breaks yet. If the change is a component moving path, the [`f0-experimental-component-migration`](https://github.com/factorialco/f0/blob/main/packages/react/.skills/f0-experimental-component-migration/SKILL.md) skill does exactly this — deprecated re-exports that keep the old import working.
+- **Deprecate the old surface** with the three JSDoc tags (policy below). Consumers get an IDE warning and a migration link, but nothing breaks yet. If the change is a component moving path, the [`f0-experimental-component-migration`](https://github.com/factorialco/f0/blob/main/vendor/skills/f0-experimental-component-migration/SKILL.md) skill does exactly this — deprecated re-exports that keep the old import working.
 - Ship it as a normal `feat:` (minor bump).
 
 A hard break is the exception, not the default. Reach for it only when additive-plus-deprecation genuinely can't express the change.
@@ -190,4 +190,4 @@ tags: ["autodocs", "deprecated"]
 
 F0 currently has 60+ accumulated `@deprecated` markers with no removal policy, because the project never bumps the major version. This policy commits Foundations to either bump the major version on schedule or extend `@removeIn` explicitly — never silent perpetual deprecation.
 
-For the full lifecycle (proposal → stable → deprecated → removed), see the [Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).
+For the full lifecycle (proposal → stable → deprecated → removed), see the [Definition of Done](/docs/about-f0-definition-of-done--documentation).

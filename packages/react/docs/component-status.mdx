@@ -8,7 +8,7 @@ import { ComponentStatusTable } from "./components/ComponentStatusTable"
 
 Overview of all F0 components, their API stability, and documentation coverage.
 
-For the definition of each status level, see the [Maturity Model](/?path=/docs/lifecycle-components-maturity--docs) page.
+For the definition of each status level, see the [Maturity Model](/docs/about-f0-components-maturity--documentation) page.
 
 > **Looking for a richer view?** An expanded dashboard with adoption, age, test coverage, and promotion-readiness signals may be added in the future. For now, this table is generated nightly from the codebase.
 
@@ -28,7 +28,7 @@ For the definition of each status level, see the [Maturity Model](/?path=/docs/l
 | **Unit Tests** | Whether a `__tests__/` folder or `.test.tsx` file exists near the component                                                                            |
 | **MDX Docs**   | Whether an `.mdx` documentation file exists alongside the stories                                                                                      |
 
-> The **Internal** badge in the API Status column refers to components in `src/ui/` (Radix wrappers used only inside F0). It is **not** a maturity level — it's a folder convention. The three maturity levels are **Experimental**, **Stable**, and **Deprecated** (see [Component Maturity](/?path=/docs/lifecycle-components-maturity--docs)).
+> The **Internal** badge in the API Status column refers to components in `src/ui/` (Radix wrappers used only inside F0). It is **not** a maturity level — it's a folder convention. The three maturity levels are **Experimental**, **Stable**, and **Deprecated** (see [Component Maturity](/docs/about-f0-components-maturity--documentation)).
 
 ## How to update a component's status
 
@@ -54,7 +54,7 @@ The **effective status** is what matters: a component counts as **stable** only
 when it is both tagged `stable` **and** clears every item below. Anything else —
 untagged, tagged stable but below the bar, or meeting the bar without the tag —
 is treated as **experimental**. This mirrors the
-[Lifecycle Definition of Done](/?path=/docs/lifecycle-definition-of-done--docs).
+[Lifecycle Definition of Done](/docs/about-f0-definition-of-done--documentation).
 
 | Requirement                | How it's checked                                                     |
 | -------------------------- | ------------------------------------------------------------------- |

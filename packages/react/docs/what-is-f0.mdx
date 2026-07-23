@@ -1,0 +1,58 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { Grid } from "./_lifecycle-visuals"
+
+<Meta title="About F0/What is F0" />
+
+# What is F0
+
+F0 is Factorial's **design system** — a living ecosystem, not just a component library.
+
+## What it is
+
+- A **shared component library** (`@factorialco/f0-react`).
+- A set of **design rules and tokens** — colors, spacing, typography.
+- A **contribution lifecycle** anyone in Factorial can use.
+- **Owned by the Foundations team, built with the whole company.**
+
+## Why it helps
+
+- **One source of truth for UI** — no more five different buttons.
+- **Accessibility built in**, so every product gets it.
+- **Faster shipping** — compose features, don't rebuild primitives.
+- **A predictable look** across the whole Factorial product.
+
+## What it is _not_
+
+- **Not a product-specific UI kit** — if only your product uses it, it doesn't belong here.
+- **Not a sandbox to iterate styles** — once stable, a component has a contract.
+- **Not a Figma library** — the repo is the source of truth.
+- **Not owned by Foundations alone** — anyone can propose and contribute.
+
+## Where F0 lives
+
+A few surfaces make up F0 — and the **repo** is the source of truth everything else reads from:
+
+- **Claude (with the F0 skills)** — your main entry point. Run Claude with the F0 skills loaded and it reads the catalogue and rules and builds for you.
+- **Storybook** — the visual catalogue of every component, with live examples and when-to-use docs. → [f0.factorial.dev ↗](https://f0.factorial.dev)
+- **F0 Compose** — a canvas that renders the composition an agent builds, with real F0 pieces (work in progress). → [factorial-composer ↗](https://github.com/factorialco/factorial-composer)
+- **The repo (`f0`)** — the **source of truth**: components, rules, skills and docs. Everything else is a view over it. → [GitHub ↗](https://github.com/factorialco/f0)
+- **#f0-support (Slack)** — where every request starts (contributions, bugs, promotions): you raise a message and Foundations picks it up. → [Open #f0-support ↗](https://factorialteam.slack.com/archives/C082ZNKS403)
+- **Figma library** — an optional sandbox to sketch variants (a Composer prototype works too). Not the source of truth — the code is. → [F0 library in Figma ↗](https://www.figma.com/files/1209519141454845458/team/1359486354120896816)
+
+## Principles
+
+Five principles guide how we build and use F0 across every Factorial product.
+
+<Unstyled>
+  <Grid items={[
+    { label: "1 · Product first", text: "Prioritize the overall product experience over any single feature. Every decision weighs its impact across the platform; new components are evaluated against existing workflows before they're added." },
+    { label: "2 · Pragmatism & systematization", text: "Flexible, efficient solutions to real-world problems. Patterns adapt across many use cases, so teams work faster with components they can adjust." },
+    { label: "3 · Purposeful consistency", text: "Meaningful consistency in visual design and interaction. Users build intuition, cognitive load drops, and new components follow established models." },
+    { label: "4 · Accessibility by default", text: "WCAG built in from the start, not bolted on — screen readers, keyboard navigation and proper contrast, across devices." },
+    { label: "5 · Efficient composition", text: "Components work well together: complex interfaces built from simple, predictable blocks with consistent APIs." },
+  ]} />
+</Unstyled>
+
+---
+
+Built and maintained by **Foundations**, with contributions from every product team. For how anything enters and moves through F0, see [How to contribute](/docs/about-f0-how-to-contribute--documentation).

@@ -184,15 +184,17 @@ const preview: Preview = {
       storySort: {
         method: "alphabetical",
         order: [
-          // Get started (lifecycle docs are ordered by PR #4253)
+          // Get started: Introduction (how to consume) → About F0 (the definition) → Using F0
           "Introduction",
-          "Lifecycle",
+          "About F0",
           [
+            "What is F0",
             "How to contribute",
-            "Definition of done",
-            "Components maturity",
-            "Design review",
-            "Release and versioning",
+            "Where it goes",
+            "Definition of Done",
+            "Components Maturity",
+            "Design Review",
+            "Release and Versioning",
           ],
           "AI configuration",
           "Changelog",
