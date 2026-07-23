@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.47.3](https://github.com/factorialco/f0/compare/f0-react-v4.47.2...f0-react-v4.47.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** auto-recover from stale chunk imports after redeploy ([#4796](https://github.com/factorialco/f0/issues/4796)) ([566da64](https://github.com/factorialco/f0/commit/566da647a7229240e5b8d438182316b6ed8adbfd))
+
 ## [4.47.2](https://github.com/factorialco/f0/compare/f0-react-v4.47.1...f0-react-v4.47.2) (2026-07-22)
 
 
