@@ -8,6 +8,7 @@ import {
 } from "axe-playwright"
 import type Reporter from "axe-playwright/dist/types"
 import { appendFileSync, readFileSync } from "fs"
+import { join } from "path"
 
 // Story files grandfathered to skip axe while their violations are burned
 // down (Path to AA). Maps file → number of allowed skip call-sites; counts
@@ -26,8 +27,72 @@ const a11ySkipAllowlist: Set<string> = new Set(
 
 const A11Y_TEST_MODES = ["error", "todo", "warning"] as const
 
+// Machine-readable a11y record consumed by the PR-comment step
+// (.scripts/check-a11y-comment.ts). One JSONL line per violating story so the
+// workflow can report the issues in the stories a PR changed. Written to the
+// package root (cwd is packages/react under `pnpm --filter … test-storybook`,
+// matching where the check script reads it) — an absolute path, since the
+// test-runner relocates import.meta.url when it transforms this module.
+const A11Y_ARTIFACT = join(process.cwd(), "a11y-violations.jsonl")
+
+/**
+ * Map an axe rule's tags to its WCAG success criterion, level and version.
+ * Inlined (not shared with A11yRow's copy) because the test-runner's loader
+ * doesn't resolve sibling .ts imports cleanly — dedupe once both land.
+ */
+function wcagFromTags(tags: string[]): {
+  sc: string | null
+  level: string
+  version: string
+} {
+  let sc: string | null = null
+  for (const t of tags) {
+    const m = /^wcag(\d)(\d)(\d{1,2})$/.exec(t)
+    if (m) {
+      sc = `${m[1]}.${m[2]}.${m[3]}`
+      break
+    }
+  }
+  const level = tags.some((t) => /^wcag2\d?aa$/.test(t)) ? "AA" : "A"
+  const version =
+    tags.includes("wcag22a") || tags.includes("wcag22aa")
+      ? "2.2"
+      : tags.includes("wcag21a") || tags.includes("wcag21aa")
+        ? "2.1"
+        : "2.0"
+  return { sc, level, version }
+}
+
 // Infer the violations type from getViolations return type
 type Violations = Awaited<ReturnType<typeof getViolations>>
+
+/**
+ * Append one compact JSONL line describing a story's violations. Best-effort:
+ * never let artifact writing break a test. Kept small (rule id/impact/SC +
+ * node counts, no node HTML) so each append stays within O_APPEND atomicity.
+ */
+function recordA11yViolations(
+  story: { id: string; title: string; name: string; file: string },
+  mode: string,
+  violations: Violations
+): void {
+  try {
+    const line =
+      JSON.stringify({
+        ...story,
+        mode,
+        rules: violations.map((v) => ({
+          id: v.id,
+          impact: v.impact ?? null,
+          nodes: v.nodes.length,
+          ...wcagFromTags(v.tags),
+        })),
+      }) + "\n"
+    appendFileSync(A11Y_ARTIFACT, line)
+  } catch {
+    // ignore — the comment is a nice-to-have, not worth failing CI over
+  }
+}
 
 /**
  * Custom reporter that only logs violations, suppressing success messages
@@ -138,6 +203,19 @@ const config: TestRunnerConfig = {
       if (violations.length > 0) {
         const reporter = new SilentReporter()
         await reporter.report(violations)
+
+        // Record for the PR-comment step — both todo debt and enforced
+        // failures, written before the error-mode throw below.
+        recordA11yViolations(
+          {
+            id: context.id,
+            title: context.title,
+            name: context.name,
+            file: storyFile,
+          },
+          testMode,
+          violations
+        )
 
         if (testMode === "error") {
           // Throw a simple, single-line error for error mode

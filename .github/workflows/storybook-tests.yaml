@@ -22,8 +22,14 @@ jobs:
       !contains(github.event.pull_request.labels.*.name, 'autorelease')
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so the a11y comment can diff changed files vs main.
+          fetch-depth: 0
       - uses: ./.github/actions/setup-node-pnpm
       - name: Get Playwright version
         id: playwright-version
@@ -48,6 +54,7 @@ jobs:
           pnpm --filter @factorialco/f0-react run build-storybook --quiet
 
       - name: Serve Storybook and run tests
+        id: run_tests
         env:
           DEBUG: vite
           VITEST_LOG_LEVEL: debug
@@ -55,3 +62,40 @@ jobs:
           pnpx concurrently -k -s first -n "SB,TEST" -c "magenta,blue" \
              "pnpx http-server packages/react/storybook-static --port 6006 --silent" \
              "pnpx wait-on http://localhost:6006 --timeout 60000 && sleep 2 && pnpm --filter @factorialco/f0-react test-storybook"
+
+      # Turn the a11y violations captured during the run into a PR comment,
+      # scoped to the stories/components this PR changed. Runs whenever the
+      # tests actually executed (pass or fail — enforced failures still count),
+      # but not when Storybook failed to build (run_tests skipped).
+      - name: Build a11y comment for changed components
+        id: a11y_comment
+        if: >
+          always() && steps.run_tests.outcome != 'skipped' &&
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        run: |
+          git fetch origin main --quiet || true
+          pnpm --filter @factorialco/f0-react exec tsx .scripts/check-a11y-comment.ts \
+            --compare-commit origin/main > /tmp/a11y-output.txt 2>&1 || true
+          LAST_JSON_LINE=$(grep -n '^{' /tmp/a11y-output.txt | tail -n 1 | cut -d: -f1)
+          if [ -n "$LAST_JSON_LINE" ]; then
+            sed -n "${LAST_JSON_LINE},\$p" /tmp/a11y-output.txt > /tmp/a11y-data.json
+            jq -r '.commentMarkdown // ""' /tmp/a11y-data.json > /tmp/a11y-comment.md || true
+            {
+              echo "body<<A11Y_COMMENT_EOF"
+              cat /tmp/a11y-comment.md
+              echo "A11Y_COMMENT_EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
+      - name: Post a11y PR comment
+        if: >
+          always() && steps.a11y_comment.outputs.body != '' &&
+          github.event_name == 'pull_request' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
+        uses: ./.github/actions/add-or-update-pr-comment
+        with:
+          comment-type: a11y_axe
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          comment-body: ${{ steps.a11y_comment.outputs.body }}
