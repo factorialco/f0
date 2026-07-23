@@ -17,7 +17,6 @@ import {
 import { useZoomAtLeast } from "../hooks/useZoomAtLeast"
 import type { F0MapPoint } from "../types"
 
-import { CurrentLocationDot } from "./internal/CurrentLocationDot"
 import { F0MapCluster } from "./internal/F0MapCluster"
 import { F0MapMarker, type F0MapMarkerVariantProps } from "./F0MapMarker"
 import {
@@ -165,14 +164,11 @@ const MapMarkerPortal = ({
   map,
   coordinates,
   selected,
-  interactive = true,
   children,
 }: {
   map: maplibregl.Map
   coordinates: [number, number]
   selected: boolean
-  /** When false the element ignores pointer events (clicks fall to the map). */
-  interactive?: boolean
   children: React.ReactNode
 }) => {
   const [el] = useState(() => document.createElement("div"))
@@ -181,15 +177,10 @@ const MapMarkerPortal = ({
   useEffect(() => {
     // Marker elements live inside the map's canvas container, so clicks on
     // them bubble into the map's own click handler (which clears the
-    // selection). Stop them here so selecting a marker sticks. Non-interactive
-    // markers (the current-location dot) let clicks fall through to the map.
+    // selection). Stop them here so selecting a marker sticks.
     const stop = (event: MouseEvent) => event.stopPropagation()
-    if (interactive) {
-      el.style.cursor = "pointer"
-      el.addEventListener("click", stop)
-    } else {
-      el.style.pointerEvents = "none"
-    }
+    el.style.cursor = "pointer"
+    el.addEventListener("click", stop)
     const marker = new maplibregl.Marker({ element: el, anchor: "center" })
       .setLngLat(coordinates)
       .addTo(map)
@@ -199,9 +190,7 @@ const MapMarkerPortal = ({
       marker.remove()
       markerRef.current = null
     }
-    // Created once. `coordinates` is handled by the next effect; `interactive`
-    // is also frozen at mount, which is fine - it's constant per marker kind
-    // (the location dot never becomes clickable, markers never stop being so).
+    // Created once; `coordinates` is handled by the next effect.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, el])
 
@@ -224,10 +213,6 @@ export interface F0MapMarkersLayerProps {
   /** Emphasised (not selected) marker: floats above and keeps its label. */
   highlightedId?: string | null
   onSelect: (id: string) => void
-  /** Enable distance clustering (optionally with a px radius). */
-  cluster?: boolean | { radius?: number }
-  /** The user's `[lng, lat]`, rendered as a current-location dot. */
-  currentLocation?: [number, number] | null
 }
 
 export const F0MapMarkersLayer = ({
@@ -236,19 +221,12 @@ export const F0MapMarkersLayer = ({
   selectedId,
   highlightedId,
   onSelect,
-  cluster = false,
-  currentLocation,
 }: F0MapMarkersLayerProps) => {
   const i18n = useI18n()
   const reduceMotion = useReducedMotion()
-  const clusterEnabled = cluster !== false
-  const clusterRadius = typeof cluster === "object" ? cluster.radius : undefined
-  const { clusters, singles } = useClusters(
-    map,
-    points,
-    clusterEnabled,
-    clusterRadius
-  )
+  // Clustering is always on - markers gather when zoomed out and separate as
+  // you zoom in. It is intrinsic to the map, not a mode the caller opts into.
+  const { clusters, singles } = useClusters(map, points, true)
   // Markers bump one size step up once POI names appear (see POI_LABEL_ZOOM).
   const poiZoom = useZoomAtLeast(map, POI_LABEL_ZOOM)
   const sizeStep: BaseMapMarkerSize = poiZoom ? "lg" : "md"
@@ -276,28 +254,6 @@ export const F0MapMarkersLayer = ({
     // One AnimatePresence over both lists so a single leaving (becoming a
     // cluster) fades out while the cluster fades in - a soft crossfade.
     <AnimatePresence>
-      {currentLocation && (
-        <MapMarkerPortal
-          key="current-location"
-          map={map}
-          coordinates={currentLocation}
-          selected={false}
-          interactive={false}
-        >
-          {/* In-flow (not absolute) so the maplibre marker element sizes to the
-              dot and its `center` anchor keeps the dot centred on the coordinate
-              at every zoom. */}
-          <motion.span
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.12 } }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="flex leading-none"
-          >
-            <CurrentLocationDot />
-          </motion.span>
-        </MapMarkerPortal>
-      )}
       {clusters.map((c) => (
         <MapMarkerPortal
           key={c.id}
