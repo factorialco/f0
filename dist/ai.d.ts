@@ -261,6 +261,15 @@ export declare type AiChatProviderProps = {
      */
     side?: "left" | "right";
     /**
+     * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+     * `side`, keeping everything in one panel. Set it to the opposite edge to
+     * split them — e.g. communications: conversations dock left while the AI
+     * chat keeps its right-side panel and toggle. The two are still exclusive
+     * (opening one swaps the other out); only the main content moves during
+     * the swap, uncovering the incoming panel in place.
+     */
+    panelContentSide?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -520,6 +529,16 @@ declare type AiChatProviderReturnValue = {
     /** Clear the custom panel content and fall back to the F0.ai chat. */
     clearPanelContent: () => void;
     /**
+     * Id of the hosted content that was showing when the page last unloaded,
+     * pending restoration. The panel holds a skeleton (no AI-chat flash) until
+     * the host re-mounts it via `setPanelContent`, cancels via
+     * `cancelPanelContentRestore` (content no longer accessible), or a safety
+     * timeout falls back to the AI chat.
+     */
+    restoringPanelContentId: string | null;
+    /** Give up on restoring the persisted panel content — show the AI chat. */
+    cancelPanelContentRestore: () => void;
+    /**
      * Edge the whole side panel docks to — the AI chat, hosted content and the
      * canvas all follow it. Defaults to "right". Hosts flip it to "left" for a
      * chat-first experience (e.g. communications), where left is comfier to
@@ -528,6 +547,14 @@ declare type AiChatProviderReturnValue = {
     panelSide: "left" | "right";
     /** Set which edge the side panel docks to. */
     setPanelSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
+    /**
+     * Edge hosted panel content (`setPanelContent`) docks to. Defaults to
+     * `panelSide`; when it differs, the AI chat and hosted content render in
+     * separate windows, one per edge, still mutually exclusive.
+     */
+    panelContentSide: "left" | "right";
+    /** Set which edge hosted panel content docks to. */
+    setPanelContentSide: React.Dispatch<React.SetStateAction<"left" | "right">>;
 } & Pick<AiChatState, "agent" | "chatHeader" | "chatMessages" | "chatInput" | "disclaimer" | "resizable" | "entityRefs" | "canvasActions" | "canvasEntities" | "credits" | "employeeCredits" | "creditWarning" | "fileAttachments" | "onTranscribe"> & {
     /** The current canvas content, or null when canvas is closed */
     canvasContent: CanvasContent | null;
@@ -552,6 +579,8 @@ declare interface AiChatState {
     enabled: boolean;
     /** Initial edge the panel docks to. @default "right" */
     side?: "left" | "right";
+    /** Initial edge hosted panel content docks to. Defaults to `side`. */
+    panelContentSide?: "left" | "right";
     agent?: string;
     initialMessage?: string | string[];
     chatHeader?: React.ReactNode;
@@ -1754,6 +1783,9 @@ declare type DataListProps = {
 export declare type DateGroup = "today" | "yesterday" | "thisMonth" | "older";
 
 export declare const defaultTranslations: {
+    readonly common: {
+        readonly selectPlaceholder: "Select";
+    };
     readonly countries: {
         ad: string;
         ae: string;
@@ -2050,6 +2082,8 @@ export declare const defaultTranslations: {
             readonly settings: {
                 readonly showAllColumns: "Show all";
                 readonly hideAllColumns: "Hide all";
+                readonly addColumn: "Add column";
+                readonly removeColumn: "Remove column";
             };
         };
         readonly editableTable: {
@@ -2057,6 +2091,9 @@ export declare const defaultTranslations: {
                 readonly saveFailed: "Save failed";
             };
             readonly addRow: "Add row";
+            readonly removeRow: "Remove row";
+            readonly editRow: "Edit";
+            readonly reorderRow: "Drag to reorder";
         };
         readonly itemsCount: "items";
         readonly emptyStates: {
@@ -2094,6 +2131,8 @@ export declare const defaultTranslations: {
         readonly date: "Date";
         readonly custom: "Custom period";
         readonly selectDate: "Select Date";
+        readonly selectMonth: "Select month";
+        readonly selectYear: "Select year";
         readonly compareTo: "Compare to";
         readonly presets: {
             readonly last7Days: "Last 7 days";
@@ -2329,6 +2368,8 @@ export declare const defaultTranslations: {
         readonly noResults: "No chats found";
         readonly backToLatest: "Jump to latest";
         readonly muted: "Muted";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
         readonly attachFile: "Attach file";
         readonly addEmoji: "Add emoji";
         readonly recordAudio: "Record audio";
@@ -2355,6 +2396,13 @@ export declare const defaultTranslations: {
         readonly twoTyping: "{{first}} and {{second}} are writing…";
         readonly severalTyping: "Several people are writing…";
         readonly deletedMessage: "Message deleted";
+        readonly location: "Location";
+        readonly voiceNote: "Voice note";
+        readonly sendVoiceNote: "Send voice note";
+        readonly sendingVoiceNote: "Sending voice note…";
+        readonly sending: "Sending…";
+        readonly notSent: "Not sent";
+        readonly retry: "Retry";
         readonly moreActions: "Message actions";
         readonly options: "Options";
         readonly pin: "Pin";
@@ -2378,6 +2426,8 @@ export declare const defaultTranslations: {
         readonly closePreview: "Close";
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
+        readonly openDocument: "Open document";
+        readonly documentPreview: "Document preview";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -2393,6 +2443,22 @@ export declare const defaultTranslations: {
         };
         readonly scrollToBottom: "Scroll to bottom";
         readonly newMessages: "New messages";
+        readonly system: {
+            readonly memberAdded: {
+                readonly one: "{{members}} was added to the group";
+                readonly other: "{{members}} were added to the group";
+            };
+            readonly memberRemoved: {
+                readonly one: "{{members}} was removed from the group";
+                readonly other: "{{members}} were removed from the group";
+            };
+            readonly memberLeft: {
+                readonly one: "{{members}} left the group";
+                readonly other: "{{members}} left the group";
+            };
+            readonly membersWithLast: "{{names}} and {{last}}";
+            readonly membersWithMore: "{{names}} and {{count}} more";
+        };
         readonly unreadCount: {
             readonly one: "{{count}} unread";
             readonly other: "{{count}} unread";
@@ -2599,6 +2665,19 @@ export declare const defaultTranslations: {
             readonly invalidFileType: "File type not accepted. Accepted formats: {{types}}";
             readonly maxFilesReached: "Maximum {{maxFiles}} files";
         };
+        readonly entitiesList: {
+            readonly add: "Add";
+            readonly edit: "Edit";
+            readonly remove: "Remove";
+            readonly view: "View";
+            readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
+            readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
+            readonly addBlockedMaxHint: "You've reached the maximum number of items";
+            readonly removeConfirmTitle: "Remove item?";
+            readonly removeConfirmMessage: "This item will be removed. This action cannot be undone.";
+            readonly removeError: "Couldn't remove the item. Please try again.";
+            readonly removeErrorTitle: "Remove failed";
+        };
         readonly moreInformation: "More information";
         readonly validation: {
             readonly required: "This field is required";
@@ -2660,6 +2739,11 @@ export declare const defaultTranslations: {
         readonly print: "Print";
         readonly download: "Download";
         readonly loading: "Loading document";
+        readonly previewFailed: "Preview isn't available for this file";
+        readonly showingFirstRows: {
+            readonly one: "Showing the first row";
+            readonly other: "Showing the first {{count}} rows";
+        };
     };
 };
 
@@ -2725,6 +2809,7 @@ declare type DropdownItemObject = Pick<NavigationItem, "label" | "href"> & {
     description?: string;
     critical?: boolean;
     avatar?: AvatarVariant;
+    disabled?: boolean;
 };
 
 declare type DropdownItemSeparator = {
@@ -2952,7 +3037,7 @@ export declare interface F0AiChatProps {
 /**
  * @experimental This is an experimental component use it at your own risk
  */
-export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
+export declare const F0AiChatProvider: ({ enabled, side, panelContentSide, initialMessage, chatHeader, chatMessages, chatInput, welcomeScreenSuggestions, welcomeScreenCards, disclaimer, resizable, defaultVisualizationMode, lockVisualizationMode, historyEnabled, footer, VoiceMode, entityRefs, canvasActions, canvasEntities, credits, employeeCredits, creditWarning, fileAttachments, onTranscribe, onThumbsUp, onThumbsDown, children, agent, tracking, }: AiChatProviderProps) => JSX_2.Element;
 
 /**
  * Headless chat composer.
@@ -2963,7 +3048,7 @@ export declare const F0AiChatProvider: ({ enabled, side, initialMessage, chatHea
  * coupling to `useAiChat()` or CopilotKit — wrappers like F0AiChat
  * provide the wiring.
  */
-export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
+export declare const F0AiChatTextArea: ({ onSubmit, onStop, inProgress, onBeforeSubmit, placeholders, creditWarning, clarifyingUI, pendingContext, onPendingContextChange, pendingQuote, onPendingQuoteChange, fileAttachments, toolbarStart, onTranscribe, searchPersons, onProcessFilesRef, disclaimer, footer, isWelcomeScreen, fullscreen, welcomeScreenSuggestions, onSuggestionClick, welcomeScreenCards, ref, }: F0AiChatTextAreaProps) => JSX_2.Element;
 
 export declare type F0AiChatTextAreaProps = {
     ref: RefObject<HTMLDivElement>;
@@ -3001,6 +3086,13 @@ export declare type F0AiChatTextAreaProps = {
     onPendingQuoteChange?: (quote: PendingQuote | null) => void;
     /** File attachment configuration. When omitted, attachments are disabled. */
     fileAttachments?: AiChatFileAttachmentConfig;
+    /**
+     * Host-owned compact controls rendered after the attachment action in the
+     * normal action row. Controls render inside the chat form, so buttons must
+     * use `type="button"` unless they intentionally submit it. Hidden while the
+     * composer is clarifying or recording.
+     */
+    toolbarStart?: ReactNode;
     /**
      * Voice dictation. When provided, a microphone button is shown: recorded
      * audio is transcribed and the transcript fills the textarea (the user
@@ -3945,6 +4037,11 @@ declare type F0TagRawProps = {
      * Extra classes merged onto the tag (e.g. to give it a background).
      */
     className?: string;
+    /**
+     * The size of the tag
+     * @default "md"
+     */
+    size?: "md" | "sm";
 } & ({
     icon: IconType;
     onlyIcon: true;
@@ -5069,11 +5166,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }
@@ -5081,8 +5175,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
