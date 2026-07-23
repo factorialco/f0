@@ -408,6 +408,7 @@ export const TableCollection = <
       <TableWrapper>
         <div
           className={cn(
+            "min-h-0",
             bordered &&
               "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}

@@ -317,6 +317,14 @@ export function useData<
 
   const isLoadingMoreRef = useRef(false)
 
+  // Latest loaded records + the query/pageSize that produced them, so a
+  // shrinking page size can reuse the already-loaded records instead of
+  // refetching (see the initial fetch effect below).
+  const rawDataRef = useRef(rawData)
+  rawDataRef.current = rawData
+  const lastFetchSignatureRef = useRef<string | undefined>(undefined)
+  const lastFetchedPerPageRef = useRef<number | undefined>(undefined)
+
   // The provided `currentPage` only seeds the very first page-based fetch
   // (e.g. restoring a page from the URL); later fetches reset to page 1 as
   // before — notably when filters/search/sortings change.
@@ -609,9 +617,11 @@ export function useData<
 
           const defaultPerPage = 20
 
-          // Safely access perPage, defaulting to 20 if not available
+          // Safely access perPage, defaulting to 20 if not available.
+          // "auto" is resolved to a number by OneDataCollection before it
+          // reaches this hook; fall back to the default if it wasn't.
           const perPageValue =
-            "perPage" in dataAdapter && dataAdapter.perPage !== undefined
+            "perPage" in dataAdapter && typeof dataAdapter.perPage === "number"
               ? dataAdapter.perPage
               : defaultPerPage
 
@@ -758,6 +768,51 @@ export function useData<
     () => {
       if (!enabled) return
       if (!isLoadingMoreRef.current) {
+        // Page-based reuse: when only the page size shrank (same filters /
+        // sortings / search) and page 1 already holds at least that many
+        // records, trim the loaded records instead of refetching — no extra
+        // network round-trip. This is what makes the auto page size hide items
+        // it over-fetched without loading again.
+        const perPageValue =
+          "perPage" in dataAdapter && typeof dataAdapter.perPage === "number"
+            ? dataAdapter.perPage
+            : undefined
+        const currentPagination = paginationInfoRef.current
+        const fetchSignature = JSON.stringify({
+          filters: mergedFilters,
+          sortings: currentSortings,
+          grouping: currentGrouping,
+          search: searchValue.current,
+          paginationType: dataAdapter.paginationType,
+        })
+        const canReuseLoadedData =
+          dataAdapter.paginationType === "pages" &&
+          perPageValue !== undefined &&
+          fetchSignature === lastFetchSignatureRef.current &&
+          lastFetchedPerPageRef.current !== undefined &&
+          perPageValue < lastFetchedPerPageRef.current &&
+          isPageBasedPagination(currentPagination) &&
+          currentPagination.currentPage === 1 &&
+          rawDataRef.current.length >= perPageValue
+
+        if (canReuseLoadedData) {
+          lastFetchedPerPageRef.current = perPageValue
+          setRawData((prev) => prev.slice(0, perPageValue))
+          setPaginationInfo((info) =>
+            info && info.type === "pages"
+              ? {
+                  ...info,
+                  perPage: perPageValue,
+                  pagesCount: Math.max(1, Math.ceil(info.total / perPageValue)),
+                }
+              : info
+          )
+          return
+        }
+
+        lastFetchSignatureRef.current = fetchSignature
+        lastFetchedPerPageRef.current = perPageValue
+
         setIsLoading(true)
         // Seed the first page-based fetch from `currentPage` (if provided), then
         // fall back to page 1 for every subsequent fetch (filter/search/sorting
