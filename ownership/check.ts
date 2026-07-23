@@ -27,7 +27,7 @@ function validateManifestPresence(): CheckResult {
   if (missing.length === 0) return pass()
 
   return fail([
-    "Every module in sds/ and kits/ must declare an owner through a package.yml manifest.",
+    "Every module in sds/ must declare an owner through a package.yml manifest.",
     "The following modules are missing one:",
     ...missing.map((folder) => `  >> ${folder}/package.yml`),
     "",
@@ -128,7 +128,7 @@ function validateCodeownersUpToDate(): CheckResult {
 }
 
 const checks = [
-  { name: "Every sds/kits module has a package.yml manifest", run: validateManifestPresence },
+  { name: "Every sds module has a package.yml manifest", run: validateManifestPresence },
   { name: "Every manifest declares a valid owner", run: validateManifestSchema },
   { name: "All teams exist in ownership/teams.yml", run: validateTeams },
   { name: "All reviewer include paths point to real files", run: validateReviewerPaths },

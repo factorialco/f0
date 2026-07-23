@@ -11,10 +11,7 @@ export const TEAMS_FILE = path.join(import.meta.dirname, "teams.yml")
  * Folders whose direct children are modules that MUST declare ownership
  * through a package.yml manifest. Paths are relative to the repo root.
  */
-export const MANDATORY_MODULE_ROOTS = [
-  "packages/react/src/sds",
-  "packages/react/src/kits",
-]
+export const MANDATORY_MODULE_ROOTS = ["packages/react/src/sds"]
 
 export const TEAM_PATTERN = /^@factorialco\/[a-z0-9][a-z0-9-]*$/
 
@@ -116,7 +113,7 @@ export function generateCodeowners(): string {
   return [
     "# ⚠️ GENERATED FILE — DO NOT EDIT BY HAND",
     "# Global rules live in ownership/CODEOWNERS.base; module ownership is",
-    "# declared in each module's package.yml (packages/react/src/{sds,kits}/**).",
+    "# declared in each module's package.yml (packages/react/src/sds/**).",
     "# Regenerate with: pnpm ownership (validate with: pnpm ownership:check)",
     "",
     base,

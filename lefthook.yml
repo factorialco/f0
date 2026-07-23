@@ -24,5 +24,5 @@ pre-commit:
       run: pnpm exec tsx packages/react/.scripts/check-cycle-dependencies.ts --pre-commit
 
     ownership:
-      glob: "{CODEOWNERS,ownership/*,packages/react/src/sds/**,packages/react/src/kits/**}"
+      glob: "{CODEOWNERS,ownership/*,packages/react/src/sds/**}"
       run: pnpm --filter @factorialco/f0-ownership run check

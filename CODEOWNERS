@@ -1,17 +1,14 @@
 # ⚠️ GENERATED FILE — DO NOT EDIT BY HAND
 # Global rules live in ownership/CODEOWNERS.base; module ownership is
-# declared in each module's package.yml (packages/react/src/{sds,kits}/**).
+# declared in each module's package.yml (packages/react/src/sds/**).
 # Regenerate with: pnpm ownership (validate with: pnpm ownership:check)
 
-# Global rules, maintained by hand. Module-level ownership (sds/, kits/)
+# Global rules, maintained by hand. Module-level ownership (sds/)
 # is declared in each module's package.yml — do not add those paths here.
 * @factorialco/f0-devs
 /packages/react-native/ @factorialco/mobile
 
 # --- Module ownership (generated from package.yml manifests) ---
-/packages/react/src/kits/Charts/ @factorialco/f0-general
-/packages/react/src/kits/F0DataChart/ @factorialco/platform-ai-building-blocks
-/packages/react/src/kits/Social/ @factorialco/talent-spaces
 /packages/react/src/sds/ai/ @factorialco/platform-ai-building-blocks
 /packages/react/src/sds/chat/ @factorialco/platform-ai-building-blocks
 /packages/react/src/sds/Home/ @factorialco/foundations
