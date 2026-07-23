@@ -1,7 +1,7 @@
 import { S as L, o as ye, u as Z, q as ne, r as Se, s as Re, i as ke, j as _e, k as Ne, t as Ce, l as Le, w as Fe, v as Ve, x as Te } from "./F0CanvasPanel-Dj8UKne7.js";
 import { jsx as t, jsxs as y } from "react/jsx-runtime";
 import { lazy as J, forwardRef as ae, Suspense as He, useState as V, useRef as A, useMemo as te, useCallback as w, useEffect as T } from "react";
-import { e as Ee, D as Ue, P as je, c as De } from "./pdfWorker-CtnAtPLI.js";
+import { e as Ee, D as Ue, P as je, c as De } from "./pdfWorker-BZ6RSDxv.js";
 import { F as We } from "./Printer-B7iDPx2r.js";
 import './index.css';const Oe = ({
   label: o,
@@ -221,7 +221,7 @@ import './index.css';const Oe = ({
   }), i;
 };
 Ee();
-const qe = J(() => import("./SheetViewer-B-8e12Pn.js")), Ge = J(() => import("./DocxViewer-B-_tVuGi.js")), Ze = J(() => import("./TextViewer-DIFkYiln.js")), oe = 48, se = ae(
+const qe = J(() => import("./SheetViewer-DlKhhgk5.js")), Ge = J(() => import("./DocxViewer-TrPm7eFx.js")), Ze = J(() => import("./TextViewer-qUaLfQhD.js")), oe = 48, se = ae(
   (o, a) => {
     const { kind: e = "pdf", mimeType: i, ...l } = o;
     if (e === "pdf") return /* @__PURE__ */ t(le, { ref: a, ...l });
