@@ -251,6 +251,80 @@ describe("DashboardGrid", () => {
     })
   })
 
+  describe("resize handle scroll preservation", () => {
+    function getResizeHandle(container: HTMLElement): HTMLElement {
+      const handle = container.querySelector(".group\\/resize")
+      if (!(handle instanceof HTMLElement)) {
+        throw new Error("Expected a resize handle to be rendered")
+      }
+      return handle
+    }
+
+    // The resize clamp momentarily collapses the row to `height: 0` to measure
+    // its content floor. In a real browser that synchronous shrink makes any
+    // scrollable ancestor clamp its `scrollTop` to the reduced range; jsdom has
+    // no layout, so we model that clamp at its exact trigger point — the read
+    // of a card's `scrollHeight` while its row is collapsed — by nudging the
+    // target's scroll offset to 0. Without the fix that clamp would stick; the
+    // fix snapshots the offset before the collapse and restores it after.
+    function mockScrollHeightThatClampsOnCollapse(
+      cardId: string,
+      contentHeight: number,
+      clampTarget: () => void
+    ) {
+      vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockImplementation(
+        function getScrollHeight(this: HTMLElement) {
+          if (this.dataset.cardId !== cardId) return 0
+          const row = this.closest("[data-dashboard-row]")
+          if (row instanceof HTMLElement && row.style.height === "0px") {
+            clampTarget()
+          }
+          return contentHeight
+        }
+      )
+    }
+
+    it("keeps a scrollable ancestor's offset when a resize handle is grabbed while scrolled down", () => {
+      const scroller = document.createElement("div")
+      // jsdom reports clientHeight 0, so any non-zero scrollHeight makes the
+      // scroller qualify as a scrollable ancestor. Instance property shadows
+      // the prototype `scrollHeight` spy set below.
+      Object.defineProperty(scroller, "scrollHeight", {
+        configurable: true,
+        get: () => 2000,
+      })
+      scroller.scrollTop = 480
+
+      mockScrollHeightThatClampsOnCollapse("headcount", 160, () => {
+        scroller.scrollTop = 0
+      })
+
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />,
+        { container: scroller }
+      )
+
+      const handle = getResizeHandle(container)
+      fireEvent.mouseDown(handle, { clientY: 500 })
+      fireEvent.mouseUp(document, { clientY: 500 })
+
+      expect(scroller.scrollTop).toBe(480)
+    })
+
+    it("still resizes the row normally with the scroll guard in place", () => {
+      const { container } = render(
+        <DashboardGrid items={makeMetricItems(200)} filters={{}} editMode />
+      )
+
+      const handle = getResizeHandle(container)
+      fireEvent.mouseDown(handle, { clientY: 500 })
+      fireEvent.mouseMove(document, { clientY: 560 })
+      fireEvent.mouseUp(document, { clientY: 560 })
+
+      expect(getDashboardRowHeight(container)).toBe("260px")
+    })
+  })
+
   describe("content overflow containment", () => {
     it("clips vertical overflow on collection rows so a too-short row can never paint over the next one", () => {
       const { container } = render(
