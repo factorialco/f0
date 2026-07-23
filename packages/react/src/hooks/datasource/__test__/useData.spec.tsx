@@ -610,8 +610,12 @@ describe("mergeFiltersWithIntersection", () => {
       expect(result.current.data.records.map((r) => r.id)).toEqual([
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
       ])
-      expect(result.current.paginationInfo?.perPage).toBe(10)
-      expect(result.current.paginationInfo?.pagesCount).toBe(3)
+      const pagination = result.current.paginationInfo
+      expect(pagination?.type).toBe("pages")
+      if (pagination?.type === "pages") {
+        expect(pagination.perPage).toBe(10)
+        expect(pagination.pagesCount).toBe(3)
+      }
     })
 
     it("does fetch when the page size grows beyond the loaded records", async () => {
