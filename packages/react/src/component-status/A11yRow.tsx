@@ -130,85 +130,116 @@ export function A11yRow({
     []
   )
 
-  const met = enforced
-  const glyph = met ? "✓" : skipped ? "–" : "✕"
-  const glyphColor = met
+  const glyph = enforced ? "✓" : "✕"
+  const glyphColor = enforced
     ? "text-f1-foreground-positive"
-    : skipped
-      ? "text-f1-foreground-secondary"
-      : "text-f1-foreground-warning"
-  const posture = met
+    : "text-f1-foreground-secondary"
+  const posture = enforced
     ? "enforced"
     : skipped
-      ? "axe skipped — not measured"
-      : "not enforced — running axe on this component’s stories"
+      ? "axe skipped"
+      : "not enforced yet"
 
   return (
     <li className="flex items-start gap-2">
       <span aria-hidden className={`mt-0.5 shrink-0 ${glyphColor}`}>
         {glyph}
       </span>
-      <details className="min-w-0 flex-1" onToggle={onToggle}>
-        <summary className="cursor-pointer list-none text-base text-f1-foreground marker:hidden [&::-webkit-details-marker]:hidden">
+      <div className="min-w-0">
+        {/* Label + posture, always visible — matches the other checklist rows. */}
+        <div className="text-base text-f1-foreground">
           Accessibility{" "}
           <span className="text-f1-foreground-secondary">— {posture}</span>
-        </summary>
-        <div className="mt-1 text-base text-f1-foreground-secondary">
-          {detail}
-          {audit.status === "running" && (
-            <p className="mt-2 italic">Running axe on the rendered stories…</p>
-          )}
-          {audit.status === "unavailable" && (
-            <p className="mt-2">
-              Live results are available on the Storybook docs page. See the
-              story’s <strong>Accessibility</strong> tab for per-element detail.
-            </p>
-          )}
-          {audit.status === "done" && audit.criteria.length === 0 && (
-            <p className="mt-2 text-f1-foreground-positive">
-              No violations in the stories’ default state.
-            </p>
-          )}
-          {audit.status === "done" && audit.criteria.length > 0 && (
-            <ul className="mt-2 list-none space-y-1 p-0">
-              {audit.criteria.map((c) => (
-                <li
-                  key={c.ruleId}
-                  className="flex items-start gap-2 !text-base"
-                >
-                  <span
-                    aria-hidden
-                    className="shrink-0 text-f1-foreground-warning"
-                  >
-                    ⚠
-                  </span>
-                  <span>
-                    <code className="text-f1-foreground">{c.ruleId}</code>
-                    {c.sc && (
-                      <span className="text-f1-foreground-secondary">
-                        {" "}
-                        · WCAG {c.sc} {c.level} ({c.version})
-                      </span>
-                    )}
-                    <span className="text-f1-foreground-secondary">
-                      {" "}
-                      · {c.description} · {c.nodes}{" "}
-                      {c.nodes === 1 ? "element" : "elements"}
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          {(audit.status === "done" || audit.status === "unavailable") && (
-            <p className="mt-2 text-sm text-f1-foreground-secondary">
-              Checked in each story’s default state — violations behind
-              interactions (open menus, dialogs) aren’t shown here. CI enforces
-              the full set, including play-function states.
-            </p>
-          )}
         </div>
-      </details>
+        <div className="mt-0.5 text-base text-f1-foreground-secondary">
+          {detail}
+          {/* Only the live per-criterion results are collapsed — expanding
+              triggers the axe run so the docs page stays cheap by default. */}
+          <details className="mt-1" onToggle={onToggle}>
+            <summary className="cursor-pointer list-none text-f1-foreground marker:hidden [&::-webkit-details-marker]:hidden">
+              Check the rendered stories
+            </summary>
+            <div className="mt-2" aria-live="polite">
+              {audit.status === "running" && (
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="h-4 w-4 shrink-0 animate-spin text-f1-foreground-secondary motion-reduce:animate-none"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeOpacity="0.25"
+                      strokeWidth="3"
+                    />
+                    <path
+                      d="M21 12a9 9 0 0 0-9-9"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span>Checking the rendered stories…</span>
+                </div>
+              )}
+              {audit.status === "unavailable" && (
+                <p className="m-0">
+                  Live results are available on the Storybook docs page. See the
+                  story’s <strong>Accessibility</strong> tab for per-element
+                  detail.
+                </p>
+              )}
+              {audit.status === "done" && audit.criteria.length === 0 && (
+                <p className="m-0 text-f1-foreground-positive">
+                  No violations in the stories’ default state.
+                </p>
+              )}
+              {audit.status === "done" && audit.criteria.length > 0 && (
+                <ul className="m-0 list-none space-y-1 p-0">
+                  {audit.criteria.map((c) => (
+                    <li
+                      key={c.ruleId}
+                      className="flex items-start gap-2 !text-base"
+                    >
+                      <span
+                        aria-hidden
+                        className="shrink-0 text-f1-foreground-warning"
+                      >
+                        ⚠
+                      </span>
+                      <span>
+                        <code className="text-f1-foreground">{c.ruleId}</code>
+                        {c.sc && (
+                          <span className="text-f1-foreground-secondary">
+                            {" "}
+                            · WCAG {c.sc} {c.level} ({c.version})
+                          </span>
+                        )}
+                        <span className="text-f1-foreground-secondary">
+                          {" "}
+                          · {c.description} · {c.nodes}{" "}
+                          {c.nodes === 1 ? "element" : "elements"}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {(audit.status === "done" || audit.status === "unavailable") && (
+                <p className="mt-2 text-sm text-f1-foreground-secondary">
+                  Checked in each story’s default state — violations behind
+                  interactions (open menus, dialogs) aren’t shown here. CI
+                  enforces the full set, including play-function states.
+                </p>
+              )}
+            </div>
+          </details>
+        </div>
+      </div>
     </li>
   )
 }
