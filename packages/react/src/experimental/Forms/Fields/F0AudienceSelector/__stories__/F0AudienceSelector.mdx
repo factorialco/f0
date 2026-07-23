@@ -1,0 +1,132 @@
+import { Canvas, Meta } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0AudienceSelector.stories"
+
+<Meta of={Stories} />
+
+# F0AudienceSelector
+
+Bulk selector for arbitrary people or **groups of people**: teams, legal
+entities, workplaces, roles, permission groups and the company-wide
+"everyone". Selected entities render as removable chips inside the field.
+Groups are selected **atomically** — picking a team adds one team chip, never
+its expanded members.
+
+Built for share dialogs (Sharing v2), but domain-neutral: any feature that
+needs an audience can use it.
+
+---
+
+# Overview
+
+<Canvas of={Stories.Default} />
+
+## Data contract
+
+The component never fetches by itself and is **never called with an empty
+query**. Consumers pass a narrowed data adapter plus a record mapper:
+
+```tsx
+const source = useMemo(
+  () => ({
+    dataAdapter: {
+      fetchData: async ({ search }) => ({
+        // ONE flat list, all kinds interleaved — ranking is owned by the
+        // backend/consumer; the component renders records in the given order
+        records: await searchGranteeCandidates(search),
+      }),
+    },
+    search: { debounceTime: 300 }, // the default
+  }),
+  []
+)
+
+<F0AudienceSelector
+  label="Share with people, teams & groups"
+  source={source}
+  mapEntity={(node) => ({
+    entity: granteeToEntity(node),
+    disabledReason: alreadyHasAccess(node)
+      ? t("share.alreadyHasAccess")
+      : isCurrentUser(node)
+        ? t("share.thatsYou")
+        : undefined,
+  })}
+  value={selection}
+  onChange={setSelection}
+/>
+```
+
+Keep `source` referentially stable (module scope or `useMemo`) — a new adapter
+identity on every render restarts the search engine.
+
+Identity is **composite** (`kind` + `id`): ids may collide across kinds. Use
+the exported `audienceEntityKey(entity)` for dedupe and lookups.
+
+## Mapping to the Resource Registry sharing surface
+
+Today (person-only writes via parent verbs taking
+`PermissionsSharingSelectionInput { employeeIds, role }`):
+
+```ts
+const sharingSelection = {
+  employeeIds: selection
+    .filter((entity) => entity.kind === "individual")
+    .map((entity) => entity.id),
+  role,
+}
+```
+
+Tomorrow (grantee union — see `share.yml` in the permissions component):
+
+```ts
+const sharingSelection = {
+  grantees: selection.map((entity) => ({ kind: entity.kind, id: entity.id })),
+  role,
+}
+```
+
+Nothing in the component changes when group grantees land — group kinds simply
+start appearing in the adapter's results.
+
+## Suggestions
+
+With an empty query the adapter is not called; pass `suggestions` (e.g. direct
+reports and their team) or the component shows a "Start typing to search"
+empty state.
+
+<Canvas of={Stories.WithSuggestions} />
+
+## Unavailable options
+
+`disabledReason` disables the row and **replaces** its subtitle — the copy is
+domain knowledge and always comes from the consumer.
+
+<Canvas of={Stories.DisabledReasons} />
+
+## Batch role dropdown and warnings
+
+`trailing` renders inside the field only while entities are selected — the
+share dialog's batch role dropdown. `warning` renders an alert below the field
+and hides while the dropdown is open; computing it (e.g. out-of-reporting-line)
+is consumer-side.
+
+<Canvas of={Stories.WithTrailingRoleDropdown} />
+<Canvas of={Stories.WithWarning} />
+
+## Keyboard and dialogs
+
+- Picking an option keeps the dropdown open and clears the query.
+- `Backspace` with an empty query removes the last chip.
+- `ArrowUp`/`ArrowDown` move the active option (disabled options are skipped),
+  `Enter` toggles it.
+- `Escape` closes **only the dropdown** and does not propagate — inside an
+  `F0Dialog` the dialog stays open; a second `Escape` closes it.
+
+<Canvas of={Stories.InsideDialog} />
+
+## Share dialog recipe
+
+The full composition a share modal builds from this kit, together with
+`F0AudienceListItem`:
+
+<Canvas of={Stories.ShareDialogRecipe} />

@@ -633,6 +633,34 @@ export const defaultTranslations = {
     createWithValue: 'Create "{{value}}"',
     createEmptyMessage: "Try another search or create a new item",
   },
+  audience: {
+    selector: {
+      typeToSearch: "Start typing to search",
+      noResults: "No matches found",
+      loading: "Loading...",
+      removeItem: "Remove {{name}}",
+      kind: {
+        team: "Team",
+        legalEntity: "Legal entity",
+        workplace: "Workplace",
+        role: "Role",
+        permissionGroup: "Permission group",
+        everyone: "Company-wide",
+      },
+      memberCount: {
+        one: "{{count}} person",
+        other: "{{count}} people",
+      },
+    },
+    listItem: {
+      you: "(You)",
+      showMembers: "Show members of {{name}}",
+      hideMembers: "Hide members of {{name}}",
+      noMembers: "No current members",
+      loadError: "Couldn't load members",
+      retry: "Try again",
+    },
+  },
   numberInput: {
     between: "It should be between {{min}} and {{max}}",
     greaterThan: "It should be greater than {{min}}",
