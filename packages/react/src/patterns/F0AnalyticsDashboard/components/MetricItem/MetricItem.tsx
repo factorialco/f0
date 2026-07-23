@@ -1,3 +1,5 @@
+import { useRef } from "react"
+
 import type {
   FiltersDefinition,
   FiltersState,
@@ -5,6 +7,7 @@ import type {
 
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
+import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
 import { cn } from "@/lib/utils"
 
 import type {
@@ -64,16 +67,74 @@ function formatValue(
   }
 }
 
+type MetricTrend = { percent: number; direction: "up" | "down" | "flat" }
+
 function computeTrend(
   value: number,
   previousValue?: number
-): { percent: number; direction: "up" | "down" | "flat" } | undefined {
+): MetricTrend | undefined {
   if (previousValue === undefined || previousValue === 0) return undefined
 
   const percent = ((value - previousValue) / Math.abs(previousValue)) * 100
   const direction = percent > 0.5 ? "up" : percent < -0.5 ? "down" : "flat"
 
   return { percent: Math.abs(percent), direction }
+}
+
+/**
+ * The formatted value + optional trend, aligned within the widget body.
+ *
+ * Bottom-left by default; once the body grows taller than 220px it centers on
+ * both axes so the number sits in the middle of a large tile instead of
+ * hugging the bottom edge. Height is tracked with a `ResizeObserver`, so it
+ * reacts to grid resizes and fullscreen toggles.
+ */
+function MetricValue({ value, trend }: { value: string; trend?: MetricTrend }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const { height } = useContainerSize(ref)
+  const centered = height > 220
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex h-full min-h-0 overflow-auto px-4",
+        centered ? "items-center justify-center py-4" : "items-end pb-4"
+      )}
+    >
+      <div
+        className={cn(
+          "flex items-baseline gap-3",
+          // Nudge up to offset the widget header, so the value reads as
+          // optically centered against the whole card rather than the body.
+          centered && "-translate-y-4"
+        )}
+      >
+        <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
+          {value}
+        </span>
+        {trend && trend.direction !== "flat" && (
+          <div className="flex shrink-0 items-center">
+            {trend.direction === "up" ? (
+              <F0Icon icon={ArrowUp} color="positive" size="sm" />
+            ) : (
+              <F0Icon icon={ArrowDown} color="critical" size="sm" />
+            )}
+            <span
+              className={cn(
+                "whitespace-nowrap text-base font-medium",
+                trend.direction === "up"
+                  ? "text-f1-foreground-positive"
+                  : "text-f1-foreground-critical"
+              )}
+            >
+              {trend.percent.toFixed(1)}%
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
 }
 
 /**
@@ -112,34 +173,14 @@ export function MetricItem<Filters extends FiltersDefinition>({
       itemId={item.id}
     >
       {data && (
-        <div className="flex h-full min-h-0 items-end overflow-auto px-4 pb-4">
-          <div className="flex items-baseline gap-3">
-            <span className="whitespace-nowrap text-4xl font-semibold leading-none tracking-tight text-f1-foreground">
-              {item.valueFormatter
-                ? item.valueFormatter(data.value)
-                : formatValue(data.value, item.format, item.decimals)}
-            </span>
-            {trend && trend.direction !== "flat" && (
-              <div className="flex shrink-0 items-center">
-                {trend.direction === "up" ? (
-                  <F0Icon icon={ArrowUp} color="positive" size="sm" />
-                ) : (
-                  <F0Icon icon={ArrowDown} color="critical" size="sm" />
-                )}
-                <span
-                  className={cn(
-                    "whitespace-nowrap text-base font-medium",
-                    trend.direction === "up"
-                      ? "text-f1-foreground-positive"
-                      : "text-f1-foreground-critical"
-                  )}
-                >
-                  {trend.percent.toFixed(1)}%
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
+        <MetricValue
+          value={
+            item.valueFormatter
+              ? item.valueFormatter(data.value)
+              : formatValue(data.value, item.format, item.decimals)
+          }
+          trend={trend}
+        />
       )}
     </DashboardItem>
   )
