@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.50.0](https://github.com/factorialco/f0/compare/f0-react-v4.49.3...f0-react-v4.50.0) (2026-07-23)
+
+
+### Features
+
+* **categoryBarChart:** center cell and add loading skeleton ([#4808](https://github.com/factorialco/f0/issues/4808)) ([0784857](https://github.com/factorialco/f0/commit/07848579d8d2cdba1caf65258723d397174a1bf5))
+
 ## [4.49.3](https://github.com/factorialco/f0/compare/f0-react-v4.49.2...f0-react-v4.49.3) (2026-07-23)
 
 
