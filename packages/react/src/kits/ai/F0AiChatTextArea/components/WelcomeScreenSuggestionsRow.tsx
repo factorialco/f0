@@ -144,7 +144,7 @@ export const WelcomeScreenSuggestionsRow = ({
             id={popoverHeadingId}
             className="flex items-center gap-1.5 p-2 pb-1 text-sm font-medium text-f1-foreground-secondary"
           >
-            <F0Icon icon={activeGroup.icon} size="sm" />
+            <F0Icon aria-hidden icon={activeGroup.icon} size="sm" />
             <span>{activeGroup.label}</span>
           </div>
           <div className="flex flex-col">
