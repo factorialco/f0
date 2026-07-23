@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useId, useRef, useState } from "react"
 
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0Icon } from "@/components/F0Icon"
@@ -61,6 +61,10 @@ export const WelcomeScreenSuggestionsRow = ({
 }: WelcomeScreenSuggestionsRowProps) => {
   const [activeIdx, setActiveIdx] = useState<number | null>(null)
   const rowRef = useRef<HTMLDivElement>(null)
+  const lastTriggerRef = useRef<HTMLElement | null>(null)
+  const shouldRestoreFocusRef = useRef(false)
+  const popoverContentId = useId()
+  const popoverHeadingId = useId()
   const activeGroup = activeIdx !== null ? suggestions[activeIdx] : null
 
   if (suggestions.length === 0) return null
@@ -89,7 +93,12 @@ export const WelcomeScreenSuggestionsRow = ({
               label={group.label}
               icon={group.icon}
               pressed={activeIdx === index}
-              onClick={() => {
+              aria-haspopup="dialog"
+              aria-expanded={activeIdx === index}
+              aria-controls={activeIdx === index ? popoverContentId : undefined}
+              onClick={(event) => {
+                lastTriggerRef.current = event.currentTarget
+                shouldRestoreFocusRef.current = false
                 setActiveIdx((current) => (current === index ? null : index))
                 onItemHover?.(null)
               }}
@@ -102,7 +111,19 @@ export const WelcomeScreenSuggestionsRow = ({
           side={side}
           align="start"
           sideOffset={8}
+          id={popoverContentId}
+          aria-labelledby={popoverHeadingId}
           onOpenAutoFocus={(e) => e.preventDefault()}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault()
+            if (shouldRestoreFocusRef.current) {
+              lastTriggerRef.current?.focus()
+            }
+            shouldRestoreFocusRef.current = false
+          }}
+          onEscapeKeyDown={() => {
+            shouldRestoreFocusRef.current = true
+          }}
           onPointerDownOutside={(event) => {
             // Group-button clicks own the open/switch/close semantics; letting
             // the popover also dismiss on the same pointerdown would race the
@@ -110,6 +131,8 @@ export const WelcomeScreenSuggestionsRow = ({
             const target = event.target as Node | null
             if (target && rowRef.current?.contains(target)) {
               event.preventDefault()
+            } else {
+              shouldRestoreFocusRef.current = false
             }
           }}
           className={cn(
@@ -117,7 +140,10 @@ export const WelcomeScreenSuggestionsRow = ({
             "w-[var(--radix-popover-trigger-width)]"
           )}
         >
-          <div className="flex items-center gap-1.5 p-2 pb-1 text-sm font-medium text-f1-foreground-secondary">
+          <div
+            id={popoverHeadingId}
+            className="flex items-center gap-1.5 p-2 pb-1 text-sm font-medium text-f1-foreground-secondary"
+          >
             <F0Icon icon={activeGroup.icon} size="sm" />
             <span>{activeGroup.label}</span>
           </div>
@@ -126,8 +152,10 @@ export const WelcomeScreenSuggestionsRow = ({
               <button
                 key={index}
                 type="button"
-                onClick={() => {
+                onClick={(event) => {
                   onItemClick(item, activeGroup)
+                  shouldRestoreFocusRef.current =
+                    document.activeElement === event.currentTarget
                   setActiveIdx(null)
                   onItemHover?.(null)
                 }}
