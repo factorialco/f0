@@ -14,6 +14,8 @@ const pointLabel = (p: F0MapPoint, fallback: string): string => {
       return `${p.firstName} ${p.lastName}`.trim()
     case "company":
       return p.name
+    case "stop":
+      return p.letter.charAt(0).toUpperCase()
     default:
       return fallback
   }

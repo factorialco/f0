@@ -22,6 +22,7 @@ const PLACE_IMG =
 const SAMPLE: Record<BaseMapMarkerVariant, BaseMapMarkerProps> = {
   color: { variant: "color" },
   icon: { variant: "icon", icon: StarFilled },
+  letter: { variant: "letter", letter: "A", color: "radical" },
   person: { variant: "person", firstName: "Ada", lastName: "Lovelace" },
   team: { variant: "team", name: "Design" },
   company: { variant: "company", name: "Factorial" },

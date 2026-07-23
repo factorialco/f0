@@ -6,6 +6,7 @@ export {
   markerColors,
   markerVariants,
   markerLabelPlacements,
+  markerColorTriplet,
   MARKER_SHADOW_HSL,
   SELECTED_DOT_R,
   SELECTED_DOT_GAP,

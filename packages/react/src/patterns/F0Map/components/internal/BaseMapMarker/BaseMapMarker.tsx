@@ -14,6 +14,7 @@ export type BaseMapMarkerSize = (typeof markerSizes)[number]
 export const markerVariants = [
   "color",
   "icon",
+  "letter",
   "person",
   "team",
   "company",
@@ -71,6 +72,15 @@ const HUE_DARK: Record<BaseMapMarkerColor, string> = {
     PALETTE_COLORS.map((c) => [c, baseColors[c][70]])
   ) as Record<Exclude<BaseMapMarkerColor, "neutral" | "grey">, string>),
 }
+
+/**
+ * Raw HSL triplet ("H S% L%") for a palette color, per theme (`.50` light,
+ * `.70` dark). For non-DOM consumers that need the sanctioned hue value where
+ * the `--<hue>` CSS vars aren't available - e.g. GL line-layer paint, which
+ * takes a plain color string. Wrap it as `hsl(...)` at the call site.
+ */
+export const markerColorTriplet = (c: BaseMapMarkerColor, isDark: boolean) =>
+  isDark ? HUE_DARK[c] : HUE[c]
 
 /**
  * The ink color (grey.100) at low opacity - the one shadow tone for markers.
@@ -238,6 +248,7 @@ interface BaseMapMarkerBaseProps extends WithDataTestIdProps {
 export type BaseMapMarkerVariantProps =
   | { variant?: "color" }
   | { variant: "icon"; icon: IconType }
+  | { variant: "letter"; letter: string }
   | { variant: "person"; firstName: string; lastName: string; src?: string }
   | { variant: "team"; name: string; src?: string }
   | { variant: "company"; name: string; src?: string }
@@ -266,7 +277,8 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
     // Selected markers always render at the reserved `xl` size.
     const m = METRICS[selected ? "xl" : size]
     const interactive = Boolean(onClick)
-    const colored = variant === "color" || variant === "icon"
+    const colored =
+      variant === "color" || variant === "icon" || variant === "letter"
     // The name F0Avatar hashes into its "random" color - matched here so the
     // label + dot pick up the same hue the avatar itself shows.
     const avatarColorName =
@@ -275,8 +287,8 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
         : (variant === "team" || variant === "company") && "name" in props
           ? props.name
           : null
-    // Accent = label text + dot color (and the head fill for color/icon):
-    //  - color/icon: the hue prop (default radical)
+    // Accent = label text + dot color (and the head fill for color/icon/letter):
+    //  - color/icon/letter: the hue prop (default radical)
     //  - person: the avatar's own color, or grey when it shows a photo instead
     //    of a colored initials chip
     //  - team/company: the avatar's own color (they always have one)
@@ -326,6 +338,20 @@ const BaseMapMarkerBase = forwardRef<HTMLButtonElement, BaseMapMarkerProps>(
             transition: "width 200ms ease-out, height 200ms ease-out",
           }}
         />
+      ) : variant === "letter" && "letter" in props ? (
+        // A single white glyph (route-stop "A" / "B" ...), sized off the same
+        // step as the icon so it animates with the head when growing to xl.
+        <span
+          aria-hidden
+          className="font-semibold leading-none"
+          style={{
+            color: WHITE,
+            fontSize: Math.round(iconPx * 0.78),
+            transition: "font-size 200ms ease-out",
+          }}
+        >
+          {props.letter.charAt(0).toUpperCase()}
+        </span>
       ) : variant === "person" && "firstName" in props ? (
         scaledAvatar(
           <F0Avatar

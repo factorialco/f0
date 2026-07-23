@@ -13,6 +13,7 @@ import {
 const SAMPLE: Record<F0MapMarkerVariant, F0MapMarkerProps> = {
   default: { variant: "default", label: "Meetup point" },
   workplace: { variant: "workplace", label: "Barcelona HQ" },
+  stop: { variant: "stop", letter: "A", label: "Pickup" },
   employee: {
     variant: "employee",
     firstName: "Ada",

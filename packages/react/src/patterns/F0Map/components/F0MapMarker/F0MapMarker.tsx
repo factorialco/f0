@@ -24,6 +24,7 @@ export const f0MapMarkerVariants = [
   "workplace",
   "employee",
   "company",
+  "stop",
 ] as const
 export type F0MapMarkerVariant = (typeof f0MapMarkerVariants)[number]
 
@@ -37,6 +38,8 @@ export type F0MapMarkerLabelPlacement = BaseMapMarkerLabelPlacement
 
 /** Fixed hue for every workplace pin, so all sites read the same. */
 const WORKPLACE_COLOR: BaseMapMarkerColor = "malibu"
+/** Fixed hue for route stops - matches the route/arc lines they punctuate. */
+const STOP_COLOR: BaseMapMarkerColor = "radical"
 
 interface F0MapMarkerBaseProps extends WithDataTestIdProps {
   /**
@@ -66,12 +69,15 @@ interface F0MapMarkerBaseProps extends WithDataTestIdProps {
  *  - `workplace`: a building glyph on a fixed brand hue (all sites match).
  *  - `employee` / `company`: an avatar whose color is its own identity color
  *    (grey when a photo replaces the colored chip).
+ *  - `stop`: a route stop - a single letter (A, B, C...) on the same fixed
+ *    hue as the route/arc lines it punctuates.
  */
 export type F0MapMarkerVariantProps =
   | { variant: "default" }
   | { variant: "workplace" }
   | { variant: "employee"; firstName: string; lastName: string; src?: string }
   | { variant: "company"; name: string; src?: string }
+  | { variant: "stop"; letter: string }
 
 export type F0MapMarkerProps = F0MapMarkerBaseProps & F0MapMarkerVariantProps
 
@@ -97,6 +103,11 @@ const toBase = (
       return {
         variant: { variant: "icon", icon: Office },
         color: WORKPLACE_COLOR,
+      }
+    case "stop":
+      return {
+        variant: { variant: "letter", letter: props.letter },
+        color: STOP_COLOR,
       }
     case "default":
     default:
