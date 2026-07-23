@@ -48,7 +48,8 @@ export function meetsStableBar(c) {
     c.hasUnitTests &&
     c.hasPlayFunction &&
     c.hasMdxDocs &&
-    DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good")
+    DOC_TIER_ORDER.indexOf(c.docQuality) >= DOC_TIER_ORDER.indexOf("good") &&
+    c.a11yEnforced
   )
 }
 
@@ -300,6 +301,18 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
     }
     const docSignals = docSignalsOf(mdxContent)
 
+    // Accessibility posture (heuristic, mirrors the axe ratchet in
+    // .storybook/test-runner.ts). "enforced" means the file opts its stories
+    // into blocking axe (`test: "error"`) with no skips and no todo/warning
+    // downgrades — which, on a green main, implies the stories are axe-clean.
+    // Limitation: a file mixing `error` with a per-story `todo` reads as debt.
+    const a11ySkipped =
+      /\bskipCi\b/.test(content) || /\bwithSkipA11y\s*\(/.test(content)
+    const a11yEnforced =
+      /\btest\s*:\s*["']error["']/.test(content) &&
+      !a11ySkipped &&
+      !/\btest\s*:\s*["'](todo|warning)["']/.test(content)
+
     components.push({
       name: storyName,
       zone,
@@ -313,6 +326,9 @@ export function computeComponentStatusData(srcDir = SRC_DIR) {
       hasMdxDocs: Boolean(mdxPath),
       docQuality: scoreDocQuality(mdxContent, docSignals),
       docSignals,
+      // Accessibility: enforced = axe blocks on this component's stories.
+      a11yEnforced,
+      a11ySkipped,
       storyFile: relative,
     })
   }

@@ -24,6 +24,8 @@ const DATASET: ComponentEntry[] = [
       hasDoDonts: false,
       exampleCount: 0,
     },
+    a11yEnforced: false,
+    a11ySkipped: false,
     storyFile: "components/F0Card/__stories__/Card.stories.tsx",
   },
   {
@@ -45,6 +47,8 @@ const DATASET: ComponentEntry[] = [
       hasDoDonts: true,
       exampleCount: 4,
     },
+    a11yEnforced: true,
+    a11ySkipped: false,
     storyFile: "components/F0Alert/__stories__/F0Alert.stories.tsx",
   },
 ]
@@ -96,5 +100,19 @@ describe("ComponentStability", () => {
       <ComponentStability componentName="DoesNotExist" components={DATASET} />
     )
     expect(container).toBeEmptyDOMElement()
+  })
+
+  test("shows the Accessibility row with its build-time posture", () => {
+    // Enforced component: the row reads "enforced" (collapsed, no axe run).
+    const { unmount } = render(
+      <ComponentStability componentName="Alert" components={DATASET} />
+    )
+    expect(screen.getByText("Accessibility")).toBeInTheDocument()
+    expect(screen.getByText(/— enforced/)).toBeInTheDocument()
+    unmount()
+
+    // Not enforced: the row invites expanding to see the issues.
+    render(<ComponentStability componentName="Card" components={DATASET} />)
+    expect(screen.getByText(/not enforced/)).toBeInTheDocument()
   })
 })

@@ -62,6 +62,11 @@ export interface ComponentEntry {
   hasMdxDocs: boolean
   docQuality: DocQuality
   docSignals: DocSignals
+  /** Every story opts into blocking axe (`test: "error"`), none skipped or
+   * downgraded to todo/warning — implies axe-clean on a green main. */
+  a11yEnforced: boolean
+  /** At least one story skips axe entirely (skipCi / withSkipA11y). */
+  a11ySkipped: boolean
   storyFile: string
 }
 
@@ -284,6 +289,13 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
       },
     ],
     isMet: (c) => docQualityAtLeast(c.docQuality, MIN_DOC_QUALITY),
+  },
+  {
+    key: "a11y",
+    label: "Accessibility enforced",
+    detail:
+      'Every story runs axe in blocking mode (a11y: { test: "error" }) — none skipped or downgraded to "todo". On a green main this means the component is axe-clean (WCAG 2.0/2.1/2.2, A & AA).',
+    isMet: (c) => c.a11yEnforced,
   },
 ]
 
