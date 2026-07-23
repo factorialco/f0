@@ -1,0 +1,461 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./index.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# Analytics dashboard
+
+F0AnalyticsDashboard presents related metrics, charts, and tables as one report with shared filters, optional export, and an editable grid.
+
+## Anatomy
+
+<Canvas of={Stories.MixedDashboard} />
+
+<Controls of={Stories.MixedDashboard} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>items</code>
+        </td>
+        <td>
+          <code>DashboardItem&lt;Filters&gt;[]</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>
+          Ordered metric, chart, and collection definitions rendered in the
+          shared grid.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>filters</code>
+        </td>
+        <td>
+          <code>Filters</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Dashboard-level filter definitions. Every participating item receives
+          the applied values.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>filtersLoading</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Shows a filter-bar skeleton while definitions or options are loading.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>presets</code>
+        </td>
+        <td>
+          <code>PresetsDefinition&lt;Filters&gt;</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Quick-select report filter configurations.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultFilters</code>
+        </td>
+        <td>
+          <code>FiltersState&lt;Filters&gt;</code>
+        </td>
+        <td>
+          <code>empty object</code>
+        </td>
+        <td>—</td>
+        <td>
+          Initial applied values for uncontrolled usage. Ignored when{" "}
+          <code>filtersValue</code> is provided.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>filtersValue</code>
+        </td>
+        <td>
+          <code>FiltersState&lt;Filters&gt;</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Applied values for controlled usage.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onFiltersChange</code>
+        </td>
+        <td>
+          <code>(value: FiltersState&lt;Filters&gt;) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Receives committed Apply, Clear, chip removal, and preset transitions.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>navigationFilters</code>
+        </td>
+        <td>
+          <code>NavigationFiltersDefinition</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Navigation-oriented filters, such as date navigation, merged into item
+          fetch values.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>editMode</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Enables item rearrangement, resizing, and deletion controls.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onLayoutChange</code>
+        </td>
+        <td>
+          <code>(layout: DashboardItemLayout[]) =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Receives the ordered item layout after an edit.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>enableExport</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Displays the dashboard-level export control.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>exportFilename</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>
+          <code>"dashboard"</code>
+        </td>
+        <td>—</td>
+        <td>Base filename for Excel export.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onExportReady</code>
+        </td>
+        <td>
+          <code>
+            (exportFn: (() =&gt; Promise&lt;void&gt;) | undefined) =&gt; void
+          </code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Exposes the current dashboard export function to a parent surface.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>resetKey</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Forces the grid back to its initial layout when incremented.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onTransformChart</code>
+        </td>
+        <td>
+          <code>
+            (itemId: string, newType: string, orientation?: "vertical" |
+            "horizontal") =&gt; void
+          </code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Receives chart-type changes requested from an item menu.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0AnalyticsDashboard when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>One report combines related visualizations</td>
+        <td>
+          Metrics, charts, and tables must share context and filter values.
+        </td>
+      </tr>
+      <tr>
+        <td>A report supports reusable saved views</td>
+        <td>
+          The parent can own filter and layout state through the controlled
+          callbacks.
+        </td>
+      </tr>
+      <tr>
+        <td>A report needs a combined export</td>
+        <td>Multiple dashboard items belong in one workbook.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>A page contains one searchable table</td>
+        <td>
+          <code>OneDataCollection</code> with its collection controls.
+        </td>
+      </tr>
+      <tr>
+        <td>A control affects only one visualization</td>
+        <td>An item-specific control owned by that visualization.</td>
+      </tr>
+      <tr>
+        <td>Information is a transient summary</td>
+        <td>A compact KPI or summary surface without dashboard editing.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description: "Keep report filters global and predictable.",
+    guidelines: [
+      "Use one applied filter state for every participating item",
+      "Keep filter labels consistent with the report's data vocabulary",
+      "Persist only committed values",
+    ],
+  }}
+  dont={{
+    description: "Avoid mixing report and item scope.",
+    guidelines: [
+      "Don't present a dashboard filter when it changes only one item",
+      "Don't persist temporary picker selections before Apply",
+      "Don't silently retain values for removed filter definitions",
+    ],
+  }}
+/>
+
+### Behavior
+
+- WHEN <code>filtersValue</code> is provided → THEN the dashboard is controlled and waits for the parent to pass each committed value back.
+- WHEN only <code>defaultFilters</code> is provided → THEN the dashboard owns subsequent committed filter state.
+- WHEN Apply, Clear, chip removal, or a preset commits a change → THEN <code>onFiltersChange</code> receives the next applied state and participating items refetch with it.
+- WHEN the picker closes without applying → THEN temporary selections are discarded.
+- WHEN an item sets <code>useDashboardFilters=false</code> → THEN that item fetches with an empty filter object.
+- WHEN <code>items</code> is empty → THEN the filter bar remains usable without a grid item fetch.
+
+### Usage examples
+
+**Report-level filter review matrix**
+
+Report filters are one controlled state for the entire dashboard. Every example keeps the applied value visible above the report so changes can be reviewed without inspecting component internals.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th scope="col" className="text-left">
+          Review case
+        </th>
+        <th scope="col" className="text-left">
+          What it demonstrates
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Empty controlled state</td>
+        <td>No chips or counter until the first committed filter.</td>
+      </tr>
+      <tr>
+        <td>Pre-applied controlled state</td>
+        <td>
+          Apply, dismiss/rollback, Clear, chip removal, presets, and counter
+          behavior.
+        </td>
+      </tr>
+      <tr>
+        <td>Scalar values</td>
+        <td>
+          Search text, one selected option, a single date, and a single number.
+        </td>
+      </tr>
+      <tr>
+        <td>Collection and range values</td>
+        <td>Multiple selected options, a date range, and a numeric range.</td>
+      </tr>
+      <tr>
+        <td>Export, no-data, and no-item reports</td>
+        <td>
+          The same report-level state remains available across established
+          dashboard variants.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Empty controlled state**
+
+Start from an empty saved value. There are no applied chips or filter counter until a reviewer commits the first report filter.
+
+<Canvas of={Stories.ReportFiltersEmpty} />
+
+**Pre-applied and commit lifecycle**
+
+Start from a saved Department filter. Draft changes roll back on dismiss; Apply, Clear, chip removal, and presets update the visible parent state.
+
+<Canvas of={Stories.ReportFiltersPreApplied} />
+
+**Scalar values**
+
+Review search text, one selected option, a single date, and a single number together.
+
+<Canvas of={Stories.ReportFilterScalarValues} />
+
+**Collection and range values**
+
+Review multiple selected options, a date range, and a numeric range together. Boolean and valueless filters are not native <code>OneFilterPicker</code> filter types and are intentionally not represented as supported dashboard controls.
+
+<Canvas of={Stories.ReportFilterRangeAndMultipleValues} />
+
+**With dashboard export**
+
+The export control and every dashboard item consume the same applied report filter value.
+
+<Canvas of={Stories.WithExport} />
+
+**With no report data**
+
+The filter bar remains usable when valid report filters return empty chart data.
+
+<Canvas of={Stories.EmptyDashboard} />
+
+**With no dashboard items**
+
+The filter bar remains usable when the report has no items, without starting an item fetch.
+
+<Canvas of={Stories.ReportFiltersNoItems} />
+
+## Accessibility
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>
+          Moves through the filter trigger, presets, applied chips, export, and
+          item actions.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Opens controls and activates focused filter options or actions.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>Closes the filter dialog and rolls back temporary selections.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- The filter trigger names the applied filter labels, while a visible counter shows how many report filters are active.
+- The filter popover has a dialog name, and filter options expose native checkbox semantics.
+- Applied filter removal buttons include the filter label and selected value in their accessible names.

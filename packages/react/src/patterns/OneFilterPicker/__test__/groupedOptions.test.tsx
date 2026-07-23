@@ -64,23 +64,37 @@ const groupedDefinition = {
 const openPicker = async (user: ReturnType<typeof userEvent.setup>) => {
   await user.click(screen.getByRole("button", { name: /filters/i }))
   await waitFor(() =>
-    expect(screen.getByText("Barcelona HQ")).toBeInTheDocument()
+    expect(
+      screen.getByRole("checkbox", { name: "Barcelona HQ" })
+    ).toBeInTheDocument()
   )
 }
 
-// The expand chevron is a ghost icon-button with no accessible label; it's the
-// only empty-labelled button rendered inside a group row.
 const expandGroup = async (
   user: ReturnType<typeof userEvent.setup>,
   index = 0
 ) => {
-  const chevrons = screen
-    .getAllByRole("button")
-    .filter((b) => !b.textContent?.trim() && !b.getAttribute("aria-label"))
+  const chevrons = screen.getAllByRole("button", { expanded: false })
   await user.click(chevrons[index])
 }
 
 describe("OneFilterPicker - grouped (nested) options", () => {
+  it("counts an applied hidden nested filter in the trigger", () => {
+    render(
+      <OneFilterPicker
+        filters={groupedDefinition}
+        value={{ space: ["1"] }}
+        onChange={vi.fn()}
+        displayCounter
+      />
+    )
+
+    const trigger = screen.getByRole("button", {
+      name: "Filters. Active filters: Space",
+    })
+    expect(trigger).toHaveTextContent("1")
+  })
+
   it("does not render hideSelector sibling filters as their own list entry", async () => {
     const user = userEvent.setup({ pointerEventsCheck: 0 })
 
@@ -118,8 +132,10 @@ describe("OneFilterPicker - grouped (nested) options", () => {
 
     // Expand "Barcelona HQ" and pick its nested "Floor 1" child.
     await expandGroup(user, 0)
-    await waitFor(() => expect(screen.getByText("Floor 1")).toBeInTheDocument())
-    await user.click(screen.getByText("Floor 1"))
+    const floorCheckbox = await screen.findByRole("checkbox", {
+      name: "Floor 1",
+    })
+    await user.click(floorCheckbox)
 
     await user.click(screen.getByRole("button", { name: /apply filters/i }))
 
@@ -147,8 +163,10 @@ describe("OneFilterPicker - grouped (nested) options", () => {
 
     // Then drill into it and select a nested child.
     await expandGroup(user, 0)
-    await waitFor(() => expect(screen.getByText("Floor 1")).toBeInTheDocument())
-    await user.click(screen.getByText("Floor 1"))
+    const floorCheckbox = await screen.findByRole("checkbox", {
+      name: "Floor 1",
+    })
+    await user.click(floorCheckbox)
 
     await user.click(screen.getByRole("button", { name: /apply filters/i }))
 

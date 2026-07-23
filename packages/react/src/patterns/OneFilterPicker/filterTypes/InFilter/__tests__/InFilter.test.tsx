@@ -231,12 +231,8 @@ describe("InFilter", () => {
     })
   })
 
-  // Regression coverage for the checkbox being unclickable: the presentational
-  // checkbox sits behind a pointer-events guard so a real click falls through to
-  // the row's onToggle. userEvent doesn't model that fall-through, so we disable
-  // its pointer-events check to dispatch directly on the checkbox — which still
-  // reproduces the broken case (the click used to be swallowed by the wrapper's
-  // stopPropagation and never reached onToggle).
+  // Regression coverage for the option checkbox. It is both pointer and keyboard
+  // operable, while its click is isolated from the row to avoid double toggles.
   describe("selecting via the checkbox", () => {
     const staticSchema = (options: { value: string; label: string }[]) => ({
       label: "Department",
@@ -267,6 +263,60 @@ describe("InFilter", () => {
       await user.click(screen.getByRole("checkbox", { name: "Design" }))
 
       expect(onChange).toHaveBeenCalledWith(["design"])
+    })
+
+    it("selects a flat option from the keyboard", async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      const options = [
+        { value: "eng", label: "Engineering" },
+        { value: "design", label: "Design" },
+      ]
+      mockedUseLoadOptions.mockReturnValue({
+        ...defaultLoadOptionsReturn,
+        options,
+      })
+
+      render(
+        <InFilter
+          schema={staticSchema(options)}
+          value={[]}
+          onChange={onChange}
+        />
+      )
+
+      screen.getByRole("checkbox", { name: "Engineering" }).focus()
+      await user.keyboard(" ")
+
+      expect(onChange).toHaveBeenCalledWith(["eng"])
+    })
+
+    it("selects all flat options from the keyboard", async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+
+      const options = [
+        { value: "eng", label: "Engineering" },
+        { value: "design", label: "Design" },
+      ]
+      mockedUseLoadOptions.mockReturnValue({
+        ...defaultLoadOptionsReturn,
+        options,
+      })
+
+      render(
+        <InFilter
+          schema={staticSchema(options)}
+          value={[]}
+          onChange={onChange}
+        />
+      )
+
+      screen.getByRole("checkbox", { name: "Select all" }).focus()
+      await user.keyboard(" ")
+
+      expect(onChange).toHaveBeenCalledWith(["eng", "design"])
     })
 
     it("deselects an already-selected flat option when its checkbox is clicked", async () => {
@@ -327,6 +377,75 @@ describe("InFilter", () => {
       await user.click(screen.getByRole("checkbox", { name: "Engineering" }))
 
       expect(onChange).toHaveBeenCalledWith(["eng"])
+    })
+
+    it("selects a nested parent option from the keyboard", async () => {
+      const onChange = vi.fn()
+      const user = userEvent.setup()
+      const options = [
+        {
+          value: "eng",
+          label: "Engineering",
+          children: {
+            filterKey: "team",
+            options: [{ value: "frontend", label: "Frontend" }],
+          },
+        },
+      ]
+      mockedUseLoadOptions.mockReturnValue({
+        ...defaultLoadOptionsReturn,
+        options,
+      })
+
+      render(
+        <InFilter
+          schema={{ label: "Department", options: { options } }}
+          value={[]}
+          onChange={onChange}
+        />
+      )
+
+      screen.getByRole("checkbox", { name: "Engineering" }).focus()
+      await user.keyboard(" ")
+
+      expect(onChange).toHaveBeenCalledWith(["eng"])
+    })
+
+    it("selects an expanded nested child option from the keyboard", async () => {
+      const onFilterChange = vi.fn()
+      const user = userEvent.setup()
+      const options = [
+        {
+          value: "eng",
+          label: "Engineering",
+          children: {
+            filterKey: "team",
+            options: [{ value: "frontend", label: "Frontend" }],
+          },
+        },
+      ]
+      mockedUseLoadOptions.mockReturnValue({
+        ...defaultLoadOptionsReturn,
+        options,
+      })
+
+      render(
+        <InFilter
+          schema={{ label: "Department", options: { options } }}
+          value={[]}
+          onChange={vi.fn()}
+          onFilterChange={onFilterChange}
+          allFiltersValue={{ team: [] }}
+        />
+      )
+
+      await user.click(
+        screen.getByRole("button", { name: "Expand Engineering" })
+      )
+      screen.getByRole("checkbox", { name: "Frontend" }).focus()
+      await user.keyboard(" ")
+
+      expect(onFilterChange).toHaveBeenCalledWith("team", ["frontend"])
     })
 
     it("toggles exactly once inside a <form> without an infinite update loop", async () => {

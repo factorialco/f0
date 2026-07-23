@@ -316,12 +316,10 @@ export function InFilter<T extends string, R extends RecordType = RecordType>({
           </OneEllipsis>
         </span>
         <F0Checkbox
-          id="select-all"
           title={i18n.actions.selectAll}
           checked={isIndeterminate || allFilteredSelected}
           indeterminate={isIndeterminate}
           onCheckedChange={handleCheckSelectAll}
-          presentational
           hideLabel
         />
       </div>

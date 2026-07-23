@@ -116,6 +116,58 @@ describe("Filters", () => {
       })
     })
 
+    it("keeps an in-progress draft when the host re-renders with a content-identical value", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      const { rerender } = render(
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+      )
+
+      await openFilterPopover(user)
+      await user.click(screen.getByText("Engineering"))
+      expect(
+        screen.getByRole("checkbox", { name: "Engineering" })
+      ).toBeChecked()
+
+      // Controlled hosts commonly rebuild the value object every render.
+      // An identity-only change must not wipe the unapplied draft.
+      rerender(
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+      )
+
+      expect(
+        screen.getByRole("checkbox", { name: "Engineering" })
+      ).toBeChecked()
+
+      await user.click(screen.getByRole("button", { name: /apply filters/i }))
+      expect(onChange).toHaveBeenCalledWith({ department: ["engineering"] })
+    })
+
+    it("rolls back unapplied changes when the popover is dismissed", async () => {
+      const user = userEvent.setup()
+      const onChange = vi.fn()
+
+      render(
+        <OneFilterPicker filters={definition} value={{}} onChange={onChange} />
+      )
+
+      await openFilterPopover(user)
+      await user.click(screen.getByText("Engineering"))
+      expect(
+        screen.getByRole("checkbox", { name: "Engineering" })
+      ).toBeChecked()
+
+      await user.keyboard("{Escape}")
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      await openFilterPopover(user)
+
+      expect(
+        screen.getByRole("checkbox", { name: "Engineering" })
+      ).not.toBeChecked()
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
     it("correctly removes a filter when handleRemoveFilter is called", () => {
       const onChange = vi.fn()
 
@@ -166,7 +218,7 @@ describe("Filters", () => {
       )
 
       // Find all close buttons in the document
-      const closeButtons = screen.getAllByRole("button", { name: "Close" })
+      const closeButtons = screen.getAllByRole("button", { name: /^Close:/ })
 
       // Click the first close button (assuming it's the department filter's close button)
       await user.click(closeButtons[0])

@@ -56,7 +56,9 @@ describe("URL sync without an id", () => {
     // A filter chip rendered → the URL filter was applied to a collection
     // without an id, and the param survives (re-affirmed by the write).
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: "Close" })).toBeInTheDocument()
+      expect(
+        screen.getByRole("button", { name: /^Close:/ })
+      ).toBeInTheDocument()
     )
     expect(window.location.search).toContain("dc_department=Design")
   })

@@ -40,6 +40,7 @@ export function FilterBar<Filters extends FiltersDefinition>({
       presets={presets}
       presetsLoading={presetsLoading}
       onChange={onChange}
+      displayCounter
     />
   )
 }

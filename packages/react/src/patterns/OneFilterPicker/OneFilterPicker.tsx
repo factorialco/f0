@@ -23,7 +23,11 @@ import { PresetsDefinition } from "./types"
 export type OneFilterPickerRootProps<Definition extends FiltersDefinition> = {
   /** The definition of available filters and their configurations */
   filters?: Definition
-  /** Current state of applied filters */
+  /**
+   * Current state of applied filters. Fully controlled: the picker renders
+   * exclusively from this prop, so `onChange` must be reflected back into it
+   * (synchronously) or chips and applied state will not update.
+   */
   value: FiltersState<Definition>
   /** Optional preset configurations that users can select */
   presets?: PresetsDefinition<Definition>
@@ -141,15 +145,8 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
     onOpenChange?.(isFiltersOpen)
   }, [isFiltersOpen, onOpenChange])
 
-  const [localFiltersValue, setLocalFiltersValue] = useState(value)
-
-  useEffect(() => {
-    setLocalFiltersValue(value ?? {})
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- We deep compare the filters object
-  }, [JSON.stringify(filters), JSON.stringify(value)])
-
   const removeFilterValue = (key: keyof Definition) => {
-    const newFilters = { ...localFiltersValue }
+    const newFilters = { ...value }
     delete newFilters[key]
 
     // Also clear nested child filter keys to avoid orphaned values
@@ -161,12 +158,10 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
       })
     }
 
-    setLocalFiltersValue(newFilters as FiltersState<Definition>)
     props.onChange(newFilters as FiltersState<Definition>)
   }
 
   const setFiltersValue = (filters: FiltersState<Definition>) => {
-    setLocalFiltersValue(filters)
     props.onChange(filters)
   }
 
@@ -177,7 +172,7 @@ const FiltersRoot = <Definition extends FiltersDefinition>({
         mode,
         presets: props.presets as PresetsDefinition<FiltersDefinition>,
         presetsLoading,
-        value: localFiltersValue,
+        value,
         filters: filters,
         removeFilterValue,
         setFiltersValue: (value: FiltersState<FiltersDefinition>) =>
