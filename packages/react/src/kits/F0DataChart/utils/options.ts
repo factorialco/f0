@@ -634,6 +634,8 @@ interface BaseChartOptionsParams {
   tooltipFilterSeries?: (seriesName: string) => boolean
   /** Custom tooltip formatter — when provided, replaces the default one */
   tooltipFormatter?: (params: unknown) => string
+  /** Value formatter used only in the tooltip (defaults to `valueFormatter`) */
+  tooltipValueFormatter?: (value: number) => string
   /** User-provided ECharts overrides (shallow-merged on top) */
   echartsOptions?: Partial<echarts.EChartsOption>
   /** Container width in pixels — used to auto-compute category label interval */
@@ -671,6 +673,7 @@ export function buildBaseChartOptions({
   categoryFormatter,
   tooltipFilterSeries,
   tooltipFormatter,
+  tooltipValueFormatter,
   echartsOptions,
   containerWidth,
   containerHeight,
@@ -715,7 +718,9 @@ export function buildBaseChartOptions({
     tooltip: buildTooltip({
       theme,
       filterSeries: tooltipFilterSeries,
-      valueFormatter,
+      // Tooltip can format values differently from the axis/labels (e.g. show
+      // the precise number while the labels stay compact).
+      valueFormatter: tooltipValueFormatter ?? valueFormatter,
       customFormatter: tooltipFormatter,
     }),
     emphasis: DEFAULT_EMPHASIS,

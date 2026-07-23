@@ -335,3 +335,49 @@ describe("BarChart — hideOverflowingLabels", () => {
     expect(getMainSeries()[0]?.labelLayout?.(exact)).toEqual({}) // 0px default → fits
   })
 })
+
+// ---------------------------------------------------------------------------
+// tooltipValueFormatter — the tooltip can show precise values while the
+// axis/labels stay compact.
+// ---------------------------------------------------------------------------
+
+describe("BarChart — tooltipValueFormatter", () => {
+  function getTooltipFormatter() {
+    const call = setOptionMock.mock.calls.at(-1)
+    if (!call) throw new Error("setOption was never called")
+    return (call[0] as { tooltip?: { formatter?: (p: unknown) => string } })
+      .tooltip?.formatter
+  }
+
+  it("formats tooltip values independently of the compact axis/label formatter", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+        tooltipValueFormatter={(v) => v.toLocaleString("en-US")}
+      />
+    )
+    const html = getTooltipFormatter()?.([
+      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
+    ])
+    expect(html).toContain("107,505") // precise, grouped
+    expect(html).not.toContain("K") // not the compact form
+  })
+
+  it("falls back to valueFormatter when no tooltipValueFormatter is given", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A"]}
+        series={[{ name: "S", data: [107505] }]}
+        valueFormatter={(v) => `${Math.round(v / 1000)}K`}
+      />
+    )
+    const html = getTooltipFormatter()?.([
+      { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
+    ])
+    expect(html).toContain("108K")
+  })
+})

@@ -278,6 +278,7 @@ export function useBarChartOptions(
     labelFitPadding,
     hideAllLabelsOnOverflow = true,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber = 2,
@@ -392,6 +393,10 @@ export function useBarChartOptions(
 
     const hasAnyTargets = targetMap.size > 0
 
+    // Tooltip values use their own formatter when provided (precise numbers),
+    // otherwise fall back to the shared value formatter.
+    const tooltipValue = tooltipValueFormatter ?? valueFormatter
+
     const tooltipFormatter = hasAnyTargets
       ? (params: unknown) => {
           if (!Array.isArray(params)) return ""
@@ -411,14 +416,14 @@ export function useBarChartOptions(
                 dataIndex?: number
               }) => {
                 const val = Number(p.value)
-                const formattedValue = valueFormatter
-                  ? valueFormatter(val)
+                const formattedValue = tooltipValue
+                  ? tooltipValue(val)
                   : String(val)
                 const targets = targetMap.get(String(p.seriesName ?? ""))
                 const target = targets?.[p.dataIndex ?? 0]
                 const targetHtml =
                   target !== undefined
-                    ? ` <span style="opacity: 0.6">/ ${valueFormatter ? valueFormatter(target) : String(target)}</span>`
+                    ? ` <span style="opacity: 0.6">/ ${tooltipValue ? tooltipValue(target) : String(target)}</span>`
                     : ""
                 return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong>${targetHtml}</div>`
               }
@@ -445,6 +450,7 @@ export function useBarChartOptions(
       categoryFormatter,
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
       tooltipFormatter,
+      tooltipValueFormatter,
       valueAxisSplitNumber,
       echartsOptions,
       containerWidth,
@@ -474,6 +480,7 @@ export function useBarChartOptions(
     labelFitPadding,
     hideAllLabelsOnOverflow,
     valueFormatter,
+    tooltipValueFormatter,
     categoryFormatter,
     labelFontSize,
     valueAxisSplitNumber,

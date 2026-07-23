@@ -177,6 +177,12 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    * Font size in pixels for the value labels. @default 11
    */
   labelFontSize?: number
+  /**
+   * Formatter for the values shown in the hover tooltip. Defaults to
+   * {@link F0DataChartBaseProps.valueFormatter}; set it to show precise values
+   * (e.g. "107,505") while the axis and labels stay compact ("107.5K").
+   */
+  tooltipValueFormatter?: (value: number) => string
 }
 
 // ---------------------------------------------------------------------------
