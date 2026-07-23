@@ -145,6 +145,12 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
   orientation?: "vertical" | "horizontal"
   /** Stack all series into a single bar per category. @default false */
   stacked?: boolean
+  /**
+   * Suggested number of segments on the value axis — lower values draw fewer
+   * grid lines. Applies to whichever axis is the value axis (Y for vertical
+   * bars, X for horizontal). ECharts rounds to "nice" intervals. @default 2
+   */
+  valueAxisSplitNumber?: number
 }
 
 // ---------------------------------------------------------------------------

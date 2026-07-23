@@ -230,6 +230,7 @@ export function useBarChartOptions(
     showLabels = false,
     valueFormatter,
     categoryFormatter,
+    valueAxisSplitNumber = 2,
     echartsOptions,
   }: F0DataChartBarProps,
   size: BarChartSize
@@ -327,6 +328,7 @@ export function useBarChartOptions(
       categoryFormatter,
       tooltipFilterSeries: (name) => name.endsWith(" (target)"),
       tooltipFormatter,
+      valueAxisSplitNumber,
       echartsOptions,
       containerWidth,
       containerHeight,
@@ -353,6 +355,7 @@ export function useBarChartOptions(
     showLabels,
     valueFormatter,
     categoryFormatter,
+    valueAxisSplitNumber,
     echartsOptions,
     theme,
     containerWidth,

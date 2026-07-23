@@ -226,6 +226,8 @@ interface ValueAxisOptions {
   maxLabelWidth?: number
   /** Whether the axis labels are rendered. Grid lines stay controlled by showGrid. */
   show?: boolean
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  splitNumber?: number
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -235,9 +237,11 @@ export function buildValueAxis({
   formatter,
   maxLabelWidth,
   show = true,
+  splitNumber,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
+    ...(splitNumber !== undefined ? { splitNumber } : {}),
     axisLine: {
       show: false,
     },
@@ -523,6 +527,7 @@ export function buildAxes({
   showCategoryAxis = true,
   showValueAxis = true,
   categoryMaxLabelWidth,
+  valueAxisSplitNumber,
 }: {
   isVertical: boolean
   categories: string[]
@@ -543,6 +548,8 @@ export function buildAxes({
    * "September" still get rendered horizontally and truncate gracefully.
    */
   categoryMaxLabelWidth?: number
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  valueAxisSplitNumber?: number
 }) {
   const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
 
@@ -586,6 +593,7 @@ export function buildAxes({
     showGrid,
     formatter: valueFormatter,
     show: showValueAxis,
+    splitNumber: valueAxisSplitNumber,
     ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
@@ -640,6 +648,8 @@ interface BaseChartOptionsParams {
   showValueAxis?: boolean
   /** Optional ellipsis truncation width for the category axis labels */
   categoryMaxLabelWidth?: number
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  valueAxisSplitNumber?: number
 }
 
 /**
@@ -668,6 +678,7 @@ export function buildBaseChartOptions({
   showCategoryAxis = true,
   showValueAxis = true,
   categoryMaxLabelWidth,
+  valueAxisSplitNumber,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -682,6 +693,7 @@ export function buildBaseChartOptions({
     showCategoryAxis,
     showValueAxis,
     categoryMaxLabelWidth,
+    valueAxisSplitNumber,
   })
 
   const baseOptions: echarts.EChartsOption = {
