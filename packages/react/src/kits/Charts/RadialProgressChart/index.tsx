@@ -7,6 +7,11 @@ export interface RadialProgressProps {
   overview?: { number: number; label: string }
 }
 
+/**
+ * @deprecated The Charts kit is deprecated and RadialProgressChart has no
+ * known consumers — it will be removed. Use `<F0DataChart type="gauge" />`
+ * for gauge-style progress.
+ */
 export function RadialProgressChart({
   value,
   max = 100,

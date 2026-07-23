@@ -2,8 +2,17 @@ import { forwardRef } from "react"
 
 import { experimentalComponent } from "@/lib/experimental"
 
-import { AreaChart, AreaChartProps } from "@/kits/Charts/AreaChart"
+import type { AreaChartProps } from "@/kits/Charts/AreaChart"
+import { F0DataChart } from "@/kits/F0DataChart"
+import { usePrivacyMode } from "@/lib/privacyMode"
 import { withSkeleton } from "../../../../lib/skeleton"
+import {
+  toAxisEchartsOptions,
+  toCategories,
+  toLineSeries,
+  toLineType,
+  toValueFormatter,
+} from "../adapters"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 
 export interface AreaChartWidgetProps extends ComposeChartContainerProps<AreaChartProps> {
@@ -15,6 +24,11 @@ const _AreaChartWidget = withSkeleton(
     { canBeBlurred, ...props },
     ref
   ) {
+    const { enabled: privacyModeEnabled } = usePrivacyMode()
+    // Privacy mode: mask value labels and disable the tooltip, mirroring the
+    // deprecated Charts AreaChart behavior for sensitive data (e.g. salaries)
+    const blurred = Boolean(canBeBlurred && privacyModeEnabled)
+
     const newContainerProps = {
       ...props,
       header: {
@@ -23,16 +37,41 @@ const _AreaChartWidget = withSkeleton(
       },
     }
 
-    const newPropsChart = {
-      ...props.chart,
-      yAxis: props.chart.yAxis ? { ...props.chart.yAxis } : { hide: true },
-    }
+    // Widget default: hide the value axis for a compact look (overridable)
+    const {
+      data,
+      dataConfig,
+      lineType,
+      xAxis,
+      yAxis = { hide: true },
+    } = props.chart
 
     return (
       <ChartContainer
         ref={ref}
         {...newContainerProps}
-        chart={<AreaChart {...newPropsChart} canBeBlurred={canBeBlurred} />}
+        chart={
+          <F0DataChart
+            type="line"
+            categories={toCategories(data)}
+            series={toLineSeries(dataConfig, data)}
+            lineType={toLineType(lineType)}
+            showArea
+            showLegend={false}
+            categoryFormatter={xAxis?.tickFormatter}
+            valueFormatter={
+              blurred ? () => "**" : toValueFormatter(yAxis?.tickFormatter)
+            }
+            echartsOptions={{
+              ...toAxisEchartsOptions({
+                categoryAxis: xAxis,
+                valueAxis: yAxis,
+                valueAxisName: "y",
+              }),
+              ...(blurred ? { tooltip: { show: false } } : {}),
+            }}
+          />
+        }
       />
     )
   }),

@@ -2,18 +2,39 @@ import { forwardRef } from "react"
 
 import { experimentalComponent } from "@/lib/experimental"
 
-import { PieChart, PieChartProps } from "@/kits/Charts/PieChart"
+import type { PieChartProps } from "@/kits/Charts/PieChart"
+import { F0DataChart } from "@/kits/F0DataChart"
 import { withSkeleton } from "../../../../lib/skeleton"
+import { toChartColorToken } from "../adapters"
 import { ChartContainer, ComposeChartContainerProps } from "../ChartContainer"
 
 const _PieChartWidget = withSkeleton(
   forwardRef<HTMLDivElement, ComposeChartContainerProps<PieChartProps>>(
     function PieChartWidget(props, ref) {
+      const { data, dataConfig } = props.chart
+
       return (
         <ChartContainer
           ref={ref}
           {...props}
-          chart={<PieChart {...props.chart} />}
+          chart={
+            <F0DataChart
+              type="pie"
+              // Donut ring, matching the deprecated Charts PieChart default
+              innerRadius={70}
+              showLabels={false}
+              series={{
+                name: "",
+                data: data.map((item) => ({
+                  name: item.label,
+                  value: item.value,
+                  color:
+                    toChartColorToken(item.color) ??
+                    toChartColorToken(dataConfig[item.label]?.color),
+                })),
+              }}
+            />
+          }
         />
       )
     }

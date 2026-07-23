@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { getColor } from "@/kits/Charts/utils/colors"
+import { getColor } from "@/lib/chart-colors"
 import { zeroRender as render, screen } from "@/testing/test-utils"
 
 import { F0SegmentedBar } from "../index"

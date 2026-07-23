@@ -1,20 +1,6 @@
-export const getCategoricalColor = (index: number, opacity?: number) => {
-  const categoricalColors = [
-    "categorical-1",
-    "categorical-2",
-    "categorical-3",
-    "categorical-4",
-    "categorical-5",
-    "categorical-6",
-    "categorical-7",
-    "categorical-8",
-  ]
-  return getColor(categoricalColors[index % categoricalColors.length], opacity)
-}
-
-export const getColor = (color: string, opacity?: number) => {
-  const opacityString = opacity !== undefined ? ` / ${opacity}` : ""
-  const chartColorName = `chart-${color}`
-
-  return `hsl(var(--${chartColorName})${opacityString})`
-}
+/**
+ * @deprecated Chart color helpers moved to `@/lib/chart-colors` — import
+ * from there instead. This re-export only remains so the deprecated Charts
+ * kit keeps compiling until it is removed.
+ */
+export { getCategoricalColor, getColor } from "@/lib/chart-colors"

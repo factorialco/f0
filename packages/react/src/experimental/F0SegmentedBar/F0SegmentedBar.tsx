@@ -1,6 +1,6 @@
 import { forwardRef } from "react"
 
-import { getColor } from "@/kits/Charts/utils/colors"
+import { getColor } from "@/lib/chart-colors"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 import { useI18n } from "@/lib/providers/i18n"
