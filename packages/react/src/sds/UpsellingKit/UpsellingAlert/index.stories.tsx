@@ -9,11 +9,15 @@ import { UpsellingAlert } from "."
 /**
  * Example dismiss handler: persist the dismissal so the alert stays hidden for
  * a number of days and reappears afterwards.
+ *
+ * Takes a per-alert `storageKey` so multiple upselling alerts on the same page
+ * don't overwrite each other's dismissal state. Namespace it by the module /
+ * feature the alert promotes.
  */
-const dismissForDays = () => {
+const dismissForDays = (storageKey: string) => () => {
   const HIDE_FOR_DAYS = 7
   const hideUntil = Date.now() + HIDE_FOR_DAYS * 24 * 60 * 60 * 1000
-  window.localStorage.setItem("upselling-alert-hidden-until", String(hideUntil))
+  window.localStorage.setItem(storageKey, String(hideUntil))
   alert(`Dismissed — hidden for ${HIDE_FOR_DAYS} days.`)
 }
 
@@ -40,7 +44,11 @@ const meta: Meta<typeof UpsellingAlert> = {
   render: ({ onDismiss, ...args }) => (
     <UpsellingAlert
       {...args}
-      onDismiss={onDismiss ? dismissForDays : undefined}
+      onDismiss={
+        onDismiss
+          ? dismissForDays("upselling-alert-hidden-until:demo")
+          : undefined
+      }
     />
   ),
 }
@@ -95,13 +103,15 @@ export const WithIcon: Story = {
 /**
  * When `onDismiss` is provided, a close button is rendered to the right of the
  * upselling action button. The consumer decides what happens on dismiss — here
- * we persist the dismissal so the alert stays hidden for a number of days and
- * reappears afterwards. Toggle the `onDismiss` control to show/hide the button.
+ * we persist the dismissal under a per-alert key so the alert stays hidden for
+ * a number of days and reappears afterwards. Use a distinct key per alert so
+ * multiple upselling alerts don't overwrite each other. Toggle the `onDismiss`
+ * control to show/hide the button.
  */
 export const Dismissible: Story = {
   args: {
     ...WithIcon.args,
-    onDismiss: dismissForDays,
+    onDismiss: dismissForDays("upselling-alert-hidden-until:performance"),
   },
 }
 
