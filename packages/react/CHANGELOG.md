@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.53.0](https://github.com/factorialco/f0/compare/f0-react-v4.52.0...f0-react-v4.53.0) (2026-07-24)
+
+
+### Features
+
+* **component-status:** a11y as a stability requirement + live panel row ([#4798](https://github.com/factorialco/f0/issues/4798)) ([589c538](https://github.com/factorialco/f0/commit/589c53815f7b45ff16571838605326c1f1155ff2))
+
 ## [4.52.0](https://github.com/factorialco/f0/compare/f0-react-v4.51.0...f0-react-v4.52.0) (2026-07-24)
 
 
