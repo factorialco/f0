@@ -25,7 +25,13 @@ function tint(hex: string, a: number) {
 }
 
 type Step = { k: string; t: string; d: string; color?: string }
-type CardItem = { name: string; color: string; desc: string; meta?: string; href?: string }
+type CardItem = {
+  name: string
+  color: string
+  desc: string
+  meta?: string
+  href?: string
+}
 type Item = { label: string; text: string; color?: string }
 
 export function Flow({ steps }: { steps: Step[] }) {
@@ -35,14 +41,24 @@ export function Flow({ steps }: { steps: Step[] }) {
         <React.Fragment key={s.t}>
           <div
             className={`rounded-lg p-3 ${SURFACE}`}
-            style={{ flex: "1 1 150px", borderTopWidth: 3, borderTopColor: s.color ?? "transparent" }}
+            style={{
+              flex: "1 1 150px",
+              borderTopWidth: 3,
+              borderTopColor: s.color ?? "transparent",
+            }}
           >
-            <div className="font-mono text-xs" style={{ opacity: 0.6 }}>{s.k}</div>
+            <div className="font-mono text-xs" style={{ opacity: 0.6 }}>
+              {s.k}
+            </div>
             <div className="mt-1 text-sm font-semibold">{s.t}</div>
-            <div className="mt-1 text-xs" style={{ opacity: 0.72 }}>{s.d}</div>
+            <div className="mt-1 text-xs" style={{ opacity: 0.72 }}>
+              {s.d}
+            </div>
           </div>
           {i < steps.length - 1 && (
-            <div className="self-center" style={{ opacity: 0.35 }}>→</div>
+            <div className="self-center" style={{ opacity: 0.35 }}>
+              →
+            </div>
           )}
         </React.Fragment>
       ))}
@@ -59,13 +75,27 @@ export function Cards({ items }: { items: CardItem[] }) {
       {items.map((c) => {
         const inner = (
           <>
-            <div className="flex items-center gap-1.5 text-base font-semibold" style={{ color: c.color }}>
+            <div
+              className="flex items-center gap-1.5 text-base font-semibold"
+              style={{ color: c.color }}
+            >
               {c.name}
-              {c.href && <span aria-hidden style={{ opacity: 0.7 }}>→</span>}
+              {c.href && (
+                <span aria-hidden style={{ opacity: 0.7 }}>
+                  →
+                </span>
+              )}
             </div>
-            <div className="mt-2 text-sm leading-relaxed" style={{ opacity: 0.82 }}>{c.desc}</div>
+            <div
+              className="mt-2 text-sm leading-relaxed"
+              style={{ opacity: 0.82 }}
+            >
+              {c.desc}
+            </div>
             {c.meta && (
-              <div className="mt-2 font-mono text-xs" style={{ opacity: 0.55 }}>{c.meta}</div>
+              <div className="mt-2 font-mono text-xs" style={{ opacity: 0.55 }}>
+                {c.meta}
+              </div>
             )}
           </>
         )
@@ -81,7 +111,11 @@ export function Cards({ items }: { items: CardItem[] }) {
             {inner}
           </a>
         ) : (
-          <div key={c.name} className={`rounded-xl p-5 ${SURFACE}`} style={style}>
+          <div
+            key={c.name}
+            className={`rounded-xl p-5 ${SURFACE}`}
+            style={style}
+          >
             {inner}
           </div>
         )
@@ -118,10 +152,17 @@ export function NavGroup({
             href={it.href}
             target="_top"
             className={`block rounded-lg px-4 py-3 no-underline transition-opacity hover:opacity-80 ${SURFACE}`}
-            style={{ color: "inherit", borderLeftWidth: 3, borderLeftColor: color }}
+            style={{
+              color: "inherit",
+              borderLeftWidth: 3,
+              borderLeftColor: color,
+            }}
           >
             <span className="text-sm font-semibold">{it.name}</span>
-            <span className="text-sm" style={{ opacity: 0.62 }}> — {it.desc}</span>
+            <span className="text-sm" style={{ opacity: 0.62 }}>
+              {" "}
+              — {it.desc}
+            </span>
           </a>
         ))}
       </div>
@@ -146,7 +187,10 @@ export function KeyPoint({
   return (
     <div
       className="my-6 rounded-xl p-5"
-      style={{ background: tint(color, 0.06), border: `1px solid ${tint(color, 0.3)}` }}
+      style={{
+        background: tint(color, 0.06),
+        border: `1px solid ${tint(color, 0.3)}`,
+      }}
     >
       {eyebrow && (
         <div
@@ -159,7 +203,10 @@ export function KeyPoint({
       {title && (
         <div className="mt-1 text-xl font-semibold tracking-tight">{title}</div>
       )}
-      <div className="text-sm" style={{ opacity: 0.85, marginTop: title || eyebrow ? 8 : 0 }}>
+      <div
+        className="text-sm"
+        style={{ opacity: 0.85, marginTop: title || eyebrow ? 8 : 0 }}
+      >
         {children}
       </div>
     </div>
@@ -182,20 +229,38 @@ export function Callout({
       style={{ background: tint(c, 0.08), borderLeft: `3px solid ${c}` }}
     >
       {title && (
-        <div className="text-sm font-semibold" style={{ color: c }}>{title}</div>
+        <div className="text-sm font-semibold" style={{ color: c }}>
+          {title}
+        </div>
       )}
-      <div className="text-sm" style={{ opacity: 0.85, marginTop: title ? 4 : 0 }}>
+      <div
+        className="text-sm"
+        style={{ opacity: 0.85, marginTop: title ? 4 : 0 }}
+      >
         {children}
       </div>
     </div>
   )
 }
 
-export function Badge({ color = hue.accent, children }: { color?: string; children: React.ReactNode }) {
+export function Badge({
+  color = hue.accent,
+  children,
+}: {
+  color?: string
+  children: React.ReactNode
+}) {
   return (
     <span
       className="font-mono"
-      style={{ background: tint(color, 0.16), color, padding: "2px 8px", borderRadius: 999, fontSize: "11px", whiteSpace: "nowrap" }}
+      style={{
+        background: tint(color, 0.16),
+        color,
+        padding: "2px 8px",
+        borderRadius: 999,
+        fontSize: "11px",
+        whiteSpace: "nowrap",
+      }}
     >
       {children}
     </span>
@@ -205,16 +270,41 @@ export function Badge({ color = hue.accent, children }: { color?: string; childr
 // Numbered vertical steps — for a sequence (use instead of a ``` code fence).
 export function Steps({ items }: { items: React.ReactNode[] }) {
   return (
-    <ol style={{ listStyle: "none", padding: 0, margin: "1.5rem 0", display: "grid", gap: 8 }}>
+    <ol
+      style={{
+        listStyle: "none",
+        padding: 0,
+        margin: "1.5rem 0",
+        display: "grid",
+        gap: 8,
+      }}
+    >
       {items.map((it, i) => (
-        <li key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        <li
+          key={i}
+          style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
+        >
           <span
             className="font-mono"
-            style={{ flexShrink: 0, width: 24, height: 24, borderRadius: 999, background: tint(hue.accent, 0.16), color: hue.accent, fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", justifyContent: "center" }}
+            style={{
+              flexShrink: 0,
+              width: 24,
+              height: 24,
+              borderRadius: 999,
+              background: tint(hue.accent, 0.16),
+              color: hue.accent,
+              fontSize: 12,
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             {i + 1}
           </span>
-          <span className="text-sm" style={{ opacity: 0.9, paddingTop: 2 }}>{it}</span>
+          <span className="text-sm" style={{ opacity: 0.9, paddingTop: 2 }}>
+            {it}
+          </span>
         </li>
       ))}
     </ol>
@@ -223,18 +313,36 @@ export function Steps({ items }: { items: React.ReactNode[] }) {
 
 // Scrollable, styled table — contains wide tables so they never overflow into
 // the docs table-of-contents. Cells accept strings or JSX (e.g. <code>).
-export function Table({ head, rows }: { head: React.ReactNode[]; rows: React.ReactNode[][] }) {
+export function Table({
+  head,
+  rows,
+}: {
+  head: React.ReactNode[]
+  rows: React.ReactNode[][]
+}) {
   const cell = "border border-f1-border"
   return (
     <div className="my-6" style={{ overflowX: "auto", maxWidth: "100%" }}>
-      <table style={{ borderCollapse: "collapse", width: "100%", minWidth: 560, fontSize: "13px" }}>
+      <table
+        style={{
+          borderCollapse: "collapse",
+          width: "100%",
+          minWidth: 560,
+          fontSize: "13px",
+        }}
+      >
         <thead>
           <tr>
             {head.map((h, i) => (
               <th
                 key={i}
                 className={`${cell} bg-f1-background-secondary`}
-                style={{ textAlign: "left", padding: "8px 12px", fontWeight: 600, whiteSpace: "nowrap" }}
+                style={{
+                  textAlign: "left",
+                  padding: "8px 12px",
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}
               >
                 {h}
               </th>
@@ -245,7 +353,11 @@ export function Table({ head, rows }: { head: React.ReactNode[]; rows: React.Rea
           {rows.map((r, ri) => (
             <tr key={ri}>
               {r.map((c, ci) => (
-                <td key={ci} className={cell} style={{ padding: "8px 12px", verticalAlign: "top" }}>
+                <td
+                  key={ci}
+                  className={cell}
+                  style={{ padding: "8px 12px", verticalAlign: "top" }}
+                >
                   {c}
                 </td>
               ))}
@@ -266,8 +378,12 @@ export function Grid({ items, min = 260 }: { items: Item[]; min?: number }) {
     >
       {items.map((it, i) => (
         <div key={i} className={`rounded-lg px-4 py-3 ${SURFACE}`}>
-          <span className="font-mono text-xs" style={{ color: it.color }}>{it.label}</span>
-          <div className="mt-1 text-sm" style={{ opacity: 0.8 }}>{it.text}</div>
+          <span className="font-mono text-xs" style={{ color: it.color }}>
+            {it.label}
+          </span>
+          <div className="mt-1 text-sm" style={{ opacity: 0.8 }}>
+            {it.text}
+          </div>
         </div>
       ))}
     </div>

@@ -97,7 +97,10 @@ const config: StorybookConfig = {
     { directory: "../src/sds/Profile", titlePrefix: "Domain specific" },
     { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
     { directory: "../src/sds/social", titlePrefix: "Domain specific/social" }, // Reactions
-    { directory: "../src/sds/timeline", titlePrefix: "Domain specific/timeline" }, // composed timeline (lives in sds/)
+    {
+      directory: "../src/sds/timeline",
+      titlePrefix: "Domain specific/timeline",
+    }, // composed timeline (lives in sds/)
     {
       directory: "../src/sds/chat",
       titlePrefix: "Domain specific/Communications",

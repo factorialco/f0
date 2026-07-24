@@ -67,6 +67,15 @@ importers:
         specifier: ^4.8.1
         version: 4.21.0
 
+  ownership:
+    devDependencies:
+      tsx:
+        specifier: ^4.8.1
+        version: 4.21.0
+      yaml:
+        specifier: ^2.7.0
+        version: 2.7.0
+
   packages/changelog-summarizer:
     dependencies:
       '@ai-sdk/anthropic':
