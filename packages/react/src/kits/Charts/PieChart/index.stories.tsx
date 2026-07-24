@@ -5,6 +5,7 @@ import { PieChart } from "./index"
 const meta: Meta<typeof PieChart> = {
   component: PieChart,
   title: "Charts/PieChart",
+  tags: ["no-sidebar"],
   parameters: {
     a11y: {
       config: {
