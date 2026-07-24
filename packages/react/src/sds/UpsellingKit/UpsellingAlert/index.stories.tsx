@@ -105,6 +105,26 @@ export const Dismissible: Story = {
   },
 }
 
+/**
+ * When the action only opens a modal or navigates instead of creating an
+ * upselling request, set `showConfirmation: false` so the success dialog
+ * ("request sent") isn't shown for a request that was never made.
+ */
+export const WithoutConfirmation: Story = {
+  args: {
+    ...Default.args,
+    title: "Open the product details",
+    description:
+      "Use showConfirmation: false when the action only opens a modal or navigates, so no success dialog is shown for a request that was never sent.",
+    action: {
+      ...Default.args!.action!,
+      label: "Learn more",
+      showConfirmation: false,
+      onRequest: () => alert("Open product modal"),
+    },
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: Default.args,

@@ -15,6 +15,13 @@ type AlertAction = {
   loadingState: UpsellingButtonProps["loadingState"]
   nextSteps: UpsellingButtonProps["nextSteps"]
   closeLabel: UpsellingButtonProps["closeLabel"]
+  /**
+   * Whether to show the confirmation dialog after the request resolves.
+   * Defaults to `true`. Set to `false` when `onRequest` only opens a modal or
+   * navigates instead of creating an upselling request, so the success dialog
+   * ("request sent") is not shown for an action that sent nothing.
+   */
+  showConfirmation?: UpsellingButtonProps["showConfirmation"]
 }
 
 export interface UpsellingAlertProps {
@@ -119,6 +126,7 @@ function _UpsellingAlert({
                 loadingState={action.loadingState}
                 nextSteps={action.nextSteps}
                 closeLabel={action.closeLabel}
+                showConfirmation={action.showConfirmation}
                 variant="outlinePromote"
                 size="sm"
               />
