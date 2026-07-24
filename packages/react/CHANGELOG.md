@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.52.0](https://github.com/factorialco/f0/compare/f0-react-v4.51.0...f0-react-v4.52.0) (2026-07-24)
+
+
+### Features
+
+* **F0VideoPlayer:** add video player component ([#4754](https://github.com/factorialco/f0/issues/4754)) ([626ce82](https://github.com/factorialco/f0/commit/626ce8277900f45e05b1ecdfd14195cc64bebf13))
+
 ## [4.51.0](https://github.com/factorialco/f0/compare/f0-react-v4.50.0...f0-react-v4.51.0) (2026-07-24)
 
 
