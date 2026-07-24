@@ -1233,6 +1233,50 @@ describe("TableCollection", () => {
       expect(within(salaryCell).queryByText("ROW")).not.toBeInTheDocument()
     })
 
+    it("uses column ids for summary cell keys when labels are duplicated", async () => {
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {})
+
+      render(
+        <TableCollection<
+          SummaryPerson,
+          TestFilters,
+          SortingsDefinition,
+          SummaryTestDefinitions,
+          ItemActionsDefinition<SummaryPerson>,
+          TestNavigationFilters,
+          GroupingDefinition<SummaryPerson>
+        >
+          columns={[
+            {
+              label: "Transport benefit",
+              id: "compensation-transport-benefit",
+              summary: "salary" as const,
+              render: (item: SummaryPerson) => item.salary ?? undefined,
+            },
+            {
+              label: "Transport benefit",
+              id: "payroll-result-transport-benefit",
+              summary: "salary" as const,
+              render: (item: SummaryPerson) => item.salary ?? undefined,
+            },
+          ]}
+          source={createSummarySource({ salarySummary: 100 })}
+          onSelectItems={vi.fn()}
+          onLoadData={vi.fn()}
+          onLoadError={vi.fn()}
+        />
+      )
+
+      await waitFor(() => {
+        expect(screen.getAllByText("Transport benefit")).toHaveLength(2)
+      })
+
+      expect(consoleError).not.toHaveBeenCalled()
+      consoleError.mockRestore()
+    })
+
     it("treats empty-string summaries as empty and shows the placeholder", async () => {
       render(
         <TableCollection<
