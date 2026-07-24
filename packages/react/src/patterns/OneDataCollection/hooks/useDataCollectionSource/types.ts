@@ -104,13 +104,28 @@ export type SearchPreviewResultData = {
 }
 
 /**
+ * One page of search-preview results. `hasMore` tells the dropdown whether to
+ * keep pulling further pages as the user scrolls (infinite scroll).
+ */
+export type SearchPreviewPage<R extends RecordType> = {
+  records: R[]
+  hasMore: boolean
+}
+
+/**
  * Optional rich search preview shown in the shared Data Collection search.
  * When provided, typing in the header search renders a results dropdown with
  * avatar + title + subtitle, consistent across every visualization. Selecting a
  * result calls `onSelect` (e.g. the graph view reveals/centers the node).
  */
 export type SearchPreview<R extends RecordType> = {
-  search: (query: string) => Promise<R[]>
+  /**
+   * Fetch one page of matches for `query`. `page` starts at 0 and increments as
+   * the user scrolls the dropdown to the bottom. Return a bare array for a
+   * single, non-paginated page (treated as `hasMore: false`), or a
+   * `SearchPreviewPage` to drive infinite scroll across pages.
+   */
+  search: (query: string, page: number) => Promise<R[] | SearchPreviewPage<R>>
   getId: (record: R) => string
   render: (record: R) => SearchPreviewResultData
   onSelect: (record: R) => void

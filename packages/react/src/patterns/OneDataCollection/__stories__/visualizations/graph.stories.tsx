@@ -496,15 +496,26 @@ const queryEmployees = (input: {
     )
   })
 
-/** `searchEmployees(query)` — typeahead across the whole org. */
-const queryEmployeeSearch = (query: string): Promise<EmployeeNode[]> =>
+/** `searchEmployees(query, page)` — paginated typeahead across the whole org. */
+const SEARCH_PAGE_SIZE = 5
+const queryEmployeeSearch = (
+  query: string,
+  page: number
+): Promise<{ records: EmployeeNode[]; hasMore: boolean }> =>
   gqlRequest(() => {
     const normalized = query.toLowerCase()
-    return EMPLOYEES.filter(
+    const matches = EMPLOYEES.filter(
       (employee) =>
         employee.name.toLowerCase().includes(normalized) ||
         employee.title.toLowerCase().includes(normalized)
-    ).map(toEmployeeNode)
+    )
+    const start = page * SEARCH_PAGE_SIZE
+    return {
+      records: matches
+        .slice(start, start + SEARCH_PAGE_SIZE)
+        .map(toEmployeeNode),
+      hasMore: start + SEARCH_PAGE_SIZE < matches.length,
+    }
   })
 
 /** `ancestorPath(nodeId)` — root → … → node, for revealing on search. */

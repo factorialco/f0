@@ -1700,6 +1700,9 @@ const OneDataCollectionComp = <
                     results={searchPreview.results}
                     resultsLoading={searchPreview.loading}
                     onResultSelect={searchPreview.onSelect}
+                    hasMore={searchPreview.hasMore}
+                    loadingMore={searchPreview.loadingMore}
+                    onLoadMore={searchPreview.onLoadMore}
                   />
                 )}
                 {visualizations && visualizations.length > 1 && (
