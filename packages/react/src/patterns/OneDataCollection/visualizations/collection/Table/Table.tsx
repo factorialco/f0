@@ -873,7 +873,7 @@ export const TableCollection = <
                       )}
                       {columns.map((column, cellIndex) => (
                         <TableCell
-                          key={`summary-${String(column.label)}`}
+                          key={`summary-${column.id ?? String(column.label)}`}
                           firstCell={cellIndex === 0}
                           width={column.width}
                           sticky={getStickyPosition(cellIndex)}
