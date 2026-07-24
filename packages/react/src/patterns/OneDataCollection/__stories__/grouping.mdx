@@ -8,6 +8,7 @@ import {
 import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 import * as GroupingStories from "./grouping.stories"
+import * as KanbanStories from "./visualizations/kanban.stories"
 
 <Meta title="Data Collection/Grouping" />
 
@@ -182,3 +183,16 @@ field of the record and the value is an object with the following properties:
 Group headers remain below the sticky summary footer when scrolling vertically.
 
 <Canvas of={GroupingStories.WithGroupingAndSummary} />
+
+### Kanban grouping
+
+Grouping is supported in the Kanban visualization too. Each group renders as its
+own board showing the full set of lanes (a lane with no items in a group renders
+empty, so every group keeps the same columns). The collection toolbar (search,
+counter and actions) stays above all groups and applies to every group, and each
+group header shows its own item count.
+
+Note: pagination and infinite scroll apply per board, not per lane inside a
+group — grouped lanes render the records that have already been fetched.
+
+<Canvas of={KanbanStories.KanbanWithGrouping} />

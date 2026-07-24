@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { AnimatePresence, motion } from "motion/react"
+import { useCallback, useEffect, useMemo } from "react"
 
 import type { FiltersDefinition } from "@/patterns/OneFilterPicker/types"
 import type { KanbanProps } from "@/ui/Kanban/types"
@@ -10,10 +11,9 @@ import {
   PaginationInfo,
   type RecordType,
 } from "@/hooks/datasource"
-import { createAtlaskitDriver } from "@/lib/dnd/atlaskitDriver"
-import { DndProvider } from "@/lib/dnd/context"
-import { useIsDev } from "@/lib/providers/user-platafform"
-import { Kanban } from "@/ui/Kanban"
+import { useGroups } from "@/hooks/datasource/useGroups"
+import { useReducedMotion } from "@/lib/a11y"
+import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
 
 import type { NavigationFiltersDefinition } from "../../../navigationFilters/types"
@@ -24,6 +24,7 @@ import type {
 } from "../../../types"
 
 import { ItemActionsDefinition } from "../../../item-actions"
+import { KanbanBoard } from "./KanbanBoard"
 import { KanbanCollectionProps } from "./types"
 
 const isInfiniteScrollPaginationInfo = (
@@ -52,6 +53,7 @@ export const KanbanCollection = <
   onSelectItems,
   onLoadError,
   onLoadData,
+  getLanesForGroup,
 }: KanbanCollectionProps<
   R,
   Filters,
@@ -72,22 +74,8 @@ export const KanbanCollection = <
     onError: (error) => onLoadError(error),
   })
 
-  const isDev = useIsDev()
-
-  if (source.currentGrouping && isDev) {
-    throw new Error("Grouping is not supported in Kanban yet")
-  }
-
-  const [instanceId] = useState(() => Symbol("kanban-visualization"))
-
   const idProvider = source.idProvider
-
-  const laneItems = useMemo(() => {
-    return lanes.map((lane) => ({
-      ...lane,
-      items: lanesHooks[lane.id]?.data?.records || [],
-    }))
-  }, [lanes, lanesHooks])
+  const shouldReduceMotion = useReducedMotion()
 
   // Fine-grained reorder only when no sort order is applied
   const allowReorder = source.currentSortings === null
@@ -141,32 +129,15 @@ export const KanbanCollection = <
     source.currentSearch,
   ])
 
-  // Build index maps per lane when needed
-  const laneIndexMaps = useMemo(() => {
-    const maps = new Map<string, Map<string, number>>()
-    laneItems.forEach((lane) => {
-      const map = new Map<string, number>()
-      lane.items.forEach((item, index) => {
-        const rawId = idProvider
-          ? idProvider(item as R, index)
-          : ((item as unknown as { id?: string | number })?.id ?? index)
-        const itemId = String(rawId)
-        map.set(itemId, index)
-      })
-      maps.set(lane.id, map)
-    })
-    return maps
-  }, [laneItems, idProvider])
-
   /**
-   * Selection
+   * Selection — one useSelectable per lane, scoped over the lane's full data.
+   * Shared across boards; grouping partitions items visually, not the lane ids.
    */
-
   const lanesDef = useMemo(() => {
     return lanes.map((lane) => ({
       id: lane.id,
       data: lanesHooks[lane.id]?.data || {
-        type: "flat",
+        type: "flat" as const,
         records: [],
         groups: [],
       },
@@ -184,30 +155,6 @@ export const KanbanCollection = <
   >(lanesDef, source, (selectItemsStatus, clearCallback) => {
     onSelectItems?.(selectItemsStatus, clearCallback)
   })
-
-  const kanbanLanes = useMemo(
-    () =>
-      laneItems.map((l) => {
-        const laneData = lanesHooks[l.id]
-        const totalItems = laneData?.paginationInfo?.total
-        const hasMore =
-          isInfiniteScrollPaginationInfo(laneData?.paginationInfo) &&
-          laneData?.paginationInfo?.hasMore
-        return {
-          id: l.id,
-          title: l.title,
-          items: l.items,
-          variant: l.variant,
-          color: l.color,
-          total: totalItems,
-          hasMore,
-          loading: laneData ? laneData.isInitialLoading : true,
-          loadingMore: laneData?.isLoadingMore || false,
-          fetchMore: hasMore ? () => laneData.loadMore() : undefined,
-        }
-      }),
-    [laneItems, lanesHooks] // laneItems → items; lanesHooks → pagination/loading/fetchMore per lane
-  )
 
   const getKey = useCallback<NonNullable<KanbanProps<R>["getKey"]>>(
     (item, index) => {
@@ -289,40 +236,202 @@ export const KanbanCollection = <
     ]
   )
 
-  const dnd = useMemo<NonNullable<KanbanProps<R>["dnd"]>>(
-    () => ({
-      instanceId,
-      getIndexById: (laneId: string, id: string) => {
-        const idx = laneIndexMaps.get(laneId)?.get(id) ?? -1
-        return allowReorder ? idx : -1
-      },
-      onMove,
-    }),
-    [instanceId, laneIndexMaps, allowReorder, onMove]
+  /**
+   * Flat lanes: a single board whose items are each lane's records.
+   */
+  const flatLanes = useMemo<KanbanProps<R>["lanes"]>(
+    () =>
+      lanes.map((l) => {
+        const laneData = lanesHooks[l.id]
+        const totalItems = laneData?.paginationInfo?.total
+        const hasMore =
+          isInfiniteScrollPaginationInfo(laneData?.paginationInfo) &&
+          laneData?.paginationInfo?.hasMore
+        return {
+          id: l.id,
+          title: l.title,
+          items: laneData?.data?.records ?? [],
+          variant: l.variant,
+          color: l.color,
+          total: totalItems,
+          hasMore,
+          loading: laneData ? laneData.isInitialLoading : true,
+          loadingMore: laneData?.isLoadingMore || false,
+          fetchMore: hasMore ? () => laneData.loadMore() : undefined,
+        }
+      }),
+    [lanes, lanesHooks]
   )
 
-  const kanbanProps = useMemo<KanbanProps<R>>(
-    () => ({
-      lanes: kanbanLanes,
-      loading: kanbanLoading,
-      getKey,
-      renderCard,
-      onCreate,
-      dnd,
-    }),
-    [kanbanLanes, kanbanLoading, getKey, renderCard, onCreate, dnd]
+  /**
+   * Grouped boards: pivot the per-lane grouped data (lane → groups) into
+   * group → lanes. One board per group, each showing the full set of lanes
+   * (a lane with no items in a group renders empty, so every group keeps the
+   * same columns). Group order follows the adapter's grouping sort (first
+   * appearance across lanes). Per-lane and per-group counters come from record
+   * counts.
+   *
+   * Pagination is per board, not per lane inside a group: grouped lanes render
+   * the records already fetched (no per-lane load-more), so reorder is disabled
+   * in grouped mode (DnD indices would otherwise be group-relative).
+   */
+  const isGrouped = !!source.currentGrouping
+
+  const groupedBoards = useMemo(() => {
+    if (!isGrouped) {
+      return [] as {
+        key: string
+        label: string | Promise<string>
+        itemCount: number
+        lanes: KanbanProps<R>["lanes"]
+      }[]
+    }
+
+    // Group axis is data-driven: a group appears only if it has items (standard
+    // grouping behaviour), so empty versions are simply not shown.
+    const orderedKeys: string[] = []
+    const labelByKey = new Map<string, string | Promise<string>>()
+    for (const lane of lanes) {
+      const data = lanesHooks[lane.id]?.data
+      if (data?.type !== "grouped") continue
+      for (const group of data.groups) {
+        if (!labelByKey.has(group.key)) {
+          labelByKey.set(group.key, group.label)
+          orderedKeys.push(group.key)
+        }
+      }
+    }
+
+    return orderedKeys.map((key) => {
+      // Per-group columns when provided, else the shared global lane set.
+      const groupLaneDefs = getLanesForGroup ? getLanesForGroup(key) : lanes
+      const boardLanes: KanbanProps<R>["lanes"] = groupLaneDefs.map((lane) => {
+        const laneData = lanesHooks[lane.id]
+        const group =
+          laneData?.data?.type === "grouped"
+            ? laneData.data.groups.find((g) => g.key === key)
+            : undefined
+        const items = group?.records ?? []
+        return {
+          id: lane.id,
+          title: lane.title,
+          items,
+          variant: lane.variant,
+          color: lane.color,
+          total: items.length,
+          hasMore: false,
+          loading: laneData ? laneData.isInitialLoading : true,
+          loadingMore: false,
+          fetchMore: undefined,
+        }
+      })
+      const itemCount = boardLanes.reduce(
+        (sum, lane) => sum + lane.items.length,
+        0
+      )
+      return {
+        key,
+        label: labelByKey.get(key) ?? key,
+        itemCount,
+        lanes: boardLanes,
+      }
+    })
+  }, [isGrouped, lanes, lanesHooks, getLanesForGroup])
+
+  const collapsible = source.grouping?.collapsible
+  const defaultOpenGroups = source.grouping?.defaultOpenGroups
+  const { openGroups, setGroupOpen } = useGroups(
+    groupedBoards.map((b) => ({
+      key: b.key,
+      label: b.label,
+      itemCount: b.itemCount,
+      records: [] as R[],
+    })),
+    defaultOpenGroups
   )
 
   return (
     <>
       {lanesProvider}
       {lanesSelectProvider}
-      {!onMove ? (
-        <Kanban<R> {...kanbanProps} />
+      {isGrouped ? (
+        <div
+          className="flex flex-col gap-6"
+          aria-busy={kanbanLoading}
+          aria-live="polite"
+        >
+          {groupedBoards.length === 0 ? (
+            // Groups have not arrived yet: show the lanes in a loading state
+            // instead of flashing an empty container while data mounts.
+            <KanbanBoard<R>
+              lanes={flatLanes}
+              renderCard={renderCard}
+              getKey={getKey}
+              onCreate={onCreate}
+              idProvider={idProvider}
+              allowReorder={false}
+              loading={kanbanLoading}
+            />
+          ) : (
+            groupedBoards.map((board) => (
+              <div
+                className="flex flex-col gap-2"
+                key={`kanban-group-${board.key}`}
+                data-testid={`kanban-group-${board.key}`}
+              >
+                <GroupHeader
+                  className="cursor-pointer select-none rounded-md px-3.5 py-3 transition-colors hover:bg-f1-background-hover"
+                  showOpenChange={collapsible}
+                  label={board.label}
+                  itemCount={board.itemCount}
+                  open={openGroups[board.key]}
+                  onOpenChange={(open) => setGroupOpen(board.key, open)}
+                />
+                <AnimatePresence>
+                  {(!collapsible || openGroups[board.key]) && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{
+                        duration: shouldReduceMotion ? 0 : 0.1,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      {/* PROVISIONAL preview height. The Kanban UI is h-full, so
+                          stacked boards need a bounded height or the layout breaks.
+                          The real stacked-board layout is a Foundations decision —
+                          this fixed value is only to preview the feature. */}
+                      <div className="h-[440px] min-h-0">
+                        <KanbanBoard<R>
+                          lanes={board.lanes}
+                          renderCard={renderCard}
+                          getKey={getKey}
+                          onCreate={onCreate}
+                          onMove={onMove}
+                          idProvider={idProvider}
+                          allowReorder={false}
+                          loading={kanbanLoading}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))
+          )}
+        </div>
       ) : (
-        <DndProvider driver={createAtlaskitDriver(instanceId)}>
-          <Kanban<R> {...kanbanProps} />
-        </DndProvider>
+        <KanbanBoard<R>
+          lanes={flatLanes}
+          renderCard={renderCard}
+          getKey={getKey}
+          onCreate={onCreate}
+          onMove={onMove}
+          idProvider={idProvider}
+          allowReorder={allowReorder}
+          loading={kanbanLoading}
+        />
       )}
     </>
   )
