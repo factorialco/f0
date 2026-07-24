@@ -97,9 +97,9 @@ describe("CategoryBarChartCell", () => {
     ).toBeInTheDocument()
   })
 
-  it("applies token color when color is provided", () => {
+  it("applies a base-color token when color is provided", () => {
     const args: CategoryBarChartCellValue = {
-      dataPoints: [{ name: "Test", value: 10, color: "categorical-3" }],
+      dataPoints: [{ name: "Test", value: 10, color: "viridian" }],
     }
 
     const { container } = render(CategoryBarChartCell(args, defaultMeta))
@@ -107,6 +107,45 @@ describe("CategoryBarChartCell", () => {
     const segment = container.querySelector('[role="img"][aria-label*="%"]')
     expect(segment).toBeInTheDocument()
     expect(segment?.getAttribute("style")).toContain("background-color")
+  })
+
+  it("supports the location base-color tokens (viridian / yellow / barbie)", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [
+        { name: "Work from home", value: 5, color: "viridian" },
+        { name: "Office", value: 3, color: "yellow" },
+        { name: "Business trip", value: 2, color: "barbie" },
+      ],
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
+    expect(segments.length).toBe(3)
+    segments.forEach((segment) => {
+      expect(segment.getAttribute("style")).toContain("background-color")
+    })
+  })
+
+  it("still supports legacy kits/Charts tokens (categorical-* / feedback-*)", () => {
+    const args: CategoryBarChartCellValue = {
+      dataPoints: [
+        { name: "A", value: 5, color: "categorical-3" },
+        { name: "B", value: 3, color: "feedback-positive" },
+      ],
+    }
+
+    const { container } = render(CategoryBarChartCell(args, defaultMeta))
+
+    const segments = container.querySelectorAll('[role="img"][aria-label*="%"]')
+    expect(segments.length).toBe(2)
+    // legacy tokens resolve to a CSS var
+    expect(segments[0]?.getAttribute("style")).toContain(
+      "--chart-categorical-3"
+    )
+    expect(segments[1]?.getAttribute("style")).toContain(
+      "--chart-feedback-positive"
+    )
   })
 
   it("still renders segments when hideTooltip is true", () => {
