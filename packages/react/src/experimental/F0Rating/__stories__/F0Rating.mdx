@@ -1,0 +1,413 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0Rating.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# F0Rating
+
+A numeric rating scale that lets users grant a score from 1 to a configurable
+maximum, or displays an existing score as a read-only summary.
+
+---
+
+# Overview
+
+## Purpose
+
+- Captures a single numeric rating on a discrete scale (1…`max`).
+- Shows an existing score in a compact, non-interactive read-only view.
+- Provides one consistent rating control across forms and detail views.
+- Ships an accessible, localizable name out of the box.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Element</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Group</code>
+        </td>
+        <td>
+          Container exposing the scale as a single-select group with an
+          accessible name.
+        </td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Tile</code>
+        </td>
+        <td>One selectable cell per value, labelled with its number.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Selected tile</code>
+        </td>
+        <td>
+          The active value, highlighted with the selected border and background.
+        </td>
+        <td>No</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Sizes
+
+<Canvas of={Stories.Sizes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>Compact tiles (24px).</td>
+        <td>Dense rows, tables, or tight side panels.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code>
+        </td>
+        <td>Default tile size (32px).</td>
+        <td>Most forms and detail views.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>Large tiles (40px).</td>
+        <td>Primary, focal rating inputs.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## States
+
+Read-only renders a non-interactive, non-dimmed summary of the score.
+
+<Canvas of={Stories.ReadOnly} />
+
+Disabled is non-interactive and visually dimmed.
+
+<Canvas of={Stories.Disabled} />
+
+Empty shows the scale with no value selected.
+
+<Canvas of={Stories.Empty} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Visual indicator</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Interactive</code>
+        </td>
+        <td>Default; the user can select or clear a value.</td>
+        <td>Hover and focus affordances on tiles.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>readOnly</code>
+        </td>
+        <td>Displays the score; cannot be changed.</td>
+        <td>Selected tile highlighted, no hover or focus.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>Inactive and not editable.</td>
+        <td>Dimmed text, default cursor.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Guidelines
+
+## Design Best Practices
+
+### When to use
+
+- Collecting a quick, discrete score (e.g. interview feedback, satisfaction).
+- Showing a previously granted score inside a card or detail view (`readOnly`).
+- Any place that needs a consistent 1…`max` scale across the product.
+
+### When NOT to use
+
+- Free-form or open-ended feedback: use a text input instead.
+- Choosing between unordered, labelled options: use `F0SegmentedControl`.
+- A continuous range (e.g. a percentage): use a slider.
+
+### How to use
+
+- Keep `max` small (5 is the default); large scales are hard to compare.
+- Use `readOnly` — not `disabled` — to display a score that simply can't change
+  in the current context.
+- Set `required` when the scale must always keep a value once one is chosen.
+
+## Content Best Practices
+
+- Pair the control with a visible label describing what is being rated.
+- Provide a meaningful accessible name via the visible label
+  (`ariaLabelledBy`) or `ariaLabel` when the default is not specific enough.
+
+<DoDonts
+  do={{
+    description:
+      "Use readOnly to present a score that the current user cannot edit.",
+  }}
+  dont={{
+    description:
+      "Use disabled to display a final score — it reads as temporarily unavailable, not as a result.",
+  }}
+/>
+
+## Layout
+
+- Tiles lay out in a single horizontal row with consistent spacing.
+- Place a label directly before the control on the same line or above it.
+
+## Accessibility
+
+- Interactive mode is a single-select group; arrow keys move between tiles and
+  Space/Enter selects the focused tile.
+- Read-only mode is exposed as a single labelled image, so assistive tech
+  announces the score rather than five separate cells.
+- A localized accessible name is provided by default; override it with
+  `ariaLabel` or point to a visible label with `ariaLabelledBy`.
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Move focus to the rating group.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>ArrowLeft</kbd> / <kbd>ArrowRight</kbd>
+        </td>
+        <td>Move between tiles.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Space</kbd> / <kbd>Enter</kbd>
+        </td>
+        <td>Select the focused tile; re-select to clear (unless required).</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Code
+
+## Import
+
+```tsx
+import { F0Rating } from "@factorialco/f0-react"
+```
+
+## Props
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+### Props Reference
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>value</code>
+        </td>
+        <td>
+          <code>number | null</code>
+        </td>
+        <td>-</td>
+        <td>The selected rating (1…`max`); `null` for none.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>defaultValue</code>
+        </td>
+        <td>
+          <code>number | null</code>
+        </td>
+        <td>-</td>
+        <td>Initial value when uncontrolled.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>max</code>
+        </td>
+        <td>
+          <code>number</code>
+        </td>
+        <td>
+          <code>5</code>
+        </td>
+        <td>Highest selectable rating; renders tiles for 1…`max`.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onChange</code>
+        </td>
+        <td>
+          <code>{"(value: number | null) => void"}</code>
+        </td>
+        <td>-</td>
+        <td>Called on selection; emits `null` when cleared.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>readOnly</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>Non-interactive, non-dimmed display of the value.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>disabled</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>Non-interactive and visually dimmed.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>required</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>Prevents clearing the value by re-selecting it.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>size</code>
+        </td>
+        <td>
+          <code>"sm" | "md" | "lg"</code>
+        </td>
+        <td>
+          <code>"md"</code>
+        </td>
+        <td>Tile size.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>ariaLabel</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>-</td>
+        <td>Overrides the default accessible name.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>ariaLabelledBy</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>-</td>
+        <td>ID of a visible label; used instead of `ariaLabel`.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Examples
+
+## Grant a rating
+
+<Canvas of={Stories.Default} />
+
+```tsx
+<F0Rating value={rating} onChange={setRating} ariaLabel="Interview score" />
+```
+
+## Read-only display
+
+<Canvas of={Stories.ReadOnly} />
+
+```tsx
+<F0Rating value={4} readOnly />
+```
+
+## Controlled
+
+<Canvas of={Stories.Controlled} />
+
+```tsx
+const [value, setValue] = useState<number | null>(2)
+
+return <F0Rating value={value} onChange={setValue} ariaLabel="Rating" />
+```
