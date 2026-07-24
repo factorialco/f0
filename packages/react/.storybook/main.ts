@@ -81,12 +81,10 @@ const config: StorybookConfig = {
     { directory: "../src/patterns", titlePrefix: "Patterns" },
     { directory: "../src/experimental/CrudPatterns", titlePrefix: "Patterns" },
     { directory: "../src/layouts", titlePrefix: "Patterns/App shell" },
-    { directory: "../src/sds/TimeLine", titlePrefix: "Patterns/Timeline" }, // composed timeline pattern (lives in sds/ but it's Core)
 
     // ── Kits · functional bundles (AI + Chat promoted from sds) ──
     { directory: "../src/kits/Charts", titlePrefix: "Kits" },
     { directory: "../src/kits/F0DataChart", titlePrefix: "Kits" },
-    { directory: "../src/kits/Social", titlePrefix: "Components" }, // Reactions is a generic component
     { directory: "../src/kits/ai", titlePrefix: "Kits" },
     { directory: "../src/kits/surveys", titlePrefix: "Kits" },
     {
@@ -98,6 +96,8 @@ const config: StorybookConfig = {
     { directory: "../src/sds/Home", titlePrefix: "Domain specific" },
     { directory: "../src/sds/Profile", titlePrefix: "Domain specific" },
     { directory: "../src/sds/inbox", titlePrefix: "Domain specific" },
+    { directory: "../src/sds/social", titlePrefix: "Domain specific/social" }, // Reactions
+    { directory: "../src/sds/timeline", titlePrefix: "Domain specific/timeline" }, // composed timeline (lives in sds/)
     {
       directory: "../src/sds/chat",
       titlePrefix: "Domain specific/Communications",
