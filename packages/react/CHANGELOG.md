@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.54.0](https://github.com/factorialco/f0/compare/f0-react-v4.53.0...f0-react-v4.54.0) (2026-07-24)
+
+
+### Features
+
+* **F0DatePicker:** add defaultMonth to control initial view ([#4776](https://github.com/factorialco/f0/issues/4776)) ([dbfb70b](https://github.com/factorialco/f0/commit/dbfb70bf0556fb1e119cea6a48d493038ea83920))
+
 ## [4.53.0](https://github.com/factorialco/f0/compare/f0-react-v4.52.0...f0-react-v4.53.0) (2026-07-24)
 
 
