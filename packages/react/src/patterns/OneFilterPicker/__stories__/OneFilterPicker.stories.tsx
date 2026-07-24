@@ -30,6 +30,7 @@ import {
   getPresetMock,
   samplePresets,
   sourceBasedDefinition,
+  subfiltersDefinition,
 } from "./mockData"
 
 const meta = {
@@ -544,6 +545,23 @@ const SourceBasedPaginationComponent = () => {
 
 export const WithSourceBasedPagination: Story = {
   render: () => <SourceBasedPaginationComponent />,
+}
+
+/**
+ * Hierarchical subfilters: expanding an option in the "Office" filter reveals
+ * nested levels (office → space → desk). Each nested level stores its
+ * selections under a dedicated filter key declared with `hideSelector: true`,
+ * so "Space" and "Desk" don't appear as standalone filters in the picker list.
+ *
+ * Select a deep-level option (e.g. Floor 1 / Desk A1) and click Apply — the
+ * emitted filter state (shown below the picker) must include the nested keys
+ * (`space`, `desk`), not only the first level.
+ */
+export const WithSubfilters: StoryObj = {
+  args: {
+    filters: subfiltersDefinition,
+    value: {},
+  },
 }
 
 export const WithNumberFilter: Story = {
