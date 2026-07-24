@@ -49,6 +49,7 @@ import { CollectionProps } from "../../../types"
 import { useAddRow } from "../EditableTable/context/AddRowContext"
 import { statusToChecked } from "../utils"
 import { Row } from "./components/Row"
+import { useAddedRowKeys } from "./hooks/useAddedRowKeys"
 import { useColumns } from "./hooks/useColums"
 import { groupBorderClass, useHeaderGroups } from "./hooks/useHeaderGroups"
 import { NestedDataProvider } from "./providers/NestedProvider"
@@ -222,6 +223,31 @@ export const TableCollection = <
     }
     return `index:${String(index)}`
   }
+
+  // Flash newly-added rows: track which flat row keys appeared since the last
+  // render so a freshly-inserted row can play the green "flash on add" effect.
+  const flatRowKeys =
+    data?.type === "flat"
+      ? data.records.map((item, index) => `row-${getRowKey(item, index)}`)
+      : []
+  // Identity of the current pagination position. When it changes the row set is
+  // swapped by navigation (paging / loading more), not by an insert, so the
+  // flash must be suppressed for that render.
+  const paginationResetKey =
+    paginationInfo?.type === "pages"
+      ? paginationInfo.currentPage
+      : paginationInfo?.type === "infinite-scroll"
+        ? paginationInfo.cursor
+        : undefined
+  const addedRowKeys = useAddedRowKeys(flatRowKeys, paginationResetKey)
+
+  // Remount the flat row presence group on page-based page changes so the
+  // outgoing page doesn't animate out. Infinite scroll keeps a stable key: its
+  // rows are appended, not swapped, so they must not be torn down on load-more.
+  const flatPresenceKey =
+    paginationInfo?.type === "pages"
+      ? `flat-page-${paginationInfo.currentPage}`
+      : "flat"
 
   const selectionRegistry = useCreateSelectionRegistry<R>()
   const {
@@ -399,6 +425,7 @@ export const TableCollection = <
       <TableWrapper>
         <div
           className={cn(
+            "min-h-0",
             bordered &&
               "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}
@@ -728,44 +755,62 @@ export const TableCollection = <
                     </Fragment>
                   )
                 })}
-              {data?.type === "flat" &&
-                data.records.map((item, index) => {
-                  const rowKey = `row-${getRowKey(item, index)}`
-                  const row = (
-                    <Row
-                      key={rowKey}
-                      groupIndex={0}
-                      source={effectiveSource}
-                      item={item}
-                      index={index}
-                      onItemCheckedChange={handleSelectItemChange}
-                      onCheckedChange={(checked) =>
-                        handleSelectItemChange(item, checked)
-                      }
-                      selectedItems={selectedItems}
-                      columns={columns}
-                      frozenColumnsLeft={frozenColumnsLeft}
-                      checkColumnWidth={checkColumnWidth}
-                      tableWithChildren={tableWithChildren}
-                      referenceRowType={referenceRowType}
-                      rowWrapper={RowWrapper}
-                      cellRenderer={cellRenderer}
-                      fromVisualization={fromVisualization}
-                      headerGroups={headerGroups}
-                      registerSelectable={selectionRegistry.register}
-                      unregisterSelectable={selectionRegistry.unregister}
-                    />
-                  )
-                  if (RowWrapper) {
-                    return (
-                      <RowWrapper key={rowKey} item={item} index={index}>
-                        {row}
-                      </RowWrapper>
+              {data?.type === "flat" && (
+                // Keying the presence group by page makes a page change remount
+                // the whole group, so the outgoing page's rows are dropped
+                // instantly instead of playing their exit animation. Inserts and
+                // deletes within a page (same key) still animate.
+                <AnimatePresence initial={false} key={flatPresenceKey}>
+                  {data.records.map((item, index) => {
+                    const rowKey = `row-${getRowKey(item, index)}`
+                    const isNew = addedRowKeys.has(rowKey)
+                    const motionRow = (
+                      <MotionRow
+                        variants={getAnimationVariants()}
+                        // Only a genuinely-inserted row plays the enter
+                        // animation; rows arriving via pagination or the initial
+                        // load appear in place, without movement.
+                        initial={isNew ? "hidden" : false}
+                        animate="visible"
+                        exit="hidden"
+                        custom={index}
+                        key={rowKey}
+                        layout
+                        isNew={isNew}
+                        groupIndex={0}
+                        source={effectiveSource}
+                        item={item}
+                        index={index}
+                        onItemCheckedChange={handleSelectItemChange}
+                        onCheckedChange={(checked) =>
+                          handleSelectItemChange(item, checked)
+                        }
+                        selectedItems={selectedItems}
+                        columns={columns}
+                        frozenColumnsLeft={frozenColumnsLeft}
+                        checkColumnWidth={checkColumnWidth}
+                        tableWithChildren={tableWithChildren}
+                        referenceRowType={referenceRowType}
+                        rowWrapper={RowWrapper}
+                        cellRenderer={cellRenderer}
+                        fromVisualization={fromVisualization}
+                        headerGroups={headerGroups}
+                        registerSelectable={selectionRegistry.register}
+                        unregisterSelectable={selectionRegistry.unregister}
+                      />
                     )
-                  }
+                    if (RowWrapper) {
+                      return (
+                        <RowWrapper key={rowKey} item={item} index={index}>
+                          {motionRow}
+                        </RowWrapper>
+                      )
+                    }
 
-                  return row
-                })}
+                    return motionRow
+                  })}
+                </AnimatePresence>
+              )}
               {paginationInfo?.type === "infinite-scroll" &&
                 isLoadingMore &&
                 Array.from({ length: 5 }).map((_, rowIndex) => (

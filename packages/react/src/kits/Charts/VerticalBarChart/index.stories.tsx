@@ -5,7 +5,7 @@ import { VerticalBarChart } from "./index"
 const meta: Meta = {
   title: "Charts/VerticalBarChart",
   component: VerticalBarChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   decorators: [
     (Story) => (
       <div className="h-96 w-full">

@@ -573,6 +573,98 @@ export const SEEDS: Seed[] = [
       },
     ],
   },
+  // GROUP — document attachments of every previewable kind (pdf, xlsx, csv,
+  // docx, md, txt) plus a non-previewable deck that stays a plain chip. The
+  // sample files live in `public/`, same as the F0Chat "Document attachments"
+  // story.
+  {
+    id: "grp-reporting",
+    type: "group",
+    title: "Quarterly Reporting",
+    avatar: groupAvatar("Quarterly Reporting", "📊"),
+    participants: [GRACE, MARCUS, SAM],
+    lines: [
+      {
+        from: GRACE,
+        body: "Quarterly report is final, please give it a last read 📄",
+        min: 3 * HOUR,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-pdf-viewer-sample.pdf",
+            name: "quarterly-report.pdf",
+            mimeType: "application/pdf",
+          },
+        ],
+      },
+      {
+        from: ME,
+        body: "Looks great. Attaching the raw data behind the charts",
+        min: 2 * HOUR,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.xlsx",
+            name: "raw-data.xlsx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.csv",
+            name: "offices.csv",
+            mimeType: "text/csv",
+          },
+        ],
+      },
+      {
+        from: MARCUS,
+        body: "Offer draft + release notes for the announcement",
+        min: 80 * MIN,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.docx",
+            name: "offer-letter.docx",
+            mimeType:
+              "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          },
+          {
+            kind: "file",
+            url: "/f0-document-sample.md",
+            name: "RELEASE-NOTES.md",
+            mimeType: "text/markdown",
+          },
+        ],
+      },
+      {
+        from: SAM,
+        body: "Worker log from the failed import, for whoever debugs it",
+        min: 45 * MIN,
+        attachments: [
+          {
+            kind: "file",
+            url: "/f0-document-sample.txt",
+            name: "worker.log",
+            mimeType: "text/plain",
+          },
+        ],
+      },
+      {
+        from: ME,
+        body: "And the kickoff deck — no client-side preview for ppt, stays a chip",
+        min: 10 * MIN,
+        attachments: [
+          {
+            kind: "file",
+            url: "#",
+            name: "kickoff-deck.pptx",
+            mimeType: "application/vnd.ms-powerpoint",
+          },
+        ],
+      },
+    ],
+  },
   // GROUP — extensive, weeks/days of history.
   {
     id: "grp-design",

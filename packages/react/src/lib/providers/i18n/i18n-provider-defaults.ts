@@ -561,6 +561,8 @@ export const defaultTranslations = {
     closePreview: "Close",
     previousImage: "Previous image",
     nextImage: "Next image",
+    openDocument: "Open document",
+    documentPreview: "Document preview",
     // Attachment previews in reply quotes + the composer chip (a lone file shows
     // its real name instead of a count).
     photo: "Photo",
@@ -820,6 +822,11 @@ export const defaultTranslations = {
       addBlockedErrorHint:
         "Fix the errors in the existing items before adding another one",
       addBlockedMaxHint: "You've reached the maximum number of items",
+      removeConfirmTitle: "Remove item?",
+      removeConfirmMessage:
+        "This item will be removed. This action cannot be undone.",
+      removeError: "Couldn't remove the item. Please try again.",
+      removeErrorTitle: "Remove failed",
     },
     moreInformation: "More information",
     validation: {
@@ -901,6 +908,27 @@ export const defaultTranslations = {
     print: "Print",
     download: "Download",
     loading: "Loading document",
+    previewFailed: "Preview isn't available for this file",
+    showingFirstRows: {
+      one: "Showing the first row",
+      other: "Showing the first {{count}} rows",
+    },
+  },
+  videoPlayer: {
+    regionLabel: "Video player",
+    play: "Play",
+    pause: "Pause",
+    playing: "Playing",
+    paused: "Paused",
+    mute: "Mute",
+    unmute: "Unmute",
+    volume: "Volume",
+    seekLabel: "Seek",
+    enterFullscreen: "Enter fullscreen",
+    exitFullscreen: "Exit fullscreen",
+    playbackSpeed: "Playback speed ({{rate}})",
+    playbackSpeedLabel: "Playback speed",
+    timeProgress: "{{current}} of {{total}}",
   },
 } as const
 

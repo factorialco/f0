@@ -5,7 +5,7 @@ import { RadialProgressChart } from "./index"
 const meta: Meta<typeof RadialProgressChart> = {
   title: "Charts/RadialProgressChart",
   component: RadialProgressChart,
-  tags: ["autodocs"],
+  tags: ["autodocs", "no-sidebar"],
   args: {
     value: 75,
     max: 100,

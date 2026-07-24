@@ -1,0 +1,66 @@
+import { Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { Callout } from "./_lifecycle-visuals"
+
+<Meta title="About F0/Where it goes" />
+
+# Where it goes
+
+Placement in F0 comes down to **one decision**: which of the three homes an artifact belongs to. Everything else — how it's named, tagged, and graduated — is the same across all three.
+
+## Which home?
+
+Adding something **new**? Ask, in order:
+
+1. **Specific to one domain, owned by that team?** → **Domain specific** — `src/sds/<area>/`
+2. **A set of pieces used together for one job, reusable across products?** → **Kit** — `src/kits/<kit>/`
+3. **Generic, useful in two or more product areas?** → **Core** — `src/components/` (or `patterns/`, `ui/`, `layouts/`, `hooks/`)
+4. **None of these?** → it's not F0 — build it in your product.
+
+**Extending** something that already exists stays **where that component already lives** — you don't pick a new home.
+
+---
+
+## Core
+
+_The shared building blocks every product uses._
+
+Generic components and patterns — buttons, inputs, modals, forms. **Built and owned by Foundations.**
+
+- **When:** the thing you need is generic and useful in **two or more** product areas.
+- **Lives in:** `src/components/`, `src/patterns/`, `src/ui/`, `src/layouts/`, `src/hooks/`
+- Only Foundations marks a component **stable**; stable means the API is settled. You can add a prop or variant to a stable one (it gets reviewed first). Docs and tests are always required.
+- **Examples:** `F0Button`, `F0Checkbox`, `F0DatePicker`, `F0Alert` · patterns `F0Form`, `F0WizardForm`, `F0Modal`
+
+<Callout title="Patterns are part of Core">
+A pattern is several Core pieces combined into one reusable whole — like a form or a modal. It's still Core, with the same rules. If teams keep rebuilding the same combination, it can become a Core pattern. (`F0Form`, `F0WizardForm`, `F0Modal`, `ApplicationFrame`, `Header`, `Menu`.)
+</Callout>
+
+## Kits
+
+_A ready-made set of pieces for one job._
+
+A handful of components that go together for one purpose — like charts or chat — shipped as a **single import**.
+
+- **When:** several pieces are always used together, so they're easy to find and your agent knows they belong as a set.
+- **Lives in:** `src/kits/<kit>/` · **Owner:** Foundations, open to contributions.
+- A Kit can use Core. **🔴 A Kit can't use another Kit** — that's how circular dependencies start.
+- **Examples:** Charts (`BarChart`, `LineChart`, `PieChart`), Reactions.
+
+## Domain specific
+
+_Components that only make sense in one product area._
+
+Pieces tied to a single domain — clocking in, surveys, payroll. **The domain's own team builds and maintains them.**
+
+- **When:** the component only matters inside one domain and other areas won't reuse it.
+- **Lives in:** `src/sds/<area>/` · **Owner:** the domain's team — not Foundations.
+- Uses the same F0 tokens (no separate visual identity), shipped as its own import, and it stays in its domain — no need to push it into Core.
+- **Examples:** Time tracking (`ClockInControls`, `ClockInGraph`), Surveys (`BaseQuestion`, `SurveyAnsweringForm`).
+
+> Domain-owned is not a shortcut: creating a `sds/` area is still reviewed (Foundations confirms it's genuinely systemic and belongs in F0, not the product), built to the [Definition of Done](/docs/about-f0-definition-of-done--documentation) and documented. The difference is only **ownership** — the creating team keeps it.
+
+---
+
+## How it becomes stable
+
+New Core & Kit are born in `experimental/`; Domain specific is born in `src/sds/`. Both turn **stable** once they meet the [Definition of Done](/docs/about-f0-definition-of-done--documentation) and are adopted — see [Components Maturity](/docs/about-f0-components-maturity--documentation).

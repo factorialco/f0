@@ -2,7 +2,6 @@ import { ReactFlowProvider } from "@xyflow/react"
 import { forwardRef, type ForwardedRef, type ReactNode, type Ref } from "react"
 
 import "./F0Graph.css"
-import { F0GraphView } from "./components/F0GraphView"
 import type { EdgeVariant } from "./components/F0GraphEdge"
 import type {
   F0GraphNodeTagColumn,
@@ -18,6 +17,8 @@ import type {
   ZoomPreset,
   ZoomThresholds,
 } from "./types"
+
+import { F0GraphView } from "./components/F0GraphView"
 
 // ─── Props ─────────────────────────────────────────────────────
 export interface F0GraphProps<T = unknown> {
@@ -145,6 +146,15 @@ export interface F0GraphProps<T = unknown> {
    * navigation controls).
    */
   canvasActions?: ReactNode
+
+  /**
+   * Optional action(s) rendered at the bottom-right of the canvas. Anchored to
+   * the canvas (not the viewport), so it tracks the graph's visible area and
+   * reflows when a side panel shrinks it. Symmetric to `canvasActions`
+   * (top-left) and clear of the controls (bottom-left). Consumers provide their
+   * own `<F0Button>` elements (use `size="md"` to match the navigation controls).
+   */
+  canvasFooterActions?: ReactNode
 
   // ---- Controls ----
   showControls?: boolean

@@ -10,7 +10,7 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
-import { aiTranslations } from "@/sds/ai/F0AiChat/types"
+import { aiTranslations } from "@/kits/ai/F0AiChat/types"
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
@@ -176,18 +176,25 @@ const preview: Preview = {
     },
     options: {
       /*
-       * Top-level order mirrors the F0 component lifecycle (PR #4253):
-       * ownership drives the sections (Components/Patterns = Core, Kits,
-       * Domain specific); maturity is a badge, not a section. Everything
-       * not listed here falls back to alphabetical.
+       * Sort stories alphabetically by default, but keep the documented top-level sections
+       * and nested Foundations/CRUD patterns/Lifecycle groups in the specific order defined below.
+       * Inside `Lifecycle/`, the order follows the actual workflow
+       * (contribute → DoD → maturity → review → release).
        */
       storySort: {
         method: "alphabetical",
         order: [
-          // Get started (lifecycle docs are ordered by PR #4253)
+          // Get started: Introduction (how to consume) → About F0 (the definition) → Using F0
           "Introduction",
-          "How to contribute",
-          "Components maturity",
+          "About F0",
+          [
+            "What is F0",
+            "How to contribute",
+            "Where it goes",
+            "Definition of Done",
+            "Components Maturity",
+            "Release and Versioning",
+          ],
           "AI configuration",
           "Changelog",
           // Foundations

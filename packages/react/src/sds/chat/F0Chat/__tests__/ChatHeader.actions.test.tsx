@@ -8,24 +8,14 @@ import { F0Chat } from "../F0Chat"
 import { F0ChatProvider } from "../providers/F0ChatProvider"
 import { type F0ChatHeaderAction, type F0ChatRuntime } from "../types"
 
-// Same virtualizer pass-through as F0Chat.test: jsdom has no layout, so render
-// all rows instead of windowing.
-vi.mock("@tanstack/react-virtual", () => ({
-  useVirtualizer: ({ count }: { count: number }) => ({
-    getVirtualItems: () =>
-      Array.from({ length: count }, (_, index) => ({
-        index,
-        key: index,
-        start: index * 40,
-        size: 40,
-        end: index * 40 + 40,
-      })),
-    getTotalSize: () => count * 40,
-    measureElement: () => {},
-    scrollToIndex: () => {},
-    measure: () => {},
-  }),
-}))
+// jsdom has no layout — wrap Virtuoso in its official mock context so every
+// row renders (see mocks/virtuoso-jsdom).
+vi.mock("react-virtuoso", async (importOriginal) => {
+  const { mockVirtuosoModule } = await import("../mocks/virtuoso-jsdom")
+  return mockVirtuosoModule(
+    await importOriginal<typeof import("react-virtuoso")>()
+  )
+})
 
 const makeRuntime = (
   overrides: Partial<F0ChatRuntime> = {}

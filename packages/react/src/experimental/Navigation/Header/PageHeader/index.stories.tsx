@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ForwardedRef, useCallback, useState } from "react"
 
-import { F0AiChatProvider } from "@/sds/ai/F0AiChat"
+import { F0AiChatProvider } from "@/kits/ai/F0AiChat"
 import { FiltersDefinition, FiltersState } from "@/patterns/OneFilterPicker"
 import { useDataCollectionItemNavigation } from "@/patterns/OneDataCollection/hooks/useDataCollectionItemNavigation"
 import {

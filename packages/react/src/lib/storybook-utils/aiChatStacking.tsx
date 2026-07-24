@@ -11,7 +11,7 @@ import {
   MockConnectedChatHeader,
   MockConnectedChatInput,
   MockConnectedMessagesContainer,
-} from "@/sds/ai/F0AiChat/__stories__/_mock"
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
 
 // AI chat locked open in fullscreen. In ApplicationFrame the fullscreen chat
 // paints at `z-20` inside a `relative isolate`, as a sibling of `#content`

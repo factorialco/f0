@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { z } from "zod"
 
+import { dialogs } from "@/lib/providers/dialogs-alike"
 import {
   zeroRender as render,
   screen,
@@ -180,11 +181,21 @@ describe("EntitiesListFieldRenderer — add / remove", () => {
     await userEvent.click(screen.getByRole("button", { name: "Add FAQ" }))
     expect(screen.getAllByRole("row")).toHaveLength(3) // header + 2 rows
 
+    // Removing is now confirmation-gated (per the CRUD "Delete & destructive"
+    // doc) even without an `onRemove` — stub the confirmation to accept.
+    const confirmation = vi
+      .spyOn(dialogs, "confirmation")
+      .mockResolvedValue(true)
+
     // Remove the first data row (the entities list labels its remove action
     // "Remove", consistent with the list-view and overridable via labels.remove)
     const removeButtons = screen.getAllByRole("button", { name: "Remove" })
     await userEvent.click(removeButtons[0])
-    expect(screen.getAllByRole("row")).toHaveLength(2) // header + 1 row
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(2) // header + 1 row
+    })
+    expect(confirmation).toHaveBeenCalledTimes(1)
+    confirmation.mockRestore()
   })
 })
 
@@ -332,5 +343,369 @@ describe("EntitiesListFieldRenderer — editableIds", () => {
     expect(screen.queryByDisplayValue("Locked")).toBeNull()
     const lockedCell = screen.getByText("Locked")
     expect(within(lockedCell.closest("tr")!).queryByRole("textbox")).toBeNull()
+  })
+})
+
+describe("EntitiesListFieldRenderer — removableIds (editable-table)", () => {
+  it("shows the remove button only for rows inside removableIds", () => {
+    const schema = z.object({
+      faqs: f0FormField.entitiesList({
+        label: "FAQs",
+        schema: z.object({ title: z.string().min(1) }),
+        // Independent of editing: "a" is removable, "b" is not.
+        config: { removableIds: ["a"] },
+      }),
+    })
+
+    render(
+      <F0Form
+        name="removable-table"
+        schema={schema}
+        defaultValues={{
+          faqs: [
+            { id: "a", title: "Removable" },
+            { id: "b", title: "Pinned" },
+          ],
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // The removable row has a Remove button; the pinned row has none.
+    // (Cells are editable inputs, so match on the input value, not text.)
+    const removableRow = screen.getByDisplayValue("Removable").closest("tr")!
+    const pinnedRow = screen.getByDisplayValue("Pinned").closest("tr")!
+    expect(
+      within(removableRow).getByRole("button", { name: "Remove" })
+    ).toBeInTheDocument()
+    expect(
+      within(pinnedRow).queryByRole("button", { name: "Remove" })
+    ).toBeNull()
+  })
+})
+
+describe("EntitiesListFieldRenderer — delete persistence + confirmation", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  /** A single-column (inline) entities list with an optional `onRemove`. */
+  function renderList(
+    onRemove?: (item: unknown) => Promise<{ success: boolean } | void>,
+    extraConfig?: Record<string, unknown>
+  ) {
+    const schema = z.object({
+      faqs: f0FormField.entitiesList({
+        label: "FAQs",
+        schema: z.object({ title: z.string().min(1) }),
+        config: { onRemove, ...extraConfig },
+      }),
+    })
+    return render(
+      <F0Form
+        name="delete"
+        schema={schema}
+        defaultValues={{ faqs: [{ id: "a", title: "One" }] }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+  }
+
+  it("shows a confirmation before removing; cancelling keeps the row and skips onRemove", async () => {
+    const confirmation = vi
+      .spyOn(dialogs, "confirmation")
+      .mockResolvedValue(false)
+    const onRemove = vi.fn(async () => ({ success: true }))
+    renderList(onRemove)
+
+    expect(screen.getAllByRole("row")).toHaveLength(2) // header + 1 row
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }))
+
+    await waitFor(() => expect(confirmation).toHaveBeenCalledTimes(1))
+    // Cancelled: row stays, onRemove never runs.
+    expect(onRemove).not.toHaveBeenCalled()
+    expect(screen.getAllByRole("row")).toHaveLength(2)
+  })
+
+  it("confirming calls onRemove with the item and removes the row on success", async () => {
+    vi.spyOn(dialogs, "confirmation").mockResolvedValue(true)
+    const onRemove = vi.fn(async () => ({ success: true }))
+    renderList(onRemove)
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }))
+
+    await waitFor(() => {
+      expect(onRemove).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "a", title: "One" })
+      )
+    })
+    await waitFor(() => {
+      expect(screen.getAllByRole("row")).toHaveLength(1) // header only
+    })
+  })
+
+  it("keeps the row when onRemove returns { success: false }", async () => {
+    vi.spyOn(dialogs, "confirmation").mockResolvedValue(true)
+    const alert = vi.spyOn(dialogs, "alert").mockResolvedValue(true)
+    const onRemove = vi.fn(async () => ({ success: false }))
+    renderList(onRemove)
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }))
+
+    await waitFor(() => expect(onRemove).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(alert).toHaveBeenCalledTimes(1))
+    // Persistence failed → the row is kept.
+    expect(screen.getAllByRole("row")).toHaveLength(2)
+  })
+
+  it("keeps the row when onRemove throws", async () => {
+    vi.spyOn(dialogs, "confirmation").mockResolvedValue(true)
+    const alert = vi.spyOn(dialogs, "alert").mockResolvedValue(true)
+    const onRemove = vi.fn(async () => {
+      throw new Error("boom")
+    })
+    renderList(onRemove)
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }))
+
+    await waitFor(() => expect(alert).toHaveBeenCalledTimes(1))
+    expect(screen.getAllByRole("row")).toHaveLength(2)
+  })
+
+  it("disables the remove action while onRemove is in flight", async () => {
+    vi.spyOn(dialogs, "confirmation").mockResolvedValue(true)
+    let release: (value: { success: boolean }) => void = () => {}
+    const onRemove = vi.fn(
+      () =>
+        new Promise<{ success: boolean }>((resolve) => {
+          release = resolve
+        })
+    )
+    renderList(onRemove)
+
+    const removeButton = screen.getByRole("button", { name: "Remove" })
+    await userEvent.click(removeButton)
+
+    // Pending: the remove control is disabled until onRemove settles.
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Remove" })).toBeDisabled()
+    )
+
+    release({ success: true })
+    await waitFor(() => expect(screen.getAllByRole("row")).toHaveLength(1))
+  })
+
+  it("uses the confirmRemove copy when provided", async () => {
+    const confirmation = vi
+      .spyOn(dialogs, "confirmation")
+      .mockResolvedValue(false)
+    const confirmRemove = vi.fn((item: { title?: unknown }) => ({
+      type: "critical" as const,
+      title: `Delete ${String(item.title)}?`,
+      msg: "This FAQ will be permanently removed.",
+    }))
+    renderList(undefined, { confirmRemove })
+
+    await userEvent.click(screen.getByRole("button", { name: "Remove" }))
+
+    await waitFor(() =>
+      expect(confirmation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "critical",
+          title: "Delete One?",
+          msg: "This FAQ will be permanently removed.",
+        })
+      )
+    )
+    expect(confirmRemove).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "One" })
+    )
+  })
+
+  it("still gates editing via editableIds while remove stays confirm-gated", async () => {
+    vi.spyOn(dialogs, "confirmation").mockResolvedValue(true)
+    const onRemove = vi.fn(async () => ({ success: true }))
+    const schema = z.object({
+      faqs: f0FormField.entitiesList({
+        label: "FAQs",
+        schema: z.object({ title: z.string().min(1) }),
+        config: { editableIds: ["a"], onRemove },
+      }),
+    })
+    render(
+      <F0Form
+        name="editable-delete"
+        schema={schema}
+        defaultValues={{
+          faqs: [
+            { id: "a", title: "Editable" },
+            { id: "b", title: "Locked" },
+          ],
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+
+    // Editing gating unchanged: locked row has no input.
+    expect(screen.getByDisplayValue("Editable")).toBeInTheDocument()
+    expect(screen.queryByDisplayValue("Locked")).toBeNull()
+
+    // Removing the locked row still confirms + persists.
+    const lockedRow = screen.getByText("Locked").closest("tr")!
+    await userEvent.click(
+      within(lockedRow).getByRole("button", { name: "Remove" })
+    )
+    await waitFor(() =>
+      expect(onRemove).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "b", title: "Locked" })
+      )
+    )
+  })
+})
+
+describe("EntitiesListFieldRenderer — list-view remove gating (removableIds)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  /**
+   * The list-view row container. Rows have no semantic role, so walk up from
+   * the row's title text to the collection row element (identified by its
+   * `min-h-[64px]` layout class) to scope action queries per row.
+   */
+  function rowOf(name: string): HTMLElement {
+    let el: HTMLElement | null = screen.getByText(name)
+    while (el && !(el.className || "").includes("min-h-[64px]")) {
+      el = el.parentElement
+    }
+    if (!el) throw new Error(`Row for "${name}" not found`)
+    return el
+  }
+
+  /**
+   * A pinned-owner + members list, with independent `editableIds` /
+   * `removableIds` gates (each omitted → all rows).
+   */
+  function renderMembers(
+    opts: {
+      editableIds?: Array<string | number>
+      removableIds?: Array<string | number>
+      onRemove?: () => Promise<{ success: boolean } | void>
+    } = {}
+  ) {
+    const schema = z.object({
+      members: f0FormField.entitiesList({
+        label: "Members",
+        schema: z.object({
+          name: z.string().min(1),
+          role: z.string().min(1),
+        }),
+        config: {
+          visualization: "list-view",
+          ...(opts.editableIds ? { editableIds: opts.editableIds } : {}),
+          ...(opts.removableIds ? { removableIds: opts.removableIds } : {}),
+          ...(opts.onRemove ? { onRemove: opts.onRemove } : {}),
+        },
+      }),
+    })
+    return render(
+      <F0Form
+        name="members"
+        schema={schema}
+        defaultValues={{
+          members: [
+            { id: "owner", name: "Ada", role: "Owner" },
+            { id: "m1", name: "Bob", role: "Member" },
+            { id: "m2", name: "Cid", role: "Member" },
+          ],
+        }}
+        onSubmit={async () => ({ success: true })}
+      />
+    )
+  }
+
+  it("hides remove for a row outside removableIds (pinned owner)", async () => {
+    // Everyone removable except the pinned owner; editing left ungated.
+    renderMembers({ removableIds: ["m1", "m2"] })
+
+    // The owner is still editable (editableIds omitted), but not removable:
+    // remove is its only overflow item, so with it gated out there's no ⋮ menu.
+    const owner = rowOf("Ada")
+    expect(
+      within(owner).getByRole("button", { name: "Edit" })
+    ).toBeInTheDocument()
+    expect(within(owner).queryByRole("button", { name: "Actions" })).toBeNull()
+
+    // A removable member has the overflow menu with Remove.
+    await userEvent.click(
+      within(rowOf("Bob")).getByRole("button", { name: "Actions" })
+    )
+    expect(
+      await screen.findByRole("menuitem", { name: "Remove" })
+    ).toBeInTheDocument()
+  })
+
+  it("keeps every row removable when removableIds is omitted (back-compat)", async () => {
+    renderMembers()
+
+    // With no gate every row exposes edit and an overflow trigger, and the
+    // pinned owner is removable too.
+    expect(screen.getAllByRole("button", { name: "Edit" })).toHaveLength(3)
+    expect(screen.getAllByRole("button", { name: "Actions" })).toHaveLength(3)
+    await userEvent.click(
+      within(rowOf("Ada")).getByRole("button", { name: "Actions" })
+    )
+    expect(
+      await screen.findByRole("menuitem", { name: "Remove" })
+    ).toBeInTheDocument()
+  })
+
+  it("gates edit and remove independently (removable but not editable)", async () => {
+    // Owner is removable but NOT editable; the axes don't track each other.
+    renderMembers({ editableIds: ["m1", "m2"], removableIds: ["owner"] })
+
+    // Check the member first: opening a row's overflow menu marks the rest of
+    // the page inert (Radix focus-trap), so assert the un-opened rows before
+    // clicking into the owner's menu below.
+    // A member is editable but not removable: pencil, no ⋮ menu.
+    const member = rowOf("Bob")
+    expect(
+      within(member).getByRole("button", { name: "Edit" })
+    ).toBeInTheDocument()
+    expect(within(member).queryByRole("button", { name: "Actions" })).toBeNull()
+
+    // The owner is not editable (no pencil) but is removable (⋮ → Remove).
+    const owner = rowOf("Ada")
+    expect(within(owner).queryByRole("button", { name: "Edit" })).toBeNull()
+    await userEvent.click(
+      within(owner).getByRole("button", { name: "Actions" })
+    )
+    expect(
+      await screen.findByRole("menuitem", { name: "Remove" })
+    ).toBeInTheDocument()
+  })
+
+  it("removes a removable row from the overflow menu (confirm + onRemove)", async () => {
+    const confirmation = vi
+      .spyOn(dialogs, "confirmation")
+      .mockResolvedValue(true)
+    const onRemove = vi.fn(async () => ({ success: true }))
+    renderMembers({ removableIds: ["m1", "m2"], onRemove })
+
+    await userEvent.click(
+      within(rowOf("Bob")).getByRole("button", { name: "Actions" })
+    )
+    await userEvent.click(
+      await screen.findByRole("menuitem", { name: "Remove" })
+    )
+
+    await waitFor(() => expect(confirmation).toHaveBeenCalledTimes(1))
+    await waitFor(() =>
+      expect(onRemove).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "m1", name: "Bob" })
+      )
+    )
+    // The row is gone once onRemove resolves.
+    await waitFor(() => expect(screen.queryByText("Bob")).toBeNull())
   })
 })

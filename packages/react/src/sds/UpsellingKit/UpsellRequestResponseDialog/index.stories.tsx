@@ -38,7 +38,7 @@ const defaultMessages = {
 }
 
 const meta = {
-  title: "UpsellingKit/UpsellRequestResponseDialog",
+  title: "UpsellRequestResponseDialog",
   component: UpsellRequestResponseDialog,
   parameters: {
     layout: "fullscreen",

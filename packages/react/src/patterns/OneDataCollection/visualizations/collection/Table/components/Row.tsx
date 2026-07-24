@@ -1,4 +1,4 @@
-import { forwardRef, useEffect } from "react"
+import { forwardRef, useEffect, useState } from "react"
 
 import type { IconType } from "@/components/F0Icon"
 import type { TableVisualizationType } from "@/patterns/OneDataCollection/types"
@@ -68,6 +68,8 @@ export type RowProps<
   tableWithChildren: boolean
   nestedRowProps?: NestedRowProps
   disableHover?: boolean
+  /** When true, plays the green "flash on add" background animation once. */
+  isNew?: boolean
   /** Optional predicate to apply a row-level visual variant. */
   referenceRowType?: (item: R) => ReferenceType
   /** Optional custom cell renderer. When provided, wraps each cell's content. */
@@ -110,6 +112,10 @@ export type NestedRowProps = {
   stickyRow?: boolean
 }
 
+// Must match the `row-flash` animation duration in tailwind.config.ts.
+// ponytail: two sources of truth for the duration; bump both if the animation timing changes.
+const ROW_FLASH_DURATION_MS = 1500
+
 const referenceTypeClasses: Record<ReferenceType, string> = {
   none: "",
   striped:
@@ -143,6 +149,7 @@ const RowComponentInner = <
     nestedRowProps,
     tableWithChildren,
     disableHover = false,
+    isNew = false,
     referenceRowType: referenceRowTypeFn,
     cellRenderer: CellRenderer,
     rowWrapper,
@@ -167,6 +174,20 @@ const RowComponentInner = <
   const rowWithChildren = !!source.itemsWithChildren?.(item)
 
   const i18n = useI18n()
+
+  // Play the green "flash on add" highlight once, when a newly-added row
+  // mounts. `isNew` is captured at mount (a re-render would otherwise flip it
+  // back to false and cancel the animation early). Once the CSS animation
+  // (tailwind.config.ts `row-flash`) finishes, we turn the class back off —
+  // otherwise it stays attached to the row forever and can replay on any
+  // later re-render that touches this row's class list.
+  const [flashing, setFlashing] = useState(isNew)
+
+  useEffect(() => {
+    if (!flashing) return
+    const timeout = setTimeout(() => setFlashing(false), ROW_FLASH_DURATION_MS)
+    return () => clearTimeout(timeout)
+  }, [flashing])
 
   const renderCell = (
     item: R,
@@ -257,6 +278,7 @@ const RowComponentInner = <
         noBorder && "after:bg-white-100",
         disableHover && "hover:bg-transparent",
         isSelected && "bg-f1-background-selected-secondary",
+        flashing && "animate-row-flash",
         referenceTypeClasses[referenceRowType]
       )}
     >

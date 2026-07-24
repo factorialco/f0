@@ -36,6 +36,15 @@ describe("flattenChatRows", () => {
     expect(indexById.get("a")).toBe(1)
   })
 
+  it("tags each separator with the item that created it (forId)", () => {
+    const { rows } = flattenChatRows([
+      msg("a", "u1", "2026-06-21T10:00:00"),
+      msg("b", "u1", "2026-06-22T09:00:00"),
+    ])
+    const separators = rows.filter((r) => r.type === "separator")
+    expect(separators.map((s) => s.forId)).toEqual(["a", "b"])
+  })
+
   it("flags first/last of run and the conversation's last message", () => {
     const { rows } = flattenChatRows([
       msg("a", "u1", "2026-06-21T10:00:00"),

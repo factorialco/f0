@@ -1,4 +1,7 @@
 import { getCategoricalColor, getColor } from "@/kits/Charts/utils/colors"
+import { CSSProperties } from "react"
+
+import { Skeleton } from "@/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
@@ -19,9 +22,39 @@ export interface CategoryBarDataPoint {
 export interface CategoryBarChartCellValue {
   dataPoints: CategoryBarDataPoint[]
   hideTooltip?: boolean
+  /**
+   * Renders a skeleton (same height/width as the loaded bar) instead of the
+   * chart while the row's data is still loading. Prevents flashing the empty
+   * dash before the values arrive.
+   */
+  loading?: boolean
 }
 
 const CELL_MIN_HEIGHT_PX = 40
+
+/**
+ * Shared wrapper for every cell state (loaded, empty, loading). The table
+ * `<td>` is `align-top` by design (so multi-line cells align by their first
+ * line), which would leave the short 8px bar stuck to the top. To align the
+ * bar with the row's text instead, the wrapper takes the height of one text
+ * line (`h-5` = the `text-sm` line-height) and centers the bar within it — no
+ * `h-full` (it doesn't resolve against the cell's `min-height`) and no extra
+ * vertical space that would make the row taller than a normal one.
+ */
+function cellWrapperClassName(): string {
+  return "flex h-5 w-full items-center"
+}
+
+/**
+ * Inside a table the row height comes from the sibling cells, so we only set a
+ * horizontal min-width. Outside a table (e.g. cards) we keep a min-height so
+ * the bar keeps some presence on its own.
+ */
+function cellWrapperStyle(meta: ValueDisplayRendererContext): CSSProperties {
+  return meta.visualization === "table"
+    ? { minWidth: 80 }
+    : { minHeight: CELL_MIN_HEIGHT_PX, minWidth: 80 }
+}
 
 function formatPercentage(value: number, total: number): string {
   const pct = (value / total) * 100
@@ -46,6 +79,19 @@ export const CategoryBarChartCell = (
   args: CategoryBarChartCellValue,
   meta: ValueDisplayRendererContext
 ) => {
+  if (args?.loading) {
+    return (
+      <div
+        className={cellWrapperClassName()}
+        style={cellWrapperStyle(meta)}
+        data-cell-type="categoryBarChart"
+        aria-busy="true"
+      >
+        <Skeleton className="h-2 w-full rounded-2xs" />
+      </div>
+    )
+  }
+
   const dataPoints = args?.dataPoints
 
   if (!dataPoints || !Array.isArray(dataPoints) || dataPoints.length === 0) {
@@ -60,11 +106,8 @@ export const CategoryBarChartCell = (
 
   return (
     <div
-      className={cn(
-        "flex w-full items-center",
-        meta.visualization === "table" && "py-1"
-      )}
-      style={{ minHeight: CELL_MIN_HEIGHT_PX, minWidth: 80 }}
+      className={cellWrapperClassName()}
+      style={cellWrapperStyle(meta)}
       data-cell-type="categoryBarChart"
       role="img"
       aria-label="Category bar chart"

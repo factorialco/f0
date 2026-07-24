@@ -10,7 +10,7 @@ import { useIsomorphicLayoutEffect } from "usehooks-ts"
 
 import type { F0FormLikeComponent } from "@/patterns/F0Form/types"
 
-import { FormCardValueFormatterProvider } from "@/sds/ai/F0AiChat/providers/FormCardValueFormatterProvider"
+import { FormCardValueFormatterProvider } from "@/kits/ai/F0AiChat/providers/FormCardValueFormatterProvider"
 
 import { ToastProvider } from "../../../hooks/toast/ToastProvider"
 import { ImageContextValue, ImageProvider } from "../../imageHandler"

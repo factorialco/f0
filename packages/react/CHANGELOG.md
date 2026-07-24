@@ -1,5 +1,171 @@
 # Changelog
 
+## [4.55.0](https://github.com/factorialco/f0/compare/f0-react-v4.54.0...f0-react-v4.55.0) (2026-07-24)
+
+
+### Features
+
+* **upselling-kit:** add dismiss option and confirmation opt-out to UpsellingAlert ([#4732](https://github.com/factorialco/f0/issues/4732)) ([1d17599](https://github.com/factorialco/f0/commit/1d1759934c4191acd007bba36f7f04ac5df9cb2a))
+
+## [4.54.0](https://github.com/factorialco/f0/compare/f0-react-v4.53.0...f0-react-v4.54.0) (2026-07-24)
+
+
+### Features
+
+* **F0DatePicker:** add defaultMonth to control initial view ([#4776](https://github.com/factorialco/f0/issues/4776)) ([dbfb70b](https://github.com/factorialco/f0/commit/dbfb70bf0556fb1e119cea6a48d493038ea83920))
+
+## [4.53.0](https://github.com/factorialco/f0/compare/f0-react-v4.52.0...f0-react-v4.53.0) (2026-07-24)
+
+
+### Features
+
+* **component-status:** a11y as a stability requirement + live panel row ([#4798](https://github.com/factorialco/f0/issues/4798)) ([589c538](https://github.com/factorialco/f0/commit/589c53815f7b45ff16571838605326c1f1155ff2))
+
+## [4.52.0](https://github.com/factorialco/f0/compare/f0-react-v4.51.0...f0-react-v4.52.0) (2026-07-24)
+
+
+### Features
+
+* **F0VideoPlayer:** add video player component ([#4754](https://github.com/factorialco/f0/issues/4754)) ([626ce82](https://github.com/factorialco/f0/commit/626ce8277900f45e05b1ecdfd14195cc64bebf13))
+
+## [4.51.0](https://github.com/factorialco/f0/compare/f0-react-v4.50.0...f0-react-v4.51.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
+## [4.50.0](https://github.com/factorialco/f0/compare/f0-react-v4.49.3...f0-react-v4.50.0) (2026-07-23)
+
+
+### Features
+
+* **categoryBarChart:** center cell and add loading skeleton ([#4808](https://github.com/factorialco/f0/issues/4808)) ([0784857](https://github.com/factorialco/f0/commit/07848579d8d2cdba1caf65258723d397174a1bf5))
+
+## [4.49.3](https://github.com/factorialco/f0/compare/f0-react-v4.49.2...f0-react-v4.49.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** serve remote MCP at /mcp via Azure SWA rewrite ([#4814](https://github.com/factorialco/f0/issues/4814)) ([ad6eb44](https://github.com/factorialco/f0/commit/ad6eb44802e8e6525ef6b099c85b283b4711dc58))
+
+## [4.49.2](https://github.com/factorialco/f0/compare/f0-react-v4.49.1...f0-react-v4.49.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **Table:** don't animate rows when paginating ([#4809](https://github.com/factorialco/f0/issues/4809)) ([63e76f9](https://github.com/factorialco/f0/commit/63e76f9ec00d984e189d9cc3d01947a4d9cf79c8))
+
+## [4.49.1](https://github.com/factorialco/f0/compare/f0-react-v4.49.0...f0-react-v4.49.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **tailwind:** close the unterminated row-flash keyframe ([#4804](https://github.com/factorialco/f0/issues/4804)) ([b52cada](https://github.com/factorialco/f0/commit/b52cada74b11521cb974a6b7fae7cb668861d7f7))
+
+## [4.49.0](https://github.com/factorialco/f0/compare/f0-react-v4.48.0...f0-react-v4.49.0) (2026-07-23)
+
+
+### Features
+
+* **OneDataCollection:** auto page size for full-height collections ([#4795](https://github.com/factorialco/f0/issues/4795)) ([227209f](https://github.com/factorialco/f0/commit/227209fb13377cf0350b645c4f241bd91e700134))
+
+## [4.48.0](https://github.com/factorialco/f0/compare/f0-react-v4.47.3...f0-react-v4.48.0) (2026-07-23)
+
+
+### Features
+
+* **Table:** flash newly-added rows on insert ([#4709](https://github.com/factorialco/f0/issues/4709)) ([4f632af](https://github.com/factorialco/f0/commit/4f632af8e482481a99d0d23e4471af1e6639fa76))
+
+
+### Bug Fixes
+
+* **F0Form:** validate typed date on blur after value commits ([#4790](https://github.com/factorialco/f0/issues/4790)) ([d8b5979](https://github.com/factorialco/f0/commit/d8b5979910b96e6acd4df7ec0431abee54ea5b8c))
+
+## [4.47.3](https://github.com/factorialco/f0/compare/f0-react-v4.47.2...f0-react-v4.47.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** auto-recover from stale chunk imports after redeploy ([#4796](https://github.com/factorialco/f0/issues/4796)) ([566da64](https://github.com/factorialco/f0/commit/566da647a7229240e5b8d438182316b6ed8adbfd))
+
+## [4.47.2](https://github.com/factorialco/f0/compare/f0-react-v4.47.1...f0-react-v4.47.2) (2026-07-22)
+
+
+### Bug Fixes
+
+* **SectionHeader:** use 1px dashed separator aligned with border tokens ([#4792](https://github.com/factorialco/f0/issues/4792)) ([2d91aec](https://github.com/factorialco/f0/commit/2d91aec078a61794851da96ebf6040d818c1c6b2))
+
+## [4.47.1](https://github.com/factorialco/f0/compare/f0-react-v4.47.0...f0-react-v4.47.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* **react:** wrap survey rating options so long labels don't clip ([#4769](https://github.com/factorialco/f0/issues/4769)) ([8fb8b14](https://github.com/factorialco/f0/commit/8fb8b1414404935c2930f6bf37b89d60b311f9ca))
+
+## [4.47.0](https://github.com/factorialco/f0/compare/f0-react-v4.46.5...f0-react-v4.47.0) (2026-07-22)
+
+
+### Features
+
+* **ai:** toolbarStart slot in the chat composer action row ([#4713](https://github.com/factorialco/f0/issues/4713)) ([8e21ef3](https://github.com/factorialco/f0/commit/8e21ef325703b0db35bcb63b234cdeef5b0b98a7))
+
+## [4.46.5](https://github.com/factorialco/f0/compare/f0-react-v4.46.4...f0-react-v4.46.5) (2026-07-22)
+
+
+### Bug Fixes
+
+* **F0AnalyticsDashboard:** dashboard rows can't be shrunk + chart tooltips vanish on hover pause ([#4740](https://github.com/factorialco/f0/issues/4740)) ([8c6ea20](https://github.com/factorialco/f0/commit/8c6ea20785dc90396ff5fc264fef5c7d26ffff48))
+
+## [4.46.4](https://github.com/factorialco/f0/compare/f0-react-v4.46.3...f0-react-v4.46.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* **F0Graph:** don't let React Flow double-cull the windowed node array ([#4742](https://github.com/factorialco/f0/issues/4742)) ([95809bf](https://github.com/factorialco/f0/commit/95809bfc55e87f556828895b59b637c2ca37fb0f))
+
+## [4.46.3](https://github.com/factorialco/f0/compare/f0-react-v4.46.2...f0-react-v4.46.3) (2026-07-21)
+
+
+### Bug Fixes
+
+* **EditableTable:** render display-only cells without field icons ([#4739](https://github.com/factorialco/f0/issues/4739)) ([c3ca518](https://github.com/factorialco/f0/commit/c3ca518a5b385b77eea5403b9bd9b828eb7b6cf8))
+
+## [4.46.2](https://github.com/factorialco/f0/compare/f0-react-v4.46.1...f0-react-v4.46.2) (2026-07-21)
+
+
+### Bug Fixes
+
+* relax react-virtuoso to ^4.18.10 ([#4762](https://github.com/factorialco/f0/issues/4762)) ([5332b2f](https://github.com/factorialco/f0/commit/5332b2fdde71f8eab94b98ec6375c96f3287c9ff))
+
+## [4.46.1](https://github.com/factorialco/f0/compare/f0-react-v4.46.0...f0-react-v4.46.1) (2026-07-21)
+
+
+### Performance Improvements
+
+* **OneDataCollection:** debounce the collection→URL sync (fixes per-keystroke Sentry session churn) ([#4759](https://github.com/factorialco/f0/issues/4759)) ([5d67bb4](https://github.com/factorialco/f0/commit/5d67bb4fc8b1fa1d21223ee2505254d3b580091b))
+
+## [4.46.0](https://github.com/factorialco/f0/compare/f0-react-v4.45.0...f0-react-v4.46.0) (2026-07-21)
+
+
+### Features
+
+* **F0Chat:** document previews, virtuoso transcript rewrite and optimistic status footer ([#4743](https://github.com/factorialco/f0/issues/4743)) ([3aaa5b2](https://github.com/factorialco/f0/commit/3aaa5b2f4bcb30a9f64541b7e094cb19de8e1074))
+
+## [4.45.0](https://github.com/factorialco/f0/compare/f0-react-v4.44.0...f0-react-v4.45.0) (2026-07-21)
+
+
+### Features
+
+* **F0Form:** add delete persistence + confirmation to entitiesList ([#4728](https://github.com/factorialco/f0/issues/4728)) ([afc4237](https://github.com/factorialco/f0/commit/afc4237209357c6a2c548c6c6b5d38d33d937b57))
+
+## [4.44.0](https://github.com/factorialco/f0/compare/f0-react-v4.43.0...f0-react-v4.44.0) (2026-07-20)
+
+
+### Features
+
+* **F0PdfViewer:** document viewer kinds (sheet, docx, text) with toolbar actions ([#4741](https://github.com/factorialco/f0/issues/4741)) ([ddbeb67](https://github.com/factorialco/f0/commit/ddbeb67fa5b0157479d77251dee8c0d2534f112c))
+
 ## [4.43.0](https://github.com/factorialco/f0/compare/f0-react-v4.42.1...f0-react-v4.43.0) (2026-07-20)
 
 

@@ -1579,7 +1579,10 @@ export const ExampleComponent = ({
 
   return (
     <div
-      className={cn("space-y-4", fullHeight && "max-h-full w-full bg-[#fff]")}
+      className={cn(
+        "space-y-4",
+        fullHeight && "flex h-full min-h-0 w-full flex-col bg-[#fff]"
+      )}
     >
       <OneDataCollection
         dataTestId={`one-data-collection-${id ?? "example"}`}
@@ -1719,7 +1722,7 @@ interface DataAdapterOptions<TRecord> {
   delay?: number
   useObservable?: boolean
   paginationType?: PaginationType
-  perPage?: number
+  perPage?: number | "auto"
   search?: string
 }
 
@@ -1853,7 +1856,8 @@ export function createDataAdapter<
     // Apply pagination if needed
     if (pagination && paginationType === "pages") {
       const { currentPage = 1 } = pagination
-      const pageSize = pagination.perPage || perPage
+      const pageSize =
+        pagination.perPage || (typeof perPage === "number" ? perPage : 20)
       const startIndex = (currentPage - 1) * pageSize
       const paginatedRecords = filteredRecords.slice(
         startIndex,
@@ -1870,7 +1874,8 @@ export function createDataAdapter<
         summaries: summaries as TRecord, // Include summaries
       }
     } else if (pagination && paginationType === "infinite-scroll") {
-      const pageSize = pagination.perPage || perPage
+      const pageSize =
+        pagination.perPage || (typeof perPage === "number" ? perPage : 20)
 
       const cursor = "cursor" in pagination ? pagination.cursor : null
 

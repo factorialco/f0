@@ -1,5 +1,6 @@
 import React from "react"
 
+import { A11yRow } from "./A11yRow"
 import {
   getComponentStatus,
   type ApiStatus,
@@ -91,42 +92,61 @@ export function ComponentStability({
       </p>
 
       {status.showChecklist && (
-        <ul className="mt-4 list-none space-y-3 p-0">
-          {status.requirements.map((req) => (
-            <li key={req.key} className="flex items-start gap-2">
-              <span
-                aria-hidden
-                className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+        // role="list" divs (not <ul>/<li>): Storybook docs injects a global
+        // `#storybook-docs ul { margin-bottom: 24px !important }` that .sb-unstyled
+        // doesn't neutralize and no utility class can outrank, so semantic-role
+        // divs keep the spacing under our control while preserving list semantics.
+        <div role="list" className="mt-4 space-y-3">
+          {status.requirements.map((req) =>
+            req.key === "a11y" ? (
+              <A11yRow
+                key={req.key}
+                detail={req.detail}
+                tier={status.a11yTier}
+              />
+            ) : (
+              <div
+                key={req.key}
+                role="listitem"
+                className="flex items-start gap-2"
               >
-                {req.met ? "✓" : "✕"}
-              </span>
-              <div>
-                <div className="text-base text-f1-foreground">{req.label}</div>
-                <div className="mt-0.5 text-base text-f1-foreground-secondary">
-                  {req.detail}
-                  {req.criteria && req.criteria.length > 0 && (
-                    <ul className="mt-1 list-none space-y-0.5 p-0">
-                      {req.criteria.map((criterion) => (
-                        <li
-                          key={criterion.label}
-                          className="flex items-start gap-2 !text-base"
-                        >
-                          <span
-                            aria-hidden
-                            className={`shrink-0 ${criterion.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                <span
+                  aria-hidden
+                  className={`mt-0.5 shrink-0 ${req.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                >
+                  {req.met ? "✓" : "✕"}
+                </span>
+                <div>
+                  <div className="text-base text-f1-foreground">
+                    {req.label}
+                  </div>
+                  <div className="mt-0.5 text-base text-f1-foreground-secondary">
+                    {req.detail}
+                    {req.criteria && req.criteria.length > 0 && (
+                      <div role="list" className="mt-1 space-y-0.5">
+                        {req.criteria.map((criterion) => (
+                          <div
+                            key={criterion.label}
+                            role="listitem"
+                            className="flex items-start gap-2 text-base"
                           >
-                            {criterion.met ? "✓" : "✕"}
-                          </span>
-                          <span>{criterion.label}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                            <span
+                              aria-hidden
+                              className={`shrink-0 ${criterion.met ? "text-f1-foreground-positive" : "text-f1-foreground-secondary"}`}
+                            >
+                              {criterion.met ? "✓" : "✕"}
+                            </span>
+                            <span>{criterion.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </li>
-          ))}
-        </ul>
+            )
+          )}
+        </div>
       )}
     </div>
   )
