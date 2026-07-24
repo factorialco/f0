@@ -10,6 +10,8 @@ import {
   DetailsExtension,
   DetailsSummaryExtension,
   EnhanceHighlight,
+  FileAttachmentExtension,
+  FileUploadConfig,
   HighlightExtension,
   ImageExtension,
   LinkExtension,
@@ -35,6 +37,7 @@ interface CreateNotesTextEditorExtensionsProps {
   translations: I18nContextType
   aiBlockConfig?: AIBlockConfig
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
   enhanceEnabled?: boolean
 }
 
@@ -43,6 +46,7 @@ export const createNotesTextEditorExtensions = ({
   translations,
   aiBlockConfig,
   imageUploadConfig,
+  fileUploadConfig,
   enhanceEnabled = false,
 }: CreateNotesTextEditorExtensionsProps) => {
   return [
@@ -67,6 +71,7 @@ export const createNotesTextEditorExtensions = ({
     }),
     ImageExtension,
     VideoEmbedExtension,
+    FileAttachmentExtension,
     ...(imageUploadConfig
       ? [createFileHandlerExtension(imageUploadConfig)]
       : []),
@@ -80,6 +85,7 @@ export const createNotesTextEditorExtensions = ({
       aiBlockConfig,
       translations,
       imageUploadConfig,
+      fileUploadConfig,
     }),
   ]
 }

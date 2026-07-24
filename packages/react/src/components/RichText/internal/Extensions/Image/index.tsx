@@ -11,23 +11,20 @@ import {
 import { useCallback, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
-import { Spinner } from "@/ui/Spinner"
 import { Delete } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
-export type ImageUploadErrorType =
-  | "file-too-large"
-  | "invalid-type"
-  | "upload-failed"
+import {
+  type BaseUploadConfig,
+  handleOptimisticUpload,
+  type UploadErrorType,
+} from "../shared/optimisticUpload"
 
-export interface ImageUploadConfig {
-  onUpload: (file: File) => Promise<{ url: string; signedId?: string }>
-  maxFileSize?: number
-  onError?: (errorType: ImageUploadErrorType) => void
-}
+export type ImageUploadErrorType = UploadErrorType
+export type ImageUploadConfig = BaseUploadConfig
 
-const DEFAULT_MAX_SIZE = 50 * 1024 * 1024 // 50MB
 export const DEFAULT_ACCEPTED_TYPES = [
   "image/jpeg",
   "image/png",
@@ -179,95 +176,28 @@ export const ImageExtension = Image.extend({
   allowBase64: true,
 })
 
-const findUploadPlaceholderPos = (
-  editor: Editor,
-  uploadId: string
-): number | null => {
-  let nodePos: number | null = null
-  editor.state.doc.descendants((node, position) => {
-    if (
-      node.type.name === "image" &&
-      node.attrs["data-upload-id"] === uploadId
-    ) {
-      nodePos = position
-      return false
-    }
-    return true
-  })
-  return nodePos
-}
-
-const handleImageUpload = async (
+const handleImageUpload = (
   editor: Editor,
   file: File,
   uploadConfig: ImageUploadConfig,
   pos?: number
-) => {
-  const maxSize = uploadConfig.maxFileSize ?? DEFAULT_MAX_SIZE
-  const { onError } = uploadConfig
-
-  // Validate file type
-  if (!DEFAULT_ACCEPTED_TYPES.includes(file.type)) {
-    onError?.("invalid-type")
-    return
-  }
-
-  // Validate file size
-  if (file.size > maxSize) {
-    onError?.("file-too-large")
-    return
-  }
-
-  // Create a local preview to make a smoother experience for the user
-  const previewUrl = URL.createObjectURL(file)
-  const uploadId = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`
-
-  const insertPos = pos ?? editor.state.selection.anchor
-  editor
-    .chain()
-    .focus()
-    .insertContentAt(insertPos, [
-      {
-        type: "image",
-        attrs: {
-          src: previewUrl,
-          alt: file.name,
-          uploading: true,
-          "data-upload-id": uploadId,
-        },
-      },
-    ])
-    .run()
-
-  try {
-    const { url } = await uploadConfig.onUpload(file)
-
-    // Replace the local preview URL with the URL from the server
-    const nodePos = findUploadPlaceholderPos(editor, uploadId)
-    if (nodePos !== null) {
-      editor
-        .chain()
-        .setNodeSelection(nodePos)
-        .updateAttributes("image", {
-          src: url,
-          uploading: false,
-          "data-upload-id": null,
-        })
-        .run()
-    }
-  } catch {
-    onError?.("upload-failed")
-
-    // Remove the placeholder on failure
-    const nodePos = findUploadPlaceholderPos(editor, uploadId)
-    if (nodePos !== null) {
-      editor.chain().setNodeSelection(nodePos).deleteSelection().run()
-    }
-  } finally {
-    // Clean up the blob URL
-    URL.revokeObjectURL(previewUrl)
-  }
-}
+) =>
+  handleOptimisticUpload(
+    editor,
+    file,
+    uploadConfig,
+    {
+      nodeName: "image",
+      validate: (f) =>
+        DEFAULT_ACCEPTED_TYPES.includes(f.type) ? null : "invalid-type",
+      buildInsertAttrs: ({ previewUrl, file: f }) => ({
+        src: previewUrl,
+        alt: f.name,
+      }),
+      buildSettledAttrs: ({ url }) => ({ src: url }),
+    },
+    pos
+  )
 
 export const createFileHandlerExtension = (uploadConfig: ImageUploadConfig) =>
   FileHandler.configure({

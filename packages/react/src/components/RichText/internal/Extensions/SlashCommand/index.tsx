@@ -6,6 +6,7 @@ import { createRoot, Root } from "react-dom/client"
 
 import { I18nContextType } from "@/lib/providers/i18n"
 
+import { FileUploadConfig } from "../FileAttachment"
 import { ImageUploadConfig } from "../Image"
 import {
   AIBlockConfig,
@@ -19,12 +20,14 @@ interface CreateSlashCommandExtensionProps {
   aiBlockConfig?: AIBlockConfig
   translations: I18nContextType
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
 }
 
 const createSlashCommandExtension = ({
   aiBlockConfig,
   translations,
   imageUploadConfig,
+  fileUploadConfig,
 }: CreateSlashCommandExtensionProps) => {
   // The command catalog is static for the lifetime of the extension: build it
   // once (with lowercased titles) instead of regenerating it on every
@@ -33,6 +36,7 @@ const createSlashCommandExtension = ({
     aiBlockConfig,
     translations,
     imageUploadConfig,
+    fileUploadConfig,
   })
   const searchableCommands = groupedCommands
     .flatMap((group) => group.commands)
