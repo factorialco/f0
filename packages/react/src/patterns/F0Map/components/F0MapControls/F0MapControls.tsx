@@ -21,18 +21,22 @@ export const F0MapControls = forwardRef<HTMLDivElement, F0MapControlsProps>(
     const hasZoomGroup = Boolean(onZoomIn || onZoomOut)
 
     // Each group sits on its own card so zoom and navigation read as two
-    // separate surfaces lifted off the map.
+    // separate surfaces lifted off the map. F0Box has no backdrop-filter
+    // prop, so the frosted-glass blur lives on a wrapper whose radius matches
+    // the card - the translucent surface then frosts the map behind it.
     const card = (children: React.ReactNode) => (
-      <F0Box
-        background="inverse-secondary"
-        border="default"
-        borderStyle="solid"
-        borderColor="secondary"
-        borderRadius="lg"
-        padding="xs"
-      >
-        <div className="flex flex-col items-center gap-1">{children}</div>
-      </F0Box>
+      <div className="rounded-lg backdrop-blur-md">
+        <F0Box
+          background="inverse-secondary"
+          border="default"
+          borderStyle="solid"
+          borderColor="secondary"
+          borderRadius="lg"
+          padding="xs"
+        >
+          <div className="flex flex-col items-center gap-1">{children}</div>
+        </F0Box>
+      </div>
     )
 
     return (
