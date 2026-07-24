@@ -31,6 +31,13 @@
       "react-native": "./src/icons/index.ts",
       "default": "./src/icons/index.ts"
     },
+    "./icons/ai": {
+      "types": "./src/icons/ai/index.ts",
+      "import": "./src/icons/ai/index.ts",
+      "require": "./src/icons/ai/index.ts",
+      "react-native": "./src/icons/ai/index.ts",
+      "default": "./src/icons/ai/index.ts"
+    },
     "./icons/app": {
       "types": "./src/icons/app/index.ts",
       "import": "./src/icons/app/index.ts",
