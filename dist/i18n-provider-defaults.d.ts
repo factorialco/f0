@@ -961,6 +961,22 @@ export declare const defaultTranslations: {
             readonly other: "Showing the first {{count}} rows";
         };
     };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
+    };
 };
 
 declare type Join<T extends string[], D extends string> = T extends [] ? never : T extends [infer F] ? F : T extends [infer F, ...infer R] ? F extends string ? `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;

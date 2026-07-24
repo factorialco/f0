@@ -812,6 +812,20 @@ blurArea?: "l" | "r" | "lr";
 
 export declare const AreaChartWidget: ForwardRefExoticComponent<Omit<AreaChartWidgetProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
 
+/**
+ * Upper bound for the resolved page size, so a very tall container never
+ * fetches an unreasonably large page.
+ */
+export declare const AUTO_PER_PAGE_MAX = 30;
+
+/**
+ * Number of rows the min-height reservation keeps space for (see
+ * `getAutoPerPageMinHeight`). This is NOT a lower bound on the page size — the
+ * page size always matches what actually fits, so it never overflows. It only
+ * sizes the space a squeezed collection reserves to stay usable.
+ */
+export declare const AUTO_PER_PAGE_MIN_RESERVED_ROWS = 10;
+
 export declare const AutoGrid: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 tileSize?: "lg" | "md" | "sm" | undefined;
 gap?: "0" | "1" | "2" | "3" | "4" | "lg" | "md" | "sm" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12" | "14" | "16" | "px" | "xl" | "1.5" | "0.5" | "2.5" | undefined;
@@ -4090,6 +4104,22 @@ declare const defaultTranslations: {
             readonly other: "Showing the first {{count}} rows";
         };
     };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
+    };
 };
 
 export declare interface DeleteBlockNotesTextEditorPageDocumentPatch {
@@ -6635,6 +6665,15 @@ declare interface GaugeComputation {
 
 export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
 
+/**
+ * Minimum height a `perPage: "auto"` collection reserves so it stays usable
+ * (space for AUTO_PER_PAGE_MIN_RESERVED_ROWS rows plus chrome). Applied as a
+ * `min-height` so the collection stays visible when its siblings would
+ * otherwise squeeze it to nothing — the whole page scrolls instead of the
+ * collection disappearing.
+ */
+export declare function getAutoPerPageMinHeight(rowHeight?: number): number;
+
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
 
 /**
@@ -8544,8 +8583,15 @@ declare interface PageProps {
 export declare type PaginatedDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>, FetchReturn = PaginatedResponse<R>> = {
     /** Indicates this adapter uses page-based pagination */
     paginationType: PaginationType;
-    /** Default number of records per page */
-    perPage?: number;
+    /**
+     * Number of records per page. Pass `"auto"` to derive the page size from the
+     * available vertical space (page-based pagination inside a `fullHeight`
+     * collection only), sized to exactly the rows that fit (capped at 30). In a
+     * `fullHeight` collection, leaving this unset behaves like `"auto"` — an
+     * unspecified page size means "fill the height". Outside `fullHeight`, an
+     * unset value falls back to the default page size.
+     */
+    perPage?: number | "auto";
     /**
      * Function to fetch paginated data based on filter and pagination options
      * @param options - The filter and pagination options to apply when fetching data
