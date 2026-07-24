@@ -9196,10 +9196,25 @@ declare type SearchOptions = {
  * result calls `onSelect` (e.g. the graph view reveals/centers the node).
  */
 export declare type SearchPreview<R extends RecordType> = {
-    search: (query: string) => Promise<R[]>;
+    /**
+     * Fetch one page of matches for `query`. `page` starts at 0 and increments as
+     * the user scrolls the dropdown to the bottom. Return a bare array for a
+     * single, non-paginated page (treated as `hasMore: false`), or a
+     * `SearchPreviewPage` to drive infinite scroll across pages.
+     */
+    search: (query: string, page: number) => Promise<R[] | SearchPreviewPage<R>>;
     getId: (record: R) => string;
     render: (record: R) => SearchPreviewResultData;
     onSelect: (record: R) => void;
+};
+
+/**
+ * One page of search-preview results. `hasMore` tells the dropdown whether to
+ * keep pulling further pages as the user scrolls (infinite scroll).
+ */
+export declare type SearchPreviewPage<R extends RecordType> = {
+    records: R[];
+    hasMore: boolean;
 };
 
 /** Data shown for a single row of the search preview dropdown. */
@@ -11411,8 +11426,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        moodTracker: {
-            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
@@ -11420,11 +11438,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        moodTracker: {
+            insertMoodTracker: (data: MoodTrackerData) => ReturnType;
         };
     }
 }

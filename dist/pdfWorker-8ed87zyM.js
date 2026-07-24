@@ -1,7 +1,7 @@
 import { jsx, jsxs } from "react/jsx-runtime";
 import { createContext, useReducer, forwardRef, useRef, useImperativeHandle, useEffect, useCallback, useMemo, useContext, useLayoutEffect } from "react";
 import { v as invariant, x as clsx } from "./F0CanvasPanel-DvAledR4.js";
-import { d as dequal } from "./index-BzHtGp2w.js";
+import { d as dequal } from "./index-D51iR-uW.js";
 import { a as getAugmentedNamespace, g as getDefaultExportFromCjs } from "./_commonjsHelpers-ByX85dGu.js";
 import { c as commonjsRequire } from "./_commonjs-dynamic-modules-BpilXLfW.js";
 import './pdfWorker.css';var pdf$1 = { exports: {} };
