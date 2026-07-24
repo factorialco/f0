@@ -11,6 +11,7 @@ import { Cross } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { toArray } from "@/lib/toArray"
 import { cn } from "@/lib/utils"
+import { Spinner } from "@/ui/Spinner"
 
 import {
   F0ToastProps,
@@ -26,7 +27,8 @@ const toastVariants = cva({
       error: "",
       warning: "",
       success: "",
-      default: "py-3 px-4",
+      loading: "",
+      default: "",
     },
   },
   defaultVariants: {
@@ -41,6 +43,7 @@ const titleVariants = cva({
       error: "text-f1-foreground-inverse",
       warning: "text-f1-foreground-inverse",
       success: "text-f1-foreground-inverse",
+      loading: "text-f1-foreground-inverse",
       default: "text-f1-foreground-inverse",
     },
     hasIcon: {
@@ -69,7 +72,18 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
   ) => {
     const i18n = useI18n()
     const [remainingTime, setRemainingTime] = useState(duration || 0)
+    const [prevDuration, setPrevDuration] = useState(duration)
     const [isPaused, setIsPaused] = useState(false)
+
+    // Reset the countdown when the toast is updated in place (its `duration`
+    // changes) — e.g. error → loading → success on the same id. Done DURING render
+    // (not in an effect) so `remainingTime` is never momentarily 0 while
+    // `duration > 0`: otherwise the auto-close effect below sees 0 in the commit
+    // between resolving and the reset, and dismisses the toast mid-resolution.
+    if (duration !== prevDuration) {
+      setPrevDuration(duration)
+      setRemainingTime(duration || 0)
+    }
 
     const { role, ariaLive, avatarType, progressBarColor } = useMemo(() => {
       const getRoleAndAriaLive = () => {
@@ -92,6 +106,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         error: "critical",
         warning: "warning",
         success: "positive",
+        loading: null,
         default: null,
       }
 
@@ -99,6 +114,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         error: "bg-f1-icon-critical",
         warning: "bg-f1-icon-warning",
         success: "bg-f1-icon-positive",
+        loading: "bg-f1-foreground-inverse-secondary",
         default: "bg-f1-foreground-inverse-secondary",
       }
 
@@ -154,6 +170,8 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
     const linkActions: ToastActionLink[] = actionsArray.filter(
       (action): action is ToastActionLink => action.type === "link"
     )
+    const isLoading = variant === "loading"
+    const hasActions = buttonActions.length > 0 || linkActions.length > 0
 
     const handleActionClick = (
       action: ToastActionButton | ToastActionLink,
@@ -179,11 +197,24 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        <div className="pointer-events-auto flex flex-row gap-3">
-          {avatarType && (
+        <div
+          className={cn(
+            "pointer-events-auto flex flex-row gap-3",
+            // top-align icon + controls with the title when there's a
+            // description (multi-line); centre for a single-line toast
+            description ? "items-start" : "items-center"
+          )}
+        >
+          {isLoading ? (
             <div className="flex-shrink-0">
-              <F0AvatarAlert type={avatarType} size="sm" />
+              <Spinner size="small" className="text-f1-foreground-inverse" />
             </div>
+          ) : (
+            avatarType && (
+              <div className="flex-shrink-0">
+                <F0AvatarAlert type={avatarType} size="sm" />
+              </div>
+            )
           )}
 
           <div className="flex flex-1 flex-col gap-1">
@@ -191,7 +222,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
               <p
                 className={titleVariants({
                   variant,
-                  hasIcon: !!avatarType,
+                  hasIcon: !!avatarType || isLoading,
                 })}
               >
                 {title}
@@ -202,38 +233,38 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
                 {description}
               </p>
             )}
-
-            {(buttonActions.length > 0 || linkActions.length > 0) && (
-              <div className="dark mt-1 flex flex-row flex-wrap items-center gap-3">
-                {buttonActions.map((buttonAction) => (
-                  <F0Button
-                    key={`button-${buttonAction.label}`}
-                    label={buttonAction.label}
-                    icon={buttonAction.icon}
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      handleActionClick(buttonAction, buttonAction.onClick)
-                    }
-                  />
-                ))}
-                {linkActions.map((linkAction) => (
-                  <div
-                    key={`link-${linkAction.label}`}
-                    onClick={() => handleActionClick(linkAction)}
-                  >
-                    <F0Link
-                      href={linkAction.href}
-                      children={linkAction.label}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Close button */}
-          {onClose && (
+          {/* Action(s) — inline on the trailing edge (never below the text).
+              Link sits to the LEFT of the primary button (button is trailing). */}
+          {!isLoading && hasActions && (
+            <div className="dark flex flex-shrink-0 flex-row flex-wrap items-center gap-3">
+              {linkActions.map((linkAction) => (
+                <div
+                  key={`link-${linkAction.label}`}
+                  onClick={() => handleActionClick(linkAction)}
+                >
+                  <F0Link href={linkAction.href} children={linkAction.label} />
+                </div>
+              ))}
+              {buttonActions.map((buttonAction) => (
+                <F0Button
+                  key={`button-${buttonAction.label}`}
+                  label={buttonAction.label}
+                  icon={buttonAction.icon}
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    handleActionClick(buttonAction, buttonAction.onClick)
+                  }
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Close — only when there's no action (so it's never mis-clicked for
+              the action) and not while loading */}
+          {onClose && !isLoading && !hasActions && (
             <div className="dark flex-shrink-0">
               <F0Button
                 variant="outline"
@@ -248,7 +279,7 @@ const F0Toast = forwardRef<HTMLDivElement, F0ToastProps>(
         </div>
 
         {/* Progress Bar */}
-        {duration && duration > 0 && (
+        {!isLoading && duration && duration > 0 && (
           <div className="absolute bottom-0 left-0 right-0 h-[3px] w-full overflow-hidden rounded-b-lg">
             <div
               className={cn("h-full w-full", progressBarColor)}

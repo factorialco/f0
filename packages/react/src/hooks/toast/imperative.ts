@@ -3,8 +3,10 @@ import { nanoid } from "nanoid"
 import { toastStore } from "./store"
 import { ToastId, ToastOptions } from "./types"
 
-// Default lifetime for a non-persistent toast (ms).
-const DEFAULT_DURATION = 10000
+// Default lifetime for a non-persistent toast (ms). Toasts with an action get a
+// longer window so there's time to read, decide and reach the button (e.g. Undo).
+const DEFAULT_DURATION = 5000
+const ACTION_DURATION = 10000
 
 const warnIfNoProvider = (method: string) => {
   if (process.env.NODE_ENV !== "production" && !toastStore.hasProvider()) {
@@ -20,8 +22,14 @@ const open = (options: ToastOptions): ToastId => {
 
   warnIfNoProvider("toasts.open()")
 
+  const hasAction = options.actions != null
+  // A toast is transient: it auto-dismisses. Only a loading toast stays open
+  // (until it's resolved in place), plus anything the caller marks `persistent`.
+  // A persistent CONDITION (offline, session expired) is not a toast — use an
+  // F0Alert / banner instead. Toasts with an action get a longer window.
+  const persist = options.persistent === true || options.variant === "loading"
   toastStore.addItem({
-    duration: options.persistent ? undefined : DEFAULT_DURATION,
+    duration: persist ? undefined : hasAction ? ACTION_DURATION : DEFAULT_DURATION,
     ...options,
     id,
     onClose: () => toastStore.removeItem(id),

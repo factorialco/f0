@@ -1,6 +1,6 @@
 import { IconType } from "@/components/F0Icon"
 
-export const toastVariants = ["error", "warning", "success", "default"] as const
+export const toastVariants = ["error", "warning", "success", "loading", "default"] as const
 export type F0ToastVariant = (typeof toastVariants)[number]
 
 export type ToastActionButton = {
