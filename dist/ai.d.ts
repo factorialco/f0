@@ -2745,6 +2745,22 @@ export declare const defaultTranslations: {
             readonly other: "Showing the first {{count}} rows";
         };
     };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
+    };
 };
 
 declare type DetailsItemContent = (ComponentProps<typeof DataList.Item> & {
@@ -5187,8 +5203,10 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        transcript: {
-            insertTranscript: (data: TranscriptData) => ReturnType;
+        videoEmbed: {
+            setVideoEmbed: (options: {
+                src: string;
+            }) => ReturnType;
         };
     }
 }
@@ -5196,10 +5214,8 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        videoEmbed: {
-            setVideoEmbed: (options: {
-                src: string;
-            }) => ReturnType;
+        transcript: {
+            insertTranscript: (data: TranscriptData) => ReturnType;
         };
     }
 }
