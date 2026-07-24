@@ -25,7 +25,7 @@ function tint(hex: string, a: number) {
 }
 
 type Step = { k: string; t: string; d: string; color?: string }
-type CardItem = { name: string; color: string; desc: string; meta?: string }
+type CardItem = { name: string; color: string; desc: string; meta?: string; href?: string }
 type Item = { label: string; text: string; color?: string }
 
 export function Flow({ steps }: { steps: Step[] }) {
@@ -53,22 +53,115 @@ export function Flow({ steps }: { steps: Step[] }) {
 export function Cards({ items }: { items: CardItem[] }) {
   return (
     <div
-      className="my-6 grid gap-3"
-      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))" }}
+      className="my-6 grid gap-4"
+      style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}
     >
-      {items.map((c) => (
+      {items.map((c) => {
+        const inner = (
+          <>
+            <div className="flex items-center gap-1.5 text-base font-semibold" style={{ color: c.color }}>
+              {c.name}
+              {c.href && <span aria-hidden style={{ opacity: 0.7 }}>→</span>}
+            </div>
+            <div className="mt-2 text-sm leading-relaxed" style={{ opacity: 0.82 }}>{c.desc}</div>
+            {c.meta && (
+              <div className="mt-2 font-mono text-xs" style={{ opacity: 0.55 }}>{c.meta}</div>
+            )}
+          </>
+        )
+        const style = { borderTopWidth: 3, borderTopColor: c.color }
+        return c.href ? (
+          <a
+            key={c.name}
+            href={c.href}
+            target="_top"
+            className={`block rounded-xl p-5 no-underline transition-opacity hover:opacity-80 ${SURFACE}`}
+            style={{ ...style, color: "inherit" }}
+          >
+            {inner}
+          </a>
+        ) : (
+          <div key={c.name} className={`rounded-xl p-5 ${SURFACE}`} style={style}>
+            {inner}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// A titled group of destinations: colored group header + one visible, clickable
+// row per destination (name + one-line why). Used to lay out the whole map on
+// the Start-here page so nothing is hidden behind a "pick a path" choice.
+type NavItem = { name: string; href: string; desc: string }
+export function NavGroup({
+  title,
+  color = hue.accent,
+  items,
+}: {
+  title: string
+  color?: string
+  items: NavItem[]
+}) {
+  return (
+    <div className="my-6">
+      <div
+        className="text-xs font-semibold uppercase"
+        style={{ color, letterSpacing: "0.1em" }}
+      >
+        {title}
+      </div>
+      <div className="mt-3 grid gap-2">
+        {items.map((it) => (
+          <a
+            key={it.name}
+            href={it.href}
+            target="_top"
+            className={`block rounded-lg px-4 py-3 no-underline transition-opacity hover:opacity-80 ${SURFACE}`}
+            style={{ color: "inherit", borderLeftWidth: 3, borderLeftColor: color }}
+          >
+            <span className="text-sm font-semibold">{it.name}</span>
+            <span className="text-sm" style={{ opacity: 0.62 }}> — {it.desc}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// A single highlighted "remember this" block: small accent eyebrow, a neutral
+// bold heading (NOT colored — so it reads as a highlight, not an error), muted
+// body, on a subtle accent tint. Mirrors the landing's hero callout.
+export function KeyPoint({
+  eyebrow,
+  title,
+  color = hue.accent,
+  children,
+}: {
+  eyebrow?: string
+  title?: string
+  color?: string
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className="my-6 rounded-xl p-5"
+      style={{ background: tint(color, 0.06), border: `1px solid ${tint(color, 0.3)}` }}
+    >
+      {eyebrow && (
         <div
-          key={c.name}
-          className={`rounded-lg p-4 ${SURFACE}`}
-          style={{ borderTopWidth: 3, borderTopColor: c.color }}
+          className="text-xs font-semibold uppercase"
+          style={{ color, letterSpacing: "0.12em" }}
         >
-          <div className="text-sm font-semibold" style={{ color: c.color }}>{c.name}</div>
-          <div className="mt-1 text-xs" style={{ opacity: 0.8 }}>{c.desc}</div>
-          {c.meta && (
-            <div className="mt-2 font-mono text-xs" style={{ opacity: 0.55 }}>{c.meta}</div>
-          )}
+          {eyebrow}
         </div>
-      ))}
+      )}
+      {title && (
+        <div className="mt-1 text-xl font-semibold tracking-tight">{title}</div>
+      )}
+      <div className="text-sm" style={{ opacity: 0.85, marginTop: title || eyebrow ? 8 : 0 }}>
+        {children}
+      </div>
     </div>
   )
 }
