@@ -13,8 +13,8 @@ import {
   EnhanceActivator,
 } from "@/components/RichText/internal/Enhance"
 import type { UseEnhanceReturn } from "@/components/RichText/internal/Enhance"
-import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
-import { type RecorderStatus } from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
+import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/RecordingWaveform"
+import { type RecorderStatus } from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { UPLOAD_INPUT_ID } from "../../utils/constants"
 import { primaryActionType, secondaryActionsType } from "../../utils/types"
 import { ActionsMenu } from "./ActionsMenu"

@@ -24,6 +24,7 @@ const DATASET: ComponentEntry[] = [
       hasDoDonts: false,
       exampleCount: 0,
     },
+    a11yTier: "todo",
     storyFile: "components/F0Card/__stories__/Card.stories.tsx",
   },
   {
@@ -45,6 +46,7 @@ const DATASET: ComponentEntry[] = [
       hasDoDonts: true,
       exampleCount: 4,
     },
+    a11yTier: "enforced",
     storyFile: "components/F0Alert/__stories__/F0Alert.stories.tsx",
   },
 ]
@@ -97,4 +99,21 @@ describe("ComponentStability", () => {
     )
     expect(container).toBeEmptyDOMElement()
   })
+
+  test.each([
+    { tier: "enforced" as const, posture: "enforced", glyph: "✓" },
+    { tier: "todo" as const, posture: "not enforced yet", glyph: "✕" },
+    { tier: "skipped" as const, posture: "axe skipped", glyph: "✕" },
+  ])(
+    "renders the Accessibility row posture for tier=$tier (no axe run)",
+    ({ tier, posture, glyph }) => {
+      const one = [{ ...DATASET[1], name: "Widget", a11yTier: tier }]
+      render(<ComponentStability componentName="Widget" components={one} />)
+      const label = screen.getByText("Accessibility").closest("div")!
+      expect(label.textContent).toContain(`— ${posture}`)
+      // the row's glyph reflects met (✓) vs unmet (✕)
+      const row = label.parentElement!.parentElement!
+      expect(row.textContent).toContain(glyph)
+    }
+  )
 })

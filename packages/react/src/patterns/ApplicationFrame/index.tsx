@@ -22,11 +22,11 @@ import {
   F0AiChat,
   F0AiChatProvider,
   AiChatProviderProps,
-} from "@/sds/ai/F0AiChat"
-import { HostedPanelWindow } from "@/sds/ai/F0AiChat/components/layout/HostedPanelWindow"
-import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
-import { DEFAULT_CHAT_WIDTH } from "@/sds/ai/F0AiChat/utils/constants"
-import { F0CanvasPanel } from "@/sds/ai/F0CanvasPanel"
+} from "@/kits/ai/F0AiChat"
+import { HostedPanelWindow } from "@/kits/ai/F0AiChat/components/layout/HostedPanelWindow"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
+import { DEFAULT_CHAT_WIDTH } from "@/kits/ai/F0AiChat/utils/constants"
+import { F0CanvasPanel } from "@/kits/ai/F0CanvasPanel"
 
 import { FrameProvider, SidebarState, useSidebar } from "./FrameProvider"
 

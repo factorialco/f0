@@ -38,6 +38,14 @@ export type ApiStatus =
 
 export type DocQuality = "none" | "stub" | "acceptable" | "good" | "gold"
 
+/**
+ * A component's accessibility posture, ordered like doc quality. "skipped" =
+ * at least one story opts out of axe; "todo" = axe runs but non-blocking;
+ * "enforced" = every story runs axe at test:"error" (⇒ axe-clean on a green
+ * main). Stable requires "enforced".
+ */
+export type A11yTier = "skipped" | "todo" | "enforced"
+
 /** Granular MDX signals used to score the doc tier and its per-criterion checks. */
 export interface DocSignals {
   /** How many of Anatomy / Guidelines / Accessibility are present (0–3). */
@@ -62,6 +70,8 @@ export interface ComponentEntry {
   hasMdxDocs: boolean
   docQuality: DocQuality
   docSignals: DocSignals
+  /** Accessibility posture: "skipped" | "todo" | "enforced" (see A11yTier). */
+  a11yTier: A11yTier
   storyFile: string
 }
 
@@ -216,6 +226,12 @@ function docQualityAtLeast(actual: DocQuality, min: DocQuality): boolean {
   return DOC_QUALITY_ORDER.indexOf(actual) >= DOC_QUALITY_ORDER.indexOf(min)
 }
 
+export const A11Y_TIER_ORDER: A11yTier[] = ["skipped", "todo", "enforced"]
+
+export function a11yTierAtLeast(actual: A11yTier, min: A11yTier): boolean {
+  return A11Y_TIER_ORDER.indexOf(actual) >= A11Y_TIER_ORDER.indexOf(min)
+}
+
 /**
  * The Definition of Done for a stable component — the mechanically-checkable
  * subset of the lifecycle DoD (Lifecycle/Definition of Done). Each requirement
@@ -284,6 +300,13 @@ export const STABLE_REQUIREMENTS: ReadonlyArray<{
       },
     ],
     isMet: (c) => docQualityAtLeast(c.docQuality, MIN_DOC_QUALITY),
+  },
+  {
+    key: "a11y",
+    label: "Accessibility enforced",
+    detail:
+      'Every story runs axe blocking (test: "error"), never skipped or "todo" — on a green main, axe-clean (WCAG 2.0–2.2, A/AA).',
+    isMet: (c) => a11yTierAtLeast(c.a11yTier, "enforced"),
   },
 ]
 

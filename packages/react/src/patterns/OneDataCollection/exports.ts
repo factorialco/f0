@@ -12,6 +12,11 @@ export * from "./hooks/useDataCollectionData"
 export * from "./hooks/useDataCollectionItemNavigation"
 export * from "./hooks/useDataCollectionSource"
 export * from "./hooks/useInfiniteScrollPagination"
+export {
+  AUTO_PER_PAGE_MAX,
+  AUTO_PER_PAGE_MIN_RESERVED_ROWS,
+  getAutoPerPageMinHeight,
+} from "./hooks/useAutoPerPage"
 export { useExportAction } from "./hooks/useExportAction"
 export { downloadAsCSV, generateCSVContent } from "./utils/csvExport"
 export type { CSVExportOptions } from "./utils/csvExport"

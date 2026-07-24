@@ -2,8 +2,8 @@ import { type ReactNode } from "react"
 
 import { AnimatePresence, motion } from "motion/react"
 
-import { Picker } from "@/kits/Social/Reactions/Picker"
-import { Reaction } from "@/kits/Social/Reactions/reaction"
+import { Picker } from "@/sds/social/Reactions/Picker"
+import { Reaction } from "@/sds/social/Reactions/reaction"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"

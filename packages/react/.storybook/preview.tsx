@@ -10,7 +10,7 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
-import { aiTranslations } from "@/sds/ai/F0AiChat/types"
+import { aiTranslations } from "@/kits/ai/F0AiChat/types"
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
@@ -184,15 +184,16 @@ const preview: Preview = {
       storySort: {
         method: "alphabetical",
         order: [
-          // Get started (lifecycle docs are ordered by PR #4253)
+          // Get started: Introduction (how to consume) → About F0 (the definition) → Using F0
           "Introduction",
-          "Lifecycle",
+          "About F0",
           [
+            "What is F0",
             "How to contribute",
-            "Definition of done",
-            "Components maturity",
-            "Design review",
-            "Release and versioning",
+            "Where it goes",
+            "Definition of Done",
+            "Components Maturity",
+            "Release and Versioning",
           ],
           "AI configuration",
           "Changelog",

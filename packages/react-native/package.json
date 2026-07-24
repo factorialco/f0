@@ -1,6 +1,6 @@
 {
   "name": "@factorialco/f0-react-native",
-  "version": "0.58.1",
+  "version": "0.59.0",
   "type": "module",
   "description": "React Native components for F0 Design System",
   "main": "expo-router/entry",
@@ -30,6 +30,13 @@
       "require": "./src/icons/index.ts",
       "react-native": "./src/icons/index.ts",
       "default": "./src/icons/index.ts"
+    },
+    "./icons/ai": {
+      "types": "./src/icons/ai/index.ts",
+      "import": "./src/icons/ai/index.ts",
+      "require": "./src/icons/ai/index.ts",
+      "react-native": "./src/icons/ai/index.ts",
+      "default": "./src/icons/ai/index.ts"
     },
     "./icons/app": {
       "types": "./src/icons/app/index.ts",

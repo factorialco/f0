@@ -1,5 +1,87 @@
 # Changelog
 
+## [4.54.0](https://github.com/factorialco/f0/compare/f0-react-v4.53.0...f0-react-v4.54.0) (2026-07-24)
+
+
+### Features
+
+* **F0DatePicker:** add defaultMonth to control initial view ([#4776](https://github.com/factorialco/f0/issues/4776)) ([dbfb70b](https://github.com/factorialco/f0/commit/dbfb70bf0556fb1e119cea6a48d493038ea83920))
+
+## [4.53.0](https://github.com/factorialco/f0/compare/f0-react-v4.52.0...f0-react-v4.53.0) (2026-07-24)
+
+
+### Features
+
+* **component-status:** a11y as a stability requirement + live panel row ([#4798](https://github.com/factorialco/f0/issues/4798)) ([589c538](https://github.com/factorialco/f0/commit/589c53815f7b45ff16571838605326c1f1155ff2))
+
+## [4.52.0](https://github.com/factorialco/f0/compare/f0-react-v4.51.0...f0-react-v4.52.0) (2026-07-24)
+
+
+### Features
+
+* **F0VideoPlayer:** add video player component ([#4754](https://github.com/factorialco/f0/issues/4754)) ([626ce82](https://github.com/factorialco/f0/commit/626ce8277900f45e05b1ecdfd14195cc64bebf13))
+
+## [4.51.0](https://github.com/factorialco/f0/compare/f0-react-v4.50.0...f0-react-v4.51.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
+## [4.50.0](https://github.com/factorialco/f0/compare/f0-react-v4.49.3...f0-react-v4.50.0) (2026-07-23)
+
+
+### Features
+
+* **categoryBarChart:** center cell and add loading skeleton ([#4808](https://github.com/factorialco/f0/issues/4808)) ([0784857](https://github.com/factorialco/f0/commit/07848579d8d2cdba1caf65258723d397174a1bf5))
+
+## [4.49.3](https://github.com/factorialco/f0/compare/f0-react-v4.49.2...f0-react-v4.49.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** serve remote MCP at /mcp via Azure SWA rewrite ([#4814](https://github.com/factorialco/f0/issues/4814)) ([ad6eb44](https://github.com/factorialco/f0/commit/ad6eb44802e8e6525ef6b099c85b283b4711dc58))
+
+## [4.49.2](https://github.com/factorialco/f0/compare/f0-react-v4.49.1...f0-react-v4.49.2) (2026-07-23)
+
+
+### Bug Fixes
+
+* **Table:** don't animate rows when paginating ([#4809](https://github.com/factorialco/f0/issues/4809)) ([63e76f9](https://github.com/factorialco/f0/commit/63e76f9ec00d984e189d9cc3d01947a4d9cf79c8))
+
+## [4.49.1](https://github.com/factorialco/f0/compare/f0-react-v4.49.0...f0-react-v4.49.1) (2026-07-23)
+
+
+### Bug Fixes
+
+* **tailwind:** close the unterminated row-flash keyframe ([#4804](https://github.com/factorialco/f0/issues/4804)) ([b52cada](https://github.com/factorialco/f0/commit/b52cada74b11521cb974a6b7fae7cb668861d7f7))
+
+## [4.49.0](https://github.com/factorialco/f0/compare/f0-react-v4.48.0...f0-react-v4.49.0) (2026-07-23)
+
+
+### Features
+
+* **OneDataCollection:** auto page size for full-height collections ([#4795](https://github.com/factorialco/f0/issues/4795)) ([227209f](https://github.com/factorialco/f0/commit/227209fb13377cf0350b645c4f241bd91e700134))
+
+## [4.48.0](https://github.com/factorialco/f0/compare/f0-react-v4.47.3...f0-react-v4.48.0) (2026-07-23)
+
+
+### Features
+
+* **Table:** flash newly-added rows on insert ([#4709](https://github.com/factorialco/f0/issues/4709)) ([4f632af](https://github.com/factorialco/f0/commit/4f632af8e482481a99d0d23e4471af1e6639fa76))
+
+
+### Bug Fixes
+
+* **F0Form:** validate typed date on blur after value commits ([#4790](https://github.com/factorialco/f0/issues/4790)) ([d8b5979](https://github.com/factorialco/f0/commit/d8b5979910b96e6acd4df7ec0431abee54ea5b8c))
+
+## [4.47.3](https://github.com/factorialco/f0/compare/f0-react-v4.47.2...f0-react-v4.47.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** auto-recover from stale chunk imports after redeploy ([#4796](https://github.com/factorialco/f0/issues/4796)) ([566da64](https://github.com/factorialco/f0/commit/566da647a7229240e5b8d438182316b6ed8adbfd))
+
 ## [4.47.2](https://github.com/factorialco/f0/compare/f0-react-v4.47.1...f0-react-v4.47.2) (2026-07-22)
 
 
