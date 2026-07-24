@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.55.0](https://github.com/factorialco/f0/compare/f0-core-v1.54.0...f0-core-v1.55.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
 ## [1.54.0](https://github.com/factorialco/f0/compare/f0-core-v1.53.0...f0-core-v1.54.0) (2026-06-29)
 
 
