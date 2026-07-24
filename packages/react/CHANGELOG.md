@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.55.0](https://github.com/factorialco/f0/compare/f0-react-v4.54.0...f0-react-v4.55.0) (2026-07-24)
+
+
+### Features
+
+* **upselling-kit:** add dismiss option and confirmation opt-out to UpsellingAlert ([#4732](https://github.com/factorialco/f0/issues/4732)) ([1d17599](https://github.com/factorialco/f0/commit/1d1759934c4191acd007bba36f7f04ac5df9cb2a))
+
 ## [4.54.0](https://github.com/factorialco/f0/compare/f0-react-v4.53.0...f0-react-v4.54.0) (2026-07-24)
 
 
