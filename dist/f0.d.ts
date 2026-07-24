@@ -5320,6 +5320,22 @@ export declare const defaultTranslations: {
             readonly other: "Showing the first {{count}} rows";
         };
     };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
+    };
 };
 
 /**
@@ -11923,6 +11939,57 @@ export declare type F0ToolCall = {
         arguments: string;
     };
 };
+
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ *
+ * Video player built on a native `<video>` element with f0-styled controls
+ * (play/pause, seekbar, volume, playback speed, fullscreen) plus keyboard
+ * shortcuts. Analytics, watch-% milestones, completion and forward-seek
+ * restriction are built in and enabled via props (`onTrackAction`,
+ * `onMilestone`, `onComplete`, `restrictForwardSeek`).
+ */
+export declare const F0VideoPlayer: WithDataTestIdReturnType_3<typeof F0VideoPlayerInternal>;
+
+/**
+ * Video player built on a native `<video>` element.
+ *
+ *   useVideoState           → element ref, native listeners, derived state.
+ *   useFullscreen           → toggles fullscreen on the wrapper (keeps controls visible).
+ *   useKeyboardShortcuts    → Space, ←/→, ↑/↓, M, F.
+ *   useVideoTracking        → analytics callback on play/pause + interval.
+ *   useVideoMilestones      → watched-% milestone callbacks (25/50/75).
+ *   useVideoCompletion      → "watched enough" callback (min(10s, 3%)).
+ *   useRestrictForwardSeek  → blocks seeking past the furthest-watched point.
+ *   <Controls>              → presentation only; interactions delegated back here.
+ */
+declare function F0VideoPlayerInternal({ src, autoPlay, autoFocus, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
+
+export declare interface F0VideoPlayerProps extends DataAttributes_2 {
+    /** Video source URL. */
+    src: string;
+    /** Start playing on mount. Default `false`. */
+    autoPlay?: boolean;
+    /** Focus the player on mount so keyboard shortcuts work immediately. Default `false`. */
+    autoFocus?: boolean;
+    /**
+     * Prevent seeking past the furthest point already watched. Renders a marker at
+     * that position and blocks the cursor beyond it. Default `false`.
+     */
+    restrictForwardSeek?: boolean;
+    /** Called on play, on pause and on a recurring heartbeat during playback. */
+    onTrackAction?: () => void;
+    /**
+     * Called once when each watched-% milestone (`25`, `50`, `75`) is first
+     * reached. For progress analytics; completion is reported via `onComplete`.
+     */
+    onMilestone?: (milestone: number, video: HTMLVideoElement) => void;
+    /**
+     * Called once when the video is "watched enough": the remaining time drops to
+     * `min(10s, 3% of duration)` (the later of "last 10s" and "97%").
+     */
+    onComplete?: (video: HTMLVideoElement) => void;
+}
 
 export declare const F0WizardForm: {
     <TSchema extends F0FormSchema_2>(props: F0WizardFormSingleSchemaProps<TSchema>): default_2.ReactElement;
