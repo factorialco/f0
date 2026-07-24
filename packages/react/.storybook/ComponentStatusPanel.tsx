@@ -2,14 +2,13 @@ import { DocsContext } from "@storybook/addon-docs/blocks"
 import React, { useContext, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
-import { ComponentStability } from "@/component-status"
+import { ComponentMaturityTag } from "@/component-status"
 
 /**
- * Creates a portal container immediately after the docs title/description block,
- * so the panel renders under the heading rather than at the very top of the page.
- * Mirrors the placement logic used by the import banner.
+ * Creates a portal container inside the docs `<h1>` title so the maturity tag
+ * renders inline next to the component name rather than as a separate section.
  */
-function usePortalAfterTitle() {
+function usePortalInTitle() {
   const [target, setTarget] = useState<HTMLElement | null>(null)
   const containerRef = useRef<HTMLElement | null>(null)
 
@@ -19,18 +18,13 @@ function usePortalAfterTitle() {
     )
     if (!titleEl) return
 
-    const sibling = titleEl.nextElementSibling
-    const afterEl =
-      sibling?.tagName === "P"
-        ? sibling
-        : sibling?.tagName === "DIV" && sibling.querySelector("p")
-          ? sibling
-          : titleEl
-
     if (!containerRef.current) {
-      containerRef.current = document.createElement("div")
+      const el = document.createElement("span")
+      el.style.marginLeft = "0.5rem"
+      el.style.whiteSpace = "nowrap"
+      containerRef.current = el
     }
-    afterEl.after(containerRef.current)
+    titleEl.append(containerRef.current)
     setTarget(containerRef.current)
 
     return () => {
@@ -42,14 +36,16 @@ function usePortalAfterTitle() {
 }
 
 /**
- * Injects the exported `ComponentStability` panel into every component docs
- * page. All content comes from the shared component-status data, so the docs
- * page and any consuming app render identically. Renders nothing on
- * non-component pages (the title doesn't resolve to a tracked component).
+ * Injects the exported `ComponentMaturityTag` next to every component docs
+ * title. The tag shows the maturity status, and on hover reveals the full
+ * summary and Definition-of-Done checklist in a tooltip. All content comes from
+ * the shared component-status data, so the docs page and any consuming app stay
+ * consistent. Renders nothing on non-component pages (the title doesn't resolve
+ * to a tracked component).
  */
 export function ComponentStatusPanel() {
   const context = useContext(DocsContext)
-  const portalTarget = usePortalAfterTitle()
+  const portalTarget = usePortalInTitle()
 
   let title: string | undefined
   try {
@@ -63,7 +59,7 @@ export function ComponentStatusPanel() {
 
   if (!title || !portalTarget) return null
   return createPortal(
-    <ComponentStability componentName={title} className="my-6" />,
+    <ComponentMaturityTag componentName={title} />,
     portalTarget
   )
 }
