@@ -521,6 +521,15 @@ declare type AiChatProviderProps = {
      */
     side?: "left" | "right";
     /**
+     * Edge hosted side-panel content (`setPanelContent`) docks to. Defaults to
+     * `side`, keeping everything in one panel. Set it to the opposite edge to
+     * split them — e.g. communications: conversations dock left while the AI
+     * chat keeps its right-side panel and toggle. The two are still exclusive
+     * (opening one swaps the other out); only the main content moves during
+     * the swap, uncovering the incoming panel in place.
+     */
+    panelContentSide?: "left" | "right";
+    /**
      * Greeting phrase(s) shown by the welcome screen when the chat is empty.
      * A single string renders once; an array rotates through phrases. Purely
      * UI config — does not affect runtime behavior.
@@ -804,6 +813,20 @@ blurArea?: "l" | "r" | "lr";
 } & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare const AreaChartWidget: ForwardRefExoticComponent<Omit<AreaChartWidgetProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>;
+
+/**
+ * Upper bound for the resolved page size, so a very tall container never
+ * fetches an unreasonably large page.
+ */
+export declare const AUTO_PER_PAGE_MAX = 30;
+
+/**
+ * Number of rows the min-height reservation keeps space for (see
+ * `getAutoPerPageMinHeight`). This is NOT a lower bound on the page size — the
+ * page size always matches what actually fits, so it never overflows. It only
+ * sizes the space a squeezed collection reserves to stay usable.
+ */
+export declare const AUTO_PER_PAGE_MIN_RESERVED_ROWS = 10;
 
 export declare const AutoGrid: ForwardRefExoticComponent<Omit<HTMLAttributes<HTMLDivElement> & VariantProps<(props?: ({
 tileSize?: "lg" | "md" | "sm" | undefined;
@@ -3770,6 +3793,8 @@ declare const defaultTranslations: {
         readonly closePreview: "Close";
         readonly previousImage: "Previous image";
         readonly nextImage: "Next image";
+        readonly openDocument: "Open document";
+        readonly documentPreview: "Document preview";
         readonly photo: "Photo";
         readonly photoCount: {
             readonly one: "{{count}} photo";
@@ -4015,6 +4040,10 @@ declare const defaultTranslations: {
             readonly addBlockedHint: "Finish filling out the last item you just added in order to add another one";
             readonly addBlockedErrorHint: "Fix the errors in the existing items before adding another one";
             readonly addBlockedMaxHint: "You've reached the maximum number of items";
+            readonly removeConfirmTitle: "Remove item?";
+            readonly removeConfirmMessage: "This item will be removed. This action cannot be undone.";
+            readonly removeError: "Couldn't remove the item. Please try again.";
+            readonly removeErrorTitle: "Remove failed";
         };
         readonly moreInformation: "More information";
         readonly validation: {
@@ -4096,6 +4125,27 @@ declare const defaultTranslations: {
         readonly print: "Print";
         readonly download: "Download";
         readonly loading: "Loading document";
+        readonly previewFailed: "Preview isn't available for this file";
+        readonly showingFirstRows: {
+            readonly one: "Showing the first row";
+            readonly other: "Showing the first {{count}} rows";
+        };
+    };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
     };
 };
 
@@ -5666,7 +5716,7 @@ export declare const F0FormEditableTable: typeof F0FormEditableTableBase;
  * `onCellChange`, reorders via `onReorderRows`, removals via `onRemoveRow`,
  * and additions via `addRow.onClick`.
  */
-declare function F0FormEditableTableBase<R extends RecordType>({ columns: columnsProp, items, getRowId, onCellChange, sortableRows, onReorderRows, onRemoveRow, onEditRow, canEditRow, rowActions, getCellError, addRow, editLabel: editLabelProp, removeLabel: removeLabelProp, bordered, disabled, }: F0FormEditableTableProps<R>): JSX_2.Element;
+declare function F0FormEditableTableBase<R extends RecordType>({ columns: columnsProp, items, getRowId, onCellChange, sortableRows, onReorderRows, onRemoveRow, onEditRow, canEditRow, canRemoveRow, rowActions, getCellError, addRow, editLabel: editLabelProp, removeLabel: removeLabelProp, bordered, disabled, }: F0FormEditableTableProps<R>): JSX_2.Element;
 
 /**
  * Column definition for F0FormEditableTable.
@@ -5736,6 +5786,12 @@ export declare type F0FormEditableTableProps<R extends RecordType> = {
      * `onEditRow` is provided). Defaults to showing it on every row.
      */
     canEditRow?: (item: R, index: number) => boolean;
+    /**
+     * Controls per-row visibility of the remove button (only relevant when
+     * `onRemoveRow` is provided). Independent of `canEditRow`. Defaults to
+     * showing it on every row.
+     */
+    canRemoveRow?: (item: R, index: number) => boolean;
     /**
      * Custom trailing actions per row. Return the actions to show for the given
      * row; because it's resolved per row, the actions can depend on the row's
@@ -6988,6 +7044,15 @@ declare interface GaugeComputation {
 
 export declare function generateCSVContent<R extends RecordType, Filters extends FiltersDefinition, Sortings extends SortingsDefinition, Summaries extends SummariesDefinition, ItemActions extends ItemActionsDefinition<R>, NavigationFilters extends NavigationFiltersDefinition, Grouping extends GroupingDefinition<R>>(data: R[], visualization: Visualization<R, Filters, Sortings, Summaries, ItemActions, NavigationFilters, Grouping> | undefined, options?: CSVExportOptions): string;
 
+/**
+ * Minimum height a `perPage: "auto"` collection reserves so it stays usable
+ * (space for AUTO_PER_PAGE_MIN_RESERVED_ROWS rows plus chrome). Applied as a
+ * `min-height` so the collection stays visible when its siblings would
+ * otherwise squeeze it to nothing — the whole page scrolls instead of the
+ * collection disappearing.
+ */
+export declare function getAutoPerPageMinHeight(rowHeight?: number): number;
+
 export declare const getGranularityDefinition: (granularityKey: GranularityDefinitionKey) => GranularityDefinition;
 
 /**
@@ -7194,6 +7259,14 @@ declare type GraphVisualizationOptions<R extends RecordType, Filters extends Fil
     maxZoom?: number;
     /** Whether to render the zoom/fit controls. Defaults to `true`. */
     showControls?: boolean;
+    /**
+     * Optional action(s) rendered at the bottom-right of the graph canvas
+     * (pass-through to F0Graph's `canvasFooterActions`). Anchored to the canvas,
+     * so it tracks the graph's visible area and reflows when a side panel shrinks
+     * it — clear of the controls (bottom-left). Use for a persistent affordance
+     * like a "Give feedback" button.
+     */
+    canvasFooterActions?: ReactNode;
     /**
      * Opt into F0Graph node-array windowing (pass-through). Only the nodes near
      * the viewport are handed to React Flow — for very large trees (thousands of
@@ -8566,6 +8639,10 @@ declare type OneDataCollectionProps<R extends RecordType, Filters extends Filter
     csvExport?: boolean | {
         filename?: string;
     };
+    /** Hide the dashed "Save view" chip (preset save action). Opt-in for
+     * collections where saving views doesn't apply (e.g. the org-chart graph).
+     * Defaults to `false` — behavior unchanged for every existing consumer. */
+    savingViewsDisabled?: boolean;
     /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
     initialVisualization?: number;
 };
@@ -8891,8 +8968,15 @@ declare interface PageProps {
 export declare type PaginatedDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>, FetchReturn = PaginatedResponse<R>> = {
     /** Indicates this adapter uses page-based pagination */
     paginationType: PaginationType;
-    /** Default number of records per page */
-    perPage?: number;
+    /**
+     * Number of records per page. Pass `"auto"` to derive the page size from the
+     * available vertical space (page-based pagination inside a `fullHeight`
+     * collection only), sized to exactly the rows that fit (capped at 30). In a
+     * `fullHeight` collection, leaving this unset behaves like `"auto"` — an
+     * unspecified page size means "fill the height". Outside `fullHeight`, an
+     * unset value falls back to the default page size.
+     */
+    perPage?: number | "auto";
     /**
      * Function to fetch paginated data based on filter and pagination options
      * @param options - The filter and pagination options to apply when fetching data
@@ -10062,18 +10146,26 @@ export declare type SidebarTabPanelProps = {
 
 /**
  * Tab switcher that replaces the `SearchBar` row when the Sidebar gains tabs.
- * The active tab shows icon + label (animated in); inactive tabs are
- * icon-only. Search becomes an icon button on the right.
+ * The active tab always shows icon + label (animated in); inactive tabs show
+ * theirs too when every label fits in the row, and fall back to icon-only
+ * when space is tight. Search becomes an icon button on the right.
  *
  * When no tabs are needed, keep composing the Sidebar header with `SearchBar`
  * instead — that path is unchanged.
  */
-export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, }: SidebarTabsProps) => JSX_2.Element;
+export declare const SidebarTabs: ({ tabs, activeTab, onTabChange, persistKey, }: SidebarTabsProps) => JSX_2.Element;
 
 export declare type SidebarTabsProps = {
     tabs: SidebarTab[];
     activeTab: string;
     onTabChange: (id: string) => void;
+    /**
+     * Remember the active tab across reloads under this key (namespaced as
+     * `f0-sidebar-tab:<persistKey>` in localStorage). On mount, a stored tab
+     * that still exists in `tabs` is restored via `onTabChange`; unknown ids
+     * (e.g. a tab that no longer ships) are ignored. Omit for session-only tabs.
+     */
+    persistKey?: string;
 };
 
 /**
