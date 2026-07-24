@@ -5,22 +5,22 @@ import { KeyPoint, Grid } from "./_lifecycle-visuals"
 
 # Contributing to F0
 
-Contributing to F0 happens **in the chat with Claude** — it reads the repo and walks you through it. Anyone at Factorial can shape F0, but it grows **intentionally**: we add things with clear cross-team value, and say no with a documented reason and an alternative. Below are the steps, and each one has prompts you can drop straight into Claude.
+Contributing to F0 happens **in the chat with your AI agent** — it reads the repo and walks you through it. Anyone at Factorial can shape F0, but it grows **intentionally**: we add things with clear cross-team value, and say no with a documented reason and an alternative. Below are the steps, and each one has prompts you can drop straight into your agent. (F0 ships **AGENTS.md** and skills, so any AGENTS.md-aware agent works — Claude Code, Codex, or whatever you use.)
 
-<KeyPoint eyebrow="Start here" title="Tell Claude what you want to build">
-Open **Claude** in the `f0` repo and say what you need — e.g. _"I need X in F0 — is there anything already, and if not, what process should I follow to contribute it?"_ It takes it from there and walks you through the steps below.
+<KeyPoint eyebrow="Start here" title="Tell your agent what you want to build">
+Open **your agent** in the `f0` repo and say what you need — e.g. _"I need X in F0 — is there anything already, and if not, what process should I follow to contribute it?"_ It takes it from there and walks you through the steps below.
 </KeyPoint>
 
 ## The steps, from idea to F0
 
 ### 1 · Look first
 
-_Ask Claude, or browse Storybook._
+_Ask your agent, or browse Storybook._
 
 - Understand what F0 already has.
 - Check if you can use — or extend — something that already exists.
 
-> **Ask Claude** — _"Is there already an F0 component, kit or pattern for X?"_ · _"Could I cover X by extending an existing component instead?"_
+> **Ask your agent** — _"Is there already an F0 component, kit or pattern for X?"_ · _"Could I cover X by extending an existing component instead?"_
 
 ### 2 · Is it worth being in F0 for everyone?
 
@@ -32,19 +32,19 @@ _Ask Claude, or browse Storybook._
 
 ### 3 · Design it right
 
-_Claude suggests · Foundations confirms._
+_Your agent suggests · Foundations confirms._
 
 - Decide where it lives — Core, a Kit, or Domain specific (see [Where it goes](/docs/about-f0-where-it-goes--documentation)).
 - Build it abstract, so other teams can reuse it — not tied to your screen.
 
-> **Ask Claude** — _"Where should X live — Core, a Kit, or Domain specific?"_ · _"How do I build X so other teams can reuse it?"_
+> **Ask your agent** — _"Where should X live — Core, a Kit, or Domain specific?"_ · _"How do I build X so other teams can reuse it?"_
 
 ### 4 · Validate with the team
 
 - Share the proposal in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) — bring whatever fits: the need, a Figma, a prototype, a draft PR.
 - Foundations reviews it (design + development) and gives the OK before it's final.
 
-> **Ask Claude** — _"Draft a #f0-support message proposing X: what it is, where it'd live, and what I'm bringing."_
+> **Ask your agent** — _"Draft a #f0-support message proposing X: what it is, where it'd live, and what I'm bringing."_
 
 **Depth scales with impact** — a prop or an icon is light; a shared pattern needs buy-in; changing something already in use needs a migration plan (see [Release & Versioning](/docs/about-f0-release-and-versioning--documentation)). Match the process to the blast radius, not the amount of code.
 
@@ -59,8 +59,8 @@ Alignment can end in one of these — each has a next step, none is a dead end:
 <Unstyled>
   <Grid items={[
     { label: "iterate", text: "Foundations asks for changes or more evidence → refine and bring it back to the same thread. Nothing is thrown away." },
-    { label: "redirect", text: "It's real but belongs in a Kit, as Domain specific, or as an extension → re-enter at that home; Claude points you to the exact place." },
-    { label: "lives-in-product", text: "One screen, no reuse or shared identity → build it there with Claude / Composer from F0 pieces. A valid outcome, not a rejection.", color: "#3fae74" },
+    { label: "redirect", text: "It's real but belongs in a Kit, as Domain specific, or as an extension → re-enter at that home; your agent points you to the exact place." },
+    { label: "lives-in-product", text: "One screen, no reuse or shared identity → build it there with your agent / Composer from F0 pieces. A valid outcome, not a rejection.", color: "#3fae74" },
     { label: "declined", text: "Doesn't fit F0's strategy → a documented reason and, where possible, a concrete alternative.", color: "#ff6364" },
   ]} />
 </Unstyled>
@@ -69,7 +69,7 @@ Alignment can end in one of these — each has a next step, none is a dead end:
 
 ## Reporting a bug
 
-Fixing a bug, or something looks broken? That's **not a new contribution**. Ask Claude for the owner (or check [CODEOWNERS](https://github.com/factorialco/f0/blob/main/CODEOWNERS)), open a PR with steps to reproduce, and flag it in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) if it's blocking you.
+Fixing a bug, or something looks broken? That's **not a new contribution**. Ask your agent for the owner (or check [CODEOWNERS](https://github.com/factorialco/f0/blob/main/CODEOWNERS)), open a PR with steps to reproduce, and flag it in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403) if it's blocking you.
 
 ---
 
@@ -85,15 +85,15 @@ F0 is built and maintained by the **Foundations team**, with contributions from 
 
 - **Foundations** — owns Core (`components/`, `patterns/`, `ui/`, `kits/`, `layouts/`, `hooks/`) and the shared **tokens** and **icons**. They review what enters F0, and **approve and promote Core & Kit to stable**. (A **Domain specific** component is its team's to promote, in place.) Reach them in [#f0-support](https://factorialteam.slack.com/archives/C082ZNKS403).
 - **Your team** — builds the contribution and **owns and maintains it**. While it's experimental, your team is its **CODEOWNER** (add its path to [`CODEOWNERS`](https://github.com/factorialco/f0/blob/main/CODEOWNERS)) and fields its bugs. On promotion, a Core/Kit component's ownership transfers to Foundations; a **Domain specific** component stays yours.
-- **Claude** — the **access layer**: it searches, filters, guides placement, and builds to the standard. It does **not** approve, mark anything stable, or merge on your behalf — those are human / Foundations calls.
+- **Your agent** — the **access layer**: it searches, filters, guides placement, and builds to the standard. It does **not** approve, mark anything stable, or merge on your behalf — those are human / Foundations calls.
 
-**Source of truth:** the repo — code, [`CODEOWNERS`](https://github.com/factorialco/f0/blob/main/CODEOWNERS), and these docs — is authoritative. If Claude ever seems to contradict them, the repo wins; treat its output as a suggestion to verify, not a ruling.
+**Source of truth:** the repo — code, [`CODEOWNERS`](https://github.com/factorialco/f0/blob/main/CODEOWNERS), and these docs — is authoritative. If your agent ever seems to contradict them, the repo wins; treat its output as a suggestion to verify, not a ruling.
 
 ---
 
 ## Working with AI agents
 
-Claude is the **entry point** to F0 — it reads the repo, searches Storybook, filters your request, and drives the build. Each step has a matching **skill** that tells it exactly how F0 does things:
+Your agent is the **entry point** to F0. F0 ships **AGENTS.md** and skills in the repo, so any AGENTS.md-aware agent (Claude Code, Codex, …) reads the repo, searches Storybook, filters your request, and drives the build. Each step has a matching **skill** that tells it exactly how F0 does things:
 
 | Task                              | Skill                                                                                                                       |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
