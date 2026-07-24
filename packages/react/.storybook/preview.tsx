@@ -193,7 +193,6 @@ const preview: Preview = {
             "Where it goes",
             "Definition of Done",
             "Components Maturity",
-            "Design Review",
             "Release and Versioning",
           ],
           "AI configuration",
