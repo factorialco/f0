@@ -13,6 +13,12 @@ interface CategoryAxisOptions {
   /** Axis length in pixels — used to auto-compute label interval */
   axisLength?: number
   /**
+   * Minimum pixels each label needs along the axis before labels start being
+   * skipped. Defaults to a horizontal-text width; horizontal charts (stacked
+   * labels on the Y axis) should pass a line-height instead.
+   */
+  minLabelSpace?: number
+  /**
    * Whether to leave space at the edges of the category axis.
    * - `true` (default for ECharts) — centres categories with padding at edges.
    *   Appropriate for bar charts where bars need centering space.
@@ -63,13 +69,16 @@ const LABEL_GAP = 8
  */
 export function computeLabelInterval(
   categoryCount: number,
-  containerWidth: number | undefined
+  axisLength: number | undefined,
+  // Space each label needs along the axis. For a horizontal axis this is the
+  // label width; for a vertical axis (horizontal charts) it's the line-height.
+  minSpace: number = MIN_LABEL_WIDTH
 ): number | undefined {
-  if (!containerWidth || categoryCount <= 1) return undefined
-  const spacePerLabel = containerWidth / categoryCount
-  if (spacePerLabel >= MIN_LABEL_WIDTH) return undefined
+  if (!axisLength || categoryCount <= 1) return undefined
+  const spacePerLabel = axisLength / categoryCount
+  if (spacePerLabel >= minSpace) return undefined
   // How many labels fit comfortably
-  const fitCount = Math.max(1, Math.floor(containerWidth / MIN_LABEL_WIDTH))
+  const fitCount = Math.max(1, Math.floor(axisLength / minSpace))
   // interval = skip every N labels so that only fitCount labels are shown
   return Math.max(0, Math.ceil(categoryCount / fitCount) - 1)
 }
@@ -136,6 +145,7 @@ export function buildCategoryAxis({
   theme,
   formatter,
   axisLength,
+  minLabelSpace,
   boundaryGap,
   maxLabelWidth,
   show = true,
@@ -151,7 +161,8 @@ export function buildCategoryAxis({
       : undefined
 
   const interval =
-    layout?.interval ?? computeLabelInterval(data.length, axisLength)
+    layout?.interval ??
+    computeLabelInterval(data.length, axisLength, minLabelSpace)
 
   // Resolved truncation width: smart layout takes precedence; otherwise the
   // explicit `maxLabelWidth` override is used as before.
@@ -215,6 +226,8 @@ interface ValueAxisOptions {
   maxLabelWidth?: number
   /** Whether the axis labels are rendered. Grid lines stay controlled by showGrid. */
   show?: boolean
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  splitNumber?: number
 }
 
 /** Build a styled value axis with optional solid grid lines */
@@ -224,9 +237,11 @@ export function buildValueAxis({
   formatter,
   maxLabelWidth,
   show = true,
+  splitNumber,
 }: ValueAxisOptions) {
   return {
     type: "value" as const,
+    ...(splitNumber !== undefined ? { splitNumber } : {}),
     axisLine: {
       show: false,
     },
@@ -512,6 +527,7 @@ export function buildAxes({
   showCategoryAxis = true,
   showValueAxis = true,
   categoryMaxLabelWidth,
+  valueAxisSplitNumber,
 }: {
   isVertical: boolean
   categories: string[]
@@ -532,6 +548,8 @@ export function buildAxes({
    * "September" still get rendered horizontally and truncate gracefully.
    */
   categoryMaxLabelWidth?: number
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  valueAxisSplitNumber?: number
 }) {
   const yAxisMaxLabelWidth = Math.min(80, (containerWidth ?? 600) * 0.2)
 
@@ -544,11 +562,19 @@ export function buildAxes({
     ? Math.max(0, containerWidth - Y_AXIS_RESERVED)
     : undefined
 
+  // On a horizontal chart the category labels stack vertically on the Y axis,
+  // so each needs a line-height of room — not the horizontal-text width used
+  // for the X axis. Using the width constant there dropped labels far too
+  // eagerly (reserving ~60px of height for a ~17px-tall label).
+  const verticalLabelSpace =
+    Math.round(theme.textStyle.fontSize * 1.4) + LABEL_GAP
+
   const categoryAxis = buildCategoryAxis({
     data: categories,
     theme,
     formatter: categoryFormatter,
     axisLength: isVertical ? xPlotLength : containerHeight,
+    minLabelSpace: isVertical ? undefined : verticalLabelSpace,
     boundaryGap,
     show: showCategoryAxis,
     // Vertical charts get the smart layout (truncate-then-skip). Horizontal
@@ -567,6 +593,7 @@ export function buildAxes({
     showGrid,
     formatter: valueFormatter,
     show: showValueAxis,
+    splitNumber: valueAxisSplitNumber,
     ...(isVertical ? { maxLabelWidth: yAxisMaxLabelWidth } : {}),
   })
 
@@ -607,6 +634,8 @@ interface BaseChartOptionsParams {
   tooltipFilterSeries?: (seriesName: string) => boolean
   /** Custom tooltip formatter — when provided, replaces the default one */
   tooltipFormatter?: (params: unknown) => string
+  /** Value formatter used only in the tooltip (defaults to `valueFormatter`) */
+  tooltipValueFormatter?: (value: number) => string
   /** User-provided ECharts overrides (shallow-merged on top) */
   echartsOptions?: Partial<echarts.EChartsOption>
   /** Container width in pixels — used to auto-compute category label interval */
@@ -621,6 +650,8 @@ interface BaseChartOptionsParams {
   showValueAxis?: boolean
   /** Optional ellipsis truncation width for the category axis labels */
   categoryMaxLabelWidth?: number
+  /** Suggested number of value-axis segments — fewer ticks → fewer grid lines. */
+  valueAxisSplitNumber?: number
 }
 
 /**
@@ -642,6 +673,7 @@ export function buildBaseChartOptions({
   categoryFormatter,
   tooltipFilterSeries,
   tooltipFormatter,
+  tooltipValueFormatter,
   echartsOptions,
   containerWidth,
   containerHeight,
@@ -649,6 +681,7 @@ export function buildBaseChartOptions({
   showCategoryAxis = true,
   showValueAxis = true,
   categoryMaxLabelWidth,
+  valueAxisSplitNumber,
 }: BaseChartOptionsParams): echarts.EChartsOption {
   const { xAxis, yAxis } = buildAxes({
     isVertical,
@@ -663,6 +696,7 @@ export function buildBaseChartOptions({
     showCategoryAxis,
     showValueAxis,
     categoryMaxLabelWidth,
+    valueAxisSplitNumber,
   })
 
   const baseOptions: echarts.EChartsOption = {
@@ -684,7 +718,9 @@ export function buildBaseChartOptions({
     tooltip: buildTooltip({
       theme,
       filterSeries: tooltipFilterSeries,
-      valueFormatter,
+      // Tooltip can format values differently from the axis/labels (e.g. show
+      // the precise number while the labels stay compact).
+      valueFormatter: tooltipValueFormatter ?? valueFormatter,
       customFormatter: tooltipFormatter,
     }),
     emphasis: DEFAULT_EMPHASIS,
