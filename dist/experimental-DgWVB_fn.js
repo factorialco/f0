@@ -26187,7 +26187,7 @@ const Ux = {
   dark: cx
 }, Y0 = cg(
   ({ onZoomIn: r, onZoomOut: h, onFit: Q, onLocate: D, labels: _, dataTestId: M }, y) => {
-    const n = kt(), G = !!(D || Q), L = !!(r || h), K = (J) => /* @__PURE__ */ m(
+    const n = kt(), G = !!(D || Q), L = !!(r || h), K = (J) => /* @__PURE__ */ m("div", { className: "rounded-lg backdrop-blur-md", children: /* @__PURE__ */ m(
       Cw,
       {
         background: "inverse-secondary",
@@ -26198,7 +26198,7 @@ const Ux = {
         padding: "xs",
         children: /* @__PURE__ */ m("div", { className: "flex flex-col items-center gap-1", children: J })
       }
-    );
+    ) });
     return /* @__PURE__ */ m(br, { dataTestId: M, children: /* @__PURE__ */ te(
       "div",
       {
@@ -38930,7 +38930,7 @@ const aR = (r) => {
       ]
     }
   );
-}, xR = xr(() => import("./LocationMap-DTpdce-d.js")), _R = 200, SR = ({ latitude: r, longitude: h }) => `https://www.google.com/maps?q=${r},${h}`, vR = ({
+}, xR = xr(() => import("./LocationMap-NxAAq1LG.js")), _R = 200, SR = ({ latitude: r, longitude: h }) => `https://www.google.com/maps?q=${r},${h}`, vR = ({
   location: r,
   cornerClass: h = "rounded-xl"
 }) => {
