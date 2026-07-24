@@ -70,6 +70,21 @@ export const WithIcon: Story = {
   },
 }
 
+export const WithoutConfirmation: Story = {
+  args: {
+    ...Default.args,
+    title: "Open the product details",
+    description:
+      "Use showConfirmation: false when the action only opens a modal or navigates, so no success dialog is shown for a request that was never sent.",
+    action: {
+      ...Default.args!.action!,
+      label: "Learn more",
+      showConfirmation: false,
+      onRequest: () => alert("Open product modal"),
+    },
+  },
+}
+
 export const Snapshot: Story = {
   parameters: withSnapshot({}),
   args: Default.args,
