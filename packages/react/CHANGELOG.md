@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.51.0](https://github.com/factorialco/f0/compare/f0-react-v4.50.0...f0-react-v4.51.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
 ## [4.50.0](https://github.com/factorialco/f0/compare/f0-react-v4.49.3...f0-react-v4.50.0) (2026-07-23)
 
 
