@@ -1,6 +1,7 @@
 import type { F0DataChartProps } from "./types"
 
 import { BarChart } from "./components/BarChart/BarChart"
+import { CategoryBarChart } from "./components/CategoryBarChart/CategoryBarChart"
 import { DataChartEmptyStateView } from "./components/EmptyState/DataChartEmptyStateView"
 import { FunnelChart } from "./components/FunnelChart/FunnelChart"
 import { GaugeChart } from "./components/GaugeChart/GaugeChart"
@@ -35,5 +36,7 @@ export const F0DataChart = (props: F0DataChartProps) => {
       return <GaugeChart {...props} />
     case "heatmap":
       return <HeatmapChart {...props} />
+    case "categoryBar":
+      return <CategoryBarChart {...props} />
   }
 }
