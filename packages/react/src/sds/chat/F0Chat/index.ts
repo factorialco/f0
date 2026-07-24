@@ -31,4 +31,4 @@ export type {
 export { isSystemMessage, isUserMessage, LATEST } from "./types"
 // Re-exported because `F0ChatRuntime.transcribe` is typed as `TranscribeFn`;
 // a host implementing the runtime needs to name it.
-export type { TranscribeFn } from "@/sds/ai/F0AiChat/types"
+export type { TranscribeFn } from "@/kits/ai/F0AiChat/types"

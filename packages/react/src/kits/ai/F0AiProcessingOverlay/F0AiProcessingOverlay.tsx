@@ -4,7 +4,7 @@ import { memo, type ReactNode, useEffect } from "react"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { F0OneIcon } from "@/sds/ai/F0OneIcon"
+import { F0OneIcon } from "@/kits/ai/F0OneIcon"
 
 const IconMotion = motion.create(F0OneIcon)
 

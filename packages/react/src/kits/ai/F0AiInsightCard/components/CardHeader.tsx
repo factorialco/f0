@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
-import { AIButton } from "@/sds/ai/AIButton"
+import { AIButton } from "@/kits/ai/AIButton"
 
 import { descriptionVariants } from "../variants"
 

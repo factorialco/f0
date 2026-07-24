@@ -46,14 +46,14 @@ import { Sidebar } from "@/patterns/Navigation/Sidebar/Sidebar"
 import { SidebarTabPanel } from "@/patterns/Navigation/Sidebar/TabPanel"
 import { SidebarTabs } from "@/patterns/Navigation/Sidebar/Tabs"
 import { DaytimePage } from "@/sds/Home/DaytimePage"
-import { useAiChat } from "@/sds/ai/F0AiChat"
+import { useAiChat } from "@/kits/ai/F0AiChat"
 import {
   MockAiChatRuntimeProvider,
   MockConnectedChatHeader,
   MockConnectedChatInput,
   MockConnectedMessagesContainer,
   useMockAiChatRuntime,
-} from "@/sds/ai/F0AiChat/__stories__/_mock"
+} from "@/kits/ai/F0AiChat/__stories__/_mock"
 import {
   type CandidateProfile,
   type ExpenseProfile,
@@ -63,14 +63,14 @@ import {
   type PersonProfile,
   type UploadedFile,
   type VacancyProfile,
-} from "@/sds/ai/F0AiChat/types"
-import { WelcomeScreenCardsRow } from "@/sds/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
-import { F0AiChatCreditsButton } from "@/sds/ai/F0AiChatHeader"
+} from "@/kits/ai/F0AiChat/types"
+import { WelcomeScreenCardsRow } from "@/kits/ai/F0AiChatTextArea/components/WelcomeScreenCardsRow"
+import { F0AiChatCreditsButton } from "@/kits/ai/F0AiChatHeader"
 import {
   ThreadItem,
   ThreadListSkeleton,
   useChatHistory,
-} from "@/sds/ai/F0AiChatHistory"
+} from "@/kits/ai/F0AiChatHistory"
 import { F0Chat, F0ChatProvider } from "@/sds/chat/F0Chat"
 import {
   MockChatAppProvider,

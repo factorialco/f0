@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
-import { F0AuraVoiceAnimation } from "@/sds/ai/F0AuraVoiceAnimation"
+import { F0AuraVoiceAnimation } from "@/kits/ai/F0AuraVoiceAnimation"
 
 const meta = {
   title: "AI/F0AuraVoiceAnimation",

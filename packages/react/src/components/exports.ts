@@ -98,7 +98,10 @@ export * from "./F0TableOfContentPopover"
 export * from "./OneCalendar"
 export * from "./OneEmptyState"
 export * from "./RichText/exports"
-export * from "../sds/surveys/exports"
+/**
+ * @deprecated Surveys has moved to @/kits/surveys. Import from there instead.
+ */
+export * from "../kits/surveys/exports"
 /**
  * @deprecated UpsellingKit has moved to @/sds/UpsellingKit. Import from there instead.
  */

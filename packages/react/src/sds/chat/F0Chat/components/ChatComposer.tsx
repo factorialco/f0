@@ -18,11 +18,11 @@ import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
-import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
+import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/RecordingWaveform"
 import {
   type RecorderError,
   useAudioRecorder,
-} from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
+} from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { Skeleton } from "@/ui/skeleton"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"
