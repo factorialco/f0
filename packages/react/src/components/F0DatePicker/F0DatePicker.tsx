@@ -17,7 +17,6 @@ export function F0DatePicker({
   granularities = ["day"],
   minDate,
   maxDate,
-  defaultMonth,
   open = false,
   showIcon = true,
   displayFormat,
@@ -139,7 +138,6 @@ export function F0DatePicker({
       granularities={granularities}
       minDate={minDate}
       maxDate={maxDate}
-      defaultMonth={defaultMonth}
       open={isOpen}
       onOpenChange={handlePickerOpenChange}
       selectOnCellOnly={selectOnCellOnly}

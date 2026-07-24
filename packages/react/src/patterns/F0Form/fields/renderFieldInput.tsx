@@ -143,7 +143,6 @@ export function renderFieldInput({
             // Evaluate dynamic date constraints
             minDate: evaluateDateConstraint(field.minDate, values),
             maxDate: evaluateDateConstraint(field.maxDate, values),
-            defaultMonth: evaluateDateConstraint(field.defaultMonth, values),
           }}
           formField={formField}
           {...errorAndLoadingProps}

@@ -16,7 +16,6 @@ export type F0DatePickerProps = Pick<
   | "granularities"
   | "minDate"
   | "maxDate"
-  | "defaultMonth"
   | "presets"
   | "open"
   | "onOpenChange"

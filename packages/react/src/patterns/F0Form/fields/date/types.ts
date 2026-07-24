@@ -126,15 +126,6 @@ export interface F0DateConfig {
    * maxDate: ({ values }) => values.endDate
    */
   maxDate?: F0DateConstraintProp
-  /**
-   * Date the calendar view opens on when the field has no value yet.
-   * Only affects which month is displayed initially; it does not preselect a value.
-   * Can be a static Date or a function that receives form values for dynamic behavior.
-   * @example
-   * // Open the end-date picker on the selected start date
-   * defaultMonth: ({ values }) => values.startDate
-   */
-  defaultMonth?: F0DateConstraintProp
 }
 
 /**
@@ -238,12 +229,11 @@ export type F0DateTimeField = F0BaseField &
  */
 export type ResolvedDateField = Omit<
   F0DateField,
-  "disabled" | "minDate" | "maxDate" | "defaultMonth"
+  "disabled" | "minDate" | "maxDate"
 > & {
   disabled?: boolean
   minDate?: Date
   maxDate?: Date
-  defaultMonth?: Date
 }
 
 /**
