@@ -35,11 +35,16 @@ interface SearchProps {
   resultsLoading?: boolean
   /** Fired when a preview result is selected. */
   onResultSelect?: (id: string) => void
+  /** Whether another page of results can be pulled via infinite scroll. */
+  hasMore?: boolean
+  /** Whether a further page is currently being appended. */
+  loadingMore?: boolean
+  /** Request the next page (fired when the list is scrolled near the bottom). */
+  onLoadMore?: () => void
 }
 
-// Upper bound on how many preview rows we render. The dropdown shows a few at
-// a time and scrolls to reach the rest, so this stays generous rather than tiny.
-const MAX_PREVIEW_RESULTS = 25
+// Trigger the next page when the user scrolls within this many px of the bottom.
+const LOAD_MORE_SCROLL_MARGIN = 56
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
@@ -56,6 +61,9 @@ export const Search = ({
   results,
   resultsLoading = false,
   onResultSelect,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
 }: SearchProps) => {
   const [open, setOpen] = useState(false)
   const [showResults, setShowResults] = useState(false)
@@ -66,10 +74,21 @@ export const Search = ({
   const activeItemRef = useRef<HTMLButtonElement>(null)
   const i18n = useI18n()
 
-  // Cap the preview to the top matches — it narrows as you keep typing.
-  const resultItems = (results ?? []).slice(0, MAX_PREVIEW_RESULTS)
+  // Render every loaded row; growth is bounded by paginated loading, not a cap.
+  const resultItems = results ?? []
   const resultsVisible =
     open && showResults && Boolean(value) && resultItems.length > 0
+
+  const handleResultsScroll = (e: React.UIEvent<HTMLUListElement>) => {
+    if (!hasMore || loadingMore || !onLoadMore) return
+    const el = e.currentTarget
+    if (
+      el.scrollHeight - el.scrollTop - el.clientHeight <=
+      LOAD_MORE_SCROLL_MARGIN
+    ) {
+      onLoadMore()
+    }
+  }
 
   // Highlight the first row whenever results change, so a plain Enter jumps to
   // the top match without the user having to arrow down or click first.
@@ -137,9 +156,13 @@ export const Search = ({
 
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      setActiveIndex((index) =>
-        index < resultItems.length - 1 ? index + 1 : index
-      )
+      if (activeIndex < resultItems.length - 1) {
+        setActiveIndex(activeIndex + 1)
+      } else if (hasMore && !loadingMore) {
+        // At the end of the loaded rows — pull the next page so keyboard users
+        // can page through as well, not just scrollers.
+        onLoadMore?.()
+      }
     } else if (e.key === "ArrowUp") {
       e.preventDefault()
       setActiveIndex((index) => (index > 0 ? index - 1 : 0))
@@ -288,7 +311,10 @@ export const Search = ({
               </motion.div>
             )}
             {resultsVisible ? (
-              <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
+              <ul
+                className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
+                onScroll={handleResultsScroll}
+              >
                 {resultItems.map((result, index) => (
                   <li key={result.id}>
                     <button
@@ -319,6 +345,14 @@ export const Search = ({
                     </button>
                   </li>
                 ))}
+                {loadingMore ? (
+                  <li
+                    className="flex items-center justify-center py-2 text-f1-icon"
+                    aria-hidden
+                  >
+                    <F0Icon icon={Spinner} className="animate-spin" />
+                  </li>
+                ) : null}
               </ul>
             ) : null}
           </motion.div>
