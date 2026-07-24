@@ -1,3 +1,5 @@
+import type { NewColor } from "@/components/tags/F0TagDot"
+
 import { AvatarBadge } from "../F0Avatar/types"
 import { BaseAvatarProps } from "../internal/BaseAvatar/types"
 
@@ -22,6 +24,12 @@ export type F0AvatarPersonProps = {
    * The badge to display on the avatar. Can be a module badge or a custom badge.
    */
   badge?: AvatarBadge
+  /**
+   * The background color of the avatar, from the F0 color palette.
+   * Only applies when no image (`src`) is provided.
+   * @default "random"
+   */
+  bgColor?: NewColor | "random"
   /**
    * Whether the person is deactivated. If true, the avatar will display an icon instead of the person's name or picture.
    */
