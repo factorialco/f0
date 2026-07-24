@@ -1,5 +1,17 @@
 import { default as default_2 } from 'react';
 
+export declare const A11Y_TIER_ORDER: A11yTier[];
+
+/**
+ * A component's accessibility posture, ordered like doc quality. "skipped" =
+ * at least one story opts out of axe; "todo" = axe runs but non-blocking;
+ * "enforced" = every story runs axe at test:"error" (⇒ axe-clean on a green
+ * main). Stable requires "enforced".
+ */
+export declare type A11yTier = "skipped" | "todo" | "enforced";
+
+export declare function a11yTierAtLeast(actual: A11yTier, min: A11yTier): boolean;
+
 /**
  * Component Status API
  * ====================
@@ -42,6 +54,8 @@ export declare interface ComponentEntry {
     hasMdxDocs: boolean;
     docQuality: DocQuality;
     docSignals: DocSignals;
+    /** Accessibility posture: "skipped" | "todo" | "enforced" (see A11yTier). */
+    a11yTier: A11yTier;
     storyFile: string;
 }
 
@@ -259,11 +273,9 @@ declare namespace Calendar {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        enhanceHighlight: {
-            setEnhanceHighlight: (from: number, to: number, options?: {
-                placeholder?: string;
-            }) => ReturnType;
-            clearEnhanceHighlight: () => ReturnType;
+        aiBlock: {
+            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
+            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
         };
     }
 }
@@ -271,9 +283,11 @@ declare module "@tiptap/core" {
 
 declare module "@tiptap/core" {
     interface Commands<ReturnType> {
-        aiBlock: {
-            insertAIBlock: (data: AIBlockData, config: AIBlockConfig) => ReturnType;
-            executeAIAction: (actionType: string, config: AIBlockConfig) => ReturnType;
+        enhanceHighlight: {
+            setEnhanceHighlight: (from: number, to: number, options?: {
+                placeholder?: string;
+            }) => ReturnType;
+            clearEnhanceHighlight: () => ReturnType;
         };
     }
 }
