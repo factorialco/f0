@@ -37,7 +37,9 @@ interface SearchProps {
   onResultSelect?: (id: string) => void
 }
 
-const MAX_PREVIEW_RESULTS = 5
+// Upper bound on how many preview rows we render. The dropdown shows a few at
+// a time and scrolls to reach the rest, so this stays generous rather than tiny.
+const MAX_PREVIEW_RESULTS = 25
 
 const IconComponent = ({ loading }: { loading: boolean }) => {
   return loading ? (
@@ -61,6 +63,7 @@ export const Search = ({
   const uniqueId = useId()
   const ref = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const activeItemRef = useRef<HTMLButtonElement>(null)
   const i18n = useI18n()
 
   // Cap the preview to the top matches — it narrows as you keep typing.
@@ -68,10 +71,16 @@ export const Search = ({
   const resultsVisible =
     open && showResults && Boolean(value) && resultItems.length > 0
 
-  // Keep the active row in range as results change.
+  // Highlight the first row whenever results change, so a plain Enter jumps to
+  // the top match without the user having to arrow down or click first.
   useEffect(() => {
-    setActiveIndex(-1)
+    setActiveIndex((results ?? []).length > 0 ? 0 : -1)
   }, [results])
+
+  // Keep the highlighted row visible as the user arrows past the fold.
+  useEffect(() => {
+    activeItemRef.current?.scrollIntoView({ block: "nearest" })
+  }, [activeIndex])
 
   const handleClear = () => {
     onChange(undefined)
@@ -185,7 +194,7 @@ export const Search = ({
                     onChange={(e) => {
                       onChange(e.target.value)
                       setShowResults(true)
-                      setActiveIndex(-1)
+                      setActiveIndex(0)
                     }}
                     className="h-full w-full appearance-none rounded border-none bg-f1-background py-2 pl-7 text-base text-f1-foreground"
                     initial={{ opacity: 0 }}
@@ -279,10 +288,11 @@ export const Search = ({
               </motion.div>
             )}
             {resultsVisible ? (
-              <ul className="absolute right-0 top-full z-50 mt-2 max-h-96 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
+              <ul className="absolute right-0 top-full z-50 mt-2 max-h-72 w-72 overflow-auto rounded-xl border border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md">
                 {resultItems.map((result, index) => (
                   <li key={result.id}>
                     <button
+                      ref={index === activeIndex ? activeItemRef : null}
                       type="button"
                       onMouseDown={(e) => e.preventDefault()}
                       onMouseEnter={() => setActiveIndex(index)}
