@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+
 import { fn } from "storybook/test"
 
 import { NewColor } from "@/components/tags/F0TagDot"
 import { Summary } from "@/icons/ai"
-import { mockEnhanceText } from "@/lib/storybook-utils/ai-mocks"
 import { AcademicCap, Alert, Globe, List, Placeholder } from "@/icons/app"
+import { mockEnhanceText } from "@/lib/storybook-utils/ai-mocks"
 
 import {
   EnhancementOption,
@@ -149,6 +150,19 @@ const mockImageUpload = async (file: File) => {
   }
 }
 
+// Mock file (PDF/document) upload — same contract as the image uploader. The
+// returned URL is opened in a new browser tab when the attachment is clicked.
+const mockFileUpload = async (file: File) => {
+  await new Promise((resolve) => setTimeout(resolve, 1500))
+
+  const url = URL.createObjectURL(file)
+
+  return {
+    url,
+    signedId: `mock-file-signed-id-${Date.now()}`,
+  }
+}
+
 export const Default: Story = {
   args: {
     placeholder: "Enter '/' to open the command palette...",
@@ -162,6 +176,9 @@ export const Default: Story = {
     titlePlaceholder: "Untitled note",
     imageUploadConfig: {
       onUpload: mockImageUpload,
+    },
+    fileUploadConfig: {
+      onUpload: mockFileUpload,
     },
     enhanceConfig: {
       onEnhanceText: mockEnhanceText,
@@ -304,6 +321,40 @@ export const WithoutEnhance: Story = {
   args: {
     ...Default.args,
     enhanceConfig: undefined,
+  },
+}
+
+// PoC: a document that already contains a PDF attachment block. Exercises the
+// node's parseHTML/renderHTML round-trip and the NodeView (chip + click to open
+// in a browser viewer) without going through the native file picker.
+const contentWithAttachment = `<h2 data-id="a1">📎 Attachments (PoC)</h2><p data-id="a2">Below is a PDF attached as a block. Click it to open it in the browser viewer.</p><div data-type="file-attachment" data-src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" data-filename="Q1-report.pdf" data-mime-type="application/pdf"></div><p data-id="a3">You can also type <strong>/file</strong> anywhere to attach another document.</p>`
+
+export const WithFileAttachment: Story = {
+  args: {
+    ...Default.args,
+    initialEditorState: {
+      content: contentWithAttachment,
+      title: "PDF attachment — proof of concept",
+    },
+    fileUploadConfig: {
+      onUpload: mockFileUpload,
+    },
+  },
+}
+
+// PoC: same attachment in readonly mode. The delete action must NOT appear, but
+// the chip must still be clickable to open the document.
+export const WithFileAttachmentReadonly: Story = {
+  args: {
+    ...Default.args,
+    readonly: true,
+    initialEditorState: {
+      content: contentWithAttachment,
+      title: "PDF attachment — readonly",
+    },
+    fileUploadConfig: {
+      onUpload: mockFileUpload,
+    },
   },
 }
 

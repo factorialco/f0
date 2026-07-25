@@ -12,6 +12,7 @@ import {
   List,
   Minus,
   OlList,
+  Paperclip,
   Quote,
   Video,
 } from "@/icons/app"
@@ -19,11 +20,31 @@ import { I18nContextType } from "@/lib/providers/i18n"
 
 import { AIBlockConfig } from "../AIBlock"
 import {
+  DEFAULT_FILE_ACCEPTED_TYPES,
+  FileUploadConfig,
+  insertFileFromFile,
+} from "../FileAttachment"
+import {
   DEFAULT_ACCEPTED_TYPES,
   ImageUploadConfig,
   insertImageFromFile,
 } from "../Image"
 import { parseVideoUrl } from "../VideoEmbed"
+
+// Open a native file picker and hand the chosen file to `onPick`. Shared by
+// the /image and /file commands so the picker glue lives in one place.
+const openFilePicker = (accept: string[], onPick: (file: File) => void) => {
+  const input = document.createElement("input")
+  input.type = "file"
+  input.accept = accept.join(",")
+  input.onchange = () => {
+    const file = input.files?.[0]
+    if (file) {
+      onPick(file)
+    }
+  }
+  input.click()
+}
 
 interface CommandItem {
   title: string
@@ -41,12 +62,14 @@ interface GetGroupedCommandsProps {
   aiBlockConfig?: AIBlockConfig
   translations: I18nContextType
   imageUploadConfig?: ImageUploadConfig
+  fileUploadConfig?: FileUploadConfig
 }
 
 const getGroupedCommands = ({
   aiBlockConfig,
   translations,
   imageUploadConfig,
+  fileUploadConfig,
 }: GetGroupedCommandsProps): CommandGroup[] => {
   return [
     // Only include AI Block group if config is provided
@@ -166,19 +189,26 @@ const getGroupedCommands = ({
               {
                 title: "Image",
                 command: (editor: Editor) => {
-                  // Create a file input to select an image
-                  const input = document.createElement("input")
-                  input.type = "file"
-                  input.accept = DEFAULT_ACCEPTED_TYPES.join(",")
-                  input.onchange = () => {
-                    const file = input.files?.[0]
-                    if (file) {
-                      insertImageFromFile(editor, file, imageUploadConfig)
-                    }
-                  }
-                  input.click()
+                  openFilePicker(DEFAULT_ACCEPTED_TYPES, (file) =>
+                    insertImageFromFile(editor, file, imageUploadConfig)
+                  )
                 },
                 icon: Image,
+              },
+            ]
+          : []),
+        ...(fileUploadConfig
+          ? [
+              {
+                title: translations.richTextEditor.file,
+                command: (editor: Editor) => {
+                  openFilePicker(
+                    fileUploadConfig.acceptedTypes ??
+                      DEFAULT_FILE_ACCEPTED_TYPES,
+                    (file) => insertFileFromFile(editor, file, fileUploadConfig)
+                  )
+                },
+                icon: Paperclip,
               },
             ]
           : []),
