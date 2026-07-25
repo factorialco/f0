@@ -7,7 +7,12 @@ import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import type { DashboardItem } from "../types"
 
 import { F0AnalyticsDashboard } from "../index"
-import { dashboardFilters, dashboardPresets, mixedItems } from "./mockDataMixed"
+import {
+  dashboardFilters,
+  dashboardPresets,
+  mixedItems,
+  widgetLoadingStatesItems,
+} from "./mockDataMixed"
 
 const meta = {
   component: F0AnalyticsDashboard,
@@ -148,6 +153,17 @@ export const EmptyDashboard: Story = {
       filters={dashboardFilters}
       presets={dashboardPresets}
       items={emptyItems}
+    />
+  ),
+}
+
+/** Every widget type on a slow (~2s) source: skeletons must not shift card heights, and the short table must clip and scroll inside its card. Change any filter to replay the reload treatment. */
+export const WidgetLoadingStates: Story = {
+  render: () => (
+    <F0AnalyticsDashboard
+      filters={dashboardFilters}
+      presets={dashboardPresets}
+      items={widgetLoadingStatesItems}
     />
   ),
 }

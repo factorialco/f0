@@ -4,6 +4,10 @@ import { zeroRender as render } from "@/testing/test-utils"
 
 import { F0DataChart } from "../F0DataChart"
 
+import { stubChartContainerLayout } from "./stubChartContainerLayout"
+
+stubChartContainerLayout()
+
 const setOptionMock = vi.fn()
 
 vi.mock("echarts", () => ({
@@ -11,6 +15,7 @@ vi.mock("echarts", () => ({
     setOption: setOptionMock,
     resize: vi.fn(),
     dispose: vi.fn(),
+    isDisposed: vi.fn(() => false),
     getDom: vi.fn(() => document.createElement("div")),
     on: vi.fn(),
     off: vi.fn(),

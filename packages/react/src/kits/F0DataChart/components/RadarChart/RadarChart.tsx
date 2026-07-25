@@ -13,8 +13,8 @@ export const RadarChart = (props: F0DataChartRadarProps) => {
   const { width } = useContainerSize(ref)
   const size = resolveChartSize(width)
   const options = useRadarChartOptions(ref, props, size)
-  const chartRef = useEChartsInstance(ref, options)
-  useLegendInteraction(chartRef)
+  const chart = useEChartsInstance(ref, options)
+  useLegendInteraction(chart)
 
   return <div ref={ref} className="h-full w-full" />
 }

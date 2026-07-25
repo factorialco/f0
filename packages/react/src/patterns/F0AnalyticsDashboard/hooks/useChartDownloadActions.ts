@@ -22,7 +22,8 @@ function getEChartsInstance(
   containerRef: RefObject<HTMLDivElement | null>
 ): echarts.ECharts | null {
   const el = containerRef.current?.querySelector<HTMLDivElement>(":scope > div")
-  return el ? (echarts.getInstanceByDom(el) ?? null) : null
+  const instance = el ? (echarts.getInstanceByDom(el) ?? null) : null
+  return instance && !instance.isDisposed() ? instance : null
 }
 
 interface UseChartDownloadActionsOptions {

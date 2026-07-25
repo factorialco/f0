@@ -592,7 +592,7 @@ const MOCK_EMPLOYEES: Employee[] = FIRST_NAMES.map((firstName, i) => {
 
 const PER_PAGE = 5
 
-function createEmployeeSource(filters: Filters) {
+function createEmployeeSource(filters: Filters, delayMs = 200) {
   return {
     dataAdapter: {
       paginationType: "pages" as const,
@@ -639,7 +639,7 @@ function createEmployeeSource(filters: Filters) {
               perPage,
               pagesCount: Math.ceil(filtered.length / perPage),
             })
-          }, 200)
+          }, delayMs)
         })
       },
     },
@@ -749,6 +749,112 @@ const collectionItem: DashboardCollectionItem<DashboardFiltersType> = {
   createSource: createEmployeeSource,
   visualizations: [employeeTableVisualization],
 }
+
+const SLOW_FETCH_DELAY = 2000
+
+function slow<Args extends unknown[], T>(
+  fetch: (...args: Args) => Promise<T>
+): (...args: Args) => Promise<T> {
+  return (...args) => delay(SLOW_FETCH_DELAY).then(() => fetch(...args))
+}
+
+/** Every widget type on a slow (~2s) source. The tables get their own grid rows — a row sizes to its tallest item, which would override the short card's itemHeight. */
+export const widgetLoadingStatesItems: DashboardItem<DashboardFiltersType>[] = [
+  {
+    id: "loading-total-headcount",
+    title: "Total Headcount",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    rowSpan: 3,
+    fetchData: slow(fetchTotalHeadcount),
+  },
+  {
+    id: "loading-avg-salary",
+    title: "Avg. Salary",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: slow(fetchAvgSalary),
+  },
+  {
+    id: "loading-attrition",
+    title: "Attrition Rate",
+    type: "metric",
+    colSpan: 4,
+    x: 8,
+    y: 0,
+    rowSpan: 3,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: slow(fetchAttritionMetric),
+  },
+  {
+    id: "loading-bar-chart",
+    title: "Headcount by Department",
+    description: "Bar-chart skeleton while loading",
+    type: "chart",
+    colSpan: 4,
+    x: 0,
+    y: 3,
+    rowSpan: 7,
+    chart: { type: "bar" },
+    fetchData: slow(fetchHeadcountByDepartment),
+  },
+  {
+    id: "loading-line-chart",
+    title: "Revenue Trend",
+    description: "Line-chart skeleton while loading",
+    type: "chart",
+    colSpan: 4,
+    x: 4,
+    y: 3,
+    rowSpan: 7,
+    chart: { type: "line" },
+    fetchData: slow(fetchRevenueTrend),
+  },
+  {
+    id: "loading-pie-chart",
+    title: "Headcount Distribution",
+    description: "Pie-chart skeleton while loading",
+    type: "chart",
+    colSpan: 4,
+    x: 8,
+    y: 3,
+    rowSpan: 7,
+    chart: { type: "pie", innerRadius: 60, showPercentage: true },
+    fetchData: slow(fetchHeadcountPie),
+  },
+  {
+    id: "short-employee-table",
+    title: "Short table widget",
+    description: "Content is taller than the card — must clip and scroll",
+    type: "collection",
+    colSpan: 12,
+    x: 0,
+    y: 10,
+    // Clamped to the grid's 300px collection minimum — still shorter than the table
+    itemHeight: 220,
+    createSource: (filters) => createEmployeeSource(filters, SLOW_FETCH_DELAY),
+    visualizations: [employeeTableVisualization],
+  },
+  {
+    id: "default-employee-table",
+    title: "Default table widget",
+    description: "Reference table at the default collection height",
+    type: "collection",
+    colSpan: 12,
+    x: 0,
+    y: 15,
+    rowSpan: 10,
+    createSource: (filters) => createEmployeeSource(filters, SLOW_FETCH_DELAY),
+    visualizations: [employeeTableVisualization],
+  },
+]
 
 // ---------------------------------------------------------------------------
 // Mixed items — full dashboard with all types and filter reactivity

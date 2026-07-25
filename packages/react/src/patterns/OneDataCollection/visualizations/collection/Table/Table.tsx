@@ -423,6 +423,8 @@ export const TableCollection = <
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
       <TableWrapper>
+        {/* min-h-0: without it this flex item never shrinks, OneTable's
+            internal scroll never engages and tall tables overflow the card */}
         <div
           className={cn(
             "min-h-0",
