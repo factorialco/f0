@@ -1,0 +1,426 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0AiChatHeader.stories"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+
+<Meta of={Stories} />
+
+# AI chat header
+
+Provides consistent conversation navigation, credits, host actions, fullscreen,
+and close controls for Factorial AI chat surfaces.
+
+## Anatomy
+
+<Canvas of={Stories.Legacy} />
+
+<Controls of={Stories.Legacy} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>historyEnabled</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Turns the title into a conversation-history selector.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>title</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Static heading used by the legacy mode.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>currentThreadTitle</code>
+        </td>
+        <td>
+          <code>string | null</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Current conversation title. A null value displays “New conversation”.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>fullscreen</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Switches the panel control between expand and minimize.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lockVisualizationMode</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Hides controls that change the current visualization mode.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onToggleVisualizationMode</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Handles the expand or minimize action.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onClose</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>Yes</td>
+        <td>Closes the hosting chat surface.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onNewChat</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Starts a new conversation in legacy mode.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onOpenHistory</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Opens the host-owned conversation history.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>hasMessages</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>Shows the new-conversation action in legacy mode.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>compact</code>
+        </td>
+        <td>
+          <code>boolean</code>
+        </td>
+        <td>
+          <code>false</code>
+        </td>
+        <td>—</td>
+        <td>
+          Uses a minimal title and action layout for chats with external
+          navigation.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>credits</code>
+        </td>
+        <td>
+          <code>AiChatCredits</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Configures the classic credits and settings popover.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>employeeCredits</code>
+        </td>
+        <td>
+          <code>AiChatEmployeeCredits</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Configures employee credits and takes precedence over{" "}
+          <code>credits</code>.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>actions</code>
+        </td>
+        <td>
+          <code>F0AiChatHeaderAction[]</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>Host actions rendered before the fullscreen and close controls.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Action fields**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Field</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>id</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>Yes</td>
+        <td>Stable identifier for the action.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>label</code>
+        </td>
+        <td>
+          <code>string</code>
+        </td>
+        <td>Yes</td>
+        <td>Already-localized accessible name and tooltip text.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>icon</code>
+        </td>
+        <td>
+          <code>IconType</code>
+        </td>
+        <td>Yes</td>
+        <td>Icon rendered inside the header action button.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>onClick</code>
+        </td>
+        <td>
+          <code>() =&gt; void</code>
+        </td>
+        <td>Yes</td>
+        <td>Command invoked when the action is activated.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Modes
+
+<Canvas of={Stories.WithHistory} />
+
+<Canvas of={Stories.Compact} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Mode</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Legacy</td>
+        <td>Static title with an optional new-conversation action.</td>
+      </tr>
+      <tr>
+        <td>History</td>
+        <td>Clickable conversation title connected to host-owned history.</td>
+      </tr>
+      <tr>
+        <td>Compact</td>
+        <td>Plain conversation title with host actions and panel controls.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use F0AiChatHeader when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Factorial AI conversation panel</td>
+        <td>The host needs consistent conversation and panel controls.</td>
+      </tr>
+      <tr>
+        <td>Product-specific chat destination</td>
+        <td>
+          A small host action must appear alongside the built-in controls.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Non-AI messaging</td>
+        <td>
+          <code>F0Chat</code> and its header actions.
+        </td>
+      </tr>
+      <tr>
+        <td>Rich custom header content</td>
+        <td>A product-owned header composed from F0 components.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Pass host actions through the actions prop so F0 owns their spacing, tooltip, and focus behavior.",
+  }}
+  dont={{
+    description:
+      "Do not position actions over the header or depend on its internal DOM structure.",
+  }}
+/>
+
+### Content best practices
+
+- Use short, destination-oriented action labels such as “Routines” or “History”.
+- Avoid generic or sentence-length action labels.
+- Keep conversation titles descriptive enough to distinguish them in history.
+
+### Behavior
+
+- WHEN <code>compact</code> is true → THEN the header displays a plain conversation title, host actions, expand, and close controls.
+- WHEN <code>historyEnabled</code> is true → THEN the conversation title opens host-owned history.
+- WHEN neither compact nor history mode is active → THEN the header displays the static legacy title.
+- WHEN <code>actions</code> are provided → THEN F0 renders them as icon-only ghost buttons immediately before the fullscreen and close controls.
+- WHEN <code>employeeCredits</code> is provided → THEN it replaces the classic <code>credits</code> popover.
+- WHEN <code>lockVisualizationMode</code> is true → THEN visualization-mode controls are hidden.
+- WHEN the viewport is small → THEN the fullscreen control is hidden.
+
+### Usage examples
+
+**Host-provided action**
+
+Use for a localized, icon-based destination or command owned by the chat host.
+
+<Canvas of={Stories.WithHostAction} />
+
+**Locked visualization**
+
+Use when the hosting surface controls whether the chat can change size.
+
+<Canvas of={Stories.LockedMode} />
+
+## Accessibility
+
+Every icon-only control receives its accessible name and tooltip from its label.
+Provide already-localized, unique labels for host actions.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Moves focus through the title selector and header actions.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Enter</kbd> / <kbd>Space</kbd>
+        </td>
+        <td>Activates the focused header control.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+### Screen reader behavior
+
+- Host action icons are decorative; <code>action.label</code> provides the accessible name.
+- The current conversation title remains visible text in compact mode and an accessible button in history mode.

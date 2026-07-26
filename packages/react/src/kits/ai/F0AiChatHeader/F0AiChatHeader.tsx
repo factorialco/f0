@@ -10,6 +10,7 @@ import ChevronDown from "@/icons/app/ChevronDown"
 import Cross from "@/icons/app/Cross"
 import Maximize from "@/icons/app/Maximize"
 import Minimize from "@/icons/app/Minimize"
+import { useReducedMotion } from "@/lib/a11y"
 import { OneEllipsis } from "@/lib/OneEllipsis"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
@@ -59,6 +60,7 @@ export const F0AiChatCreditsButton = CreditsPopoverPicker
  * - with-history: title acts as a thread selector (clickable) — the host
  *   wires `onOpenHistory` to mount its own history dialog.
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
+ * Hosts can add actions that F0 renders alongside the built-in controls.
  *
  * Decoupled from CopilotKit and `useAiChat()` — everything via props.
  */
@@ -76,8 +78,10 @@ export const F0AiChatHeader = ({
   credits,
   employeeCredits,
   compact = false,
+  actions,
 }: F0AiChatHeaderProps) => {
   const translations = useI18n()
+  const shouldReduceMotion = useReducedMotion()
   const isSmallScreen = useMediaQuery(`(max-width: ${breakpoints.md}px)`, {
     initializeWithValue: true,
   })
@@ -104,10 +108,22 @@ export const F0AiChatHeader = ({
     />
   )
 
+  const actionButtons = actions?.map((action) => (
+    <ButtonInternal
+      key={action.id}
+      variant="ghost"
+      hideLabel
+      label={action.label}
+      icon={action.icon}
+      type="button"
+      onClick={action.onClick}
+    />
+  ))
+
   // Compact: the chat is hosted next to a sidebar that owns navigation (history,
   // new chat) and the credits/settings popover, so the header keeps only the
   // conversation title (plain text — the thread title, or "New chat") plus the
-  // expand + close controls.
+  // host actions, expand + close controls.
   if (compact) {
     return (
       <header
@@ -123,8 +139,12 @@ export const F0AiChatHeader = ({
           className="flex shrink-0 items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.2,
+            ease: "easeOut",
+          }}
         >
+          {actionButtons}
           {expandButton}
           {closeButton}
         </motion.div>
@@ -160,12 +180,16 @@ export const F0AiChatHeader = ({
           className="flex shrink-0 items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.2,
+            ease: "easeOut",
+          }}
         >
           <CreditsPopoverPicker
             credits={credits}
             employeeCredits={employeeCredits}
           />
+          {actionButtons}
           {expandButton}
           {closeButton}
         </motion.div>
@@ -182,7 +206,10 @@ export const F0AiChatHeader = ({
         className="flex items-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.2, ease: "easeOut" }}
+        transition={{
+          duration: shouldReduceMotion ? 0 : 0.2,
+          ease: "easeOut",
+        }}
       >
         {hasMessages && !lockVisualizationMode && (
           <ButtonInternal
@@ -197,6 +224,7 @@ export const F0AiChatHeader = ({
           credits={credits}
           employeeCredits={employeeCredits}
         />
+        {actionButtons}
         {expandButton}
         {closeButton}
       </motion.div>

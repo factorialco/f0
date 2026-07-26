@@ -1,4 +1,15 @@
+import type { IconType } from "@/components/F0Icon"
+
 import type { AiChatCredits, AiChatEmployeeCredits } from "../F0AiChat/types"
+
+export interface F0AiChatHeaderAction {
+  /** Stable identifier used as the React key. */
+  id: string
+  /** Already-localized accessible label and tooltip. */
+  label: string
+  icon: IconType
+  onClick: () => void
+}
 
 export type F0AiChatHeaderProps = {
   /**
@@ -40,9 +51,9 @@ export type F0AiChatHeaderProps = {
   hasMessages?: boolean
 
   /**
-   * Minimal header: render only the expand + close controls (no title, new
-   * chat or credits popover). Use when a sidebar owns the chat navigation and
-   * the credits/settings popover (see `F0AiChatCreditsButton`).
+   * Minimal header: render only host actions plus the expand and close controls
+   * (no title, new chat or credits popover). Use when a sidebar owns the chat
+   * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
    */
   compact?: boolean
 
@@ -55,4 +66,10 @@ export type F0AiChatHeaderProps = {
    * with `credits`). Hosts opt in per-employee.
    */
   employeeCredits?: AiChatEmployeeCredits
+
+  /**
+   * Host-provided actions rendered immediately before the fullscreen and close
+   * controls. F0 owns their presentation so they match the built-in actions.
+   */
+  actions?: F0AiChatHeaderAction[]
 }

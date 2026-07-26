@@ -1,11 +1,19 @@
+import { userEvent } from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 
+import { Clock } from "@/icons/app"
 import { zeroRender as render, screen } from "@/testing/test-utils"
-import React from "react"
 
 import { F0AiChatHeader } from "../F0AiChatHeader"
+import type { F0AiChatHeaderProps } from "../types"
 
-describe("F0AiChatHeader compact", () => {
+const modes: Array<[string, Partial<F0AiChatHeaderProps>]> = [
+  ["compact", { compact: true }],
+  ["history", { historyEnabled: true }],
+  ["legacy", {}],
+]
+
+describe("F0AiChatHeader", () => {
   it("renders only the close control (no new chat) in compact mode", () => {
     render(
       <F0AiChatHeader
@@ -62,5 +70,62 @@ describe("F0AiChatHeader compact", () => {
     expect(
       screen.getByRole("button", { name: /start new chat/i })
     ).toBeInTheDocument()
+  })
+
+  it("renders host actions using the built-in header controls", async () => {
+    const user = userEvent.setup()
+    const onClick = vi.fn()
+
+    render(
+      <F0AiChatHeader
+        historyEnabled
+        actions={[
+          {
+            id: "routines",
+            label: "Routines",
+            icon: Clock,
+            onClick,
+          },
+        ]}
+        onClose={vi.fn()}
+      />
+    )
+
+    const action = screen.getByRole("button", { name: "Routines" })
+    await user.hover(action)
+
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Routines")
+
+    await user.click(action)
+
+    expect(onClick).toHaveBeenCalledOnce()
+  })
+
+  it.each(modes)("renders host actions in %s mode", (_mode, props) => {
+    render(
+      <F0AiChatHeader
+        {...props}
+        actions={[
+          {
+            id: "routines",
+            label: "Routines",
+            icon: Clock,
+            onClick: vi.fn(),
+          },
+        ]}
+        onClose={vi.fn()}
+      />
+    )
+
+    expect(screen.getByRole("button", { name: "Routines" })).toBeInTheDocument()
+  })
+
+  it("preserves the built-in controls when actions are omitted", () => {
+    render(<F0AiChatHeader historyEnabled onClose={vi.fn()} />)
+
+    expect(
+      screen.getByRole("button", { name: /close chat/i })
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Routines" })).toBeNull()
   })
 })
