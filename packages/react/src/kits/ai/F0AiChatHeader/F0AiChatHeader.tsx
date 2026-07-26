@@ -22,8 +22,8 @@ import { CreditsPopover } from "./components/CreditsPopover"
 import { EmployeeCreditsPopover } from "./components/EmployeeCreditsPopover"
 
 /**
- * Picks the right credits popover to render based on which prop the host
- * provided. `employeeCredits` (employee-only) takes precedence; otherwise
+ * Picks the right credits popover to render based on which prop was provided.
+ * `employeeCredits` (employee-only) takes precedence; otherwise
  * falls back to the classic `credits` popover. Renders nothing when neither
  * is set.
  */
@@ -57,10 +57,10 @@ export const F0AiChatCreditsButton = CreditsPopoverPicker
  * Headless chat header. Renders a top bar with title (or thread selector),
  * credits popover, fullscreen toggle and close button. Has two visual
  * variants:
- * - with-history: title acts as a thread selector (clickable) — the host
- *   wires `onOpenHistory` to mount its own history dialog.
+ * - with-history: title acts as a thread selector (clickable) —
+ *   `onOpenHistory` opens the application's history dialog.
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
- * Hosts can add actions that F0 renders alongside the built-in controls.
+ * Applications can add actions that F0 renders alongside the built-in controls.
  *
  * Decoupled from CopilotKit and `useAiChat()` — everything via props.
  */
@@ -120,10 +120,10 @@ export const F0AiChatHeader = ({
     />
   ))
 
-  // Compact: the chat is hosted next to a sidebar that owns navigation (history,
+  // Compact: the chat sits next to a sidebar that owns navigation (history,
   // new chat) and the credits/settings popover, so the header keeps only the
   // conversation title (plain text — the thread title, or "New chat") plus the
-  // host actions, expand + close controls.
+  // header actions, expand + close controls.
   if (compact) {
     return (
       <header

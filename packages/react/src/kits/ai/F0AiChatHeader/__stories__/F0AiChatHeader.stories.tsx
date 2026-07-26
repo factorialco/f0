@@ -82,7 +82,7 @@ export const WithCredits: Story = {
   },
 }
 
-export const WithHostAction: Story = {
+export const WithHeaderAction: Story = {
   args: {
     historyEnabled: true,
     currentThreadTitle: "Discussing perf reviews",
@@ -108,7 +108,7 @@ export const WithHostAction: Story = {
       )
     })
 
-    await step("Invokes the host action", async () => {
+    await step("Invokes the header action", async () => {
       await userEvent.click(action)
       await expect(openRoutines).toHaveBeenCalledOnce()
     })
@@ -174,7 +174,7 @@ export const Snapshot: Story = {
         <F0AiChatHeader {...WithCredits.args} />
       </div>
       <div className="rounded-md border border-solid border-f1-border">
-        <F0AiChatHeader {...WithHostAction.args} />
+        <F0AiChatHeader {...WithHeaderAction.args} />
       </div>
       <div className="rounded-md border border-solid border-f1-border">
         <F0AiChatHeader {...Compact.args} />

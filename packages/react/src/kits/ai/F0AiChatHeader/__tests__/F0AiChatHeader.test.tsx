@@ -72,7 +72,7 @@ describe("F0AiChatHeader", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders host actions using the built-in header controls", async () => {
+  it("renders additional actions using the built-in header controls", async () => {
     const user = userEvent.setup()
     const onClick = vi.fn()
 
@@ -101,7 +101,7 @@ describe("F0AiChatHeader", () => {
     expect(onClick).toHaveBeenCalledOnce()
   })
 
-  it.each(modes)("renders host actions in %s mode", (_mode, props) => {
+  it.each(modes)("renders additional actions in %s mode", (_mode, props) => {
     render(
       <F0AiChatHeader
         {...props}

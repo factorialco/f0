@@ -6,7 +6,7 @@ import { DoDonts } from "@/lib/storybook-utils/do-donts"
 
 # AI chat header
 
-Provides consistent conversation navigation, credits, host actions, fullscreen,
+Provides consistent conversation navigation, credits, header actions, fullscreen,
 and close controls for Factorial AI chat surfaces.
 
 ## Anatomy
@@ -110,7 +110,7 @@ and close controls for Factorial AI chat surfaces.
         </td>
         <td>—</td>
         <td>Yes</td>
-        <td>Closes the hosting chat surface.</td>
+        <td>Closes the chat surface.</td>
       </tr>
       <tr>
         <td>
@@ -132,7 +132,7 @@ and close controls for Factorial AI chat surfaces.
         </td>
         <td>—</td>
         <td>—</td>
-        <td>Opens the host-owned conversation history.</td>
+        <td>Opens the conversation history provided by the application.</td>
       </tr>
       <tr>
         <td>
@@ -197,7 +197,9 @@ and close controls for Factorial AI chat surfaces.
         </td>
         <td>—</td>
         <td>—</td>
-        <td>Host actions rendered before the fullscreen and close controls.</td>
+        <td>
+          Additional actions rendered before the fullscreen and close controls.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -281,11 +283,16 @@ and close controls for Factorial AI chat surfaces.
       </tr>
       <tr>
         <td>History</td>
-        <td>Clickable conversation title connected to host-owned history.</td>
+        <td>
+          Clickable conversation title connected to application-provided
+          history.
+        </td>
       </tr>
       <tr>
         <td>Compact</td>
-        <td>Plain conversation title with host actions and panel controls.</td>
+        <td>
+          Plain conversation title with header actions and panel controls.
+        </td>
       </tr>
     </tbody>
   </table>
@@ -308,12 +315,14 @@ and close controls for Factorial AI chat surfaces.
     <tbody>
       <tr>
         <td>Factorial AI conversation panel</td>
-        <td>The host needs consistent conversation and panel controls.</td>
+        <td>
+          The application needs consistent conversation and panel controls.
+        </td>
       </tr>
       <tr>
         <td>Product-specific chat destination</td>
         <td>
-          A small host action must appear alongside the built-in controls.
+          A small header action must appear alongside the built-in controls.
         </td>
       </tr>
     </tbody>
@@ -350,7 +359,7 @@ and close controls for Factorial AI chat surfaces.
 <DoDonts
   do={{
     description:
-      "Pass host actions through the actions prop so F0 owns their spacing, tooltip, and focus behavior.",
+      "Pass header actions through the actions prop so F0 owns their spacing, tooltip, and focus behavior.",
   }}
   dont={{
     description:
@@ -366,8 +375,8 @@ and close controls for Factorial AI chat surfaces.
 
 ### Behavior
 
-- WHEN <code>compact</code> is true → THEN the header displays a plain conversation title, host actions, expand, and close controls.
-- WHEN <code>historyEnabled</code> is true → THEN the conversation title opens host-owned history.
+- WHEN <code>compact</code> is true → THEN the header displays a plain conversation title, header actions, expand, and close controls.
+- WHEN <code>historyEnabled</code> is true → THEN the conversation title opens application-provided history.
 - WHEN neither compact nor history mode is active → THEN the header displays the static legacy title.
 - WHEN <code>actions</code> are provided → THEN F0 renders them as icon-only ghost buttons immediately before the fullscreen and close controls.
 - WHEN <code>employeeCredits</code> is provided → THEN it replaces the classic <code>credits</code> popover.
@@ -376,22 +385,22 @@ and close controls for Factorial AI chat surfaces.
 
 ### Usage examples
 
-**Host-provided action**
+**Additional header action**
 
-Use for a localized, icon-based destination or command owned by the chat host.
+Use for a localized, icon-based destination or command owned by the parent chat surface.
 
-<Canvas of={Stories.WithHostAction} />
+<Canvas of={Stories.WithHeaderAction} />
 
 **Locked visualization**
 
-Use when the hosting surface controls whether the chat can change size.
+Use when the parent chat surface controls whether the chat can change size.
 
 <Canvas of={Stories.LockedMode} />
 
 ## Accessibility
 
 Every icon-only control receives its accessible name and tooltip from its label.
-Provide already-localized, unique labels for host actions.
+Provide already-localized, unique labels for header actions.
 
 ### Keyboard interaction
 
@@ -422,5 +431,5 @@ Provide already-localized, unique labels for host actions.
 
 ### Screen reader behavior
 
-- Host action icons are decorative; <code>action.label</code> provides the accessible name.
+- Header action icons are decorative; <code>action.label</code> provides the accessible name.
 - The current conversation title remains visible text in compact mode and an accessible button in history mode.

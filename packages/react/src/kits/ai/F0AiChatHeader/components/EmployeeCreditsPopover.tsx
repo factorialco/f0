@@ -26,7 +26,7 @@ type EmployeeCreditsPopoverProps = {
 /**
  * Employee-only credits popover.
  *
- * Rendered when the host passes `employeeCredits` to the AI provider.
+ * Rendered when the application passes `employeeCredits` to the AI provider.
  * Mutually exclusive with the classic {@link CreditsPopover}: when both
  * `credits` and `employeeCredits` are provided, this one wins.
  *
@@ -34,7 +34,7 @@ type EmployeeCreditsPopoverProps = {
  * (ConnectedChatHeader) reads the value from `useAiChat()` and forwards it.
  *
  * No company-level section, no upgrade CTA — just the logged-in employee's
- * monthly allocation. Hosts opt in by passing `employeeCredits` only for
+ * monthly allocation. Applications opt in by passing `employeeCredits` only for
  * employees who have a per-employee monthly allocation configured.
  */
 export function EmployeeCreditsPopover({

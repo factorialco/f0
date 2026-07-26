@@ -51,7 +51,7 @@ export type F0AiChatHeaderProps = {
   hasMessages?: boolean
 
   /**
-   * Minimal header: render only host actions plus the expand and close controls
+   * Minimal header: render only header actions plus the expand and close controls
    * (no title, new chat or credits popover). Use when a sidebar owns the chat
    * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
    */
@@ -63,12 +63,12 @@ export type F0AiChatHeaderProps = {
   /**
    * Employee-level credits configuration. When present, an employee-only
    * popover is rendered **instead of** the classic one (mutually exclusive
-   * with `credits`). Hosts opt in per-employee.
+   * with `credits`). Applications opt in per employee.
    */
   employeeCredits?: AiChatEmployeeCredits
 
   /**
-   * Host-provided actions rendered immediately before the fullscreen and close
+   * Additional actions rendered immediately before the fullscreen and close
    * controls. F0 owns their presentation so they match the built-in actions.
    */
   actions?: F0AiChatHeaderAction[]
