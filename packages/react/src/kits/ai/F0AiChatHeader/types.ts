@@ -63,7 +63,7 @@ export type F0AiChatHeaderProps = {
   /**
    * Employee-level credits configuration. When present, an employee-only
    * popover is rendered **instead of** the classic one (mutually exclusive
-   * with `credits`). Applications opt in per employee.
+   * with `credits`). Hosts opt in per-employee.
    */
   employeeCredits?: AiChatEmployeeCredits
 

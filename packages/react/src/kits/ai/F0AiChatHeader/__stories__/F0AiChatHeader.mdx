@@ -110,7 +110,7 @@ and close controls for Factorial AI chat surfaces.
         </td>
         <td>—</td>
         <td>Yes</td>
-        <td>Closes the chat surface.</td>
+        <td>Closes the hosting chat surface.</td>
       </tr>
       <tr>
         <td>
@@ -132,7 +132,7 @@ and close controls for Factorial AI chat surfaces.
         </td>
         <td>—</td>
         <td>—</td>
-        <td>Opens the conversation history provided by the application.</td>
+        <td>Opens the host-owned conversation history.</td>
       </tr>
       <tr>
         <td>
@@ -283,10 +283,7 @@ and close controls for Factorial AI chat surfaces.
       </tr>
       <tr>
         <td>History</td>
-        <td>
-          Clickable conversation title connected to application-provided
-          history.
-        </td>
+        <td>Clickable conversation title connected to host-owned history.</td>
       </tr>
       <tr>
         <td>Compact</td>
@@ -315,9 +312,7 @@ and close controls for Factorial AI chat surfaces.
     <tbody>
       <tr>
         <td>Factorial AI conversation panel</td>
-        <td>
-          The application needs consistent conversation and panel controls.
-        </td>
+        <td>The host needs consistent conversation and panel controls.</td>
       </tr>
       <tr>
         <td>Product-specific chat destination</td>
@@ -376,7 +371,7 @@ and close controls for Factorial AI chat surfaces.
 ### Behavior
 
 - WHEN <code>compact</code> is true → THEN the header displays a plain conversation title, header actions, expand, and close controls.
-- WHEN <code>historyEnabled</code> is true → THEN the conversation title opens application-provided history.
+- WHEN <code>historyEnabled</code> is true → THEN the conversation title opens host-owned history.
 - WHEN neither compact nor history mode is active → THEN the header displays the static legacy title.
 - WHEN <code>actions</code> are provided → THEN F0 renders them as icon-only ghost buttons immediately before the fullscreen and close controls.
 - WHEN <code>employeeCredits</code> is provided → THEN it replaces the classic <code>credits</code> popover.
@@ -387,13 +382,13 @@ and close controls for Factorial AI chat surfaces.
 
 **Additional header action**
 
-Use for a localized, icon-based destination or command owned by the parent chat surface.
+Use for a localized, icon-based destination or command owned by the chat host.
 
 <Canvas of={Stories.WithHeaderAction} />
 
 **Locked visualization**
 
-Use when the parent chat surface controls whether the chat can change size.
+Use when the hosting surface controls whether the chat can change size.
 
 <Canvas of={Stories.LockedMode} />
 
