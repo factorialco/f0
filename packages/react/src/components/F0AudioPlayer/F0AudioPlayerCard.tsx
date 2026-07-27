@@ -99,6 +99,23 @@ const F0AudioPlayerCardBase = forwardRef<
       : "missing"
 
   const hasDetails = tabs.length > 0
+  // With a single tab there's nothing to switch between, so the segmented
+  // control is dropped and the toggle names the content it reveals.
+  const singleTab = tabs.length === 1 ? tabs[0] : undefined
+  const detailToggleLabel = (isOpen: boolean): string => {
+    if (singleTab?.value === "transcription") {
+      return isOpen
+        ? i18n.audioPlayer.hideTranscription
+        : i18n.audioPlayer.viewTranscription
+    }
+    if (singleTab?.value === "summary") {
+      return isOpen
+        ? i18n.audioPlayer.hideSummary
+        : i18n.audioPlayer.viewSummary
+    }
+    return isOpen ? i18n.audioPlayer.hideDetail : i18n.audioPlayer.viewDetail
+  }
+
   const [isExpanded = false, setExpanded] = useControllableState<boolean>({
     prop: expanded,
     defaultProp: defaultExpanded,
@@ -157,11 +174,7 @@ const F0AudioPlayerCardBase = forwardRef<
               <F0Button
                 variant="outline"
                 size="sm"
-                label={
-                  isExpanded
-                    ? i18n.audioPlayer.hideDetail
-                    : i18n.audioPlayer.viewDetail
-                }
+                label={detailToggleLabel(isExpanded)}
                 onClick={() => setExpanded(!isExpanded)}
                 aria-expanded={isExpanded}
               />
@@ -198,7 +211,7 @@ const F0AudioPlayerCardBase = forwardRef<
       {hasDetails && (
         <motion.div
           role="region"
-          aria-label={i18n.audioPlayer.details}
+          aria-label={singleTab ? singleTab.label : i18n.audioPlayer.details}
           initial={false}
           animate={{
             height: isExpanded ? "auto" : 0,
@@ -212,17 +225,20 @@ const F0AudioPlayerCardBase = forwardRef<
           }}
           className="overflow-hidden"
         >
-          <F0SegmentedControl
-            fullWidth
-            ariaLabel={i18n.audioPlayer.details}
-            value={activeTab}
-            onChange={setSelectedTab}
-            items={tabs.map((tab) => ({
-              value: tab.value,
-              label: tab.label,
-            }))}
-          />
-          <div className="pt-2.5">
+          {/* One tab has nothing to switch between — show the content alone. */}
+          {!singleTab && (
+            <F0SegmentedControl
+              fullWidth
+              ariaLabel={i18n.audioPlayer.details}
+              value={activeTab}
+              onChange={setSelectedTab}
+              items={tabs.map((tab) => ({
+                value: tab.value,
+                label: tab.label,
+              }))}
+            />
+          )}
+          <div className={singleTab ? undefined : "pt-2.5"}>
             <ScrollArea
               style={
                 {

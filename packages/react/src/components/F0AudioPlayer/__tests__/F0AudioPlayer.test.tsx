@@ -286,6 +286,57 @@ describe("F0AudioPlayerCard", () => {
     ).not.toBeInTheDocument()
   })
 
+  it("drops the segmented control and names the toggle for a lone transcription", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ transcription: "Transcript body" }}
+      />
+    )
+
+    const toggle = screen.getByRole("button", { name: "View transcription" })
+    await user.click(toggle)
+    expect(
+      screen.getByRole("button", { name: "Hide transcription" })
+    ).toBeInTheDocument()
+    // A single tab has nothing to switch between — no segmented control.
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+    expect(screen.getByText("Transcript body")).toBeInTheDocument()
+  })
+
+  it("names the toggle for a lone summary", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ summary: "Summary body" }}
+      />
+    )
+    expect(
+      screen.getByRole("button", { name: "View summary" })
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+  })
+
+  it("keeps the segmented control and generic label with multiple tabs", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ summary: "S", transcription: "T" }}
+      />
+    )
+    expect(
+      screen.getByRole("button", { name: "View detail" })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("radio", { name: "Summary" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("radio", { name: "Transcription" })
+    ).toBeInTheDocument()
+  })
+
   it("flags a card with no transcription for the a11y check", () => {
     render(<F0AudioPlayerCard src="test.mp3" title="AI Call" />)
     expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(
