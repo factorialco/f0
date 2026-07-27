@@ -74,6 +74,7 @@ import { F0TagRawProps } from './types';
 import { F0TagStatusProps } from './types';
 import { F0TagTeamProps } from './types';
 import { F0TimelineRowProps as F0TimelineRowProps_2 } from './types';
+import { F0VideoPlayerProps as F0VideoPlayerProps_2 } from './types';
 import { f1Colors } from '@factorialco/f0-core';
 import { FC } from 'react';
 import { FileCellValue } from './f0';
@@ -7065,12 +7066,12 @@ declare type F0AssistantMessageExtraProps = {
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
-export declare const F0AudioPlayer: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0AudioPlayerProps_2 & RefAttributes<HTMLDivElement>>>;
+export declare const F0AudioPlayer: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0AudioPlayerProps_2 & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 /**
  * @experimental This is an experimental component, use it at your own risk.
  */
-export declare const F0AudioPlayerCard: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0AudioPlayerCardProps_2 & RefAttributes<HTMLDivElement>>>;
+export declare const F0AudioPlayerCard: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0AudioPlayerCardProps_2 & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
     /**
@@ -11933,21 +11934,7 @@ export declare type F0ToolCall = {
  * restriction are built in and enabled via props (`onTrackAction`,
  * `onMilestone`, `onComplete`, `restrictForwardSeek`).
  */
-export declare const F0VideoPlayer: WithDataTestIdReturnType_3<typeof F0VideoPlayerInternal>;
-
-/**
- * Video player built on a native `<video>` element.
- *
- *   useVideoState           → element ref, native listeners, derived state.
- *   useFullscreen           → toggles fullscreen on the wrapper (keeps controls visible).
- *   useKeyboardShortcuts    → Space, ←/→, ↑/↓, M, F.
- *   useVideoTracking        → analytics callback on play/pause + interval.
- *   useVideoMilestones      → watched-% milestone callbacks (25/50/75).
- *   useVideoCompletion      → "watched enough" callback (min(10s, 3%)).
- *   useRestrictForwardSeek  → blocks seeking past the furthest-watched point.
- *   <Controls>              → presentation only; interactions delegated back here.
- */
-declare function F0VideoPlayerInternal({ src, autoPlay, autoFocus, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
+export declare const F0VideoPlayer: WithDataTestIdReturnType_3<ForwardRefExoticComponent<Omit<F0VideoPlayerProps_2 & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLElement | SVGElement>>>;
 
 export declare interface F0VideoPlayerProps extends DataAttributes_2 {
     /** Video source URL. */
