@@ -44,6 +44,7 @@ describe("withDataTestId", () => {
         Test Content
       </div>
     ))
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent dataTestId="test-id" />)
@@ -57,11 +58,11 @@ describe("withDataTestId", () => {
     // reaching the DOM as "datatestid" instead of "data-testid". React may pass
     // the memo's props through to the inner component. Prefer wrapping the inner
     // component with withDataTestId before memo: memo(withDataTestId(Component)).
-    const TestComponent = memo(
-      (props: React.HTMLAttributes<HTMLDivElement>) => (
-        <div {...props}>Test Content</div>
-      )
+    const InnerComponent = (props: React.HTMLAttributes<HTMLDivElement>) => (
+      <div {...props}>Test Content</div>
     )
+    InnerComponent.displayName = "TestComponent"
+    const TestComponent = memo(InnerComponent)
     const WrappedComponent = withDataTestId(TestComponent)
 
     render(<WrappedComponent dataTestId="test-id" />)
@@ -127,6 +128,7 @@ describe("withDataTestId", () => {
         Test Content
       </div>
     ))
+    TestComponent.displayName = "TestComponent"
     const WrappedComponent = withDataTestId(TestComponent)
 
     renderWithProviders(<WrappedComponent ref={ref} dataTestId="test-id" />)
@@ -203,6 +205,68 @@ describe("withDataTestId", () => {
     renderWithProviders(<WrappedComponent dataTestId="null-regular" />)
 
     expect(screen.getByTestId("null-regular")).toBeInTheDocument()
+  })
+
+  describe("data-f0-component-name", () => {
+    it("stamps the attribute on a forwardRef component's root node using its displayName", () => {
+      const TestComponent = forwardRef<
+        HTMLDivElement,
+        React.HTMLAttributes<HTMLDivElement>
+      >((props, ref) => (
+        <div ref={ref} {...props}>
+          Content
+        </div>
+      ))
+      TestComponent.displayName = "F0Test"
+      const WrappedComponent = withDataTestId(TestComponent)
+
+      renderWithProviders(<WrappedComponent />)
+
+      expect(screen.getByText("Content")).toHaveAttribute(
+        "data-f0-component-name",
+        "F0Test"
+      )
+    })
+
+    it("stamps the attribute independently of the dataTestId prop / platform flag", () => {
+      const TestComponent = forwardRef<
+        HTMLDivElement,
+        React.HTMLAttributes<HTMLDivElement>
+      >((props, ref) => (
+        <div ref={ref} {...props}>
+          Content
+        </div>
+      ))
+      TestComponent.displayName = "F0Test"
+      const WrappedComponent = withDataTestId(TestComponent)
+
+      // No dataTestId, and the platform flag disabled.
+      renderWithoutDataTestId(<WrappedComponent />)
+
+      expect(screen.getByText("Content")).toHaveAttribute(
+        "data-f0-component-name",
+        "F0Test"
+      )
+    })
+
+    it("still forwards the caller's ref while stamping", () => {
+      const ref = React.createRef<HTMLDivElement>()
+      const TestComponent = forwardRef<
+        HTMLDivElement,
+        React.HTMLAttributes<HTMLDivElement>
+      >((props, forwardedRef) => (
+        <div ref={forwardedRef} {...props}>
+          Content
+        </div>
+      ))
+      TestComponent.displayName = "F0Test"
+      const WrappedComponent = withDataTestId(TestComponent)
+
+      renderWithProviders(<WrappedComponent ref={ref} />)
+
+      expect(ref.current).toBeInstanceOf(HTMLDivElement)
+      expect(ref.current).toHaveAttribute("data-f0-component-name", "F0Test")
+    })
   })
 
   describe("type-level: onChange callback argument inference", () => {

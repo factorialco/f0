@@ -1,6 +1,42 @@
-import React, { forwardRef, memo, type ReactNode } from "react"
+import { useComposedRefs } from "@radix-ui/react-compose-refs"
+import React, { forwardRef, memo, useCallback, type ReactNode } from "react"
 
 import { useRenderDataTestIdAttribute } from "../providers/user-platafform/UserPlatformProvider"
+
+/**
+ * Data attribute stamped on every component wrapped with {@link withDataTestId}.
+ * Lets static analysis / tooling identify which F0 component rendered a given
+ * DOM node. Always emitted (independent of the test-id platform flag).
+ */
+export const F0_COMPONENT_NAME_ATTRIBUTE = "data-f0-component-name"
+
+/**
+ * Resolves the public-facing name of a component for the
+ * `data-f0-component-name` attribute (and displayName fallback).
+ */
+const resolveComponentName = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  component: any
+): string =>
+  component?.displayName ||
+  component?.name ||
+  component?.render?.name ||
+  component?.type?.displayName ||
+  "Component"
+
+/**
+ * Returns a stable callback ref that stamps `data-f0-component-name` onto the
+ * component's root DOM node. Skips non-element refs (e.g. imperative handles).
+ */
+const useComponentNameRef = <T,>(name: string): React.RefCallback<T> =>
+  useCallback(
+    (node: T | null) => {
+      if (node instanceof Element) {
+        node.setAttribute(F0_COMPONENT_NAME_ATTRIBUTE, name)
+      }
+    },
+    [name]
+  )
 
 const ignoredStaticProps = ["prototype", "length", "name", "$$typeof", "render"]
 /**
@@ -87,6 +123,11 @@ export type WithDataTestIdPropsOf<T extends React.ComponentType<unknown>> =
  *
  * We use a mapped type approach to avoid the pitfalls of React.ComponentType
  * which collapses callback inference.
+ *
+ * At runtime, every wrapped component also stamps its root DOM node with the
+ * `data-f0-component-name` attribute (see {@link F0_COMPONENT_NAME_ATTRIBUTE}),
+ * so tooling can statically identify which F0 component rendered a node. This
+ * is always applied, independent of the `dataTestId` prop or platform flag.
  */
 export type WithDataTestIdReturnType<
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -121,13 +162,16 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
     // and hook ordering stays consistent across CI environments.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const OriginalComponent = component as any
+    const resolvedName = resolveComponentName(component)
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const WrappedComponent = forwardRef((props: any, ref: any) => {
       const { dataTestId, ...rest } = props
+      const nameRef = useComponentNameRef(resolvedName)
+      const composedRef = useComposedRefs(ref, nameRef)
       return (
         <DataTestIdWrapper dataTestId={dataTestId}>
-          <OriginalComponent {...rest} ref={ref} />
+          <OriginalComponent {...rest} ref={composedRef} />
         </DataTestIdWrapper>
       )
     })
@@ -137,13 +181,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
 
     // Set displayName
     if (!WrappedComponent.displayName) {
-      const name =
-        component.displayName ||
-        component.name ||
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (component as any).render?.name ||
-        "Component"
-      WrappedComponent.displayName = name
+      WrappedComponent.displayName = resolvedName
     }
 
     return WrappedComponent as unknown as ReturnedComponentType
@@ -190,12 +228,19 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
   // For regular components (function or class). Always render via JSX to ensure
   // hooks always run in the same fiber regardless of whether dataTestId is set,
   // avoiding "Rendered more/fewer hooks than during the previous render" crashes.
+  const resolvedName = resolveComponentName(component)
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const WrappedComponent = forwardRef((props: any, ref: any) => {
     const { dataTestId, ...rest } = props
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Component = component as any
 
+    // NOTE: the `data-f0-component-name` stamp is intentionally only applied in
+    // the forwardRef branch above. Plain function components cannot receive a
+    // ref (React warns) and never forward one to a DOM node, so there is no node
+    // to stamp here; class instances aren't Elements either. Forcing a composed
+    // ref would add zero coverage and emit spurious ref warnings.
     return (
       <DataTestIdWrapper dataTestId={dataTestId}>
         <Component {...rest} ref={ref} />
@@ -208,8 +253,7 @@ export const withDataTestId = <T extends React.ComponentType<any>>(
 
   // Set displayName
   if (!WrappedComponent.displayName) {
-    const name = component.displayName || component.name || "Component"
-    WrappedComponent.displayName = name
+    WrappedComponent.displayName = resolvedName
   }
 
   return WrappedComponent as unknown as ReturnedComponentType
