@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.56.3](https://github.com/factorialco/f0/compare/f0-react-v4.56.2...f0-react-v4.56.3) (2026-07-27)
+
+
+### Bug Fixes
+
+* **EditableTable:** span disabled background across cell hint ([#4848](https://github.com/factorialco/f0/issues/4848)) ([1bf81e3](https://github.com/factorialco/f0/commit/1bf81e336326e945ebe0d78d7d52c4c4362424a2))
+
 ## [4.56.2](https://github.com/factorialco/f0/compare/f0-react-v4.56.1...f0-react-v4.56.2) (2026-07-27)
 
 
