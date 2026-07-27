@@ -80,7 +80,12 @@ export const WelcomeScreenSuggestionsRow = ({
       }}
     >
       <PopoverAnchor asChild>
-        <div ref={rowRef} className="flex w-full flex-wrap items-center gap-2">
+        {/* min-h reserves two chip rows (2 × h-8 + gap-2) so a suggestion-set
+            swap that wraps 1↔2 rows cannot shift the layout above it. */}
+        <div
+          ref={rowRef}
+          className="flex min-h-[72px] w-full flex-wrap content-end items-center gap-2"
+        >
           {/* Plain buttons, NOT `PopoverTrigger`s: Radix registers a single
               trigger per popover (the last one mounted), whose built-in toggle
               fires after the button's own onClick and overwrites the group
