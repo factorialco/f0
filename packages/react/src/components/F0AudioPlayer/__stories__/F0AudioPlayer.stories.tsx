@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
+import { ComponentProps, useEffect, useRef } from "react"
 
 import { Download } from "@/icons/app"
 import { withSnapshot } from "@/lib/storybook-utils/parameters"
@@ -152,6 +153,66 @@ export const CardWithContentExpanded: StoryObj<typeof F0AudioPlayerCard> = {
     defaultExpanded: true,
   },
 }
+
+// Transcription only — no summary. `content.summary` is omitted, so the card
+// shows a single Transcription tab (no Summary tab).
+export const CardWithTranscriptionOnly: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    content: { transcription: SAMPLE_TRANSCRIPT },
+    defaultExpanded: true,
+  },
+}
+
+// Attaches an in-band text track to the <audio> after mount — the shape a
+// browser exposes for a transcript shipped inside the file (no `content` prop).
+// Audio files with browser-exposed transcripts aren't a reliable public sample,
+// so we simulate that track here to exercise the same derive-from-file path.
+function EmbeddedTranscriptionDemo(
+  args: ComponentProps<typeof F0AudioPlayerCard>
+) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const audio = ref.current?.querySelector("audio")
+    if (!audio || typeof audio.addTextTrack !== "function") return
+    const track = audio.addTextTrack("captions", "English", "en")
+    const lines = [
+      "Interviewer: Can you tell me about your availability for night shifts and weekends?",
+      "Alex: Yes, I'm fully available for night shifts and weekends.",
+      "Interviewer: And how long is your commute?",
+      "Alex: Under 40 minutes from Barajas.",
+    ]
+    lines.forEach((text, i) => track.addCue(new VTTCue(i * 4, i * 4 + 4, text)))
+  }, [])
+  return (
+    <div ref={ref}>
+      <F0AudioPlayerCard {...args} />
+    </div>
+  )
+}
+
+/**
+ * Transcription embedded in the audio file — no `content.transcription` passed.
+ * The card derives it from the file's own text track and shows the Transcription
+ * tab automatically.
+ *
+ * Audio files with browser-exposed transcripts aren't a reliable public sample,
+ * so this story simulates an in-band track to demonstrate the derive-from-file
+ * behaviour.
+ */
+export const CardWithEmbeddedTranscription: StoryObj<typeof F0AudioPlayerCard> =
+  {
+    render: (args) => <EmbeddedTranscriptionDemo {...args} />,
+    args: {
+      src: SAMPLE_SRC,
+      title: "AI Call with Alex Williams",
+      subtitle: "May 9, 2025 - 10:00am",
+      defaultExpanded: true,
+    },
+  }
 
 // Backward compatibility: the deprecated `details` tab array is still honoured.
 // Prefer `content` for new code — see CardWithContent above.

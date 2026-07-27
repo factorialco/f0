@@ -525,6 +525,17 @@ translated labels, inside a height-restricted scroll area.
 
 <Canvas of={Stories.CardWithContentExpanded} />
 
+`summary` and `transcription` are independent — pass just one to show a single
+tab (here, transcription only):
+
+<Canvas of={Stories.CardWithTranscriptionOnly} />
+
+When the transcript lives in the audio file itself, no `content.transcription`
+is needed — the card derives it from the file's own track and shows the
+Transcription tab:
+
+<Canvas of={Stories.CardWithEmbeddedTranscription} />
+
 The deprecated `details` tab array is still honoured for backward compatibility:
 
 <Canvas of={Stories.CardWithLegacyDetails} />
