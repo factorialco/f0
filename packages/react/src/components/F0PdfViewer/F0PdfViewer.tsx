@@ -136,6 +136,10 @@ const PdfViewerBase = forwardRef<
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null)
   const [pages, setPages] = useState<PageMetrics[]>([])
   const [scale, setScale] = useState(1)
+  // The scale react-pdf actually rasterizes at. It lags `scale` during manual
+  // zoom so the gesture animates with a CSS transform instead of rebuilding the
+  // canvas every step; it catches up (debounced) once the user settles.
+  const [renderScale, setRenderScale] = useState(1)
   const [currentPage, setCurrentPage] = useState(0)
   const [selectedScale, setSelectedScale] = useState<F0PdfScale>(initialScale)
   const [rotation, setRotation] = useState<F0PdfRotation>(initialRotation)
@@ -200,7 +204,10 @@ const PdfViewerBase = forwardRef<
           : (container.clientHeight - toolbarHeight - PAGE_VIEWPORT_PADDING) /
             pageHeight
 
+      // Fit changes rasterize immediately (no transform gap), so they never
+      // flash or animate on load.
       setScale(computed)
+      setRenderScale(computed)
       setSelectedScale(value)
     },
     [pages, currentPage, rotation]
@@ -320,6 +327,16 @@ const PdfViewerBase = forwardRef<
     return () => container.removeEventListener("click", handleClick, true)
   }, [])
 
+  // Manual zoom animates via a cheap CSS transform on each page (see the render
+  // below) so the gesture stays smooth. Re-rasterizing at the new scale is what
+  // flashes (react-pdf tears the canvas down and rebuilds it), so we defer it:
+  // once the user settles, catch renderScale up to scale in one debounced step.
+  useEffect(() => {
+    if (renderScale === scale) return
+    const id = setTimeout(() => setRenderScale(scale), 200)
+    return () => clearTimeout(id)
+  }, [scale, renderScale])
+
   return (
     <div
       ref={ref}
@@ -371,11 +388,23 @@ const PdfViewerBase = forwardRef<
                   <div
                     key={index}
                     className="F0PdfViewer__page mx-auto w-fit px-4 pt-4 last:pb-4"
+                    style={{
+                      // Manual zoom scales the already-rendered page (GPU, no
+                      // canvas rebuild) until renderScale catches up. Fit changes
+                      // keep scale === renderScale, so this stays at 1 with no
+                      // transition (no animation on load).
+                      transformOrigin: "top center",
+                      transform: `scale(${scale / renderScale})`,
+                      transition:
+                        renderScale === scale
+                          ? "none"
+                          : "transform 180ms cubic-bezier(0.2, 0, 0, 1)",
+                    }}
                   >
                     <Page
                       className="overflow-hidden rounded-lg border border-solid border-f1-border-secondary shadow-md"
                       pageNumber={pageNumber}
-                      scale={scale}
+                      scale={renderScale}
                       rotate={rotation}
                       loading={
                         <Skeleton
