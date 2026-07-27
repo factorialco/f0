@@ -47,12 +47,12 @@ _Optional — module-by-module priority so the migration can be sequenced (highe
 
 The heart of the guide. One row per import, prop, token, or method that changes. This table is what makes the migration mechanical.
 
-| `<OldName>`                                   | `<NewName>`                                   |
-| --------------------------------------------- | --------------------------------------------- |
+| `<OldName>`                          | `<NewName>`                          |
+| ------------------------------------ | ------------------------------------ |
 | `import { F0OldName } from "@factorialco/f0"` | `import { F0NewName } from "@factorialco/f0"` |
-| `<F0OldName variant="x" />`                   | `<F0NewName kind="x" />`                      |
-| `oldProp`                                     | `newProp` (or "removed — use …")              |
-| `--f1-old-token`                              | `--f1-new-token`                              |
+| `<F0OldName variant="x" />`          | `<F0NewName kind="x" />`             |
+| `oldProp`                            | `newProp` (or "removed — use …")     |
+| `--f1-old-token`                     | `--f1-new-token`                     |
 
 ## Step by step
 
