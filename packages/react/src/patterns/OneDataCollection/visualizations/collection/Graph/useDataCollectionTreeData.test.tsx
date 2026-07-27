@@ -202,6 +202,44 @@ describe("useDataCollectionTreeData", () => {
     expect(countParentFetches(fetchData, "vp1")).toBe(1)
   })
 
+  it("merges a node's children in the same commit it becomes expanded (no childless-expanded frame)", async () => {
+    const fetchData = vi.fn(fetchByParent)
+    const source = buildSource(fetchData)
+    const snapshots: Array<{ expandedHasCeo: boolean; hasVp1: boolean }> = []
+
+    const { result } = renderHook(() => {
+      const api = useDataCollectionTreeData(
+        source,
+        buildOptions({ defaultExpandDepth: 0 }),
+        callbacks()
+      )
+      snapshots.push({
+        expandedHasCeo: api.expandedNodes.has("ceo"),
+        hasVp1: api.nodes.some((node) => node.id === "vp1"),
+      })
+      return api
+    })
+
+    await waitFor(() => expect(result.current.isInitialLoading).toBe(false))
+
+    await act(async () => {
+      result.current.setExpandedNodes(new Set(["ceo"]))
+    })
+    await waitFor(() =>
+      expect(result.current.expandedNodes.has("ceo")).toBe(true)
+    )
+
+    // The reflow bug: expanding used to flip the expanded set in one commit and
+    // merge the children in a later one, so for a frame the node rendered
+    // "expanded but childless" and the tree settled late. Assert no such
+    // intermediate render exists — expansion and child-merge are one commit.
+    const childlessExpandedFrame = snapshots.some(
+      (snapshot) => snapshot.expandedHasCeo && !snapshot.hasVp1
+    )
+    expect(childlessExpandedFrame).toBe(false)
+    expect(result.current.nodes.some((node) => node.id === "vp1")).toBe(true)
+  })
+
   it("reveals a node with its full ancestor path on search", async () => {
     const fetchData = vi.fn(fetchByParent)
     const source = buildSource(fetchData)

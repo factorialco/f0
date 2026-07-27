@@ -163,6 +163,31 @@ const mergeChildren = <R extends RecordType>(
   return [...withParentMarked, ...additions]
 }
 
+/**
+ * Appends the freshly collected children of several parents at once and marks
+ * every loaded parent as `childrenLoaded`. Lets a whole expansion frontier be
+ * merged in a single `setNodes` so it can be batched with the expanded-set
+ * update into one commit (see `applyExpansion`). A no-op merge returns `prev`
+ * unchanged so it never triggers a spurious re-render.
+ */
+const mergeManyChildren = <R extends RecordType>(
+  prev: GraphNode<R>[],
+  children: GraphNode<R>[],
+  loadedParentIds: Set<string>
+): GraphNode<R>[] => {
+  const existing = new Set(prev.map((node) => node.id))
+  const additions = children.filter((child) => !existing.has(child.id))
+  let changed = additions.length > 0
+  const withParentsMarked = prev.map((node) => {
+    if (loadedParentIds.has(node.id) && !node.childrenLoaded) {
+      changed = true
+      return { ...node, childrenLoaded: true }
+    }
+    return node
+  })
+  return changed ? [...withParentsMarked, ...additions] : prev
+}
+
 /** parentId → direct child ids, indexed over the given nodes. */
 const indexChildrenByParent = <R extends RecordType>(
   nodes: Iterable<GraphNode<R>>
@@ -445,8 +470,14 @@ export function useDataCollectionTreeData<
     []
   )
 
-  /** Loads (once) and merges the direct children of `nodeId`; returns them. */
-  const loadChildrenOf = useCallback(
+  /**
+   * Fetches (once) the direct children of `nodeId` and returns them WITHOUT
+   * merging them into `nodes`. Marks the parent loaded in `loadedParents` so a
+   * repeat expansion doesn't refetch; an already-loaded parent short-circuits
+   * to the children already in the tree. Keeping the merge out of here lets the
+   * caller batch it with other state updates (see `applyExpansion`).
+   */
+  const fetchChildrenOf = useCallback(
     async (nodeId: string): Promise<GraphNode<R>[]> => {
       if (loadedParents.current.has(nodeId)) {
         return nodesRef.current.filter((node) => node.parentId === nodeId)
@@ -456,9 +487,7 @@ export function useDataCollectionTreeData<
         const records = await fetchRecords(
           optionsRef.current.childrenFilters(nodeId)
         )
-        const children = records.map((record) => toNode(record, nodeId))
-        setNodes((prev) => mergeChildren(prev, children, nodeId))
-        return children
+        return records.map((record) => toNode(record, nodeId))
       } catch (cause) {
         loadedParents.current.delete(nodeId)
         const dataError = toDataError(cause)
@@ -470,27 +499,51 @@ export function useDataCollectionTreeData<
     [fetchRecords, toNode]
   )
 
+  /** `fetchChildrenOf` plus an immediate merge; returns the children. */
+  const loadChildrenOf = useCallback(
+    async (nodeId: string): Promise<GraphNode<R>[]> => {
+      const alreadyLoaded = loadedParents.current.has(nodeId)
+      const children = await fetchChildrenOf(nodeId)
+      if (!alreadyLoaded) {
+        setNodes((prev) => mergeChildren(prev, children, nodeId))
+      }
+      return children
+    },
+    [fetchChildrenOf]
+  )
+
   /**
-   * Ensures the direct children of every *expanded* node are loaded, so their
-   * children render. Collapsed nodes need no loading: F0Graph draws their
-   * expander affordance from `childrenCount` alone, so there is no "one level
-   * ahead" pre-loading — expanding a node with N children is a single fetch,
-   * not 1 + N. Walks down only through expanded nodes (the expanded set is
-   * always a connected subtree from the roots) and reads the children returned
-   * by `loadChildrenOf` so it never depends on React committing state between
-   * awaits. Already-loaded parents short-circuit, so re-applying the same
-   * expansion does not refetch. The loop reassigns `frontier` each pass but is
-   * guaranteed to terminate: every pass only descends into ids never seen
-   * before (the `seen` guard), so the walk is bounded by the size of the
-   * expanded set even if the data ever contained a parent cycle.
+   * Loads the direct children of every *expanded* node and returns them all
+   * (flattened) together with the set of parents whose children are now loaded
+   * — WITHOUT merging into `nodes`. The caller merges the result and flips the
+   * expanded set together, in one commit (see `applyExpansion`), so an expand
+   * is a single atomic reflow instead of a two-phase "mark expanded, then
+   * children arrive a frame later" settle. Collapsed nodes need no loading:
+   * F0Graph draws their expander affordance from `childrenCount` alone, so
+   * there is no "one level ahead" pre-loading — expanding a node with N
+   * children is a single fetch, not 1 + N. Walks down only through expanded
+   * nodes (the expanded set is always a connected subtree from the roots) and
+   * descends via the children returned by `fetchChildrenOf`, so it never
+   * depends on React committing state between awaits. Already-loaded parents
+   * short-circuit, so re-applying the same expansion does not refetch. The loop
+   * reassigns `frontier` each pass but is guaranteed to terminate: every pass
+   * only descends into ids never seen before (the `seen` guard), so the walk is
+   * bounded by the size of the expanded set even if the data ever contained a
+   * parent cycle.
    */
-  const ensureFrontierLoaded = useCallback(
-    async (expanded: Set<string>): Promise<void> => {
+  const collectFrontierChildren = useCallback(
+    async (
+      expanded: Set<string>
+    ): Promise<{
+      children: GraphNode<R>[]
+      loadedParentIds: Set<string>
+    }> => {
       let frontier = nodesRef.current.filter(
         (node) =>
           node.parentId === null && expanded.has(node.id) && hasChildren(node)
       )
       const seen = new Set<string>()
+      const collected: GraphNode<R>[] = []
 
       while (frontier.length > 0) {
         const loadable = frontier.filter((node) => !seen.has(node.id))
@@ -498,16 +551,15 @@ export function useDataCollectionTreeData<
         if (loadable.length === 0) break
 
         const results = await Promise.all(
-          loadable.map((node) =>
-            loadChildrenOf(node.id).then((children) => ({ children }))
-          )
+          loadable.map((node) => fetchChildrenOf(node.id))
         )
 
         // Descend only into children that are themselves expanded — their
         // children become visible and so must be loaded too.
         const next: GraphNode<R>[] = []
-        for (const { children } of results) {
+        for (const children of results) {
           for (const child of children) {
+            collected.push(child)
             if (expanded.has(child.id) && hasChildren(child)) {
               next.push(child)
             }
@@ -515,16 +567,33 @@ export function useDataCollectionTreeData<
         }
         frontier = next
       }
+
+      return { children: collected, loadedParentIds: seen }
     },
-    [loadChildrenOf]
+    [fetchChildrenOf]
+  )
+
+  /**
+   * Loads the frontier's children, then merges them and flips the expanded set
+   * in the same continuation so React batches both into a single commit: the
+   * node's children are already present the instant it renders expanded, so the
+   * graph reflows once instead of settling into place a frame after the toggle.
+   * A collapse loads nothing new, so its frontier resolves immediately.
+   */
+  const applyExpansion = useCallback(
+    async (next: Set<string>): Promise<void> => {
+      const { children, loadedParentIds } = await collectFrontierChildren(next)
+      setNodes((prev) => mergeManyChildren(prev, children, loadedParentIds))
+      setExpandedState(next)
+    },
+    [collectFrontierChildren]
   )
 
   const setExpandedNodes = useCallback(
     (next: Set<string>) => {
-      setExpandedState(next)
-      void ensureFrontierLoaded(next)
+      void applyExpansion(next)
     },
-    [ensureFrontierLoaded]
+    [applyExpansion]
   )
 
   // Resolve+merge a node's ancestor path and load the chain's children so the
@@ -570,7 +639,9 @@ export function useDataCollectionTreeData<
     async (nodeId: string): Promise<void> => {
       try {
         const ancestorIds = await resolvePath(nodeId)
-        setExpandedNodes(new Set([...expandedNodesRef.current, ...ancestorIds]))
+        await applyExpansion(
+          new Set([...expandedNodesRef.current, ...ancestorIds])
+        )
         setFocusedNode(nodeId)
         setHighlightedNodes(new Set([nodeId]))
       } catch (cause) {
@@ -579,7 +650,7 @@ export function useDataCollectionTreeData<
         callbacksRef.current.onLoadError(dataError)
       }
     },
-    [resolvePath, setExpandedNodes]
+    [resolvePath, applyExpansion]
   )
 
   // Drop the centered/highlighted node (e.g. when the user clicks the empty
