@@ -1,0 +1,203 @@
+import { Canvas, Controls, Meta, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0AiChat.stories"
+
+<Meta of={Stories} />
+
+# F0AiChat
+
+Provides the complete One chat surface and accepts host-provided header,
+message, input, and overlay content. Use the overlay slot for content that must
+temporarily cover the whole chat while remaining scoped to the chat surface.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Prop</th>
+        <th className="text-left">Type</th>
+        <th className="text-left">Default</th>
+        <th className="text-left">Required</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>header</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>Provider value</td>
+        <td>—</td>
+        <td>Content rendered at the top of the chat.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>messages</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>Provider value</td>
+        <td>—</td>
+        <td>Scrollable conversation content rendered below the header.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>input</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>Provider value</td>
+        <td>—</td>
+        <td>Composer content rendered at the bottom of the chat.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>overlay</code>
+        </td>
+        <td>
+          <code>ReactNode</code>
+        </td>
+        <td>Provider value</td>
+        <td>—</td>
+        <td>Host-provided content rendered above the complete chat surface.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Guidelines
+
+### Design best practices
+
+**When to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use the overlay slot when</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Chat-scoped discovery or onboarding</td>
+        <td>
+          The content must cover the header, conversation, and composer without
+          leaving the chat surface.
+        </td>
+      </tr>
+      <tr>
+        <td>Host-owned interruption</td>
+        <td>
+          The host needs to own the content, actions, analytics, and dismissal
+          state.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**When not to use**
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Situation</th>
+        <th className="text-left">Use instead</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Content that belongs in the conversation timeline</td>
+        <td>The messages slot and a chat message component</td>
+      </tr>
+      <tr>
+        <td>A decision that must block the whole application</td>
+        <td>
+          <code>F0Dialog</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+**Do's and don'ts**
+
+<DoDonts
+  do={{
+    description:
+      "Keep overlay content and dismissal behavior in the host application.",
+  }}
+  dont={{
+    description:
+      "Do not position content over private chat DOM or reproduce the backdrop in the host.",
+  }}
+/>
+
+### Behavior
+
+- WHEN `overlay` or the provider's `chatOverlay` is present → THEN F0 renders
+  it above the complete chat surface and makes the chat beneath it inert.
+- WHEN both overlay APIs are present → THEN the direct `overlay` prop takes
+  precedence.
+- WHEN the overlay is removed → THEN the underlying chat becomes interactive
+  again.
+- The host owns the overlay content, visibility state, actions, and dismissal
+  behavior. F0 owns only the scoped backdrop and interaction blocking.
+
+### Usage examples
+
+**Host-owned chat overlay**
+
+Use this pattern for chat-scoped discovery content with host-owned actions.
+
+<Canvas of={Stories.WithHostOverlay} />
+
+## Accessibility
+
+Overlay content must provide its own semantic structure, accessible name,
+focus management, keyboard behavior, and dismissal controls. While an overlay
+is mounted, F0 applies `inert` to the chat header, messages, and composer so
+they are unavailable to keyboard and assistive-technology navigation.
+
+### Keyboard interaction
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Key</th>
+        <th className="text-left">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <kbd>Tab</kbd>
+        </td>
+        <td>Moves focus among controls supplied by the host overlay.</td>
+      </tr>
+      <tr>
+        <td>
+          <kbd>Escape</kbd>
+        </td>
+        <td>
+          Dismisses the overlay only when the host implements that behavior.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
