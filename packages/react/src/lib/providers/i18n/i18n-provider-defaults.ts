@@ -5,6 +5,10 @@ export const defaultTranslations = {
     selectPlaceholder: "Select",
   },
   countries: i18nCountries,
+  starRating: {
+    ariaLabel: "Rating: {{value}} of {{max}}",
+    ariaLabelEmpty: "Rating: not rated, out of {{max}}",
+  },
   approvals: {
     history: "Approval history",
     statuses: {

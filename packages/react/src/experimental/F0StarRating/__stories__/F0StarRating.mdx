@@ -1,0 +1,252 @@
+import { Canvas, Meta, Controls, Unstyled } from "@storybook/addon-docs/blocks"
+import { DoDonts } from "@/lib/storybook-utils/do-donts"
+import * as Stories from "./F0StarRating.stories"
+
+<Meta of={Stories} />
+
+# F0StarRating
+
+Captures or displays a rating on a 1-to-`max` star scale. It works as an
+interactive control (click, hover-preview or keyboard) and as a read-only
+summary that renders fractional averages by partially filling a star. The stars
+use the `selected` icon token, because a rating is a selection.
+
+---
+
+# Overview
+
+## Purpose
+
+- Captures a single rating on a discrete 1…`max` star scale.
+- Optionally allows half-star (x.5) precision while interacting.
+- Displays an existing score — including a fractional average such as 4.3 — as a
+  non-interactive summary.
+- Ships an accessible, localizable name and full keyboard support out of the box.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Element</th>
+        <th className="text-left">Description</th>
+        <th className="text-left">Required</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Group</code>
+        </td>
+        <td>
+          Container exposing the scale as a single <code>slider</code> (or{" "}
+          <code>img</code> when read-only) with an accessible name.
+        </td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Star</code>
+        </td>
+        <td>One cell per value, drawn as an outline track star.</td>
+        <td>Yes</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Fill</code>
+        </td>
+        <td>
+          A clipped overlay filling each star from 0–100%, using the{" "}
+          <code>selected</code> icon token.
+        </td>
+        <td>No</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## Variants
+
+### Read-only average
+
+A read-only rating fills stars fractionally, so a computed average (e.g. 4.3)
+is shown precisely regardless of the `allowHalf` flag.
+
+<Canvas of={Stories.ReadOnlyAverage} />
+
+### Half stars
+
+With `allowHalf`, hovering or clicking the left half of a star selects the x.5
+value; the keyboard steps by 0.5.
+
+<Canvas of={Stories.AllowHalf} />
+
+### Sizes
+
+<Canvas of={Stories.Sizes} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">Size</th>
+        <th className="text-left">When to use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>sm</code>
+        </td>
+        <td>Compact contexts such as table cells and list rows.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>md</code>
+        </td>
+        <td>Default — forms and detail views.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>lg</code>
+        </td>
+        <td>Prominent, primary rating actions (e.g. a feedback prompt).</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+## States
+
+<Canvas of={Stories.Empty} />
+<Canvas of={Stories.Disabled} />
+
+<Unstyled>
+  <table className="mb-8 w-full dark:text-f1-foreground-inverse/80">
+    <thead>
+      <tr>
+        <th className="text-left">State</th>
+        <th className="text-left">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <code>Empty</code>
+        </td>
+        <td>
+          <code>value=null</code> — every star shows the outline track.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>Disabled</code>
+        </td>
+        <td>Non-interactive and visually muted; renders as an image.</td>
+      </tr>
+      <tr>
+        <td>
+          <code>Read-only</code>
+        </td>
+        <td>Non-interactive summary that keeps full colour and precision.</td>
+      </tr>
+    </tbody>
+  </table>
+</Unstyled>
+
+---
+
+# Guidelines
+
+## Design Best Practices
+
+### When to use
+
+- To let a person grant a subjective score, such as feedback or a review.
+- To surface an aggregate rating (an average) in a scannable, at-a-glance form.
+- When the scale is small and ordinal (typically up to five stars).
+
+### When NOT to use
+
+- For a numeric scale where the exact number matters (e.g. an NPS 0–10): use
+  `F0Rating` (numeric tiles) instead.
+- For progress toward a goal or a percentage: use `Progress`.
+- For a part-to-whole breakdown: use a category bar.
+
+### How to use
+
+- Keep `max` constant across a list so ratings stay comparable.
+- Only enable `allowHalf` when half-step precision is meaningful to the user;
+  whole stars are simpler to target.
+- Reserve fractional values for read-only averages; let interactive input land
+  on whole or half stars.
+
+## Content Best Practices
+
+- Provide an accessible name via `ariaLabel` (or `ariaLabelledBy`); a localized
+  default is used otherwise.
+- Render any surrounding label or helper text yourself — the component renders
+  only the stars.
+
+<DoDonts
+  do={{
+    description:
+      "Use a read-only star rating to show an average score, and give the control a clear accessible name such as “Overall rating”.",
+  }}
+  dont={{
+    description:
+      "Recolour the stars to an unrelated token or use stars for an exact numeric scale where the precise number carries the meaning.",
+  }}
+/>
+
+## Accessibility
+
+- Interactive: `role="slider"` with `aria-valuemin`, `aria-valuemax`,
+  `aria-valuenow` and `aria-valuetext`; the whole row is a single focusable
+  slider.
+- Keyboard: ←/↓ decrease and →/↑ increase by one step (0.5 with `allowHalf`,
+  otherwise 1); Home selects the lowest star, End the maximum; stepping below
+  the minimum clears the rating.
+- Read-only / disabled: `role="img"` with an accessible name, no interaction.
+- The accessible name is resolved through `useI18n()` and is fully localizable.
+
+---
+
+# Code
+
+## Import
+
+```tsx
+import { F0StarRating } from "@factorialco/f0-react/experimental"
+```
+
+## Props
+
+<Canvas of={Stories.Default} />
+
+<Controls of={Stories.Default} />
+
+---
+
+# Examples
+
+## Interactive (controlled)
+
+<Canvas of={Stories.Controlled} />
+
+```tsx
+const [value, setValue] = useState<number | null>(3)
+
+<F0StarRating value={value} onChange={setValue} allowHalf ariaLabel="Rating" />
+```
+
+## Read-only average
+
+<Canvas of={Stories.ReadOnlyAverage} />
+
+```tsx
+<F0StarRating value={4.3} readOnly ariaLabel="Average rating: 4.3 of 5" />
+```
