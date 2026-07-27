@@ -72,6 +72,10 @@ const config: StorybookConfig = {
       titlePrefix: "Components",
     },
     {
+      directory: "../src/experimental/F0StarRating",
+      titlePrefix: "Components",
+    },
+    {
       directory: "../src/experimental/F0VersionHistory",
       titlePrefix: "Components",
     },
