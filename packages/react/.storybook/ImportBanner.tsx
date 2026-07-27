@@ -37,10 +37,18 @@ function ImportSnippet({ code }: { code: string }) {
       <div className="min-w-0 overflow-x-auto">
         <code className="whitespace-pre font-mono text-base">{code}</code>
       </div>
+      {/* Colors are inline (not Tailwind) because Storybook's Tailwind build
+          doesn't scan `.storybook/` for one-off utilities like `text-white`,
+          which would silently fall back to the default (black) text. */}
       <button
         type="button"
         onClick={onCopy}
-        className="shrink-0 rounded-md border border-solid border-white/25 bg-white/10 px-2 py-1 text-sm font-medium text-white transition-colors hover:bg-white/20"
+        className="shrink-0 rounded-md px-2 py-1 text-sm font-medium transition-colors"
+        style={{
+          color: "#fff",
+          backgroundColor: "rgba(255,255,255,0.1)",
+          border: "1px solid rgba(255,255,255,0.25)",
+        }}
       >
         {copied ? "Copied" : "Copy"}
       </button>
@@ -49,19 +57,26 @@ function ImportSnippet({ code }: { code: string }) {
 }
 
 /**
- * Storybook's docs theme hides `<svg>` inside the title `<h1>` and only reveals
- * it on hover (its heading anchor-link affordance). Our tag icon is portaled
- * into that `<h1>`, so it inherits that rule and appears only on hover. This
- * injects a scoped, !important override that keeps icons inside our own
- * `.sb-unstyled` tag wrappers visible, without touching Storybook's anchor icon.
+ * Storybook renders the docs title as a block `<h1>` with a floated permalink
+ * anchor in the gutter, and hides `<svg>`s inside it (revealing them on hover).
+ * We portal tags into that `<h1>`, so this injects a scoped stylesheet that:
+ *   - lays the title out as a centered flex row so the tags sit vertically
+ *     centered against the title (with a gap between items),
+ *   - takes the floated permalink anchor out of flow so it doesn't offset the
+ *     centered row,
+ *   - keeps icons inside our own `.sb-unstyled` tag wrappers visible (the
+ *     Storybook anchor icon stays hidden-until-hover, untouched).
  */
-function ensureTitleTagIconVisible() {
-  const id = "f0-title-tag-icon-fix"
+function ensureTitleTagStyles() {
+  const id = "f0-title-tag-styles"
   if (document.getElementById(id)) return
   const style = document.createElement("style")
   style.id = id
-  style.textContent =
-    "#storybook-docs h1 .sb-unstyled svg{visibility:visible!important;position:static!important;top:auto!important}"
+  style.textContent = [
+    "#storybook-docs h1{display:flex;align-items:center;flex-wrap:wrap;column-gap:.5rem;row-gap:.25rem}",
+    "#storybook-docs h1>a{position:absolute}",
+    "#storybook-docs h1 .sb-unstyled svg{visibility:visible!important;position:static!important;top:auto!important}",
+  ].join("")
   document.head.appendChild(style)
 }
 
@@ -80,11 +95,10 @@ function usePortalInTitle() {
     )
     if (!titleEl) return
 
-    ensureTitleTagIconVisible()
+    ensureTitleTagStyles()
 
     if (!containerRef.current) {
       const el = document.createElement("span")
-      el.style.marginLeft = "0.5rem"
       el.style.whiteSpace = "nowrap"
       containerRef.current = el
     }

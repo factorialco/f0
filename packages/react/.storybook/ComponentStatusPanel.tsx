@@ -20,7 +20,6 @@ function usePortalInTitle() {
 
     if (!containerRef.current) {
       const el = document.createElement("span")
-      el.style.marginLeft = "0.5rem"
       el.style.whiteSpace = "nowrap"
       containerRef.current = el
     }
