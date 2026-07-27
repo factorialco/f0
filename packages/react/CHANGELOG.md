@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.56.4](https://github.com/factorialco/f0/compare/f0-react-v4.56.3...f0-react-v4.56.4) (2026-07-27)
+
+
+### Bug Fixes
+
+* **ResourceHeader:** use secondary border token for bottom rule ([#4839](https://github.com/factorialco/f0/issues/4839)) ([3a08ea4](https://github.com/factorialco/f0/commit/3a08ea49958fc4a3b1647005f2e3d9cfcdc2522c))
+
 ## [4.56.3](https://github.com/factorialco/f0/compare/f0-react-v4.56.2...f0-react-v4.56.3) (2026-07-27)
 
 
