@@ -1,6 +1,6 @@
 import { jsx as h } from "react/jsx-runtime";
 import { useRef as n, useState as b, useEffect as g } from "react";
-import { r as p } from "./docx-preview-C2vSulnG.js";
+import { r as p } from "./docx-preview-BaRDMyPN.js";
 const x = ({
   url: a,
   width: s,

@@ -1,5 +1,17 @@
 import { default as default_2 } from 'react';
 
+export declare const A11Y_TIER_ORDER: A11yTier[];
+
+/**
+ * A component's accessibility posture, ordered like doc quality. "skipped" =
+ * at least one story opts out of axe; "todo" = axe runs but non-blocking;
+ * "enforced" = every story runs axe at test:"error" (⇒ axe-clean on a green
+ * main). Stable requires "enforced".
+ */
+export declare type A11yTier = "skipped" | "todo" | "enforced";
+
+export declare function a11yTierAtLeast(actual: A11yTier, min: A11yTier): boolean;
+
 /**
  * Component Status API
  * ====================
@@ -42,8 +54,20 @@ export declare interface ComponentEntry {
     hasMdxDocs: boolean;
     docQuality: DocQuality;
     docSignals: DocSignals;
+    /** Accessibility posture: "skipped" | "todo" | "enforced" (see A11yTier). */
+    a11yTier: A11yTier;
     storyFile: string;
 }
+
+/**
+ * The maturity status badge, sized to sit inline next to a component title. On
+ * hover/focus it reveals the full maturity summary and Definition-of-Done
+ * checklist in a tooltip — the same information the `ComponentStability` panel
+ * shows, so collapsing the section loses no context.
+ *
+ * Renders nothing when the name doesn't resolve to a tracked component.
+ */
+export declare function ComponentMaturityTag({ componentName, components, className, }: ComponentStabilityProps): default_2.JSX.Element | null;
 
 /**
  * Renders a component's maturity status and Definition-of-Done checklist. All

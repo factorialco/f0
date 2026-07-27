@@ -983,6 +983,22 @@ const e = {
       one: "Showing the first row",
       other: "Showing the first {{count}} rows"
     }
+  },
+  videoPlayer: {
+    regionLabel: "Video player",
+    play: "Play",
+    pause: "Pause",
+    playing: "Playing",
+    paused: "Paused",
+    mute: "Mute",
+    unmute: "Unmute",
+    volume: "Volume",
+    seekLabel: "Seek",
+    enterFullscreen: "Enter fullscreen",
+    exitFullscreen: "Exit fullscreen",
+    playbackSpeed: "Playback speed ({{rate}})",
+    playbackSpeedLabel: "Playback speed",
+    timeProgress: "{{current}} of {{total}}"
   }
 };
 export {

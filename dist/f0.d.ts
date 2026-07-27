@@ -1133,6 +1133,13 @@ declare type AlertAction = {
     loadingState: UpsellingButtonProps["loadingState"];
     nextSteps: UpsellingButtonProps["nextSteps"];
     closeLabel: UpsellingButtonProps["closeLabel"];
+    /**
+     * Whether to show the confirmation dialog after the request resolves.
+     * Defaults to `true`. Set to `false` when `onRequest` only opens a modal or
+     * navigates instead of creating an upselling request, so the success dialog
+     * ("request sent") is not shown for an action that sent nothing.
+     */
+    showConfirmation?: UpsellingButtonProps["showConfirmation"];
 };
 
 export declare type AlertAvatarProps = VariantProps<typeof alertAvatarVariants> & {
@@ -5310,6 +5317,22 @@ export declare const defaultTranslations: {
             readonly other: "Showing the first {{count}} rows";
         };
     };
+    readonly videoPlayer: {
+        readonly regionLabel: "Video player";
+        readonly play: "Play";
+        readonly pause: "Pause";
+        readonly playing: "Playing";
+        readonly paused: "Paused";
+        readonly mute: "Mute";
+        readonly unmute: "Unmute";
+        readonly volume: "Volume";
+        readonly seekLabel: "Seek";
+        readonly enterFullscreen: "Enter fullscreen";
+        readonly exitFullscreen: "Exit fullscreen";
+        readonly playbackSpeed: "Playback speed ({{rate}})";
+        readonly playbackSpeedLabel: "Playback speed";
+        readonly timeProgress: "{{current}} of {{total}}";
+    };
 };
 
 /**
@@ -5798,8 +5821,14 @@ declare type EditableTableColumnDefinition<R extends RecordType, Sortings extend
     /**
      * Configuration for `"date"` cells. Accepts `minDate` / `maxDate` to
      * restrict the selectable date range in the picker.
+     *
+     * Can be a static object or a function that receives the current row item
+     * to return a per-row range (e.g. bound one date field by another field's
+     * value: `(item) => ({ minDate: parseISO(item.startDate) })`). The picker's
+     * default visible month follows `minDate`, so a per-row `minDate` also
+     * opens the calendar on that date.
      */
-    dateConfig?: DateCellConfig;
+    dateConfig?: DateCellConfig | ((item: R) => DateCellConfig);
     /**
      * Called after this cell's value changes. Use to compute derived values
      * and update other cells in the same row.
@@ -6241,10 +6270,20 @@ export declare const F0AiChatCreditsButton: ({ credits, employeeCredits, trigger
  * - with-history: title acts as a thread selector (clickable) — the host
  *   wires `onOpenHistory` to mount its own history dialog.
  * - legacy: title is static; a "new chat" button is shown when `hasMessages`.
+ * Hosts can add header actions that F0 renders alongside the built-in controls.
  *
  * Decoupled from CopilotKit and `useAiChat()` — everything via props.
  */
-export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, }: F0AiChatHeaderProps) => JSX_2.Element;
+export declare const F0AiChatHeader: ({ historyEnabled, title, currentThreadTitle, fullscreen, lockVisualizationMode, onToggleVisualizationMode, onClose, onNewChat, onOpenHistory, hasMessages, credits, employeeCredits, compact, actions, }: F0AiChatHeaderProps) => JSX_2.Element;
+
+export declare interface F0AiChatHeaderAction {
+    /** Stable identifier used as the React key. */
+    id: string;
+    /** Already-localized accessible label and tooltip. */
+    label: string;
+    icon: IconType;
+    onClick: () => void;
+}
 
 export declare type F0AiChatHeaderProps = {
     /**
@@ -6279,9 +6318,9 @@ export declare type F0AiChatHeaderProps = {
     /** Legacy variant gate: only renders the "new chat" button when true. */
     hasMessages?: boolean;
     /**
-     * Minimal header: render only the expand + close controls (no title, new
-     * chat or credits popover). Use when a sidebar owns the chat navigation and
-     * the credits/settings popover (see `F0AiChatCreditsButton`).
+     * Minimal header: render only header actions plus the expand and close controls
+     * (no title, new chat or credits popover). Use when a sidebar owns the chat
+     * navigation and the credits/settings popover (see `F0AiChatCreditsButton`).
      */
     compact?: boolean;
     /** Credits configuration. When present, renders the credits popover button. */
@@ -6292,6 +6331,11 @@ export declare type F0AiChatHeaderProps = {
      * with `credits`). Hosts opt in per-employee.
      */
     employeeCredits?: AiChatEmployeeCredits;
+    /**
+     * Additional actions rendered immediately before the fullscreen and close
+     * controls. F0 owns their presentation so they match the built-in actions.
+     */
+    actions?: F0AiChatHeaderAction[];
 };
 
 /**
@@ -11880,6 +11924,57 @@ export declare type F0ToolCall = {
     };
 };
 
+/**
+ * @experimental This is an experimental component, use it at your own risk.
+ *
+ * Video player built on a native `<video>` element with f0-styled controls
+ * (play/pause, seekbar, volume, playback speed, fullscreen) plus keyboard
+ * shortcuts. Analytics, watch-% milestones, completion and forward-seek
+ * restriction are built in and enabled via props (`onTrackAction`,
+ * `onMilestone`, `onComplete`, `restrictForwardSeek`).
+ */
+export declare const F0VideoPlayer: WithDataTestIdReturnType_3<typeof F0VideoPlayerInternal>;
+
+/**
+ * Video player built on a native `<video>` element.
+ *
+ *   useVideoState           → element ref, native listeners, derived state.
+ *   useFullscreen           → toggles fullscreen on the wrapper (keeps controls visible).
+ *   useKeyboardShortcuts    → Space, ←/→, ↑/↓, M, F.
+ *   useVideoTracking        → analytics callback on play/pause + interval.
+ *   useVideoMilestones      → watched-% milestone callbacks (25/50/75).
+ *   useVideoCompletion      → "watched enough" callback (min(10s, 3%)).
+ *   useRestrictForwardSeek  → blocks seeking past the furthest-watched point.
+ *   <Controls>              → presentation only; interactions delegated back here.
+ */
+declare function F0VideoPlayerInternal({ src, autoPlay, autoFocus, restrictForwardSeek, onTrackAction, onMilestone, onComplete, ...dataAttributes }: F0VideoPlayerProps): JSX_2.Element;
+
+export declare interface F0VideoPlayerProps extends DataAttributes_2 {
+    /** Video source URL. */
+    src: string;
+    /** Start playing on mount. Default `false`. */
+    autoPlay?: boolean;
+    /** Focus the player on mount so keyboard shortcuts work immediately. Default `false`. */
+    autoFocus?: boolean;
+    /**
+     * Prevent seeking past the furthest point already watched. Renders a marker at
+     * that position and blocks the cursor beyond it. Default `false`.
+     */
+    restrictForwardSeek?: boolean;
+    /** Called on play, on pause and on a recurring heartbeat during playback. */
+    onTrackAction?: () => void;
+    /**
+     * Called once when each watched-% milestone (`25`, `50`, `75`) is first
+     * reached. For progress analytics; completion is reported via `onComplete`.
+     */
+    onMilestone?: (milestone: number, video: HTMLVideoElement) => void;
+    /**
+     * Called once when the video is "watched enough": the remaining time drops to
+     * `min(10s, 3% of duration)` (the later of "last 10s" and "97%").
+     */
+    onComplete?: (video: HTMLVideoElement) => void;
+}
+
 export declare const F0WizardForm: {
     <TSchema extends F0FormSchema_2>(props: F0WizardFormSingleSchemaProps<TSchema>): default_2.ReactElement;
     <T extends F0PerSectionSchema_2>(props: F0WizardFormPerSectionProps<T>): default_2.ReactElement;
@@ -14714,8 +14809,15 @@ export declare interface PageLayoutGroupComponent {
 export declare type PaginatedDataAdapter<R extends RecordType, Filters extends FiltersDefinition, Options extends PaginatedFetchOptions<Filters> = PaginatedFetchOptions<Filters>, FetchReturn = PaginatedResponse<R>> = {
     /** Indicates this adapter uses page-based pagination */
     paginationType: PaginationType;
-    /** Default number of records per page */
-    perPage?: number;
+    /**
+     * Number of records per page. Pass `"auto"` to derive the page size from the
+     * available vertical space (page-based pagination inside a `fullHeight`
+     * collection only), sized to exactly the rows that fit (capped at 30). In a
+     * `fullHeight` collection, leaving this unset behaves like `"auto"` — an
+     * unspecified page size means "fill the height". Outside `fullHeight`, an
+     * unset value falls back to the default page size.
+     */
+    perPage?: number | "auto";
     /**
      * Function to fetch paginated data based on filter and pagination options
      * @param options - The filter and pagination options to apply when fetching data
@@ -17142,7 +17244,7 @@ declare type UpsellActionDefinitionFn = () => UpsellActionDefinition | undefined
 
 export declare const UpsellingAlert: WithDataTestIdReturnType_4<typeof _UpsellingAlert>;
 
-declare function _UpsellingAlert({ icon, title, description, action, }: UpsellingAlertProps): JSX_2.Element;
+declare function _UpsellingAlert({ icon, title, description, action, onDismiss, }: UpsellingAlertProps): JSX_2.Element;
 
 export declare interface UpsellingAlertProps {
     /**
@@ -17161,6 +17263,16 @@ export declare interface UpsellingAlertProps {
      * The upselling action button configuration.
      */
     action: AlertAction;
+    /**
+     * Called when the user dismisses the alert. When provided, a close button is
+     * shown just to the right of the upselling action button.
+     *
+     * The consumer is responsible for deciding what happens on dismiss — for
+     * example, hiding the alert for a number of days and showing it again later
+     * by persisting the dismissal (e.g. in a cookie or local storage) and
+     * unmounting the component while it should stay hidden.
+     */
+    onDismiss?: () => void;
 }
 
 export declare const UpsellingBanner: WithDataTestIdReturnType_4<ForwardRefExoticComponent<Omit<BaseBannerProps, "children" | "primaryAction" | "secondaryAction"> & {
