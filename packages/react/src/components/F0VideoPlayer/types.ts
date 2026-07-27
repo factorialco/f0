@@ -7,8 +7,9 @@ import { DataAttributes } from "@/global.types"
  * SC 1.2.2, Captions). Pass either a WebVTT resource URL or a raw WebVTT string
  * (the player turns raw VTT into a blob track, so no CORS setup is needed); a
  * remote URL requires the video host to allow cross-origin reads. When omitted,
- * the player uses any caption/subtitle track embedded in the video file. A "CC"
- * toggle in the controls shows/hides them.
+ * the player uses any caption/subtitle track embedded in the video file. A
+ * captions toggle in the controls shows/hides them (a filled glyph when on, a
+ * line glyph when off).
  */
 export interface VideoPlayerContent {
   /** WebVTT URL, or raw WebVTT content, for captions shown during playback. */

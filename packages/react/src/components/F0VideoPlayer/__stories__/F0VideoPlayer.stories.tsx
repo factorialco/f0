@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
-import { ReactNode } from "react"
+import { ReactNode, useEffect, useRef } from "react"
 
 import { F0VideoPlayer } from "../F0VideoPlayer"
 import { bigBuckBunnyCaptions } from "./bigBuckBunnyCaptions"
@@ -76,12 +76,56 @@ export const Playground: Story = {
 /**
  * Captions passed via `content.captions`. Here they are a raw WebVTT string
  * (converted from Big Buck Bunny's community SRT), so no CORS setup is needed;
- * a WebVTT URL works too. The "CC" control in the bottom bar shows/hides them.
+ * a WebVTT URL works too. The captions toggle in the bottom bar (a filled glyph
+ * when on, a line glyph when off) shows/hides them.
  */
 export const WithCaptions: Story = {
   args: {
     content: { captions: bigBuckBunnyCaptions },
   },
+}
+
+// Attaches an in-band caption track to the <video> after mount — the shape a
+// browser exposes for captions muxed into the file (no <track> element, no
+// `content` prop). Muxed captions aren't a reliably supported public sample, so
+// we simulate that track here to exercise the same derive-from-file path.
+function EmbeddedCaptionsDemo(
+  args: React.ComponentProps<typeof F0VideoPlayer>
+) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const video = ref.current?.querySelector("video")
+    if (!video || typeof video.addTextTrack !== "function") return
+    const track = video.addTextTrack("captions", "English", "en")
+    const cues: Array<[number, number, string]> = [
+      [2.5, 6.4, "[SERENE MUSIC]"],
+      [11.8, 14, "[BROOK BABBLES] [FLY BUZZES]"],
+      [16.1, 17.7, "[BIRD TWEETS]"],
+      [19.8, 22, "[WINGS FLAP]"],
+    ]
+    for (const [start, end, text] of cues) {
+      track.addCue(new VTTCue(start, end, text))
+    }
+  }, [])
+  return (
+    <div ref={ref}>
+      <Frame>
+        <F0VideoPlayer {...args} />
+      </Frame>
+    </div>
+  )
+}
+
+/**
+ * Captions embedded in the video file — no `content.captions` passed. The player
+ * finds the file's own caption track and offers the same captions toggle.
+ *
+ * Browsers don't reliably expose muxed caption tracks (and HLS needs a JS
+ * player), so this story simulates an in-band track in the browser to
+ * demonstrate the derive-from-file behaviour.
+ */
+export const WithEmbeddedCaptions: Story = {
+  render: (args) => <EmbeddedCaptionsDemo {...args} />,
 }
 
 /**

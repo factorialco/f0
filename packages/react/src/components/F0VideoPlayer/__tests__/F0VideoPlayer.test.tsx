@@ -358,11 +358,11 @@ describe("F0VideoPlayer", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
       fireEvent.loadedData(getVideo())
 
-      const cc = screen.getByRole("button", { name: "CC" })
+      const cc = screen.getByRole("button", { name: "Captions" })
       expect(cc).toHaveAttribute("aria-pressed", "false")
 
       await user.click(cc)
-      expect(screen.getByRole("button", { name: "CC" })).toHaveAttribute(
+      expect(screen.getByRole("button", { name: "Captions" })).toHaveAttribute(
         "aria-pressed",
         "true"
       )
@@ -372,7 +372,7 @@ describe("F0VideoPlayer", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} />)
       fireEvent.loadedData(getVideo())
       expect(
-        screen.queryByRole("button", { name: "CC" })
+        screen.queryByRole("button", { name: "Captions" })
       ).not.toBeInTheDocument()
     })
   })

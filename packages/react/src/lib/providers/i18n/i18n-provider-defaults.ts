@@ -912,7 +912,7 @@ export const defaultTranslations = {
     playbackSpeed: "Playback speed ({{rate}})",
     playbackSpeedLabel: "Playback speed",
     timeProgress: "{{current}} of {{total}}",
-    captions: "CC",
+    captions: "Captions",
   },
 } as const
 

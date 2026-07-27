@@ -4,6 +4,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { PlaybackRate, formatTime } from "../utils"
+import { CaptionsFilledIcon, CaptionsLineIcon } from "./CaptionsToggleIcons"
 import { PlaybackRateMenu } from "./PlaybackRateMenu"
 import { Seekbar } from "./Seekbar"
 import { VolumeControl } from "./VolumeControl"
@@ -108,12 +109,13 @@ export function Controls({
       />
 
       {captionsAvailable && (
-        // "CC" is the visible label (and accessible name — no aria-label, so
-        // it stays label-in-name compliant); `aria-pressed` conveys on/off,
-        // and `outline` gives an on-state box over the video.
+        // Filled glyph when captions are on, line glyph when off; `aria-pressed`
+        // conveys the state to assistive tech (the label stays stable).
         <F0Button
-          variant={captionsOn ? "outline" : "ghost"}
+          variant="ghost"
           size="sm"
+          hideLabel
+          icon={captionsOn ? CaptionsFilledIcon : CaptionsLineIcon}
           label={t("videoPlayer.captions")}
           aria-pressed={captionsOn}
           onClick={onToggleCaptions}
