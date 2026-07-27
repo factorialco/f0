@@ -8412,7 +8412,7 @@ const $h = {
     ] })
   ] }) });
 }, Jh = tn(
-  () => import("./index-D7jDoHdN.js").then((e) => e.i).then((e) => ({
+  () => import("./index-Co_HIaZ4.js").then((e) => e.i).then((e) => ({
     default: e.F0PdfViewer
   }))
 ), Zh = () => {
