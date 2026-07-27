@@ -1,6 +1,7 @@
 import { jsxs as a, jsx as t, Fragment as Re } from "react/jsx-runtime";
 import { useInsertionEffect as Tr, forwardRef as h, useRef as j, useEffect as q, useLayoutEffect as rt, useState as I, useMemo as J, useCallback as _, createContext as Ge, useContext as Ie, useId as ot, createElement as Hr, memo as Ar } from "react";
-import { d6 as $r, d7 as Br, ac as nt, c4 as Ir, d8 as Pr, d9 as jr, da as Dr, db as Zr, c5 as _r, cd as st, c3 as Or, dc as Ur, al as s1, dd as zr, aU as Gr, de as Wr, df as qr, dg as Xr, at as Yr, dh as Kr, cE as Qr, an as it, aq as Jr, di as eo, q as i1, ag as at, a7 as We, o as ct, bs as to, cb as ro, dj as oo, bd as no, cD as so, ae as Fe, aG as io, bw as lt, dk as ao, cB as co, l as Me, cz as lo, dl as fo, bZ as dt, bc as uo, dm as ho, dn as go, dp as po, dq as Co, dr as mo, ds as ft, cs as vo, ct as wo, dt as xo, du as ko, dv as Lo, dw as bo, dx as yo, bG as Mo, c7 as Eo, dy as Ro, dz as Fo, dA as No, dB as Vo, dC as So, dD as To, dE as Ho, dF as Ao, bF as $o, cC as Bo, ao as Io, co as Po, dG as jo, dH as Do, dI as Zo, dJ as _o, dK as Oo, dL as Uo, dM as zo, aC as Go, bH as Wo, b$ as ut, a4 as qo, af as Xo, bI as ht, bY as Yo, b_ as gt, i as Ko, bv as Qo, bu as Jo, dN as en, dO as tn, bJ as pt, bK as rn, bL as on, bb as nn, aJ as sn, dP as an, j as cn, bq as Ct, bp as mt, bj as ln, dQ as vt, bi as dn, c6 as a1, r as fn, bm as c1, dR as un, dS as hn, dT as l1, c9 as gn, ca as pn, cA as wt, dU as Cn, $ as mn, _ as vn, dV as wn, dW as xn, dX as kn, dY as Ln, bW as bn, dZ as xt, d_ as yn, ap as Mn, d$ as En, a3 as se, n as k, L as Te, ci as Rn, u as G, bV as Fn, S as he, bU as kt, a0 as le, U as ge, ah as Nn, m as ve, e0 as Vn, ar as ie, a_ as ke, Z as Ee, K as ee, cJ as Lt, aO as d1, e1 as Sn, aP as f1, aQ as u1, b as ye, bS as Tn, e2 as Hn, bT as An, a8 as $n, ba as Bn, ak as h1, bM as In, bN as Pn, bO as jn, bP as y1, ai as Dn, ax as bt, b1 as yt, c8 as Zn, cO as _n, e3 as On, e4 as Un, b6 as Mt, e5 as zn, cK as Gn, e6 as Wn, b3 as Be, bk as Et, e7 as Rt, bl as Ft, c as r1, cc as M1, e8 as Nt, e9 as qn, ea as Xn, bA as Yn, eb as Kn, br as g1, cp as Qn, ec as Jn, ed as es, ee as ts, ef as rs, eg as os, w as ns, t as ss, X as is, Y as as, aw as E1, eh as Vt, ei as St, ej as cs, ek as ls, av as ds, am as fs, el as us, em as hs, d as gs } from "./F0CanvasPanel-DvAledR4.js";
+import { c$ as $r, d0 as Br, a5 as nt, bZ as Ir, d1 as Pr, d2 as jr, d3 as Dr, d4 as Zr, b_ as _r, c6 as st, bY as Or, d5 as Ur, ae as s1, d6 as zr, aN as Gr, d7 as Wr, d8 as qr, d9 as Xr, am as Yr, da as Kr, cx as Qr, ag as it, aj as Jr, db as eo, o as i1, a9 as at, a0 as We, n as ct, bl as to, c4 as ro, dc as oo, b6 as no, cw as so, a7 as Fe, az as io, bp as lt, dd as ao, cu as co, l as Me, cs as lo, de as fo, bS as dt, b5 as uo, df as ho, dg as go, dh as po, di as Co, dj as mo, dk as ft, cl as vo, cm as wo, dl as xo, dm as ko, dn as Lo, dp as bo, dq as yo, bz as Mo, c0 as Eo, dr as Ro, ds as Fo, dt as No, du as Vo, dv as So, dw as To, dx as Ho, dy as Ao, by as $o, cv as Bo, ah as Io, ch as Po, dz as jo, dA as Do, dB as Zo, dC as _o, dD as Oo, dE as Uo, dF as zo, av as Go, bA as Wo, bU as ut, Z as qo, a8 as Xo, bB as ht, bR as Yo, bT as gt, i as Ko, bo as Qo, bn as Jo, dG as en, dH as tn, bC as pt, bD as rn, bE as on, b4 as nn, aC as sn, dI as an, j as cn, bj as Ct, bi as mt, bc as ln, dJ as vt, bb as dn, b$ as a1, q as fn, bf as c1, dK as un, dL as hn, dM as l1, c2 as gn, c3 as pn, ct as wt, dN as Cn, U as mn, Q as vn, dO as wn, dP as xn, dQ as kn, dR as Ln, bP as bn, dS as xt, dT as yn, ai as Mn, dU as En, Y as se, J as Te, cb as Rn, u as G, bO as Fn, S as he, bN as kt, V as le, aa as Nn, m as ve, dV as Vn, ak as ie, aT as ke, O as Ee, H as ee, cC as Lt, aH as d1, dW as Sn, aI as f1, aJ as u1, b as ye, bL as Tn, dX as Hn, bM as An, a1 as $n, b3 as Bn, ad as h1, bF as In, bG as Pn, bH as jn, bI as y1, ab as Dn, aq as bt, aW as yt, c1 as Zn, cH as _n, dY as On, dZ as Un, a$ as Mt, d_ as zn, cD as Gn, d$ as Wn, aY as Be, bd as Et, e0 as Rt, be as Ft, c as r1, c5 as M1, e1 as Nt, e2 as qn, e3 as Xn, bt as Yn, e4 as Kn, bk as g1, ci as Qn, e5 as Jn, e6 as es, e7 as ts, e8 as rs, e9 as os, w as ns, s as ss, M as is, N as as, ap as E1, ea as Vt, eb as St, ec as cs, ed as ls, ao as ds, af as fs, ee as us, ef as hs, d as gs } from "./F0CanvasPanel-BeVQHrJo.js";
+import { d as k, f as ge } from "./tooltip-BH6Se8A4.js";
 import { createPortal as Tt } from "react-dom";
 import { defaultTranslations as ps } from "./i18n-provider-defaults.js";
 import { useTrackVolume as Cs } from "@livekit/components-react";
@@ -6503,7 +6504,7 @@ const e1 = Rn(
     type: "layout"
   },
   Jt
-), P6 = ["xs", "sm", "md", "lg"], j6 = [
+), j6 = ["xs", "sm", "md", "lg"], D6 = [
   "inProgress",
   "executing",
   "writing",
@@ -7515,7 +7516,7 @@ function i2({
     close: E
   };
 }
-const a2 = /[\\`*_{}[\]()#+\-.!|~>]/g, c2 = (e) => e.split(/(<entity-ref\b[^>]*>[\s\S]*?<\/entity-ref>)/g).map((r, o) => o % 2 === 1 ? r : r.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(a2, "\\$&")).join(""), D6 = ({
+const a2 = /[\\`*_{}[\]()#+\-.!|~>]/g, c2 = (e) => e.split(/(<entity-ref\b[^>]*>[\s\S]*?<\/entity-ref>)/g).map((r, o) => o % 2 === 1 ? r : r.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(a2, "\\$&")).join(""), Z6 = ({
   onSubmit: e,
   onStop: r,
   inProgress: o,
@@ -8719,7 +8720,7 @@ function I2({
   const n = o1(o), s = B2(e);
   return s ? /* @__PURE__ */ t(s, { id: r, label: n }) : /* @__PURE__ */ t("span", { children: o });
 }
-const Z6 = {
+const _6 = {
   p: L2,
   h1: b2,
   h2: y2,
@@ -8794,7 +8795,7 @@ function ir({
 }
 ir.displayName = "F0CanvasCard";
 const C1 = Ge(null);
-function _6({
+function O6({
   children: e
 }) {
   const [r, o] = I(0), n = j([]), s = _(
@@ -8829,7 +8830,7 @@ function P2(e) {
       return l.format(s, { key: n, ...i });
   }, [o, e]);
 }
-function O6() {
+function U6() {
   const e = Ie(C1);
   if (!e)
     throw new Error(
@@ -9070,7 +9071,7 @@ function dr({ anchor: e, onReply: r }) {
     document.body
   );
 }
-const fr = Ge(void 0), U6 = () => Ie(fr), G2 = (e) => /* @__PURE__ */ t(Mt, { content: e, format: "markdown" }), W2 = ({
+const fr = Ge(void 0), z6 = () => Ie(fr), G2 = (e) => /* @__PURE__ */ t(Mt, { content: e, format: "markdown" }), W2 = ({
   isGenerating: e,
   isLoading: r,
   message: o,
@@ -9529,7 +9530,7 @@ const fl = {
   },
   onThumbsDown: () => {
   }
-}, z6 = (e) => /* @__PURE__ */ t(X2, { children: /* @__PURE__ */ t(ul, { ...e }) }), ul = ({
+}, G6 = (e) => /* @__PURE__ */ t(X2, { children: /* @__PURE__ */ t(ul, { ...e }) }), ul = ({
   turns: e,
   isLoadingThread: r = !1,
   interrupt: o,
@@ -9744,16 +9745,16 @@ const fl = {
   /* @__PURE__ */ t(he, { className: "mt-6 h-5 w-full rounded-md" }),
   /* @__PURE__ */ t(he, { className: "h-5 w-2/5 rounded-md" }),
   /* @__PURE__ */ t(he, { className: "h-5 w-4/5 rounded-md" })
-] }) }), G6 = {
+] }) }), W6 = {
   ai: ps.ai
 }, pr = Ge(null);
-function W6({
+function q6({
   children: e,
   translations: r
 }) {
   return /* @__PURE__ */ t(pr.Provider, { value: r, children: e });
 }
-function q6() {
+function X6() {
   const e = Ie(pr);
   if (e === null)
     throw new Error(
@@ -9765,7 +9766,7 @@ function gl() {
   const { canvasEntities: e } = ye();
   return e;
 }
-function X6(e) {
+function Y6(e) {
   const r = gl();
   if (!(!e || !r))
     return r[e];
@@ -10077,7 +10078,7 @@ const ml = ({
       }
     )
   ] });
-}, wl = "easeOut", xl = 0.3, Y6 = ({
+}, wl = "easeOut", xl = 0.3, K6 = ({
   clarifyingQuestion: e,
   isSubmitDisabled: r
 }) => /* @__PURE__ */ t(
@@ -10550,7 +10551,7 @@ function El(e) {
   const [, o, n, s] = r;
   return [parseInt(o) / 255, parseInt(n) / 255, parseInt(s) / 255];
 }
-class K6 {
+class Q6 {
   element;
   canvas;
   options;
@@ -11683,7 +11684,7 @@ function vr({
   ) });
 }
 vr.displayName = "AuraShader";
-function Q6({
+function J6({
   size: e = "lg",
   state: r,
   color: o,
@@ -11717,7 +11718,7 @@ function Q6({
     }
   );
 }
-const J6 = ({
+const e4 = ({
   text: e,
   description: r,
   avatar: o,
@@ -12125,9 +12126,9 @@ const s6 = () => /* @__PURE__ */ a(
       ] })
     ]
   }
-), e4 = ns(
+), t4 = ns(
   ss(Lr, s6)
-), t4 = [
+), r4 = [
   "text",
   "person",
   "people",
@@ -12658,7 +12659,7 @@ const n1 = ({
     employeeCredits: r,
     trigger: o
   }
-) : e ? /* @__PURE__ */ t(m6, { credits: e, trigger: o }) : null, r4 = n1, o4 = ({
+) : e ? /* @__PURE__ */ t(m6, { credits: e, trigger: o }) : null, o4 = n1, n4 = ({
   historyEnabled: e = !1,
   title: r,
   currentThreadTitle: o,
@@ -13020,7 +13021,7 @@ function E6() {
     /* @__PURE__ */ t(et, { titleWidth: "w-24", rows: J1 })
   ] });
 }
-const n4 = ({
+const s4 = ({
   onClose: e,
   onSelectThread: r,
   onNewChat: o,
@@ -13185,7 +13186,7 @@ function R6() {
 function tt(e) {
   hs(yr, [...e]);
 }
-function s4({
+function i4({
   enabled: e = !1,
   fetchThreads: r,
   deleteThread: o,
@@ -13306,7 +13307,7 @@ const F6 = ee.create(gs), N6 = ({
       ]
     }
   )
-), i4 = Ar(function({
+), a4 = Ar(function({
   active: r,
   label: o,
   className: n,
@@ -13351,12 +13352,12 @@ const F6 = ee.create(gs), N6 = ({
   ] });
 });
 export {
-  W6 as A,
-  i4 as B,
+  q6 as A,
+  a4 as B,
   Q1 as C,
   Dt as D,
   mc as E,
-  _6 as F,
+  O6 as F,
   ic as G,
   nc as H,
   rc as I,
@@ -13372,30 +13373,30 @@ export {
   ri as S,
   y6 as T,
   ci as U,
-  G6 as a,
-  q6 as b,
+  W6 as a,
+  X6 as b,
   P2 as c,
-  O6 as d,
+  U6 as d,
   ir as e,
-  X6 as f,
-  Y6 as g,
-  j6 as h,
-  K6 as i,
-  Q6 as j,
-  J6 as k,
-  e4 as l,
-  Z6 as m,
-  t4 as n,
-  P6 as o,
+  Y6 as f,
+  K6 as g,
+  D6 as h,
+  Q6 as i,
+  J6 as j,
+  e4 as k,
+  t4 as l,
+  _6 as m,
+  r4 as n,
+  j6 as o,
   d6 as p,
   g6 as q,
   C6 as r,
-  o4 as s,
-  r4 as t,
-  U6 as u,
-  n4 as v,
+  n4 as s,
+  o4 as t,
+  z6 as u,
+  s4 as v,
   E6 as w,
-  s4 as x,
-  D6 as y,
-  z6 as z
+  i4 as x,
+  Z6 as y,
+  G6 as z
 };
