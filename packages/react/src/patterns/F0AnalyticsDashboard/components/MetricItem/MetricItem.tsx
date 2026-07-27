@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 
 import type {
   FiltersDefinition,
@@ -8,7 +8,7 @@ import type {
 import { F0Icon } from "@/components/F0Icon"
 import { ArrowUp, ArrowDown } from "@/icons/app"
 import { useContainerSize } from "@/kits/F0DataChart/utils/useContainerSize"
-import { cn } from "@/lib/utils"
+import { cn, focusRing } from "@/lib/utils"
 
 import type {
   DashboardMetricData,
@@ -89,17 +89,38 @@ function computeTrend(
  * hugging the bottom edge. Height is tracked with a `ResizeObserver`, so it
  * reacts to grid resizes and fullscreen toggles.
  */
-function MetricValue({ value, trend }: { value: string; trend?: MetricTrend }) {
+export function MetricValue({
+  value,
+  trend,
+}: {
+  value: string
+  trend?: MetricTrend
+}) {
   const ref = useRef<HTMLDivElement>(null)
-  const { height } = useContainerSize(ref)
+  const { height, width } = useContainerSize(ref)
+  const [isScrollable, setIsScrollable] = useState(false)
   const centered = height > 220
+
+  useLayoutEffect(() => {
+    const element = ref.current
+    setIsScrollable(
+      element !== null &&
+        (element.scrollWidth > element.clientWidth ||
+          element.scrollHeight > element.clientHeight)
+    )
+  }, [height, trend?.direction, trend?.percent, value, width])
 
   return (
     <div
       ref={ref}
+      tabIndex={isScrollable ? 0 : undefined}
       className={cn(
         "flex h-full min-h-0 overflow-auto px-4",
-        centered ? "items-center py-4" : "items-end pb-4"
+        centered ? "items-center py-4" : "items-end pb-4",
+        isScrollable &&
+          focusRing(
+            "rounded-sm focus-visible:ring-inset focus-visible:ring-offset-0"
+          )
       )}
     >
       <div
