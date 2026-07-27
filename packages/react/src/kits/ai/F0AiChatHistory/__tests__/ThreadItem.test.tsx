@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest"
 
+import Graph from "@/icons/app/Graph"
+
 import { screen, zeroRender } from "@/testing/test-utils"
 
 import { type ChatThread } from "../useChatHistory"
@@ -19,6 +21,40 @@ const handlers = {
   onUnpin: vi.fn(),
   onDelete: vi.fn(),
 }
+
+describe("ThreadItem mode adornments", () => {
+  it("renders an icon before the title and a trailing label when provided", () => {
+    zeroRender(
+      <ThreadItem
+        thread={{ ...thread, icon: Graph, trailingLabel: "Analytics" }}
+        isPinned={false}
+        {...handlers}
+      />
+    )
+
+    const title = screen.getByText("Alpha")
+    const label = screen.getByText("Analytics")
+    const icon = title.closest("[role=button]")?.querySelector("svg")
+    expect(icon).not.toBeNull()
+    expect(label).toBeInTheDocument()
+    expect(
+      (icon as Element).compareDocumentPosition(title) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy()
+  })
+
+  it("renders neither adornment by default", () => {
+    zeroRender(<ThreadItem thread={thread} isPinned={false} {...handlers} />)
+
+    expect(screen.queryByText("Analytics")).not.toBeInTheDocument()
+    expect(
+      screen
+        .getByText("Alpha")
+        .closest("[role=button]")
+        ?.querySelector("svg[aria-hidden]")
+    ).toBeNull()
+  })
+})
 
 describe("ThreadItem pending state", () => {
   it("renders the actions dropdown trigger when not pending", () => {
