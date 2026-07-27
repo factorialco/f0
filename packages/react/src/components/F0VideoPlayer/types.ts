@@ -71,6 +71,14 @@ export interface F0VideoPlayerProps extends DataAttributes {
    * embedded in the video file are used instead.
    */
   content?: VideoPlayerContent
+  /**
+   * Keep the controls bar visible during playback instead of auto-hiding it.
+   * By default the controls show while the video is paused and auto-hide while
+   * it plays (revealing on hover or keyboard focus); set this to keep them
+   * visible the whole time. Default `false`.
+   */
+  persistControls?: boolean
+
   /** Start playing on mount. Default `false`. */
   autoPlay?: boolean
   /** Focus the player on mount so keyboard shortcuts work immediately. Default `false`. */

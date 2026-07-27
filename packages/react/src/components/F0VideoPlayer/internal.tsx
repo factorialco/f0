@@ -33,6 +33,7 @@ export function F0VideoPlayerInternal({
   src,
   poster,
   silent = false,
+  persistControls = false,
   content,
   autoPlay = false,
   autoFocus = false,
@@ -254,6 +255,7 @@ export function F0VideoPlayerInternal({
           audioDescriptionAvailable={audioDescription.available}
           audioDescriptionOn={audioDescriptionOn}
           silent={silent}
+          persist={persistControls}
           onTogglePlay={video.togglePlay}
           onToggleMute={video.toggleMute}
           onVolumeChange={video.setVolume}

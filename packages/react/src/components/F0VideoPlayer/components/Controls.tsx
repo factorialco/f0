@@ -34,6 +34,8 @@ export interface ControlsProps {
   audioDescriptionOn: boolean
   /** The video has no audio (declared `silent`) — show a muted, disabled volume cue. */
   silent: boolean
+  /** Keep the controls visible during playback instead of auto-hiding them. */
+  persist: boolean
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
@@ -61,6 +63,7 @@ export function Controls({
   audioDescriptionAvailable,
   audioDescriptionOn,
   silent,
+  persist,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
@@ -87,11 +90,11 @@ export function Controls({
         "[text-shadow:0_1px_2px_rgba(0,0,0,0.55)] [&_svg]:drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]",
         "transition-opacity duration-200 motion-reduce:transition-none",
         // Always visible while paused (a paused video should look controllable,
-        // not like a still image); during playback they auto-hide and reveal on
-        // hover or keyboard focus.
-        isPlaying
-          ? "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-          : "opacity-100"
+        // not like a still image) or when `persist` is set; otherwise they
+        // auto-hide during playback and reveal on hover or keyboard focus.
+        !isPlaying || persist
+          ? "opacity-100"
+          : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
       )}
     >
       <F0Button

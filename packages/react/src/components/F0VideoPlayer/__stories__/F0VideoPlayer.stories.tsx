@@ -45,6 +45,7 @@ const meta = {
     autoFocus: { control: "boolean" },
     restrictForwardSeek: { control: "boolean" },
     silent: { control: "boolean" },
+    persistControls: { control: "boolean" },
     onTrackAction: { action: "trackAction" },
     onMilestone: { action: "milestone" },
     onComplete: { action: "complete" },
