@@ -35,3 +35,7 @@ export const routes: RouteObject[] = [
     handle: { crumb: meta.title },
   },
 ]
+
+// Composer (monorepo) registers by meta + default export; the standalone uses
+// meta + routes and ignores this default. Exporting both keeps it running in both.
+export default ControllingStepPoc
