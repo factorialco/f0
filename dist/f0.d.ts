@@ -6103,13 +6103,6 @@ declare type ExtractVisualizationSettings<T> = T extends {
 } ? S : never;
 
 /**
- * Data attribute stamped on every component wrapped with {@link withDataTestId}.
- * Lets static analysis / tooling identify which F0 component rendered a given
- * DOM node. Always emitted (independent of the test-id platform flag).
- */
-export declare const F0_COMPONENT_NAME_ATTRIBUTE = "data-f0-component-name";
-
-/**
  * @experimental This is an experimental component, use it at your own risk.
  */
 export declare const F0Accordion: WithDataTestIdReturnType_3<ForwardRefExoticComponent<F0AccordionProps & RefAttributes<HTMLDivElement>> & {
@@ -18365,11 +18358,6 @@ export declare type WithDataTestIdPropsOf<T extends default_2.ComponentType<unkn
  *
  * We use a mapped type approach to avoid the pitfalls of React.ComponentType
  * which collapses callback inference.
- *
- * At runtime, every wrapped component also stamps its root DOM node with the
- * `data-f0-component-name` attribute (see {@link F0_COMPONENT_NAME_ATTRIBUTE}),
- * so tooling can statically identify which F0 component rendered a node. This
- * is always applied, independent of the `dataTestId` prop or platform flag.
  */
 export declare type WithDataTestIdReturnType<T extends default_2.ComponentType<any>> = default_2.ForwardRefExoticComponent<default_2.PropsWithoutRef<default_2.ComponentProps<T> & WithDataTestIdProps> & default_2.RefAttributes<T extends default_2.ForwardRefExoticComponent<infer P> ? P extends default_2.RefAttributes<infer R> ? R : unknown : unknown>> & Pick<T, Exclude<keyof T, keyof default_2.ForwardRefExoticComponent<unknown>>>;
 
