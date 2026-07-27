@@ -1,5 +1,6 @@
 import { F0Button } from "@/components/F0Button"
 import { Maximize, Minimize, SolidPause, SolidPlay } from "@/icons/app"
+import { type LanguageOption } from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
@@ -9,6 +10,7 @@ import {
   AudioDescriptionLineIcon,
 } from "./AudioDescriptionToggleIcons"
 import { CaptionsFilledIcon, CaptionsLineIcon } from "./CaptionsToggleIcons"
+import { LanguageMenu } from "./LanguageMenu"
 import { PlaybackRateMenu } from "./PlaybackRateMenu"
 import { Seekbar } from "./Seekbar"
 import { VolumeControl } from "./VolumeControl"
@@ -36,6 +38,11 @@ export interface ControlsProps {
   silent: boolean
   /** Keep the controls visible during playback instead of auto-hiding them. */
   persist: boolean
+  /** Languages offered by the localized content (empty / single = no picker). */
+  languages: LanguageOption[]
+  /** Active content language. */
+  language: string | undefined
+  onLanguageChange: (locale: string) => void
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
@@ -64,6 +71,9 @@ export function Controls({
   audioDescriptionOn,
   silent,
   persist,
+  languages,
+  language,
+  onLanguageChange,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
@@ -162,6 +172,15 @@ export function Controls({
           label={t("videoPlayer.audioDescription")}
           aria-pressed={audioDescriptionOn}
           onClick={onToggleAudioDescription}
+        />
+      )}
+
+      {languages.length > 1 && language && (
+        <LanguageMenu
+          value={language}
+          options={languages}
+          onChange={onLanguageChange}
+          containerRef={containerRef}
         />
       )}
 

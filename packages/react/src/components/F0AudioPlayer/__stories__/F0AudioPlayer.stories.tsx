@@ -154,6 +154,44 @@ export const CardWithContentExpanded: StoryObj<typeof F0AudioPlayerCard> = {
   },
 }
 
+// Localized summary + transcript for the multi-language example.
+const SAMPLE_SUMMARY_ES =
+  "La llamada con IA confirmó que Alex está disponible para turnos de noche y " +
+  "fines de semana, vive en Barajas con un trayecto de menos de 40 minutos y " +
+  "tiene experiencia sólida en logística; solo podría incorporarse en 2 semanas."
+
+const SAMPLE_TRANSCRIPT_ES = Array.from({ length: 8 }, (_, i) =>
+  i % 2 === 0
+    ? "Entrevistador: ¿Cuál es tu disponibilidad para turnos de noche y fines de semana?"
+    : "Alex: Tengo total disponibilidad para turnos de noche y fines de semana."
+).join("\n\n")
+
+/**
+ * Localized content: pass `summary` / `transcription` as per-locale lists and a
+ * language selector appears in the detail panel. One selection drives both tabs;
+ * `defaultLanguage` sets the initial choice.
+ */
+export const CardWithLocalizedContent: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    defaultExpanded: true,
+    defaultLanguage: "en",
+    content: {
+      summary: [
+        { locale: "en", value: SAMPLE_SUMMARY },
+        { locale: "es", value: SAMPLE_SUMMARY_ES },
+      ],
+      transcription: [
+        { locale: "en", value: SAMPLE_TRANSCRIPT },
+        { locale: "es", value: SAMPLE_TRANSCRIPT_ES },
+      ],
+    },
+  },
+}
+
 // Transcription only — no summary. `content.summary` is omitted, so the card
 // shows a single Transcription tab (no Summary tab).
 export const CardWithTranscriptionOnly: StoryObj<typeof F0AudioPlayerCard> = {

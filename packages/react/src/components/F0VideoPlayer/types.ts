@@ -1,7 +1,14 @@
 import { DataAttributes } from "@/global.types"
+import { Localized } from "@/lib/localized"
 
 /**
  * Structured content for the video player.
+ *
+ * Every field accepts either a single value or a localized list
+ * (`[{ locale, label?, value }]`) — pass several languages and a language
+ * selector appears in the controls. A single shared selection drives captions,
+ * descriptions and the described source together (each falls back to its first
+ * entry for languages it doesn't provide). See `F0VideoPlayerProps.defaultLanguage`.
  *
  * `captions` are timed text shown over the video during playback (WCAG 2.1
  * SC 1.2.2, Captions). Pass either a WebVTT resource URL or a raw WebVTT string
@@ -24,28 +31,39 @@ import { DataAttributes } from "@/global.types"
  *   `describedSrc` is absent.
  */
 export interface VideoPlayerContent {
-  /** WebVTT URL, or raw WebVTT content, for captions shown during playback. */
-  captions?: string
+  /**
+   * WebVTT URL, or raw WebVTT content, for captions shown during playback.
+   * Localizable — pass a per-locale list to offer captions in several languages.
+   */
+  captions?: Localized<string>
 
   /**
    * A pre-produced described media source (description mixed into the audio),
    * swapped in when audio description is enabled. Takes precedence over
    * `descriptions`. Should match `src`'s duration so the position carries
-   * across the swap.
+   * across the swap. Localizable.
    */
-  describedSrc?: string
+  describedSrc?: Localized<string>
 
   /**
    * WebVTT URL, or raw WebVTT content, of a `kind="descriptions"` script.
    * Delivered at runtime with extended (pausing) audio description when no
-   * `describedSrc` is provided.
+   * `describedSrc` is provided. Localizable.
    */
-  descriptions?: string
+  descriptions?: Localized<string>
 }
 
 export interface F0VideoPlayerProps extends DataAttributes {
   /** Video source URL. */
   src: string
+
+  /**
+   * Initial language for localized `content` (captions/descriptions/described
+   * source). Matched against the provided locales exactly or by primary subtag;
+   * falls back to the viewer's browser language, then the first provided. Only
+   * relevant when `content` carries more than one language.
+   */
+  defaultLanguage?: string
 
   /**
    * Image URL shown while the video loads and before playback starts (the

@@ -3,6 +3,7 @@ import { ReactNode } from "react"
 import { IconType } from "@/components/F0Icon"
 import { DataAttributes } from "@/global.types"
 import { WithDataTestIdProps } from "@/lib/data-testid"
+import { Localized } from "@/lib/localized"
 
 export const audioPlayerSizes = ["sm", "md"] as const
 export type F0AudioPlayerSize = (typeof audioPlayerSizes)[number]
@@ -40,16 +41,24 @@ export interface AudioPlayerDetailTab {
  * (WCAG 2.1 SC 1.2.1, Audio-only). When you omit `transcription`, the card
  * still tries to derive one from the audio file's own text tracks; if none can
  * be passed or derived, the recording is flagged in the accessibility checks.
+ *
+ * Both fields are localizable — pass a per-locale list
+ * (`[{ locale, label?, value }]`) to offer several languages, and a language
+ * selector appears in the detail panel (a single selection drives both tabs).
  */
 export interface AudioPlayerContent {
-  /** Plain-text summary of the recording, shown in the "Summary" tab. */
-  summary?: string
+  /**
+   * Plain-text summary of the recording, shown in the "Summary" tab.
+   * Localizable.
+   */
+  summary?: Localized<string>
   /**
    * Plain-text transcription of the recording, shown in the "Transcription"
    * tab. Line breaks are preserved. When omitted, the card attempts to derive
    * a transcription from the audio file's embedded/attached text tracks.
+   * Localizable.
    */
-  transcription?: string
+  transcription?: Localized<string>
 }
 
 export interface F0AudioPlayerProps
@@ -180,6 +189,14 @@ export interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
    * deprecated `details` prop when both are set.
    */
   content?: AudioPlayerContent
+
+  /**
+   * Initial language for localized `content` (summary/transcription). Matched
+   * against the provided locales exactly or by primary subtag; falls back to the
+   * viewer's browser language, then the first provided. Only relevant when
+   * `content` carries more than one language.
+   */
+  defaultLanguage?: string
 
   /**
    * Tabbed detail content revealed by a "View detail" toggle in the header

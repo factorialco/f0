@@ -66,6 +66,18 @@ counts as missing, not available.
 
 <Canvas of={Stories.WithCaptions} />
 
+**Localization.** Every `content` field (captions, descriptions, described
+source) accepts either a single value or a per-locale list —
+`captions: [{ locale: "en", value }, { locale: "es", label?, value }]`. When
+more than one language is provided, a language selector appears in the controls;
+a single shared selection drives captions, descriptions and the described source
+together (each falls back to its first entry for languages it doesn't provide).
+`defaultLanguage` sets the initial choice (matched by primary subtag, then the
+viewer's browser language, then the first provided); language names come from
+`Intl.DisplayNames` unless you pass an explicit `label`.
+
+<Canvas of={Stories.WithLocalizedCaptions} />
+
 When the captions live in the video file itself, no `content.captions` is needed
 — the player derives them from the file's own track and shows the same toggle:
 

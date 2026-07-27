@@ -1,7 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { F0Icon } from "@/components/F0Icon"
 import { SolidPlay } from "@/icons/app"
+import {
+  collectLanguages,
+  defaultLocale,
+  resolveLocalized,
+} from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
@@ -35,6 +40,7 @@ export function F0VideoPlayerInternal({
   silent = false,
   persistControls = false,
   content,
+  defaultLanguage,
   autoPlay = false,
   autoFocus = false,
   restrictForwardSeek = false,
@@ -46,17 +52,38 @@ export function F0VideoPlayerInternal({
   const { t } = useI18n()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
+  // Localized content: a single shared language selection drives captions,
+  // descriptions and the described source (each falls back to its first entry).
+  const languages = useMemo(
+    () =>
+      collectLanguages(
+        content?.captions,
+        content?.descriptions,
+        content?.describedSrc
+      ),
+    [content?.captions, content?.descriptions, content?.describedSrc]
+  )
+  const [selectedLocale, setSelectedLocale] = useState(() =>
+    defaultLocale(languages, defaultLanguage)
+  )
+  const activeLocale = languages.some((l) => l.locale === selectedLocale)
+    ? selectedLocale
+    : defaultLocale(languages, defaultLanguage)
+
+  const captionsSrc = resolveLocalized(content?.captions, activeLocale)
+  const descriptionsSrc = resolveLocalized(content?.descriptions, activeLocale)
+  const describedSrc = resolveLocalized(content?.describedSrc, activeLocale)
+
   // While audio description is on, play the described rendition (if provided).
   const [audioDescriptionOn, setAudioDescriptionOn] = useState(false)
-  const describedSrc = content?.describedSrc
   const activeSrc = audioDescriptionOn && describedSrc ? describedSrc : src
 
   const video = useVideoState(activeSrc)
-  const captions = useVideoCaptions(video.videoElement, content?.captions)
+  const captions = useVideoCaptions(video.videoElement, captionsSrc)
   const audioDescription = useAudioDescription(video.videoElement, {
     enabled: audioDescriptionOn,
     describedSrc,
-    descriptions: content?.descriptions,
+    descriptions: descriptionsSrc,
   })
 
   // Toggling the described source reloads the element, so preserve the position
@@ -103,9 +130,7 @@ export function F0VideoPlayerInternal({
   // description path speaks through the browser, independent of the video's
   // audio, so it plays regardless.)
   const noop = useCallback(() => {}, [])
-  const describedSourceAudioActive = Boolean(
-    audioDescriptionOn && content?.describedSrc
-  )
+  const describedSourceAudioActive = Boolean(audioDescriptionOn && describedSrc)
   useEffect(() => {
     const el = video.videoRef.current
     if (silent && el) el.muted = !describedSourceAudioActive
@@ -263,6 +288,9 @@ export function F0VideoPlayerInternal({
           audioDescriptionOn={audioDescriptionOn}
           silent={silent}
           persist={persistControls}
+          languages={languages}
+          language={activeLocale}
+          onLanguageChange={setSelectedLocale}
           onTogglePlay={video.togglePlay}
           onToggleMute={video.toggleMute}
           onVolumeChange={video.setVolume}

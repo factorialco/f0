@@ -506,6 +506,15 @@ translated labels, inside a height-restricted scroll area.
 
 <Canvas of={Stories.CardWithContentExpanded} />
 
+**Localization.** `summary` and `transcription` each accept a single string or a
+per-locale list — `transcription: [{ locale: "en", value }, { locale: "es", label?, value }]`.
+When more than one language is provided, a language selector appears in the
+detail panel and a single selection drives both tabs. `defaultLanguage` sets the
+initial choice (matched by primary subtag, then the viewer's browser language,
+then the first provided).
+
+<Canvas of={Stories.CardWithLocalizedContent} />
+
 `summary` and `transcription` are independent — pass just one to show a single
 tab (here, transcription only):
 

@@ -90,6 +90,41 @@ export const WithCaptions: Story = {
   },
 }
 
+// A short Spanish caption track (raw WebVTT) for the localized example.
+const bigBuckBunnyCaptionsEs = [
+  "WEBVTT",
+  "",
+  "1",
+  "00:00:02.499 --> 00:00:06.416",
+  "[MÚSICA SERENA]",
+  "",
+  "2",
+  "00:00:11.791 --> 00:00:13.958",
+  "[EL ARROYO MURMULLA] [ZUMBIDO DE MOSCA]",
+  "",
+  "3",
+  "00:00:16.166 --> 00:00:17.666",
+  "[PÍO DE PÁJARO]",
+  "",
+].join("\n")
+
+/**
+ * Localized captions: pass a per-locale list and a language selector appears in
+ * the controls. The selection drives all localized content together (here just
+ * captions); `defaultLanguage` sets the initial choice.
+ */
+export const WithLocalizedCaptions: Story = {
+  args: {
+    defaultLanguage: "en",
+    content: {
+      captions: [
+        { locale: "en", value: bigBuckBunnyCaptions },
+        { locale: "es", value: bigBuckBunnyCaptionsEs },
+      ],
+    },
+  },
+}
+
 // Attaches an in-band caption track to the <video> after mount — the shape a
 // browser exposes for captions muxed into the file (no <track> element, no
 // `content` prop). Muxed captions aren't a reliably supported public sample, so

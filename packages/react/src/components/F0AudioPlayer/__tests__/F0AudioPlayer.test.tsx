@@ -337,6 +337,28 @@ describe("F0AudioPlayerCard", () => {
     ).toBeInTheDocument()
   })
 
+  it("offers a language selector for localized content and defaults correctly", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        defaultExpanded
+        defaultLanguage="en"
+        content={{
+          summary: [
+            { locale: "en", value: "English summary" },
+            { locale: "es", value: "Resumen en español" },
+          ],
+        }}
+      />
+    )
+    // Language trigger present; its accessible name is the active language.
+    expect(screen.getByRole("button", { name: /english/i })).toBeInTheDocument()
+    // Default language ("en") content is shown.
+    expect(screen.getByText("English summary")).toBeInTheDocument()
+    expect(screen.queryByText("Resumen en español")).not.toBeInTheDocument()
+  })
+
   it("flags a card with no transcription for the a11y check", () => {
     render(<F0AudioPlayerCard src="test.mp3" title="AI Call" />)
     expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(

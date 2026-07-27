@@ -414,6 +414,43 @@ describe("F0VideoPlayer", () => {
       ).not.toBeInTheDocument()
     })
 
+    it("offers a language selector for localized captions and defaults correctly", () => {
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          defaultLanguage="en"
+          content={{
+            captions: [
+              { locale: "en", value: "https://example.com/en.vtt" },
+              { locale: "es", value: "https://example.com/es.vtt" },
+            ],
+          }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      // Trigger's accessible name is the active language (label-in-name safe).
+      expect(
+        screen.getByRole("button", { name: /english/i })
+      ).toBeInTheDocument()
+      // Default language ("en") is the rendered track.
+      expect(
+        getVideo().querySelector('track[kind="captions"]')
+      ).toHaveAttribute("src", "https://example.com/en.vtt")
+    })
+
+    it("shows no language selector for single-language captions", () => {
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ captions: "https://example.com/only.vtt" }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      expect(
+        screen.queryByRole("button", { name: /english|language/i })
+      ).not.toBeInTheDocument()
+    })
+
     it("marks a silent video as no-audio so captions aren't required", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} silent />)
       expect(region()).toHaveAttribute("data-video-captions", "no-audio")

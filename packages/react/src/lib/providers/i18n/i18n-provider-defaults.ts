@@ -63,6 +63,7 @@ export const defaultTranslations = {
     details: "Recording details",
     summary: "Summary",
     transcription: "Transcription",
+    language: "Language",
   },
   actions: {
     add: "Add",
@@ -919,6 +920,7 @@ export const defaultTranslations = {
     timeProgress: "{{current}} of {{total}}",
     captions: "Captions",
     audioDescription: "Audio description",
+    language: "Language",
   },
 } as const
 

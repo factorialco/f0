@@ -5,11 +5,17 @@ import { forwardRef, useMemo, useState, type CSSProperties } from "react"
 import { F0Button } from "@/components/F0Button"
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
 import { useReducedMotion } from "@/lib/a11y"
+import {
+  collectLanguages,
+  defaultLocale,
+  resolveLocalized,
+} from "@/lib/localized"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollArea } from "@/ui/scrollarea"
 
 import { AudioScrubber } from "./components/AudioScrubber"
+import { LanguageSelect } from "./components/LanguageSelect"
 import { PlaybackMenu } from "./components/PlaybackMenu"
 import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
@@ -34,6 +40,7 @@ const F0AudioPlayerCardBase = forwardRef<
     ariaLabel,
     size = "md",
     content,
+    defaultLanguage,
     details,
     expanded,
     defaultExpanded = false,
@@ -50,9 +57,27 @@ const F0AudioPlayerCardBase = forwardRef<
   // structured `content` prop is absent — `content` always wins.
   const usesLegacyDetails = !content && Boolean(details && details.length > 0)
 
+  // Localized content: a single shared language selection drives both the
+  // summary and the transcription (each falls back to its first entry).
+  const languages = useMemo(
+    () => collectLanguages(content?.summary, content?.transcription),
+    [content?.summary, content?.transcription]
+  )
+  const [selectedLocale, setSelectedLocale] = useState(() =>
+    defaultLocale(languages, defaultLanguage)
+  )
+  const activeLocale = languages.some((l) => l.locale === selectedLocale)
+    ? selectedLocale
+    : defaultLocale(languages, defaultLanguage)
+
+  const summary = resolveLocalized(content?.summary, activeLocale)
+
   // A transcription passed via `content` takes precedence; otherwise try to
   // derive one from the audio file's own text tracks.
-  const passedTranscription = content?.transcription
+  const passedTranscription = resolveLocalized(
+    content?.transcription,
+    activeLocale
+  )
   const derivedTranscription = useDerivedTranscription(
     controller.audioRef,
     controller.currentSrc,
@@ -64,11 +89,11 @@ const F0AudioPlayerCardBase = forwardRef<
   const tabs: AudioPlayerDetailTab[] = useMemo(() => {
     if (usesLegacyDetails) return details ?? []
     const built: AudioPlayerDetailTab[] = []
-    if (content?.summary) {
+    if (summary) {
       built.push({
         value: "summary",
         label: i18n.audioPlayer.summary,
-        content: <p className="whitespace-pre-line">{content.summary}</p>,
+        content: <p className="whitespace-pre-line">{summary}</p>,
       })
     }
     if (transcription) {
@@ -82,7 +107,7 @@ const F0AudioPlayerCardBase = forwardRef<
   }, [
     usesLegacyDetails,
     details,
-    content?.summary,
+    summary,
     transcription,
     i18n.audioPlayer.summary,
     i18n.audioPlayer.transcription,
@@ -222,6 +247,17 @@ const F0AudioPlayerCardBase = forwardRef<
           }}
           className="overflow-hidden"
         >
+          {/* Language picker when the content is provided in several languages;
+              a single selection drives both tabs. */}
+          {languages.length > 1 && activeLocale && (
+            <div className="flex justify-end pb-2.5">
+              <LanguageSelect
+                value={activeLocale}
+                options={languages}
+                onChange={setSelectedLocale}
+              />
+            </div>
+          )}
           {/* One tab has nothing to switch between — show the content alone. */}
           {!singleTab && (
             <F0SegmentedControl
