@@ -88,15 +88,12 @@ const F0AudioPlayerCardBase = forwardRef<
     i18n.audioPlayer.transcription,
   ])
 
-  // Accessibility signal for the Storybook a11y check: an audio-only recording
-  // needs a transcription (WCAG 2.1 SC 1.2.1). "missing" is flagged; a passed
-  // or derived transcription is "available"; legacy `details` content is opaque
-  // (we can't inspect it for a transcript) so it is left unflagged.
-  const transcriptionState = transcription
-    ? "available"
-    : usesLegacyDetails
-      ? "legacy"
-      : "missing"
+  // Accessibility signal for the Storybook a11y check and product audits: an
+  // audio-only recording needs a transcription (WCAG 2.1 SC 1.2.1). A passed or
+  // derived transcription is "available"; anything else is "missing" — including
+  // the deprecated `details` array, whose opaque content we can't confirm as a
+  // transcript (migrate to `content.transcription` to be counted as available).
+  const transcriptionState = transcription ? "available" : "missing"
 
   const hasDetails = tabs.length > 0
   // With a single tab there's nothing to switch between, so the segmented

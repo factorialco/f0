@@ -234,6 +234,10 @@ export const CardWithLegacyDetails: StoryObj<typeof F0AudioPlayerCard> = {
     details: LEGACY_DETAILS,
     defaultExpanded: true,
   },
+  // The deprecated `details` array is opaque, so the card counts as missing a
+  // transcription (flagged by the audio-transcription a11y rule) — migrate to
+  // `content.transcription` to resolve it.
+  parameters: { a11y: { test: "todo" } },
 }
 
 export const Snapshot: Story = {

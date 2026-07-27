@@ -373,13 +373,15 @@ describe("F0AudioPlayerCard", () => {
     )
   })
 
-  it("does not flag opaque legacy details content", () => {
+  it("flags a legacy details card as missing a transcription", () => {
+    // The deprecated `details` array is opaque — we can't confirm a transcript,
+    // so it counts as missing (migrate to `content.transcription`).
     render(
       <F0AudioPlayerCard src="test.mp3" title="AI Call" details={DETAILS} />
     )
     expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(
       "data-audio-transcription",
-      "legacy"
+      "missing"
     )
   })
 })
