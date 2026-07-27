@@ -299,7 +299,7 @@ type GroupSessionRow = {
 type SessionAttendanceRow = {
   id: string
   name: string
-  attendance: "Attended" | "Not attended" | "Pending"
+  attendance: "Attended" | "Not attended" | "Not started"
   completedHours: string
 }
 type GroupParticipantRow = {
@@ -4446,11 +4446,11 @@ function SessionSidepanel({
       ? [{ id: "notes" as const, label: "Notes", onClick: () => onTabChange("notes") }]
       : []),
     { id: "attendance", label: "Attendance", onClick: () => onTabChange("attendance") },
-    { id: "transcript", label: "Transcript", disabled: inFactorial && !isEnded, onClick: () => (inFactorial && !isEnded ? undefined : onTabChange("transcript")) },
+    { id: "transcript", label: "Transcript", onClick: () => onTabChange("transcript") },
   ]
 
   const visibleTab =
-    (activeTab === "transcript" && inFactorial && !isEnded) || (activeTab === "notes" && role !== "instructor")
+    activeTab === "notes" && role !== "instructor"
       ? "details"
       : activeTab
 
@@ -4486,7 +4486,7 @@ function SessionSidepanel({
               {visibleTab === "details" ? <SessionDetailsTab session={session} role={role} isEnded={isEnded} onJoinSession={onJoinSession} /> : null}
               {visibleTab === "notes" ? (inFactorial ? <SessionNotesTab session={session} scope={role} /> : <SessionFactorialOnlyNote feature="notes" />) : null}
               {visibleTab === "attendance" ? <SessionAttendanceTable isEnded={isEnded} /> : null}
-              {visibleTab === "transcript" ? (inFactorial ? <SessionTranscriptTab session={session} /> : <SessionFactorialOnlyNote feature="transcript" />) : null}
+              {visibleTab === "transcript" ? (inFactorial ? <SessionTranscriptTab session={session} isEnded={isEnded} /> : <SessionFactorialOnlyNote feature="transcript" />) : null}
             </F0BoxWithClassName>
           </F0BoxWithClassName>
         </F0Box>
@@ -4884,9 +4884,6 @@ function SessionDetailsTab({ session, role, isEnded, onJoinSession }: { session:
         <F0Box display="grid" columns="2" gap="5xl">
           <SessionJoinField session={session} role={role} disabled={isEnded} isEnded={isEnded} onJoinSession={onJoinSession} />
         </F0Box>
-        {!isEnded && isWaitingInstructor && inFactorial ? (
-          <F0Alert variant="info" title="You can enter to set up 5 minutes before" description="Open the room early to check your camera, mic and notes. The class clock and attendance only start at the scheduled time." />
-        ) : null}
       </F0BoxWithClassName>
       <F0BoxWithClassName display="flex" flexDirection="column" style={{ gap: 24 }}>
         <SessionPlainInfo title="Calendar invite" value="No invites sent" icon={Envelope} />
@@ -5089,6 +5086,14 @@ function RoomSettingsDialog(props: { isOpen: boolean; onClose: () => void }) {
 }
 
 function LiveSessionChatDrawer({ onClose }: { onClose: () => void }) {
+  const [messages, setMessages] = useState<{ author: string; text: string }[]>([])
+  const [draft, setDraft] = useState("")
+  const send = () => {
+    const text = draft.trim()
+    if (!text) return
+    setMessages((prev) => [...prev, { author: "You", text }])
+    setDraft("")
+  }
   return (
     <F0BoxWithClassName background="primary" border="default" borderColor="secondary" borderRadius="xl" display="flex" flexDirection="column" height="full" style={{ overflow: "hidden" }}>
       <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" padding="lg" borderBottom="default" borderColor="secondary">
@@ -5097,14 +5102,35 @@ function LiveSessionChatDrawer({ onClose }: { onClose: () => void }) {
           <F0Icon icon={Cross} size="md" />
         </F0BoxWithClassName>
       </F0Box>
-      <F0Box display="flex" alignItems="center" justifyContent="center" grow padding="lg">
-        <F0Text content="No messages yet" variant="description" />
-      </F0Box>
-      <F0Box display="flex" alignItems="center" gap="sm" padding="md" borderTop="default" borderColor="secondary">
-        <F0BoxWithClassName grow background="secondary" borderRadius="lg" padding="md" style={{ minWidth: 0 }}>
-          <F0Text content="Write a message" variant="description" />
+      {messages.length === 0 ? (
+        <F0Box display="flex" alignItems="center" justifyContent="center" grow padding="lg">
+          <F0Text content="No messages yet" variant="description" />
+        </F0Box>
+      ) : (
+        <F0BoxWithClassName grow display="flex" flexDirection="column" gap="lg" padding="lg" style={{ overflowY: "auto", minHeight: 0 }}>
+          {messages.map((m, idx) => (
+            <F0Box key={idx} display="flex" flexDirection="column" gap="xs">
+              <F0Text content={m.author} variant="label" />
+              <F0BoxWithClassName background="secondary" borderRadius="lg" padding="md" style={{ width: "fit-content", maxWidth: "100%" }}>
+                <F0Text content={m.text} variant="body" />
+              </F0BoxWithClassName>
+            </F0Box>
+          ))}
         </F0BoxWithClassName>
-        <F0Button label="Send" variant="outline" onClick={() => undefined} />
+      )}
+      <F0Box display="flex" alignItems="center" gap="sm" padding="md" borderTop="default" borderColor="secondary">
+        <F0BoxWithClassName grow background="secondary" borderRadius="lg" paddingLeft="md" paddingRight="md" style={{ minWidth: 0 }}>
+          <input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") send() }}
+            placeholder="Write a message"
+            aria-label="Write a message"
+            className="w-full bg-transparent text-f1-foreground placeholder:text-f1-foreground-secondary text-sm outline-none border-0"
+            style={{ height: 40 }}
+          />
+        </F0BoxWithClassName>
+        <F0Button label="Send" variant="outline" onClick={send} />
       </F0Box>
     </F0BoxWithClassName>
   )
@@ -5121,6 +5147,9 @@ function liveParticipantCameraOff(index: number) {
 }
 
 function LiveParticipantRosterRow({ name, team, muted, cameraOff, joined }: { name: string; team: string; muted?: boolean; cameraOff?: boolean; joined: boolean }) {
+  // The instructor's only control over a participant is muting their mic; they
+  // can't turn off someone's camera, so the camera is a status indicator only.
+  const [isMuted, setIsMuted] = useState(!!muted)
   return (
     <F0Box display="flex" alignItems="center" justifyContent="between" gap="md" paddingX="lg" paddingY="sm">
       <F0Box display="flex" alignItems="center" gap="md" style={{ minWidth: 0 }}>
@@ -5132,11 +5161,15 @@ function LiveParticipantRosterRow({ name, team, muted, cameraOff, joined }: { na
       </F0Box>
       {joined ? (
         <F0Box display="flex" alignItems="center" gap="sm">
-          <F0BoxWithClassName display="flex" className={muted ? "text-f1-foreground-secondary" : "text-f1-foreground"}>
-            <F0Icon icon={muted ? MicrophoneNegative : Microphone} size="sm" />
-          </F0BoxWithClassName>
-          <F0BoxWithClassName display="flex" className={cameraOff ? "text-f1-foreground-secondary" : "text-f1-foreground"}>
-            <F0Icon icon={cameraOff ? VideoRecorderNegative : VideoRecorder} size="sm" />
+          <F0ButtonToggle
+            label={["Unmute", "Mute"]}
+            icon={[MicrophoneNegative, Microphone]}
+            selected={!isMuted}
+            onSelectedChange={(value) => setIsMuted(!value)}
+            size="md"
+          />
+          <F0BoxWithClassName className={`flex items-center justify-center ${cameraOff ? "text-f1-foreground-secondary" : "text-f1-foreground"}`} style={{ width: 32, height: 32 }}>
+            <F0Icon icon={cameraOff ? VideoRecorderNegative : VideoRecorder} size="md" />
           </F0BoxWithClassName>
         </F0Box>
       ) : (
@@ -5452,7 +5485,7 @@ function SessionRoomScreen({
         <F0BoxWithClassName display="flex" flexDirection="column" gap="lg" grow style={{ minWidth: 0 }}>
           <F0BoxWithClassName display="grid" gap="md" grow width="full" style={{ minHeight: 0, gridTemplateColumns: `repeat(${grid.columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${grid.rows}, minmax(0, 1fr))` }}>
             {liveParticipants.map((participant, index) => (
-              <LiveParticipantTile key={participant.id} participant={participant} isSpeaking={index === 0} isMuted={index !== 0 && index % 3 !== 0} />
+              <LiveParticipantTile key={participant.id} participant={participant} index={index} isSpeaking={index === 0} isMuted={index !== 0 && index % 3 !== 0} />
             ))}
           </F0BoxWithClassName>
         </F0BoxWithClassName>
@@ -5508,13 +5541,45 @@ function SessionRoomScreen({
   )
 }
 
-function LiveParticipantTile({ participant, isSpeaking, isMuted }: { participant: GroupParticipantRow; isSpeaking: boolean; isMuted: boolean }) {
-  const displayName = isSpeaking ? "Adam Joseph" : participant.name
+// Some attendees have their camera on (a real webcam feed, simulated with a
+// generated portrait — not a real person). The rest show their initials.
+// Ordered to match each participant's name gender (Adam, Calvino, Cristóbal,
+// Noé are men; the rest women). Faces 1,3,9,10 read male; 2,4,5,6,7,8 female.
+const CALL_FACES = [
+  "/faces/face-1.jpg",  // Adam Joseph (m)
+  "/faces/face-2.jpg",  // Emilia Estrada (f)
+  "/faces/face-4.jpg",  // Samantha Suárez (f)
+  "/faces/face-3.jpg",  // Calvino Collins (m)
+  "/faces/face-9.jpg",  // Cristóbal Cárdenas (m)
+  "/faces/face-6.jpg",  // Clara Castillo (f)
+  "/faces/face-7.jpg",  // Margarita Márquez (f)
+  "/faces/face-8.jpg",  // Hellen Howard (f)
+  "/faces/face-5.jpg",  // Susana Stanley (f)
+  "/faces/face-10.jpg", // Noé Navarro (m)
+]
 
-  return <CallParticipantTile displayName={displayName} initials={participantInitials(displayName)} isMuted={isMuted} />
+function LiveParticipantTile({ participant, index, isSpeaking, isMuted }: { participant: GroupParticipantRow; index: number; isSpeaking: boolean; isMuted: boolean }) {
+  const displayName = isSpeaking ? "Adam Joseph" : participant.name
+  const photo = CALL_FACES[index]
+  return <CallParticipantTile displayName={displayName} initials={participantInitials(displayName)} isMuted={isMuted} photo={photo} />
 }
 
-function CallParticipantTile({ displayName, initials, isMuted = false, isCameraOff = false }: { displayName: string; initials: string; isMuted?: boolean; isCameraOff?: boolean }) {
+function CallParticipantTile({ displayName, initials, isMuted = false, isCameraOff = false, photo }: { displayName: string; initials: string; isMuted?: boolean; isCameraOff?: boolean; photo?: string }) {
+  if (photo) {
+    return (
+      <F0BoxWithClassName background="inverse" borderRadius="xl" height="full" overflow="hidden" style={{ position: "relative", minHeight: 0 }}>
+        <img src={photo} alt={displayName} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+        {isMuted ? (
+          <F0BoxWithClassName display="flex" alignItems="center" justifyContent="center" background="primary" border="default" borderColor="secondary" borderRadius="full" padding="sm" style={{ position: "absolute", top: 12, right: 12 }}>
+            <F0Icon icon={MicrophoneNegative} size="sm" />
+          </F0BoxWithClassName>
+        ) : null}
+        <F0BoxWithClassName style={{ position: "absolute", left: 12, bottom: 12, background: "rgba(0,0,0,0.55)", borderRadius: 8, padding: "4px 10px" }}>
+          <F0Text content={displayName} variant="inverse" />
+        </F0BoxWithClassName>
+      </F0BoxWithClassName>
+    )
+  }
   return (
     <F0BoxWithClassName background="inverse" borderRadius="xl" padding="xl" display="flex" flexDirection="column" justifyContent="between" gap="xl" height="full" style={{ minHeight: 0 }}>
       <F0Box display="flex" justifyContent="end" alignItems="center" gap="md" height="8">
@@ -5622,15 +5687,24 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
       ? // Default each status from the session's minimum-attendance threshold
         // (present >= required → Attended). The instructor can override below.
         sessionAttendance.map((row) => ({ ...row, attendance: attendanceFromThreshold(row.completedHours) }))
-      : sessionAttendance.map((row) => ({ ...row, attendance: "Pending" as const, completedHours: `0m/${row.completedHours.split("/")[1] ?? "60m"}` }))
+      : sessionAttendance.map((row) => ({ ...row, attendance: "Not started" as const, completedHours: `0m/${row.completedHours.split("/")[1] ?? "60m"}` }))
   )
   const isModal = variant === "modal"
+  // After a session ends, the definitive attendance (and transcript) take a
+  // moment to compute. On landing on the Attendance tab we show a "gathering
+  // data" notice, then reveal the table once it's ready.
+  const [preparing, setPreparing] = useState(isEnded && variant === "tab")
+  useEffect(() => {
+    if (!preparing) return
+    const timer = setTimeout(() => setPreparing(false), 5000)
+    return () => clearTimeout(timer)
+  }, [preparing])
   const attendanceFilterOptions = isEnded
     ? [
         { value: "Attended", label: "Attended" },
         { value: "Not attended", label: "Not attended" },
       ]
-    : [{ value: "Pending", label: "Pending" }]
+    : [{ value: "Not started", label: "Not started" }]
   const source = useDataCollectionSource<SessionAttendanceRow>(
     {
       search: { enabled: true, sync: true },
@@ -5685,6 +5759,18 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
     [isEnded, rows]
   )
 
+  if (preparing) {
+    return (
+      <F0BoxWithClassName className="ml-4 mt-4 w-[574px]">
+        <F0Alert
+          variant="info"
+          title="We're gathering this session's data"
+          description="Attendance and transcript are still being prepared. They'll appear here automatically in a few minutes."
+        />
+      </F0BoxWithClassName>
+    )
+  }
+
   return (
     <F0BoxWithClassName className={isModal ? "w-full px-6 pb-2" : "ml-4 mt-4 w-[574px]"}>
       <OneDataCollection
@@ -5719,7 +5805,41 @@ function SessionAttendanceTable({ isEnded, variant = "tab" }: { isEnded: boolean
   )
 }
 
-function SessionTranscriptTab({ session }: { session: GroupSessionRow }) {
+function SessionTranscriptTab({ session, isEnded }: { session: GroupSessionRow; isEnded: boolean }) {
+  // Before the session runs there's nothing to show (empty state). Right after
+  // it ends the transcript takes a moment to generate — same "gathering data"
+  // notice as the Attendance tab — then the transcript appears.
+  const [preparing, setPreparing] = useState(isEnded)
+  useEffect(() => {
+    if (!preparing) return
+    const timer = setTimeout(() => setPreparing(false), 5000)
+    return () => clearTimeout(timer)
+  }, [preparing])
+
+  if (!isEnded) {
+    return (
+      <F0BoxWithClassName className="ml-4 mt-4 w-[574px]">
+        <F0Box display="flex" flexDirection="column" alignItems="center" gap="sm" style={{ padding: "48px 24px", textAlign: "center" }}>
+          <F0Icon icon={File} size="lg" />
+          <F0Heading content="No transcript yet" variant="heading" as="h3" />
+          <F0Text content="The transcript is generated automatically once the session has taken place." variant="description" />
+        </F0Box>
+      </F0BoxWithClassName>
+    )
+  }
+
+  if (preparing) {
+    return (
+      <F0BoxWithClassName className="ml-4 mt-4 w-[574px]">
+        <F0Alert
+          variant="info"
+          title="We're gathering this session's data"
+          description="Attendance and transcript are still being prepared. They'll appear here automatically in a few minutes."
+        />
+      </F0BoxWithClassName>
+    )
+  }
+
   return (
     <F0BoxWithClassName className="ml-4 mt-4 w-[574px]" display="flex" flexDirection="column" gap="lg">
       <F0Box display="flex" flexDirection="column" gap="xs">
@@ -7010,7 +7130,7 @@ function attendanceFromThreshold(completedHours: string): "Attended" | "Not atte
 function attendanceStatusValue(status: SessionAttendanceRow["attendance"]) {
   if (status === "Attended") return { label: "Attended", status: "positive" as const }
   if (status === "Not attended") return { label: "Not attended", status: "critical" as const }
-  return { label: "Pending", status: "warning" as const }
+  return { label: "Not started", status: "neutral" as const }
 }
 
 function budgetFinancialStatusValue(budget: BudgetRow) {
