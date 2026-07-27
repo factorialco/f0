@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
-import { format } from "date-fns"
+import { format, parseISO } from "date-fns"
 import { useMemo, useRef, useState } from "react"
 import { action } from "storybook/actions"
 
@@ -1326,6 +1326,140 @@ export const EditableTableWithDateCellMinMax: Story = {
         ]}
         dataAdapter={dataAdapter}
         id="editable-table-date-min-max/v1"
+      />
+    )
+  },
+}
+
+export const EditableTableWithPerRowDateConfig: Story = {
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "`dateConfig` as a per-row function `(item) => ({ minDate, maxDate })`. The End date picker's `minDate` — and therefore the month it opens on, since the picker's default month follows `minDate` — tracks each row's Start date, so an empty/unset End cell opens the calendar on that row's start. The Start date picker's `maxDate` tracks each row's End date. To test: the three rows have different start dates, so opening each End picker opens on a different month; then change a row's Start date and reopen its End picker — it now opens on the new start month, and earlier dates are disabled.",
+      },
+    },
+  },
+  render: () => {
+    type Hire = RecordType & {
+      name: string
+      email: string
+      department: (typeof import("@/mocks").DEPARTMENTS_MOCK)[number]
+      startDate: string
+      endDate: string
+    }
+
+    const initialItems: Hire[] = [
+      {
+        index: 0,
+        id: "hire-1",
+        name: "Ada Lovelace",
+        email: "",
+        department: "Engineering",
+        startDate: "2026-09-01",
+        endDate: "2027-08-31",
+      },
+      {
+        index: 1,
+        id: "hire-2",
+        name: "Alan Turing",
+        email: "",
+        department: "Engineering",
+        startDate: "2026-11-15",
+        endDate: "2027-11-14",
+      },
+      {
+        index: 2,
+        id: "hire-3",
+        name: "Grace Hopper",
+        email: "",
+        department: "Engineering",
+        startDate: "2027-02-01",
+        endDate: "2027-12-31",
+      },
+    ]
+
+    const [items, setItems] = useState<Hire[]>(initialItems)
+    const itemsRef = useRef(items)
+    itemsRef.current = items
+
+    const onCellChange = async ({ updatedItem }: { updatedItem: Hire }) => {
+      action("onCellChange")(updatedItem)
+      setItems((prev) =>
+        prev.map((i) => (i.id === updatedItem.id ? updatedItem : i))
+      )
+    }
+
+    const dataAdapter = useMemo(() => {
+      const adapter = createDataAdapter({
+        data: items,
+        paginationType: "pages",
+        perPage: 10,
+      })
+      adapter.fetchData = (fetchOptions: unknown) => {
+        const currentAdapter = createDataAdapter({
+          data: itemsRef.current,
+          paginationType: "pages",
+          perPage: 10,
+        })
+        return currentAdapter.fetchData(fetchOptions as never)
+      }
+      return adapter
+    }, [items])
+
+    const source = useDataCollectionSource<
+      Hire,
+      Record<string, never>,
+      never,
+      never,
+      never,
+      never,
+      never
+    >({
+      dataAdapter,
+    })
+
+    return (
+      <OneDataCollection
+        source={source}
+        visualizations={[
+          {
+            type: "editableTable" as const,
+            options: {
+              columns: [
+                {
+                  label: "Name",
+                  id: "name",
+                  width: 200,
+                  editType: () => "text" as const,
+                  render: (item: Hire) => item.name,
+                },
+                {
+                  label: "Start date (≤ end date)",
+                  id: "startDate",
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  render: (item: Hire) => item.startDate,
+                  dateConfig: (item: Hire) => ({
+                    maxDate: parseISO(item.endDate),
+                  }),
+                },
+                {
+                  label: "End date (opens on start)",
+                  id: "endDate",
+                  editType: () => "date" as const,
+                  inputPlaceholder: "DD/MM/YYYY",
+                  render: (item: Hire) => item.endDate,
+                  dateConfig: (item: Hire) => ({
+                    minDate: parseISO(item.startDate),
+                  }),
+                },
+              ],
+              onCellChange,
+            },
+          },
+        ]}
+        id="editable-table-per-row-date-config/v1"
       />
     )
   },

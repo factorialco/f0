@@ -1,5 +1,13 @@
 # Changelog
 
+## [4.56.0](https://github.com/factorialco/f0/compare/f0-react-v4.55.0...f0-react-v4.56.0) (2026-07-27)
+
+
+### Features
+
+* **EditableTable:** support per-row dateConfig function for date cells ([#4841](https://github.com/factorialco/f0/issues/4841)) ([7712310](https://github.com/factorialco/f0/commit/77123108ddda3b8bb9e6c93a21b18c1ce7248c2f))
+* **F0AiChatHeader:** support header actions ([#4837](https://github.com/factorialco/f0/issues/4837)) ([f8bda8e](https://github.com/factorialco/f0/commit/f8bda8e2476b4d50228ce62cf3951be33e995aec))
+
 ## [4.55.0](https://github.com/factorialco/f0/compare/f0-react-v4.54.0...f0-react-v4.55.0) (2026-07-24)
 
 

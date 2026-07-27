@@ -196,7 +196,6 @@ const preview: Preview = {
             "Release and Versioning",
           ],
           "AI configuration",
-          "Changelog",
           // Foundations
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
