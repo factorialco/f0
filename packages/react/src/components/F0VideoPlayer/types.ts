@@ -48,6 +48,12 @@ export interface F0VideoPlayerProps extends DataAttributes {
   src: string
 
   /**
+   * Image URL shown while the video loads and before playback starts (the
+   * native `<video>` poster). Cleared by the browser once playback begins.
+   */
+  poster?: string
+
+  /**
    * Structured content for the player. Currently carries `captions` (a WebVTT
    * URL or raw WebVTT string) shown over the video during playback and
    * toggled with the "CC" control. When `captions` is omitted, captions

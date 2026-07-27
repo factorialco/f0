@@ -7,6 +7,8 @@ import { bigBuckBunnyCaptions } from "./bigBuckBunnyCaptions"
 // Big Buck Bunny, served locally from `public/` (Storybook's staticDirs) so the
 // stories don't depend on an external host.
 const SAMPLE_SRC = "/Big_Buck_Bunny_alt.webm"
+// Poster frame shown before playback, also served locally.
+const SAMPLE_POSTER = "/video-poster.webp"
 
 /** The player fills its container, so stories give it a sized frame. */
 function Frame({ children }: { children: ReactNode }) {
@@ -36,6 +38,7 @@ const meta = {
   },
   args: {
     src: SAMPLE_SRC,
+    poster: SAMPLE_POSTER,
   },
   argTypes: {
     autoPlay: { control: "boolean" },

@@ -65,6 +65,11 @@ describe("F0VideoPlayer", () => {
       expect(getVideo()).not.toHaveAttribute("controls")
     })
 
+    it("sets the poster when provided", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} poster="poster.webp" />)
+      expect(getVideo()).toHaveAttribute("poster", "poster.webp")
+    })
+
     it("enables autoplay when autoPlay is true", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} autoPlay />)
       expect(getVideo()).toHaveProperty("autoplay", true)

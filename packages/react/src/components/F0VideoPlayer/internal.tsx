@@ -29,6 +29,7 @@ import { F0VideoPlayerProps } from "./types"
  */
 export function F0VideoPlayerInternal({
   src,
+  poster,
   content,
   autoPlay = false,
   autoFocus = false,
@@ -135,6 +136,7 @@ export function F0VideoPlayerInternal({
         onContextMenu={handleContextMenu}
         onClick={video.togglePlay}
         src={activeSrc}
+        poster={poster}
         // Only for a remote caption/description URL — a same-origin blob (raw
         // VTT) needs none, and setting it unconditionally would force the video
         // itself through CORS.
@@ -151,7 +153,9 @@ export function F0VideoPlayerInternal({
           // pseudo-element; other engines keep the default bottom placement.
           "[&::-webkit-media-text-track-container]:![transform:translateY(-3.5rem)]"
         )}
-        style={{ opacity: video.videoLoaded ? 1 : 0 }}
+        // Fade the video in once it loads — but if a poster is set, show it
+        // immediately (otherwise the opacity gate would hide the poster too).
+        style={{ opacity: video.videoLoaded || poster ? 1 : 0 }}
       >
         {captions.trackSrc && (
           <track
