@@ -32,6 +32,8 @@ export interface ControlsProps {
   audioDescriptionAvailable: boolean
   /** Whether audio description is currently on. */
   audioDescriptionOn: boolean
+  /** The video has no audio (declared `silent`) — show a muted, disabled volume cue. */
+  silent: boolean
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
@@ -58,6 +60,7 @@ export function Controls({
   captionsOn,
   audioDescriptionAvailable,
   audioDescriptionOn,
+  silent,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
@@ -82,8 +85,13 @@ export function Controls({
         "rounded-b-[inherit] bg-gradient-to-t from-[#000000f2] via-[#000000b3] to-transparent px-3 py-3",
         // Shadow so the white controls stay legible over light *and* dark frames.
         "[text-shadow:0_1px_2px_rgba(0,0,0,0.55)] [&_svg]:drop-shadow-[0_1px_2px_rgba(0,0,0,0.55)]",
-        "opacity-0 transition-opacity duration-200 motion-reduce:transition-none",
-        "group-hover:opacity-100 group-focus-within:opacity-100"
+        "transition-opacity duration-200 motion-reduce:transition-none",
+        // Always visible while paused (a paused video should look controllable,
+        // not like a still image); during playback they auto-hide and reveal on
+        // hover or keyboard focus.
+        isPlaying
+          ? "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+          : "opacity-100"
       )}
     >
       <F0Button
@@ -112,6 +120,7 @@ export function Controls({
         isMuted={isMuted}
         onToggleMute={onToggleMute}
         onVolumeChange={onVolumeChange}
+        silent={silent}
       />
 
       <PlaybackRateMenu

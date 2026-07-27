@@ -70,6 +70,18 @@ describe("F0VideoPlayer", () => {
       expect(getVideo()).toHaveAttribute("poster", "poster.webp")
     })
 
+    it("shows a center play overlay while paused and hides it during playback", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      expect(
+        document.querySelector("[data-video-play-overlay]")
+      ).toBeInTheDocument()
+
+      fireEvent.play(getVideo())
+      expect(
+        document.querySelector("[data-video-play-overlay]")
+      ).not.toBeInTheDocument()
+    })
+
     it("enables autoplay when autoPlay is true", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} autoPlay />)
       expect(getVideo()).toHaveProperty("autoplay", true)
@@ -399,6 +411,24 @@ describe("F0VideoPlayer", () => {
       fireEvent.loadedData(getVideo())
       expect(
         screen.queryByRole("button", { name: "Captions" })
+      ).not.toBeInTheDocument()
+    })
+
+    it("marks a silent video as no-audio so captions aren't required", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} silent />)
+      expect(region()).toHaveAttribute("data-video-captions", "no-audio")
+    })
+
+    it("force-mutes a silent video and shows a disabled muted volume cue", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} silent />)
+      // Sound is dropped even if the file carries an audio track.
+      expect(getVideo().muted).toBe(true)
+
+      fireEvent.loadedData(getVideo())
+      expect(screen.getByRole("button", { name: "No audio" })).toBeDisabled()
+      // No volume slider to adjust on a silent video.
+      expect(
+        screen.queryByRole("slider", { name: /volume/i })
       ).not.toBeInTheDocument()
     })
   })

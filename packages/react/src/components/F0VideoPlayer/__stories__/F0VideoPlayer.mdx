@@ -10,6 +10,10 @@ seekbar, a custom volume slider, a playback-speed menu, fullscreen, keyboard
 shortcuts and full a11y. Analytics, watch-% milestones and forward-seek
 restriction are built in — enabled with plain props.
 
+While paused, a centered play button and the controls bar are both shown, so a
+still frame or `poster` reads as a video without hovering. During playback the
+controls auto-hide and reveal again on hover or keyboard focus.
+
 ## Anatomy
 
 <Canvas of={Stories.Default} />
@@ -55,7 +59,9 @@ glyph when off) to show/hide them.
 Prerecorded video needs captions to be accessible ([WCAG 2.1 SC 1.2.2](https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html)).
 A player with no captions — neither passed nor embedded — is flagged by the
 `f0-video-captions` rule in the Storybook accessibility checks; stories that
-intentionally omit them are marked `a11y: { test: "todo" }`.
+intentionally omit them are marked `a11y: { test: "todo" }`. Availability is
+load-verified — a caption URL that fails to load or resolves to an empty track
+counts as missing, not available.
 
 <Canvas of={Stories.WithCaptions} />
 
@@ -63,6 +69,27 @@ When the captions live in the video file itself, no `content.captions` is needed
 — the player derives them from the file's own track and shows the same toggle:
 
 <Canvas of={Stories.WithEmbeddedCaptions} />
+
+### Silent (video-only) videos
+
+Some videos have no audio at all — a silent animation, a screen recording, a
+looping background clip. Captions (SC 1.2.2) don't apply to them, so requiring
+captions would be wrong.
+
+Set **`silent`** to declare a video has no audio. Then the player:
+
+- marks `data-video-captions="no-audio"`, so the captions a11y rule doesn't flag
+  it (no caption source needed);
+- drops any sound — the video is force-muted even if its file happens to carry
+  an audio track — and shows a **disabled, muted volume control** as a cue that
+  there's nothing to hear.
+
+Browsers can't reliably detect the absence of audio before playback (Chrome
+doesn't expose it pre-play), so this is declared explicitly rather than sniffed.
+Note a silent clip may still need a text or audio alternative for its visual
+information (SC 1.2.1) — `silent` only removes the _captions_ requirement.
+
+<Canvas of={Stories.SilentVideoOnly} />
 
 ## Audio description
 

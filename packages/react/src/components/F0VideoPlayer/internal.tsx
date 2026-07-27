@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
+import { F0Icon } from "@/components/F0Icon"
+import { SolidPlay } from "@/icons/app"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
@@ -30,6 +32,7 @@ import { F0VideoPlayerProps } from "./types"
 export function F0VideoPlayerInternal({
   src,
   poster,
+  silent = false,
   content,
   autoPlay = false,
   autoFocus = false,
@@ -91,13 +94,22 @@ export function F0VideoPlayerInternal({
     targetRef: wrapperRef,
   })
 
+  // A silent (video-only) clip has no audio to play: force-mute it — even if the
+  // file carries a track — and disable the mute/volume affordances, so the muted
+  // control reads as a cue rather than a broken toggle.
+  const noop = useCallback(() => {}, [])
+  useEffect(() => {
+    const el = video.videoRef.current
+    if (silent && el) el.muted = true
+  }, [silent, video.videoElement, video.videoRef])
+
   const handleKeyDown = useKeyboardShortcuts({
     videoRef: video.videoRef,
     seek,
     togglePlay: video.togglePlay,
-    toggleMute: video.toggleMute,
+    toggleMute: silent ? noop : video.toggleMute,
     toggleFullscreen,
-    setVolume: video.setVolume,
+    setVolume: silent ? noop : video.setVolume,
   })
 
   useEffect(() => {
@@ -122,8 +134,11 @@ export function F0VideoPlayerInternal({
       onKeyDown={handleKeyDown}
       // Accessibility signal for the Storybook a11y check: prerecorded video
       // needs captions (WCAG 2.1 SC 1.2.2). "missing" is flagged when none are
-      // passed via `content.captions` and none are embedded in the file.
-      data-video-captions={captions.available ? "available" : "missing"}
+      // available; "no-audio" exempts a silent (video-only) clip, for which
+      // captions don't apply.
+      data-video-captions={
+        silent ? "no-audio" : captions.available ? "available" : "missing"
+      }
       {...dataAttributes}
     >
       <video
@@ -175,6 +190,27 @@ export function F0VideoPlayerInternal({
         )}
       </video>
 
+      {/* Center play affordance while paused, so a still frame / poster reads
+          as a video without hovering to reveal the controls. Visual only
+          (`aria-hidden`, not focusable): the labelled play control lives in the
+          controls bar and Space toggles playback on the focused region. */}
+      {!video.isPlaying && (
+        <div
+          aria-hidden
+          data-video-play-overlay
+          className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center"
+        >
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={video.togglePlay}
+            className="dark pointer-events-auto flex size-14 items-center justify-center rounded-full bg-[#000000b3] pl-0.5 text-f1-foreground shadow-[0_2px_8px_rgba(0,0,0,0.45)] transition-transform duration-150 hover:scale-105 motion-reduce:transition-none [&_svg]:size-7"
+          >
+            <F0Icon icon={SolidPlay} size="lg" />
+          </button>
+        </div>
+      )}
+
       {/* Description text shown as a caption for deaf/HoH viewers when captions
           are on — the visual counterpart of the spoken audio description. Drawn
           here (top, distinct italic style) since browsers don't render
@@ -217,6 +253,7 @@ export function F0VideoPlayerInternal({
           captionsOn={captions.showing}
           audioDescriptionAvailable={audioDescription.available}
           audioDescriptionOn={audioDescriptionOn}
+          silent={silent}
           onTogglePlay={video.togglePlay}
           onToggleMute={video.toggleMute}
           onVolumeChange={video.setVolume}

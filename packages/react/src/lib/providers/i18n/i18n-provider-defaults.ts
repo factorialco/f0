@@ -909,6 +909,7 @@ export const defaultTranslations = {
     paused: "Paused",
     mute: "Mute",
     unmute: "Unmute",
+    noAudio: "No audio",
     volume: "Volume",
     seekLabel: "Seek",
     enterFullscreen: "Enter fullscreen",

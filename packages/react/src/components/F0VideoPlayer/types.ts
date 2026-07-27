@@ -54,6 +54,17 @@ export interface F0VideoPlayerProps extends DataAttributes {
   poster?: string
 
   /**
+   * Marks the video as having no audio (video-only). Captions (WCAG 2.1
+   * SC 1.2.2) don't apply to silent media, so this exempts the player from the
+   * captions requirement — `data-video-captions` is set to `"no-audio"` instead
+   * of `"missing"`. Note video-only content may still need a text/audio
+   * alternative for its visual information (SC 1.2.1). Browsers can't reliably
+   * detect the absence of audio before playback, so this is declared explicitly.
+   * @default false
+   */
+  silent?: boolean
+
+  /**
    * Structured content for the player. Currently carries `captions` (a WebVTT
    * URL or raw WebVTT string) shown over the video during playback and
    * toggled with the "CC" control. When `captions` is omitted, captions

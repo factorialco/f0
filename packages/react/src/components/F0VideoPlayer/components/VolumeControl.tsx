@@ -12,6 +12,11 @@ export interface VolumeControlProps {
   isMuted: boolean
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
+  /**
+   * The video has no audio (declared `silent`). Shows a disabled muted icon
+   * instead of the volume control — a cue that there's nothing to hear.
+   */
+  silent?: boolean
 }
 
 /** Picks the volume icon by range: muted (0), mid (1–50%), high (51–100%). */
@@ -26,9 +31,25 @@ export function VolumeControl({
   isMuted,
   onToggleMute,
   onVolumeChange,
+  silent = false,
 }: VolumeControlProps) {
   const { t } = useI18n()
   const muted = isMuted || volume === 0
+
+  // Silent (video-only): no volume to control — show a disabled muted icon as a
+  // cue that the clip has no sound.
+  if (silent) {
+    return (
+      <F0Button
+        variant="ghost"
+        size="sm"
+        hideLabel
+        disabled
+        icon={VolumeMuted}
+        label={t("videoPlayer.noAudio")}
+      />
+    )
+  }
 
   return (
     <div className="flex items-center gap-1">

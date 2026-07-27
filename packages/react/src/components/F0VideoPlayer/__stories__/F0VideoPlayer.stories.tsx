@@ -44,6 +44,7 @@ const meta = {
     autoPlay: { control: "boolean" },
     autoFocus: { control: "boolean" },
     restrictForwardSeek: { control: "boolean" },
+    silent: { control: "boolean" },
     onTrackAction: { action: "trackAction" },
     onMilestone: { action: "milestone" },
     onComplete: { action: "complete" },
@@ -201,4 +202,16 @@ export const LMSConfiguration: Story = {
   },
   // No captions — flagged by the video-captions a11y rule.
   parameters: { a11y: { test: "todo" } },
+}
+
+/**
+ * A silent (video-only) clip. `silent` marks it as having no audio, so captions
+ * don't apply (WCAG 1.2.2) — `data-video-captions` reads `"no-audio"` and the
+ * captions a11y rule doesn't flag it, without any caption source. (The sample
+ * has audio; `silent` is set here only to illustrate the exemption.)
+ */
+export const SilentVideoOnly: Story = {
+  args: {
+    silent: true,
+  },
 }
