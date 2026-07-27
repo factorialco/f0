@@ -328,10 +328,31 @@ describe("F0VideoPlayer", () => {
 
     it("marks the video available and renders a track when captions are passed", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      // Optimistic while the track is still loading.
       expect(region()).toHaveAttribute("data-video-captions", "available")
       const track = getVideo().querySelector("track")
       expect(track).toHaveAttribute("src", CAPS_URL)
       expect(track).toHaveAttribute("kind", "captions")
+    })
+
+    it("downgrades to missing when the caption track fails to load", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      const track = getVideo().querySelector('track[kind="captions"]')!
+      // A 404 / CORS failure must not read as available.
+      fireEvent.error(track)
+      expect(region()).toHaveAttribute("data-video-captions", "missing")
+    })
+
+    it("downgrades to missing when the caption track loads with no cues", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      const track = getVideo().querySelector('track[kind="captions"]')!
+      // Loaded, but the file was empty (zero cues) → not usable captions.
+      Object.defineProperty(track, "readyState", {
+        value: 2,
+        configurable: true,
+      })
+      fireEvent.load(track)
+      expect(region()).toHaveAttribute("data-video-captions", "missing")
     })
 
     it("sets crossOrigin for a remote caption URL but not for raw VTT", () => {
