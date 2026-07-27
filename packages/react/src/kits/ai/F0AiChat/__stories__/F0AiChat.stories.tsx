@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from "@storybook/react-vite"
 import { useEffect, useState } from "react"
-import { expect, userEvent, within } from "storybook/test"
+import { expect, userEvent, waitFor, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { ChartVerticalBars, Pencil, Search } from "@/icons/app"
@@ -109,7 +109,7 @@ const AiChatWrapper = ({ children }: { children: React.ReactElement }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return <div className="flex h-[700px] flex-1">{children}</div>
+  return <div className="flex h-[700px] w-[480px]">{children}</div>
 }
 
 const meta = {
@@ -230,12 +230,28 @@ const ChatWithHostOverlay = () => {
 
 export const WithHostOverlay: Story = {
   render: () => <ChatWithHostOverlay />,
+  play: async ({ canvasElement, step }) => {
+    const canvas = within(canvasElement)
+
+    await step("Show the host overlay inside the chat", async () => {
+      const dialog = canvas.getByRole("dialog", {
+        name: "Discover a new workflow",
+      })
+
+      await expect(dialog).toBeInTheDocument()
+      await waitFor(() => {
+        expect(dialog.getBoundingClientRect().width).toBeGreaterThan(0)
+      })
+    })
+  },
+}
+
+export const HostOverlayDismissal: Story = {
+  tags: ["no-sidebar"],
+  render: () => <ChatWithHostOverlay />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
 
-    await expect(
-      canvas.getByRole("dialog", { name: "Discover a new workflow" })
-    ).toBeInTheDocument()
     await userEvent.click(canvas.getByRole("button", { name: "Dismiss" }))
     await expect(
       canvas.queryByRole("dialog", { name: "Discover a new workflow" })
