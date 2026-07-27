@@ -21,6 +21,19 @@ import {
 
 import { useI18n } from "@/lib/providers/i18n"
 
+import type {
+  F0GraphHandle,
+  F0GraphNodeRenderContext,
+  F0GraphProps,
+} from "../../F0Graph"
+import type {
+  GraphEdge,
+  GraphNode,
+  LayoutDirection,
+  PositionedNode,
+} from "../../types"
+import type { F0GraphNodeTagColumn } from "../F0GraphNode"
+
 import {
   BACKGROUND_DOT_GAP,
   EMPTY_HIGHLIGHTED_NODES,
@@ -39,18 +52,13 @@ import {
   F0GraphZoomContext,
   useF0GraphRenderConfigInternal,
 } from "../../contexts"
-import type {
-  F0GraphHandle,
-  F0GraphNodeRenderContext,
-  F0GraphProps,
-} from "../../F0Graph"
+import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useExpandState } from "../../hooks/useExpandState"
 import { useGraphKeyboard } from "../../hooks/useGraphKeyboard"
 import { useGraphRenderModel } from "../../hooks/useGraphRenderModel"
 import { useGraphViewport } from "../../hooks/useGraphViewport"
-import { useSelectionFocus } from "../../hooks/useSelectionFocus"
-import { useDeferredMerge } from "../../hooks/useDeferredMerge"
 import { useLazyTree } from "../../hooks/useLazyTree"
+import { useSelectionFocus } from "../../hooks/useSelectionFocus"
 import { useTreeBuilder } from "../../hooks/useTreeBuilder"
 import { useViewportDataLoader } from "../../hooks/useViewportDataLoader"
 import { ClickSpark } from "../../internal/ClickSpark"
@@ -59,17 +67,10 @@ import {
   F0GraphExpanderWrapper,
   F0GraphNodeWrapper,
 } from "../../internal/ReactFlowAdapters"
-import type {
-  GraphEdge,
-  GraphNode,
-  LayoutDirection,
-  PositionedNode,
-} from "../../types"
 import { resolveInitialFitViewNodes } from "../../utils"
 import { F0GraphControls } from "../F0GraphControls"
 import { type EdgeVariant, type F0GraphEdgeProps } from "../F0GraphEdge"
 import { F0GraphEdgeBase } from "../F0GraphEdge/F0GraphEdge"
-import type { F0GraphNodeTagColumn } from "../F0GraphNode"
 
 // ─── Custom Edge Wrapper (supports renderEdge override via context) ────────
 interface GraphEdgeData extends Record<string, unknown> {
@@ -165,6 +166,7 @@ export function F0GraphView<T = unknown>(
     nodeWidth: nodeWidthProp,
     nodeHeight: nodeHeightProp,
     canvasActions,
+    canvasFooterActions,
     showControls = false,
     onZoomLevelChange,
     onViewportChange,
@@ -334,6 +336,17 @@ export function F0GraphView<T = unknown>(
     getNodePosition: getNodePositionStable,
   })
 
+  // Windowing only actually drives the render once the first viewport has settled
+  // (before then the mount-time fit needs every node — see the gate on the render
+  // model below). Computed once and reused for BOTH the render model AND React
+  // Flow's own `onlyRenderVisibleElements`: when F0 is windowing it already hands
+  // React Flow just the nodes near the viewport (grown by `nodeWindowPadding`), so
+  // React Flow must render ALL of them. Letting React Flow run its own viewport
+  // culling on top re-drops that padding band — nodes pop in at the viewport edge,
+  // and edges whose (windowed-in) endpoint sits just outside the exact viewport are
+  // dropped entirely, so connecting lines vanish while panning a large/deep tree.
+  const nodeWindowingActive = (enableNodeWindowing ?? false) && viewportReady
+
   // ── Selection + roving-tabindex focus ──
   const {
     selectedNodes,
@@ -405,7 +418,7 @@ export function F0GraphView<T = unknown>(
     hoveredEdgeId,
     // Gate windowing on the first settled viewport so the mount-time `fitView`
     // frames the whole graph before the camera decides which nodes to keep.
-    enableNodeWindowing: (enableNodeWindowing ?? false) && viewportReady,
+    enableNodeWindowing: nodeWindowingActive,
     nodeWindowPadding,
   })
 
@@ -647,6 +660,12 @@ export function F0GraphView<T = unknown>(
                         const dy = e.clientY - start.y
                         if (dx * dx + dy * dy > NODE_CLICK_DISTANCE_SQ) return
                         const target = e.target as HTMLElement | null
+                        // Opt-out affordances inside a node (e.g. the tag row)
+                        // are marked `data-no-node-select`: a pointerup on one
+                        // must not select the node. Checked before the node
+                        // lookup because this fires regardless of any inner
+                        // `onClick` stopPropagation.
+                        if (target?.closest("[data-no-node-select]")) return
                         const nodeEl =
                           target?.closest<HTMLElement>(".react-flow__node")
                         if (!nodeEl) return
@@ -660,7 +679,14 @@ export function F0GraphView<T = unknown>(
                         edges={rfEdges}
                         nodeTypes={nodeTypes}
                         edgeTypes={edgeTypes}
-                        onlyRenderVisibleElements
+                        // With F0 node windowing active, F0 already limits the
+                        // node array to the padded viewport, so React Flow must
+                        // render everything it is handed — a second, tighter
+                        // viewport cull here would drop the padding band and the
+                        // edges crossing the viewport edge (vanishing nodes/lines
+                        // on pan). Keep React Flow's own culling only when F0 is
+                        // NOT windowing (the original large-graph safeguard).
+                        onlyRenderVisibleElements={!nodeWindowingActive}
                         minZoom={minZoom}
                         maxZoom={maxZoom}
                         defaultViewport={{ x: 0, y: 0, zoom: defaultZoom }}
@@ -715,6 +741,15 @@ export function F0GraphView<T = unknown>(
                         data-no-spark
                       >
                         {canvasActions}
+                      </div>
+                    )}
+
+                    {canvasFooterActions && (
+                      <div
+                        className="absolute bottom-6 right-6 z-10 flex flex-col items-end gap-2"
+                        data-no-spark
+                      >
+                        {canvasFooterActions}
                       </div>
                     )}
 

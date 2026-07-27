@@ -1,15 +1,20 @@
-import { type ReactNode, useState } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 
+import { AnimatePresence, motion } from "motion/react"
+
+import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { useChatHighlightedId } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
+import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage, type F0ChatUser } from "../types"
+import { microEnterTransition } from "../utils/chat-motion"
 import { bubbleCornerClass, ChatBubble } from "./ChatBubble"
 import { ChatMessageActions } from "./ChatMessageActions"
 import { ChatMessageAttachments } from "./ChatMessageAttachments"
 import { ChatMessageReactions } from "./ChatMessageReactions"
+import { SendingClock } from "./ChatMessageStatusIcon"
 
 /** One message: bubble (with any reply quote nested inside) + reactions, with a
  * hover ellipsis menu. */
@@ -37,11 +42,25 @@ export const ChatMessageItem = ({
   isLastOfRun?: boolean
 }): ReactNode => {
   const i18n = useI18n()
+  const reducedMotion = useReducedMotion()
   const [actionsOpen, setActionsOpen] = useState(false)
   const { highlightedId } = useChatHighlightedId()
-  const { currentUserId } = useF0Chat()
+  // Stable slice — the full runtime context changes on every transport event
+  // and would re-render every mounted row.
+  const { currentUserId } = useF0ChatStable()
   const highlighted = highlightedId === message.id
   const hasReactions = !message.deleted && (message.reactions?.length ?? 0) > 0
+  // Whether the row MOUNTED with its reactions already there (history, or a
+  // reacted message scrolled back into the virtual window): render them in
+  // place. Only reactions changing on an already-visible message animate.
+  const hadReactionsAtMountRef = useRef(hasReactions)
+  // Same gate for the failure alert: only a LIVE sending→failed flip pops it —
+  // an already-failed message scrolled back into view renders it in place.
+  const wasFailedAtMountRef = useRef(message.status === "failed")
+  useEffect(() => {
+    // After the first commit, any (re)appearance of the row is a live change.
+    hadReactionsAtMountRef.current = false
+  }, [])
   const hasAttachments =
     !message.deleted && (message.attachments?.length ?? 0) > 0
   // Attachment-only messages (no caption) skip the empty bubble but still show.
@@ -81,15 +100,16 @@ export const ChatMessageItem = ({
                 bubble), so it reads even on image-only / multi-part messages. */}
             <div
               className={cn(
-                // `transition-shadow` is always on so the jump-to highlight ring
-                // fades in/out instead of snapping when `highlighted` toggles.
-                // `min-w-0` lets this flex item shrink below its content's
-                // intrinsic width so the reply quote's single line truncates
-                // instead of forcing the bubble wider than the column.
-                "flex min-w-0 max-w-full flex-col gap-1 transition-shadow duration-200",
                 // Match the bubble's chained corners so the highlight ring and
                 // hover surface follow its exact shape (not a fixed 2xl box).
                 bubbleCornerClass(isMine, isFirstOfRun, isLastOfRun),
+                // Shadow AND radius transition together (single property list —
+                // tailwind-merge would otherwise drop one): the jump-to ring
+                // fades instead of snapping, and a run extending animates the
+                // tail corner. `min-w-0` lets this flex item shrink below its
+                // content's intrinsic width so the reply quote's single line
+                // truncates instead of forcing the bubble wider than the column.
+                "flex min-w-0 max-w-full flex-col gap-1 transition-[box-shadow,border-radius] duration-200",
                 isMine ? "items-end" : "items-start",
                 // `ring-offset-f1-background` colours the offset gap with the
                 // transcript surface — without it the gap defaults to white and
@@ -102,7 +122,12 @@ export const ChatMessageItem = ({
               )}
             >
               {hasAttachments && (
-                <ChatMessageAttachments message={message} isMine={isMine} />
+                <ChatMessageAttachments
+                  message={message}
+                  isMine={isMine}
+                  isFirstOfRun={isFirstOfRun}
+                  isLastOfRun={isLastOfRun}
+                />
               )}
               {hasBubble && (
                 <ChatBubble
@@ -110,7 +135,11 @@ export const ChatMessageItem = ({
                   isMine={isMine}
                   author={author}
                   currentUserId={currentUserId}
-                  isFirstOfRun={isFirstOfRun}
+                  // Media above the caption counts as "continuing" for corners:
+                  // the bubble tucks its tail-side top so attachment + caption
+                  // read as one chained stack (the nested reply quote / link
+                  // preview mirror the same corner).
+                  isFirstOfRun={isFirstOfRun && !hasAttachments}
                   isLastOfRun={isLastOfRun}
                 />
               )}
@@ -123,34 +152,88 @@ export const ChatMessageItem = ({
                 </span>
               )}
             </div>
-            {/* Deleted tombstones have nothing to act on. The menu stays visible
-                while open (not just on hover) so the ellipsis doesn't flicker. */}
-            {!message.deleted && (
+            {/* Sending indicator for own messages, in the slot next to the
+                bubble (the row is flex-row-reverse for mine, so it reads to
+                the bubble's left). Adding/removing it never shifts the bubble
+                (right-anchored) nor the row height — stable measurements for
+                the virtualizer. */}
+            {isMine && message.status === "sending" && (
+              <SendingClock sentAt={message.createdAt} />
+            )}
+            {/* Deleted tombstones have nothing to act on, and an in-flight
+                (sending) message can't be acted on yet either — only the clock
+                shows until it settles. The menu stays visible while open (not
+                just on hover) so the ellipsis doesn't flicker. A FAILED message
+                swaps the hover ellipsis for an always-visible critical alert
+                (same popover, reduced to Retry / Delete). */}
+            {!message.deleted && message.status !== "sending" && (
               <div
                 className={cn(
-                  "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
+                  message.status === "failed"
+                    ? "opacity-100"
+                    : "opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100",
                   actionsOpen && "opacity-100"
                 )}
               >
-                <ChatMessageActions
-                  message={message}
-                  isMine={isMine}
-                  open={actionsOpen}
-                  onOpenChange={setActionsOpen}
-                />
+                {message.status === "failed" ? (
+                  // The alert fades in on a live failure (the branch switch
+                  // remounts it, so `initial` applies) — never on a
+                  // scroll-back of an old failure.
+                  <motion.div
+                    initial={
+                      wasFailedAtMountRef.current || reducedMotion
+                        ? false
+                        : { opacity: 0, scale: 0.9 }
+                    }
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={microEnterTransition}
+                  >
+                    <ChatMessageActions
+                      message={message}
+                      isMine={isMine}
+                      open={actionsOpen}
+                      onOpenChange={setActionsOpen}
+                    />
+                  </motion.div>
+                ) : (
+                  <ChatMessageActions
+                    message={message}
+                    isMine={isMine}
+                    open={actionsOpen}
+                    onOpenChange={setActionsOpen}
+                  />
+                )}
               </div>
             )}
           </div>
         </div>
       )}
-      {hasReactions && (
-        <div className="flex w-full gap-2">
-          {belowGutter}
-          <div className="min-w-0 flex-1">
-            <ChatMessageReactions message={message} isMine={isMine} />
-          </div>
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {hasReactions && (
+          // Reactions grow the row in (height + fade) when the first one lands
+          // on a visible message, and collapse it back out when the last one is
+          // removed — never a pop. The transcript's slide layer absorbs the
+          // shift when pinned at the bottom. Pills/pickers portal their
+          // popovers, so the overflow clip never cuts them.
+          <motion.div
+            key="reactions"
+            className="flex w-full gap-2 overflow-hidden"
+            initial={
+              hadReactionsAtMountRef.current || reducedMotion
+                ? false
+                : { height: 0, opacity: 0 }
+            }
+            animate={{ height: "auto", opacity: 1 }}
+            exit={reducedMotion ? undefined : { height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            {belowGutter}
+            <div className="min-w-0 flex-1">
+              <ChatMessageReactions message={message} isMine={isMine} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

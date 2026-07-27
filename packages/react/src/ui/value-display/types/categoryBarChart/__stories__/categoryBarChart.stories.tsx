@@ -81,7 +81,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with a tooltip on hover/focus. Mirrors the standalone CategoryBarChart kit but sized for table cells.\n\n- **Tooltip**: shown by default per segment (color dot + name + value/percentage). Set `hideTooltip: true` on the value to suppress it.\n- **Clickable cells**: inside OneDataCollection the cell sits in a `pointer-events-none` wrapper with a stretched navigation link. The bar segments re-enable pointer events so the tooltip still opens, while a click on the cell navigates the row.",
+          "Horizontal stacked proportional bar chart cell. Displays category distribution as colored segments with a tooltip on hover/focus. Mirrors the standalone CategoryBarChart kit but sized for table cells.\n\n- **Tooltip**: shown by default per segment (color dot + name + value/percentage). Set `hideTooltip: true` on the value to suppress it.\n- **Loading**: set `loading: true` to render a skeleton with the same height/width as the loaded bar until the data is there, instead of flashing the empty dash.\n- **Clickable cells**: inside OneDataCollection the cell sits in a `pointer-events-none` wrapper with a stretched navigation link. The bar segments re-enable pointer events so the tooltip still opens, while a click on the cell navigates the row.",
       },
     },
   },
@@ -209,11 +209,14 @@ export const InsideClickableTableCell: Story = {
 type DataCollectionArgs = {
   /** When true, wrap each cell in OneTable's clickable mechanics. */
   clickableCells: boolean
+  /** When true, render each cell as a loading skeleton instead of the bar. */
+  loading: boolean
 }
 
 export const DataCollectionExample: StoryObj<DataCollectionArgs> = {
   args: {
     clickableCells: true,
+    loading: true,
   },
   argTypes: {
     clickableCells: {
@@ -221,6 +224,12 @@ export const DataCollectionExample: StoryObj<DataCollectionArgs> = {
       control: "boolean",
       description:
         "Wrap each cell in OneTable's clickable mechanics (pointer-events-none content + stretched navigation link). When off, the cells are plain (no row navigation), which is how the tooltip behaves outside OneDataCollection.",
+    },
+    loading: {
+      name: "Loading",
+      control: "boolean",
+      description:
+        "When on, every cell renders a skeleton (same size as the loaded bar) instead of the chart — this is what the column shows while the row's data is still loading, in place of the empty dash.",
     },
   },
   parameters: {
@@ -245,7 +254,7 @@ const value = {
       },
     },
   },
-  render: ({ clickableCells }) => {
+  render: ({ clickableCells, loading }) => {
     const wrap = (node: React.ReactNode) =>
       clickableCells ? <ClickableTableCell>{node}</ClickableTableCell> : node
     return (
@@ -273,7 +282,7 @@ const value = {
                       label: "Work location",
                       render: () => ({
                         type: "categoryBarChart",
-                        value: { dataPoints: row.dataPoints },
+                        value: { dataPoints: row.dataPoints, loading },
                       }),
                     }}
                   />
@@ -412,6 +421,39 @@ export const Empty: Story = {
         code: `{
   type: "categoryBarChart",
   value: { dataPoints: [] }, // renders a fallback dash
+}`,
+      },
+    },
+  },
+}
+
+export const Loading: Story = {
+  args: {
+    item: mockItem,
+    property: {
+      label: "Work location",
+      render: () => ({
+        type: "categoryBarChart",
+        value: {
+          loading: true,
+          dataPoints: [],
+        },
+      }),
+    },
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "**Loading**: set `loading: true` while the row's data is still loading. The cell renders a skeleton with the exact same height and width as the loaded bar (`h-2 w-full`), so the row doesn't jump and no empty dash flashes before the values arrive.",
+      },
+      source: {
+        code: `{
+  type: "categoryBarChart",
+  value: {
+    loading: true, // skeleton matches the loaded bar size until data is there
+    dataPoints: [],
+  },
 }`,
       },
     },

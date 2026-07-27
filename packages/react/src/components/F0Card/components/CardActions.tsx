@@ -55,9 +55,20 @@ export function CardActions({
     <CardFooter
       className={cn(
         "flex-col gap-2 sm:flex-row sm:justify-between [&>div]:z-[1]",
-        "relative -mx-4 mt-4 border-0 border-t border-solid border-t-f1-border-secondary px-4 pt-4",
-        compact && "pt-3"
+        // Sit above the full-card overlay link (z-1) so the footer never triggers
+        // card navigation — only its own buttons/links act, keeping it a safe
+        // place for actions. The negative margins stretch this region to the
+        // card's edges (over the card padding) so the whole footer band, not just
+        // the area right under the buttons, is excluded from the clickable card.
+        // cursor-auto so the footer band doesn't inherit the card's pointer cursor
+        // (the card root sets it when interactive via onClick) — it isn't clickable
+        // as a card; only its own actions are.
+        "relative z-[2] -mx-4 -mb-4 mt-4 cursor-auto border-0 border-t border-solid border-t-f1-border-secondary px-4 pb-4 pt-4",
+        compact && "-mb-3 pb-3 pt-3"
       )}
+      // Stop clicks in the footer from bubbling to the card root's onClick handler
+      // (used when the card is interactive via onClick instead of a link).
+      onClick={(e) => e.stopPropagation()}
     >
       {secondaryActions && (
         <div className="flex w-full flex-col gap-md sm:flex-row [&_a]:justify-center sm:[&_a]:justify-start [&_button]:w-full sm:[&_button]:w-fit [&_div]:w-full [&_div]:justify-center sm:[&_div]:w-fit">

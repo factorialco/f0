@@ -38,7 +38,7 @@ import { EnhanceErrorBanner } from "@/components/RichText/internal/Error"
 import {
   type RecorderError,
   useAudioRecorder,
-} from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
+} from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { FileList } from "./components/FileList"
 import { Footer } from "./components/Footer"
 import { Head } from "./components/Head"
@@ -50,7 +50,7 @@ import {
   setupContainerObservers,
 } from "./utils/helpers"
 import type { MentionsConfig } from "@/components/RichText/internal"
-import type { TranscribeFn } from "@/sds/ai/F0AiChat/types"
+import type { TranscribeFn } from "@/kits/ai/F0AiChat/types"
 import type {
   enhanceConfig,
   filesConfig,

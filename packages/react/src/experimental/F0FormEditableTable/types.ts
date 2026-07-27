@@ -114,6 +114,12 @@ export type F0FormEditableTableProps<R extends RecordType> = {
    */
   canEditRow?: (item: R, index: number) => boolean
   /**
+   * Controls per-row visibility of the remove button (only relevant when
+   * `onRemoveRow` is provided). Independent of `canEditRow`. Defaults to
+   * showing it on every row.
+   */
+  canRemoveRow?: (item: R, index: number) => boolean
+  /**
    * Custom trailing actions per row. Return the actions to show for the given
    * row; because it's resolved per row, the actions can depend on the row's
    * value (e.g. an "Archive" vs "Unarchive" toggle driven by a hidden column).

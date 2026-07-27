@@ -54,7 +54,7 @@ const ExampleComponent = (props: {
 }
 
 const meta = {
-  title: "Components/Dialog",
+  title: "Dialog",
   component: ExampleComponent,
   parameters: {
     docs: {

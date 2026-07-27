@@ -18,7 +18,11 @@ export function NonEditableCell<R extends RecordType>({
       hintPosition="right"
       cursor="default"
     >
-      <ReadOnlyCellContent editableColumn={editableColumn} item={item} />
+      <ReadOnlyCellContent
+        editableColumn={editableColumn}
+        item={item}
+        showFieldAffordances={false}
+      />
     </BaseCell>
   )
 }

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 
 import { useReplyPreview } from "../hooks/useReplyPreview"
 import { useChatJump } from "../providers/ChatUIProvider"
-import { useF0Chat } from "../providers/F0ChatProvider"
+import { useF0ChatStable } from "../providers/F0ChatProvider"
 import { type F0ChatMessage } from "../types"
 import { senderNameColorClass } from "../utils/sender-color"
 
@@ -31,7 +31,7 @@ export const ReplyQuote = ({
   isFirstOfRun?: boolean
 }): ReactNode => {
   const { jumpToMessage } = useChatJump()
-  const { currentUserId } = useF0Chat()
+  const { currentUserId } = useF0ChatStable()
   const i18n = useI18n()
   const { icon, label, thumbnailUrl } = useReplyPreview(reply)
   // WhatsApp-style: a quote of your own message reads "You" rather than your name.

@@ -8,6 +8,7 @@ import { defineConfig, Plugin } from "vite"
 import dts from "vite-plugin-dts"
 import { libInjectCss } from "vite-plugin-lib-inject-css"
 
+import { componentStatusVitePlugin } from "./scripts/component-status-build.mjs"
 import { buildSyncPlugin } from "./vite/build-sync.plugin"
 
 dotenv.config({
@@ -86,7 +87,11 @@ if (process.env.BUILD_TYPES) {
         // - ../../../components/Charts/* (BarChart, LineChart, PieChart, VerticalBarChart)
         // - ../F0Avatar, ../internal/BaseAvatar, ../Layout, ../Widget
         // - ../../f0 (self-reference that should be ./f0)
-        const dtsFiles = ["f0.d.ts", "experimental.d.ts"]
+        const dtsFiles = [
+          "f0.d.ts",
+          "experimental.d.ts",
+          "component-status.d.ts",
+        ]
         for (const file of dtsFiles) {
           const filePath = resolve(__dirname, `dist/${file}`)
           if (existsSync(filePath)) {
@@ -126,7 +131,12 @@ const alias = {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), libInjectCss(), ...extraPlugins],
+  plugins: [
+    react(),
+    libInjectCss(),
+    componentStatusVitePlugin(),
+    ...extraPlugins,
+  ],
   resolve: {
     alias: {
       ...alias,
@@ -139,6 +149,7 @@ export default defineConfig({
         ["f0"]: resolve(__dirname, "src/f0.ts"),
         ["experimental"]: resolve(__dirname, "src/experimental.ts"),
         ["ai"]: resolve(__dirname, "src/ai.ts"),
+        ["component-status"]: resolve(__dirname, "src/component-status.ts"),
         ["i18n-provider-defaults"]: resolve(
           __dirname,
           "src/lib/providers/i18n/i18n-provider-defaults.ts"

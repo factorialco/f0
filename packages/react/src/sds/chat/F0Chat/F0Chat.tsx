@@ -3,6 +3,7 @@ import { type DragEvent, type ReactNode, useRef, useState } from "react"
 import { ChatComposer } from "./components/ChatComposer"
 import { ChatDropOverlay } from "./components/ChatDropOverlay"
 import { ChatHeader } from "./components/ChatHeader"
+import { ChatDocumentPreview } from "./components/ChatDocumentPreview"
 import { ChatImagePreview } from "./components/ChatImagePreview"
 import { ChatMessagesContainer } from "./components/ChatMessagesContainer"
 import {
@@ -12,6 +13,7 @@ import {
 } from "./components/ChatStates"
 import { ChatUIProvider, useChatDrop } from "./providers/ChatUIProvider"
 import { useF0Chat } from "./providers/F0ChatProvider"
+import { type F0ChatChannel, type F0ChatHeaderAction } from "./types"
 
 export type F0ChatProps = {
   /** Whether the hosting panel is in fullscreen (controls the header toggle icon). */
@@ -20,6 +22,16 @@ export type F0ChatProps = {
   onToggleFullscreen?: () => void
   /** Close the hosting panel. Hidden when omitted. */
   onClose?: () => void
+  /**
+   * Host-provided header actions (pin, mute, edit group…). Search is the only
+   * built-in one. The function form receives the current channel so each
+   * channel offers exactly what the user's PERMISSIONS allow — return `[]`
+   * where they can do nothing but search. For toggles (mute/unmute) rebuild
+   * the array per render with the current label/icon.
+   */
+  headerActions?:
+    | F0ChatHeaderAction[]
+    | ((channel: F0ChatChannel) => F0ChatHeaderAction[])
 }
 
 const isFileDrag = (e: DragEvent) => e.dataTransfer?.types?.includes("Files")
@@ -28,8 +40,9 @@ const ChatShell = ({
   isFullscreen,
   onToggleFullscreen,
   onClose,
+  headerActions,
 }: F0ChatProps): ReactNode => {
-  const { channel, status, messages } = useF0Chat()
+  const { channel, status, messages, capabilities } = useF0Chat()
   const { dropFiles } = useChatDrop()
 
   // Whole-panel drag & drop, just like the AI chat: the overlay covers the
@@ -78,19 +91,32 @@ const ChatShell = ({
         isFullscreen={isFullscreen}
         onToggleFullscreen={onToggleFullscreen}
         onClose={onClose}
+        actions={
+          typeof headerActions === "function"
+            ? headerActions(channel)
+            : headerActions
+        }
       />
       {status === "connecting" ? (
         <ChatConnecting />
       ) : status === "error" ? (
         <ChatError />
-      ) : messages.length === 0 ? (
+      ) : messages.length > 0 ? (
+        // `reconnecting` / `offline` render the transcript exactly like
+        // `ready` — per-message states communicate connectivity, no banner.
+        <ChatMessagesContainer />
+      ) : status === "ready" ? (
         <ChatEmptyState />
       ) : (
-        <ChatMessagesContainer />
+        // reconnecting/offline with nothing loaded yet: can't tell "empty"
+        // from "not loaded" — show the skeleton until the transport settles.
+        <ChatConnecting />
       )}
-      <ChatComposer />
+      {/* A read-only channel (frozen, announcements…) hides the composer. */}
+      {capabilities?.canSend !== false && <ChatComposer />}
       <ChatDropOverlay visible={dragging} />
       <ChatImagePreview />
+      <ChatDocumentPreview />
     </div>
   )
 }

@@ -9,7 +9,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { IconType } from "@/components/F0Icon"
-import { F0AiBanner } from "@/sds/ai/Banners/F0AiBanner"
+import { F0AiBanner } from "@/kits/ai/Banners/F0AiBanner"
 // Import from the sibling modules (not the internal barrel): this file is
 // itself re-exported by the barrel, and evaluating the module-level extension
 // list through the barrel would hit the circular-import TDZ.

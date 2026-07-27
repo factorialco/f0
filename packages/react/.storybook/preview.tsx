@@ -10,16 +10,33 @@ import { INITIAL_VIEWPORTS } from "storybook/viewport"
 import { addons } from "storybook/preview-api"
 
 import "../src/styles.css"
-import { aiTranslations } from "@/sds/ai/F0AiChat/types"
+import { aiTranslations } from "@/kits/ai/F0AiChat/types"
 import { WeekStartDay } from "@/components/OneCalendar/types"
 import { dataCollectionLocalStorageHandler } from "@/lib/providers/datacollection"
 import { F0Provider } from "@/lib/providers/f0"
 import { buildTranslations, defaultTranslations } from "@/lib/providers/i18n"
 import { ThemeProvider } from "@/lib/providers/theme"
 
+import {
+  getAllComponentStatuses,
+  getComponentStatus,
+  getStatusGeneratedAt,
+} from "@/component-status"
+
 import { DocsContainer } from "./DocsContainer.tsx"
 
 MotionGlobalConfig.skipAnimations = isChromatic()
+
+// Public status API — queryable from the Storybook preview console, e.g.
+//   f0ComponentStatus.get("Button")
+//   f0ComponentStatus.get("F0Alert").missing
+if (typeof window !== "undefined") {
+  ;(window as unknown as { f0ComponentStatus: unknown }).f0ComponentStatus = {
+    get: getComponentStatus,
+    getAll: getAllComponentStatuses,
+    generatedAt: getStatusGeneratedAt,
+  }
+}
 
 const channel = addons.getChannel()
 
@@ -160,18 +177,30 @@ const preview: Preview = {
     options: {
       /*
        * Sort stories alphabetically by default, but keep the documented top-level sections
-       * and nested Foundations/CRUD patterns groups in the specific order defined below.
+       * and nested Foundations/CRUD patterns/Lifecycle groups in the specific order defined below.
+       * Inside `Lifecycle/`, the order follows the actual workflow
+       * (contribute → DoD → maturity → review → release).
        */
       storySort: {
         method: "alphabetical",
         order: [
+          // Get started: Introduction (how to consume) → About F0 (the definition) → Using F0
           "Introduction",
-          "How to contribute",
+          "About F0",
+          [
+            "What is F0",
+            "How to contribute",
+            "Where it goes",
+            "Definition of Done",
+            "Components Maturity",
+            "Release and Versioning",
+          ],
           "AI configuration",
+          // Foundations
           "Foundations",
           ["Colors", "Typography", "Spacing", "Borders", "Shadows", "Icons"],
+          // Core
           "Components",
-          ["Primitives", "Inputs"],
           "Patterns",
           [
             "Data collection",
@@ -179,32 +208,18 @@ const preview: Preview = {
               "CRUD patterns",
               ["Overview", "By view", "Create", "Read", "Update", "Delete"],
             ],
+            "App shell",
           ],
-          "Graph",
-          ["F0Graph", "F0GraphNode", "F0GraphEdge", "F0GraphControls"],
+          // Kits
           "Kits",
-          "Layouts",
-          "Library",
-          "Experimental",
-          [
-            "CRUD patterns",
-            [
-              "Overview",
-              "Principles",
-              "Action hierarchy",
-              "Containers",
-              "Create & Update",
-              "Read",
-              "Delete & destructive",
-              "Bulk & async",
-              "Decisions",
-              "Quick reference",
-              "Checklist",
-              "New surfaces",
-            ],
-          ],
-          "Examples",
-          "Internal",
+          ["Charts", "AI", "Chat", "Social"],
+          // Domain specific (was "SDS")
+          "Domain specific",
+          ["Time tracking", "Growth", "Home", "Profile", "Inbox", "Surveys"],
+          // Tail
+          "Resources",
+          "Deprecated",
+          "🔒 Internal",
         ],
       },
     },

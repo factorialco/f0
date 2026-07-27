@@ -71,6 +71,12 @@ import {
 } from "./hooks/useDataColectionStorage/types"
 import { useDataCollectionStorage } from "./hooks/useDataColectionStorage/useDataCollectionStorage"
 import { DataCollectionSource } from "./hooks/useDataCollectionSource"
+import {
+  ESTIMATED_LIST_ROW_HEIGHT,
+  ESTIMATED_ROW_HEIGHT,
+  shouldAutoSizePerPage,
+  useAutoPerPage,
+} from "./hooks/useAutoPerPage"
 import { CustomEmptyStates, useEmptyState } from "./hooks/useEmptyState"
 import { useExportAction } from "./hooks/useExportAction"
 import { useDataCollectionUrlSync } from "./hooks/useDataCollectionUrlSync"
@@ -244,6 +250,11 @@ export type OneDataCollectionProps<
    */
   csvExport?: boolean | { filename?: string }
 
+  /** Hide the dashed "Save view" chip (preset save action). Opt-in for
+   * collections where saving views doesn't apply (e.g. the org-chart graph).
+   * Defaults to `false` — behavior unchanged for every existing consumer. */
+  savingViewsDisabled?: boolean
+
   /** Visualization index rendered on mount, before async storage/URL restore — lets a consumer boot straight into the persisted view and skip the default→restore bounce. Defaults to 0. */
   initialVisualization?: number
 }
@@ -271,6 +282,7 @@ const OneDataCollectionComp = <
   disableUrlParams,
   tmpFullWidth,
   csvExport,
+  savingViewsDisabled,
   initialVisualization = 0,
 }: OneDataCollectionProps<
   R,
@@ -369,19 +381,100 @@ const OneDataCollectionComp = <
     storageKey: id,
   })
 
-  // Patched source with per-viz currentFilters to avoid stale filters during transitions
-  const effectiveSource = useMemo(() => {
-    if (!hasPerVisualizationFilters) return source
-    return {
-      ...source,
-      currentFilters: activeCurrentFilters,
-      setCurrentFilters: activeSetCurrentFilters,
+  /**
+   * Auto page size: `perPage: "auto"` derives the page size from the measured
+   * height of the visualization container. Only meaningful with `fullHeight`,
+   * where the container is height-bounded — otherwise its height would derive
+   * from the content itself (feedback loop), so we fall back to the default.
+   */
+  const vizContainerRef = useRef<HTMLDivElement>(null)
+  // Flips true once the first page of data has rendered, so the auto page size
+  // can measure the real content (see useAutoPerPage). Set from onLoadData.
+  const [firstDataLoaded, setFirstDataLoaded] = useState(false)
+  // Auto page size is on when a page-based full-height collection either asks
+  // for `perPage: "auto"` or leaves `perPage` unset (in a full-height layout an
+  // unspecified page size means "fill the height").
+  const autoPerPageEnabled = shouldAutoSizePerPage(
+    source.dataAdapter,
+    fullHeight
+  )
+  // Explicit `perPage: "auto"` without fullHeight is a misconfiguration worth
+  // warning about; an unset perPage without fullHeight just uses the default.
+  const autoPerPageMisconfigured =
+    "perPage" in source.dataAdapter &&
+    source.dataAdapter.perPage === "auto" &&
+    source.dataAdapter.paginationType === "pages" &&
+    !fullHeight
+  // The auto page size seeds the first page with a per-visualization row-height
+  // estimate, then measures the real content. The estimate must be a LOWER
+  // bound of the real row height so the seed over-fetches (or matches) and the
+  // measurement trims down to what fits — an estimate above the real height
+  // would under-fetch and leave the collection short, since the measurement
+  // only trims, never grows. List rows are a fixed height (no reflow); the
+  // table and editable table depend on their content, so they seed at the
+  // baseline and rely on the measurement to trim.
+  const autoPerPageRowHeight = (() => {
+    switch (visualizations[currentVisualization]?.type) {
+      case "list":
+        return ESTIMATED_LIST_ROW_HEIGHT
+      default:
+        return ESTIMATED_ROW_HEIGHT
     }
+  })()
+  const autoPerPage = useAutoPerPage(vizContainerRef, autoPerPageEnabled, {
+    rowHeight: autoPerPageRowHeight,
+    ready: firstDataLoaded,
+    measureKey: currentVisualization,
+  })
+
+  // Each visualization has its own row layout, so the auto page size is
+  // re-measured when the visualization switches: clear the ready flag so the
+  // measurement waits for the new visualization's first page to load.
+  useEffect(() => {
+    if (autoPerPageEnabled) setFirstDataLoaded(false)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only on visualization change
+  }, [currentVisualization])
+
+  useEffect(() => {
+    if (autoPerPageMisconfigured) {
+      console.warn(
+        '[OneDataCollection] perPage: "auto" requires the fullHeight prop — falling back to the default page size.'
+      )
+    }
+  }, [autoPerPageMisconfigured])
+
+  // Resolve `perPage: "auto"` to the measured page size. Memoized narrowly on
+  // the source adapter and the resolved size so its reference only changes when
+  // one of those changes — otherwise a fresh adapter object on every render of
+  // effectiveSource would retrigger useData's fetch in an infinite loop.
+  const resolvedDataAdapter = useMemo(() => {
+    if (autoPerPageEnabled) {
+      return { ...source.dataAdapter, perPage: autoPerPage }
+    }
+    return source.dataAdapter
+  }, [source.dataAdapter, autoPerPageEnabled, autoPerPage])
+
+  // Patched source with per-viz currentFilters to avoid stale filters during
+  // transitions, and with `perPage: "auto"` resolved to the measured value
+  const effectiveSource = useMemo(() => {
+    let patched = source
+    if (hasPerVisualizationFilters) {
+      patched = {
+        ...patched,
+        currentFilters: activeCurrentFilters,
+        setCurrentFilters: activeSetCurrentFilters,
+      }
+    }
+    if (patched.dataAdapter !== resolvedDataAdapter) {
+      patched = { ...patched, dataAdapter: resolvedDataAdapter }
+    }
+    return patched
   }, [
     source,
     hasPerVisualizationFilters,
     activeCurrentFilters,
     activeSetCurrentFilters,
+    resolvedDataAdapter,
   ])
 
   const defaultSortings = useRef(currentSortings)
@@ -845,6 +938,7 @@ const OneDataCollectionComp = <
 
     setIsInitialLoading(isInitialLoadingFromCallback)
     setTotalItems(totalItems)
+    setFirstDataLoaded(true)
     setEmptyStateType(getEmptyStateType(totalItems, filters, search))
   }
 
@@ -1127,6 +1221,9 @@ const OneDataCollectionComp = <
    * baseline, never offers "Save view" — switching views is too transient.
    */
   const presetActionState = useMemo<"save" | "none">(() => {
+    // Consumer opted out of saving views (e.g. the org-chart graph): never show
+    // the "Save view" chip regardless of how the view diverges from the baseline.
+    if (savingViewsDisabled) return "none"
     // Compares everything except the view mode, so a visualization-only change
     // does not count as a reason to save a new view.
     const sameIgnoringVisualization = (a: ViewSnapshot, b: ViewSnapshot) =>
@@ -1157,7 +1254,13 @@ const OneDataCollectionComp = <
       return "save"
     }
     return "none"
-  }, [selectedPresetId, mergedPresets, capturedState, sessionBaseline])
+  }, [
+    savingViewsDisabled,
+    selectedPresetId,
+    mergedPresets,
+    capturedState,
+    sessionBaseline,
+  ])
 
   const handleSavePreset = useCallback(
     (values: PresetFormValues) => {
@@ -1648,20 +1751,25 @@ const OneDataCollectionComp = <
       )}
       {/* Visualization renderer must be always mounted to react (load data) even if empty state is shown */}
       <div
+        ref={vizContainerRef}
         className={cn(
           emptyState && "hidden",
           fullHeight && "h-full min-h-0 flex-1"
         )}
       >
-        <VisualizationRenderer
-          visualization={visualizations[currentVisualization]}
-          source={effectiveSource}
-          onSelectItems={onSelectItemsLocal}
-          onLoadData={onLoadData}
-          onLoadError={onLoadError}
-          tmpFullWidth={tmpFullWidth}
-          searchSelectionNonce={searchPreview.selectionNonce}
-        />
+        {/* With perPage "auto", defer mounting one frame until the container
+            is measured, so the first fetch already uses the resolved size */}
+        {(!autoPerPageEnabled || autoPerPage !== undefined) && (
+          <VisualizationRenderer
+            visualization={visualizations[currentVisualization]}
+            source={effectiveSource}
+            onSelectItems={onSelectItemsLocal}
+            onLoadData={onLoadData}
+            onLoadError={onLoadError}
+            tmpFullWidth={tmpFullWidth}
+            searchSelectionNonce={searchPreview.selectionNonce}
+          />
+        )}
       </div>
       {emptyState ? (
         <div className="flex flex-1 flex-col items-center justify-center">

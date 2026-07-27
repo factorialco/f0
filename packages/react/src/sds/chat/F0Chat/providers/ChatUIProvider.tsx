@@ -11,7 +11,16 @@ import {
   type ReactNode,
 } from "react"
 
-import { type F0ChatImageAttachment, type F0ChatMessage } from "../types"
+import {
+  isUserMessage,
+  type F0ChatFileAttachment,
+  type F0ChatImageAttachment,
+  type F0ChatMessage,
+} from "../types"
+import {
+  documentPreviewKind,
+  type ChatDocumentKind,
+} from "../utils/attachments"
 import { useF0Chat } from "./F0ChatProvider"
 
 /** Debounce before running a search as the user types. */
@@ -67,6 +76,14 @@ type ChatImagePreviewContextValue = {
   setImagePreviewIndex: (index: number) => void
 }
 
+type ChatDocumentPreviewContextValue = {
+  /** The document being previewed fullscreen, or null when closed. */
+  documentPreview: { file: F0ChatFileAttachment; kind: ChatDocumentKind } | null
+  /** Open the fullscreen viewer on a previewable attachment (no-op otherwise). */
+  openDocumentPreview: (file: F0ChatFileAttachment) => void
+  closeDocumentPreview: () => void
+}
+
 type ChatSearchContextValue = {
   /** Whether the header is in search mode. */
   searchOpen: boolean
@@ -93,6 +110,8 @@ const ChatEditContext = createContext<ChatEditContextValue | null>(null)
 const ChatDropContext = createContext<ChatDropContextValue | null>(null)
 const ChatImagePreviewContext =
   createContext<ChatImagePreviewContextValue | null>(null)
+const ChatDocumentPreviewContext =
+  createContext<ChatDocumentPreviewContextValue | null>(null)
 const ChatSearchContext = createContext<ChatSearchContextValue | null>(null)
 
 /** Ephemeral, presentation-only chat UI state (reply target, jump-to-message, search). */
@@ -115,6 +134,11 @@ export const ChatUIProvider = ({
   const [imagePreview, setImagePreview] = useState<{
     images: F0ChatImageAttachment[]
     index: number
+  } | null>(null)
+
+  const [documentPreview, setDocumentPreview] = useState<{
+    file: F0ChatFileAttachment
+    kind: ChatDocumentKind
   } | null>(null)
 
   const [searchOpen, setSearchOpen] = useState(false)
@@ -171,6 +195,12 @@ export const ChatUIProvider = ({
       setImagePreview((prev) => (prev ? { ...prev, index } : prev)),
     []
   )
+
+  const openDocumentPreview = useCallback((file: F0ChatFileAttachment) => {
+    const kind = documentPreviewKind(file)
+    if (kind) setDocumentPreview({ file, kind })
+  }, [])
+  const closeDocumentPreview = useCallback(() => setDocumentPreview(null), [])
 
   /** Scroll to a message and highlight it; `persist` keeps the ring (search). */
   const scrollAndHighlight = useCallback((id: string, persist: boolean) => {
@@ -250,7 +280,9 @@ export const ChatUIProvider = ({
         apply(
           messagesRef.current
             .filter((m) => {
-              if (m.deleted) return false
+              // System rows aren't searchable content (narrow BEFORE reading
+              // user-message-only fields like `deleted`).
+              if (!isUserMessage(m) || m.deleted) return false
               let lower = cache.get(m)
               if (lower === undefined) {
                 lower = m.body.toLowerCase()
@@ -324,6 +356,10 @@ export const ChatUIProvider = ({
     }),
     [imagePreview, openImagePreview, closeImagePreview, setImagePreviewIndex]
   )
+  const documentPreviewValue = useMemo<ChatDocumentPreviewContextValue>(
+    () => ({ documentPreview, openDocumentPreview, closeDocumentPreview }),
+    [documentPreview, openDocumentPreview, closeDocumentPreview]
+  )
   const searchValue = useMemo<ChatSearchContextValue>(
     () => ({
       searchOpen,
@@ -357,9 +393,13 @@ export const ChatUIProvider = ({
           <ChatEditContext.Provider value={editValue}>
             <ChatDropContext.Provider value={dropValue}>
               <ChatImagePreviewContext.Provider value={imagePreviewValue}>
-                <ChatSearchContext.Provider value={searchValue}>
-                  {children}
-                </ChatSearchContext.Provider>
+                <ChatDocumentPreviewContext.Provider
+                  value={documentPreviewValue}
+                >
+                  <ChatSearchContext.Provider value={searchValue}>
+                    {children}
+                  </ChatSearchContext.Provider>
+                </ChatDocumentPreviewContext.Provider>
               </ChatImagePreviewContext.Provider>
             </ChatDropContext.Provider>
           </ChatEditContext.Provider>
@@ -404,6 +444,11 @@ export const useChatDrop = (): ChatDropContextValue =>
 /** Image lightbox state. Consumed by attachments and the preview overlay. */
 export const useChatImagePreview = (): ChatImagePreviewContextValue =>
   useCtx(ChatImagePreviewContext, "useChatImagePreview")
+
+/** Document fullscreen-viewer state (pdf/sheet/docx/text). Consumed by the
+ * document card and its overlay. */
+export const useChatDocumentPreview = (): ChatDocumentPreviewContextValue =>
+  useCtx(ChatDocumentPreviewContext, "useChatDocumentPreview")
 
 /** In-conversation search state. Consumed by the header and its search bar. */
 export const useChatSearch = (): ChatSearchContextValue =>

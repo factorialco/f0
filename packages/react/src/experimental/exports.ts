@@ -12,9 +12,9 @@ import { ScrollArea as ScrollAreaComponent } from "./Utilities/ScrollArea"
 export * from "./AiPromotionChat/exports"
 export * from "./Actions/exports"
 /**
- * @deprecated Banners has moved to @/sds/ai/Banners. Import from there instead.
+ * @deprecated Banners has moved to @/kits/ai/Banners. Import from there instead.
  */
-export * from "../sds/ai/Banners/exports"
+export * from "../kits/ai/Banners/exports"
 /**
  * @deprecated Charts has moved to @/kits/Charts. Import from there instead.
  */

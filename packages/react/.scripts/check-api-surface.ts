@@ -67,7 +67,7 @@ import consola from "consola"
 import ts from "typescript"
 
 /** Public entry points shipped in `dist/`. */
-export const ENTRIES = ["f0", "experimental", "ai"] as const
+export const ENTRIES = ["f0", "experimental", "ai", "component-status"] as const
 export type Entry = (typeof ENTRIES)[number]
 
 /** How deep to expand object/signature types before treating them as opaque
