@@ -4,9 +4,9 @@ import { ReactNode, useEffect, useRef } from "react"
 import { F0VideoPlayer } from "../F0VideoPlayer"
 import { bigBuckBunnyCaptions } from "./bigBuckBunnyCaptions"
 
-// Big Buck Bunny (H.264 / 16:9), hosted on the Internet Archive.
-const SAMPLE_SRC =
-  "https://dn801203.us.archive.org/0/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
+// Big Buck Bunny, served locally from `public/` (Storybook's staticDirs) so the
+// stories don't depend on an external host.
+const SAMPLE_SRC = "/Big_Buck_Bunny_alt.webm"
 
 /** The player fills its container, so stories give it a sized frame. */
 function Frame({ children }: { children: ReactNode }) {
