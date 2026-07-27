@@ -69,7 +69,7 @@ export const PdfToolbar = ({
       role="toolbar"
       aria-label={pdfViewer.toolbar}
       className={cn(
-        "F0PdfViewer__surface sticky top-0 z-10 flex flex-row items-center justify-between gap-2",
+        "F0PdfViewer__surface flex flex-row items-center justify-between gap-2",
         "px-6 py-4"
       )}
     >

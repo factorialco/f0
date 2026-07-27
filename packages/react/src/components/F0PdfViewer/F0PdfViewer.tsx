@@ -7,6 +7,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -143,6 +144,9 @@ const PdfViewerBase = forwardRef<
   const containerRef = useRef<HTMLDivElement>(null)
   const toolbarRef = useRef<HTMLDivElement>(null)
   const pageElements = useRef<(HTMLElement | null)[]>([])
+  // Previous scale + a guard so the initial page-fit doesn't animate on load.
+  const prevScaleRef = useRef(scale)
+  const zoomAnimationReady = useRef(false)
 
   const totalPages =
     pagesToDisplay.length > 0 ? pagesToDisplay.length : pdf?.numPages
@@ -173,8 +177,9 @@ const PdfViewerBase = forwardRef<
       const element = pageElements.current[destination]
       const container = element?.offsetParent
       if (element && container instanceof HTMLElement) {
-        container.scrollTop =
-          element.offsetTop - (toolbarRef.current?.offsetHeight ?? 0) - 10
+        // The toolbar sits outside the scroll container, so offsetTop is already
+        // measured from the content top, with no toolbar height to subtract.
+        container.scrollTop = element.offsetTop - 10
       }
     },
     [totalPages]
@@ -186,7 +191,8 @@ const PdfViewerBase = forwardRef<
       const container = containerRef.current
       if (!metrics || !container) return
 
-      const toolbarHeight = toolbarRef.current?.offsetHeight ?? 0
+      // container is the scroll region only (the toolbar sits above it), so its
+      // clientHeight already excludes the toolbar.
       const quarterTurned = rotation === 90 || rotation === 270
       const pageWidth = quarterTurned
         ? metrics.originalHeight
@@ -197,8 +203,7 @@ const PdfViewerBase = forwardRef<
       const computed =
         value === "page-width"
           ? (container.clientWidth - PAGE_VIEWPORT_PADDING) / pageWidth
-          : (container.clientHeight - toolbarHeight - PAGE_VIEWPORT_PADDING) /
-            pageHeight
+          : (container.clientHeight - PAGE_VIEWPORT_PADDING) / pageHeight
 
       setScale(computed)
       setSelectedScale(value)
@@ -257,11 +262,8 @@ const PdfViewerBase = forwardRef<
   const onContainerScroll = useCallback((event: BaseSyntheticEvent) => {
     const container = event.target
     if (!(container instanceof HTMLElement)) return
-    const visiblePage = calculateVisiblePage(
-      container,
-      pageElements.current,
-      toolbarRef.current?.offsetHeight ?? 0
-    )
+    // Toolbar is outside the scroll region, so there's no top overlap to offset.
+    const visiblePage = calculateVisiblePage(container, pageElements.current, 0)
     if (visiblePage) setCurrentPage(visiblePage)
   }, [])
 
@@ -320,36 +322,66 @@ const PdfViewerBase = forwardRef<
     return () => container.removeEventListener("click", handleClick, true)
   }, [])
 
+  // Smooth zoom: the page is re-rasterized at the new scale instantly, which
+  // reads as a hard jump. Ease it with a FLIP: the page is already at its new
+  // size in the DOM, so we start it visually at the previous size (an inverse
+  // transform) and let a GPU transform transition settle it back to 1. Runs in a
+  // layout effect so the start frame paints before the browser shows the new size.
+  useLayoutEffect(() => {
+    const previous = prevScaleRef.current
+    prevScaleRef.current = scale
+    // Skip the first change (the initial page-fit) so nothing animates on load.
+    if (!zoomAnimationReady.current) {
+      zoomAnimationReady.current = true
+      return
+    }
+    if (previous <= 0 || scale <= 0 || previous === scale) return
+
+    const ratio = previous / scale
+    pageElements.current.forEach((element) => {
+      if (!element) return
+      element.style.transformOrigin = "top center"
+      element.style.transition = "none"
+      element.style.transform = `scale(${ratio})`
+      // Read layout to commit the start frame before animating to the real size.
+      element.getBoundingClientRect()
+      element.style.transition = "transform 200ms cubic-bezier(0.2, 0, 0, 1)"
+      element.style.transform = "scale(1)"
+    })
+  }, [scale])
+
   return (
     <div
       ref={ref}
       {...rest}
-      className="F0PdfViewer__surface relative flex h-full w-full flex-col overflow-hidden border border-solid border-f1-border-secondary"
+      className="F0PdfViewer__surface relative flex h-full w-full min-w-0 flex-col overflow-hidden border border-solid border-f1-border-secondary"
     >
+      {/* Toolbar lives OUTSIDE the scroll region: zooming the content can add a
+          horizontal scrollbar, but the header must never scroll with it. */}
+      <PdfToolbar
+        toolbarRef={toolbarRef}
+        currentPage={currentPage}
+        totalPages={totalPages}
+        hasDocument={Boolean(pdf?.numPages)}
+        selectedScale={selectedScale}
+        scaleOptions={scaleOptions}
+        onPreviousPage={() => goToPage(currentPage - 2)}
+        onNextPage={() => goToPage(currentPage)}
+        onZoomIn={onZoomIn}
+        onZoomOut={onZoomOut}
+        onScaleChange={onScaleChange}
+        rotatable={rotatable}
+        onRotate={onRotate}
+        onPrint={onPrint}
+        onDownload={onDownload}
+        actions={actions}
+      />
+
       <div
         ref={containerRef}
         onScroll={onContainerScroll}
-        className="F0PdfViewer__surface relative flex h-full flex-col overflow-auto [scrollbar-gutter:stable_both-edges]"
+        className="F0PdfViewer__surface relative flex min-h-0 min-w-0 flex-1 flex-col overflow-auto [scrollbar-gutter:stable_both-edges]"
       >
-        <PdfToolbar
-          toolbarRef={toolbarRef}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          hasDocument={Boolean(pdf?.numPages)}
-          selectedScale={selectedScale}
-          scaleOptions={scaleOptions}
-          onPreviousPage={() => goToPage(currentPage - 2)}
-          onNextPage={() => goToPage(currentPage)}
-          onZoomIn={onZoomIn}
-          onZoomOut={onZoomOut}
-          onScaleChange={onScaleChange}
-          rotatable={rotatable}
-          onRotate={onRotate}
-          onPrint={onPrint}
-          onDownload={onDownload}
-          actions={actions}
-        />
-
         {url && (
           <Document
             file={file}
