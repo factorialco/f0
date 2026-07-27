@@ -99,7 +99,7 @@ function MetricValue({ value, trend }: { value: string; trend?: MetricTrend }) {
       ref={ref}
       className={cn(
         "flex h-full min-h-0 overflow-auto px-4",
-        centered ? "items-center justify-center py-4" : "items-end pb-4"
+        centered ? "items-center py-4" : "items-end pb-4"
       )}
     >
       <div
@@ -107,7 +107,9 @@ function MetricValue({ value, trend }: { value: string; trend?: MetricTrend }) {
           "flex items-baseline gap-3",
           // Nudge up to offset the widget header, so the value reads as
           // optically centered against the whole card rather than the body.
-          centered && "-translate-y-4"
+          // Auto margins center content that fits, but collapse to zero when
+          // it overflows so the beginning remains reachable by scrolling.
+          centered && "mx-auto -translate-y-4"
         )}
       >
         <span className="whitespace-nowrap text-3xl font-semibold leading-none tracking-tight text-f1-foreground">
@@ -116,11 +118,26 @@ function MetricValue({ value, trend }: { value: string; trend?: MetricTrend }) {
         {trend && trend.direction !== "flat" && (
           <div className="flex shrink-0 items-center">
             {trend.direction === "up" ? (
-              <F0Icon icon={ArrowUp} color="positive" size="sm" />
+              <F0Icon
+                icon={ArrowUp}
+                color="positive"
+                size="sm"
+                aria-hidden="true"
+              />
             ) : (
-              <F0Icon icon={ArrowDown} color="critical" size="sm" />
+              <F0Icon
+                icon={ArrowDown}
+                color="critical"
+                size="sm"
+                aria-hidden="true"
+              />
             )}
+            <span className="sr-only">
+              {trend.direction === "up" ? "Increased" : "Decreased"} by{" "}
+              {trend.percent.toFixed(1)}%
+            </span>
             <span
+              aria-hidden="true"
               className={cn(
                 "whitespace-nowrap text-base font-medium",
                 trend.direction === "up"

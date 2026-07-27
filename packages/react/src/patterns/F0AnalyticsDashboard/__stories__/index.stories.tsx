@@ -82,14 +82,82 @@ export const WithExport: Story = {
   ),
 }
 
-export const Snapshot: Story = {
-  parameters: withSnapshot({}),
+const metricHeightItems: DashboardItem<typeof dashboardFilters>[] = [
+  {
+    id: "compact-metric",
+    title: "Compact KPI — 144px",
+    description: "The value stays aligned to the bottom-left.",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 0,
+    itemHeight: 144,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: async () => ({ value: 1_234_567 }),
+  },
+  {
+    id: "tall-metric",
+    title: "Tall KPI — 336px",
+    description: "A positive trend centers once the body exceeds 220px.",
+    type: "metric",
+    colSpan: 4,
+    x: 0,
+    y: 3,
+    itemHeight: 336,
+    format: { type: "currency", currency: "EUR" },
+    fetchData: async () => ({ value: 1_234_567, previousValue: 1_000_000 }),
+  },
+  {
+    id: "tall-decrease",
+    title: "Tall KPI with decrease",
+    description: "Direction remains explicit beyond its icon and color.",
+    type: "metric",
+    colSpan: 4,
+    x: 4,
+    y: 3,
+    itemHeight: 336,
+    format: { type: "percent" },
+    decimals: 1,
+    fetchData: async () => ({ value: 76.5, previousValue: 100 }),
+  },
+  {
+    id: "tall-long-value",
+    title: "Tall KPI with a long value",
+    description: "Overflow starts at the left edge and remains scrollable.",
+    type: "metric",
+    colSpan: 4,
+    x: 8,
+    y: 3,
+    itemHeight: 336,
+    valueFormatter: () => "€123,456,789,012,345,678,901,234,567,890",
+    fetchData: async () => ({ value: 123_456_789 }),
+  },
+]
+
+/** KPI height, trend-direction, and long-value overflow variants. */
+export const MetricHeightVariants: Story = {
   render: () => (
     <F0AnalyticsDashboard
       filters={dashboardFilters}
-      presets={dashboardPresets}
-      items={mixedItems}
+      items={metricHeightItems}
     />
+  ),
+}
+
+export const Snapshot: Story = {
+  parameters: withSnapshot({}),
+  render: () => (
+    <div className="flex flex-col gap-8">
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        presets={dashboardPresets}
+        items={mixedItems}
+      />
+      <F0AnalyticsDashboard
+        filters={dashboardFilters}
+        items={metricHeightItems}
+      />
+    </div>
   ),
 }
 
