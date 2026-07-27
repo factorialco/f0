@@ -148,7 +148,7 @@ const SAMPLE_DESCRIPTIONS = [
 
 /**
  * Audio description alongside captions. `content.descriptions` is a WebVTT
- * `kind="descriptions"` script delivered at runtime: the "AD" control pauses the
+ * `kind="descriptions"` script delivered at runtime: the audio-description toggle pauses the
  * video on each cue and speaks it (extended audio description) via the browser's
  * speech synthesis, then resumes. Captions ("CC") stay independent — both can be
  * on at once.
@@ -164,7 +164,7 @@ export const WithAudioDescriptions: Story = {
 
 /**
  * A pre-produced described audio track. `content.describedSrc` points at a
- * rendition with the description mixed into the audio; the "AD" control swaps to
+ * rendition with the description mixed into the audio; the audio-description toggle swaps to
  * it, preserving position and play state, and captions keep working across the
  * swap.
  *

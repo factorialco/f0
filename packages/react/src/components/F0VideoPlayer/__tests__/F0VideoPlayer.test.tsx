@@ -391,13 +391,12 @@ describe("F0VideoPlayer", () => {
       const track = getVideo().querySelector('track[kind="descriptions"]')
       expect(track).toHaveAttribute("src", DESC_URL)
 
-      const ad = screen.getByRole("button", { name: "AD" })
+      const ad = screen.getByRole("button", { name: "Audio description" })
       expect(ad).toHaveAttribute("aria-pressed", "false")
       await user.click(ad)
-      expect(screen.getByRole("button", { name: "AD" })).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      )
+      expect(
+        screen.getByRole("button", { name: "Audio description" })
+      ).toHaveAttribute("aria-pressed", "true")
     })
 
     it("swaps to the described source when AD is enabled", async () => {
@@ -415,22 +414,23 @@ describe("F0VideoPlayer", () => {
         getVideo().querySelector('track[kind="descriptions"]')
       ).not.toBeInTheDocument()
 
-      await user.click(screen.getByRole("button", { name: "AD" }))
+      await user.click(
+        screen.getByRole("button", { name: "Audio description" })
+      )
       expect(getVideo()).toHaveAttribute("src", DESCRIBED_SRC)
 
       // Controls re-render after the swapped source loads.
       fireEvent.loadedData(getVideo())
-      expect(screen.getByRole("button", { name: "AD" })).toHaveAttribute(
-        "aria-pressed",
-        "true"
-      )
+      expect(
+        screen.getByRole("button", { name: "Audio description" })
+      ).toHaveAttribute("aria-pressed", "true")
     })
 
     it("does not render an AD toggle when no description is available", () => {
       render(<F0VideoPlayer src={VIDEO_SRC} />)
       fireEvent.loadedData(getVideo())
       expect(
-        screen.queryByRole("button", { name: "AD" })
+        screen.queryByRole("button", { name: "Audio description" })
       ).not.toBeInTheDocument()
     })
   })

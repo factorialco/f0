@@ -13,7 +13,8 @@ import { DataAttributes } from "@/global.types"
  *
  * Audio description (WCAG 2.1 SC 1.2.5) conveys on-screen visual information as
  * audio, complementary to captions — both are independent and can be on at
- * once. Provide it in one of two ways, toggled with the "AD" control:
+ * once. Provide it in one of two ways, toggled with the audio-description
+ * control (a filled "AD" badge when on, a line badge when off):
  * - `describedSrc`: a pre-produced media rendition with description mixed into
  *   the audio. Toggling swaps the source, preserving position and play state.
  *   Highest quality; assumed the same length as `src`.

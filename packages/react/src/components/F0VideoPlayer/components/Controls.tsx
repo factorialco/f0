@@ -4,6 +4,10 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 
 import { PlaybackRate, formatTime } from "../utils"
+import {
+  AudioDescriptionFilledIcon,
+  AudioDescriptionLineIcon,
+} from "./AudioDescriptionToggleIcons"
 import { CaptionsFilledIcon, CaptionsLineIcon } from "./CaptionsToggleIcons"
 import { PlaybackRateMenu } from "./PlaybackRateMenu"
 import { Seekbar } from "./Seekbar"
@@ -131,11 +135,18 @@ export function Controls({
       )}
 
       {audioDescriptionAvailable && (
-        // "AD" is the visible label and the accessible name (label-in-name
-        // safe); `aria-pressed` conveys on/off, `outline` boxes the on state.
+        // Filled "AD" badge when on, line badge when off — the same on/off
+        // language as captions, legible over video. `hideLabel` gives the
+        // captions-style tooltip from the label; `aria-pressed` conveys state.
         <F0Button
-          variant={audioDescriptionOn ? "outline" : "ghost"}
+          variant="ghost"
           size="sm"
+          hideLabel
+          icon={
+            audioDescriptionOn
+              ? AudioDescriptionFilledIcon
+              : AudioDescriptionLineIcon
+          }
           label={t("videoPlayer.audioDescription")}
           aria-pressed={audioDescriptionOn}
           onClick={onToggleAudioDescription}
