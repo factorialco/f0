@@ -1,3 +1,4 @@
+import { Component } from "@/lib/component/component"
 import { withDataTestId } from "@/lib/data-testid"
 import { experimentalComponent } from "@/lib/experimental"
 
@@ -21,7 +22,9 @@ export type { AudioPlayerState, AudioPlayerControls } from "./useAudioPlayer"
  */
 export const F0AudioPlayer = experimentalComponent(
   "F0AudioPlayer",
-  withDataTestId(F0AudioPlayerBase)
+  withDataTestId(
+    Component({ name: "F0AudioPlayer", type: "info" }, F0AudioPlayerBase)
+  )
 )
 
 /**
@@ -29,5 +32,10 @@ export const F0AudioPlayer = experimentalComponent(
  */
 export const F0AudioPlayerCard = experimentalComponent(
   "F0AudioPlayerCard",
-  withDataTestId(F0AudioPlayerCardBase)
+  withDataTestId(
+    Component(
+      { name: "F0AudioPlayerCard", type: "info" },
+      F0AudioPlayerCardBase
+    )
+  )
 )

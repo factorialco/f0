@@ -36,6 +36,14 @@ describe("F0AudioPlayer", () => {
     expect(screen.getByRole("button", { name: "Play" })).toBeInTheDocument()
   })
 
+  it("marks the root node with data-f0-component-name", () => {
+    render(<F0AudioPlayer src="test.mp3" />)
+    expect(screen.getByRole("group", { name: "Audio player" })).toHaveAttribute(
+      "data-f0-component-name",
+      "F0AudioPlayer"
+    )
+  })
+
   it("renders the audio element with the given src and preload", () => {
     render(<F0AudioPlayer src="test.mp3" preload="auto" />)
     const audio = getAudio()
