@@ -41,8 +41,9 @@ const CHAT_WIDTH_MIN = 300
 const CHAT_WIDTH_MAX = 712
 
 /** How long a pending panel-content restore may wait for the host before
- * falling back to the AI chat — a host that never resolves (the conversation
- * is gone, or it isn't restore-aware) must not block the panel forever. */
+ * removing the pending hosted view — a host that never resolves (the
+ * conversation is gone, or it isn't restore-aware) must not block the panel
+ * forever. */
 const PANEL_RESTORE_TIMEOUT_MS = 5000
 
 const isPersistableVisualizationMode = (value: VisualizationMode): boolean =>
@@ -135,12 +136,6 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   const [initialMessage, setInitialMessage] = useState<
     string | string[] | undefined
   >(initialInitialMessage)
-
-  useEffect(() => {
-    if (open) {
-      tracking?.onVisibility?.()
-    }
-  }, [open])
 
   const [canvasContent, setCanvasContent] = useState<CanvasContent | null>(null)
 
@@ -271,21 +266,41 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   // Pending restore: the panel reopened (persisted `open`) while hosted
   // content was up on the last session. Until the host re-mounts it (via
   // `setPanelContent`) the panel shows a skeleton instead of flashing the AI
-  // chat. Cleared by the host (restore or cancel), by opening the AI chat
-  // (`clearPanelContent`), by closing the panel, or by the safety timeout.
+  // base panel view. Cleared by the host (restore or cancel), by clearing
+  // hosted content, by closing the panel, or by the safety timeout.
   const [restoringPanelContentId, setRestoringPanelContentId] = useState<
     string | null
   >(() => (open ? persistedPanelContentId : null))
+  const wasAiChatVisibleRef = useRef(false)
+
+  useEffect(() => {
+    const isAiChatVisible =
+      enabledInternal &&
+      open &&
+      panelContent === null &&
+      restoringPanelContentId === null
+    if (isAiChatVisible && !wasAiChatVisibleRef.current) {
+      tracking?.onVisibility?.()
+    }
+    wasAiChatVisibleRef.current = isAiChatVisible
+  }, [enabledInternal, open, panelContent, restoringPanelContentId, tracking])
 
   const setPanelContent = useCallback(
     (content: SidePanelContent | null) => {
       setPanelContentState(content)
       setRestoringPanelContentId(null)
-      if (content && !open) {
-        setOpen(true)
+      if (content) {
+        // Hosted content and the AI canvas use the same frame space. Entering
+        // a hosted view always leaves canvas mode so both can never overlap.
+        setVisualizationMode((current) =>
+          current === "canvas" ? "sidepanel" : current
+        )
+        if (!open) {
+          setOpen(true)
+        }
       }
     },
-    [open, setOpen]
+    [open, setOpen, setVisualizationMode]
   )
   const clearPanelContent = useCallback(() => {
     setPanelContentState(null)
@@ -305,13 +320,13 @@ export const AiChatStateProvider: FC<PropsWithChildren<AiChatState>> = ({
   }, [panelContent, restoringPanelContentId, setPersistedPanelContentId])
 
   // A restore only makes sense while the panel is open; closing it drops the
-  // pending id (the AI chat comes back normally on the next open).
+  // pending id (the base panel view comes back normally on the next open).
   useEffect(() => {
     if (!open) setRestoringPanelContentId(null)
   }, [open])
 
   // Safety net: a host that never resolves the restore must not block the
-  // panel — fall back to the AI chat.
+  // panel — remove the pending hosted view.
   useEffect(() => {
     if (!restoringPanelContentId) return
     const timer = setTimeout(
@@ -485,6 +500,81 @@ const NO_PROVIDER_CONTEXT = new Proxy({} as AiChatProviderReturnValue, {
     return noop
   },
 })
+
+export type ApplicationFrameSidePanelVisualizationMode =
+  | "sidepanel"
+  | "fullscreen"
+
+export type ApplicationFrameSidePanelReturnValue = {
+  /** Whether the shared panel shell is open. */
+  open: boolean
+  /** Open or close the shared panel shell. */
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  /** Layout available to generic hosted content. */
+  visualizationMode: ApplicationFrameSidePanelVisualizationMode
+  /** Switch generic hosted content between docked and fullscreen layouts. */
+  setVisualizationMode: React.Dispatch<
+    React.SetStateAction<ApplicationFrameSidePanelVisualizationMode>
+  >
+  /** Content currently hosted in the panel. */
+  panelContent: SidePanelContent | null
+  /** Mount hosted content and open the panel. */
+  setPanelContent: (content: SidePanelContent | null) => void
+  /** Remove the hosted content without changing the open state. */
+  clearPanelContent: () => void
+  /** Persisted hosted-content id waiting for the host to restore it. */
+  restoringPanelContentId: string | null
+  /** Abandon a pending hosted-content restore. */
+  cancelPanelContentRestore: () => void
+}
+
+/**
+ * Read and control ApplicationFrame's generic side panel.
+ *
+ * Unlike `useAiChat`, this contract contains no AI state and remains available
+ * when ApplicationFrame enables its side panel without enabling the AI chat.
+ */
+export function useApplicationFrameSidePanel(): ApplicationFrameSidePanelReturnValue {
+  const {
+    open,
+    setOpen,
+    visualizationMode,
+    setVisualizationMode,
+    panelContent,
+    setPanelContent,
+    clearPanelContent,
+    restoringPanelContentId,
+    cancelPanelContentRestore,
+  } = useContext(AiChatStateContext) ?? NO_PROVIDER_CONTEXT
+  const sidePanelVisualizationMode =
+    visualizationMode === "fullscreen" ? "fullscreen" : "sidepanel"
+  const setSidePanelVisualizationMode = useCallback<
+    React.Dispatch<
+      React.SetStateAction<ApplicationFrameSidePanelVisualizationMode>
+    >
+  >(
+    (next) => {
+      setVisualizationMode((current) => {
+        const currentSidePanelMode =
+          current === "fullscreen" ? "fullscreen" : "sidepanel"
+        return typeof next === "function" ? next(currentSidePanelMode) : next
+      })
+    },
+    [setVisualizationMode]
+  )
+
+  return {
+    open,
+    setOpen,
+    visualizationMode: sidePanelVisualizationMode,
+    setVisualizationMode: setSidePanelVisualizationMode,
+    panelContent,
+    setPanelContent,
+    clearPanelContent,
+    restoringPanelContentId,
+    cancelPanelContentRestore,
+  }
+}
 
 /**
  * Read the AiChat context. Returns an inert fallback when no provider

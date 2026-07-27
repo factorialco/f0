@@ -169,6 +169,7 @@ const F0AiChatComponent = ({
       <Skeleton
         role="status"
         aria-busy={true}
+        aria-label={translations.navigation.sidePanel.loading}
         className="h-full w-full rounded-none"
       />
     )
@@ -218,6 +219,7 @@ const F0AiChatComponent = ({
           : undefined
       }
       exitStyle={splitPanel && open ? "hold" : "shrink"}
+      withAiFeatures={!panelContent && !restoringPanelContentId}
     >
       {/* Simultaneous crossfade: the outgoing view fades out while the next
           fades in (both briefly mounted, stacked via `absolute inset-0` over the

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useMediaQuery } from "usehooks-ts"
 
 import { cn } from "@/lib/utils"
+import { useReducedMotion } from "@/lib/a11y"
 
 import { DropOverlay } from "../../../F0AiChatTextArea"
 import { F0AiPong } from "../../../F0AiPong"
@@ -18,6 +19,7 @@ export const SidebarWindow = ({
   visible,
   side,
   exitStyle = "shrink",
+  withAiFeatures = true,
 }: {
   children?: ReactNode
   /** Overrides the context `open` as the mount condition — lets the frame
@@ -32,6 +34,8 @@ export const SidebarWindow = ({
    * the panels feel like they were always there.
    */
   exitStyle?: "shrink" | "hold"
+  /** Enable AI-only overlays and file-drop behavior. */
+  withAiFeatures?: boolean
 }) => {
   const {
     open,
@@ -39,8 +43,10 @@ export const SidebarWindow = ({
     shouldPlayEntranceAnimation,
     setShouldPlayEntranceAnimation,
     resizable,
+    chatWidth,
     setChatWidth,
     resetChatWidth,
+    panelSide,
     fileAttachments,
     isClarifying,
     fileDragOver,
@@ -48,9 +54,9 @@ export const SidebarWindow = ({
     processDroppedFiles,
     activeGame,
     closeGame,
-    panelSide,
   } = useAiChat()
-  const isCanvasMode = visualizationMode === "canvas"
+  const shouldReduceMotion = useReducedMotion()
+  const isCanvasMode = withAiFeatures && visualizationMode === "canvas"
   // Hosts dock the whole panel left for a chat-first experience (communications);
   // the default is right. The AI chat follows the panel side too.
   const isLeft = (side ?? panelSide) === "left"
@@ -66,7 +72,8 @@ export const SidebarWindow = ({
   })
 
   const dragCounterRef = useRef(0)
-  const canDrop = fileAttachments?.onUploadFiles != null && !isClarifying
+  const canDrop =
+    withAiFeatures && fileAttachments?.onUploadFiles != null && !isClarifying
 
   const handleDragEnter = useCallback(
     (e: React.DragEvent) => {
@@ -125,11 +132,12 @@ export const SidebarWindow = ({
   )
 
   const wrapperTransition = useMemo(() => {
+    if (shouldReduceMotion) return { duration: 0 }
     if (isResizing) return { duration: 0 }
     if (shouldPlayEntranceAnimation)
       return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
     return { duration: 0.3, ease: [0, 0, 0.1, 1] as const }
-  }, [isResizing, shouldPlayEntranceAnimation])
+  }, [isResizing, shouldPlayEntranceAnimation, shouldReduceMotion])
 
   return (
     <AnimatePresence>
@@ -154,11 +162,13 @@ export const SidebarWindow = ({
             width: "100%",
           }}
           exit={
-            exitStyle === "hold"
-              ? // Swap: stay put while the main content slides over (300ms),
-                // then a blink of fade right before unmounting.
-                { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
-              : { opacity: 0, width: 0 }
+            shouldReduceMotion
+              ? { opacity: 0, transition: { duration: 0 } }
+              : exitStyle === "hold"
+                ? // Swap: stay put while the main content slides over (300ms),
+                  // then a blink of fade right before unmounting.
+                  { opacity: 0, transition: { delay: 0.25, duration: 0.05 } }
+                : { opacity: 0, width: 0 }
           }
           transition={wrapperTransition}
           style={{ transformOrigin: isLeft ? "left center" : "right center" }}
@@ -178,6 +188,9 @@ export const SidebarWindow = ({
               setIsResizing={setIsResizing}
               isCanvasMode={isCanvasMode}
               side="right"
+              value={chatWidth}
+              minValue={MIN_CHAT_WIDTH}
+              maxValue={MAX_CHAT_WIDTH}
             />
           )}
           <div
@@ -196,10 +209,10 @@ export const SidebarWindow = ({
                   : "xs:rounded-r-xl"
                 : "xs:rounded-xl"
             )}
-            onDragEnter={handleDragEnter}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
+            onDragEnter={withAiFeatures ? handleDragEnter : undefined}
+            onDragOver={withAiFeatures ? handleDragOver : undefined}
+            onDragLeave={withAiFeatures ? handleDragLeave : undefined}
+            onDrop={withAiFeatures ? handleDrop : undefined}
           >
             <motion.div
               className="relative flex h-full w-full flex-col overflow-hidden"
@@ -207,9 +220,14 @@ export const SidebarWindow = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{
-                duration: shouldPlayEntranceAnimation ? 0.3 : 0.05,
+                duration: shouldReduceMotion
+                  ? 0
+                  : shouldPlayEntranceAnimation
+                    ? 0.3
+                    : 0.05,
                 ease: "easeOut",
-                delay: shouldPlayEntranceAnimation ? 0.2 : 0,
+                delay:
+                  shouldReduceMotion || !shouldPlayEntranceAnimation ? 0 : 0.2,
               }}
             >
               {children}
@@ -224,7 +242,9 @@ export const SidebarWindow = ({
                 }}
               />
             )}
-            {activeGame === "pong" && <F0AiPong onClose={closeGame} />}
+            {withAiFeatures && activeGame === "pong" && (
+              <F0AiPong onClose={closeGame} />
+            )}
           </div>
           {resizable && !fullscreen && !isSmallScreen && isLeft && (
             <ResizeHandle
@@ -234,6 +254,9 @@ export const SidebarWindow = ({
               setIsResizing={setIsResizing}
               isCanvasMode={isCanvasMode}
               side="left"
+              value={chatWidth}
+              minValue={MIN_CHAT_WIDTH}
+              maxValue={MAX_CHAT_WIDTH}
             />
           )}
         </motion.div>

@@ -4,7 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { TestProviders } from "@/testing/test-utils"
 
-import { AiChatStateProvider, useAiChat } from "../AiChatStateProvider"
+import {
+  AiChatStateProvider,
+  useAiChat,
+  useApplicationFrameSidePanel,
+} from "../AiChatStateProvider"
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <TestProviders>
@@ -129,6 +133,116 @@ describe("AiChatStateProvider panel content", () => {
       result.current.setPanelContentSide("right")
     })
     expect(result.current.panelContentSide).toBe("right")
+  })
+
+  it("keeps AI canvas state out of the generic side-panel contract", () => {
+    const { result } = renderHook(
+      () => ({
+        ai: useAiChat(),
+        sidePanel: useApplicationFrameSidePanel(),
+      }),
+      { wrapper }
+    )
+
+    act(() => {
+      result.current.ai.openCanvas({
+        type: "form",
+        title: "Example form",
+        description: "Example",
+        formName: "example",
+      })
+    })
+
+    expect(result.current.ai.visualizationMode).toBe("canvas")
+    expect(result.current.sidePanel.visualizationMode).toBe("sidepanel")
+
+    act(() => {
+      result.current.sidePanel.setPanelContent({
+        id: "conv",
+        content: <div>Conv</div>,
+      })
+    })
+
+    expect(result.current.ai.visualizationMode).toBe("sidepanel")
+    expect(result.current.ai.canvasContent).toBeNull()
+    expect(result.current.sidePanel.panelContent?.id).toBe("conv")
+  })
+})
+
+describe("AiChatStateProvider visibility tracking", () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  const trackingWrapper = (onVisibility: () => void, enabled = true) => {
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+      <TestProviders>
+        <AiChatStateProvider enabled={enabled} tracking={{ onVisibility }}>
+          {children}
+        </AiChatStateProvider>
+      </TestProviders>
+    )
+    return Wrapper
+  }
+
+  it("tracks each transition into the visible AI view", () => {
+    const onVisibility = vi.fn()
+    const { result } = renderHook(() => useAiChat(), {
+      wrapper: trackingWrapper(onVisibility),
+    })
+
+    act(() => {
+      result.current.setOpen(true)
+    })
+    expect(onVisibility).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      result.current.setPanelContent({
+        id: "conv",
+        content: <div>Conv</div>,
+      })
+    })
+    expect(onVisibility).toHaveBeenCalledTimes(1)
+
+    act(() => {
+      result.current.clearPanelContent()
+    })
+    expect(onVisibility).toHaveBeenCalledTimes(2)
+  })
+
+  it("does not track a hosted panel while AI is disabled", () => {
+    const onVisibility = vi.fn()
+    const { result } = renderHook(() => useAiChat(), {
+      wrapper: trackingWrapper(onVisibility, false),
+    })
+
+    act(() => {
+      result.current.setPanelContent({
+        id: "conv",
+        content: <div>Conv</div>,
+      })
+    })
+
+    expect(result.current.open).toBe(true)
+    expect(onVisibility).not.toHaveBeenCalled()
+  })
+
+  it("waits for a pending restore to resolve before tracking AI visibility", () => {
+    localStorage.setItem("ONE-ai-chat-open", "true")
+    localStorage.setItem("ONE-ai-chat-panel-content-id", '"conv"')
+    const onVisibility = vi.fn()
+    const { result } = renderHook(() => useAiChat(), {
+      wrapper: trackingWrapper(onVisibility),
+    })
+
+    expect(result.current.restoringPanelContentId).toBe("conv")
+    expect(onVisibility).not.toHaveBeenCalled()
+
+    act(() => {
+      result.current.cancelPanelContentRestore()
+    })
+
+    expect(onVisibility).toHaveBeenCalledTimes(1)
   })
 })
 

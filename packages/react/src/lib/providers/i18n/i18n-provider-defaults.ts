@@ -30,6 +30,13 @@ export const defaultTranslations = {
         placeholder: "Select a company",
       },
     },
+    sidePanel: {
+      decreaseWidth: "Decrease side panel width",
+      increaseWidth: "Increase side panel width",
+      loading: "Loading side panel",
+      resize: "Resize side panel",
+      width: "{{width}} pixels",
+    },
     previous: "Previous",
     next: "Next",
   },

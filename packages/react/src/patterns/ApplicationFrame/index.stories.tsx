@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react-vite"
 
 import { ComponentProps, useCallback, useEffect, useRef, useState } from "react"
+import { expect, within } from "storybook/test"
 
 import { F0Button } from "@/components/F0Button"
 import { F0Icon, IconType } from "@/components/F0Icon"
@@ -24,6 +25,7 @@ import { HomeLayout } from "@/layouts/HomeLayout"
 import * as HomeLayoutStories from "@/layouts/HomeLayout/index.stories"
 import { F0Box } from "@/lib/F0Box"
 import { mockTranscribe } from "@/lib/storybook-utils/ai-mocks"
+import { withSnapshot } from "@/lib/storybook-utils/parameters"
 import { Page } from "@/patterns/Navigation/Page"
 import * as PageStories from "@/patterns/Navigation/Page/index.stories"
 import { exampleActions } from "@/patterns/Navigation/Sidebar/Chats/index.stories"
@@ -81,7 +83,7 @@ import { SEED_BY_ID } from "@/sds/chat/F0Chat/mocks/mockSeeds"
 import { useDemoHeaderActions } from "@/sds/chat/F0Chat/mocks/useDemoHeaderActions"
 import { Action } from "@/ui/Action"
 
-import { ApplicationFrame } from "./index"
+import { ApplicationFrame, useApplicationFrameSidePanel } from "./index"
 
 /**
  * Mock people database for @mention search and entity resolution in Storybook.
@@ -516,10 +518,10 @@ const WelcomeCards = () => {
   return <WelcomeScreenCardsRow cards={cards} />
 }
 
-const meta: Meta<typeof ApplicationFrame> = {
+const meta = {
   title: "App shell/ApplicationFrame",
   component: ApplicationFrame,
-  tags: ["autodocs", "experimental"],
+  tags: ["!autodocs", "experimental"],
   parameters: {
     layout: "fullscreen",
   },
@@ -761,7 +763,7 @@ const meta: Meta<typeof ApplicationFrame> = {
     sidebar: <TabbedSidebar />,
     children: <Page {...PageStories.Default.args} />,
   } satisfies ComponentProps<typeof ApplicationFrame>,
-}
+} satisfies Meta<typeof ApplicationFrame>
 
 export default meta
 
@@ -797,15 +799,13 @@ export const Default: Story = {
       <MockChatAppProvider>
         <ApplicationFrame
           // Transitional communications layout: conversations dock LEFT
-          // (panelContentSide) while the AI chat keeps its classic right-side
+          // (sidePanel.side) while the AI chat keeps its classic right-side
           // panel, full header and history, toggled from the page header's One
           // switch. Opening one swaps the other out — only the main content
           // moves, uncovering the incoming panel in place.
-          ai={{
-            ...withMockChatSlots(args.ai),
-            panelContentSide: "left",
-          }}
+          ai={withMockChatSlots(args.ai)}
           aiPromotion={args.aiPromotion}
+          sidePanel={{ enabled: true, side: "left", resizable: true }}
           sidebar={
             <ConversationsSidebar
               withOneTab={false}
@@ -832,6 +832,64 @@ export const Default: Story = {
       </MockChatAppProvider>
     </MockAiChatRuntimeProvider>
   ),
+}
+
+/**
+ * Communications remains fully usable when One is unavailable. The hosted
+ * panel has its own configuration and context; `ai.enabled` stays false.
+ */
+export const CommunicationsWithoutAi: Story = {
+  name: "Communications — without AI",
+  render: () => (
+    <MockChatAppProvider>
+      <ApplicationFrame
+        ai={{ enabled: false }}
+        sidePanel={{ enabled: true, side: "left", resizable: true }}
+        sidebar={
+          <ConversationsSidebar
+            initialTab="messages"
+            autoOpenConvId="dm-eleanor"
+            withOneTab={false}
+          />
+        }
+      >
+        <DaytimePage
+          period="morning"
+          hideOneSwitch
+          header={{
+            employeeFirstName: "Jordan",
+            employeeLastName: "Avery",
+            title: "Good morning, Jordan!",
+            employeeAvatar: "/avatars/person05.jpg",
+          }}
+        >
+          <HomeLayout {...HomeLayoutStories.Default.args} />
+        </DaytimePage>
+      </ApplicationFrame>
+    </MockChatAppProvider>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const messages = await canvas.findAllByText(
+      "Hey Eleanor! Got 10 minutes today?"
+    )
+
+    await expect(
+      messages.some((message) => message.closest(".left-0") !== null)
+    ).toBe(true)
+    await expect(
+      canvas.queryByText("Ask anything about your company")
+    ).not.toBeInTheDocument()
+    await expect(
+      canvas.getByRole("separator", { name: "Resize side panel" })
+    ).toBeVisible()
+  },
+}
+
+export const Snapshot: Story = {
+  ...CommunicationsWithoutAi,
+  name: "Snapshot",
+  parameters: withSnapshot({}),
 }
 
 /**
@@ -961,7 +1019,7 @@ export const WithAiAssistant: Story = {
 /**
  * A fully-mocked conversation hosted in the side panel, driven by the shared
  * `MockChatApp` store (so reads/unreads stay in sync with the sidebar). Wires
- * fullscreen/close to the panel via `useAiChat()`.
+ * fullscreen/close to the panel via `useApplicationFrameSidePanel()`.
  */
 const MockChatPanel = ({ convId }: { convId: string }) => {
   const runtime = useConversationRuntime(convId)
@@ -980,7 +1038,7 @@ const MockChatPanel = ({ convId }: { convId: string }) => {
     setVisualizationMode,
     setOpen,
     clearPanelContent,
-  } = useAiChat()
+  } = useApplicationFrameSidePanel()
   const isFullscreen = visualizationMode === "fullscreen"
 
   return (
@@ -1298,8 +1356,8 @@ const OneHistoryTab = ({
  * Tabbed sidebar (mirrors `TabbedSidebar`) whose "Messages" conversations swap
  * the side-panel content, plus a "One" tab hosting the AI chat history grouped
  * by day. It lives inside the `F0AiChatProvider` that `ApplicationFrame`
- * mounts, so it can call `useAiChat()` directly. "Ask AI" clears the custom
- * content and falls back to the real chat.
+ * mounts, so it can call `useApplicationFrameSidePanel()` directly. "Ask AI"
+ * clears the custom content and falls back to the real chat.
  */
 const ConversationsSidebarInner = ({
   initialTab = "home",
@@ -1329,7 +1387,7 @@ const ConversationsSidebarInner = ({
     panelContent,
     restoringPanelContentId,
     cancelPanelContentRestore,
-  } = useAiChat()
+  } = useApplicationFrameSidePanel()
 
   // Clicking a conversation mounts it in the side panel (one at a time).
   const onSelect = useCallback(

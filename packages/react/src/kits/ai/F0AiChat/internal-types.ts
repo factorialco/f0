@@ -186,27 +186,28 @@ export type AiChatProviderReturnValue = {
   /** Set the pending quote (pass null to clear). */
   setPendingQuote: React.Dispatch<React.SetStateAction<PendingQuote | null>>
   /**
-   * Content currently hosted in the side panel, or `null` to show the F0.ai
-   * chat. Only one is mounted at a time — see {@link SidePanelContent}.
+   * Content currently hosted in the side panel, or `null` when there is no
+   * hosted view. If the F0.ai chat is enabled, it is revealed instead.
+   * Only one hosted view is mounted at a time — see {@link SidePanelContent}.
    */
   panelContent: SidePanelContent | null
   /**
    * Mount `content` in the side panel (replacing whatever was there) and open
-   * the panel. Pass `null` to fall back to the AI chat. The previous content
-   * is unmounted thanks to the `id` key.
+   * the panel. Pass `null` to remove the hosted view. The previous content is
+   * unmounted thanks to the `id` key.
    */
   setPanelContent: (content: SidePanelContent | null) => void
-  /** Clear the custom panel content and fall back to the F0.ai chat. */
+  /** Clear the hosted panel content, revealing the F0.ai chat when enabled. */
   clearPanelContent: () => void
   /**
    * Id of the hosted content that was showing when the page last unloaded,
    * pending restoration. The panel holds a skeleton (no AI-chat flash) until
    * the host re-mounts it via `setPanelContent`, cancels via
    * `cancelPanelContentRestore` (content no longer accessible), or a safety
-   * timeout falls back to the AI chat.
+   * timeout removes the pending hosted view.
    */
   restoringPanelContentId: string | null
-  /** Give up on restoring the persisted panel content — show the AI chat. */
+  /** Give up on restoring the persisted hosted panel content. */
   cancelPanelContentRestore: () => void
   /**
    * Edge the whole side panel docks to — the AI chat, hosted content and the
