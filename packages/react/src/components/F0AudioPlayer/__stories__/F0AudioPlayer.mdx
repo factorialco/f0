@@ -282,24 +282,6 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
       </tr>
       <tr>
         <td>
-          <code>details</code> <em>(deprecated)</em>
-        </td>
-        <td>
-          <code>AudioPlayerDetailTab[]</code>
-        </td>
-        <td>—</td>
-        <td>—</td>
-        <td>
-          <strong>
-            Deprecated — use <code>content</code> instead.
-          </strong>{" "}
-          The raw tab array (each tab a <code>value</code>, translated{" "}
-          <code>label</code>, and <code>content</code>) is still honoured for
-          backward compatibility. <code>content</code> wins when both are set.
-        </td>
-      </tr>
-      <tr>
-        <td>
           <code>expanded</code> / <code>defaultExpanded</code>
         </td>
         <td>
@@ -492,8 +474,7 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
   from translations. Without any detail content the card is unchanged. The
   toggle stays usable even when the player is `disabled` (that only governs
   audio controls), and the panel is height-capped by `detailsMaxHeight`
-  (default `200px`) and scrolls beyond it. The deprecated `details` array is
-  still accepted for now; prefer `content`.
+  (default `200px`) and scrolls beyond it.
 - **Transcription can be derived.** When you don't pass `content.transcription`,
   the card reads the audio element's text tracks — a transcript embedded in the
   file is used first, an attached `<track>` as a fallback — and surfaces it as a
@@ -535,10 +516,6 @@ is needed — the card derives it from the file's own track and shows the
 Transcription tab:
 
 <Canvas of={Stories.CardWithEmbeddedTranscription} />
-
-The deprecated `details` tab array is still honoured for backward compatibility:
-
-<Canvas of={Stories.CardWithLegacyDetails} />
 
 **Disabled**
 

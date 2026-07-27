@@ -214,32 +214,6 @@ export const CardWithEmbeddedTranscription: StoryObj<typeof F0AudioPlayerCard> =
     },
   }
 
-// Backward compatibility: the deprecated `details` tab array is still honoured.
-// Prefer `content` for new code — see CardWithContent above.
-const LEGACY_DETAILS = [
-  { value: "summary", label: "Summary", content: <p>{SAMPLE_SUMMARY}</p> },
-  {
-    value: "transcript",
-    label: "Transcript",
-    content: <p className="whitespace-pre-line">{SAMPLE_TRANSCRIPT}</p>,
-  },
-]
-
-export const CardWithLegacyDetails: StoryObj<typeof F0AudioPlayerCard> = {
-  render: (args) => <F0AudioPlayerCard {...args} />,
-  args: {
-    src: SAMPLE_SRC,
-    title: "AI Call with Alex Williams",
-    subtitle: "May 9, 2025 - 10:00am",
-    details: LEGACY_DETAILS,
-    defaultExpanded: true,
-  },
-  // The deprecated `details` array is opaque, so the card counts as missing a
-  // transcription (flagged by the audio-transcription a11y rule) — migrate to
-  // `content.transcription` to resolve it.
-  parameters: { a11y: { test: "todo" } },
-}
-
 export const Snapshot: Story = {
   ...withSnapshot({}),
   render: (args) => (
