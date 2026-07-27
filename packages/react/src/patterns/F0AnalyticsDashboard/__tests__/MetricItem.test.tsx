@@ -89,12 +89,12 @@ describe("MetricItem", () => {
     {
       value: 123,
       previousValue: 100,
-      direction: "Increased by 23.0%",
+      direction: "+23.0%",
     },
     {
       value: 77,
       previousValue: 100,
-      direction: "Decreased by 23.0%",
+      direction: "−23.0%",
     },
   ])(
     "announces trend direction as $direction",

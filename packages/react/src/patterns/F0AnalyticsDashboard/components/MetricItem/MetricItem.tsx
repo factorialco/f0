@@ -133,7 +133,7 @@ function MetricValue({ value, trend }: { value: string; trend?: MetricTrend }) {
               />
             )}
             <span className="sr-only">
-              {trend.direction === "up" ? "Increased" : "Decreased"} by{" "}
+              {trend.direction === "up" ? "+" : "−"}
               {trend.percent.toFixed(1)}%
             </span>
             <span
