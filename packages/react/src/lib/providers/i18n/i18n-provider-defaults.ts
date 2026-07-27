@@ -230,6 +230,7 @@ export const defaultTranslations = {
       },
     },
     summaries: {
+      total: "Total sum",
       types: {
         sum: "sum",
         count: "count",

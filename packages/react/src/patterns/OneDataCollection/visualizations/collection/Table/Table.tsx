@@ -116,6 +116,7 @@ export const TableCollection = <
   visualizationSettings,
   fromVisualization = "table",
   summaryPlaceholder = "-",
+  scroll = "self",
 }: CollectionProps<
   R,
   Filters,
@@ -308,6 +309,23 @@ export const TableCollection = <
     columnPlaceholder ?? summaryPlaceholder
 
   /**
+   * Summary value for a column, or undefined when the column defines no
+   * summary or the value came back empty.
+   */
+  const getColumnSummaryValue = (column: (typeof columns)[number]) => {
+    if (
+      !column.summary ||
+      !source.summaries ||
+      source.summaries[column.summary]?.type !== "sum"
+    ) {
+      return undefined
+    }
+
+    const value = summaryData?.data[column.summary]
+    return isEmptySummaryValue(value) ? undefined : `${value}`
+  }
+
+  /**
    * Handle column sort click
    */
   const handleSortClick = (columnSorting: SortingKey<Sortings>) => {
@@ -430,7 +448,7 @@ export const TableCollection = <
               "overflow-hidden rounded-lg border border-solid border-f1-border-secondary [&_thead::before]:!bg-transparent [&_thead_th>div:first-child]:!bg-transparent [&_tbody>tr:last-child::after]:!bg-transparent"
           )}
         >
-          <OneTable loading={isLoading}>
+          <OneTable loading={isLoading} scroll={scroll}>
             <TableHeader sticky={true}>
               {headerGroups ? (
                 <TableRow>
@@ -603,9 +621,14 @@ export const TableCollection = <
                   <TableRow>
                     <th
                       colSpan={1 + selectionHeaderColSpan}
-                      className="h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background-secondary px-5"
+                      className="relative h-11 border-0 border-t border-solid border-f1-border-secondary bg-f1-background px-5"
                     >
-                      <div className="flex items-center gap-3">
+                      {/* This row sits in the sticky header, so rows scroll
+                          behind it and it needs an opaque base. The secondary
+                          tint is only 6% opaque, so it is layered over that
+                          base rather than applied to the cell directly. */}
+                      <div className="pointer-events-none absolute inset-0 bg-f1-background-secondary" />
+                      <div className="relative flex items-center gap-3">
                         <HighlightedCount
                           text={
                             allSelectedStatus.checked &&
@@ -864,81 +887,56 @@ export const TableCollection = <
                           width={checkColumnWidth}
                           sticky={{ left: 0 }}
                         >
-                          {summaryData.label && (
-                            <div className="font-medium text-f1-foreground-secondary">
-                              {summaryData.label}
-                            </div>
-                          )}
+                          {""}
                         </TableCell>
                       )}
-                      {columns.map((column, cellIndex) => (
-                        <TableCell
-                          key={`summary-${String(column.label)}`}
-                          firstCell={cellIndex === 0}
-                          width={column.width}
-                          sticky={getStickyPosition(cellIndex)}
-                          className={cn(
-                            isEditableTable &&
-                              (cellIndex !== columns.length - 1 ||
-                                showItemActions) &&
-                              "border-0 border-r-[1px] border-solid border-f1-border-secondary"
-                          )}
-                        >
-                          {cellIndex === 0 &&
-                          !source.selectable &&
-                          summaryData.label ? (
-                            <div className="font-medium text-f1-foreground-secondary">
-                              {summaryData.label}
-                            </div>
-                          ) : (
-                            <div
-                              className={cn(
-                                column.align === "right" ? "justify-end" : "",
-                                "flex"
-                              )}
-                            >
-                              {(() => {
-                                const placeholder = getSummaryPlaceholder(
-                                  column.summaryPlaceholder
-                                )
+                      {columns.map((column, cellIndex) => {
+                        const summaryValue = getColumnSummaryValue(column)
 
-                                if (
-                                  column.summary &&
-                                  source.summaries &&
-                                  source.summaries[column.summary]?.type ===
-                                    "sum"
-                                ) {
-                                  const summaryValue =
-                                    summaryData.data[column.summary]
+                        // The leading column labels the row so the values can
+                        // stand on their own, instead of repeating the summary
+                        // type next to every one of them. A leading column that
+                        // carries its own summary keeps showing the value.
+                        const showLabel =
+                          cellIndex === 0 && summaryValue === undefined
 
-                                  if (isEmptySummaryValue(summaryValue)) {
-                                    return (
-                                      <span className="text-f1-foreground-secondary">
-                                        {placeholder}
-                                      </span>
-                                    )
-                                  }
-
-                                  return (
-                                    <div className="flex gap-1">
-                                      <span className="text-f1-foreground-secondary">
-                                        {i18n.collections.summaries.types.sum}
-                                      </span>
-                                      {`${summaryValue}`}
-                                    </div>
-                                  )
-                                }
-
-                                return (
+                        return (
+                          <TableCell
+                            key={`summary-${String(column.label)}`}
+                            firstCell={cellIndex === 0}
+                            width={column.width}
+                            sticky={getStickyPosition(cellIndex)}
+                            className={cn(
+                              isEditableTable &&
+                                (cellIndex !== columns.length - 1 ||
+                                  showItemActions) &&
+                                "border-0 border-r-[1px] border-solid border-f1-border-secondary"
+                            )}
+                          >
+                            {showLabel ? (
+                              <div className="font-medium text-f1-foreground-secondary">
+                                {summaryData.label ??
+                                  i18n.collections.summaries.total}
+                              </div>
+                            ) : (
+                              <div
+                                className={cn(
+                                  column.align === "right" ? "justify-end" : "",
+                                  "flex"
+                                )}
+                              >
+                                {summaryValue ?? (
                                   <span className="text-f1-foreground-secondary">
-                                    {placeholder}
+                                    {getSummaryPlaceholder(
+                                      column.summaryPlaceholder
+                                    )}
                                   </span>
-                                )
-                              })()}
-                            </div>
-                          )}
-                        </TableCell>
-                      ))}
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                        )
+                      })}
                       {showItemActions &&
                         (isEditableTable ? (
                           <TableCell
