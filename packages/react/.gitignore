@@ -1,3 +1,6 @@
 
 # Generated at Storybook startup for the sidebar status dots
 .storybook/*.generated.json
+
+# Written by the a11y test-runner; consumed by the a11y PR-comment step
+a11y-violations.jsonl
