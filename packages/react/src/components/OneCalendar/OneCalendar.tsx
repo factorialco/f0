@@ -81,7 +81,7 @@ const OneCalendarInternal = ({
   mode = "single",
   view = "month",
   onSelect,
-  defaultMonth = new Date(),
+  defaultMonth,
   defaultSelected = null,
   showNavigation = true,
   showInput = false,
@@ -97,7 +97,19 @@ const OneCalendarInternal = ({
   const effectiveWeekStartsOn =
     weekStartsOn ?? l10n.date?.weekStartsOn ?? WeekStartDay.Monday
 
-  const [viewDate, setViewDate] = useState<Date>(defaultMonth)
+  // When nothing is selected, open the calendar on the month closest to today
+  // that is within the allowed range: today when it falls inside the range,
+  // otherwise the nearest bound (e.g. a start date acting as the end date's
+  // minDate). An explicit `defaultMonth` always takes precedence.
+  const effectiveDefaultMonth = useMemo(() => {
+    if (defaultMonth) return defaultMonth
+    const today = new Date()
+    if (minDate && today < minDate) return minDate
+    if (maxDate && today > maxDate) return maxDate
+    return today
+  }, [defaultMonth, minDate, maxDate])
+
+  const [viewDate, setViewDate] = useState<Date>(effectiveDefaultMonth)
 
   const [selected, setSelectedInternal] = useState<Date | DateRange | null>(
     defaultSelected
@@ -118,15 +130,17 @@ const OneCalendarInternal = ({
       setInputValue(granularity.toRangeString(date, i18n))
 
       const newViewDate = granularity.getViewDateFromDate(
-        date instanceof Date ? date : date?.from || date?.to || new Date()
+        date instanceof Date
+          ? date
+          : date?.from || date?.to || effectiveDefaultMonth
       )
 
       if (newViewDate !== granularity.getViewDateFromDate(viewDate)) {
         setViewDate(newViewDate)
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the granularity changes
-    [granularity]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only needs to be rebuilt when the granularity or effectiveDefaultMonth changes
+    [granularity, effectiveDefaultMonth]
   )
 
   useEffect(() => {

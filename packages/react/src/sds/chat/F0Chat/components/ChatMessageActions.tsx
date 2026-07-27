@@ -13,7 +13,7 @@ import {
   Reply,
   Plus,
 } from "@/icons/app"
-import { Picker } from "@/kits/Social/Reactions/Picker"
+import { Picker } from "@/sds/social/Reactions/Picker"
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 import { Action } from "@/ui/Action"

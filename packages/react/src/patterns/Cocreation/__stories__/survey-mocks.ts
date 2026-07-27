@@ -4,16 +4,16 @@
 // themed to the "Employee engagement survey" card.
 
 import { makeMockTranscribe } from "@/lib/storybook-utils/ai-mocks"
-import type { SurveyAnswers } from "@/sds/surveys/SurveyAnsweringForm"
+import type { SurveyAnswers } from "@/kits/surveys/SurveyAnsweringForm"
 import {
   getDefaultParamsForQuestionType,
   getDefaultQuestionTypeToAdd,
   getNewElementId,
-} from "@/sds/surveys/SurveyFormBuilder/lib"
+} from "@/kits/surveys/SurveyFormBuilder/lib"
 import type {
   QuestionElement,
   SurveyFormBuilderElement,
-} from "@/sds/surveys/SurveyFormBuilder/types"
+} from "@/kits/surveys/SurveyFormBuilder/types"
 
 /**
  * The starting point of a blank survey: a single empty section holding one

@@ -13,16 +13,16 @@ import { F0AvatarAlert } from "@/components/avatars/F0AvatarAlert"
 import { ButtonInternal } from "@/components/F0Button/internal"
 import { F0FileItem } from "@/components/F0FileItem"
 import { ArrowUp, Check, Cross, Microphone, Paperclip } from "@/icons/app"
-import { Picker } from "@/kits/Social/Reactions/Picker"
+import { Picker } from "@/sds/social/Reactions/Picker"
 import { useReducedMotion } from "@/lib/a11y"
 import { useI18n } from "@/lib/providers/i18n"
 import { containsEmojis } from "@/lib/text"
 import { cn } from "@/lib/utils"
-import { RecordingWaveform } from "@/sds/ai/F0AiChatTextArea/components/RecordingWaveform"
+import { RecordingWaveform } from "@/kits/ai/F0AiChatTextArea/components/RecordingWaveform"
 import {
   type RecorderError,
   useAudioRecorder,
-} from "@/sds/ai/F0AiChatTextArea/useAudioRecorder"
+} from "@/kits/ai/F0AiChatTextArea/useAudioRecorder"
 import { Skeleton } from "@/ui/skeleton"
 
 import { buildHighlightSegments } from "../hooks/highlight-utils"

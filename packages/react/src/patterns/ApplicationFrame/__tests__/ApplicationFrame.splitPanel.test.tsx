@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import { beforeEach, describe, expect, it } from "vitest"
 
-import { useAiChat } from "@/sds/ai/F0AiChat/providers/AiChatStateProvider"
+import { useAiChat } from "@/kits/ai/F0AiChat/providers/AiChatStateProvider"
 import {
   zeroRender as render,
   screen,

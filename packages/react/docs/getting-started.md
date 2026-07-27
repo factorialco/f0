@@ -26,10 +26,10 @@ And that's it!
 ## Next steps
 
 - **Browse components** — explore the sidebar to see what's available and try the live examples.
-- **Understand maturity levels** — see [Component Maturity](/?path=/docs/lifecycle-components-maturity--docs) to know what to expect from `experimental` vs `stable` components.
-- **Contribute** — see [How to contribute](/?path=/docs/lifecycle-how-to-contribute--docs) to propose a new component, report a bug, or improve an existing one.
+- **Understand maturity levels** — see [Component Maturity](/docs/about-f0-components-maturity--documentation) to know what to expect from `experimental` vs `stable` components.
+- **Contribute** — see [How to contribute](/docs/about-f0-how-to-contribute--documentation) to propose a new component, report a bug, or improve an existing one.
 
 Related:
 
 - [Using F0 source](development/using-f0-source.md)
-- [Release and Versioning](/?path=/docs/lifecycle-release-and-versioning--docs)
+- [Release and Versioning](/docs/about-f0-release-and-versioning--documentation)

@@ -1,0 +1,69 @@
+import { Canvas, Meta, Controls } from "@storybook/addon-docs/blocks"
+import * as Stories from "./F0VideoPlayer.stories"
+
+<Meta of={Stories} />
+
+# F0VideoPlayer
+
+<span
+  style={{
+    display: "inline-block",
+    padding: "2px 8px",
+    borderRadius: 4,
+    background: "#FEF3C7",
+    color: "#92400E",
+    fontSize: 12,
+    fontWeight: 600,
+  }}
+>
+  Experimental
+</span>
+
+A video player built on a native `<video>` element: play/pause, an interactive
+seekbar, a custom volume slider, a playback-speed menu, fullscreen, keyboard
+shortcuts and full a11y. Analytics, watch-% milestones and forward-seek
+restriction are built in — enabled with plain props.
+
+## Anatomy
+
+<Canvas of={Stories.Default} />
+<Controls of={Stories.Playground} />
+
+## Keyboard shortcuts
+
+While the player (or a non-input descendant) holds focus:
+
+- `Space` — play / pause
+- `←` / `→` — seek ∓5s (forward seeks respect `restrictForwardSeek`)
+- `↑` / `↓` — volume ∓10%
+- `M` — mute / unmute
+- `F` — toggle fullscreen
+
+The seekbar and volume slider own `Arrow` / `Home` / `End` while focused.
+
+## Built-in behaviours
+
+These props turn on behaviour previously implemented by hand in the trainings
+player. The parent receives playback information through the callbacks:
+
+- **`onTrackAction`** — called on play, on pause, and every 5 min during
+  continuous playback. Use it to drive analytics / session keep-alive.
+- **`onMilestone(milestone, video)`** — called once when watched-% first crosses
+  `25`, `50` and `75`. For progress-funnel analytics.
+- **`onComplete(video)`** — called once when the video is "watched enough": the
+  remaining time drops to `min(10s, 3% of duration)` — i.e. the later of "last
+  10s" and "97%". Short videos complete at 97%; long videos in their final 10s.
+- **`restrictForwardSeek`** — prevents seeking past the furthest-watched point and
+  renders a marker at that position.
+
+## LMS configuration
+
+<Canvas of={Stories.LMSConfiguration} />
+
+## Notes
+
+- Advanced browser behaviours are always disabled: the native context menu (and
+  its "Save video as…" download), Picture-in-Picture, remote playback and drag.
+  This is intentional for embedded product video; there is no opt-in for v1.
+- The playback-speed menu portals into the player wrapper (not `document.body`)
+  so it stays visible and interactive in fullscreen.

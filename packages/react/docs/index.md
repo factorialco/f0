@@ -7,7 +7,6 @@ factorial's app
 - Concepts
   - [Definition of Done](definition-of-done.mdx)
   - [Component Maturity](components-maturity.mdx)
-  - [Design Review](design-review.mdx)
   - [Contributions](contributions.mdx)
 - Development
   - [Local Development](development/development.md)

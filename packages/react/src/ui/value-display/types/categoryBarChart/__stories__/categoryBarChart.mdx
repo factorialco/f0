@@ -17,6 +17,7 @@ type value = {
     color?: string        // optional color name or hex; falls back to categorical palette
   }>
   hideTooltip?: boolean   // when true, suppresses hover tooltips
+  loading?: boolean       // when true, renders a skeleton (same size as the bar) until data arrives
 }
 ```
 
@@ -53,3 +54,9 @@ Set `hideTooltip: true` on the value to suppress the per-segment tooltip. Segmen
 #### Empty
 
 <Canvas of={CategoryBarChartStories.Empty} />
+
+#### Loading
+
+Set `loading: true` while the row's data is still loading. The cell renders a skeleton with the same height and width as the loaded bar, so the row doesn't jump and no empty dash flashes before the values arrive.
+
+<Canvas of={CategoryBarChartStories.Loading} />

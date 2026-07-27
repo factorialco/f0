@@ -86,4 +86,6 @@ The repo includes a `.mcp.json` at the root that configures the local Storybook 
 
 **Remote / published** (docs toolset only):
 
-The Azure Static Web Apps deployment also exposes `/mcp` with the docs toolset enabled. Use the published URL for read-only component documentation access without a local dev server.
+The Azure Static Web Apps deployment exposes the MCP server at `https://f0.factorial.dev/mcp` with the docs toolset enabled. Use this URL for read-only component documentation access without a local dev server.
+
+The Azure Function itself is mounted at `/api/mcp` (Azure Static Web Apps serves managed Functions under the `/api/` prefix); `/mcp` is a rewrite to it configured in `packages/react/.storybook/static/staticwebapp.config.json`, so the remote endpoint matches the local `/mcp` convention.

@@ -21,7 +21,7 @@ import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { ScrollBar } from "@/ui/scrollarea"
 
-import { ScrollShadow } from "@/sds/ai/F0AiMessagesContainer/components/ScrollShadow"
+import { ScrollShadow } from "@/kits/ai/F0AiMessagesContainer/components/ScrollShadow"
 
 import {
   AT_BOTTOM_THRESHOLD_PX,

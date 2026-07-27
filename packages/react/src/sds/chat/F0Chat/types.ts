@@ -1,6 +1,6 @@
 import { type AvatarVariant } from "@/components/avatars/F0Avatar"
 import { type IconType } from "@/components/F0Icon"
-import { type TranscribeFn } from "@/sds/ai/F0AiChat/types"
+import { type TranscribeFn } from "@/kits/ai/F0AiChat/types"
 
 /** A participant in a conversation. */
 export type F0ChatUser = {

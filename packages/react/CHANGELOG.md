@@ -1,5 +1,69 @@
 # Changelog
 
+## [4.56.1](https://github.com/factorialco/f0/compare/f0-react-v4.56.0...f0-react-v4.56.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* **component-status:** auto-run the a11y audit in the maturity tooltip ([#4845](https://github.com/factorialco/f0/issues/4845)) ([1297ce7](https://github.com/factorialco/f0/commit/1297ce7c9e178aa5194e6647417cf922102f1eaf))
+
+## [4.56.0](https://github.com/factorialco/f0/compare/f0-react-v4.55.0...f0-react-v4.56.0) (2026-07-27)
+
+
+### Features
+
+* **EditableTable:** support per-row dateConfig function for date cells ([#4841](https://github.com/factorialco/f0/issues/4841)) ([7712310](https://github.com/factorialco/f0/commit/77123108ddda3b8bb9e6c93a21b18c1ce7248c2f))
+* **F0AiChatHeader:** support header actions ([#4837](https://github.com/factorialco/f0/issues/4837)) ([f8bda8e](https://github.com/factorialco/f0/commit/f8bda8e2476b4d50228ce62cf3951be33e995aec))
+
+## [4.55.0](https://github.com/factorialco/f0/compare/f0-react-v4.54.0...f0-react-v4.55.0) (2026-07-24)
+
+
+### Features
+
+* **upselling-kit:** add dismiss option and confirmation opt-out to UpsellingAlert ([#4732](https://github.com/factorialco/f0/issues/4732)) ([1d17599](https://github.com/factorialco/f0/commit/1d1759934c4191acd007bba36f7f04ac5df9cb2a))
+
+## [4.54.0](https://github.com/factorialco/f0/compare/f0-react-v4.53.0...f0-react-v4.54.0) (2026-07-24)
+
+
+### Features
+
+* **F0DatePicker:** add defaultMonth to control initial view ([#4776](https://github.com/factorialco/f0/issues/4776)) ([dbfb70b](https://github.com/factorialco/f0/commit/dbfb70bf0556fb1e119cea6a48d493038ea83920))
+
+## [4.53.0](https://github.com/factorialco/f0/compare/f0-react-v4.52.0...f0-react-v4.53.0) (2026-07-24)
+
+
+### Features
+
+* **component-status:** a11y as a stability requirement + live panel row ([#4798](https://github.com/factorialco/f0/issues/4798)) ([589c538](https://github.com/factorialco/f0/commit/589c53815f7b45ff16571838605326c1f1155ff2))
+
+## [4.52.0](https://github.com/factorialco/f0/compare/f0-react-v4.51.0...f0-react-v4.52.0) (2026-07-24)
+
+
+### Features
+
+* **F0VideoPlayer:** add video player component ([#4754](https://github.com/factorialco/f0/issues/4754)) ([626ce82](https://github.com/factorialco/f0/commit/626ce8277900f45e05b1ecdfd14195cc64bebf13))
+
+## [4.51.0](https://github.com/factorialco/f0/compare/f0-react-v4.50.0...f0-react-v4.51.0) (2026-07-24)
+
+
+### Features
+
+* **icons:** ReceiptAi — add to react-native + refresh art (web + mobile) ([#4708](https://github.com/factorialco/f0/issues/4708)) ([b230d04](https://github.com/factorialco/f0/commit/b230d04bd319ba28f83ba7d98d1ec6a93c79c4a3))
+
+## [4.50.0](https://github.com/factorialco/f0/compare/f0-react-v4.49.3...f0-react-v4.50.0) (2026-07-23)
+
+
+### Features
+
+* **categoryBarChart:** center cell and add loading skeleton ([#4808](https://github.com/factorialco/f0/issues/4808)) ([0784857](https://github.com/factorialco/f0/commit/07848579d8d2cdba1caf65258723d397174a1bf5))
+
+## [4.49.3](https://github.com/factorialco/f0/compare/f0-react-v4.49.2...f0-react-v4.49.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **storybook:** serve remote MCP at /mcp via Azure SWA rewrite ([#4814](https://github.com/factorialco/f0/issues/4814)) ([ad6eb44](https://github.com/factorialco/f0/commit/ad6eb44802e8e6525ef6b099c85b283b4711dc58))
+
 ## [4.49.2](https://github.com/factorialco/f0/compare/f0-react-v4.49.1...f0-react-v4.49.2) (2026-07-23)
 
 
