@@ -1,4 +1,4 @@
-import { useEffect, useState, type KeyboardEvent } from "react"
+import { useEffect, useRef, useState, type KeyboardEvent } from "react"
 
 import { useReducedMotion } from "@/lib/a11y"
 import { cn } from "@/lib/utils"
@@ -49,16 +49,24 @@ export const WelcomeScreen = ({
   const reducedMotion = useReducedMotion()
   const current = messages[index] ?? ""
 
-  // Recover from external mutations of `messages` (e.g. host swapping in a
-  // shorter array). Without this, an out-of-range `index` would render a
-  // blank phrase for one full cycle and `(i + 1) % 0` would yield NaN.
+  // Restart the sequence whenever the phrase list itself changes (e.g. host
+  // swapping in a mode-specific set): the rotation must begin at the first
+  // phrase of the NEW list, not wherever the old list's index happened to be.
+  // This also covers the out-of-range case (shorter array), where a stale
+  // `index` would render a blank phrase and `(i + 1) % 0` would yield NaN.
+  // A swap types immediately ("writing") -- the start delay is a first-mount
+  // settle beat, and repeating it after a mode switch reads as a stall.
+  const messagesSignature = messages.join("\u0000")
+  const isFirstSignatureRef = useRef(true)
   useEffect(() => {
-    if (messages.length > 0 && index >= messages.length) {
-      setIndex(0)
-      setChars(0)
-      setPhase("starting")
+    if (isFirstSignatureRef.current) {
+      isFirstSignatureRef.current = false
+      return
     }
-  }, [messages.length, index])
+    setIndex(0)
+    setChars(0)
+    setPhase("writing")
+  }, [messagesSignature])
 
   useEffect(() => {
     // Reduced motion renders the first phrase statically: no typewriter,

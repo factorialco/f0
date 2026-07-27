@@ -161,7 +161,11 @@ export const EmptyWelcome: Story = {
 export const EmptyWelcomeWithCaptionAndSubtitle: Story = {
   args: {
     turns: [],
-    initialMessage: "Ask a data question.",
+    initialMessage: [
+      "Ask a data question.",
+      "Get an instant answer.",
+      "Turn it into a report.",
+    ],
     initialMessageCaption: "Analytics mode:",
     initialMessageSubtitle:
       "Ask about employees, contracts, absences, and presence. More data soon.",

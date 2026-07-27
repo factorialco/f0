@@ -1,3 +1,4 @@
+import { act } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 import { screen, userEvent, zeroRender } from "@/testing/test-utils"
@@ -56,6 +57,42 @@ describe("WelcomeScreen", () => {
 
     await user.keyboard(" ")
     expect(onClick).toHaveBeenCalledTimes(2)
+  })
+
+  it("restarts from the first phrase when the message list changes", () => {
+    vi.useFakeTimers()
+    // Effects only flush at the end of each act(), so the timer chain must be
+    // advanced in small steps for each tick to schedule the next one.
+    const typeFor = (ms: number) => {
+      for (let elapsed = 0; elapsed < ms; elapsed += 10) {
+        act(() => {
+          vi.advanceTimersByTime(10)
+        })
+      }
+    }
+    try {
+      const { rerender } = zeroRender(<WelcomeScreen messages={["Hi"]} />)
+      typeFor(400 + "Hi".length * 35 + 100)
+      // Fully typed: visible (aria-hidden) span now matches the sr-only span.
+      expect(screen.getAllByText("Hi")).toHaveLength(2)
+
+      rerender(
+        <WelcomeScreen
+          messages={["Ask a data question.", "Get an instant answer."]}
+        />
+      )
+
+      // The swap resets the typewriter: only the sr-only span holds the NEW
+      // first phrase; nothing is typed yet (no leftover index/chars). It also
+      // types IMMEDIATELY — the budget below has no room for the 400ms
+      // first-mount settle delay.
+      expect(screen.getAllByText("Ask a data question.")).toHaveLength(1)
+      typeFor("Ask a data question.".length * 35 + 100)
+      expect(screen.getAllByText("Ask a data question.")).toHaveLength(2)
+      expect(screen.queryAllByText("Get an instant answer.")).toHaveLength(0)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it("renders the full phrase statically when reduced motion is preferred", () => {
