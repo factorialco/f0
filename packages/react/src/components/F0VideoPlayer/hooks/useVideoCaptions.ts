@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useState } from "react"
 
+import { useVttSource } from "./useVttSource"
+
 // Text-track kinds that count as captions for display and for the a11y check.
 const CAPTION_TRACK_KINDS: ReadonlySet<TextTrackKind> = new Set([
   "captions",
   "subtitles",
 ])
-
-// Raw WebVTT payloads begin with the "WEBVTT" magic line; anything else is
-// treated as a URL to a .vtt resource.
-const isRawVtt = (value: string): boolean =>
-  value.trimStart().startsWith("WEBVTT")
 
 export interface VideoCaptions {
   /** `src` for the rendered <track>, or `undefined` when captions come from the file. */
@@ -44,23 +41,7 @@ export function useVideoCaptions(
   video: HTMLVideoElement | null,
   captions: string | undefined
 ): VideoCaptions {
-  const rawVtt = captions !== undefined && isRawVtt(captions)
-
-  // Raw VTT is turned into a blob URL so it can back a same-origin <track>.
-  const [blobUrl, setBlobUrl] = useState<string>()
-  useEffect(() => {
-    if (captions === undefined || !isRawVtt(captions)) {
-      setBlobUrl(undefined)
-      return
-    }
-    const url = URL.createObjectURL(new Blob([captions], { type: "text/vtt" }))
-    setBlobUrl(url)
-    return () => URL.revokeObjectURL(url)
-  }, [captions])
-
-  const trackSrc =
-    captions === undefined ? undefined : rawVtt ? blobUrl : captions
-  const needsCrossOrigin = captions !== undefined && !rawVtt
+  const { trackSrc, needsCrossOrigin } = useVttSource(captions)
 
   const [showing, setShowing] = useState(false)
   // Availability from the file's own tracks. Passed captions are always

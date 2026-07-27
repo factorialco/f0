@@ -24,12 +24,17 @@ export interface ControlsProps {
   captionsAvailable: boolean
   /** Whether captions are currently displayed. */
   captionsOn: boolean
+  /** Whether audio description is offered (described source or descriptions track). */
+  audioDescriptionAvailable: boolean
+  /** Whether audio description is currently on. */
+  audioDescriptionOn: boolean
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
   onPlaybackRateChange: (rate: PlaybackRate) => void
   onToggleFullscreen: () => void
   onToggleCaptions: () => void
+  onToggleAudioDescription: () => void
   onSeek: (time: number) => void
 }
 
@@ -47,12 +52,15 @@ export function Controls({
   containerRef,
   captionsAvailable,
   captionsOn,
+  audioDescriptionAvailable,
+  audioDescriptionOn,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
   onPlaybackRateChange,
   onToggleFullscreen,
   onToggleCaptions,
+  onToggleAudioDescription,
   onSeek,
 }: ControlsProps) {
   const { t } = useI18n()
@@ -119,6 +127,18 @@ export function Controls({
           label={t("videoPlayer.captions")}
           aria-pressed={captionsOn}
           onClick={onToggleCaptions}
+        />
+      )}
+
+      {audioDescriptionAvailable && (
+        // "AD" is the visible label and the accessible name (label-in-name
+        // safe); `aria-pressed` conveys on/off, `outline` boxes the on state.
+        <F0Button
+          variant={audioDescriptionOn ? "outline" : "ghost"}
+          size="sm"
+          label={t("videoPlayer.audioDescription")}
+          aria-pressed={audioDescriptionOn}
+          onClick={onToggleAudioDescription}
         />
       )}
 

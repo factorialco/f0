@@ -10,10 +10,36 @@ import { DataAttributes } from "@/global.types"
  * the player uses any caption/subtitle track embedded in the video file. A
  * captions toggle in the controls shows/hides them (a filled glyph when on, a
  * line glyph when off).
+ *
+ * Audio description (WCAG 2.1 SC 1.2.5) conveys on-screen visual information as
+ * audio, complementary to captions — both are independent and can be on at
+ * once. Provide it in one of two ways, toggled with the "AD" control:
+ * - `describedSrc`: a pre-produced media rendition with description mixed into
+ *   the audio. Toggling swaps the source, preserving position and play state.
+ *   Highest quality; assumed the same length as `src`.
+ * - `descriptions`: a WebVTT `kind="descriptions"` script (URL or raw VTT),
+ *   delivered at runtime — the video pauses on each cue so the description can
+ *   be spoken (extended audio description), then resumes. Used only when
+ *   `describedSrc` is absent.
  */
 export interface VideoPlayerContent {
   /** WebVTT URL, or raw WebVTT content, for captions shown during playback. */
   captions?: string
+
+  /**
+   * A pre-produced described media source (description mixed into the audio),
+   * swapped in when audio description is enabled. Takes precedence over
+   * `descriptions`. Should match `src`'s duration so the position carries
+   * across the swap.
+   */
+  describedSrc?: string
+
+  /**
+   * WebVTT URL, or raw WebVTT content, of a `kind="descriptions"` script.
+   * Delivered at runtime with extended (pausing) audio description when no
+   * `describedSrc` is provided.
+   */
+  descriptions?: string
 }
 
 export interface F0VideoPlayerProps extends DataAttributes {

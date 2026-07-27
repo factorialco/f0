@@ -128,6 +128,59 @@ export const WithEmbeddedCaptions: Story = {
   render: (args) => <EmbeddedCaptionsDemo {...args} />,
 }
 
+// A short WebVTT description script (visual events narrated in the gaps).
+const SAMPLE_DESCRIPTIONS = [
+  "WEBVTT",
+  "",
+  "1",
+  "00:00:07.000 --> 00:00:10.000",
+  "A butterfly flutters over a sunlit meadow.",
+  "",
+  "2",
+  "00:00:15.000 --> 00:00:19.000",
+  "A large white rabbit emerges from its burrow and stretches.",
+  "",
+  "3",
+  "00:00:24.000 --> 00:00:27.000",
+  "The rabbit smiles and sniffs the morning air.",
+  "",
+].join("\n")
+
+/**
+ * Audio description alongside captions. `content.descriptions` is a WebVTT
+ * `kind="descriptions"` script delivered at runtime: the "AD" control pauses the
+ * video on each cue and speaks it (extended audio description) via the browser's
+ * speech synthesis, then resumes. Captions ("CC") stay independent — both can be
+ * on at once.
+ */
+export const WithAudioDescriptions: Story = {
+  args: {
+    content: {
+      captions: bigBuckBunnyCaptions,
+      descriptions: SAMPLE_DESCRIPTIONS,
+    },
+  },
+}
+
+/**
+ * A pre-produced described audio track. `content.describedSrc` points at a
+ * rendition with the description mixed into the audio; the "AD" control swaps to
+ * it, preserving position and play state, and captions keep working across the
+ * swap.
+ *
+ * There's no described rendition of Big Buck Bunny available, so this story uses
+ * the same file as a labeled stand-in — toggling AD demonstrates the source swap,
+ * not an audibly different track.
+ */
+export const WithDescribedAudioTrack: Story = {
+  args: {
+    content: {
+      captions: bigBuckBunnyCaptions,
+      describedSrc: SAMPLE_SRC,
+    },
+  },
+}
+
 /**
  * The trainings/LMS configuration: analytics tracking, watch-% milestones,
  * completion and forward-seek restriction — all enabled with plain props, no

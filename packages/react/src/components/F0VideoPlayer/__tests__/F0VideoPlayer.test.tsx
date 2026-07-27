@@ -376,4 +376,62 @@ describe("F0VideoPlayer", () => {
       ).not.toBeInTheDocument()
     })
   })
+
+  describe("audio description", () => {
+    const DESC_URL = "https://example.com/descriptions.vtt"
+    const DESCRIBED_SRC = "https://example.com/video.described.mp4"
+
+    it("offers an AD toggle and renders a descriptions track for a VTT script", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer src={VIDEO_SRC} content={{ descriptions: DESC_URL }} />
+      )
+      fireEvent.loadedData(getVideo())
+
+      const track = getVideo().querySelector('track[kind="descriptions"]')
+      expect(track).toHaveAttribute("src", DESC_URL)
+
+      const ad = screen.getByRole("button", { name: "AD" })
+      expect(ad).toHaveAttribute("aria-pressed", "false")
+      await user.click(ad)
+      expect(screen.getByRole("button", { name: "AD" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      )
+    })
+
+    it("swaps to the described source when AD is enabled", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ describedSrc: DESCRIBED_SRC }}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      expect(getVideo()).toHaveAttribute("src", VIDEO_SRC)
+      // A described source is a media rendition, not a text track.
+      expect(
+        getVideo().querySelector('track[kind="descriptions"]')
+      ).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole("button", { name: "AD" }))
+      expect(getVideo()).toHaveAttribute("src", DESCRIBED_SRC)
+
+      // Controls re-render after the swapped source loads.
+      fireEvent.loadedData(getVideo())
+      expect(screen.getByRole("button", { name: "AD" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      )
+    })
+
+    it("does not render an AD toggle when no description is available", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      fireEvent.loadedData(getVideo())
+      expect(
+        screen.queryByRole("button", { name: "AD" })
+      ).not.toBeInTheDocument()
+    })
+  })
 })

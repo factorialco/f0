@@ -64,6 +64,28 @@ When the captions live in the video file itself, no `content.captions` is needed
 
 <Canvas of={Stories.WithEmbeddedCaptions} />
 
+## Audio description
+
+Audio description conveys on-screen visual information as audio ([WCAG 2.1 SC 1.2.5](https://www.w3.org/WAI/WCAG21/Understanding/audio-description-prerecorded.html),
+Level AA — required only when the video has meaningful visual-only content). It's
+the mirror of captions and fully independent: a separate **"AD"** toggle, and
+both AD and captions can be on at once. Provide it in either of two ways:
+
+- **`content.describedSrc`** — a pre-produced rendition with description mixed
+  into the audio. The "AD" toggle swaps to it, preserving position and play
+  state; captions keep working. Highest quality; assumed to match `src`'s length.
+- **`content.descriptions`** — a WebVTT `kind="descriptions"` script (URL or raw
+  VTT). Delivered at runtime: the video pauses on each cue so the description can
+  be spoken (extended audio description) via the browser's speech synthesis, then
+  resumes. Used only when `describedSrc` is absent.
+
+Unlike captions, a missing audio description is **not** auto-flagged — AD is only
+required when there's visual-only information, so it stays opt-in.
+
+<Canvas of={Stories.WithAudioDescriptions} />
+
+<Canvas of={Stories.WithDescribedAudioTrack} />
+
 ## LMS configuration
 
 The player's built-in behaviours were designed for LMS / e-learning (Learning

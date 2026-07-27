@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 import { useI18n } from "@/lib/providers/i18n"
 import { cn, focusRing } from "@/lib/utils"
 
 import { Controls } from "./components/Controls"
+import { useAudioDescription } from "./hooks/useAudioDescription"
 import { useFullscreen } from "./hooks/useFullscreen"
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts"
 import { useRestrictForwardSeek } from "./hooks/useRestrictForwardSeek"
@@ -40,8 +41,35 @@ export function F0VideoPlayerInternal({
   const { t } = useI18n()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  const video = useVideoState(src)
+  // While audio description is on, play the described rendition (if provided).
+  const [audioDescriptionOn, setAudioDescriptionOn] = useState(false)
+  const describedSrc = content?.describedSrc
+  const activeSrc = audioDescriptionOn && describedSrc ? describedSrc : src
+
+  const video = useVideoState(activeSrc)
   const captions = useVideoCaptions(video.videoElement, content?.captions)
+  const audioDescription = useAudioDescription(video.videoElement, {
+    enabled: audioDescriptionOn,
+    describedSrc,
+    descriptions: content?.descriptions,
+  })
+
+  // Toggling the described source reloads the element, so preserve the position
+  // and play state across the swap. (The WebVTT path doesn't change the source.)
+  const toggleAudioDescription = useCallback(() => {
+    const el = video.videoRef.current
+    if (el && describedSrc) {
+      const time = el.currentTime
+      const wasPlaying = !el.paused
+      const restore = () => {
+        el.currentTime = time
+        if (wasPlaying) void el.play().catch(() => {})
+        el.removeEventListener("loadedmetadata", restore)
+      }
+      el.addEventListener("loadedmetadata", restore)
+    }
+    setAudioDescriptionOn((on) => !on)
+  }, [video.videoRef, describedSrc])
 
   useVideoTracking({ video: video.videoElement, onTrackAction })
   useVideoMilestones({ video: video.videoElement, onMilestone, resetKey: src })
@@ -106,11 +134,15 @@ export function F0VideoPlayerInternal({
         draggable={false}
         onContextMenu={handleContextMenu}
         onClick={video.togglePlay}
-        src={src}
-        // Only for a remote caption URL — a same-origin blob (raw VTT) needs
-        // none, and setting it unconditionally would force the video itself
-        // through CORS.
-        crossOrigin={captions.needsCrossOrigin ? "anonymous" : undefined}
+        src={activeSrc}
+        // Only for a remote caption/description URL — a same-origin blob (raw
+        // VTT) needs none, and setting it unconditionally would force the video
+        // itself through CORS.
+        crossOrigin={
+          captions.needsCrossOrigin || audioDescription.needsCrossOrigin
+            ? "anonymous"
+            : undefined
+        }
         onLoadedData={() => video.setVideoLoaded(true)}
         className={cn(
           "block h-full w-full cursor-pointer rounded-[inherit] object-contain transition-opacity duration-300",
@@ -126,6 +158,14 @@ export function F0VideoPlayerInternal({
             kind="captions"
             src={captions.trackSrc}
             label={t("videoPlayer.captions")}
+            default={false}
+          />
+        )}
+        {audioDescription.trackSrc && (
+          <track
+            kind="descriptions"
+            src={audioDescription.trackSrc}
+            label={t("videoPlayer.audioDescription")}
             default={false}
           />
         )}
@@ -152,12 +192,15 @@ export function F0VideoPlayerInternal({
           containerRef={wrapperRef}
           captionsAvailable={captions.available}
           captionsOn={captions.showing}
+          audioDescriptionAvailable={audioDescription.available}
+          audioDescriptionOn={audioDescriptionOn}
           onTogglePlay={video.togglePlay}
           onToggleMute={video.toggleMute}
           onVolumeChange={video.setVolume}
           onPlaybackRateChange={video.setPlaybackRate}
           onToggleFullscreen={() => void toggleFullscreen()}
           onToggleCaptions={captions.toggle}
+          onToggleAudioDescription={toggleAudioDescription}
           onSeek={seek}
         />
       )}
