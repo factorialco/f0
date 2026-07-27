@@ -245,6 +245,92 @@ describe("F0AudioPlayerCard", () => {
       "on"
     )
   })
+
+  it("builds Summary and Transcription tabs from the content prop", async () => {
+    const user = userEvent.setup()
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ summary: "Summary body", transcription: "Transcript body" }}
+        defaultExpanded
+      />
+    )
+
+    expect(screen.getByRole("radio", { name: "Summary" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("radio", { name: "Transcription" })
+    ).toBeInTheDocument()
+    expect(screen.getByText("Summary body")).toBeInTheDocument()
+
+    await user.click(screen.getByRole("radio", { name: "Transcription" }))
+    expect(screen.getByText("Transcript body")).toBeInTheDocument()
+  })
+
+  it("prefers content over the deprecated details prop", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ summary: "New summary" }}
+        details={DETAILS}
+        defaultExpanded
+      />
+    )
+
+    expect(screen.getByText("New summary")).toBeInTheDocument()
+    // The legacy tab content is ignored when `content` is set.
+    expect(screen.queryByText("Summary text")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("radio", { name: "Transcript" })
+    ).not.toBeInTheDocument()
+  })
+
+  it("flags a card with no transcription for the a11y check", () => {
+    render(<F0AudioPlayerCard src="test.mp3" title="AI Call" />)
+    expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(
+      "data-audio-transcription",
+      "missing"
+    )
+  })
+
+  it("marks the card available once a transcription is provided", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ transcription: "A spoken-word transcript" }}
+      />
+    )
+    expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(
+      "data-audio-transcription",
+      "available"
+    )
+  })
+
+  it("treats content without a transcription as still missing", () => {
+    render(
+      <F0AudioPlayerCard
+        src="test.mp3"
+        title="AI Call"
+        content={{ summary: "Just a summary" }}
+      />
+    )
+    expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(
+      "data-audio-transcription",
+      "missing"
+    )
+  })
+
+  it("does not flag opaque legacy details content", () => {
+    render(
+      <F0AudioPlayerCard src="test.mp3" title="AI Call" details={DETAILS} />
+    )
+    expect(screen.getByRole("group", { name: "AI Call" })).toHaveAttribute(
+      "data-audio-transcription",
+      "legacy"
+    )
+  })
 })
 
 describe("F0AudioPlayer lazy source", () => {

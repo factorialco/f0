@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { VolumeHigh, VolumeMid, VolumeMuted } from "@/icons/app"
-import { fireEvent, zeroRender as render, screen } from "@/testing/test-utils"
+import {
+  fireEvent,
+  screen,
+  userEvent,
+  zeroRender as render,
+} from "@/testing/test-utils"
 
 import { F0VideoPlayer } from "../F0VideoPlayer"
 import { volumeIcon } from "../components/VolumeControl"
@@ -306,6 +311,69 @@ describe("F0VideoPlayer", () => {
     it("is high above 50%", () => {
       expect(volumeIcon(0.51, false)).toBe(VolumeHigh)
       expect(volumeIcon(1, false)).toBe(VolumeHigh)
+    })
+  })
+
+  describe("captions", () => {
+    const CAPS_URL = "https://example.com/captions.vtt"
+
+    function region(): HTMLElement {
+      return screen.getByRole("region", { name: "Video player" })
+    }
+
+    it("flags a video with no captions for the a11y check", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      expect(region()).toHaveAttribute("data-video-captions", "missing")
+    })
+
+    it("marks the video available and renders a track when captions are passed", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      expect(region()).toHaveAttribute("data-video-captions", "available")
+      const track = getVideo().querySelector("track")
+      expect(track).toHaveAttribute("src", CAPS_URL)
+      expect(track).toHaveAttribute("kind", "captions")
+    })
+
+    it("sets crossOrigin for a remote caption URL but not for raw VTT", () => {
+      const createObjectURL = vi
+        .spyOn(URL, "createObjectURL")
+        .mockReturnValue("blob:caps")
+      const { rerender } = render(
+        <F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />
+      )
+      expect(getVideo()).toHaveAttribute("crossorigin", "anonymous")
+
+      rerender(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          content={{ captions: "WEBVTT\n\n00:00.000 --> 00:01.000\nHi" }}
+        />
+      )
+      expect(getVideo()).not.toHaveAttribute("crossorigin")
+      expect(createObjectURL).toHaveBeenCalled()
+    })
+
+    it("shows a CC toggle that flips its pressed state", async () => {
+      const user = userEvent.setup()
+      render(<F0VideoPlayer src={VIDEO_SRC} content={{ captions: CAPS_URL }} />)
+      fireEvent.loadedData(getVideo())
+
+      const cc = screen.getByRole("button", { name: "CC" })
+      expect(cc).toHaveAttribute("aria-pressed", "false")
+
+      await user.click(cc)
+      expect(screen.getByRole("button", { name: "CC" })).toHaveAttribute(
+        "aria-pressed",
+        "true"
+      )
+    })
+
+    it("does not render a CC toggle when no captions are available", () => {
+      render(<F0VideoPlayer src={VIDEO_SRC} />)
+      fireEvent.loadedData(getVideo())
+      expect(
+        screen.queryByRole("button", { name: "CC" })
+      ).not.toBeInTheDocument()
     })
   })
 })

@@ -14,6 +14,11 @@ export interface AudioPlayerMenuAction {
   critical?: boolean
 }
 
+/**
+ * @deprecated Prefer the structured `content` prop
+ * ({@link AudioPlayerContent}). The raw tab array is still honoured for now for
+ * backward compatibility, but will be removed in a future release.
+ */
 export interface AudioPlayerDetailTab {
   /** Stable value used to identify the tab. */
   value: string
@@ -21,6 +26,30 @@ export interface AudioPlayerDetailTab {
   label: string
   /** Tab panel content, rendered inside a scrollable area. */
   content: ReactNode
+}
+
+/**
+ * Structured detail content for {@link F0AudioPlayerCardProps.content}.
+ *
+ * Pass a `summary` and/or a `transcription` string and the card builds the
+ * tabbed "View detail" panel for you, with labels pulled from translations
+ * (`audioPlayer.summary` / `audioPlayer.transcription`) — you no longer wire up
+ * the tabs yourself as with the deprecated `details` array.
+ *
+ * A transcription is what makes an audio-only recording accessible
+ * (WCAG 2.1 SC 1.2.1, Audio-only). When you omit `transcription`, the card
+ * still tries to derive one from the audio file's own text tracks; if none can
+ * be passed or derived, the recording is flagged in the accessibility checks.
+ */
+export interface AudioPlayerContent {
+  /** Plain-text summary of the recording, shown in the "Summary" tab. */
+  summary?: string
+  /**
+   * Plain-text transcription of the recording, shown in the "Transcription"
+   * tab. Line breaks are preserved. When omitted, the card attempts to derive
+   * a transcription from the audio file's embedded/attached text tracks.
+   */
+  transcription?: string
 }
 
 export interface F0AudioPlayerProps
@@ -144,9 +173,23 @@ export interface F0AudioPlayerCardProps extends F0AudioPlayerProps {
   actions?: AudioPlayerMenuAction[]
 
   /**
+   * Structured detail content revealed by a "View detail" toggle in the header:
+   * a `summary` and/or a `transcription`. The card renders the tabs with
+   * translated labels. Providing a `transcription` (or shipping one in the
+   * audio file) keeps the recording accessible. Takes precedence over the
+   * deprecated `details` prop when both are set.
+   */
+  content?: AudioPlayerContent
+
+  /**
    * Tabbed detail content revealed by a "View detail" toggle in the header
    * (e.g. a Summary and a Transcript tab). When omitted or empty, no toggle and
    * no panel are rendered and the card behaves like a plain recording player.
+   *
+   * @deprecated Use the structured {@link F0AudioPlayerCardProps.content} prop
+   * instead (`{ summary, transcription }`). This raw tab array is still
+   * honoured for backward compatibility but will be removed in a future
+   * release.
    */
   details?: AudioPlayerDetailTab[]
 

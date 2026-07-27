@@ -266,7 +266,23 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
       </tr>
       <tr>
         <td>
-          <code>details</code>
+          <code>content</code>
+        </td>
+        <td>
+          <code>{`{ summary?: string; transcription?: string }`}</code>
+        </td>
+        <td>—</td>
+        <td>—</td>
+        <td>
+          Structured detail content revealed by a "View detail" toggle. The card
+          builds the Summary / Transcription tabs with translated labels. When{" "}
+          <code>transcription</code> is omitted it is derived from the audio
+          file's text tracks if present. Omit to render a plain recording card.
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <code>details</code> <em>(deprecated)</em>
         </td>
         <td>
           <code>AudioPlayerDetailTab[]</code>
@@ -274,9 +290,12 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
         <td>—</td>
         <td>—</td>
         <td>
-          Tabbed content revealed by a "View detail" toggle in the header — each
-          tab has a <code>value</code>, a (translated) <code>label</code>, and{" "}
-          <code>content</code>. Omit to render a plain recording card.
+          <strong>
+            Deprecated — use <code>content</code> instead.
+          </strong>{" "}
+          The raw tab array (each tab a <code>value</code>, translated{" "}
+          <code>label</code>, and <code>content</code>) is still honoured for
+          backward compatibility. <code>content</code> wins when both are set.
         </td>
       </tr>
       <tr>
@@ -467,12 +486,19 @@ audio use `useAudioRecorder` with `RecordingWaveform` instead.
   exposed through `F0AudioPlayerCard`'s kebab. The bare `F0AudioPlayer` has no
   speed control. Pass `playbackRates={[]}` to show only the `actions` in the
   kebab.
-- **Expandable details are optional.** Pass `details` to add a "View detail"
-  toggle that expands the card into a tabbed, scrollable panel (e.g. a Summary
-  and a Transcript). Without `details` the card is unchanged. The toggle stays
-  usable even when the player is `disabled` (that only governs audio controls),
-  the panel is height-capped by `detailsMaxHeight` (default `200px`) and scrolls
-  beyond it, and tab labels come from the consumer already translated.
+- **Expandable details are optional.** Pass `content` (`{ summary, transcription }`)
+  to add a "View detail" toggle that expands the card into a tabbed, scrollable
+  panel. The card builds the Summary / Transcription tabs and pulls their labels
+  from translations. Without any detail content the card is unchanged. The
+  toggle stays usable even when the player is `disabled` (that only governs
+  audio controls), and the panel is height-capped by `detailsMaxHeight`
+  (default `200px`) and scrolls beyond it. The deprecated `details` array is
+  still accepted for now; prefer `content`.
+- **Transcription can be derived.** When you don't pass `content.transcription`,
+  the card reads the audio element's text tracks — a transcript embedded in the
+  file is used first, an attached `<track>` as a fallback — and surfaces it as a
+  Transcription tab. Passing `content.transcription` explicitly always takes
+  precedence.
 
 ### Usage examples
 
@@ -491,13 +517,17 @@ the speed options, after a separator.
 
 **Card with expandable details**
 
-Pass `details` to add a "View detail" toggle. Expanding the card reveals a
-tabbed panel (here, a Summary and a Transcript) inside a height-restricted
-scroll area.
+Pass `content` (`{ summary, transcription }`) to add a "View detail" toggle.
+Expanding the card reveals a tabbed panel — a Summary and a Transcription — with
+translated labels, inside a height-restricted scroll area.
 
-<Canvas of={Stories.CardWithDetails} />
+<Canvas of={Stories.CardWithContent} />
 
-<Canvas of={Stories.CardWithDetailsExpanded} />
+<Canvas of={Stories.CardWithContentExpanded} />
+
+The deprecated `details` tab array is still honoured for backward compatibility:
+
+<Canvas of={Stories.CardWithLegacyDetails} />
 
 **Disabled**
 
@@ -570,7 +600,20 @@ Render the controls in a non-interactive state while a recording is unavailable.
   is conveyed visually with a check icon (the options use standard menu
   semantics, not radio semantics).
 - Icons are decorative — the labels, title, and time text carry the meaning.
-- When `details` are provided, the "View detail" / "Hide detail" toggle exposes
-  `aria-expanded`, and the panel is a labelled `role="region"`. The Summary /
-  Transcript tabs reuse the same `TabNavigation` primitive as the page and
-  side-panel tabs, so they share its look and keyboard navigation.
+- When detail content is provided, the "View detail" / "Hide detail" toggle
+  exposes `aria-expanded`, and the panel is a labelled `role="region"`. The
+  Summary / Transcription tabs reuse the same `TabNavigation` primitive as the
+  page and side-panel tabs, so they share its look and keyboard navigation.
+
+### Transcription (WCAG 1.2.1)
+
+An audio-only recording needs a text transcription to be accessible
+([WCAG 2.1 SC 1.2.1](https://www.w3.org/WAI/WCAG21/Understanding/audio-only-and-video-only-prerecorded.html)).
+`F0AudioPlayerCard` treats this as a first-class concern:
+
+- Pass one via `content.transcription`, or ship it in the audio file's text
+  tracks and the card derives it automatically.
+- A card with **no** transcription — neither passed nor derivable — is flagged
+  by the `f0-audio-transcription` rule in the Storybook accessibility checks, so
+  the gap is visible rather than silent. Stories that intentionally omit one are
+  marked `a11y: { test: "todo" }` to record the debt.

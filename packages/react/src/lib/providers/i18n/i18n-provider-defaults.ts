@@ -57,6 +57,8 @@ export const defaultTranslations = {
     viewDetail: "View detail",
     hideDetail: "Hide detail",
     details: "Recording details",
+    summary: "Summary",
+    transcription: "Transcription",
   },
   actions: {
     add: "Add",
@@ -910,6 +912,7 @@ export const defaultTranslations = {
     playbackSpeed: "Playback speed ({{rate}})",
     playbackSpeedLabel: "Playback speed",
     timeProgress: "{{current}} of {{total}}",
+    captions: "CC",
   },
 } as const
 

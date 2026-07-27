@@ -1,6 +1,6 @@
 import { useControllableState } from "@radix-ui/react-use-controllable-state"
 import { motion } from "motion/react"
-import { forwardRef, useState, type CSSProperties } from "react"
+import { forwardRef, useMemo, useState, type CSSProperties } from "react"
 
 import { F0Button } from "@/components/F0Button"
 import { F0SegmentedControl } from "@/experimental/Actions/F0SegmentedControl"
@@ -13,7 +13,8 @@ import { AudioScrubber } from "./components/AudioScrubber"
 import { PlaybackMenu } from "./components/PlaybackMenu"
 import { PlaybackTime } from "./components/PlaybackTime"
 import { PlayPauseButton } from "./components/PlayPauseButton"
-import type { F0AudioPlayerCardProps } from "./types"
+import type { AudioPlayerDetailTab, F0AudioPlayerCardProps } from "./types"
+import { useDerivedTranscription } from "./useDerivedTranscription"
 import { usePlayerController } from "./usePlayerController"
 import { getDataAttributes } from "./utils"
 
@@ -32,6 +33,7 @@ const F0AudioPlayerCardBase = forwardRef<
     disabled = false,
     ariaLabel,
     size = "md",
+    content,
     details,
     expanded,
     defaultExpanded = false,
@@ -44,26 +46,79 @@ const F0AudioPlayerCardBase = forwardRef<
   const dataAttributes = getDataAttributes(props)
   const shouldReduceMotion = useReducedMotion()
 
-  const hasDetails = Boolean(details && details.length > 0)
+  // Legacy path: the deprecated `details` tab array is only used when the
+  // structured `content` prop is absent — `content` always wins.
+  const usesLegacyDetails = !content && Boolean(details && details.length > 0)
+
+  // A transcription passed via `content` takes precedence; otherwise try to
+  // derive one from the audio file's own text tracks.
+  const passedTranscription = content?.transcription
+  const derivedTranscription = useDerivedTranscription(
+    controller.audioRef,
+    controller.currentSrc,
+    !passedTranscription
+  )
+  const transcription = passedTranscription ?? derivedTranscription
+
+  // Normalise whichever input was given into the tab list the panel renders.
+  const tabs: AudioPlayerDetailTab[] = useMemo(() => {
+    if (usesLegacyDetails) return details ?? []
+    const built: AudioPlayerDetailTab[] = []
+    if (content?.summary) {
+      built.push({
+        value: "summary",
+        label: i18n.audioPlayer.summary,
+        content: <p className="whitespace-pre-line">{content.summary}</p>,
+      })
+    }
+    if (transcription) {
+      built.push({
+        value: "transcription",
+        label: i18n.audioPlayer.transcription,
+        content: <p className="whitespace-pre-line">{transcription}</p>,
+      })
+    }
+    return built
+  }, [
+    usesLegacyDetails,
+    details,
+    content?.summary,
+    transcription,
+    i18n.audioPlayer.summary,
+    i18n.audioPlayer.transcription,
+  ])
+
+  // Accessibility signal for the Storybook a11y check: an audio-only recording
+  // needs a transcription (WCAG 2.1 SC 1.2.1). "missing" is flagged; a passed
+  // or derived transcription is "available"; legacy `details` content is opaque
+  // (we can't inspect it for a transcript) so it is left unflagged.
+  const transcriptionState = transcription
+    ? "available"
+    : usesLegacyDetails
+      ? "legacy"
+      : "missing"
+
+  const hasDetails = tabs.length > 0
   const [isExpanded = false, setExpanded] = useControllableState<boolean>({
     prop: expanded,
     defaultProp: defaultExpanded,
     onChange: onExpandedChange,
   })
-  const [selectedTab, setSelectedTab] = useState(details?.[0]?.value)
-  // Guard against a stale selection if `details` changes (e.g. a recycled
-  // card in a list): fall back to the first tab so the highlight and content
-  // stay in sync.
-  const activeTab = details?.some((tab) => tab.value === selectedTab)
+  const [selectedTab, setSelectedTab] = useState(tabs[0]?.value)
+  // Guard against a stale selection if the tabs change (e.g. a recycled card in
+  // a list, or a transcription resolving asynchronously): fall back to the
+  // first tab so the highlight and content stay in sync.
+  const activeTab = tabs.some((tab) => tab.value === selectedTab)
     ? selectedTab
-    : details?.[0]?.value
-  const activeContent = details?.find((tab) => tab.value === activeTab)?.content
+    : tabs[0]?.value
+  const activeContent = tabs.find((tab) => tab.value === activeTab)?.content
 
   return (
     <div
       ref={ref}
       role="group"
       aria-label={ariaLabel ?? title}
+      data-audio-transcription={transcriptionState}
       className={cn(
         "flex flex-col gap-2.5 rounded-2xl border border-solid border-f1-border-secondary bg-f1-background p-3",
         className
@@ -162,12 +217,10 @@ const F0AudioPlayerCardBase = forwardRef<
             ariaLabel={i18n.audioPlayer.details}
             value={activeTab}
             onChange={setSelectedTab}
-            items={
-              details?.map((tab) => ({
-                value: tab.value,
-                label: tab.label,
-              })) ?? []
-            }
+            items={tabs.map((tab) => ({
+              value: tab.value,
+              label: tab.label,
+            }))}
           />
           <div className="pt-2.5">
             <ScrollArea

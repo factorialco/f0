@@ -48,6 +48,10 @@ export const Disabled: Story = {
   args: { disabled: true },
 }
 
+// This card has no transcription (none passed and none in the sample file), so
+// the `f0-audio-transcription` a11y rule flags it (WCAG 1.2.1). It's marked
+// `test: "todo"` to record that gap without failing CI — see CardWithContent
+// for the accessible pattern.
 export const Card: StoryObj<typeof F0AudioPlayerCard> = {
   render: (args) => <F0AudioPlayerCard {...args} />,
   args: {
@@ -55,6 +59,7 @@ export const Card: StoryObj<typeof F0AudioPlayerCard> = {
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
   },
+  parameters: { a11y: { test: "todo" } },
 }
 
 // The kebab always carries the playback-speed options; `actions` adds extra
@@ -73,6 +78,8 @@ export const CardWithActions: StoryObj<typeof F0AudioPlayerCard> = {
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
   },
+  // No transcription — flagged by the audio-transcription a11y rule.
+  parameters: { a11y: { test: "todo" } },
 }
 
 export const WithDataTestId: Story = {
@@ -93,6 +100,8 @@ export const LazySource: StoryObj<typeof F0AudioPlayerCard> = {
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
   },
+  // No transcription — flagged by the audio-transcription a11y rule.
+  parameters: { a11y: { test: "todo" } },
 }
 
 // Sample copy lifted from the design, long enough to demonstrate the
@@ -113,7 +122,40 @@ const SAMPLE_TRANSCRIPT = Array.from({ length: 8 }, (_, i) =>
     : "Alex: Yes, I'm fully available for night shifts and weekends, and my commute is under 40 minutes."
 ).join("\n\n")
 
-const DETAILS = [
+// The structured `content` prop: the card builds the Summary / Transcription
+// tabs (with translated labels) for you. A transcription keeps the recording
+// accessible (WCAG 1.2.1).
+const CONTENT = {
+  summary: SAMPLE_SUMMARY,
+  transcription: SAMPLE_TRANSCRIPT,
+}
+
+// Collapsed by default — the "View detail" button toggles the tabbed panel.
+export const CardWithContent: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    content: CONTENT,
+  },
+}
+
+// Same card, starting expanded so the Summary / Transcription tabs are visible.
+export const CardWithContentExpanded: StoryObj<typeof F0AudioPlayerCard> = {
+  render: (args) => <F0AudioPlayerCard {...args} />,
+  args: {
+    src: SAMPLE_SRC,
+    title: "AI Call with Alex Williams",
+    subtitle: "May 9, 2025 - 10:00am",
+    content: CONTENT,
+    defaultExpanded: true,
+  },
+}
+
+// Backward compatibility: the deprecated `details` tab array is still honoured.
+// Prefer `content` for new code — see CardWithContent above.
+const LEGACY_DETAILS = [
   { value: "summary", label: "Summary", content: <p>{SAMPLE_SUMMARY}</p> },
   {
     value: "transcript",
@@ -122,25 +164,13 @@ const DETAILS = [
   },
 ]
 
-// Collapsed by default — the "View detail" button toggles the tabbed panel.
-export const CardWithDetails: StoryObj<typeof F0AudioPlayerCard> = {
+export const CardWithLegacyDetails: StoryObj<typeof F0AudioPlayerCard> = {
   render: (args) => <F0AudioPlayerCard {...args} />,
   args: {
     src: SAMPLE_SRC,
     title: "AI Call with Alex Williams",
     subtitle: "May 9, 2025 - 10:00am",
-    details: DETAILS,
-  },
-}
-
-// Same card, starting expanded so the Summary/Transcript tabs are visible.
-export const CardWithDetailsExpanded: StoryObj<typeof F0AudioPlayerCard> = {
-  render: (args) => <F0AudioPlayerCard {...args} />,
-  args: {
-    src: SAMPLE_SRC,
-    title: "AI Call with Alex Williams",
-    subtitle: "May 9, 2025 - 10:00am",
-    details: DETAILS,
+    details: LEGACY_DETAILS,
     defaultExpanded: true,
   },
 }
@@ -155,12 +185,13 @@ export const Snapshot: Story = {
         {...args}
         title="AI Call with Alex Williams"
         subtitle="May 9, 2025 - 10:00am"
+        content={{ transcription: SAMPLE_TRANSCRIPT }}
       />
       <F0AudioPlayerCard
         {...args}
         title="AI Call with Alex Williams"
         subtitle="May 9, 2025 - 10:00am"
-        details={DETAILS}
+        content={CONTENT}
         defaultExpanded
       />
     </div>

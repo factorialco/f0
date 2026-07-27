@@ -19,11 +19,16 @@ export interface ControlsProps {
   markerTime?: number
   blockSeekPastMarker: boolean
   containerRef: React.RefObject<HTMLElement | null>
+  /** Whether captions can be shown (passed or embedded in the file). */
+  captionsAvailable: boolean
+  /** Whether captions are currently displayed. */
+  captionsOn: boolean
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
   onPlaybackRateChange: (rate: PlaybackRate) => void
   onToggleFullscreen: () => void
+  onToggleCaptions: () => void
   onSeek: (time: number) => void
 }
 
@@ -39,11 +44,14 @@ export function Controls({
   markerTime,
   blockSeekPastMarker,
   containerRef,
+  captionsAvailable,
+  captionsOn,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
   onPlaybackRateChange,
   onToggleFullscreen,
+  onToggleCaptions,
   onSeek,
 }: ControlsProps) {
   const { t } = useI18n()
@@ -98,6 +106,19 @@ export function Controls({
         onChange={onPlaybackRateChange}
         containerRef={containerRef}
       />
+
+      {captionsAvailable && (
+        // "CC" is the visible label (and accessible name — no aria-label, so
+        // it stays label-in-name compliant); `aria-pressed` conveys on/off,
+        // and `outline` gives an on-state box over the video.
+        <F0Button
+          variant={captionsOn ? "outline" : "ghost"}
+          size="sm"
+          label={t("videoPlayer.captions")}
+          aria-pressed={captionsOn}
+          onClick={onToggleCaptions}
+        />
+      )}
 
       <F0Button
         variant="ghost"

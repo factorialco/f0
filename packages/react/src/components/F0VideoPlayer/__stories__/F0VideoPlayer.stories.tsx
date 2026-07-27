@@ -2,10 +2,11 @@ import type { Meta, StoryObj } from "@storybook/react-vite"
 import { ReactNode } from "react"
 
 import { F0VideoPlayer } from "../F0VideoPlayer"
+import { bigBuckBunnyCaptions } from "./bigBuckBunnyCaptions"
 
-// H.264 / 16:9, hosted on Blender's CDN — broadly supported and reliable.
+// Big Buck Bunny (H.264 / 16:9), hosted on the Internet Archive.
 const SAMPLE_SRC =
-  "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"
+  "https://dn801203.us.archive.org/0/items/BigBuckBunny_328/BigBuckBunny_512kb.mp4"
 
 /** The player fills its container, so stories give it a sized frame. */
 function Frame({ children }: { children: ReactNode }) {
@@ -54,13 +55,32 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+// No captions supplied and the sample file has none embedded, so the
+// `f0-video-captions` a11y rule flags this (WCAG 1.2.2). Marked `test: "todo"`
+// to record the gap without failing CI — see WithCaptions for the accessible
+// pattern.
+export const Default: Story = {
+  parameters: { a11y: { test: "todo" } },
+}
 
 export const Playground: Story = {
   args: {
     autoPlay: false,
     autoFocus: false,
     restrictForwardSeek: false,
+  },
+  // No captions — flagged by the video-captions a11y rule.
+  parameters: { a11y: { test: "todo" } },
+}
+
+/**
+ * Captions passed via `content.captions`. Here they are a raw WebVTT string
+ * (converted from Big Buck Bunny's community SRT), so no CORS setup is needed;
+ * a WebVTT URL works too. The "CC" control in the bottom bar shows/hides them.
+ */
+export const WithCaptions: Story = {
+  args: {
+    content: { captions: bigBuckBunnyCaptions },
   },
 }
 
@@ -75,4 +95,6 @@ export const LMSConfiguration: Story = {
     autoPlay: false,
     restrictForwardSeek: true,
   },
+  // No captions — flagged by the video-captions a11y rule.
+  parameters: { a11y: { test: "todo" } },
 }

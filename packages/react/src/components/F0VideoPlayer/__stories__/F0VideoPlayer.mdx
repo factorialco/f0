@@ -5,20 +5,6 @@ import * as Stories from "./F0VideoPlayer.stories"
 
 # F0VideoPlayer
 
-<span
-  style={{
-    display: "inline-block",
-    padding: "2px 8px",
-    borderRadius: 4,
-    background: "#FEF3C7",
-    color: "#92400E",
-    fontSize: 12,
-    fontWeight: 600,
-  }}
->
-  Experimental
-</span>
-
 A video player built on a native `<video>` element: play/pause, an interactive
 seekbar, a custom volume slider, a playback-speed menu, fullscreen, keyboard
 shortcuts and full a11y. Analytics, watch-% milestones and forward-seek
@@ -56,7 +42,37 @@ player. The parent receives playback information through the callbacks:
 - **`restrictForwardSeek`** — prevents seeking past the furthest-watched point and
   renders a marker at that position.
 
+## Captions
+
+Pass `content.captions` to show captions over the video during playback. Accepts
+either a **WebVTT URL** or a **raw WebVTT string** (the player turns raw VTT into
+a same-origin blob track, so no CORS setup is needed — a remote URL instead
+requires the video host to allow cross-origin reads). When `captions` is omitted,
+the player uses any caption/subtitle track embedded in the video file. Either way
+a **"CC"** toggle appears in the controls to show/hide them.
+
+Prerecorded video needs captions to be accessible ([WCAG 2.1 SC 1.2.2](https://www.w3.org/WAI/WCAG21/Understanding/captions-prerecorded.html)).
+A player with no captions — neither passed nor embedded — is flagged by the
+`f0-video-captions` rule in the Storybook accessibility checks; stories that
+intentionally omit them are marked `a11y: { test: "todo" }`.
+
+<Canvas of={Stories.WithCaptions} />
+
 ## LMS configuration
+
+The player's built-in behaviours were designed for LMS / e-learning (Learning
+Management System) use — the trainings context it was extracted from. This story
+turns them on together to show a typical lesson-video setup:
+
+- **`restrictForwardSeek`** keeps learners from skipping ahead of the
+  furthest-watched point (a marker shows where that is).
+- **`onTrackAction`** drives analytics / session keep-alive (play, pause, and a
+  recurring heartbeat).
+- **`onMilestone`** (25 / 50 / 75 %) and **`onComplete`** report progress and
+  "watched enough", so the LMS can record completion.
+
+All of it is plain props — no external wiring. The callbacks are logged to the
+Actions panel below.
 
 <Canvas of={Stories.LMSConfiguration} />
 
