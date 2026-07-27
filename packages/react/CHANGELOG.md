@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.56.2](https://github.com/factorialco/f0/compare/f0-react-v4.56.1...f0-react-v4.56.2) (2026-07-27)
+
+
+### Bug Fixes
+
+* **ai:** welcome suggestions popover closes when switching to the last group ([#4653](https://github.com/factorialco/f0/issues/4653)) ([d640b12](https://github.com/factorialco/f0/commit/d640b12e36c335619635d0aba45bbc18a97b2205))
+
 ## [4.56.1](https://github.com/factorialco/f0/compare/f0-react-v4.56.0...f0-react-v4.56.1) (2026-07-27)
 
 

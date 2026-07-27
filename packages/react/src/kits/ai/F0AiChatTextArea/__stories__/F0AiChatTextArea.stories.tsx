@@ -1,5 +1,6 @@
-import { Meta, StoryObj } from "@storybook/react-vite"
+import type { Meta, StoryObj } from "@storybook/react-vite"
 import { useRef, useState } from "react"
+import { expect, userEvent, within } from "storybook/test"
 
 import { F0AiChatTextArea } from "../F0AiChatTextArea"
 import type { F0AiChatTextAreaSubmitPayload } from "../types"
@@ -451,6 +452,42 @@ export const WithWelcomeSuggestions: Story = {
     fullscreen: true,
     welcomeScreenSuggestions: WELCOME_SUGGESTIONS,
     disclaimer: DISCLAIMER,
+  },
+  play: async ({ canvasElement, step }) => {
+    const page = within(canvasElement.closest("body")!)
+
+    await step("Open the first suggestion group", async () => {
+      const analyzeTrigger = page.getByRole("button", { name: "Analyze" })
+      await userEvent.click(analyzeTrigger)
+      const dialog = page.getByRole("dialog", { name: "Analyze" })
+
+      await expect(analyzeTrigger).toHaveAttribute("aria-expanded", "true")
+      await expect(analyzeTrigger).toHaveAttribute("aria-controls", dialog.id)
+      await expect(
+        page.getByRole("button", {
+          name: "April leave and overtime summary",
+        })
+      ).toBeInTheDocument()
+    })
+
+    await step("Switch to the third suggestion group", async () => {
+      const createTrigger = page.getByRole("button", { name: "Create" })
+      await userEvent.click(createTrigger)
+      const dialog = page.getByRole("dialog", { name: "Create" })
+
+      await expect(createTrigger).toHaveAttribute("aria-expanded", "true")
+      await expect(createTrigger).toHaveAttribute("aria-controls", dialog.id)
+      await expect(
+        page.getByRole("button", {
+          name: "Draft a Senior Backend job description",
+        })
+      ).toBeInTheDocument()
+      await expect(
+        page.queryByRole("button", {
+          name: "April leave and overtime summary",
+        })
+      ).not.toBeInTheDocument()
+    })
   },
 }
 
