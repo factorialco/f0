@@ -52,14 +52,24 @@ function getLatestOption() {
   if (!call) throw new Error("setOption was never called")
   return call[0] as {
     legend?: { show?: boolean }
-    xAxis: { axisLabel: { show: boolean } }
-    yAxis: { axisLabel: { show: boolean } }
+    xAxis: {
+      axisLabel: { show: boolean; interval?: number }
+      splitNumber?: number
+    }
+    yAxis: {
+      axisLabel: { show: boolean; interval?: number }
+      splitNumber?: number
+    }
+    aria?: {
+      enabled?: boolean
+      label?: { enabled?: boolean; description?: string }
+    }
   }
 }
 
 type LabelLayoutParams = {
   rect: { width: number; height: number }
-  labelRect: { width: number; height: number }
+  labelRect: { x?: number; width: number; height: number }
   dataIndex: number
 }
 
@@ -69,7 +79,16 @@ function getMainSeries() {
   return (
     call[0] as {
       series: {
-        label?: { position?: string; color?: string }
+        data?: {
+          label?: { color?: string }
+          emphasis?: { label?: { color?: string } }
+        }[]
+        label?: {
+          position?: string
+          color?: string
+          fontSize?: number
+          formatter?: (params: { value: number }) => string
+        }
         emphasis?: { label?: { color?: string; show?: boolean } }
         labelLayout?: (p: LabelLayoutParams) => { fontSize?: number }
       }[]
@@ -146,7 +165,7 @@ describe("BarChart — label placement", () => {
     showLabels: true,
   }
 
-  it("centers labels inside the segment and paints them white when stacked", () => {
+  it("centers labels inside the segment with contrast-safe text when stacked", () => {
     render(
       <F0DataChart
         {...base}
@@ -159,9 +178,8 @@ describe("BarChart — label placement", () => {
     )
     const series = getMainSeries()[0]
     expect(series?.label?.position).toBe("inside")
-    expect(series?.label?.color).toBe("rgba(255, 255, 255, 0.85)")
-    // Full white on hover.
-    expect(series?.emphasis?.label?.color).toBe("#ffffff")
+    expect(series?.label?.color).toBe("#000000")
+    expect(series?.emphasis?.label?.color).toBe("#000000")
   })
 
   it("places labels above the bar in the neutral colour when not stacked", () => {
@@ -186,6 +204,81 @@ describe("BarChart — label placement", () => {
       />
     )
     expect(getMainSeries()[0]?.emphasis?.label?.show).not.toBe(true)
+  })
+
+  it("applies the configured font size and value formatter to labels", () => {
+    render(
+      <F0DataChart
+        {...base}
+        series={[{ name: "X", data: [1500, 2300] }]}
+        labelFontSize={13}
+        valueFormatter={(value) => `${value / 1000}K`}
+      />
+    )
+
+    const label = getMainSeries()[0]?.label
+    expect(label?.fontSize).toBe(13)
+    expect(label?.formatter?.({ value: 1500 })).toBe("1.5K")
+  })
+
+  it("uses the documented 11px label size by default", () => {
+    render(<F0DataChart {...base} series={[{ name: "X", data: [1, 2] }]} />)
+
+    expect(getMainSeries()[0]?.label?.fontSize).toBe(11)
+  })
+
+  it("chooses contrast-safe label colours for per-bar fills", () => {
+    render(
+      <F0DataChart
+        {...base}
+        stacked
+        series={[
+          {
+            name: "X",
+            data: [
+              { value: 1, color: "indigo" },
+              { value: 2, color: "yellow" },
+            ],
+          },
+        ]}
+      />
+    )
+
+    const data = getMainSeries()[0]?.data
+    expect(data?.[0]?.label?.color).toBe("#ffffff")
+    expect(data?.[1]?.label?.color).toBe("#000000")
+    expect(data?.[0]?.emphasis?.label?.color).toBe("#ffffff")
+    expect(data?.[1]?.emphasis?.label?.color).toBe("#000000")
+  })
+})
+
+describe("BarChart — value axis grid density", () => {
+  const base = {
+    type: "bar" as const,
+    categories: ["A", "B"],
+    series: [{ name: "X", data: [10, 20] }],
+    valueAxisSplitNumber: 5,
+  }
+
+  it("applies the split count to Y for vertical bars", () => {
+    render(<F0DataChart {...base} />)
+    expect(getLatestOption().yAxis.splitNumber).toBe(5)
+  })
+
+  it("applies the split count to X for horizontal bars", () => {
+    render(<F0DataChart {...base} orientation="horizontal" />)
+    expect(getLatestOption().xAxis.splitNumber).toBe(5)
+  })
+
+  it("uses two value-axis segments by default", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["A", "B"]}
+        series={[{ name: "X", data: [10, 20] }]}
+      />
+    )
+    expect(getLatestOption().yAxis.splitNumber).toBe(2)
   })
 })
 
@@ -291,6 +384,79 @@ describe("BarChart — hideOverflowingLabels", () => {
     expect(labelLayout?.(seg(20, 27))).toEqual({ fontSize: 0 }) // wider → hide
   })
 
+  it("vertical stacked: hides a label that is taller than its segment", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        stacked
+        categories={["Column"]}
+        series={[
+          { name: "A", data: [100] },
+          { name: "B", data: [100] },
+        ]}
+        showLabels
+      />
+    )
+    const labelLayout = getMainSeries()[0]?.labelLayout
+    expect(
+      labelLayout?.({
+        rect: { width: 100, height: 20 },
+        labelRect: { width: 20, height: 24 },
+        dataIndex: 0,
+      })
+    ).toEqual({ fontSize: 0 })
+  })
+
+  it("horizontal non-stacked: hides labels that are too tall or cross the container edge", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Row"]}
+        series={[{ name: "A", data: [100] }]}
+        showLabels
+        hideAllLabelsOnOverflow={false}
+      />
+    )
+    const labelLayout = getMainSeries()[0]?.labelLayout
+
+    expect(
+      labelLayout?.({
+        rect: { width: 100, height: 10 },
+        labelRect: { x: 100, width: 20, height: 12 },
+        dataIndex: 0,
+      })
+    ).toEqual({ fontSize: 0 })
+    expect(
+      labelLayout?.({
+        rect: { width: 100, height: 24 },
+        labelRect: { x: 790, width: 20, height: 12 },
+        dataIndex: 0,
+      })
+    ).toEqual({ fontSize: 0 })
+  })
+
+  it("horizontal non-stacked: defaults to hiding every label when the widest exceeds the right allowance", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={["Row"]}
+        series={[{ name: "A", data: [123456789012] }]}
+        showLabels
+      />
+    )
+    const labelLayout = getMainSeries()[0]?.labelLayout
+
+    expect(
+      labelLayout?.({
+        rect: { width: 100, height: 24 },
+        labelRect: { x: 100, width: 96, height: 12 },
+        dataIndex: 0,
+      })
+    ).toEqual({ fontSize: 0 })
+  })
+
   it("defaults fit padding to 12 inside a stacked segment (override lowers it)", () => {
     // A 100px label in a 120px segment fits only if per-side padding ≤ 10px, so
     // it's hidden at the 12px stacked default but shown once padding drops to 0.
@@ -364,6 +530,8 @@ describe("BarChart — tooltipValueFormatter", () => {
     ])
     expect(html).toContain("107,505") // precise, grouped
     expect(html).not.toContain("K") // not the compact form
+    expect(getLatestOption().aria?.enabled).toBe(true)
+    expect(getLatestOption().aria?.label?.description).toContain("107,505")
   })
 
   it("falls back to valueFormatter when no tooltipValueFormatter is given", () => {
@@ -379,5 +547,116 @@ describe("BarChart — tooltipValueFormatter", () => {
       { axisValueLabel: "A", seriesName: "S", value: 107505, marker: "" },
     ])
     expect(html).toContain("108K")
+  })
+
+  it("formats and escapes actual and target values in target tooltips", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["<script>category</script>"]}
+        series={[
+          {
+            name: "<strong>Revenue</strong>",
+            data: [{ value: 107505, target: 125000 }],
+          },
+        ]}
+        tooltipValueFormatter={(value) =>
+          `<em>${value.toLocaleString("en-US")}</em>`
+        }
+      />
+    )
+
+    const html = getTooltipFormatter()?.([
+      {
+        axisValueLabel: "<script>category</script>",
+        seriesName: "<strong>Revenue</strong>",
+        value: 107505,
+        dataIndex: 0,
+        marker: '<span class="trusted-marker"></span>',
+      },
+    ])
+
+    expect(html).toContain('<span class="trusted-marker"></span>')
+    expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
+    expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
+    expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
+    expect(html).toContain("&lt;em&gt;125,000&lt;/em&gt;")
+    expect(html).not.toContain("<script>")
+  })
+
+  it("escapes the ordinary tooltip while preserving ECharts marker HTML", () => {
+    render(
+      <F0DataChart
+        type="bar"
+        categories={["<script>category</script>"]}
+        series={[{ name: "<strong>Revenue</strong>", data: [107505] }]}
+        tooltipValueFormatter={(value) =>
+          `<em>${value.toLocaleString("en-US")}</em>`
+        }
+      />
+    )
+
+    const html = getTooltipFormatter()?.([
+      {
+        axisValueLabel: "<script>category</script>",
+        seriesName: "<strong>Revenue</strong>",
+        value: 107505,
+        marker: '<span class="trusted-marker"></span>',
+      },
+    ])
+
+    expect(html).toContain('<span class="trusted-marker"></span>')
+    expect(html).toContain("&lt;script&gt;category&lt;/script&gt;")
+    expect(html).toContain("&lt;strong&gt;Revenue&lt;/strong&gt;")
+    expect(html).toContain("&lt;em&gt;107,505&lt;/em&gt;")
+    expect(html).not.toContain("<script>")
+  })
+
+  it("bounds the accessible description for large datasets", () => {
+    const categories = Array.from(
+      { length: 25 },
+      (_, index) => `Category ${index + 1}`
+    )
+    render(
+      <F0DataChart
+        type="bar"
+        categories={categories}
+        series={[
+          {
+            name: "Revenue",
+            data: categories.map((_, index) => index + 1),
+          },
+        ]}
+      />
+    )
+
+    const description = getLatestOption().aria?.label?.description
+    expect(description).toContain("Category 20: 20")
+    expect(description).toContain("5 more values")
+    expect(description).not.toContain("Category 21")
+  })
+})
+
+describe("BarChart — horizontal category density", () => {
+  it("keeps all 12 category labels at a representative chart height", () => {
+    containerSize.height = 360
+    render(
+      <F0DataChart
+        type="bar"
+        orientation="horizontal"
+        categories={Array.from(
+          { length: 12 },
+          (_, index) => `Row ${index + 1}`
+        )}
+        series={[
+          {
+            name: "Headcount",
+            data: Array.from({ length: 12 }, (_, index) => index + 1),
+          },
+        ]}
+      />
+    )
+
+    expect(getLatestOption().yAxis.axisLabel.interval ?? 0).toBe(0)
   })
 })

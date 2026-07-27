@@ -103,6 +103,25 @@ Override individual bar colors using F0 design tokens.
 
 <Canvas of={BarStories.PerBarColors} />
 
+### Labels, grid density, and overflow
+
+Bar labels use `valueFormatter`, with configurable size and collision handling:
+
+- `labelFontSize` controls label text size.
+- `hideOverflowingLabels` hides labels that do not fit instead of allowing overlap.
+- `hideAllLabelsOnOverflow` keeps the chart from showing a ragged partial label set.
+- `labelFitPadding` controls the clearance used by the fit check.
+- `valueAxisSplitNumber` suggests how many value-axis segments and grid lines to draw.
+
+<Canvas of={BarStories.Snapshot} />
+<Canvas of={BarStories.OverflowingLabels} />
+
+### Precise tooltip values
+
+Use `tooltipValueFormatter` when the axis and labels should stay compact while the hover tooltip retains the precise value.
+
+<Canvas of={BarStories.PreciseTooltip} />
+
 ### Responsive Snapshot
 
 The same chart rendered in every breakpoint (small / medium / large) and every series count (low / normal / large) — mirrors the AI Analytics Figma matrix.

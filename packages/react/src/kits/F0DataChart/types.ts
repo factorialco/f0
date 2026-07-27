@@ -160,11 +160,12 @@ export interface F0DataChartBarProps extends F0DataChartBaseProps {
    */
   labelFitPadding?: number
   /**
-   * With {@link F0DataChartBarProps.hideOverflowingLabels} on, escalate a
-   * horizontal overflow to the whole chart: if ANY value is too wide for its
-   * bar, hide every label instead of just that category's (which reads as
-   * ragged). A value that's only too tall for a thin segment still hides on its
-   * own — this escalation is horizontal-only. @default true
+   * With {@link F0DataChartBarProps.hideOverflowingLabels} on, use the widest
+   * label as the fit reference for vertical columns and labels outside
+   * horizontal bars. If it exceeds the shared allowance, hide every label
+   * instead of leaving a ragged, partially labelled chart. Labels inside
+   * horizontal stacked segments always fit per segment because their available
+   * widths differ. Height overflow is also evaluated per bar. @default true
    */
   hideAllLabelsOnOverflow?: boolean
   /**

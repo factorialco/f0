@@ -3,7 +3,16 @@ import { describe, expect, it } from "vitest"
 import {
   computeCategoryAxisLayout,
   computeLabelInterval,
+  escapeTooltipText,
 } from "../utils/options"
+
+describe("escapeTooltipText", () => {
+  it("escapes HTML-significant characters in consumer-provided text", () => {
+    expect(escapeTooltipText(`<img src=x onerror="alert('xss')">&`)).toBe(
+      "&lt;img src=x onerror=&quot;alert(&#039;xss&#039;)&quot;&gt;&amp;"
+    )
+  })
+})
 
 describe("computeLabelInterval", () => {
   it("returns undefined when labels fit comfortably", () => {

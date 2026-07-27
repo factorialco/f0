@@ -8,7 +8,7 @@ import type {
 } from "../../types"
 
 import { paletteColor, resolveChartColorToken } from "../../utils/colors"
-import { buildBaseChartOptions } from "../../utils/options"
+import { buildBaseChartOptions, escapeTooltipText } from "../../utils/options"
 import type { ChartResponsiveSize } from "../../utils/responsive"
 import { useChartTheme } from "../../utils/useChartTheme"
 import { useContainerSize } from "../../utils/useContainerSize"
@@ -23,6 +23,49 @@ const DEFAULT_LABEL_FONT_SIZE = 11
  */
 const STACKED_LABEL_FIT_PADDING = 12
 const OUTSIDE_LABEL_FIT_PADDING = 0
+const HORIZONTAL_LABEL_GRID_RIGHT = 60
+const HORIZONTAL_LABEL_GAP = 8
+const ARIA_MAX_SERIES = 10
+const ARIA_MAX_VALUES_PER_SERIES = 20
+
+/** Pick the black/white foreground with the higher contrast against a hex fill. */
+function readableLabelColor(background: string): "#000000" | "#ffffff" {
+  const hex = background.replace("#", "")
+  const normalized =
+    hex.length === 3
+      ? hex
+          .split("")
+          .map((value) => `${value}${value}`)
+          .join("")
+      : hex
+  const channels = [0, 2, 4].map((offset) => {
+    const value =
+      Number.parseInt(normalized.slice(offset, offset + 2), 16) / 255
+    return value <= 0.04045
+      ? value / 12.92
+      : Math.pow((value + 0.055) / 1.055, 2.4)
+  })
+  const luminance =
+    0.2126 * (channels[0] ?? 0) +
+    0.7152 * (channels[1] ?? 0) +
+    0.0722 * (channels[2] ?? 0)
+
+  return luminance > 0.179 ? "#000000" : "#ffffff"
+}
+
+function resolveGridRightSpace(
+  right: number | string | undefined,
+  containerWidth: number
+): number {
+  if (typeof right === "number") return right
+  if (typeof right === "string" && right.endsWith("%")) {
+    const percentage = Number.parseFloat(right)
+    if (Number.isFinite(percentage)) {
+      return (containerWidth * percentage) / 100
+    }
+  }
+  return HORIZONTAL_LABEL_GRID_RIGHT
+}
 
 /** Lazily-created canvas 2D context reused for measuring label text width. */
 let measureContext: CanvasRenderingContext2D | null | undefined
@@ -115,9 +158,16 @@ function buildSeriesEntries(
         if (pointColor === undefined) {
           return getValue(point)
         }
+        const contrastColor = readableLabelColor(pointColor)
         return {
           value: getValue(point),
           itemStyle: { color: pointColor },
+          ...(stacked
+            ? {
+                label: { color: contrastColor },
+                emphasis: { label: { color: contrastColor } },
+              }
+            : {}),
         }
       })
     : series.data.map(getValue)
@@ -143,9 +193,10 @@ function buildSeriesEntries(
       // Stacked bars are segmented, so center the value inside its own segment;
       // single/grouped bars keep the value just outside the bar (above / beside).
       position: stacked ? "inside" : isVertical ? "top" : "right",
-      // Inside a coloured segment the value is white at 85% opacity; outside
-      // (on the chart background) it uses the secondary foreground colour.
-      color: stacked ? "rgba(255, 255, 255, 0.85)" : labelColor,
+      // Inside a coloured segment, choose black or white per fill so small
+      // canvas text retains WCAG AA contrast. Outside labels use the semantic
+      // secondary foreground colour from the active theme.
+      color: stacked ? readableLabelColor(color) : labelColor,
       fontWeight: "bold",
       fontSize: labelFontSize,
       overflow: "truncate",
@@ -162,11 +213,11 @@ function buildSeriesEntries(
         shadowOffsetX: 0,
         shadowColor: "transparent",
       },
-      // When labels are shown, stacked ones render at 85% white; lift them to
-      // full white on hover. With labels off, add nothing here — otherwise
-      // hovering a stacked bar would reveal numbers that are meant to stay off.
+      // Keep the same contrast-safe colour on hover. With labels off, add
+      // nothing here — otherwise hovering a stacked bar would reveal numbers
+      // that are meant to stay off.
       ...(stacked && showLabels
-        ? { label: { show: true, color: "#ffffff" } }
+        ? { label: { show: true, color: readableLabelColor(color) } }
         : {}),
     },
   }
@@ -293,6 +344,13 @@ export function useBarChartOptions(
   return useMemo(() => {
     const isVertical = orientation === "vertical"
     const resolvedLabelFontSize = labelFontSize ?? DEFAULT_LABEL_FONT_SIZE
+    const userGridRight = (
+      echartsOptions?.grid as { right?: number | string } | undefined
+    )?.right
+    const horizontalLabelSpace = resolveGridRightSpace(
+      userGridRight,
+      containerWidth
+    )
 
     const responsive = resolveResponsiveDisplay(size)
     // The user-provided `showLegend` prop can still force the legend off,
@@ -353,9 +411,14 @@ export function useBarChartOptions(
           // label against its own segment (per-segment), not the whole row.
           fits = own.width <= box.width - pad && heightFits
         } else {
-          // Horizontal grouped/single: label sits beside the bar, bounded only
-          // by the row thickness.
-          fits = heightFits
+          // Horizontal grouped/single: the label sits beside the bar. The
+          // default grid reserves 60px on the right; hide labels that exceed
+          // that shared allowance (global mode) or whose actual label box
+          // crosses the container edge (per-label mode).
+          const widthFits = hideAllLabelsOnOverflow
+            ? globalWidestLabel + HORIZONTAL_LABEL_GAP <= horizontalLabelSpace
+            : own.x + own.width <= containerWidth
+          fits = widthFits && heightFits
         }
         // NOTE: labelLayout ignores `{ hide: true }` on echarts 6 — a label is
         // dropped by returning `{ fontSize: 0 }`.
@@ -406,7 +469,7 @@ export function useBarChartOptions(
           )
           if (filtered.length === 0) return ""
 
-          const header = `<div style="margin-bottom: 4px; font-weight: 500">${String(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
+          const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
           const items = filtered
             .map(
               (p: {
@@ -423,9 +486,9 @@ export function useBarChartOptions(
                 const target = targets?.[p.dataIndex ?? 0]
                 const targetHtml =
                   target !== undefined
-                    ? ` <span style="opacity: 0.6">/ ${tooltipValue ? tooltipValue(target) : String(target)}</span>`
+                    ? ` <span style="opacity: 0.6">/ ${escapeTooltipText(tooltipValue ? tooltipValue(target) : String(target))}</span>`
                     : ""
-                return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong>${targetHtml}</div>`
+                return `<div>${String(p.marker ?? "")} ${escapeTooltipText(p.seriesName ?? "")} <strong>${escapeTooltipText(formattedValue)}</strong>${targetHtml}</div>`
               }
             )
             .join("")
@@ -457,12 +520,48 @@ export function useBarChartOptions(
       containerHeight,
     })
 
+    // Keep the DOM attribute bounded for large datasets, matching ECharts'
+    // own default of summarizing rather than serializing every data point.
+    const ariaDescriptions = series
+      .slice(0, ARIA_MAX_SERIES)
+      .map((currentSeries) => {
+        const values = currentSeries.data
+          .slice(0, ARIA_MAX_VALUES_PER_SERIES)
+          .map((point, categoryIndex) => {
+            const value = getValue(point)
+            const formattedValue = tooltipValue
+              ? tooltipValue(value)
+              : String(value)
+            const target = getTarget(point)
+            const formattedTarget =
+              target === undefined
+                ? ""
+                : `, target ${tooltipValue ? tooltipValue(target) : String(target)}`
+            return `${categories[categoryIndex] ?? categoryIndex + 1}: ${formattedValue}${formattedTarget}`
+          })
+          .join("; ")
+        const remainingValues = Math.max(
+          0,
+          currentSeries.data.length - ARIA_MAX_VALUES_PER_SERIES
+        )
+        return `${currentSeries.name}: ${values}${remainingValues > 0 ? `; ${remainingValues} more values` : ""}.`
+      })
+    if (series.length > ARIA_MAX_SERIES) {
+      ariaDescriptions.push(`${series.length - ARIA_MAX_SERIES} more series.`)
+    }
+    options.aria = {
+      enabled: true,
+      label: {
+        enabled: true,
+        description: ariaDescriptions.join(" "),
+      },
+    }
+
     if (!isVertical && showLabels) {
-      const userGridRight = (echartsOptions?.grid as { right?: number })?.right
       if (userGridRight === undefined) {
         const grid = options.grid as { right?: number }
         if (grid) {
-          grid.right = 60
+          grid.right = HORIZONTAL_LABEL_GRID_RIGHT
         }
       }
     }

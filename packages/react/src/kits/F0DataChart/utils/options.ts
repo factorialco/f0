@@ -374,6 +374,16 @@ interface TooltipOptions {
   customFormatter?: (params: unknown) => string
 }
 
+/** Escape consumer-provided tooltip text before inserting it into HTML. */
+export function escapeTooltipText(value: unknown): string {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+}
+
 /**
  * Build a fully styled axis-triggered tooltip that optionally filters out
  * ghost series (e.g. target gradient bars).
@@ -447,14 +457,14 @@ export function buildTooltip({
 
         if (filtered.length === 0) return ""
 
-        const header = `<div style="margin-bottom: 4px; font-weight: 500">${String(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
+        const header = `<div style="margin-bottom: 4px; font-weight: 500">${escapeTooltipText(filtered[0].axisValueLabel ?? filtered[0].name ?? "")}</div>`
         const items = filtered
           .map(
             (p: { marker?: string; seriesName?: string; value?: number }) => {
               const formattedValue = valueFormatter
                 ? valueFormatter(Number(p.value))
                 : String(p.value)
-              return `<div>${String(p.marker ?? "")} ${String(p.seriesName ?? "")} <strong>${formattedValue}</strong></div>`
+              return `<div>${String(p.marker ?? "")} ${escapeTooltipText(p.seriesName ?? "")} <strong>${escapeTooltipText(formattedValue)}</strong></div>`
             }
           )
           .join("")
