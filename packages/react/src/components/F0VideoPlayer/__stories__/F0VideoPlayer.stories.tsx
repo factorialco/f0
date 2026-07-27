@@ -207,12 +207,18 @@ export const LMSConfiguration: Story = {
 
 /**
  * A silent (video-only) clip. `silent` marks it as having no audio, so captions
- * don't apply (WCAG 1.2.2) — `data-video-captions` reads `"no-audio"` and the
- * captions a11y rule doesn't flag it, without any caption source. (The sample
- * has audio; `silent` is set here only to illustrate the exemption.)
+ * don't apply (WCAG 1.2.2) — `data-video-captions` reads `"no-audio"`, the
+ * captions rule doesn't flag it, and the volume control shows a disabled "No
+ * audio" cue. (The sample has audio; `silent` is set here only to illustrate.)
+ *
+ * It still carries **audio description** (`content.descriptions`): the "AD"
+ * toggle speaks the visual narration through the browser — audio description
+ * works over a silent video, and is a valid SC 1.2.1 alternative for its
+ * visuals.
  */
 export const SilentVideoOnly: Story = {
   args: {
     silent: true,
+    content: { descriptions: SAMPLE_DESCRIPTIONS },
   },
 }

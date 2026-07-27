@@ -97,12 +97,19 @@ export function F0VideoPlayerInternal({
 
   // A silent (video-only) clip has no audio to play: force-mute it — even if the
   // file carries a track — and disable the mute/volume affordances, so the muted
-  // control reads as a cue rather than a broken toggle.
+  // control reads as a cue rather than a broken toggle. Exception: a silent video
+  // can still carry audio description; when it's delivered by a *described
+  // source* (audio in the media), that source must not be muted. (The WebVTT
+  // description path speaks through the browser, independent of the video's
+  // audio, so it plays regardless.)
   const noop = useCallback(() => {}, [])
+  const describedSourceAudioActive = Boolean(
+    audioDescriptionOn && content?.describedSrc
+  )
   useEffect(() => {
     const el = video.videoRef.current
-    if (silent && el) el.muted = true
-  }, [silent, video.videoElement, video.videoRef])
+    if (silent && el) el.muted = !describedSourceAudioActive
+  }, [silent, describedSourceAudioActive, video.videoElement, video.videoRef])
 
   const handleKeyDown = useKeyboardShortcuts({
     videoRef: video.videoRef,

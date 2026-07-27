@@ -431,6 +431,26 @@ describe("F0VideoPlayer", () => {
         screen.queryByRole("slider", { name: /volume/i })
       ).not.toBeInTheDocument()
     })
+
+    it("unmutes a silent video's described source so the description is heard", async () => {
+      const user = userEvent.setup()
+      render(
+        <F0VideoPlayer
+          src={VIDEO_SRC}
+          silent
+          content={{ describedSrc: "https://example.com/described.mp4" }}
+        />
+      )
+      // Silent + AD off: muted (nothing to hear).
+      expect(getVideo().muted).toBe(true)
+
+      fireEvent.loadedData(getVideo())
+      await user.click(
+        screen.getByRole("button", { name: "Audio description" })
+      )
+      // AD on via a described source → its audio must play, so unmute.
+      expect(getVideo().muted).toBe(false)
+    })
   })
 
   describe("audio description", () => {

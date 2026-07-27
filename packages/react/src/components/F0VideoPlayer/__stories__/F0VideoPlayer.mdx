@@ -87,8 +87,13 @@ Set **`silent`** to declare a video has no audio. Then the player:
 
 Browsers can't reliably detect the absence of audio before playback (Chrome
 doesn't expose it pre-play), so this is declared explicitly rather than sniffed.
-Note a silent clip may still need a text or audio alternative for its visual
-information (SC 1.2.1) — `silent` only removes the _captions_ requirement.
+
+`silent` only removes the _captions_ requirement — a video-only clip with
+meaningful visuals may still need a text or audio alternative (SC 1.2.1). Audio
+description is a natural fit: a silent video can still carry one, and the
+description audio plays even though the video itself is silent. Use
+`content.descriptions` (spoken through the browser, independent of the muted
+video) or a described source — see [Audio description](#audio-description) below.
 
 <Canvas of={Stories.SilentVideoOnly} />
 

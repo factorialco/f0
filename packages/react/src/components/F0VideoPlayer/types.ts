@@ -58,8 +58,10 @@ export interface F0VideoPlayerProps extends DataAttributes {
    * SC 1.2.2) don't apply to silent media, so this exempts the player from the
    * captions requirement — `data-video-captions` is set to `"no-audio"` instead
    * of `"missing"`. Note video-only content may still need a text/audio
-   * alternative for its visual information (SC 1.2.1). Browsers can't reliably
-   * detect the absence of audio before playback, so this is declared explicitly.
+   * alternative for its visual information (SC 1.2.1) — audio description still
+   * works over a silent video (its description audio plays even though the video
+   * itself is muted). Browsers can't reliably detect the absence of audio before
+   * playback, so this is declared explicitly.
    * @default false
    */
   silent?: boolean
