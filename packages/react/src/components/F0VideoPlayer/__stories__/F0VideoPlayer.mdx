@@ -80,6 +80,12 @@ both AD and captions can be on at once. Provide it in either of two ways:
   be spoken (extended audio description) via the browser's speech synthesis, then
   resumes. Used only when `describedSrc` is absent.
 
+When `content.descriptions` is provided, the description text is also shown
+on-screen (top, distinct italic style) whenever captions are on — so
+deaf/hard-of-hearing viewers can **read** the audio description too, not just
+hear it. This needs the WebVTT script: a described audio track (`describedSrc`)
+carries no text, so pair it with `descriptions` to get both.
+
 Unlike captions, a missing audio description is **not** auto-flagged — AD is only
 required when there's visual-only information, so it stays opt-in.
 

@@ -171,6 +171,25 @@ export function F0VideoPlayerInternal({
         )}
       </video>
 
+      {/* Description text shown as a caption for deaf/HoH viewers when captions
+          are on — the visual counterpart of the spoken audio description. Drawn
+          here (top, distinct italic style) since browsers don't render
+          `kind="descriptions"` tracks; `aria-hidden` because screen-reader users
+          get the spoken description instead. */}
+      {captions.showing && audioDescription.activeCue && (
+        <div
+          aria-hidden
+          className="dark pointer-events-none absolute inset-x-0 top-0 z-[2] flex justify-center p-3"
+        >
+          <p className="max-w-[90%] rounded-md bg-[#000000b3] px-2 py-1 text-center text-base italic text-f1-foreground [text-shadow:0_1px_2px_rgba(0,0,0,0.55)]">
+            <span className="pr-1 font-medium not-italic opacity-70">
+              [{t("videoPlayer.audioDescription")}]
+            </span>
+            {audioDescription.activeCue}
+          </p>
+        </div>
+      )}
+
       {/* Polite live region so play/pause via keyboard shortcuts is announced. */}
       <span className="sr-only" aria-live="polite">
         {video.isPlaying ? t("videoPlayer.playing") : t("videoPlayer.paused")}

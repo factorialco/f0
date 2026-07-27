@@ -171,12 +171,16 @@ export const WithAudioDescriptions: Story = {
  * There's no described rendition of Big Buck Bunny available, so this story uses
  * the same file as a labeled stand-in — toggling AD demonstrates the source swap,
  * not an audibly different track.
+ *
+ * `descriptions` is provided too: with captions on, the description text also
+ * appears on screen (top, italic) so deaf/hard-of-hearing viewers can read it.
  */
 export const WithDescribedAudioTrack: Story = {
   args: {
     content: {
       captions: bigBuckBunnyCaptions,
       describedSrc: SAMPLE_SRC,
+      descriptions: SAMPLE_DESCRIPTIONS,
     },
   },
 }
