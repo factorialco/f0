@@ -121,7 +121,7 @@ export const WelcomeScreen = ({
     >
       <div className="flex flex-col items-center">
         {caption && (
-          <p className="mb-1 text-center text-2xl font-semibold leading-[28px] text-f1-foreground-secondary">
+          <p className="animate-in fade-in-0 text-center text-2xl font-semibold leading-[28px] text-f1-foreground-secondary duration-500">
             {caption}
           </p>
         )}
@@ -152,7 +152,7 @@ export const WelcomeScreen = ({
           <span className="sr-only">{current}</span>
         </p>
         {subtitle && (
-          <p className="mt-3 text-center text-lg leading-snug text-f1-foreground-secondary">
+          <p className="animate-in fade-in-0 mt-3 text-center text-base leading-snug text-f1-foreground-secondary duration-500">
             {subtitle}
           </p>
         )}

@@ -120,7 +120,7 @@ describe("WelcomeScreen", () => {
     const phrase = getPhrase("Ask a data question")
 
     expect(caption).toHaveClass("text-f1-foreground-secondary", "text-2xl")
-    expect(subtitle).toHaveClass("text-f1-foreground-secondary", "text-lg")
+    expect(subtitle).toHaveClass("text-f1-foreground-secondary", "text-base")
     expect(
       caption.compareDocumentPosition(phrase) & Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy()
