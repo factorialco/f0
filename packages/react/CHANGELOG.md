@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.56.1](https://github.com/factorialco/f0/compare/f0-react-v4.56.0...f0-react-v4.56.1) (2026-07-27)
+
+
+### Bug Fixes
+
+* **component-status:** auto-run the a11y audit in the maturity tooltip ([#4845](https://github.com/factorialco/f0/issues/4845)) ([1297ce7](https://github.com/factorialco/f0/commit/1297ce7c9e178aa5194e6647417cf922102f1eaf))
+
 ## [4.56.0](https://github.com/factorialco/f0/compare/f0-react-v4.55.0...f0-react-v4.56.0) (2026-07-27)
 
 
