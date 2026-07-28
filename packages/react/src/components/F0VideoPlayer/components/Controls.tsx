@@ -38,11 +38,14 @@ export interface ControlsProps {
   silent: boolean
   /** Keep the controls visible during playback instead of auto-hiding them. */
   persist: boolean
-  /** Languages offered by the localized content (empty / single = no picker). */
-  languages: LanguageOption[]
-  /** Active content language. */
-  language: string | undefined
-  onLanguageChange: (locale: string) => void
+  /** Audio (dubbed `src`) languages (empty / single = no picker). */
+  audioLanguages: LanguageOption[]
+  audioLanguage: string | undefined
+  onAudioLanguageChange: (locale: string) => void
+  /** Subtitle/text (captions/descriptions) languages (empty / single = no picker). */
+  subtitleLanguages: LanguageOption[]
+  subtitleLanguage: string | undefined
+  onSubtitleLanguageChange: (locale: string) => void
   onTogglePlay: () => void
   onToggleMute: () => void
   onVolumeChange: (value: number) => void
@@ -71,9 +74,12 @@ export function Controls({
   audioDescriptionOn,
   silent,
   persist,
-  languages,
-  language,
-  onLanguageChange,
+  audioLanguages,
+  audioLanguage,
+  onAudioLanguageChange,
+  subtitleLanguages,
+  subtitleLanguage,
+  onSubtitleLanguageChange,
   onTogglePlay,
   onToggleMute,
   onVolumeChange,
@@ -175,12 +181,23 @@ export function Controls({
         />
       )}
 
-      {languages.length > 1 && language && (
+      {subtitleLanguages.length > 1 && subtitleLanguage && (
         <LanguageMenu
-          value={language}
-          options={languages}
-          onChange={onLanguageChange}
+          value={subtitleLanguage}
+          options={subtitleLanguages}
+          onChange={onSubtitleLanguageChange}
           containerRef={containerRef}
+          kind={t("videoPlayer.subtitles")}
+        />
+      )}
+
+      {audioLanguages.length > 1 && audioLanguage && (
+        <LanguageMenu
+          value={audioLanguage}
+          options={audioLanguages}
+          onChange={onAudioLanguageChange}
+          containerRef={containerRef}
+          kind={t("videoPlayer.audio")}
         />
       )}
 

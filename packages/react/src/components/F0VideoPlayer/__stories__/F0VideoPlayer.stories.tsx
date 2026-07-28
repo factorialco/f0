@@ -125,6 +125,31 @@ export const WithLocalizedCaptions: Story = {
   },
 }
 
+/**
+ * Localized (dubbed) audio: pass a per-locale `src` list and a separate "Audio"
+ * selector appears, independent of the subtitle language — so a viewer can pick
+ * the spoken language and the caption language separately. Switching preserves
+ * the playback position.
+ *
+ * There's no dubbed rendition of the sample, so both entries point at the same
+ * file (a labeled stand-in) — the selector demonstrates the source swap.
+ */
+export const WithLocalizedAudio: Story = {
+  args: {
+    defaultLanguage: "en",
+    src: [
+      { locale: "en", value: SAMPLE_SRC },
+      { locale: "es", value: SAMPLE_SRC },
+    ],
+    content: {
+      captions: [
+        { locale: "en", value: bigBuckBunnyCaptions },
+        { locale: "es", value: bigBuckBunnyCaptionsEs },
+      ],
+    },
+  },
+}
+
 // Attaches an in-band caption track to the <video> after mount — the shape a
 // browser exposes for captions muxed into the file (no <track> element, no
 // `content` prop). Muxed captions aren't a reliably supported public sample, so

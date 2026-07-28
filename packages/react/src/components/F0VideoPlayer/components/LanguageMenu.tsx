@@ -3,7 +3,6 @@ import { useState } from "react"
 import { F0Button } from "@/components/F0Button"
 import { Check } from "@/icons/app"
 import { type LanguageOption, languageLabel } from "@/lib/localized"
-import { useI18n } from "@/lib/providers/i18n"
 import { cn } from "@/lib/utils"
 import { Popover, PopoverContent, PopoverTrigger } from "@/ui/popover"
 
@@ -14,23 +13,31 @@ export interface LanguageMenuProps {
   onChange: (locale: string) => void
   /** Portal target (the player wrapper), so the menu survives fullscreen. */
   containerRef: React.RefObject<HTMLElement | null>
+  /**
+   * What this selector controls — e.g. "Audio" or "Subtitles". Shown as the
+   * tooltip and prefixed into the accessible name (which still contains the
+   * visible language, so it stays label-in-name compliant) to disambiguate
+   * when the player has more than one language menu.
+   */
+  kind: string
 }
 
 /**
- * Language selector for the video's localized text tracks and described source.
- * Trigger shows the active language's short code; the menu lists full language
- * names. Mirrors PlaybackRateMenu (f0 Popover, roving focus, fullscreen-safe).
+ * Language selector for the video's localized content. The trigger shows the
+ * active language name; the menu lists all languages. Mirrors PlaybackRateMenu
+ * (f0 Popover, roving focus, fullscreen-safe).
  */
 export function LanguageMenu({
   value,
   options,
   onChange,
   containerRef,
+  kind,
 }: LanguageMenuProps) {
-  const { t } = useI18n()
   const [open, setOpen] = useState(false)
 
   const active = options.find((o) => o.locale === value)
+  const activeName = active ? languageLabel(active) : value
 
   const handleMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const items = Array.from(
@@ -67,8 +74,9 @@ export function LanguageMenu({
         <F0Button
           variant="ghost"
           size="sm"
-          label={active ? languageLabel(active) : value}
-          tooltip={t("videoPlayer.language")}
+          label={activeName}
+          aria-label={`${kind}: ${activeName}`}
+          tooltip={kind}
         />
       </PopoverTrigger>
       <PopoverContent
@@ -81,7 +89,7 @@ export function LanguageMenu({
           "border-solid border-f1-border-secondary bg-f1-background p-1 shadow-md"
         )}
         role="menu"
-        aria-label={t("videoPlayer.language")}
+        aria-label={kind}
         onKeyDown={handleMenuKeyDown}
       >
         {options.map((option) => {

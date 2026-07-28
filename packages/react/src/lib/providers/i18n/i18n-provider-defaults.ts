@@ -920,7 +920,8 @@ export const defaultTranslations = {
     timeProgress: "{{current}} of {{total}}",
     captions: "Captions",
     audioDescription: "Audio description",
-    language: "Language",
+    audio: "Audio",
+    subtitles: "Subtitles",
   },
 } as const
 

@@ -438,6 +438,25 @@ describe("F0VideoPlayer", () => {
       ).toHaveAttribute("src", "https://example.com/en.vtt")
     })
 
+    it("offers a separate audio-language selector for a localized src", () => {
+      render(
+        <F0VideoPlayer
+          defaultLanguage="en"
+          src={[
+            { locale: "en", value: "https://example.com/en.mp4" },
+            { locale: "es", value: "https://example.com/es.mp4" },
+          ]}
+        />
+      )
+      fireEvent.loadedData(getVideo())
+      // Audio selector present (accessible name "Audio: <language>").
+      expect(
+        screen.getByRole("button", { name: /audio: /i })
+      ).toBeInTheDocument()
+      // Default audio language is the rendered source.
+      expect(getVideo()).toHaveAttribute("src", "https://example.com/en.mp4")
+    })
+
     it("shows no language selector for single-language captions", () => {
       render(
         <F0VideoPlayer

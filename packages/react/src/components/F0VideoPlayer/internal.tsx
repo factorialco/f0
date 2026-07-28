@@ -52,9 +52,19 @@ export function F0VideoPlayerInternal({
   const { t } = useI18n()
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // Localized content: a single shared language selection drives captions,
-  // descriptions and the described source (each falls back to its first entry).
-  const languages = useMemo(
+  // Two independent language selections: the audio (dubbed `src`) track, and the
+  // text (captions/descriptions/described source). Each has its own selector so
+  // a viewer can, say, watch English audio with Spanish subtitles.
+  const audioLanguages = useMemo(() => collectLanguages(src), [src])
+  const [audioLocale, setAudioLocale] = useState(() =>
+    defaultLocale(audioLanguages, defaultLanguage)
+  )
+  const activeAudioLocale = audioLanguages.some((l) => l.locale === audioLocale)
+    ? audioLocale
+    : defaultLocale(audioLanguages, defaultLanguage)
+  const resolvedSrc = resolveLocalized(src, activeAudioLocale) ?? ""
+
+  const subtitleLanguages = useMemo(
     () =>
       collectLanguages(
         content?.captions,
@@ -63,20 +73,26 @@ export function F0VideoPlayerInternal({
       ),
     [content?.captions, content?.descriptions, content?.describedSrc]
   )
-  const [selectedLocale, setSelectedLocale] = useState(() =>
-    defaultLocale(languages, defaultLanguage)
+  const [textLocale, setTextLocale] = useState(() =>
+    defaultLocale(subtitleLanguages, defaultLanguage)
   )
-  const activeLocale = languages.some((l) => l.locale === selectedLocale)
-    ? selectedLocale
-    : defaultLocale(languages, defaultLanguage)
+  const activeTextLocale = subtitleLanguages.some(
+    (l) => l.locale === textLocale
+  )
+    ? textLocale
+    : defaultLocale(subtitleLanguages, defaultLanguage)
 
-  const captionsSrc = resolveLocalized(content?.captions, activeLocale)
-  const descriptionsSrc = resolveLocalized(content?.descriptions, activeLocale)
-  const describedSrc = resolveLocalized(content?.describedSrc, activeLocale)
+  const captionsSrc = resolveLocalized(content?.captions, activeTextLocale)
+  const descriptionsSrc = resolveLocalized(
+    content?.descriptions,
+    activeTextLocale
+  )
+  const describedSrc = resolveLocalized(content?.describedSrc, activeTextLocale)
 
   // While audio description is on, play the described rendition (if provided).
   const [audioDescriptionOn, setAudioDescriptionOn] = useState(false)
-  const activeSrc = audioDescriptionOn && describedSrc ? describedSrc : src
+  const activeSrc =
+    audioDescriptionOn && describedSrc ? describedSrc : resolvedSrc
 
   const video = useVideoState(activeSrc)
   const captions = useVideoCaptions(video.videoElement, captionsSrc)
@@ -86,31 +102,51 @@ export function F0VideoPlayerInternal({
     descriptions: descriptionsSrc,
   })
 
-  // Toggling the described source reloads the element, so preserve the position
-  // and play state across the swap. (The WebVTT path doesn't change the source.)
-  const toggleAudioDescription = useCallback(() => {
+  // Swapping the media source (audio-language change or described-source
+  // toggle) reloads the element; carry the position and play state across it.
+  const preservePositionAcrossSwap = useCallback(() => {
     const el = video.videoRef.current
-    if (el && describedSrc) {
-      const time = el.currentTime
-      const wasPlaying = !el.paused
-      const restore = () => {
-        el.currentTime = time
-        if (wasPlaying) void el.play().catch(() => {})
-        el.removeEventListener("loadedmetadata", restore)
-      }
-      el.addEventListener("loadedmetadata", restore)
+    if (!el) return
+    const time = el.currentTime
+    const wasPlaying = !el.paused
+    const restore = () => {
+      el.currentTime = time
+      if (wasPlaying) void el.play().catch(() => {})
+      el.removeEventListener("loadedmetadata", restore)
     }
+    el.addEventListener("loadedmetadata", restore)
+  }, [video.videoRef])
+
+  const changeAudioLanguage = useCallback(
+    (locale: string) => {
+      preservePositionAcrossSwap()
+      setAudioLocale(locale)
+    },
+    [preservePositionAcrossSwap]
+  )
+
+  const toggleAudioDescription = useCallback(() => {
+    // Only the described-source path swaps the source; the WebVTT path doesn't.
+    if (describedSrc) preservePositionAcrossSwap()
     setAudioDescriptionOn((on) => !on)
-  }, [video.videoRef, describedSrc])
+  }, [describedSrc, preservePositionAcrossSwap])
 
   useVideoTracking({ video: video.videoElement, onTrackAction })
-  useVideoMilestones({ video: video.videoElement, onMilestone, resetKey: src })
-  useVideoCompletion({ video: video.videoElement, onComplete, resetKey: src })
+  useVideoMilestones({
+    video: video.videoElement,
+    onMilestone,
+    resetKey: resolvedSrc,
+  })
+  useVideoCompletion({
+    video: video.videoElement,
+    onComplete,
+    resetKey: resolvedSrc,
+  })
 
   const { maxWatchedTime, clampSeek } = useRestrictForwardSeek({
     video: video.videoElement,
     enabled: restrictForwardSeek,
-    resetKey: src,
+    resetKey: resolvedSrc,
   })
 
   const seek = useCallback(
@@ -288,9 +324,12 @@ export function F0VideoPlayerInternal({
           audioDescriptionOn={audioDescriptionOn}
           silent={silent}
           persist={persistControls}
-          languages={languages}
-          language={activeLocale}
-          onLanguageChange={setSelectedLocale}
+          audioLanguages={audioLanguages}
+          audioLanguage={activeAudioLocale}
+          onAudioLanguageChange={changeAudioLanguage}
+          subtitleLanguages={subtitleLanguages}
+          subtitleLanguage={activeTextLocale}
+          onSubtitleLanguageChange={setTextLocale}
           onTogglePlay={video.togglePlay}
           onToggleMute={video.toggleMute}
           onVolumeChange={video.setVolume}

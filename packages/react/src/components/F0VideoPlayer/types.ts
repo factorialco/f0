@@ -54,14 +54,19 @@ export interface VideoPlayerContent {
 }
 
 export interface F0VideoPlayerProps extends DataAttributes {
-  /** Video source URL. */
-  src: string
+  /**
+   * Video source URL. Localizable — pass a per-locale list of dubbed renditions
+   * to offer selectable audio languages; an "Audio" selector then appears,
+   * independent of the subtitle/caption language.
+   */
+  src: Localized<string>
 
   /**
-   * Initial language for localized `content` (captions/descriptions/described
-   * source). Matched against the provided locales exactly or by primary subtag;
-   * falls back to the viewer's browser language, then the first provided. Only
-   * relevant when `content` carries more than one language.
+   * Initial language for localized content, matched against the provided
+   * locales exactly or by primary subtag, then the viewer's browser language,
+   * then the first provided. Applies to both the audio (`src`) and the text
+   * (`content`) language selections. Only relevant when more than one language
+   * is available.
    */
   defaultLanguage?: string
 
