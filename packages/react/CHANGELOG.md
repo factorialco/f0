@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.60.1](https://github.com/factorialco/f0/compare/f0-react-v4.60.0...f0-react-v4.60.1) (2026-07-28)
+
+
+### Bug Fixes
+
+* **F0DataChart:** round negative bars away from the zero line ([#4871](https://github.com/factorialco/f0/issues/4871)) ([da1c075](https://github.com/factorialco/f0/commit/da1c075c79de738737a433cf58d33b8dd2956fe3))
+
 ## [4.60.0](https://github.com/factorialco/f0/compare/f0-react-v4.59.0...f0-react-v4.60.0) (2026-07-28)
 
 
