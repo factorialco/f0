@@ -5,7 +5,10 @@ import { Calendar, Flag, Person } from "@/icons/app"
 
 import { RecordType } from "@/hooks/datasource"
 
-import { useDataCollectionSource } from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
+import {
+  type DataCollectionDataAdapter,
+  useDataCollectionSource,
+} from "@/patterns/OneDataCollection/hooks/useDataCollectionSource"
 import { OneDataCollection } from "../.."
 
 // Preview of per-version columns (the onboarding case): each version shows its
@@ -112,12 +115,14 @@ type Story = StoryObj<typeof meta>
 
 export const PerVersionColumns: Story = {
   render: () => {
-    const dataAdapter = useMemo(
+    const dataAdapter: DataCollectionDataAdapter<Onbo> = useMemo(
       () => ({
-        paginationType: "infinite-scroll" as const,
+        paginationType: "infinite-scroll",
         perPage: 50,
-        fetchData: async (options: { filters?: { phase?: string[] } }) => {
-          const phase = options.filters?.phase
+        // Lane filters are `{ phase: [id] }`; this demo has no filter schema, so
+        // narrow the untyped filter bag to the one key we read.
+        fetchData: async ({ filters }) => {
+          const phase = (filters as { phase?: string[] }).phase
           const records = phase
             ? DATA.filter((d) => phase.includes(d.phase))
             : DATA
@@ -151,8 +156,8 @@ export const PerVersionColumns: Story = {
             },
           },
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- preview adapter
-        dataAdapter: dataAdapter as any,
+        selectable: (item) => item.id,
+        dataAdapter,
       },
       [dataAdapter]
     )

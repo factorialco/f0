@@ -13,6 +13,7 @@ import {
 } from "@/hooks/datasource"
 import { useGroups } from "@/hooks/datasource/useGroups"
 import { useReducedMotion } from "@/lib/a11y"
+import { useIsDev } from "@/lib/providers/user-platafform"
 import { GroupHeader } from "@/ui/GroupHeader/GroupHeader"
 import { KanbanCard } from "@/ui/Kanban/components/KanbanCard"
 
@@ -276,35 +277,70 @@ export const KanbanCollection = <
    * in grouped mode (DnD indices would otherwise be group-relative).
    */
   const isGrouped = !!source.currentGrouping
+  const isDev = useIsDev()
+  const groupOrder = source.currentGrouping?.order ?? "asc"
+  const groupingField = source.currentGrouping?.field
+  const paginationType = source.dataAdapter?.paginationType
+
+  // Group metadata (label, itemCount) is lane-independent: resolve it from the
+  // grouping config — like useData/List/Table — instead of from whichever lane
+  // happened to surface the group first (each lane fetches with its own filters).
+  const groupByConfig = useMemo(() => {
+    const field = source.currentGrouping?.field
+    if (field == null) return undefined
+    const byField = source.grouping?.groupBy as
+      | Record<
+          string,
+          {
+            label: (
+              groupId: unknown,
+              filters: unknown
+            ) => string | Promise<string>
+            itemCount?: (
+              groupId: unknown,
+              filters: unknown
+            ) => number | undefined | Promise<number | undefined>
+          }
+        >
+      | undefined
+    return byField?.[field as string]
+  }, [source.currentGrouping?.field, source.grouping])
+
+  const knownLaneIds = useMemo(() => new Set(lanes.map((l) => l.id)), [lanes])
+
+  // Group keys present in the data, ordered by the grouping sort
+  // (currentGrouping.order) — NOT by the order lanes happen to surface them. A
+  // group only appears if it has items, so empty groups aren't shown.
+  const groupKeysOrdered = useMemo(() => {
+    if (!isGrouped) return [] as string[]
+    const keys = new Set<string>()
+    for (const lane of lanes) {
+      const data = lanesHooks[lane.id]?.data
+      if (data?.type !== "grouped") continue
+      for (const group of data.groups) keys.add(group.key)
+    }
+    return Array.from(keys).sort((a, b) => {
+      const cmp = a.localeCompare(b, undefined, { numeric: true })
+      return groupOrder === "desc" ? -cmp : cmp
+    })
+  }, [isGrouped, lanes, lanesHooks, groupOrder])
 
   const groupedBoards = useMemo(() => {
     if (!isGrouped) {
       return [] as {
         key: string
         label: string | Promise<string>
-        itemCount: number
+        itemCount: number | Promise<number | undefined> | undefined
         lanes: KanbanProps<R>["lanes"]
       }[]
     }
 
-    // Group axis is data-driven: a group appears only if it has items (standard
-    // grouping behaviour), so empty versions are simply not shown.
-    const orderedKeys: string[] = []
-    const labelByKey = new Map<string, string | Promise<string>>()
-    for (const lane of lanes) {
-      const data = lanesHooks[lane.id]?.data
-      if (data?.type !== "grouped") continue
-      for (const group of data.groups) {
-        if (!labelByKey.has(group.key)) {
-          labelByKey.set(group.key, group.label)
-          orderedKeys.push(group.key)
-        }
-      }
-    }
-
-    return orderedKeys.map((key) => {
-      // Per-group columns when provided, else the shared global lane set.
-      const groupLaneDefs = getLanesForGroup ? getLanesForGroup(key) : lanes
+    return groupKeysOrdered.map((key) => {
+      // Per-group columns when provided, else the shared global lane set. Drop
+      // ids that aren't declared lanes — they would never load (see dev warning).
+      const groupLaneDefs = (
+        getLanesForGroup ? getLanesForGroup(key) : lanes
+      ).filter((lane) => knownLaneIds.has(lane.id))
       const boardLanes: KanbanProps<R>["lanes"] = groupLaneDefs.map((lane) => {
         const laneData = lanesHooks[lane.id]
         const group =
@@ -325,18 +361,68 @@ export const KanbanCollection = <
           fetchMore: undefined,
         }
       })
-      const itemCount = boardLanes.reduce(
-        (sum, lane) => sum + lane.items.length,
-        0
-      )
-      return {
-        key,
-        label: labelByKey.get(key) ?? key,
-        itemCount,
-        lanes: boardLanes,
-      }
+      const label = groupByConfig
+        ? groupByConfig.label(key, source.currentFilters)
+        : key
+      // Header count from the authoritative itemCount (matches List/Table); fall
+      // back to loaded records only when the source provides no itemCount.
+      const itemCount: number | Promise<number | undefined> | undefined =
+        groupByConfig?.itemCount
+          ? groupByConfig.itemCount(key, source.currentFilters)
+          : boardLanes.reduce((sum, lane) => sum + lane.items.length, 0)
+      return { key, label, itemCount, lanes: boardLanes }
     })
-  }, [isGrouped, lanes, lanesHooks, getLanesForGroup])
+  }, [
+    isGrouped,
+    groupKeysOrdered,
+    lanes,
+    lanesHooks,
+    getLanesForGroup,
+    groupByConfig,
+    knownLaneIds,
+    source.currentFilters,
+  ])
+
+  // Ids returned by getLanesForGroup that aren't declared lanes: they never load.
+  const unknownLaneIds = useMemo(() => {
+    if (!isGrouped || !getLanesForGroup) return [] as string[]
+    const unknown = new Set<string>()
+    for (const key of groupKeysOrdered) {
+      for (const lane of getLanesForGroup(key)) {
+        if (!knownLaneIds.has(lane.id)) unknown.add(lane.id)
+      }
+    }
+    return Array.from(unknown)
+  }, [isGrouped, getLanesForGroup, groupKeysOrdered, knownLaneIds])
+
+  // Dev diagnostics: surface silent-failure modes instead of degrading quietly.
+  useEffect(() => {
+    if (!isDev || !isGrouped) return
+    if (groupingField != null && !groupByConfig) {
+      // The old runtime throw caught this: a grouping field absent from groupBy
+      // makes useData return flat data, so the board renders without groups.
+      console.error(
+        `[OneDataCollection/Kanban] currentGrouping.field "${String(groupingField)}" is not a key of grouping.groupBy — the board will render without groups.`
+      )
+    }
+    if (paginationType === "infinite-scroll" || paginationType === "pages") {
+      console.warn(
+        "[OneDataCollection/Kanban] grouping with a paginated source only shows each group's first page; counters use the authoritative itemCount but cards may be incomplete. Use a non-paginated source for grouped Kanban."
+      )
+    }
+    if (unknownLaneIds.length > 0) {
+      console.warn(
+        `[OneDataCollection/Kanban] getLanesForGroup returned lane id(s) not present in source.lanes: ${unknownLaneIds.join(", ")}. They are ignored (they would never load).`
+      )
+    }
+  }, [
+    isDev,
+    isGrouped,
+    groupingField,
+    paginationType,
+    groupByConfig,
+    unknownLaneIds,
+  ])
 
   const collapsible = source.grouping?.collapsible
   const defaultOpenGroups = source.grouping?.defaultOpenGroups
@@ -356,9 +442,9 @@ export const KanbanCollection = <
       {lanesSelectProvider}
       {isGrouped ? (
         <div
-          className="flex flex-col gap-6"
+          className="flex max-h-full min-h-0 flex-1 flex-col gap-6 overflow-auto"
           aria-busy={kanbanLoading}
-          aria-live="polite"
+          aria-live={kanbanLoading ? "polite" : undefined}
         >
           {groupedBoards.length === 0 ? (
             // Groups have not arrived yet: show the lanes in a loading state
@@ -368,41 +454,72 @@ export const KanbanCollection = <
               renderCard={renderCard}
               getKey={getKey}
               onCreate={onCreate}
+              onMove={onMove}
               idProvider={idProvider}
               allowReorder={false}
               loading={kanbanLoading}
             />
           ) : (
-            groupedBoards.map((board) => (
-              <div
-                className="flex flex-col gap-2"
-                key={`kanban-group-${board.key}`}
-                data-testid={`kanban-group-${board.key}`}
-              >
-                <GroupHeader
-                  className="cursor-pointer select-none rounded-md px-3.5 py-3 transition-colors hover:bg-f1-background-hover"
-                  showOpenChange={collapsible}
-                  label={board.label}
-                  itemCount={board.itemCount}
-                  open={openGroups[board.key]}
-                  onOpenChange={(open) => setGroupOpen(board.key, open)}
-                />
-                <AnimatePresence>
-                  {(!collapsible || openGroups[board.key]) && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{
-                        duration: shouldReduceMotion ? 0 : 0.1,
-                        ease: "easeInOut",
-                      }}
-                    >
-                      {/* PROVISIONAL preview height. The Kanban UI is h-full, so
-                          stacked boards need a bounded height or the layout breaks.
-                          The real stacked-board layout is a Foundations decision —
-                          this fixed value is only to preview the feature. */}
-                      <div className="h-[440px] min-h-0">
+            groupedBoards.map((board) => {
+              // Group-level selection: selection lives per lane, so aggregate the
+              // board's lanes' status for this group into one tri-state, and fan
+              // the toggle out to each lane (same primitives Card/List use, just
+              // summed across the board's columns).
+              const groupSelectable = source.selectable !== undefined
+              let selectedCount = 0
+              let unselectedCount = 0
+              for (const lane of board.lanes) {
+                const status = lanesUseSelectable.get(lane.id)
+                  ?.groupAllSelectedStatus[board.key]
+                selectedCount += status?.selectedCount ?? 0
+                unselectedCount += status?.unselectedCount ?? 0
+              }
+              const groupSelect: boolean | "indeterminate" =
+                selectedCount === 0
+                  ? false
+                  : unselectedCount === 0
+                    ? true
+                    : "indeterminate"
+              return (
+                <div
+                  className="flex flex-col gap-2"
+                  key={`kanban-group-${board.key}`}
+                  data-testid={`kanban-group-${board.key}`}
+                >
+                  <GroupHeader
+                    className="cursor-pointer select-none rounded-md px-3.5 py-3 transition-colors hover:bg-f1-background-hover"
+                    showOpenChange={collapsible}
+                    label={board.label}
+                    itemCount={board.itemCount}
+                    selectable={groupSelectable}
+                    select={groupSelect}
+                    onSelectChange={(checked) =>
+                      board.lanes.forEach((lane) =>
+                        lanesUseSelectable
+                          .get(lane.id)
+                          ?.handleSelectGroupChange(board.key, checked)
+                      )
+                    }
+                    open={openGroups[board.key]}
+                    onOpenChange={(open) => setGroupOpen(board.key, open)}
+                  />
+                  <AnimatePresence>
+                    {(!collapsible || openGroups[board.key]) && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.1,
+                          ease: "easeInOut",
+                        }}
+                      >
+                        {/* Stacked boards render at content height; the group list
+                          above owns the single vertical scroll — same model as the
+                          grouped List/Card. Each lane still honours ui/Kanban's
+                          400px minimum (KanbanLane MIN_HEIGHT); a true content-hug
+                          for short groups would need an explicit content-height
+                          option on ui/Kanban (pending Foundations). */}
                         <KanbanBoard<R>
                           lanes={board.lanes}
                           renderCard={renderCard}
@@ -413,12 +530,12 @@ export const KanbanCollection = <
                           allowReorder={false}
                           loading={kanbanLoading}
                         />
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })
           )}
         </div>
       ) : (

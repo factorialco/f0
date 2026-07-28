@@ -367,7 +367,7 @@ describe("KanbanCollection - grouping", () => {
     expect(within(groupA).getByText("Group A")).toBeInTheDocument()
     expect(within(groupB).getByText("Group B")).toBeInTheDocument()
 
-    // Boards render in grouping order (first appearance across lanes: A, B)
+    // Boards render in grouping order (currentGrouping.order asc → A, B)
     expect(
       screen
         .getAllByTestId(/^kanban-group-/)
@@ -446,6 +446,121 @@ describe("KanbanCollection - grouping", () => {
     await waitFor(() => {
       expect(within(groupA).getAllByTestId("card")).toHaveLength(2)
     })
+  })
+
+  it("orders boards by currentGrouping.order, not the order lanes surface groups", async () => {
+    // The todo lane surfaces group A first (John), so a lane-traversal order
+    // would be [A, B]. With order:"desc" the boards must render [B, A] instead.
+    const people: GroupPerson[] = [
+      { id: 1, name: "John", group: "A", lane: "todo" },
+      { id: 2, name: "Jane", group: "A", lane: "doing" },
+      { id: 3, name: "Bob", group: "B", lane: "doing" },
+    ]
+
+    const source = {
+      ...createGroupedSource(people),
+      currentGrouping: { field: "group", order: "desc" as const },
+      lanes: [
+        { id: "todo", filters: { lane: ["todo"] } },
+        { id: "doing", filters: { lane: ["doing"] } },
+      ],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        GroupPerson,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<GroupPerson>,
+        TestNavigationFilters,
+        GroupingDefinition<GroupPerson>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    await screen.findByTestId("kanban-group-B")
+    expect(
+      screen
+        .getAllByTestId(/^kanban-group-/)
+        .map((b) => b.getAttribute("data-testid"))
+    ).toEqual(["kanban-group-B", "kanban-group-A"])
+  })
+
+  it("selects a whole group from its header, scoped to that group's lanes", async () => {
+    const user = userEvent.setup()
+    const people: GroupPerson[] = [
+      { id: 1, name: "John", group: "A", lane: "todo" },
+      { id: 2, name: "Jane", group: "A", lane: "doing" },
+      { id: 3, name: "Bob", group: "B", lane: "doing" },
+    ]
+
+    const source = {
+      ...createGroupedSource(people),
+      selectable: (p: GroupPerson) => p.id,
+      lanes: [
+        { id: "todo", filters: { lane: ["todo"] } },
+        { id: "doing", filters: { lane: ["doing"] } },
+      ],
+    }
+
+    zeroRender(
+      <KanbanCollection<
+        GroupPerson,
+        TestFilters,
+        SortingsDefinition,
+        SummariesDefinition,
+        ItemActionsDefinition<GroupPerson>,
+        TestNavigationFilters,
+        GroupingDefinition<GroupPerson>
+      >
+        lanes={[
+          { id: "todo", title: "Todo" },
+          { id: "doing", title: "Doing" },
+        ]}
+        title={(p) => p.name}
+        description={(p) => p.name}
+        metadata={() => []}
+        source={source}
+        onSelectItems={vi.fn()}
+        onLoadData={vi.fn()}
+        onLoadError={vi.fn()}
+      />
+    )
+
+    const groupA = await screen.findByTestId("kanban-group-A")
+    const groupB = await screen.findByTestId("kanban-group-B")
+    await waitFor(() => {
+      expect(within(groupA).getAllByTestId("card")).toHaveLength(2)
+    })
+
+    const selectAllA = () =>
+      within(groupA).getByRole("checkbox", { name: "Select all" })
+    const selectAllB = () =>
+      within(groupB).getByRole("checkbox", { name: "Select all" })
+
+    // Nothing selected initially.
+    expect(selectAllA()).toHaveAttribute("aria-checked", "false")
+    expect(selectAllB()).toHaveAttribute("aria-checked", "false")
+
+    // Selecting group A's header selects group A across its lanes...
+    await user.click(selectAllA())
+    await waitFor(() => {
+      expect(selectAllA()).toHaveAttribute("aria-checked", "true")
+    })
+    // ...and leaves group B untouched.
+    expect(selectAllB()).toHaveAttribute("aria-checked", "false")
   })
 
   // Onboarding case: each version renders its own phases; a version with no
