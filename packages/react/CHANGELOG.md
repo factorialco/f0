@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.59.0](https://github.com/factorialco/f0/compare/f0-react-v4.58.0...f0-react-v4.59.0) (2026-07-28)
+
+
+### Features
+
+* **F0ProgressSeries:** add multi-bar progress series component ([#4842](https://github.com/factorialco/f0/issues/4842)) ([782df82](https://github.com/factorialco/f0/commit/782df828971549584c1f66e798935e32a8708e9b))
+
 ## [4.58.0](https://github.com/factorialco/f0/compare/f0-react-v4.57.0...f0-react-v4.58.0) (2026-07-28)
 
 
