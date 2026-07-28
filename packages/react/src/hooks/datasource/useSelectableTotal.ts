@@ -96,7 +96,14 @@ export const useHasNonSelectableRows = (
   if (queryKeyRef.current !== queryKey) {
     queryKeyRef.current = queryKey
     seenRef.current = false
+    // The rows still on screen belong to the previous query — the fetch for the
+    // new one hasn't resolved yet — so this render's evidence says nothing
+    // about the new dataset. Taking it would carry "seen" across queries and
+    // strand the new one on the unknown-total path forever. The next render,
+    // once the new records land, provides the real answer.
+    return false
   }
+
   if (pageHasNonSelectableRows) seenRef.current = true
 
   return seenRef.current

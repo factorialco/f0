@@ -104,6 +104,24 @@ describe("useHasNonSelectableRows", () => {
     rerender({ page: false, query: "filters-b" })
     expect(result.current).toBe(false)
   })
+
+  test("ignores the stale page flag on the render the query changes", () => {
+    // Filters change before the new records arrive, so the rows still on screen
+    // — and the flag derived from them — belong to the previous query.
+    const { result, rerender } = renderHook(
+      ({ page, query }: { page: boolean; query: string }) =>
+        useHasNonSelectableRows(page, query),
+      { initialProps: { page: true, query: "filters-a" } }
+    )
+    expect(result.current).toBe(true)
+
+    rerender({ page: true, query: "filters-b" })
+    expect(result.current).toBe(false)
+
+    // Once the new page has actually loaded, its evidence counts again.
+    rerender({ page: true, query: "filters-b" })
+    expect(result.current).toBe(true)
+  })
 })
 
 describe("select all with no selectable rows on the current page", () => {
