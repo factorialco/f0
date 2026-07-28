@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.58.0](https://github.com/factorialco/f0/compare/f0-react-v4.57.0...f0-react-v4.58.0) (2026-07-28)
+
+
+### Features
+
+* **OneDataCollection:** add grouping to the Kanban visualization ([#4821](https://github.com/factorialco/f0/issues/4821)) ([c676f08](https://github.com/factorialco/f0/commit/c676f08a90de2ebe97b3829412a2a0f72e6718d8))
+
 ## [4.57.0](https://github.com/factorialco/f0/compare/f0-react-v4.56.5...f0-react-v4.57.0) (2026-07-28)
 
 
