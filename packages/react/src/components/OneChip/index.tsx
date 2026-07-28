@@ -94,8 +94,7 @@ const _Chip = ({
         onClose && "pr-1.5",
         avatar && "pl-0.5",
         avatar && avatar?.type !== "person" && "rounded-sm",
-        icon && !avatar && "pl-1.5",
-        onClick && "cursor-pointer"
+        icon && !avatar && "pl-1.5"
       )}
     >
       {onClick ? (
